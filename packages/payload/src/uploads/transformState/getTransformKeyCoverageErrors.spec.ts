@@ -6,33 +6,76 @@ import { getTransformKeyCoverageErrors } from './getTransformKeyCoverageErrors.j
 
 const makeStage = (slug: string): UploadTransformer => ({ mimeTypes: ['*/*'], slug })
 
+const clip = { endMs: 10, startMs: 0 }
+const crop = { height: 1, width: 1, x: 0, y: 0 }
+const focalPoint = { x: 20, y: 80 }
+
 describe('getTransformKeyCoverageErrors', () => {
-  it('should return no errors when no keys are saved', () => {
-    const errors = getTransformKeyCoverageErrors({ claims: new Map(), transforms: null })
-
-    expect(errors).toEqual([])
-  })
-
-  it('should return no errors when every saved key has exactly one claim', () => {
-    const sharp = makeStage('sharp')
-    const clipper = makeStage('clipper')
-
+  it.for([
+    { name: 'no keys are saved', claims: [], transforms: null },
+    {
+      name: 'every saved key has exactly one claim',
+      claims: [
+        ['sharp', ['crop', 'focalPoint']],
+        ['clipper', ['clip']],
+      ],
+      transforms: { clip, crop, focalPoint },
+    },
+    {
+      name: 'a custom key has no claim',
+      claims: [['sharp', ['crop']]],
+      transforms: { watermark: { text: 'draft' } },
+    },
+    {
+      name: 'a claimed key is not saved',
+      claims: [['clipper', ['clip', 'posterFrame']]],
+      transforms: { clip },
+    },
+    { name: 'a focalPoint has no claim', claims: [], transforms: { focalPoint } },
+  ] as const)('should return no errors when $name', ({ claims, transforms }) => {
     const errors = getTransformKeyCoverageErrors({
-      claims: new Map([
-        [sharp, ['crop', 'focalPoint']],
-        [clipper, ['clip']],
-      ]),
-      transforms: {
-        clip: { endMs: 10, startMs: 0 },
-        crop: { height: 1, width: 1, x: 0, y: 0 },
-        focalPoint: { x: 50, y: 50 },
-      },
+      claims: new Map(claims.map(([slug, keys]) => [makeStage(slug), [...keys]])),
+      transforms,
     })
 
     expect(errors).toEqual([])
   })
 
-  it('should name a saved built-in key that no stage claims', () => {
+  it.for([
+    {
+      name: 'a custom key that two stages claim',
+      claims: [
+        ['watermarker', ['watermark']],
+        ['other-watermarker', ['watermark']],
+      ],
+      transforms: { watermark: { text: 'draft' } },
+      expectedPaths: ['_transforms.watermark'],
+    },
+    {
+      name: 'a focalPoint that two stages claim',
+      claims: [
+        ['sharp', ['focalPoint']],
+        ['smart-crop', ['focalPoint']],
+      ],
+      transforms: { focalPoint },
+      expectedPaths: ['_transforms.focalPoint'],
+    },
+    {
+      name: 'each saved built-in key that no stage claims',
+      claims: [],
+      transforms: { clip, rotate: { angle: 90 } },
+      expectedPaths: ['_transforms.clip', '_transforms.rotate'],
+    },
+  ] as const)('should reject $name', ({ claims, expectedPaths, transforms }) => {
+    const errors = getTransformKeyCoverageErrors({
+      claims: new Map(claims.map(([slug, keys]) => [makeStage(slug), [...keys]])),
+      transforms,
+    })
+
+    expect(errors.map(({ path }) => path)).toEqual(expectedPaths)
+  })
+
+  it('should explain that no configured transformer applies an unclaimed built-in key', () => {
     const errors = getTransformKeyCoverageErrors({
       claims: new Map([[makeStage('sharp'), ['crop']]]),
       transforms: { rotate: { angle: 90 } },
@@ -46,34 +89,13 @@ describe('getTransformKeyCoverageErrors', () => {
     ])
   })
 
-  it('should allow a custom key that no stage claims', () => {
-    const errors = getTransformKeyCoverageErrors({
-      claims: new Map([[makeStage('sharp'), ['crop']]]),
-      transforms: { watermark: { text: 'draft' } },
-    })
-
-    expect(errors).toEqual([])
-  })
-
-  it('should reject a custom key that two stages claim', () => {
-    const errors = getTransformKeyCoverageErrors({
-      claims: new Map([
-        [makeStage('watermarker'), ['watermark']],
-        [makeStage('other-watermarker'), ['watermark']],
-      ]),
-      transforms: { watermark: { text: 'draft' } },
-    })
-
-    expect(errors.map(({ path }) => path)).toEqual(['_transforms.watermark'])
-  })
-
-  it('should name a saved key and both transformers when two stages claim it', () => {
+  it('should name both transformers when two stages claim a saved key', () => {
     const errors = getTransformKeyCoverageErrors({
       claims: new Map([
         [makeStage('sharp'), ['crop']],
         [makeStage('other-cropper'), ['crop']],
       ]),
-      transforms: { crop: { height: 1, width: 1, x: 0, y: 0 } },
+      transforms: { crop },
     })
 
     expect(errors).toEqual([
@@ -82,44 +104,5 @@ describe('getTransformKeyCoverageErrors', () => {
         path: '_transforms.crop',
       },
     ])
-  })
-
-  it('should return one error for each uncovered key', () => {
-    const errors = getTransformKeyCoverageErrors({
-      claims: new Map(),
-      transforms: { clip: { endMs: 10, startMs: 0 }, rotate: { angle: 90 } },
-    })
-
-    expect(errors.map(({ path }) => path)).toEqual(['_transforms.clip', '_transforms.rotate'])
-  })
-
-  it('should ignore a claimed key that is not saved', () => {
-    const errors = getTransformKeyCoverageErrors({
-      claims: new Map([[makeStage('clipper'), ['clip', 'posterFrame']]]),
-      transforms: { clip: { endMs: 10, startMs: 0 } },
-    })
-
-    expect(errors).toEqual([])
-  })
-
-  it('should allow a focalPoint that no stage claims', () => {
-    const errors = getTransformKeyCoverageErrors({
-      claims: new Map(),
-      transforms: { focalPoint: { x: 20, y: 80 } },
-    })
-
-    expect(errors).toEqual([])
-  })
-
-  it('should reject a focalPoint that two stages claim', () => {
-    const errors = getTransformKeyCoverageErrors({
-      claims: new Map([
-        [makeStage('sharp'), ['focalPoint']],
-        [makeStage('smart-crop'), ['focalPoint']],
-      ]),
-      transforms: { focalPoint: { x: 20, y: 80 } },
-    })
-
-    expect(errors.map(({ path }) => path)).toEqual(['_transforms.focalPoint'])
   })
 })

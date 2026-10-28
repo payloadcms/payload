@@ -177,16 +177,7 @@ describe('transformUploadFile', () => {
     })
     const second = makeTransformer({ slug: 'second', transformFile: vi.fn() })
 
-    const result = transformUploadFile({
-      claims: new Map([[second, ['crop']]]),
-      collectionSlug: 'media',
-      file: new File(['original'], 'logo.png'),
-      ...makeDocs(),
-      options: undefined,
-      originalFile: new File(['original'], 'logo.png'),
-      pipeline: [first, second],
-      req: makeReq(),
-    })
+    const result = runPipeline({ claims: new Map([[second, ['crop']]]), pipeline: [first, second] })
 
     await expect(result).rejects.toThrow(TransformerContractError)
     await expect(result).rejects.toThrow(/"first".*_transforms\.crop.*"second"/)
@@ -202,16 +193,7 @@ describe('transformUploadFile', () => {
       }),
     })
 
-    const result = await transformUploadFile({
-      claims: new Map([[first, ['score']]]),
-      collectionSlug: 'media',
-      file: new File(['original'], 'logo.png'),
-      ...makeDocs(),
-      options: undefined,
-      originalFile: new File(['original'], 'logo.png'),
-      pipeline: [first],
-      req: makeReq(),
-    })
+    const result = await runPipeline({ claims: new Map([[first, ['score']]]), pipeline: [first] })
 
     expect(result.doc._transforms).toEqual({ score: 2 })
   })
