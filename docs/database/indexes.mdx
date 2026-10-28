@@ -64,6 +64,30 @@ export const MyCollection: CollectionConfig = {
 }
 ```
 
+### Indexing documents only when fields exist
+
+With MongoDB, use `requireExists` to limit a compound index to documents where every listed field is present:
+
+```ts
+indexes: [
+  {
+    fields: ['tenant', 'slug'],
+    requireExists: ['slug'],
+    unique: true,
+  },
+]
+```
+
+This allows multiple documents in the same tenant to omit `slug`, while still rejecting duplicate combinations of `tenant` and a present `slug`. MongoDB implements the condition with a `partialFilterExpression` using `$exists: true` for each path.
+
+- Paths use the same dot notation as `fields`, such as `metadata.code`. A filter path can also refer to a field outside the index keys. Every path must identify a configured field.
+- **An explicit `null` counts as present.** Documents with `slug: null` participate in the unique index. Only missing fields are excluded.
+- When an index key or existence filter is localized, Payload creates a separate partial index for each locale. A document can participate in one locale's index without supplying the field in every locale.
+- The option also works on non-unique compound indexes. Version indexes retain the filter and remain non-unique.
+- `requireExists` is **MongoDB only**. SQL adapters ignore it and retain their existing index and `NULL` behavior.
+
+For an existing collection, update its database indexes through your normal index-management or migration workflow. Adding the option to the config alone does not change an existing MongoDB index when automatic index management is disabled.
+
 ## Unique Fields
 
 Setting `unique: true` on a field creates a **collection-wide** database unique index on that field's path. This means no two documents in the collection can share the same value for that field.
