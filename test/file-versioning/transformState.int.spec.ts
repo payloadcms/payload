@@ -109,14 +109,14 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     })
   })
 
-  test('should reject a custom key that no transformer applies', async ({ payload }) => {
-    await expect(
-      createImage({
-        payload,
-        _transforms: { watermark: { opacity: 0.5, position: 'bottom-right' } },
-      }),
-    ).rejects.toMatchObject({
-      data: { errors: [expect.objectContaining({ path: '_transforms.watermark' })] },
+  test('should keep unknown custom keys unchanged', async ({ payload }) => {
+    const created = await createImage({
+      payload,
+      _transforms: { watermark: { opacity: 0.5, position: 'bottom-right' } },
+    })
+
+    expect(created._transforms).toEqual({
+      watermark: { opacity: 0.5, position: 'bottom-right' },
     })
   })
 

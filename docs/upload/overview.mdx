@@ -324,7 +324,7 @@ await payload.update({
 
 - Omit `_transforms` to keep the saved value. Send `null` to remove all edits. An object replaces the whole value, so a key that you leave out is removed.
 - Saved crops and focal points are applied by the Sharp transformer (`@payloadcms/transformer-sharp`). Other transformers can apply saved keys too; see [Applying saved `_transforms` keys](/docs/upload/transformers#applying-saved-_transforms-keys).
-- When Payload processes the file, every saved key must be applied by exactly one transformer. Otherwise the operation fails with a validation error for `_transforms.<key>`, for example for a crop with no transformer that applies it. A focal point that no transformer applies is saved without processing the file.
+- When Payload processes the file, every saved built-in key must be applied by a transformer, and no key can be applied by two. Otherwise the operation fails with a validation error for `_transforms.<key>`, for example for a crop with no transformer that applies it. A focal point or custom key that no transformer applies is saved without processing the file.
 - Uploading a new file clears `_transforms`, unless the same request sends a new value.
 - `focalX` and `focalY` stay available and always match `_transforms.focalPoint`. Writing either one updates both. When the two disagree in one request, `_transforms` is used. For a document saved before `_transforms` existed, the first write copies its focal point into `_transforms.focalPoint`, unless it is the center.
 - The crop must fit inside the original. Invalid values return a validation error for `_transforms`.

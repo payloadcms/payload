@@ -24,10 +24,12 @@ const textFile = (text: string) => ({
 })
 
 const createNote = ({
+  _transforms,
   contractStages,
   payload,
   text = 'hello',
 }: {
+  _transforms?: Record<string, unknown>
   contractStages?: ContractStages
   payload: Payload
   text?: string
@@ -35,7 +37,7 @@ const createNote = ({
   payload.create({
     collection: contractMediaSlug,
     context: contractStages ? { contractStages } : undefined,
-    data: { alt: 'note', details: { caption: 'A note' } },
+    data: { _transforms, alt: 'note', details: { caption: 'A note' } },
     file: textFile(text),
   })
 
@@ -268,14 +270,23 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       expect(await readStoredFile(created.filename)).toBe('hello!')
     })
 
-    test('should reject a saved key that no transformer claims, before any transformer runs', async ({
+    test('should reject a saved built-in key that no transformer claims, before any transformer runs', async ({
       payload,
     }) => {
-      await expect(createSuffixedNote({ contractStages: {}, payload })).rejects.toThrow(
-        /_transforms\.contractSuffix/,
-      )
+      await expect(
+        createNote({ _transforms: { rotate: { angle: 90 } }, contractStages: {}, payload }),
+      ).rejects.toThrow(/_transforms\.rotate/)
 
       expect(contractCalls.transformFile).toEqual([])
+    })
+
+    test('should save a custom key that no transformer claims, without applying it', async ({
+      payload,
+    }) => {
+      const created = await createSuffixedNote({ contractStages: {}, payload })
+
+      expect(created._transforms).toEqual({ contractSuffix: '!' })
+      expect(await readStoredFile(created.filename)).toBe('hello')
     })
 
     test('should reject a saved key that two transformers claim, naming both', async ({
@@ -392,10 +403,14 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       expect(await readStoredFile(updated.filename)).toBe('hello!')
     })
 
-    test('should reject a rebuild of a key no transformer claims any more, before reading the original', async ({
+    test('should reject a rebuild of a built-in key no transformer claims any more, before reading the original', async ({
       payload,
     }) => {
-      const created = await createSuffixedNote({ payload })
+      const created = await createNote({
+        _transforms: { rotate: { angle: 90 } },
+        contractStages: { claims: { first: ['rotate'] } },
+        payload,
+      })
       // Reading the original now would fail with a different error, so this proves the check
       // runs before Payload reads it.
       await rm(path.join(contractMediaDir, created.original!.filename))
@@ -406,14 +421,32 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
           id: created.id,
           collection: contractMediaSlug,
           context: { contractStages: {} },
-          data: { _transforms: { contractSuffix: '?' } },
+          data: { _transforms: { rotate: { angle: 180 } } },
         }),
-      ).rejects.toThrow(/_transforms\.contractSuffix/)
+      ).rejects.toThrow(/_transforms\.rotate/)
 
       const stored = await payload.findByID({ id: created.id, collection: contractMediaSlug })
 
       expect(contractCalls.transformFile).toEqual([])
-      expect(stored._transforms).toEqual({ contractSuffix: '!' })
+      expect(stored._transforms).toEqual({ rotate: { angle: 90 } })
+    })
+
+    test('should save a change to a custom key no transformer claims any more, without a rebuild', async ({
+      payload,
+    }) => {
+      const created = await createSuffixedNote({ payload })
+      resetContractCalls()
+
+      const updated = await payload.update({
+        id: created.id,
+        collection: contractMediaSlug,
+        context: { contractStages: {} },
+        data: { _transforms: { contractSuffix: '?' } },
+      })
+
+      expect(updated._transforms).toEqual({ contractSuffix: '?' })
+      expect(contractCalls.transformFile).toEqual([])
+      expect(await readStoredFile(updated.filename)).toBe('hello!')
     })
 
     test('should rebuild an upload without an original once from its main file, then from that file', async ({

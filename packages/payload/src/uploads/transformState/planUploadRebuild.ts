@@ -5,9 +5,9 @@ import type { UploadTransformer } from '../transformers/types.js'
 import { ValidationError } from '../../errors/ValidationError.js'
 import { planTransformerPipeline } from '../transformers/planTransformerPipeline.js'
 import { getUploadTransformerInternal } from '../transformers/uploadTransformerBridge.js'
-import { isFocalPointKey } from './focalPoint.js'
 import { getChangedTransformKeys } from './getChangedTransformKeys.js'
 import { getTransformKeyCoverageErrors } from './getTransformKeyCoverageErrors.js'
+import { isClaimRequired, isFocalPointKey } from './transformKeyClaims.js'
 
 export type UploadPlan = { mimeType: string } & PlannedTransformerPipeline
 
@@ -52,9 +52,9 @@ export async function planUploadRebuild({
           next: planArgs.pipelineDoc._transforms,
           previous: previousTransforms,
         })
-  const hasOtherKeyChange = changedKeys.some((key) => !isFocalPointKey(key))
+  const hasNonFocalPointChange = changedKeys.some((key) => !isFocalPointKey(key))
 
-  if (!isDuplicating && !hasOtherKeyChange && !isLegacyReupload) {
+  if (!isDuplicating && !hasNonFocalPointChange && !isLegacyReupload) {
     return { shouldRebuild: false }
   }
 
@@ -63,14 +63,20 @@ export async function planUploadRebuild({
   }
 
   const rebuildPlan = await planUploadPipeline({ ...planArgs, mimeType: storedMimeType })
-  const isFocalPointOnlyChange = !isDuplicating && !hasCropOrResizeEdit && !hasOtherKeyChange
+  const hasRequiredChange =
+    isDuplicating || hasCropOrResizeEdit || changedKeys.some(isClaimRequired)
+  // These keys rebuild the file only when a stage that runs claims them.
+  const optionalChangedKeys = changedKeys.filter((key) => !isClaimRequired(key))
+  if (isLegacyReupload) {
+    optionalChangedKeys.push('focalPoint')
+  }
   const shouldRebuild =
-    !isFocalPointOnlyChange ||
+    hasRequiredChange ||
     getStagesThatRun({
       collectionSlug: planArgs.collectionSlug,
       plan: rebuildPlan,
     }).stagesThatRun.some((transformer) =>
-      rebuildPlan.claims.get(transformer)?.some(isFocalPointKey),
+      rebuildPlan.claims.get(transformer)?.some((key) => optionalChangedKeys.includes(key)),
     )
 
   if (shouldRebuild) {

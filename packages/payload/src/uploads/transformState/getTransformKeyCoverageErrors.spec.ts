@@ -32,18 +32,39 @@ describe('getTransformKeyCoverageErrors', () => {
     expect(errors).toEqual([])
   })
 
-  it('should name a saved key that no stage claims', () => {
+  it('should name a saved built-in key that no stage claims', () => {
     const errors = getTransformKeyCoverageErrors({
       claims: new Map([[makeStage('sharp'), ['crop']]]),
-      transforms: { watermark: { text: 'draft' } },
+      transforms: { rotate: { angle: 90 } },
     })
 
     expect(errors).toEqual([
       {
         message: expect.stringContaining('No configured transformer'),
-        path: '_transforms.watermark',
+        path: '_transforms.rotate',
       },
     ])
+  })
+
+  it('should allow a custom key that no stage claims', () => {
+    const errors = getTransformKeyCoverageErrors({
+      claims: new Map([[makeStage('sharp'), ['crop']]]),
+      transforms: { watermark: { text: 'draft' } },
+    })
+
+    expect(errors).toEqual([])
+  })
+
+  it('should reject a custom key that two stages claim', () => {
+    const errors = getTransformKeyCoverageErrors({
+      claims: new Map([
+        [makeStage('watermarker'), ['watermark']],
+        [makeStage('other-watermarker'), ['watermark']],
+      ]),
+      transforms: { watermark: { text: 'draft' } },
+    })
+
+    expect(errors.map(({ path }) => path)).toEqual(['_transforms.watermark'])
   })
 
   it('should name a saved key and both transformers when two stages claim it', () => {
@@ -66,10 +87,10 @@ describe('getTransformKeyCoverageErrors', () => {
   it('should return one error for each uncovered key', () => {
     const errors = getTransformKeyCoverageErrors({
       claims: new Map(),
-      transforms: { clip: { endMs: 10, startMs: 0 }, watermark: true },
+      transforms: { clip: { endMs: 10, startMs: 0 }, rotate: { angle: 90 } },
     })
 
-    expect(errors.map(({ path }) => path)).toEqual(['_transforms.clip', '_transforms.watermark'])
+    expect(errors.map(({ path }) => path)).toEqual(['_transforms.clip', '_transforms.rotate'])
   })
 
   it('should ignore a claimed key that is not saved', () => {

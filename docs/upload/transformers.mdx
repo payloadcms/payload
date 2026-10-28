@@ -107,11 +107,17 @@ canTransform: ({ mimeType }) =>
 
 A transformer that returns `true` runs, but applies no saved keys.
 
-In `transformFile`, a stage can change the `doc._transforms` keys that it claims. It cannot change a key that another stage claims, because that stage may have read the value already, and the saved value would then not match the file. Such a change throws a `TransformerContractError`. After the last stage, Payload checks the final `_transforms` value again, so a key that a stage adds must also be claimed by exactly one stage that runs. In both cases, nothing is saved.
+In `transformFile`, a stage can change the `doc._transforms` keys that it claims. It cannot change a key that another stage claims, because that stage may have read the value already, and the saved value would then not match the file. Such a change throws a `TransformerContractError`. After the last stage, Payload checks the final `_transforms` value again with the rules below, so a built-in key that a stage adds also needs a stage that claims it. In both cases, nothing is saved.
 
-Whenever Payload processes a file (a new upload, a duplicate, or a change to `_transforms`), every saved key must be claimed by exactly one stage that runs. Payload checks this after `canTransform` and before it reads the stored file or runs any stage. A key that no stage claims, or that more than one stage claims, fails the operation with a validation error for `_transforms.<key>`, and nothing is saved. A `focalPoint` that no stage claims is allowed: it is saved, and the file is not processed again.
+Whenever Payload processes a file (a new upload, a duplicate, or a change to `_transforms`), it checks the saved keys after `canTransform` and before it reads the stored file or runs any stage:
 
-An update that does not process the file, such as a change to another field, keeps the saved `_transforms` value without this check. A key whose transformer was removed stays readable and survives such updates. Changing `_transforms` on that document fails until a configured transformer claims the key again, or until the key is removed.
+- A built-in key, such as `crop` or `rotate`, must be claimed by a stage that runs.
+- A `focalPoint` or a custom key that no stage claims is allowed. It is saved and does nothing, so something outside Payload can apply a custom key. Changing only such keys processes the file again only when a stage that runs claims one of them.
+- No key can be claimed by more than one stage.
+
+A key that breaks these rules fails the operation with a validation error for `_transforms.<key>`, and nothing is saved.
+
+An update that does not process the file, such as a change to another field, keeps the saved `_transforms` value without this check. A key whose transformer was removed stays readable and survives such updates. For a built-in key, changing `_transforms` on that document fails until a configured transformer claims the key again, or until the key is removed. A custom key is then saved and does nothing.
 
 An older upload with no retained `original` is processed from its current main file the first time. Payload then keeps that file as its `original`, and later changes start from it.
 
@@ -205,7 +211,7 @@ There is no whole-file read. A transformer that needs the whole file in memory m
   see the main file must not be combined with Sharp for image uploads.
 </Banner>
 
-Transformers only run on uploads whose full bytes are available. When a client uploads directly to cloud storage (`clientUploads`) on a collection with `disableLocalStorage`, Payload first reads only what it needs: the whole file when `upload.mimeTypes` restricts the allowed types, the request carries a crop or resize edit, the file is an animated image, or the collection has Sharp `variants` or image adjustments (`resizeOptions`, `formatOptions`, and so on); otherwise only a header or nothing. Payload then plans the pipeline with the real `doc`. If a transformer other than `sharpTransformer` accepts the upload (its `mimeTypes` match and its `canTransform`, if any, returns `true` or an object), Payload downloads the whole file before that transformer runs. Payload also downloads the whole file when `sharpTransformer` claims a saved `_transforms` key, such as a crop. A transformer that declines never causes a download, and a key that no stage claims fails before any download.
+Transformers only run on uploads whose full bytes are available. When a client uploads directly to cloud storage (`clientUploads`) on a collection with `disableLocalStorage`, Payload first reads only what it needs: the whole file when `upload.mimeTypes` restricts the allowed types, the request carries a crop or resize edit, the file is an animated image, or the collection has Sharp `variants` or image adjustments (`resizeOptions`, `formatOptions`, and so on); otherwise only a header or nothing. Payload then plans the pipeline with the real `doc`. If a transformer other than `sharpTransformer` accepts the upload (its `mimeTypes` match and its `canTransform`, if any, returns `true` or an object), Payload downloads the whole file before that transformer runs. Payload also downloads the whole file when `sharpTransformer` claims a saved `_transforms` key, such as a crop. A transformer that declines never causes a download, and a built-in key that no stage claims fails before any download.
 
 The stored `filename` is based on the returned `File`'s `name`. Its `mimeType` and extension come from the output bytes when their format can be detected, such as an image converted to WebP. Otherwise, as for text-like output like CSV or JSON, they come from the returned `File`'s `type` and `name`. Set both on the `File` you return when your transformer changes the format.
 
