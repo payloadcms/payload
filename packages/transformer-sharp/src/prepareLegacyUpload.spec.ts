@@ -47,6 +47,8 @@ const runPrepareUpload = async ({
     .map(([task]) => task.options as SharpUploadTaskOptions)
     .find((options) => options.kind === 'size')
 
+  expect(sizeTask?.kind).toBe('size')
+
   return sizeTask?.kind === 'size' ? sizeTask.focalPoint : undefined
 }
 
