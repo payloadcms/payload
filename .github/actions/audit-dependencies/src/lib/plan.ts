@@ -89,9 +89,16 @@ const manualReason = (fix: Extract<FixResult, { status: 'none' | 'unknown' }>): 
   if (fix.status === 'none') {
     return 'no published version clears the vulnerability; allowlist or escalate'
   }
-  return fix.reason === 'registry'
-    ? 'registry unreachable; retry before deciding'
-    : 'current version undeclared in scanned workspaces; determine the owner manually'
+  return MANUAL_REASONS[fix.reason]
+}
+
+const MANUAL_REASONS: Record<Extract<FixResult, { status: 'unknown' }>['reason'], string> = {
+  'no-current-version':
+    'current version undeclared in scanned workspaces; determine the owner manually',
+  'no-patched-range': 'advisory has no patched range; check the advisory before deciding',
+  registry: 'registry unreachable; retry before deciding',
+  'unsupported-spec':
+    'declared spec is not a semver range (alias, tag, file, or git); determine the current version manually',
 }
 
 const verifyCommand = (scope: Scope): string =>

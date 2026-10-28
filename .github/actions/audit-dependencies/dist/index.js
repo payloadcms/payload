@@ -11550,8 +11550,24 @@ const compareBumps = (a, b) => a.dependency.localeCompare(b.dependency) ||
     (a.currentSpec ?? '').localeCompare(b.currentSpec ?? '');
 const buildBump = async ({ chainPackages, client, group, module, patchedRange, }) => {
     const { dependency, spec, workspacePackages } = group;
-    // Aliases, dist-tags, and file/git specs are not ranges; their current version is unknown.
-    const min = spec && (0,semver.validRange)(spec) ? (0,semver.minVersion)(spec) : null;
+    if (!(0,semver.validRange)(patchedRange)) {
+        return {
+            currentSpec: spec,
+            dependency,
+            fix: { reason: 'no-patched-range', status: 'unknown' },
+            workspacePackages,
+        };
+    }
+    // Aliases, dist-tags, and file/git specs carry no semver floor to bump from.
+    if (spec && !(0,semver.validRange)(spec)) {
+        return {
+            currentSpec: spec,
+            dependency,
+            fix: { reason: 'unsupported-spec', status: 'unknown' },
+            workspacePackages,
+        };
+    }
+    const min = spec ? (0,semver.minVersion)(spec) : null;
     const fix = await findMinimalFix({
         chainPackages,
         client,
@@ -11612,8 +11628,9 @@ const findMinimalFix = async ({ chainPackages, client, currentMajor, currentSpec
  * module lands in the patched range.
  */
 const traceModule = async ({ chainPackages, client, module, patchedRange, rootName, rootVersion, }) => {
-    if (rootName === module) {
-        return (0,semver.satisfies)(rootVersion, patchedRange) ? 'clear' : 'vulnerable';
+    // A patched root can still pull a vulnerable copy back in, so the trace continues below it.
+    if (rootName === module && !(0,semver.satisfies)(rootVersion, patchedRange)) {
+        return 'vulnerable';
     }
     const moduleVersions = [];
     const visited = new Set([`${rootName}@${rootVersion}`]);
@@ -11951,7 +11968,7 @@ const toAdvisory = (value) => {
         typeof value.github_advisory_id !== 'string' ||
         typeof value.module_name !== 'string' ||
         typeof value.severity !== 'string' ||
-        (typeof value.patched_versions !== 'string' && value.patched_versions !== null) ||
+        (typeof value.patched_versions !== 'string' && value.patched_versions != null) ||
         typeof value.vulnerable_versions !== 'string') {
         return null;
     }
@@ -11960,13 +11977,23 @@ const toAdvisory = (value) => {
         github_advisory_id: value.github_advisory_id,
         id: typeof value.id === 'number' ? value.id : 0,
         module_name: value.module_name,
-        // pnpm reports `null` when no patched version is published; keep it as the unfixable sentinel.
-        patched_versions: value.patched_versions ?? '<0.0.0',
+        patched_versions: toPatchedVersions(value.patched_versions),
         severity: value.severity,
         title: typeof value.title === 'string' ? value.title : '',
         url: typeof value.url === 'string' ? value.url : '',
         vulnerable_versions: value.vulnerable_versions,
     };
+};
+/**
+ * pnpm reports `null` when no patched version is published (unfixable), and omits the
+ * field when it cannot infer a patched range. An omitted range may still have a fix,
+ * so it stays fixable as `unknown` and surfaces for review instead of being hidden.
+ */
+const toPatchedVersions = (value) => {
+    if (typeof value === 'string') {
+        return value;
+    }
+    return value === null ? '<0.0.0' : 'unknown';
 };
 const auditReport_isRecord = (value) => typeof value === 'object' && value !== null;
 
@@ -12289,9 +12316,13 @@ const manualReason = (fix) => {
     if (fix.status === 'none') {
         return 'no published version clears the vulnerability; allowlist or escalate';
     }
-    return fix.reason === 'registry'
-        ? 'registry unreachable; retry before deciding'
-        : 'current version undeclared in scanned workspaces; determine the owner manually';
+    return MANUAL_REASONS[fix.reason];
+};
+const MANUAL_REASONS = {
+    'no-current-version': 'current version undeclared in scanned workspaces; determine the owner manually',
+    'no-patched-range': 'advisory has no patched range; check the advisory before deciding',
+    registry: 'registry unreachable; retry before deciding',
+    'unsupported-spec': 'declared spec is not a semver range (alias, tag, file, or git); determine the current version manually',
 };
 const verifyCommand = (scope) => scope === 'monorepo' ? 'pnpm script:audit:deps:monorepo' : 'pnpm script:audit:deps:consumer';
 
@@ -12456,14 +12487,17 @@ const printAllowlistReview = (findings) => {
         }
     }
 };
+const UNKNOWN_FIX_CAUSES = {
+    'no-current-version': 'current version unknown, declared outside packages/',
+    'no-patched-range': 'advisory has no patched range',
+    registry: 'registry unreachable',
+    'unsupported-spec': 'declared spec is not a semver range',
+};
 /** Prints the remediation for one direct dependency: the minimal bump, relock, or why none applies. */
 const printBump = ({ bump: { currentSpec, dependency, fix, workspacePackages }, module, }) => {
     const where = workspacePackages.length > 0 ? ` (in ${workspacePackages.join(', ')})` : '';
     if (fix.status === 'unknown') {
-        const cause = fix.reason === 'registry'
-            ? 'registry unreachable'
-            : 'current version unknown, declared outside packages/';
-        console.log(`  ${dependency}: fix availability unknown — ${cause}${where}`);
+        console.log(`  ${dependency}: fix availability unknown — ${UNKNOWN_FIX_CAUSES[fix.reason]}${where}`);
         return;
     }
     if (fix.status === 'none') {

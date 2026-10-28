@@ -101,8 +101,25 @@ const buildBump = async ({
   patchedRange: string
 }): Promise<Bump> => {
   const { dependency, spec, workspacePackages } = group
-  // Aliases, dist-tags, and file/git specs are not ranges; their current version is unknown.
-  const min = spec && validRange(spec) ? minVersion(spec) : null
+  if (!validRange(patchedRange)) {
+    return {
+      currentSpec: spec,
+      dependency,
+      fix: { reason: 'no-patched-range', status: 'unknown' },
+      workspacePackages,
+    }
+  }
+  // Aliases, dist-tags, and file/git specs carry no semver floor to bump from.
+  if (spec && !validRange(spec)) {
+    return {
+      currentSpec: spec,
+      dependency,
+      fix: { reason: 'unsupported-spec', status: 'unknown' },
+      workspacePackages,
+    }
+  }
+
+  const min = spec ? minVersion(spec) : null
   const fix = await findMinimalFix({
     chainPackages,
     client,
@@ -208,8 +225,9 @@ const traceModule = async ({
   rootName: string
   rootVersion: string
 }): Promise<TraceOutcome> => {
-  if (rootName === module) {
-    return satisfies(rootVersion, patchedRange) ? 'clear' : 'vulnerable'
+  // A patched root can still pull a vulnerable copy back in, so the trace continues below it.
+  if (rootName === module && !satisfies(rootVersion, patchedRange)) {
+    return 'vulnerable'
   }
 
   const moduleVersions: string[] = []
