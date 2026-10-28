@@ -2,7 +2,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { CollectionConfig } from 'payload'
 
 import { definePlugin } from 'payload'
-import { hasAutosaveEnabled } from 'payload/shared'
+import { hasAutosaveEnabled, parsePayloadComponent } from 'payload/shared'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { MultiTenantPluginConfig } from './types.js'
@@ -275,9 +275,18 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
           const assignTenantTriggerPath =
             '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger'
           const hasAssignTenantTrigger = collection.admin.components.edit.editMenuItems.some(
-            (component) =>
-              (typeof component === 'string' ? component : component.path) ===
-              assignTenantTriggerPath,
+            (component) => {
+              if (!component) {
+                return false
+              }
+
+              const { exportName, path } = parsePayloadComponent(component)
+
+              return (
+                path === '@payloadcms/plugin-multi-tenant/client' &&
+                exportName === 'AssignTenantFieldTrigger'
+              )
+            },
           )
 
           if (!hasAssignTenantTrigger) {
