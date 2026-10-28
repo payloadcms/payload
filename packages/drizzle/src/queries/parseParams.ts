@@ -347,6 +347,41 @@ export function parseParams({
                   break
                 }
 
+                if (
+                  operator === 'not_like' &&
+                  (field.type === 'number' ||
+                    field.type === 'relationship' ||
+                    field.type === 'upload' ||
+                    table[columnName].columnType === 'PgUUID')
+                ) {
+                  operator = 'not_equals'
+                }
+
+                // Negation of `like`, matching the MongoDB adapter: none of the words may be present.
+                // Documents without a value are included, as `NOT LIKE` on NULL never matches.
+                if (operator === 'not_like') {
+                  constraints.push(
+                    or(
+                      isNull(table[columnName]),
+                      and(
+                        ...val.split(' ').map((word) =>
+                          buildOperatorConstraint({
+                            adapter,
+                            column: table[columnName],
+                            field,
+                            locale,
+                            originalOperator,
+                            path: relationOrPath,
+                            resolvedOperator: 'not_like',
+                            value: `%${word}%`,
+                          }),
+                        ),
+                      ),
+                    ),
+                  )
+                  break
+                }
+
                 const sanitizedQueryValue = sanitizeQueryValue({
                   adapter,
                   columns,
