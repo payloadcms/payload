@@ -105,7 +105,7 @@
     "react-dom": "19.3.1",
     "sass": "1.77.4",
     "server-only": "^0.0.1",
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "shiki": "^4.0.2",
     "string-argv": "0.3.2",
     "tempy": "^1.0.1",
