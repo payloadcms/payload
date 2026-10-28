@@ -124,6 +124,15 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     )
   })
 
+  test('should pass each stage its canTransform options in transformFile', async ({ payload }) => {
+    await createNote({ contractStages: {}, payload })
+
+    expect(contractCalls.transformFile.map(({ options }) => options)).toEqual([
+      { stage: 'first' },
+      { stage: 'second' },
+    ])
+  })
+
   test.for(pipelineRuns)(
     'should pass the working doc, and a frozen copy of it as originalDoc, to canTransform on $name',
     async ({ expected, run }, { payload }) => {
@@ -154,6 +163,41 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     expect(contractCalls.handleRequest[0]?.doc).toMatchObject({ id: created.id, alt: 'note' })
     expect(contractCalls.handleRequest[0]?.originalDoc).toMatchObject({ id: created.id })
     expect(Object.isFrozen(contractCalls.handleRequest[0]?.originalDoc)).toBe(true)
+  })
+
+  test.describe('request phases', () => {
+    test.for([
+      { isStored: false, purposes: ['persisted-default', 'request-override'] },
+      { isStored: true, purposes: ['request-override'] },
+    ])(
+      'should run the $purposes phases in config order, each with its own options, when isStored is $isStored, keeping _transforms and hiding _stored',
+      async ({ isStored, purposes }, { payload, restClient }) => {
+        const created = await createNote({ _transforms: { contractSuffix: '!' }, payload })
+
+        if (!isStored) {
+          await payload.db.updateOne({
+            id: created.id,
+            collection: contractMediaSlug,
+            data: { _stored: false },
+          })
+        }
+
+        resetContractCalls()
+
+        await restClient.GET(`/${contractMediaSlug}/file/${created.filename}?contract=1`)
+        const stored = await payload.findByID({ id: created.id, collection: contractMediaSlug })
+
+        // The fixture's request options echo the `purpose` that its `canTransform` received.
+        expect(contractCalls.handleRequest.map(({ options, slug }) => [slug, options])).toEqual(
+          purposes.flatMap((purpose) => [
+            ['contract-first', { purpose }],
+            ['contract-second', { purpose }],
+          ]),
+        )
+        expect(stored._transforms).toEqual({ contractSuffix: '!' })
+        expect(stored).not.toHaveProperty('_stored')
+      },
+    )
   })
 
   test.describe('changing _transforms', () => {
@@ -580,6 +624,20 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
     }
+
+    test('should pass a stage its own canTransform options in every task, not the Sharp task', async ({
+      payload,
+    }) => {
+      await createImage({ contractStages: {}, payload })
+
+      const calls = contractCalls.transformFile.map(({ options, slug }) => [slug, options])
+
+      // Two stages in the main task and in the thumbnail task.
+      expect(calls).toHaveLength(4)
+      expect(calls).toEqual(
+        calls.map(([slug]) => [slug, { stage: String(slug).replace('contract-', '') }]),
+      )
+    })
 
     test('should keep the main task doc changes and give size tasks a frozen copy', async ({
       payload,
