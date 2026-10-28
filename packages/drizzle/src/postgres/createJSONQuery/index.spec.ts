@@ -122,6 +122,18 @@ describe('createJSONQuery (postgres)', () => {
       })
       expect(gteResult).toBe('jsonb_path_exists("posts"."data", \'$.score[*] ? (@ >= 49.99)\')')
     })
+
+    it('preserves exact numeric precision for large integers beyond JavaScript safe integer limit', () => {
+      const result = createJSONQuery({
+        column: postsTable.data,
+        operator: 'greater_than_equal',
+        pathSegments: ['data', 'bigNumber'],
+        value: '9007199254740993',
+      })
+      expect(result).toBe(
+        'jsonb_path_exists("posts"."data", \'$.bigNumber[*] ? (@ >= 9007199254740993)\')',
+      )
+    })
   })
 
   describe('existing operators compatibility', () => {
