@@ -599,7 +599,7 @@ jobs:
 
       - name: Accessibility tests
         id: a11y_tests
-        run: pnpm test:e2e:prod:server:run:noturbo a11y --workers=1 --grep-invert="@visual"
+        run: pnpm test:e2e:prod:server:run a11y --workers=1 --grep-invert="@visual"
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_a11y_${{ matrix.framework }}_1.json
           A11Y_REPORT_PATH: ${{ github.workspace }}/test/test-results/a11y-summary.md
