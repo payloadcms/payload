@@ -139,9 +139,9 @@ export const loadBranchManifest = async (
     },
   })
 
-  for (const change of docs as Record<string, any>[]) {
+  for (const change of docs as Record<string, unknown>[]) {
     const slug = change.collectionSlug as string
-    const docID = change.doc?.value ?? change.doc
+    const docID = extractRelationshipID({ relationship: change.doc })
 
     if (!slug || docID === undefined || docID === null) {
       continue

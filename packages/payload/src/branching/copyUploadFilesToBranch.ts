@@ -1,32 +1,22 @@
 import fs from 'node:fs/promises'
-
 import path from 'node:path'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
-
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
 import { replaceStoredFileReferences } from '../uploads/fileVersioning/archive.js'
-
 import { removeUnreferencedStagedObjects } from '../uploads/fileVersioning/cleanup.js'
-
 import { runFileOperationPlan } from '../uploads/fileVersioning/fileOperationManager.js'
-
 import { copyLocalFile } from '../uploads/fileVersioning/localStorage.js'
-
 import { normalizeStorageKey } from '../uploads/fileVersioning/naming.js'
-
 import {
   collectStoredFiles,
   getStoredFileIdentity,
   withLegacyCloudUploadFileData,
   withLegacyUploadFileData,
 } from '../uploads/fileVersioning/storedFiles.js'
-
 import { getBranchUploadFilename } from '../uploads/generateFileData.js'
-
 import { getSafeFileName, incrementName } from '../uploads/getSafeFilename.js'
-
 import { markTransactionWrite } from '../utilities/transactionMutationTracker.js'
 
 export const copyUploadFilesToBranch = async ({

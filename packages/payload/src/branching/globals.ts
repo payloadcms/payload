@@ -1,7 +1,6 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
 import { resolveBranch } from './resolveBranch.js'
-
 import { branchField, MAIN_BRANCH } from './types.js'
 
 type BaseArgs = {
@@ -67,7 +66,7 @@ export const branchGlobalNeedsBothRows = (args: BaseArgs): boolean => {
 }
 
 /** Picks the branch's copy of a global when it has one, else main's. */
-export const pickBranchGlobal = <T extends Record<string, any>>(
+export const pickBranchGlobal = <T extends Record<string, unknown>>(
   docs: T[],
   branch: string,
 ): T | undefined => docs.find((doc) => doc?.[branchField] === branch) ?? docs[0]

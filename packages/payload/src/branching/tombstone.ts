@@ -1,30 +1,21 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
 import { APIError } from '../errors/index.js'
-
+import { extractRelationshipID } from '../utilities/extractRelationshipID.js'
 import { httpStatus } from '../utilities/httpStatus.js'
-
 import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
-
 import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
-
 import { assertBranchWritable } from './assertBranchWritable.js'
-
 import { copyUploadFilesToBranch } from './copyUploadFilesToBranch.js'
-
 import { createShadowRow } from './createShadowRow.js'
-
 import {
   loadBranchOperation,
   peekBranchOperation,
   resetBranchState,
   resolveBranch,
 } from './resolveBranch.js'
-
 import { resolveBranchQuery } from './resolveBranchQuery.js'
-
 import { branchChangesCollectionSlug, branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
-
 import { findBranchVersionForkBoundary } from './versions.js'
 
 type Args = {
@@ -284,8 +275,7 @@ export const resolveBranchDelete = async ({
 
   const targetID = target.id as number | string
   const isOnThisBranch = target[branchField] === branch
-  const canonicalID =
-    (target[branchDocIDField] as any)?.value ?? target[branchDocIDField] ?? targetID
+  const canonicalID = extractRelationshipID({ relationship: target[branchDocIDField] }) ?? targetID
   const operation = peekBranchOperation({ collectionSlug, docID: canonicalID, req })
   const isTombstoneExpectedForTarget = !(isOnThisBranch && operation === 'create')
 

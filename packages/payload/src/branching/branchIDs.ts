@@ -1,9 +1,7 @@
 import type { PayloadRequest, Where, WhereField } from '../types/index.js'
 
 import { extractRelationshipID } from '../utilities/extractRelationshipID.js'
-
 import { isBranchProjectionActive } from './branchSelect.js'
-
 import { branchDocIDField, branchParentField } from './types.js'
 
 /**
@@ -98,7 +96,7 @@ export const rewriteBranchVersionParents = (where: undefined | Where): undefined
  * `_branchDocID` holds the canonical ID for forked rows and is null for
  * branch-created rows, whose own ID is already canonical.
  */
-export const projectBranchIDs = <T extends Record<string, any>>(docs: T[]): T[] => {
+export const projectBranchIDs = <T extends Record<string, unknown>>(docs: T[]): T[] => {
   for (const doc of docs) {
     const canonical = doc?.[branchDocIDField]
 

@@ -1,9 +1,7 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
 import { appendBranchFilter } from './appendBranchFilter.js'
-
 import { rewriteBranchIDs } from './branchIDs.js'
-
 import {
   loadBranchDeletions,
   loadBranchManifest,
@@ -11,7 +9,6 @@ import {
   peekBranchManifest,
   resolveBranch,
 } from './resolveBranch.js'
-
 import { MAIN_BRANCH } from './types.js'
 
 type Args = {
