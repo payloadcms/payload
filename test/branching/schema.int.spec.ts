@@ -175,7 +175,9 @@ test.suite('Branching: schema', { config: './config.ts', resetBetweenTests: fals
             expect.objectContaining({ path: 'metadata.code' }),
             expect.objectContaining({ path: '_branch' }),
           ]),
-          requireExists: ['metadata.code'],
+          requireExists: [
+            { localizedPath: 'metadata.code', path: 'metadata.code', pathHasLocalized: false },
+          ],
           unique: true,
         }),
       )
