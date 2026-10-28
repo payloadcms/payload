@@ -24,6 +24,8 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       admin: { className, description, placeholder, rtl } = {},
       label,
       localized,
+      maxLength,
+      minLength,
       required,
     } = {} as PasswordFieldProps['field'],
     inputRef,
@@ -49,6 +51,8 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
         blockData: {},
         data: {},
         event: 'onChange',
+        maxLength,
+        minLength,
         path: pathSegments,
         preferences: { fields: {} },
         req: {
@@ -61,7 +65,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
         siblingData: {},
       })
     },
-    [validate, config, t, required, path],
+    [validate, config, t, required, path, maxLength, minLength],
   )
 
   const {

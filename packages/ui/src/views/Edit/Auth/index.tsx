@@ -49,9 +49,9 @@ export const Auth: React.FC<Props> = (props) => {
     getEntityConfig,
   } = useConfig()
 
-  const hasPasswordField = useMemo(
+  const passwordField = useMemo(
     () =>
-      flattenTopLevelFields(getEntityConfig({ collectionSlug }).fields).some(
+      flattenTopLevelFields(getEntityConfig({ collectionSlug }).fields).find(
         (field) => field.name === 'password',
       ),
     [collectionSlug, getEntityConfig],
@@ -63,7 +63,7 @@ export const Auth: React.FC<Props> = (props) => {
     typeof docPermissions.fields === 'object' &&
     ('username' in docPermissions.fields || 'email' in docPermissions.fields)
 
-  if (hasPasswordField) {
+  if (passwordField) {
     const { operation: passwordPermission } = getFieldPermissions({
       field: { name: 'password', type: 'text' },
       operation,
@@ -262,6 +262,10 @@ export const Auth: React.FC<Props> = (props) => {
                       field={{
                         name: 'password',
                         label: t('authentication:newPassword'),
+                        maxLength:
+                          passwordField?.type === 'text' ? passwordField.maxLength : undefined,
+                        minLength:
+                          passwordField?.type === 'text' ? passwordField.minLength : undefined,
                         required: true,
                       }}
                       indexPath=""
