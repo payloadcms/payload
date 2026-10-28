@@ -1,5 +1,4 @@
 import type { BigIntStats } from 'node:fs'
-
 import type { FileHandle } from 'node:fs/promises'
 
 import fs from 'node:fs/promises'

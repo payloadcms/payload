@@ -1,9 +1,7 @@
 import type { PayloadRequest } from '../types/index.js'
 
 import { APIError } from '../errors/index.js'
-
 import { resolveBranch } from './resolveBranch.js'
-
 import { MAIN_BRANCH } from './types.js'
 
 export type BranchMergeWrite = {

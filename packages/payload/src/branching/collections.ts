@@ -1,17 +1,11 @@
 import type { CollectionConfig } from '../collections/config/types.js'
-
 import type { Config } from '../config/types.js'
-
 import type { CollectionAfterChangeHook, Where } from '../index.js'
-
 import type { SanitizedBranchingConfig } from './types.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
-
 import { combineBranchAccess } from './combineBranchAccess.js'
-
 import { loadBranchRow, setBranchRow } from './resolveBranch.js'
-
 import {
   branchChangesCollectionSlug,
   branchesCollectionSlug,

@@ -1,13 +1,9 @@
 import { randomUUID } from 'node:crypto'
-
 import { constants } from 'node:fs'
-
 import fs from 'node:fs/promises'
-
 import path from 'node:path'
 
 import type { FileIdentity } from './fileIdentity.js'
-
 import type { FileToSave } from './types.js'
 
 import {
@@ -16,7 +12,6 @@ import {
   hasFileIdentity,
   hasRenameStableFileIdentity,
 } from './fileIdentity.js'
-
 import { linkFileWithoutOverwrite } from './linkFileWithoutOverwrite.js'
 
 type UploadFileRollback = {
