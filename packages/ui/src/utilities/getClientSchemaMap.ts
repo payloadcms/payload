@@ -27,7 +27,10 @@ export const getClientSchemaMap = cache(
       cachedClientSchemaMap = new Map()
     }
 
-    const cacheKey = collectionSlug || globalSlug || `widget:${widgetSlug}`
+    // Unauthenticated configs intentionally omit field schemas, so they cannot share a cache entry.
+    const cacheKey = `${config.unauthenticated ? 'unauthenticated' : 'authenticated'}:${
+      collectionSlug || globalSlug || `widget:${widgetSlug}`
+    }`
     let cachedEntityClientFieldMap = cachedClientSchemaMap.get(cacheKey)
 
     if (cachedEntityClientFieldMap) {
