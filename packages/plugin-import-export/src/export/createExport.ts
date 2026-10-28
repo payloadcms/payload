@@ -16,6 +16,7 @@ import { getSchemaColumns, mergeColumns } from '../utilities/getSchemaColumns.js
 import { getSelect } from '../utilities/getSelect.js'
 import { validateLimitValue } from '../utilities/validateLimitValue.js'
 import { createExportBatchProcessor, type ExportFindArgs } from './batchProcessor.js'
+import { resolveStreamedCSVColumns } from './resolveStreamedCSVColumns.js'
 
 export type Export = {
   /**
@@ -282,9 +283,55 @@ export const createExport = async (args: CreateExportArgs) => {
       }
     }
 
-    // allColumns will be finalized after first batch (schema + data columns merged)
+    // Header columns are fixed once the first CSV chunk is written. Scan every
+    // batch first so a later document with a longer array (or any other key the
+    // first page never had) is not dropped. This matches the non-streaming path,
+    // which collects columns across all pages before writing.
     let allColumns: string[] = []
     let columnsFinalized = false
+    let scannedColumns: string[] = []
+
+    if (isCSV && !accessDenied) {
+      const processor = createExportBatchProcessor({ batchSize, debug })
+
+      scannedColumns = await processor.discoverColumns({
+        collectionSlug,
+        exportDoc,
+        findArgs: findArgs as ExportFindArgs,
+        format,
+        maxDocs:
+          typeof maxExportDocuments === 'number' ? maxExportDocuments : Number.POSITIVE_INFINITY,
+        req,
+        startPage: adjustedPage,
+        totalDocs,
+        transformDoc: (doc) =>
+          filterDisabledCSV(
+            flattenObject({
+              data: doc as Record<string, unknown>,
+              exportFieldHooks,
+              fields,
+              format,
+              req,
+            }),
+          ),
+      })
+
+      allColumns = resolveStreamedCSVColumns({
+        scannedColumns,
+        schemaColumns,
+      })
+      // A collection before hook can still add or remove columns. Apply that
+      // delta on the first streamed batch, starting from the full scan.
+      columnsFinalized = !exportHooks?.before
+
+      if (debug) {
+        req.payload.logger.debug({
+          dataColumnsCount: scannedColumns.length,
+          finalColumnsCount: allColumns.length,
+          msg: 'Pre-scanned CSV columns across all batches',
+        })
+      }
+    }
 
     const encoder = new TextEncoder()
     let isFirstBatch = true
@@ -363,33 +410,52 @@ export const createExport = async (args: CreateExportArgs) => {
             })
           }
 
-          // On first batch, discover additional columns from data and merge with schema
+          // Pre-scan already merged schema columns with every batch. When a
+          // before hook rewrites this batch, drop keys it removed and keep keys
+          // it added, without discarding columns that only exist in later batches.
           if (!columnsFinalized) {
-            const dataColumns: string[] = []
-            const seenCols = new Set<string>()
+            const hookColumns: string[] = []
+            const seenHookColumns = new Set<string>()
+
             for (const row of batchRowsToWrite) {
               for (const key of Object.keys(row)) {
-                if (!seenCols.has(key)) {
-                  seenCols.add(key)
-                  dataColumns.push(key)
+                if (!seenHookColumns.has(key)) {
+                  seenHookColumns.add(key)
+                  hookColumns.push(key)
                 }
               }
             }
-            // Merge schema columns with data-discovered columns.
-            // When a before hook is active and rows exist, restrict to columns actually present
-            // in the data so that the hook can remove fields by not returning them.
-            const mergedColumns = mergeColumns(schemaColumns, dataColumns)
+
+            const rawColumns: string[] = []
+            const seenRawColumns = new Set<string>()
+
+            for (const row of batchRows) {
+              for (const key of Object.keys(row)) {
+                if (!seenRawColumns.has(key)) {
+                  seenRawColumns.add(key)
+                  rawColumns.push(key)
+                }
+              }
+            }
+
             allColumns =
               Boolean(exportHooks?.before) && batchRowsToWrite.length > 0
-                ? mergedColumns.filter((col) => dataColumns.includes(col))
-                : mergedColumns
+                ? resolveStreamedCSVColumns({
+                    hookColumns,
+                    rawColumns,
+                    scannedColumns,
+                    schemaColumns,
+                  })
+                : resolveStreamedCSVColumns({
+                    scannedColumns: scannedColumns.length > 0 ? scannedColumns : hookColumns,
+                    schemaColumns,
+                  })
             columnsFinalized = true
 
             if (debug) {
               req.payload.logger.debug({
-                dataColumnsCount: dataColumns.length,
                 finalColumnsCount: allColumns.length,
-                msg: 'Merged schema and data columns',
+                msg: 'Finalized streamed CSV columns',
               })
             }
           }
