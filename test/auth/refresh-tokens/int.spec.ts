@@ -1,5 +1,6 @@
 import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
 
+import { wait } from 'payload/shared'
 import { expect, onTestFinished, vi } from 'vitest'
 
 import { test } from '../../__helpers/int/vitest.js'
@@ -52,6 +53,9 @@ test.suite('Refresh tokens', { config: './config.ts' }, () => {
     restClient,
   }) => {
     const login = await restClient.login({ slug: collectionSlug, credentials: devUser })
+
+    moveClockForward(3 * 60 * 60 * 1000)
+
     const refreshed = await refresh({ refreshToken: login.refreshToken, restClient }).then((res) =>
       res.json(),
     )
@@ -64,6 +68,29 @@ test.suite('Refresh tokens', { config: './config.ts' }, () => {
     expect((await refresh({ refreshToken: login.refreshToken, restClient })).status).toBe(403)
     expect((await refresh({ refreshToken: refreshed.refreshToken, restClient })).status).toBe(403)
     expect(await getUser({ restClient, token: refreshed.refreshedToken })).toBeNull()
+  })
+
+  test('should stay logged in after refreshing twice at once', async ({ payload, restClient }) => {
+    const login = await restClient.login({ slug: collectionSlug, credentials: devUser })
+
+    // A database that takes a moment to save, so both refreshes read the session before either saves
+    const updateOne = payload.db.updateOne.bind(payload.db)
+    vi.spyOn(payload.db, 'updateOne').mockImplementation(async (args) => {
+      await wait(100)
+      return updateOne(args)
+    })
+    onTestFinished(() => vi.restoreAllMocks())
+
+    // Like two requests a few milliseconds apart that both found the token expired
+    const first = refresh({ refreshToken: login.refreshToken, restClient }).then((res) => res.json())
+    await wait(10)
+    await refresh({ refreshToken: login.refreshToken, restClient })
+
+    const { refreshToken } = await first
+
+    moveClockForward(60 * 1000)
+
+    expect((await refresh({ refreshToken, restClient })).status).toBe(200)
   })
 
   test('should keep the refresh token working when refreshing with the token', async ({
