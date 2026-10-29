@@ -47,7 +47,10 @@ export const renderTitle = ({
 
 describe('RenderTitle', () => {
   test('should render ID as title when there is a numerical title', async () => {
-    const { getByText } = await renderTitle({ id: 123, title: '123' })
+    const { getByRole, getByText } = await renderTitle({ id: 123, title: '123' })
+
+    expect(getByRole('heading')).toHaveClass('render-title--has-id')
+    expect(getByText('ID')).toBeInTheDocument()
     expect(getByText('123')).toBeInTheDocument()
   })
 
