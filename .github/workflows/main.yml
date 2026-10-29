@@ -32,7 +32,7 @@ jobs:
       needs_tests: ${{ steps.filter.outputs.needs_tests }}
       needs_visual: ${{ steps.filter.outputs.needs_visual }}
       needs_a11y: ${{ steps.a11y_filter.outputs.needs_a11y }}
-      a11y_files: ${{ steps.a11y_filter.outputs.needs_a11y_files }}
+      a11y_files: ${{ steps.a11y_report_files.outputs.files }}
       templates: ${{ steps.filter.outputs.templates }}
       build_approvals: ${{ steps.filter.outputs.build_approvals }}
       needs_sbom: ${{ steps.filter.outputs.needs_sbom }}
@@ -131,6 +131,15 @@ jobs:
         with:
           list-files: json
           filters: .github/filters/a11y.yml
+
+      - name: Bound accessibility report file list
+        id: a11y_report_files
+        continue-on-error: true
+        # The full JSON list travels through stdin, never an argument or environment variable.
+        run: |
+          node .github/scripts/a11y/matched-files.mjs <<'A11Y_MATCHED_FILES_JSON'
+          ${{ steps.a11y_filter.outputs.needs_a11y_files }}
+          A11Y_MATCHED_FILES_JSON
 
       - name: Log filter results
         run: |

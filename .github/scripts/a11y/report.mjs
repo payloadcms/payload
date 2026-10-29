@@ -3,7 +3,13 @@ import path from 'node:path'
 import { stripVTControlCharacters } from 'node:util'
 import { pathToFileURL } from 'node:url'
 
-export function buildSummary({ report, matchedFiles = [], sha = '', repositoryURL = '' }) {
+export function buildSummary({
+  report,
+  matchedFiles = [],
+  omittedFiles = 0,
+  sha = '',
+  repositoryURL = '',
+}) {
   const { tests } = report
   const counts = { passed: 0, retried: 0, failed: 0, incomplete: 0 }
   const scans = tests.flatMap((test) => test.attempts.at(-1)?.scans ?? [])
@@ -18,6 +24,9 @@ export function buildSummary({ report, matchedFiles = [], sha = '', repositoryUR
     ...(matchedFiles.length
       ? matchedFiles.map((value) => `- ${escape({ value })}`)
       : ['Matching-file information unavailable.']),
+    ...(omittedFiles
+      ? ['', `${omittedFiles} more matching files omitted to keep report metadata bounded.`]
+      : []),
     '',
     '</details>',
     '',

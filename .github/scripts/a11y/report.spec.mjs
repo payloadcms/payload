@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { closeSync, mkdtempSync, openSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -207,7 +207,7 @@ describe('real Playwright reporter', () => {
           ...process.env,
           CI: '',
           FORCE_COLOR: '0',
-          A11Y_MATCHED_FILES: '["packages/ui/Form.tsx"]',
+          A11Y_MATCHED_FILES: '{"files":["packages/ui/Form.tsx"],"omitted":17}',
         },
         timeout: 30000,
       },
@@ -222,6 +222,7 @@ describe('real Playwright reporter', () => {
     expect(markdown).toContain('Skipped check: focus restoration')
     expect(markdown).toContain('Delete button')
     expect(markdown).toContain('packages/ui/Form.tsx')
+    expect(markdown).toContain('17 more matching files omitted')
   }, 40000)
 })
 
@@ -252,5 +253,67 @@ describe('invalid scan evidence', () => {
     expect(markdown).toContain('Incomplete')
     expect(markdown).toContain('Missing evidence: Invalid axe scan evidence')
     expect(markdown).not.toContain('✅ 1/1 passed')
+  })
+})
+
+describe('matching-file transport', () => {
+  it('should preserve a small list and disclose omitted files for oversized Unicode paths', async () => {
+    const { boundMatchedFiles } = await import('./matched-files.mjs')
+    expect(boundMatchedFiles({ files: ['packages/ui/Form.tsx'] })).toEqual({
+      files: ['packages/ui/Form.tsx'],
+      omitted: 0,
+    })
+    const files = Array.from(
+      { length: 3000 },
+      (_, index) => `packages/ui/${index}-${'界'.repeat(70)}.tsx`,
+    )
+    const bounded = boundMatchedFiles({ files })
+    expect(Buffer.byteLength(JSON.stringify(bounded))).toBeLessThan(64 * 1024)
+    expect(bounded.files.length).toBeGreaterThan(0)
+    expect(bounded.omitted).toBeGreaterThan(0)
+    expect(bounded.files).toEqual(files.slice(0, bounded.files.length))
+    expect(bounded.files.length + bounded.omitted).toBe(3000)
+    const markdown = buildSummary({
+      report: report(),
+      matchedFiles: bounded.files,
+      omittedFiles: bounded.omitted,
+    })
+    expect(markdown).toContain(`${bounded.omitted} more matching files omitted`)
+  })
+
+  it('should read the full list through stdin and write only bounded job output', async () => {
+    const { spawnSync } = await import('node:child_process')
+    const { fileURLToPath } = await import('node:url')
+    const directory = temporaryDirectory()
+    const outputFile = path.join(directory, 'outputs')
+    const inputFile = path.join(directory, 'files.json')
+    const files = Array.from(
+      { length: 3000 },
+      (_, index) => `packages/ui/${index}-${'x'.repeat(70)}.tsx`,
+    )
+    writeFileSync(inputFile, JSON.stringify(files))
+    const input = openSync(inputFile, 'r')
+    let result
+    try {
+      result = spawnSync(
+        process.execPath,
+        [fileURLToPath(new URL('./matched-files.mjs', import.meta.url))],
+        {
+          stdio: [input, 'pipe', 'pipe'],
+          encoding: 'utf8',
+          timeout: 10000,
+          env: { ...process.env, GITHUB_OUTPUT: outputFile },
+        },
+      )
+    } finally {
+      closeSync(input)
+    }
+    expect(result.status, result.stderr).toBe(0)
+    const output = readFileSync(outputFile, 'utf8')
+    expect(output.startsWith('files=')).toBe(true)
+    expect(Buffer.byteLength(output)).toBeLessThan(64 * 1024)
+    const bounded = JSON.parse(output.slice('files='.length))
+    expect(bounded.files.length + bounded.omitted).toBe(3000)
+    expect(bounded.omitted).toBeGreaterThan(0)
   })
 })

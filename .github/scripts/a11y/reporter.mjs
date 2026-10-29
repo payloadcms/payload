@@ -104,10 +104,18 @@ export default class A11yReporter {
 
   async onEnd(result) {
     let matchedFiles = []
+    let omittedFiles = 0
     try {
-      matchedFiles = JSON.parse(process.env.A11Y_MATCHED_FILES || '[]')
-      if (!Array.isArray(matchedFiles) || matchedFiles.some((file) => typeof file !== 'string'))
+      const matching = JSON.parse(process.env.A11Y_MATCHED_FILES || '{"files":[],"omitted":0}')
+      if (
+        !Array.isArray(matching.files) ||
+        matching.files.some((file) => typeof file !== 'string') ||
+        !Number.isInteger(matching.omitted) ||
+        matching.omitted < 0
+      )
         throw new Error('Invalid matching-file list')
+      matchedFiles = matching.files
+      omittedFiles = matching.omitted
     } catch {
       matchedFiles = []
       this.errors.push('Matching-file information unavailable.')
@@ -120,6 +128,7 @@ export default class A11yReporter {
         errors: this.errors,
       },
       matchedFiles,
+      omittedFiles,
       sha: process.env.GITHUB_SHA,
       repositoryURL: process.env.GITHUB_REPOSITORY
         ? `${process.env.GITHUB_SERVER_URL || 'https://github.com'}/${process.env.GITHUB_REPOSITORY}`
