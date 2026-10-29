@@ -545,6 +545,7 @@ export const getTableColumnFromPath = ({
                 newAliasTable[field.on.replaceAll('.', '_')],
                 aliasTable ? aliasTable.id : adapter.tables[tableName].id,
               ),
+              isOneToMany: true,
               queryPath: `${constraintPath}${field.name}`,
               table: newAliasTable,
             })
