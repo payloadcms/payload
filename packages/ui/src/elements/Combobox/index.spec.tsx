@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
 
 import { Combobox } from './index.js'
@@ -197,3 +197,99 @@ test.each([
     }
   },
 )
+
+test.each(['fit-content', 'large', 'small'] as const)(
+  'should fit a narrow viewport before and during search with size=%s',
+  async (size) => {
+    const originalViewport = { width: window.innerWidth, height: window.innerHeight }
+
+    try {
+      await page.viewport(160, 720)
+      const onSelect = vi.fn()
+      const screen = await render(
+        <Combobox
+          theme="auto"
+          button="Choose"
+          entries={entries}
+          minEntriesForSearch={0}
+          onSelect={onSelect}
+          size={size}
+        />,
+      )
+      const trigger = screen.getByRole('button', { name: 'Choose', exact: true })
+
+      await trigger.click()
+      const input = screen.getByRole('textbox')
+
+      await expect.element(input).toHaveFocus()
+      const content = input.element().closest('.combobox__content') as HTMLElement
+      const popup = screen.getByRole('dialog').element()
+      const searchBar = input.element().closest('.combobox__search-bar') as HTMLElement
+      const assertFitsViewport = () => {
+        const popupRect = popup.getBoundingClientRect()
+
+        expect(popupRect.left).toBeGreaterThanOrEqual(0)
+        expect(popupRect.right).toBeLessThanOrEqual(window.innerWidth)
+        expect(content.scrollWidth).toBeLessThanOrEqual(content.clientWidth)
+        expect(content.getBoundingClientRect().right).toBeLessThanOrEqual(popupRect.right)
+        expect(input.element().getBoundingClientRect().width).toBeGreaterThan(0)
+        expect(searchBar.getBoundingClientRect().right).toBeLessThanOrEqual(popupRect.right)
+      }
+
+      assertFitsViewport()
+      await input.fill('be')
+      assertFitsViewport()
+      await userEvent.keyboard('{Tab}{Enter}')
+      expect(onSelect).toHaveBeenCalledWith(entries[1])
+      await expect.element(trigger).toHaveFocus()
+      await page.viewport(640, 720)
+      await trigger.click()
+      await expect.element(input).toHaveFocus()
+      await input.fill('be')
+      await page.viewport(160, 720)
+      await expect.poll(() => popup.getBoundingClientRect().right).toBeLessThanOrEqual(160)
+      assertFitsViewport()
+      await input.fill('')
+      assertFitsViewport()
+    } finally {
+      await page.viewport(originalViewport.width, originalViewport.height)
+    }
+  },
+)
+
+test.each([0, 8])(
+  'should not report a failed search for an empty list with search threshold=%s',
+  async (minEntriesForSearch) => {
+    const screen = await render(
+      <Combobox
+        theme="auto"
+        button="Choose"
+        entries={[]}
+        minEntriesForSearch={minEntriesForSearch}
+      />,
+    )
+
+    await screen.getByRole('button', { name: 'Choose', exact: true }).click()
+    await expect.element(screen.getByRole('status')).not.toBeInTheDocument()
+    if (minEntriesForSearch === 0) {
+      await screen.getByRole('textbox').fill('missing')
+      await expect.element(screen.getByRole('status')).not.toBeInTheDocument()
+    }
+  },
+)
+
+test('should allow callers to suppress the empty search message', async () => {
+  const screen = await render(
+    <Combobox
+      theme="auto"
+      button="Choose"
+      entries={entries}
+      minEntriesForSearch={0}
+      showEmptyMessage={false}
+    />,
+  )
+
+  await screen.getByRole('button', { name: 'Choose', exact: true }).click()
+  await screen.getByRole('textbox').fill('missing')
+  await expect.element(screen.getByRole('status')).not.toBeInTheDocument()
+})

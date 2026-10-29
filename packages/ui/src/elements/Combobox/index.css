@@ -1,4 +1,10 @@
 @layer payload-default {
+  /* Content controls the minimum width, including when the viewport is narrower
+     than Popup's size presets. */
+  .popup.combobox > .popup__content {
+    min-width: 0;
+  }
+
   /* The combobox supplies its own padding so the search bar can span the full
      width and sit flush against its dividing border. */
   .popup__scroll-container:has(> .combobox__content) {
@@ -7,17 +13,18 @@
   }
 
   .combobox__content {
-    --combobox-min-width: 240px;
+    --combobox-min-width: calc(var(--spacer-6) * 6);
+    --combobox-available-width: calc(100vw - var(--spacer-3));
 
     display: flex;
     flex-direction: column;
-    min-width: var(--combobox-min-width);
+    min-width: min(var(--combobox-min-width), var(--combobox-available-width));
     max-height: inherit;
   }
 
   /* Held steady while searching so the popup doesn't resize as entries filter out */
   .combobox__content[data-width-locked] {
-    min-width: var(--combobox-locked-width);
+    min-width: min(var(--combobox-locked-width), var(--combobox-available-width));
   }
 
   .combobox__search {
@@ -33,6 +40,7 @@
     display: flex;
     align-items: center;
     flex: 1;
+    min-width: 0;
     height: var(--spacer-4);
     padding-inline-end: var(--spacer-2);
     background: var(--color-bg-secondary);
@@ -52,6 +60,7 @@
 
   .combobox__search-input {
     flex: 1;
+    min-width: 0;
     height: 100%;
     padding: 0;
     background: transparent;

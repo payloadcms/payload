@@ -41,6 +41,23 @@ describe('matchesSearchQuery', () => {
     })
   })
 
+  it.each([
+    { label: '東京', query: '京' },
+    { label: 'とうきょう', query: 'き' },
+    { label: 'トウキョウ', query: 'キ' },
+    { label: 'ประเทศไทย', query: 'ท' },
+    { label: 'ປະເທດລາວ', query: 'ລ' },
+    { label: 'កម្ពុជា', query: 'ម' },
+    { label: 'သတင်း', query: 'တ' },
+    { label: 'Location 東京', query: '京' },
+  ])('should match an interior character in an unspaced script: $label', ({ label, query }) => {
+    expect(matchesSearchQuery({ label, query })).toBe(true)
+  })
+
+  it('should retain word-start matching for Latin text alongside unspaced scripts', () => {
+    expect(matchesSearchQuery({ label: 'Location 東京', query: 'c' })).toBe(false)
+  })
+
   describe('multi-character queries', () => {
     it('matches a substring in the middle of the label', () => {
       expect(matchesSearchQuery({ label: 'Published Date', query: 'ish' })).toBe(true)

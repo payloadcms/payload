@@ -45,8 +45,7 @@ export type ComboboxProps = {
   /**
    * Whether to say so when a search matches nothing.
    *
-   * Off for a list that is empty to begin with: there is no search to have failed,
-   * so the message describes something that did not happen.
+   * Only shown for a nonempty query against a nonempty list.
    */
   showEmptyMessage?: boolean
 } & Omit<PopupProps, 'children' | 'render'>
@@ -185,7 +184,9 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
               </div>
             </PopupList.ButtonGroup>
           ) : (
-            showEmptyMessage && (
+            showEmptyMessage &&
+            entries.length > 0 &&
+            searchValue.trim() !== '' && (
               <div className={`${baseClass}__no-results`} role="status">
                 {t('general:noMatchesFound')}
               </div>
