@@ -70,13 +70,15 @@ export const countDistinct: CountDistinct = async function countDistinct(
 
 // A join multiplies rows when its table holds more than one row per
 // document: array, blocks, _locales and _rels tables, and has-many value
-// tables (_texts, _numbers). Only array joins are flagged with
-// `isOneToMany`, and aliased tables report a generated UUID as their name,
-// so classification also falls back to the table's columns, which aliasing
-// preserves: _rels and has-many value tables carry `parent` + `path`,
-// blocks and array tables carry `_parentID`, and _locales tables carry
-// `_locale`. Anything unrecognized is treated as multiplying, which only
-// costs performance, never correctness.
+// tables (_texts, _numbers, select values). Joins flagged with
+// `isOneToMany` at the source are multiplying; aliased tables report a
+// generated UUID as their name, so classification also falls back to the
+// table's columns, which aliasing preserves: _rels and has-many value
+// tables carry `parent` and/or `path` (a non-localized select value table
+// carries `parent` but no `path`), blocks and array tables carry
+// `_parentID`, and _locales tables carry `_locale`. A table with none of
+// these markers is a plain main table behind a has-one join, which is
+// what keeps the fast path exact.
 const isRowMultiplyingJoin = (join: BuildQueryJoinAliases[number]): boolean => {
   if (join.isOneToMany) {
     return true
@@ -100,5 +102,5 @@ const isRowMultiplyingJoin = (join: BuildQueryJoinAliases[number]): boolean => {
     return true
   }
 
-  return table.parent !== undefined && table.path !== undefined
+  return table.parent !== undefined || table.path !== undefined
 }
