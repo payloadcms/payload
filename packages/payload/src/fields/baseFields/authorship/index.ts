@@ -80,10 +80,12 @@ const setCreatedBy: FieldHook = ({
   overrideAccess,
   previousValue,
   req,
+  siblingDocWithLocales,
 }) => {
-  const hasEmptyOriginalDocument = !originalDoc || Object.keys(originalDoc).length === 0
-  // Globals always write via `update`, so their first write is detected by an empty original doc.
-  // Validation uses its own operation and represents a collection create with the same empty doc.
+  // Use stored data before afterRead defaults; persisted global drafts can also lack an ID.
+  const storedDoc = siblingDocWithLocales ?? originalDoc
+  const hasEmptyOriginalDocument = !storedDoc || Object.keys(storedDoc).length === 0
+  // Globals always write via `update`; validation represents creates with its own operation.
   const isFirstWrite =
     operation === 'create' ||
     (operation === 'validate' && hasEmptyOriginalDocument) ||
