@@ -189,6 +189,7 @@ describe('assets', () => {
     expect(toml).toContain('[shell_environment_policy.set]')
     expect(toml).toContain('PNPM_HOME = "/tmp/audit-deps/pnpm-home"')
     expect(toml).toContain('XDG_CACHE_HOME = "/tmp/audit-deps/cache"')
+    expect(toml).toContain('XDG_DATA_HOME = "/tmp/audit-deps/data"')
   })
 
   it('prompt pins the pnpm store under /tmp', () => {
@@ -196,6 +197,9 @@ describe('assets', () => {
 
     expect(template).toContain(
       'pnpm install --lockfile-only --ignore-scripts --store-dir=/tmp/audit-deps/store',
+    )
+    expect(template).toContain(
+      'pnpm update -r <pkg> --lockfile-only --ignore-scripts --store-dir=/tmp/audit-deps/store',
     )
   })
 })
