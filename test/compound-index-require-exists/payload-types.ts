@@ -81,6 +81,7 @@ export interface Config {
   collections: {
     'compound-existence-posts': CompoundExistencePost;
     'compound-existence-localized-posts': CompoundExistenceLocalizedPost;
+    'compound-existence-array-filtered-posts': CompoundExistenceArrayFilteredPost;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -92,6 +93,7 @@ export interface Config {
   collectionsSelect: {
     'compound-existence-posts': CompoundExistencePostsSelect<false> | CompoundExistencePostsSelect<true>;
     'compound-existence-localized-posts': CompoundExistenceLocalizedPostsSelect<false> | CompoundExistenceLocalizedPostsSelect<true>;
+    'compound-existence-array-filtered-posts': CompoundExistenceArrayFilteredPostsSelect<false> | CompoundExistenceArrayFilteredPostsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -216,6 +218,31 @@ export interface CompoundExistenceLocalizedPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "compound-existence-array-filtered-posts".
+ */
+export interface CompoundExistenceArrayFilteredPost {
+  id: string;
+  tenant: string;
+  code?: string | null;
+  items?:
+    | {
+        gate?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -245,6 +272,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'compound-existence-localized-posts';
         value: string | CompoundExistenceLocalizedPost;
+      } | null)
+    | ({
+        relationTo: 'compound-existence-array-filtered-posts';
+        value: string | CompoundExistenceArrayFilteredPost;
       } | null)
     | ({
         relationTo: 'users';
@@ -345,6 +376,24 @@ export interface CompoundExistenceLocalizedPostsSelect<T extends boolean = true>
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "compound-existence-array-filtered-posts_select".
+ */
+export interface CompoundExistenceArrayFilteredPostsSelect<T extends boolean = true> {
+  tenant?: T;
+  code?: T;
+  items?:
+    | T
+    | {
+        gate?: T;
+        id?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -454,7 +503,11 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'compound-existence-posts' | 'compound-existence-localized-posts' | 'users';
+    relatedCollection:
+      | 'compound-existence-posts'
+      | 'compound-existence-localized-posts'
+      | 'compound-existence-array-filtered-posts'
+      | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -476,7 +529,14 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('compound-existence-posts' | 'compound-existence-localized-posts' | 'users')[] | null;
+    excludedCollections?:
+      | (
+          | 'compound-existence-posts'
+          | 'compound-existence-localized-posts'
+          | 'compound-existence-array-filtered-posts'
+          | 'users'
+        )[]
+      | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

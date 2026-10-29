@@ -36,7 +36,7 @@ type RunValidationLifecycleArgs = {
   overrideAccess: boolean
   req: PayloadRequest
   skipMutationHooks?: boolean
-  validateData?: (args: { data: JsonObject }) => Promise<void> | void
+  validateData?: (args: { data: JsonObject; dataWithLocales: JsonObject }) => Promise<void> | void
   validationOperation?: 'create' | 'update' | 'validate'
 } & EntityArgs
 
@@ -143,7 +143,7 @@ export async function runValidationLifecycle(
 
     let processedData = data
 
-    await beforeChange({
+    const dataForStorage = await beforeChange({
       id,
       collection,
       context: req.context,
@@ -166,7 +166,13 @@ export async function runValidationLifecycle(
       processedData,
     )
     onValidationData?.(validationData)
-    await validateData?.({ data: validationData })
+    await validateData?.({
+      data: validationData,
+      dataWithLocales: deepMergeWithSourceArraysIgnoringUndefined<JsonObject>(
+        docWithLocales,
+        dataForStorage,
+      ),
+    })
   } catch (error) {
     return toValidationResult({ error, req })
   }
