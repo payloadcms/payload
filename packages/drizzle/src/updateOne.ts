@@ -2,9 +2,10 @@ import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateOne } from 'payload'
 
+import { and, eq } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
-import type { DrizzleAdapter } from './types.js'
+import type { DrizzleAdapter, PostgresDB } from './types.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
@@ -51,6 +52,10 @@ export const updateOne: UpdateOne = async function updateOne(
     whereToUpdate = joins.length === 0 ? where : undefined
 
     if (options.atomic === true) {
+      if (joins.length > 0) {
+        throw new Error('Atomic where updates do not support predicates that require joins')
+      }
+
       if (!shouldUseOptimizedUpsertRow({ data, fields: collection.flattenedFields })) {
         throw new Error('Atomic where updates only support fields stored on the main table')
       }
@@ -67,12 +72,25 @@ export const updateOne: UpdateOne = async function updateOne(
         throw new Error('Atomic where updates do not support array operations')
       }
 
+      const table = this.tables[tableName]
+      const matchingRowQuery = (db as PostgresDB)
+        .select({ id: table.id })
+        .from(table)
+        .where(where)
+        .limit(1)
+
+      // PostgreSQL must lock the candidate before applying LIMIT so a waiting caller can
+      // continue to another match if a concurrent update makes the first row ineligible.
+      // SQLite serializes writers and does not support SELECT ... FOR UPDATE.
+      const matchingRow =
+        this.name === 'postgres' ? matchingRowQuery.for('update') : matchingRowQuery
+
       markWrite(this)
 
       const docs = await (db as LibSQLDatabase)
-        .update(this.tables[tableName])
+        .update(table)
         .set(row)
-        .where(where)
+        .where(and(eq(table.id, matchingRow), where))
         .returning()
 
       if (!docs[0]) {
