@@ -174,6 +174,37 @@ describe('multi-tenant config isolation', () => {
     expect(secondPosts?.fields[0]).toMatchObject({ name: 'site' })
   })
 
+  it('should transform nested block references once without changing shared definitions', async () => {
+    const { config, customFilter, options } = createFixture()
+    const shared = config.blocks![0]!
+
+    config.blocks = [
+      {
+        ...shared,
+        fields: [...shared.fields, { name: 'nested', type: 'blocks', blocks: ['child'] }],
+      },
+      {
+        slug: 'child',
+        fields: [...shared.fields, { name: 'loop', type: 'blocks', blocks: ['shared'] }],
+      },
+      { slug: 'unused', fields: shared.fields },
+    ]
+
+    const sourceBlocks = config.blocks
+    const built = await multiTenantPlugin(options)(config)
+
+    expect(config.blocks).toBe(sourceBlocks)
+    expect(built.blocks?.[2]).toBe(sourceBlocks[2])
+
+    for (let index = 0; index < 2; index++) {
+      const originalRelationship = sourceBlocks[index]?.fields[0] as RelationshipField
+      const builtRelationship = built.blocks?.[index]?.fields[0] as RelationshipField
+
+      expect(originalRelationship.filterOptions).toBe(customFilter)
+      expect(builtRelationship.filterOptions).not.toBe(customFilter)
+    }
+  })
+
   it('should preserve runtime adapter references outside the modified config branches', async () => {
     const { config, options } = createFixture()
     const db = { name: 'custom-adapter' } as Config['db']
