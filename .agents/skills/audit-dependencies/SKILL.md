@@ -101,7 +101,7 @@ On `monorepo` scope, relocks and overrides are allowed.
 
 A bump that crosses a major version can break us. Before you apply it:
 
-1. Read the changelog or release notes for each major in the range. Sources: GitHub releases, `CHANGELOG.md` via raw.githubusercontent.com, or the npm registry (`pnpm view <pkg> repository.url`, `pnpm view <pkg> versions`).
+1. Read the changelog or release notes for each major in the range. Start from `pnpm view <pkg>@<target> repository --json`: the source can move between majors, and a package in a monorepo sets `directory` to the folder that holds its changelog. In CI, only the npm registry and GitHub hosts are reachable. If you cannot find the notes, do not apply the bump.
 2. Use grep to find our usage of the package across the repo (imports, requires, config keys, CLI calls).
 3. Compare each breaking change with our usage.
 
