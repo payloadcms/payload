@@ -6,9 +6,9 @@ import { refuseWithoutAppApiKey } from './appApiKey'
 
 /**
  * Raw material prices for the VgemsAI app's Research tab, from Market Materials and Market Prices (under
- * "VgemsAI App"). awoz-api reads them for the app, and saves each material's closing price every day. Server
- * to server only, with `X-API-Key: <APP_API_KEY>` (see ./appApiKey.ts); while APP_API_KEY is empty both
- * endpoints answer 404.
+ * "VgemsAI App"). awoz-api reads them for the app, and saves each material's price every 4 hours (one per
+ * day: the day's last). Server to server only, with `X-API-Key: <APP_API_KEY>` (see ./appApiKey.ts); while
+ * APP_API_KEY is empty both endpoints answer 404.
  *
  * Days are written `YYYY-MM-DD`. They're stored at 12:00 UTC on the day, as the admin panel's date picker
  * saves them.
@@ -16,22 +16,26 @@ import { refuseWithoutAppApiKey } from './appApiKey'
 
 /** How far back the monthly prices go */
 const HISTORY_MONTHS = 120
+/** How far back the weekly prices go */
+const WEEKLY_DAYS = 371
+const DAY_MS = 24 * 60 * 60 * 1000
 const MAX_PRICES_PER_REQUEST = 1000
 /** Where awoz-api's prices may come from; "manual" is for the admin panel only */
-const SOURCES = ['yahoo'] as const
+const SOURCES = ['api-ninjas'] as const
 
 type Day = { date: string; price: number }
 
 /**
- * `GET /api/app/market` - the active materials, in their order, each with its two latest prices and its
- * price at the end of every month for the last 10 years:
+ * `GET /api/app/market` - the active materials, in their order, each with its two latest prices, its
+ * price at the end of every month for the last 10 years, and at the end of every week for the last year:
  *
  *   { materials: [{ key, name, unit, icon, symbol, highlight,
  *                   latest: { date, price } | null, previous: { date, price } | null,
- *                   monthly: [{ month: "2026-09", date: "2026-09-30", price }] }] }
+ *                   monthly: [{ month: "2026-09", date: "2026-09-30", price }],
+ *                   weekly: [{ date: "2026-10-23", price }] }] }
  *
- * `monthly` is oldest first, and its last month is the current one so far (its price is `latest`).
- * `symbol` is null for a material whose prices are entered by hand.
+ * `monthly` and `weekly` are oldest first; their last month or week is the current one so far (its price
+ * is `latest`). Weeks start on Monday. `symbol` is null for a material whose prices are entered by hand.
  */
 export const appMarketEndpoint: Endpoint = {
   handler: async (req) => {
@@ -229,6 +233,18 @@ const toAppMaterial = (
     }
   }
 
+  // The last price of each week, for the last year
+  const weeklySince = daysAgo(WEEKLY_DAYS)
+  const weekly: (Day & { week: string })[] = []
+  for (const day of days.filter(({ date }) => date >= weeklySince)) {
+    const week = mondayOf(day.date)
+    if (weekly.at(-1)?.week === week) {
+      weekly[weekly.length - 1] = { ...day, week }
+    } else {
+      weekly.push({ ...day, week })
+    }
+  }
+
   return {
     name: material.name,
     highlight: material.highlight ?? false,
@@ -239,7 +255,19 @@ const toAppMaterial = (
     previous: days.at(-2) ?? null,
     symbol: material.symbol || null,
     unit: material.unit,
+    weekly: weekly.map(({ date, price }) => ({ date, price })),
   }
+}
+
+/** YYYY-MM-DD of the day `count` days before today, UTC */
+const daysAgo = (count: number) => new Date(Date.now() - count * DAY_MS).toISOString().slice(0, 10)
+
+/** YYYY-MM-DD of the Monday of a YYYY-MM-DD day's week */
+const mondayOf = (day: string) => {
+  const date = new Date(storedDate(day))
+  const sinceMonday = (date.getUTCDay() + 6) % 7
+
+  return new Date(date.getTime() - sinceMonday * DAY_MS).toISOString().slice(0, 10)
 }
 
 const storedDate = (day: string) => `${day}T12:00:00.000Z`

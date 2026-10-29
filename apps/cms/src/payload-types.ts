@@ -1108,7 +1108,7 @@ export interface MarketMaterial {
    */
   unit: string;
   /**
-   * Its Yahoo Finance symbol, e.g. GC=F for gold: awoz-api saves its price every day. Leave it empty to enter the prices by hand under Market Prices.
+   * Its name in API Ninjas' Commodity Price API, e.g. gold, silver, platinum, palladium, copper or brent_crude_oil: awoz-api saves its price every 4 hours. Leave it empty to enter the prices by hand under Market Prices.
    */
   symbol?: string | null;
   /**
@@ -1121,7 +1121,7 @@ export interface MarketMaterial {
     totalDocs?: number;
   };
   /**
-   * Shown in the app, with a price saved every day. Untick it to hide it and keep its prices.
+   * Shown in the app, with its price saved every 4 hours. Untick it to hide it and keep its prices.
    */
   active?: boolean | null;
   /**
@@ -1144,7 +1144,7 @@ export interface MarketMaterial {
   createdAt: string;
 }
 /**
- * Closing prices, saved by awoz-api every day. A price added or changed here is kept as it is.
+ * Each day's last price, saved by awoz-api every 4 hours. A price added or changed here is kept as it is.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "market-prices".
@@ -1163,7 +1163,7 @@ export interface MarketPrice {
   /**
    * Where the price comes from. Saving it here makes it "Entered by hand".
    */
-  source: 'yahoo' | 'manual';
+  source: 'api-ninjas' | 'yahoo' | 'manual';
   createdBy?: {
     relationTo: 'users';
     value: string | User;

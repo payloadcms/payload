@@ -913,23 +913,24 @@ The app's **Research** tab shows raw material prices, and lets people predict wh
 month. The prices are kept under **VgemsAI App**:
 
 - **Market Materials**: what the tab shows, in order: name, key (the app's name for it, e.g. `gold`), unit, an SF
-  Symbols icon, whether it's a **highlight** (a chart under Highlight Trends and in the widget), and its **Yahoo
-  Finance symbol**. Gold (`GC=F`), silver (`SI=F`), Brent crude (`BZ=F`), platinum (`PL=F`), palladium (`PA=F`) and
-  copper (`HG=F`) are added the first time the CMS starts. Untick **Active** to hide one and keep its prices;
-  deleting one deletes its prices too. Don't change a key once people have voted: their predictions are kept under
-  it.
-- **Market Prices**: one closing price per material and day. awoz-api saves them every day, and the first time it
-  also fills in the last 10 years (see its README, "Market prices and predictions"). A price you add or correct
-  here is marked **Entered by hand** and never overwritten. A material without a Yahoo Finance symbol only has the
-  prices you enter.
+  Symbols icon, whether it's a **highlight** (a chart under Highlight Trends and in the widget), and its **API Ninjas
+  commodity** (`gold`, `silver`, `brent_crude_oil`, `platinum`, `palladium`, `copper`, … as in API Ninjas' Commodity
+  Price API). Those six are added the first time the CMS starts; materials still named by their Yahoo Finance
+  symbol (`GC=F` …, from the first version) get their API Ninjas name when the CMS starts. Untick **Active** to hide
+  one and keep its prices; deleting one deletes its prices too. Don't change a key once people have voted: their
+  predictions are kept under it.
+- **Market Prices**: one price per material and day, the day's last. awoz-api saves them every 4 hours from API
+  Ninjas, and the first time also fills in the last year (see its README, "Market prices and predictions"). A price
+  you add or correct here is marked **Entered by hand** and never overwritten. A material without an API Ninjas
+  commodity only has the prices you enter.
 
 awoz-api uses these endpoints (`src/endpoints/appMarket.ts`); people's predictions are kept by awoz-api itself,
 with their accounts:
 
 | Endpoint | What it does |
 | --- | --- |
-| `GET /api/app/market` | The active materials with their latest two prices and their price at the end of each month for 10 years |
-| `POST /api/app/market-prices` | Saves up to 1000 closing prices, e.g. `{"source": "yahoo", "prices": [{"material": "gold", "date": "2026-10-28", "price": 2680.5}]}`; answers how many were created, updated, unchanged and kept |
+| `GET /api/app/market` | The active materials with their latest two prices, their price at the end of each month for 10 years, and at the end of each week for the last year |
+| `POST /api/app/market-prices` | Saves up to 1000 prices, one per material and day, e.g. `{"source": "api-ninjas", "prices": [{"material": "gold", "date": "2026-10-28", "price": 2680.5}]}`; answers how many were created, updated, unchanged and kept |
 
 #### Privacy policy and terms of use
 
