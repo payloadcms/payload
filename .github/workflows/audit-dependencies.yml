@@ -50,6 +50,5 @@ jobs:
       # inputs.* are empty on `schedule`; fall back to the defaults.
       scope: ${{ inputs.scope || 'consumer-facing' }}
       severity: ${{ inputs.audit-level || 'high' }}
-      is-default-inputs: ${{ (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'high') == 'high' }}
-    secrets:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      # Only runs from main may change PRs; runs from other branches are dry runs.
+      is-default-inputs: ${{ github.ref == 'refs/heads/main' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'high') == 'high' }}

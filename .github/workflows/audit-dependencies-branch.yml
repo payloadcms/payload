@@ -16,11 +16,8 @@ on:
         type: string
         required: true
       is-default-inputs:
-        description: Only default inputs may create, update, or close PRs
+        description: Only runs from main with default inputs may create, update, or close PRs
         type: boolean
-        required: true
-    secrets:
-      OPENAI_API_KEY:
         required: true
 
 permissions: {}
@@ -132,6 +129,8 @@ jobs:
     # codex-action drop-sudo fails on ubuntu-26.04: https://github.com/openai/codex-action/issues/188
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    # The environment's branch policy keeps OPENAI_API_KEY away from runs on other branches.
+    environment: audit-deps
     permissions:
       contents: read
     outputs:
@@ -403,7 +402,7 @@ jobs:
     needs: [precheck, fix, verify]
     if: needs.verify.result == 'success' && contains(fromJSON('["create","update"]'), needs.precheck.outputs.next_step)
     runs-on: ubuntu-26.04
-    environment: release
+    environment: audit-deps
     permissions:
       contents: read
     outputs:
@@ -481,8 +480,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          client-id: ${{ secrets.RELEASE_APP_CLIENT_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          client-id: ${{ secrets.AUDIT_DEPS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.AUDIT_DEPS_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
 
@@ -510,7 +509,7 @@ jobs:
     needs: precheck
     if: contains(fromJSON('["close","blocked"]'), needs.precheck.outputs.next_step)
     runs-on: ubuntu-26.04
-    environment: release
+    environment: audit-deps
     permissions:
       contents: read
     steps:
@@ -529,8 +528,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          client-id: ${{ secrets.RELEASE_APP_CLIENT_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          client-id: ${{ secrets.AUDIT_DEPS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.AUDIT_DEPS_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
 
@@ -622,7 +621,24 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
           fi
 
-          if [ "$HAS_FINDINGS" = "true" ] || [ "$HAS_UNSUCCESSFUL_JOB" = "true" ]; then
-            echo "::error::Audit has findings or a job failed for $REF"
+          if [ "$HAS_UNSUCCESSFUL_JOB" = "true" ]; then
+            echo "::error::A job failed for $REF"
             exit 1
           fi
+
+          if [ "$HAS_FINDINGS" != "true" ]; then
+            exit 0
+          fi
+
+          # Findings with a fix PR to review do not fail the run.
+          case "$NEXT_STEP" in
+            create | update | skip)
+              if [ -n "$pr_link" ]; then
+                echo "::warning::Audit has findings for $REF; fix PR: $pr_link"
+                exit 0
+              fi
+              ;;
+          esac
+
+          echo "::error::Audit has findings for $REF and no fix PR"
+          exit 1
