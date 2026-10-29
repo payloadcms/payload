@@ -217,6 +217,8 @@ jobs:
         uses: openai/codex-action@bdf19a4a223ec2549a3e2274a0cf61556bc07675 # v1.13
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          # Unset installs the latest CLI, so a new release can change sandbox behavior unreviewed.
+          codex-version: 0.165.0
           prompt-file: .audit-deps/prompt.md
           permission-profile: audit-deps
           codex-home: ${{ runner.temp }}/codex-home
