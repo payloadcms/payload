@@ -16,7 +16,12 @@ type GetRelatedFields = (collectionSlug: string) => FlattenedField[] | undefined
  *
  * A virtual field linked to a path (`virtual: 'category.links.label'`) is grouped by that path,
  * which `findDistinct` resolves from the root of the field's collection, so the walk checks the
- * target path the same way. Virtual fields that link to each other in a cycle are rejected.
+ * target path the same way. Virtual fields that link to each other in a cycle are rejected, and so
+ * are virtual fields not linked to a path (`virtual: true`), which `findDistinct` cannot query.
+ *
+ * A path naming a field that does not exist (for example one removed from the config since the
+ * preference was saved) is rejected too, since `findDistinct` would fail on it. The one exception is
+ * `id` right after a relationship (`category.id`), which `findDistinct` accepts.
  */
 export const canGroupByFieldPath = ({
   fields,
@@ -51,11 +56,28 @@ const canGroupByPath = ({
 
   const segments = path.split('.')
 
+  let previousField: FlattenedField | undefined
+
   for (const [index, segment] of segments.entries()) {
-    const field: FlattenedField | undefined = currentFields?.find((each) => each.name === segment)
+    // Fields of a related collection the caller cannot look up: nothing more to check.
+    if (!currentFields) {
+      return true
+    }
+
+    const field: FlattenedField | undefined = currentFields.find((each) => each.name === segment)
 
     if (!field) {
-      return true
+      return (
+        segment === 'id' &&
+        index === segments.length - 1 &&
+        (previousField?.type === 'relationship' || previousField?.type === 'upload')
+      )
+    }
+
+    previousField = field
+
+    if ('virtual' in field && field.virtual === true) {
+      return false
     }
 
     if ('virtual' in field && typeof field.virtual === 'string') {

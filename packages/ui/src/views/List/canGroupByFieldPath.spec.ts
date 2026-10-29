@@ -26,6 +26,7 @@ const fields = [
   { name: 'linkLabels', type: 'text', virtual: 'category.links.label' },
   { name: 'loopA', type: 'text', virtual: 'loopB' },
   { name: 'loopB', type: 'text', virtual: 'loopA' },
+  { name: 'computed', type: 'text', virtual: true },
 ] as unknown as FlattenedField[]
 
 const categoryFields = [
@@ -79,5 +80,20 @@ describe('canGroupByFieldPath', () => {
     expect(canGroupByFieldPath({ fields, path: '-breadcrumbs.url' })).toBe(false)
     expect(canGroupByFieldPath({ fields, path: 'breadcrumbs' })).toBe(false)
     expect(canGroupByFieldPath({ fields, path: 'layout.hero.title' })).toBe(false)
+  })
+
+  it('rejects virtual fields not linked to a path', () => {
+    expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'computed' })).toBe(false)
+  })
+
+  it('rejects fields that do not exist', () => {
+    expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'removed' })).toBe(false)
+    expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'meta.removed' })).toBe(false)
+    expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'category.removed' })).toBe(false)
+  })
+
+  it('allows the id of a related document', () => {
+    expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'category.id' })).toBe(true)
+    expect(canGroupByFieldPath({ fields, getRelatedFields, path: 'meta.id' })).toBe(false)
   })
 })
