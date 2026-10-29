@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
+import type { StoredFileRole } from '../../uploads/fileVersioning/types.js'
 import type { Collection } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -20,7 +21,7 @@ import {
   runFileOperationPlan,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { copyLocalFile } from '../../uploads/fileVersioning/localStorage.js'
-import { getOriginalFilename, normalizeStorageKey } from '../../uploads/fileVersioning/naming.js'
+import { normalizeStorageKey } from '../../uploads/fileVersioning/naming.js'
 import {
   collectStoredFiles,
   getStoredFileIdentity,
@@ -34,6 +35,8 @@ import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { updateDocument } from './utilities/update.js'
+
+const LEGACY_ORIGINAL_MARKER = '-original'
 
 export type RenameFileArguments = {
   collection: Collection
@@ -106,33 +109,46 @@ export const renameFileOperation = async (
 
     const { newStem } = validateRename({ filename, oldFilename })
     const originalStem = path.posix.parse(oldFilename).name
-    const originalMarkerIndex = originalStem.lastIndexOf('-original')
+    // Uploads saved before the `-original` suffix was removed carry it after the base name.
+    const legacyMarkerIndex = originalStem.lastIndexOf(LEGACY_ORIGINAL_MARKER)
+    const mainStem = path.posix.parse(stored.filename as string).name
+    // The main file and the original can each extend the shared base name (`photo-cropped`,
+    // or a `photo-1` counter), so the shorter one is the base.
     const oldStem =
-      originalMarkerIndex > 0
-        ? originalStem.slice(0, originalMarkerIndex)
-        : path.posix.parse(stored.filename as string).name
+      legacyMarkerIndex > 0
+        ? originalStem.slice(0, legacyMarkerIndex)
+        : mainStem.startsWith(originalStem)
+          ? originalStem
+          : mainStem
     if (filename === `${oldStem}${path.posix.extname(oldFilename)}`) {
       throw new APIError('The upload already has this filename.', 400)
     }
 
-    const originalFilename = getOriginalFilename({ filename })
+    const oldStems =
+      legacyMarkerIndex > 0 ? [`${oldStem}${LEGACY_ORIGINAL_MARKER}`, oldStem] : [oldStem]
+    const hasDefaultRole = ({ roles }: { roles: StoredFileRole[] }) =>
+      roles.some(({ type }) => type === 'default')
+    const getNextFilename = ({ key }: { key: string }) => {
+      const previousFilename = path.posix.basename(key)
+      const matchedStem = oldStems.find((stem) => previousFilename.startsWith(stem))
+      const suffix = matchedStem
+        ? previousFilename.slice(matchedStem.length)
+        : `-${previousFilename}`
+
+      return `${newStem}${suffix}`
+    }
+    // The main file keeps the requested name; other files take a counter if they collide with it.
     const plannedKeys = new Set(
-      storedFiles
-        .filter(({ roles }) => roles.some(({ type }) => type === 'original'))
-        .map(({ key }) =>
-          getStoredFileIdentity({
-            key: path.posix.join(path.posix.dirname(key), originalFilename),
-          }),
-        ),
+      storedFiles.filter(hasDefaultRole).map(({ key }) =>
+        getStoredFileIdentity({
+          key: path.posix.join(path.posix.dirname(key), getNextFilename({ key })),
+        }),
+      ),
     )
     const replacements = new Map<string, string>()
     for (const file of storedFiles) {
-      const previousFilename = path.posix.basename(file.key)
-      const hasOriginalRole = file.roles.some(({ type }) => type === 'original')
-      const suffix = previousFilename.startsWith(oldStem)
-        ? previousFilename.slice(oldStem.length)
-        : `-${previousFilename}`
-      let nextFilename = hasOriginalRole ? originalFilename : `${newStem}${suffix}`
+      const isMainFile = hasDefaultRole(file)
+      let nextFilename = getNextFilename(file)
       const directory = path.posix.dirname(file.key)
       let nextKey = path.posix.join(directory, nextFilename)
       let nextIdentity = getStoredFileIdentity({
@@ -141,7 +157,7 @@ export const renameFileOperation = async (
       const extension = path.posix.extname(nextFilename)
       const stem = nextFilename.slice(0, -extension.length || undefined)
       let collisionNumber = 1
-      while (!hasOriginalRole && plannedKeys.has(nextIdentity)) {
+      while (!isMainFile && plannedKeys.has(nextIdentity)) {
         nextFilename = `${stem}-${collisionNumber}${extension}`
         nextKey = path.posix.join(directory, nextFilename)
         nextIdentity = getStoredFileIdentity({

@@ -3,6 +3,7 @@ import type { PayloadComponent } from '../config/types.js'
 import type { UploadCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { StagedObject } from './fileVersioning/fileOperationManager.js'
+import type { StoredFileRole } from './fileVersioning/types.js'
 
 export type OriginalFileData = {
   _objectKey?: string
@@ -294,6 +295,11 @@ export type UploadConfig = {
       params: {
         collection: string
         filename: string
+        /**
+         * True when the request asks for the original with `?original=true`. The original and
+         * the main file can share a filename, so the filename alone does not say which to serve.
+         */
+        isOriginal?: boolean
         /** @default 'read' */
         operation?: FileHandlerOperation
         prefix?: string
@@ -454,7 +460,13 @@ export type File = {
   tempFilePath?: string
 }
 
-export type FileToSave =
+export type FileToSave = {
+  /**
+   * Which document field describes this file. Storage uses it to find the file's location,
+   * because the main file and the original can share a filename.
+   */
+  role?: StoredFileRole
+} & (
   | {
       /**
        * The buffer of the file.
@@ -476,6 +488,7 @@ export type FileToSave =
        */
       sourcePath: string
     }
+)
 
 type Crop = {
   height: number

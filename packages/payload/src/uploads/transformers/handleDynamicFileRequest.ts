@@ -27,11 +27,13 @@ import { withFileTransformAccessContext } from './withFileTransformAccessContext
 export async function handleDynamicFileRequest({
   collection,
   filename,
+  isOriginal: isOriginalParam,
   prefix,
   req,
 }: {
   collection: Collection
   filename: string
+  isOriginal?: boolean
   prefix?: string
   req: PayloadRequest
 }): Promise<Response> {
@@ -51,9 +53,13 @@ export async function handleDynamicFileRequest({
     throw new NotFound(req.t)
   }
 
-  if (
+  const isOriginalRequest =
     resolvedDocument.original?.filename === filename &&
-    (resolvedDocument.filename !== filename || req.searchParams.size === 0)
+    (isOriginalParam || resolvedDocument.filename !== filename)
+
+  if (
+    isOriginalRequest ||
+    (resolvedDocument.original?.filename === filename && req.searchParams.size === 0)
   ) {
     const permittedDocument = await withFileTransformAccessContext({
       callback: () => checkFileAccess({ collection, filename, prefix, req }),
@@ -65,6 +71,7 @@ export async function handleDynamicFileRequest({
       collection,
       doc: permittedDocument ?? resolvedDocument,
       filename,
+      isOriginal: isOriginalRequest,
       prefix,
       req,
     })

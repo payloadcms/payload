@@ -189,6 +189,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                   collectionSlug: collection.slug,
                   config,
                   filename: data?.original?.filename || originalDoc?.original?.filename,
+                  isOriginal: shouldRequestOriginal({ doc: data ?? originalDoc }),
                   relative: false,
                   serverURL: req.payload.config.serverURL,
                   urlOrPath: value,
@@ -201,6 +202,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                   collectionSlug: collection.slug,
                   config,
                   filename: data?.original?.filename || originalDoc?.original?.filename,
+                  isOriginal: shouldRequestOriginal({ doc: data ?? originalDoc }),
                   relative: true,
                   serverURL: req.payload.config.serverURL,
                   urlOrPath: value,
@@ -356,4 +358,26 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     ])
   }
   return uploadFields
+}
+
+/**
+ * A transformed original can share the main file's name in its own storage folder. The bare
+ * filename serves the main file, so the original's URL asks for the original.
+ */
+const shouldRequestOriginal = ({
+  doc,
+}: {
+  doc?: {
+    _objectKey?: null | string
+    filename?: null | string
+    original?: { _objectKey?: null | string; filename?: null | string } | null
+  }
+}): boolean => {
+  const original = doc?.original
+
+  return Boolean(
+    original?.filename &&
+    original.filename === doc?.filename &&
+    (original._objectKey ?? null) !== (doc?._objectKey ?? null),
+  )
 }

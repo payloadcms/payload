@@ -305,7 +305,11 @@ The focal point selector is only displayed when the collection has image sizes (
 
 ## File Versioning
 
-Payload retains the source of each new upload as `original`, even when the main image is processed. With versions enabled, saved versions also retain the stored files they reference until those versions are removed. Keeping originals and file history uses additional storage, especially when an image has several generated sizes.
+Payload retains the source of each new upload as `original`, even when the main image is processed. The document's `original` field records where that file is stored; its filename is not changed to mark it.
+
+When the main image is processed, the original is stored as a separate file. With a storage adapter, it keeps the uploaded filename in its own storage folder. With local storage, all files share one folder, so the original gets a counter (for example `photo-1.png`) if the main file already uses the name. When the original and the main file share a filename, `original.url` includes `?original=true`. Without it, the file endpoint serves the main file. Custom storage adapters must handle `isOriginal` to serve the original; see [Custom Storage Adapters](./storage-adapters#custom-storage-adapters). Uploads saved before this change keep their `-original` filenames and are still served.
+
+With versions enabled, saved versions also retain the stored files they reference until those versions are removed. Keeping originals and file history uses additional storage, especially when an image has several generated sizes.
 
 Existing uploads are upgraded as they are edited; no bulk file migration is required. For an older image whose untouched source was already deleted, the existing stored file is the best available original. The upgrade cannot recover source bytes or historical files that were deleted before file versioning was enabled.
 

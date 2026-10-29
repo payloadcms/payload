@@ -95,7 +95,11 @@ describe('generateFileData - non-image temp file buffering', () => {
     expect(readFileMock).not.toHaveBeenCalled()
     expect(writeFileMock).not.toHaveBeenCalled()
     expect(result.files).toEqual([
-      { path: '/tmp/media/big-video-original.mp4', sourcePath: '/tmp/payload-client-upload-def' },
+      {
+        path: '/tmp/media/big-video.mp4',
+        role: { type: 'default' },
+        sourcePath: '/tmp/payload-client-upload-def',
+      },
     ])
   })
 

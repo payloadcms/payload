@@ -16,7 +16,6 @@ import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { downloadFileToBuffer } from './downloadFileToBuffer.js'
-import { getOriginalFilename } from './fileVersioning/naming.js'
 import { generateImageSizeFilename } from './generateImageSizeFilename.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
@@ -228,6 +227,7 @@ export const generateFileData = async <T>({
           collection: { config: collectionConfig },
           doc: originalDoc as TypeWithID,
           filename,
+          isOriginal: true,
           operation: 'transform',
           req,
         })
@@ -484,22 +484,12 @@ export const generateFileData = async <T>({
     }
 
     let fsSafeName = getSanitizedUploadFilename(outputName, ext)
-    const isDuplicatingAnOriginal =
-      isDuplicating && file.name === (originalDoc as FileData | undefined)?.original?.filename
-
-    // A provider reference without a receipt names an object the client already stored; renaming
-    // it would point the document at a key that was never uploaded.
-    const isUnverifiedProviderReference = Boolean(hasProviderDirectReference && !providerOriginal)
-
-    if (
-      !fileWasTransformed &&
-      !retainedOriginal &&
-      !providerOriginal &&
-      !isDuplicatingAnOriginal &&
-      !isUnverifiedProviderReference
-    ) {
-      fsSafeName = getOriginalFilename({ filename: fsSafeName })
-    }
+    // Each new cloud version is stored in its own `_objectKey` folder, so the document's own
+    // files cannot collide with it and the name can stay the same.
+    const ownDocumentID =
+      hasManagedCloudStorage && operation === 'update'
+        ? (originalDoc as TypeWithID | undefined)?.id
+        : undefined
 
     if (hasReusableOriginalMain) {
       fsSafeName = retainedOriginal!.filename
@@ -513,6 +503,7 @@ export const generateFileData = async <T>({
       fsSafeName = await getSafeFileName({
         collectionSlug: collectionConfig.slug,
         desiredFilename: fsSafeName,
+        excludeDocumentID: ownDocumentID,
         prefix,
         req,
         staticPath: staticPath!,
@@ -535,6 +526,8 @@ export const generateFileData = async <T>({
     if (newObjectKey) {
       fileData._objectKey = newObjectKey
     }
+    // The client already uploaded this object, so it must not be saved again.
+    const isProviderObjectMain = Boolean(providerOriginal && !fileWasTransformed)
     if (providerOriginal && !fileWasTransformed) {
       fileData._objectKey = providerOriginal._objectKey
       fileData.prefix = providerOriginal.prefix
@@ -549,17 +542,19 @@ export const generateFileData = async <T>({
         retainedOriginal?.filename ??
         providerOriginal?.filename ??
         (fileWasTransformed
-          ? await getSafeFileName({
+          ? await getTransformedOriginalFilename({
               collectionSlug: collectionConfig.slug,
-              desiredFilename: getOriginalFilename({
-                filename: getSanitizedUploadFilename(file.name),
-              }),
+              hasOwnFolder: Boolean(newObjectKey),
+              mainFilename: fsSafeName,
               req,
               staticPath: staticPath!,
+              uploadedFilename: file.name,
             })
           : fsSafeName)
+      // A transformed original is a separate object, so it gets its own folder.
+      const originalObjectKey = fileWasTransformed && newObjectKey ? randomUUID() : newObjectKey
       const original = retainedOriginal ?? {
-        _objectKey: providerOriginal ? providerOriginal._objectKey : newObjectKey,
+        _objectKey: providerOriginal ? providerOriginal._objectKey : originalObjectKey,
         filename: originalFilename,
         filesize: file.size,
         mimeType: file.mimetype,
@@ -594,6 +589,7 @@ export const generateFileData = async <T>({
         filesToSave.push({
           buffer: Buffer.from(await originalWebFile!.arrayBuffer()),
           path: `${staticPath}/${originalFilename}`,
+          role: { type: 'original' },
         })
       }
     }
@@ -606,6 +602,7 @@ export const generateFileData = async <T>({
       filesToSave.push({
         buffer: mainBuffer,
         path: `${staticPath}/${fsSafeName}`,
+        role: { type: 'default' },
       })
 
       if (file.tempFilePath) {
@@ -617,7 +614,7 @@ export const generateFileData = async <T>({
           size: mainBuffer.length,
         }
       }
-    } else if (!hasReusableOriginalMain) {
+    } else if (!hasReusableOriginalMain && !isProviderObjectMain) {
       // file.data is empty when useTempFiles is on, so the real content lives at
       // file.tempFilePath instead (see the function doc for why we avoid buffering it).
       const tempFileHandling = resolveTempFileHandling({
@@ -629,6 +626,7 @@ export const generateFileData = async <T>({
       if (tempFileHandling.type === 'copyFromTempFile') {
         filesToSave.push({
           path: `${staticPath}/${fsSafeName}`,
+          role: { type: 'default' },
           sourcePath: tempFileHandling.sourcePath,
         })
       } else if (tempFileHandling.type === 'useBuffer') {
@@ -642,6 +640,7 @@ export const generateFileData = async <T>({
           filesToSave.push({
             buffer: bufferToSave,
             path: `${staticPath}/${fsSafeName}`,
+            role: { type: 'default' },
           })
 
           if (bufferToSave.length > 0) {
@@ -717,6 +716,7 @@ export const generateFileData = async <T>({
             imageName = await getSafeFileName({
               collectionSlug: collectionConfig.slug,
               desiredFilename: imageName,
+              excludeDocumentID: ownDocumentID,
               prefix,
               req,
               staticPath: disableLocalStorage ? undefined : staticPath!,
@@ -750,6 +750,7 @@ export const generateFileData = async <T>({
           filesToSave.push({
             buffer: sizeBuffer,
             path: imagePath,
+            role: { type: 'size', sizeKey: sizeName },
           })
         }
       }
@@ -770,6 +771,36 @@ export const generateFileData = async <T>({
   return {
     data: newData,
     files: filesToSave,
+  }
+}
+
+/**
+ * Names the untouched upload kept next to a transformed main file. Without its own storage
+ * folder the original shares the main file's folder, so it cannot reuse the main file's name.
+ */
+async function getTransformedOriginalFilename({
+  collectionSlug,
+  hasOwnFolder,
+  mainFilename,
+  req,
+  staticPath,
+  uploadedFilename,
+}: {
+  collectionSlug: string
+  hasOwnFolder: boolean
+  mainFilename: string
+  req: PayloadRequest
+  staticPath: string
+  uploadedFilename: string
+}): Promise<string> {
+  let filename = getSanitizedUploadFilename(uploadedFilename)
+
+  while (true) {
+    filename = await getSafeFileName({ collectionSlug, desiredFilename: filename, req, staticPath })
+    if (hasOwnFolder || filename !== mainFilename) {
+      return filename
+    }
+    filename = incrementName(filename)
   }
 }
 

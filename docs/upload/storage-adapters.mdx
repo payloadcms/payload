@@ -504,6 +504,8 @@ When providing upload instructions, set `uploadInstructions.useInAdmin` to `true
 
 `staticHandler` receives `params.operation`: `'read'` for an ordinary file request (treat a missing value as `'read'`, for backward compatibility), or `'transform'` when Payload is reading the file's bytes on behalf of a [file transformer](./transformers), which only happens when at least one transformer is configured. For `'transform'`, return the full object body rather than a redirect to a signed/public URL, and skip `Range` handling, conditional/ETag short-circuiting, and `modifyResponseHeaders` — Payload applies headers once, on the final response, after every transformer has run. The five first-party adapters already implement this; a custom adapter only needs to branch on `operation` if it currently redirects to an external URL for `'read'`.
 
+`staticHandler` also receives `params.isOriginal`. It is `true` when the request URL includes `?original=true`. A cropped or otherwise processed upload stores its original under its own `_objectKey` with the same filename as the main file, so the filename alone does not identify which file to serve. When `isOriginal` is `true`, serve the document's `original` file; otherwise serve the main file. If you use `getFilePrefix`, pass `isOriginal` to it and it returns the folder of the requested file. An adapter that ignores `isOriginal` always serves the main file, so the original of a processed upload cannot be reached by URL.
+
 ```ts
 import { buildConfig } from 'payload'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'

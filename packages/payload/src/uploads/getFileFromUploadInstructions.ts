@@ -83,16 +83,20 @@ export const getFileFromUploadInstructions = async ({
       signedReceipt,
     })
     allowOverwrite = receipt.allowOverwrite === true
-    let originalFilename: string
+    let storedFilenames: string[]
     let storageFilePath: string
 
     try {
-      originalFilename = getOriginalFilename({ filename: file.filename })
+      // Receipts signed before the `-original` suffix was removed name the suffixed key.
+      storedFilenames = [file.filename, getOriginalFilename({ filename: file.filename })]
       storageFilePath = normalizeStorageKey({ key: receipt.storageFilePath })
     } catch {
       throw new APIError('Invalid upload reference.', 400)
     }
 
+    const originalFilename = storedFilenames.find(
+      (filename) => path.posix.basename(storageFilePath) === filename,
+    )
     const expectedKeySuffix = [receipt.filePrefix, receipt._objectKey, originalFilename]
       .filter(Boolean)
       .join('/')
@@ -100,7 +104,7 @@ export const getFileFromUploadInstructions = async ({
     if (
       (!allowOverwrite &&
         (!receipt._objectKey ||
-          path.posix.basename(storageFilePath) !== originalFilename ||
+          !originalFilename ||
           !`/${storageFilePath}`.endsWith(`/${expectedKeySuffix}`))) ||
       ('prefix' in file.uploadReference && file.uploadReference.prefix !== receipt.filePrefix) ||
       ('_objectKey' in file.uploadReference &&
@@ -109,11 +113,11 @@ export const getFileFromUploadInstructions = async ({
       throw new APIError('Invalid upload reference.', 400)
     }
 
-    providerFilename = allowOverwrite ? file.filename : originalFilename
+    providerFilename = allowOverwrite ? file.filename : originalFilename!
     if (!allowOverwrite) {
       verifiedOriginal = {
         _objectKey: receipt._objectKey,
-        filename: originalFilename,
+        filename: originalFilename!,
         key: storageFilePath,
         prefix: receipt.filePrefix,
         signedReceipt: signedReceipt as string,

@@ -1,12 +1,7 @@
 import type { PayloadRequest } from 'payload'
 
 import { randomUUID } from 'node:crypto'
-import {
-  createClientUploadReceipt,
-  getOriginalFilename,
-  getSafeFileName,
-  incrementName,
-} from 'payload/internal'
+import { createClientUploadReceipt, getSafeFileName, incrementName } from 'payload/internal'
 import { getSanitizedUploadFilename } from 'payload/shared'
 
 import type { UploadReference } from '../types.js'
@@ -55,16 +50,13 @@ export async function resolveSignedURLKey({
   storageFilePath: string
   uploadReference: UploadReference
 }> {
-  // The document stores the -original name, so check collisions against that name.
   let sanitizedFilename = getSanitizedUploadFilename(filename)
-  let originalFilename = getOriginalFilename({ filename: sanitizedFilename })
 
   while (
-    (await getSafeFileName({ collectionSlug, desiredFilename: originalFilename, req })) !==
-    originalFilename
+    (await getSafeFileName({ collectionSlug, desiredFilename: sanitizedFilename, req })) !==
+    sanitizedFilename
   ) {
     sanitizedFilename = incrementName(sanitizedFilename)
-    originalFilename = getOriginalFilename({ filename: sanitizedFilename })
   }
 
   const rawBaseDocPrefix = useCompositePrefixes ? docPrefix : docPrefix || collectionPrefix
@@ -81,7 +73,7 @@ export async function resolveSignedURLKey({
   const { storageFilePath } = buildUploadStoragePathData({
     collectionPrefix,
     docPrefix: keyedDocPrefix,
-    filename: originalFilename,
+    filename: sanitizedFilename,
     useCompositePrefixes,
   })
 

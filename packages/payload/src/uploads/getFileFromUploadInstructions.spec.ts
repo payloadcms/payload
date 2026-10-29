@@ -442,6 +442,35 @@ describe('getFileFromUploadInstructions', () => {
     expect(result.uploadReference).toStrictEqual({ prefix: '' })
   })
 
+  it.each([
+    { label: 'plain', storedFilename: 'video.mp4' },
+    { label: 'legacy -original', storedFilename: 'video-original.mp4' },
+  ])('should accept a receipt for the $label uploaded filename', async ({ storedFilename }) => {
+    const handler = vi.fn(
+      async () =>
+        new Response(Buffer.alloc(18), { headers: { 'Content-Length': '18' }, status: 200 }),
+    )
+    const req = createReq([handler], {})
+    const file = createUploadReferenceFile()
+    file.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(file.uploadReference.signedReceipt as string),
+      storageFilePath: `media/upload-1/${storedFilename}`,
+    })
+
+    await getFileFromUploadInstructions({ collectionSlug: 'media', file, req })
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        params: expect.objectContaining({ filename: storedFilename }),
+      }),
+    )
+    expect(req.context?._payloadVerifiedProviderOriginal).toMatchObject({
+      filename: storedFilename,
+      key: `media/upload-1/${storedFilename}`,
+    })
+  })
+
   it('fetches only a bounded header for an image with no configured adjustments', async () => {
     const handler = vi.fn(async (handlerReq: PayloadRequest) => {
       expect(handlerReq.headers.get('range')).toBe(`bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}`)
