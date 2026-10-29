@@ -43,6 +43,7 @@ uses to test templates.
 | `src/app/(frontend)/ios-app/`, `scripts/import-legal-pages.ts` | Privacy Policy and Terms of Use of the app and the Vigor website (see "Privacy policy and terms of use") |
 | `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
 | `scripts/import-vigor.ts`                  | Copies the Vigor website's current content into the CMS (see "Vigor website")          |
+| `scripts/import-app-page.ts`, `scripts/app-page/` | The first version of the Vigor website's VgemsAI app page (see "VgemsAI app page") |
 | `src/timezones.ts`                         | Time zones offered for event dates                                                     |
 | `src/proxy.ts`, `src/twoFactor/`           | Two-factor authentication for every login (see "Two-factor authentication")            |
 | `src/email/sendgrid.ts`                    | Sends emails such as "forgot password" through SendGrid (see "Email (SendGrid)")       |
@@ -57,6 +58,7 @@ uses to test templates.
 | `deploy/locate-events.sh`                  | Looks up the coordinates of events on the server                                       |
 | `deploy/import-personal-website.sh`        | Runs the personal website import on the server                                         |
 | `deploy/import-vigor.sh`                   | Runs the Vigor website import on the server                                            |
+| `deploy/import-app-page.sh`                | Adds the VgemsAI app page's first version on the server                                |
 | `deploy/import-legal-pages.sh`             | Adds the Privacy Policy and Terms of Use on the server                                 |
 | `deploy/mongodb/create-payload-user.js`    | Creates the MongoDB user for Payload (run on the DB EC2)                               |
 | `scripts/pack-local-packages.mjs`          | Packs `packages/*` into tarballs for the app (used by the Dockerfile)                  |
@@ -562,6 +564,7 @@ Traditional Chinese. The code is in `src/vigor/`, the languages in `src/locales.
 | Site settings      | Company name, contact details (see below), social links, main menu, key figures         |
 | Home page          | The hero slides at the top of the home page                                             |
 | About page         | `/about`                                                                                |
+| VgemsAI app page   | `/vgemsai`: what the app does and how to join its beta (see "VgemsAI app page")         |
 | Pages              | Pages whose **Sites** include Vigor website, at `/<slug>`, e.g. the privacy policy      |
 
 **Languages.** Switch language with the menu at the top right; each text field shows its language, e.g.
@@ -594,6 +597,37 @@ illustration on the website.
 **Catalog choices** (categories, gemstones, metals, units, badges, news categories) are in
 `src/vigor/options.ts`. The website translates them with the `glossary` in its `shared/i18n/*.json`: when
 you add one, add its translations there too, or it shows in English on the other languages' pages.
+
+### VgemsAI app page
+
+**Vigor website → VgemsAI app page** is the website's page about the app, at `/vgemsai` (and `/es/vgemsai`, …), in the
+four languages like the rest of the Vigor website. It's public, so it can be the Marketing or Support URL in App Store
+Connect, and App Review can open it. Saving it puts it live; it stays hidden ("page not found") while it has no title.
+It has four tabs:
+
+- **Banner:** title, summary, a status badge (e.g. "In development · Public beta on TestFlight"), the banner artwork,
+  the highlights under the banner, and two links that decide the main button:
+  - **App Store link** set: "Download on the App Store";
+  - otherwise **TestFlight link** set (App Store Connect → TestFlight → External Testing → Public Link): "Join the beta
+    on TestFlight";
+  - neither: "Ask for beta access", which opens the contact page.
+- **Features**, **Beta** (the steps to join it) and **FAQ**.
+
+The icons of the highlights and features are a dropdown (`appIcons` in `src/vigor/options.ts`); the website draws
+each one, so a new icon needs a drawing there too (`client/src/pages/AppPage.tsx` in the website repo). Buttons and
+small labels, like the main button's text, are the website's interface texts (`app` in its `shared/i18n/*.json`).
+
+**Adding the first version (once).** It's in `scripts/app-page/`: `content.json` in English, Spanish, French and
+Traditional Chinese, and `banner.jpg`. On the app server:
+
+```bash
+cd ~/payloadcms/apps/cms
+./deploy/import-app-page.sh --dry-run   # only show what would happen
+./deploy/import-app-page.sh
+```
+
+A page that already has a title is skipped, so running it again keeps your edits; `--update` replaces its text with
+the one in `scripts/app-page/` (the banner stays). Then add the TestFlight link and check each language.
 
 ### Connecting the website (once)
 

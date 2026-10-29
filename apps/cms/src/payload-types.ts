@@ -241,6 +241,7 @@ export interface Config {
     'vigor-settings': VigorSettings;
     'vigor-home': VigorHome;
     'vigor-about': VigorAbout;
+    'vigor-app': VigorApp;
   };
   globalsSelect: {
     'personal-settings': PersonalSettingsSelect<false> | PersonalSettingsSelect<true>;
@@ -254,6 +255,7 @@ export interface Config {
     'vigor-settings': VigorSettingsSelect<false> | VigorSettingsSelect<true>;
     'vigor-home': VigorHomeSelect<false> | VigorHomeSelect<true>;
     'vigor-about': VigorAboutSelect<false> | VigorAboutSelect<true>;
+    'vigor-app': VigorAppSelect<false> | VigorAppSelect<true>;
   };
   locale: 'en' | 'es' | 'fr' | 'zh-Hant';
   widgets: {
@@ -2817,6 +2819,93 @@ export interface VigorAbout {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-app".
+ */
+export interface VigorApp {
+  id: string;
+  title: string;
+  summary?: string | null;
+  /**
+   * Badge in the banner, e.g. "In development · Public beta on TestFlight". Leave it empty for none.
+   */
+  status?: string | null;
+  /**
+   * Banner artwork, at least 1600 × 600 pixels.
+   */
+  image?: (string | null) | Media;
+  /**
+   * Once the app is on the App Store: its link. The main button then says "Download on the App Store".
+   */
+  appStoreUrl?: string | null;
+  /**
+   * The public link of the beta (App Store Connect → TestFlight → External Testing → Public Link). Without it, the beta button opens the contact form.
+   */
+  testFlightUrl?: string | null;
+  /**
+   * The short points under the banner, three or four of them.
+   */
+  highlights?:
+    | {
+        icon:
+          'assistant' | 'events' | 'map' | 'products' | 'research' | 'widgets' | 'security' | 'account' | 'languages';
+        title: string;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  features?: {
+    title?: string | null;
+    intro?: string | null;
+    items?:
+      | {
+          icon:
+            'assistant' | 'events' | 'map' | 'products' | 'research' | 'widgets' | 'security' | 'account' | 'languages';
+          title: string;
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  beta?: {
+    title?: string | null;
+    /**
+     * Where the app is at, and how to join the beta. Separate paragraphs with a blank line.
+     */
+    text?: string | null;
+    steps?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Small print under the steps, e.g. the iOS version the app needs.
+     */
+    note?: string | null;
+  };
+  faq?: {
+    title?: string | null;
+    items?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "personal-settings_select".
  */
 export interface PersonalSettingsSelect<T extends boolean = true> {
@@ -3222,6 +3311,70 @@ export interface VigorAboutSelect<T extends boolean = true> {
         name?: T;
         text?: T;
         id?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-app_select".
+ */
+export interface VigorAppSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  status?: T;
+  image?: T;
+  appStoreUrl?: T;
+  testFlightUrl?: T;
+  highlights?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  features?:
+    | T
+    | {
+        title?: T;
+        intro?: T;
+        items?:
+          | T
+          | {
+              icon?: T;
+              title?: T;
+              text?: T;
+              id?: T;
+            };
+      };
+  beta?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        steps?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        note?: T;
+      };
+  faq?:
+    | T
+    | {
+        title?: T;
+        items?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
       };
   createdBy?: T;
   updatedBy?: T;

@@ -42,3 +42,16 @@ export const units = options(['piece', 'pair', 'parcel', 'strand'])
 export const badges = options(['New', 'Best seller'])
 
 export const newsCategories = options(['Technology', 'Collections', 'Company', 'Sustainability'])
+
+/** Icons of the highlights and features on the VgemsAI app page; the website draws each one */
+export const appIcons = [
+  { label: 'Vigor AI (sparkles)', value: 'assistant' },
+  { label: 'Events (calendar)', value: 'events' },
+  { label: 'Map pin', value: 'map' },
+  { label: 'Products (gem)', value: 'products' },
+  { label: 'Research (chart)', value: 'research' },
+  { label: 'Widgets (tiles)', value: 'widgets' },
+  { label: 'Security (shield)', value: 'security' },
+  { label: 'Account (person)', value: 'account' },
+  { label: 'Languages (globe)', value: 'languages' },
+]
