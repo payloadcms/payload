@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-search",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.5",
   "description": "Search plugin for Payload",
   "keywords": [
     "algolia",
@@ -77,8 +77,6 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "test": "echo \"Error: no tests specified\""
   },
   "dependencies": {
@@ -86,7 +84,6 @@
     "@payloadcms/ui": "workspace:*"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "payload": "workspace:*"

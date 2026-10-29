@@ -7,10 +7,10 @@ import {
   RenderFields,
   useDocumentForm,
   useDocumentInfo,
+  useEffectEvent,
   useServerFunctions,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
@@ -38,7 +38,6 @@ export const DrawerContent: React.FC<
   const { fields: parentDocumentFields } = useDocumentForm()
   const isEditable = useLexicalEditable()
 
-  const [formUUID] = useState(() => uuid())
   const onChangeAbortControllerRef = useRef(new AbortController())
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
@@ -55,6 +54,9 @@ export const DrawerContent: React.FC<
 
   const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath] // Field Schema
 
+  // Parent autosave updates this context without starting a new drawer editing session.
+  const getParentDocumentFields = useEffectEvent(() => parentDocumentFields)
+
   useEffect(() => {
     const controller = new AbortController()
 
@@ -67,9 +69,7 @@ export const DrawerContent: React.FC<
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
+        documentFormState: getParentDocumentFields(),
         globalSlug,
         initialBlockData: data,
         operation: 'update',
@@ -96,7 +96,6 @@ export const DrawerContent: React.FC<
     isEditable,
     globalSlug,
     getDocPreferences,
-    parentDocumentFields,
   ])
 
   const onChange = useCallback(
@@ -113,9 +112,7 @@ export const DrawerContent: React.FC<
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
+        documentFormState: parentDocumentFields,
         formState: prevFormState,
         globalSlug,
         initialBlockFormState: prevFormState,
@@ -163,7 +160,7 @@ export const DrawerContent: React.FC<
       initialState={initialState}
       onChange={[onChange]}
       onSubmit={handleDrawerSubmit}
-      uuid={formUUID}
+      uuid={uuid()}
     >
       <RenderFields
         fields={Array.isArray(fields) ? fields : []}

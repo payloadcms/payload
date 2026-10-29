@@ -1482,9 +1482,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
       expect(errors[2].message).toEqual('The following field is invalid: Email')
       expect(errors[2].path[0]).toEqual('test4')
       expect(errors[2].extensions.name).toEqual('ValidationError')
-      expect(errors[2].extensions.data.errors[0].message).toEqual(
-        'Please enter a valid email address.',
-      )
+      expect(errors[2].extensions.data.errors[0].message).toEqual('This field is required.')
       expect(errors[2].extensions.data.errors[0].path).toEqual('email')
     })
 

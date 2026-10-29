@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import packageJson from '../../package.json'
+
 import { renderUpgradePrompt } from './prompt.js'
 
 describe('renderUpgradePrompt', () => {
@@ -7,6 +9,12 @@ describe('renderUpgradePrompt', () => {
     const out = renderUpgradePrompt()
 
     expect(out).toContain('npx @payloadcms/codemod upgrade run')
+  })
+
+  it('should document the minimum Node.js version required by the CLI', () => {
+    const out = renderUpgradePrompt()
+
+    expect(out).toContain(`Use Node ${packageJson.engines.node}`)
   })
 
   it('honors a custom command token so a local build points followers at itself', () => {

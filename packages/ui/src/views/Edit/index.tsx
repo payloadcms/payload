@@ -85,7 +85,7 @@ export function DefaultEditView({
     disableLeaveWithoutSaving,
     docPermissions,
     documentIsLocked,
-    documentLockState,
+    documentLockState: documentLockStateRef,
     getDocPermissions,
     getDocPreferences,
     globalSlug,
@@ -183,7 +183,7 @@ export function DefaultEditView({
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
   const [showStaleDataModal, setShowStaleDataModal] = useState(false)
 
-  const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
+  const [editSessionStartTime, setEditSessionStartTime] = useState(() => Date.now())
 
   const hasCheckedForStaleDataRef = useRef(false)
   const originalUpdatedAtRef = useRef(data?.updatedAt)
@@ -191,7 +191,20 @@ export function DefaultEditView({
   const isSavingRef = useRef(false)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
-  const isLockExpired = Date.now() > lockExpiryTime
+  // Render can't read the current time, so check for expiry when the lock changes and expires
+  const [isLockExpired, setIsLockExpired] = useState(() => Date.now() > lockExpiryTime)
+
+  useEffect(() => {
+    const msUntilExpiry = lockExpiryTime - Date.now()
+    setIsLockExpired(msUntilExpiry < 0)
+
+    // Start a timer that marks the lock as expired at the moment it expires, which
+    // hides the "document locked" modal
+    if (msUntilExpiry >= 0 && msUntilExpiry <= 2_147_483_647) {
+      const timeout = setTimeout(() => setIsLockExpired(true), msUntilExpiry)
+      return () => clearTimeout(timeout)
+    }
+  }, [lockExpiryTime])
 
   const preventLeaveWithoutSaving =
     !isReadOnlyForIncomingUser &&
@@ -215,9 +228,9 @@ export function DefaultEditView({
     (lockedState: LockedState) => {
       setDocumentIsLocked(true)
       const previousOwnerID =
-        typeof documentLockState.current?.user === 'object'
-          ? documentLockState.current?.user?.id
-          : documentLockState.current?.user
+        typeof documentLockStateRef.current?.user === 'object'
+          ? documentLockStateRef.current?.user?.id
+          : documentLockStateRef.current?.user
 
       if (lockedState && lockedState.user) {
         const lockedUserID =
@@ -225,16 +238,16 @@ export function DefaultEditView({
             ? lockedState.user
             : lockedState.user.id
 
-        if (!documentLockState.current || lockedUserID !== previousOwnerID) {
+        if (!documentLockStateRef.current || lockedUserID !== previousOwnerID) {
           if (previousOwnerID === user.id && lockedUserID !== user.id) {
             setShowTakeOverModal(true)
-            documentLockState.current.hasShownLockedModal = true
+            documentLockStateRef.current.hasShownLockedModal = true
           }
 
-          documentLockState.current = {
-            hasShownLockedModal: documentLockState.current?.hasShownLockedModal || false,
+          documentLockStateRef.current = {
+            hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
             isLocked: true,
-            user: lockedState.user as User,
+            user: lockedState.user,
           }
           setCurrentEditor(lockedState.user as User)
         }
@@ -245,7 +258,7 @@ export function DefaultEditView({
         }
       }
     },
-    [documentLockState, setCurrentEditor, setDocumentIsLocked, setLastUpdateTime, user?.id],
+    [documentLockStateRef, setCurrentEditor, setDocumentIsLocked, setLastUpdateTime, user?.id],
   )
 
   const handleStaleDataReload = useCallback(() => {
@@ -261,7 +274,7 @@ export function DefaultEditView({
   }, [])
 
   const handleLeaveConfirm = useCallback(async () => {
-    const lockUser = documentLockState.current?.user
+    const lockUser = documentLockStateRef.current?.user
 
     const isLockOwnedByCurrentUser =
       typeof lockUser === 'object' ? lockUser?.id === user?.id : lockUser === user?.id
@@ -287,7 +300,7 @@ export function DefaultEditView({
   }, [
     collectionSlug,
     documentIsLocked,
-    documentLockState,
+    documentLockStateRef,
     globalSlug,
     id,
     isLockingEnabled,
@@ -301,81 +314,11 @@ export function DefaultEditView({
     async (json, ctx) => {
       const { context, formState } = ctx || {}
 
-      const document = json?.doc || json?.result
-      const hasCreatedDocument =
-        operation === 'create' && Boolean(collectionSlug) && document?.id != null
+      const controller = handleAbortRef(abortOnSaveRef)
 
-      if (ctx?.isQueueReset()) {
-        return
-      }
+      const document = json?.doc || json?.result
 
       const updatedAt = document?.updatedAt || new Date().toISOString()
-      const recordSaveMetadata = () => {
-        setLastUpdateTime(new Date(updatedAt).getTime())
-
-        // Update stale data check refs after successful save
-        // This allows detecting if another user modifies the document after this save
-        originalUpdatedAtRef.current = updatedAt
-        hasCheckedForStaleDataRef.current = false
-        isSavingRef.current = false
-
-        if (context?.incrementVersionCount !== false) {
-          incrementVersionCount()
-        }
-      }
-
-      if (ctx?.requestIntent !== 'autosave') {
-        recordSaveMetadata()
-      }
-
-      if (ctx && !ctx.isCurrent() && !hasCreatedDocument) {
-        return
-      }
-
-      let docPreferences
-
-      if (id || globalSlug) {
-        docPreferences = await getDocPreferences()
-
-        if (!ctx?.isCurrent()) {
-          return
-        }
-      }
-
-      let formStateResult
-
-      if (id || globalSlug) {
-        const controller = handleAbortRef(abortOnSaveRef)
-        formStateResult = await getFormState({
-          id,
-          collectionSlug,
-          data: document,
-          docPermissions,
-          docPreferences,
-          formState,
-          globalSlug,
-          operation,
-          renderAllFields: false,
-          returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
-          returnLockStatus: false,
-          returnPreviewURL: isPreviewEnabled,
-          schemaPath: schemaPathSegments.join('.'),
-          signal: controller.signal,
-          skipValidation: true,
-        })
-
-        abortOnSaveRef.current = null
-
-        if (!ctx?.isCurrent()) {
-          return
-        }
-      }
-
-      if (context?.getDocPermissions !== false) {
-        void getDocPermissions(json).catch((err) => {
-          console.error('Error getting document permissions', err) // eslint-disable-line no-console
-        })
-      }
 
       // If we're editing the doc of the logged-in user,
       // Refresh the cookie to get new permissions
@@ -383,8 +326,16 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      if (ctx?.requestIntent === 'autosave') {
-        recordSaveMetadata()
+      setLastUpdateTime(new Date(updatedAt).getTime())
+
+      // Update stale data check refs after successful save
+      // This allows detecting if another user modifies the document after this save
+      originalUpdatedAtRef.current = updatedAt
+      hasCheckedForStaleDataRef.current = false
+      isSavingRef.current = false
+
+      if (context?.incrementVersionCount !== false) {
+        incrementVersionCount()
       }
 
       if (typeof setData === 'function') {
@@ -418,26 +369,35 @@ export function DefaultEditView({
           path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
         })
 
-        startRouteTransition(() => router.push(redirectRoute))
+        void startRouteTransition(() => router.push(redirectRoute))
       } else {
         resetUploadEdits()
       }
 
-      reportUpdate({
-        id,
-        doc: document,
-        drawerSlug,
-        entitySlug,
-        operation: id || globalSlug ? 'update' : 'create',
-        updatedAt,
-      })
-
-      if (!ctx?.isCurrent()) {
-        return
+      if (context?.getDocPermissions !== false) {
+        await getDocPermissions(json)
       }
 
       if (id || globalSlug) {
-        const { livePreviewURL, previewURL, state } = formStateResult
+        const docPreferences = await getDocPreferences()
+
+        const { livePreviewURL, previewURL, state } = await getFormState({
+          id,
+          collectionSlug,
+          data: document,
+          docPermissions,
+          docPreferences,
+          formState,
+          globalSlug,
+          operation,
+          renderAllFields: false,
+          returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
+          returnLockStatus: false,
+          returnPreviewURL: isPreviewEnabled,
+          schemaPath: schemaPathSegments.join('.'),
+          signal: controller.signal,
+          skipValidation: true,
+        })
 
         // For upload collections, clear the file field from the returned state
         // to prevent the File object from persisting in form state after save
@@ -458,7 +418,27 @@ export function DefaultEditView({
           setPreviewURL(previewURL)
         }
 
+        reportUpdate({
+          id,
+          doc: document,
+          drawerSlug,
+          entitySlug,
+          operation: 'update',
+          updatedAt,
+        })
+
+        abortOnSaveRef.current = null
+
         return state
+      } else {
+        reportUpdate({
+          id,
+          doc: document,
+          drawerSlug,
+          entitySlug,
+          operation: 'create',
+          updatedAt,
+        })
       }
     },
     [
@@ -641,7 +621,7 @@ export function DefaultEditView({
       : currentEditor !== user?.id) &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
-    !documentLockState.current?.hasShownLockedModal &&
+    !documentLockStateRef.current?.hasShownLockedModal &&
     !isLockExpired
 
   const isFolderCollection = Boolean(
@@ -683,7 +663,7 @@ export function DefaultEditView({
         id,
         clearRouteCache,
         collectionSlug,
-        documentLockStateRef: documentLockState,
+        documentLockStateRef,
         globalSlug,
         isLockingEnabled,
         isWithinDoc: true,
@@ -712,7 +692,7 @@ export function DefaultEditView({
       readOnly={!hasSavePermission}
       requirePassword={!id}
       setValidateBeforeSubmit={setValidateBeforeSubmit}
-      // eslint-disable-next-line react-compiler/react-compiler
+      // eslint-disable-next-line react-hooks/hooks
       useAPIKey={auth.useAPIKey}
       username={data?.username}
       verify={auth.verify}
@@ -782,7 +762,7 @@ export function DefaultEditView({
                   id,
                   clearRouteCache,
                   collectionSlug,
-                  documentLockStateRef: documentLockState,
+                  documentLockStateRef,
                   globalSlug,
                   isLockingEnabled,
                   isWithinDoc: false,

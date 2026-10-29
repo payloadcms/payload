@@ -294,6 +294,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     and: 'এবং',
     anotherUser: 'অন্য ব্যবহারকারী',
     anotherUserTakenOver: 'অন্য একজন ব্যবহারকারী এই ডকুমেন্ট সম্পাদনার দায়িত্ব নিয়েছেন।',
+    apiResponse: 'API প্রতিক্রিয়া',
     applyChanges: 'পরিবর্তনগুলি প্রয়োগ করুন',
     ascending: 'আরোহী',
     auto: 'স্বয়ংক্রিয়',
@@ -366,6 +367,13 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     documentModified: 'নথি পরিবর্তিত হয়েছে',
     documentOutOfDate: 'এই নথিটি সাম্প্রতিকভাবে অন্য ব্যবহারকারীর দ্বারা আপডেট করা হয়েছে। আপনার দর্শন আপতিত।',
     documents: 'ডকুমেন্টগুলি',
+    dragCancelled: '{{label}} টেনে সরানো বাতিল হয়েছে।',
+    dragDropped: '{{label}} ছেড়ে দেওয়া হয়েছে। {{count}}টির মধ্যে অবস্থান {{position}}।',
+    dragInstructions:
+      'একটি সারি তুলতে Space বা Enter চাপুন। সরাতে তীর চিহ্নের কী ব্যবহার করুন। VoiceOver ব্যবহার করলে Quick Nav বন্ধ করে Command + তীর চিহ্নের কী ব্যবহার করুন। ছেড়ে দিতে Space বা Enter, অথবা বাতিল করতে Escape চাপুন।',
+    dragMoved: '{{label}}: {{direction}}. {{count}}টির মধ্যে অবস্থান {{position}}।',
+    dragPickedUp: '{{label}} তুলে নেওয়া হয়েছে। {{count}}টির মধ্যে অবস্থান {{position}}।',
+    dragToMove: 'সরাতে টেনে আনুন',
     dragToReorder: 'টেনে এনে পুনঃক্রমবিন্যাস করুন',
     duplicate: 'ডুপ্লিকেট করুন',
     duplicateWithoutSaving: 'পরিবর্তনগুলি সংরক্ষণ না করে ডুপ্লিকেট করুন',
@@ -480,6 +488,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     reindexingAll: 'সমস্ত {{collections}} পুনরায় সূচিবদ্ধ করা হচ্ছে।',
     reloadDocument: 'নথি পুনরায় লোড করুন',
     remove: 'অপসারণ করুন',
+    removeFilter: 'ফিল্টার সরান',
     rename: 'নাম পরিবর্তন করুন',
     replaceRow: 'সারি প্রতিস্থাপন করুন',
     requiredFields: '* চিহ্নিত ঘরগুলো পূরণ করা আবশ্যক।',
@@ -573,6 +582,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     yes: 'হ্যাঁ',
   },
   hierarchy: {
+    folderLocation: 'ফোল্ডারের অবস্থান',
     goTo: '"{{name}}" এ যান',
     itemsMovedTo: '{{title}} এখন {{destination}} এ স্থানান্তরিত হয়েছে',
     itemsMovedToRoot: '{{title}} মূলে সরানো হয়েছে',
@@ -705,6 +715,10 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'আপনি নির্বাচনে সমস্ত {{label}} প্রকাশ করতে চলেছেন। আপনি কি নিশ্চিত?',
     aboutToRestore:
       'আপনি এই {{label}} ডকুমেন্টটি {{versionDate}} তারিখে যে অবস্থায় ছিল সেই অবস্থায় পুনরুদ্ধার করতে চলেছেন।',
+    aboutToRestoreAsDraft:
+      '{{versionDate}} তারিখের বিষয়বস্তু খসড়া হিসেবে পুনরুদ্ধার করুন। সম্পাদক থেকে প্রকাশ না করা পর্যন্ত প্রকাশিত বিষয়বস্তু অপরিবর্তিত থাকবে।',
+    aboutToRestoreAsDraftAllLocales:
+      '{{versionDate}} তারিখের বিষয়বস্তু সব ভাষায় খসড়া হিসেবে পুনরুদ্ধার করুন। সম্পাদক থেকে প্রকাশ না করা পর্যন্ত প্রকাশিত বিষয়বস্তু অপরিবর্তিত থাকবে।',
     aboutToRestoreGlobal:
       'আপনি গ্লোবাল {{label}} কে {{versionDate}} তারিখে যে অবস্থায় ছিল সেই অবস্থায় পুনরুদ্ধার করতে চলেছেন।',
     aboutToRevertToPublished:

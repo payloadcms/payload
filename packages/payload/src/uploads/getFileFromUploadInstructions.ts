@@ -60,6 +60,7 @@ export const getFileFromUploadInstructions = async ({
   }
 
   const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
+  const clientData = getClientData({ uploadReference: file.uploadReference })
   let allowOverwrite = false
   let providerFilename = file.filename
   let verifiedOriginal:
@@ -122,8 +123,21 @@ export const getFileFromUploadInstructions = async ({
       ...file,
       uploadReference: {
         _objectKey: receipt._objectKey,
+        ...(receipt.adapterData && { adapterData: receipt.adapterData }),
+        ...(clientData && { clientData }),
         prefix: receipt.filePrefix,
         signedReceipt,
+      },
+    }
+  } else {
+    const { _objectKey, prefix, signedReceipt } = file.uploadReference
+    file = {
+      ...file,
+      uploadReference: {
+        ...(_objectKey !== undefined && { _objectKey }),
+        ...(clientData && { clientData }),
+        ...(prefix !== undefined && { prefix }),
+        ...(signedReceipt !== undefined && { signedReceipt }),
       },
     }
   }
@@ -254,6 +268,30 @@ export const getFileFromUploadInstructions = async ({
   }
 }
 
+const reservedUploadReferenceKeys = new Set([
+  '_objectKey',
+  'adapterData',
+  'clientData',
+  'prefix',
+  'signedReceipt',
+])
+
+/**
+ * Collects the fields the client added to `uploadReference`. Payload never reads them, so
+ * adapters must verify them before use.
+ */
+const getClientData = ({
+  uploadReference,
+}: {
+  uploadReference: Record<string, unknown>
+}): Record<string, unknown> | undefined => {
+  const entries = Object.entries(uploadReference).filter(
+    ([key]) => !reservedUploadReferenceKeys.has(key),
+  )
+
+  return entries.length ? Object.fromEntries(entries) : undefined
+}
+
 /**
  * Whether the request's `uploadEdits` query param carries a crop or resize edit - reads the raw
  * `req.query.uploadEdits`, since a full parse (with its `data`/`originalDoc` focal-point
@@ -266,7 +304,7 @@ const requestHasSizeEdits = (req: PayloadRequest): boolean => {
     return false
   }
 
-  return hasCropOrResizeEdit(uploadEdits as UploadEdits)
+  return hasCropOrResizeEdit(uploadEdits)
 }
 
 /**

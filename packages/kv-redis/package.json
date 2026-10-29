@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/kv-redis",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.5",
   "description": "Redis KV adapter for Payload",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -47,9 +47,7 @@
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "clean": "rimraf {dist,*.tsbuildinfo}"
   },
   "dependencies": {
     "ioredis": "^5.4.1"
@@ -61,6 +59,6 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }

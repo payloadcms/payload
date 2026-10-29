@@ -291,6 +291,7 @@ export const taTranslations: DefaultTranslationsObject = {
     and: 'மற்றும்',
     anotherUser: 'மற்றொரு பயனர்',
     anotherUserTakenOver: 'இந்த ஆவணத்தை மற்றொரு பயனர் திருத்திக் கொண்டிருக்கிறார்.',
+    apiResponse: 'API பதில்',
     applyChanges: 'மாற்றங்களைப் பயன்படுத்தவும்',
     ascending: 'ஏறுவரிசை',
     auto: 'ஆட்டோ',
@@ -360,6 +361,13 @@ export const taTranslations: DefaultTranslationsObject = {
     documentModified: 'ஆவணம் மாற்றப்பட்டது',
     documentOutOfDate: 'இந்த ஆவணம் விரைவில் மற்றொரு பயனரால் மேம்படுத்தப்பட்டது. உங்கள் காட்சி காலாவதியானது.',
     documents: 'ஆவணங்கள்',
+    dragCancelled: '{{label}} இழுத்தல் ரத்துசெய்யப்பட்டது.',
+    dragDropped: '{{label}} வைக்கப்பட்டது. {{count}} இல் நிலை {{position}}.',
+    dragInstructions:
+      'ஒரு வரியை எடுக்க Space அல்லது Enter ஐ அழுத்தவும். நகர்த்த அம்புக்குறி விசைகளைப் பயன்படுத்தவும். VoiceOver உடன் Quick Nav ஐ முடக்கி Command + அம்புக்குறி விசைகளைப் பயன்படுத்தவும். வைக்க Space அல்லது Enter, அல்லது ரத்துசெய்ய Escape ஐ அழுத்தவும்.',
+    dragMoved: '{{label}}: {{direction}}. {{count}} இல் நிலை {{position}}.',
+    dragPickedUp: '{{label}} எடுக்கப்பட்டது. {{count}} இல் நிலை {{position}}.',
+    dragToMove: 'நகர்த்த இழுக்கவும்',
     dragToReorder: 'இழுத்து மறுவரிசைப்படுத்தவும்',
     duplicate: 'நகலெடு',
     duplicateWithoutSaving: 'மாற்றங்களைச் சேமிக்காமல் நகலெடு',
@@ -473,6 +481,7 @@ export const taTranslations: DefaultTranslationsObject = {
     reindexingAll: 'அனைத்து {{collections}} மறுஅட்டவணை செய்யப்படுகிறது.',
     reloadDocument: 'ஆவணத்தை மீளாக்கு',
     remove: 'நீக்கு',
+    removeFilter: 'வடிகட்டியை அகற்று',
     rename: 'பெயர் மாற்று',
     replaceRow: 'வரிசையை மாற்றவும்',
     requiredFields: '* குறியிடப்பட்ட புலங்கள் கட்டாயமானவை.',
@@ -564,6 +573,7 @@ export const taTranslations: DefaultTranslationsObject = {
     yes: 'ஆம்',
   },
   hierarchy: {
+    folderLocation: 'கோப்புறையின் இருப்பிடம்',
     goTo: '"{{name}}"க்கு செல்லுங்கள்',
     itemsMovedTo: '{{title}} ஐ {{destination}} க்கு நகர்த்தினோம்',
     itemsMovedToRoot: '{{title}} மூலத்திற்கு நகர்த்தப்பட்டது',
@@ -699,6 +709,10 @@ export const taTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'நீங்கள் தேர்வில் உள்ள அனைத்து {{label}}-ஐ வெளியிடப் போகிறீர்கள். உறுதியா?',
     aboutToRestore:
       'நீங்கள் இந்த {{label}} ஆவணத்தை {{versionDate}} அன்று இருந்த நிலைக்கு மீட்டமைக்கப் போகிறீர்கள்.',
+    aboutToRestoreAsDraft:
+      '{{versionDate}} தேதியின் உள்ளடக்கத்தை வரைவாக மீட்டமைக்கவும். திருத்தியிலிருந்து வெளியிடும் வரை வெளியிடப்பட்ட உள்ளடக்கம் மாறாமல் இருக்கும்.',
+    aboutToRestoreAsDraftAllLocales:
+      '{{versionDate}} தேதியின் உள்ளடக்கத்தை அனைத்து மொழிகளிலும் வரைவாக மீட்டமைக்கவும். திருத்தியிலிருந்து வெளியிடும் வரை வெளியிடப்பட்ட உள்ளடக்கம் மாறாமல் இருக்கும்.',
     aboutToRestoreGlobal:
       'நீங்கள் உலகளாவிய {{label}}-ஐ {{versionDate}} அன்று இருந்த நிலைக்கு மீட்டமைக்கப் போகிறீர்கள்.',
     aboutToRevertToPublished: 'இந்த ஆவணத்தின் மாற்றங்களை வெளியிடப்பட்ட நிலைக்கு மாற்றப்போகிறீர்கள். உறுதியா?',

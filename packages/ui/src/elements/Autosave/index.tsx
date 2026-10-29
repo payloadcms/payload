@@ -13,7 +13,12 @@ import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
 import type { OnSaveContext } from '../../views/Edit/index.js'
 
-import { useAllFormFields, useForm, useFormModified } from '../../forms/Form/context.js'
+import {
+  useAllFormFields,
+  useForm,
+  useFormModified,
+  useFormSubmitted,
+} from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -21,6 +26,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
 import './index.css'
 
@@ -49,10 +55,11 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     setUnpublishedVersionCount,
   } = useDocumentInfo()
 
-  const { getFields, isValid, submit } = useForm()
+  const { isValid, submit } = useForm()
 
   const [formState] = useAllFormFields()
   const modified = useFormModified()
+  const submitted = useFormSubmitted()
 
   const currentLocale = useLocale()
   const locale = currentLocale?.code
@@ -70,38 +77,28 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const outstandingSubmitCountRef = useRef(0)
-  const savingStartTimestampRef = useRef(0)
   const autosaveSequenceRef = useRef(0)
+  const retryAutosaveRef = useRef<(() => Promise<void>) | null>(null)
+  const savingStartTimestampRef = useRef(0)
 
-  const handleAutosave = useEffectEvent(async () => {
-    const hideIndicator = ({
-      autosaveSequence,
-      startTimestamp,
-    }: {
-      autosaveSequence: number
-      startTimestamp: number
-    }) => {
-      const elapsedTime = new Date().getTime() - startTimestamp
-      // If request was faster than minimum animation time, animate the difference
-      if (elapsedTime < minimumAnimationTime) {
-        autosaveTimeoutRef.current = setTimeout(() => {
-          if (autosaveSequence === autosaveSequenceRef.current) {
-            setSaving(false)
-          }
-        }, minimumAnimationTime - elapsedTime)
-      } else if (autosaveSequence === autosaveSequenceRef.current) {
-        stopAutoSaveIndicator()
-      }
+  const stopAutoSaveIndicator = useEffectEvent(() => {
+    if (autosaveTimeoutRef.current) {
+      clearTimeout(autosaveTimeoutRef.current)
     }
 
-    if (!modified) {
+    setSaving(false)
+  })
+
+  const handleAutosave = useEffectEvent(async () => {
+    const { valid } = reduceFieldsToValuesWithValidation(formState, true)
+
+    if (!modified || (submitted && !valid && validateOnDraft)) {
       return
     }
 
     let url: string
     let method: string
     let entitySlug: string
-
     const params = qs.stringify(
       {
         autosave: true,
@@ -138,15 +135,18 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       return
     }
 
-    const startTimestamp = new Date().getTime()
+    if (autosaveTimeoutRef.current) {
+      clearTimeout(autosaveTimeoutRef.current)
+    }
+
+    savingStartTimestampRef.current = Date.now()
     const autosaveSequence = ++autosaveSequenceRef.current
     outstandingSubmitCountRef.current += 1
-    savingStartTimestampRef.current = startTimestamp
     setSaving(true)
 
     try {
       const result = await submit<any, OnSaveContext>({
-        acceptValues: true,
+        acceptValues: { overrideLocalChanges: false },
         action: url,
         context: {
           getDocPermissions: false,
@@ -155,43 +155,58 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
         disableFormWhileProcessing: false,
         disableSuccessStatus: true,
         method,
-        onStaleRequest: () => reconcileAutosave({ autosaveSequence }),
-        overrides: {
-          _status: 'draft',
+        onStaleRequest: () => {
+          if (autosaveSequence === autosaveSequenceRef.current) {
+            void retryAutosaveRef.current?.()
+          }
         },
+        overrides: { _status: 'draft' },
         requestIntent: 'autosave',
         skipValidation: !validateOnDraft,
       })
 
-      if (result && result?.res?.ok && !mostRecentVersionIsAutosaved) {
+      if (result && result.res?.ok && !mostRecentVersionIsAutosaved) {
         setMostRecentVersionIsAutosaved(true)
         setUnpublishedVersionCount((prev) => prev + 1)
       }
+    } catch (err) {
+      console.error('Error autosaving form:', err) // eslint-disable-line no-console
     } finally {
       outstandingSubmitCountRef.current -= 1
 
       if (outstandingSubmitCountRef.current === 0) {
-        hideIndicator({
-          autosaveSequence: autosaveSequenceRef.current,
-          startTimestamp: savingStartTimestampRef.current,
-        })
+        const completedSequence = autosaveSequenceRef.current
+        const hideIndicator = () => {
+          if (
+            outstandingSubmitCountRef.current === 0 &&
+            completedSequence === autosaveSequenceRef.current
+          ) {
+            stopAutoSaveIndicator()
+          }
+        }
+        const remainingAnimationTime =
+          minimumAnimationTime - (Date.now() - savingStartTimestampRef.current)
+
+        if (remainingAnimationTime > 0) {
+          autosaveTimeoutRef.current = setTimeout(hideIndicator, remainingAnimationTime)
+        } else {
+          hideIndicator()
+        }
       }
     }
   })
 
+  useEffect(() => {
+    retryAutosaveRef.current = handleAutosave
+
+    return () => {
+      retryAutosaveRef.current = null
+    }
+  }, [handleAutosave])
+
   const didMount = useRef(false)
   const previousDebouncedData = useRef(reduceFieldsToValues(debouncedFormState))
   const previousUploadEdits = useRef(uploadEdits)
-
-  const reconcileAutosave = useEffectEvent(({ autosaveSequence }: { autosaveSequence: number }) => {
-    if (autosaveSequence !== autosaveSequenceRef.current) {
-      return
-    }
-
-    previousDebouncedData.current = reduceFieldsToValues(getFields())
-    previousUploadEdits.current = uploadEdits
-    void handleAutosave()
-  })
 
   // When debounced fields change, autosave
   useEffect(() => {
@@ -228,14 +243,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       stopAutoSaveIndicator()
     }
   }, [])
-
-  const stopAutoSaveIndicator = useEffectEvent(() => {
-    if (autosaveTimeoutRef.current) {
-      clearTimeout(autosaveTimeoutRef.current)
-    }
-
-    setSaving(false)
-  })
 
   return (
     <React.Fragment>

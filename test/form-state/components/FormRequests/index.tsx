@@ -4,7 +4,7 @@ import type { FormState } from 'payload'
 
 import { Form, useConfig, useField, useForm, useSearchParams } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 const initialState: FormState = { title: { value: 'Initial value' } }
 const fieldOptions = { path: 'title' }
@@ -20,18 +20,42 @@ export function FormRequests() {
     formRef.current = form
   }, [])
 
-  const onSuccess = useCallback(async () => {
-    if (scenario === 'reset') {
-      await fetch(resetAction)
-      formRef.current?.replaceState({ title: { value: 'Reset value' } })
-    }
-  }, [resetAction, scenario])
+  const onChange = useCallback(
+    async ({ formState }: { formState: FormState }) => {
+      const response = await fetch(`${action}-change`, {
+        body: JSON.stringify(formState),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      })
+
+      return response.json() as Promise<FormState>
+    },
+    [action],
+  )
+
+  const onChangeHandlers = useMemo(
+    () => (scenario === 'queue' ? [onChange] : undefined),
+    [onChange, scenario],
+  )
+
+  const onSuccess = useCallback(
+    async (json: { state?: FormState }) => {
+      if (scenario === 'reset') {
+        await fetch(resetAction)
+        formRef.current?.replaceState({ title: { value: 'Reset value' } })
+      }
+
+      return json.state
+    },
+    [resetAction, scenario],
+  )
 
   return (
     <Form
       action={action}
       initialState={scenario === 'empty' ? undefined : initialState}
       method="POST"
+      onChange={onChangeHandlers}
       onSuccess={onSuccess}
       waitForAutocomplete={scenario === 'autocomplete'}
     >
@@ -81,6 +105,21 @@ function RequestControls({
       >
         Submit request
       </button>
+      {scenario === 'queue' && (
+        <>
+          <button
+            onClick={() =>
+              void form.submit({ disableFormWhileProcessing: false, requestIntent: 'autosave' })
+            }
+            type="button"
+          >
+            Autosave request
+          </button>
+          <button onClick={() => form.replaceState(initialState)} type="button">
+            Reset request
+          </button>
+        </>
+      )}
     </>
   )
 }

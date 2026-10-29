@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import type { PnpmAdvisory } from '../types'
 
-import { formatDependencyPath, mergeHits, toHits } from './auditReport'
+import { formatDependencyPath, mergeHits, parseAuditReport, toHits } from './auditReport'
+import { isFixable } from './severity'
 
 const advisory = (overrides: Partial<PnpmAdvisory>): PnpmAdvisory => ({
   findings: [],
@@ -15,6 +16,28 @@ const advisory = (overrides: Partial<PnpmAdvisory>): PnpmAdvisory => ({
   url: 'https://example.test',
   vulnerable_versions: '<1.0.1',
   ...overrides,
+})
+
+describe('parseAuditReport', () => {
+  it('keeps an advisory with no published patch as the unfixable sentinel', () => {
+    const stdout = JSON.stringify({
+      advisories: { '1': { ...advisory({}), patched_versions: null } },
+    })
+
+    const report = parseAuditReport(stdout)
+
+    expect(report.advisories['1']?.patched_versions).toBe('<0.0.0')
+  })
+
+  it('keeps an advisory whose patched range pnpm could not infer as fixable', () => {
+    const { patched_versions: _omitted, ...withoutPatch } = advisory({ vulnerable_versions: '*' })
+    const stdout = JSON.stringify({ advisories: { '1': withoutPatch } })
+
+    const report = parseAuditReport(stdout)
+
+    expect(report.advisories['1']?.patched_versions).toBe('unknown')
+    expect(isFixable(report.advisories['1']?.patched_versions ?? '')).toBe(true)
+  })
 })
 
 describe('formatDependencyPath', () => {

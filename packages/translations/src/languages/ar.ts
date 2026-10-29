@@ -287,6 +287,7 @@ export const arTranslations: DefaultTranslationsObject = {
     and: 'و',
     anotherUser: 'مستخدم آخر',
     anotherUserTakenOver: 'قام مستخدم آخر بالاستيلاء على تحرير هذا المستند.',
+    apiResponse: 'استجابة API',
     applyChanges: 'طبق التغييرات',
     ascending: 'تصاعدي',
     auto: 'تلقائي',
@@ -356,6 +357,13 @@ export const arTranslations: DefaultTranslationsObject = {
     documentModified: 'تم تعديل المستند',
     documentOutOfDate: 'تم تحديث هذا المستند مؤخرًا بواسطة مستخدم آخر. عرضك غير محدث.',
     documents: 'وثائق',
+    dragCancelled: 'تم إلغاء سحب {{label}}.',
+    dragDropped: 'تم إفلات {{label}}. الموضع {{position}} من {{count}}.',
+    dragInstructions:
+      'اضغط على Space أو Enter لالتقاط صف. استخدم مفاتيح الأسهم لنقله. مع VoiceOver، أوقف Quick Nav واستخدم Command مع مفاتيح الأسهم. اضغط على Space أو Enter للإفلات، أو Escape للإلغاء.',
+    dragMoved: '{{label}}: {{direction}}. الموضع {{position}} من {{count}}.',
+    dragPickedUp: 'تم التقاط {{label}}. الموضع {{position}} من {{count}}.',
+    dragToMove: 'اسحب للنقل',
     dragToReorder: 'اسحب لإعادة الترتيب',
     duplicate: 'استنساخ',
     duplicateWithoutSaving: 'استنساخ بدون حفظ التغييرات',
@@ -468,6 +476,7 @@ export const arTranslations: DefaultTranslationsObject = {
     reindexingAll: 'جاري إعادة فهرسة جميع {{collections}}.',
     reloadDocument: 'أعد تحميل الوثيقة',
     remove: 'إزالة',
+    removeFilter: 'إزالة عامل التصفية',
     rename: 'إعادة تسمية',
     replaceRow: 'استبدال الصف',
     requiredFields: 'الحقول المميزة بعلامة * مطلوبة.',
@@ -559,6 +568,7 @@ export const arTranslations: DefaultTranslationsObject = {
     yes: 'نعم',
   },
   hierarchy: {
+    folderLocation: 'موقع المجلد',
     goTo: 'اذهب إلى "{{name}}"',
     itemsMovedTo: '{{title}} تم نقله إلى {{destination}}',
     itemsMovedToRoot: '{{title}} تم نقله إلى الجذر',
@@ -692,6 +702,10 @@ export const arTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'أنت على وشك نشر كلّ {{label}} في التّحديد. هل أنت متأكّد؟',
     aboutToRestore:
       'أنت على وشك استرجاع هذا المستند {{label}} إلى الحالة التّي كان عليها في {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'استعد المحتوى من {{versionDate}} كمسودة. سيبقى المحتوى المنشور دون تغيير حتى تنشر من المحرر.',
+    aboutToRestoreAsDraftAllLocales:
+      'استعد المحتوى من {{versionDate}} كمسودة بجميع اللغات. سيبقى المحتوى المنشور دون تغيير حتى تنشر من المحرر.',
     aboutToRestoreGlobal:
       'أنت على وشك استرجاع الاعداد العامّ {{label}} إلى الحالة التي كان عليها في {{versionDate}}.',
     aboutToRevertToPublished: 'أنت على وشك إعادة هذا المستند إلى حالته المنشورة. هل أنت متأكّد؟',

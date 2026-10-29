@@ -3,7 +3,7 @@ import type { CollectionSlug, ListQuery } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { hoistQueryParamsToAnd } from 'payload/shared'
-import React, { startTransition, useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { ListDrawerContextProps, ListDrawerContextType } from '../ListDrawer/Provider.js'
 import type {
@@ -110,8 +110,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             } satisfies RenderListServerFnArgs,
           })) as RenderListServerFnReturnType
 
-          // Keep the current list visible while streamed server components finish loading.
-          startTransition(() => setListView(result?.List || null))
+          setListView(result?.List || null)
         } else {
           setListView(null)
         }
@@ -159,7 +158,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const onQueryChange: ListDrawerContextProps['onQueryChange'] = useCallback(
     (query) => {
-      void refresh({ slug: selectedOption?.value, query })
+      return refresh({ slug: selectedOption?.value, query })
     },
     [refresh, selectedOption.value],
   )
@@ -204,13 +203,15 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       selectedOption={selectedOption}
       setSelectedOption={setMySelectedOption}
     >
-      {!isLoading && (
-        <>
-          <div className="drawer__fade-in">{ListView}</div>
-          <DocumentDrawer onSave={onCreateNew} />
-        </>
-      )}
-      <LoadingOverlay animationDuration="200ms" overlayType="drawer" show={isLoading} />
+      <React.Suspense fallback={<LoadingOverlay animationDuration="200ms" overlayType="drawer" />}>
+        {!isLoading && (
+          <>
+            <div className="drawer__fade-in">{ListView}</div>
+            <DocumentDrawer onSave={onCreateNew} />
+          </>
+        )}
+        <LoadingOverlay animationDuration="200ms" overlayType="drawer" show={isLoading} />
+      </React.Suspense>
     </ListDrawerContextProvider>
   )
 }

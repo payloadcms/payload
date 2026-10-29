@@ -39,6 +39,7 @@ export const reduceFormStateToBlockData = (formState: FormState, currentData?: D
       if (
         fieldState.value === undefined ||
         (fieldState.disableFormData !== false &&
+          fieldState.isModified !== true &&
           fieldState.rows.length === 0 &&
           getValueAtPath(currentData, path) === null)
       ) {
@@ -50,7 +51,7 @@ export const reduceFormStateToBlockData = (formState: FormState, currentData?: D
         fieldState.value === null ? fieldState : { ...fieldState, disableFormData: true },
       ]
     }),
-  ) as FormState
+  )
 
   return normalizeData({
     data: reduceFieldsToValues(formStateWithoutRowCounts, true),
@@ -131,7 +132,7 @@ const normalizeValue = ({
   }
 
   if (value && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
-    return normalizeData({ data: value as Data, parentPath, rowFieldPaths })
+    return normalizeData({ data: value, parentPath, rowFieldPaths })
   }
 
   return value

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/email-nodemailer",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.5",
   "description": "Payload Nodemailer Email Adapter",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -49,9 +49,7 @@
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "clean": "rimraf -g {dist,*.tsbuildinfo}"
   },
   "dependencies": {
     "nodemailer": "^10.1.1"
@@ -63,6 +61,6 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }

@@ -295,6 +295,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     and: 'И',
     anotherUser: 'Други корисник',
     anotherUserTakenOver: 'Други корисник је преузео уређивање овог документа.',
+    apiResponse: 'API одговор',
     applyChanges: 'Примени промене',
     ascending: 'Узлазно',
     auto: 'Automatski',
@@ -365,6 +366,13 @@ export const rsTranslations: DefaultTranslationsObject = {
     documentModified: 'Izmenjen dokument',
     documentOutOfDate: 'Ovaj dokument je nedavno ažurirao drugi korisnik. Vaš pogled je zastareo.',
     documents: 'Dokumenti',
+    dragCancelled: 'Превлачење {{label}} је отказано.',
+    dragDropped: '{{label}} је спуштен. Положај {{position}} од {{count}}.',
+    dragInstructions:
+      'Притисните Space или Enter да подигнете ред. Користите стрелице да га преместите. Уз VoiceOver искључите Quick Nav и користите Command + стрелице. Притисните Space или Enter за спуштање или Escape за отказивање.',
+    dragMoved: '{{label}}: {{direction}}. Положај {{position}} од {{count}}.',
+    dragPickedUp: '{{label}} је подигнут. Положај {{position}} од {{count}}.',
+    dragToMove: 'Превуците за премештање',
     dragToReorder: 'Prevucite da biste promenili redosled',
     duplicate: 'Дупликат',
     duplicateWithoutSaving: 'Понови без чувања промена',
@@ -479,6 +487,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
     reloadDocument: 'Ponovo učitaj dokument',
     remove: 'Уклони',
+    removeFilter: 'Уклони филтер',
     rename: 'Preimenujte',
     replaceRow: 'Zameni red',
     requiredFields: 'Поља означена са * су обавезна.',
@@ -570,6 +579,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     yes: 'Да',
   },
   hierarchy: {
+    folderLocation: 'Локација фасцикле',
     goTo: 'Idite na "{{name}}"',
     itemsMovedTo: '{{title}} je premešten u {{destination}}',
     itemsMovedToRoot: '{{title}} premestio se u koren',
@@ -704,6 +714,10 @@ export const rsTranslations: DefaultTranslationsObject = {
     type: 'Тип',
     aboutToPublishSelection: 'Управо ћете објавити све {{label}} у избору. Да ли сте сигурни?',
     aboutToRestore: 'Вратићете {{label}} документ у стање у којем је био {{versionDate}}',
+    aboutToRestoreAsDraft:
+      'Вратите садржај од {{versionDate}} као нацрт. Објављени садржај остаће непромењен док га не објавите из уређивача.',
+    aboutToRestoreAsDraftAllLocales:
+      'Вратите садржај од {{versionDate}} као нацрт на свим језицима. Објављени садржај остаће непромењен док га не објавите из уређивача.',
     aboutToRestoreGlobal: 'Вратићете глобални {{label}} у стање у којем је био {{versionDate}}.',
     aboutToRevertToPublished: 'Вратићете промене у документу у објављено стање. Да ли сте сигурни?',
     aboutToUnpublish: 'Поништићете објаву овог документа. Да ли сте сигурни?',

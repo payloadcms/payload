@@ -23,6 +23,6 @@
 
   .multi-value.rs__multi-value:has(.multi-value-label__drag-button:focus-visible) {
     outline: var(--accessibility-outline);
-    outline-offset: calc(var(--stroke-width-small) * -1);
+    outline-offset: var(--accessibility-outline-inset);
   }
 }

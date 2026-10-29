@@ -6,7 +6,7 @@ set -ex
 
 # Get all package.json files in packages directory, except eslint-* packages
 package_json_files=$(find packages -name "package.json" \
-  -not -path "packages/eslint-*")
+  -not -path "packages/oxlint-*")
 
 npm_script_name="lint"
 npm_script_command="eslint ."

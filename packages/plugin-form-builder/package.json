@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.5",
   "description": "Form builder plugin for Payload CMS",
   "keywords": [
     "cms",
@@ -99,8 +99,6 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "test": "echo \"No tests available.\""
   },
   "dependencies": {
@@ -109,7 +107,6 @@
     "escape-html": "^1.0.3"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "^1.0.4",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",

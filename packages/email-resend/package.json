@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/email-resend",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.5",
   "description": "Payload Resend Email Adapter",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -49,8 +49,6 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "devDependencies": {
@@ -60,6 +58,6 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }

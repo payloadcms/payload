@@ -72,7 +72,7 @@ export const getFileFromDoc = async ({ collectionConfig, doc, req }: Args): Prom
         })
 
     const file = await downloadFileToBuffer({
-      data: { filename: doc.filename, url: fileUrl } as FileData,
+      data: { filename: doc.filename, url: fileUrl },
       req,
       uploadConfig,
     })

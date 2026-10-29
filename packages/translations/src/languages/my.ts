@@ -286,6 +286,7 @@ export const myTranslations: DefaultTranslationsObject = {
     and: 'နှင့်',
     anotherUser: 'တစ်ခြားအသုံးပြုသူ',
     anotherUserTakenOver: 'တစ်ခြားအသုံးပြုသူသည်ဤစာရွက်စာတမ်းကိုပြင်ဆင်မှုကိုရယူလိုက်သည်။',
+    apiResponse: 'API တုံ့ပြန်ချက်',
     applyChanges: 'ပြောင်းလဲမှုများ အသုံးပြုပါ',
     ascending: 'တက်နေသည်',
     auto: 'အော်တို',
@@ -357,6 +358,13 @@ export const myTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'ဤစာရွက်စာတမ်းကို အခြားအသုံးပြုသူတစ်ဦးက မကြာသေးမီက အပ်ဒိတ်လုပ်ထားသည်။ သင့်ကြည့်ရှုမှုသည် နောက်ကျနေပါသည်။',
     documents: 'စာရွက်စာတမ်းများ',
+    dragCancelled: '{{label}} ကို ဆွဲရွှေ့ခြင်း ပယ်ဖျက်ထားသည်။',
+    dragDropped: '{{label}} ကို ချထားသည်။ {{count}} ခုအနက် နေရာ {{position}}။',
+    dragInstructions:
+      'အတန်းတစ်ခုကို ကောက်ယူရန် Space သို့မဟုတ် Enter ကို နှိပ်ပါ။ ရွှေ့ရန် မြားခလုတ်များကို အသုံးပြုပါ။ VoiceOver ဖြင့် Quick Nav ကို ပိတ်ပြီး Command + မြားခလုတ်များကို အသုံးပြုပါ။ ချရန် Space သို့မဟုတ် Enter၊ ပယ်ဖျက်ရန် Escape ကို နှိပ်ပါ။',
+    dragMoved: '{{label}}: {{direction}}. {{count}} ခုအနက် နေရာ {{position}}။',
+    dragPickedUp: '{{label}} ကို ကောက်ယူထားသည်။ {{count}} ခုအနက် နေရာ {{position}}။',
+    dragToMove: 'ရွှေ့ရန် ဆွဲပါ',
     dragToReorder: 'ဆွဲ၍ အမျိုးအစား ပြန်စဉ်ပါ',
     duplicate: 'ပုံတူပွားမည်။',
     duplicateWithoutSaving: 'သေချာပါပြီ။',
@@ -470,6 +478,7 @@ export const myTranslations: DefaultTranslationsObject = {
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',
     reloadDocument: 'စာရွက်စာတမ်း ပြန်လည်ဖွင့်ပါ',
     remove: 'ဖယ်ရှားမည်။',
+    removeFilter: 'စစ်ထုတ်မှုကို ဖယ်ရှားရန်',
     rename: 'အမည်ပြောင်း',
     replaceRow: 'တန်းစီအစားထိုးရန်',
     requiredFields: '* ဖြင့် အမှတ်အသားပြုထားသော အကွက်များကို မဖြစ်မနေ ဖြည့်ရပါမည်။',
@@ -560,6 +569,7 @@ export const myTranslations: DefaultTranslationsObject = {
     yes: 'ဟုတ်ကဲ့',
   },
   hierarchy: {
+    folderLocation: 'ဖိုင်တွဲတည်နေရာ',
     goTo: '"{{name}}" သို့သွားပါ',
     itemsMovedTo: '{{title}} ကို {{destination}} သို့ ရွှေ့လိုက်ပါပြီ',
     itemsMovedToRoot: '"{{title}}" ကို အမြစ်သို့ ရွှေ့လိုက်ပါပြီ။',
@@ -690,6 +700,10 @@ export const myTranslations: DefaultTranslationsObject = {
     type: 'အမျိုးအစား',
     aboutToPublishSelection: 'သင်သည် ရွေးချယ်မှုတွင် {{label}} အားလုံးကို ထုတ်ဝေပါတော့မည်။ သေချာလား?',
     aboutToRestore: 'သင်သည် ဤ {{label}} စာရွက်စာတမ်းကို {{versionDate}} တွင် ပါရှိသည့် အခြေအနေသို့ ပြန်ယူတော့မည်။',
+    aboutToRestoreAsDraft:
+      '{{versionDate}} မှ အကြောင်းအရာကို မူကြမ်းအဖြစ် ပြန်လည်ရယူပါ။ တည်းဖြတ်ကိရိယာမှ ထုတ်ဝေသည့်အချိန်အထိ ထုတ်ဝေပြီးသော အကြောင်းအရာသည် ပြောင်းလဲမည်မဟုတ်ပါ။',
+    aboutToRestoreAsDraftAllLocales:
+      '{{versionDate}} မှ အကြောင်းအရာကို ဘာသာစကားအားလုံးတွင် မူကြမ်းအဖြစ် ပြန်လည်ရယူပါ။ တည်းဖြတ်ကိရိယာမှ ထုတ်ဝေသည့်အချိန်အထိ ထုတ်ဝေပြီးသော အကြောင်းအရာသည် ပြောင်းလဲမည်မဟုတ်ပါ။',
     aboutToRestoreGlobal:
       'သင်သည် ဂလိုဘယ် {{label}} ကို {{versionDate}} တွင် ပါရှိသည့် အခြေအနေသို့ ပြန်လည်ရောက်ရှိတော့မည်ဖြစ်သည်။',
     aboutToRevertToPublished: 'သင်သည် အပြောင်းအလဲများကို အများဆိုင် အခြေအနေသို့ ပြန်ပြောင်းပါတော့မည်။ သေချာလား?',
