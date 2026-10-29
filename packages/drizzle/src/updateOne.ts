@@ -55,7 +55,7 @@ export const updateOne: UpdateOne = async function updateOne(
         throw new Error('Atomic where updates only support fields stored on the main table')
       }
 
-      const { arraysToPush, row } = transformForWrite({
+      const { arraysToPush, locales, row } = transformForWrite({
         adapter: this,
         data,
         enableAtomicWrites: true,
@@ -65,6 +65,10 @@ export const updateOne: UpdateOne = async function updateOne(
 
       if (arraysToPush && Object.keys(arraysToPush).length) {
         throw new Error('Atomic where updates do not support array operations')
+      }
+
+      if (Object.keys(locales).length) {
+        throw new Error('Atomic where updates only support fields stored on the main table')
       }
 
       markWrite(this)
