@@ -7,23 +7,19 @@ import type { AuthorizedMCP, MCPItem } from '../types.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 
 export type GetAuthorizedMCPArgs = {
-  overrideAccess: boolean
   req: PayloadRequest
 }
 
 /**
  * Authenticates an MCP request and removes items the user cannot access.
- * `overrideAccess` skips Payload and MCP item access checks.
  */
 export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<AuthorizedMCP> = async ({
-  overrideAccess,
   req,
 }) => {
   const pluginConfig = getPluginConfig({ config: req.payload.config })
 
   if (pluginConfig.overrideGetAuthorizedMCP) {
     return await pluginConfig.overrideGetAuthorizedMCP({
-      overrideAccess,
       pluginConfig,
       req,
     })
@@ -44,27 +40,18 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
   return {
     items: await filterMCPItems({
       items: pluginConfig.items,
-      overrideAccess,
       req,
     }),
-    overrideAccess,
   }
 }
 
 export const filterMCPItems = async ({
   items,
-  overrideAccess,
   req,
 }: {
   items: MCPItem[]
-  overrideAccess: boolean
   req: PayloadRequest
 }): Promise<MCPItem[]> => {
-  // Match Payload core: overrideAccess bypasses access evaluation
-  if (overrideAccess) {
-    return items
-  }
-
   const authorizedItems: MCPItem[] = []
 
   const permissions = await getAccessResults({ req })
