@@ -41,7 +41,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
 import { DefaultFilter } from './DefaultFilter/index.js'
-import { getOperatorValueTypes } from './validOperators.js'
+import { shouldResetValueOnOperatorChange } from './validOperators.js'
 import './index.css'
 
 const baseClass = 'condition'
@@ -136,15 +136,15 @@ export const Condition: React.FC<Props> = (props) => {
   )
 
   const handleOperatorChange = useCallback(
-    async (operator: Option<Operator>) => {
-      const operatorValueTypes = getOperatorValueTypes(reducedField.field.type)
-      const validOperatorValue = operatorValueTypes[operator.value] || 'any'
-      const isValidValue =
-        validOperatorValue === 'any' ||
-        typeof value === validOperatorValue ||
-        (validOperatorValue === 'boolean' && (value === 'true' || value === 'false'))
+    async (newOperator: Option<Operator>) => {
+      const shouldResetValue = shouldResetValueOnOperatorChange({
+        fieldType: reducedField.field.type,
+        newOperator: newOperator.value,
+        previousOperator: operator,
+        value,
+      })
 
-      if (!isValidValue) {
+      if (shouldResetValue) {
         // if the current value is not valid for the new operator
         // reset the value before passing it to updateCondition
         setInternalValue(undefined)
@@ -154,12 +154,12 @@ export const Condition: React.FC<Props> = (props) => {
         type: 'operator',
         andIndex,
         field: reducedField,
-        operator: operator.value,
+        operator: newOperator.value,
         orIndex,
-        value: isValidValue ? value : undefined,
+        value: shouldResetValue ? undefined : value,
       })
     },
-    [andIndex, reducedField, orIndex, updateCondition, value],
+    [andIndex, operator, reducedField, orIndex, updateCondition, value],
   )
 
   return (
