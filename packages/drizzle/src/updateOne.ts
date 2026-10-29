@@ -73,37 +73,41 @@ export const updateOne: UpdateOne = async function updateOne(
       }
 
       const table = this.tables[tableName]
-      const matchingRows = await (db as LibSQLDatabase)
-        .select({ id: table.id })
-        .from(table)
-        .where(where)
-        .limit(1)
-      const matchingRowID = matchingRows[0]?.id
 
-      if (matchingRowID === undefined || matchingRowID === null) {
-        return null
+      while (true) {
+        const matchingRows = await (db as LibSQLDatabase)
+          .select({ id: table.id })
+          .from(table)
+          .where(where)
+          .limit(1)
+        const matchingRowID = matchingRows[0]?.id
+
+        if (matchingRowID === undefined || matchingRowID === null) {
+          return null
+        }
+
+        markWrite(this)
+
+        const docs = await (db as LibSQLDatabase)
+          .update(table)
+          .set(row)
+          .where(and(eq(table.id, matchingRowID), where))
+          .returning()
+
+        if (!docs[0]) {
+          // Another caller changed this row. Look for another document matching the predicate.
+          continue
+        }
+
+        return transform({
+          adapter: this,
+          config: this.payload.config,
+          data: docs[0],
+          fields: collection.flattenedFields,
+          joinQuery: false,
+          tableName,
+        })
       }
-
-      markWrite(this)
-
-      const docs = await (db as LibSQLDatabase)
-        .update(table)
-        .set(row)
-        .where(and(eq(table.id, matchingRowID), where))
-        .returning()
-
-      if (!docs[0]) {
-        return null
-      }
-
-      return transform({
-        adapter: this,
-        config: this.payload.config,
-        data: docs[0],
-        fields: collection.flattenedFields,
-        joinQuery: false,
-        tableName,
-      })
     }
 
     // selectDistinct will only return if there are joins
