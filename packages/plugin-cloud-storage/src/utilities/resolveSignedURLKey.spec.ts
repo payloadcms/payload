@@ -6,7 +6,6 @@ import { resolveSignedURLKey } from './resolveSignedURLKey.js'
 vi.mock('payload/internal', () => ({
   createClientUploadReceipt: vi.fn(() => 'receipt'),
   getSafeFileName: vi.fn(async ({ desiredFilename }) => desiredFilename),
-  incrementName: vi.fn((filename: string) => filename.replace(/(\.[^.]+)?$/, '-1$1')),
 }))
 
 describe('resolveSignedURLKey', () => {
@@ -47,6 +46,19 @@ describe('resolveSignedURLKey', () => {
         signedReceipt: 'receipt',
       },
     })
+  })
+
+  it('should use the filename from one collision lookup', async () => {
+    vi.mocked(getSafeFileName).mockResolvedValueOnce('photo-3.png')
+
+    const result = await resolveSignedURLKey({
+      collectionSlug: 'uploads',
+      filename: 'photo.png',
+      req: {} as never,
+    })
+
+    expect(getSafeFileName).toHaveBeenCalledTimes(1)
+    expect(result.sanitizedFilename).toBe('photo-3.png')
   })
 
   it('should mint the receipt for a key contained by the collection prefix', async () => {

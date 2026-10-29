@@ -149,6 +149,83 @@ test.suite('File rename', { config: './config.ts' }, () => {
     expect(await readFile(path.join(transformedMediaDir, 'cover-1.png'))).toEqual(bytes)
   })
 
+  test('should rename an upload whose own name contains -original', async ({ payload }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: mediaSlug,
+      data: { alt: 'marker in name' },
+      file: {
+        name: 'my-original-photo.png',
+        data: bytes,
+        mimetype: 'image/png',
+        size: bytes.length,
+      },
+    })
+    const renamed = await payload.renameFile({
+      id: created.id,
+      collection: mediaSlug,
+      filename: 'cover.png',
+      overrideAccess: true,
+    })
+
+    expect(renamed.filename).toBe('cover.png')
+    expect(renamed.original?.filename).toBe('cover.png')
+  })
+
+  test('should rename an upload whose own name ends with -original', async ({ payload }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: mediaSlug,
+      data: { alt: 'marker at end' },
+      file: { name: 'logo-original.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+    const renamed = await payload.renameFile({
+      id: created.id,
+      collection: mediaSlug,
+      filename: 'logo.png',
+      overrideAccess: true,
+    })
+
+    expect(renamed.filename).toBe('logo.png')
+    expect(await readFile(path.join(mediaDir, 'logo.png'))).toEqual(bytes)
+  })
+
+  test('should rename a beta upload whose original has the -original suffix', async ({
+    payload,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    await mkdir(mediaDir, { recursive: true })
+    await writeFile(path.join(mediaDir, 'photo.png'), bytes)
+    await writeFile(path.join(mediaDir, 'photo-original.png'), bytes)
+    const beta = await payload.db.create({
+      collection: mediaSlug,
+      data: {
+        alt: 'beta',
+        filename: 'photo.png',
+        filesize: bytes.length,
+        mimeType: 'image/png',
+        original: {
+          filename: 'photo-original.png',
+          filesize: bytes.length,
+          mimeType: 'image/png',
+          url: `/api/${mediaSlug}/file/photo-original.png`,
+        },
+        url: `/api/${mediaSlug}/file/photo.png`,
+      },
+    })
+
+    const renamed = await payload.renameFile({
+      id: beta.id,
+      collection: mediaSlug,
+      filename: 'cover.png',
+      overrideAccess: true,
+    })
+
+    expect(renamed.filename).toBe('cover.png')
+    expect(renamed.original?.filename).toMatch(/^cover/)
+    expect(await readFile(path.join(mediaDir, renamed.original!.filename!))).toEqual(bytes)
+  })
+
   test('should leave the published upload unchanged when renaming a draft', async ({ payload }) => {
     const bytes = await readFile(imageFixture)
     const created = await payload.create({
