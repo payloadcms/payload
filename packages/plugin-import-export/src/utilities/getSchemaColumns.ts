@@ -92,6 +92,24 @@ export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): st
 
   for (const col of dataColumns) {
     if (!schemaSet.has(col)) {
+      // A beforeExport hook can collapse an array, block or group field into a single value
+      // (e.g. "tags" instead of "tags_0_label", "tags_0_id"). Replace the schema columns of that
+      // field with the derived column, unless the data still contains any of them.
+      const replacedChildren = result.filter((schemaCol) => schemaCol.startsWith(`${col}_`))
+      if (
+        replacedChildren.length > 0 &&
+        !replacedChildren.some((schemaCol) => dataColumns.includes(schemaCol))
+      ) {
+        const firstIdx = result.indexOf(replacedChildren[0]!)
+        result.splice(firstIdx, 0, col)
+        for (const schemaCol of replacedChildren) {
+          result.splice(result.indexOf(schemaCol), 1)
+          schemaSet.delete(schemaCol)
+        }
+        schemaSet.add(col)
+        continue
+      }
+
       let inserted = false
 
       for (const schemaCol of schemaColumns) {
