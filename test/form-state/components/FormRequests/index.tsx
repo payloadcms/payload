@@ -109,7 +109,7 @@ function RequestControls({
         <>
           <button
             onClick={() =>
-              void form.submit({ disableFormWhileProcessing: false, requestIntent: 'autosave' })
+              void form.submit({ disableFormWhileProcessing: false, submissionType: 'autosave' })
             }
             type="button"
           >

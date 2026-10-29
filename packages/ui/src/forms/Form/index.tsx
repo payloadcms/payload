@@ -365,7 +365,7 @@ export const Form: React.FC<FormProps> = (props) => {
           setDisabled(true)
         }
 
-        if (options?.requestIntent === 'autosave') {
+        if (options?.submissionType === 'autosave') {
           setBackgroundProcessing(true)
         }
 
@@ -689,7 +689,7 @@ export const Form: React.FC<FormProps> = (props) => {
       const requestScope = requestScopeRef.current
       let didSucceed = false
       const resultPromise = scheduleRequest({
-        priority: requestPriority[options?.requestIntent ?? 'submit'],
+        priority: requestPriority[options?.submissionType ?? 'submit'],
         run: (requestContext) =>
           executeSubmit({
             onResponse: ({ res }) => {
@@ -700,7 +700,7 @@ export const Form: React.FC<FormProps> = (props) => {
           }),
       })
 
-      if (options?.requestIntent !== 'autosave') {
+      if (options?.submissionType !== 'autosave') {
         latestExplicitSubmitRef.current = resultPromise.then(
           () => didSucceed,
           () => didSucceed,
@@ -709,7 +709,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       const result = await resultPromise
 
-      if (result.status === 'superseded' && options?.requestIntent === 'autosave') {
+      if (result.status === 'superseded' && options?.submissionType === 'autosave') {
         let explicitSubmit = latestExplicitSubmitRef.current
         let didExplicitSubmitSucceed = true
 
