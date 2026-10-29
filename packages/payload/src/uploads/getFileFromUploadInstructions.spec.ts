@@ -444,7 +444,7 @@ describe('getFileFromUploadInstructions', () => {
 
   it.each([
     { label: 'plain', storedFilename: 'video.mp4' },
-    { label: 'legacy -original', storedFilename: 'video-original.mp4' },
+    { label: 'beta -original', storedFilename: 'video-original.mp4' },
   ])('should accept a receipt for the $label uploaded filename', async ({ storedFilename }) => {
     const handler = vi.fn(
       async () =>

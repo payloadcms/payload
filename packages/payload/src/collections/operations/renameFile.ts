@@ -36,9 +36,9 @@ import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { updateDocument } from './utilities/update.js'
 
-const LEGACY_ORIGINAL_MARKER = '-original'
+const BETA_ORIGINAL_SUFFIX = '-original'
 // Earlier betas named the original `<base>-original`, with a `-<n>` counter on a collision.
-const LEGACY_ORIGINAL_STEM = /^(.+)-original(?:-\d+)?$/
+const BETA_ORIGINAL_STEM = /^(.+)-original(?:-\d+)?$/
 
 export type RenameFileArguments = {
   collection: Collection
@@ -113,15 +113,15 @@ export const renameFileOperation = async (
     const originalStem = path.posix.parse(oldFilename).name
     const mainStem = path.posix.parse(stored.filename as string).name
     // A user's own filename can contain `-original`, so only a separate original whose base
-    // matches the main file counts as a legacy one.
-    const legacyBase = LEGACY_ORIGINAL_STEM.exec(originalStem)?.[1]
-    const isLegacyOriginal = Boolean(
-      legacyBase && originalStem !== mainStem && mainStem.startsWith(legacyBase),
+    // matches the main file counts as a beta one.
+    const betaBase = BETA_ORIGINAL_STEM.exec(originalStem)?.[1]
+    const isBetaOriginal = Boolean(
+      betaBase && originalStem !== mainStem && mainStem.startsWith(betaBase),
     )
     // The main file and the original can each extend the shared base name (`photo-cropped`,
     // or a `photo-1` counter), so the shorter one is the base.
-    const oldStem = isLegacyOriginal
-      ? legacyBase!
+    const oldStem = isBetaOriginal
+      ? betaBase!
       : mainStem.startsWith(originalStem)
         ? originalStem
         : mainStem
@@ -129,7 +129,7 @@ export const renameFileOperation = async (
       throw new APIError('The upload already has this filename.', 400)
     }
 
-    const oldStems = isLegacyOriginal ? [`${oldStem}${LEGACY_ORIGINAL_MARKER}`, oldStem] : [oldStem]
+    const oldStems = isBetaOriginal ? [`${oldStem}${BETA_ORIGINAL_SUFFIX}`, oldStem] : [oldStem]
     const hasDefaultRole = ({ roles }: { roles: StoredFileRole[] }) =>
       roles.some(({ type }) => type === 'default')
     const getNextFilename = ({ key }: { key: string }) => {

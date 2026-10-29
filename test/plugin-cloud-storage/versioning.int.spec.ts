@@ -501,8 +501,8 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     const files = getStoredCloudFiles(stored)
     const main = files.find((file) => file.roles.some((role) => role.type === 'default'))
     const original = files.find((file) => file.roles.some((role) => role.type === 'original'))
-    const legacyOriginalKey = path.posix.join(path.posix.dirname(main!.key), 'image-original.png')
-    versionedCloudFiles.set(legacyOriginalKey, versionedCloudFiles.get(original!.key)!)
+    const betaOriginalKey = path.posix.join(path.posix.dirname(main!.key), 'image-original.png')
+    versionedCloudFiles.set(betaOriginalKey, versionedCloudFiles.get(original!.key)!)
     versionedCloudFiles.delete(original!.key)
     await payload.db.updateOne({
       collection: versionedCloudMediaSlug,
