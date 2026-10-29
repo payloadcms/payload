@@ -112,6 +112,24 @@ export default buildConfig({
 })
 ```
 
+**Groundmail adapter:**
+
+You can also use the [Groundmail](https://docs.groundmail.dev/guides/payload) email adapter ([`groundmail-payload`](https://www.npmjs.com/package/groundmail-payload)) to send transactional email through the Groundmail API, without Nodemailer:
+
+```ts
+import { buildConfig } from 'payload'
+import { groundmailAdapter } from 'groundmail-payload'
+
+export default buildConfig({
+  email: groundmailAdapter({
+    // Must be on a domain you have verified in Groundmail
+    defaultFromAddress: 'noreply@yourdomain.com',
+    defaultFromName: 'Payload',
+    // apiKey: process.env.GROUNDMAIL_API_KEY,
+  }),
+})
+```
+
 During development, if you pass nothing to `nodemailerAdapter`, it will use the [ethereal.email](https://ethereal.email) service.
 
 This will log the ethereal.email details to console on startup.
