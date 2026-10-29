@@ -12,9 +12,5 @@ export const Media: CollectionConfig = {
       required: true,
     },
   ],
-  upload: {
-    // These are not supported on Workers yet due to lack of sharp
-    crop: false,
-    focalPoint: false,
-  },
+  upload: true,
 }

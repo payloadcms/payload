@@ -43,6 +43,7 @@
     "build:payload": "turbo build --filter payload",
     "build:payload-cloud": "turbo build --filter \"@payloadcms/payload-cloud\"",
     "build:plugin-cloud-storage": "turbo build --filter \"@payloadcms/plugin-cloud-storage\"",
+    "build:plugin-cloudflare": "turbo build --filter \"@payloadcms/plugin-cloudflare\"",
     "build:plugin-ecommerce": "turbo build --filter \"@payloadcms/plugin-ecommerce\"",
     "build:plugin-form-builder": "turbo build --filter \"@payloadcms/plugin-form-builder\"",
     "build:plugin-import-export": "turbo build --filter \"@payloadcms/plugin-import-export\"",

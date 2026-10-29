@@ -1,3 +1,5 @@
+Written with AI
+
 # Payload Cloudflare Template
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/payloadcms/payload/tree/3.x/templates/with-cloudflare-d1)
@@ -86,21 +88,19 @@ By default logs are not enabled for your API, we've made this decision because i
 
 ### Logger Configuration
 
-This template includes a custom console-based logger compatible with Cloudflare Workers. Payload's default logger uses `pino-pretty`, which relies on Node.js APIs not available in Workers and would cause `fs.write is not implemented` errors.
+This template uses `@payloadcms/plugin-cloudflare` to apply Workers compatibility defaults in both local development and production:
 
-The custom logger in `payload.config.ts`:
+- Password hashes use 100,000 PBKDF2-SHA256 iterations, the Workers-supported limit. This is lower than Payload's OWASP-aligned 600,000 default.
+- Logs use Pino's console implementation, with JSON records, log-level filtering, error serialization, and child logger support. Set `PAYLOAD_LOG_LEVEL` to control verbosity or `DISABLE_LOGGING=true` to disable output. An explicit Payload `logger` takes precedence.
+- Upload collections default to `crop: false` and `focalPoint: false`. Explicit collection settings take precedence.
 
-- Routes logs through `console.*` methods which Workers handles correctly
-- Outputs JSON-formatted logs for Cloudflare observability
-- Only active in production (development uses the default `pino-pretty` for better DX)
+D1 and R2 remain configured separately. The R2 adapter disables local file storage for its collections.
 
-You can control the log level via the `PAYLOAD_LOG_LEVEL` environment variable (e.g., `debug`, `info`, `warn`, `error`).
+See the [plugin documentation](../../packages/plugin-cloudflare/README.md) for options and password migration requirements. Existing 600,000-iteration password hashes require a password reset or migration through a runtime that can verify them before those users can log in on Workers.
 
-### Diagnostic Channel Errors
+### Remote file fetching
 
-If you see "Failed to publish diagnostic channel message" errors in your observability logs, these typically come from the `undici` HTTP client library. The template includes `skipSafeFetch: true` in the Media collection to use native fetch instead of undici for file uploads, which helps reduce these errors.
-
-Cloudflare Workers runs in an [isolated environment that cannot access private IP ranges](https://developers.cloudflare.com/workers-vpc/examples/route-across-private-services/) by default, providing built-in SSRF protection. This makes `skipSafeFetch` safe to use.
+Payload's SSRF-filtering fetch remains enabled by default. If your deployment restricts outbound access to trusted destinations, you can opt into native fetch with `cloudflarePlugin({ useNativeFetch: true })`. This defaults `upload.skipSafeFetch` to `true` on upload collections and bypasses Payload's SSRF protection. Explicit collection settings, including allowlists and `false`, are preserved. Assess both local development and production networking before enabling this option.
 
 ## Known issues
 

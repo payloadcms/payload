@@ -60,6 +60,7 @@ jobs:
             payload-cloud
             plugin-cloud
             plugin-cloud-storage
+            plugin-cloudflare
             plugin-ecommerce
             plugin-form-builder
             plugin-import-export

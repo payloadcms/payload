@@ -47,6 +47,7 @@ async function main() {
         'live-preview-react',
         'next',
         'payload-cloud',
+        'plugin-cloudflare',
         'plugin-form-builder',
         'plugin-ecommerce',
         'plugin-nested-docs',

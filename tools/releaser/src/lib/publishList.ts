@@ -45,6 +45,7 @@ export const packagePublishList = [
   'live-preview-vue',
 
   // Plugins
+  'plugin-cloudflare',
   'plugin-ecommerce',
   'plugin-form-builder',
   'plugin-import-export',
