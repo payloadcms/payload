@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { HtmlDiff } from './diff/index.js'
+import { escapeDiffHTML, unescapeDiffHTML } from './escapeHtml.js'
 import './colors.css'
 import './index.css'
 
@@ -9,6 +10,7 @@ export { escapeDiffHTML, unescapeDiffHTML } from './escapeHtml.js'
 const baseClass = 'html-diff'
 
 export const getHTMLDiffComponents = ({
+  deletedLabel,
   fromHTML,
   fromLabel,
   postProcess,
@@ -16,6 +18,7 @@ export const getHTMLDiffComponents = ({
   tokenizeByCharacter,
   toLabel,
 }: {
+  deletedLabel?: string
   fromHTML: string
   fromLabel?: string
   /**
@@ -31,6 +34,7 @@ export const getHTMLDiffComponents = ({
   To: React.ReactNode
 } => {
   const diffHTML = new HtmlDiff(fromHTML, toHTML, {
+    deletedLabel: deletedLabel ? unescapeDiffHTML(escapeDiffHTML(deletedLabel)) : undefined,
     tokenizeByCharacter,
   })
 
