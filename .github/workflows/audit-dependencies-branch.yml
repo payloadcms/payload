@@ -274,19 +274,6 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Probe sandbox (temporary)
-        if: always()
-        run: |
-          echo "TMPDIR=${TMPDIR:-unset}"
-          codex --version
-          for target in "$GITHUB_WORKSPACE/.audit-deps/.probe" /tmp/.probe "$RUNNER_TEMP/.probe" "$GITHUB_ENV" "$RUNNER_TEMP/codex-home/config.toml"; do
-            if CODEX_HOME="$RUNNER_TEMP/codex-home" codex sandbox --permission-profile audit-deps -C "$GITHUB_WORKSPACE" -- sh -c ": >> '$target'"; then
-              echo "WRITABLE $target"
-            else
-              echo "BLOCKED $target"
-            fi
-          done
-
   verify:
     needs: [precheck, fix]
     if: needs.fix.outputs.has_patch == 'true'
