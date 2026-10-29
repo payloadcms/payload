@@ -8,6 +8,8 @@ import { locateEvent } from '../hooks/locateEvent'
  * involved. Internal only: every operation, including reading, requires a logged-in user.
  *
  * The coordinates of each event's place come from Apple Maps when it's saved (../hooks/locateEvent.ts).
+ * awoz-api adds the gem, jewellery and raw material trade shows Claude finds on the web every week
+ * (../endpoints/appEventDiscovery.ts).
  */
 export const Events: CollectionConfig = {
   slug: 'events',
@@ -223,6 +225,20 @@ export const Events: CollectionConfig = {
         { label: 'Cancelled', value: 'cancelled' },
       ],
       required: true,
+    },
+    {
+      name: 'foundBy',
+      type: 'select',
+      admin: {
+        // Only on events awoz-api's weekly search added
+        condition: (data) => Boolean(data?.foundBy),
+        description:
+          "Added by awoz-api's weekly web search; its sources are in the notes. Check the dates and the place.",
+        position: 'sidebar',
+        readOnly: true,
+      },
+      label: 'Found by',
+      options: [{ label: 'Claude (weekly web search)', value: 'claude' }],
     },
     {
       name: 'attachments',

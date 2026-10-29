@@ -37,6 +37,7 @@ uses to test templates.
 | `src/maps/`, `src/hooks/locateEvent.ts`    | Finds each event's coordinates in Apple Maps (see "Event locations")                   |
 | `scripts/locate-events.ts`                 | Looks up the coordinates of events saved earlier (see "Event locations")               |
 | `src/endpoints/appEvents.ts`               | Upcoming events for the VgemsAI app (see "The VgemsAI app")                            |
+| `src/endpoints/appEventDiscovery.ts`       | Trade shows Claude finds every week (see "Events found by Claude")                     |
 | `src/endpoints/appClients.ts`              | VgemsAI app signups as clients, and their Account screen (see "The VgemsAI app")       |
 | `src/endpoints/appChat.ts`                 | Saves VgemsAI app chats, deletes app accounts' data (see "The VgemsAI app")            |
 | `src/collections/ChatSessions.ts`, `…/ChatMessages.ts` | VgemsAI app conversations, deleted after 90 days (see "Chats")             |
@@ -44,7 +45,7 @@ uses to test templates.
 | `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
 | `scripts/import-vigor.ts`                  | Copies the Vigor website's current content into the CMS (see "Vigor website")          |
 | `scripts/import-app-page.ts`, `scripts/app-page/` | The first version of the Vigor website's VgemsAI app page (see "VgemsAI app page") |
-| `src/timezones.ts`                         | Time zones offered for event dates                                                     |
+| `src/timezones.ts`, `src/zonedTime.ts`     | Time zones offered for event dates, and days at midnight in a time zone                |
 | `src/proxy.ts`, `src/twoFactor/`           | Two-factor authentication for every login (see "Two-factor authentication")            |
 | `src/email/sendgrid.ts`                    | Sends emails such as "forgot password" through SendGrid (see "Email (SendGrid)")       |
 | `src/hooks/revalidateWebsite.ts`           | Tells the personal website to refresh its pages when its content changes               |
@@ -762,6 +763,31 @@ Locally, run `pnpm payload run scripts/import-events.ts <file.json> [--dry-run]`
 With Apple Maps set up (next section), every imported event gets its coordinates, which adds a second or two
 per event.
 
+### Events found by Claude
+
+Every Monday, awoz-api asks Claude to search the web for gem, jewellery and raw material trade shows and fairs
+around the world in the next 12 months, and adds the ones the CMS doesn't have yet (awoz-api README: "Weekly event
+search"):
+
+1. awoz-api reads the events the CMS knows from `GET /api/app/event-discovery`: those that started in the last
+   13 months, so Claude looks for their next edition, and those coming up, cancelled ones included.
+2. Claude searches the web, preferably the organizers' own sites, for the others.
+3. awoz-api sends what Claude found to `POST /api/app/event-discovery`
+   (`src/endpoints/appEventDiscovery.ts`), which adds each event it doesn't know yet as **planned**, with its
+   coordinates from Apple Maps (next section).
+
+Added events are marked **Found by: Claude (weekly web search)** in the sidebar, and their notes say when they
+were found and list the pages Claude found the dates on. Filter the Events list by *Found by* to check them. They
+show in the app right away, like any planned event. To hide one, set it to **Cancelled** rather than deleting it:
+the search skips cancelled events, but a deleted one can be found and added again.
+
+An event counts as known when one starts within 60 days of it under the same name (years, edition numbers and
+"Jewellery" or "Jewelry" don't count), under a name with the same words and more in the same country (e.g.
+"HKTDC Hong Kong International Jewellery Show" for "Hong Kong International Jewellery Show"), or under a similar
+name in the same city within 3 days. A found event is rejected, and awoz-api logs why, when it's over, starts more
+than 400 days ahead, lasts more than 31 days, has no city or country, or its time zone has no counterpart with the
+same UTC offset in `src/timezones.ts`.
+
 ### Event locations
 
 Each event's **Coordinates** (longitude and latitude, under Location) are filled in from the
@@ -827,7 +853,7 @@ Locally, run `pnpm payload run scripts/locate-events.ts [--dry-run] [--all]` in 
 ### The VgemsAI app
 
 The VgemsAI app talks to the CMS through its own backend, awoz-api, which reads upcoming events from
-`GET /api/app/events`, saves every signup as a client with `POST /api/app/clients`, keeps the app's chats
+`GET /api/app/events`, adds the trade shows Claude finds every week (see "Events found by Claude"), saves every signup as a client with `POST /api/app/clients`, keeps the app's chats
 (see "Chats" below) and the Research tab's market prices (see "Market prices"). A server can't pass two-factor,
 so instead of logging in it sends a shared key:
 

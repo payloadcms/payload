@@ -30,6 +30,10 @@ import {
   appClientsEndpoint,
   appClientUpdateEndpoint,
 } from './endpoints/appClients'
+import {
+  appEventDiscoveryEndpoint,
+  appEventDiscoverySaveEndpoint,
+} from './endpoints/appEventDiscovery'
 import { appEventsEndpoint } from './endpoints/appEvents'
 import { appMarketEndpoint, appMarketPricesEndpoint } from './endpoints/appMarket'
 import { healthEndpoint } from './endpoints/health'
@@ -118,6 +122,8 @@ export default buildConfig({
     appClientsEndpoint,
     appClientUpdateEndpoint,
     appEventsEndpoint,
+    appEventDiscoveryEndpoint,
+    appEventDiscoverySaveEndpoint,
     appMarketEndpoint,
     appMarketPricesEndpoint,
     healthEndpoint,

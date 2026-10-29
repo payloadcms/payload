@@ -988,6 +988,10 @@ export interface Event {
   notes?: string | null;
   status: 'planned' | 'confirmed' | 'completed' | 'cancelled';
   /**
+   * Added by awoz-api's weekly web search; its sources are in the notes. Check the dates and the place.
+   */
+  foundBy?: 'claude' | null;
+  /**
    * Brochures, floor plans, photos
    */
   attachments?: (string | Media)[] | null;
@@ -1916,6 +1920,7 @@ export interface EventsSelect<T extends boolean = true> {
   clients?: T;
   notes?: T;
   status?: T;
+  foundBy?: T;
   attachments?: T;
   createdBy?: T;
   updatedBy?: T;
