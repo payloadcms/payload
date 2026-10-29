@@ -10,6 +10,9 @@ import { ensureChatRetentionIndexes } from './collections/chatRetention'
 import { ChatSessions } from './collections/ChatSessions'
 import { Clients } from './collections/Clients'
 import { Events } from './collections/Events'
+import { MarketMaterials } from './collections/MarketMaterials'
+import { MarketPrices } from './collections/MarketPrices'
+import { seedMarketMaterials } from './collections/marketSeed'
 import { Media, mediaVariants } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
@@ -28,6 +31,7 @@ import {
   appClientUpdateEndpoint,
 } from './endpoints/appClients'
 import { appEventsEndpoint } from './endpoints/appEvents'
+import { appMarketEndpoint, appMarketPricesEndpoint } from './endpoints/appMarket'
 import { healthEndpoint } from './endpoints/health'
 import { locales } from './locales'
 import { personalCollections, personalGlobals } from './personal'
@@ -89,6 +93,8 @@ export default buildConfig({
     Events,
     ChatSessions,
     ChatMessages,
+    MarketMaterials,
+    MarketPrices,
     ...vigorCollections,
   ],
   cors: allowedOrigins,
@@ -112,12 +118,17 @@ export default buildConfig({
     appClientsEndpoint,
     appClientUpdateEndpoint,
     appEventsEndpoint,
+    appMarketEndpoint,
+    appMarketPricesEndpoint,
     healthEndpoint,
   ],
   globals: [...personalGlobals, ...vigorGlobals],
   // Only fields marked `localized: true` have a version per language; see src/locales.ts
-  // Lets MongoDB delete VgemsAI app chats after 90 days
-  onInit: ensureChatRetentionIndexes,
+  // Lets MongoDB delete VgemsAI app chats after 90 days, and adds the Research tab's materials the first time
+  onInit: async (payload) => {
+    await ensureChatRetentionIndexes(payload)
+    await seedMarketMaterials(payload)
+  },
   localization: {
     defaultLocale: 'en',
     fallback: true,

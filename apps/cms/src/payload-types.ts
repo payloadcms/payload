@@ -112,17 +112,17 @@ export type LexicalNodes_8909F562 =
   | SerializedListItemNode<LexicalNodes_8909F562>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_74DAFDD6".
+ * via the `definition` "LexicalNodes_184C5A6E".
  */
-export type LexicalNodes_74DAFDD6 =
+export type LexicalNodes_184C5A6E =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_74DAFDD6>
+  | SerializedParagraphNode<LexicalNodes_184C5A6E>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'personal-photos'>
-  | SerializedQuoteNode<LexicalNodes_74DAFDD6>
+  | SerializedQuoteNode<LexicalNodes_184C5A6E>
   | SerializedRelationshipNode<
       | 'users'
       | 'posts'
@@ -134,6 +134,8 @@ export type LexicalNodes_74DAFDD6 =
       | 'events'
       | 'chat-sessions'
       | 'chat-messages'
+      | 'market-materials'
+      | 'market-prices'
       | 'vigor-products'
       | 'vigor-services'
       | 'vigor-news'
@@ -143,11 +145,11 @@ export type LexicalNodes_74DAFDD6 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_74DAFDD6, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_74DAFDD6, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_74DAFDD6>
-  | SerializedListItemNode<LexicalNodes_74DAFDD6>
-  | SerializedHeadingNode<LexicalNodes_74DAFDD6>;
+  | SerializedAutoLinkNode<LexicalNodes_184C5A6E, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_184C5A6E, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_184C5A6E>
+  | SerializedListItemNode<LexicalNodes_184C5A6E>
+  | SerializedHeadingNode<LexicalNodes_184C5A6E>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -179,6 +181,8 @@ export interface Config {
     events: Event;
     'chat-sessions': ChatSession;
     'chat-messages': ChatMessage;
+    'market-materials': MarketMaterial;
+    'market-prices': MarketPrice;
     'vigor-products': VigorProduct;
     'vigor-services': VigorService;
     'vigor-news': VigorNewsArticle;
@@ -200,6 +204,9 @@ export interface Config {
     'chat-sessions': {
       messages: 'chat-messages';
     };
+    'market-materials': {
+      prices: 'market-prices';
+    };
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
@@ -214,6 +221,8 @@ export interface Config {
     events: EventsSelect<false> | EventsSelect<true>;
     'chat-sessions': ChatSessionsSelect<false> | ChatSessionsSelect<true>;
     'chat-messages': ChatMessagesSelect<false> | ChatMessagesSelect<true>;
+    'market-materials': MarketMaterialsSelect<false> | MarketMaterialsSelect<true>;
+    'market-prices': MarketPricesSelect<false> | MarketPricesSelect<true>;
     'vigor-products': VigorProductsSelect<false> | VigorProductsSelect<true>;
     'vigor-services': VigorServicesSelect<false> | VigorServicesSelect<true>;
     'vigor-news': VigorNewsSelect<false> | VigorNewsSelect<true>;
@@ -783,7 +792,7 @@ export interface Profile {
    */
   headline?: string | null;
   photo?: (string | null) | Media;
-  bio?: LexicalRichText<LexicalNodes_74DAFDD6> | null;
+  bio?: LexicalRichText<LexicalNodes_184C5A6E> | null;
   links?:
     | {
         platform: 'github' | 'linkedin' | 'youtube' | 'x' | 'website' | 'other';
@@ -1079,6 +1088,94 @@ export interface ChatMessage {
   createdAt: string;
 }
 /**
+ * The prices the VgemsAI app shows under Research, where people predict whether each goes up or down next month.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "market-materials".
+ */
+export interface MarketMaterial {
+  id: string;
+  /**
+   * As the app shows it, e.g. Crude Oil (Brent)
+   */
+  name: string;
+  /**
+   * The app's name for it, e.g. gold. People's predictions are kept under it: don't change it once they have voted.
+   */
+  key: string;
+  /**
+   * e.g. USD/oz, USD/lb, USD/bbl
+   */
+  unit: string;
+  /**
+   * Its Yahoo Finance symbol, e.g. GC=F for gold: awoz-api saves its price every day. Leave it empty to enter the prices by hand under Market Prices.
+   */
+  symbol?: string | null;
+  /**
+   * An SF Symbols name, e.g. circle.hexagongrid.fill
+   */
+  icon: string;
+  prices?: {
+    docs?: (string | MarketPrice)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Shown in the app, with a price saved every day. Untick it to hide it and keep its prices.
+   */
+  active?: boolean | null;
+  /**
+   * Also shown as a chart under Highlight Trends, and in the price widget
+   */
+  highlight?: boolean | null;
+  /**
+   * Lower numbers come first
+   */
+  sortOrder?: number | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Closing prices, saved by awoz-api every day. A price added or changed here is kept as it is.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "market-prices".
+ */
+export interface MarketPrice {
+  id: string;
+  material: string | MarketMaterial;
+  /**
+   * The trading day
+   */
+  date: string;
+  /**
+   * In the material's unit
+   */
+  price: number;
+  /**
+   * Where the price comes from. Saving it here makes it "Entered by hand".
+   */
+  source: 'yahoo' | 'manual';
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "vigor-products".
  */
@@ -1297,6 +1394,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'chat-messages';
         value: string | ChatMessage;
+      } | null)
+    | ({
+        relationTo: 'market-materials';
+        value: string | MarketMaterial;
+      } | null)
+    | ({
+        relationTo: 'market-prices';
+        value: string | MarketPrice;
       } | null)
     | ({
         relationTo: 'vigor-products';
@@ -1854,6 +1959,39 @@ export interface ChatMessagesSelect<T extends boolean = true> {
   outputTokens?: T;
   durationMs?: T;
   expiresAt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "market-materials_select".
+ */
+export interface MarketMaterialsSelect<T extends boolean = true> {
+  name?: T;
+  key?: T;
+  unit?: T;
+  symbol?: T;
+  icon?: T;
+  prices?: T;
+  active?: T;
+  highlight?: T;
+  sortOrder?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "market-prices_select".
+ */
+export interface MarketPricesSelect<T extends boolean = true> {
+  material?: T;
+  date?: T;
+  price?: T;
+  source?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -3422,6 +3560,8 @@ export interface CollectionQueryWidget {
       | 'events'
       | 'chat-sessions'
       | 'chat-messages'
+      | 'market-materials'
+      | 'market-prices'
       | 'vigor-products'
       | 'vigor-services'
       | 'vigor-news'
@@ -3461,6 +3601,8 @@ export interface ActivityWidget {
           | 'events'
           | 'chat-sessions'
           | 'chat-messages'
+          | 'market-materials'
+          | 'market-prices'
           | 'vigor-products'
           | 'vigor-services'
           | 'vigor-news'

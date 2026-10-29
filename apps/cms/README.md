@@ -827,8 +827,9 @@ Locally, run `pnpm payload run scripts/locate-events.ts [--dry-run] [--all]` in 
 ### The VgemsAI app
 
 The VgemsAI app talks to the CMS through its own backend, awoz-api, which reads upcoming events from
-`GET /api/app/events`, saves every signup as a client with `POST /api/app/clients`, and keeps the app's chats
-(see "Chats" below). A server can't pass two-factor, so instead of logging in it sends a shared key:
+`GET /api/app/events`, saves every signup as a client with `POST /api/app/clients`, keeps the app's chats
+(see "Chats" below) and the Research tab's market prices (see "Market prices"). A server can't pass two-factor,
+so instead of logging in it sends a shared key:
 
 ```bash
 curl -H "X-API-Key: $APP_API_KEY" https://cms.example.com/api/app/events
@@ -905,6 +906,30 @@ session only ever answers to the account that started it:
 | `GET /api/app/chat-sessions/to-summarize` | Sessions quiet for 30 minutes whose summary is missing or older than their last message |
 | `POST /api/app/chat-sessions/:id/summary` | Saves the AI's summary and topics |
 | `POST /api/app/accounts/delete` | When someone deletes their app account: deletes their chats, and their client while it's still an untouched app lead (status Lead, source "VgemsAI app"); otherwise the client stays, unlinked, with a note |
+
+#### Market prices (Research tab)
+
+The app's **Research** tab shows raw material prices, and lets people predict whether each one goes up or down next
+month. The prices are kept under **VgemsAI App**:
+
+- **Market Materials**: what the tab shows, in order: name, key (the app's name for it, e.g. `gold`), unit, an SF
+  Symbols icon, whether it's a **highlight** (a chart under Highlight Trends and in the widget), and its **Yahoo
+  Finance symbol**. Gold (`GC=F`), silver (`SI=F`), Brent crude (`BZ=F`), platinum (`PL=F`), palladium (`PA=F`) and
+  copper (`HG=F`) are added the first time the CMS starts. Untick **Active** to hide one and keep its prices;
+  deleting one deletes its prices too. Don't change a key once people have voted: their predictions are kept under
+  it.
+- **Market Prices**: one closing price per material and day. awoz-api saves them every day, and the first time it
+  also fills in the last 10 years (see its README, "Market prices and predictions"). A price you add or correct
+  here is marked **Entered by hand** and never overwritten. A material without a Yahoo Finance symbol only has the
+  prices you enter.
+
+awoz-api uses these endpoints (`src/endpoints/appMarket.ts`); people's predictions are kept by awoz-api itself,
+with their accounts:
+
+| Endpoint | What it does |
+| --- | --- |
+| `GET /api/app/market` | The active materials with their latest two prices and their price at the end of each month for 10 years |
+| `POST /api/app/market-prices` | Saves up to 1000 closing prices, e.g. `{"source": "yahoo", "prices": [{"material": "gold", "date": "2026-10-28", "price": 2680.5}]}`; answers how many were created, updated, unchanged and kept |
 
 #### Privacy policy and terms of use
 
