@@ -286,7 +286,8 @@ export async function gotoFirstPost({
   await expect(postLink).toHaveAttribute('href')
   const href = await postLink.getAttribute('href')
 
-  await page.goto(new URL(href!, serverURL).toString())
+  await postLink.click()
+  await expect(page).toHaveURL(new URL(href!, serverURL).toString())
   await waitForFormReady(page)
 }
 
@@ -482,7 +483,16 @@ export async function captureScreenReader({
 }) {
   await screenReader.clearItemTextLog()
   await screenReader.clearSpokenPhraseLog()
-  return screenReader.capture(action)
+  const capture = await screenReader.capture(action)
+
+  if (process.env.PAYLOAD_SCREEN_READER_DEBUG === 'true') {
+    console.info(
+      '[screen-reader-capture]',
+      JSON.stringify({ itemText: capture.itemText, spokenPhrase: capture.spokenPhrase }),
+    )
+  }
+
+  return capture
 }
 
 export async function captureScreenReaderOutput({
@@ -498,49 +508,83 @@ export async function captureScreenReaderOutput({
 
 export async function navigateScreenReaderTo({
   matches,
+  maxSteps = 150,
   screenReader,
+  shouldEnterDialogs = false,
+  shouldMoveCursorToKeyboardFocus = false,
+  shouldResetCursor = true,
+  shouldSkipToContent = false,
+  startAt,
 }: {
   matches: RegExp
+  maxSteps?: number
   screenReader: ScreenReaderPlaywright
+  shouldEnterDialogs?: boolean
+  shouldMoveCursorToKeyboardFocus?: boolean
+  shouldResetCursor?: boolean
+  shouldSkipToContent?: boolean
+  startAt?: Locator
 }) {
+  if (startAt) {
+    await expect(startAt).toHaveCount(1)
+    await expect(startAt).toBeVisible()
+  }
+
   await screenReader.clearItemTextLog()
   await screenReader.clearSpokenPhraseLog()
-  await screenReader.navigateToWebContent()
+  if (shouldResetCursor) {
+    await screenReader.navigateToWebContent()
+  }
 
-  for (let index = 0; index < 150; index++) {
-    const output = `${await screenReader.itemText()} ${await screenReader.lastSpokenPhrase()}`
-      .replace(/\s+/g, ' ')
-      .trim()
+  if (startAt) {
+    await captureScreenReader({ action: () => startAt.focus(), screenReader })
+    await expect(startAt).toBeFocused()
+    if (shouldMoveCursorToKeyboardFocus && screenReader.name === 'VoiceOver') {
+      const { voiceOverKeyCodeCommands } = await import('@guidepup/guidepup')
+
+      // DOM focus does not establish the VoiceOver cursor's starting position.
+      await screenReader.perform(voiceOverKeyCodeCommands.moveCursorToKeyboardFocus)
+    }
+  }
+
+  let hasSkippedToContent = false
+
+  for (let index = 0; index < maxSteps; index++) {
+    const itemText = await screenReader.itemText()
+    const spokenPhrase = await screenReader.lastSpokenPhrase()
+    const output = `${itemText} ${spokenPhrase}`.replace(/\s+/g, ' ').trim()
+
+    if (process.env.PAYLOAD_SCREEN_READER_DEBUG === 'true') {
+      console.info(
+        '[screen-reader-navigation]',
+        JSON.stringify({ index, itemText, matches: matches.source, spokenPhrase }),
+      )
+    }
+
+    if (shouldSkipToContent && !hasSkippedToContent && /^skip to content\b/i.test(itemText)) {
+      hasSkippedToContent = true
+      await screenReader.act()
+      continue
+    }
 
     matches.lastIndex = 0
     if (matches.test(output)) {
       return output
     }
-    await screenReader.next()
+    if (
+      shouldEnterDialogs &&
+      screenReader.name === 'VoiceOver' &&
+      /\bweb dialog\b/i.test(itemText)
+    ) {
+      await screenReader.interact()
+    } else {
+      await screenReader.next()
+    }
   }
 
   throw new Error(
     `Screen reader did not reach ${matches}. Visited: ${JSON.stringify(await screenReader.itemTextLog())}`,
   )
-}
-
-export async function expectPopupCursorToMove({
-  expectedItem,
-  screenReader,
-  trigger,
-}: {
-  expectedItem: RegExp
-  screenReader: ScreenReaderPlaywright
-  trigger: Locator
-}) {
-  await trigger.focus()
-  const capture = await captureScreenReader({
-    action: () => trigger.press('Enter'),
-    screenReader,
-  })
-
-  expect.soft(capture.itemText).toMatch(expectedItem)
-  await trigger.page().keyboard.press('Escape')
 }
 
 export async function inContrastThemes({
@@ -984,7 +1028,13 @@ export async function addCollectionQueryWidget({ page }: { page: Page }) {
   await expect(widgets).toHaveCount(previousCount + 1)
   await expect(widgets.last().locator('.collection-query-widget')).toBeVisible()
   await expect(widgets.last().locator('.draggable')).toBeFocused()
-  return widgets.last()
+  const widgetID = await widgets.last().getAttribute('data-slug')
+
+  if (!widgetID) {
+    throw new Error('Added Collection Query widget has no ID')
+  }
+
+  return page.locator(`.widget[data-slug="${widgetID}"]`)
 }
 
 export async function insertTextBlockWithKeyboard({ page }: { page: Page }) {
@@ -1295,7 +1345,7 @@ export async function openWorkflowDeleteDialog({ page }: { page: Page }) {
   }
   await expect(trigger).toBeFocused()
   await page.keyboard.press('Enter')
-  const dialog = page.getByRole('dialog', { name: /confirm deletion/i })
+  const dialog = page.getByRole('alertdialog', { name: /confirm deletion/i })
 
   await expectFocusInside({ container: dialog, page })
   return { dialog, trigger: menu }
@@ -1586,7 +1636,10 @@ export async function openDragReorderField({
 
   if (kind === 'Array') {
     await page.locator('#field-items .array-field__add-row').click()
-    await expect(page.locator('#field-items input[name$=".label"]')).toBeVisible()
+    // Array sub-fields mount asynchronously after adding a row.
+    await expect(page.locator('#field-items input[name$=".label"]')).toBeVisible({
+      timeout: 15000,
+    })
     for (let index = 1; index < rowCount; index++) {
       await page.locator('#field-items .array-field__add-row').click()
     }

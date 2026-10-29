@@ -149,6 +149,59 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    test('should expose a translated deletion cue beside removed version text', async () => {
+      // PYLD-3722: deletion meaning must be available without seeing strikethrough styling.
+      await openVersionComparison({ page, postsURL, serverURL, versionIndex: 0 })
+      const removed = page.locator('.text-diff [data-match-type="delete"]').first()
+
+      await expect(removed).toBeVisible()
+      await expect(removed).toHaveRole('deletion')
+      await expect(removed.locator('.sr-only')).toHaveText('Deleted: ')
+      expect(await removed.ariaSnapshot()).toContain('Deleted:')
+      expect((await removed.innerText()).trim()).not.toBe('')
+    })
+
+    test('should keep sort commands out of version data-cell names', async () => {
+      // PYLD-3596: version-table names; exact NVDA speech remains a manual check.
+      await openTableVersionHistory({ kind: 'collection', page, postsURL, serverURL })
+      const cells = page.locator('main.versions tbody td')
+
+      expect(await cells.count()).toBeGreaterThan(0)
+      for (const cell of await cells.all()) {
+        await expect(cell).not.toHaveAccessibleName(
+          /ascending.*descending|descending.*ascending|sort by|\{\{label\}\}/i,
+        )
+      }
+    })
+
+    test('should associate duplicate locale checkboxes with their visible labels', async () => {
+      // PYLD-3671: native association and operation; one VoiceOver browse stop needs manual verification.
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.getByRole('menuitem', { name: /duplicate selected locales/i }).click()
+      const drawer = page.locator('.select-locales-drawer')
+
+      await expect(drawer).toBeVisible()
+      await expect(drawer.getByRole('checkbox')).toHaveCount(3)
+      for (const name of ['English', 'Spanish']) {
+        const checkbox = drawer.getByRole('checkbox', { name, exact: true })
+        const id = await checkbox.getAttribute('id')
+
+        expect(id).toBeTruthy()
+        expect(
+          await checkbox.evaluate((input: HTMLInputElement) =>
+            Array.from(input.labels || []).map((label) => label.textContent?.trim()),
+          ),
+        ).toEqual([name])
+        await expect(page.locator(`[id="${id}"]`)).toHaveCount(1)
+        await drawer.locator(`label[for="${id}"]`).click()
+        await expect(checkbox).toBeChecked()
+        await checkbox.focus()
+        await checkbox.press('Space')
+        await expect(checkbox).not.toBeChecked()
+      }
+    })
+
     test('should name the live preview frame by its purpose', async () => {
       // pyld-3807
       await openLivePreview({ page, postsURL, serverURL })
@@ -1247,6 +1300,20 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(descendingButton).toHaveAttribute('aria-pressed', 'true')
       },
     )
+
+    test('should give the Copy to locale dialog a concise accessible name without repeating its contents', async () => {
+      // PYLD-3689: guard against announcing the entire dialog as its name or description.
+      // Confirm the opening announcement separately with NVDA; DOM checks cannot prove speech frequency.
+      const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
+
+      await expect(drawer).toHaveRole('dialog')
+      await expect(drawer).toHaveAccessibleName('Copy to locale')
+      await expect(drawer).toHaveAccessibleDescription('')
+      await expect(drawer.getByRole('combobox', { name: 'Copy to', exact: true })).toBeVisible()
+      await expect(
+        drawer.getByRole('checkbox', { name: 'Overwrite existing field data', exact: true }),
+      ).toBeVisible()
+    })
   })
 
   test.describe('1.4.3 Contrast (Minimum) (AA)', () => {
@@ -2931,7 +2998,9 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
-    test('should open draft restoration by keyboard in enhanced contrast themes and return focus after cancellation', async ({}, testInfo) => {
+    test('should open draft restoration by keyboard in enhanced contrast themes and return focus after cancellation', async ({
+      browser: _browser,
+    }, testInfo) => {
       await inContrastThemes({
         page,
         run: async () => {
@@ -3087,6 +3156,8 @@ test.describe('WCAG 2.2 Level AA', () => {
 
     for (const kind of ['Array', 'Blocks'] as const) {
       test(`should drop a keyboard-dragged ${kind} row at its new position`, async () => {
+        // PYLD-3628
+
         // Additional coverage for PYLD-3625
         const { firstRowLabel, handle, rows, values } = await openDragReorderField({
           kind,
@@ -5033,12 +5104,40 @@ test.describe('WCAG 2.2 Level AA', () => {
       async () => {
         await gotoPostsList({ page, postsURL })
         const grid = page.getByRole('grid', { name: 'Posts', exact: true })
+        // PYLD-3750: browser names/navigation complement the recorded manual speech check.
         const title = grid.getByRole('link', { name: 'Example post two', exact: true })
+        const row = page.getByRole('row').filter({
+          has: page.getByRole('link', { name: 'Example post two', exact: true }),
+        })
+        const checkbox = row.getByRole('checkbox')
         const defaults = encodeURIComponent(
           JSON.stringify(['title', 'accessibilitySelect', 'updatedAt']),
         )
 
         try {
+          await expect(title).toHaveAccessibleName('Example post two')
+          await expect(row.locator('.cell-title')).toHaveAccessibleName('Example post two')
+          await expect(checkbox).toHaveCount(1)
+          await expect(checkbox).toBeVisible()
+          await page.getByRole('link', { name: 'Create New', exact: true }).focus()
+          for (let index = 0; index < 8; index++) {
+            await page.keyboard.press('Tab')
+            if (await grid.evaluate((element) => element.contains(document.activeElement))) {
+              break
+            }
+          }
+          await expect(grid.locator('tbody .cell--linked').first()).toBeFocused()
+          await page.keyboard.press('Home')
+          const rowIndex = await row.evaluate((element) =>
+            Array.from(element.parentElement!.children).indexOf(element),
+          )
+
+          for (let index = 0; index < rowIndex; index++) {
+            await page.keyboard.press('ArrowDown')
+          }
+          await expect(checkbox).toBeFocused()
+          await page.keyboard.press('ArrowRight')
+          await expect(row.locator('.cell-title')).toBeFocused()
           await title.focus()
           await page.keyboard.press('Enter')
           await expect(page).toHaveURL(/\/posts\/[^/?]+$/)
@@ -5376,6 +5475,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       { tag: ['@document-editing'] },
       async () => {
         // PYLD-3688
+        // PYLD-3680: keyboard operation complements the manual single-stop check.
         const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
         const combobox = drawer.locator('#field-toLocale input[role="combobox"]')
 
@@ -5392,7 +5492,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       'should not activate or close disabled row-menu actions',
       { tag: ['@admin-navigation'] },
       async () => {
-        // Additional coverage for PYLD-3743 and PYLD-3745; canonical ticket coverage is in screen-reader.spec.ts.
+        // PYLD-3743
+        // PYLD-3745: disabled semantics/operation complement manual Array and Blocks checks.
         const menu = await openFirstBlockActions({ page, postsURL })
         const disabledAction = menu.getByRole('menuitem', { name: /replace row/i })
         const blockRows = page.locator('#field-layout .blocks-field__row')
@@ -5612,7 +5713,11 @@ test.describe('WCAG 2.2 Level AA', () => {
 
             await expect(dialog).toHaveAccessibleName(/confirm deletion/i)
             await expect(dialog).toContainText(title)
-            await expect(dialog.getByRole('heading', { name: /confirm deletion/i })).toBeFocused()
+            await expect(cancel).toBeFocused()
+            await workflowPage.keyboard.press(
+              workflowTabKey({ direction: 'Tab', page: workflowPage }),
+            )
+            await expect(confirm).toBeFocused()
             await workflowPage.keyboard.press(
               workflowTabKey({ direction: 'Tab', page: workflowPage }),
             )
@@ -5734,6 +5839,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       'should exit Lexical editors with Escape then Tab or Shift+Tab',
       { tag: ['@document-editing'] },
       async () => {
+        // PYLD-3741
+
         // PYLD-3775
         await gotoCreatePost({ page, postsURL })
         await insertTextBlockWithKeyboard({ page })
@@ -5937,6 +6044,86 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.3 Focus Order (A)', () => {
+    test('should expose a named deletion alert with its warning and safe initial focus', async () => {
+      // PYLD-3769: focus a real safe action; exact dialog speech is checked manually.
+      await gotoFirstPost({ page, postsURL, serverURL })
+      const moreOptions = page.locator('.doc-controls__popup .popup__trigger-wrap button')
+
+      await moreOptions.focus()
+      await moreOptions.press('Enter')
+      const deleteAction = page.getByRole('menuitem', { name: 'Delete', exact: true })
+
+      await deleteAction.focus()
+      await deleteAction.press('Enter')
+      const dialog = page.getByRole('alertdialog', { name: 'Confirm deletion', exact: true })
+
+      await expect(dialog).toBeVisible()
+      await expect(dialog).toHaveAccessibleDescription(
+        /^You are about to move the Post .+ to the trash\. Are you sure\?$/,
+      )
+      await expect(dialog.getByRole('button', { name: 'Cancel', exact: true })).toBeFocused()
+      await expect(dialog.getByRole('button', { name: 'Confirm', exact: true })).not.toBeFocused()
+      await page.keyboard.press('Escape')
+      await expect(dialog).toBeHidden()
+      await expect(moreOptions).toBeFocused()
+    })
+
+    test('should move focus into Copy to locale when opened from the overflow menu', async () => {
+      // PYLD-3682: DOM focus evidence; virtual-cursor entry was checked manually.
+      await gotoFirstPost({ page, postsURL, serverURL })
+      const moreOptions = page.locator('.doc-controls__popup .popup__trigger-wrap button')
+
+      await moreOptions.focus()
+      await moreOptions.press('Enter')
+      const trigger = page.locator('#copy-locale-data__button')
+
+      await trigger.focus()
+      await trigger.press('Enter')
+      const drawer = page.locator('#copy-locale')
+
+      await expect(drawer).toBeVisible()
+      await expect(drawer).toHaveAccessibleName('Copy to locale')
+      await expectFocusInside({ container: drawer, page })
+      await expect(trigger).not.toBeFocused()
+    })
+
+    test('should exclude hidden Lexical controls from the accessibility tree', async () => {
+      // PYLD-3789: both top-level and Blocks editors, with actual hidden controls present.
+      await gotoCreatePost({ page, postsURL })
+      await insertTextBlockWithKeyboard({ page })
+      for (const field of ['content', 'layout.0.body']) {
+        const container = page.locator(`[data-field-path="${field}"]`)
+        const editor = container.locator('[contenteditable="true"]')
+        const hiddenNames = /^(Drag to move|Add block|Edit link|Remove link)$/
+
+        await editor.fill(`Hidden controls ${field}`)
+        await page.mouse.move(0, 0)
+        const handles = container.locator('.draggable-block-menu__button, .add-block-menu')
+
+        await expect(handles).toHaveCount(2)
+        for (const control of await handles.all()) {
+          await expect(control).toBeHidden()
+          await expect.poll(() => control.ariaSnapshot()).toBe('')
+        }
+        await expect(container.getByRole('button', { name: hiddenNames })).toHaveCount(0)
+        const linkControls = container.locator('.link-editor .link-edit, .link-editor .link-trash')
+
+        await expect(linkControls).toHaveCount(2)
+
+        for (const control of await linkControls.all()) {
+          await expect(control).toBeHidden()
+          expect(await control.ariaSnapshot()).toBe('')
+        }
+        await editor.locator('p').first().hover()
+        const drag = container.getByRole('button', { name: 'Drag to move', exact: true })
+
+        await expect(drag).toBeVisible()
+        await expect(drag).toHaveAccessibleName('Drag to move')
+        await page.mouse.move(0, 0)
+        await expect(drag).toHaveCount(0)
+      }
+    })
+
     test('should restore submit focus after an asynchronous custom response handler completes', async () => {
       const responseURL = '**/api/a11y-custom-response'
 
@@ -6508,6 +6695,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
       const widget = await addCollectionQueryWidget({ page })
 
+      // PYLD-3572: include every visible error bullet in the card name and drag-handle description.
+      // Exact focus announcements require manual Safari/WebKit and VoiceOver verification.
       await test.step('Expose the added widget content and structure', async () => {
         const card = widget.locator('.draggable')
         const bullets = await widget
@@ -6527,6 +6716,10 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
       const drag = widget.getByRole('button', { name: 'Drag to reorder', exact: true })
 
+      await expect(widget.locator('.draggable')).toBeFocused()
+      await page.keyboard.press('Tab')
+      await expect(drag).toBeFocused()
+      await page.keyboard.press('Shift+Tab')
       await expect(widget.locator('.draggable')).toBeFocused()
       await page.keyboard.press('Tab')
       await expect(drag).toBeFocused()
@@ -6557,15 +6750,27 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(widget.locator('.widget-wrapper__size-btn')).toBeFocused()
       await page.keyboard.press('Shift+Tab')
       await expect(widget.locator('.widget-wrapper__edit-btn')).toBeFocused()
+      const queryWidgets = page.locator('.widget[data-slug^="collection-query-"]')
+      const countBeforeDelete = await queryWidgets.count()
+
+      expect(countBeforeDelete).toBeGreaterThan(1)
+      await widget.locator('.widget-wrapper__delete-btn').press('Enter')
+      await expect(queryWidgets).toHaveCount(countBeforeDelete - 1)
+      await expect(widget).toHaveCount(0)
     })
 
     test(
       'should omit a finished relationship loading indicator from the accessibility tree',
       { tag: ['@document-editing', '@relationships'] },
       async () => {
+        // PYLD-3650: opacity alone must not leave the completed loading overlay exposed.
         const drawer = await openRelationshipCreationDrawer({ page, postsURL })
+        const overlay = drawer.locator('.loading-overlay--drawer')
 
         await expect(drawer.locator('[data-form-ready="true"]').first()).toBeVisible()
+        await expect(overlay).toHaveCount(1)
+        await expect(overlay).toHaveAttribute('aria-hidden', 'true')
+        expect(await overlay.ariaSnapshot()).toBe('')
         expect(await drawer.ariaSnapshot()).not.toMatch(/Loading/i)
       },
     )
@@ -6608,7 +6813,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       'should visit every theme option with arrow keys including the middle option',
       { tag: ['@admin-navigation'] },
       async () => {
-        // PYLD-3636
+        // PYLD-3636, PYLD-3645: keyboard navigation and selected Theme state.
         await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
         await openNavigationForUserMenu({ page })
         await page.locator('.user-menu__trigger').press('Enter')
@@ -6616,6 +6821,11 @@ test.describe('WCAG 2.2 Level AA', () => {
         const options = page.getByRole('menuitemradio')
 
         await expect(options).toHaveCount(3)
+        const selected = page.getByRole('menuitemradio', { checked: true })
+
+        await expect(selected).toHaveCount(1)
+        const originalTheme = (await selected.innerText()).trim()
+
         await page.keyboard.press('Home')
         await expect(options.nth(0)).toBeFocused()
         await page.keyboard.press('ArrowDown')
@@ -6624,7 +6834,14 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(options.nth(2)).toBeFocused()
         await page.keyboard.press('ArrowUp')
         await expect(options.nth(1)).toBeFocused()
-        await page.keyboard.press('Escape')
+        try {
+          await page.keyboard.press('Space')
+          await expect(options.nth(1)).toHaveAttribute('aria-checked', 'true')
+          await expect(selected).toHaveCount(1)
+        } finally {
+          await page.getByRole('menuitemradio', { name: originalTheme, exact: true }).press('Enter')
+          await page.keyboard.press('Escape')
+        }
       },
     )
 
@@ -6784,10 +7001,20 @@ test.describe('WCAG 2.2 Level AA', () => {
               const password = formPage.locator('input[name="password"]')
 
               await expectRequiredState({ input: password })
+              // Errors are exposed only after a submission; then exercise edit-and-clear without resubmitting.
+              await formPage.getByRole('button', { name: 'Login', exact: true }).click()
+              const passwordError = formPage
+                .locator('.field-type')
+                .filter({ has: password })
+                .getByRole('alert')
+
+              await expect(passwordError).toBeVisible()
               await password.fill('temporary')
+              await expect(passwordError).toHaveCount(0)
               await password.fill('')
               await password.press('Tab')
-              await formPage.getByRole('button', { name: 'Login', exact: true }).click()
+              await expect(passwordError).toBeVisible()
+              await expect(password).toHaveAttribute('aria-invalid', 'true')
             } else {
               await gotoCreatePost({ page: formPage, postsURL })
               await formPage.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
@@ -7768,6 +7995,11 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(removeButtons.nth(1)).toHaveAccessibleName(/remove.*accessibility select/i)
       },
     )
+
+    test('should expose Welcome and the signed-in account as a heading', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.getByRole('heading', { name: /^Welcome, /, level: 1 })).toBeVisible()
+    })
   })
 
   test.describe('2.4.7 Focus Visible (AA)', () => {
@@ -8469,6 +8701,34 @@ test.describe('WCAG 2.2 Level AA', () => {
         }
       },
     )
+
+    test('should describe automatic search before input and retain focus', async () => {
+      // PYLD-3773: describe automatic search before input in both the list and Columns.
+      // Actual table-result speech is covered in screen-reader.spec.ts; confirm the Columns hint manually with NVDA.
+      for (const isColumnSearch of [false, true]) {
+        await page.goto(`${postsURL.list}?search=`)
+        if (isColumnSearch) {
+          await page.locator('.columns-button__button').click()
+        }
+        const search = isColumnSearch
+          ? page
+              .getByRole('dialog', { name: /columns/i })
+              .getByRole('textbox', { name: /search columns/i })
+          : page.locator('#search-filter-input')
+
+        await expect(search).toHaveAccessibleDescription(/automatically as you type/i)
+        await search.fill('no-matching-accessibility-result')
+        if (isColumnSearch) {
+          await expect(
+            page.getByText('No matches found for this search', { exact: true }),
+          ).toBeVisible()
+        } else {
+          await expect(page.locator('tbody tr')).toHaveCount(0)
+          await expect(page.locator('.no-results__title')).toHaveText('No Results.')
+        }
+        await expect(search).toBeFocused()
+      }
+    })
   })
 
   test.describe('3.3.1 Error Identification (A)', () => {
@@ -8595,7 +8855,11 @@ test.describe('WCAG 2.2 Level AA', () => {
         await workflowPage.keyboard.press('Enter')
         const notifications = workflowPage.getByRole('region', { name: /notifications/i })
         await expect(notifications).toContainText(/token.*invalid|token.*expired/i)
-        await expect(notifications).toHaveAttribute('aria-live', 'polite')
+        await expect(notifications).toHaveAttribute('aria-live', 'off')
+        await expect(notifications.getByRole('status').last()).toHaveAttribute(
+          'aria-live',
+          'polite',
+        )
         await expect(password).toHaveValue(value)
         const back = workflowPage.getByRole('link', { name: /back to login/i })
         await tabToWorkflowControl({ control: back, page: workflowPage })
@@ -8636,7 +8900,11 @@ test.describe('WCAG 2.2 Level AA', () => {
           await workflowPage.keyboard.press('Enter')
           const notifications = workflowPage.getByRole('region', { name: /notifications/i })
           await expect(notifications).toContainText('Image upload failed. Try again.')
-          await expect(notifications).toHaveAttribute('aria-live', 'polite')
+          await expect(notifications).toHaveAttribute('aria-live', 'off')
+          await expect(notifications.getByRole('status').last()).toHaveAttribute(
+            'aria-live',
+            'polite',
+          )
           await expect(alt).toHaveValue(value)
           await expect(workflowPage.locator('.file-manager__selected-preview')).toBeVisible()
           const beforeRetry = await workflowPage.request.get(`${serverURL}/api/media`, {
@@ -8747,7 +9015,11 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(
           notifications.getByText('The email or password provided is incorrect.', { exact: true }),
         ).toBeVisible()
-        await expect(notifications).toHaveAttribute('aria-live', 'polite')
+        await expect(notifications).toHaveAttribute('aria-live', 'off')
+        await expect(notifications.getByRole('status').last()).toHaveAttribute(
+          'aria-live',
+          'polite',
+        )
         await expect(email).toHaveValue(devUser.email)
         await expect(signInPage).toHaveURL(
           formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }),
@@ -8869,7 +9141,11 @@ test.describe('WCAG 2.2 Level AA', () => {
               await expect(
                 notifications.getByText('Unable to save. Try again.', { exact: true }),
               ).toBeVisible()
-              await expect(notifications).toHaveAttribute('aria-live', 'polite')
+              await expect(notifications).toHaveAttribute('aria-live', 'off')
+              await expect(notifications.getByRole('status').last()).toHaveAttribute(
+                'aria-live',
+                'polite',
+              )
               await expect(subtitle).toHaveValue(value)
               await expect
                 .poll(async () => {
@@ -9770,15 +10046,20 @@ test.describe('WCAG 2.2 Level AA', () => {
       'should use a native checkbox label without inferring an ARIA reference from its name',
       { tag: ['@trash'] },
       async () => {
-        // PYLD-3817
+        // PYLD-3817, PYLD-3678: native association; one VoiceOver browse stop needs manual verification.
         await gotoFirstPost({ page, postsURL, serverURL })
         await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
         await page.getByRole('menuitem', { name: 'Delete', exact: true }).click()
-        const dialog = page.getByRole('dialog', { name: /confirm deletion/i })
+        const dialog = page.getByRole('alertdialog', { name: /confirm deletion/i })
         const checkbox = dialog.getByRole('checkbox')
 
         await expect(checkbox).toBeVisible()
         await expect(checkbox).toHaveAccessibleName('Skip trash and delete permanently')
+        expect(
+          await checkbox.evaluate((input: HTMLInputElement) =>
+            Array.from(input.labels || []).map((label) => label.textContent?.trim()),
+          ),
+        ).toEqual(['Skip trash and delete permanently'])
         await checkbox.focus()
         await checkbox.press('Space')
         await expect(checkbox).toBeChecked()
@@ -10378,7 +10659,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       'should name version table per-page controls with their value and purpose',
       { tag: ['@admin-navigation'] },
       async () => {
-        // PYLD-3712
+        // PYLD-3712, PYLD-3713: named control and selected option on both version tables.
         test.setTimeout(60000)
         for (const kind of ['collection', 'global'] as const) {
           const view = await openTableVersionHistory({ kind, page, postsURL, serverURL })
@@ -10386,6 +10667,12 @@ test.describe('WCAG 2.2 Level AA', () => {
           const value = (await button.innerText()).trim()
 
           await expect.soft(button).toHaveAccessibleName(`Per Page: ${value}`)
+          await button.click()
+          await expect(
+            page.getByRole('menuitemradio', { name: value, exact: true }),
+          ).toHaveAttribute('aria-checked', 'true')
+          await expect(page.getByRole('menuitemradio', { checked: true })).toHaveCount(1)
+          await page.keyboard.press('Escape')
         }
       },
     )
@@ -10501,6 +10788,8 @@ test.describe('WCAG 2.2 Level AA', () => {
           `should expose named ${control} filter options in the rich-text ${label} drawer`,
           { tag: ['@document-editing'] },
           async () => {
+            // PYLD-3656
+
             // Additional coverage for PYLD-3662; NVDA browse-mode output is checked in screen-reader.spec.ts.
             const drawer = await open({ page, postsURL })
             const comboboxes = await openDrawerFilters({
@@ -10609,13 +10898,22 @@ test.describe('WCAG 2.2 Level AA', () => {
       'should expose the current locale and popup state on the locale selector',
       { tag: ['@document-editing'] },
       async () => {
-        // pyld-3690
-        // Additional coverage for PYLD-3704.
-        await gotoFirstPost({ page, postsURL, serverURL })
-        const trigger = page.locator('.localizer .popup__trigger-wrap button')
+        // PYLD-3704: cover the reported versions view as well as the collection list.
+        for (const isVersionsView of [false, true]) {
+          if (isVersionsView) {
+            await openVersionsList({ page, postsURL, serverURL })
+          } else {
+            await gotoPostsList({ page, postsURL })
+          }
+          const trigger = page.locator('.localizer .popup__trigger-wrap button')
 
-        await expect(trigger).toHaveAccessibleName('Locale: English (en)')
-        await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+          await expect(trigger).toHaveAccessibleName('Locale: English (en)')
+          await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+          await trigger.click()
+          await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+          await page.keyboard.press('Escape')
+          await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+        }
       },
     )
 
@@ -10703,14 +11001,16 @@ test.describe('WCAG 2.2 Level AA', () => {
     )
 
     test('should expose the selected folder as the current creation location', async () => {
-      // Additional coverage for PYLD-3585.
+      // PYLD-3585: expose the selected folder name, checkbox state, and current location.
       const modal = await openFolderCreationLocation({ page, serverURL })
       const folder = modal.locator('.hierarchy-column-item', {
         hasText: 'Accessibility folder',
       })
 
-      await folder.getByRole('checkbox').click()
+      const checkbox = folder.getByRole('checkbox', { name: 'Accessibility folder', exact: true })
 
+      await checkbox.click()
+      await expect(checkbox).toBeChecked()
       await expect(folder).toHaveAttribute('aria-current', 'location')
     })
 
@@ -10794,6 +11094,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       'should give filter and bulk-edit controls and options meaningful accessible names',
       { tag: ['@admin-navigation'] },
       async () => {
+        // PYLD-3752
         // PYLD-3751
         // PYLD-3754
         test.slow()
@@ -10874,6 +11175,90 @@ test.describe('WCAG 2.2 Level AA', () => {
         expect(isHiddenAndFocusable).toBe(false)
       },
     )
+
+    test('should expose the live-preview zoom name, expansion, and selected option', async () => {
+      // PYLD-3723, PYLD-3725
+      await openLivePreview({ page, postsURL, serverURL })
+      const trigger = page.locator('.live-preview-toolbar-controls__zoom').getByRole('button')
+
+      await expect(trigger).toHaveAccessibleName(/^Zoom \d+%$/)
+      await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+      await trigger.click()
+      await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+      const selected = page.getByRole('menuitemradio', { checked: true })
+
+      await expect(selected).toHaveCount(1)
+      const originalZoom = (await selected.innerText()).trim()
+
+      await expect(trigger).toHaveAccessibleName(`Zoom ${originalZoom}`)
+      const nextZoom = page.getByRole('menuitemradio', { checked: false }).first()
+      const nextValue = (await nextZoom.innerText()).trim()
+
+      try {
+        await nextZoom.click()
+        await expect(trigger).toHaveAccessibleName(`Zoom ${nextValue}`)
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+        await trigger.click()
+        await expect(
+          page.getByRole('menuitemradio', { name: nextValue, exact: true }),
+        ).toHaveAttribute('aria-checked', 'true')
+        await expect(selected).toHaveCount(1)
+      } finally {
+        if ((await trigger.getAttribute('aria-expanded')) !== 'true') {
+          await trigger.click()
+        }
+        await page.getByRole('menuitemradio', { name: originalZoom, exact: true }).click()
+      }
+    })
+
+    test('should expose the selected Add Blocks option by name and pressed state', async () => {
+      // PYLD-3623, PYLD-3735
+      await gotoCreatePost({ page, postsURL })
+      await page.locator('#field-layout > .blocks-field__drawer-toggler').click()
+      const option = page.locator('button.thumbnail-card[title="Text block"]')
+
+      await expect(option).toHaveAccessibleName('Text block')
+      await expect(option).toHaveAttribute('aria-pressed', 'false')
+      await option.click()
+      await expect(option).toHaveAttribute('aria-pressed', 'true')
+      await page.keyboard.press('Escape')
+    })
+
+    test('should expose the disabled Paste or Replace action by name and menu role', async () => {
+      // PYLD-3743: the action has menuitem semantics, rather than a literal button role.
+      const menu = await openFirstBlockActions({ page, postsURL })
+      const action = menu.getByRole('menuitem', { name: /paste|replace/i }).first()
+
+      await expect(action).toHaveAccessibleName(/paste|replace/i)
+      await expect(action).toHaveAttribute('aria-disabled', 'true')
+      await page.keyboard.press('Escape')
+    })
+
+    test('should expose named options in the relationship field', async () => {
+      // PYLD-3656: cover the direct relationship combobox as well as the flyout filters.
+      await gotoCreatePost({ page, postsURL })
+      const combobox = page.locator('#field-relatedPost').getByRole('combobox')
+
+      await combobox.focus()
+      await combobox.press('ArrowDown')
+      await expect(combobox).toHaveAttribute('aria-expanded', 'true')
+      await expect(combobox).toHaveAttribute('aria-controls', /\S/)
+      const listboxID = await combobox.getAttribute('aria-controls')
+      const listbox = page.locator(`[id="${listboxID}"]`)
+      const options = listbox.getByRole('option')
+
+      await expect(listbox).toHaveRole('listbox')
+      await expect(options.first()).toBeVisible()
+      await expectOptionsToHaveAccessibleNames(options, { areUnique: true })
+      for (const option of await options.all()) {
+        const label = (await option.innerText()).trim()
+
+        await expect(option).toHaveAccessibleName(label)
+      }
+      await expect(
+        listbox.getByRole('option', { name: 'Example post two', exact: true }),
+      ).toBeVisible()
+    })
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
     test(
@@ -10900,7 +11285,11 @@ test.describe('WCAG 2.2 Level AA', () => {
 
             await expect(success).toBeVisible()
             await expect(success).toContainText(/updated|saved|published/i)
-            await expect(notifications).toHaveAttribute('aria-live', 'polite')
+            await expect(notifications).toHaveAttribute('aria-live', 'off')
+            await expect(notifications.getByRole('status').last()).toHaveAttribute(
+              'aria-live',
+              'polite',
+            )
             await expectPersistedWorkflowPost({
               id,
               draft: true,
@@ -11162,7 +11551,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       const region = page.getByRole('region', { name: 'Notifications alt+T' })
       const close = region.getByRole('button', { name: 'Close toast', exact: true })
 
-      await expect(region).toHaveAttribute('aria-live', 'polite')
+      await expect(region).toHaveAttribute('aria-live', 'off')
+      await expect(region.getByRole('status')).toHaveAttribute('aria-live', 'polite')
       await expect(close).toHaveAttribute('aria-live', 'off')
       await expect(close).toBeVisible()
       await expect
@@ -11182,7 +11572,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.getByRole('button', { name: 'Show action toast' }).click()
       const announcement = page.getByRole('region', { name: 'Notifications alt+T' })
 
-      await expect(announcement).toContainText('Action notification')
+      await expect(announcement.getByRole('status')).toHaveAttribute('aria-live', 'polite')
+      await expect(announcement.getByRole('status')).toContainText('Action notification')
       await expect(announcement).toContainText('Action description')
       await expect(announcement).toContainText('Undo change')
       await page.getByRole('button', { name: 'Undo change', exact: true }).click()
@@ -11190,11 +11581,14 @@ test.describe('WCAG 2.2 Level AA', () => {
     })
 
     test('should preserve accessible names and controls in the native toast content', async () => {
+      // Exact spontaneous speech remains a manual AT check; this guards the native content and controls.
       await page.goto(`${postsURL.admin}/status-messages`)
       await page.getByRole('button', { name: 'Show custom toast' }).click()
       const announcement = page.getByRole('region', { name: 'Notifications alt+T' })
 
-      await expect(announcement).toContainText('Custom notification')
+      await expect(announcement).toHaveAttribute('aria-live', 'off')
+      await expect(announcement.getByRole('status')).toHaveAttribute('aria-live', 'polite')
+      await expect(announcement.getByRole('status')).toContainText('Custom notification')
       await expect(announcement.getByRole('img', { name: 'Upload complete' })).toBeVisible()
       await expect(announcement.getByRole('button', { name: 'Retry upload' })).toBeVisible()
       await expect(announcement).toContainText('View details')
@@ -11210,8 +11604,12 @@ test.describe('WCAG 2.2 Level AA', () => {
       await page.getByRole('button', { name: 'Show rapid toasts' }).click()
       const region = page.getByRole('region', { name: 'Notifications alt+T' })
 
-      await expect(region).toHaveAttribute('aria-live', 'polite')
+      await expect(region).toHaveAttribute('aria-live', 'off')
       await expect(region.locator('[data-sonner-toast]')).toHaveCount(2)
+      await expect(region.getByRole('status')).toHaveCount(2)
+      for (const status of await region.getByRole('status').all()) {
+        await expect(status).toHaveAttribute('aria-live', 'polite')
+      }
       await expect(region).toContainText('First rapid notification')
       await expect(region).toContainText('Second rapid notification')
     })
@@ -11239,13 +11637,16 @@ test.describe('WCAG 2.2 Level AA', () => {
         await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
         await page.locator('#copy-locale-data__button').click()
         const notification = page.locator('[data-sonner-toast]').filter({ hasText: /unsaved/i })
-        const announcement = page
-          .locator('[role="status"], [aria-live="polite"]')
-          .filter({ hasText: /unsaved/i })
-          .first()
+        const announcement = notification.getByRole('status')
 
         await expect(notification).toBeVisible()
-        await expect(announcement).toBeAttached()
+        await expect(page.getByRole('region', { name: 'Notifications alt+T' })).toHaveAttribute(
+          'aria-live',
+          'off',
+        )
+        await expect(announcement).toContainText(/unsaved/i)
+        await expect(announcement.getByRole('button', { name: /close toast/i })).toHaveCount(0)
+        expect(await announcement.ariaSnapshot()).not.toContain('Close toast')
         await expect(announcement).toHaveAttribute('aria-live', 'polite')
         await expect(notification.getByRole('button', { name: /close toast/i })).toHaveAttribute(
           'aria-live',
@@ -11393,7 +11794,12 @@ test.describe('WCAG 2.2 Level AA', () => {
           await expect(drawer).toBeHidden()
           const notifications = page.getByRole('region', { name: 'Notifications alt+T' })
 
-          await expect(notifications).toHaveAttribute('aria-live', 'polite')
+          await expect(notifications).toHaveAttribute('aria-live', 'off')
+
+          await expect(notifications.getByRole('status').last()).toHaveAttribute(
+            'aria-live',
+            'polite',
+          )
           await expect(
             notifications
               .locator('[data-sonner-toast]')
@@ -11638,6 +12044,80 @@ test.describe('WCAG 2.2 Level AA', () => {
         }
       },
     )
+
+    test('should pause trash-toast dismissal while its close button has keyboard focus', async () => {
+      // PYLD-3580: DOM-focus persistence; virtual-cursor-only persistence needs separate AT verification.
+      const apiURL = formatAdminURL({ apiRoute: '/api', path: '/posts', serverURL })
+      const response = await page.request.post(apiURL, {
+        data: { title: 'Toast keyboard-focus persistence regression' },
+      })
+
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
+
+      try {
+        await gotoPostsList({ page, postsURL })
+        const row = page.locator('tbody tr').filter({ hasText: doc.title })
+
+        await row.locator('.cell-_select input').check()
+        await page.locator('.list-selection__button[aria-label="Delete"]').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
+        const notification = page
+          .locator('[data-sonner-toast]')
+          .filter({ hasText: /moved to trash/i })
+        const close = notification.getByRole('button', { name: 'Close toast', exact: true })
+
+        await expect(notification).toBeVisible()
+        await page.mouse.move(0, 0)
+        await close.focus()
+        await expect(close).toBeFocused()
+        // Real elapsed time must exceed the six-second default while keyboard focus remains inside.
+        await page.waitForTimeout(7000)
+        await expect(notification).toBeVisible()
+        await expect(close).toBeFocused()
+        await page.locator('#search-filter-input').focus()
+        await expect(close).not.toBeFocused()
+        await expect(notification).toBeHidden({ timeout: 7000 })
+      } finally {
+        const cleanup = await page.request.delete(`${apiURL}/${doc.id}?trash=true`)
+
+        expect(cleanup.ok()).toBe(true)
+      }
+    })
+
+    test('should preserve toast focus pausing after hover and reset it after manual dismissal', async () => {
+      test.setTimeout(30000)
+      await page.goto(`${postsURL.admin}/status-messages`)
+      const trigger = page.getByRole('button', { name: 'Show action toast', exact: true })
+
+      await trigger.click()
+      const notification = page
+        .locator('[data-sonner-toast]')
+        .filter({ hasText: 'Action notification' })
+      const close = notification.getByRole('button', { name: 'Close toast', exact: true })
+
+      await expect(notification).toBeVisible()
+      await close.focus()
+      await notification.hover()
+      await page.mouse.move(0, 0)
+      // Leaving hover must not cancel keyboard-focus pausing.
+      await page.waitForTimeout(7000)
+      await expect(notification).toBeVisible()
+      await expect(close).toBeFocused()
+      const action = notification.getByRole('button', { name: 'Undo change', exact: true })
+
+      await action.focus()
+      await expect(action).toBeFocused()
+      await expect(notification).toBeVisible()
+      await close.focus()
+      await close.press('Enter')
+      await expect(notification).toHaveCount(0)
+      await trigger.click()
+      await page.mouse.move(0, 0)
+      await expect(notification).toBeVisible()
+      // Removing the focused toast must not leave later notifications paused.
+      await expect(notification).toBeHidden({ timeout: 8000 })
+    })
   })
 })
 
@@ -11805,7 +12285,7 @@ async function openWorkflowDeleteDialog({ page }: { page: Page }) {
   }
   await expect(trigger).toBeFocused()
   await page.keyboard.press('Enter')
-  const dialog = page.getByRole('dialog', { name: /confirm deletion/i })
+  const dialog = page.getByRole('alertdialog', { name: /confirm deletion/i })
 
   await expectFocusInside({ container: dialog, page })
   return { dialog, trigger: menu }

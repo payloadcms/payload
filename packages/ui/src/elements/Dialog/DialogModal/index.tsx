@@ -15,22 +15,26 @@ const baseClass = 'dialog'
 export type DialogSize = 'large' | 'medium' | 'small'
 
 export type DialogModalProps = {
+  readonly 'aria-describedby'?: string
   readonly children?: React.ReactNode
   readonly className?: string
   readonly closeOnBlur?: boolean
   readonly closeOnEsc?: boolean
   readonly focusTrapOptions?: FocusTrapOptions
+  readonly role?: 'alertdialog' | 'dialog'
   readonly size?: DialogSize
   readonly slug: string
 }
 
 export const DialogModal: React.FC<DialogModalProps> = ({
   slug,
+  'aria-describedby': ariaDescribedBy,
   children,
   className,
   closeOnBlur = false,
   closeOnEsc = true,
   focusTrapOptions,
+  role,
   size = 'small',
 }) => {
   const [isConfirming, setConfirming] = useState(false)
@@ -63,8 +67,10 @@ export const DialogModal: React.FC<DialogModalProps> = ({
     <DialogDepthProvider>
       <DialogContext value={{ slug, isConfirming, setConfirming }}>
         <Modal
+          aria-describedby={ariaDescribedBy}
           closeOnBlur={closeOnBlur}
           focusTrapOptions={focusTrapOptions}
+          role={role}
           slug={slug}
           style={{ zIndex: drawerZBase + drawerDepth + dialogDepth + 1 }}
         >

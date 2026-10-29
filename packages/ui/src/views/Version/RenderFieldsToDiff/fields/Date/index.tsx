@@ -50,6 +50,7 @@ export const DateDiffComponent: React.FC<DateFieldDiffClientProps> = ({
   const escapedToDate = escapeDiffHTML(formattedToDate)
 
   const { From, To } = getHTMLDiffComponents({
+    deletedLabel: i18n.t('general:deleted'),
     fromHTML:
       `<div class="${baseClass}" data-enable-match="true" data-date="${escapedFromDate}"><p>` +
       escapedFromDate +
