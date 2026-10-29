@@ -240,6 +240,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
 
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
+      i18n,
       search: searchParams.get('search'),
     })
 
@@ -273,7 +274,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
       },
       { addQueryPrefix: true },
     )
-  }, [collection, searchParams, selectAll, ids, locale, where])
+  }, [collection, i18n, searchParams, selectAll, ids, locale, where])
 
   const onSuccess = () => {
     void router.replace(
