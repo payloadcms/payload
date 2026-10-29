@@ -76,7 +76,7 @@ export type FormProps = {
   waitForAutocomplete?: boolean
 } & (
   | {
-      action: (formData: FormData) => Promise<void>
+      action: (formData: FormData | string) => Promise<void>
     }
   | {
       action?: string
@@ -139,7 +139,7 @@ export type CreateFormData = (
     data?: Data
     mergeOverrideData?: boolean
   },
-) => FormData | Promise<FormData>
+) => FormData | string | Promise<FormData | string>
 
 export type GetFields = () => FormState
 export type GetField = (path: string) => FormField
