@@ -359,6 +359,54 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         expect(updatedUser?.salt).not.toBe(existingSalt)
       })
 
+      test('should rehash a 100k password hash to 600k after login', async ({ payload }) => {
+        const testEmail = '100k-password-hash@example.com'
+        const testPassword = 'test-password'
+        const existingSalt = crypto.randomBytes(32).toString('hex')
+        const existingHash = `pbkdf2-sha256-100k-v1:${crypto
+          .pbkdf2Sync(testPassword, existingSalt, 100000, 32, 'sha256')
+          .toString('hex')}`
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+          overrideAccess: true,
+        })
+        createdUserIDs.push(user.id)
+
+        await payload.db.updateOne({
+          id: user.id,
+          collection: slug,
+          data: {
+            hash: existingHash,
+            salt: existingSalt,
+          },
+        })
+
+        await payload.login({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+          overrideAccess: true,
+        })
+
+        const updatedUser = await payload.db.findOne({
+          collection: slug,
+          select: {
+            hash: true,
+          },
+          where: {
+            id: { equals: user.id },
+          },
+        })
+
+        expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v1:[a-f0-9]{64}$/)
+      })
+
       test('should preserve a password changed during login', async ({ payload }) => {
         const testEmail = 'password-change-during-login@example.com'
         const testPassword = 'test-password'
