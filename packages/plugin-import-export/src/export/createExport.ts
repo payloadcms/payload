@@ -397,6 +397,27 @@ export const createExport = async (args: CreateExportArgs) => {
           )
 
           const originalDocs = result.docs as Record<string, unknown>[]
+
+          // Pre-scan already merged schema columns with every batch. When a
+          // before hook rewrites this batch, drop keys it removed and keep keys
+          // it added, without discarding columns that only exist in later batches.
+          let firstBatchRawColumns: string[] | undefined
+          if (!columnsFinalized) {
+            const rawColumns: string[] = []
+            const seenRawColumns = new Set<string>()
+
+            for (const row of batchRows) {
+              for (const key of Object.keys(row)) {
+                if (!seenRawColumns.has(key)) {
+                  seenRawColumns.add(key)
+                  rawColumns.push(key)
+                }
+              }
+            }
+
+            firstBatchRawColumns = rawColumns
+          }
+
           let batchRowsToWrite = batchRows
           if (exportHooks?.before && batchRows.length > 0) {
             batchRowsToWrite = await exportHooks.before({
@@ -410,9 +431,6 @@ export const createExport = async (args: CreateExportArgs) => {
             })
           }
 
-          // Pre-scan already merged schema columns with every batch. When a
-          // before hook rewrites this batch, drop keys it removed and keep keys
-          // it added, without discarding columns that only exist in later batches.
           if (!columnsFinalized) {
             const hookColumns: string[] = []
             const seenHookColumns = new Set<string>()
@@ -426,17 +444,7 @@ export const createExport = async (args: CreateExportArgs) => {
               }
             }
 
-            const rawColumns: string[] = []
-            const seenRawColumns = new Set<string>()
-
-            for (const row of batchRows) {
-              for (const key of Object.keys(row)) {
-                if (!seenRawColumns.has(key)) {
-                  seenRawColumns.add(key)
-                  rawColumns.push(key)
-                }
-              }
-            }
+            const rawColumns = firstBatchRawColumns ?? []
 
             allColumns =
               Boolean(exportHooks?.before) && batchRowsToWrite.length > 0

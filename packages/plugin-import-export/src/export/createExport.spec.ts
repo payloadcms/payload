@@ -18,7 +18,7 @@ const flattenedFields = [
   },
 ]
 
-const shortDoc = (id: string, title: string) => ({
+const shortDoc = ({ id, title }: { id: string; title: string }) => ({
   id,
   title,
   array: [{ id: `${id}-0`, field1: 'only', field2: 'one' }],
@@ -35,7 +35,10 @@ const longDoc = {
 }
 
 const pages = [
-  { docs: [shortDoc('1', 'short-1'), shortDoc('2', 'short-2')], hasNextPage: true },
+  {
+    docs: [shortDoc({ id: '1', title: 'short-1' }), shortDoc({ id: '2', title: 'short-2' })],
+    hasNextPage: true,
+  },
   { docs: [longDoc], hasNextPage: false },
 ]
 
@@ -123,6 +126,39 @@ describe('createExport streamed CSV columns', () => {
     const shortRow = rows.find((row) => row.title === 'short-1')
     expect(shortRow?.array_0_field1).toBe('only')
     expect(shortRow?.array_2_field1).toBe('')
+  })
+
+  it('should keep later-batch array columns when a before hook mutates rows in place', async () => {
+    const before = vi.fn((args: { data: Record<string, unknown>[] }) => {
+      for (const row of args.data) {
+        delete row.array_0_field2
+      }
+      return args.data
+    })
+    const { find, req } = createReq({ before })
+
+    const response = await createExport({
+      id: 'export-1',
+      name: 'pages',
+      batchSize: 2,
+      collectionSlug: 'pages',
+      download: true,
+      exportCollection: 'exports',
+      exportDoc: { name: 'pages' },
+      fields: ['id', 'title', 'array'],
+      format: 'csv',
+      req,
+    })
+
+    const csv = await response.text()
+    const rows = parse(csv, { bom: true, columns: true }) as Record<string, string>[]
+    const header = Object.keys(rows[0] ?? {})
+
+    expect(before).toHaveBeenCalledTimes(2)
+    expect(find.mock.calls.length).toBeGreaterThanOrEqual(2)
+    expect(header).not.toContain('array_0_field2')
+    expect(header).toContain('array_2_field1')
+    expect(rows.find((row) => row.title === 'long')?.array_2_field1).toBe('c')
   })
 
   it('should keep later-batch array columns when a before hook removes a first-batch column', async () => {
