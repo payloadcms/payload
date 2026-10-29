@@ -18,6 +18,10 @@ import { validate as uuidValidate } from 'uuid'
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
+import {
+  bindsAsPostgresInteger,
+  fitsPostgresSerialInteger,
+} from '../utilities/fitsPostgresSerialInteger.js'
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
 import { jsonBuildObject } from '../utilities/json.js'
@@ -38,6 +42,11 @@ type TableColumn = {
   columns?: {
     idType: 'number' | 'text' | 'uuid'
     rawColumn: SQL<unknown>
+    /**
+     * Postgres serial ID columns are int4. Values that do not fit are omitted
+     * instead of being bound as integer.
+     */
+    serialInteger?: boolean
   }[]
   constraints: Constraint[]
   field: FlattenedField
@@ -754,9 +763,13 @@ export const getTableColumnFromPath = ({
                 }
 
                 const idTypeTextOrUuid = idType === 'text' || idType === 'uuid'
+                // Custom numeric IDs use `numeric`, not int4. Only default serial columns overflow.
+                const isSerialIntegerColumn =
+                  idType === 'number' && !customIDType && adapter.name === 'postgres'
 
-                // Do not add the column to OR if we know that it can't match by the type
-                // We can't do the same with idType: 'number' because `value` can be from the REST search query params
+                // Do not add the column to OR if we know that it can't match by the type.
+                // In-range numeric strings still match serial IDs (REST query params are strings).
+                // Strings outside int4 are text IDs and must not be bound as integer.
                 if (typeof value === 'number' && idTypeTextOrUuid) {
                   return null
                 }
@@ -792,6 +805,24 @@ export const getTableColumnFromPath = ({
                   return null
                 }
 
+                if (
+                  isSerialIntegerColumn &&
+                  !Array.isArray(value) &&
+                  bindsAsPostgresInteger(value) &&
+                  !fitsPostgresSerialInteger(value)
+                ) {
+                  return null
+                }
+
+                if (
+                  isSerialIntegerColumn &&
+                  Array.isArray(value) &&
+                  value.some((val) => bindsAsPostgresInteger(val)) &&
+                  !value.some((val) => fitsPostgresSerialInteger(val))
+                ) {
+                  return null
+                }
+
                 const relationTableName = adapter.tableNameMap.get(
                   toSnakeCase(adapter.payload.collections[relationTo].config.slug),
                 )
@@ -799,6 +830,7 @@ export const getTableColumnFromPath = ({
                 return {
                   idType,
                   rawColumn: sql.raw(`"${aliasRelationshipTableName}"."${relationTableName}_id"`),
+                  serialInteger: isSerialIntegerColumn || undefined,
                 }
               })
               .filter(Boolean)
