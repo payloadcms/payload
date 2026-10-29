@@ -52,11 +52,7 @@ export function isolateObjectProperty<T extends object>(object: T, key: (keyof T
             // A non-configurable target property must be reported with the
             // target's own enumerability and kind; only the value of a
             // writable data property can come from the delegate.
-            if (
-              'value' in targetDescriptor &&
-              'value' in descriptor &&
-              targetDescriptor.writable
-            ) {
+            if ('value' in targetDescriptor && 'value' in descriptor && targetDescriptor.writable) {
               return { ...targetDescriptor, value: descriptor.value }
             }
 
@@ -75,10 +71,7 @@ export function isolateObjectProperty<T extends object>(object: T, key: (keyof T
         // An isolated key missing from the delegate counts as absent,
         // unless the target holds it as non-configurable or the target is
         // non-extensible, which a proxy is not allowed to hide.
-        if (
-          targetDescriptor &&
-          (!targetDescriptor.configurable || !Object.isExtensible(target))
-        ) {
+        if (targetDescriptor && (!targetDescriptor.configurable || !Object.isExtensible(target))) {
           return targetDescriptor
         }
 
