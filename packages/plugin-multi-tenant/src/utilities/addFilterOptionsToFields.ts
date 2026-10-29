@@ -181,7 +181,7 @@ function addRelationshipFilter({
         return originalFilterResult
       }
 
-      // If the original filtr returns false, return early
+      // If the original filter returns false, return early
       if (originalFilterResult === false) {
         return false
       }
