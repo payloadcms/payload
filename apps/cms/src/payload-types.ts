@@ -1163,7 +1163,7 @@ export interface MarketPrice {
   /**
    * Where the price comes from. Saving it here makes it "Entered by hand".
    */
-  source: 'api-ninjas' | 'yahoo' | 'manual';
+  source: 'api-ninjas' | 'world-bank' | 'eia' | 'yahoo' | 'manual';
   createdBy?: {
     relationTo: 'users';
     value: string | User;

@@ -65,6 +65,9 @@ export const MarketPrices: CollectionConfig = {
       defaultValue: 'manual',
       options: [
         { label: 'API Ninjas', value: 'api-ninjas' },
+        // The ten years before API Ninjas, from scripts/market-history (see SOURCES.md there)
+        { label: 'World Bank (monthly average)', value: 'world-bank' },
+        { label: 'U.S. EIA', value: 'eia' },
         // Saved by awoz-api's first version
         { label: 'Yahoo Finance', value: 'yahoo' },
         { label: 'Entered by hand', value: 'manual' },
