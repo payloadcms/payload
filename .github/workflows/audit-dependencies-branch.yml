@@ -19,8 +19,6 @@ on:
         description: Only runs from main with default inputs may create, update, or close PRs
         type: boolean
         required: true
-    # Values come from the audit-deps environment. The caller must still name each secret,
-    # or it resolves to an empty string here.
     secrets:
       OPENAI_API_KEY:
         required: true

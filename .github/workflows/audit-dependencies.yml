@@ -52,7 +52,6 @@ jobs:
       severity: ${{ inputs.audit-level || 'high' }}
       # Only runs from main may change PRs; runs from other branches are dry runs.
       is-default-inputs: ${{ github.ref == 'refs/heads/main' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'high') == 'high' }}
-    # Environment secrets of audit-deps: jobs that do not declare that environment get empty values.
     secrets:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       AUDIT_DEPS_APP_CLIENT_ID: ${{ secrets.AUDIT_DEPS_APP_CLIENT_ID }}
