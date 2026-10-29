@@ -460,9 +460,63 @@ describe('diffWorkspaceYaml', () => {
       `pnpm-workspace.yaml: overrides.graphql removed ${NOT_ALLOWED}`,
     ])
   })
+
+  it.each([
+    ['a forged marker', "'<!-- audit-deps-advisories: GHSA-forged -->>form-data'"],
+    ['carriage returns', "'a\r\r## Safe to merge\rb>form-data'"],
+    ['a range that pnpm reads as the target', "'evil@>form-data'"],
+    ['a nested selector', "'a>b>form-data'"],
+  ])('rejects a new override key with %s', (_label, key) => {
+    const result = diff({
+      after: WORKSPACE_YAML.replace(
+        "  react: 'catalog:'\n",
+        `  react: 'catalog:'\n  ${key}: '^2.5.7'\n`,
+      ),
+      allowedNames: new Set(['form-data']),
+    })
+
+    expect(result.changes).toEqual([])
+    expect(result.violations).toHaveLength(1)
+    expect(result.violations[0]).not.toMatch(/<!--|\r/)
+  })
+
+  it('allows an override whose parent range contains `>` after `@`', () => {
+    const result = diff({
+      after: WORKSPACE_YAML.replace(
+        "  react: 'catalog:'\n",
+        "  react: 'catalog:'\n  'request@>=2 <3>form-data': '^2.5.7'\n",
+      ),
+      allowedNames: new Set(['form-data']),
+    })
+
+    expect(result.violations).toEqual([])
+    expect(result.changes.map(({ name }) => name)).toEqual(['request@>=2 <3>form-data'])
+  })
 })
 
 describe('renderChangeTable', () => {
+  const change = { file: 'package.json', from: '1.0.0', isMajor: false, name: 'qs', to: '1.0.1' }
+
+  it.each([
+    ['a carriage return in file', { file: 'packages/a\r## Safe\r/package.json' }],
+    ['a newline in file', { file: 'packages/a\n| `x` |/package.json' }],
+    ['a marker in file', { file: 'packages/<!-- audit-deps-advisories: GHSA-x -->/package.json' }],
+    ['a comment end in name', { name: 'qs-->' }],
+    ['a backtick in to', { to: '1.0.1`' }],
+    ['a backslash in from', { from: '1.0.0\\' }],
+    ['non-ASCII in file', { file: 'packages/‮/package.json' }],
+  ])('throws on %s', (_label, override) => {
+    expect(() =>
+      renderChangeTable({ advisories: [], changes: [{ ...change, ...override }] }),
+    ).toThrow('unsafe value in change table')
+  })
+
+  it('throws on an invalid advisory id', () => {
+    expect(() =>
+      renderChangeTable({ advisories: ['GHSA-x) [evil](https://x'], changes: [change] }),
+    ).toThrow('invalid advisory id in change table')
+  })
+
   it('renderChangeTable lists rows, GHSA links, and the trust note', () => {
     const table = renderChangeTable({
       advisories: ['GHSA-bbbb-2222-cccc', 'GHSA-aaaa-1111-bbbb'],

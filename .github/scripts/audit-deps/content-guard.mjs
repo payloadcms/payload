@@ -17,10 +17,21 @@ const WORKSPACE_SPEC_PATTERN = /^workspace:[0-9A-Za-z.+\-^~<>=|* ]*$/
 const NPM_ALIAS_SPEC_PATTERN = /^npm:(?<aliasName>(?:@[\w.-]+\/)?[\w.-]+)@(?<range>.+)$/
 
 const TOP_LEVEL_KEY_PATTERN = /^[^\s#]/
-// One `  <key>: <value>` scalar per line. Quoted forms exclude escapes, so the raw text is the value.
+// One `  <key>: <value>` scalar per line, printable ASCII only. Quoted forms exclude escapes,
+// so the raw text is the value.
 const SCALAR_ENTRY_PATTERN =
-  /^ {2}(?:'(?<singleKey>[^'`]*)'|"(?<doubleKey>[^"\\`]*)"|(?<bareKey>\w[\w./@>-]*)): +(?<rawValue>'[^'`]*'|"[^"\\`]*"|[0-9A-Za-z^=<][^\s#'"`:,[\]{}]*)(?<comment> +#.*)?$/
+  /^ {2}(?:'(?<singleKey>(?:(?!['\\`])[\x20-\x7e])*)'|"(?<doubleKey>(?:(?!["\\`])[\x20-\x7e])*)"|(?<bareKey>\w[\w./@>-]*)): +(?<rawValue>'(?:(?!['\\`])[\x20-\x7e])*'|"(?:(?!["\\`])[\x20-\x7e])*"|[0-9A-Za-z^=<](?:(?![#'"`:,[\]{}\\])[\x21-\x7e])*)(?<comment> +#.*)?$/
+
+const NPM_NAME_SOURCE = String.raw`(?:@[a-z0-9][\w.-]*\/)?[a-z0-9][\w.-]*`
+// A `>` inside a range must follow ` `, `|` or `@`; pnpm splits parent>child at any other `>`.
+const SELECTOR_RANGE_SOURCE = String.raw`(?:[0-9A-Za-z.+\-^~<=*| ]|(?<=[ |@])>)+`
+const OVERRIDE_SELECTOR_PATTERN = new RegExp(
+  `^(?:${NPM_NAME_SOURCE}(?:@${SELECTOR_RANGE_SOURCE})?(?<![ |@])>)?(?<targetName>${NPM_NAME_SOURCE})(?:@${SELECTOR_RANGE_SOURCE})?$`,
+)
+
 const SAFE_PATH_SEGMENT_PATTERN = /^[\w@./>-]+$/
+const SAFE_TABLE_CELL_PATTERN = /^(?:(?![`\\])[\x20-\x7e])+$/
+const ADVISORY_ID_PATTERN = /^GHSA(?:-[0-9a-z]{4}){3}$/
 
 /**
  * Dependency names that a patch may change. On `monorepo` scope, relock modules and
@@ -178,9 +189,15 @@ export function renderChangeTable({ advisories, changes }) {
       return `| ${formatCode({ value: name })} | ${fromCell} | ${toCell} | ${formatCode({ value: file })} |`
     })
 
-  const advisoryLinks = [...new Set(advisories)]
-    .sort()
-    .map((advisory) => `[${advisory}](https://github.com/advisories/${advisory})`)
+  const advisoryLinks = [...new Set(advisories)].sort().map((advisory) => {
+    if (!ADVISORY_ID_PATTERN.test(advisory)) {
+      throw new Error(
+        `invalid advisory id in change table: ${formatPath({ segments: [advisory] })}`,
+      )
+    }
+
+    return `[${advisory}](https://github.com/advisories/${advisory})`
+  })
 
   return [
     '| Package | From | To | File |',
@@ -360,6 +377,10 @@ function classifyScalarEntry({ afterEntry, allowed, beforeEntry, majors, name, s
   }
 
   const target = section === 'overrides' ? findOverrideTarget({ key: name }) : name
+  if (target === null) {
+    return { violation }
+  }
+
   if (!allowed.has(target)) {
     return { violation: `${WORKSPACE_FILE}: ${path} not in audit plan` }
   }
@@ -424,16 +445,12 @@ function splitTopLevelSections({ text }) {
   return sections
 }
 
-/** The override target is the last `>` selector with any `@version` suffix removed. */
+/**
+ * The package an override key targets, parsed with the same parent>child split pnpm uses.
+ * Returns null for any key outside the `[parent[@range]>]name[@range]` grammar.
+ */
 function findOverrideTarget({ key }) {
-  const lastSelector = key.split('>').at(-1)
-  const versionIndex = lastSelector.indexOf('@', 1)
-
-  if (versionIndex === -1) {
-    return lastSelector
-  }
-
-  return lastSelector.slice(0, versionIndex)
+  return OVERRIDE_SELECTOR_PATTERN.exec(key)?.groups.targetName ?? null
 }
 
 /**
@@ -480,19 +497,44 @@ function formatViolation({ file, kind, path }) {
   return `${file}: ${path} ${kind} ${NOT_ALLOWED_SUFFIX}`
 }
 
-/** Untrusted keys with unusual characters are JSON-quoted so they cannot inject text. */
+/**
+ * Untrusted keys with unusual characters are JSON-quoted, with `<`, `>` and non-printable-ASCII
+ * escaped, so they cannot inject markers or markup into logs or comments.
+ */
 function formatPath({ segments }) {
   if (segments.length === 0) {
     return '(root)'
   }
 
   return segments
-    .map((segment) => (SAFE_PATH_SEGMENT_PATTERN.test(segment) ? segment : JSON.stringify(segment)))
+    .map((segment) => {
+      if (SAFE_PATH_SEGMENT_PATTERN.test(segment)) {
+        return segment
+      }
+
+      return JSON.stringify(segment).replace(
+        /[^\x20-\x3b\x3d\x3f-\x7e]/g,
+        (character) => `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`,
+      )
+    })
     .join('.')
 }
 
-/** Values reach the table only after the spec check, which excludes backticks and newlines. */
+/**
+ * The table is trusted output, so it throws on any cell that could break out of its code span,
+ * its row, or carry a hidden marker. Escaped `|` stays literal in GFM tables, even in code spans.
+ */
 function formatCode({ value }) {
+  const isSafe =
+    typeof value === 'string' &&
+    SAFE_TABLE_CELL_PATTERN.test(value) &&
+    !value.includes('<!--') &&
+    !value.includes('-->')
+
+  if (!isSafe) {
+    throw new Error(`unsafe value in change table: ${formatPath({ segments: [String(value)] })}`)
+  }
+
   return `\`${value.replaceAll('|', '\\|')}\``
 }
 
