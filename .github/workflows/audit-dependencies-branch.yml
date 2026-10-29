@@ -192,6 +192,9 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/codex-home"
           cp "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/codex-config.toml" "$RUNNER_TEMP/codex-home/config.toml"
+          # An untrusted project skips the checkout's .codex/config.toml, which starts MCP servers
+          # (`pnpm dlx @playwright/mcp@latest`) that this run must not load.
+          printf '\n[projects."%s"]\ntrust_level = "untrusted"\n' "$GITHUB_WORKSPACE" >> "$RUNNER_TEMP/codex-home/config.toml"
 
       # Codex can write .git; git after Codex runs only on this pre-Codex snapshot.
       - name: Snapshot git directory
