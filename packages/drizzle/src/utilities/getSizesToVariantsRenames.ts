@@ -95,6 +95,7 @@ const columnPrefixes = [
 ]
 const generatedVariantMetadataFieldNames = [
   '_objectKey',
+  '_stored',
   'filename',
   'filesize',
   'height',
