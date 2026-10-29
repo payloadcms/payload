@@ -18,6 +18,8 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { parseSearchParams } from '../../../utilities/parseSearchParams.js'
 
 export type ListSelectionProps = {
+  /** Base filter of the list view; bulk actions across pages must respect it */
+  baseFilter?: Where
   collectionConfig?: ClientCollectionConfig
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
@@ -31,6 +33,7 @@ export type ListSelectionProps = {
 }
 
 export const ListSelection: React.FC<ListSelectionProps> = ({
+  baseFilter,
   collectionConfig,
   disableBulkDelete,
   disableBulkEdit,
@@ -69,16 +72,34 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
 
   const selectingAll = selectAll === SelectAllStatus.AllAvailable
   const deleteIDs = selectingAll ? [] : selectedIDs
-  const baseWhere = parseSearchParams(searchParams)?.where as Where
-  const deleteWhere =
+  const urlWhere = parseSearchParams(searchParams)?.where as Where
+
+  // Bulk actions across pages resolve documents server-side, so they must carry
+  // the same base filter the list applies; otherwise they also hit documents
+  // the list never shows. See https://github.com/payloadcms/payload/issues/19189.
+  const baseFilterConstraints = [baseFilter, where].filter(
+    (constraint): constraint is Where => !!constraint && Object.keys(constraint).length > 0,
+  )
+
+  const urlWhereConstraints = Array.isArray(urlWhere?.and)
+    ? urlWhere.and
+    : urlWhere
+      ? [urlWhere]
+      : []
+
+  const deleteWhere: undefined | Where =
     viewType === 'trash'
-      ? {
-          and: [
-            ...(Array.isArray(baseWhere?.and) ? baseWhere.and : baseWhere ? [baseWhere] : []),
-            { deletedAt: { exists: true } },
-          ],
-        }
-      : baseWhere
+      ? { and: [...baseFilterConstraints, ...urlWhereConstraints, { deletedAt: { exists: true } }] }
+      : baseFilterConstraints.length === 0
+        ? urlWhere
+        : { and: [...baseFilterConstraints, ...urlWhereConstraints] }
+
+  const bulkActionsWhere: undefined | Where =
+    baseFilterConstraints.length === 0
+      ? undefined
+      : baseFilterConstraints.length === 1
+        ? baseFilterConstraints[0]
+        : { and: baseFilterConstraints }
 
   return (
     <ListSelection_v4
@@ -107,7 +128,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
-              where={where}
+              where={bulkActionsWhere}
             />
             <PublishMany
               collection={collectionConfig}
@@ -116,7 +137,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
-              where={where}
+              where={bulkActionsWhere}
             />
             <UnpublishMany
               collection={collectionConfig}
@@ -125,7 +146,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
-              where={where}
+              where={bulkActionsWhere}
             />
           </Fragment>
         ),
