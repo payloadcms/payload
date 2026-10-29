@@ -129,7 +129,8 @@ jobs:
   fix:
     needs: precheck
     if: contains(fromJSON('["create","update","dry-run"]'), needs.precheck.outputs.next_step)
-    runs-on: ubuntu-26.04
+    # codex-action drop-sudo fails on ubuntu-26.04: https://github.com/openai/codex-action/issues/188
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read
