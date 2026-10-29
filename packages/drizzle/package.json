@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/drizzle",
-  "version": "4.0.0-beta.5",
+  "version": "4.0.0-beta.6",
   "description": "A library of shared functions used by different payload database adapters",
   "homepage": "https://payloadcms.com",
   "license": "MIT",

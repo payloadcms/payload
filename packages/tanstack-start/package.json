@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/tanstack-start",
-  "version": "4.0.0-beta.5",
+  "version": "4.0.0-beta.6",
   "description": "TanStack Start framework adapter for Payload",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
