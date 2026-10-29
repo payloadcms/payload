@@ -14,7 +14,7 @@ export type UploadEditsContext = {
   uploadEdits: UploadEdits
 }
 
-const Context = React.createContext<UploadEditsContext>({
+export const Context = React.createContext<UploadEditsContext>({
   getUploadEdits: () => undefined,
   resetUploadEdits: undefined,
   updateUploadEdits: undefined,
