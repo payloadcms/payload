@@ -33,6 +33,7 @@ export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (
         }
       }}
       onMouseDown={(event) => event.stopPropagation()}
+      onTouchEnd={(event) => event.stopPropagation()}
       type="button"
     >
       <CircledXIcon className={`${baseClass}__icon`} size={24} />
