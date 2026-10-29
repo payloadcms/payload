@@ -37,21 +37,52 @@ export function isolateObjectProperty<T extends object>(object: T, key: (keyof T
         if (descriptor) {
           const targetDescriptor = Reflect.getOwnPropertyDescriptor(target, p)
 
-          // A key held only in the delegate is not an own property of the
-          // target, so it can only be reported as configurable. Keep the
-          // target's configurability when it also holds the key.
+          if (!targetDescriptor) {
+            // A key held only in the delegate is not an own property of the
+            // target, so it can only be reported as configurable, and a
+            // non-extensible target cannot report new properties at all.
+            if (!Object.isExtensible(target)) {
+              return undefined
+            }
+
+            return { ...descriptor, configurable: true }
+          }
+
+          if (!targetDescriptor.configurable) {
+            // A non-configurable target property must be reported with the
+            // target's own enumerability and kind; only the value of a
+            // writable data property can come from the delegate.
+            if (
+              'value' in targetDescriptor &&
+              'value' in descriptor &&
+              targetDescriptor.writable
+            ) {
+              return { ...targetDescriptor, value: descriptor.value }
+            }
+
+            return targetDescriptor
+          }
+
+          // Keep the target's configurability when it also holds the key.
           return {
             ...descriptor,
-            configurable: targetDescriptor ? targetDescriptor.configurable : true,
+            configurable: targetDescriptor.configurable,
           }
         }
 
         const targetDescriptor = Reflect.getOwnPropertyDescriptor(target, p)
 
         // An isolated key missing from the delegate counts as absent,
-        // unless the target holds it as non-configurable, which a proxy
-        // is not allowed to hide.
-        return targetDescriptor && !targetDescriptor.configurable ? targetDescriptor : undefined
+        // unless the target holds it as non-configurable or the target is
+        // non-extensible, which a proxy is not allowed to hide.
+        if (
+          targetDescriptor &&
+          (!targetDescriptor.configurable || !Object.isExtensible(target))
+        ) {
+          return targetDescriptor
+        }
+
+        return undefined
       }
       return Reflect.getOwnPropertyDescriptor(target, p)
     },
