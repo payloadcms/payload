@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["fixedAdvisories", "needsPerson", "body"],
+  "properties": {
+    "fixedAdvisories": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "needsPerson": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["advisory", "module", "dependency", "reason"],
+        "properties": {
+          "advisory": { "type": "string" },
+          "module": { "type": "string" },
+          "dependency": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "body": { "type": "string" }
+  }
+}

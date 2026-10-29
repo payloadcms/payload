@@ -1,0 +1,16 @@
+default_permissions = "audit-deps"
+
+[features]
+network_proxy = true
+
+[permissions.audit-deps]
+extends = ":workspace"
+
+[permissions.audit-deps.network]
+enabled = true
+
+[permissions.audit-deps.network.domains]
+"registry.npmjs.org" = "allow"
+"github.com" = "allow"
+"api.github.com" = "allow"
+"raw.githubusercontent.com" = "allow"
