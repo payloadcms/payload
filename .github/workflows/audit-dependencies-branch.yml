@@ -29,6 +29,8 @@ env:
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
+# Trusted tooling and every artifact live under $RUNNER_TEMP, outside the worktree, so a
+# patch or Codex cannot overwrite what later steps execute.
 jobs:
   precheck:
     runs-on: ubuntu-26.04
@@ -36,8 +38,10 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
+      base_sha: ${{ steps.base.outputs.sha }}
       fixable: ${{ steps.summarize.outputs.fixable }}
       has_findings: ${{ steps.summarize.outputs.has_findings }}
+      has_foreign_commits: ${{ steps.decide.outputs.has_foreign_commits }}
       next_step: ${{ steps.decide.outputs.next_step }}
       pr_number: ${{ steps.decide.outputs.pr_number }}
     steps:
@@ -47,20 +51,23 @@ jobs:
           ref: ${{ inputs.ref }}
           persist-credentials: false
 
-      - name: Exclude tooling from git status
-        run: echo '.audit-deps/' >> .git/info/exclude
+      # Later jobs check out this commit, so all of them see the base the audit ran on.
+      - name: Record base commit
+        id: base
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       # Tooling comes from the triggering commit: the audited ref (e.g. 3.x) may not have it.
+      # actions/checkout only writes under the workspace, so plain git places it in $RUNNER_TEMP.
       - name: Checkout tooling
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ github.sha }}
-          path: .audit-deps/tooling
-          persist-credentials: false
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            .github/scripts/audit-deps
-            .agents/skills/audit-dependencies
+        env:
+          TOOLING_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tooling="$RUNNER_TEMP/audit-deps-tooling"
+          git clone -q --filter=blob:none --no-checkout --depth=1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$tooling"
+          git -C "$tooling" sparse-checkout set --no-cone /.github/scripts/audit-deps/ /.agents/skills/audit-dependencies/
+          git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
+          git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
 
       - name: Setup
         uses: ./.github/actions/setup
@@ -76,15 +83,15 @@ jobs:
         with:
           scope: ${{ inputs.scope }}
           severity: ${{ inputs.severity }}
-          json: .audit-deps/audit_output.json
+          json: ${{ runner.temp }}/audit_output.json
 
       - name: Summarize findings
         id: summarize
         env:
           SCOPE: ${{ inputs.scope }}
         run: >-
-          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs summarize
-          --report=.audit-deps/audit_output.json
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" summarize
+          --report="$RUNNER_TEMP/audit_output.json"
           --scope="$SCOPE"
 
       - name: Decide next step
@@ -98,7 +105,7 @@ jobs:
           github-token: ${{ github.token }}
           script: |
             const { runPrecheck } = await import(
-              `${process.env.GITHUB_WORKSPACE}/.audit-deps/tooling/.github/scripts/audit-deps/github.mjs`
+              `${process.env.RUNNER_TEMP}/audit-deps-tooling/.github/scripts/audit-deps/github.mjs`
             )
 
             await runPrecheck({
@@ -115,9 +122,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: audit-report-${{ inputs.ref }}
-          path: .audit-deps/audit_output.json
-          # The report sits in a dot-directory, which upload-artifact skips by default.
-          include-hidden-files: true
+          path: ${{ runner.temp }}/audit_output.json
           if-no-files-found: error
           retention-days: 7
 
@@ -134,22 +139,23 @@ jobs:
       - name: Checkout ${{ inputs.ref }}
         uses: actions/checkout@v5
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ needs.precheck.outputs.base_sha }}
           persist-credentials: false
 
-      - name: Exclude tooling from git status
+      # Codex reads its inputs from .audit-deps/; this keeps them out of its git status.
+      - name: Exclude Codex inputs from git status
         run: echo '.audit-deps/' >> .git/info/exclude
 
       - name: Checkout tooling
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ github.sha }}
-          path: .audit-deps/tooling
-          persist-credentials: false
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            .github/scripts/audit-deps
-            .agents/skills/audit-dependencies
+        env:
+          TOOLING_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tooling="$RUNNER_TEMP/audit-deps-tooling"
+          git clone -q --filter=blob:none --no-checkout --depth=1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$tooling"
+          git -C "$tooling" sparse-checkout set --no-cone /.github/scripts/audit-deps/ /.agents/skills/audit-dependencies/
+          git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
+          git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
 
       - name: Setup
         uses: ./.github/actions/setup
@@ -171,10 +177,10 @@ jobs:
           SCOPE: ${{ inputs.scope }}
           SEVERITY: ${{ inputs.severity }}
         run: >-
-          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs build-prompt
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" build-prompt
           --report=.audit-deps/audit_output.json
-          --template=.audit-deps/tooling/.github/scripts/audit-deps/prompt.md
-          --skill=.audit-deps/tooling/.agents/skills/audit-dependencies/SKILL.md
+          --template="$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/prompt.md"
+          --skill="$RUNNER_TEMP/audit-deps-tooling/.agents/skills/audit-dependencies/SKILL.md"
           --ref="$REF"
           --scope="$SCOPE"
           --severity="$SEVERITY"
@@ -184,7 +190,7 @@ jobs:
       - name: Write Codex config
         run: |
           mkdir -p "$RUNNER_TEMP/codex-home"
-          cp .audit-deps/tooling/.github/scripts/audit-deps/codex-config.toml "$RUNNER_TEMP/codex-home/config.toml"
+          cp "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/codex-config.toml" "$RUNNER_TEMP/codex-home/config.toml"
 
       # Codex can write .git; git after Codex runs only on this pre-Codex snapshot.
       - name: Snapshot git directory
@@ -196,6 +202,8 @@ jobs:
 
       # OPENAI_API_KEY: never reference it in jobs on pull_request_target, or on issue_comment with a checkout of PR code.
       - name: Run Codex
+        # Leaves time in the job timeout for the git restore step below.
+        timeout-minutes: 25
         uses: openai/codex-action@bdf19a4a223ec2549a3e2274a0cf61556bc07675 # v1.13
         env:
           # The sandbox allows writes only in the workspace and temp dir; pnpm defaults to ~.
@@ -206,27 +214,40 @@ jobs:
           prompt-file: .audit-deps/prompt.md
           permission-profile: audit-deps
           codex-home: ${{ runner.temp }}/codex-home
-          output-schema-file: .audit-deps/tooling/.github/scripts/audit-deps/codex-output.schema.json
+          output-schema-file: ${{ runner.temp }}/audit-deps-tooling/.github/scripts/audit-deps/codex-output.schema.json
           output-file: ${{ runner.temp }}/codex-result.json
           safety-strategy: drop-sudo
 
-      # Restores the trusted .git and drops the Codex-writable tooling repo before any git runs.
+      # Runs even when Codex fails or times out, so checkout's post step never runs git on a
+      # Codex-written .git. Every repo Codex could reach is removed before the hash verdict.
+      - name: Restore git directory
+        if: always()
+        env:
+          GIT_SNAPSHOT_SHA256: ${{ steps.git-snapshot.outputs.sha256 }}
+        run: |
+          set -euo pipefail
+          is_snapshot_intact=false
+          if echo "$GIT_SNAPSHOT_SHA256  $RUNNER_TEMP/git.tar" | sha256sum --check --status; then
+            is_snapshot_intact=true
+          fi
+
+          rm -rf "$GITHUB_WORKSPACE/.git" "$RUNNER_TEMP/audit-deps-tooling"
+          find "$GITHUB_WORKSPACE" -mindepth 2 -name .git -prune -exec rm -rf {} +
+
+          if [ "$is_snapshot_intact" != true ]; then
+            echo "::error::git snapshot changed during the Codex step"
+            exit 1
+          fi
+          tar -C "$GITHUB_WORKSPACE" -xf "$RUNNER_TEMP/git.tar"
+
       # The -c flags and env stay as defense in depth; diffing against HEAD also captures staged changes.
       - name: Save patch
         id: patch
         env:
           GIT_CONFIG_GLOBAL: /dev/null
           GIT_CONFIG_NOSYSTEM: '1'
-          GIT_SNAPSHOT_SHA256: ${{ steps.git-snapshot.outputs.sha256 }}
         run: |
           set -euo pipefail
-          if ! echo "$GIT_SNAPSHOT_SHA256  $RUNNER_TEMP/git.tar" | sha256sum --check --status; then
-            echo "::error::git snapshot changed during the Codex step"
-            exit 1
-          fi
-          rm -rf .git .audit-deps/tooling
-          tar -C "$GITHUB_WORKSPACE" -xf "$RUNNER_TEMP/git.tar"
-
           git -c core.hooksPath=/dev/null -c core.fsmonitor=false -c diff.external= -c core.attributesFile=/dev/null \
             diff HEAD --binary --no-ext-diff --no-textconv > "$RUNNER_TEMP/fix.patch"
           if [ -s "$RUNNER_TEMP/fix.patch" ]; then
@@ -255,22 +276,19 @@ jobs:
       - name: Checkout ${{ inputs.ref }}
         uses: actions/checkout@v5
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ needs.precheck.outputs.base_sha }}
           persist-credentials: false
-
-      - name: Exclude tooling from git status
-        run: echo '.audit-deps/' >> .git/info/exclude
 
       - name: Checkout tooling
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ github.sha }}
-          path: .audit-deps/tooling
-          persist-credentials: false
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            .github/scripts/audit-deps
-            .agents/skills/audit-dependencies
+        env:
+          TOOLING_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tooling="$RUNNER_TEMP/audit-deps-tooling"
+          git clone -q --filter=blob:none --no-checkout --depth=1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$tooling"
+          git -C "$tooling" sparse-checkout set --no-cone /.github/scripts/audit-deps/ /.agents/skills/audit-dependencies/
+          git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
+          git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
 
       - name: Setup
         uses: ./.github/actions/setup
@@ -283,7 +301,7 @@ jobs:
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: audit-report-${{ inputs.ref }}
-          path: .audit-deps
+          path: ${{ runner.temp }}/audit-report
 
       - name: Download fix
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
@@ -291,21 +309,27 @@ jobs:
           name: audit-fix-${{ inputs.ref }}
           path: ${{ runner.temp }}/audit-fix
 
+      - name: Check patch paths
+        run: >-
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" patch-guard
+          --cwd="$GITHUB_WORKSPACE"
+          --patch="$RUNNER_TEMP/audit-fix/fix.patch"
+
       - name: Apply patch
         run: git apply --binary "$RUNNER_TEMP/audit-fix/fix.patch"
 
       - name: Check changed paths
         run: >-
-          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs path-guard
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" path-guard
           --cwd="$GITHUB_WORKSPACE"
 
       - name: Check manifest changes
         env:
           SCOPE: ${{ inputs.scope }}
         run: >-
-          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs content-guard
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" content-guard
           --cwd="$GITHUB_WORKSPACE"
-          --report=.audit-deps/audit_output.json
+          --report="$RUNNER_TEMP/audit-report/audit_output.json"
           --scope="$SCOPE"
 
       # Proves the lockfile comes from the base lockfile plus the patched manifests, with no hand edits.
@@ -344,14 +368,14 @@ jobs:
         with:
           scope: ${{ inputs.scope }}
           severity: ${{ inputs.severity }}
-          json: .audit-deps/reaudit.json
+          json: ${{ runner.temp }}/reaudit.json
 
       - name: Check claimed fixes
         env:
           FIXABLE: ${{ needs.precheck.outputs.fixable }}
         run: >-
-          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs check-fixed
-          --report=.audit-deps/reaudit.json
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" check-fixed
+          --report="$RUNNER_TEMP/reaudit.json"
           --result="$RUNNER_TEMP/audit-fix/codex-result.json"
           --fixable="$FIXABLE"
 
@@ -381,6 +405,74 @@ jobs:
     outputs:
       pr_url: ${{ steps.cpr.outputs.pull-request-url }}
     steps:
+      # create-pull-request sets its own credential from its token input, so none is persisted here.
+      - name: Checkout ${{ inputs.ref }}
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.precheck.outputs.base_sha }}
+          persist-credentials: false
+
+      - name: Checkout tooling
+        env:
+          TOOLING_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tooling="$RUNNER_TEMP/audit-deps-tooling"
+          git clone -q --filter=blob:none --no-checkout --depth=1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$tooling"
+          git -C "$tooling" sparse-checkout set --no-cone /.github/scripts/audit-deps/ /.agents/skills/audit-dependencies/
+          git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
+          git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
+
+      - name: Download audit report
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: audit-report-${{ inputs.ref }}
+          path: ${{ runner.temp }}/audit-report
+
+      - name: Download fix
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: audit-fix-${{ inputs.ref }}
+          path: ${{ runner.temp }}/audit-fix
+
+      # This job pushes, so it repeats the guards instead of trusting the verify job.
+      - name: Check patch paths
+        run: >-
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" patch-guard
+          --cwd="$GITHUB_WORKSPACE"
+          --patch="$RUNNER_TEMP/audit-fix/fix.patch"
+
+      - name: Apply patch
+        run: git apply --binary "$RUNNER_TEMP/audit-fix/fix.patch"
+
+      - name: Check changed paths
+        run: >-
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" path-guard
+          --cwd="$GITHUB_WORKSPACE"
+
+      - name: Check manifest changes
+        env:
+          SCOPE: ${{ inputs.scope }}
+        run: >-
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" content-guard
+          --cwd="$GITHUB_WORKSPACE"
+          --report="$RUNNER_TEMP/audit-report/audit_output.json"
+          --scope="$SCOPE"
+
+      - name: Build PR body
+        env:
+          FIXABLE: ${{ needs.precheck.outputs.fixable }}
+          SCOPE: ${{ inputs.scope }}
+        run: >-
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" pr-body
+          --cwd="$GITHUB_WORKSPACE"
+          --report="$RUNNER_TEMP/audit-report/audit_output.json"
+          --scope="$SCOPE"
+          --fixable="$FIXABLE"
+          --result="$RUNNER_TEMP/audit-fix/codex-result.json"
+          --out="$RUNNER_TEMP/pr-body.md"
+
+      # Minted only after every guard passed, so no earlier step can reach the write token.
       - name: Mint App token
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
@@ -389,69 +481,6 @@ jobs:
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
-
-      - name: Checkout ${{ inputs.ref }}
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ inputs.ref }}
-          token: ${{ steps.app-token.outputs.token }}
-
-      - name: Exclude tooling from git status
-        run: echo '.audit-deps/' >> .git/info/exclude
-
-      - name: Checkout tooling
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ github.sha }}
-          path: .audit-deps/tooling
-          persist-credentials: false
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            .github/scripts/audit-deps
-            .agents/skills/audit-dependencies
-
-      - name: Download audit report
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: audit-report-${{ inputs.ref }}
-          path: .audit-deps
-
-      - name: Download fix
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: audit-fix-${{ inputs.ref }}
-          path: ${{ runner.temp }}/audit-fix
-
-      - name: Apply patch
-        run: git apply --binary "$RUNNER_TEMP/audit-fix/fix.patch"
-
-      # This job pushes, so it repeats the guards instead of trusting the verify job.
-      - name: Check changed paths
-        run: >-
-          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs path-guard
-          --cwd="$GITHUB_WORKSPACE"
-
-      - name: Check manifest changes
-        env:
-          SCOPE: ${{ inputs.scope }}
-        run: >-
-          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs content-guard
-          --cwd="$GITHUB_WORKSPACE"
-          --report=.audit-deps/audit_output.json
-          --scope="$SCOPE"
-
-      - name: Build PR body
-        env:
-          FIXABLE: ${{ needs.precheck.outputs.fixable }}
-          SCOPE: ${{ inputs.scope }}
-        run: >-
-          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs pr-body
-          --cwd="$GITHUB_WORKSPACE"
-          --report=.audit-deps/audit_output.json
-          --scope="$SCOPE"
-          --fixable="$FIXABLE"
-          --result="$RUNNER_TEMP/audit-fix/codex-result.json"
-          --out="$RUNNER_TEMP/pr-body.md"
 
       - name: Create pull request
         id: cpr
@@ -481,6 +510,17 @@ jobs:
     permissions:
       contents: read
     steps:
+      - name: Checkout tooling
+        env:
+          TOOLING_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tooling="$RUNNER_TEMP/audit-deps-tooling"
+          git clone -q --filter=blob:none --no-checkout --depth=1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$tooling"
+          git -C "$tooling" sparse-checkout set --no-cone /.github/scripts/audit-deps/ /.agents/skills/audit-dependencies/
+          git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
+          git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
+
       - name: Mint App token
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
@@ -490,21 +530,11 @@ jobs:
           permission-contents: write
           permission-pull-requests: write
 
-      - name: Checkout tooling
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ github.sha }}
-          path: .audit-deps/tooling
-          persist-credentials: false
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            .github/scripts/audit-deps
-            .agents/skills/audit-dependencies
-
       - name: Close or comment on PR
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           FIXABLE: ${{ needs.precheck.outputs.fixable }}
+          HAS_FOREIGN_COMMITS: ${{ needs.precheck.outputs.has_foreign_commits }}
           NEXT_STEP: ${{ needs.precheck.outputs.next_step }}
           PR_NUMBER: ${{ needs.precheck.outputs.pr_number }}
           REF: ${{ inputs.ref }}
@@ -512,7 +542,7 @@ jobs:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
             const { closeStalePr, commentBlocked } = await import(
-              `${process.env.GITHUB_WORKSPACE}/.audit-deps/tooling/.github/scripts/audit-deps/github.mjs`
+              `${process.env.RUNNER_TEMP}/audit-deps-tooling/.github/scripts/audit-deps/github.mjs`
             )
 
             const prNumber = Number(process.env.PR_NUMBER)
@@ -523,7 +553,15 @@ jobs:
             const { owner, repo } = context.repo
 
             if (process.env.NEXT_STEP === 'close') {
-              await closeStalePr({ github, owner, prNumber, ref: process.env.REF, repo })
+              await closeStalePr({
+                github,
+                // Anything but an explicit 'false' keeps the branch.
+                hasForeignCommits: process.env.HAS_FOREIGN_COMMITS !== 'false',
+                owner,
+                prNumber,
+                ref: process.env.REF,
+                repo,
+              })
             } else {
               await commentBlocked({
                 fixable: JSON.parse(process.env.FIXABLE),
@@ -549,7 +587,8 @@ jobs:
 
       - name: Report status
         env:
-          HAS_FAILED_JOB: ${{ contains(needs.*.result, 'failure') }}
+          # Any job other than success or skipped fails the run; precheck must succeed.
+          HAS_UNSUCCESSFUL_JOB: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || needs.precheck.result != 'success' }}
           HAS_FINDINGS: ${{ needs.precheck.outputs.has_findings }}
           NEXT_STEP: ${{ needs.precheck.outputs.next_step }}
           PR_NUMBER: ${{ needs.precheck.outputs.pr_number }}
@@ -579,7 +618,7 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
           fi
 
-          if [ "$HAS_FINDINGS" = "true" ] || [ "$HAS_FAILED_JOB" = "true" ]; then
+          if [ "$HAS_FINDINGS" = "true" ] || [ "$HAS_UNSUCCESSFUL_JOB" = "true" ]; then
             echo "::error::Audit has findings or a job failed for $REF"
             exit 1
           fi

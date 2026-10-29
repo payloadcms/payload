@@ -68,7 +68,11 @@ describe('runPrecheck', () => {
   it('sets create when no PR', async () => {
     const github = makeGithub()
 
-    expect(await precheck({ github })).toEqual({ next_step: 'create', pr_number: '' })
+    expect(await precheck({ github })).toEqual({
+      has_foreign_commits: 'false',
+      next_step: 'create',
+      pr_number: '',
+    })
     expect(github.rest.pulls.list).toHaveBeenCalledWith({
       base: REF,
       head: HEAD,
@@ -84,7 +88,11 @@ describe('runPrecheck', () => {
       openPrs: [{ body: `text\n${MARKER}\n`, number: 7 }],
     })
 
-    expect(await precheck({ github })).toEqual({ next_step: 'skip', pr_number: '7' })
+    expect(await precheck({ github })).toEqual({
+      has_foreign_commits: 'false',
+      next_step: 'skip',
+      pr_number: '7',
+    })
   })
 
   it('sets blocked on foreign commit', async () => {
@@ -93,7 +101,11 @@ describe('runPrecheck', () => {
       openPrs: [{ body: '<!-- audit-deps-advisories: GHSA-zzzz-zzzz-zzzz -->', number: 8 }],
     })
 
-    expect(await precheck({ github })).toEqual({ next_step: 'blocked', pr_number: '8' })
+    expect(await precheck({ github })).toEqual({
+      has_foreign_commits: 'true',
+      next_step: 'blocked',
+      pr_number: '8',
+    })
   })
 
   it('sets update when the set changed and only the bot committed', async () => {
@@ -102,7 +114,11 @@ describe('runPrecheck', () => {
       openPrs: [{ body: 'no marker', number: 9 }],
     })
 
-    expect(await precheck({ github })).toEqual({ next_step: 'update', pr_number: '9' })
+    expect(await precheck({ github })).toEqual({
+      has_foreign_commits: 'false',
+      next_step: 'update',
+      pr_number: '9',
+    })
   })
 
   it('sets skip when a person closed a PR with the same marker', async () => {
@@ -111,7 +127,11 @@ describe('runPrecheck', () => {
       closedPrs: [{ body: MARKER, merged_at: null, number: 5 }],
     })
 
-    expect(await precheck({ github })).toEqual({ next_step: 'skip', pr_number: '' })
+    expect(await precheck({ github })).toEqual({
+      has_foreign_commits: 'false',
+      next_step: 'skip',
+      pr_number: '',
+    })
     expect(github.rest.pulls.list).toHaveBeenCalledWith({
       base: REF,
       direction: 'desc',
@@ -155,6 +175,7 @@ describe('runPrecheck', () => {
     const github = makeGithub()
 
     expect(await precheck({ github, isDefaultInputs: false })).toEqual({
+      has_foreign_commits: 'false',
       next_step: 'dry-run',
       pr_number: '',
     })
@@ -164,8 +185,8 @@ describe('runPrecheck', () => {
 })
 
 describe('closeStalePr', () => {
-  const close = (github) =>
-    closeStalePr({ github, owner: OWNER, prNumber: 3, ref: REF, repo: REPO })
+  const close = (github, { hasForeignCommits = false } = {}) =>
+    closeStalePr({ github, hasForeignCommits, owner: OWNER, prNumber: 3, ref: REF, repo: REPO })
 
   it('comments, closes, deletes branch', async () => {
     const github = makeGithub()
@@ -189,6 +210,28 @@ describe('closeStalePr', () => {
       ref: 'heads/ci/audit-deps-fix-main',
       repo: REPO,
     })
+  })
+
+  it('keeps the branch when a person committed to it', async () => {
+    const github = makeGithub()
+
+    await close(github, { hasForeignCommits: true })
+
+    expect(github.rest.issues.createComment).toHaveBeenCalledWith({
+      body:
+        'Base branch `main` has no fixable findings; closing. ' +
+        'The branch has commits from a person, so it was not deleted.',
+      issue_number: 3,
+      owner: OWNER,
+      repo: REPO,
+    })
+    expect(github.rest.pulls.update).toHaveBeenCalledWith({
+      owner: OWNER,
+      pull_number: 3,
+      repo: REPO,
+      state: 'closed',
+    })
+    expect(github.rest.git.deleteRef).not.toHaveBeenCalled()
   })
 
   it('ignores a missing branch ref', async () => {

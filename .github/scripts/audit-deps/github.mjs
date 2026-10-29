@@ -5,13 +5,14 @@ const BRANCH_PREFIX = 'ci/audit-deps-fix-'
 const MISSING_REF_STATUSES = new Set([404, 422])
 
 /**
- * Looks up the bot PR for `ref` and sets the `next_step` and `pr_number` outputs.
- * Non-default inputs never touch PRs.
+ * Looks up the bot PR for `ref` and sets the `next_step`, `pr_number`, and
+ * `has_foreign_commits` outputs. Non-default inputs never touch PRs.
  */
 export async function runPrecheck({ core, fixable, github, isDefaultInputs, owner, ref, repo }) {
   if (!isDefaultInputs) {
     return setOutputs({
       core,
+      hasForeignCommits: false,
       nextStep: decideNextStep({ fixable, isDefaultInputs, openPr: null, rejectedPr: null }),
       prNumber: '',
     })
@@ -22,6 +23,7 @@ export async function runPrecheck({ core, fixable, github, isDefaultInputs, owne
 
   return setOutputs({
     core,
+    hasForeignCommits: openPr?.summary.hasForeignCommits ?? false,
     nextStep: decideNextStep({
       fixable,
       isDefaultInputs,
@@ -32,14 +34,23 @@ export async function runPrecheck({ core, fixable, github, isDefaultInputs, owne
   })
 }
 
-export async function closeStalePr({ github, owner, prNumber, ref, repo }) {
+/** Closes the stale bot PR. A branch with a person's commits is kept so their work survives. */
+export async function closeStalePr({ github, hasForeignCommits, owner, prNumber, ref, repo }) {
+  const closing = `Base branch \`${ref}\` has no fixable findings; closing.`
+
   await github.rest.issues.createComment({
-    body: `Base branch \`${ref}\` has no fixable findings; closing.`,
+    body: hasForeignCommits
+      ? `${closing} The branch has commits from a person, so it was not deleted.`
+      : closing,
     issue_number: prNumber,
     owner,
     repo,
   })
   await github.rest.pulls.update({ owner, pull_number: prNumber, repo, state: 'closed' })
+
+  if (hasForeignCommits) {
+    return
+  }
 
   try {
     await github.rest.git.deleteRef({ owner, ref: `heads/${BRANCH_PREFIX}${ref}`, repo })
@@ -74,7 +85,8 @@ export async function commentBlocked({ fixable, github, owner, prNumber, repo })
   })
 }
 
-function setOutputs({ core, nextStep, prNumber }) {
+function setOutputs({ core, hasForeignCommits, nextStep, prNumber }) {
+  core.setOutput('has_foreign_commits', String(hasForeignCommits))
   core.setOutput('next_step', nextStep)
   core.setOutput('pr_number', prNumber)
 }

@@ -22,7 +22,7 @@ digraph audit {
     "Get report" [shape=box];
     "Next action in plan.actions" [shape=box];
     "Action type?" [shape=diamond];
-    "Bump manifests (caret range)" [shape=box];
+    "Bump manifests (keep specifier style)" [shape=box];
     "Crosses major?" [shape=diamond];
     "Major review: changelog + our usage" [shape=box];
     "Breaking change affects us?" [shape=diamond];
@@ -39,12 +39,12 @@ digraph audit {
     "Action type?" -> "Crosses major?" [label="bump"];
     "Action type?" -> "Relock (monorepo only)" [label="relock"];
     "Action type?" -> "Needs a Person" [label="manual"];
-    "Crosses major?" -> "Bump manifests (caret range)" [label="no"];
+    "Crosses major?" -> "Bump manifests (keep specifier style)" [label="no"];
     "Crosses major?" -> "Major review: changelog + our usage" [label="yes"];
     "Major review: changelog + our usage" -> "Breaking change affects us?";
-    "Breaking change affects us?" -> "Bump manifests (caret range)" [label="no"];
+    "Breaking change affects us?" -> "Bump manifests (keep specifier style)" [label="no"];
     "Breaking change affects us?" -> "Needs a Person" [label="yes"];
-    "Bump manifests (caret range)" -> "More actions?";
+    "Bump manifests (keep specifier style)" -> "More actions?";
     "Relock (monorepo only)" -> "More actions?";
     "Needs a Person" -> "More actions?";
     "More actions?" -> "Next action in plan.actions" [label="yes"];
@@ -79,13 +79,13 @@ Report shape: `{ findings, plan: { actions, scope, verify } }`.
 
 ### 2. Work From `plan.actions`
 
-| Action   | What to do                                                                                                                        |
-| -------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `bump`   | Edit each file in `manifests`: set `dependency` to a caret range at or above `toRange` (for example `^7.29.0`). Never write `>=`. |
-| `relock` | Run `command` (monorepo scope only).                                                                                              |
-| `manual` | Do not fix it. Report it in "Needs a Person" with its `reason`.                                                                   |
+| Action   | What to do                                                                                                                       |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `bump`   | Edit each file in `manifests`: set `dependency` to the lowest version that satisfies `toRange`. Keep the line's specifier style. |
+| `relock` | Run `command` (monorepo scope only).                                                                                             |
+| `manual` | Do not fix it. Report it in "Needs a Person" with its `reason`.                                                                  |
 
-`toRange` is a minimum. Match the range style already used in that manifest. If the dependency uses a `catalog:` entry, edit the catalog in `pnpm-workspace.yaml` instead of the manifest.
+`toRange` is a minimum, not the text to write. Keep the specifier style of the line you change: an exact pin stays exact (`7.28.0` becomes `7.29.0`), and a caret range stays caret with the new version as its floor (`^7.28.0` becomes `^7.29.0`). Never write `>=`. If the dependency uses a `catalog:` entry, edit the catalog in `pnpm-workspace.yaml` instead of the manifest.
 
 If the user or the CI wrapper gives a fixable set of advisories, fix only those.
 
@@ -200,7 +200,7 @@ If nothing needs a person, write "None." under that heading.
 | Mistake                                                 | Fix                                                                                                                                                         |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Jumping straight to overrides                           | Check: can you bump the parent? If not, does the semver range already allow the fix (relock)? Only then override.                                           |
-| Using `>=` in manifests or overrides                    | Use `^` to stay within the same major version. `toRange` is a minimum, not the text to write. `>=2.3.2` can resolve to 4.x.                                 |
+| Using `>=` in manifests or overrides                    | Manifests: keep the line's specifier style. Overrides: use `^`. `toRange` is a minimum, not the text to write; `>=2.3.2` can resolve to 4.x.                |
 | Applying an override or relock on `consumer-facing`     | Consumers do not inherit our overrides. Only manifest or catalog bumps count; report the rest in "Needs a Person".                                          |
 | Applying a major bump without reading the changelog     | Read the notes for each major in the range, grep our usage, and list what you checked in the PR body.                                                       |
 | Not checking pinned vs ranged                           | `pnpm view <parent> dependencies.<pkg>` — if ranged and the fix is in range, relock.                                                                        |

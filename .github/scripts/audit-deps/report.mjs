@@ -1,7 +1,6 @@
 import { readFile } from 'node:fs/promises'
 
 const ADVISORY_MARKER_PATTERN = /<!-- audit-deps-advisories: ([^>]*?) -->/
-const AUDIT_DEPS_MARKER_PATTERN = /<!-- audit-deps-[a-z]+: [^>]*? -->\n?/g
 
 /**
  * Reads the audit report written by the audit-dependencies action.
@@ -52,10 +51,6 @@ export function parseAdvisoryMarker({ body }) {
   }
 
   return sortedUnique({ values: match[1].split(',').filter(Boolean) })
-}
-
-export function stripMarkers({ body }) {
-  return body.replace(AUDIT_DEPS_MARKER_PATTERN, '')
 }
 
 function sortedUnique({ values }) {

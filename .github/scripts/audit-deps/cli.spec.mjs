@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 const execFileAsync = promisify(execFile)
 const CLI = path.join(import.meta.dirname, 'cli.mjs')
 const GHSA = 'GHSA-cccc-ffff-gggg'
+const OTHER_GHSA = 'GHSA-hhhh-jjjj-mmmm'
 
 const makeReport = ({ advisories = [GHSA], dependency = 'dep' } = {}) => ({
   findings: advisories.map((advisory) => ({
@@ -190,6 +191,74 @@ describe('cli', () => {
     })
 
     expect(code).toBe(1)
+  })
+
+  it('pr-body links only claimed fixes and marks the whole fixable set', async () => {
+    await initRepo()
+    await writeFile(
+      path.join(dir, 'package.json'),
+      JSON.stringify({ dependencies: { dep: '^1.2.0' } }, null, 2),
+    )
+    const report = await writeJson({
+      name: 'report.json',
+      value: makeReport({ advisories: [GHSA, OTHER_GHSA] }),
+    })
+    const result = await writeJson({
+      name: 'result.json',
+      value: { body: 'analysis', fixedAdvisories: [GHSA], needsPerson: [] },
+    })
+    const out = path.join(dir, 'body.md')
+
+    const { code } = await run({
+      args: [
+        'pr-body',
+        `--cwd=${dir}`,
+        `--report=${report}`,
+        '--scope=consumer-facing',
+        `--result=${result}`,
+        `--fixable=["${GHSA}","${OTHER_GHSA}"]`,
+        `--out=${out}`,
+      ],
+    })
+
+    const body = await readFile(out, 'utf8')
+    expect(code).toBe(0)
+    expect(body).toContain(`Fixes: [${GHSA}](https://github.com/advisories/${GHSA})\n`)
+    expect(body).not.toContain(`](https://github.com/advisories/${OTHER_GHSA})`)
+    expect(body).toContain(`<!-- audit-deps-advisories: ${GHSA},${OTHER_GHSA} -->`)
+  })
+
+  it('patch-guard exits 1 on a patch to a disallowed path', async () => {
+    await initRepo()
+    await mkdir(path.join(dir, '.github'))
+    await writeFile(path.join(dir, '.github/ci.yml'), 'a\n')
+    await git(['add', '.github/ci.yml'])
+    await git(['commit', '-qm', 'ci'])
+    await writeFile(path.join(dir, '.github/ci.yml'), 'b\n')
+    const { stdout: patch } = await git(['diff', 'HEAD'])
+    await git(['checkout', '--', '.github/ci.yml'])
+    const patchFile = path.join(dir, 'fix.patch')
+    await writeFile(patchFile, patch)
+
+    const { code, stdout } = await run({
+      args: ['patch-guard', `--cwd=${dir}`, `--patch=${patchFile}`],
+    })
+
+    expect(code).toBe(1)
+    expect(stdout).toBe('::error::.github/ci.yml: path not allowed\n')
+  })
+
+  it('patch-guard exits 0 on an in-place manifest change', async () => {
+    await initRepo()
+    await writeFile(path.join(dir, 'package.json'), '{}\n')
+    const { stdout: patch } = await git(['diff', 'HEAD'])
+    await git(['checkout', '--', 'package.json'])
+    const patchFile = path.join(dir, 'fix.patch')
+    await writeFile(patchFile, patch)
+
+    const { code } = await run({ args: ['patch-guard', `--cwd=${dir}`, `--patch=${patchFile}`] })
+
+    expect(code).toBe(0)
   })
 
   it('pr-body writes the change table, agent body, and marker', async () => {

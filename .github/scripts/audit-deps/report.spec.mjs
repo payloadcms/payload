@@ -1,7 +1,7 @@
-import { mkdtemp, writeFile } from 'node:fs/promises'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 
 import {
   findUnfixedClaims,
@@ -9,7 +9,6 @@ import {
   parseAdvisoryMarker,
   readReport,
   selectFixableAdvisories,
-  stripMarkers,
 } from './report.mjs'
 
 function makeFinding({ advisory, status }) {
@@ -82,8 +81,15 @@ describe('selectFixableAdvisories', () => {
 })
 
 describe('readReport', () => {
+  const dirs = []
+
+  afterEach(async () => {
+    await Promise.all(dirs.splice(0).map((dir) => rm(dir, { force: true, recursive: true })))
+  })
+
   async function writeTemp({ content }) {
     const dir = await mkdtemp(path.join(tmpdir(), 'audit-deps-'))
+    dirs.push(dir)
     const file = path.join(dir, 'audit_output.json')
     await writeFile(file, content)
     return file
@@ -164,28 +170,5 @@ describe('advisory marker', () => {
   it('parseAdvisoryMarker returns null without marker', () => {
     expect(parseAdvisoryMarker({ body: 'no marker here' })).toBeNull()
     expect(parseAdvisoryMarker({ body: null })).toBeNull()
-  })
-})
-
-describe('stripMarkers', () => {
-  it('stripMarkers removes all audit-deps comments', () => {
-    const body = [
-      'text',
-      '<!-- audit-deps-advisories: A,B -->',
-      '<!-- audit-deps-blocked: C -->',
-      'more',
-    ].join('\n')
-
-    const result = stripMarkers({ body })
-
-    expect(result).not.toContain('audit-deps-')
-    expect(result).toContain('text')
-    expect(result).toContain('more')
-  })
-
-  it('stripMarkers keeps other HTML comments', () => {
-    const body = '<!-- keep me -->\n<!-- audit-deps-advisories: A -->'
-
-    expect(stripMarkers({ body })).toContain('<!-- keep me -->')
   })
 })

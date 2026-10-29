@@ -11,7 +11,12 @@ import {
   renderChangeTable,
   selectAllowedDependencies,
 } from './content-guard.mjs'
-import { findDisallowedChanges, listWorkingTreeChanges } from './path-guard.mjs'
+import {
+  findDisallowedChanges,
+  findDisallowedPatchChanges,
+  listPatchChanges,
+  listWorkingTreeChanges,
+} from './path-guard.mjs'
 import { findUnfixedClaims, readReport, selectFixableAdvisories } from './report.mjs'
 
 const execFileAsync = promisify(execFile)
@@ -22,6 +27,7 @@ const OPTION_NAMES = [
   'cwd',
   'fixable',
   'out',
+  'patch',
   'ref',
   'report',
   'result',
@@ -35,6 +41,7 @@ const COMMANDS = {
   'build-prompt': runBuildPrompt,
   'check-fixed': runCheckFixed,
   'content-guard': runContentGuard,
+  'patch-guard': runPatchGuard,
   'path-guard': runPathGuard,
   'pr-body': runPrBody,
   summarize: runSummarize,
@@ -94,6 +101,16 @@ async function runBuildPrompt({ options }) {
   await writeFile(requireOption({ name: 'out', options }), prompt)
 }
 
+// Runs before `git apply`, so a forged patch never writes outside the allowlist.
+async function runPatchGuard({ options }) {
+  const patch = await listPatchChanges({
+    cwd: options.cwd ?? process.cwd(),
+    patchPath: requireOption({ name: 'patch', options }),
+  })
+
+  failWithReasons({ reasons: findDisallowedPatchChanges(patch) })
+}
+
 async function runPathGuard({ options }) {
   const changes = await listWorkingTreeChanges({ cwd: options.cwd ?? process.cwd() })
 
@@ -122,12 +139,13 @@ async function runContentGuard({ options }) {
 async function runPrBody({ options }) {
   const fixable = parseFixable({ options })
   const text = await readFile(requireOption({ name: 'result', options }), 'utf8')
-  const { body } = parseCodexResult({ fixable, text })
+  const { body, fixedAdvisories } = parseCodexResult({ fixable, text })
 
   const { changes, violations } = await diffChangedManifests({ options })
   failWithReasons({ reasons: violations })
 
-  const changeTable = renderChangeTable({ advisories: fixable, changes })
+  // Verify's check-fixed proved these claims gone; the marker keeps the full fixable set for dedupe.
+  const changeTable = renderChangeTable({ advisories: fixedAdvisories, changes })
 
   await writeFile(
     requireOption({ name: 'out', options }),
