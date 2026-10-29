@@ -1,0 +1,551 @@
+name: audit-dependencies-branch
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Branch to audit and fix
+        type: string
+        required: true
+      scope:
+        description: Which surface to audit (consumer-facing or monorepo)
+        type: string
+        required: true
+      severity:
+        description: Minimum severity to report (low, moderate, high, critical)
+        type: string
+        required: true
+      is-default-inputs:
+        description: Only default inputs may create, update, or close PRs
+        type: boolean
+        required: true
+    secrets:
+      OPENAI_API_KEY:
+        required: true
+
+permissions: {}
+
+env:
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+
+jobs:
+  precheck:
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      fixable: ${{ steps.summarize.outputs.fixable }}
+      has_findings: ${{ steps.summarize.outputs.has_findings }}
+      next_step: ${{ steps.decide.outputs.next_step }}
+      pr_number: ${{ steps.decide.outputs.pr_number }}
+    steps:
+      - name: Checkout ${{ inputs.ref }}
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - name: Exclude tooling from git status
+        run: echo '.audit-deps/' >> .git/info/exclude
+
+      # Tooling comes from the triggering commit: the audited ref (e.g. 3.x) may not have it.
+      - name: Checkout tooling
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          path: .audit-deps/tooling
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/scripts/audit-deps
+            .agents/skills/audit-dependencies
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          # The audit resolves each package's dependencies fresh; a full
+          # workspace install is not needed.
+          pnpm-run-install: false
+
+      - name: Run audit dependencies action
+        uses: ./.github/actions/audit-dependencies
+        # Findings exit non-zero; the summarize step validates the report instead.
+        continue-on-error: true
+        with:
+          scope: ${{ inputs.scope }}
+          severity: ${{ inputs.severity }}
+          json: .audit-deps/audit_output.json
+
+      - name: Summarize findings
+        id: summarize
+        env:
+          SCOPE: ${{ inputs.scope }}
+        run: >-
+          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs summarize
+          --report=.audit-deps/audit_output.json
+          --scope="$SCOPE"
+
+      - name: Decide next step
+        id: decide
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          FIXABLE: ${{ steps.summarize.outputs.fixable }}
+          IS_DEFAULT_INPUTS: ${{ inputs.is-default-inputs }}
+          REF: ${{ inputs.ref }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { runPrecheck } = await import(
+              `${process.env.GITHUB_WORKSPACE}/.audit-deps/tooling/.github/scripts/audit-deps/github.mjs`
+            )
+
+            await runPrecheck({
+              core,
+              fixable: JSON.parse(process.env.FIXABLE),
+              github,
+              isDefaultInputs: process.env.IS_DEFAULT_INPUTS === 'true',
+              owner: context.repo.owner,
+              ref: process.env.REF,
+              repo: context.repo.repo,
+            })
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: audit-report-${{ inputs.ref }}
+          path: .audit-deps/audit_output.json
+          # The report sits in a dot-directory, which upload-artifact skips by default.
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  fix:
+    needs: precheck
+    if: contains(fromJSON('["create","update","dry-run"]'), needs.precheck.outputs.next_step)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      has_patch: ${{ steps.patch.outputs.has_patch }}
+    steps:
+      - name: Checkout ${{ inputs.ref }}
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - name: Exclude tooling from git status
+        run: echo '.audit-deps/' >> .git/info/exclude
+
+      - name: Checkout tooling
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          path: .audit-deps/tooling
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/scripts/audit-deps
+            .agents/skills/audit-dependencies
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          # Untrusted code runs in this job; a post-job cache save would publish a store it could alter.
+          pnpm-restore-cache: false
+
+      - name: Download audit report
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: audit-report-${{ inputs.ref }}
+          path: .audit-deps
+
+      - name: Build prompt
+        env:
+          FIXABLE: ${{ needs.precheck.outputs.fixable }}
+          REF: ${{ inputs.ref }}
+          SCOPE: ${{ inputs.scope }}
+          SEVERITY: ${{ inputs.severity }}
+        run: >-
+          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs build-prompt
+          --report=.audit-deps/audit_output.json
+          --template=.audit-deps/tooling/.github/scripts/audit-deps/prompt.md
+          --skill=.audit-deps/tooling/.agents/skills/audit-dependencies/SKILL.md
+          --ref="$REF"
+          --scope="$SCOPE"
+          --severity="$SEVERITY"
+          --fixable="$FIXABLE"
+          --out=.audit-deps/prompt.md
+
+      - name: Write Codex config
+        run: |
+          mkdir -p "$RUNNER_TEMP/codex-home"
+          cp .audit-deps/tooling/.github/scripts/audit-deps/codex-config.toml "$RUNNER_TEMP/codex-home/config.toml"
+
+      # OPENAI_API_KEY: never reference it in jobs on pull_request_target, or on issue_comment with a checkout of PR code.
+      - name: Run Codex
+        uses: openai/codex-action@bdf19a4a223ec2549a3e2274a0cf61556bc07675 # v1.13
+        env:
+          # The sandbox allows writes only in the workspace and temp dir; pnpm defaults to ~.
+          XDG_CACHE_HOME: /tmp/audit-deps/cache
+          XDG_DATA_HOME: /tmp/audit-deps/data
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: .audit-deps/prompt.md
+          permission-profile: audit-deps
+          codex-home: ${{ runner.temp }}/codex-home
+          output-schema-file: .audit-deps/tooling/.github/scripts/audit-deps/codex-output.schema.json
+          output-file: ${{ runner.temp }}/codex-result.json
+          safety-strategy: drop-sudo
+
+      # Codex may have edited .git/config; neutralize the hooks and diff drivers it could point at.
+      # Diffing against HEAD also captures changes Codex staged.
+      - name: Save patch
+        id: patch
+        run: |
+          set -euo pipefail
+          git -c core.hooksPath=/dev/null -c core.fsmonitor=false -c diff.external= \
+            diff HEAD --binary --no-ext-diff --no-textconv > "$RUNNER_TEMP/fix.patch"
+          if [ -s "$RUNNER_TEMP/fix.patch" ]; then
+            echo "has_patch=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_patch=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload fix
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: audit-fix-${{ inputs.ref }}
+          path: |
+            ${{ runner.temp }}/fix.patch
+            ${{ runner.temp }}/codex-result.json
+          if-no-files-found: error
+          retention-days: 7
+
+  verify:
+    needs: [precheck, fix]
+    if: needs.fix.outputs.has_patch == 'true'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout ${{ inputs.ref }}
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - name: Exclude tooling from git status
+        run: echo '.audit-deps/' >> .git/info/exclude
+
+      - name: Checkout tooling
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          path: .audit-deps/tooling
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/scripts/audit-deps
+            .agents/skills/audit-dependencies
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          # Untrusted code runs in this job; a post-job cache save would publish a store it could alter.
+          pnpm-restore-cache: false
+
+      - name: Download audit report
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: audit-report-${{ inputs.ref }}
+          path: .audit-deps
+
+      - name: Download fix
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: audit-fix-${{ inputs.ref }}
+          path: ${{ runner.temp }}/audit-fix
+
+      - name: Apply patch
+        run: git apply --binary "$RUNNER_TEMP/audit-fix/fix.patch"
+
+      - name: Check changed paths
+        run: >-
+          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs path-guard
+          --cwd="$GITHUB_WORKSPACE"
+
+      - name: Check manifest changes
+        env:
+          SCOPE: ${{ inputs.scope }}
+        run: >-
+          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs content-guard
+          --cwd="$GITHUB_WORKSPACE"
+          --report=.audit-deps/audit_output.json
+          --scope="$SCOPE"
+
+      # Proves the lockfile comes from the manifests alone, with no hand edits.
+      - name: Check lockfile regenerates cleanly
+        run: |
+          set -euo pipefail
+          cp pnpm-lock.yaml "$RUNNER_TEMP/codex-lock.yaml"
+          pnpm install --lockfile-only --ignore-scripts
+          if ! diff -q "$RUNNER_TEMP/codex-lock.yaml" pnpm-lock.yaml; then
+            echo "::error::pnpm-lock.yaml differs from a clean regeneration of the patched manifests"
+            exit 1
+          fi
+
+      # Package code runs from here on, only after every guard passed.
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Re-run audit
+        uses: ./.github/actions/audit-dependencies
+        continue-on-error: true
+        with:
+          scope: ${{ inputs.scope }}
+          severity: ${{ inputs.severity }}
+          json: .audit-deps/reaudit.json
+
+      - name: Check claimed fixes
+        env:
+          FIXABLE: ${{ needs.precheck.outputs.fixable }}
+        run: >-
+          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs check-fixed
+          --report=.audit-deps/reaudit.json
+          --result="$RUNNER_TEMP/audit-fix/codex-result.json"
+          --fixable="$FIXABLE"
+
+      - name: Build core
+        run: pnpm run build:core
+
+      - name: Build changed packages
+        run: |
+          set -euo pipefail
+          git diff --name-only -z HEAD -- ':(glob)packages/*/package.json' > "$RUNNER_TEMP/changed-manifests"
+          while IFS= read -r -d '' manifest; do
+            name="$(jq -r '.name // empty' "$manifest")"
+            if [ -z "$name" ]; then
+              echo "::error::$manifest has no name"
+              exit 1
+            fi
+            pnpm turbo build --filter="$name"
+          done < "$RUNNER_TEMP/changed-manifests"
+
+  open_pr:
+    needs: [precheck, fix, verify]
+    if: needs.verify.result == 'success' && contains(fromJSON('["create","update"]'), needs.precheck.outputs.next_step)
+    runs-on: ubuntu-26.04
+    environment: release
+    permissions:
+      contents: read
+    outputs:
+      pr_url: ${{ steps.cpr.outputs.pull-request-url }}
+    steps:
+      - name: Mint App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ secrets.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Checkout ${{ inputs.ref }}
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Exclude tooling from git status
+        run: echo '.audit-deps/' >> .git/info/exclude
+
+      - name: Checkout tooling
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          path: .audit-deps/tooling
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/scripts/audit-deps
+            .agents/skills/audit-dependencies
+
+      - name: Download audit report
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: audit-report-${{ inputs.ref }}
+          path: .audit-deps
+
+      - name: Download fix
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: audit-fix-${{ inputs.ref }}
+          path: ${{ runner.temp }}/audit-fix
+
+      - name: Apply patch
+        run: git apply --binary "$RUNNER_TEMP/audit-fix/fix.patch"
+
+      # This job pushes, so it repeats the guards instead of trusting the verify job.
+      - name: Check changed paths
+        run: >-
+          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs path-guard
+          --cwd="$GITHUB_WORKSPACE"
+
+      - name: Check manifest changes
+        env:
+          SCOPE: ${{ inputs.scope }}
+        run: >-
+          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs content-guard
+          --cwd="$GITHUB_WORKSPACE"
+          --report=.audit-deps/audit_output.json
+          --scope="$SCOPE"
+
+      - name: Build PR body
+        env:
+          FIXABLE: ${{ needs.precheck.outputs.fixable }}
+          SCOPE: ${{ inputs.scope }}
+        run: >-
+          node .audit-deps/tooling/.github/scripts/audit-deps/cli.mjs pr-body
+          --cwd="$GITHUB_WORKSPACE"
+          --report=.audit-deps/audit_output.json
+          --scope="$SCOPE"
+          --fixable="$FIXABLE"
+          --result="$RUNNER_TEMP/audit-fix/codex-result.json"
+          --out="$RUNNER_TEMP/pr-body.md"
+
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: ci/audit-deps-fix-${{ inputs.ref }}
+          base: ${{ inputs.ref }}
+          title: "${{ inputs.ref == '3.x' && 'fix(deps): resolve high severity audit vulnerabilities (3.x)' || 'fix(deps): resolve high severity audit vulnerabilities' }}"
+          commit-message: 'fix(deps): resolve high severity audit vulnerabilities'
+          body-path: ${{ runner.temp }}/pr-body.md
+          labels: dependencies
+          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          # Git pathspec `**/package.json` does not match the root manifest.
+          add-paths: |
+            package.json
+            **/package.json
+            pnpm-lock.yaml
+            pnpm-workspace.yaml
+
+  housekeeping:
+    needs: precheck
+    if: contains(fromJSON('["close","blocked"]'), needs.precheck.outputs.next_step)
+    runs-on: ubuntu-26.04
+    environment: release
+    permissions:
+      contents: read
+    steps:
+      - name: Mint App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ secrets.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Checkout tooling
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          path: .audit-deps/tooling
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/scripts/audit-deps
+            .agents/skills/audit-dependencies
+
+      - name: Close or comment on PR
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          FIXABLE: ${{ needs.precheck.outputs.fixable }}
+          NEXT_STEP: ${{ needs.precheck.outputs.next_step }}
+          PR_NUMBER: ${{ needs.precheck.outputs.pr_number }}
+          REF: ${{ inputs.ref }}
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const { closeStalePr, commentBlocked } = await import(
+              `${process.env.GITHUB_WORKSPACE}/.audit-deps/tooling/.github/scripts/audit-deps/github.mjs`
+            )
+
+            const prNumber = Number(process.env.PR_NUMBER)
+            if (!Number.isInteger(prNumber) || prNumber <= 0) {
+              throw new Error(`invalid PR number: ${process.env.PR_NUMBER}`)
+            }
+
+            const { owner, repo } = context.repo
+
+            if (process.env.NEXT_STEP === 'close') {
+              await closeStalePr({ github, owner, prNumber, ref: process.env.REF, repo })
+            } else {
+              await commentBlocked({
+                fixable: JSON.parse(process.env.FIXABLE),
+                github,
+                owner,
+                prNumber,
+                repo,
+              })
+            }
+
+  status:
+    needs: [precheck, fix, verify, open_pr, housekeeping]
+    if: always()
+    runs-on: ubuntu-26.04
+    permissions: {}
+    steps:
+      - name: Download fix result
+        if: needs.fix.result == 'success' && needs.fix.outputs.has_patch == 'false'
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: audit-fix-${{ inputs.ref }}
+          path: ${{ runner.temp }}/audit-fix
+
+      - name: Report status
+        env:
+          HAS_FAILED_JOB: ${{ contains(needs.*.result, 'failure') }}
+          HAS_FINDINGS: ${{ needs.precheck.outputs.has_findings }}
+          NEXT_STEP: ${{ needs.precheck.outputs.next_step }}
+          PR_NUMBER: ${{ needs.precheck.outputs.pr_number }}
+          PR_URL: ${{ needs.open_pr.outputs.pr_url }}
+          REF: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+
+          pr_link="$PR_URL"
+          if [ -z "$pr_link" ] && [ -n "$PR_NUMBER" ]; then
+            pr_link="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$PR_NUMBER"
+          fi
+
+          line="**$REF**: next step \`${NEXT_STEP:-unknown}\`"
+          if [ -n "$pr_link" ]; then
+            line="$line, PR: $pr_link"
+          fi
+          echo "$line" >> "$GITHUB_STEP_SUMMARY"
+
+          # Codex output is untrusted; it reaches the summary only through jq.
+          result="$RUNNER_TEMP/audit-fix/codex-result.json"
+          if [ -f "$result" ]; then
+            {
+              printf '\n### Needs a Person\n\n'
+              jq -r '.needsPerson[]? | "- \(.advisory) (\(.module), \(.dependency)): \(.reason)" | gsub("[\r\n]+"; " ")' "$result" \
+                || echo "codex-result.json could not be read"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "$HAS_FINDINGS" = "true" ] || [ "$HAS_FAILED_JOB" = "true" ]; then
+            echo "::error::Audit has findings or a job failed for $REF"
+            exit 1
+          fi

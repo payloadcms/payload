@@ -864,8 +864,12 @@ jobs:
     name: Content API Tests
     runs-on: ubuntu-26.04
     needs: [changes, build]
-    # Skip fork PRs: this job uses credentials fork workflows must not reach.
-    if: needs.changes.outputs.needs_tests == 'true' && github.event.pull_request.head.repo.fork == false
+    # Skip fork and bot PRs: this job assumes an AWS role, and bot PRs run dependency versions no person has reviewed.
+    if: >-
+      needs.changes.outputs.needs_tests == 'true'
+      && github.event.pull_request.head.repo.fork == false
+      && github.event.pull_request.user.type != 'Bot'
+      && !startsWith(github.head_ref, 'ci/audit-deps-fix-')
     # Non-blocking while adapter coverage is incomplete. Once the full suite
     # passes, migrate to the `tests-int` matrix pattern (`pnpm test:int`
     # with --shard); `test:int:summary` cannot shard.
