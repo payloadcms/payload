@@ -215,10 +215,6 @@ jobs:
         # Leaves time in the job timeout for the git restore step below.
         timeout-minutes: 25
         uses: openai/codex-action@bdf19a4a223ec2549a3e2274a0cf61556bc07675 # v1.13
-        env:
-          # The sandbox allows writes only in the workspace and temp dir; pnpm defaults to ~.
-          XDG_CACHE_HOME: /tmp/audit-deps/cache
-          XDG_DATA_HOME: /tmp/audit-deps/data
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           prompt-file: .audit-deps/prompt.md
