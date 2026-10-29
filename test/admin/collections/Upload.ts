@@ -18,8 +18,6 @@ export const UploadCollection: CollectionConfig = {
         height: 100,
       },
     ],
-    adminThumbnail: () =>
-      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
   },
   versions: false,
 }
