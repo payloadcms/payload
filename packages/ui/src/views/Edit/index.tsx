@@ -3,6 +3,7 @@
 import type { DocumentViewClientProps, User } from 'payload'
 
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -47,6 +48,8 @@ const baseClass = 'collection-edit'
 const PENDING_SUCCESS_TOAST_KEY = 'payload-pending-success-toast'
 
 export type OnSaveContext = {
+  /** Set by the autosave submit. A publish or unpublish must not recreate the lock. */
+  autosave?: boolean
   getDocPermissions?: boolean
   incrementVersionCount?: boolean
 }
@@ -127,7 +130,7 @@ export function DefaultEditView({
     config,
     config: {
       admin: { user: userSlug },
-      routes: { admin: adminRoute },
+      routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
     getEntityConfig,
@@ -189,6 +192,13 @@ export function DefaultEditView({
   const originalUpdatedAtRef = useRef(data?.updatedAt)
   const saveCounterRef = useRef(0)
   const isSavingRef = useRef(false)
+  // Set in the autosave lock-release cleanup so a queued form-state request
+  // does not recreate the lock after the editor has left the document.
+  const unmountedRef = useRef(false)
+  const pendingFormStateRef = useRef<Promise<unknown> | undefined>(undefined)
+  // The post-autosave form-state request also creates the lock, and it is not
+  // the onChange request tracked above.
+  const pendingAutosaveFormStateRef = useRef<Promise<unknown> | undefined>(undefined)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
   // Render can't read the current time, so check for expiry when the lock changes and expires
@@ -379,9 +389,19 @@ export function DefaultEditView({
       }
 
       if (id || globalSlug) {
+        // Aborting this callback does not stop a form-state call that has
+        // already reached the server. Skip starting one after the editor left.
+        if (context?.autosave && unmountedRef.current) {
+          return
+        }
+
         const docPreferences = await getDocPreferences()
 
-        const { livePreviewURL, previewURL, state } = await getFormState({
+        if (context?.autosave && unmountedRef.current) {
+          return
+        }
+
+        const formStatePromise = getFormState({
           id,
           collectionSlug,
           data: document,
@@ -392,12 +412,29 @@ export function DefaultEditView({
           operation,
           renderAllFields: false,
           returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
-          returnLockStatus: false,
+          // Autosave can land before the debounced form-state request that
+          // creates the lock. Refreshing after an autosave creates it then.
+          // Publish and unpublish omit this flag, so they stay unlocked.
+          returnLockStatus: Boolean(isLockingEnabled && context?.autosave),
           returnPreviewURL: isPreviewEnabled,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
           skipValidation: true,
         })
+
+        if (context?.autosave) {
+          const queued = [pendingAutosaveFormStateRef.current, formStatePromise].filter(
+            (promise): promise is Promise<unknown> => promise !== undefined,
+          )
+          pendingAutosaveFormStateRef.current =
+            queued.length > 1 ? Promise.all(queued) : formStatePromise
+        }
+
+        const { livePreviewURL, previewURL, state } = await formStatePromise
+
+        if (context?.autosave && unmountedRef.current) {
+          return
+        }
 
         // For upload collections, clear the file field from the returned state
         // to prevent the File object from persisting in form state after save
@@ -482,6 +519,10 @@ export function DefaultEditView({
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState, submitted }) => {
+      if (autosaveEnabled && unmountedRef.current) {
+        return
+      }
+
       const controller = handleAbortRef(abortOnChangeRef)
 
       // Capture save state before the async form-state request so we can detect
@@ -521,7 +562,11 @@ export function DefaultEditView({
 
       const docPreferences = await getDocPreferences()
 
-      const result = await getFormState({
+      if (autosaveEnabled && unmountedRef.current) {
+        return
+      }
+
+      const formStatePromise = getFormState({
         id,
         checkForStaleData,
         collectionSlug,
@@ -539,6 +584,16 @@ export function DefaultEditView({
         skipValidation: !submitted,
         updateLastEdited,
       })
+
+      if (autosaveEnabled) {
+        pendingFormStateRef.current = formStatePromise
+      }
+
+      const result = await formStatePromise
+
+      if (autosaveEnabled && unmountedRef.current) {
+        return
+      }
 
       if (!result) {
         return
@@ -600,6 +655,102 @@ export function DefaultEditView({
       abortAndIgnore(abortOnSave)
     }
   }, [])
+
+  // Autosave never renders LeaveWithoutSaving, so the lock would otherwise
+  // survive navigation. Release only this user's row, and only when the
+  // document URL is actually left (take-over refreshes the same path).
+  useEffect(() => {
+    if (
+      !isLockingEnabled ||
+      !autosaveEnabled ||
+      !user?.id ||
+      !user.collection ||
+      !(id || globalSlug)
+    ) {
+      return
+    }
+
+    unmountedRef.current = false
+
+    const docPath = formatAdminURL({
+      adminRoute,
+      path: globalSlug ? `/globals/${globalSlug}` : `/collections/${collectionSlug}/${id}`,
+    })
+
+    const releaseURL = `${formatAdminURL({
+      apiRoute,
+      path: '/payload-locked-documents',
+      serverURL,
+    })}${qs.stringify(
+      {
+        where: {
+          and: [
+            globalSlug
+              ? { globalSlug: { equals: globalSlug } }
+              : { 'document.relationTo': { equals: collectionSlug } },
+            ...(globalSlug ? [] : [{ 'document.value': { equals: id } }]),
+            { 'user.relationTo': { equals: user.collection } },
+            { 'user.value': { equals: user.id } },
+          ],
+        },
+      },
+      { addQueryPrefix: true },
+    )}`
+
+    const release = () => {
+      void fetch(releaseURL, {
+        credentials: 'include',
+        keepalive: true,
+        method: 'DELETE',
+      })
+    }
+
+    // A form-state request already in flight still creates or refreshes the
+    // lock on the server. Delete only after it settles, so the DELETE cannot
+    // lose the race. pagehide cannot wait.
+    const releaseAfterPending = () => {
+      void Promise.all(
+        [pendingFormStateRef.current, pendingAutosaveFormStateRef.current].filter(
+          (promise): promise is Promise<unknown> => Boolean(promise),
+        ),
+      ).finally(release)
+    }
+
+    const onPageHide = (event: PageTransitionEvent) => {
+      // The back/forward cache restores this page. Releasing the lock would
+      // leave that restored editor unlocked until the next edit.
+      if (!event.persisted) {
+        release()
+      }
+    }
+
+    window.addEventListener('pagehide', onPageHide)
+
+    return () => {
+      unmountedRef.current = true
+      window.removeEventListener('pagehide', onPageHide)
+      // Must outlive this effect: the next pathname is only visible on the
+      // following turn. Clearing it would skip the release.
+      // eslint-disable-next-line @eslint-react/web-api/no-leaked-timeout
+      setTimeout(() => {
+        const { pathname } = window.location
+        if (pathname !== docPath && !pathname.startsWith(`${docPath}/`)) {
+          releaseAfterPending()
+        }
+      }, 0)
+    }
+  }, [
+    adminRoute,
+    apiRoute,
+    autosaveEnabled,
+    collectionSlug,
+    globalSlug,
+    id,
+    isLockingEnabled,
+    serverURL,
+    user?.collection,
+    user?.id,
+  ])
 
   // Show pending success toast after redirect from create
   useEffect(() => {

@@ -20,6 +20,8 @@ When a user starts editing a document, Payload locks it for that user. If anothe
 
 The lock will automatically expire after a set period of inactivity, configurable using the `duration` property in the `lockDocuments` configuration, after which others can resume editing.
 
+When autosave is enabled, draft saves do not release the lock. Publishing does, as does deleting the document or moving it to the trash. The lock also ends when the editor leaves the document, or after `duration` with no further edits. Another user's save is still rejected until they take over or the lock expires.
+
 <Banner type="info">
   **Note:** If your application does not require document locking, you can
   disable this feature for any collection or global by setting the
