@@ -18,14 +18,19 @@ import { translations } from './translations/index.js'
 import { addCollectionAccess, type TenantAccessConfig } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
 import { combineFilters } from './utilities/combineFilters.js'
+import { copyConfig } from './utilities/copyConfig.js'
 import { miniChalk } from './utilities/miniChalk.js'
 
 export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
   slug: '@payloadcms/plugin-multi-tenant',
-  plugin: ({ config: incomingConfig, options: pluginConfig }) => {
+  plugin: ({ config, options: pluginConfig }) => {
     if (pluginConfig.enabled === false) {
-      return incomingConfig
+      return config
     }
+
+    // Imported config objects survive hot reload. Copy every branch this plugin mutates so
+    // rebuilding from those objects cannot accumulate fields, components, hooks or wrappers.
+    const incomingConfig = copyConfig({ config })
 
     /**
      * Set defaults
@@ -34,8 +39,7 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
       typeof pluginConfig.userHasAccessToAllTenants === 'function'
         ? pluginConfig.userHasAccessToAllTenants
         : () => false
-    const tenantsCollectionSlug = (pluginConfig.tenantsSlug =
-      pluginConfig.tenantsSlug || defaults.tenantCollectionSlug)
+    const tenantsCollectionSlug = pluginConfig.tenantsSlug || defaults.tenantCollectionSlug
     const tenantFieldName = pluginConfig?.tenantField?.name || defaults.tenantFieldName
     const tenantsArrayFieldName =
       pluginConfig?.tenantsArrayField?.arrayFieldName || defaults.tenantsArrayFieldName

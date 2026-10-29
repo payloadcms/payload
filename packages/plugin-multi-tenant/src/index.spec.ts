@@ -37,11 +37,11 @@ describe('multiTenantPlugin', () => {
         ],
       } as Config
 
-      await plugin(config)
+      const builtConfig = await plugin(config)
       await plugin(config)
       await plugin(config)
 
-      const posts = config.collections?.find(({ slug }) => slug === 'posts')
+      const posts = builtConfig.collections?.find(({ slug }) => slug === 'posts')
 
       expect(posts?.admin?.components?.edit?.editMenuItems).toEqual([
         ...customMenuItems,
