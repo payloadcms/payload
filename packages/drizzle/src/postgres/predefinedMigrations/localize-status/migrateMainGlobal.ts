@@ -39,7 +39,11 @@ export async function migrateMainGlobalStatus({
       `,
     })
 
-    const status = latestVersionStatus.rows[0]?._status || 'draft'
+    const status = latestVersionStatus.rows[0]?._status
+
+    if (!status) {
+      continue
+    }
 
     // Get the global document ID from the globals table
     const globalDoc = await db.execute({
