@@ -2,8 +2,8 @@ import type { CollectionConfig, Config } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 
-import { addTenantBaseAccess } from './addTenantBaseAccess.js'
-import { addTenantCollectionAccess } from './addTenantCollectionAccess.js'
+import { combineBaseAccessWithTenantAccess } from './combineBaseAccessWithTenantAccess.js'
+import { combineCollectionAccessWithTenantAccess } from './combineCollectionAccessWithTenantAccess.js'
 
 export type TenantAccessConfig = {
   accessResultCallback?: MultiTenantPluginConfig['usersAccessResultOverride']
@@ -22,66 +22,52 @@ export const addCollectionAccess = ({
   collectionAccessConfigs: TenantAccessConfig[]
   config: Config
 }): Config => {
-  const { accessConfigsWithoutOverrides, accessConfigsWithOverrides } =
-    collectionAccessConfigs.reduce<{
-      accessConfigsWithoutOverrides: TenantAccessConfig[]
-      accessConfigsWithOverrides: TenantAccessConfig[]
-    }>(
-      (acc, accessConfig) => {
-        if (accessConfig.accessResultCallback) {
-          acc.accessConfigsWithOverrides.push(accessConfig)
-        } else {
-          acc.accessConfigsWithoutOverrides.push(accessConfig)
-        }
+  const { baseAccessBySlug, collectionAccessBySlug } = collectionAccessConfigs.reduce<{
+    baseAccessBySlug: Map<string, TenantAccessConfig>
+    collectionAccessBySlug: Map<string, TenantAccessConfig>
+  }>(
+    (acc, accessConfig) => {
+      if (accessConfig.accessResultCallback) {
+        acc.collectionAccessBySlug.set(accessConfig.collection.slug, accessConfig)
+      } else {
+        acc.baseAccessBySlug.set(accessConfig.collection.slug, accessConfig)
+      }
 
-        return acc
-      },
-      { accessConfigsWithoutOverrides: [], accessConfigsWithOverrides: [] },
-    )
+      return acc
+    },
+    {
+      baseAccessBySlug: new Map(),
+      collectionAccessBySlug: new Map(),
+    },
+  )
+
   let updatedConfig = config
 
   // Override callbacks need the collection's own access result.
-  if (accessConfigsWithOverrides.length) {
+  if (collectionAccessBySlug.size) {
     updatedConfig = {
       ...updatedConfig,
-      collections: addCollectionAccessOverrides({
-        accessConfigs: accessConfigsWithOverrides,
-        collections: config.collections,
+      collections: updatedConfig.collections?.map((collection) => {
+        const accessConfig = collectionAccessBySlug.get(collection.slug)
+
+        if (!accessConfig) {
+          return collection
+        }
+
+        return combineCollectionAccessWithTenantAccess({ ...accessConfig, collection })
       }),
     }
   }
 
-  if (accessConfigsWithoutOverrides.length) {
+  if (baseAccessBySlug.size) {
     updatedConfig = {
       ...updatedConfig,
-      baseAccess: addTenantBaseAccess({
-        accessConfigs: accessConfigsWithoutOverrides,
+      baseAccess: combineBaseAccessWithTenantAccess({
+        accessConfigBySlug: baseAccessBySlug,
         baseAccess: config.baseAccess,
       }),
     }
   }
 
   return updatedConfig
-}
-
-const addCollectionAccessOverrides = ({
-  accessConfigs,
-  collections,
-}: {
-  accessConfigs: TenantAccessConfig[]
-  collections: Config['collections']
-}): Config['collections'] => {
-  const accessConfigBySlug = new Map(
-    accessConfigs.map((accessConfig) => [accessConfig.collection.slug, accessConfig]),
-  )
-
-  return collections?.map((collection) => {
-    const accessConfig = accessConfigBySlug.get(collection.slug)
-
-    if (!accessConfig) {
-      return collection
-    }
-
-    return addTenantCollectionAccess({ ...accessConfig, collection })
-  })
 }

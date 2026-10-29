@@ -5,17 +5,13 @@ import type { TenantAccessConfig } from './addCollectionAccess.js'
 import { collectionAccessKeys } from './collectionAccessKeys.js'
 import { getTenantAccessResult } from './getTenantAccessResult.js'
 
-export const addTenantBaseAccess = ({
-  accessConfigs,
+export const combineBaseAccessWithTenantAccess = ({
+  accessConfigBySlug,
   baseAccess,
 }: {
-  accessConfigs: TenantAccessConfig[]
+  accessConfigBySlug: Map<string, TenantAccessConfig>
   baseAccess: Config['baseAccess']
 }): Config['baseAccess'] => {
-  const accessConfigBySlug = new Map(
-    accessConfigs.map((accessConfig) => [accessConfig.collection.slug, accessConfig]),
-  )
-
   const originalBaseAccess = baseAccess?.collections || {}
   const collections: NonNullable<NonNullable<Config['baseAccess']>['collections']> = {
     ...originalBaseAccess,

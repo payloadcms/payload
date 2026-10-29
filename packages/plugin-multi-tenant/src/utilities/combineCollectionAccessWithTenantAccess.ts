@@ -5,7 +5,9 @@ import type { TenantAccessConfig } from './addCollectionAccess.js'
 import { collectionAccessKeys } from './collectionAccessKeys.js'
 import { getTenantAccessResult } from './getTenantAccessResult.js'
 
-export const addTenantCollectionAccess = (accessConfig: TenantAccessConfig): CollectionConfig => {
+export const combineCollectionAccessWithTenantAccess = (
+  accessConfig: TenantAccessConfig,
+): CollectionConfig => {
   const access = { ...accessConfig.collection.access }
   const updateAccessFallback = access.update
 
