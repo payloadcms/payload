@@ -99,6 +99,38 @@ describe('SEO Plugin', () => {
       await expect(metaTitle).toHaveValue('Website.com — Test Page')
     })
 
+    test('Should keep the existing meta title when auto-generate fails', async () => {
+      await page.goto(url.edit(id))
+      await waitForFormReady(page)
+      const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
+      const metaTitleClass = '#field-meta__title'
+
+      await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
+
+      const metaTitle = page.locator(metaTitleClass)
+      await expect(metaTitle).toHaveValue('This is a test meta title')
+
+      const generateURL = '**/plugin-seo/generate-title'
+      await page.route(generateURL, (route) =>
+        route.fulfill({
+          body: JSON.stringify({
+            errors: [{ message: 'You are not allowed to perform this action.' }],
+          }),
+          contentType: 'application/json',
+          status: 403,
+        }),
+      )
+
+      await page.locator(autoGenerateButtonClass).nth(0).click()
+
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'You are not allowed to perform this action.',
+      )
+      await expect(metaTitle).toHaveValue('This is a test meta title')
+
+      await page.unroute(generateURL)
+    })
+
     // todo: Re-enable this test once required attributes are fixed
     test.skip('Title should be required as per custom override', async () => {
       const metaTitleClass = '#field-title'
