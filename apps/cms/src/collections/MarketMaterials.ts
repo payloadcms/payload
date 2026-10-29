@@ -5,8 +5,8 @@ import { loggedIn } from '../access/loggedIn'
 /**
  * The raw materials the VgemsAI app's Research tab follows, such as gold and Brent crude, with their
  * prices in Market Prices. awoz-api reads both through src/endpoints/appMarket.ts and saves each
- * material's closing price there every day, from Yahoo Finance under its `symbol`. The six the app
- * started with are added when the CMS starts with none (src/collections/marketSeed.ts).
+ * material's price there every 4 hours, from API Ninjas' Commodity Price API under its `symbol`. The
+ * six the app started with are added when the CMS starts with none (src/collections/marketSeed.ts).
  */
 export const MarketMaterials: CollectionConfig = {
   slug: 'market-materials',
@@ -68,8 +68,9 @@ export const MarketMaterials: CollectionConfig = {
           type: 'text',
           admin: {
             description:
-              'Its Yahoo Finance symbol, e.g. GC=F for gold: awoz-api saves its price every day. Leave it empty to enter the prices by hand under Market Prices.',
+              "Its name in API Ninjas' Commodity Price API, e.g. gold, silver, platinum, palladium, copper or brent_crude_oil: awoz-api saves its price every 4 hours. Leave it empty to enter the prices by hand under Market Prices.",
           },
+          label: 'API Ninjas commodity',
         },
         {
           name: 'icon',
@@ -98,7 +99,7 @@ export const MarketMaterials: CollectionConfig = {
       type: 'checkbox',
       admin: {
         description:
-          'Shown in the app, with a price saved every day. Untick it to hide it and keep its prices.',
+          'Shown in the app, with its price saved every 4 hours. Untick it to hide it and keep its prices.',
         position: 'sidebar',
       },
       defaultValue: true,

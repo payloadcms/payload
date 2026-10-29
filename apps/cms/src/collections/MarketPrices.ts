@@ -3,9 +3,9 @@ import type { CollectionConfig } from 'payload'
 import { loggedIn } from '../access/loggedIn'
 
 /**
- * One closing price per material and day, for the VgemsAI app's Research tab. awoz-api saves them every
- * day through POST /api/app/market-prices (src/endpoints/appMarket.ts); the team can add or correct one by
- * hand, which awoz-api then leaves alone.
+ * One price per material and day, for the VgemsAI app's Research tab: the day's last price, ending as its
+ * closing price. awoz-api saves them every 4 hours through POST /api/app/market-prices
+ * (src/endpoints/appMarket.ts); the team can add or correct one by hand, which awoz-api then leaves alone.
  */
 export const MarketPrices: CollectionConfig = {
   slug: 'market-prices',
@@ -18,7 +18,7 @@ export const MarketPrices: CollectionConfig = {
   admin: {
     defaultColumns: ['material', 'date', 'price', 'source'],
     description:
-      'Closing prices, saved by awoz-api every day. A price added or changed here is kept as it is.',
+      "Each day's last price, saved by awoz-api every 4 hours. A price added or changed here is kept as it is.",
     group: 'VgemsAI App',
   },
   defaultSort: '-date',
@@ -64,6 +64,8 @@ export const MarketPrices: CollectionConfig = {
       },
       defaultValue: 'manual',
       options: [
+        { label: 'API Ninjas', value: 'api-ninjas' },
+        // Saved by awoz-api's first version
         { label: 'Yahoo Finance', value: 'yahoo' },
         { label: 'Entered by hand', value: 'manual' },
       ],
@@ -71,7 +73,7 @@ export const MarketPrices: CollectionConfig = {
     },
   ],
   hooks: {
-    // Someone in the admin panel added or corrected it: awoz-api's daily update must not overwrite it
+    // Someone in the admin panel added or corrected it: awoz-api's updates must not overwrite it
     beforeChange: [({ data, req }) => (req.user ? { ...data, source: 'manual' } : data)],
   },
   indexes: [{ fields: ['material', 'date'], unique: true }],
