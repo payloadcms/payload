@@ -2570,6 +2570,14 @@ describe('Types testing', () => {
       })
     })
 
+    test('should accept interface-typed interpolation values', () => {
+      interface GroupByVariables {
+        label: string
+      }
+
+      expect(t).type.toBeCallableWith('general:groupByLabel', {} as GroupByVariables)
+    })
+
     test('should reject unresolved config labels as interpolation values', () => {
       expect(t).type.not.toBeCallableWith('general:groupByLabel', { label: { en: 'Title' } })
       expect(t).type.not.toBeCallableWith('general:groupByLabel', { label: () => 'Title' })

@@ -139,15 +139,23 @@ export type ClientTranslationKeys<
 export type ClientTranslationsObject = GenericTranslationsObject //ReconstructObjectFromTranslationKeys<ClientTranslationKeys>
 
 /**
- * Values interpolated into `{{placeholder}}` slots of a translation string.
+ * A value interpolated into a `{{placeholder}}` slot of a translation string.
  * Interpolation stringifies each value, so config labels (locale records or label functions)
  * must be resolved with `getTranslation` first.
  */
-export type TranslationVariables = Record<string, null | number | string | undefined>
+export type TranslationVariable = null | number | string | undefined
 
-export type TFunction<TTranslationKeys = DefaultTranslationKeys> = (
+export type TranslationVariables = Record<string, TranslationVariable>
+
+/**
+ * The variables are a constrained generic instead of `TranslationVariables` so that
+ * interface-typed objects, which have no implicit index signature, are accepted too.
+ */
+export type TFunction<TTranslationKeys = DefaultTranslationKeys> = <
+  TVariables extends { [Key in keyof TVariables]: TranslationVariable },
+>(
   key: TTranslationKeys,
-  options?: TranslationVariables,
+  options?: TVariables,
 ) => string
 
 export type I18n<

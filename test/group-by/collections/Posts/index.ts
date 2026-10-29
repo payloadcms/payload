@@ -70,6 +70,11 @@ export const PostsCollection: CollectionConfig = {
           name: 'metaTitle',
           type: 'text',
         },
+        {
+          name: 'metaDescription',
+          type: 'text',
+          label: false,
+        },
       ],
     },
   ],

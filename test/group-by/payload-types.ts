@@ -200,6 +200,7 @@ export interface Post {
   tab1Field?: string | null;
   meta?: {
     metaTitle?: string | null;
+    metaDescription?: string | null;
   };
   createdBy?: {
     relationTo: 'users';
@@ -512,6 +513,7 @@ export interface PostsSelect<T extends boolean = true> {
     | T
     | {
         metaTitle?: T;
+        metaDescription?: T;
       };
   createdBy?: T;
   updatedBy?: T;
