@@ -74,7 +74,7 @@ Use `consumer-facing` (the first command) for the scheduled default. Use `monore
 Report shape: `{ findings, plan: { actions, scope, verify } }`.
 
 - `findings[]`: `advisory`, `package` (the vulnerable module), `severity`, `title`, `url` (GHSA link), `fixed_in`, `paths` (dependency chains), `bumps[]` (direct dependencies and the workspace packages that declare them).
-- `plan.actions[]`: the starting point for all work (see step 2).
+- `plan.actions[]`: the starting point for all work (see step 2). A `bump` action is `{ type, dependency, manifests, toRange, crossesMajor }`.
 - `plan.verify`: the command that re-runs the audit.
 
 ### 2. Work From `plan.actions`
@@ -107,7 +107,7 @@ A bump that crosses a major version can break us. Before you apply it:
 
 Then decide:
 
-- No breaking change affects us: apply the bump. If a small code change is required, make it only if the allowed-files rules of the caller permit it; otherwise treat the bump as affecting us.
+- No breaking change affects us: apply the bump. Never change source code. If a bump needs a code change, it affects us: skip it and report it in "Needs a Person".
 - A breaking change affects us: do not apply the bump. Add it to "Needs a Person" with the advisory, the breaking change, the affected `file:line` items, and a suggested fix.
 
 The PR body must list, for each applied major bump, the breaking changes you checked and the files you checked.
@@ -129,7 +129,7 @@ Add an override only when:
 
 - The parent pins an exact version that does not satisfy the fix.
 - No version of the parent fixes the vulnerability.
-- The parent bump has high breaking-change risk and the user or caller defers it.
+- The parent bump has high breaking-change risk and the caller defers it.
 
 Overrides are in `pnpm-workspace.yaml` under `overrides`, in alphabetical order. Do not put them in `package.json`. Override format: `"<parent>><vulnerable-pkg>": "^<fixed-version>"`.
 
