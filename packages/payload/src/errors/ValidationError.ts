@@ -37,13 +37,15 @@ export class ValidationError extends APIError<{
       id?: number | string
       /**
        *  req needs to be passed through (if you have one) in order to resolve label functions that may be part of the errors array
+       *  and to translate the message when `t` is not passed
        */
       req?: Partial<PayloadRequest>
     },
     t?: TFunction,
   ) {
-    const message = t
-      ? t('error:followingFieldsInvalid', { count: results.errors.length })
+    const translate = t ?? results.req?.t
+    const message = translate
+      ? translate('error:followingFieldsInvalid', { count: results.errors.length })
       : results.errors.length === 1
         ? en.translations.error.followingFieldsInvalid_one
         : en.translations.error.followingFieldsInvalid_other
