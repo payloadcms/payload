@@ -21,6 +21,9 @@ import {
   OperatorHandlerJoinNotes,
   OperatorHandlerJoinParents,
 } from './collections/OperatorHandlerJoins.js'
+import { MultipleCollectionsMany1 } from './collections/MultipleCollectionsMany1.js'
+import { MultipleCollectionsMany2 } from './collections/MultipleCollectionsMany2.js'
+import { MultipleCollectionsManyParents } from './collections/MultipleCollectionsManyParents.js'
 import { Posts } from './collections/Posts.js'
 import { SelfJoins } from './collections/SelfJoins.js'
 import { Singular } from './collections/Singular.js'
@@ -138,6 +141,9 @@ export default buildConfigWithDefaults({
         versions: false,
       },
       Posts,
+      MultipleCollectionsManyParents,
+      MultipleCollectionsMany1,
+      MultipleCollectionsMany2,
       Categories,
       HiddenPosts,
       Uploads,
