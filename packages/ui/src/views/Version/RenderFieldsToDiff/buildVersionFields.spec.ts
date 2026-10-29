@@ -228,6 +228,23 @@ function addFieldsToClientSchemaMap({
         parentIndexPath: indexPath,
         parentSchemaPath: schemaPath,
       })
+    } else if (field.type === 'tabs') {
+      field.tabs.forEach((tab, tabIndex) => {
+        const { indexPath: tabIndexPath, schemaPath: tabSchemaPath } = getFieldPaths({
+          field: { ...tab, type: 'tab' },
+          index: tabIndex,
+          parentIndexPath: indexPath,
+          parentSchemaPath: schemaPath,
+        })
+
+        addFieldsToClientSchemaMap({
+          clientSchemaMap,
+          entitySlug,
+          fields: tab.fields,
+          parentIndexPath: 'name' in tab ? '' : tabIndexPath,
+          parentSchemaPath: tabSchemaPath,
+        })
+      })
     } else if (field.type === 'group') {
       addFieldsToClientSchemaMap({
         clientSchemaMap,
@@ -258,10 +275,66 @@ function getSchemaPaths(versionFields: VersionField[]): string[] {
 }
 
 describe('version diff fields', () => {
+  it.each(['row', 'collapsible', 'group', 'tabs'] as const)(
+    'should retain changed children of a hidden %s layout field',
+    (type) => {
+      const children: Field[] = [
+        { name: 'visible', type: 'text' },
+        { name: 'secret', type: 'text', hidden: true },
+      ]
+      const field: Field =
+        type === 'tabs'
+          ? { type, hidden: true, tabs: [{ label: 'Content', fields: children }] }
+          : type === 'row'
+            ? { type, hidden: true, fields: children }
+            : { type, hidden: true, label: 'Content', fields: children }
+      const clientSchemaMap: ClientFieldSchemaMap = new Map()
+
+      addFieldsToClientSchemaMap({
+        clientSchemaMap,
+        entitySlug: 'posts',
+        fields: [field],
+        parentSchemaPath: '',
+      })
+
+      const { versionFields } = buildVersionFields({
+        clientSchemaMap,
+        customDiffComponents: {},
+        entitySlug: 'posts',
+        fields: [field],
+        fieldsPermissions: true,
+        i18n: { t: (key: string) => key },
+        modifiedOnly: true,
+        parentIndexPath: '',
+        parentIsLocalized: false,
+        parentPath: '',
+        parentSchemaPath: '',
+        req: { payload: { config: {}, logger: { error: vi.fn() } } },
+        selectedLocales: [],
+        versionFromSiblingData: { visible: 'before' },
+        versionToSiblingData: { visible: 'after' },
+      } as unknown as BuildVersionFieldsArgs)
+
+      const childFields =
+        type === 'tabs'
+          ? versionFields[0]?.field?.tabs?.[0]?.fields
+          : versionFields[0]?.field?.fields
+
+      expect(childFields).toHaveLength(1)
+      expect(childFields?.[0]?.field?.path).toBe('visible')
+    },
+  )
+
   it('should omit API-hidden fields while retaining admin-hidden fields', () => {
     const fields = [
       { name: 'secret', type: 'text', hidden: true },
       { name: 'visible', type: 'text', admin: { hidden: true } },
+      {
+        name: 'secretGroup',
+        type: 'group',
+        hidden: true,
+        fields: [{ name: 'nested', type: 'text' }],
+      },
     ]
     const result = buildVersionFields({
       fields,
