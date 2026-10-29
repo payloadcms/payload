@@ -1790,7 +1790,10 @@ export type FlattenedJoinField = {
   targetField: RelationshipField | UploadField
 } & JoinField
 
-export type FlattenedField =
+export type FlattenedField = {
+  /** Whether a non-data layout ancestor has an admin condition. */
+  hasConditionalParent?: boolean
+} & (
   | CheckboxField
   | CodeField
   | DateField
@@ -1811,6 +1814,7 @@ export type FlattenedField =
   | TextareaField
   | TextField
   | UploadField
+)
 export type Field =
   | ArrayField
   | BlocksField
