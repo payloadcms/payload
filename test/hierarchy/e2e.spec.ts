@@ -1095,7 +1095,8 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(productsFolder).toHaveAttribute('aria-disabled', 'true')
       await expect(selectedFolder).toHaveAttribute('aria-disabled', 'true')
 
-      await organizationsFolder.press('Enter')
+      await organizationsFolder.getByRole('checkbox').focus()
+      await expect(organizationsFolder.getByRole('checkbox')).not.toBeFocused()
       await expect(modal.locator('.hierarchy-column')).toHaveCount(1)
     })
 
@@ -1129,7 +1130,8 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(organizationsAndProductsFolder).toHaveAttribute('aria-disabled', 'true')
       await expect(productsFolder).toHaveAttribute('aria-disabled', 'true')
 
-      await organizationsFolder.press('Enter')
+      await organizationsFolder.getByRole('checkbox').focus()
+      await expect(organizationsFolder.getByRole('checkbox')).not.toBeFocused()
       await expect(modal.locator('.hierarchy-column')).toHaveCount(1)
     })
 

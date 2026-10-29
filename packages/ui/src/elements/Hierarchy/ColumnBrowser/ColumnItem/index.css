@@ -20,6 +20,11 @@
     &:hover {
       background-color: var(--color-bg-hover);
     }
+
+    &:has(.hierarchy-column-item__content:focus-visible) {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
   }
 
   .hierarchy-column-item--expanded {
@@ -55,7 +60,27 @@
     }
   }
 
+  .hierarchy-column-item__content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    gap: var(--spacer-2-5);
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
   .hierarchy-column-item__checkbox {
+    order: -1;
     flex-shrink: 0;
     display: flex;
     align-items: center;
