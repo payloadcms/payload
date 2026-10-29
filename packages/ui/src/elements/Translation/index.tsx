@@ -1,8 +1,4 @@
-import type {
-  ClientTranslationKeys,
-  TFunction,
-  TranslationVariables,
-} from '@payloadcms/translations'
+import type { ClientTranslationKeys, TFunction } from '@payloadcms/translations'
 
 import * as React from 'react'
 
@@ -42,7 +38,7 @@ export type TranslationProps = {
   elements?: Record<string, React.FC<{ children: React.ReactNode }>>
   i18nKey: ClientTranslationKeys
   t: TFunction
-  variables?: TranslationVariables
+  variables?: Record<string, unknown>
 }
 
 export const Translation: React.FC<TranslationProps> = ({ elements, i18nKey, t, variables }) => {

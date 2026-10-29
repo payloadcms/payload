@@ -138,24 +138,9 @@ export type ClientTranslationKeys<
 // C) Inaccurate. Client keys which previously had _many, _one or other suffixes have been removed and cannot be reconstructed
 export type ClientTranslationsObject = GenericTranslationsObject //ReconstructObjectFromTranslationKeys<ClientTranslationKeys>
 
-/**
- * A value interpolated into a `{{placeholder}}` slot of a translation string.
- * Interpolation stringifies each value, so config labels (locale records or label functions)
- * must be resolved with `getTranslation` first.
- */
-export type TranslationVariable = null | number | string | undefined
-
-export type TranslationVariables = Record<string, TranslationVariable>
-
-/**
- * The variables are a constrained generic instead of `TranslationVariables` so that
- * interface-typed objects, which have no implicit index signature, are accepted too.
- */
-export type TFunction<TTranslationKeys = DefaultTranslationKeys> = <
-  TVariables extends { [Key in keyof TVariables]: TranslationVariable },
->(
+export type TFunction<TTranslationKeys = DefaultTranslationKeys> = (
   key: TTranslationKeys,
-  options?: TVariables,
+  options?: Record<string, any>,
 ) => string
 
 export type I18n<

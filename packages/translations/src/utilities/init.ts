@@ -5,7 +5,6 @@ import type {
   InitI18n,
   InitTFunction,
   Language,
-  TranslationVariables,
 } from '../types.js'
 
 import { importDateFNSLocale } from '../importDateFNSLocale.js'
@@ -85,7 +84,9 @@ const replaceVars = ({
   vars,
 }: {
   translationString: string
-  vars: TranslationVariables
+  vars: {
+    [key: string]: any
+  }
 }) => {
   const parts = translationString.split(/(\{\{.*?\}\})/)
 
@@ -120,7 +121,7 @@ export function t<
 }: {
   key: TTranslationKeys
   translations?: Language<TTranslations>['translations']
-  vars?: TranslationVariables
+  vars?: Record<string, any>
 }): string {
   let translationString = getTranslationString({
     count: typeof vars?.count === 'number' ? vars.count : undefined,

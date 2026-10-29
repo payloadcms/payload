@@ -1,5 +1,4 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-import type { TFunction } from '@payloadcms/translations'
 import type { useAuth } from '@payloadcms/ui'
 import type { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 import type {
@@ -2555,32 +2554,6 @@ describe('Types testing', () => {
           draft: true,
         })
       })
-    })
-  })
-
-  describe('translation interpolation', () => {
-    const t = (() => '') as TFunction
-
-    test('should accept primitive interpolation values', () => {
-      expect(t).type.toBeCallableWith('general:groupByLabel', { label: 'Title' })
-      expect(t).type.toBeCallableWith('validation:greaterThanMax', {
-        label: 'Value',
-        max: 1,
-        value: 2,
-      })
-    })
-
-    test('should accept interface-typed interpolation values', () => {
-      interface GroupByVariables {
-        label: string
-      }
-
-      expect(t).type.toBeCallableWith('general:groupByLabel', {} as GroupByVariables)
-    })
-
-    test('should reject unresolved config labels as interpolation values', () => {
-      expect(t).type.not.toBeCallableWith('general:groupByLabel', { label: { en: 'Title' } })
-      expect(t).type.not.toBeCallableWith('general:groupByLabel', { label: () => 'Title' })
     })
   })
 })
