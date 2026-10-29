@@ -2,8 +2,10 @@ import sanitize from 'sanitize-filename'
 
 import type { PayloadRequest } from '../types/index.js'
 
+import { APIError } from '../errors/APIError.js'
 import { docWithFilenameExists } from './docWithFilenameExists.js'
 import { fileExists } from './fileExists.js'
+import { truncateFilename } from './truncateFilename.js'
 
 /**
  * Increments a filename by appending or incrementing a numeric suffix.
@@ -25,10 +27,12 @@ export const incrementName = (name: string): string => {
   } else {
     const matchedName = found[1]
     const matchedNumber = found[2]
-    const incremented = Number(matchedNumber) + 1
+    const incremented = (BigInt(matchedNumber) + 1n).toString()
     incrementedName = `${matchedName}-${incremented}`
   }
-  return extension ? `${incrementedName}.${extension}` : incrementedName
+  return truncateFilename({
+    filename: extension ? `${incrementedName}.${extension}` : incrementedName,
+  })
 }
 
 type Args = {
@@ -72,7 +76,8 @@ export async function getSafeFileName({
   req,
   staticPath,
 }: Args): Promise<string> {
-  let modifiedFilename = desiredFilename
+  let modifiedFilename = truncateFilename({ filename: desiredFilename })
+  let attempts = 0
 
   while (
     (await docWithFilenameExists({
@@ -84,7 +89,13 @@ export async function getSafeFileName({
     })) ||
     (staticPath ? await fileExists(`${staticPath}/${modifiedFilename}`) : false)
   ) {
-    modifiedFilename = incrementName(modifiedFilename)
+    const nextFilename = incrementName(modifiedFilename)
+
+    if (++attempts >= 1000 || nextFilename === modifiedFilename) {
+      throw new APIError('Unable to find an available upload filename', 409)
+    }
+
+    modifiedFilename = nextFilename
   }
 
   return modifiedFilename

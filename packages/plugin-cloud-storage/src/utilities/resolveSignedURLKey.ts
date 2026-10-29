@@ -6,6 +6,7 @@ import {
   getOriginalFilename,
   getSafeFileName,
   incrementName,
+  truncateFilename,
 } from 'payload/internal'
 import { getSanitizedUploadFilename } from 'payload/shared'
 
@@ -56,14 +57,27 @@ export async function resolveSignedURLKey({
   uploadReference: UploadReference
 }> {
   // The document stores the -original name, so check collisions against that name.
-  let sanitizedFilename = getSanitizedUploadFilename(filename)
+  let sanitizedFilename = truncateFilename({
+    filename: getSanitizedUploadFilename(filename),
+    maxBytes: 255 - Buffer.byteLength('-original'),
+  })
+  let attempts = 0
   let originalFilename = getOriginalFilename({ filename: sanitizedFilename })
 
   while (
     (await getSafeFileName({ collectionSlug, desiredFilename: originalFilename, req })) !==
     originalFilename
   ) {
-    sanitizedFilename = incrementName(sanitizedFilename)
+    const nextFilename = truncateFilename({
+      filename: incrementName(sanitizedFilename),
+      maxBytes: 255 - Buffer.byteLength('-original'),
+    })
+
+    if (++attempts >= 1000 || nextFilename === sanitizedFilename) {
+      throw new Error('Unable to find an available upload filename')
+    }
+
+    sanitizedFilename = nextFilename
     originalFilename = getOriginalFilename({ filename: sanitizedFilename })
   }
 

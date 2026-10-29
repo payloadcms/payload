@@ -3,18 +3,76 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { resolveSignedURLKey } from './resolveSignedURLKey.js'
 
-vi.mock('payload/internal', () => ({
-  createClientUploadReceipt: vi.fn(() => 'receipt'),
-  getOriginalFilename: vi.fn(({ filename }: { filename: string }) =>
-    filename.replace(/(\.[^.]+)?$/, '-original$1'),
-  ),
-  getSafeFileName: vi.fn(async ({ desiredFilename }) => desiredFilename),
-  incrementName: vi.fn((filename: string) => filename.replace(/(\.[^.]+)?$/, '-1$1')),
-}))
+vi.mock('payload/internal', async () => {
+  const { incrementName } = await import('../../../payload/src/uploads/getSafeFilename.js')
+  const { getOriginalFilename } =
+    await import('../../../payload/src/uploads/fileVersioning/naming.js')
+  const { truncateFilename } = await import('../../../payload/src/uploads/truncateFilename.js')
+
+  return {
+    createClientUploadReceipt: vi.fn(() => 'receipt'),
+    getOriginalFilename,
+    getSafeFileName: vi.fn(async ({ desiredFilename }) => desiredFilename),
+    incrementName,
+    truncateFilename,
+  }
+})
 
 describe('resolveSignedURLKey', () => {
+  it('should advance an extensionless numeric suffix beyond the safe integer limit', async () => {
+    vi.mocked(getSafeFileName).mockImplementation(async ({ desiredFilename }) =>
+      desiredFilename === 'x-9007199254740992-original'
+        ? 'x-9007199254740992-original-1'
+        : desiredFilename,
+    )
+
+    const result = await resolveSignedURLKey({
+      collectionSlug: 'media',
+      filename: 'x-9007199254740992',
+      req: {} as never,
+    })
+
+    expect(result.sanitizedFilename).toBe('x-9007199254740993')
+    expect(getSafeFileName).toHaveBeenCalledTimes(2)
+  })
+
+  it.each(['', '.jpg'])(
+    'should reserve bytes for original and collision suffixes with extension %s',
+    async (extension) => {
+      vi.mocked(getSafeFileName).mockResolvedValueOnce('conflict')
+
+      const result = await resolveSignedURLKey({
+        collectionSlug: 'media',
+        filename: `${'é'.repeat(127)}${extension}`,
+        req: {} as never,
+      })
+
+      expect(result.sanitizedFilename.endsWith(`-1${extension}`)).toBe(true)
+      for (const [args] of vi.mocked(getSafeFileName).mock.calls) {
+        expect(Buffer.byteLength(args.desiredFilename)).toBeLessThanOrEqual(255)
+        expect(args.desiredFilename.endsWith(`-original${extension}`)).toBe(true)
+      }
+      expect(getSafeFileName).toHaveBeenCalledTimes(2)
+    },
+  )
+
+  it('should stop retrying persistent collisions', async () => {
+    vi.mocked(getSafeFileName).mockResolvedValue('conflict')
+
+    await expect(
+      resolveSignedURLKey({
+        collectionSlug: 'media',
+        filename: 'photo.jpg',
+        req: {} as never,
+      }),
+    ).rejects.toThrow('Unable to find an available upload filename')
+    expect(getSafeFileName).toHaveBeenCalledTimes(1000)
+  })
+
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.mocked(getSafeFileName).mockReset()
+    vi.mocked(getSafeFileName).mockImplementation(async ({ desiredFilename }) => desiredFilename)
+    vi.mocked(createClientUploadReceipt).mockClear()
   })
 
   it('checks the normalized filename before resolving the storage key', async () => {

@@ -17,6 +17,25 @@ const mockDocWithFilenameExists = vi.mocked(docWithFilenameExists)
 const mockFileExists = vi.mocked(fileExists)
 
 describe('incrementName', () => {
+  it.each(['', '.jpg'])('should advance large numeric suffixes with extension %s', (extension) => {
+    expect(incrementName(`file-9007199254740992${extension}`)).toBe(
+      `file-9007199254740993${extension}`,
+    )
+  })
+
+  it.each([
+    ['a'.repeat(255), `${'a'.repeat(253)}-1`],
+    [`${'a'.repeat(251)}.jpg`, `${'a'.repeat(249)}-1.jpg`],
+    [`${'a'.repeat(253)}-9`, `${'a'.repeat(252)}-10`],
+    ['é'.repeat(127), `${'é'.repeat(126)}-1`],
+    ['😀'.repeat(63), `${'😀'.repeat(63)}-1`],
+  ])('should fit collision suffixes within the byte limit for %s', (filename, expected) => {
+    const result = incrementName(filename)
+
+    expect(result).toBe(expected)
+    expect(Buffer.byteLength(result)).toBeLessThanOrEqual(255)
+  })
+
   it('should add -1 suffix to filename without existing suffix', () => {
     expect(incrementName('photo.jpg')).toBe('photo-1.jpg')
   })
@@ -147,6 +166,68 @@ describe('getSafeFileName', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  it.each(['', '.jpg'])(
+    'should resolve near-limit original filename collisions with extension %s',
+    async (extension) => {
+      mockDocWithFilenameExists.mockResolvedValueOnce(true).mockResolvedValueOnce(false)
+      mockFileExists.mockResolvedValue(false)
+
+      const result = await getSafeFileName({
+        collectionSlug: 'media',
+        desiredFilename: `${'a'.repeat(245 - extension.length)}-original${extension}`,
+        req: mockReq,
+        staticPath: '/uploads',
+      })
+
+      expect(result).toBe(`${'a'.repeat(244 - extension.length)}-original-1${extension}`)
+      expect(Buffer.byteLength(result)).toBe(255)
+      expect(mockFileExists).toHaveBeenCalledWith(`/uploads/${result}`)
+    },
+  )
+
+  it('should normalize an overlong candidate before any conflict checks', async () => {
+    mockDocWithFilenameExists.mockResolvedValue(false)
+    mockFileExists.mockResolvedValue(false)
+
+    const result = await getSafeFileName({
+      collectionSlug: 'media',
+      desiredFilename: `${'a'.repeat(255)}.jpg`,
+      req: mockReq,
+      staticPath: '/uploads',
+    })
+
+    expect(result).toBe(`${'a'.repeat(251)}.jpg`)
+    expect(mockDocWithFilenameExists).toHaveBeenCalledWith(
+      expect.objectContaining({ filename: result }),
+    )
+    expect(mockFileExists).toHaveBeenCalledWith(`/uploads/${result}`)
+  })
+
+  it('should stop retrying persistent conflicts', async () => {
+    mockDocWithFilenameExists.mockResolvedValue(true)
+
+    await expect(
+      getSafeFileName({
+        collectionSlug: 'media',
+        desiredFilename: 'photo.jpg',
+        req: mockReq,
+      }),
+    ).rejects.toThrow('Unable to find an available upload filename')
+    expect(mockDocWithFilenameExists).toHaveBeenCalledTimes(1000)
+  })
+
+  it('should resolve collisions for large numeric suffixes', async () => {
+    mockDocWithFilenameExists.mockResolvedValueOnce(true).mockResolvedValueOnce(false)
+
+    const result = await getSafeFileName({
+      collectionSlug: 'media',
+      desiredFilename: 'file-9007199254740992',
+      req: mockReq,
+    })
+
+    expect(result).toBe('file-9007199254740993')
   })
 
   it('should return original filename when no conflicts exist', async () => {
