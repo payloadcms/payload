@@ -1,7 +1,7 @@
 import type { DynamicMigrationTemplate } from 'payload'
 
 import { randomUUID } from 'crypto'
-import { readdirSync, readFileSync, writeFileSync } from 'fs'
+import { writeFileSync } from 'fs'
 
 import type { DrizzleAdapter } from '../types.js'
 import type { SizesToVariantsTableRenames } from './getSizesToVariantsRenames.js'
@@ -10,6 +10,7 @@ import {
   findSizesToVariantsFieldCollision,
   getSizesToVariantsRenames,
 } from './getSizesToVariantsRenames.js'
+import { readLatestSnapshot } from './readLatestSnapshot.js'
 
 type SnapshotIndex = {
   columns: ({ expression: string } | string)[]
@@ -46,7 +47,7 @@ export const buildDynamicPredefinedSizesToVariantsMigration = ({
 }): DynamicMigrationTemplate => {
   return async ({ filePath, payload }) => {
     const adapter = payload.db as unknown as DrizzleAdapter
-    const previousSnapshot = await readLatestSnapshot({ adapter })
+    const previousSnapshot = await readLatestSnapshot<Snapshot>({ adapter })
 
     if (previousSnapshot) {
       const renamedSnapshot = applySizesToVariantsRenames({
@@ -63,29 +64,6 @@ export const buildDynamicPredefinedSizesToVariantsMigration = ({
       upSQL: `  await migrateSizesToVariants({ db, payload })`,
     }
   }
-}
-
-/** The latest snapshot in the migrations directory, upgraded to drizzle-kit's current format. */
-async function readLatestSnapshot({
-  adapter,
-}: {
-  adapter: DrizzleAdapter
-}): Promise<Snapshot | undefined> {
-  const dir = adapter.migrationDir
-  const latestSnapshotFile = readdirSync(dir)
-    .filter((file) => file.endsWith('.json'))
-    .sort()
-    .reverse()[0]
-
-  if (!latestSnapshotFile) {
-    return undefined
-  }
-
-  const { generateDrizzleJson, upSnapshot } = await adapter.requireDrizzleKit()
-  const currentVersion = (await generateDrizzleJson(adapter.schema)).version
-  const snapshot = JSON.parse(readFileSync(`${dir}/${latestSnapshotFile}`, 'utf8')) as Snapshot
-
-  return upSnapshot && snapshot.version < currentVersion ? upSnapshot(snapshot) : snapshot
 }
 
 function applySizesToVariantsRenames({
