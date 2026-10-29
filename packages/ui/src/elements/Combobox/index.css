@@ -1,8 +1,9 @@
 @layer payload-default {
   /* The combobox supplies its own padding so the search bar can span the full
      width and sit flush against its dividing border. */
-  .popup__scroll-container:has(.combobox__content) {
+  .popup__scroll-container:has(> .combobox__content) {
     padding: 0;
+    overflow: hidden;
   }
 
   .combobox__content {
@@ -11,12 +12,7 @@
     display: flex;
     flex-direction: column;
     min-width: var(--combobox-min-width);
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    max-height: inherit;
   }
 
   /* Held steady while searching so the popup doesn't resize as entries filter out */
@@ -41,6 +37,11 @@
     padding-inline-end: var(--spacer-2);
     background: var(--color-bg-secondary);
     border-radius: var(--button-radius);
+
+    &:focus-within {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
   }
 
   .combobox__search-bar svg {
@@ -73,8 +74,20 @@
   }
 
   .combobox__entries {
+    min-height: 0;
     padding-block: var(--spacer-2);
     overflow-y: auto;
+  }
+
+  .popup__scroll-container:not(.popup__scroll-container--show-scrollbar)
+    > .combobox__content
+    > .combobox__entries {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .combobox__entry {

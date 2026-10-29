@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 
 import type { PopupProps } from '../Popup/index.js'
 
@@ -86,21 +86,7 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
   const showSearch = entries.length >= minEntriesForSearch
   const hasResults = filteredEntries.length > 0
 
-  // Locking the width the moment searching begins keeps the popup from
-  // resizing around the cursor as entries filter out from under it.
   const [lockedWidth, setLockedWidth] = useState<null | number>(null)
-
-  useLayoutEffect(() => {
-    if (!contentRef.current) {
-      return
-    }
-
-    if (searchValue && lockedWidth === null) {
-      setLockedWidth(contentRef.current.offsetWidth)
-    } else if (!searchValue && lockedWidth !== null) {
-      setLockedWidth(null)
-    }
-  }, [searchValue, lockedWidth])
 
   const handleToggleOpen = useCallback(
     (active: boolean) => {
@@ -149,7 +135,15 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
                 <input
                   aria-label={searchPlaceholder}
                   className={`${baseClass}__search-input`}
-                  onChange={(e) => setSearchValue(e.target.value)}
+                  onChange={(e) => {
+                    // Measure before filtering removes the entries that determine the width.
+                    if (e.target.value && lockedWidth === null) {
+                      setLockedWidth(contentRef.current?.offsetWidth ?? null)
+                    } else if (!e.target.value) {
+                      setLockedWidth(null)
+                    }
+                    setSearchValue(e.target.value)
+                  }}
                   placeholder={searchPlaceholder}
                   ref={searchInputRef}
                   type="text"
