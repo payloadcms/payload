@@ -138,9 +138,16 @@ export type ClientTranslationKeys<
 // C) Inaccurate. Client keys which previously had _many, _one or other suffixes have been removed and cannot be reconstructed
 export type ClientTranslationsObject = GenericTranslationsObject //ReconstructObjectFromTranslationKeys<ClientTranslationKeys>
 
+/**
+ * Values interpolated into `{{placeholder}}` slots of a translation string.
+ * Interpolation stringifies each value, so config labels (locale records or label functions)
+ * must be resolved with `getTranslation` first.
+ */
+export type TranslationVariables = Record<string, null | number | string | undefined>
+
 export type TFunction<TTranslationKeys = DefaultTranslationKeys> = (
   key: TTranslationKeys,
-  options?: Record<string, any>,
+  options?: TranslationVariables,
 ) => string
 
 export type I18n<

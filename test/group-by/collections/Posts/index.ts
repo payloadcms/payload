@@ -62,6 +62,16 @@ export const PostsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'meta',
+      type: 'group',
+      fields: [
+        {
+          name: 'metaTitle',
+          type: 'text',
+        },
+      ],
+    },
   ],
   versions: false,
 }

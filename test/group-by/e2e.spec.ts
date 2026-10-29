@@ -445,6 +445,14 @@ test.describe('Group By', () => {
     ).toBeVisible()
   })
 
+  test('should render the label of a nested field as text in the group-by button', async () => {
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Meta > Meta Title', fieldPath: 'meta.metaTitle' })
+
+    await expect(page.locator('#toggle-group-by')).toHaveText('Group by Meta > Meta Title')
+  })
+
   test('should sort the group-by field globally', async () => {
     await page.goto(url.list)
 
