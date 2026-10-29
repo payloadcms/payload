@@ -27,6 +27,57 @@ test.describe('Shared form request queue', () => {
     await page.unrouteAll({ behavior: 'ignoreErrors' })
   })
 
+  test('should notify field context subscribers only when fields change', async ({ page }) => {
+    await page.goto(`${serverURL}/admin/form-requests?scenario=context`)
+    await expect(page.locator('#request-title')).toHaveValue('Initial value')
+    const updates = page.getByTestId('field-context-updates')
+
+    await expect(updates).not.toHaveText('0')
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        ),
+    )
+    const initialUpdates = await updates.textContent()
+
+    await page.getByRole('button', { name: 'Start processing', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Stop processing', exact: true })).toBeVisible()
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        ),
+    )
+    await expect(updates).toHaveText(initialUpdates!)
+    await page.getByRole('button', { name: 'Stop processing', exact: true }).click()
+    await page.locator('#request-title').fill('Changed field')
+    await expect(updates).not.toHaveText(initialUpdates!)
+  })
+
+  test('should restore field focus after a keyboard submission', async ({ page }) => {
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+
+    releases.add(released.resolve)
+    await page.route('**/api/form-request', async (route) => {
+      captured.resolve()
+      await released.promise
+      await route.fulfill({ json: { message: 'Saved' } })
+    })
+    await page.goto(`${serverURL}/admin/form-requests?scenario=focus`)
+    const title = page.locator('#request-title')
+
+    await expect(title).toHaveValue('Initial value')
+    await title.focus()
+    await title.press('Enter')
+    await captured.promise
+    await expect(title).toBeDisabled()
+    released.resolve()
+    await expect(title).toBeEnabled()
+    await expect(title).toBeFocused()
+  })
+
   test('should wait for a form-state refresh before starting an explicit save', async ({
     page,
   }) => {

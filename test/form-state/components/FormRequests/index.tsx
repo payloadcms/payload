@@ -2,9 +2,17 @@
 
 import type { FormState } from 'payload'
 
-import { Form, useConfig, useField, useForm, useSearchParams } from '@payloadcms/ui'
+import {
+  Form,
+  useAllFormFields,
+  useConfig,
+  useField,
+  useForm,
+  useFormProcessing,
+  useSearchParams,
+} from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react'
 
 const initialState: FormState = { title: { value: 'Initial value' } }
 const fieldOptions = { path: 'title' }
@@ -60,9 +68,45 @@ export function FormRequests() {
       waitForAutocomplete={scenario === 'autocomplete'}
     >
       <RequestControls onReady={onReady} scenario={scenario} />
+      {scenario === 'context' && (
+        <>
+          <ContextControls />
+          <ContextObserver />
+        </>
+      )}
     </Form>
   )
 }
+
+function ContextControls() {
+  const { setProcessing } = useForm()
+  const processing = useFormProcessing()
+
+  return (
+    <button onClick={() => setProcessing(!processing)} type="button">
+      {processing ? 'Stop processing' : 'Start processing'}
+    </button>
+  )
+}
+
+const ContextObserver = memo(function ContextObserver() {
+  const fields = useAllFormFields()
+  const updates = useRef(0)
+  const output = useRef<HTMLOutputElement>(null)
+
+  useEffect(() => {
+    updates.current += 1
+    if (output.current) {
+      output.current.textContent = String(updates.current)
+    }
+  }, [fields])
+
+  return (
+    <output data-testid="field-context-updates" ref={output}>
+      0
+    </output>
+  )
+})
 
 function RequestControls({
   onReady,
