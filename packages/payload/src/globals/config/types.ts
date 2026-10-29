@@ -17,7 +17,6 @@ import type { DBIdentifierName } from '../../database/types.js'
 import type { Authorship, SanitizedAuthorship } from '../../fields/baseFields/authorship/types.js'
 import type { Field, FlattenedField } from '../../fields/config/types.js'
 import type {
-  GeneratedTypes,
   GlobalAdminCustom,
   GlobalCustom,
   GlobalSlug,
@@ -37,6 +36,12 @@ import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../vers
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
+
+/** Draft reads may omit any field except the global ID because validation is skipped. */
+export type QueryDraftDataFromGlobalSlug<TSlug extends GlobalSlug> = Partial<
+  Omit<DataFromGlobalSlug<TSlug>, 'id'>
+> &
+  Pick<DataFromGlobalSlug<TSlug>, 'id'>
 
 export type GlobalAccess<TData = any> = {
   read?: Access<TData>
@@ -60,13 +65,11 @@ export type GlobalsWithoutDrafts = {
 }[GlobalSlug]
 
 /**
- * Conditionally allows or forbids the `draft` property based on global configuration.
- * When `strictDraftTypes` is enabled, the `draft` property is forbidden on globals without drafts.
+ * Allows the `draft` property only on globals with drafts enabled.
  */
-export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes extends {
-  strictDraftTypes: true
-}
-  ? TSlug extends GlobalsWithoutDrafts
+export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = string extends GlobalSlug
+  ? { draft?: boolean }
+  : TSlug extends GlobalsWithoutDrafts
     ? {
         /**
          * The `draft` property is not allowed because this global does not have `versions.drafts` enabled.
@@ -75,16 +78,10 @@ export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes e
       }
     : {
         /**
-         * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+         * Whether to read or write the draft version. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
          */
         draft?: boolean
       }
-  : {
-      /**
-       * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-       */
-      draft?: boolean
-    }
 
 type GlobalChangeOperation = Extract<FieldOperation, 'update' | 'validate'>
 

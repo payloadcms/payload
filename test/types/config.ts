@@ -280,6 +280,7 @@ export default buildConfigWithDefaults({
           {
             type: 'text',
             name: 'siteName',
+            required: true,
           },
         ],
       },
@@ -287,7 +288,6 @@ export default buildConfigWithDefaults({
     typescript: {
       generateInputTypes: true,
       outputFile: path.resolve(dirname, 'payload-types.ts'),
-      strictDraftTypes: true,
       postProcess: [
         ({ compiledTypes }) => {
           const genericType = `export type TestPluginGeneric<T> = { value: T };`
