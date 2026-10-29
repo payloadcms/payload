@@ -5,6 +5,7 @@ import type { FlattenedBlock, FlattenedField } from '../fields/config/types.js'
  * Get the field by its schema path, e.g. group.title, array.group.title
  * If there were any localized on the path, `pathHasLocalized` will be true and `localizedPath` will look like:
  * `group.<locale>.title` // group is localized here
+ * If the path crosses a blocks field (e.g. `blocks.myBlock.title`), `pathCrossesBlocks` will be true.
  */
 export const getFieldByPath = ({
   config,
@@ -24,6 +25,7 @@ export const getFieldByPath = ({
 }): {
   field: FlattenedField
   localizedPath: string
+  pathCrossesBlocks: boolean
   pathHasLocalized: boolean
 } | null => {
   let currentFields: FlattenedField[] = fields
@@ -67,7 +69,7 @@ export const getFieldByPath = ({
       }
 
       if (segments.length === 1 && segments[0] === 'id') {
-        return { field, localizedPath, pathHasLocalized }
+        return { field, localizedPath, pathCrossesBlocks: false, pathHasLocalized }
       }
     }
 
@@ -85,13 +87,19 @@ export const getFieldByPath = ({
           return null
         }
 
-        return getFieldByPath({
+        const result = getFieldByPath({
           config,
           fields: block.flattenedFields,
           includeRelationships,
           localizedPath,
           path: segments.join('.'),
         })
+
+        if (result) {
+          return { ...result, pathCrossesBlocks: true }
+        }
+
+        return null
       }
     }
 
@@ -102,5 +110,5 @@ export const getFieldByPath = ({
     return null
   }
 
-  return { field: currentField, localizedPath, pathHasLocalized }
+  return { field: currentField, localizedPath, pathCrossesBlocks: false, pathHasLocalized }
 }
