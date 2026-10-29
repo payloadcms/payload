@@ -26,7 +26,10 @@ import {
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
-import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
+import {
+  checkDocumentLockStatus,
+  deleteUserLocks,
+} from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -224,6 +227,26 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     })
 
     // /////////////////////////////////////
+    // Delete locks owned by the user and their preferences before the user
+    // row is removed, so database cascades cannot orphan them
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      await deleteUserLocks({
+        collectionSlug: collectionConfig.slug,
+        ids: [id],
+        req,
+      })
+    }
+
+    await deleteUserPreferences({
+      collectionConfig,
+      ids: [id],
+      payload,
+      req,
+    })
+
+    // /////////////////////////////////////
     // Delete document
     // /////////////////////////////////////
 
@@ -249,17 +272,6 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     if (collectionConfig.auth) {
       result = { ...result, collection: collectionConfig.slug }
     }
-
-    // /////////////////////////////////////
-    // Delete Preferences
-    // /////////////////////////////////////
-
-    await deleteUserPreferences({
-      collectionConfig,
-      ids: [id],
-      payload,
-      req,
-    })
 
     // /////////////////////////////////////
     // afterRead - Fields
