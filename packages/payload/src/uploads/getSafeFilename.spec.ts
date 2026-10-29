@@ -17,10 +17,17 @@ const mockDocWithFilenameExists = vi.mocked(docWithFilenameExists)
 const mockFileExists = vi.mocked(fileExists)
 
 describe('incrementName', () => {
-  it.each(['', '.jpg'])('should advance large numeric suffixes with extension %s', (extension) => {
-    expect(incrementName(`file-9007199254740992${extension}`)).toBe(
-      `file-9007199254740993${extension}`,
-    )
+  it.each(['', '.jpg'])(
+    'should append a suffix when the existing number cannot safely increment with extension %s',
+    (extension) => {
+      expect(incrementName(`file-9007199254740992${extension}`)).toBe(
+        `file-9007199254740992-1${extension}`,
+      )
+    },
+  )
+
+  it('should append a suffix at the safe integer boundary', () => {
+    expect(incrementName('file-9007199254740991.jpg')).toBe('file-9007199254740991-1.jpg')
   })
 
   it.each([
@@ -227,7 +234,7 @@ describe('getSafeFileName', () => {
       req: mockReq,
     })
 
-    expect(result).toBe('file-9007199254740993')
+    expect(result).toBe('file-9007199254740992-1')
   })
 
   it('should return original filename when no conflicts exist', async () => {

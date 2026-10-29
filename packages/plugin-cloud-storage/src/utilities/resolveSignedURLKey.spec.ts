@@ -19,7 +19,7 @@ vi.mock('payload/internal', async () => {
 })
 
 describe('resolveSignedURLKey', () => {
-  it('should advance an extensionless numeric suffix beyond the safe integer limit', async () => {
+  it('should resolve a collision when the numeric suffix cannot safely increment', async () => {
     vi.mocked(getSafeFileName).mockImplementation(async ({ desiredFilename }) =>
       desiredFilename === 'x-9007199254740992-original'
         ? 'x-9007199254740992-original-1'
@@ -32,7 +32,7 @@ describe('resolveSignedURLKey', () => {
       req: {} as never,
     })
 
-    expect(result.sanitizedFilename).toBe('x-9007199254740993')
+    expect(result.sanitizedFilename).toBe('x-9007199254740992-1')
     expect(getSafeFileName).toHaveBeenCalledTimes(2)
   })
 

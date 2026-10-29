@@ -27,8 +27,10 @@ export const incrementName = (name: string): string => {
   } else {
     const matchedName = found[1]
     const matchedNumber = found[2]
-    const incremented = (BigInt(matchedNumber) + 1n).toString()
-    incrementedName = `${matchedName}-${incremented}`
+    const incremented = Number(matchedNumber) + 1
+    incrementedName = Number.isSafeInteger(incremented)
+      ? `${matchedName}-${incremented}`
+      : `${baseFilename}-1`
   }
   return truncateFilename({
     filename: extension ? `${incrementedName}.${extension}` : incrementedName,
