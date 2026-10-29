@@ -186,7 +186,7 @@ export default buildConfig({
 })
 
 describe('addStorageAdapter', () => {
-  it('adds vercelBlobStorage adapter to plugins array', () => {
+  it('adds vercelBlobStorage adapter to storage array, not plugins', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
@@ -203,10 +203,11 @@ export default buildConfig({
     expect(result.modified).toBe(true)
     const text = sourceFile.getText()
     expect(text).toMatch(/import.*vercelBlobStorage.*from.*@payloadcms\/storage-vercel-blob/)
-    expect(text).toContain('vercelBlobStorage(')
+    expect(text).toMatch(/storage: \[\s*vercelBlobStorage\(/)
+    expect(text).toContain('plugins: []')
   })
 
-  it('creates plugins array if missing', () => {
+  it('creates storage array if missing', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
@@ -221,11 +222,11 @@ export default buildConfig({
 
     expect(result.success).toBe(true)
     const text = sourceFile.getText()
-    expect(text).toContain('plugins: [')
-    expect(text).toContain('r2Storage(')
+    expect(text).toMatch(/storage: \[\s*r2Storage\(/)
+    expect(text).not.toContain('plugins')
   })
 
-  it('adds to existing plugins array', () => {
+  it('adds to existing storage array', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
@@ -234,6 +235,9 @@ export default buildConfig({
 export default buildConfig({
   plugins: [
     someOtherPlugin()
+  ],
+  storage: [
+    someOtherStorage()
   ]
 })`,
     )
@@ -242,8 +246,47 @@ export default buildConfig({
 
     expect(result.success).toBe(true)
     const text = sourceFile.getText()
-    expect(text).toContain('someOtherPlugin()')
-    expect(text).toContain('s3Storage(')
+    expect(text).toMatch(/plugins: \[\s*someOtherPlugin\(\)\s*\]/)
+    expect(text).toMatch(/storage: \[\s*someOtherStorage\(\),\s*s3Storage\(/)
+  })
+
+  it('creates valid syntax when the config ends with a trailing comma and comments', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: [],
+  plugins,
+  // sharp,
+})`,
+    )
+
+    const result = addStorageAdapter({ sourceFile, adapter: 's3Storage' })
+
+    expect(result.success).toBe(true)
+    expect(project.getProgram().getSyntacticDiagnostics(sourceFile)).toHaveLength(0)
+    expect(sourceFile.getText()).toMatch(/storage: \[\s*s3Storage\(/)
+  })
+
+  it('spreads shorthand storage property', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+import { storage } from './storage'
+
+export default buildConfig({
+  storage,
+})`,
+    )
+
+    const result = addStorageAdapter({ sourceFile, adapter: 'vercelBlobStorage' })
+
+    expect(result.success).toBe(true)
+    const text = sourceFile.getText()
+    expect(text).toMatch(/storage: \[\s*\.\.\.storage,\s*vercelBlobStorage\(/)
   })
 })
 
@@ -269,6 +312,56 @@ export default buildConfig({
     const text = sourceFile.getText()
     expect(text).not.toContain("import sharp from 'sharp'")
     expect(text).not.toContain('sharp,')
+  })
+
+  it('removes sharpTransformer import and empty upload config', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
+
+export default buildConfig({
+  collections: [],
+  upload: {
+    transformers: [sharpTransformer()],
+  },
+})`,
+    )
+
+    const result = removeSharp(sourceFile)
+
+    expect(result.success).toBe(true)
+    expect(result.modified).toBe(true)
+    const text = sourceFile.getText()
+    expect(text).not.toContain('@payloadcms/transformer-sharp')
+    expect(text).not.toContain('sharpTransformer')
+    expect(text).not.toContain('upload')
+    expect(text).toContain('collections: []')
+  })
+
+  it('keeps other upload transformers and options when removing sharpTransformer', () => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile(
+      'payload.config.ts',
+      `import { buildConfig } from 'payload'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
+
+export default buildConfig({
+  upload: {
+    limits: { fileSize: 1000 },
+    transformers: [sharpTransformer(), otherTransformer()],
+  },
+})`,
+    )
+
+    const result = removeSharp(sourceFile)
+
+    expect(result.success).toBe(true)
+    const text = sourceFile.getText()
+    expect(text).not.toContain('sharpTransformer')
+    expect(text).toContain('limits: { fileSize: 1000 }')
+    expect(text).toMatch(/transformers: \[\s*otherTransformer\(\)\s*\]/)
   })
 
   it('does nothing if sharp not present', () => {

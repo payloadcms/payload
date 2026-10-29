@@ -54,6 +54,26 @@ describe('updatePackageJson', () => {
     expect(updated.dependencies.sharp).toBeUndefined()
   })
 
+  it('removes sharp transformer package when removing sharp', () => {
+    const pkgPath = path.join(tempDir, 'package.json')
+    const originalPkg = {
+      name: 'test-app',
+      dependencies: {
+        '@payloadcms/transformer-sharp': '^4.0.0',
+        payload: '^4.0.0',
+      },
+    }
+    fs.writeFileSync(pkgPath, JSON.stringify(originalPkg, null, 2))
+
+    updatePackageJson(pkgPath, {
+      removeSharp: true,
+    })
+
+    const updated = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+    expect(updated.dependencies['@payloadcms/transformer-sharp']).toBeUndefined()
+    expect(updated.dependencies.payload).toBe('^4.0.0')
+  })
+
   it('should remove selected packages from dependencies and devDependencies', () => {
     const pkgPath = path.join(tempDir, 'package.json')
     const originalPkg = {
