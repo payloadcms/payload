@@ -920,9 +920,25 @@ month. The prices are kept under **VgemsAI App**:
   one and keep its prices; deleting one deletes its prices too. Don't change a key once people have voted: their
   predictions are kept under it.
 - **Market Prices**: one price per material and day, the day's last. awoz-api saves them every 4 hours from API
-  Ninjas, and the first time also fills in the last year (see its README, "Market prices and predictions"). A price
-  you add or correct here is marked **Entered by hand** and never overwritten. A material without an API Ninjas
-  commodity only has the prices you enter.
+  Ninjas, and the first time also fills in the last year (see its README, "Market prices and predictions"). The ten
+  years before come from World Bank and U.S. EIA data (below). A price you add or correct here is marked **Entered
+  by hand** and never overwritten. A material without an API Ninjas commodity only has the prices you enter.
+
+**Adding the ten years before (once).** API Ninjas' history needs a premium plan, and awoz-api only asks it for a
+year, so `scripts/market-history/` holds ten years of prices from open sources: World Bank monthly averages for gold,
+silver, platinum and copper (Oct 2016 – Sep 2026), and the U.S. EIA's daily Brent price (Oct 2016 – Oct 2026).
+`SOURCES.md` there says exactly what each is and its licence. Palladium has none: no openly licensed source was
+found, so its chart starts with API Ninjas. Import them after deploying this version:
+
+```bash
+cd ~/payloadcms/apps/cms
+./deploy/import-market-history.sh --dry-run   # only show what would happen
+./deploy/import-market-history.sh             # about a minute for ~3,000 prices
+```
+
+Days that already have a price keep it, so running it again is safe. The World Bank's prices are licensed CC BY
+4.0: the app credits them at the bottom of the Research tab. To add history for another material, put a
+`<key>.csv` with the columns `date,price,source` in that folder and import again.
 
 awoz-api uses these endpoints (`src/endpoints/appMarket.ts`); people's predictions are kept by awoz-api itself,
 with their accounts:
