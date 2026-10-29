@@ -13,9 +13,10 @@ import { VigorNews } from './collections/VigorNews'
 import { VigorProducts } from './collections/VigorProducts'
 import { VigorServices } from './collections/VigorServices'
 import { VigorAbout } from './globals/VigorAbout'
+import { VigorApp } from './globals/VigorApp'
 import { VigorHome } from './globals/VigorHome'
 import { VigorSettings } from './globals/VigorSettings'
 
 export const vigorCollections = [VigorProducts, VigorServices, VigorNews, VigorEvents]
 
-export const vigorGlobals = [VigorSettings, VigorHome, VigorAbout]
+export const vigorGlobals = [VigorSettings, VigorHome, VigorAbout, VigorApp]
