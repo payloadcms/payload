@@ -2,13 +2,13 @@ import { useCallback, useRef } from 'react'
 
 export type QueueContext = {
   /**
-   * Returns `true` if the queue has not been reset and the external sequence still matches the one captured when this task started.
+   * Returns `true` if the queue has not been reset since this task started.
    * Recheck after awaiting work before applying results.
    * Scheduling another task alone does not invalidate this context.
    */
   isCurrent: () => boolean
   /**
-   * Returns `true` if the queue has been reset since this task started, regardless of external sequence changes.
+   * Returns `true` if the queue has been reset since this task started.
    */
   isQueueReset: () => boolean
 }
@@ -29,11 +29,6 @@ type Queue = {
   schedule: <T>(task: QueueTask<T>) => Promise<QueueResult<T>>
 }
 
-export type UseQueueOptions = {
-  /** Returns the external sequence used to determine whether an active task is still current. */
-  getSequence?: () => unknown
-}
-
 type PendingEntry = {
   priority: number
   reject: (reason: unknown) => void
@@ -41,7 +36,7 @@ type PendingEntry = {
   run: (context: QueueContext) => Promise<unknown>
 }
 
-const initializeQueue = ({ getSequence }: { getSequence: () => unknown }): Queue => {
+const initializeQueue = (): Queue => {
   let resetCount = 0
   let isActive = false
   let pending: PendingEntry | undefined
@@ -50,10 +45,9 @@ const initializeQueue = ({ getSequence }: { getSequence: () => unknown }): Queue
     isActive = true
 
     const resetCountAtStart = resetCount
-    const dispatchedSequence = getSequence()
     const isQueueReset = () => resetCount !== resetCountAtStart
     const context: QueueContext = {
-      isCurrent: () => !isQueueReset() && Object.is(getSequence(), dispatchedSequence),
+      isCurrent: () => !isQueueReset(),
       isQueueReset,
     }
 
@@ -134,12 +128,9 @@ export type UseQueueResult = {
  * Queues asynchronous work sequentially while retaining only the highest-priority pending task.
  * `queueTask` preserves the original fire-and-forget API; `schedule` returns the task result.
  */
-export function useQueue(options: UseQueueOptions = {}): UseQueueResult {
-  const getSequenceRef = useRef(options.getSequence)
-  getSequenceRef.current = options.getSequence
-
+export function useQueue(): UseQueueResult {
   const queueRef = useRef<Queue>(undefined)
-  queueRef.current ??= initializeQueue({ getSequence: () => getSequenceRef.current?.() })
+  queueRef.current ??= initializeQueue()
 
   const queueTask = useCallback<UseQueueResult['queueTask']>((fn, taskOptions) => {
     void queueRef.current.schedule({

@@ -27,19 +27,6 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      * The form state that was sent with the request when retrieving the `json` arg.
      */
     formState?: FormState
-    /**
-     * Returns `true` while this submission still matches the current form state and form instance.
-     * Local field value changes, resetting or replacing the form, and unmounting invalidate the submission.
-     * Recheck after awaiting work before applying response-driven state changes.
-     */
-    isCurrent: () => boolean
-    /**
-     * Returns `true` after the form's request queue is reset, including form replacement or unmounting.
-     * Field value changes alone leave this `false`.
-     */
-    isQueueReset: () => boolean
-    /** Identifies background autosaves; omitted values represent explicit submissions. */
-    requestIntent?: SubmitOptions['requestIntent']
   },
 ) => Promise<FormState | void> | void
 
@@ -81,10 +68,6 @@ export type FormProps = {
   log?: boolean
   onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
-  /**
-   * Handles successful submissions, including stale explicit document saves that still need metadata updates.
-   * Check `ctx.isCurrent()` before applying response values.
-   */
   onSuccess?: FormOnSuccess
   redirect?: string
   submitted?: boolean
@@ -121,10 +104,10 @@ export type SubmitOptions<C = Record<string, unknown>> = {
    */
   disableSuccessStatus?: boolean
   method?: string
-  /** @internal Reconcile an autosave invalidated by edits in the current form. */
+  /** Recovers an autosave superseded by an unsuccessful explicit submission. */
   onStaleRequest?: () => void
   overrides?: ((formState) => FormData) | Record<string, unknown>
-  /** @internal */
+  /** Schedules background autosaves behind explicit submissions. */
   requestIntent?: 'autosave' | 'submit'
   /**
    * When true, will skip validation before submitting the form.

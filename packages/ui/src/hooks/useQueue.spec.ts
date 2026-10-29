@@ -2,17 +2,17 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
-import type { UseQueueOptions, UseQueueResult } from './useQueue.js'
+import type { UseQueueResult } from './useQueue.js'
 
 import { useQueue } from './useQueue.js'
 
 const deferred = <T = void>() => Promise.withResolvers<T>()
 
-const renderQueue = (options: UseQueueOptions = {}): UseQueueResult => {
+const renderQueue = (): UseQueueResult => {
   let queue: UseQueueResult | undefined
 
   const Probe = () => {
-    queue = useQueue(options)
+    queue = useQueue()
     return null
   }
 
@@ -29,7 +29,7 @@ describe('useQueue', () => {
   it('should run one active task and only the latest equal-priority pending task', async () => {
     const active = deferred()
     const calls: string[] = []
-    const queue = renderQueue({ getSequence: () => 0 })
+    const queue = renderQueue()
     const first = queue.schedule({
       run: async () => {
         calls.push('first')
@@ -57,82 +57,10 @@ describe('useQueue', () => {
     expect(calls).toEqual(['first', 'latest'])
   })
 
-  it('should capture the external version when each task starts', async () => {
-    let version = 1
-    const active = deferred()
-    const currentStates: boolean[] = []
-    const queue = renderQueue({ getSequence: () => version })
-    const first = queue.schedule({
-      run: async ({ isCurrent }) => {
-        currentStates.push(isCurrent())
-        await active.promise
-        currentStates.push(isCurrent())
-      },
-    })
-    const pending = queue.schedule({
-      run: async ({ isCurrent }) => {
-        currentStates.push(isCurrent())
-      },
-    })
-
-    version = 2
-    active.resolve()
-    await first
-    await pending
-    expect(currentStates).toEqual([true, false, true])
-  })
-
-  it('should keep the active context current when work is queued at the same version', async () => {
-    const active = deferred()
-    let isCurrent: (() => boolean) | undefined
-    let isQueueReset: (() => boolean) | undefined
-    const queue = renderQueue({ getSequence: () => 0 })
-    const running = queue.schedule({
-      run: async (context) => {
-        isCurrent = context.isCurrent
-        isQueueReset = context.isQueueReset
-        await active.promise
-      },
-    })
-    const pending = queue.schedule({
-      priority: 2,
-      run: async () => undefined,
-    })
-    const superseded = queue.schedule({
-      run: async () => undefined,
-    })
-
-    await expect(superseded).resolves.toEqual({ status: 'superseded' })
-    expect(isCurrent?.()).toBe(true)
-    expect(isQueueReset?.()).toBe(false)
-    active.resolve()
-    await running
-    await pending
-  })
-
-  it('should invalidate an active context when the version changes without scheduling work', async () => {
-    let version = 1
-    const active = deferred()
-    const queue = renderQueue({ getSequence: () => version })
-    const running = queue.schedule({
-      run: async ({ isCurrent, isQueueReset }) => {
-        expect(isCurrent()).toBe(true)
-        expect(isQueueReset()).toBe(false)
-        await active.promise
-        expect(isCurrent()).toBe(false)
-        expect(isQueueReset()).toBe(false)
-      },
-    })
-
-    version = 2
-    active.resolve()
-    await running
-  })
-
   it('should retain the highest-priority pending task', async () => {
     const active = deferred()
     const calls: string[] = []
-    const queue = renderQueue({ getSequence: () => 0 })
+    const queue = renderQueue()
 
     void queue.schedule({
       run: async () => {
@@ -162,7 +90,7 @@ describe('useQueue', () => {
   it('should not replace higher-priority pending work with a lower-priority task', async () => {
     const active = deferred()
     const calls: string[] = []
-    const queue = renderQueue({ getSequence: () => 0 })
+    const queue = renderQueue()
 
     void queue.schedule({
       run: async () => {
@@ -188,7 +116,7 @@ describe('useQueue', () => {
   it('should start pending work after an active task rejects', async () => {
     const active = deferred()
     const calls: string[] = []
-    const queue = renderQueue({ getSequence: () => 0 })
+    const queue = renderQueue()
     const rejected = queue.schedule({
       run: async () => {
         calls.push('active')
@@ -209,7 +137,7 @@ describe('useQueue', () => {
     const active = deferred()
     let isCurrent: (() => boolean) | undefined
     let isQueueReset: (() => boolean) | undefined
-    const queue = renderQueue({ getSequence: () => 0 })
+    const queue = renderQueue()
     const running = queue.schedule({
       run: async (context) => {
         isCurrent = context.isCurrent
@@ -231,7 +159,7 @@ describe('useQueue', () => {
   it('should wait for an unabortable active promise before starting pending work', async () => {
     const active = deferred()
     const calls: string[] = []
-    const queue = renderQueue({ getSequence: () => 0 })
+    const queue = renderQueue()
 
     void queue.schedule({
       run: async () => {

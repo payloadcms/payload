@@ -7,9 +7,7 @@ import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
 import { devUser } from '../credentials.js'
-import { DocumentInfoData } from './collections/Autosave/DocumentInfoData.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
-import { NonDirtyFieldUpdater } from './collections/Autosave/NonDirtyFieldUpdater.js'
 import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
@@ -66,32 +64,23 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     const restrictedValue = 'client supplied'
     const title = 'Access filtered autosave'
     vi.stubGlobal('React', React)
-    const previousImportMap = payload.importMap
-    payload.importMap = {
-      './collections/Autosave/DocumentInfoData.js#DocumentInfoData': DocumentInfoData,
-      './collections/Autosave/NonDirtyFieldUpdater.js#NonDirtyFieldUpdater': NonDirtyFieldUpdater,
-    }
 
-    try {
-      await renderDocumentHandler({
-        collectionSlug: autosavePostsSlug,
-        cookies: new Map(),
-        docID: undefined as never,
-        importMap: payload.importMap,
-        initialData: {
-          restrictedValue,
-          title,
-        },
-        locale: undefined,
-        permissions,
-        redirectAfterCreate: false,
-        redirectAfterDelete: false,
-        redirectAfterDuplicate: false,
-        req,
-      })
-    } finally {
-      payload.importMap = previousImportMap
-    }
+    await renderDocumentHandler({
+      collectionSlug: autosavePostsSlug,
+      cookies: new Map(),
+      docID: undefined as never,
+      importMap: payload.importMap,
+      initialData: {
+        restrictedValue,
+        title,
+      },
+      locale: undefined,
+      permissions,
+      redirectAfterCreate: false,
+      redirectAfterDelete: false,
+      redirectAfterDuplicate: false,
+      req,
+    })
 
     const { docs } = await payload.find({
       collection: autosavePostsSlug,
@@ -889,7 +878,10 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
         valid: true,
         value: 'Test Post (computed on the client)',
       },
-      title,
+      title: {
+        ...title,
+        isModified: true, // This is critical, this is what we're testing
+      },
     }
 
     const incomingStateFromServer: Record<string, FieldState> = {
@@ -942,16 +934,63 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
         ...incomingStateFromServer.array,
         rows: currentState?.array?.rows,
       },
+      title: {
+        ...incomingStateFromServer.title,
+        isModified: true,
+      },
     })
   })
 
-  test('should accept server values after an autosave response passes the revision gate', () => {
+  test('should not accept values from the server if they have been modified locally since the request was made, e.g. `overrideLocalChanges: false` on autosave', () => {
+    const title: FieldState = {
+      initialValue: 'Test Post',
+      passesCondition: true,
+      valid: true,
+      value: 'Test Post (modified on the client 1)',
+    }
+
+    const currentState: Record<string, FieldState> = {
+      computedTitle: {
+        initialValue: 'Test Post',
+        passesCondition: true,
+        valid: true,
+        value: 'Test Post',
+      },
+      title: {
+        ...title,
+        isModified: true,
+      },
+    }
+
+    const incomingStateFromServer: Record<string, FieldState> = {
+      computedTitle: {
+        initialValue: 'Test Post',
+        passesCondition: true,
+        valid: true,
+        value: 'Test Post (modified on the server)',
+      },
+      title: {
+        initialValue: 'Test Post',
+        passesCondition: true,
+        valid: true,
+        value: 'Test Post (modified on the server)',
+      },
+    }
+
     const newState = mergeServerFormState({
       acceptValues: { overrideLocalChanges: false },
-      currentState: { computedTitle: { value: 'Manual value' } },
-      incomingState: { computedTitle: { value: 'Server-computed value' } },
+      currentState,
+      incomingState: incomingStateFromServer,
     })
-    expect(newState.computedTitle?.value).toBe('Server-computed value')
+
+    expect(newState).toStrictEqual({
+      ...currentState,
+      computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
+      title: {
+        ...currentState.title,
+        isModified: true,
+      },
+    })
   })
 
   test('should preserve client row data after reorder and delete during autosave', () => {

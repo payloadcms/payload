@@ -3,16 +3,15 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { AutosavePostsCollection, DraftPostsCollection } from './collections/Autosave/index.js'
+import { AutosavePostsCollection } from './collections/Autosave/index.js'
 import { ConditionsCollection } from './collections/Conditions/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
-import { UploadsCollection } from './collections/Uploads/index.js'
-import { permissionSettingsSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
+  suite: 'form-state',
   config: {
     admin: {
       components: {
@@ -21,25 +20,13 @@ export default buildConfigWithDefaults({
             Component: './components/FormRequests/index.js#FormRequests',
             path: '/form-requests',
           },
-          permissionRequests: {
-            Component: './components/PermissionRequests/index.js#PermissionRequests',
-            path: '/permission-requests',
-          },
         },
       },
       importMap: {
         baseDir: path.resolve(dirname),
       },
     },
-    collections: [
-      PostsCollection,
-      AutosavePostsCollection,
-      DraftPostsCollection,
-      ConditionsCollection,
-      UploadsCollection,
-    ],
-    globals: [{ slug: permissionSettingsSlug, fields: [{ name: 'title', type: 'text' }] }],
-    localization: { defaultLocale: 'en', locales: ['en', 'fr'] },
+    collections: [PostsCollection, AutosavePostsCollection, ConditionsCollection],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
@@ -62,5 +49,4 @@ export default buildConfigWithDefaults({
       overrideAccess: true,
     })
   },
-  suite: 'form-state',
 })

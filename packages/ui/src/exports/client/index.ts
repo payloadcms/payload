@@ -26,7 +26,6 @@ export type {
   QueuedTaskOptions,
   QueueResult,
   QueueTask,
-  UseQueueOptions,
   UseQueueResult,
 } from '../../hooks/useQueue.js'
 
