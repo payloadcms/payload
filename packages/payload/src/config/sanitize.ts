@@ -21,7 +21,7 @@ import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
-import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
+import { DuplicateCollection, DuplicateGlobal, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { resolveHierarchyCollections } from '../hierarchy/resolveHierarchyCollections.js'
@@ -390,6 +390,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   const schedulePublishGlobals: GlobalSlug[] = []
 
   const collectionSlugs = new Set<CollectionSlug>()
+  const globalSlugs = new Set<GlobalSlug>()
 
   const validRelationships = [
     ...(config.collections?.map((c) => c.slug) ?? []),
@@ -530,8 +531,20 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   if (config.globals!.length > 0) {
     for (let i = 0; i < config.globals!.length; i++) {
+      const globalSlug = config.globals![i]!.slug
+
+      if (globalSlugs.has(globalSlug)) {
+        throw new DuplicateGlobal('slug', globalSlug)
+      }
+
+      if (collectionSlugs.has(globalSlug as unknown as CollectionSlug)) {
+        throw new DuplicateGlobal('slug', globalSlug)
+      }
+
+      globalSlugs.add(globalSlug)
+
       if (hasScheduledPublishEnabled(config.globals![i]!)) {
-        schedulePublishGlobals.push(config.globals![i]!.slug)
+        schedulePublishGlobals.push(globalSlug)
       }
 
       config.globals![i] = sanitizeGlobal(
