@@ -104,7 +104,11 @@ export type SubmitOptions<C = Record<string, unknown>> = {
    */
   disableSuccessStatus?: boolean
   method?: string
+  /** Recovers an autosave superseded by an unsuccessful explicit submission. */
+  onStaleRequest?: () => void
   overrides?: ((formState) => FormData) | Record<string, unknown>
+  /** Schedules background autosaves behind explicit submissions. */
+  requestIntent?: 'autosave' | 'submit'
   /**
    * When true, will skip validation before submitting the form.
    * @default false

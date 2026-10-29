@@ -11,11 +11,12 @@ import {
   uploadRequiresServerValidation,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type {
   CreateFormData,
+  FieldAction,
   Context as FormContextType,
   FormProps,
   GetDataByPath,
@@ -26,7 +27,7 @@ import type {
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { useQueue } from '../../hooks/useQueue.js'
+import { type QueueContext, useQueue } from '../../hooks/useQueue.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -59,6 +60,7 @@ import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
 
 const baseClass = 'form'
+const requestPriority = { autosave: 1, formState: 0, submit: 2 } as const
 
 export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
@@ -101,7 +103,12 @@ export const Form: React.FC<FormProps> = (props) => {
   const { refreshCookie, user } = useAuth()
   const onNonFieldError = useFormErrorHandler()
   const operation = useOperation()
-  const { queueTask } = useQueue()
+  const { reset: resetQueue, schedule: scheduleRequest } = useQueue()
+  const requestScopeRef = useRef({})
+  const resetRequestQueue = useCallback(() => {
+    requestScopeRef.current = {}
+    resetQueue()
+  }, [resetQueue])
 
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
@@ -191,11 +198,28 @@ export const Form: React.FC<FormProps> = (props) => {
   const abortResetFormRef = useRef<AbortController>(null)
   const isFirstRenderRef = useRef(true)
 
-  const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
+  const latestExplicitSubmitRef = useRef<Promise<boolean> | undefined>(undefined)
+  const [formState, setFormState] = useState<FormState>(() => initialState || {})
+  const formStateRef = useRef(formState)
+  const disabledFromPropsRef = useRef(disabledFromProps)
+  disabledFromPropsRef.current = disabledFromProps
 
-  const [formState, dispatchFields] = fieldsReducer
+  const dispatchFields = useCallback<React.Dispatch<FieldAction>>((action) => {
+    const newState = fieldReducer(formStateRef.current, action)
 
-  contextRef.current.fields = formState
+    // A queued task can start before React commits the preceding task's state update.
+    formStateRef.current = newState
+    contextRef.current.fields = newState
+    setFormState(newState)
+  }, [])
+
+  contextRef.current.fields = formStateRef.current
+
+  const restoreRequestState = useCallback(() => {
+    setProcessing(false)
+    setDisabled(disabledFromPropsRef.current || false)
+    setBackgroundProcessing(false)
+  }, [setBackgroundProcessing])
 
   const prevFormState = useRef(formState)
 
@@ -270,8 +294,16 @@ export const Form: React.FC<FormProps> = (props) => {
     return isValid
   }, [collectionSlug, config, dispatchFields, id, operation, t, user, documentForm])
 
-  const submit = useCallback<Submit>(
-    async (options, e) => {
+  const executeSubmit = useCallback(
+    async ({
+      onResponse,
+      options,
+      requestContext,
+    }: {
+      onResponse: (args: { res: Response }) => void
+      options?: SubmitOptions
+      requestContext: QueueContext
+    }) => {
       const {
         acceptValues = true,
         action: actionArg = action,
@@ -285,17 +317,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
       const disableToast = disableSuccessStatusFromArgs ?? disableSuccessStatus
 
-      if (disabled) {
-        if (e) {
-          e.preventDefault()
-        }
-        return
-      }
-
       modifiedWhileProcessingRef.current = false
 
       // create new toast promise which will resolve manually later
       let errorToast, successToast
+      let promiseToastID: number | string | undefined
 
       const promise = new Promise((resolve, reject) => {
         successToast = resolve
@@ -311,7 +337,7 @@ export const Form: React.FC<FormProps> = (props) => {
         successToast = (data) => toast.success(data)
         errorToast = (data) => toast.error(data)
       } else {
-        toast.promise(promise, {
+        const promiseToast = toast.promise(promise, {
           error: (data) => {
             return data as string
           },
@@ -320,272 +346,320 @@ export const Form: React.FC<FormProps> = (props) => {
             return data as string
           },
         })
-      }
-
-      if (e) {
-        e.stopPropagation()
-        e.preventDefault()
-      }
-
-      if (disableFormWhileProcessing) {
-        const activeElement = document.activeElement
-
-        // Disabling the active field drops browser focus to the body.
-        submitFocusRef.current =
-          activeElement instanceof HTMLElement && formRef.current?.contains(activeElement)
-            ? activeElement
-            : null
-        setProcessing(true)
-        setDisabled(true)
-      }
-
-      if (waitForAutocomplete) {
-        await wait(100)
-      }
-
-      const data = reduceFieldsToValues(contextRef.current.fields, true)
-
-      const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
-        contextRef.current.fields,
-        {
-          excludeFiles: true,
-        },
-      )
-
-      // Execute server side validations
-      if (Array.isArray(beforeSubmit)) {
-        let revalidatedFormState: FormState
-
-        await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
-          await priorOnChange
-
-          const result = await beforeSubmitFn({
-            formState: serializableFormState,
-          })
-
-          revalidatedFormState = result
-        }, Promise.resolve())
-
-        const isValid = Object.entries(revalidatedFormState).every(
-          ([, field]) => field.valid !== false,
-        )
-
-        setIsValid(isValid)
-
-        if (!isValid) {
-          setProcessing(false)
-          setSubmitted(true)
-          setDisabled(false)
-          return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
+        const toastID = promiseToast.valueOf()
+        if (typeof toastID === 'number' || typeof toastID === 'string') {
+          promiseToastID = toastID
         }
-      }
-
-      const isValid =
-        skipValidation || disableValidationOnSubmit ? true : await contextRef.current.validateForm()
-
-      setIsValid(isValid)
-
-      // If not valid, prevent submission
-      if (!isValid) {
-        errorToast(t('error:correctInvalidFields'))
-        setProcessing(false)
-        setSubmitted(true)
-        setDisabled(false)
-        return
-      }
-
-      let overrides = {}
-
-      if (typeof overridesFromArgs === 'function') {
-        overrides = overridesFromArgs(contextRef.current.fields)
-      } else if (typeof overridesFromArgs === 'object') {
-        overrides = overridesFromArgs
-      }
-
-      // If submit handler comes through via props, run that
-      if (onSubmit) {
-        for (const [key, value] of Object.entries(overrides)) {
-          data[key] = value
-        }
-
-        onSubmit(contextRef.current.fields, data)
-      }
-
-      if (!hasFormSubmitAction) {
-        // No action provided, so we should return. An example where this happens are lexical link drawers. Upon submitting the drawer, we
-        // want to close it without submitting the form. Stuff like validation would be handled by lexical before this, through beforeSubmit
-        setProcessing(false)
-        setSubmitted(true)
-        setDisabled(false)
-        return
       }
 
       try {
-        const formData = await contextRef.current.createFormData(overrides, {
-          data,
-          mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
-        })
+        if (disableFormWhileProcessing) {
+          const activeElement = document.activeElement
 
-        let res
-
-        if (typeof actionArg === 'string') {
-          res = await requests[methodToUse.toLowerCase()](actionArg, {
-            body: formData,
-            headers: {
-              'Accept-Language': i18n.language,
-            },
-          })
-        } else if (typeof action === 'function') {
-          res = await action(formData)
+          // Disabling the active field drops browser focus to the body.
+          submitFocusRef.current =
+            activeElement instanceof HTMLElement && formRef.current?.contains(activeElement)
+              ? activeElement
+              : null
+          setProcessing(true)
+          setDisabled(true)
         }
 
-        if (res.status < 400 && !modifiedWhileProcessingRef.current) {
-          setModified(false)
+        if (options?.requestIntent === 'autosave') {
+          setBackgroundProcessing(true)
         }
-        modifiedWhileProcessingRef.current = false
 
-        setDisabled(false)
+        if (waitForAutocomplete) {
+          await wait(100)
+        }
 
-        if (typeof handleResponse === 'function') {
-          await handleResponse(res, successToast, errorToast)
-          setProcessing(false)
+        if (!requestContext.isCurrent()) {
           return
         }
 
-        const contentType = res.headers.get('content-type')
-        const isJSON = contentType && contentType.indexOf('application/json') !== -1
+        const data = reduceFieldsToValues(contextRef.current.fields, true)
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let json: Record<string, any> = {}
+        const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
+          contextRef.current.fields,
+          {
+            excludeFiles: true,
+          },
+        )
 
-        if (isJSON) {
-          json = await res.json()
-        }
+        // Execute server side validations
+        if (Array.isArray(beforeSubmit)) {
+          let revalidatedFormState: FormState
 
-        if (res.status < 400) {
-          setSuccessfulSubmitCount((count) => count + 1)
+          await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
+            await priorOnChange
 
-          if (typeof onSuccess === 'function') {
-            const newFormState = await onSuccess(json, {
-              context,
+            const result = await beforeSubmitFn({
               formState: serializableFormState,
             })
 
-            if (newFormState) {
-              dispatchFields({
-                type: 'MERGE_SERVER_STATE',
-                acceptValues,
-                prevStateRef: prevFormState,
-                serverState: newFormState,
-              })
-            }
-          }
+            revalidatedFormState = result
+          }, Promise.resolve())
 
-          setSubmitted(false)
-          setProcessing(false)
-
-          if (redirect) {
-            void startRouteTransition(() => router.push(redirect))
-          } else if (!disableToast) {
-            successToast(json.message || t('general:submissionSuccessful'))
-          }
-        } else {
-          setProcessing(false)
-          setSubmitted(true)
-
-          // When there was an error submitting a draft,
-          // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
-          // Also keep the form as modified so the save button remains enabled for retry.
-          if (overridesFromArgs['_status'] === 'draft') {
-            setModified(true)
-
-            if (!validateDrafts) {
-              setSubmitted(false)
-            }
-          }
-
-          contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
-
-          if (json.message) {
-            errorToast(json.message)
+          if (!requestContext.isCurrent()) {
             return
           }
 
-          if (Array.isArray(json.errors)) {
-            const [fieldErrors, nonFieldErrors] = json.errors.reduce(
-              ([fieldErrs, nonFieldErrs], err) => {
-                const newFieldErrs = []
-                const newNonFieldErrs = []
+          const isValid = Object.entries(revalidatedFormState).every(
+            ([, field]) => field.valid !== false,
+          )
 
-                if (err?.message) {
-                  newNonFieldErrs.push(err)
-                }
+          setIsValid(isValid)
 
-                if (Array.isArray(err?.data?.errors)) {
-                  err.data?.errors.forEach((dataError) => {
-                    if (dataError?.path) {
-                      newFieldErrs.push(dataError)
-                    } else {
-                      newNonFieldErrs.push(dataError)
-                    }
-                  })
-                }
-
-                return [
-                  [...fieldErrs, ...newFieldErrs],
-                  [...nonFieldErrs, ...newNonFieldErrs],
-                ]
-              },
-              [[], []],
-            )
-
-            setIsValid(false)
-
-            const serverErrorAction = {
-              type: 'ADD_SERVER_ERRORS' as const,
-              errors: fieldErrors,
-            }
-
-            prevFormState.current = fieldReducer(prevFormState.current, serverErrorAction)
-            dispatchFields(serverErrorAction)
-
-            nonFieldErrors.forEach((err) => {
-              // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
-              if (
-                onNonFieldError?.(
-                  err,
-                  () => void contextRef.current.submit({ overrides: overridesFromArgs }),
-                )
-              ) {
-                return
-              }
-              errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
-            })
-
-            return
+          if (!isValid) {
+            setProcessing(false)
+            setSubmitted(true)
+            setDisabled(false)
+            return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
           }
-
-          const message = errorMessages?.[res.status] || res?.statusText || t('error:unknown')
-
-          errorToast(message)
         }
 
-        return { formState: contextRef.current.fields, res }
-      } catch (err) {
-        console.error('Error submitting form', err) // eslint-disable-line no-console
-        setProcessing(false)
-        setSubmitted(true)
-        setDisabled(false)
-        errorToast(err.message)
+        const isValid =
+          skipValidation || disableValidationOnSubmit
+            ? true
+            : await contextRef.current.validateForm()
+
+        if (!requestContext.isCurrent()) {
+          return
+        }
+
+        setIsValid(isValid)
+
+        // If not valid, prevent submission
+        if (!isValid) {
+          errorToast(t('error:correctInvalidFields'))
+          setProcessing(false)
+          setSubmitted(true)
+          setDisabled(false)
+          return
+        }
+
+        let overrides = {}
+
+        if (typeof overridesFromArgs === 'function') {
+          overrides = overridesFromArgs(contextRef.current.fields)
+        } else if (typeof overridesFromArgs === 'object') {
+          overrides = overridesFromArgs
+        }
+
+        // If submit handler comes through via props, run that
+        if (onSubmit) {
+          for (const [key, value] of Object.entries(overrides)) {
+            data[key] = value
+          }
+
+          onSubmit(contextRef.current.fields, data)
+        }
+
+        if (!hasFormSubmitAction) {
+          // No action provided, so we should return. An example where this happens are lexical link drawers. Upon submitting the drawer, we
+          // want to close it without submitting the form. Stuff like validation would be handled by lexical before this, through beforeSubmit
+          setProcessing(false)
+          setSubmitted(true)
+          setDisabled(false)
+          return
+        }
+
+        try {
+          const formData = await contextRef.current.createFormData(overrides, {
+            data,
+            mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
+          })
+
+          if (!requestContext.isCurrent()) {
+            return
+          }
+
+          let res
+
+          if (typeof actionArg === 'string') {
+            res = await requests[methodToUse.toLowerCase()](actionArg, {
+              body: formData,
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+            })
+          } else if (typeof action === 'function') {
+            res = await action(formData)
+          }
+
+          onResponse({ res })
+
+          if (!requestContext.isCurrent()) {
+            return
+          }
+
+          if (res.status < 400 && !modifiedWhileProcessingRef.current) {
+            setModified(false)
+          }
+          modifiedWhileProcessingRef.current = false
+
+          setDisabled(false)
+
+          if (typeof handleResponse === 'function') {
+            await handleResponse(res, successToast, errorToast)
+            setProcessing(false)
+            return
+          }
+
+          const contentType = res.headers.get('content-type')
+          const isJSON = contentType && contentType.indexOf('application/json') !== -1
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let json: Record<string, any> = {}
+
+          if (isJSON) {
+            json = await res.json()
+          }
+
+          if (!requestContext.isCurrent()) {
+            return
+          }
+
+          if (res.status < 400) {
+            setSuccessfulSubmitCount((count) => count + 1)
+
+            if (typeof onSuccess === 'function') {
+              const newFormState = await onSuccess(json, {
+                context,
+                formState: serializableFormState,
+              })
+
+              if (!requestContext.isCurrent()) {
+                return
+              }
+
+              if (newFormState) {
+                dispatchFields({
+                  type: 'MERGE_SERVER_STATE',
+                  acceptValues,
+                  prevStateRef: prevFormState,
+                  serverState: newFormState,
+                })
+              }
+            }
+
+            setSubmitted(false)
+            setProcessing(false)
+
+            if (redirect) {
+              void startRouteTransition(() => router.push(redirect))
+            } else if (!disableToast) {
+              successToast(json.message || t('general:submissionSuccessful'))
+            }
+          } else {
+            setProcessing(false)
+            setSubmitted(true)
+
+            // When there was an error submitting a draft,
+            // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
+            // Also keep the form as modified so the save button remains enabled for retry.
+            if (overridesFromArgs['_status'] === 'draft') {
+              setModified(true)
+
+              if (!validateDrafts) {
+                setSubmitted(false)
+              }
+            }
+
+            contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
+
+            if (json.message) {
+              errorToast(json.message)
+              return
+            }
+
+            if (Array.isArray(json.errors)) {
+              const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+                ([fieldErrs, nonFieldErrs], err) => {
+                  const newFieldErrs = []
+                  const newNonFieldErrs = []
+
+                  if (err?.message) {
+                    newNonFieldErrs.push(err)
+                  }
+
+                  if (Array.isArray(err?.data?.errors)) {
+                    err.data?.errors.forEach((dataError) => {
+                      if (dataError?.path) {
+                        newFieldErrs.push(dataError)
+                      } else {
+                        newNonFieldErrs.push(dataError)
+                      }
+                    })
+                  }
+
+                  return [
+                    [...fieldErrs, ...newFieldErrs],
+                    [...nonFieldErrs, ...newNonFieldErrs],
+                  ]
+                },
+                [[], []],
+              )
+
+              setIsValid(false)
+
+              const serverErrorAction = {
+                type: 'ADD_SERVER_ERRORS' as const,
+                errors: fieldErrors,
+              }
+
+              prevFormState.current = fieldReducer(prevFormState.current, serverErrorAction)
+              dispatchFields(serverErrorAction)
+
+              nonFieldErrors.forEach((err) => {
+                // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
+                if (
+                  onNonFieldError?.(
+                    err,
+                    () => void contextRef.current.submit({ overrides: overridesFromArgs }),
+                  )
+                ) {
+                  return
+                }
+                errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
+              })
+
+              return
+            }
+
+            const message = errorMessages?.[res.status] || res?.statusText || t('error:unknown')
+
+            errorToast(message)
+          }
+
+          return { formState: contextRef.current.fields, res }
+        } catch (err) {
+          if (!requestContext.isCurrent()) {
+            return
+          }
+
+          console.error('Error submitting form', err) // eslint-disable-line no-console
+          setProcessing(false)
+          setSubmitted(true)
+          setDisabled(false)
+          errorToast(err.message)
+        }
+      } finally {
+        if (requestContext.isCurrent()) {
+          restoreRequestState()
+        } else if (promiseToastID !== undefined) {
+          toast.dismiss(promiseToastID)
+        }
       }
     },
     [
       beforeSubmit,
+      restoreRequestState,
+      setBackgroundProcessing,
       startRouteTransition,
       action,
       disableSuccessStatus,
       disableValidationOnSubmit,
-      disabled,
       dispatchFields,
       handleResponse,
       method,
@@ -601,6 +675,60 @@ export const Form: React.FC<FormProps> = (props) => {
       setSubmitted,
       onNonFieldError,
     ],
+  )
+
+  const submit = useCallback<Submit>(
+    async (options, event) => {
+      event?.stopPropagation()
+      event?.preventDefault()
+
+      if (contextRef.current.disabled) {
+        return
+      }
+
+      const requestScope = requestScopeRef.current
+      let didSucceed = false
+      const resultPromise = scheduleRequest({
+        priority: requestPriority[options?.requestIntent ?? 'submit'],
+        run: (requestContext) =>
+          executeSubmit({
+            onResponse: ({ res }) => {
+              didSucceed = res.ok
+            },
+            options,
+            requestContext,
+          }),
+      })
+
+      if (options?.requestIntent !== 'autosave') {
+        latestExplicitSubmitRef.current = resultPromise.then(
+          () => didSucceed,
+          () => didSucceed,
+        )
+      }
+
+      const result = await resultPromise
+
+      if (result.status === 'superseded' && options?.requestIntent === 'autosave') {
+        let explicitSubmit = latestExplicitSubmitRef.current
+        let didExplicitSubmitSucceed = true
+
+        while (explicitSubmit !== undefined) {
+          didExplicitSubmitSucceed = await explicitSubmit
+          if (explicitSubmit === latestExplicitSubmitRef.current) {
+            break
+          }
+          explicitSubmit = latestExplicitSubmitRef.current
+        }
+
+        if (!didExplicitSubmitSucceed && requestScope === requestScopeRef.current) {
+          options.onStaleRequest?.()
+        }
+      }
+
+      return result.status === 'completed' ? result.value : undefined
+    },
+    [executeSubmit, scheduleRequest],
   )
 
   const getFields = useCallback(() => contextRef.current.fields, [])
@@ -677,6 +805,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
+      resetRequestQueue()
+      restoreRequestState()
       const controller = handleAbortRef(abortResetFormRef)
 
       const docPreferences = await getDocPreferences()
@@ -713,16 +843,20 @@ export const Form: React.FC<FormProps> = (props) => {
       getDocPreferences,
       locale,
       setModified,
+      resetRequestQueue,
+      restoreRequestState,
     ],
   )
 
   const replaceState = useCallback(
     (state: FormState) => {
+      resetRequestQueue()
+      restoreRequestState()
       contextRef.current = { ...initContextState }
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
-    [dispatchFields, setModified],
+    [dispatchFields, setModified, resetRequestQueue, restoreRequestState],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
@@ -791,8 +925,9 @@ export const Form: React.FC<FormProps> = (props) => {
 
     return () => {
       abortAndIgnore(abortOnChange)
+      resetRequestQueue()
     }
-  }, [])
+  }, [resetRequestQueue])
 
   useEffect(() => {
     if (initializingFromProps !== undefined) {
@@ -846,6 +981,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useEffect(() => {
     if (initialState) {
+      resetRequestQueue()
+      restoreRequestState()
       contextRef.current = { ...initContextState }
       dispatchFields({
         type: 'REPLACE_STATE',
@@ -853,7 +990,7 @@ export const Form: React.FC<FormProps> = (props) => {
         state: initialState,
       })
     }
-  }, [initialState, dispatchFields])
+  }, [initialState, dispatchFields, resetRequestQueue, restoreRequestState])
 
   useThrottledEffect(
     () => {
@@ -875,28 +1012,41 @@ export const Form: React.FC<FormProps> = (props) => {
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
   const executeOnChange = useEffectEvent(() => {
-    queueTask(async () => {
-      if (Array.isArray(onChange)) {
-        let serverState: FormState
-
-        for (const onChangeFn of onChange) {
-          // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-          serverState = await onChangeFn({
-            formState: deepCopyObjectSimpleWithoutReactComponents(formState, {
+    void scheduleRequest({
+      priority: requestPriority.formState,
+      run: async (requestContext) => {
+        if (Array.isArray(onChange)) {
+          let serverState: FormState
+          const requestFormState = deepCopyObjectSimpleWithoutReactComponents(
+            contextRef.current.fields,
+            {
               excludeFiles: true,
-            }),
-            submitted,
+            },
+          )
+
+          for (const onChangeFn of onChange) {
+            // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
+            serverState = await onChangeFn({
+              formState: requestFormState,
+              submitted,
+            })
+          }
+
+          if (!requestContext.isCurrent()) {
+            return
+          }
+
+          React.startTransition(() => {
+            dispatchFields({
+              type: 'MERGE_SERVER_STATE',
+              prevStateRef: prevFormState,
+              serverState,
+            })
           })
         }
-
-        React.startTransition(() => {
-          dispatchFields({
-            type: 'MERGE_SERVER_STATE',
-            prevStateRef: prevFormState,
-            serverState,
-          })
-        })
-      }
+      },
+    }).catch((err) => {
+      console.error('Error in queued function:', err) // eslint-disable-line no-console
     })
   })
 
@@ -954,7 +1104,7 @@ export const Form: React.FC<FormProps> = (props) => {
                   <BackgroundProcessingContext value={backgroundProcessing}>
                     <ModifiedContext value={modified}>
                       {/* eslint-disable-next-line @eslint-react/no-context-provider */}
-                      <FormFieldsContext.Provider value={fieldsReducer}>
+                      <FormFieldsContext.Provider value={[formState, dispatchFields]}>
                         <SuccessfulSubmitCountContext value={successfulSubmitCount}>
                           {children}
                         </SuccessfulSubmitCountContext>
