@@ -1,5 +1,5 @@
 import type { ValidationFieldError } from '../../../errors/ValidationError.js'
-import type { JsonObject, PayloadRequest } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest, SelectIncludeType } from '../../../types/index.js'
 import type { SanitizedCollectionConfig } from '../../config/types.js'
 
 import { ValidationError } from '../../../errors/index.js'
@@ -9,6 +9,7 @@ import { fieldValueExists } from '../../../utilities/fieldValueExists.js'
 import { getObjectDotNotation } from '../../../utilities/getObjectDotNotation.js'
 import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { traverseFields } from '../../../utilities/traverseFields.js'
+import { unflatten } from '../../../utilities/unflatten.js'
 
 type Args = {
   collection: SanitizedCollectionConfig
@@ -115,26 +116,30 @@ export const validateUniqueConstraints = async ({
 
         delete queryReq.transactionID
 
+        const requiredPaths = requiredFields.map((field) =>
+          field.pathHasLocalized && req.payload.config.localization && req.locale
+            ? field.localizedPath.replaceAll('<locale>', req.locale)
+            : field.path,
+        )
+        const select: SelectIncludeType = unflatten(
+          Object.fromEntries([['id', true], ...requiredFields.map(({ path }) => [path, true])]),
+          { object: true },
+        )
+
         const { docs } = await req.payload.db.find({
           collection: collection.slug,
           limit: 0,
           locale: req.locale ?? undefined,
           pagination: false,
           req: queryReq,
+          select,
           where,
         })
 
         exists = docs.some(
           (doc) =>
             doc.id !== id &&
-            requiredFields.every((field) => {
-              const path =
-                field.pathHasLocalized && req.payload.config.localization && req.locale
-                  ? field.localizedPath.replaceAll('<locale>', req.locale)
-                  : field.path
-
-              return getObjectDotNotation(doc, path) !== undefined
-            }),
+            requiredPaths.every((path) => getObjectDotNotation(doc, path) !== undefined),
         )
       } else {
         exists = await documentMatchingWhereExists({

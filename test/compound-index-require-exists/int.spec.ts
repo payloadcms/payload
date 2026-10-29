@@ -119,6 +119,22 @@ test.suite('Compound index existence filters', { config: './config.ts', db: 'mon
     ).toMatchObject({ valid: false })
   })
 
+  test('should exclude the document being validated from raw candidates', async ({ payload }) => {
+    const doc = await payload.create({
+      collection: postsSlug,
+      data: { code: 'shared', gate: null, tenant: 'same' },
+      overrideAccess: true,
+    })
+
+    expect(
+      await payload.validate({
+        id: doc.id,
+        collection: postsSlug,
+        overrideAccess: true,
+      }),
+    ).toMatchObject({ valid: true })
+  })
+
   test('should enforce uniqueness when a filtered document is updated to include the field', async ({
     payload,
   }) => {
@@ -159,6 +175,22 @@ test.suite('Compound index existence filters', { config: './config.ts', db: 'mon
         data: { metadata: { code: 'shared' }, tenant: 'same' },
       }),
     ).rejects.toThrow(ValidationError)
+  })
+
+  test('should preserve nested null values when selecting required paths', async ({ payload }) => {
+    await payload.create({
+      collection: postsSlug,
+      data: { metadata: { code: null }, tenant: 'same' },
+      overrideAccess: true,
+    })
+
+    expect(
+      await payload.validate({
+        collection: postsSlug,
+        data: { metadata: { code: null }, tenant: 'same' },
+        overrideAccess: true,
+      }),
+    ).toMatchObject({ valid: false })
   })
 
   test('should create partial indexes for each locale in MongoDB', async ({ payload }) => {
