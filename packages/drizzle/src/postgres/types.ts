@@ -180,7 +180,7 @@ export type BasePostgresAdapter = {
   }[]
   push: boolean
   readReplicaOptions?: string[]
-  rejectInitializing: () => void
+  rejectInitializing: (err?: unknown) => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   resolveInitializing: () => void
