@@ -93,14 +93,23 @@ describe('cli', () => {
     expect(stdout.trim().split('\n')).toHaveLength(1)
   })
 
-  it('rejects --fixable that is not an array of strings', async () => {
+  it.each([
+    ['{"a":1}', '--fixable must be a JSON array of strings'],
+    ['[1]', '--fixable must be a JSON array of strings'],
+    ['not json', '--fixable is not valid JSON'],
+  ])('rejects --fixable %s', async (fixable, message) => {
     const report = await writeJson({ name: 'report.json', value: makeReport() })
+    const result = await writeJson({
+      name: 'result.json',
+      value: { body: 'b', fixedAdvisories: [], needsPerson: [] },
+    })
 
-    const { code } = await run({
-      args: ['check-fixed', `--report=${report}`, '--result=x', '--fixable={"a":1}'],
+    const { code, stdout } = await run({
+      args: ['check-fixed', `--report=${report}`, `--result=${result}`, `--fixable=${fixable}`],
     })
 
     expect(code).toBe(1)
+    expect(stdout).toContain(message)
   })
 
   it('path-guard exits 1 on disallowed change', async () => {
