@@ -4,6 +4,7 @@ import { expect } from 'vitest'
 import type { Organization } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
+import { folderTagDocumentsSlug, foldersSlug, organizationsSlug } from './shared.js'
 
 test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () => {
   test.describe('Collection Config Property', () => {
@@ -1662,6 +1663,189 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
       // Should have full 3-level path
       expect(result._h_slugPath).toBe('level-1/level-2/level-3')
       expect(result._h_titlePath).toBe('Level 1/Level 2/Level 3')
+    })
+  })
+
+  test.describe('Deleting a hierarchy item referenced by multi-value fields', () => {
+    const createdFolderIds: Array<number | string> = []
+    const createdDocIds: Array<number | string> = []
+    const createdOrgIds: Array<number | string> = []
+
+    test.afterEach(async ({ payload }) => {
+      if (createdDocIds.length) {
+        await payload.delete({
+          collection: folderTagDocumentsSlug,
+          overrideAccess: true,
+          where: { id: { in: createdDocIds } },
+        })
+        createdDocIds.length = 0
+      }
+
+      if (createdOrgIds.length) {
+        await payload.delete({
+          collection: organizationsSlug,
+          overrideAccess: true,
+          where: { id: { in: createdOrgIds } },
+        })
+        createdOrgIds.length = 0
+      }
+
+      if (createdFolderIds.length) {
+        await payload.delete({
+          collection: foldersSlug,
+          overrideAccess: true,
+          where: { id: { in: createdFolderIds } },
+        })
+        createdFolderIds.length = 0
+      }
+    })
+
+    const createFolder = async (payload, name: string) => {
+      const folder = await payload.create({
+        collection: foldersSlug,
+        data: { name },
+        overrideAccess: true,
+      })
+      createdFolderIds.push(folder.id)
+      return folder
+    }
+
+    test('should remove only the deleted id from a multi-value tag field', async ({ payload }) => {
+      const news = await createFolder(payload, 'News')
+      const sport = await createFolder(payload, 'Sport')
+
+      const doc = await payload.create({
+        collection: folderTagDocumentsSlug,
+        data: {
+          parentFolder: [news.id, sport.id],
+          title: 'Hello',
+        },
+        overrideAccess: true,
+      })
+      createdDocIds.push(doc.id)
+
+      await payload.delete({
+        collection: foldersSlug,
+        id: sport.id,
+        overrideAccess: true,
+      })
+      createdFolderIds.splice(createdFolderIds.indexOf(sport.id), 1)
+
+      const updated = await payload.findByID({
+        collection: folderTagDocumentsSlug,
+        depth: 0,
+        id: doc.id,
+        overrideAccess: true,
+      })
+
+      expect(updated.parentFolder).toEqual([news.id])
+    })
+
+    test('should leave a multi-value tag field empty when the deleted id was the only value', async ({
+      payload,
+    }) => {
+      const sport = await createFolder(payload, 'Only Tag')
+
+      const doc = await payload.create({
+        collection: folderTagDocumentsSlug,
+        data: {
+          parentFolder: [sport.id],
+          title: 'Solo',
+        },
+        overrideAccess: true,
+      })
+      createdDocIds.push(doc.id)
+
+      await payload.delete({
+        collection: foldersSlug,
+        id: sport.id,
+        overrideAccess: true,
+      })
+      createdFolderIds.splice(createdFolderIds.indexOf(sport.id), 1)
+
+      const updated = await payload.findByID({
+        collection: folderTagDocumentsSlug,
+        depth: 0,
+        id: doc.id,
+        overrideAccess: true,
+      })
+
+      expect(updated.parentFolder ?? []).toEqual([])
+    })
+
+    test('should remove the deleted id from every referencing document across pages', async ({
+      payload,
+    }) => {
+      const news = await createFolder(payload, 'Paged News')
+      const sport = await createFolder(payload, 'Paged Sport')
+
+      // The afterDelete hook reads matches in pages of 100, so create more
+      // referencing documents than one page holds.
+      const totalDocs = 101
+      for (let i = 0; i < totalDocs; i++) {
+        const doc = await payload.create({
+          collection: folderTagDocumentsSlug,
+          data: {
+            parentFolder: [news.id, sport.id],
+            title: `Paged doc ${i}`,
+          },
+          overrideAccess: true,
+        })
+        createdDocIds.push(doc.id)
+      }
+
+      await payload.delete({
+        collection: foldersSlug,
+        id: sport.id,
+        overrideAccess: true,
+      })
+      createdFolderIds.splice(createdFolderIds.indexOf(sport.id), 1)
+
+      const stillTaggedWithDeleted = await payload.count({
+        collection: folderTagDocumentsSlug,
+        overrideAccess: true,
+        where: { parentFolder: { equals: sport.id } },
+      })
+      const stillTaggedWithKept = await payload.count({
+        collection: folderTagDocumentsSlug,
+        overrideAccess: true,
+        where: { parentFolder: { equals: news.id } },
+      })
+
+      expect(stillTaggedWithDeleted.totalDocs).toBe(0)
+      expect(stillTaggedWithKept.totalDocs).toBe(totalDocs)
+    })
+
+    test('should clear a single-value folder reference when the folder is deleted', async ({
+      payload,
+    }) => {
+      const folder = await createFolder(payload, 'Single Value Folder')
+
+      const org = await payload.create({
+        collection: organizationsSlug,
+        data: {
+          parentFolder: folder.id,
+          title: 'Org In Folder',
+        },
+        overrideAccess: true,
+      })
+      createdOrgIds.push(org.id)
+
+      await payload.delete({
+        collection: foldersSlug,
+        id: folder.id,
+        overrideAccess: true,
+      })
+      createdFolderIds.splice(createdFolderIds.indexOf(folder.id), 1)
+
+      const updated = await payload.findByID({
+        collection: organizationsSlug,
+        depth: 0,
+        id: org.id,
+        overrideAccess: true,
+      })
+
+      expect(updated.parentFolder).toBeNull()
     })
   })
 })
