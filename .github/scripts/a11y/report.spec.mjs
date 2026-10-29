@@ -100,6 +100,29 @@ describe('per-job workflow summary', () => {
     expect(output).toContain('Run: failed')
   })
 
+  it('should preserve literal failure text and newlines while escaping HTML and terminal controls', () => {
+    const output = buildSummary({
+      report: report({
+        tests: [
+          entry({
+            attempts: [
+              attempt({
+                status: 'failed',
+                errors: [
+                  '\u001b[31mtest/__helpers/[name] `code` * _ ~ \\path |\u001b[0m\n<script> & </pre>\u0000',
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+    })
+    const failure = output.match(/<pre>([\s\S]*?)<\/pre>/)?.[1]
+    expect(failure).toBe(
+      'test/__helpers/[name] `code` * _ ~ \\path |\n&lt;script&gt; &amp; &lt;/pre&gt;',
+    )
+  })
+
   it('should escape filenames, names and failure messages while linking the test source', () => {
     const output = buildSummary({
       report: report({

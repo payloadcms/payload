@@ -69,7 +69,10 @@ export function buildSummary({
       '',
     )
     if (attempt?.errors.length)
-      lines.push(`<pre>${escape({ value: attempt.errors.join('\n').slice(0, 2000) })}</pre>`, '')
+      lines.push(
+        `<pre>${escapeHtml({ value: attempt.errors.join('\n').slice(0, 2000) })}</pre>`,
+        '',
+      )
     for (const value of last?.skippedSteps ?? [])
       lines.push(`- Skipped check: ${escape({ value })}`)
     for (const value of last?.evidenceErrors ?? [])
@@ -142,6 +145,13 @@ function cell({ tests }) {
 }
 
 function escape({ value }) {
+  return escapeHtml({ value })
+    .replace(/\|/g, '&#124;')
+    .replace(/\r?\n/g, '<br>')
+    .replace(/([\\`*_[\]~])/g, '\\$1')
+}
+
+function escapeHtml({ value }) {
   return (
     stripVTControlCharacters(String(value))
       // oxlint-disable-next-line no-control-regex -- Remove control characters from untrusted test output.
@@ -149,9 +159,6 @@ function escape({ value }) {
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      .replace(/\|/g, '&#124;')
-      .replace(/\r?\n/g, '<br>')
-      .replace(/([\\`*_[\]~])/g, '\\$1')
   )
 }
 
