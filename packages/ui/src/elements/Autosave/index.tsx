@@ -158,8 +158,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
           }
         },
         overrides: { _status: 'draft' },
-        requestIntent: 'autosave',
         skipValidation: !validateOnDraft,
+        submissionType: 'autosave',
       })
 
       if (result && result.res?.ok && !mostRecentVersionIsAutosaved) {

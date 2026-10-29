@@ -39,7 +39,7 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      */
     isQueueReset: () => boolean
     /** Identifies background autosaves; omitted values represent explicit submissions. */
-    requestIntent?: SubmitOptions['requestIntent']
+    submissionType?: SubmitOptions['submissionType']
   },
 ) => Promise<FormState | void> | void
 
@@ -124,13 +124,13 @@ export type SubmitOptions<C = Record<string, unknown>> = {
   /** @internal Reconcile an autosave invalidated by edits in the current form. */
   onStaleRequest?: () => void
   overrides?: ((formState) => FormData) | Record<string, unknown>
-  /** @internal */
-  requestIntent?: 'autosave' | 'submit'
   /**
    * When true, will skip validation before submitting the form.
    * @default false
    */
   skipValidation?: boolean
+  /** @internal */
+  submissionType?: 'autosave' | 'submit'
 }
 
 export type DispatchFields = React.Dispatch<any>

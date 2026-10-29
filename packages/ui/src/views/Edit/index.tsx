@@ -337,7 +337,7 @@ export function DefaultEditView({
         }
       }
 
-      if (ctx?.requestIntent !== 'autosave') {
+      if (ctx?.submissionType !== 'autosave') {
         recordSaveMetadata()
       }
 
@@ -396,7 +396,7 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      if (ctx?.requestIntent === 'autosave') {
+      if (ctx?.submissionType === 'autosave') {
         recordSaveMetadata()
       }
 

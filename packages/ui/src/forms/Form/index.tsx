@@ -340,8 +340,8 @@ export const Form: React.FC<FormProps> = (props) => {
         method: methodToUse = method,
         onStaleRequest,
         overrides: overridesFromArgs = {},
-        requestIntent,
         skipValidation,
+        submissionType,
       } = options || {}
 
       const disableToast = disableSuccessStatusFromArgs ?? disableSuccessStatus
@@ -393,7 +393,7 @@ export const Form: React.FC<FormProps> = (props) => {
         setDisabled(true)
       }
 
-      if (requestIntent === 'autosave') {
+      if (submissionType === 'autosave') {
         setBackgroundProcessing(true)
       }
 
@@ -557,7 +557,7 @@ export const Form: React.FC<FormProps> = (props) => {
           )
 
           const shouldHandleStaleSuccess =
-            hasCreatedDocument || (isDocumentForm && requestIntent !== 'autosave')
+            hasCreatedDocument || (isDocumentForm && submissionType !== 'autosave')
 
           // Document forms still record explicit saves when newer edits make the response values stale.
           if (
@@ -566,7 +566,7 @@ export const Form: React.FC<FormProps> = (props) => {
           ) {
             // Completed explicit saves still count when newer edits prevent merging their values.
             // Autosaves reconcile stale submissions through onStaleRequest instead.
-            return requestIntent !== 'autosave' && !requestContext.isQueueReset()
+            return submissionType !== 'autosave' && !requestContext.isQueueReset()
               ? { res }
               : undefined
           }
@@ -585,7 +585,7 @@ export const Form: React.FC<FormProps> = (props) => {
               formState: serializableFormState,
               isCurrent: requestContext.isCurrent,
               isQueueReset: requestContext.isQueueReset,
-              requestIntent,
+              submissionType,
             })
           }
 
@@ -601,7 +601,7 @@ export const Form: React.FC<FormProps> = (props) => {
               preservePromiseToast = true
               successToast(json.message || t('general:submissionSuccessful'))
             }
-            return requestIntent !== 'autosave' && !requestContext.isQueueReset()
+            return submissionType !== 'autosave' && !requestContext.isQueueReset()
               ? { res }
               : undefined
           }
@@ -740,14 +740,14 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         if (!requestContext.isQueueReset()) {
-          if (requestIntent === 'autosave') {
+          if (submissionType === 'autosave') {
             setBackgroundProcessing(false)
           }
 
           setProcessing(false)
           setDisabled(disabledFromPropsRef.current)
 
-          if (requestIntent === 'autosave' && !requestContext.isCurrent()) {
+          if (submissionType === 'autosave' && !requestContext.isCurrent()) {
             onStaleRequest?.()
           }
         }
@@ -841,7 +841,7 @@ export const Form: React.FC<FormProps> = (props) => {
       const resetSequence = resetSequenceRef.current
       let didReceiveSuccessfulResponse = false
       const scheduledRequest = scheduleRequest({
-        priority: requestPriority[options?.requestIntent ?? 'submit'],
+        priority: requestPriority[options?.submissionType ?? 'submit'],
         run: (requestContext) =>
           executeSubmit({
             onResponse: ({ res }) => {
@@ -852,7 +852,7 @@ export const Form: React.FC<FormProps> = (props) => {
           }),
       })
 
-      if (options?.requestIntent !== 'autosave') {
+      if (options?.submissionType !== 'autosave') {
         latestExplicitSubmitRef.current = scheduledRequest.then(
           () => didReceiveSuccessfulResponse,
           () => didReceiveSuccessfulResponse,
@@ -872,7 +872,7 @@ export const Form: React.FC<FormProps> = (props) => {
         executeOnChange()
       }
 
-      if (result.status === 'superseded' && options?.requestIntent === 'autosave') {
+      if (result.status === 'superseded' && options?.submissionType === 'autosave') {
         let explicitSubmit = latestExplicitSubmitRef.current
         let didSubmitSucceed = true
 
