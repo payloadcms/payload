@@ -159,6 +159,81 @@ test.each([{ selected: true }, true])(
   },
 )
 
+test.each([{ selected: true }, 'grid'])(
+  'should await an identical merged value while a non-merged write is pending (%j)',
+  async (value) => {
+    let preferences: ReturnType<typeof usePreferences>
+    let finishWrite: () => void
+    const persisted = new Promise<void>((resolve) => {
+      finishWrite = resolve
+    })
+
+    mocks.post.mockReset().mockReturnValue(persisted)
+
+    function Consumer() {
+      preferences = usePreferences()
+      return null
+    }
+
+    await render(
+      <PreferencesProvider>
+        <Consumer />
+      </PreferencesProvider>,
+    )
+
+    const first = preferences!.setPreference('view', value)
+    const settled = vi.fn()
+    const second = preferences!.setPreference('view', value, true).then(settled)
+
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(settled).not.toHaveBeenCalled()
+
+    finishWrite!()
+    await Promise.all([first, second])
+    expect(settled).toHaveBeenCalledOnce()
+    expect(mocks.post).toHaveBeenCalledOnce()
+  },
+)
+
+test.each([{ selected: true }, 'grid'])(
+  'should reject an identical merged value when a non-merged write fails (%j)',
+  async (value) => {
+    let preferences: ReturnType<typeof usePreferences>
+    let rejectWrite: (error: Error) => void
+    const persisted = new Promise<void>((_resolve, reject) => {
+      rejectWrite = reject
+    })
+
+    mocks.post.mockReset().mockReturnValue(persisted)
+
+    function Consumer() {
+      preferences = usePreferences()
+      return null
+    }
+
+    await render(
+      <PreferencesProvider>
+        <Consumer />
+      </PreferencesProvider>,
+    )
+
+    const first = preferences!.setPreference('view', value)
+    const second = preferences!.setPreference('view', value, true)
+    const results = Promise.allSettled([first, second])
+    const error = new Error('write failed')
+
+    rejectWrite!(error)
+    expect(await results).toEqual([
+      { status: 'rejected', reason: error },
+      { status: 'rejected', reason: error },
+    ])
+    expect(mocks.post).toHaveBeenCalledOnce()
+
+    preferences!.syncPreference('view', { refreshed: true })
+    expect(await preferences!.getPreference('view')).toEqual({ refreshed: true })
+  },
+)
+
 test('should ignore stale hydration until all queued merged writes finish', async () => {
   let preferences: ReturnType<typeof usePreferences>
   let finishFirstWrite: () => void

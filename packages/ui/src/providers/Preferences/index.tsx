@@ -162,13 +162,18 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         pendingWrites.current[key] = (pendingWrites.current[key] ?? 0) + 1
 
         try {
-          await requests.post(
-            formatAdminURL({
-              apiRoute: api,
-              path: `/payload-preferences/${key}`,
-            }),
-            requestOptions(value, i18n.language),
-          )
+          const update = requests
+            .post(
+              formatAdminURL({
+                apiRoute: api,
+                path: `/payload-preferences/${key}`,
+              }),
+              requestOptions(value, i18n.language),
+            )
+            .then(() => undefined)
+
+          latestWrites.current[key] = update
+          await update
         } finally {
           pendingWrites.current[key] -= 1
         }
