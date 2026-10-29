@@ -14,7 +14,7 @@ export type QueueContext = {
 }
 
 export type QueueTask<T> = {
-  /** Determines which task is retained while another task is active. Higher values take precedence. */
+  /** Determines which pending task is retained. Lower values take precedence; defaults to `Infinity` (lowest priority). */
   priority?: number
   /** Runs when this task reaches the active position in the queue. */
   run: (context: QueueContext) => Promise<T>
@@ -93,7 +93,7 @@ const initializeQueue = ({ getSequence }: { getSequence: () => unknown }): Queue
       reject = rejectPromise
     })
     const entry: PendingEntry = {
-      priority: task.priority ?? 0,
+      priority: task.priority ?? Infinity,
       reject,
       resolve: resolve as (result: QueueResult<unknown>) => void,
       run: task.run as (context: QueueContext) => Promise<unknown>,
@@ -104,7 +104,7 @@ const initializeQueue = ({ getSequence }: { getSequence: () => unknown }): Queue
       return result
     }
 
-    if (!pending || entry.priority >= pending.priority) {
+    if (!pending || entry.priority <= pending.priority) {
       pending?.resolve({ status: 'superseded' })
       pending = entry
     } else {

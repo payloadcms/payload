@@ -51,14 +51,10 @@ import {
 } from './context.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
+import { requestPriority } from './requestPriority.js'
 import { useFormSubmission } from './useFormSubmission.js'
 
 const baseClass = 'form'
-const requestPriority = {
-  autosave: 1,
-  formState: 0,
-  submit: 2,
-} as const
 
 export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
@@ -245,34 +241,6 @@ export const Form: React.FC<FormProps> = (props) => {
     ],
   )
 
-  const submissionOptions = useMemo(
-    () => ({
-      contextRef,
-      dispatchFieldsWithoutIncrementingFormSequence,
-      formRef,
-      formSequenceRef,
-      isMountedRef,
-      prevFormStateRef: prevFormState,
-      props,
-      resetSequenceRef,
-      setIsValid,
-      setModifiedWithoutTracking: _setModified,
-      validateForm,
-    }),
-    [
-      contextRef,
-      dispatchFieldsWithoutIncrementingFormSequence,
-      formRef,
-      formSequenceRef,
-      isMountedRef,
-      prevFormState,
-      props,
-      resetSequenceRef,
-      setIsValid,
-      _setModified,
-      validateForm,
-    ],
-  )
   const {
     backgroundProcessing,
     disabled,
@@ -287,7 +255,19 @@ export const Form: React.FC<FormProps> = (props) => {
     submissionErrorsRef,
     submitted,
     successfulSubmitCount,
-  } = useFormSubmission(submissionOptions)
+  } = useFormSubmission({
+    contextRef,
+    dispatchFieldsWithoutIncrementingFormSequence,
+    formRef,
+    formSequenceRef,
+    isMountedRef,
+    prevFormStateRef: prevFormState,
+    props,
+    resetSequenceRef,
+    setIsValid,
+    setModifiedWithoutTracking: _setModified,
+    validateForm,
+  })
 
   const executeOnChange = useEffectEvent(() => {
     void scheduleRequest({
