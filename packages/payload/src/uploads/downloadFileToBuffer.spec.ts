@@ -201,7 +201,8 @@ describe('downloadFileToBuffer', () => {
   })
 
   test('should use the body byte length as the file size when content-length is wrong', async () => {
-    // A compressed response whose content-length describes the encoded body, not the decoded one.
+    // content-length is deliberately wrong here; the recorded size must come
+    // from the body that was actually read, not from the header.
     const body = 'uncompressed-svg-content'
     vitest.spyOn(global, 'fetch').mockResolvedValue(
       new Response(body, {
