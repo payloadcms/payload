@@ -8,7 +8,6 @@ import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
-import { getOriginalFilename } from './fileVersioning/naming.js'
 import { getFileFromUploadInstructions } from './getFileFromUploadInstructions.js'
 
 vi.mock('./clientUploadReceipt.js', () => ({
@@ -65,11 +64,9 @@ const createUploadReferenceFile = (
   const uploadReference = overrides.uploadReference ?? {}
   const prefix = typeof uploadReference.prefix === 'string' ? uploadReference.prefix : ''
   const objectKey = 'upload-1'
-  const originalFilename =
-    filename.includes('/') || filename.includes('\\') ? filename : getOriginalFilename({ filename })
   const storageFilePath = prefix
-    ? `${prefix}/${objectKey}/${originalFilename}`
-    : `media/${objectKey}/${originalFilename}`
+    ? `${prefix}/${objectKey}/${filename}`
+    : `media/${objectKey}/${filename}`
   return {
     filename: 'video.mp4',
     mimeType: 'video/mp4',
@@ -442,10 +439,21 @@ describe('getFileFromUploadInstructions', () => {
     expect(result.uploadReference).toStrictEqual({ prefix: '' })
   })
 
-  it.each([
-    { label: 'plain', storedFilename: 'video.mp4' },
-    { label: 'beta -original', storedFilename: 'video-original.mp4' },
-  ])('should accept a receipt for the $label uploaded filename', async ({ storedFilename }) => {
+  it('should reject a receipt signed for the beta -original filename', async () => {
+    const req = createReq([vi.fn()], {})
+    const file = createUploadReferenceFile()
+    file.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(file.uploadReference.signedReceipt as string),
+      storageFilePath: 'media/upload-1/video-original.mp4',
+    })
+
+    await expect(
+      getFileFromUploadInstructions({ collectionSlug: 'media', file, req }),
+    ).rejects.toThrow('Invalid upload reference.')
+  })
+
+  it('should accept a receipt for the plain uploaded filename', async () => {
+    const storedFilename = 'video.mp4'
     const handler = vi.fn(
       async () =>
         new Response(Buffer.alloc(18), { headers: { 'Content-Length': '18' }, status: 200 }),

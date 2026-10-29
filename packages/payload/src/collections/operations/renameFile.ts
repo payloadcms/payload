@@ -36,10 +36,6 @@ import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { updateDocument } from './utilities/update.js'
 
-const BETA_ORIGINAL_SUFFIX = '-original'
-// Earlier betas named the original `<base>-original`, with a `-<n>` counter on a collision.
-const BETA_ORIGINAL_STEM = /^(.+)-original(?:-\d+)?$/
-
 export type RenameFileArguments = {
   collection: Collection
   depth?: number
@@ -112,31 +108,19 @@ export const renameFileOperation = async (
     const { newStem } = validateRename({ filename, oldFilename })
     const originalStem = path.posix.parse(oldFilename).name
     const mainStem = path.posix.parse(stored.filename as string).name
-    // A user's own filename can contain `-original`, so only a separate original whose base
-    // matches the main file counts as a beta one.
-    const betaBase = BETA_ORIGINAL_STEM.exec(originalStem)?.[1]
-    const isBetaOriginal = Boolean(
-      betaBase && originalStem !== mainStem && mainStem.startsWith(betaBase),
-    )
     // The main file and the original can each extend the shared base name (`photo-cropped`,
     // or a `photo-1` counter), so the shorter one is the base.
-    const oldStem = isBetaOriginal
-      ? betaBase!
-      : mainStem.startsWith(originalStem)
-        ? originalStem
-        : mainStem
+    const oldStem = mainStem.startsWith(originalStem) ? originalStem : mainStem
     if (filename === `${oldStem}${path.posix.extname(oldFilename)}`) {
       throw new APIError('The upload already has this filename.', 400)
     }
 
-    const oldStems = isBetaOriginal ? [`${oldStem}${BETA_ORIGINAL_SUFFIX}`, oldStem] : [oldStem]
     const hasDefaultRole = ({ roles }: { roles: StoredFileRole[] }) =>
       roles.some(({ type }) => type === 'default')
     const getNextFilename = ({ key }: { key: string }) => {
       const previousFilename = path.posix.basename(key)
-      const matchedStem = oldStems.find((stem) => previousFilename.startsWith(stem))
-      const suffix = matchedStem
-        ? previousFilename.slice(matchedStem.length)
+      const suffix = previousFilename.startsWith(oldStem)
+        ? previousFilename.slice(oldStem.length)
         : `-${previousFilename}`
 
       return `${newStem}${suffix}`

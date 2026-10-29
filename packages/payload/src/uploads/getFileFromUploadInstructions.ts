@@ -16,7 +16,7 @@ import { sanitizeFilename } from '../utilities/sanitizeFilename.js'
 import { sanitizeUploadPrefix } from '../utilities/sanitizeUploadPrefix.js'
 import { verifyClientUploadReceipt } from './clientUploadReceipt.js'
 import { docWithFilenameExists } from './docWithFilenameExists.js'
-import { getOriginalFilename, normalizeStorageKey } from './fileVersioning/naming.js'
+import { normalizeStorageKey } from './fileVersioning/naming.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
@@ -83,20 +83,16 @@ export const getFileFromUploadInstructions = async ({
       signedReceipt,
     })
     allowOverwrite = receipt.allowOverwrite === true
-    let storedFilenames: string[]
     let storageFilePath: string
 
     try {
-      // Receipts signed before the `-original` suffix was removed name the suffixed key.
-      storedFilenames = [file.filename, getOriginalFilename({ filename: file.filename })]
       storageFilePath = normalizeStorageKey({ key: receipt.storageFilePath })
     } catch {
       throw new APIError('Invalid upload reference.', 400)
     }
 
-    const originalFilename = storedFilenames.find(
-      (filename) => path.posix.basename(storageFilePath) === filename,
-    )
+    const originalFilename =
+      path.posix.basename(storageFilePath) === file.filename ? file.filename : undefined
     const expectedKeySuffix = [receipt.filePrefix, receipt._objectKey, originalFilename]
       .filter(Boolean)
       .join('/')
