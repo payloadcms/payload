@@ -292,6 +292,8 @@ test('should show fresh data', { tag: '@also-without-cache-components' }, async 
 
 This repository follows [Conventional Commits](https://www.conventionalcommits.org/).
 
+Don't introduce breaking changes unless they fall under one of the exceptions in `docs/migration-guide/versioning.mdx`. The v4 migration guide records past breaking changes and is not permission to add new ones. If a change can't be made without breaking, flag it instead of working around it.
+
 ### PR Title Format
 
 `<type>(<scope>): <title>`
