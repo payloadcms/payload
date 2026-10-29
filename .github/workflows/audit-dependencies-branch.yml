@@ -370,7 +370,7 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Re-run audit
+      - name: Re-run audit (unfixable findings expected)
         uses: ./.github/actions/audit-dependencies
         continue-on-error: true
         with:
