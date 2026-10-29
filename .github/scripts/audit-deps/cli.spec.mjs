@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process'
-import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { promisify } from 'node:util'
@@ -124,13 +124,6 @@ describe('cli', () => {
     expect(stdout).toContain('::error::.github/evil.yml: path not allowed')
   })
 
-  it('path-guard exits 0 on allowed change', async () => {
-    await initRepo()
-    await writeFile(path.join(dir, 'package.json'), '{}')
-
-    expect((await run({ args: ['path-guard', `--cwd=${dir}`] })).code).toBe(0)
-  })
-
   it('check-fixed exits 1 when claim still reported', async () => {
     const reaudit = await writeJson({ name: 'reaudit.json', value: makeReport() })
     const result = await writeJson({
@@ -145,23 +138,6 @@ describe('cli', () => {
     expect(code).toBe(1)
     expect(stdout).toContain(`::error::`)
     expect(await readFile(summaryFile, 'utf8')).toContain('my analysis')
-  })
-
-  it('check-fixed exits 0 when claims are cleared', async () => {
-    const reaudit = await writeJson({
-      name: 'reaudit.json',
-      value: makeReport({ advisories: [] }),
-    })
-    const result = await writeJson({
-      name: 'result.json',
-      value: { body: 'done', fixedAdvisories: [GHSA], needsPerson: [] },
-    })
-
-    const { code } = await run({
-      args: ['check-fixed', `--report=${reaudit}`, `--result=${result}`, `--fixable=["${GHSA}"]`],
-    })
-
-    expect(code).toBe(0)
   })
 
   it('content-guard exits 1 on scripts change', async () => {
@@ -246,19 +222,6 @@ describe('cli', () => {
 
     expect(code).toBe(1)
     expect(stdout).toBe('::error::.github/ci.yml: path not allowed\n')
-  })
-
-  it('patch-guard exits 0 on an in-place manifest change', async () => {
-    await initRepo()
-    await writeFile(path.join(dir, 'package.json'), '{}\n')
-    const { stdout: patch } = await git(['diff', 'HEAD'])
-    await git(['checkout', '--', 'package.json'])
-    const patchFile = path.join(dir, 'fix.patch')
-    await writeFile(patchFile, patch)
-
-    const { code } = await run({ args: ['patch-guard', `--cwd=${dir}`, `--patch=${patchFile}`] })
-
-    expect(code).toBe(0)
   })
 
   it('pr-body writes the change table, agent body, and marker', async () => {

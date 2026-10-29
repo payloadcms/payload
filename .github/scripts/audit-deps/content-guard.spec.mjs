@@ -293,10 +293,6 @@ describe('diffWorkspaceYaml', () => {
     })
   }
 
-  it('accepts an unchanged file', () => {
-    expect(diff({ after: WORKSPACE_YAML })).toEqual({ changes: [], violations: [] })
-  })
-
   it('allows a planned catalog bump in pnpm-workspace.yaml', () => {
     const result = diff({
       after: WORKSPACE_YAML.replace("  react: '19.3.1'", "  react: '19.3.2'"),

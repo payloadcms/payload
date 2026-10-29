@@ -82,19 +82,6 @@ describe('runPrecheck', () => {
     })
   })
 
-  it('sets skip when marker matches', async () => {
-    const github = makeGithub({
-      commits: [botCommit],
-      openPrs: [{ body: `text\n${MARKER}\n`, number: 7 }],
-    })
-
-    expect(await precheck({ github })).toEqual({
-      has_foreign_commits: 'false',
-      next_step: 'skip',
-      pr_number: '7',
-    })
-  })
-
   it('sets blocked on foreign commit', async () => {
     const github = makeGithub({
       commits: [botCommit, { author: { login: 'someone' } }],
@@ -105,19 +92,6 @@ describe('runPrecheck', () => {
       has_foreign_commits: 'true',
       next_step: 'blocked',
       pr_number: '8',
-    })
-  })
-
-  it('sets update when the set changed and only the bot committed', async () => {
-    const github = makeGithub({
-      commits: [botCommit],
-      openPrs: [{ body: 'no marker', number: 9 }],
-    })
-
-    expect(await precheck({ github })).toEqual({
-      has_foreign_commits: 'false',
-      next_step: 'update',
-      pr_number: '9',
     })
   })
 

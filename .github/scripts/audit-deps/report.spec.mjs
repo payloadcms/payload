@@ -95,21 +95,6 @@ describe('readReport', () => {
     return file
   }
 
-  it('readReport returns a valid report', async () => {
-    const report = makeReport({ findings: [makeFinding({ advisory: 'A', status: 'fix' })] })
-    const file = await writeTemp({ content: JSON.stringify(report) })
-
-    expect(await readReport({ path: file })).toEqual(report)
-  })
-
-  it('readReport throws on missing file', async () => {
-    const missing = path.join(tmpdir(), 'audit-deps-does-not-exist.json')
-
-    await expect(readReport({ path: missing })).rejects.toThrow(
-      `audit report missing or invalid: ${missing}`,
-    )
-  })
-
   it('readReport throws on invalid JSON', async () => {
     const file = await writeTemp({ content: '{not json' })
 

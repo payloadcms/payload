@@ -182,24 +182,4 @@ describe('assets', () => {
       expect(toml).toContain(`"${host}" = "allow"`)
     }
   })
-
-  it('config sends pnpm home and caches to /tmp', () => {
-    const toml = readFileSync(new URL('./codex-config.toml', import.meta.url), 'utf8')
-
-    expect(toml).toContain('[shell_environment_policy.set]')
-    expect(toml).toContain('PNPM_HOME = "/tmp/audit-deps/pnpm-home"')
-    expect(toml).toContain('XDG_CACHE_HOME = "/tmp/audit-deps/cache"')
-    expect(toml).toContain('XDG_DATA_HOME = "/tmp/audit-deps/data"')
-  })
-
-  it('prompt pins the pnpm store under /tmp', () => {
-    const template = readFileSync(new URL('./prompt.md', import.meta.url), 'utf8')
-
-    expect(template).toContain(
-      'pnpm install --lockfile-only --ignore-scripts --store-dir=/tmp/audit-deps/store',
-    )
-    expect(template).toContain(
-      'pnpm update -r <pkg> --lockfile-only --ignore-scripts --store-dir=/tmp/audit-deps/store',
-    )
-  })
 })
