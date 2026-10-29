@@ -16,14 +16,13 @@ export function buildPrompt({ context, skill, template }) {
   const filled = template.replace(/\{\{(\w+)\}\}/g, (token, key) =>
     Object.hasOwn(values, key) ? String(values[key]) : token,
   )
-  const prompt = `${filled}\n\n---\n\n${skill.replace(FRONTMATTER_PATTERN, '').trim()}\n`
 
-  const unfilled = prompt.match(UNFILLED_TOKEN_PATTERN)
+  const unfilled = filled.match(UNFILLED_TOKEN_PATTERN)
   if (unfilled) {
     throw new Error(`unfilled prompt token: ${unfilled[0]}`)
   }
 
-  return prompt
+  return `${filled}\n\n---\n\n${skill.replace(FRONTMATTER_PATTERN, '').trim()}\n`
 }
 
 /** Validates Codex's untrusted final message against the schema and the fixable set. */
@@ -35,7 +34,11 @@ export function parseCodexResult({ fixable, text }) {
     throw new Error('codex result is not valid JSON')
   }
 
-  if (!Array.isArray(result?.fixedAdvisories) || typeof result.body !== 'string') {
+  if (
+    !Array.isArray(result?.fixedAdvisories) ||
+    !Array.isArray(result.needsPerson) ||
+    typeof result.body !== 'string'
+  ) {
     throw new Error('codex result is missing required fields')
   }
 
@@ -85,8 +88,11 @@ function stripHtmlComments({ text }) {
   let previous
   do {
     previous = current
-    current = current.replace(/<!--[\s\S]*?-->/g, '')
+    current = current
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replaceAll('<!--', '')
+      .replaceAll('-->', '')
   } while (current !== previous)
 
-  return current.replaceAll('<!--', '').replaceAll('-->', '')
+  return current
 }

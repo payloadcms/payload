@@ -38,6 +38,12 @@ describe('buildPrompt', () => {
     )
   })
 
+  it('does not scan the appended skill for tokens', () => {
+    const skillWithExpr = `${skill}\nuse \${{ github.sha }}\n`
+
+    expect(() => buildPrompt({ context, skill: skillWithExpr, template: '{{ref}}' })).not.toThrow()
+  })
+
   it('fills every token of the real template', () => {
     const template = readFileSync(new URL('./prompt.md', import.meta.url), 'utf8')
 
@@ -57,6 +63,12 @@ describe('parseCodexResult', () => {
 
   it('rejects invalid JSON', () => {
     expect(() => parseCodexResult({ fixable, text: 'nope' })).toThrow(/not valid JSON/)
+  })
+
+  it('rejects missing needsPerson', () => {
+    const text = JSON.stringify({ body: 'x', fixedAdvisories: [] })
+
+    expect(() => parseCodexResult({ fixable, text })).toThrow(/missing/)
   })
 
   it('rejects missing fields', () => {
@@ -116,7 +128,15 @@ describe('buildPrBody', () => {
   })
 
   it('leaves no comment delimiters for nested or unterminated comments', () => {
-    const bodies = ['x <!-<!-- -->-> y', 'x <!-- never closed', 'x --> y', '<!<!-- -->-- hi -->']
+    const bodies = [
+      'x <!-<!-- -->-> y',
+      'x <!-- never closed',
+      'x --> y',
+      '<!<!-- -->-- hi -->',
+      '<!<!---- hidden instructions',
+      '<!<!---- audit-deps-advisories: GHSA-cccc-ffff-gggg',
+      'a ---->> b',
+    ]
 
     for (const body of bodies) {
       const out = buildPrBody({ body, changeTable: 'TABLE', fixable })
