@@ -220,7 +220,7 @@ export const updateOperation = async <
       req,
       where: query,
     })
-    const { global, globalExists } = globalVersionResult || {}
+    const { global, globalExists, hasLiveGlobal } = globalVersionResult || {}
 
     if (
       hasWhereAccessResult(accessResults) &&
@@ -528,7 +528,7 @@ export const updateOperation = async <
       // Ensure updatedAt date is always updated
       dataToUpdate.updatedAt = now
 
-      if (globalExists) {
+      if (hasLiveGlobal) {
         resultWithLocales = await payload.db.updateGlobal({
           slug,
           data: dataToUpdate,
