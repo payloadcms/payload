@@ -18,7 +18,6 @@ import type {
   FormFieldsContext as FormFieldsContextType,
   FormProps,
   GetDataByPath,
-  Submit,
 } from './types.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
@@ -49,10 +48,10 @@ import {
 } from './context.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
+import { requestPriority } from './requestPriority.js'
 import { useFormSubmission } from './useFormSubmission.js'
 
 const baseClass = 'form'
-const requestPriority = { autosave: 1, formState: 0, submit: 2 } as const
 
 export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
@@ -100,40 +99,11 @@ export const Form: React.FC<FormProps> = (props) => {
   const [isValid, setIsValid] = useState(true)
   const [initializing, setInitializing] = useState(initializingFromProps)
 
-  /**
-   * A ref that can be read within the `setModified` interceptor.
-   * Dependents of this state can read it immediately without needing to wait for a render cycle.
-   */
-  const backgroundProcessingRef = useRef(false)
-
-  /**
-   * Flag to track if the form was modified _during a submission_, e.g. while autosave is running.
-   * Useful in order to avoid resetting `modified` to false wrongfully after a submit.
-   * For example, if the user modifies a field while the a background process (autosave) is running,
-   * we need to ensure that after the submit completes, the `modified` state remains true.
-   */
-  const modifiedWhileProcessingRef = useRef(false)
-
-  const [modified, _setModified] = useState(false)
-
-  /**
-   * Intercept the `setModified` method to track whether the event happened during background processing.
-   * See the `modifiedWhileProcessingRef` ref for more details.
-   */
-  const setModified = useCallback((modified: boolean) => {
-    if (backgroundProcessingRef.current) {
-      modifiedWhileProcessingRef.current = true
-    }
-
-    _setModified(modified)
-  }, [])
-
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
   const isFirstRenderRef = useRef(true)
 
-  const latestExplicitSubmitRef = useRef<Promise<boolean> | undefined>(undefined)
   const [formState, setFormState] = useState<FormState>(() => initialState || {})
   const formStateRef = useRef(formState)
 
@@ -226,97 +196,30 @@ export const Form: React.FC<FormProps> = (props) => {
     return isValid
   }, [collectionSlug, config, dispatchFields, id, operation, t, user, documentForm])
 
-  const submissionOptions = useMemo(
-    () => ({
-      backgroundProcessingRef,
-      contextRef,
-      dispatchFields,
-      formRef,
-      modifiedWhileProcessingRef,
-      prevFormState,
-      props,
-      setIsValid,
-      setModified,
-    }),
-    [
-      backgroundProcessingRef,
-      contextRef,
-      dispatchFields,
-      formRef,
-      modifiedWhileProcessingRef,
-      prevFormState,
-      props,
-      setIsValid,
-      setModified,
-    ],
-  )
   const {
     backgroundProcessing,
     disabled,
-    executeSubmit,
+    modified,
     processing,
     restoreRequestState,
     setBackgroundProcessing,
     setDisabled,
+    setModified,
     setProcessing,
     setSubmitted,
+    submit,
     submitted,
     successfulSubmitCount,
-  } = useFormSubmission(submissionOptions)
-
-  const submit = useCallback<Submit>(
-    async (options, event) => {
-      event?.stopPropagation()
-      event?.preventDefault()
-
-      if (contextRef.current.disabled) {
-        return
-      }
-
-      const requestScope = requestScopeRef.current
-      let didSucceed = false
-      const resultPromise = scheduleRequest({
-        priority: requestPriority[options?.submissionType ?? 'submit'],
-        run: (requestContext) =>
-          executeSubmit({
-            onResponse: ({ res }) => {
-              didSucceed = res.ok
-            },
-            options,
-            requestContext,
-          }),
-      })
-
-      if (options?.submissionType !== 'autosave') {
-        latestExplicitSubmitRef.current = resultPromise.then(
-          () => didSucceed,
-          () => didSucceed,
-        )
-      }
-
-      const result = await resultPromise
-
-      if (result.status === 'superseded' && options?.submissionType === 'autosave') {
-        let explicitSubmit = latestExplicitSubmitRef.current
-        let didExplicitSubmitSucceed = true
-
-        while (explicitSubmit !== undefined) {
-          didExplicitSubmitSucceed = await explicitSubmit
-          if (explicitSubmit === latestExplicitSubmitRef.current) {
-            break
-          }
-          explicitSubmit = latestExplicitSubmitRef.current
-        }
-
-        if (!didExplicitSubmitSucceed && requestScope === requestScopeRef.current) {
-          options.onStaleRequest?.()
-        }
-      }
-
-      return result.status === 'completed' ? result.value : undefined
-    },
-    [executeSubmit, scheduleRequest],
-  )
+  } = useFormSubmission({
+    contextRef,
+    dispatchFields,
+    formRef,
+    prevFormState,
+    props,
+    requestScopeRef,
+    scheduleRequest,
+    setIsValid,
+  })
 
   const getFields = useCallback(() => contextRef.current.fields, [])
 

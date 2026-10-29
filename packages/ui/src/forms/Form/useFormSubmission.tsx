@@ -12,8 +12,14 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { QueueContext } from '../../hooks/useQueue.js'
-import type { FieldAction, Context as FormContextType, FormProps, SubmitOptions } from './types.js'
+import type { QueueContext, UseQueueResult } from '../../hooks/useQueue.js'
+import type {
+  FieldAction,
+  Context as FormContextType,
+  FormProps,
+  Submit,
+  SubmitOptions,
+} from './types.js'
 
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -24,29 +30,28 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
+import { requestPriority } from './requestPriority.js'
 
 type Args = {
-  backgroundProcessingRef: RefObject<boolean>
   contextRef: RefObject<FormContextType>
   dispatchFields: Dispatch<FieldAction>
   formRef: RefObject<HTMLFormElement | null>
-  modifiedWhileProcessingRef: RefObject<boolean>
   prevFormState: RefObject<FormState>
   props: FormProps
+  requestScopeRef: RefObject<unknown>
+  scheduleRequest: UseQueueResult['schedule']
   setIsValid: FormContextType['setIsValid']
-  setModified: FormContextType['setModified']
 }
 
 export const useFormSubmission = ({
-  backgroundProcessingRef,
   contextRef,
   dispatchFields,
   formRef,
-  modifiedWhileProcessingRef,
   prevFormState,
   props,
+  requestScopeRef,
+  scheduleRequest,
   setIsValid,
-  setModified,
 }: Args) => {
   const {
     action,
@@ -69,6 +74,36 @@ export const useFormSubmission = ({
   const { i18n, t } = useTranslation()
   const onNonFieldError = useFormErrorHandler()
 
+  /**
+   * A ref that can be read within the `setModified` interceptor.
+   * Dependents of this state can read it immediately without needing to wait for a render cycle.
+   */
+  const backgroundProcessingRef = useRef(false)
+
+  /**
+   * Flag to track if the form was modified _during a submission_, e.g. while autosave is running.
+   * Useful in order to avoid resetting `modified` to false wrongfully after a submit.
+   * For example, if the user modifies a field while the a background process (autosave) is running,
+   * we need to ensure that after the submit completes, the `modified` state remains true.
+   */
+  const modifiedWhileProcessingRef = useRef(false)
+
+  const [modified, _setModified] = useState(false)
+
+  /**
+   * Intercept the `setModified` method to track whether the event happened during background processing.
+   * See the `modifiedWhileProcessingRef` ref for more details.
+   */
+  const setModified = useCallback((modified: boolean) => {
+    if (backgroundProcessingRef.current) {
+      modifiedWhileProcessingRef.current = true
+    }
+
+    _setModified(modified)
+  }, [])
+
+  const latestExplicitSubmitRef = useRef<Promise<boolean> | undefined>(undefined)
+
   const [disabled, setDisabled] = useState(disabledFromProps || false)
 
   const [submitted, setSubmitted] = useState(false)
@@ -87,13 +122,10 @@ export const useFormSubmission = ({
    * Intercept the `setBackgroundProcessing` method to keep the ref in sync.
    * See the `backgroundProcessingRef` for more details.
    */
-  const setBackgroundProcessing = useCallback(
-    (backgroundProcessing: boolean) => {
-      backgroundProcessingRef.current = backgroundProcessing
-      _setBackgroundProcessing(backgroundProcessing)
-    },
-    [backgroundProcessingRef],
-  )
+  const setBackgroundProcessing = useCallback((backgroundProcessing: boolean) => {
+    backgroundProcessingRef.current = backgroundProcessing
+    _setBackgroundProcessing(backgroundProcessing)
+  }, [])
 
   const submitFocusRef = useRef<HTMLElement | null>(null)
 
@@ -507,10 +539,63 @@ export const useFormSubmission = ({
       onNonFieldError,
       contextRef,
       formRef,
-      modifiedWhileProcessingRef,
       prevFormState,
       setIsValid,
     ],
+  )
+
+  const submit = useCallback<Submit>(
+    async (options, event) => {
+      event?.stopPropagation()
+      event?.preventDefault()
+
+      if (contextRef.current.disabled) {
+        return
+      }
+
+      const requestScope = requestScopeRef.current
+      let didSucceed = false
+      const resultPromise = scheduleRequest({
+        priority: requestPriority[options?.submissionType ?? 'submit'],
+        run: (requestContext) =>
+          executeSubmit({
+            onResponse: ({ res }) => {
+              didSucceed = res.ok
+            },
+            options,
+            requestContext,
+          }),
+      })
+
+      if (options?.submissionType !== 'autosave') {
+        latestExplicitSubmitRef.current = resultPromise.then(
+          () => didSucceed,
+          () => didSucceed,
+        )
+      }
+
+      const result = await resultPromise
+
+      if (result.status === 'superseded' && options?.submissionType === 'autosave') {
+        let explicitSubmit = latestExplicitSubmitRef.current
+        let didExplicitSubmitSucceed = true
+
+        while (explicitSubmit !== undefined) {
+          didExplicitSubmitSucceed = await explicitSubmit
+          if (explicitSubmit === latestExplicitSubmitRef.current) {
+            break
+          }
+          explicitSubmit = latestExplicitSubmitRef.current
+        }
+
+        if (!didExplicitSubmitSucceed && requestScope === requestScopeRef.current) {
+          options.onStaleRequest?.()
+        }
+      }
+
+      return result.status === 'completed' ? result.value : undefined
+    },
+    [contextRef, executeSubmit, requestScopeRef, scheduleRequest],
   )
 
   useEffect(() => {
@@ -528,13 +613,15 @@ export const useFormSubmission = ({
   return {
     backgroundProcessing,
     disabled,
-    executeSubmit,
+    modified,
     processing,
     restoreRequestState,
     setBackgroundProcessing,
     setDisabled,
+    setModified,
     setProcessing,
     setSubmitted,
+    submit,
     submitted,
     successfulSubmitCount,
   }

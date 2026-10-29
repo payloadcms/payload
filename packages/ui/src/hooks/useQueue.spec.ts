@@ -57,7 +57,7 @@ describe('useQueue', () => {
     expect(calls).toEqual(['first', 'latest'])
   })
 
-  it('should retain the highest-priority pending task', async () => {
+  it('should retain the pending task with the lowest priority number', async () => {
     const active = deferred()
     const calls: string[] = []
     const queue = renderQueue()
@@ -69,6 +69,7 @@ describe('useQueue', () => {
       },
     })
     const low = queue.schedule({
+      priority: 2,
       run: async () => calls.push('low'),
     })
     const medium = queue.schedule({
@@ -76,13 +77,13 @@ describe('useQueue', () => {
       run: async () => calls.push('medium'),
     })
     const high = queue.schedule({
-      priority: 2,
+      priority: 0,
       run: async () => calls.push('high'),
     })
 
+    active.resolve()
     await expect(low).resolves.toEqual({ status: 'superseded' })
     await expect(medium).resolves.toEqual({ status: 'superseded' })
-    active.resolve()
     await high
     expect(calls).toEqual(['active', 'high'])
   })
@@ -99,7 +100,7 @@ describe('useQueue', () => {
       },
     })
     const high = queue.schedule({
-      priority: 2,
+      priority: 0,
       run: async () => calls.push('high'),
     })
     const low = queue.schedule({
@@ -107,10 +108,28 @@ describe('useQueue', () => {
       run: async () => calls.push('low'),
     })
 
-    await expect(low).resolves.toEqual({ status: 'superseded' })
     active.resolve()
+    await expect(low).resolves.toEqual({ status: 'superseded' })
     await high
     expect(calls).toEqual(['active', 'high'])
+  })
+
+  it('should give pending tasks without a priority the lowest precedence', async () => {
+    const active = deferred()
+    const calls: string[] = []
+    const queue = renderQueue()
+
+    void queue.schedule({ run: async () => active.promise })
+    const high = queue.schedule({
+      priority: 0,
+      run: async () => calls.push('high'),
+    })
+    const low = queue.schedule({ run: async () => calls.push('low') })
+
+    active.resolve()
+    await expect(low).resolves.toEqual({ status: 'superseded' })
+    await high
+    expect(calls).toEqual(['high'])
   })
 
   it('should start pending work after an active task rejects', async () => {
