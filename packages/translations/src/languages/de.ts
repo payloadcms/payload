@@ -119,6 +119,7 @@ export const deTranslations: DefaultTranslationsObject = {
     resetLayout: 'Layout zurücksetzen',
     resizeWidget: 'Größe von {{label}} ändern, aktuelle Größe: {{size}}',
     searchWidgets: 'Suche Widgets...',
+    widgetAddPin: 'Dokument anheften',
     widgetCollectionRequired: 'Collection ist erforderlich.',
     widgetConfigurationError: 'Widget-Konfigurationsfehler',
     widgetDropFilesToUpload: 'Datei per Drag & Drop verschieben',
@@ -130,9 +131,20 @@ export const deTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Begrenzung',
     widgetNonSortableSortField:
       'Das Sortierfeld "{{field}}" ist in der Collection "{{collection}}" nicht sortierbar.',
+    widgetPageCount: '{{currentPage}} von {{totalPages}}',
+    widgetPagination: 'Dokumentseiten',
+    widgetPinned: 'Angeheftet',
+    widgetPinnedEmpty: 'Keine angehefteten Dokumente',
+    widgetPinnedEmptyDescription: 'Dokumente, die Sie anheften, erscheinen hier',
+    widgetPinnedSaveError: 'Angeheftete Dokumente konnten nicht gespeichert werden.',
     widgetQueryError: 'Dokumente für dieses Widget konnten nicht geladen werden.',
-    widgetRecentlyViewedEmpty: 'Sie haben noch keine Dokumente angesehen.',
-    widgetRecentlyViewedTitle: 'Sie haben kürzlich angesehen',
+    widgetRecentlyViewedEmpty: 'Keine aktuellen Dokumente',
+    widgetRecentlyViewedEmptyDescription:
+      'Hier werden Dokumente angezeigt, die Sie kürzlich angesehen haben.',
+    widgetRecentlyViewedFilterDescription: 'Nur kürzlich angesehene filtern.',
+    widgetRecentlyViewedTitle: 'Kürzlich angesehen',
+    widgetRecentsAndPinned: 'Aktuelle und angeheftete',
+    widgetRemovePin: 'Dokument lösen',
     widgetSelectCollectionFirst:
       'Wählen Sie eine Collection aus, bevor Sie eine Sortierung auswählen',
     widgetSelectSortField: 'Wählen Sie ein Feld zum Sortieren aus',
@@ -289,14 +301,17 @@ export const deTranslations: DefaultTranslationsObject = {
     all: 'Alle',
     allCollections: 'Alle Sammlungen',
     allLocales: 'Alle Sprachen',
+    allowedTypes: 'Zulässige Typen',
     and: 'Und',
     anotherUser: 'Ein anderer Benutzer',
     anotherUserTakenOver: 'Ein anderer Benutzer hat die Bearbeitung dieses Dokuments übernommen.',
+    apiResponse: 'API-Antwort',
     applyChanges: 'Änderungen anwenden',
     ascending: 'Aufsteigend',
     auto: 'Automatisch',
     automatic: 'Automatisch',
     backToDashboard: 'Zurück zur Übersicht',
+    breadcrumb: 'Brotkrumennavigation',
     by: 'Von',
     cancel: 'Abbrechen',
     changesNotSaved:
@@ -304,6 +319,7 @@ export const deTranslations: DefaultTranslationsObject = {
     checked: 'Überprüft',
     clear: 'Leeren',
     clearAll: 'Alles leeren',
+    clearSearch: 'Suche löschen',
     close: 'Schließen',
     collapse: 'Einklappen',
     collection: 'Sammlung',
@@ -362,6 +378,13 @@ export const deTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Dieses Dokument wurde kürzlich von einem anderen Benutzer aktualisiert. Deine Ansicht ist veraltet.',
     documents: 'Dokumente',
+    dragCancelled: 'Ziehen von {{label}} abgebrochen.',
+    dragDropped: '{{label}} abgelegt. Position {{position}} von {{count}}.',
+    dragInstructions:
+      'Drücken Sie Space oder Enter, um eine Zeile aufzunehmen. Verschieben Sie sie mit den Pfeiltasten. Deaktivieren Sie mit VoiceOver Quick Nav und verwenden Sie Command + Pfeiltasten. Drücken Sie Space oder Enter zum Ablegen oder Escape zum Abbrechen.',
+    dragMoved: '{{label}}: {{direction}}. Position {{position}} von {{count}}.',
+    dragPickedUp: '{{label}} aufgenommen. Position {{position}} von {{count}}.',
+    dragToMove: 'Zum Verschieben ziehen',
     dragToReorder: 'Ziehen, um die Reihenfolge zu ändern',
     duplicate: 'Duplizieren',
     duplicateWithoutSaving: 'Duplizieren ohne Änderungen zu speichern',
@@ -396,6 +419,7 @@ export const deTranslations: DefaultTranslationsObject = {
     globals: 'Globale Dokumente',
     goBack: 'Zurück',
     goToPage: 'Zur Tabellenseite wechseln',
+    gridLayout: 'Raster',
     groupByLabel: 'Nach {{label}} gruppieren',
     hideSidebar: 'Seitenleiste ausblenden',
     import: 'Importieren',
@@ -445,6 +469,8 @@ export const deTranslations: DefaultTranslationsObject = {
     notFound: 'Nicht gefunden',
     nothingFound: 'Keine Ergebnisse',
     noTrashResults: 'Kein {{label}} im Papierkorb.',
+    notSelectedDocument:
+      'Nicht ausgewählt. Drücken Sie die Eingabetaste oder die Leertaste, um die Auswahl zu ändern.',
     notShownInTable: 'Nicht in der Tabelle angezeigt',
     noUpcomingEventsScheduled: 'Keine bevorstehenden Ereignisse geplant.',
     noValue: 'Kein Wert',
@@ -474,6 +500,7 @@ export const deTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Alle {{collections}} werden neu indiziert.',
     reloadDocument: 'Dokument neu laden',
     remove: 'Entfernen',
+    removeFilter: 'Filter entfernen',
     rename: 'Umbenennen',
     replaceRow: 'Zeile ersetzen',
     requiredFields: 'Mit * gekennzeichnete Felder sind Pflichtfelder.',
@@ -502,6 +529,8 @@ export const deTranslations: DefaultTranslationsObject = {
     selectAll: 'Alle {{count}} {{label}} auswählen',
     selectAllRows: 'Alle Zeilen auswählen',
     selectedCount: '{{count}} {{label}} ausgewählt',
+    selectedDocument:
+      'Ausgewählt. Drücken Sie die Eingabetaste oder die Leertaste, um die Auswahl zu ändern.',
     selectLabel: '{{label}} auswählen',
     selectValue: 'Wert auswählen',
     settings: 'Einstellungen',
@@ -524,6 +553,7 @@ export const deTranslations: DefaultTranslationsObject = {
     successfullyDuplicated: '{{label}} wurde erfolgreich dupliziert.',
     successfullyReindexed:
       '{{count}} von insgesamt {{total}} Dokumenten aus {{collections}} wurden erfolgreich neu indexiert, {{skips}} Entwürfe wurden übersprungen.',
+    tableLayout: 'Tabelle',
     takeOver: 'Übernehmen',
     theme: 'Thema',
     thisLanguage: 'Deutsch',
@@ -566,15 +596,34 @@ export const deTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Ordnerpfad',
+    goTo: 'Gehen Sie zu "{{name}}"',
     itemsMovedTo: '{{title}} wurde nach {{destination}} verschoben.',
     itemsMovedToRoot: '{{title}} wurde zur Wurzel verschoben',
-    moveItemsToRootConfirmation:
-      'Sie sind dabei, <1>{{count}} {{label}}</1> zum Hauptverzeichnis zu verschieben. Sind Sie sicher?',
+    moveTo: 'Verschieben nach...',
     moveToRoot: 'Zur Root verschieben',
     noParent: 'Kein Elternteil',
     noResults: 'No results for "{{query}}"',
+    removeFrom: 'Aus {{label}} entfernen',
     searchLabel: 'Suche {{label}}',
     searchResults: '{{count}} gefunden',
+  },
+  llmInstructions: {
+    additionalInstructions: 'Zusätzliche Anweisungen',
+    collectionDescription:
+      'Fügen Sie eigene Anweisungen für die Sammlung {{label}} hinzu, damit LLMs passendere Antworten auf Prompts geben können.',
+    collectionSystemDescription:
+      'Diese Systemanweisungen stammen aus der Konfigurationsdatei der Sammlung und werden immer berücksichtigt.',
+    editInstructions: 'LLM-Anweisungen bearbeiten',
+    global: 'Global',
+    globalDescription:
+      'Fügen Sie eigene Anweisungen für das Global {{label}} hinzu, damit LLMs passendere Antworten auf Prompts geben können.',
+    globalSystemDescription:
+      'Diese Systemanweisungen stammen aus der Konfigurationsdatei des Globals und werden immer berücksichtigt.',
+    instructions: 'LLM-Anweisungen',
+    systemInstructions: 'Systemanweisungen (schreibgeschützt)',
+    targetCannotBeChanged: 'Das Ziel der Anweisungen kann nicht geändert werden.',
+    title: 'Titel',
   },
   localization: {
     cannotCopySameLocale: 'Kann nicht in dieselbe Sprache kopiert werden',
@@ -609,9 +658,18 @@ export const deTranslations: DefaultTranslationsObject = {
     addFiles: 'Dateien hinzufügen',
     bulkUpload: 'Mehrere Dateien hochladen',
     copyLinkToFile: 'Link zum Datei kopieren',
+    copyURL: 'URL kopieren',
     crop: 'Zuschneiden',
+    cropBottom: 'Unterer Zuschneidegriff',
+    cropBottomLeft: 'Unterer linker Zuschneidegriff',
+    cropBottomRight: 'Unterer rechter Zuschneidegriff',
+    cropLeft: 'Linker Zuschneidegriff',
+    cropRight: 'Rechter Zuschneidegriff',
     cropToolDescription:
       'Ziehe die Ecken des ausgewählten Bereichs, zeichne einen neuen Bereich oder passe die Werte unten an.',
+    cropTop: 'Oberer Zuschneidegriff',
+    cropTopLeft: 'Oberer linker Zuschneidegriff',
+    cropTopRight: 'Oberer rechter Zuschneidegriff',
     download: 'Herunterladen',
     dragAndDrop: 'Datei per Drag & Drop verschieben',
     dragAndDropHere: 'oder Datei hier ablegen',
@@ -675,6 +733,10 @@ export const deTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection:
       'Du bist dabei, alle {{label}} in der Auswahl zu veröffentlichen. Bist du dir sicher?',
     aboutToRestore: 'Du bist dabei, {{label}} auf den Stand vom {{versionDate}} zurückzusetzen.',
+    aboutToRestoreAsDraft:
+      'Stellen Sie den Inhalt vom {{versionDate}} als Entwurf wieder her. Veröffentlichte Inhalte bleiben unverändert, bis Sie sie im Editor veröffentlichen.',
+    aboutToRestoreAsDraftAllLocales:
+      'Stellen Sie den Inhalt vom {{versionDate}} für alle Sprachversionen als Entwurf wieder her. Veröffentlichte Inhalte bleiben unverändert, bis Sie sie im Editor veröffentlichen.',
     aboutToRestoreGlobal:
       'Du bist dabei, das globale Dokument {{label}} auf den Stand vom {{versionDate}} zurückzusetzen.',
     aboutToRevertToPublished:

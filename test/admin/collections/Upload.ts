@@ -1,3 +1,4 @@
+import type { SharpCollectionConfig } from '@payloadcms/transformer-sharp'
 import type { CollectionConfig } from 'payload'
 
 import { uploadCollectionSlug } from '../slugs.js'
@@ -20,4 +21,14 @@ export const UploadCollection: CollectionConfig = {
     ],
   },
   versions: false,
+}
+
+export const uploadCollectionSharpOptions: SharpCollectionConfig = {
+  variants: [
+    {
+      name: 'thumbnail',
+      height: 100,
+      width: 100,
+    },
+  ],
 }

@@ -264,7 +264,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         jsonrpc: '2.0',
       })
     })
-    /* eslint-disable vitest/no-standalone-expect -- testModern is a custom Vitest test registrar. */
+    /* eslint-disable @vitest/no-standalone-expect -- testModern is a custom Vitest test registrar. */
     testModern(
       'should reject subscription streams without opening SSE',
       async ({ mcp, getApiKey }) => {
@@ -284,7 +284,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         ).toBe(false)
       },
     )
-    /* eslint-enable vitest/no-standalone-expect */
+    /* eslint-enable @vitest/no-standalone-expect */
     test.describe('API Keyed Access', () => {
       it('should not allow GET /api/mcp', async ({ getApiKey, restClient }) => {
         const apiKey = await getApiKey()
@@ -1131,13 +1131,13 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(result.errors).toEqual([])
         expect(storedPNG).toMatchObject({
           alt: 'First bulk upload',
-          filename: 'mcp-bulk-first.png',
+          filename: 'mcp-bulk-first-original.png',
           filesize: png.length,
           mimeType: 'image/png',
         })
         expect(storedJPEG).toMatchObject({
           alt: 'Second bulk upload',
-          filename: 'mcp-bulk-second.jpg',
+          filename: 'mcp-bulk-second-original.jpg',
           filesize: jpeg.length,
           mimeType: 'image/jpeg',
         })
@@ -1175,7 +1175,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           overrideAccess: true,
         })
         expect(storedMedia.alt).toBe('Uploaded from a URL through MCP')
-        expect(storedMedia.filename).toBe('mcp-url.png')
+        expect(storedMedia.filename).toBe('mcp-url-original.png')
         expect(storedMedia.mimeType).toBe('image/png')
         expect(storedMedia.filesize).toBe(image.length)
       })
@@ -1215,7 +1215,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           overrideAccess: true,
         })
         expect(storedMedia.alt).toBe('Replaced from base64 through MCP')
-        expect(storedMedia.filename).toBe('mcp-replacement.png')
+        expect(storedMedia.filename).toBe('mcp-replacement-original.png')
         expect(storedMedia.mimeType).toBe('image/png')
         expect(storedMedia.filesize).toBe(image.length)
       })
@@ -1271,7 +1271,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           }>(createResponse)
           id = created.id
           expect(created.alt).toBe('Created through MCP')
-          expect(created.filename).toBe('mcp-created.png')
+          expect(created.filename).toBe('mcp-created-original.png')
           expect(created.width).toBeGreaterThan(0)
           const updateResponse = await client.callTool({
             arguments: {
@@ -1288,7 +1288,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             filename: string
           }>(updateResponse)
           expect(updated.alt).toBe('Updated through MCP')
-          expect(updated.filename).toBe('mcp-updated.png')
+          expect(updated.filename).toBe('mcp-updated-original.png')
         } finally {
           if (id !== undefined) {
             await payload.delete({ id, collection: 'media', overrideAccess: true })
@@ -1438,7 +1438,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           overrideAccess: true,
         })
         expect(storedMedia.alt).toBe('Uploaded from base64 through MCP')
-        expect(storedMedia.filename).toBe('mcp-base64.png')
+        expect(storedMedia.filename).toBe('mcp-base64-original.png')
         expect(storedMedia.mimeType).toBe('image/png')
         expect(storedMedia.filesize).toBe(image.length)
       })

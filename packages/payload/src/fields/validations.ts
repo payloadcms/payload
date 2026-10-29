@@ -1,10 +1,9 @@
+import { validateJSONSchema } from '#validateJSONSchema'
 import ObjectIdImport from 'bson-objectid'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 import type { TFunction } from '@payloadcms/translations'
-import type { JSONSchema4 } from 'json-schema'
-import type { core } from 'zod'
 
 import type { RichTextAdapter } from '../admin/types.js'
 import type { CollectionSlug } from '../index.js'
@@ -213,7 +212,11 @@ export const email: EmailFieldValidation = (
   const emailRegex =
     /^(?!.*\.\.)[\w!#$%&'*+/=?^`{|}~-](?:[\w!#$%&'*+/=?^`{|}~.-]*[\w!#$%&'*+/=?^`{|}~-])?@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
 
-  if ((value && !emailRegex.test(value)) || (!value && required)) {
+  if (!value && required) {
+    return t('validation:required')
+  }
+
+  if (value && !emailRegex.test(value)) {
     return t('validation:emailAddress')
   }
 
@@ -341,31 +344,6 @@ export const json: JSONFieldValidation = async (
     return true
   }
 
-  const fetchSchema = ({ schema, uri }: { schema: JSONSchema4; uri: string }) => {
-    if (uri && schema) {
-      return schema
-    }
-    return fetch(uri)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok')
-        }
-        return response.json()
-      })
-      .then((_json) => {
-        const json = _json as {
-          id: string
-        }
-        const jsonSchemaSanitizations = {
-          id: undefined,
-          $id: json.id,
-          $schema: 'http://json-schema.org/draft-07/schema#',
-        }
-
-        return Object.assign(json, jsonSchemaSanitizations)
-      })
-  }
-
   if (required && !value) {
     return t('validation:required')
   }
@@ -375,26 +353,7 @@ export const json: JSONFieldValidation = async (
   }
 
   if (jsonSchema && isNotEmpty(value)) {
-    try {
-      jsonSchema.schema = fetchSchema(jsonSchema)
-      const { schema } = jsonSchema
-      const { fromJSONSchema } = await import('zod')
-      // `JSONSchema4` allows any string for `$schema`, while zod narrows it to the three drafts it
-      // supports. zod ignores `$schema` at runtime, so the wider type is safe to pass through.
-      const zodSchema = fromJSONSchema(schema as core.JSONSchema.JSONSchema)
-
-      const result = zodSchema.safeParse(value)
-
-      if (!result.success) {
-        return result.error.issues
-          .map((issue) =>
-            issue.path.length ? `${issue.path.join('.')}: ${issue.message}` : issue.message,
-          )
-          .join(', ')
-      }
-    } catch (error) {
-      return error instanceof Error ? error.message : 'Unknown error'
-    }
+    return validateJSONSchema({ jsonSchema, value })
   }
   return true
 }

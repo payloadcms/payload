@@ -101,11 +101,11 @@ describe('Lexical Fully Featured - database', () => {
       await expect(lexical.editor.locator('.LexicalEditorTheme__upload')).toHaveCount(1)
       await expect(
         lexical.editor.locator('.LexicalEditorTheme__upload__doc-drawer-toggler'),
-      ).toHaveText(expectedFileName || 'payload-1.jpg')
+      ).toHaveText(expectedFileName || 'payload-original-1.jpg')
 
       const uploadedImage = await payload.find({
         collection: 'uploads',
-        where: { filename: { equals: expectedFileName || 'payload-1.jpg' } },
+        where: { filename: { equals: expectedFileName || 'payload-original-1.jpg' } },
         overrideAccess: true,
       })
       expect(uploadedImage.totalDocs).toBe(1)
@@ -123,7 +123,7 @@ describe('Lexical Fully Featured - database', () => {
       page,
     }) => {
       // blob will be put in src of img tag => cannot infer file name
-      await uploadsTest(page, 'html', 'pasted-image.jpeg')
+      await uploadsTest(page, 'html', 'pasted-image-original.jpeg')
     })
 
     test('ensure auto upload by copy & pasting image works when pasting from website', async ({
@@ -143,7 +143,7 @@ describe('Lexical Fully Featured - database', () => {
       await lexical.editor.first().focus()
       await expect(lexical.editor).toBeFocused()
 
-      await uploadsTest(page, 'cmd+v')
+      await uploadsTest(page, 'cmd+v', 'payload-original-original.jpg')
 
       // Save page
       await saveDocAndAssert(page)
@@ -168,7 +168,7 @@ describe('Lexical Fully Featured - database', () => {
 
       const uploadNode = richText?.root?.children?.[1]?.children?.[0]
       // @ts-expect-error unsafe access is fine in tests
-      expect(uploadNode.value?.filename).toBe('payload-1.jpg')
+      expect(uploadNode.value?.filename).toBe('payload-original-original.jpg')
     })
 
     test('ensure block contents are not reset on save on both create and update', async ({
@@ -184,7 +184,7 @@ describe('Lexical Fully Featured - database', () => {
         page,
         `/admin/collections/${lexicalFullyFeaturedSlug}`,
         async () => {
-          await lexical.editor.locator('#field-someText').first().fill('Testing 123')
+          await lexical.editor.locator('input[name="someText"]').first().fill('Testing 123')
         },
         {
           allowedNumberOfRequests: 3,
@@ -192,11 +192,11 @@ describe('Lexical Fully Featured - database', () => {
         },
       )
 
-      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Testing 123')
+      await expect(lexical.editor.locator('input[name="someText"]')).toHaveValue('Testing 123')
       await saveDocAndAssert(page)
-      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Testing 123')
+      await expect(lexical.editor.locator('input[name="someText"]')).toHaveValue('Testing 123')
       await page.reload()
-      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Testing 123')
+      await expect(lexical.editor.locator('input[name="someText"]')).toHaveValue('Testing 123')
 
       /**
        * Test on update (this is where the issue appeared)
@@ -205,18 +205,18 @@ describe('Lexical Fully Featured - database', () => {
         page,
         `/admin/collections/${lexicalFullyFeaturedSlug}`,
         async () => {
-          await lexical.editor.locator('#field-someText').first().fill('Updated text')
+          await lexical.editor.locator('input[name="someText"]').first().fill('Updated text')
         },
         {
           allowedNumberOfRequests: 2,
           minimumNumberOfRequests: 2,
         },
       )
-      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Updated text')
+      await expect(lexical.editor.locator('input[name="someText"]')).toHaveValue('Updated text')
       await saveDocAndAssert(page)
-      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Updated text')
+      await expect(lexical.editor.locator('input[name="someText"]')).toHaveValue('Updated text')
       await page.reload()
-      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Updated text')
+      await expect(lexical.editor.locator('input[name="someText"]')).toHaveValue('Updated text')
     })
   })
 
@@ -341,12 +341,12 @@ describe('Lexical Fully Featured - database', () => {
 
     const regularBlocks = lexical.editor.locator('.LexicalEditorTheme__block-myBlock')
     const regularBlock = regularBlocks.nth(0)
-    await regularBlock.locator('#field-someText').fill('Regular after')
+    await regularBlock.locator('input[name="someText"]').fill('Regular after')
 
     const inlineBlock = lexical.editor.locator('.LexicalEditorTheme__inlineBlock').first()
     await inlineBlock.locator('.LexicalEditorTheme__inlineBlock__container').click()
     await expect(lexical.drawer).toBeVisible()
-    await lexical.drawer.locator('#field-someText').fill('Inline after')
+    await lexical.drawer.locator('input[name="someText"]').fill('Inline after')
     await lexical.drawer.getByText('Save changes').click()
     await expect(lexical.drawer).toBeHidden()
 
@@ -360,7 +360,7 @@ describe('Lexical Fully Featured - database', () => {
 
     await itemsField.locator('#items-row-0 .array-actions__button').click()
     await page.locator('.popup__content .array-actions__remove').click()
-    await emptyArrayBlock.locator('#field-someText').fill('Empty array after')
+    await emptyArrayBlock.locator('input[name="someText"]').fill('Empty array after')
     await emptyFormStateResponsePromise
     await expect(itemsField.locator('.array-field__row')).toHaveCount(0)
 
@@ -429,7 +429,7 @@ describe('Lexical Fully Featured - database', () => {
     )
     await fallbackCheckbox.click()
     await expect(fallbackCheckbox).not.toBeChecked()
-    await block.locator('#field-someText').fill('After')
+    await block.locator('input[name="someText"]').fill('After')
     await formStateResponsePromise
 
     const updateRequestPromise = page.waitForRequest(

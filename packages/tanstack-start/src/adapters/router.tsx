@@ -3,8 +3,7 @@
 import type { RouterAdapterContextValue } from '@payloadcms/ui/providers/RouterAdapter'
 import type { LinkAdapterProps, RouterAdapterComponent } from 'payload'
 
-import { RouterAdapterContext } from '@payloadcms/ui/providers/RouterAdapter'
-import { useRouteTransition } from '@payloadcms/ui/providers/RouteTransition'
+import { RouterAdapterContext, useRouteTransition } from '@payloadcms/ui'
 import {
   createLink,
   useLocation,
@@ -50,6 +49,26 @@ const normalizeNavigationTarget = ({
   }
 
   return path
+}
+
+// Mirror Next.js' router behavior to allow syncing client state to the URL without triggering a second server load.
+// TanStack's browser history monkeypatches `window.history.replaceState` and notifies `router.load` on every call.
+// Use `_ignoreSubscribers` to suppresses that notification — the same flag TanStack uses internally when flushing history.
+// This lives outside the component because React Compiler doesn't allow changing a value returned by a hook.
+const replaceStateWithoutLoad = ({
+  history,
+  url,
+}: {
+  history: ReturnType<typeof useRouter>['history']
+  url: string
+}) => {
+  history._ignoreSubscribers = true
+
+  try {
+    window.history.replaceState(null, '', url)
+  } finally {
+    history._ignoreSubscribers = false
+  }
 }
 
 const TanStackLinkAdapter: React.FC<LinkAdapterProps> = ({
@@ -148,25 +167,13 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
 
   const replace = useCallback(
     (path: string, options?: { scroll?: boolean }) => {
-      void router.navigate({ ...toNavOptions(path), replace: true, resetScroll: options?.scroll })
+      return router.navigate({ ...toNavOptions(path), replace: true, resetScroll: options?.scroll })
     },
     [router, toNavOptions],
   )
 
-  // Mirror Next.js' router behavior to allow syncing client state to the URL without triggering a second server load.
-  // TanStack's browser history monkeypatches `window.history.replaceState` and notifies `router.load` on every call.
-  // Use `_ignoreSubscribers` to suppresses that notification — the same flag TanStack uses internally when flushing history.
   const replaceState = useCallback(
-    (url: string) => {
-      const { history } = router
-      history._ignoreSubscribers = true
-
-      try {
-        window.history.replaceState(null, '', url)
-      } finally {
-        history._ignoreSubscribers = false
-      }
-    },
+    (url: string) => replaceStateWithoutLoad({ history: router.history, url }),
     [router],
   )
 

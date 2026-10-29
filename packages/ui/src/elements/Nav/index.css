@@ -22,11 +22,22 @@
   }
 
   .nav__close {
+    position: relative;
     display: flex;
     align-items: center;
     background: none;
     border: 0;
+    border-radius: var(--button-radius);
     outline: 0;
+
+    &:focus-visible::after {
+      content: '';
+      position: absolute;
+      inset: var(--spacer-1);
+      border: var(--stroke-width-small) solid var(--color-border-selected);
+      border-radius: var(--button-radius);
+      pointer-events: none;
+    }
   }
 
   .nav__scroll {
@@ -136,5 +147,10 @@
       --nav-padding-inline-start: var(--gutter-h);
       --nav-padding-inline-end: var(--gutter-h);
     }
+  }
+
+  html[data-enhanced-contrast] .nav__link--selected::before {
+    background: var(--color-bg-secondary);
+    border: var(--stroke-width-small) solid var(--color-border-selected);
   }
 }

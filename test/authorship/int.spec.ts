@@ -2,7 +2,7 @@ import type { Payload } from 'payload'
 
 import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 import type { Admin, Post, User } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -22,7 +22,7 @@ import {
 type TestUser = Admin | User
 
 let payload: Payload
-let restClient: NextRESTClient
+let restClient: RESTClient
 
 let user: TestUser
 let admin: TestUser

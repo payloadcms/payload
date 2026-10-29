@@ -1,7 +1,7 @@
 'use client'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
-import React, { Fragment, useEffect, useRef, useState } from 'react'
+import React, { Fragment, useEffect, useId, useRef, useState } from 'react'
 
 import type { ListControlsProps } from './types.js'
 
@@ -38,6 +38,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     hasCreatePermission,
     hasDeletePermission,
     isWhereOpen: isWhereOpenFromProps,
+    layoutToggle,
     listMenuItems,
     newDocumentURL,
     onWhereToggle,
@@ -46,7 +47,11 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     renderedFilters,
     resolvedFilterOptions,
     viewType,
+    wherePanelID: wherePanelIDFromProps,
   } = props
+
+  const instanceID = useId()
+  const wherePanelID = wherePanelIDFromProps ?? `${baseClass}-where-${instanceID}`
 
   const isControlled = typeof onWhereToggle === 'function'
 
@@ -107,7 +112,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               buttonStyle="secondary"
               className={`${baseClass}__toggle-where`}
               extraButtonProps={{
-                'aria-controls': `${baseClass}-where`,
+                'aria-controls': wherePanelID,
                 'aria-expanded': isWhereOpen,
               }}
               icon={<ChevronIcon direction={isWhereOpen ? 'up' : 'down'} size={16} />}
@@ -140,6 +145,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               {t('general:sort')}
             </Button>
           )}
+          {layoutToggle}
           {hasCreatePermission && newDocumentURL && (
             <Button
               buttonStyle="primary"
@@ -177,7 +183,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         </div>
       </div>
       {!isControlled && isWhereOpen && (
-        <div className={`${baseClass}__where`} id={`${baseClass}-where`}>
+        <div className={`${baseClass}__where`} id={wherePanelID}>
           <ListWhereBuilder
             collectionPluralLabel={collectionConfig?.labels?.plural}
             collectionSlug={collectionConfig.slug}

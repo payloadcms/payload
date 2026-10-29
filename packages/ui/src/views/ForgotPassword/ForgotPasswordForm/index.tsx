@@ -112,7 +112,7 @@ export const ForgotPasswordForm: React.FC = () => {
   }, [resendDelay])
 
   const handleResponse: FormProps['handleResponse'] = (res, successToast, errorToast) => {
-    res
+    return res
       .json()
       .then(() => {
         const nextResendAvailableAt = Date.now() + minRequestInterval
@@ -143,19 +143,54 @@ export const ForgotPasswordForm: React.FC = () => {
       })
   }
 
+  const validateUsername = (value: null | string | undefined) =>
+    text(value, {
+      name: 'username',
+      type: 'text',
+      blockData: {},
+      data: {},
+      event: 'onChange',
+      path: ['username'],
+      preferences: { fields: {} },
+      req: {
+        payload: {
+          config,
+        },
+        t,
+      } as unknown as PayloadRequest,
+      required: true,
+      siblingData: {},
+    })
+
+  const validateEmail = (value: null | string | undefined) =>
+    email(value, {
+      name: 'email',
+      type: 'email',
+      blockData: {},
+      data: {},
+      event: 'onChange',
+      path: ['email'],
+      preferences: { fields: {} },
+      req: { payload: { config }, t } as unknown as PayloadRequest,
+      required: true,
+      siblingData: {},
+    })
+
   const initialState: FormState = loginWithUsername
     ? {
         username: {
           initialValue: storedRequest?.identifier ?? '',
           valid: true,
-          value: storedRequest?.identifier,
+          validate: validateUsername,
+          value: storedRequest?.identifier ?? '',
         },
       }
     : {
         email: {
           initialValue: storedRequest?.identifier ?? '',
           valid: true,
-          value: storedRequest?.identifier,
+          validate: validateEmail,
+          value: storedRequest?.identifier ?? '',
         },
       }
 
@@ -218,25 +253,7 @@ export const ForgotPasswordForm: React.FC = () => {
                   required: true,
                 }}
                 path="username"
-                validate={(value) =>
-                  text(value, {
-                    name: 'username',
-                    type: 'text',
-                    blockData: {},
-                    data: {},
-                    event: 'onChange',
-                    path: ['username'],
-                    preferences: { fields: {} },
-                    req: {
-                      payload: {
-                        config,
-                      },
-                      t,
-                    } as unknown as PayloadRequest,
-                    required: true,
-                    siblingData: {},
-                  })
-                }
+                validate={validateUsername}
               />
             ) : (
               <EmailField
@@ -249,20 +266,7 @@ export const ForgotPasswordForm: React.FC = () => {
                   required: true,
                 }}
                 path="email"
-                validate={(value) =>
-                  email(value, {
-                    name: 'email',
-                    type: 'email',
-                    blockData: {},
-                    data: {},
-                    event: 'onChange',
-                    path: ['email'],
-                    preferences: { fields: {} },
-                    req: { payload: { config }, t } as unknown as PayloadRequest,
-                    required: true,
-                    siblingData: {},
-                  })
-                }
+                validate={validateEmail}
               />
             )}
           </div>

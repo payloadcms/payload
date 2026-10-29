@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { MetaDescriptionField, MetaTitleField } from '@payloadcms/plugin-seo/fields'
 import {
   BlocksFeature,
   FixedToolbarFeature,
@@ -36,6 +37,15 @@ export const PostsCollection: CollectionConfig = {
         description:
           'A subtitle field to test focus indicators in the admin UI, helps us detect exiting out of rich text editor properly.',
       },
+    },
+    {
+      name: 'showConditionalNote',
+      type: 'checkbox',
+    },
+    {
+      name: 'conditionalNote',
+      type: 'text',
+      admin: { condition: (_, siblingData) => Boolean(siblingData.showConditionalNote) },
     },
     {
       name: 'accessibilitySelect',
@@ -89,9 +99,72 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'relatedPosts',
+      type: 'relationship',
+      hasMany: true,
+      relationTo: postsSlug,
+    },
+    {
       name: 'relatedPost',
       type: 'relationship',
       relationTo: postsSlug,
+    },
+    {
+      name: 'contrastRelationships',
+      type: 'relationship',
+      relationTo: postsSlug,
+      hasMany: true,
+    },
+    {
+      name: 'contrastDisabledSelect',
+      type: 'select',
+      admin: { readOnly: true },
+      defaultValue: ['one', 'two'],
+      hasMany: true,
+      options: [
+        { label: 'Value One', value: 'one' },
+        { label: 'Value Two', value: 'two' },
+      ],
+    },
+    {
+      name: 'contrastDate',
+      type: 'date',
+      timezone: true,
+    },
+    {
+      name: 'contrastGroup',
+      type: 'group',
+      admin: { description: 'Group description for contrast measurement.' },
+      fields: [{ name: 'text', type: 'text' }],
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        { fields: [{ name: 'contrastFirst', type: 'text' }], label: 'Contrast first tab' },
+        { fields: [{ name: 'contrastSecond', type: 'text' }], label: 'Contrast second tab' },
+      ],
+    },
+    {
+      name: 'contrastUpload',
+      type: 'upload',
+      admin: { description: 'Choose a media file for this post.' },
+      relationTo: mediaSlug,
+    },
+    {
+      name: 'contrastSEO',
+      type: 'group',
+      fields: [MetaTitleField({}), MetaDescriptionField({})],
+      label: 'Contrast SEO',
+    },
+    {
+      name: 'status',
+      type: 'select',
+      admin: { position: 'sidebar' },
+      defaultValue: 'draft',
+      options: [
+        { label: 'Draft', value: 'draft' },
+        { label: 'Published', value: 'published' },
+      ],
     },
     {
       name: 'publishedOn',
@@ -132,6 +205,24 @@ export const PostsCollection: CollectionConfig = {
           BlocksFeature({
             blocks: [
               { slug: 'callout', fields: [{ name: 'text', type: 'text' }] },
+              {
+                slug: 'nestedRichText',
+                fields: [
+                  {
+                    name: 'body',
+                    type: 'richText',
+                    editor: lexicalEditor({
+                      features: ({ defaultFeatures }) => [
+                        ...defaultFeatures,
+                        FixedToolbarFeature(),
+                        BlocksFeature({
+                          blocks: [{ slug: 'callout', fields: [{ name: 'text', type: 'text' }] }],
+                        }),
+                      ],
+                    }),
+                  },
+                ],
+              },
               {
                 slug: 'noHandle',
                 admin: {
@@ -182,6 +273,13 @@ export const PostsCollection: CollectionConfig = {
             {
               name: 'date',
               type: 'date',
+              admin: {
+                date: {
+                  overrides: {
+                    excludeDates: [new Date('2026-09-14T12:00:00.000Z')],
+                  },
+                },
+              },
             },
           ],
           labels: {
@@ -210,6 +308,16 @@ export const PostsCollection: CollectionConfig = {
       label: 'Publishing details',
     },
     {
+      name: 'customLabelRows',
+      type: 'array',
+      admin: {
+        components: {
+          RowLabel: '/components/AccessibleRowLabel/index.js#AccessibleRowLabel',
+        },
+      },
+      fields: [{ name: 'label', type: 'text' }],
+    },
+    {
       type: 'collapsible',
       admin: {
         components: { Label: '/components/CustomCollapsibleLabel/index.js#CustomCollapsibleLabel' },
@@ -218,9 +326,24 @@ export const PostsCollection: CollectionConfig = {
     },
     createFolderField({ relationTo: 'payload-folders' }),
     {
+      name: 'readOnlyHierarchy',
+      type: 'relationship',
+      admin: {
+        components: { Field: '@payloadcms/ui/rsc#HierarchyField' },
+        readOnly: true,
+      },
+      hasMany: true,
+      relationTo: 'payload-folders',
+    },
+    {
       name: 'featuredImage',
       type: 'upload',
       relationTo: mediaSlug,
+    },
+    {
+      name: 'quantity',
+      type: 'number',
+      defaultValue: 10,
     },
     {
       name: 'location',
@@ -233,6 +356,18 @@ export const PostsCollection: CollectionConfig = {
     {
       name: 'source',
       type: 'code',
+    },
+    {
+      name: 'readOnlySettings',
+      type: 'json',
+      admin: { readOnly: true },
+      defaultValue: { enabled: true },
+    },
+    {
+      name: 'readOnlySource',
+      type: 'code',
+      admin: { readOnly: true },
+      defaultValue: 'const enabled = true;',
     },
     {
       name: 'unlabelledSettings',
@@ -250,7 +385,22 @@ export const PostsCollection: CollectionConfig = {
       },
       label: false,
     },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'tabDetails',
+          fields: [{ name: 'note', type: 'text' }],
+          label: { en: 'Post details' },
+        },
+        {
+          fields: [{ name: 'tabSummary', type: 'text' }],
+          label: 'Post summary',
+        },
+      ],
+    },
   ],
+  llmInstructions: 'Use descriptive post titles.',
   trash: true,
   versions: {
     drafts: true,

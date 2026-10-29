@@ -32,11 +32,11 @@ const CheckboxIndicator: React.FC<{
 }
 
 export const Checkbox: React.FC<CheckboxFieldDiffClientProps> = ({
-  comparisonValue: valueFrom,
   field,
   locale,
   nestingLevel,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const { i18n, t } = useTranslation()
 

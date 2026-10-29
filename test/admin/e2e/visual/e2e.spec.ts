@@ -51,8 +51,7 @@ test.describe('Visual', () => {
   visual('renders the dashboard status badge', async () => {
     await page.goto(url.admin)
 
-    const badge = page.locator('.dashboard-status__badge')
-    await expect(badge).toBeVisible()
+    const badge = await prepareStatusBadge({ page })
 
     await expectScreenshot({ name: 'dashboard-status-badge.png', page, target: badge })
   })
@@ -77,8 +76,7 @@ test.describe('Visual', () => {
     async () => {
       await page.goto(url.admin)
 
-      const badge = page.locator('.dashboard-status__badge')
-      await expect(badge).toBeVisible()
+      const badge = await prepareStatusBadge({ page })
 
       await expect(
         expectScreenshot({ name: 'dashboard-status-badge-canary.png', page, target: badge }),
@@ -86,3 +84,19 @@ test.describe('Visual', () => {
     },
   )
 })
+
+async function prepareStatusBadge({ page }: { page: Page }) {
+  const badge = page.locator('.dashboard-status__badge')
+
+  await expect(badge).toBeVisible()
+  // Isolate this badge-style snapshot from fractional positions introduced by preceding widgets.
+  await page.addStyleTag({
+    content: `.dashboard-status__badge {
+      position: fixed;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+    }`,
+  })
+
+  return badge
+}

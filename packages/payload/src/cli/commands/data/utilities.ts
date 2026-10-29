@@ -61,13 +61,8 @@ export const getGlobalValidationResult = ({
   return { slug, errors: error.data.errors, ...(schema ? { schema } : {}) }
 }
 
-export const getCollectionSchema = ({
-  slug,
-  req,
-}: {
-  req: PayloadRequest
-  slug: CollectionSlug
-}) => getCollectionInputSchema({ collectionSlug: slug, req })
+export const getCollectionSchema = ({ slug, req }: { req: PayloadRequest; slug: CollectionSlug }) =>
+  getCollectionInputSchema({ collectionSlug: slug, req })
 
 export const getReadOptions = (options: {
   depth: number

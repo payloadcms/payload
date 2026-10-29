@@ -584,7 +584,7 @@ describe('lexicalMain', () => {
     await secondUploadNode.click()
 
     await expect(secondUploadNode.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
-      'payload-1.jpg',
+      'payload-original-1.jpg',
     )
     await expect(
       secondUploadNode.locator('.LexicalEditorTheme__upload__collectionLabel'),
@@ -629,7 +629,7 @@ describe('lexicalMain', () => {
     await expect(uploadListDrawer).toBeVisible()
     await wait(500)
 
-    await uploadListDrawer.locator('button').getByText('payload.jpg').first().click()
+    await uploadListDrawer.locator('button').getByText('payload-original.jpg').first().click()
     await expect(uploadListDrawer).toBeHidden()
 
     const newUploadNode = richTextField.locator('.LexicalEditorTheme__upload').nth(1)
@@ -639,7 +639,7 @@ describe('lexicalMain', () => {
     await newUploadNode.hover()
 
     await expect(newUploadNode.locator('.LexicalEditorTheme__upload__filename')).toContainText(
-      'payload.jpg',
+      'payload-original.jpg',
     )
 
     // Click on button with class LexicalEditorTheme__upload__upload-drawer-toggler
@@ -1046,7 +1046,7 @@ describe('lexicalMain', () => {
     await expect(linkDrawer).toBeVisible()
     await wait(500)
 
-    const urlInput = linkDrawer.locator('#field-url').first()
+    const urlInput = linkDrawer.locator('input[name="url"]').first()
     // Click on the input to focus it
     await urlInput.click()
     // should be https:// value
@@ -1281,7 +1281,7 @@ describe('lexicalMain', () => {
     const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first() // IDs starting with drawer_1_lexical-rich-text-link- (there's some other symbol after the underscore)
     await expect(linkDrawer).toBeVisible()
 
-    const urlInput = linkDrawer.locator('#field-url').first()
+    const urlInput = linkDrawer.locator('input[name="url"]').first()
 
     await expect(urlInput).toBeVisible()
   })
@@ -1306,7 +1306,7 @@ describe('lexicalMain', () => {
     const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first()
     await expect(linkDrawer).toBeVisible()
 
-    const blockTextInput = linkDrawer.locator('#field-blocks__0__text').first()
+    const blockTextInput = linkDrawer.locator('input[name="blocks.0.text"]').first()
 
     await expect(blockTextInput).toBeVisible()
     await expect(blockTextInput).toBeEditable()
@@ -1354,7 +1354,7 @@ describe('lexicalMain', () => {
     await expect(uploadListDrawer).toBeVisible()
     await wait(1000)
 
-    await uploadListDrawer.locator('button').getByText('payload.png').first().click()
+    await uploadListDrawer.locator('button').getByText('payload-original.png').first().click()
     await expect(uploadListDrawer).toBeHidden()
 
     const newUploadNode = richTextField.locator('.LexicalEditorTheme__upload').first()
@@ -1366,7 +1366,7 @@ describe('lexicalMain', () => {
     await newUploadNode.hover()
 
     await expect(newUploadNode.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
-      'payload.png',
+      'payload-original.png',
     )
 
     await page.keyboard.press('Enter') // floating toolbar needs to appear with enough distance to the upload node, otherwise clicking may fail
@@ -1393,8 +1393,8 @@ describe('lexicalMain', () => {
     // Click anywhere in the drawer to make sure the cursor position is preserved
     await uploadSwapDrawer.locator('.drawer__content').first().click()
 
-    // click button with text content "payload.jpg"
-    await uploadSwapDrawer.locator('button').getByText('payload.jpg').first().click()
+    // click button with text content "payload-original.jpg"
+    await uploadSwapDrawer.locator('button').getByText('payload-original.jpg').first().click()
 
     await expect(uploadSwapDrawer).toBeHidden()
     await wait(500)
@@ -1568,7 +1568,7 @@ describe('lexicalMain', () => {
     await richTextField.locator('.slash-menu-popup button').getByText('My Block').click()
 
     await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(1)
-    await richTextField.locator('#field-someTextRequired').first().fill('test')
+    await richTextField.locator('input[name="someTextRequired"]').first().fill('test')
 
     await saveDocAndAssert(page)
 
@@ -1743,17 +1743,19 @@ describe('lexicalMain', () => {
     // test
     await navigateToLexicalFields()
     const uploadNode = page
-      .locator('.LexicalEditorTheme__upload__contents[data-filename="payload.jpg"]')
+      .locator('.LexicalEditorTheme__upload__contents[data-filename="payload-original.jpg"]')
       .first()
     await uploadNode.click()
     await expectInsideSelectedDecorator(uploadNode)
+    await page.keyboard.press('Backspace')
+    await expect(uploadNode).toBeHidden()
 
     const textNode = page.getByText('Upload Node:', { exact: true })
     await textNode.click()
     await expect(decoratorLocator).toBeHidden()
 
     const closeTagInMultiSelect = page.getByRole('button', {
-      name: /^Remove payload\.jpg/,
+      name: /^Remove payload-original\.jpg/,
     })
     await closeTagInMultiSelect.click()
     await expect(decoratorLocator).toBeHidden()
@@ -1771,11 +1773,8 @@ describe('lexicalMain', () => {
 
     const labelInsideCollapsableBody2 = page.getByText('Text2')
     await labelInsideCollapsableBody2.click()
-    await expectInsideSelectedDecorator(labelInsideCollapsableBody2)
-
-    // TEST DELETE!
-    await page.keyboard.press('Backspace')
-    await expect(labelInsideCollapsableBody2).toBeHidden()
+    await expect(page.getByRole('textbox', { name: 'Text2', exact: true })).toBeFocused()
+    await expect(decoratorLocator).toBeHidden()
 
     const monacoLabel = page.locator('.field-label').getByText('Code', { exact: true })
     await monacoLabel.click()

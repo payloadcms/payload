@@ -26,6 +26,7 @@ import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { resolveHierarchyCollections } from '../hierarchy/resolveHierarchyCollections.js'
 import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
+import { addLLMInstructions } from '../llm-instructions/addLLMInstructions.js'
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
@@ -185,8 +186,9 @@ const addDefaultDashboardWidgets = ({
         components: {
           // Presents an inclusion filter (all collections checked by default) while persisting the
           // inverse as an exclusion list, so collections added later stay visible by default.
-          Field: '@payloadcms/ui#RecentlyViewedCollectionsField',
+          Field: '@payloadcms/ui#CollectionFilter',
         },
+        description: ({ t }) => t('dashboard:widgetRecentlyViewedFilterDescription'),
       },
       hasMany: true,
       label: ({ t }) => t('general:collections'),
@@ -238,7 +240,7 @@ const addDefaultDashboardWidgets = ({
   })
   dashboard.widgets.push({
     slug: 'activity',
-    Component: '@payloadcms/ui/rsc#RecentlyViewedWidget',
+    Component: '@payloadcms/ui/rsc#ActivityWidget',
     fields: sanitizeFields({
       config: config as unknown as Config,
       existingFieldNames: new Set(),
@@ -247,8 +249,8 @@ const addDefaultDashboardWidgets = ({
       richTextSanitizers,
       validRelationships,
     }),
-    label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
-    minWidth: 'x-small',
+    label: ({ t }) => t('dashboard:widgetRecentsAndPinned'),
+    minWidth: 'small',
   })
   if (uploadCollections.length > 0) {
     dashboard.widgets.push({
@@ -558,12 +560,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   ;(config.jobs ??= {} as SanitizedJobsConfig).enabled = Boolean(
     (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs?.tasks?.length) ||
-      (Array.isArray(configWithDefaults.jobs?.workflows) &&
-        configWithDefaults.jobs?.workflows?.length),
+    (Array.isArray(configWithDefaults.jobs?.workflows) &&
+      configWithDefaults.jobs?.workflows?.length),
   )
   config.jobs.hasConcurrency = Boolean(
     config.jobs.tasks?.some((task) => task.concurrency) ||
-      config.jobs.workflows?.some((workflow) => workflow.concurrency),
+    config.jobs.workflows?.some((workflow) => workflow.concurrency),
   )
 
   // Need to add default jobs collection before locked documents collections
@@ -671,12 +673,13 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   }
 
   if (!config.upload) {
-    config.upload = { adapters: [] }
+    config.upload = { adapters: [], transformers: [] }
   }
 
   config.upload.adapters = Array.from(
     new Set(config.collections!.map((c) => c.upload?.adapter).filter(Boolean) as string[]),
   )
+  config.upload.transformers = config.upload.transformers ?? []
 
   // Pass through the email config as is so adapters don't break
   if (incomingConfig.email) {
@@ -689,6 +692,19 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       isRoot: true,
       parentIsLocalized: false,
     })
+  }
+
+  if (config.llmInstructions !== false) {
+    const instructionsCollection = addLLMInstructions({ config: config as SanitizedConfig })
+
+    config.collections!.push(
+      sanitizeCollection(
+        config as unknown as Config,
+        instructionsCollection,
+        richTextSanitizers,
+        validRelationships,
+      ),
+    )
   }
 
   for (const sanitizeRichText of richTextSanitizers) {

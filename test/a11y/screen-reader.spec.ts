@@ -4,6 +4,7 @@ import type { Locator } from '@playwright/test'
 import { NVDAKeyCodeCommands } from '@guidepup/guidepup'
 import { screenReaderTest as test } from '@guidepup/playwright'
 import { expect } from '@playwright/test'
+import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { formatAdminURL } from 'payload/shared'
@@ -20,6 +21,7 @@ import {
   captureScreenReader,
   captureScreenReaderOutput,
   cleanupModalMedia,
+  expectPersistedWorkflowPost,
   expectPopupCursorToMove,
   gotoCreatePost,
   gotoFirstPost,
@@ -31,11 +33,13 @@ import {
   openBulkUploadDialog,
   openCopyToLocaleDrawer,
   openDashboardEditor,
+  openDragReorderField,
   openDrawerFilters,
   openEditImageDialog,
   openFirstBlockActions,
   openFolderCreationLocation,
   openLivePreview,
+  openLLMInstructions,
   openLocaleOptions,
   openNavigationFolders,
   openPostsFilter,
@@ -44,6 +48,8 @@ import {
   openVersionComparison,
   openVersionsList,
   openWidgetDrawer,
+  waitForKeyboardDragActivation,
+  withWorkflowPost,
 } from './helpers.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -74,45 +80,166 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     await cleanupModalMedia({ page })
   })
   test.describe('1.1.1 Non-text Content (A)', () => {
-    test('should expose the login logo to the screen-reader cursor as Payload', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3609
-      await page.context().clearCookies()
-      await page.setExtraHTTPHeaders({ DisableAutologin: 'true' })
-      await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
-      await expect(page.locator('.login__brand .graphic-logo')).toBeVisible()
-      const output = await navigateScreenReaderTo({
-        matches: /Payload.*(?:image|graphic)|(?:image|graphic).*Payload/i,
-        screenReader,
-      })
+    test(
+      'should expose the login logo to the screen-reader cursor as Payload',
+      { tag: ['@sign-in', '@auth'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3609
+        await page.context().clearCookies()
+        await page.setExtraHTTPHeaders({ DisableAutologin: 'true' })
+        await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/login', serverURL }))
+        await expect(page.locator('.login__brand .graphic-logo')).toBeVisible()
+        const output = await navigateScreenReaderTo({
+          matches: /Payload.*(?:image|graphic)|(?:image|graphic).*Payload/i,
+          screenReader,
+        })
 
-      expect(output).toMatch(/Payload/i)
-    })
+        expect(output).toMatch(/Payload/i)
+      },
+    )
   })
 
   test.describe('1.1.1 Non-text Content (A)', () => {
-    test('should announce required state instead of the asterisk', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3579
-      await page.goto(
-        formatAdminURL({ adminRoute: '/admin', path: '/collections/media/create', serverURL }),
-      )
-      const alt = page.locator('#field-alt')
+    test(
+      'should announce required state instead of the asterisk',
+      { tag: ['@media'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3579
+        await page.goto(
+          formatAdminURL({ adminRoute: '/admin', path: '/collections/media/create', serverURL }),
+        )
+        const alt = page.locator('#field-alt')
 
-      await expect(alt).toBeVisible()
-      const capture = await captureScreenReader({ action: () => alt.focus(), screenReader })
+        await expect(alt).toBeVisible()
+        const capture = await captureScreenReader({ action: () => alt.focus(), screenReader })
 
-      expect(capture.spokenPhrase).toMatch(/alt/i)
-      expect(capture.spokenPhrase).toMatch(/required/i)
-      expect(capture.spokenPhrase).not.toMatch(/star|asterisk/i)
-    })
+        expect(capture.spokenPhrase).toMatch(/alt/i)
+        expect(capture.spokenPhrase).toMatch(/required/i)
+        expect(capture.spokenPhrase).not.toMatch(/star|asterisk/i)
+      },
+    )
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    for (const kind of ['Array', 'Blocks'] as const) {
+      test(`should announce a meaningful ${kind} row name when picked up`, async ({
+        page,
+        screenReader,
+      }) => {
+        // PYLD-3628
+        const { firstRowLabel, handle } = await openDragReorderField({ kind, page, postsURL })
+
+        await handle.focus()
+        try {
+          const output = await captureScreenReaderOutput({
+            action: () => screenReader.press('Space'),
+            screenReader,
+          })
+
+          await expect(handle).toHaveAttribute('aria-pressed', 'true')
+          expect(output.toLowerCase()).toContain(firstRowLabel.toLowerCase())
+          expect(output).toMatch(/picked up|lifted|dragging/i)
+        } finally {
+          await screenReader.press('Escape')
+        }
+      })
+
+      test(`should announce usable ${kind} pickup movement and drop instructions`, async ({
+        page,
+        screenReader,
+      }) => {
+        // PYLD-3627
+        const { handle } = await openDragReorderField({ kind, page, postsURL })
+        const output = await captureScreenReaderOutput({
+          action: () => handle.focus(),
+          screenReader,
+        })
+
+        expect.soft(output).toMatch(/space|enter/i)
+        expect.soft(output).toMatch(/arrow/i)
+        expect.soft(output).toMatch(/drop/i)
+        expect.soft(output).toMatch(/escape|cancel/i)
+        if (process.platform === 'darwin') {
+          expect(output).toMatch(/command|cmd|quick nav|pass.?through|interact/i)
+        }
+      })
+
+      test(`should announce relative direction and position while dragging the ${kind} row`, async ({
+        page,
+        screenReader,
+      }) => {
+        // PYLD-3626
+        const { handle } = await openDragReorderField({ kind, page, postsURL })
+
+        await handle.focus()
+        await screenReader.press('Space')
+        await expect(handle).toHaveAttribute('aria-pressed', 'true')
+        await waitForKeyboardDragActivation({ page })
+        try {
+          const output = await captureScreenReaderOutput({
+            action: () =>
+              screenReader.press(process.platform === 'darwin' ? 'Meta+ArrowDown' : 'ArrowDown'),
+            screenReader,
+          })
+
+          expect.soft(output).toMatch(/down|after|below/i)
+          expect(output).toMatch(/(?:position|order)(?:\s*:\s*|\s+)2|2 (?:of|out of) 2|second/i)
+        } finally {
+          await screenReader.press('Escape')
+        }
+      })
+    }
+
+    test('should encounter the duplicate locale checkbox and label as one screen-reader item', async ({
+      // PYLD-3671
+      page,
+      screenReader,
+    }) => {
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.getByRole('menuitem', { name: /duplicate selected locales/i }).click()
+      await expect(page.locator('.select-locales-drawer')).toBeVisible()
+      await navigateScreenReaderTo({
+        matches: /English.*check\s?box|check\s?box.*English/i,
+        screenReader,
+      })
+
+      expect(await screenReader.itemText()).toMatch(/English.*check\s?box|check\s?box.*English/i)
+      await screenReader.next()
+      const next = await screenReader.itemText()
+
+      expect(next).not.toMatch(/English/i)
+      expect(next).toMatch(/Spanish.*check\s?box|check\s?box.*Spanish/i)
+    })
+
+    test(
+      'should encounter the deletion checkbox label as one screen-reader item',
+      { tag: ['@dialogs', '@trash'] },
+      async ({
+        // PYLD-3678
+        page,
+        screenReader,
+      }) => {
+        await gotoFirstPost({ page, postsURL, serverURL })
+        await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+        await page.getByRole('menuitem', { name: 'Delete', exact: true }).click()
+        await expect(page.getByRole('dialog', { name: /confirm deletion/i })).toBeVisible()
+        await navigateScreenReaderTo({
+          matches: /delete permanently.*check\s?box|check\s?box.*delete permanently/i,
+          screenReader,
+        })
+
+        expect(await screenReader.itemText()).toMatch(
+          /delete permanently.*check\s?box|check\s?box.*delete permanently/i,
+        )
+        await screenReader.next()
+        const next = await screenReader.itemText()
+
+        expect(next).not.toMatch(/delete permanently/i)
+        expect(next).toMatch(/Cancel.*button|button.*Cancel/i)
+      },
+    )
+
     test.describe('Safari and VoiceOver report', () => {
       test.skip(process.platform !== 'darwin', 'Safari and VoiceOver report')
 
@@ -140,25 +267,26 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       })
     })
 
-    test('should announce table cell text once without conflicting sort commands', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3750
-      // PYLD-3596
-      await gotoPostsList({ page, postsURL })
-      const title = 'Example post two'
-      const output = await navigateScreenReaderTo({
-        matches: /^(?!.*select).*Example post two/i,
-        screenReader,
-      })
-      const spoken = await screenReader.lastSpokenPhrase()
+    test(
+      'should announce table cell text once without conflicting sort commands',
+      { tag: ['@collection-navigation', '@admin-navigation'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3750
+        // PYLD-3596
+        await gotoPostsList({ page, postsURL })
+        const title = 'Example post two'
+        const output = await navigateScreenReaderTo({
+          matches: /^(?!.*select).*Example post two/i,
+          screenReader,
+        })
+        const spoken = await screenReader.lastSpokenPhrase()
 
-      expect(output).toContain(title)
-      expect(spoken.match(/Example post two/gi) || []).toHaveLength(1)
-      expect(spoken).not.toMatch(/ascending.*descending|descending.*ascending/i)
-      expect(spoken).not.toMatch(/sort by|\{\{label\}\}/i)
-    })
+        expect(output).toContain(title)
+        expect(spoken.match(/Example post two/gi) || []).toHaveLength(1)
+        expect(spoken).not.toMatch(/ascending.*descending|descending.*ascending/i)
+        expect(spoken).not.toMatch(/sort by|\{\{label\}\}/i)
+      },
+    )
 
     test('should communicate removed version text while browsing the comparison', async ({
       page,
@@ -224,56 +352,58 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       expect(capture.spokenPhrase.match(/\bcopy to\b(?!\s+locale\b)/gi) || []).toHaveLength(1)
     })
 
-    test('should announce the deletion dialog before background page content', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3769
-      await gotoFirstPost({ page, postsURL, serverURL })
-      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
-      const trigger = page.getByRole('menuitem', { name: 'Delete', exact: true })
+    test(
+      'should announce the deletion dialog before background page content',
+      { tag: ['@dialogs', '@trash'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3769
+        await gotoFirstPost({ page, postsURL, serverURL })
+        await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+        const trigger = page.getByRole('menuitem', { name: 'Delete', exact: true })
 
-      await trigger.focus()
-      const capture = await captureScreenReader({
-        action: () => trigger.press('Enter'),
-        screenReader,
-      })
+        await trigger.focus()
+        const capture = await captureScreenReader({
+          action: () => trigger.press('Enter'),
+          screenReader,
+        })
 
-      await expect(
-        page.locator('[id^="delete-"]').filter({ has: page.locator('.dialog') }),
-      ).toBeVisible()
-      expect(capture.spokenPhrase).toMatch(
-        /(delete|trash|confirm).*dialog|dialog.*(delete|trash|confirm)/i,
-      )
-      expect(capture.spokenPhrase).not.toMatch(
-        /skip to content|navigation landmark|dashboard|subtitle/i,
-      )
-    })
+        await expect(
+          page.locator('[id^="delete-"]').filter({ has: page.locator('.dialog') }),
+        ).toBeVisible()
+        expect(capture.spokenPhrase).toMatch(
+          /(delete|trash|confirm).*dialog|dialog.*(delete|trash|confirm)/i,
+        )
+        expect(capture.spokenPhrase).not.toMatch(
+          /skip to content|navigation landmark|dashboard|subtitle/i,
+        )
+      },
+    )
 
-    test('should announce the active sort direction on rich-text relationship table headers', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3660
-      const drawer = await openRichTextRelationshipDrawer({ page, postsURL })
-      const sortableHeader = drawer.locator('th:has(.sort-column)').first()
-      const columnName = (await sortableHeader.locator('.sort-column__label').innerText()).trim()
-      const sortButton = sortableHeader.getByRole('button', { name: /ascending/i })
+    test(
+      'should announce the active sort direction on rich-text relationship table headers',
+      { tag: ['@document-editing', '@relationships'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3660
+        const drawer = await openRichTextRelationshipDrawer({ page, postsURL })
+        const sortableHeader = drawer.locator('th:has(.sort-column)').first()
+        const columnName = (await sortableHeader.locator('.sort-column__label').innerText()).trim()
+        const sortButton = sortableHeader.getByRole('button', { name: /ascending/i })
 
-      await sortButton.click()
-      await sortButton.evaluate((element) => element.blur())
-      const output = await captureScreenReaderOutput({
-        action: () => sortButton.focus(),
-        screenReader,
-      })
+        await sortButton.click()
+        await sortButton.evaluate((element) => element.blur())
+        const output = await captureScreenReaderOutput({
+          action: () => sortButton.focus(),
+          screenReader,
+        })
 
-      await expect(sortableHeader).toHaveAccessibleName(columnName)
-      await expect(sortableHeader).toHaveAttribute('aria-sort', 'ascending')
-      await expect(sortButton).toHaveAttribute('aria-pressed', 'true')
-      expect(output).toMatch(new RegExp(columnName, 'i'))
-      expect(output).toMatch(/ascending/i)
-      expect(output).toMatch(/pressed|selected/i)
-    })
+        await expect(sortableHeader).toHaveAccessibleName(columnName)
+        await expect(sortableHeader).toHaveAttribute('aria-sort', 'ascending')
+        await expect(sortButton).toHaveAttribute('aria-pressed', 'true')
+        expect(output).toMatch(new RegExp(columnName, 'i'))
+        expect(output).toMatch(/ascending/i)
+        expect(output).toMatch(/pressed|selected/i)
+      },
+    )
 
     test('should announce the selected folder location by name and state', async ({
       page,
@@ -322,6 +452,36 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     })
   })
   test.describe('2.1.1 Keyboard (A)', () => {
+    for (const kind of ['Array', 'Blocks'] as const) {
+      test(`should drop the ${kind} row with the screen reader active`, async ({
+        page,
+        screenReader,
+      }) => {
+        // PYLD-3625
+        const { handle, rows, values } = await openDragReorderField({ kind, page, postsURL })
+
+        const initialSecondTop = (await rows.nth(1).boundingBox())!.y
+
+        await handle.focus()
+        try {
+          await screenReader.press('Space')
+          await expect(handle).toHaveAttribute('aria-pressed', 'true')
+          await waitForKeyboardDragActivation({ page })
+          await screenReader.press(process.platform === 'darwin' ? 'Meta+ArrowDown' : 'ArrowDown')
+          await expect
+            .poll(async () => (await rows.nth(1).boundingBox())!.y)
+            .toBeLessThan(initialSecondTop)
+          await screenReader.press('Space')
+          await expect(values.nth(0)).toHaveValue('Second drag row')
+          await expect(values.nth(1)).toHaveValue('First drag row')
+          await expect(rows.nth(1).getByRole('button', { name: /drag to reorder/i })).toBeFocused()
+          await expect(page.locator('body')).not.toHaveClass(/is-dragging/)
+        } finally {
+          await screenReader.press('Escape')
+        }
+      })
+    }
+
     test.describe('Requires Windows and NVDA', () => {
       test.skip(process.platform !== 'win32', 'Requires Windows and NVDA')
 
@@ -406,196 +566,211 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     test.describe('Requires NVDA browse mode', () => {
       test.skip(process.platform !== 'win32', 'Requires NVDA browse mode')
 
-      test('should not expose an invisible loading object after relationship drawer content', async ({
-        page,
-        screenReader,
-      }) => {
-        // PYLD-3650
-        await gotoCreatePost({ page, postsURL })
-        await page.locator('#relatedPost-add-new button').press('Enter')
-        const drawer = page.locator('.doc-drawer:visible')
+      test(
+        'should not expose an invisible loading object after relationship drawer content',
+        { tag: ['@document-editing', '@relationships'] },
+        async ({ page, screenReader }) => {
+          // PYLD-3650
+          await gotoCreatePost({ page, postsURL })
+          await page.locator('#relatedPost-add-new button').press('Enter')
+          const drawer = page.locator('.doc-drawer:visible')
 
-        await expect(drawer.locator('[data-form-ready="true"]').first()).toBeVisible()
-        // Place a browse-cursor boundary after the overlay without relying on wrapping to the header.
-        await drawer.evaluate((element) => {
-          const boundary = document.createElement('p')
+          await expect(drawer.locator('[data-form-ready="true"]').first()).toBeVisible()
+          // Place a browse-cursor boundary after the overlay without relying on wrapping to the header.
+          await drawer.evaluate((element) => {
+            const boundary = document.createElement('p')
 
-          boundary.textContent = 'End of relationship drawer'
-          element.append(boundary)
-        })
-        await navigateScreenReaderTo({ matches: /featured image/i, screenReader })
-        const outputs: string[] = []
-        let hasReachedEnd = false
-        for (let index = 0; index < 50; index++) {
-          await screenReader.next()
-          const output = await screenReader.itemText()
-          outputs.push(output)
-          if (/end of relationship drawer/i.test(output)) {
-            hasReachedEnd = true
-            break
+            boundary.textContent = 'End of relationship drawer'
+            element.append(boundary)
+          })
+          await navigateScreenReaderTo({ matches: /featured image/i, screenReader })
+          const outputs: string[] = []
+          let hasReachedEnd = false
+          for (let index = 0; index < 50; index++) {
+            await screenReader.next()
+            const output = await screenReader.itemText()
+            outputs.push(output)
+            if (/end of relationship drawer/i.test(output)) {
+              hasReachedEnd = true
+              break
+            }
           }
-        }
-        expect(hasReachedEnd, outputs.join('\n')).toBe(true)
-        expect(outputs.join(' ')).not.toMatch(/loading|unknown|unlabeled/i)
-      })
+          expect(hasReachedEnd, outputs.join('\n')).toBe(true)
+          expect(outputs.join(' ')).not.toMatch(/loading|unknown|unlabeled/i)
+        },
+      )
     })
 
     test.describe('Requires NVDA browse mode', () => {
       test.skip(process.platform !== 'win32', 'Requires NVDA browse mode')
 
-      test('should allow the NVDA browse cursor to exit Lexical editors in both directions', async ({
-        page,
-        screenReader,
-      }) => {
-        // PYLD-3741
+      test(
+        'should allow the NVDA browse cursor to exit Lexical editors in both directions',
+        { tag: ['@document-editing'] },
+        async ({ page, screenReader }) => {
+          // PYLD-3741
+          await gotoCreatePost({ page, postsURL })
+          await insertTextBlockWithKeyboard({ page })
+          for (const field of ['content', 'layout.0.body']) {
+            const editor = page.locator(`[data-field-path="${field}"] [contenteditable="true"]`)
+            const text = `Screen reader exit ${field}`
+
+            await editor.fill(text)
+            await screenReader.perform(NVDAKeyCodeCommands.exitFocusMode)
+            for (const direction of ['next', 'previous'] as const) {
+              await navigateScreenReaderTo({ matches: new RegExp(text), screenReader })
+              const boundary =
+                field === 'content'
+                  ? direction === 'next'
+                    ? /add item/i
+                    : /published on/i
+                  : direction === 'next'
+                    ? /^text(?:$| .*?(?:edit|text field))/i
+                    : /block name/i
+              const outputs: string[] = []
+              let hasReachedOutsideContent = false
+              for (let index = 0; index < 40; index++) {
+                await screenReader[direction]()
+                const output = await screenReader.itemText()
+                outputs.push(output)
+                if (boundary.test(output)) {
+                  hasReachedOutsideContent = true
+                  break
+                }
+              }
+              expect(hasReachedOutsideContent, outputs.join('\n')).toBe(true)
+            }
+          }
+        },
+      )
+    })
+
+    test(
+      'should omit hidden Lexical controls from screen-reader navigation',
+      { tag: ['@document-editing'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3789
         await gotoCreatePost({ page, postsURL })
         await insertTextBlockWithKeyboard({ page })
         for (const field of ['content', 'layout.0.body']) {
           const editor = page.locator(`[data-field-path="${field}"] [contenteditable="true"]`)
-          const text = `Screen reader exit ${field}`
+          const text = `Screen reader hidden controls ${field}`
 
           await editor.fill(text)
-          await screenReader.perform(NVDAKeyCodeCommands.exitFocusMode)
-          for (const direction of ['next', 'previous'] as const) {
-            await navigateScreenReaderTo({ matches: new RegExp(text), screenReader })
-            const boundary =
+          await page.mouse.move(0, 0)
+          await navigateScreenReaderTo({ matches: new RegExp(text), screenReader })
+          let hasExitedEditor = false
+          const outputs: string[] = []
+          for (let index = 0; index < 40; index++) {
+            await screenReader.next()
+            const output = await screenReader.itemText()
+            outputs.push(output)
+            if (
               field === 'content'
-                ? direction === 'next'
-                  ? /add item/i
-                  : /published on/i
-                : direction === 'next'
-                  ? /^text(?:$| .*?(?:edit|text field))/i
-                  : /block name/i
-            const outputs: string[] = []
-            let hasReachedOutsideContent = false
-            for (let index = 0; index < 40; index++) {
-              await screenReader[direction]()
-              const output = await screenReader.itemText()
-              outputs.push(output)
-              if (boundary.test(output)) {
-                hasReachedOutsideContent = true
-                break
-              }
+                ? /add item/i.test(output)
+                : /text.*(?:edit|text field)/i.test(output)
+            ) {
+              hasExitedEditor = true
+              break
             }
-            expect(hasReachedOutsideContent, outputs.join('\n')).toBe(true)
           }
+          expect(hasExitedEditor, outputs.join('\n')).toBe(true)
+          expect(outputs.join(' ')).not.toMatch(/drag to move|add block|edit link|remove link/i)
         }
-      })
-    })
-
-    test('should omit hidden Lexical controls from screen-reader navigation', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3789
-      await gotoCreatePost({ page, postsURL })
-      await insertTextBlockWithKeyboard({ page })
-      for (const field of ['content', 'layout.0.body']) {
-        const editor = page.locator(`[data-field-path="${field}"] [contenteditable="true"]`)
-        const text = `Screen reader hidden controls ${field}`
-
-        await editor.fill(text)
-        await page.mouse.move(0, 0)
-        await navigateScreenReaderTo({ matches: new RegExp(text), screenReader })
-        let hasExitedEditor = false
-        const outputs: string[] = []
-        for (let index = 0; index < 40; index++) {
-          await screenReader.next()
-          const output = await screenReader.itemText()
-          outputs.push(output)
-          if (
-            field === 'content'
-              ? /add item/i.test(output)
-              : /text.*(?:edit|text field)/i.test(output)
-          ) {
-            hasExitedEditor = true
-            break
-          }
-        }
-        expect(hasExitedEditor, outputs.join('\n')).toBe(true)
-        expect(outputs.join(' ')).not.toMatch(/drag to move|add block|edit link|remove link/i)
-      }
-    })
+      },
+    )
     for (const form of ['document', 'login'] as const) {
-      test.describe(`${form} form`, () => {
-        test('should expose validation errors next to their fields', async ({
-          page,
-          screenReader,
-        }) => {
-          // PYLD-3581; login also covers the reading-order behavior of PYLD-3613.
-          if (form === 'login') {
-            await gotoLabelTestLogin({ page, serverURL })
-            await page.locator('input[name="email"]').fill('dev@payloadcms.com')
-            await page.getByRole('button', { name: 'Login', exact: true }).click()
-          } else {
-            await gotoCreatePost({ page, postsURL })
-            await page.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
-          }
+      test.describe(
+        `${form} form`,
+        form === 'login'
+          ? { tag: ['@auth', '@sign-in'] }
+          : { tag: ['@document-editing', '@validation'] },
+        () => {
+          test('should expose validation errors next to their fields', async ({
+            page,
+            screenReader,
+          }) => {
+            // PYLD-3581; login also covers the reading-order behavior of PYLD-3613.
+            if (form === 'login') {
+              await gotoLabelTestLogin({ page, serverURL })
+              await page.locator('input[name="email"]').fill('dev@payloadcms.com')
+              await page.getByRole('button', { name: 'Login', exact: true }).click()
+            } else {
+              await gotoCreatePost({ page, postsURL })
+              await page.getByRole('button', { name: /^Publish(?: in English)?$/ }).click()
+            }
 
-          const field = page.locator(form === 'login' ? 'input[name="password"]' : '#field-title')
-          const error = page
-            .locator('.field-error')
-            .filter({ hasText: /required/i })
-            .first()
+            const field = page.locator(form === 'login' ? 'input[name="password"]' : '#field-title')
+            const error = page
+              .locator('.field-error')
+              .filter({ hasText: /required/i })
+              .first()
 
-          await expect(error).toBeVisible()
-          await expectAdjacentValidationError({ error, field, screenReader })
-        })
-      })
+            await expect(error).toBeVisible()
+            await expectAdjacentValidationError({ error, field, screenReader })
+          })
+        },
+      )
     }
 
-    test('should announce password errors after submission', async ({ page, screenReader }) => {
-      // PYLD-3613
-      await gotoLabelTestLogin({ page, serverURL })
-      await page.locator('input[name="email"]').fill('dev@payloadcms.com')
-      const password = page.locator('input[name="password"]')
+    test(
+      'should announce password errors after submission',
+      { tag: ['@sign-in', '@auth'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3613
+        await gotoLabelTestLogin({ page, serverURL })
+        await page.locator('input[name="email"]').fill('dev@payloadcms.com')
+        const password = page.locator('input[name="password"]')
 
-      await password.fill('temporary')
-      await password.fill('')
-      await password.press('Tab')
-      const error = page.locator('.field-error').filter({ hasText: /required/i })
-      const capture = await captureScreenReader({
-        action: async () => {
-          await page.getByRole('button', { name: 'Login', exact: true }).click()
-          await expect(error).toBeVisible()
-        },
-        screenReader,
-      })
+        await password.fill('temporary')
+        await password.fill('')
+        await password.press('Tab')
+        const error = page.locator('.field-error').filter({ hasText: /required/i })
+        const capture = await captureScreenReader({
+          action: async () => {
+            await page.getByRole('button', { name: 'Login', exact: true }).click()
+            await expect(error).toBeVisible()
+          },
+          screenReader,
+        })
 
-      expect.soft(capture.spokenPhrase).toContain((await error.innerText()).trim())
-    })
+        expect.soft(capture.spokenPhrase).toContain((await error.innerText()).trim())
+      },
+    )
 
-    test('should contain screen-reader traversal in bulk-upload and image-edit dialogs', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3575
-      for (const open of [openBulkUploadDialog, openEditImageDialog]) {
-        const dialog = await open({ page, serverURL })
+    test(
+      'should contain screen-reader traversal in bulk-upload and image-edit dialogs',
+      { tag: ['@media'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3575
+        for (const open of [openBulkUploadDialog, openEditImageDialog]) {
+          const dialog = await open({ page, serverURL })
 
-        await dialog.getByRole('button', { name: 'Close', exact: true }).focus()
+          await dialog.getByRole('button', { name: 'Close', exact: true }).focus()
+          const stops = await collectModalCursorStops({ screenReader })
+          expect(stops.join('\n')).not.toMatch(
+            /dashboard|navigation|collections|create new|\bmedia\b|\bposts\b|\busers\b|file name|save draft/i,
+          )
+          expect(stops.join('\n')).toMatch(/add files|crop|focal point|choose files|browse files/i)
+        }
+      },
+    )
+
+    test(
+      'should contain screen-reader traversal in the nested folder-location modal',
+      { tag: ['@media'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3587
+        const modal = await openFolderCreationLocation({ page, serverURL })
+
+        await modal.getByRole('button', { name: 'Cancel', exact: true }).focus()
         const stops = await collectModalCursorStops({ screenReader })
         expect(stops.join('\n')).not.toMatch(
-          /dashboard|navigation|collections|create new|\bmedia\b|\bposts\b|\busers\b|file name|save draft/i,
+          /dashboard|navigation|collections|creating new folder|untitled|save draft/i,
         )
-        expect(stops.join('\n')).toMatch(/add files|crop|focal point|choose files|browse files/i)
-      }
-    })
-
-    test('should contain screen-reader traversal in the nested folder-location modal', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3587
-      const modal = await openFolderCreationLocation({ page, serverURL })
-
-      await modal.getByRole('button', { name: 'Cancel', exact: true }).focus()
-      const stops = await collectModalCursorStops({ screenReader })
-      expect(stops.join('\n')).not.toMatch(
-        /dashboard|navigation|collections|creating new folder|untitled|save draft/i,
-      )
-      expect(stops.join('\n')).toMatch(/accessibility folder/i)
-    })
+        expect(stops.join('\n')).toMatch(/accessibility folder/i)
+      },
+    )
 
     test('should move the screen-reader cursor into the add-widget drawer upon opening', async ({
       page,
@@ -615,284 +790,335 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       expect(capture.spokenPhrase).not.toMatch(/editing dashboard|save changes/i)
     })
 
-    test('should move the screen-reader cursor into Copy to locale from the overflow menu', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3682
-      await gotoFirstPost({ page, postsURL, serverURL })
-      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
-      const trigger = page.locator('#copy-locale-data__button')
+    test(
+      'should move the screen-reader cursor into Copy to locale from the overflow menu',
+      { tag: ['@document-editing'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3682
+        await gotoFirstPost({ page, postsURL, serverURL })
+        await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+        const trigger = page.locator('#copy-locale-data__button')
 
-      await trigger.focus()
-      const capture = await captureScreenReader({
-        action: () => trigger.press('Enter'),
-        screenReader,
-      })
+        await trigger.focus()
+        const capture = await captureScreenReader({
+          action: () => trigger.press('Enter'),
+          screenReader,
+        })
 
-      await expect(page.locator('#copy-locale')).toBeVisible()
-      expect(capture.itemText).toMatch(
-        /close|copy to locale.*dialog|dialog.*copy to locale|copy to.*(combo|pop)/i,
-      )
-      expect(capture.itemText).not.toMatch(/skip to content|dashboard|more options/i)
-    })
+        await expect(page.locator('#copy-locale')).toBeVisible()
+        expect(capture.itemText).toMatch(
+          /close|copy to locale.*dialog|dialog.*copy to locale|copy to.*(combo|pop)/i,
+        )
+        expect(capture.itemText).not.toMatch(/skip to content|dashboard|more options/i)
+      },
+    )
 
-    test('should expose one screen-reader stop for the Copy to locale select', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3680
-      const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
-      const combobox = drawer.locator('#field-toLocale input[role="combobox"]')
+    test(
+      'should expose one screen-reader stop for the Copy to locale select',
+      { tag: ['@document-editing'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3680
+        const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
+        const combobox = drawer.locator('#field-toLocale input[role="combobox"]')
 
-      const firstStop = await captureScreenReader({
-        action: () => combobox.focus(),
-        screenReader,
-      })
-      const selectStops = [firstStop.itemText]
-      let hasReachedNextField = false
+        const firstStop = await captureScreenReader({
+          action: () => combobox.focus(),
+          screenReader,
+        })
+        const selectStops = [firstStop.itemText]
+        let hasReachedNextField = false
 
-      for (let index = 0; index < 8; index++) {
-        await screenReader.next()
-        const itemText = await screenReader.itemText()
+        for (let index = 0; index < 8; index++) {
+          await screenReader.next()
+          const itemText = await screenReader.itemText()
 
-        if (/overwrite existing data/i.test(itemText)) {
-          hasReachedNextField = true
-          break
+          if (/overwrite existing data/i.test(itemText)) {
+            hasReachedNextField = true
+            break
+          }
+          selectStops.push(itemText)
         }
-        selectStops.push(itemText)
-      }
 
-      expect(hasReachedNextField, `Screen-reader stops: ${JSON.stringify(selectStops)}`).toBe(true)
-      expect(selectStops, `Screen-reader stops: ${JSON.stringify(selectStops)}`).toHaveLength(1)
-    })
+        expect(hasReachedNextField, `Screen-reader stops: ${JSON.stringify(selectStops)}`).toBe(
+          true,
+        )
+        expect(selectStops, `Screen-reader stops: ${JSON.stringify(selectStops)}`).toHaveLength(1)
+      },
+    )
 
-    test('should move the screen-reader cursor into every shared popup', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3697
-      // PYLD-3701
-      await page.goto(`${serverURL}/admin`)
-      await openNav(page)
-      await expectPopupCursorToMove({
-        expectedItem: /account|preferences|logout/i,
-        screenReader,
-        trigger: page.locator('.user-menu__trigger'),
-      })
+    test(
+      'should move the screen-reader cursor into every shared popup',
+      { tag: ['@document-editing'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3697
+        // PYLD-3701
+        await page.goto(`${serverURL}/admin`)
+        await openNav(page)
+        await expectPopupCursorToMove({
+          expectedItem: /account|preferences|logout/i,
+          screenReader,
+          trigger: page.locator('.user-menu__trigger'),
+        })
 
-      await gotoCreatePost({ page, postsURL })
-      await expectPopupCursorToMove({
-        expectedItem: /English|Spanish/i,
-        screenReader,
-        trigger: page.locator('.localizer .popup__trigger-wrap button'),
-      })
+        await gotoCreatePost({ page, postsURL })
+        await expectPopupCursorToMove({
+          expectedItem: /English|Spanish/i,
+          screenReader,
+          trigger: page.locator('.localizer .popup__trigger-wrap button'),
+        })
 
-      await gotoPostsList({ page, postsURL })
-      await expectPopupCursorToMove({
-        expectedItem: /field|sort/i,
-        screenReader,
-        trigger: page.locator('#toggle-group-by'),
-      })
+        await gotoPostsList({ page, postsURL })
+        await expectPopupCursorToMove({
+          expectedItem: /field|sort/i,
+          screenReader,
+          trigger: page.locator('#toggle-group-by'),
+        })
 
-      await gotoPostsList({ page, postsURL })
-      await expectPopupCursorToMove({
-        expectedItem: /title|updated|created/i,
-        screenReader,
-        trigger: page.locator('.columns-button__button'),
-      })
+        await gotoPostsList({ page, postsURL })
+        await expectPopupCursorToMove({
+          expectedItem: /title|updated|created/i,
+          screenReader,
+          trigger: page.locator('.columns-button__button'),
+        })
 
-      await addTextBlock({ page, postsURL })
-      await expectPopupCursorToMove({
-        expectedItem: /duplicate|remove|paste/i,
-        screenReader,
-        trigger: page.locator('#field-layout .array-actions__button').first(),
-      })
-    })
+        await addTextBlock({ page, postsURL })
+        await expectPopupCursorToMove({
+          expectedItem: /duplicate|remove|paste/i,
+          screenReader,
+          trigger: page.locator('#field-layout .array-actions__button').first(),
+        })
+      },
+    )
 
-    test('should expose disabled row-menu actions to screen-reader navigation', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3745
-      await openFirstBlockActions({ page, postsURL })
-      const output = await navigateScreenReaderTo({
-        matches: /paste|replace/i,
-        screenReader,
-      })
+    test(
+      'should expose disabled row-menu actions to screen-reader navigation',
+      { tag: ['@admin-navigation'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3745
+        await openFirstBlockActions({ page, postsURL })
+        const output = await navigateScreenReaderTo({
+          matches: /paste|replace/i,
+          screenReader,
+        })
 
-      expect(output).toMatch(/dimmed|disabled|unavailable/i)
-    })
+        expect(output).toMatch(/dimmed|disabled|unavailable/i)
+      },
+    )
 
-    test('should keep the disabled Group by sort control in screen-reader navigation', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3784
-      await gotoPostsList({ page, postsURL })
-      await openGroupBy(page)
-      const output = await navigateScreenReaderTo({ matches: /sort/i, screenReader })
+    test(
+      'should keep the disabled Group by sort control in screen-reader navigation',
+      { tag: ['@admin-navigation'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3784
+        await gotoPostsList({ page, postsURL })
+        await openGroupBy(page)
+        const output = await navigateScreenReaderTo({ matches: /sort/i, screenReader })
 
-      expect(output).toMatch(/dimmed|disabled|unavailable/i)
-    })
+        expect(output).toMatch(/dimmed|disabled|unavailable/i)
+      },
+    )
   })
 
   test.describe('2.4.6 Headings and Labels (AA)', () => {
-    test('should announce Welcome and the signed-in account as a heading', async ({
-      page,
-      screenReader,
-    }) => {
-      await page.goto(`${serverURL}/admin`)
-      await expect(page.getByRole('heading', { name: /^Welcome, /, level: 1 })).toBeVisible()
+    test(
+      'should announce Welcome and the signed-in account as a heading',
+      { tag: ['@admin-navigation'] },
+      async ({ page, screenReader }) => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.getByRole('heading', { name: /^Welcome, /, level: 1 })).toBeVisible()
 
-      const output = await navigateScreenReaderTo({ matches: /Welcome, /i, screenReader })
+        const output = await navigateScreenReaderTo({ matches: /Welcome, /i, screenReader })
 
-      expect(output).toMatch(/heading/i)
-    })
+        expect(output).toMatch(/heading/i)
+      },
+    )
   })
 
   test.describe('3.2.2 On Input (A)', () => {
-    test('should announce automatic search and collection results', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3773
-      for (const isColumnSearch of [false, true]) {
-        await gotoPostsList({ page, postsURL })
-        if (isColumnSearch) {
-          await page.locator('.columns-button__button').click()
-        }
-        const search = isColumnSearch
-          ? page
-              .getByRole('dialog', { name: /columns/i })
-              .getByRole('textbox', { name: /search columns/i })
-          : page.locator('#search-filter-input')
-        const focusCapture = await captureScreenReader({
-          action: () => search.focus(),
-          screenReader,
-        })
-        const resultsCapture = await captureScreenReader({
-          action: async () => {
-            await search.fill('no-matching-accessibility-result')
-            if (isColumnSearch) {
-              await expect(
-                page.getByText('No matches found for this search', { exact: true }),
-              ).toBeVisible()
-            } else {
-              await expect(page.locator('tbody tr')).toHaveCount(0)
-              await expect(page.locator('.no-results__title')).toHaveText('No Results.')
-            }
-          },
-          screenReader,
-        })
+    test(
+      'should announce automatic search and collection results',
+      { tag: ['@collection-navigation', '@admin-navigation'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3773
+        for (const isColumnSearch of [false, true]) {
+          await gotoPostsList({ page, postsURL })
+          if (isColumnSearch) {
+            await page.locator('.columns-button__button').click()
+          }
+          const search = isColumnSearch
+            ? page
+                .getByRole('dialog', { name: /columns/i })
+                .getByRole('textbox', { name: /search columns/i })
+            : page.locator('#search-filter-input')
+          const focusCapture = await captureScreenReader({
+            action: () => search.focus(),
+            screenReader,
+          })
+          const resultsCapture = await captureScreenReader({
+            action: async () => {
+              await search.fill('no-matching-accessibility-result')
+              if (isColumnSearch) {
+                await expect(
+                  page.getByText('No matches found for this search', { exact: true }),
+                ).toBeVisible()
+              } else {
+                await expect(page.locator('tbody tr')).toHaveCount(0)
+                await expect(page.locator('.no-results__title')).toHaveText('No Results.')
+              }
+            },
+            screenReader,
+          })
 
-        await expect(search).toBeFocused()
-        expect
-          .soft(
-            (isColumnSearch &&
-              /automatic|as you type|while you type/i.test(focusCapture.spokenPhrase)) ||
-              /results found for.*(?:0|zero)|no (?:matches|results|posts)/i.test(
-                resultsCapture.spokenPhrase,
-              ),
-            JSON.stringify({
-              focus: focusCapture.spokenPhrase,
-              isColumnSearch,
-              results: resultsCapture.spokenPhrase,
-            }),
-          )
-          .toBe(true)
-      }
-    })
+          await expect(search).toBeFocused()
+          expect
+            .soft(
+              (isColumnSearch &&
+                /automatic|as you type|while you type/i.test(focusCapture.spokenPhrase)) ||
+                /results found for.*(?:0|zero)|no (?:matches|results|posts)/i.test(
+                  resultsCapture.spokenPhrase,
+                ),
+              JSON.stringify({
+                focus: focusCapture.spokenPhrase,
+                isColumnSearch,
+                results: resultsCapture.spokenPhrase,
+              }),
+            )
+            .toBe(true)
+        }
+      },
+    )
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
-    test('should announce rich-text upload and relationship filter options in NVDA browse mode', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3662
-      test.skip(
-        screenReader.name !== 'NVDA',
-        'The report concerns NVDA browse mode; VoiceOver is not equivalent evidence.',
-      )
-      for (const open of [openRichTextUploadDrawer, openRichTextRelationshipDrawer]) {
-        for (const index of [0, 1]) {
-          // Reopen for each control: Escape currently dismisses the containing drawer too.
-          const drawer = await open({ page, postsURL })
-          const comboboxes = await openDrawerFilters({
-            collectionLabel: open === openRichTextRelationshipDrawer ? 'Post' : undefined,
-            drawer,
-          })
-          const combobox = comboboxes.nth(index)
+    test(
+      'should announce LLM instruction tabs and the read-only editor',
+      { tag: ['@document-editing'] },
+      async ({ page, screenReader }) => {
+        const field = await openLLMInstructions({ page, serverURL })
+        const additionalTab = field.getByRole('tab', {
+          name: 'Additional instructions',
+          exact: true,
+        })
+        const systemTab = field.getByRole('tab', {
+          name: 'System instructions (read-only)',
+          exact: true,
+        })
 
-          await combobox.focus()
-          await combobox.press('ArrowDown')
-          const options = page.getByRole('option')
+        await field.getByRole('textbox').focus()
 
-          await expect(options.first()).toBeVisible()
-          const optionNames = await options.allTextContents()
-          const stops: string[] = []
+        const additionalOutput = await captureScreenReaderOutput({
+          action: () => additionalTab.focus(),
+          screenReader,
+        })
 
-          // The focused editable combobox enters NVDA focus mode. Switch to browse mode
-          // without Escape, which would also dismiss the option list.
-          await screenReader.perform(NVDAKeyCodeCommands.toggleBetweenBrowseAndFocusMode)
-          await expect(options.first()).toBeVisible()
-          // NVDA's next command sends Down Arrow through its browse cursor.
-          for (let step = 0; step < optionNames.length + 8; step++) {
-            await screenReader.next()
-            stops.push(await screenReader.itemText())
+        expect(additionalOutput).toMatch(/Additional instructions/i)
+        expect(additionalOutput).toMatch(/selected/i)
+        expect(additionalOutput).toMatch(/tab/i)
+        await page.keyboard.press('ArrowRight')
+        await expect(systemTab).toBeFocused()
+        await page.keyboard.press('Enter')
+        await expect(systemTab).toHaveAttribute('aria-selected', 'true')
+
+        const output = await captureScreenReaderOutput({
+          action: () => field.getByRole('textbox').focus(),
+          screenReader,
+        })
+
+        expect(output).toMatch(/System instructions/i)
+        expect(output).toMatch(/read.only/i)
+      },
+    )
+
+    test(
+      'should announce rich-text upload and relationship filter options in NVDA browse mode',
+      { tag: ['@media', '@document-editing', '@relationships'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3662
+        test.skip(
+          screenReader.name !== 'NVDA',
+          'The report concerns NVDA browse mode; VoiceOver is not equivalent evidence.',
+        )
+        for (const open of [openRichTextUploadDrawer, openRichTextRelationshipDrawer]) {
+          for (const index of [0, 1]) {
+            // Reopen for each control: Escape currently dismisses the containing drawer too.
+            const drawer = await open({ page, postsURL })
+            const comboboxes = await openDrawerFilters({
+              collectionLabel: open === openRichTextRelationshipDrawer ? 'Post' : undefined,
+              drawer,
+            })
+            const combobox = comboboxes.nth(index)
+
+            await combobox.focus()
+            await combobox.press('ArrowDown')
+            const options = page.getByRole('option')
+
+            await expect(options.first()).toBeVisible()
+            const optionNames = await options.allTextContents()
+            const stops: string[] = []
+
+            // The focused editable combobox enters NVDA focus mode. Switch to browse mode
+            // without Escape, which would also dismiss the option list.
+            await screenReader.perform(NVDAKeyCodeCommands.toggleBetweenBrowseAndFocusMode)
+            await expect(options.first()).toBeVisible()
+            // NVDA's next command sends Down Arrow through its browse cursor.
+            for (let step = 0; step < optionNames.length + 8; step++) {
+              await screenReader.next()
+              stops.push(await screenReader.itemText())
+            }
+            for (const name of optionNames) {
+              expect(
+                stops.some((stop) => stop.toLowerCase().includes(name.trim().toLowerCase())),
+              ).toBe(true)
+            }
+            expect(stops.join('\n')).not.toMatch(/\bblank\b/i)
           }
-          for (const name of optionNames) {
-            expect(
-              stops.some((stop) => stop.toLowerCase().includes(name.trim().toLowerCase())),
-            ).toBe(true)
-          }
-          expect(stops.join('\n')).not.toMatch(/\bblank\b/i)
         }
-      }
-    })
+      },
+    )
 
-    test('should announce the selected state of the active Theme option', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3645
-      await page.goto(`${serverURL}/admin`)
-      await openNav(page)
-      await page.locator('.user-menu__trigger').click()
-      await page.getByRole('button', { name: 'Theme' }).click()
-      const selectedTheme = page.locator('.popup-button-list__button--selected').last()
-      const output = await captureScreenReaderOutput({
-        action: () => selectedTheme.focus(),
-        screenReader,
-      })
+    test(
+      'should announce the selected state of the active Theme option',
+      { tag: ['@admin-navigation'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3645
+        await page.goto(`${serverURL}/admin`)
+        await openNav(page)
+        await page.locator('.user-menu__trigger').click()
+        await page.getByRole('button', { name: 'Theme' }).click()
+        const selectedTheme = page.locator('.popup-button-list__button--selected').last()
+        const output = await captureScreenReaderOutput({
+          action: () => selectedTheme.focus(),
+          screenReader,
+        })
 
-      expect(output).toMatch(/selected|checked/i)
-    })
+        expect(output).toMatch(/selected|checked/i)
+      },
+    )
 
-    test('should expose relationship option names in NVDA browse mode', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3656
-      // Requires manual confirmation with NVDA browse mode.
-      test.skip(
-        screenReader.name !== 'NVDA',
-        'The original report is specific to NVDA browse mode.',
-      )
-      await gotoCreatePost({ page, postsURL })
-      const combobox = page.locator('#field-relatedPost input[role="combobox"]')
-      await combobox.focus()
-      await combobox.press('ArrowDown')
-      await expect(page.locator('.rs__option').first()).toBeVisible()
+    test(
+      'should expose relationship option names in NVDA browse mode',
+      { tag: ['@document-editing', '@relationships'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3656
+        // Requires manual confirmation with NVDA browse mode.
+        test.skip(
+          screenReader.name !== 'NVDA',
+          'The original report is specific to NVDA browse mode.',
+        )
+        await gotoCreatePost({ page, postsURL })
+        const combobox = page.locator('#field-relatedPost input[role="combobox"]')
+        await combobox.focus()
+        await combobox.press('ArrowDown')
+        await expect(page.locator('.rs__option').first()).toBeVisible()
 
-      const output = await navigateScreenReaderTo({
-        matches: /Example post/i,
-        screenReader,
-      })
+        const output = await navigateScreenReaderTo({
+          matches: /Example post/i,
+          screenReader,
+        })
 
-      expect(output).not.toMatch(/blank/i)
-    })
+        expect(output).not.toMatch(/blank/i)
+      },
+    )
 
     test('should announce the selected locale and collapsed state on version pages', async ({
       page,
@@ -922,23 +1148,48 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       expect(output).toMatch(/dimmed|disabled|unavailable/i)
     })
 
-    test('should announce filter and bulk-edit options by name', async ({ page, screenReader }) => {
-      // PYLD-3752
-      const whereBuilder = await openPostsFilter({ page, postsURL })
-      const filterComboboxes = whereBuilder.locator('input[role="combobox"]')
+    test(
+      'should announce filter and bulk-edit options by name',
+      { tag: ['@admin-navigation'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3752
+        const whereBuilder = await openPostsFilter({ page, postsURL })
+        const filterComboboxes = whereBuilder.locator('input[role="combobox"]')
 
-      expect(await filterComboboxes.count()).toBeGreaterThan(0)
-      for (let index = 0; index < (await filterComboboxes.count()); index++) {
-        await filterComboboxes.nth(index).focus()
-        await filterComboboxes.nth(index).press('ArrowDown')
-        await filterComboboxes.nth(index).press('ArrowDown')
+        expect(await filterComboboxes.count()).toBeGreaterThan(0)
+        for (let index = 0; index < (await filterComboboxes.count()); index++) {
+          await filterComboboxes.nth(index).focus()
+          await filterComboboxes.nth(index).press('ArrowDown')
+          await filterComboboxes.nth(index).press('ArrowDown')
+          const optionName = (await page.locator('.rs__option--is-focused').innerText()).trim()
+          await page.keyboard.press('Escape')
+          await filterComboboxes.nth(index).focus()
+          const output = await captureScreenReaderOutput({
+            action: async () => {
+              await filterComboboxes.nth(index).press('ArrowDown')
+              await filterComboboxes.nth(index).press('ArrowDown')
+            },
+            screenReader,
+          })
+
+          expect(output.toLocaleLowerCase()).toContain(optionName.toLocaleLowerCase())
+          expect(output).not.toMatch(/\bblank\b/i)
+          expect(output).not.toContain('[object Object]')
+          await page.keyboard.press('Escape')
+        }
+
+        const fieldSelect = await openBulkEditFieldSelect({ page, postsURL })
+        const bulkEditCombobox = fieldSelect.locator('input[role="combobox"]')
+        await bulkEditCombobox.focus()
+        await bulkEditCombobox.press('ArrowDown')
+        await bulkEditCombobox.press('ArrowDown')
         const optionName = (await page.locator('.rs__option--is-focused').innerText()).trim()
         await page.keyboard.press('Escape')
-        await filterComboboxes.nth(index).focus()
+        await bulkEditCombobox.focus()
         const output = await captureScreenReaderOutput({
           action: async () => {
-            await filterComboboxes.nth(index).press('ArrowDown')
-            await filterComboboxes.nth(index).press('ArrowDown')
+            await bulkEditCombobox.press('ArrowDown')
+            await bulkEditCombobox.press('ArrowDown')
           },
           screenReader,
         })
@@ -946,29 +1197,8 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
         expect(output.toLocaleLowerCase()).toContain(optionName.toLocaleLowerCase())
         expect(output).not.toMatch(/\bblank\b/i)
         expect(output).not.toContain('[object Object]')
-        await page.keyboard.press('Escape')
-      }
-
-      const fieldSelect = await openBulkEditFieldSelect({ page, postsURL })
-      const bulkEditCombobox = fieldSelect.locator('input[role="combobox"]')
-      await bulkEditCombobox.focus()
-      await bulkEditCombobox.press('ArrowDown')
-      await bulkEditCombobox.press('ArrowDown')
-      const optionName = (await page.locator('.rs__option--is-focused').innerText()).trim()
-      await page.keyboard.press('Escape')
-      await bulkEditCombobox.focus()
-      const output = await captureScreenReaderOutput({
-        action: async () => {
-          await bulkEditCombobox.press('ArrowDown')
-          await bulkEditCombobox.press('ArrowDown')
-        },
-        screenReader,
-      })
-
-      expect(output.toLocaleLowerCase()).toContain(optionName.toLocaleLowerCase())
-      expect(output).not.toMatch(/\bblank\b/i)
-      expect(output).not.toContain('[object Object]')
-    })
+      },
+    )
 
     test('should announce the selected per-page option on the versions table', async ({
       page,
@@ -986,126 +1216,314 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       expect(output).toMatch(/checked|selected/i)
     })
 
-    test('should announce the selected live-preview zoom option', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3723
-      await openLivePreview({ page, postsURL, serverURL })
-      await page.locator('.live-preview-toolbar-controls__zoom button').click()
-      const selected = page.locator('.popup-button-list__button--selected').last()
-      const output = await captureScreenReaderOutput({
-        action: () => selected.focus(),
-        screenReader,
-      })
+    test(
+      'should announce the selected live-preview zoom option',
+      { tag: ['@document-editing'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3723
+        await openLivePreview({ page, postsURL, serverURL })
+        await page.locator('.live-preview-toolbar-controls__zoom button').click()
+        const selected = page.locator('.popup-button-list__button--selected').last()
+        const output = await captureScreenReaderOutput({
+          action: () => selected.focus(),
+          screenReader,
+        })
 
-      expect(output).toMatch(/checked|selected/i)
-    })
+        expect(output).toMatch(/checked|selected/i)
+      },
+    )
 
-    test('should announce the live-preview zoom name and collapsed state', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3725
-      await openLivePreview({ page, postsURL, serverURL })
-      const zoom = page.locator('.live-preview-toolbar-controls__zoom button')
-      const output = await captureScreenReaderOutput({
-        action: () => zoom.focus(),
-        screenReader,
-      })
+    test(
+      'should announce the live-preview zoom name and collapsed state',
+      { tag: ['@document-editing'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3725
+        await openLivePreview({ page, postsURL, serverURL })
+        const zoom = page.locator('.live-preview-toolbar-controls__zoom button')
+        const output = await captureScreenReaderOutput({
+          action: () => zoom.focus(),
+          screenReader,
+        })
 
-      expect(output).toMatch(/zoom/i)
-      expect(output).toMatch(/collapsed/i)
-    })
+        expect(output).toMatch(/zoom/i)
+        expect(output).toMatch(/collapsed/i)
+      },
+    )
 
-    test('should announce the selected state of the active Add Blocks option', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3623
-      // PYLD-3735
-      await gotoCreatePost({ page, postsURL })
-      await page.locator('#field-layout > .blocks-field__drawer-toggler').click()
-      const option = page.locator('button.thumbnail-card[title="Text block"]')
-      const output = await captureScreenReaderOutput({
-        action: () => option.click(),
-        screenReader,
-      })
+    test(
+      'should announce the selected state of the active Add Blocks option',
+      { tag: ['@document-editing'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3623
+        // PYLD-3735
+        await gotoCreatePost({ page, postsURL })
+        await page.locator('#field-layout > .blocks-field__drawer-toggler').click()
+        const option = page.locator('button.thumbnail-card[title="Text block"]')
+        const output = await captureScreenReaderOutput({
+          action: () => option.click(),
+          screenReader,
+        })
 
-      expect(output).toMatch(/Text block/i)
-      expect(output).toMatch(/checked|selected/i)
-    })
+        expect(output).toMatch(/Text block/i)
+        expect(output).toMatch(/checked|selected/i)
+      },
+    )
   })
   test.describe('4.1.3 Status Messages (AA)', () => {
-    test('should announce table search result changes without moving focus', async ({
+    test(
+      'should announce a successful document save without moving the screen-reader cursor',
+      { tag: ['@a11y-workflow', '@document-editing'] },
+      async ({ page, screenReader }) => {
+        await withWorkflowPost({
+          action: async ({ id, title }) => {
+            const subtitle = page.getByLabel('Subtitle', { exact: true })
+            const updatedValue = `${title} spoken save`
+
+            await subtitle.fill(updatedValue)
+            await navigateScreenReaderTo({ matches: /Subtitle/i, screenReader })
+            const cursorBefore = (await screenReader.itemText()).replace(/\s+/g, ' ').trim()
+
+            expect(cursorBefore).toMatch(/Subtitle/i)
+            const capture = await captureScreenReader({
+              action: async () => {
+                const saveShortcut = await page.evaluate(() =>
+                  navigator.userAgent.includes('Mac OS X') ? 'Meta+s' : 'Control+s',
+                )
+
+                await page.keyboard.press(saveShortcut)
+                await expect(
+                  page.locator('[data-sonner-toast]').filter({ hasText: /successfully/i }),
+                ).toBeVisible()
+                await expectPersistedWorkflowPost({
+                  id,
+                  draft: true,
+                  page,
+                  serverURL,
+                  subtitle: updatedValue,
+                  title,
+                })
+              },
+              screenReader,
+            })
+
+            expect(capture.spokenPhrase).toMatch(
+              /(?:updated|saved).*successfully|successfully.*(?:updated|saved)/i,
+            )
+            expect((await screenReader.itemText()).replace(/\s+/g, ' ').trim()).toBe(cursorBefore)
+            await expect(subtitle).toBeFocused()
+            await page.reload()
+            await expect(subtitle).toHaveValue(updatedValue)
+          },
+          page,
+          postsURL,
+          serverURL,
+        })
+      },
+    )
+
+    test('should announce both rapid toast messages', async ({ page, screenReader }) => {
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await screenReader.navigateToWebContent()
+      const capture = await captureScreenReader({
+        action: async () => {
+          await page.getByRole('button', { name: 'Show rapid toasts' }).click()
+          await expect(
+            page.locator('[data-sonner-toast]').filter({ hasText: 'Second rapid notification' }),
+          ).toHaveText('Second rapid notification')
+        },
+        screenReader,
+      })
+
+      expect(capture.spokenPhrase).toMatch(/First rapid notification/i)
+      expect(capture.spokenPhrase).toMatch(/Second rapid notification/i)
+      expect(capture.spokenPhrase).not.toMatch(/close toast/i)
+    })
+
+    test('should announce accessible names in custom toast content', async ({
       page,
       screenReader,
     }) => {
-      // PYLD-3696
-      test.setTimeout(60000)
-      await gotoPostsList({ page, postsURL })
-      const search = page.getByRole('textbox', { name: /search/i }).first()
+      await page.goto(`${postsURL.admin}/status-messages`)
+      await screenReader.navigateToWebContent()
+      const capture = await captureScreenReader({
+        action: () => page.getByRole('button', { name: 'Show custom toast' }).click(),
+        screenReader,
+      })
 
-      await search.focus()
-      for (const { count, query, speech } of [
-        {
-          count: 1,
-          query: 'Example post two',
-          speech: /results found for.*(?:1|one)/i,
-        },
-        {
-          count: 1,
-          query: 'Example post three',
-          speech: /results found for.*(?:1|one)/i,
-        },
-        {
-          count: 0,
-          query: 'no-such-accessibility-post',
-          speech: /results found for.*(?:0|zero)/i,
-        },
-      ]) {
+      expect(capture.spokenPhrase).toMatch(/Custom notification/i)
+      expect(capture.spokenPhrase).toMatch(/Upload complete/i)
+      expect(capture.spokenPhrase).toMatch(/Retry upload/i)
+      expect(capture.spokenPhrase).toMatch(/View details/i)
+    })
+
+    test(
+      'should announce the unsaved Copy to locale toast without its close button',
+      { tag: ['@document-editing'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3669
+        await gotoFirstPost({ page, postsURL, serverURL })
+        await screenReader.navigateToWebContent()
+        await page.locator('#field-title').fill('Unsaved toast announcement regression')
+        await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
         const capture = await captureScreenReader({
           action: async () => {
-            await search.fill(query)
-            await expect(page.locator('tbody tr')).toHaveCount(count)
-            await expect(page.getByRole('status').filter({ hasText: query })).toContainText(
-              String(count),
+            await page.locator('#copy-locale-data__button').click()
+            await expect(
+              page.locator('[data-sonner-toast]').filter({ hasText: /unsaved/i }),
+            ).toBeVisible()
+          },
+          screenReader,
+        })
+
+        expect(capture.spokenPhrase).toMatch(/unsaved/i)
+        expect(capture.spokenPhrase).not.toMatch(/close toast/i)
+      },
+    )
+
+    test(
+      'should announce the trash toast and dismiss it after the default timeout',
+      { tag: ['@trash'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3580: six seconds is extra reading time, not virtual-cursor persistence.
+        const apiURL = formatAdminURL({ apiRoute: '/api', path: '/posts', serverURL })
+        const title = `Toast cursor persistence regression ${randomUUID()}`
+        const response = await page.request.post(apiURL, {
+          data: { title },
+        })
+        expect(response.ok()).toBe(true)
+        const { doc } = await response.json()
+
+        try {
+          await gotoPostsList({ page, postsURL })
+          const row = page.locator('tbody tr').filter({ hasText: title })
+          await row.locator('.cell-_select input').check()
+          await page.locator('.list-selection__button[aria-label="Delete"]').click()
+          await screenReader.navigateToWebContent()
+          const capture = await captureScreenReader({
+            action: () =>
+              page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click(),
+            screenReader,
+          })
+          expect(capture.spokenPhrase).toMatch(/moved to trash/i)
+          await page.mouse.move(0, 0)
+          // Real elapsed time must exceed the configured timeout; browse focus does not pause it.
+          await page.waitForTimeout(7000)
+          await expect(
+            page.locator('[data-sonner-toast]').filter({ hasText: /moved to trash/i }),
+          ).toHaveCount(0)
+          await expect(page.getByRole('status').filter({ hasText: /moved to trash/i })).toHaveCount(
+            0,
+          )
+        } finally {
+          const cleanup = await page.request.delete(`${apiURL}/${doc.id}?trash=true`)
+          expect(cleanup.ok()).toBe(true)
+        }
+      },
+    )
+
+    test('should announce global API depth changes while focus stays on the stepper', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3618
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/globals/menu/api', serverURL }),
+      )
+      const depth = page.getByRole('spinbutton', { name: 'Depth', exact: true })
+      await expect(depth).toBeVisible()
+      await screenReader.navigateToWebContent()
+      const initialDepth = Number(await depth.inputValue())
+      const field = page.locator('.field-type.number').filter({ has: depth })
+
+      for (const { name, value } of [
+        { name: 'Increment', value: initialDepth + 1 },
+        { name: 'Decrement', value: initialDepth },
+      ]) {
+        const stepper = field.getByRole('button', { name, exact: true })
+        await stepper.focus()
+        const capture = await captureScreenReader({
+          action: async () => {
+            await stepper.press('Enter')
+            await expect(depth).toHaveValue(String(value))
+          },
+          screenReader,
+        })
+        await expect(stepper).toBeFocused()
+        expect.soft(capture.spokenPhrase).toMatch(new RegExp(`\\b${value}\\b`))
+      }
+    })
+
+    test(
+      'should announce table search result changes without moving focus',
+      { tag: ['@collection-navigation', '@admin-navigation'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3696
+        test.setTimeout(60000)
+        await gotoPostsList({ page, postsURL })
+        const search = page.getByRole('textbox', { name: /search/i }).first()
+
+        await search.focus()
+        for (const { count, query, speech } of [
+          {
+            count: 1,
+            query: 'Example post two',
+            speech: /results found for.*(?:1|one)/i,
+          },
+          {
+            count: 1,
+            query: 'Example post three',
+            speech: /results found for.*(?:1|one)/i,
+          },
+          {
+            count: 0,
+            query: 'no-such-accessibility-post',
+            speech: /results found for.*(?:0|zero)/i,
+          },
+        ]) {
+          const capture = await captureScreenReader({
+            action: async () => {
+              await search.fill(query)
+              await expect(page.locator('tbody tr')).toHaveCount(count)
+              await expect(page.getByRole('status').filter({ hasText: query })).toContainText(
+                String(count),
+              )
+            },
+            screenReader,
+          })
+
+          await expect(search).toBeFocused()
+          expect(capture.spokenPhrase).toMatch(speech)
+        }
+      },
+    )
+
+    test(
+      'should announce navigation folder search results without moving focus',
+      { tag: ['@admin-navigation'] },
+      async ({ page, screenReader }) => {
+        // PYLD-3582
+        const sidebar = await openNavigationFolders({ page, serverURL })
+        const search = sidebar.getByRole('textbox')
+        const originalURL = page.url()
+
+        await search.fill('Accessibility child folder')
+        const capture = await captureScreenReader({
+          action: async () => {
+            await search.press('Enter')
+            await expect(sidebar.locator('.hierarchy-search-results__list')).toContainText(
+              'Accessibility child folder',
             )
           },
           screenReader,
         })
 
         await expect(search).toBeFocused()
-        expect(capture.spokenPhrase).toMatch(speech)
-      }
-    })
-
-    test('should announce navigation folder search results without moving focus', async ({
-      page,
-      screenReader,
-    }) => {
-      // PYLD-3582
-      const sidebar = await openNavigationFolders({ page, serverURL })
-      const search = sidebar.getByRole('textbox')
-      const originalURL = page.url()
-
-      await search.fill('Accessibility child folder')
-      const capture = await captureScreenReader({
-        action: async () => {
-          await search.press('Enter')
-          await expect(sidebar.locator('.hierarchy-search-results__list')).toContainText(
-            'Accessibility child folder',
-          )
-        },
-        screenReader,
-      })
-
-      await expect(search).toBeFocused()
-      await expect(page).toHaveURL(originalURL)
-      expect(capture.spokenPhrase).toMatch(
-        /(?:1|one)\s+(?:search\s+)?result|(?:1|one)\s+folder|found\s+(?:1|one)|showing\s+(?:1|one)\s+of\s+(?:1|one)/i,
-      )
-    })
+        await expect(page).toHaveURL(originalURL)
+        expect(capture.spokenPhrase).toMatch(
+          /(?:1|one)\s+(?:search\s+)?result|(?:1|one)\s+folder|found\s+(?:1|one)|showing\s+(?:1|one)\s+of\s+(?:1|one)/i,
+        )
+      },
+    )
   })
 })
 

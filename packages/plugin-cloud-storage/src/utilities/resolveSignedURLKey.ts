@@ -1,7 +1,12 @@
 import type { PayloadRequest } from 'payload'
 
 import { randomUUID } from 'node:crypto'
-import { createClientUploadReceipt, getSafeFileName } from 'payload/internal'
+import {
+  createClientUploadReceipt,
+  getOriginalFilename,
+  getSafeFileName,
+  incrementName,
+} from 'payload/internal'
 import { getSanitizedUploadFilename } from 'payload/shared'
 
 import type { UploadReference } from '../types.js'
@@ -9,6 +14,8 @@ import type { UploadReference } from '../types.js'
 import { buildUploadPrefix, buildUploadStoragePathData } from './buildStoragePathData.js'
 
 type Args = {
+  /** Signed into the receipt and returned to the upload handler as `uploadReference.adapterData`. */
+  adapterData?: Record<string, unknown>
   collectionPrefix?: string
   collectionSlug: string
   docPrefix?: string
@@ -35,6 +42,7 @@ type Args = {
  * beneath the configured collection prefix.
  */
 export async function resolveSignedURLKey({
+  adapterData,
   collectionPrefix = '',
   collectionSlug,
   docPrefix,
@@ -47,13 +55,17 @@ export async function resolveSignedURLKey({
   storageFilePath: string
   uploadReference: UploadReference
 }> {
-  // Sanitize with the same helper generateFileData uses for the DB filename so the storage key
-  // and doc.filename stay in sync (#16694).
-  const sanitizedFilename = await getSafeFileName({
-    collectionSlug,
-    desiredFilename: getSanitizedUploadFilename(filename),
-    req,
-  })
+  // The document stores the -original name, so check collisions against that name.
+  let sanitizedFilename = getSanitizedUploadFilename(filename)
+  let originalFilename = getOriginalFilename({ filename: sanitizedFilename })
+
+  while (
+    (await getSafeFileName({ collectionSlug, desiredFilename: originalFilename, req })) !==
+    originalFilename
+  ) {
+    sanitizedFilename = incrementName(sanitizedFilename)
+    originalFilename = getOriginalFilename({ filename: sanitizedFilename })
+  }
 
   const rawBaseDocPrefix = useCompositePrefixes ? docPrefix : docPrefix || collectionPrefix
   const { sanitizedDocPrefix } = buildUploadPrefix({
@@ -69,7 +81,7 @@ export async function resolveSignedURLKey({
   const { storageFilePath } = buildUploadStoragePathData({
     collectionPrefix,
     docPrefix: keyedDocPrefix,
-    filename: sanitizedFilename,
+    filename: originalFilename,
     useCompositePrefixes,
   })
 
@@ -78,6 +90,7 @@ export async function resolveSignedURLKey({
     prefix: sanitizedDocPrefix,
     signedReceipt: createClientUploadReceipt({
       _objectKey,
+      ...(adapterData !== undefined && { adapterData }),
       collectionSlug,
       filename: sanitizedFilename,
       filePrefix: sanitizedDocPrefix,

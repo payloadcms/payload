@@ -11,6 +11,7 @@ import {
   Forbidden,
   getFileByPath,
   NotFound,
+  restoreVersionOperationGlobal,
   saveVersion,
   ValidationError,
 } from 'payload'
@@ -19,7 +20,7 @@ import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -44,7 +45,10 @@ import {
   restoreAccessLocalizedCollectionSlug,
   restoreAccessNoVersionsGlobalSlug,
   secondaryAdminUserCollectionSlug,
+  simpleDraftGlobalSlug,
   versionCollectionSlug,
+  versionsDisabledCollectionSlug,
+  versionsDisabledGlobalSlug,
 } from './slugs.js'
 
 const collectionGraphQLOriginalTitle = 'autosave title'
@@ -56,6 +60,47 @@ const dirname = path.dirname(filename)
 
 const formatGraphQLID = ({ payload }: { payload: Payload }, id: number | string) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
+
+const seedGlobalSiblingLocales = async ({
+  slug,
+  payload,
+  title,
+}: {
+  payload: Payload
+  slug: typeof autoSaveGlobalSlug | typeof draftGlobalSlug
+  title: string
+}) => {
+  for (const locale of ['es', 'de']) {
+    await payload.updateGlobal({
+      slug,
+      data: { title: `${title} ${locale}` },
+      draft: true,
+      locale,
+      overrideAccess: true,
+    })
+  }
+}
+
+const seedDraftCollectionSiblingLocales = async ({
+  id,
+  payload,
+  title,
+}: {
+  id: number | string
+  payload: Payload
+  title: string
+}) => {
+  for (const locale of ['es', 'de']) {
+    await payload.update({
+      id,
+      collection: draftCollectionSlug,
+      data: { title: `${title} ${locale}` },
+      draft: true,
+      locale,
+      overrideAccess: true,
+    })
+  }
+}
 
 test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () => {
   let secondaryAdminUser: JsonObject
@@ -3216,7 +3261,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
   test.describe('Collections - GraphQL', () => {
     async function createAutoSavePostHelper(
-      { restClient }: { restClient: NextRESTClient },
+      { restClient }: { restClient: RESTClient },
       {
         description,
         title,
@@ -3247,7 +3292,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
     async function updateAutoSavePostHelper(
       { payload }: { payload: Payload },
-      { restClient }: { restClient: NextRESTClient },
+      { restClient }: { restClient: RESTClient },
       {
         id,
         title,
@@ -3278,7 +3323,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
     async function getVersionByIDHelper(
       { payload }: { payload: Payload },
-      { restClient }: { restClient: NextRESTClient },
+      { restClient }: { restClient: RESTClient },
       { id }: { id: number | string },
     ): Promise<JsonObject> {
       const query = `query {
@@ -3306,7 +3351,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
     async function getLatestVersionByParentIDHelper(
       { payload }: { payload: Payload },
-      { restClient }: { restClient: NextRESTClient },
+      { restClient }: { restClient: RESTClient },
       {
         parentID,
       }: {
@@ -3642,6 +3687,161 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
   })
 
+  test.describe.each(['collection', 'global'] as const)('Restore - %s', (entity) => {
+    const isGlobal = entity === 'global'
+
+    const cleanup = async ({ payload }: { payload: Payload }) => {
+      if (isGlobal) {
+        await cleanupGlobal({ globalSlug: localizedGlobalSlug, payload })
+      } else {
+        await cleanupDocuments({ collectionSlugs: [restoreAccessLocalizedCollectionSlug], payload })
+      }
+    }
+
+    test.beforeEach(cleanup)
+    test.afterEach(cleanup)
+
+    const createHistory = async ({ payload }: { payload: Payload }) => {
+      const data = { _status: 'published' as const, title: 'Historical' }
+      const created = isGlobal
+        ? await payload.updateGlobal({ slug: localizedGlobalSlug, data, overrideAccess: true })
+        : await payload.create({
+            collection: restoreAccessLocalizedCollectionSlug,
+            data,
+            overrideAccess: true,
+          })
+
+      const versions = isGlobal
+        ? await payload.findGlobalVersions({
+            slug: localizedGlobalSlug,
+            limit: 1,
+            overrideAccess: true,
+            sort: '-updatedAt',
+          })
+        : await payload.findVersions({
+            collection: restoreAccessLocalizedCollectionSlug,
+            limit: 1,
+            overrideAccess: true,
+            sort: '-updatedAt',
+            where: { parent: { equals: created.id } },
+          })
+
+      await wait(10)
+
+      const currentData = { _status: 'published' as const, title: 'Current' }
+
+      if (isGlobal) {
+        await payload.updateGlobal({
+          slug: localizedGlobalSlug,
+          data: currentData,
+          overrideAccess: true,
+        })
+      } else {
+        await payload.update({
+          id: created.id,
+          collection: restoreAccessLocalizedCollectionSlug,
+          data: currentData,
+          overrideAccess: true,
+        })
+      }
+
+      return { id: created.id, versionID: versions.docs[0]!.id }
+    }
+
+    test('should normalize localized statuses when restoring a draft', async ({
+      payload,
+      restClient,
+    }) => {
+      const { id, versionID } = await createHistory({ payload })
+      const findLive = () =>
+        isGlobal
+          ? payload.db.findGlobal({ slug: localizedGlobalSlug })
+          : payload.db.findOne({
+              collection: restoreAccessLocalizedCollectionSlug,
+              where: { id: { equals: id } },
+            })
+      const liveBefore = await findLive()
+
+      await restClient.login({ slug: 'users', credentials: devUser })
+
+      const basePath = isGlobal
+        ? `/globals/${localizedGlobalSlug}`
+        : `/${restoreAccessLocalizedCollectionSlug}`
+      const query = qs.stringify({ draft: true }, { addQueryPrefix: true })
+      const response = await restClient.POST(`${basePath}/versions/${versionID}${query}`)
+
+      expect(response.status).toBe(200)
+
+      const restored = isGlobal
+        ? await payload.findGlobal({
+            slug: localizedGlobalSlug,
+            draft: true,
+            locale: 'all',
+            overrideAccess: true,
+          })
+        : await payload.findByID({
+            id,
+            collection: restoreAccessLocalizedCollectionSlug,
+            draft: true,
+            locale: 'all',
+            overrideAccess: true,
+          })
+
+      expect(restored._status).toEqual({ de: 'draft', en: 'draft', es: 'draft' })
+      expect(await findLive()).toEqual(liveBefore)
+    })
+
+    test('should enforce the version limit when restoring a version', async ({ payload }) => {
+      const config = isGlobal
+        ? payload.globals.config.find(({ slug }) => slug === localizedGlobalSlug)!
+        : payload.collections[restoreAccessLocalizedCollectionSlug].config
+      const previousVersions = config.versions!
+
+      config.versions = { ...previousVersions, [isGlobal ? 'max' : 'maxPerDoc']: 2 }
+
+      try {
+        const { id, versionID } = await createHistory({ payload })
+
+        await wait(10)
+
+        if (isGlobal) {
+          await payload.restoreGlobalVersion({
+            id: versionID,
+            slug: localizedGlobalSlug,
+            overrideAccess: true,
+          })
+        } else {
+          await payload.restoreVersion({
+            id: versionID,
+            collection: restoreAccessLocalizedCollectionSlug,
+            overrideAccess: true,
+          })
+        }
+
+        const versions = isGlobal
+          ? await payload.findGlobalVersions({
+              slug: localizedGlobalSlug,
+              pagination: false,
+              overrideAccess: true,
+              sort: '-updatedAt',
+            })
+          : await payload.findVersions({
+              collection: restoreAccessLocalizedCollectionSlug,
+              pagination: false,
+              overrideAccess: true,
+              sort: '-updatedAt',
+              where: { parent: { equals: id } },
+            })
+
+        expect(versions.totalDocs).toBe(2)
+        expect(versions.docs.map(({ version }) => version.title)).toEqual(['Historical', 'Current'])
+        expect(versions.docs.map(({ id }) => id)).not.toContain(versionID)
+      } finally {
+        config.versions = previousVersions
+      }
+    })
+  })
+
   test.describe('Globals - Local', () => {
     let globalVersionID: number | string
     test.beforeEach(async ({ payload }) => {
@@ -3710,6 +3910,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       test('should have different createdAt in a new version while the same version.createdAt', async ({
         payload,
       }) => {
+        await seedGlobalSiblingLocales({
+          slug: autoSaveGlobalSlug,
+          payload,
+          title: 'Initial global title',
+        })
+
         const doc = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
           data: { title: 'asd' },
@@ -3982,8 +4188,18 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
 
     test.describe('Restore', () => {
+      test.afterEach(async ({ payload }) => {
+        await payload.db.deleteVersions({ globalSlug: simpleDraftGlobalSlug, where: {} })
+      })
+
       test('should allow a version to be restored', async ({ payload }) => {
         const title2 = 'Another updated title in EN'
+
+        await seedGlobalSiblingLocales({
+          slug: autoSaveGlobalSlug,
+          payload,
+          title: 'Restorable global title',
+        })
 
         const updatedGlobal = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
@@ -4015,7 +4231,8 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           overrideAccess: true,
         })
 
-        expect(restore.version.title).toBeDefined()
+        expect(restore.title).toBe(versions.docs[1]!.version.title)
+        expect(restore.globalType).toBe(autoSaveGlobalSlug)
 
         const restoredGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
@@ -4023,7 +4240,57 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           overrideAccess: true,
         })
 
-        expect(restoredGlobal.title).toBe(restore.version.title.en)
+        expect(restoredGlobal.title).toBe(restore.title)
+      })
+      test('should restore a never-published global as a draft without creating a live global', async ({
+        payload,
+        restClient,
+      }) => {
+        await payload.updateGlobal({
+          slug: simpleDraftGlobalSlug,
+          data: { title: 'Historical' },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        const { docs } = await payload.findGlobalVersions({
+          slug: simpleDraftGlobalSlug,
+          limit: 1,
+          overrideAccess: true,
+          sort: '-updatedAt',
+        })
+
+        await payload.updateGlobal({
+          slug: simpleDraftGlobalSlug,
+          data: { title: 'Current' },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        const liveGlobalBeforeRestore = await payload.db.findGlobal({ slug: simpleDraftGlobalSlug })
+
+        expect(Object.keys(liveGlobalBeforeRestore ?? {})).toHaveLength(0)
+
+        await restClient.login({ slug: 'users', credentials: devUser })
+
+        const response = await restClient.POST(
+          `/globals/${simpleDraftGlobalSlug}/versions/${docs[0]!.id}?draft=true`,
+        )
+
+        expect(response.status).toBe(200)
+
+        const restoredDraft = await payload.findGlobal({
+          slug: simpleDraftGlobalSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+
+        expect(restoredDraft.title).toBe('Historical')
+        expect(restoredDraft._status).toBe('draft')
+
+        const liveGlobalAfterRestore = await payload.db.findGlobal({ slug: simpleDraftGlobalSlug })
+
+        expect(Object.keys(liveGlobalAfterRestore ?? {})).toHaveLength(0)
       })
     })
 
@@ -4194,7 +4461,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           user,
         })
 
-        expect(restored.version.title).toBe('historical')
+        expect(restored.title).toBe('historical')
       })
 
       test('should throw Forbidden when update access returns false', async ({ payload }) => {
@@ -4237,7 +4504,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           user,
         })
 
-        expect(restored.version.title).toBe('historical')
+        expect(restored.title).toBe('historical')
       })
 
       test('should throw Forbidden when the current global does not match the update Where constraint', async ({
@@ -4443,6 +4710,111 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         ).rejects.toThrow(Forbidden)
       })
 
+      test('should authorize the draft intent when restoring a published global as a draft', async ({
+        payload,
+        restClient,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'Historical' },
+          overrideAccess: true,
+        })
+
+        const { docs } = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          limit: 1,
+          overrideAccess: true,
+          sort: '-updatedAt',
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'Current' },
+          overrideAccess: true,
+        })
+
+        const publishedBefore = await payload.db.findGlobal({ slug: restoreAccessGlobalSlug })
+        const { user } = await restClient.login({ slug: 'users', credentials: devUser })
+        const req = await createPayloadRequest({
+          context: { restoreAccessMode: 'publishGate' },
+          payload,
+          user: { ...user, collection: 'users' },
+        })
+
+        await restoreVersionOperationGlobal({
+          id: docs[0]!.id,
+          draft: true,
+          globalConfig: payload.globals.config.find(
+            ({ slug }) => slug === restoreAccessGlobalSlug,
+          )!,
+          overrideAccess: false,
+          req,
+        })
+
+        const restoredDraft = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+
+        expect(restoredDraft.title).toBe('Historical')
+        expect(restoredDraft._status).toBe('draft')
+        expect(await payload.db.findGlobal({ slug: restoreAccessGlobalSlug })).toEqual(
+          publishedBefore,
+        )
+
+        req.context.restoreAccessMode = 'unpublishGate'
+
+        await expect(
+          restoreVersionOperationGlobal({
+            id: docs[0]!.id,
+            draft: true,
+            globalConfig: payload.globals.config.find(
+              ({ slug }) => slug === restoreAccessGlobalSlug,
+            )!,
+            overrideAccess: false,
+            req,
+          }),
+        ).rejects.toThrow(Forbidden)
+      })
+
+      test('should reject a global draft restore outside the update access constraint', async ({
+        payload,
+        restClient,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'Historical' },
+          overrideAccess: true,
+        })
+
+        const { docs } = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          limit: 1,
+          overrideAccess: true,
+          sort: '-updatedAt',
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'Current' },
+          overrideAccess: true,
+        })
+
+        const publishedBefore = await payload.db.findGlobal({ slug: restoreAccessGlobalSlug })
+
+        await restClient.login({ slug: 'users', credentials: devUser })
+
+        const response = await restClient.POST(
+          `/globals/${restoreAccessGlobalSlug}/versions/${docs[0]!.id}?draft=true`,
+        )
+
+        expect(response.status).toBe(403)
+        expect(await payload.db.findGlobal({ slug: restoreAccessGlobalSlug })).toEqual(
+          publishedBefore,
+        )
+      })
+
       test('should deny restoring a published global version when update access denies publishing', async ({
         payload,
       }) => {
@@ -4555,6 +4927,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       test('should allow a draft to be patched', async ({ payload }) => {
         const originalTitle = 'Here is a published global'
 
+        await seedGlobalSiblingLocales({
+          slug: autoSaveGlobalSlug,
+          payload,
+          title: originalTitle,
+        })
+
         await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
           data: {
@@ -4637,10 +5015,92 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
   })
 
+  test.describe('Globals - versions disabled', () => {
+    test('should throw NotFound when finding versions of a global without versions', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.findGlobalVersions({
+          slug: versionsDisabledGlobalSlug as any,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow(NotFound)
+    })
+
+    test('should throw NotFound when finding a version by ID of a global without versions', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.findGlobalVersionByID({
+          id: '1',
+          slug: versionsDisabledGlobalSlug as any,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow(NotFound)
+    })
+
+    test('should respond with 404 instead of 500 for REST versions of a global without versions', async ({
+      restClient,
+    }) => {
+      const response = await restClient.GET(`/globals/${versionsDisabledGlobalSlug}/versions`)
+
+      expect(response.status).toBe(404)
+    })
+
+    test('should respond with 404 instead of 500 for a REST version by ID of a global without versions', async ({
+      restClient,
+    }) => {
+      const response = await restClient.GET(`/globals/${versionsDisabledGlobalSlug}/versions/1`)
+
+      expect(response.status).toBe(404)
+    })
+  })
+
+  test.describe('Collections - versions disabled', () => {
+    test('should throw NotFound when finding versions of a collection without versions', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.findVersions({
+          collection: versionsDisabledCollectionSlug as any,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow(NotFound)
+    })
+
+    test('should throw NotFound when finding a version by ID of a collection without versions', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.findVersionByID({
+          id: '1',
+          collection: versionsDisabledCollectionSlug as any,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow(NotFound)
+    })
+
+    test('should respond with 404 instead of 500 for REST versions of a collection without versions', async ({
+      restClient,
+    }) => {
+      const response = await restClient.GET(`/${versionsDisabledCollectionSlug}/versions`)
+
+      expect(response.status).toBe(404)
+    })
+
+    test('should respond with 404 instead of 500 for a REST version by ID of a collection without versions', async ({
+      restClient,
+    }) => {
+      const response = await restClient.GET(`/${versionsDisabledCollectionSlug}/versions/1`)
+
+      expect(response.status).toBe(404)
+    })
+  })
+
   test.describe('Globals - GraphQL', () => {
     let autosaveGlobalVersionID: number | string
 
-    async function createAndSetVersionID({ restClient }: { restClient: NextRESTClient }) {
+    async function createAndSetVersionID({ restClient }: { restClient: RESTClient }) {
       const update = `mutation {
         updateAutosaveGlobal(draft: true, data: {
           title: "${globalGraphQLOriginalTitle}"
@@ -4747,8 +5207,15 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           }
         }`
 
-        await restClient.GRAPHQL_POST({
-          body: JSON.stringify({ query: restore }),
+        const { data: restoredData, errors } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query: restore }),
+          })
+          .then((res) => res.json())
+
+        expect(errors).toBeUndefined()
+        expect(restoredData.restoreVersionAutosaveGlobal).toEqual({
+          title: globalGraphQLOriginalTitle,
         })
 
         const query = `query {
@@ -4781,6 +5248,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       expect(draft._status).toStrictEqual('draft')
 
+      await seedDraftCollectionSiblingLocales({
+        id: draft.id,
+        payload,
+        title: 'my doc to publish in the future',
+      })
+
       const currentDate = new Date()
 
       await payload.jobs.queue({
@@ -4790,9 +5263,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: draft.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)
@@ -4836,14 +5309,15 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             relationTo: draftCollectionSlug,
             value: draft.id,
           },
+          locale: 'en',
           user: {
             relationTo: 'users',
             value: user.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)
@@ -4889,6 +5363,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           relationTo: draftCollectionSlug,
           value: draft.id,
         },
+        localeToPublish: 'en',
         req,
         user: secondaryAdminUser,
       })
@@ -4950,6 +5425,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           relationTo: draftCollectionSlug,
           value: draft.id,
         },
+        localeToPublish: 'en',
         req,
         user: secondaryAdminUser,
       })
@@ -5002,11 +5478,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             relationTo: draftCollectionSlug,
             value: draft.id,
           },
+          locale: 'en',
           user: user.id,
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       const queuedJob = (
@@ -5058,14 +5535,15 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             relationTo: draftCollectionSlug,
             value: draft.id,
           },
+          locale: 'en',
           user: {
             relationTo: 'users',
             value: 0,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       const queuedJob = (
@@ -5121,9 +5599,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: published.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)
@@ -5167,9 +5645,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: draft.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await payload.delete({
@@ -5221,9 +5699,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             value: draft.id,
           },
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await payload.delete({
@@ -5263,15 +5741,21 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       expect(draft._status).toStrictEqual('draft')
 
+      await seedGlobalSiblingLocales({
+        slug: draftGlobalSlug,
+        payload,
+        title: 'i will publish',
+      })
+
       const currentDate = new Date()
 
       await payload.jobs.queue({
         input: {
           global: draftGlobalSlug,
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)
@@ -5306,9 +5790,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           type: 'unpublish',
           global: draftGlobalSlug,
         },
+        overrideAccess: true,
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
-        overrideAccess: true,
       })
 
       await wait(4000)
@@ -5524,6 +6008,68 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           collectionSlugs: ['payload-jobs', draftCollectionSlug],
           payload,
         })
+      })
+
+      test('should not queue a new job when deleting a scheduled publish event', async ({
+        payload,
+      }) => {
+        const req = await createPayloadRequest({ payload, user })
+
+        await schedulePublishHandler({
+          type: 'publish',
+          date: new Date(Date.now() + 60_000),
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draftDoc.id,
+          },
+          locale: 'all',
+          req,
+          user,
+        })
+
+        const { docs: jobsBeforeDelete } = await payload.find({
+          collection: 'payload-jobs',
+          overrideAccess: true,
+          where: {
+            taskSlug: {
+              equals: 'schedulePublish',
+            },
+          },
+        })
+
+        const scheduledJob = jobsBeforeDelete.find(
+          (job) => (job.input as JsonObject)?.doc?.value === draftDoc.id,
+        )
+
+        expect(scheduledJob).toBeDefined()
+
+        const result = await schedulePublishHandler({
+          deleteID: scheduledJob!.id,
+          req,
+          user,
+        })
+
+        const { docs: newJobs } = await payload.find({
+          collection: 'payload-jobs',
+          overrideAccess: true,
+          where: {
+            and: [
+              {
+                taskSlug: {
+                  equals: 'schedulePublish',
+                },
+              },
+              {
+                id: {
+                  not_in: jobsBeforeDelete.map((job) => job.id),
+                },
+              },
+            ],
+          },
+        })
+
+        expect(result).not.toHaveProperty('error')
+        expect(newJobs).toEqual([])
       })
 
       test('should not delete a job that is not a scheduled publish', async ({ payload }) => {

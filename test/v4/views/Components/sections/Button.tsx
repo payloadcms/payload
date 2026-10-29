@@ -2,8 +2,7 @@
 
 import type { Props as ButtonProps } from '@payloadcms/ui/elements/Button'
 
-import { Button } from '@payloadcms/ui'
-import { PlusIcon } from '@payloadcms/ui/icons/Plus'
+import { Button, PlusIcon } from '@payloadcms/ui'
 import React from 'react'
 
 import { Section } from '../shared.js'

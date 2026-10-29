@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import type { AdvisoryHit } from '../types'
 import type { ConsumerPackage } from './packages'
 
-import { mergeHits, parseAuditReport, toHits } from './auditReport'
+import { assertAuditCompleted, mergeHits, parseAuditReport, toHits } from './auditReport'
 import { runPnpm, type RunPnpm } from './runPnpm'
 
 const DEFAULT_CONCURRENCY = 4
@@ -81,7 +81,11 @@ const auditPackage = async ({
       args: ['audit', '--prod', '--json', '--ignore-registry-errors'],
       cwd: dir,
     })
-    const report = parseAuditReport(result.stdout)
+    const report = assertAuditCompleted({
+      report: parseAuditReport(result.stdout),
+      result,
+      target: pkg.name,
+    })
     return toHits({ originPackage: pkg.shortName, report })
   } finally {
     await rm(dir, { force: true, recursive: true })

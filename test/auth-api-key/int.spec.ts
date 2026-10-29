@@ -70,7 +70,7 @@ test.suite('API key reveal access', { config: './config.ts' }, () => {
 
       const storedUser = await payload.db.findOne({
         collection: apiKeysSlug,
-        req: {} as never,
+        req: {},
         where: { id: { equals: user.id } },
       })
 
@@ -91,13 +91,13 @@ test.suite('API key reveal access', { config: './config.ts' }, () => {
     await payload.update({
       id: user.id,
       collection: apiKeysSlug,
-      data: { apiKey: undefined } as never,
+      data: { apiKey: undefined },
       overrideAccess: true,
     })
 
     const storedUser = await payload.db.findOne({
       collection: apiKeysSlug,
-      req: {} as never,
+      req: {},
       where: { id: { equals: user.id } },
     })
 
@@ -211,12 +211,12 @@ test.suite('API key reveal access', { config: './config.ts' }, () => {
     const apiKey = uuid()
     const matching = await payload.create({
       collection: tenantRevealableKeysSlug,
-      data: { apiKey, tenant: 'match' } as never,
+      data: { apiKey, tenant: 'match' },
       overrideAccess: true,
     })
     const mismatched = await payload.create({
       collection: tenantRevealableKeysSlug,
-      data: { apiKey: uuid(), tenant: 'other' } as never,
+      data: { apiKey: uuid(), tenant: 'other' },
       overrideAccess: true,
     })
 

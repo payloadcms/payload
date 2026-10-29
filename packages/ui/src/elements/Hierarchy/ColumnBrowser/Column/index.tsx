@@ -50,8 +50,8 @@ export const Column: React.FC<ColumnProps> = ({
   )
 
   const handleCreateNew = useCallback(() => {
-    onCreateNew({ parentId })
-  }, [onCreateNew, parentId])
+    onCreateNew({ parentId, path: pathToColumn })
+  }, [onCreateNew, parentId, pathToColumn])
 
   return (
     <div className={baseClass}>

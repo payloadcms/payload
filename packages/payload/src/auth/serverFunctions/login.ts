@@ -86,5 +86,5 @@ export async function login<TSlug extends AuthCollectionSlug>({
 
   await applyAuthCookie({ cookie, serverAdapter })
 
-  return result as LoginResult<TSlug>
+  return result
 }

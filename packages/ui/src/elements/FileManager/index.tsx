@@ -22,6 +22,7 @@ import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
+import { getEditorFileSrc } from '../Upload/getEditorFileSrc.js'
 import { editDrawerSlug, sizePreviewSlug } from '../Upload/index.js'
 import { UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
 import { usePasteFromClipboard } from '../Upload/usePasteFromClipboard.js'
@@ -108,14 +109,14 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
   const imageCacheTag = uploadConfig?.cacheTags && data?.updatedAt
 
-  const hasImageSizes = uploadConfig?.imageSizes?.length > 0
-  const hasResizeOptions = Boolean(uploadConfig?.resizeOptions)
+  const hasVariants = uploadConfig?.variants?.length > 0
+  const hasImageAdjustments = Boolean(uploadConfig?.hasImageAdjustments)
   const focalPointEnabled = uploadConfig?.focalPoint === true
   const { crop: showCrop = true, focalPoint = true } = uploadConfig
-  const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions || focalPointEnabled)
+  const showFocalPoint = focalPoint && (hasVariants || hasImageAdjustments || focalPointEnabled)
 
   const selectedSizeData = selectedSize
-    ? (data?.sizes?.[selectedSize] as Record<string, unknown>)
+    ? (data?.variants?.[selectedSize] as Record<string, unknown>)
     : null
   const sidePanelFileSrc = (selectedSizeData?.url ?? data?.thumbnailURL ?? data?.url ?? null) as
     | null
@@ -143,8 +144,11 @@ export const FileManager: React.FC<FileManagerProps> = ({
         toast.error(t('error:invalidFileType'))
         return
       }
-      if (isNewFile && file instanceof File) {
-        setFileSrc(URL.createObjectURL(file))
+      if (isNewFile) {
+        setFilename(file?.name ?? '')
+        if (file instanceof File) {
+          setFileSrc(URL.createObjectURL(file))
+        }
       }
       setValue(file)
       setUploadControlFileUrl('')
@@ -293,6 +297,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
       <div className={`${baseClass}__selected-preview`}>
         <Thumbnail
           collectionSlug={collectionSlug}
+          doc={{ filename: filename || value?.name }}
           fileSrc={isImage(fileType) ? src : null}
           size="expand"
         />
@@ -306,7 +311,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
         <EditDepthProvider>
           <EditUpload
             fileName={value?.name || (data?.filename as string)}
-            fileSrc={(data?.url as string) || fileSrc}
+            fileSrc={getEditorFileSrc({ data, fileSrc, hasSelectedFile: Boolean(value) })}
             imageCacheTag={imageCacheTag}
             initialCrop={uploadEdits?.crop ?? undefined}
             initialFocalPoint={{
@@ -319,7 +324,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
           />
         </EditDepthProvider>
       )}
-      {data && hasImageSizes && (
+      {data && hasVariants && (
         <Drawer
           className={`${baseClass}__preview-drawer`}
           hoverTitle
@@ -363,7 +368,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
           {data?.filename && !removedFile ? (
             <FilePreview
               collectionSlug={collectionSlug}
-              data={data as Record<string, unknown>}
+              data={data}
               imageCacheTag={imageCacheTag}
               selectedSize={selectedSize}
               selectedSizeData={selectedSizeData}
@@ -375,6 +380,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
             <div className={`${baseClass}__upload`}>
               {!value && removedFile && data?.filename && (
                 <Button
+                  aria-label={t('general:cancel')}
                   buttonStyle="secondary"
                   className={`${baseClass}__remove`}
                   icon="x"
@@ -398,6 +404,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
               {value && fileSrc && (
                 <Fragment>
                   <Button
+                    aria-label={t('general:cancel')}
                     buttonStyle="secondary"
                     className={`${baseClass}__remove`}
                     icon="x"

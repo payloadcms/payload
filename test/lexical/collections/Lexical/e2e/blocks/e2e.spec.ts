@@ -293,8 +293,8 @@ describe('lexicalBlocks', () => {
       })
 
       const topLevelDocTextField = page.locator('#field-title').first()
-      const blockTextField = reloadedBlock.locator('#field-text').first()
-      const blockGroupTextField = reloadedBlock.locator('#field-group__groupText').first()
+      const blockTextField = reloadedBlock.locator('input[name="text"]').first()
+      const blockGroupTextField = reloadedBlock.locator('input[name="group.groupText"]').first()
 
       const dependsOnDocData = reloadedBlock.locator('#field-group__dependsOnDocData').first()
       const dependsOnSiblingData = reloadedBlock
@@ -485,20 +485,22 @@ describe('lexicalBlocks', () => {
       )
 
       // Wait for block's group fields to render
-      await expect(reloadedBlock.locator('#field-group__textDependsOnDocData')).toBeVisible({
+      await expect(reloadedBlock.locator('input[name="group.textDependsOnDocData"]')).toBeVisible({
         timeout: POLL_TOPASS_TIMEOUT,
       })
 
       const topLevelDocTextField = page.locator('#field-title').first()
-      const blockTextField = reloadedBlock.locator('#field-text').first()
-      const blockGroupTextField = reloadedBlock.locator('#field-group__groupText').first()
+      const blockTextField = reloadedBlock.locator('input[name="text"]').first()
+      const blockGroupTextField = reloadedBlock.locator('input[name="group.groupText"]').first()
 
-      const dependsOnDocData = reloadedBlock.locator('#field-group__textDependsOnDocData').first()
+      const dependsOnDocData = reloadedBlock
+        .locator('input[name="group.textDependsOnDocData"]')
+        .first()
       const dependsOnSiblingData = reloadedBlock
-        .locator('#field-group__textDependsOnSiblingData')
+        .locator('input[name="group.textDependsOnSiblingData"]')
         .first()
       const dependsOnBlockData = reloadedBlock
-        .locator('#field-group__textDependsOnBlockData')
+        .locator('input[name="group.textDependsOnBlockData"]')
         .first()
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
@@ -599,8 +601,8 @@ describe('lexicalBlocks', () => {
       richTextField,
     })
 
-    await newBlock.locator('#field-test1').fill('text1')
-    await newBlock.locator('#field-test2').fill('text2')
+    await newBlock.locator('input[name="test1"]').fill('text1')
+    await newBlock.locator('input[name="test2"]').fill('text2')
 
     await wait(300)
 
@@ -611,8 +613,8 @@ describe('lexicalBlocks', () => {
     // Reload page
     await page.reload()
 
-    await expect(newBlock.locator('#field-test1')).toHaveValue('TEXT1')
-    await expect(newBlock.locator('#field-test2')).toHaveValue('TEXT2')
+    await expect(newBlock.locator('input[name="test1"]')).toHaveValue('TEXT1')
+    await expect(newBlock.locator('input[name="test2"]')).toHaveValue('TEXT2')
   })
 
   describe('nested lexical editor in block', () => {
@@ -749,7 +751,7 @@ describe('lexicalBlocks', () => {
       const drawerContent = page.locator('.drawer__content').first()
       await expect(drawerContent).toBeVisible()
 
-      const urlField = drawerContent.locator('input#field-url').first()
+      const urlField = drawerContent.locator('input[name="url"]').first()
       await expect(urlField).toBeVisible()
       await expect(urlField).toHaveValue('https://')
       await wait(1000)
@@ -975,8 +977,11 @@ describe('lexicalBlocks', () => {
         await expect(uploadListDrawer).toBeVisible()
         await wait(300)
 
-        // find button which has a span with text "payload.jpg" and click it in playwright
-        const uploadButton = uploadListDrawer.locator('button').getByText('payload.jpg').first()
+        // find button which has a span with text "payload-original.jpg" and click it in playwright
+        const uploadButton = uploadListDrawer
+          .locator('button')
+          .getByText('payload-original.jpg')
+          .first()
         await expect(uploadButton).toBeVisible()
         await wait(300)
         await uploadButton.click()
@@ -987,7 +992,7 @@ describe('lexicalBlocks', () => {
           newSubLexicalAndUploadBlock.locator(
             '.field-type.upload .upload-relationship-details__filename a',
           ),
-        ).toHaveText('payload.jpg')
+        ).toHaveText('payload-original.jpg')
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
@@ -1002,7 +1007,7 @@ describe('lexicalBlocks', () => {
         newSubLexicalAndUploadBlock.locator(
           '.field-type.upload .upload-relationship-details__filename a',
         ),
-      ).toHaveText('payload.jpg')
+      ).toHaveText('payload-original.jpg')
       await expect(paragraphInSubEditor).toHaveText('Some subText')
       await wait(300)
 
@@ -1024,7 +1029,7 @@ describe('lexicalBlocks', () => {
         newSubLexicalAndUploadBlock.locator(
           '.field-type.upload .upload-relationship-details__filename a',
         ),
-      ).toHaveText('payload.jpg')
+      ).toHaveText('payload-original.jpg')
       await expect(paragraphInSubEditor).toHaveText('Some subText')
 
       // Check if the API result is populated correctly - Depth 0
@@ -1037,7 +1042,7 @@ describe('lexicalBlocks', () => {
               overrideAccess: true,
               where: {
                 filename: {
-                  equals: 'payload.jpg',
+                  equals: 'payload-original.jpg',
                 },
               },
             })
@@ -1067,7 +1072,7 @@ describe('lexicalBlocks', () => {
               overrideAccess: true,
               where: {
                 filename: {
-                  equals: 'payload.jpg',
+                  equals: 'payload-original.jpg',
                 },
               },
             })
@@ -1277,7 +1282,7 @@ describe('lexicalBlocks', () => {
       await expect(uploadBlock).toBeVisible()
 
       await expect(uploadBlock.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
-        'payload.jpg',
+        'payload-original.jpg',
       )
     })
 
@@ -1339,7 +1344,7 @@ describe('lexicalBlocks', () => {
       await expect(tabsBlock).toBeVisible()
       await wait(300)
 
-      const tab1Text1Field = tabsBlock.locator('#field-tab1__text1')
+      const tab1Text1Field = tabsBlock.locator('input[name="tab1.text1"]')
       await tab1Text1Field.scrollIntoViewIfNeeded()
       await expect(tab1Text1Field).toBeVisible()
       await expect(tab1Text1Field).toHaveValue('Some text1')
@@ -1352,7 +1357,7 @@ describe('lexicalBlocks', () => {
       await tab2Button.click()
       await wait(300)
 
-      const tab2Text1Field = tabsBlock.locator('#field-tab2__text2')
+      const tab2Text1Field = tabsBlock.locator('input[name="tab2.text2"]')
       await tab2Text1Field.scrollIntoViewIfNeeded()
       await expect(tab2Text1Field).toBeVisible()
       await expect(tab2Text1Field).toHaveValue('Some text2')
@@ -1617,9 +1622,9 @@ describe('lexicalBlocks', () => {
       await inlineBlockDrawer.getByRole('button', { name: 'Add Avatar' }).click()
       await inlineBlockDrawer.getByRole('button', { name: 'Choose from existing' }).click()
       const uploadDrawer = page.locator('dialog[id^=list-drawer_2_]').first()
-      await uploadDrawer.getByText('payload.jpg').click()
+      await uploadDrawer.getByText('payload-original.jpg').click()
       await expect(inlineBlockDrawer.locator('.upload-relationship-details__filename')).toHaveText(
-        'payload.jpg',
+        'payload-original.jpg',
       )
       await saveDrawer()
       await saveDocAndAssert(page)
@@ -1638,7 +1643,7 @@ describe('lexicalBlocks', () => {
               overrideAccess: true,
               where: {
                 filename: {
-                  equals: 'payload.jpg',
+                  equals: 'payload-original.jpg',
                 },
               },
             })
@@ -1664,7 +1669,7 @@ describe('lexicalBlocks', () => {
               overrideAccess: true,
               where: {
                 filename: {
-                  equals: 'payload.jpg',
+                  equals: 'payload-original.jpg',
                 },
               },
             })
@@ -1706,7 +1711,7 @@ describe('lexicalBlocks', () => {
       // Clicking inline block opens drawer
       await inlineBlockElement.click()
 
-      await page.locator('.drawer--is-open #field-text').fill('value1')
+      await page.locator('.drawer--is-open input[name="text"]').fill('value1')
       await page
         .locator('.drawer--is-open')
         .locator('button')
@@ -1740,7 +1745,7 @@ describe('lexicalBlocks', () => {
       await inlineBlockElement.click()
 
       // Check if the text field still contains 'value1'
-      await expect(page.locator('.drawer--is-open #field-text')).toHaveValue('value1')
+      await expect(page.locator('.drawer--is-open input[name="text"]')).toHaveValue('value1')
     })
   })
 })

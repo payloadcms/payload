@@ -13,7 +13,15 @@ export type Props = {
   'aria-label'?: AriaAttributes['aria-label']
   'aria-pressed'?: AriaAttributes['aria-pressed']
   buttonId?: string
-  buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'link' | 'pill' | 'primary' | 'secondary'
+  buttonStyle?:
+    | 'dashed'
+    | 'destructive'
+    | 'ghost'
+    | 'link'
+    | 'pill'
+    | 'primary'
+    | 'primary-ghost'
+    | 'secondary'
   children?: React.ReactNode
   className?: string
   disabled?: boolean
@@ -35,6 +43,7 @@ export type Props = {
   onClick?: (event: MouseEvent) => void
   onKeyDown?: KeyboardEventHandler
   onMouseDown?: (event: MouseEvent) => void
+  popupAriaLabel?: string
   /**
    * Size of the chevron icon in the split-button popup trigger.
    * @default 24

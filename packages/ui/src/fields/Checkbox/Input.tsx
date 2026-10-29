@@ -63,7 +63,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   const fallbackID = useId()
   const id = idFromProps || fallbackID
   const ariaLabel = ariaLabelFromProps || undefined
-  const ariaLabelledBy = ariaLabel ? undefined : ariaLabelledByFromProps || name
+  const ariaLabelledBy = ariaLabel ? undefined : ariaLabelledByFromProps
   const controlWrapRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {

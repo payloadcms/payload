@@ -20,7 +20,6 @@
   .collections__label {
     margin: 0;
     color: var(--color-text);
-    font-family: var(--text-heading-medium-font-family);
     font-size: var(--text-heading-medium-font-size);
     font-weight: var(--text-heading-medium-font-weight);
     line-height: var(--text-heading-medium-line-height);
