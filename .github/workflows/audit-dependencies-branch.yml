@@ -186,6 +186,14 @@ jobs:
           mkdir -p "$RUNNER_TEMP/codex-home"
           cp .audit-deps/tooling/.github/scripts/audit-deps/codex-config.toml "$RUNNER_TEMP/codex-home/config.toml"
 
+      # Codex can write .git; git after Codex runs only on this pre-Codex snapshot.
+      - name: Snapshot git directory
+        id: git-snapshot
+        run: |
+          set -euo pipefail
+          tar -C "$GITHUB_WORKSPACE" -cf "$RUNNER_TEMP/git.tar" .git
+          echo "sha256=$(sha256sum "$RUNNER_TEMP/git.tar" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+
       # OPENAI_API_KEY: never reference it in jobs on pull_request_target, or on issue_comment with a checkout of PR code.
       - name: Run Codex
         uses: openai/codex-action@bdf19a4a223ec2549a3e2274a0cf61556bc07675 # v1.13
@@ -202,13 +210,24 @@ jobs:
           output-file: ${{ runner.temp }}/codex-result.json
           safety-strategy: drop-sudo
 
-      # Codex may have edited .git/config; neutralize the hooks and diff drivers it could point at.
-      # Diffing against HEAD also captures changes Codex staged.
+      # Restores the trusted .git and drops the Codex-writable tooling repo before any git runs.
+      # The -c flags and env stay as defense in depth; diffing against HEAD also captures staged changes.
       - name: Save patch
         id: patch
+        env:
+          GIT_CONFIG_GLOBAL: /dev/null
+          GIT_CONFIG_NOSYSTEM: '1'
+          GIT_SNAPSHOT_SHA256: ${{ steps.git-snapshot.outputs.sha256 }}
         run: |
           set -euo pipefail
-          git -c core.hooksPath=/dev/null -c core.fsmonitor=false -c diff.external= \
+          if ! echo "$GIT_SNAPSHOT_SHA256  $RUNNER_TEMP/git.tar" | sha256sum --check --status; then
+            echo "::error::git snapshot changed during the Codex step"
+            exit 1
+          fi
+          rm -rf .git .audit-deps/tooling
+          tar -C "$GITHUB_WORKSPACE" -xf "$RUNNER_TEMP/git.tar"
+
+          git -c core.hooksPath=/dev/null -c core.fsmonitor=false -c diff.external= -c core.attributesFile=/dev/null \
             diff HEAD --binary --no-ext-diff --no-textconv > "$RUNNER_TEMP/fix.patch"
           if [ -s "$RUNNER_TEMP/fix.patch" ]; then
             echo "has_patch=true" >> "$GITHUB_OUTPUT"
@@ -289,18 +308,33 @@ jobs:
           --report=.audit-deps/audit_output.json
           --scope="$SCOPE"
 
-      # Proves the lockfile comes from the manifests alone, with no hand edits.
+      # Proves the lockfile comes from the base lockfile plus the patched manifests, with no hand edits.
       - name: Check lockfile regenerates cleanly
+        env:
+          SCOPE: ${{ inputs.scope }}
         run: |
           set -euo pipefail
           cp pnpm-lock.yaml "$RUNNER_TEMP/codex-lock.yaml"
+
+          if [ "$SCOPE" = "consumer-facing" ]; then
+            git show HEAD:pnpm-lock.yaml > pnpm-lock.yaml
+            pnpm install --lockfile-only --ignore-scripts
+            if ! cmp -s "$RUNNER_TEMP/codex-lock.yaml" pnpm-lock.yaml; then
+              echo "::error::pnpm-lock.yaml differs from a regeneration of the base lockfile with the patched manifests"
+              exit 1
+            fi
+            exit 0
+          fi
+
+          # Relocks cannot be replayed from the base lockfile, and monorepo scope never opens a PR.
           pnpm install --lockfile-only --ignore-scripts
           if ! diff -q "$RUNNER_TEMP/codex-lock.yaml" pnpm-lock.yaml; then
             echo "::error::pnpm-lock.yaml differs from a clean regeneration of the patched manifests"
             exit 1
           fi
 
-      # Package code runs from here on, only after every guard passed.
+      # Dependency code from here on is unreviewed, so this job holds no secrets and saves no caches.
+      # It runs only after every guard passed.
       - name: Install
         run: pnpm install --frozen-lockfile
 
