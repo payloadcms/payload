@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { MongooseAdapter } from '../index.js'
 
@@ -6,6 +6,109 @@ import { commitTransaction } from './commitTransaction.js'
 import { rollbackTransaction } from './rollbackTransaction.js'
 
 describe('commitTransaction', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.useRealTimers()
+  })
+
+  it.each([
+    { configuredTimeout: undefined, expectedTimeout: 120_000 },
+    { configuredTimeout: 0, expectedTimeout: 120_000 },
+    { configuredTimeout: 5_000, expectedTimeout: 5_000 },
+    { configuredTimeout: 240_000, expectedTimeout: 120_000 },
+  ])(
+    'should bound a commit with configured timeout $configuredTimeout to $expectedTimeout ms',
+    async ({ configuredTimeout, expectedTimeout }) => {
+      vi.useFakeTimers()
+      vi.setSystemTime(0)
+
+      const session = {
+        commitTransaction: vi.fn().mockResolvedValue(undefined),
+        endSession: vi.fn().mockResolvedValue(undefined),
+        inTransaction: vi.fn().mockReturnValue(true),
+        timeoutMS: configuredTimeout,
+      }
+      const adapter = {
+        sessions: { transaction: session },
+      } as unknown as MongooseAdapter
+
+      await commitTransaction.call(adapter, 'transaction')
+
+      expect(session.commitTransaction).toHaveBeenCalledWith({ timeoutMS: expectedTimeout })
+    },
+  )
+
+  it('should time out a stalled retry within the remaining commit budget', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(0)
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+
+    const commitError = { errorLabels: ['UnknownTransactionCommitResult'] }
+    const timeoutError = new Error('commit timed out')
+    const session = {
+      commitTransaction: vi
+        .fn()
+        .mockImplementationOnce(() => {
+          vi.setSystemTime(119_000)
+
+          return Promise.reject(commitError)
+        })
+        .mockImplementation(
+          ({ timeoutMS = 240_000 }: { timeoutMS?: number } = {}) =>
+            new Promise((_, reject) => setTimeout(() => reject(timeoutError), timeoutMS)),
+        ),
+      endSession: vi.fn().mockResolvedValue(undefined),
+      inTransaction: vi.fn().mockReturnValue(false),
+    }
+    const adapter = {
+      payload: { logger: { warn: vi.fn() } },
+      sessions: { transaction: session },
+    } as unknown as MongooseAdapter
+
+    session.inTransaction.mockReturnValueOnce(true)
+
+    const commit = commitTransaction.call(adapter, 'transaction')
+    const rejection = expect(commit).rejects.toBe(timeoutError)
+
+    await vi.advanceTimersByTimeAsync(1_000)
+    await rejection
+
+    expect(session.commitTransaction).toHaveBeenNthCalledWith(2, { timeoutMS: 1_000 })
+    expect(adapter.sessions.transaction).toBe(session)
+
+    await rollbackTransaction.call(adapter, 'transaction')
+
+    expect(session.endSession).toHaveBeenCalledOnce()
+    expect(adapter.sessions.transaction).toBeUndefined()
+  })
+
+  it('should stop retrying when the retry delay resumes after the deadline', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(0)
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+
+    const commitError = { errorLabels: ['UnknownTransactionCommitResult'] }
+    const session = {
+      commitTransaction: vi.fn().mockRejectedValue(commitError),
+      endSession: vi.fn().mockResolvedValue(undefined),
+      inTransaction: vi.fn().mockReturnValue(true),
+    }
+    const adapter = {
+      sessions: { transaction: session },
+    } as unknown as MongooseAdapter
+    const commit = commitTransaction.call(adapter, 'transaction')
+    const rejection = expect(commit).rejects.toBe(commitError)
+
+    await vi.advanceTimersByTimeAsync(0)
+    vi.setSystemTime(120_000)
+    await vi.advanceTimersByTimeAsync(5)
+    await rejection
+
+    expect(session.commitTransaction).toHaveBeenCalledOnce()
+    expect(session.endSession).toHaveBeenCalledOnce()
+    expect(adapter.sessions.transaction).toBeUndefined()
+  })
+
   it('should retry an unknown commit result on the same session until it succeeds', async () => {
     const commitError = {
       hasErrorLabel: (label: string) => label === 'UnknownTransactionCommitResult',

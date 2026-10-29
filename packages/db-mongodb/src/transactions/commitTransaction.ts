@@ -33,7 +33,13 @@ export const commitTransaction: CommitTransaction = async function commitTransac
 
   while (true) {
     try {
-      await session.commitTransaction()
+      const remainingMilliseconds = Math.max(retryDeadline - Date.now(), 1)
+      const timeoutMS =
+        session.timeoutMS && session.timeoutMS > 0
+          ? Math.min(session.timeoutMS, remainingMilliseconds)
+          : remainingMilliseconds
+
+      await session.commitTransaction({ timeoutMS })
       await endRegisteredSession({ adapter: this, session, transactionID })
       return
     } catch (error) {
@@ -54,6 +60,13 @@ export const commitTransaction: CommitTransaction = async function commitTransac
       }
 
       await new Promise((resolve) => setTimeout(resolve, retryDelayMilliseconds))
+
+      // The retry delay can resume late if the event loop is busy.
+      if (Date.now() >= retryDeadline) {
+        await endRegisteredSession({ adapter: this, session, transactionID })
+        throw error
+      }
+
       retryIndex += 1
     }
   }
