@@ -3508,6 +3508,43 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       }).toBeDefined()
     })
 
+    test('should allow creating a second document when a localized unique required field falls back to its static defaultValue in an untouched locale', async ({
+      payload,
+    }) => {
+      const firstDoc = await payload.create({
+        collection: 'indexed-fields',
+        data: {
+          text: 'first-' + Date.now(),
+          localizedUniqueRequiredText: 'first-en-' + Date.now(),
+          uniqueRequiredText: 'uniqueRequired-first-' + Date.now(),
+        },
+        overrideAccess: true,
+      })
+
+      const firstDocAllLocales = await payload.findByID({
+        id: firstDoc.id,
+        collection: 'indexed-fields',
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      // The es locale was never submitted, so it should remain unset rather than being
+      // silently filled with the field's static defaultValue.
+      expect(firstDocAllLocales.localizedUniqueRequiredText.es).toBeUndefined()
+
+      await expect(
+        payload.create({
+          collection: 'indexed-fields',
+          data: {
+            text: 'second-' + Date.now(),
+            localizedUniqueRequiredText: 'second-en-' + Date.now(),
+            uniqueRequiredText: 'uniqueRequired-second-' + Date.now(),
+          },
+          overrideAccess: true,
+        }),
+      ).resolves.toBeDefined()
+    })
+
     test('should throw validation error saving on unique relationship fields hasMany: false non polymorphic', async ({
       payload,
     }) => {
