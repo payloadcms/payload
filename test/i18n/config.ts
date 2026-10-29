@@ -45,6 +45,7 @@ export default buildConfigWithDefaults({
   collections: [
     {
       slug: 'collection1',
+      enableQueryPresets: true,
       labels: {
         singular: {
           en: 'EN Collection 1',
@@ -118,6 +119,18 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
+  },
+  queryPresets: {
+    labels: {
+      plural: {
+        en: 'EN Reports',
+        es: 'ES Reports',
+      },
+      singular: {
+        en: 'EN Report',
+        es: 'ES Report',
+      },
+    },
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

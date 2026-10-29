@@ -228,6 +228,39 @@ describe('i18n', () => {
       )
     })
 
+    test('should show translated field label in the sort button labels', async () => {
+      await payload.create({
+        collection: 'collection1',
+        data: {
+          i18nFieldLabel: 'Test',
+        },
+      })
+
+      await setUserLanguage('en')
+
+      await page.goto(collection1URL.list)
+
+      await expect(page.locator('#heading-i18nFieldLabel .sort-column__asc')).toHaveAttribute(
+        'aria-label',
+        'Sort by en-label Ascending',
+      )
+      await expect(page.locator('#heading-i18nFieldLabel .sort-column__desc')).toHaveAttribute(
+        'aria-label',
+        'Sort by en-label Descending',
+      )
+    })
+
+    test('should show translated query preset label in the query preset bar', async () => {
+      await setUserLanguage('en')
+
+      await page.goto(collection1URL.list)
+
+      await expect(page.locator('#create-new-preset')).toHaveAttribute(
+        'aria-label',
+        'New EN Report',
+      )
+    })
+
     test('should display translated collections and globals config options', async () => {
       // set language to Spanish
       await setUserLanguage('es')
