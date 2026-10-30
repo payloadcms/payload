@@ -96,8 +96,10 @@ export function mergeLocalizedData({
               }
             } else if (Array.isArray(newValue)) {
               // Non-localized array - still process children for any localized fields
+              const getExistingRow = existingRowsByIdentity(existingValue)
+
               result[field.name] = newValue.map((newItem: JsonObject, index: number) => {
-                const existingItem = existingValue?.[index] || {}
+                const existingItem = getExistingRow(newItem, index)
 
                 return mergeLocalizedData({
                   configBlockReferences,
@@ -136,6 +138,8 @@ export function mergeLocalizedData({
               }
             } else if (Array.isArray(newValue)) {
               // Non-localized blocks - still process children for any localized fields
+              const getExistingRow = existingRowsByIdentity(existingValue, true)
+
               result[field.name] = newValue.map((newBlockData: JsonObject, index: number) => {
                 let block: Block | FlattenedBlock | undefined
                 if (configBlockReferences && field.blockReferences) {
@@ -151,10 +155,7 @@ export function mergeLocalizedData({
                 }
 
                 if (block) {
-                  const blockData =
-                    Array.isArray(existingValue) && existingValue[index]
-                      ? (existingValue[index] as JsonObject)
-                      : {}
+                  const blockData = getExistingRow(newBlockData, index)
 
                   const merged = mergeLocalizedData({
                     configBlockReferences,
@@ -344,4 +345,17 @@ export function mergeLocalizedData({
   }
 
   return result
+}
+
+/** Shared rows can move; other locales must follow the row, not its former position. */
+function existingRowsByIdentity(existingRows: unknown, isBlock = false) {
+  const rows: JsonObject[] = Array.isArray(existingRows) ? existingRows : []
+  const byID = new Map(rows.filter((row) => row?.id != null).map((row) => [String(row.id), row]))
+
+  return (row: JsonObject, index: number): JsonObject => {
+    const existing =
+      row.id != null ? byID.get(String(row.id)) : rows[index]?.id == null ? rows[index] : undefined
+
+    return existing && (!isBlock || existing.blockType === row.blockType) ? existing : {}
+  }
 }
