@@ -1,9 +1,11 @@
 const WORD_SPLIT_REGEX = /[^\p{L}\p{N}]+/u
+const UNSPACED_SCRIPT_REGEX =
+  /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Myanmar}]/u
 
 /**
  * Matches a label against a search query. Single-character queries only match
- * the start of a word, keeping single-letter searches low-noise; queries of two
- * or more characters match anywhere in the label.
+ * the start of a word, keeping single-letter searches low-noise. Characters in
+ * unspaced scripts and queries of two or more characters match anywhere in the label.
  *
  * Shared by every in-popup search so they all filter alike.
  */
@@ -16,7 +18,7 @@ export function matchesSearchQuery({ label, query }: { label: string; query: str
 
   const normalizedLabel = label.toLowerCase()
 
-  if (normalizedQuery.length === 1) {
+  if (normalizedQuery.length === 1 && !UNSPACED_SCRIPT_REGEX.test(normalizedQuery)) {
     return normalizedLabel.split(WORD_SPLIT_REGEX).some((word) => word.startsWith(normalizedQuery))
   }
 
