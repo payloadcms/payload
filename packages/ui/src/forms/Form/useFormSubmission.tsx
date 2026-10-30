@@ -56,7 +56,7 @@ export const useFormSubmission = ({
   const {
     action,
     beforeSubmit,
-    disabled: disabledFromProps,
+    disabled: isDisabledFromProps,
     disableSuccessStatus,
     disableValidationOnSubmit,
     handleResponse,
@@ -64,73 +64,34 @@ export const useFormSubmission = ({
     onSubmit,
     onSuccess,
     redirect,
-    submitted: submittedFromProps,
+    submitted: isSubmittedFromProps,
     waitForAutocomplete,
   } = props
-  const method = 'method' in props ? props?.method : undefined
+
   const { collectionSlug, docConfig } = useDocumentInfo()
-  const validateDrafts = hasDraftValidationEnabled(docConfig)
   const operation = useOperation()
   const router = useRouter()
   const { startRouteTransition } = useRouteTransition()
   const { i18n, t } = useTranslation()
   const onNonFieldError = useFormErrorHandler()
 
-  const [disabled, _setDisabled] = useState(disabledFromProps || false)
+  const [isDisabled, _setDisabled] = useState(isDisabledFromProps || false)
 
-  const disabledRef = useRef(disabled)
-
-  const setDisabled = useCallback((disabled: boolean) => {
-    disabledRef.current = disabled
-    _setDisabled(disabled)
-  }, [])
-
-  const disabledFromPropsRef = useRef(Boolean(disabledFromProps))
-
-  disabledFromPropsRef.current = Boolean(disabledFromProps)
-
-  const [submitted, setSubmitted] = useState(false)
+  const [isSubmitted, setSubmitted] = useState(false)
 
   const [successfulSubmitCount, setSuccessfulSubmitCount] = useState(0)
 
-  const [processing, setProcessing] = useState(false)
+  const [isProcessing, setProcessing] = useState(false)
 
   /**
    * Determines whether the form is processing asynchronously in the background, e.g. autosave is running.
    * Useful to determine whether to disable the form or queue other processes while in flight, e.g. disable manual submits while an autosave is running.
    */
-  const [backgroundProcessing, _setBackgroundProcessing] = useState(false)
+  const [isBackgroundProcessing, _setBackgroundProcessing] = useState(false)
 
-  const setBackgroundProcessing = useCallback((backgroundProcessing: boolean) => {
-    _setBackgroundProcessing(backgroundProcessing)
-  }, [])
-
-  const restoreRequestState = useCallback(() => {
-    setBackgroundProcessing(false)
-    setProcessing(false)
-    setDisabled(disabledFromPropsRef.current)
-  }, [setBackgroundProcessing, setDisabled])
-
-  const submitFocusRef = useRef<HTMLElement | null>(null)
-
-  useEffect(() => {
-    if (processing) {
-      return
-    }
-
-    const previousFocus = submitFocusRef.current
-
-    submitFocusRef.current = null
-    if (
-      previousFocus?.isConnected &&
-      document.activeElement === document.body &&
-      !previousFocus.closest('[inert]') &&
-      !previousFocus.matches(':disabled')
-    ) {
-      previousFocus.focus({ preventScroll: true })
-    }
-  }, [processing])
-
+  const isDisabledRef = useRef(isDisabled)
+  const isDisabledFromPropsRef = useRef(Boolean(isDisabledFromProps))
+  const submitFocus = useRef<HTMLElement | null>(null)
   const submissionErrorsRef = useRef<
     | {
         fields: FormState
@@ -139,6 +100,44 @@ export const useFormSubmission = ({
       }
     | undefined
   >(undefined)
+
+  isDisabledFromPropsRef.current = Boolean(isDisabledFromProps)
+
+  const method = 'method' in props ? props?.method : undefined
+  const validateDrafts = hasDraftValidationEnabled(docConfig)
+
+  const setDisabled = useCallback((isDisabled: boolean) => {
+    isDisabledRef.current = isDisabled
+    _setDisabled(isDisabled)
+  }, [])
+
+  const setBackgroundProcessing = useCallback((isBackgroundProcessing: boolean) => {
+    _setBackgroundProcessing(isBackgroundProcessing)
+  }, [])
+
+  const restoreRequestState = useCallback(() => {
+    setBackgroundProcessing(false)
+    setProcessing(false)
+    setDisabled(isDisabledFromPropsRef.current)
+  }, [setBackgroundProcessing, setDisabled])
+
+  useEffect(() => {
+    if (isProcessing) {
+      return
+    }
+
+    const previousFocus = submitFocus.current
+
+    submitFocus.current = null
+    if (
+      previousFocus?.isConnected &&
+      document.activeElement === document.body &&
+      !previousFocus.closest('[inert]') &&
+      !previousFocus.matches(':disabled')
+    ) {
+      previousFocus.focus({ preventScroll: true })
+    }
+  }, [isProcessing])
 
   const executeSubmit = useCallback(
     async ({
@@ -204,7 +203,7 @@ export const useFormSubmission = ({
         const activeElement = document.activeElement
 
         // Disabling the active field drops browser focus to the body.
-        submitFocusRef.current =
+        submitFocus.current =
           activeElement instanceof HTMLElement && formRef.current?.contains(activeElement)
             ? activeElement
             : null
@@ -565,7 +564,7 @@ export const useFormSubmission = ({
           }
 
           setProcessing(false)
-          setDisabled(disabledFromPropsRef.current)
+          setDisabled(isDisabledFromPropsRef.current)
 
           if (submissionType === 'autosave' && !requestContext.isCurrent()) {
             onStaleRequest?.()
@@ -610,30 +609,30 @@ export const useFormSubmission = ({
   )
 
   useEffect(() => {
-    if (typeof disabledFromProps === 'boolean') {
-      setDisabled(disabledFromProps)
+    if (typeof isDisabledFromProps === 'boolean') {
+      setDisabled(isDisabledFromProps)
     }
-  }, [disabledFromProps, setDisabled])
+  }, [isDisabledFromProps, setDisabled])
 
   useEffect(() => {
-    if (typeof submittedFromProps === 'boolean') {
-      setSubmitted(submittedFromProps)
+    if (typeof isSubmittedFromProps === 'boolean') {
+      setSubmitted(isSubmittedFromProps)
     }
-  }, [submittedFromProps])
+  }, [isSubmittedFromProps])
 
   return {
-    backgroundProcessing,
-    disabled,
-    disabledRef,
+    backgroundProcessing: isBackgroundProcessing,
+    disabled: isDisabled,
+    disabledRef: isDisabledRef,
     executeSubmit,
-    processing,
+    processing: isProcessing,
     restoreRequestState,
     setBackgroundProcessing,
     setDisabled,
     setProcessing,
     setSubmitted,
     submissionErrorsRef,
-    submitted,
+    submitted: isSubmitted,
     successfulSubmitCount,
   }
 }
