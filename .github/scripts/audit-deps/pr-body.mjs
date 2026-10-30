@@ -1,17 +1,26 @@
 import { formatMarker, markerForUnit } from './decide.mjs'
-import { escapeTableCell, sanitizeOutsideText } from './sanitize.mjs'
+import {
+  closeOpenFence,
+  escapeTableCell,
+  GHSA_PATTERN,
+  neutralizeIssueRefs,
+  sanitizeOutsideText,
+} from './sanitize.mjs'
 
 const MAX_BODY_LENGTH = 60000
 const MAX_NOTES_LENGTH = 8000
+const MAX_CHECKED_LENGTH = 8000
+const MAX_FOOTER_LENGTH = 1500
+const MORE_NOT_SHOWN_RESERVE = 40
+const CUT_NOTE = "Some sections were cut to fit GitHub's size limit."
 const MAX_COMMITS = 10
 const MAX_FILES_CHECKED = 50
 const MS_PER_DAY = 86400000
-const GHSA_PATTERN = /^GHSA(-[a-z0-9]{4}){3}$/i
-const SAFE_URL_PATTERN = /^https:\/\/[^\s)<>]+$/
+const SAFE_URL_PATTERN = /^https:\/\/[^\s)<>|]+$/
 const SEVERITY_ORDER = ['low', 'moderate', 'medium', 'high', 'critical']
 
 // Sections are dropped in this order, each from the last package backwards.
-const DROP_ORDER = ['commits', 'notes', 'info']
+const DROP_ORDER = ['commits', 'notes', 'info', 'checked']
 
 /**
  * A major unit is a draft when a bump in it has no release notes.
@@ -70,8 +79,13 @@ export function renderUnitBody({
 }
 
 function assemble({ head, packages, tail }) {
-  const compose = () =>
-    `${head}\n\n${packages.map(composePackage).filter(Boolean).join('\n\n')}\n\n${tail}\n`
+  const compose = ({ keep = packages.length } = {}) => {
+    const parts = [head, ...packages.slice(0, keep).map(composePackage).filter(Boolean)]
+    if (keep < packages.length) {
+      parts.push(CUT_NOTE)
+    }
+    return `${[...parts, tail].join('\n\n')}\n`
+  }
 
   for (const key of DROP_ORDER) {
     for (let index = packages.length - 1; index >= 0; index--) {
@@ -81,7 +95,12 @@ function assemble({ head, packages, tail }) {
       packages[index] = { ...packages[index], [key]: null }
     }
   }
-  return compose()
+
+  let keep = packages.length
+  while (keep > 0 && compose({ keep }).length > MAX_BODY_LENGTH) {
+    keep--
+  }
+  return compose({ keep })
 }
 
 function composePackage({ heading, advisoryLine, info, checked, notes, commits }) {
@@ -167,11 +186,12 @@ function formatDownloads({ count }) {
   if (typeof count !== 'number') {
     return 'n/a'
   }
-  if (count >= 1e6) {
+  const thousands = Math.round(count / 1e3)
+  if (thousands >= 1000) {
     return `${(count / 1e6).toFixed(1)}M`
   }
   if (count >= 1e3) {
-    return `${Math.round(count / 1e3)}k`
+    return `${thousands}k`
   }
   return String(count)
 }
@@ -252,12 +272,14 @@ function renderInfo({ advisories }) {
     return null
   }
   const blocks = advisories.map((advisory) => {
-    const text = sanitizeOutsideText({ text: advisory.description, maxLength: 4000 }).trim()
+    const text = closeOpenFence({
+      text: sanitizeOutsideText({ text: advisory.description, maxLength: 4000 }).trim(),
+    })
     return advisories.length > 1
       ? `**${oneLine({ text: advisory.ghsa, maxLength: 40 })}**\n\n${text}`
       : text
   })
-  return details({
+  return collapsible({
     summary: 'More information',
     content: `${blocks.join('\n\n')}\n\nSource: GitHub Advisory Database (CC-BY 4.0)`,
   })
@@ -272,34 +294,57 @@ function renderChecked({ bump, draftNote, result }) {
 
   if (!result) {
     lines.push('Not checked.')
-    return details({ summary, content: lines.join('\n') })
+    return collapsible({ summary, content: lines.join('\n') })
   }
 
-  const changes = result.breakingChanges ?? []
-  if (changes.length === 0) {
-    lines.push('No changes found that affect us.')
-  }
-  for (const { change, ourUsage } of changes) {
-    lines.push(
-      `- ${oneLine({ text: change, maxLength: 1000 })}`,
-      `  - Our usage: ${oneLine({ text: ourUsage, maxLength: 1000 })}`,
-    )
-  }
-
+  const footer = []
   const files = (result.filesChecked ?? [])
     .slice(0, MAX_FILES_CHECKED)
     .map((file) => oneLine({ text: file, maxLength: 200 }).replaceAll('`', ''))
     .filter(Boolean)
+  const filesLine = `Files checked: ${files.map((file) => `\`${file}\``).join(', ')}`
   if (files.length > 0) {
-    lines.push('', `Files checked: ${files.map((file) => `\`${file}\``).join(', ')}`)
+    footer.push('', closeFilesLine({ line: filesLine }))
   }
-
-  const reason = oneLine({ text: result.reason, maxLength: 1000 })
+  const reason = oneLine({ text: result.reason, maxLength: 500 })
   if (reason) {
-    lines.push('', `Reason: ${reason}`)
+    footer.push('', `Reason: ${reason}`)
   }
 
-  return details({ summary, content: lines.join('\n') })
+  const changes = (result.breakingChanges ?? []).map(
+    ({ change, ourUsage }) =>
+      `- ${oneLine({ text: change, maxLength: 1000 })}\n  - Our usage: ${oneLine({ text: ourUsage, maxLength: 1000 })}`,
+  )
+  const footerLength = footer.join('\n').length
+  const kept = []
+  let used = lines.join('\n').length + footerLength + MORE_NOT_SHOWN_RESERVE
+
+  for (const entry of changes) {
+    if (used + entry.length + 1 > MAX_CHECKED_LENGTH) {
+      break
+    }
+    kept.push(entry)
+    used += entry.length + 1
+  }
+
+  if (changes.length === 0) {
+    lines.push('No changes found that affect us.')
+  }
+  lines.push(...kept)
+  if (kept.length < changes.length) {
+    lines.push(`… ${changes.length - kept.length} more not shown`)
+  }
+  lines.push(...footer)
+
+  return collapsible({ summary, content: lines.join('\n') })
+}
+
+function closeFilesLine({ line }) {
+  if (line.length <= MAX_FOOTER_LENGTH) {
+    return line
+  }
+  const cut = line.slice(0, MAX_FOOTER_LENGTH)
+  return `${cut.slice(0, cut.lastIndexOf('`, `') + 1)} …`
 }
 
 function renderNotes({ detail }) {
@@ -318,7 +363,9 @@ function renderNotes({ detail }) {
     const version = oneLine({ text: entry.version, maxLength: 40 })
     const title = url ? `[${version}](${url})` : version
     const text = demoteHeadings({
-      text: sanitizeOutsideText({ text: entry.text, maxLength: Infinity }),
+      text: neutralizeIssueRefs({
+        text: sanitizeOutsideText({ text: entry.text, maxLength: Infinity }),
+      }),
     }).trim()
     const isTooLong = text.length > remaining
     const kept = isTooLong ? `${text.slice(0, Math.max(0, remaining - 1))}…` : text
@@ -343,7 +390,7 @@ function renderNotes({ detail }) {
     lines.push(`All versions: ${linkParts.join(' · ')}`)
   }
 
-  return details({ summary: 'Release notes', content: lines.join('\n\n') })
+  return collapsible({ summary: 'Release notes', content: lines.join('\n\n') })
 }
 
 function renderCommits({ detail }) {
@@ -355,7 +402,7 @@ function renderCommits({ detail }) {
       .filter((url) => safeUrl({ url }))
       .map((url) => `- ${url}`)
     lines.push('The repository moved; no commit list. Release pages:', '', ...links)
-    return details({ summary: 'Commits', content: lines.join('\n') })
+    return collapsible({ summary: 'Commits', content: lines.join('\n') })
   }
 
   const shown = (commits?.commits ?? [])
@@ -367,7 +414,9 @@ function renderCommits({ detail }) {
   for (const commit of shown) {
     const sha = commit.sha.slice(0, 7)
     const label = safeUrl({ url: commit.url }) ? `[${sha}](${commit.url})` : sha
-    const message = oneLine({ text: String(commit.message ?? '').split('\n')[0], maxLength: 200 })
+    const message = neutralizeIssueRefs({
+      text: oneLine({ text: String(commit.message ?? '').split('\n')[0], maxLength: 200 }),
+    })
     lines.push(`- ${label} ${message}`)
   }
 
@@ -377,10 +426,10 @@ function renderCommits({ detail }) {
     lines.push('', compare ? `${moreCount} more: [compare](${compare})` : `${moreCount} more.`)
   }
 
-  return details({ summary: 'Commits', content: lines.join('\n') })
+  return collapsible({ summary: 'Commits', content: lines.join('\n') })
 }
 
-function details({ summary, content }) {
+function collapsible({ summary, content }) {
   return `<details><summary>${summary}</summary>\n\n${content}\n\n</details>`
 }
 
@@ -392,11 +441,6 @@ function oneLine({ text, maxLength }) {
 
 function demoteHeadings({ text }) {
   return text.replace(/^#{1,6}[ \t]+(.+)$/gm, '**$1**')
-}
-
-function closeOpenFence({ text }) {
-  const fenceCount = (text.match(/^```/gm) ?? []).length
-  return fenceCount % 2 === 1 ? `${text}\n\`\`\`` : text
 }
 
 function highestSeverity({ advisories }) {

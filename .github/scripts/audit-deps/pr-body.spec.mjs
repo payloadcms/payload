@@ -232,6 +232,12 @@ describe('draft handling', () => {
   })
 })
 
+const GHSA_DIGITS = '23456789'
+
+function ghsaFor(index) {
+  return `GHSA-cccc-ffff-${GHSA_DIGITS[(index >> 3) & 7]}${GHSA_DIGITS[index & 7]}cc`
+}
+
 describe('renderUnitBody group', () => {
   function makeBump(index) {
     return {
@@ -242,7 +248,7 @@ describe('renderUnitBody group', () => {
       to: index % 2 === 0 ? '1.0.1' : '1.1.0',
       isMajor: false,
       manifests: ['package.json'],
-      advisories: [`GHSA-aaaa-bbbb-${String(1000 + index).slice(-4)}`],
+      advisories: [ghsaFor(index)],
       fallbackFor: null,
     }
   }
@@ -263,11 +269,11 @@ describe('renderUnitBody group', () => {
       },
       advisories: [
         {
-          ghsa: `GHSA-aaaa-bbbb-${String(1000 + index).slice(-4)}`,
+          ghsa: ghsaFor(index),
           summary: `Summary ${index}`,
           description: 'd',
           severity: 'high',
-          url: `https://github.com/advisories/GHSA-aaaa-bbbb-${String(1000 + index).slice(-4)}`,
+          url: `https://github.com/advisories/${ghsaFor(index)}`,
         },
       ],
     }
@@ -336,7 +342,7 @@ describe('renderUnitBody group', () => {
   })
 
   it('should render partly fixed advisories and the lead suffix', () => {
-    const { body } = renderGroup({ count: 1, partly: ['GHSA-aaaa-bbbb-1000'] })
+    const { body } = renderGroup({ count: 1, partly: [ghsaFor(0)] })
 
     expect(body).toContain('1 more is partly fixed.')
   })
@@ -362,17 +368,17 @@ describe('partly fixed rendering', () => {
           advisories: [
             ...csvDetails.advisories,
             {
-              ghsa: 'GHSA-w5hq-aaaa-bbbb',
+              ghsa: 'GHSA-w5hq-cccc-ffff',
               summary: 'other',
               description: '',
               severity: 'high',
-              url: 'https://github.com/advisories/GHSA-w5hq-aaaa-bbbb',
+              url: 'https://github.com/advisories/GHSA-w5hq-cccc-ffff',
             },
           ],
         },
       },
       fixed: ['GHSA-8cw4-87c7-c6xx'],
-      partly: ['GHSA-w5hq-aaaa-bbbb'],
+      partly: ['GHSA-w5hq-cccc-ffff'],
       research: {},
       scope: 'consumer-facing',
       severity: 'moderate',
@@ -382,7 +388,7 @@ describe('partly fixed rendering', () => {
       now,
     })
 
-    expect(body).toContain('partly [w5hq](https://github.com/advisories/GHSA-w5hq-aaaa-bbbb)')
+    expect(body).toContain('partly [w5hq](https://github.com/advisories/GHSA-w5hq-cccc-ffff)')
     expect(body).toContain(
       'This PR fixes 1 advisory (consumer-facing, moderate+). 1 more is partly fixed.',
     )
@@ -405,7 +411,15 @@ describe('outside text', () => {
             { sha: 'abcdef1234', message: evil, url: 'https://github.com/a/b/commit/abcdef1234' },
           ],
         },
-        advisories: [{ ...csvDetails.advisories[0], summary: evil, description: evil }],
+        advisories: [
+          {
+            ...csvDetails.advisories[0],
+            summary: evil,
+            description: evil,
+            severity: 'mod|er\nate',
+          },
+        ],
+        affects: { direct: [{ name: 'we|ird\nname', dir: 'weird' }], via: [] },
       },
       research: {
         decision: 'bump',
@@ -416,11 +430,215 @@ describe('outside text', () => {
     })
 
     expect(body.match(/<!--/g)).toHaveLength(1)
-    expect(body).not.toMatch(/[^​]@someone/)
+    expect(body).not.toContain('@someone')
     const tableRows = body.split('\n').filter((line) => line.startsWith('|'))
     expect(tableRows).toHaveLength(3)
     for (const row of tableRows) {
       expect(row.replaceAll('\\|', '').match(/\|/g).length).toBe(8)
+    }
+  })
+})
+
+describe('size caps', () => {
+  const lastLine = (body) => body.trimEnd().split('\n').at(-1)
+
+  it('should cap the Codex section per package at an entry boundary', () => {
+    const body = renderCsv({
+      research: {
+        decision: 'bump',
+        breakingChanges: Array.from({ length: 40 }, (_, index) => ({
+          change: `c${index} ${'x'.repeat(1000)}`,
+          ourUsage: `u${index} ${'y'.repeat(1000)}`,
+        })),
+        filesChecked: ['a.ts'],
+        reason: '',
+      },
+    })
+    const start = body.indexOf('<summary>Breaking changes checked</summary>')
+    const section = body.slice(start, body.indexOf('</details>', start))
+
+    expect(body.length).toBeLessThanOrEqual(60000)
+    expect(section.length).toBeLessThanOrEqual(8200)
+    expect(section).toMatch(/… \d+ more not shown/)
+    expect(section).toContain('Files checked: `a.ts`')
+  })
+
+  it('should cut whole packages when every package is huge', () => {
+    const bumps = Array.from({ length: 40 }, (_, index) => ({
+      id: `dep-${index}`,
+      dependency: `dep-${index}`,
+      from: '^1.0.0',
+      fromVersion: '1.0.0',
+      to: '1.0.1',
+      isMajor: false,
+      manifests: ['package.json'],
+      advisories: [],
+      fallbackFor: null,
+    }))
+    const advisories = Array.from({ length: 10 }, (_, index) => ({
+      ghsa: ghsaFor(index),
+      summary: 's'.repeat(200),
+      description: 'd'.repeat(4000),
+      severity: 'high',
+      url: '',
+    }))
+    const details = Object.fromEntries(
+      bumps.map((bump) => [bump.id, { ...csvDetails, advisories }]),
+    )
+
+    const body = renderUnitBody({
+      unit: { id: 'non-major', kind: 'group', branch: 'b', bumpIds: bumps.map((bump) => bump.id) },
+      bumps,
+      details,
+      fixed: advisories.map((advisory) => advisory.ghsa),
+      partly: [],
+      research: {},
+      scope: 'consumer-facing',
+      severity: 'moderate',
+      ref: 'main',
+      repoUrl,
+      runUrl,
+      now,
+    })
+
+    expect(body.length).toBeLessThanOrEqual(60000)
+    expect(body).toContain("Some sections were cut to fit GitHub's size limit.")
+    expect(body.match(/^\| \[dep-\d/gm)).toHaveLength(40)
+    expect(body).toContain('This PR fixes 10 advisories')
+    expect(body).toContain('Generated by audit-dependencies')
+    expect(lastLine(body)).toMatch(/^<!-- audit-deps: /)
+  })
+})
+
+describe('fence containment', () => {
+  function descriptionBody({ description }) {
+    return renderCsv({
+      details: {
+        ...csvDetails,
+        advisories: [{ ...csvDetails.advisories[0], description }],
+      },
+    })
+  }
+
+  function isInsideFenceAtFirstClose({ body }) {
+    const start = body.indexOf('<summary>More information</summary>')
+    const lines = body.slice(start, body.indexOf('</details>', start)).split('\n')
+    let open = null
+    for (const line of lines) {
+      const match = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line)
+      if (!match) {
+        continue
+      }
+      if (!open) {
+        open = match[1]
+      } else if (
+        match[1][0] === open[0] &&
+        match[1].length >= open.length &&
+        match[2].trim() === ''
+      ) {
+        open = null
+      }
+    }
+    return open !== null
+  }
+
+  it('should close an open tilde fence', () => {
+    const body = descriptionBody({ description: '~~~js\ncode' })
+
+    expect(isInsideFenceAtFirstClose({ body })).toBe(false)
+    expect(body).toContain('code\n~~~\n')
+  })
+
+  it('should close a four-backtick fence with four backticks', () => {
+    const body = descriptionBody({ description: '````\ncode\n```\nmore' })
+
+    expect(isInsideFenceAtFirstClose({ body })).toBe(false)
+    expect(body).toContain('more\n````\n')
+  })
+
+  it('should close a fence when the description is cut inside it', () => {
+    const body = descriptionBody({ description: `\`\`\`\n${'x'.repeat(5000)}` })
+
+    expect(isInsideFenceAtFirstClose({ body })).toBe(false)
+  })
+
+  it('should close an open fence in release notes', () => {
+    const body = renderCsv({
+      details: {
+        ...csvDetails,
+        notes: {
+          ...csvDetails.notes,
+          entries: [{ ...csvDetails.notes.entries[0], text: '~~~\nnote' }],
+        },
+      },
+    })
+
+    expect(body).toContain('note\n~~~\n')
+  })
+})
+
+describe('issue reference neutralizing', () => {
+  it('should break issue refs and redirect github links in notes and commits', () => {
+    const text = 'fix #482 and org/repo#5 see https://github.com/a/b/issues/1'
+    const body = renderCsv({
+      details: {
+        ...csvDetails,
+        notes: {
+          ...csvDetails.notes,
+          entries: [{ ...csvDetails.notes.entries[0], text }],
+        },
+        commits: {
+          ...csvDetails.commits,
+          commits: [
+            { sha: 'abcdef1234', message: text, url: 'https://github.com/a/b/commit/abcdef1234' },
+          ],
+        },
+      },
+    })
+
+    expect(body).not.toMatch(/#\d/)
+    expect(body).toContain('#​482')
+    expect(body).toContain('org/repo#​5')
+    expect(body).toContain('https://redirect.github.com/a/b/issues/1')
+    expect(body).not.toContain('see https://github.com/a/b/issues/1')
+  })
+})
+
+describe('cell formatting', () => {
+  const withDownloads = (downloads) => renderCsv({ details: { ...csvDetails, downloads } })
+
+  it('should format thousands as k', () => {
+    expect(withDownloads(197898)).toContain('| 198k |')
+  })
+
+  it('should render n/a for unknown downloads', () => {
+    expect(withDownloads(null)).toContain('| n/a |')
+  })
+
+  it('should not render 1000k near a million', () => {
+    const body = withDownloads(999500)
+
+    expect(body).toContain('| 1.0M |')
+    expect(body).not.toContain('1000k')
+  })
+
+  it('should not link unsafe urls', () => {
+    for (const compare of [
+      'http://x.test/a',
+      'https://x.test/a|b',
+      'javascript:alert(1)',
+      'https://x.test/a)b',
+    ]) {
+      const body = renderCsv({
+        details: {
+          ...csvDetails,
+          notes: { ...csvDetails.notes, links: { ...csvDetails.notes.links, compare: null } },
+          commits: { ...csvDetails.commits, compareUrl: compare },
+        },
+      })
+
+      expect(body).not.toContain(`](${compare})`)
+      expect(body).toContain('| `5.6.0` → `7.0.2` |')
     }
   })
 })

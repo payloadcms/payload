@@ -1,7 +1,6 @@
 import { formatAdvisoryMarker } from './report.mjs'
-import { stripHtmlComments } from './sanitize.mjs'
+import { GHSA_PATTERN, stripHtmlComments } from './sanitize.mjs'
 
-const GHSA_PATTERN = /^GHSA(-[23456789cfghjmpqrvwx]{4}){3}$/
 const MAX_BODY_LENGTH = 60000
 const FRONTMATTER_PATTERN = /^---\r?\n[\s\S]*?\r?\n---\r?\n/
 const UNFILLED_TOKEN_PATTERN = /\{\{[^}]*\}\}/

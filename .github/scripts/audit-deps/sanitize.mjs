@@ -1,5 +1,6 @@
 const ZERO_WIDTH_SPACE = '​'
 const MENTION_PATTERN = /(^|[^\w@])@(?=\w)/g
+const FENCE_PATTERN = /^ {0,3}(`{3,}|~{3,})(.*)$/
 const STRUCTURAL_TAG_PATTERN = /<(\/?)(details|summary)/gi
 
 /**
@@ -16,6 +17,44 @@ export function sanitizeOutsideText({ text, maxLength }) {
     return cleaned
   }
   return `${cleaned.slice(0, Math.max(0, maxLength - 1))}…`
+}
+
+export const GHSA_PATTERN = /^GHSA(-[23456789cfghjmpqrvwx]{4}){3}$/
+
+/**
+ * Stops GitHub from creating cross-reference events on other repos: breaks `#123` and
+ * `owner/repo#123`, and routes github.com links through the redirect host.
+ */
+export function neutralizeIssueRefs({ text }) {
+  return text
+    .replace(/#(?=\d)/g, `#${ZERO_WIDTH_SPACE}`)
+    .replaceAll('https://github.com/', 'https://redirect.github.com/')
+}
+
+/** Appends the closing fence for a fenced code block left open, per CommonMark fence rules. */
+export function closeOpenFence({ text }) {
+  let openFence = null
+
+  for (const line of text.split('\n')) {
+    const match = FENCE_PATTERN.exec(line)
+    if (!match) {
+      continue
+    }
+
+    const [, fence, rest] = match
+    if (!openFence) {
+      const isBacktickInfoInvalid = fence[0] === '`' && rest.includes('`')
+      openFence = isBacktickInfoInvalid ? null : fence
+      continue
+    }
+
+    const isClosing = fence[0] === openFence[0] && fence.length >= openFence.length
+    if (isClosing && rest.trim() === '') {
+      openFence = null
+    }
+  }
+
+  return openFence ? `${text}\n${openFence}` : text
 }
 
 /** Makes text safe inside one markdown table cell. */

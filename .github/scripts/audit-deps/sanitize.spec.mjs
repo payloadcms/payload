@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { escapeTableCell, sanitizeOutsideText, stripHtmlComments } from './sanitize.mjs'
+import {
+  closeOpenFence,
+  escapeTableCell,
+  neutralizeIssueRefs,
+  sanitizeOutsideText,
+  stripHtmlComments,
+} from './sanitize.mjs'
 
 describe('sanitizeOutsideText', () => {
   const clean = (text, maxLength = 1000) => sanitizeOutsideText({ text, maxLength })
@@ -36,6 +42,24 @@ describe('sanitizeOutsideText', () => {
     const result = clean('abcdefghij', 5)
 
     expect(result).toBe('abcd…')
+  })
+})
+
+describe('neutralizeIssueRefs', () => {
+  it('should break refs and redirect github links', () => {
+    expect(neutralizeIssueRefs({ text: '#1 a/b#2 https://github.com/x' })).toBe(
+      '#​1 a/b#​2 https://redirect.github.com/x',
+    )
+  })
+})
+
+describe('closeOpenFence', () => {
+  it('should close with the same character and length', () => {
+    expect(closeOpenFence({ text: '````\na\n```' })).toBe('````\na\n```\n````')
+  })
+
+  it('should leave balanced fences alone', () => {
+    expect(closeOpenFence({ text: '~~~\na\n~~~' })).toBe('~~~\na\n~~~')
   })
 })
 
