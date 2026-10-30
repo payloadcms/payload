@@ -6,6 +6,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { describe, expect, onTestFinished, vi } from 'vitest'
 
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 import type { TestFileServer } from '../__helpers/shared/startTestFileServer.js'
 
 import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
@@ -341,17 +342,49 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
       })
     })
     test.describe('OAuth', () => {
-      const enableOAuth = (
-        payload: Payload,
-        oauth: Record<string, unknown> = { authorizationServers: ['https://auth.example.com'] },
-      ) => {
+      const enableOAuth = (payload: Payload, options: Record<string, unknown> = {}) => {
         const plugin = payload.config.plugins?.find(
           (plugin) => plugin.slug === '@payloadcms/plugin-mcp',
         ) as any
-        plugin.sanitizedOptions.oauth = oauth
+        plugin.sanitizedOptions.oauth = {
+          authorizationServers: ['https://auth.example.com'],
+          ...options,
+        }
         onTestFinished(() => {
           delete plugin.sanitizedOptions.oauth
         })
+      }
+      const postInitialize = ({
+        authorization,
+        restClient,
+      }: {
+        authorization?: string
+        restClient: RESTClient
+      }) =>
+        restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'initialize',
+            params: {
+              capabilities: {},
+              clientInfo: { name: 'oauth-test', version: '1.0.0' },
+              protocolVersion: '2025-11-25',
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            ...(authorization ? { Authorization: authorization } : {}),
+          },
+        })
+      const getLoginToken = async (restClient: RESTClient): Promise<string> => {
+        const { token } = await restClient
+          .POST('/users/login', {
+            body: JSON.stringify({ email: devUser.email, password: devUser.password }),
+          })
+          .then((res) => res.json())
+
+        return token
       }
 
       it('should challenge requests without an authenticated user', async ({
@@ -359,27 +392,10 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         restClient,
       }) => {
         enableOAuth(payload)
-        const postWithAuthorization = (authorization?: string) =>
-          restClient.POST('/mcp', {
-            body: JSON.stringify({
-              id: 1,
-              jsonrpc: '2.0',
-              method: 'initialize',
-              params: {
-                capabilities: {},
-                clientInfo: { name: 'oauth-test', version: '1.0.0' },
-                protocolVersion: '2025-11-25',
-              },
-            }),
-            headers: {
-              Accept: 'application/json, text/event-stream',
-              ...(authorization ? { Authorization: authorization } : {}),
-            },
-          })
         const challenge = `Bearer error="invalid_token", error_description="Unauthorized, you must be logged in to make this request.", resource_metadata="${restClient.serverURL}/api/mcp/oauth-protected-resource"`
 
         for (const authorization of [undefined, 'Bearer invalid-token']) {
-          const response = await postWithAuthorization(authorization)
+          const response = await postInitialize({ authorization, restClient })
           expect(response.status).toBe(401)
           expect(response.headers.get('WWW-Authenticate')).toBe(challenge)
           expect(response.headers.get('Access-Control-Expose-Headers')).toBe('WWW-Authenticate')
@@ -393,12 +409,10 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           resource: `${restClient.serverURL}/api/mcp`,
         })
 
-        const { token } = await restClient
-          .POST('/users/login', {
-            body: JSON.stringify({ email: devUser.email, password: devUser.password }),
-          })
-          .then((res) => res.json())
-        expect((await postWithAuthorization(`Bearer ${token}`)).status).toBe(200)
+        const token = await getLoginToken(restClient)
+        expect(
+          (await postInitialize({ authorization: `Bearer ${token}`, restClient })).status,
+        ).toBe(200)
       })
       it('should serve authorization servers returned by a function of the request', async ({
         payload,
@@ -494,6 +508,69 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
 
         expect(tools.some((tool) => tool.name === 'findDocuments')).toBe(true)
         expect(tools.some((tool) => tool.name === 'updateGlobal')).toBe(false)
+      })
+      it('should run requests as the user oauth.authenticate returns', async ({
+        payload,
+        restClient,
+        userId,
+      }) => {
+        const authenticate = vi.fn(
+          async ({ req, token }: { req: PayloadRequest; token: string }) =>
+            token === 'opaque-token'
+              ? {
+                  ...(await req.payload.findByID({
+                    id: userId,
+                    collection: 'users',
+                    overrideAccess: true,
+                  })),
+                  collection: 'users',
+                }
+              : null,
+        )
+        enableOAuth(payload, { authenticate })
+
+        const authenticated = await postInitialize({
+          authorization: 'Bearer opaque-token',
+          restClient,
+        })
+        expect(authenticated.status).toBe(200)
+        expect(authenticate).toHaveBeenCalledWith(
+          expect.objectContaining({ token: 'opaque-token' }),
+        )
+
+        const unknown = await postInitialize({ authorization: 'Bearer unknown-token', restClient })
+        expect(unknown.status).toBe(401)
+      })
+      it('should not call oauth.authenticate for API key requests', async ({
+        getApiKey,
+        mcp,
+        payload,
+      }) => {
+        const authenticate = vi.fn(() => null)
+        enableOAuth(payload, { authenticate })
+
+        const client = await mcp.connect(await getApiKey())
+        await client.listTools()
+        const invalidKey = await mcp.rawPost({
+          apiKey: 'invalid-api-key',
+          body: { id: 1, jsonrpc: '2.0', method: 'tools/list', params: {} },
+        })
+
+        expect(invalidKey.status).toBe(401)
+        expect(authenticate).not.toHaveBeenCalled()
+      })
+      it('should not call oauth.authenticate for tokens Payload auth accepts', async ({
+        payload,
+        restClient,
+      }) => {
+        const authenticate = vi.fn(() => null)
+        enableOAuth(payload, { authenticate })
+        const token = await getLoginToken(restClient)
+
+        const response = await postInitialize({ authorization: `Bearer ${token}`, restClient })
+
+        expect(response.status).toBe(200)
+        expect(authenticate).not.toHaveBeenCalled()
       })
     })
     test.describe('List', () => {
