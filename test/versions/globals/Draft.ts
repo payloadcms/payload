@@ -47,6 +47,13 @@ const DraftGlobal: GlobalConfig = {
         ],
       }
     },
+    update: ({ req: { context, payload, user } }) => {
+      if (context?.denyDraftGlobalUpdate === true) {
+        return false
+      }
+
+      return Boolean(user) && user?.collection === payload.config.admin.user
+    },
   },
   fields: [
     {
