@@ -8,6 +8,8 @@ import {
   stripHtmlComments,
 } from './sanitize.mjs'
 
+const ZERO_WIDTH_SPACE = '​'
+
 describe('sanitizeOutsideText', () => {
   const clean = (text, maxLength = 1000) => sanitizeOutsideText({ text, maxLength })
 
@@ -28,6 +30,20 @@ describe('sanitizeOutsideText', () => {
 
   it('should break mentions with a zero-width space', () => {
     expect(clean('thanks @dotansimha')).toBe('thanks @​dotansimha')
+  })
+
+  it('should break a mention after a doubled at sign', () => {
+    const result = clean('@@octocat')
+
+    expect(result).toBe(`@@${ZERO_WIDTH_SPACE}octocat`)
+    expect(result).not.toMatch(/@\w/)
+  })
+
+  it('should break a doubled-at mention that follows a word', () => {
+    const result = clean('x@@name')
+
+    expect(result).toBe(`x@@${ZERO_WIDTH_SPACE}name`)
+    expect(result).not.toMatch(/@\w/)
   })
 
   it('should leave emails unchanged', () => {
@@ -67,6 +83,24 @@ describe('neutralizeIssueRefs', () => {
 
     expect(neutralizeIssueRefs({ text })).toBe(
       'https://redirect.github.com/a https://redirect.github.com/b https://redirect.github.com/c',
+    )
+  })
+
+  it('should rewrite http links', () => {
+    expect(neutralizeIssueRefs({ text: 'http://github.com/a HTTP://www.GitHub.com/b' })).toBe(
+      'https://redirect.github.com/a https://redirect.github.com/b',
+    )
+  })
+
+  it('should rewrite protocol-relative links', () => {
+    expect(neutralizeIssueRefs({ text: '[x](//github.com/a) //WWW.github.com/b' })).toBe(
+      '[x](https://redirect.github.com/a) https://redirect.github.com/b',
+    )
+  })
+
+  it('should rewrite bare www links', () => {
+    expect(neutralizeIssueRefs({ text: 'see www.github.com/a or WWW.GITHUB.COM/b' })).toBe(
+      'see https://redirect.github.com/a or https://redirect.github.com/b',
     )
   })
 })

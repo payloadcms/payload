@@ -1,8 +1,9 @@
 const ZERO_WIDTH_SPACE = '​'
-const MENTION_PATTERN = /(^|[^\w@])@(?=\w)/g
+const MENTION_PATTERN = /(?<!\w)@(?=\w)/g
 const FENCE_PATTERN = /^ {0,3}(`{3,}|~{3,})(.*)$/
 const STRUCTURAL_TAG_PATTERN = /<(\/?)(details|summary)/gi
-const GITHUB_URL_PATTERN = /https:\/\/(www\.)?github\.com\//gi
+// GitHub autolinks bare `www.` hosts and resolves protocol-relative links, so both count.
+const GITHUB_URL_PATTERN = /(?:https?:)?\/\/(?:www\.)?github\.com\/|(?<![\w.-])www\.github\.com\//gi
 
 /**
  * Cleans text from outside the repo (advisories, release notes, commits, Codex) before it
@@ -12,7 +13,7 @@ const GITHUB_URL_PATTERN = /https:\/\/(www\.)?github\.com\//gi
 export function sanitizeOutsideText({ text, maxLength }) {
   const cleaned = neutralizeIssueRefs({
     text: stripHtmlComments({ text: String(text ?? '') })
-      .replace(MENTION_PATTERN, `$1@${ZERO_WIDTH_SPACE}`)
+      .replace(MENTION_PATTERN, `@${ZERO_WIDTH_SPACE}`)
       .replace(STRUCTURAL_TAG_PATTERN, '&lt;$1$2'),
   })
 
