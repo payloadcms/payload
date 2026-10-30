@@ -1400,7 +1400,12 @@ export const getPayload = async (
       // before the change, and that call used the flag to reload with the older config. A different
       // config object is a change too. Module caching keeps the object the same until it changes.
       const config = await options.config
-      if (config !== cached.payload.config) {
+      // Another call may have started a reload while this one awaited its config: wait for it
+      // instead of starting a second, concurrent reload, then compare with its result.
+      if (cached.reload instanceof Promise) {
+        await cached.reload
+      }
+      if (cached.reload === false && config !== cached.payload.config) {
         cached.reload = true
       }
     }
