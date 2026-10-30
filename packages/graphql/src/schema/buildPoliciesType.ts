@@ -24,9 +24,45 @@ type OperationType =
 
 type AccessScopes = 'docAccess' | undefined
 
-type ObjectTypeFields = {
-  [key in 'fields' | OperationType]?: { type: GraphQLObjectType }
+type PolicyFieldConfig = {
+  resolve?: (parent: unknown) => unknown
+  type: GraphQLObjectType
 }
+
+type ObjectTypeFields = {
+  [key in 'fields' | OperationType]?: PolicyFieldConfig
+}
+
+/**
+ * `accessOperation` and `docAccessOperation` return sanitized permissions: an operation allowed
+ * without a `where` constraint is collapsed to `true`, a field (or `fields` object) whose
+ * operations are all allowed is collapsed to `true`, and operations that are not allowed are removed.
+ * The resolvers below map these values back to the `{ permission, where }` shape of the policy types.
+ */
+const resolveOperationPermission = (operation: string) => (parent: unknown) => {
+  if (parent === true) {
+    return { permission: true }
+  }
+
+  const value = (parent as Record<string, unknown> | undefined)?.[operation]
+
+  if (value === true) {
+    return { permission: true }
+  }
+
+  if (value && typeof value === 'object') {
+    return value
+  }
+
+  return { permission: false }
+}
+
+/**
+ * Resolves a nested permissions object by its key. If the parent is `true`, everything below it is
+ * allowed. If the key was removed during sanitization, everything below it is denied.
+ */
+const resolveNestedPermissions = (key: string) => (parent: unknown) =>
+  parent === true ? true : ((parent as Record<string, unknown> | undefined)?.[key] ?? {})
 
 const buildFields = (label, fieldsToBuild) =>
   fieldsToBuild.reduce((builtFields, field) => {
@@ -55,6 +91,7 @@ const buildFields = (label, fieldsToBuild) =>
                   },
                 },
               }),
+              resolve: resolveOperationPermission(operation),
             },
           }
         }, {})
@@ -67,6 +104,7 @@ const buildFields = (label, fieldsToBuild) =>
               name: `${label}_${fieldName}_Fields`,
               fields: subFields,
             }),
+            resolve: resolveNestedPermissions('fields'),
           }
         }
 
@@ -77,6 +115,8 @@ const buildFields = (label, fieldsToBuild) =>
               name: `${label}_${fieldName}`,
               fields: objectTypeFields,
             }),
+            // Permissions are keyed by the field name, which can differ from the formatted GraphQL name
+            resolve: resolveNestedPermissions(field.name),
           },
         }
       }
@@ -103,6 +143,9 @@ const buildFields = (label, fieldsToBuild) =>
                     name: `${label}_${tabName}`,
                     fields: subFields,
                   }),
+                  // A named tab's field permissions are nested under its `fields` key
+                  resolve: (parent: unknown) =>
+                    resolveNestedPermissions('fields')(resolveNestedPermissions(tab.name)(parent)),
                 }
               }
               return fieldsWithTabFields
@@ -138,6 +181,7 @@ export const buildEntityPolicy = (args: BuildEntityPolicy) => {
         name: fieldsTypeName,
         fields: policyFields,
       }),
+      resolve: resolveNestedPermissions('fields'),
     }
   }
 
@@ -152,6 +196,7 @@ export const buildEntityPolicy = (args: BuildEntityPolicy) => {
           where: { type: GraphQLJSONObject },
         },
       }),
+      resolve: resolveOperationPermission(operation),
     }
   })
 
