@@ -97,6 +97,84 @@ export async function checkHeadUnchanged({ github, headSha, owner, prNumber, rep
   }
 }
 
+/**
+ * Ids of artifacts named `<artifactPrefix><id>` that the job leg `jobNameFor(id)` of this run
+ * attempt uploaded. A job that runs package scripts can upload under any name first, so an
+ * artifact counts only when that leg succeeded, the artifact was created while the leg ran,
+ * and it is the only one that was. Every other id is left out with a warning.
+ * @returns {Promise<Record<string, number>>}
+ */
+export async function findSealedArtifacts({
+  artifactPrefix,
+  github,
+  jobNameFor,
+  owner,
+  repo,
+  runAttempt,
+  runId,
+}) {
+  const [artifacts, jobs] = await Promise.all([
+    github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+      owner,
+      per_page: 100,
+      repo,
+      run_id: runId,
+    }),
+    github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+      filter: 'latest',
+      owner,
+      per_page: 100,
+      repo,
+      run_id: runId,
+    }),
+  ])
+
+  const artifactsById = new Map()
+  for (const artifact of artifacts) {
+    if (artifact.expired || !artifact.name.startsWith(artifactPrefix)) {
+      continue
+    }
+    const id = artifact.name.slice(artifactPrefix.length)
+    artifactsById.set(id, [...(artifactsById.get(id) ?? []), artifact])
+  }
+
+  const sealed = {}
+  for (const [id, candidates] of artifactsById) {
+    const leg = findSuccessfulLeg({ jobName: jobNameFor(id), jobs, runAttempt })
+    const uploaded = leg ? candidates.filter((artifact) => isWithinLeg({ artifact, leg })) : []
+    if (uploaded.length !== 1) {
+      console.log(
+        `::warning::Ignoring artifact ${escapeCommandText({ text: `${artifactPrefix}${id}` })}: not uploaded by its leg in this run attempt`,
+      )
+      continue
+    }
+    sealed[id] = uploaded[0].id
+  }
+
+  return sealed
+}
+
+// Jobs of a reusable workflow are listed as `<caller job> / <job>`.
+function findSuccessfulLeg({ jobName, jobs, runAttempt }) {
+  const legs = jobs.filter(
+    (job) =>
+      job.run_attempt === runAttempt &&
+      (job.name === jobName || job.name?.endsWith(` / ${jobName}`)),
+  )
+
+  return legs.length === 1 && legs[0].conclusion === 'success' ? legs[0] : null
+}
+
+function isWithinLeg({ artifact, leg }) {
+  const createdAt = Date.parse(artifact.created_at)
+
+  return createdAt >= Date.parse(leg.started_at) && createdAt <= Date.parse(leg.completed_at)
+}
+
+function escapeCommandText({ text }) {
+  return text.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A')
+}
+
 async function closeStalePr({ github, owner, prNumber, ref, repo }) {
   const { data: pr } = await github.rest.pulls.get({ owner, pull_number: prNumber, repo })
   const branch = pr.head.ref

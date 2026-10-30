@@ -1,7 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { formatMarker } from './decide.mjs'
-import { checkHeadUnchanged, closeStalePrs, commentOnFailedUnits, runPrecheck } from './github.mjs'
+import {
+  checkHeadUnchanged,
+  closeStalePrs,
+  commentOnFailedUnits,
+  findSealedArtifacts,
+  runPrecheck,
+} from './github.mjs'
 
 const OWNER = 'payloadcms'
 const REPO = 'payload'
@@ -760,5 +766,115 @@ describe('checkHeadUnchanged', () => {
     expect(result).toBe(false)
     expect(log).toHaveBeenCalledWith(expect.stringMatching(/^::warning::.*#3/))
     log.mockRestore()
+  })
+})
+
+describe('findSealedArtifacts', () => {
+  const RUN_ID = 77
+  const leg = (overrides) => ({
+    completed_at: '2026-10-30T10:10:00Z',
+    conclusion: 'success',
+    name: 'audit (main) / research (main, lodash-4)',
+    run_attempt: 2,
+    started_at: '2026-10-30T10:00:00Z',
+    ...overrides,
+  })
+  const artifact = (overrides) => ({
+    created_at: '2026-10-30T10:05:00Z',
+    expired: false,
+    id: 501,
+    name: 'research-main-lodash-4',
+    ...overrides,
+  })
+
+  const seal = async ({ artifacts, jobs }) => {
+    const rest = { actions: { listJobsForWorkflowRun: vi.fn(), listWorkflowRunArtifacts: vi.fn() } }
+    const paginate = vi.fn(async (method) =>
+      method === rest.actions.listJobsForWorkflowRun ? jobs : artifacts,
+    )
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    const sealed = await findSealedArtifacts({
+      artifactPrefix: 'research-main-',
+      github: { paginate, rest },
+      jobNameFor: (id) => `research (main, ${id})`,
+      owner: OWNER,
+      repo: REPO,
+      runAttempt: 2,
+      runId: RUN_ID,
+    })
+    const warnings = log.mock.calls.map(([line]) => line)
+    log.mockRestore()
+
+    return { paginate, rest, sealed, warnings }
+  }
+
+  it('should accept an artifact created while its successful leg ran', async () => {
+    const { paginate, rest, sealed, warnings } = await seal({
+      artifacts: [artifact({})],
+      jobs: [leg({})],
+    })
+
+    expect(sealed).toEqual({ 'lodash-4': 501 })
+    expect(warnings).toEqual([])
+    expect(paginate).toHaveBeenCalledWith(
+      rest.actions.listJobsForWorkflowRun,
+      expect.objectContaining({ filter: 'latest', run_id: RUN_ID }),
+    )
+  })
+
+  it('should reject an artifact created before its leg started', async () => {
+    const { sealed, warnings } = await seal({
+      artifacts: [artifact({ created_at: '2026-10-30T09:59:59Z' })],
+      jobs: [leg({})],
+    })
+
+    expect(sealed).toEqual({})
+    expect(warnings).toEqual([expect.stringMatching(/^::warning::.*research-main-lodash-4/)])
+  })
+
+  it('should reject an artifact whose leg failed', async () => {
+    const { sealed } = await seal({
+      artifacts: [artifact({})],
+      jobs: [leg({ conclusion: 'failure' })],
+    })
+
+    expect(sealed).toEqual({})
+  })
+
+  it('should ignore a leg from a previous attempt', async () => {
+    const { sealed } = await seal({
+      artifacts: [artifact({})],
+      jobs: [leg({ run_attempt: 1 })],
+    })
+
+    expect(sealed).toEqual({})
+  })
+
+  it('should reject an id with two artifacts inside the leg window', async () => {
+    const { sealed } = await seal({
+      artifacts: [artifact({}), artifact({ created_at: '2026-10-30T10:06:00Z', id: 502 })],
+      jobs: [leg({})],
+    })
+
+    expect(sealed).toEqual({})
+  })
+
+  it('should keep the in-window artifact when an earlier attempt left one with the same name', async () => {
+    const { sealed } = await seal({
+      artifacts: [artifact({ created_at: '2026-10-29T10:05:00Z', id: 400 }), artifact({})],
+      jobs: [leg({})],
+    })
+
+    expect(sealed).toEqual({ 'lodash-4': 501 })
+  })
+
+  it('should not match a leg of another ref by suffix', async () => {
+    const { sealed } = await seal({
+      artifacts: [artifact({})],
+      jobs: [leg({ name: 'audit (3.x) / research (3.x, lodash-4)' })],
+    })
+
+    expect(sealed).toEqual({})
   })
 })

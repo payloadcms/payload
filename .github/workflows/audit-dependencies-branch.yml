@@ -38,13 +38,19 @@ env:
 # Artifacts: audit-plan-<ref> (report, plan, store), research-<ref>-<bumpId> (<bumpId>.json),
 # verify-<ref>-<unitId> (<unitId>.json), pr-<ref>-<unitId> (<unitId>.json).
 # verify runs package scripts that can reach the runtime token and write caches and artifacts,
-# so only verify uses the pnpm cache, and plan and research results are downloaded by id.
+# so no job uses the pnpm cache, and every artifact is downloaded by an id that seal or
+# seal_verify tied to the job leg that uploaded it.
 jobs:
   # A cache entry may come from a job that ran package scripts, and restore can extract it to
-  # any path, so it is restored here, with nothing to steal, and only checked JSON leaves.
+  # any path, so it is restored in a job with no secrets, and only checked JSON leaves. The job
+  # still holds the runtime token, so its shell reads no profile and runs only root-owned
+  # binaries by absolute path, which the restore cannot replace.
   store:
     runs-on: ubuntu-26.04
     permissions: {}
+    defaults:
+      run:
+        shell: /usr/bin/bash --noprofile --norc -euo pipefail {0}
     outputs:
       store: ${{ steps.validate.outputs.store }}
     steps:
@@ -64,9 +70,9 @@ jobs:
           set -euo pipefail
           file="$RUNNER_TEMP/audit-deps-store/store.json"
           store='{"entries":[]}'
-          if [ -f "$file" ] && [ ! -L "$file" ] && [ "$(stat -c %s "$file")" -le 262144 ]; then
+          if [ -f "$file" ] && [ ! -L "$file" ] && [ "$(/usr/bin/stat -c %s "$file")" -le 262144 ]; then
             # Slurp so the file holds exactly one document and the output stays one line.
-            if checked="$(jq -cs 'if length == 1 and (.[0] | type) == "object" and (.[0].entries | type) == "array" then { entries: .[0].entries } else error("bad shape") end' "$file")"; then
+            if checked="$(/usr/bin/jq -cs 'if length == 1 and (.[0] | type) == "object" and (.[0].entries | type) == "array" then { entries: .[0].entries } else error("bad shape") end' "$file")"; then
               store="$checked"
             else
               echo "::warning::The decision store is not valid; starting from an empty store"
@@ -121,7 +127,7 @@ jobs:
           # The audit resolves each package's dependencies fresh; a full
           # workspace install is not needed.
           pnpm-run-install: false
-          # Only verify uses the pnpm cache; any job that ran package scripts could have written it.
+          # No job uses the pnpm cache; any job that ran package scripts could have written it.
           pnpm-restore-cache: false
 
       - name: Run audit dependencies action
@@ -200,7 +206,8 @@ jobs:
           retention-days: 7
 
   research:
-    name: research (${{ matrix.bumpId }})
+    # seal matches this name to the leg's artifact; the ref keeps it unique across both refs.
+    name: research (${{ inputs.ref }}, ${{ matrix.bumpId }})
     needs: precheck
     if: needs.precheck.outputs.research_matrix != '[]'
     strategy:
@@ -347,51 +354,56 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  # Fixes the research artifact ids before any job of this ref runs package scripts, so a later
-  # upload under the same name is never read.
+  # Any job that runs package scripts can upload under a research artifact's name first, so only
+  # an artifact its own successful leg created counts.
   seal:
     needs: [precheck, research]
-    if: always() && needs.precheck.result == 'success'
+    if: ${{ !cancelled() && needs.precheck.result == 'success' }}
     runs-on: ubuntu-26.04
     permissions:
       actions: read
     outputs:
-      research_artifact_ids: ${{ steps.list.outputs.research_artifact_ids }}
-      research_artifacts: ${{ steps.list.outputs.research_artifacts }}
+      research_artifact_ids: ${{ steps.seal.outputs.ids }}
     steps:
-      - name: List research artifacts
-        id: list
+      - name: Checkout tooling
+        env:
+          TOOLING_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tooling="$RUNNER_TEMP/audit-deps-tooling"
+          git clone -q --filter=blob:none --no-checkout --depth=1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$tooling"
+          git -C "$tooling" sparse-checkout set --no-cone /.github/scripts/audit-deps/ /.agents/skills/audit-dependencies/
+          git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
+          git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
+
+      - name: Seal research artifacts
+        id: seal
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           REF: ${{ inputs.ref }}
-          RESEARCH_MATRIX: ${{ needs.precheck.outputs.research_matrix }}
         with:
           github-token: ${{ github.token }}
           script: |
-            const prefix = `research-${process.env.REF}-`
-            const expected = new Set(JSON.parse(process.env.RESEARCH_MATRIX).map((entry) => entry.bumpId))
-            const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+            const { findSealedArtifacts } = await import(
+              `${process.env.RUNNER_TEMP}/audit-deps-tooling/.github/scripts/audit-deps/github.mjs`
+            )
+
+            const ref = process.env.REF
+            const sealed = await findSealedArtifacts({
+              artifactPrefix: `research-${ref}-`,
+              github,
+              jobNameFor: (bumpId) => `research (${ref}, ${bumpId})`,
               owner: context.repo.owner,
-              per_page: 100,
               repo: context.repo.repo,
-              run_id: context.runId,
+              runAttempt: Number(process.env.GITHUB_RUN_ATTEMPT),
+              runId: context.runId,
             })
 
-            // A re-run attempt can list the same name twice; the newest upload wins.
-            const ids = {}
-            for (const artifact of artifacts) {
-              const bumpId = artifact.name.startsWith(prefix) ? artifact.name.slice(prefix.length) : null
-              if (artifact.expired || !expected.has(bumpId)) {
-                continue
-              }
-              ids[bumpId] = Math.max(ids[bumpId] ?? 0, artifact.id)
-            }
-
-            core.setOutput('research_artifacts', JSON.stringify(ids))
-            core.setOutput('research_artifact_ids', Object.values(ids).join(','))
+            core.setOutput('ids', Object.values(sealed).join(','))
 
   verify:
-    name: verify (${{ matrix.unitId }})
+    # seal_verify matches this name to the leg's artifact; the ref keeps it unique across both refs.
+    name: verify (${{ inputs.ref }}, ${{ matrix.unitId }})
     needs: [precheck, research, seal]
     # Runs after failed research legs too; a bump without a valid result is not applied.
     if: >-
@@ -662,13 +674,64 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  # Verify legs run in parallel, so one leg can upload under another unit's name first; only an
+  # artifact its own successful leg created counts.
+  seal_verify:
+    needs: [precheck, verify]
+    if: ${{ !cancelled() && needs.precheck.result == 'success' }}
+    runs-on: ubuntu-26.04
+    permissions:
+      actions: read
+    outputs:
+      verify_artifact_ids: ${{ steps.seal.outputs.ids }}
+      verify_artifacts: ${{ steps.seal.outputs.artifacts }}
+    steps:
+      - name: Checkout tooling
+        env:
+          TOOLING_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tooling="$RUNNER_TEMP/audit-deps-tooling"
+          git clone -q --filter=blob:none --no-checkout --depth=1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$tooling"
+          git -C "$tooling" sparse-checkout set --no-cone /.github/scripts/audit-deps/ /.agents/skills/audit-dependencies/
+          git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
+          git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
+
+      - name: Seal verify artifacts
+        id: seal
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          REF: ${{ inputs.ref }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { findSealedArtifacts } = await import(
+              `${process.env.RUNNER_TEMP}/audit-deps-tooling/.github/scripts/audit-deps/github.mjs`
+            )
+
+            const ref = process.env.REF
+            const sealed = await findSealedArtifacts({
+              artifactPrefix: `verify-${ref}-`,
+              github,
+              jobNameFor: (unitId) => `verify (${ref}, ${unitId})`,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              runAttempt: Number(process.env.GITHUB_RUN_ATTEMPT),
+              runId: context.runId,
+            })
+
+            core.setOutput('artifacts', JSON.stringify(sealed))
+            core.setOutput('ids', Object.values(sealed).join(','))
+
   open_pr:
-    name: open_pr (${{ matrix.unitId }})
-    needs: [precheck, seal, verify]
+    # status seals PR number artifacts by this name; the ref keeps it unique across both refs.
+    name: open_pr (${{ inputs.ref }}, ${{ matrix.unitId }})
+    needs: [precheck, seal, verify, seal_verify]
     if: >-
       !cancelled() &&
       needs.precheck.result == 'success' &&
       needs.seal.result == 'success' &&
+      needs.seal_verify.result == 'success' &&
       inputs.is-default-inputs &&
       needs.precheck.outputs.open_pr_matrix != '[]'
     strategy:
@@ -722,10 +785,12 @@ jobs:
           path: ${{ runner.temp }}/research
           merge-multiple: true
 
+      # A unit without a sealed id has no verify result, and gets no PR.
       - name: Download verify result
+        if: fromJSON(needs.seal_verify.outputs.verify_artifacts)[matrix.unitId] != ''
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: verify-${{ inputs.ref }}-${{ matrix.unitId }}
+          artifact-ids: ${{ fromJSON(needs.seal_verify.outputs.verify_artifacts)[matrix.unitId] }}
           path: ${{ runner.temp }}/verify
 
       - name: Select bumps
@@ -746,7 +811,13 @@ jobs:
           UNIT_ID: ${{ matrix.unitId }}
         run: |
           set -euo pipefail
-          passed="$(jq -c '.passed' "$RUNNER_TEMP/verify/$UNIT_ID.json")"
+          result="$RUNNER_TEMP/verify/$UNIT_ID.json"
+          if [ ! -f "$result" ]; then
+            echo "::warning::No sealed verify result for $UNIT_ID; no PR is opened or updated"
+            echo "bump_ids=[]" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          passed="$(jq -c '.passed' "$result")"
           if ! jq -en --argjson passed "$passed" --argjson selected "$SELECTED" '
             ($passed | type) == "array"
             and all($passed[]; type == "string" and (. as $id | any($selected[]; . == $id)))
@@ -914,12 +985,13 @@ jobs:
           retention-days: 7
 
   housekeeping:
-    needs: [precheck, research, seal, verify]
-    # Skipped on cancel or without seal: missing results would read as failures and post wrong comments.
+    needs: [precheck, research, seal, verify, seal_verify]
+    # Skipped on cancel or without seals: missing results would read as failures and post wrong comments.
     if: >-
       !cancelled() &&
       needs.precheck.result == 'success' &&
       needs.seal.result == 'success' &&
+      needs.seal_verify.result == 'success' &&
       inputs.is-default-inputs
     runs-on: ubuntu-26.04
     environment: audit-deps
@@ -954,10 +1026,12 @@ jobs:
           path: ${{ runner.temp }}/research
           merge-multiple: true
 
+      # Ids come from seal_verify; a unit without one has no verify result.
       - name: Download verify results
+        if: needs.seal_verify.outputs.verify_artifact_ids != ''
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          pattern: verify-${{ inputs.ref }}-*
+          artifact-ids: ${{ needs.seal_verify.outputs.verify_artifact_ids }}
           path: ${{ runner.temp }}/verify
           merge-multiple: true
 
@@ -1017,10 +1091,11 @@ jobs:
             })
 
   status:
-    needs: [store, precheck, research, seal, verify, open_pr, housekeeping]
+    needs: [store, precheck, research, seal, verify, seal_verify, open_pr, housekeeping]
     if: always()
     runs-on: ubuntu-26.04
-    permissions: {}
+    permissions:
+      actions: read
     steps:
       - name: Checkout tooling
         if: needs.precheck.result == 'success'
@@ -1051,18 +1126,46 @@ jobs:
           merge-multiple: true
 
       - name: Download verify results
-        if: needs.precheck.result == 'success'
+        if: needs.precheck.result == 'success' && needs.seal_verify.outputs.verify_artifact_ids != ''
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          pattern: verify-${{ inputs.ref }}-*
+          artifact-ids: ${{ needs.seal_verify.outputs.verify_artifact_ids }}
           path: ${{ runner.temp }}/verify
           merge-multiple: true
 
+      # PR numbers only feed summary links and draft warnings, so a failure here is not fatal.
+      - name: Seal PR number artifacts
+        id: seal-prs
+        if: needs.precheck.result == 'success' && needs.open_pr.result != 'skipped'
+        continue-on-error: true
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          REF: ${{ inputs.ref }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { findSealedArtifacts } = await import(
+              `${process.env.RUNNER_TEMP}/audit-deps-tooling/.github/scripts/audit-deps/github.mjs`
+            )
+
+            const ref = process.env.REF
+            const sealed = await findSealedArtifacts({
+              artifactPrefix: `pr-${ref}-`,
+              github,
+              jobNameFor: (unitId) => `open_pr (${ref}, ${unitId})`,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              runAttempt: Number(process.env.GITHUB_RUN_ATTEMPT),
+              runId: context.runId,
+            })
+
+            core.setOutput('ids', Object.values(sealed).join(','))
+
       - name: Download PR numbers
-        if: needs.precheck.result == 'success'
+        if: steps.seal-prs.outputs.ids != ''
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          pattern: pr-${{ inputs.ref }}-*
+          artifact-ids: ${{ steps.seal-prs.outputs.ids }}
           path: ${{ runner.temp }}/prs
           merge-multiple: true
 
