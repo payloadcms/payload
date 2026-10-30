@@ -327,7 +327,7 @@ test.suite(
         ),
       )
 
-      // Each ID is queried both as a number and as a string, so 61 IDs bind 122 parameters
+      // The query sanitization adds each ID twice, so 61 IDs bind 122 parameters
       const NOT_IN = [excludedCategory!.id, ...Array.from({ length: 60 }, (_, i) => 100000 + i)]
 
       const restoreExecute = limitBoundParameters(payload)
