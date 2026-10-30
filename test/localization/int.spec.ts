@@ -285,8 +285,8 @@ describe('Localization', () => {
         const localizedFallback: any = await payload.findByID({
           id: postWithLocalizedData.id,
           collection,
-          locale: portugueseLocale,
           fallbackLocale: 'none',
+          locale: portugueseLocale,
         })
 
         expect(localizedFallback.title).not.toBeDefined()
@@ -498,8 +498,8 @@ describe('Localization', () => {
               localizedAccentPostOne = await payload.create({
                 collection,
                 data: {
-                  title: 'non accent post',
                   localizedDescription: 'something',
+                  title: 'non accent post',
                 },
                 locale: englishLocale,
               })
@@ -507,8 +507,8 @@ describe('Localization', () => {
               localizedAccentPostTwo = await payload.create({
                 collection,
                 data: {
-                  title: 'accent post',
                   localizedDescription: 'veterinarian',
+                  title: 'accent post',
                 },
                 locale: englishLocale,
               })
@@ -517,8 +517,8 @@ describe('Localization', () => {
                 id: localizedAccentPostOne.id,
                 collection,
                 data: {
-                  title: 'non accent post',
                   localizedDescription: 'valami',
+                  title: 'non accent post',
                 },
                 locale: hungarianLocale,
               })
@@ -527,8 +527,8 @@ describe('Localization', () => {
                 id: localizedAccentPostTwo.id,
                 collection,
                 data: {
-                  title: 'accent post',
                   localizedDescription: 'állatorvos',
+                  title: 'accent post',
                 },
                 locale: hungarianLocale,
               })
@@ -537,13 +537,13 @@ describe('Localization', () => {
             it('should sort alphabetically even with accented letters', async () => {
               const sortByDescriptionQuery = await payload.find({
                 collection,
+                locale: hungarianLocale,
                 sort: 'description',
                 where: {
                   title: {
                     like: 'accent',
                   },
                 },
-                locale: hungarianLocale,
               })
 
               expect(sortByDescriptionQuery.docs[0].id).toEqual(localizedAccentPostTwo.id)
@@ -558,8 +558,8 @@ describe('Localization', () => {
         const document = await payload.create({
           collection: localizedDateFieldsSlug,
           data: {
-            localizedDate: new Date().toISOString(),
             date: new Date().toISOString(),
+            localizedDate: new Date().toISOString(),
           },
         })
         expect(document.localizedDate).toBeTruthy()
@@ -569,8 +569,8 @@ describe('Localization', () => {
         const document = await payload.create({
           collection: localizedDateFieldsSlug,
           data: {
-            localizedDate: new Date().toISOString(),
             date: new Date().toISOString(),
+            localizedDate: new Date().toISOString(),
           },
         })
 
@@ -688,9 +688,9 @@ describe('Localization', () => {
           const post = await payload.create({ collection: 'localized-sort', data: { title: en } })
           const es = randomWordsSpanish[i]
           await payload.update({
+            id: post.id,
             collection: 'localized-sort',
             data: { title: es },
-            id: post.id,
             locale: 'es',
           })
 
@@ -728,9 +728,9 @@ describe('Localization', () => {
         // Fetch sorted words in Spanish (ascending)
         const { docs: randomWordsEsAsc } = await payload.find({
           collection: localizedSortSlug,
+          locale: 'es',
           sort: 'title',
           where: q,
-          locale: 'es',
         })
 
         randomWordsEsAsc.forEach((doc, i) => {
@@ -740,9 +740,9 @@ describe('Localization', () => {
         // Fetch sorted words in Spanish (descending)
         const { docs: randomWordsEsDesc } = await payload.find({
           collection: localizedSortSlug,
+          locale: 'es',
           sort: '-title',
           where: q,
-          locale: 'es',
         })
 
         randomWordsEsDesc.forEach((doc, i) => {
@@ -1780,14 +1780,26 @@ describe('Localization', () => {
         const doc = await payload.create({
           collection: withRequiredLocalizedFields,
           data: {
+            myTab: {
+              group: {
+                nestedArray2: [
+                  {
+                    nestedText: 'hello',
+                  },
+                  {
+                    nestedText: 'goodbye',
+                  },
+                ],
+                nestedText: 'hello',
+              },
+              text: 'hello',
+            },
             nav: {
               layout: [
                 {
                   blockType: 'text',
-                  text: englishText,
                   nestedArray: [
                     {
-                      text: 'hello',
                       l2: [
                         {
                           l3: [
@@ -1801,9 +1813,9 @@ describe('Localization', () => {
                           ],
                         },
                       ],
+                      text: 'hello',
                     },
                     {
-                      text: 'goodbye',
                       l2: [
                         {
                           l3: [
@@ -1817,24 +1829,12 @@ describe('Localization', () => {
                           ],
                         },
                       ],
+                      text: 'goodbye',
                     },
                   ],
+                  text: englishText,
                 },
               ],
-            },
-            myTab: {
-              text: 'hello',
-              group: {
-                nestedText: 'hello',
-                nestedArray2: [
-                  {
-                    nestedText: 'hello',
-                  },
-                  {
-                    nestedText: 'goodbye',
-                  },
-                ],
-              },
             },
             title: 'hello',
           },
@@ -1845,14 +1845,26 @@ describe('Localization', () => {
           id: doc.id,
           collection: withRequiredLocalizedFields,
           data: {
+            myTab: {
+              group: {
+                nestedArray2: [
+                  {
+                    nestedText: 'hola',
+                  },
+                  {
+                    nestedText: 'adios',
+                  },
+                ],
+                nestedText: 'hola',
+              },
+              text: 'hola',
+            },
             nav: {
               layout: [
                 {
                   blockType: 'text',
-                  text: spanishText,
                   nestedArray: [
                     {
-                      text: 'hola',
                       l2: [
                         {
                           l3: [
@@ -1866,9 +1878,9 @@ describe('Localization', () => {
                           ],
                         },
                       ],
+                      text: 'hola',
                     },
                     {
-                      text: 'adios',
                       l2: [
                         {
                           l3: [
@@ -1882,26 +1894,14 @@ describe('Localization', () => {
                           ],
                         },
                       ],
+                      text: 'adios',
                     },
                   ],
+                  text: spanishText,
                 },
               ],
             },
             title: 'hello',
-            myTab: {
-              text: 'hola',
-              group: {
-                nestedText: 'hola',
-                nestedArray2: [
-                  {
-                    nestedText: 'hola',
-                  },
-                  {
-                    nestedText: 'adios',
-                  },
-                ],
-              },
-            },
           },
           locale: spanishLocale,
         })
@@ -1937,8 +1937,8 @@ describe('Localization', () => {
         const post = await payload.create({
           collection,
           data: {
-            title: englishTitle,
             description: 'keep me',
+            title: englishTitle,
           },
         })
 
@@ -1984,25 +1984,25 @@ describe('Localization', () => {
         expect(result.groupLocalized?.title).toBe('hello en')
 
         await payload.update({
-          collection: groupSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: groupSlug,
           data: {
             groupLocalized: {
               title: 'hello es',
             },
           },
+          locale: spanishLocale,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: groupSlug,
           locale: englishLocale,
-          id: result.id,
         })
         const docEs = await payload.findByID({
+          id: result.id,
           collection: groupSlug,
           locale: spanishLocale,
-          id: result.id,
         })
 
         expect(docEn.groupLocalized.title).toBe('hello en')
@@ -2012,36 +2012,36 @@ describe('Localization', () => {
       it('should properly create/update/read localized field inside of group', async () => {
         const result = await payload.create({
           collection: groupSlug,
-          locale: englishLocale,
           data: {
             group: {
               title: 'hello en',
             },
           },
+          locale: englishLocale,
         })
 
         expect(result.group.title).toBe('hello en')
 
         await payload.update({
-          collection: groupSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: groupSlug,
           data: {
             group: {
               title: 'hello es',
             },
           },
+          locale: spanishLocale,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: groupSlug,
           locale: englishLocale,
-          id: result.id,
         })
         const docEs = await payload.findByID({
+          id: result.id,
           collection: groupSlug,
           locale: spanishLocale,
-          id: result.id,
         })
 
         expect(docEn.group.title).toBe('hello en')
@@ -2051,54 +2051,54 @@ describe('Localization', () => {
       it('should properly create/update/read deep localized field inside of group', async () => {
         const result = await payload.create({
           collection: groupSlug,
-          locale: englishLocale,
           data: {
             deep: {
+              array: [{ title: 'hello en' }],
               blocks: [
                 {
                   blockType: 'first',
                   title: 'hello en',
                 },
               ],
-              array: [{ title: 'hello en' }],
             },
           },
+          locale: englishLocale,
         })
 
         expect(result.deep.array[0].title).toBe('hello en')
 
         await payload.update({
-          collection: groupSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: groupSlug,
           data: {
             deep: {
-              blocks: [
-                {
-                  blockType: 'first',
-                  title: 'hello es',
-                  id: result.deep.blocks[0].id,
-                },
-              ],
               array: [
                 {
                   id: result.deep.array[0].id,
                   title: 'hello es',
                 },
               ],
+              blocks: [
+                {
+                  id: result.deep.blocks[0].id,
+                  blockType: 'first',
+                  title: 'hello es',
+                },
+              ],
             },
           },
+          locale: spanishLocale,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: groupSlug,
           locale: englishLocale,
-          id: result.id,
         })
         const docEs = await payload.findByID({
+          id: result.id,
           collection: groupSlug,
           locale: spanishLocale,
-          id: result.id,
         })
 
         expect(docEn.deep.array[0].title).toBe('hello en')
@@ -2121,6 +2121,7 @@ describe('Localization', () => {
         expect(doc.groupLocalizedRow.text).toBe('hello world')
 
         const docES = await payload.update({
+          id: doc.id,
           collection: 'groups',
           data: {
             groupLocalizedRow: {
@@ -2128,16 +2129,15 @@ describe('Localization', () => {
             },
           },
           locale: 'es',
-          id: doc.id,
         })
 
         expect(docES.groupLocalizedRow.text).toBe('hola world or something')
 
         // check if docES didnt break EN
-        const docEN = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'en' })
+        const docEN = await payload.findByID({ id: doc.id, collection: 'groups', locale: 'en' })
         expect(docEN.groupLocalizedRow.text).toBe('hello world')
 
-        const all = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'all' })
+        const all = await payload.findByID({ id: doc.id, collection: 'groups', locale: 'all' })
 
         expect(all.groupLocalizedRow.en.text).toBe('hello world')
         expect(all.groupLocalizedRow.es.text).toBe('hola world or something')
@@ -2146,10 +2146,10 @@ describe('Localization', () => {
       it('should not crash on empty localized tab', async () => {
         const result = await payload.create({
           collection: tabSlug,
-          locale: englishLocale,
           data: {
             tabLocalized: {},
           },
+          locale: englishLocale,
         })
 
         expect(result).toBeTruthy()
@@ -2158,37 +2158,37 @@ describe('Localization', () => {
       it('should properly create/update/read array field inside localized tab field', async () => {
         const result = await payload.create({
           collection: tabSlug,
-          locale: englishLocale,
           data: {
             tabLocalized: {
               title: 'hello en',
             },
           },
+          locale: englishLocale,
         })
 
         expect(result.tabLocalized?.title).toBe('hello en')
 
         await payload.update({
-          collection: tabSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: tabSlug,
           data: {
             tabLocalized: {
               title: 'hello es',
             },
           },
+          locale: spanishLocale,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: englishLocale,
-          id: result.id,
         })
 
         const docEs = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: spanishLocale,
-          id: result.id,
         })
 
         expect(docEn.tabLocalized.title).toBe('hello en')
@@ -2198,7 +2198,6 @@ describe('Localization', () => {
       it('should properly create/update/read localized tab field', async () => {
         const result = await payload.create({
           collection: tabSlug,
-          locale: englishLocale,
           data: {
             tabLocalized: {
               array: [
@@ -2208,31 +2207,32 @@ describe('Localization', () => {
               ],
             },
           },
+          locale: englishLocale,
         })
 
         expect(result.tabLocalized.array[0].title).toBe('hello en')
 
         await payload.update({
-          collection: tabSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: tabSlug,
           data: {
             tabLocalized: {
               array: [{ title: 'hello es' }],
             },
           },
+          locale: spanishLocale,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: englishLocale,
-          id: result.id,
         })
 
         const docEs = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: spanishLocale,
-          id: result.id,
         })
 
         expect(docEn.tabLocalized.array[0].title).toBe('hello en')
@@ -2242,36 +2242,36 @@ describe('Localization', () => {
       it('should properly create/update/read localized field inside of tab', async () => {
         const result = await payload.create({
           collection: tabSlug,
-          locale: englishLocale,
           data: {
             tab: {
               title: 'hello en',
             },
           },
+          locale: englishLocale,
         })
 
         expect(result.tab.title).toBe('hello en')
 
         await payload.update({
-          collection: tabSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: tabSlug,
           data: {
             tab: {
               title: 'hello es',
             },
           },
+          locale: spanishLocale,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: englishLocale,
-          id: result.id,
         })
         const docEs = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: spanishLocale,
-          id: result.id,
         })
 
         expect(docEn.tab.title).toBe('hello en')
@@ -2281,54 +2281,54 @@ describe('Localization', () => {
       it('should properly create/update/read deep localized field inside of tab', async () => {
         const result = await payload.create({
           collection: tabSlug,
-          locale: englishLocale,
           data: {
             deep: {
+              array: [{ title: 'hello en' }],
               blocks: [
                 {
                   blockType: 'first',
                   title: 'hello en',
                 },
               ],
-              array: [{ title: 'hello en' }],
             },
           },
+          locale: englishLocale,
         })
 
         expect(result.deep.array[0].title).toBe('hello en')
 
         await payload.update({
-          collection: tabSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: tabSlug,
           data: {
             deep: {
-              blocks: [
-                {
-                  blockType: 'first',
-                  title: 'hello es',
-                  id: result.deep.blocks[0].id,
-                },
-              ],
               array: [
                 {
                   id: result.deep.array[0].id,
                   title: 'hello es',
                 },
               ],
+              blocks: [
+                {
+                  id: result.deep.blocks[0].id,
+                  blockType: 'first',
+                  title: 'hello es',
+                },
+              ],
             },
           },
+          locale: spanishLocale,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: englishLocale,
-          id: result.id,
         })
         const docEs = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: spanishLocale,
-          id: result.id,
         })
 
         expect(docEn.deep.array[0].title).toBe('hello en')
@@ -2340,7 +2340,6 @@ describe('Localization', () => {
       it('should properly isolate locales for a group inside a localized tab', async () => {
         const docEs = await payload.create({
           collection: tabSlug,
-          locale: spanishLocale,
           data: {
             tabLocalized: {
               group: {
@@ -2348,12 +2347,12 @@ describe('Localization', () => {
               },
             },
           },
+          locale: spanishLocale,
         })
 
         await payload.update({
-          collection: tabSlug,
-          locale: englishLocale,
           id: docEs.id,
+          collection: tabSlug,
           data: {
             tabLocalized: {
               group: {
@@ -2361,18 +2360,19 @@ describe('Localization', () => {
               },
             },
           },
+          locale: englishLocale,
         })
 
         const readEn = await payload.findByID({
+          id: docEs.id,
           collection: tabSlug,
           locale: englishLocale,
-          id: docEs.id,
         })
 
         const readEs = await payload.findByID({
+          id: docEs.id,
           collection: tabSlug,
           locale: spanishLocale,
-          id: docEs.id,
         })
 
         expect(readEn.tabLocalized.group.heading).toBe('English heading')
@@ -2401,7 +2401,6 @@ describe('Localization', () => {
           data: {
             content: [
               {
-                blockType: 'blockInsideBlock',
                 array: [
                   {
                     link: {
@@ -2414,6 +2413,7 @@ describe('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'blockInsideBlock',
                 content: [
                   {
                     blockType: 'textBlock',
@@ -2428,18 +2428,16 @@ describe('Localization', () => {
         id = doc.id
 
         const retrievedInEN = await payload.findByID({
-          collection: 'blocks-fields',
           id,
+          collection: 'blocks-fields',
         })
 
         await payload.update({
-          collection: 'blocks-fields',
           id,
-          locale: 'es',
+          collection: 'blocks-fields',
           data: {
             content: [
               {
-                blockType: 'blockInsideBlock',
                 array: [
                   {
                     link: {
@@ -2452,6 +2450,7 @@ describe('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'blockInsideBlock',
                 content: [
                   {
                     blockType: 'textBlock',
@@ -2461,11 +2460,12 @@ describe('Localization', () => {
               },
             ],
           },
+          locale: 'es',
         })
 
         const retrieved = await payload.findByID({
-          collection: 'blocks-fields',
           id,
+          collection: 'blocks-fields',
           locale: 'all',
         })
 
@@ -2500,26 +2500,26 @@ describe('Localization', () => {
           {
             blockName: '1',
             blockType: 'someBlock',
-            relationWithinBlock: randomDoc.id,
             myGroup: {
               text: 'hello in english 1',
             },
+            relationWithinBlock: randomDoc.id,
           },
           {
             blockName: '2',
             blockType: 'someBlock',
-            relationWithinBlock: randomDoc.id,
             myGroup: {
               text: 'hello in english 2',
             },
+            relationWithinBlock: randomDoc.id,
           },
           {
             blockName: '3',
             blockType: 'someBlock',
-            relationWithinBlock: randomDoc.id,
             myGroup: {
               text: 'hello in english 3',
             },
+            relationWithinBlock: randomDoc.id,
           },
         ]
 
@@ -2527,33 +2527,31 @@ describe('Localization', () => {
           {
             blockName: '1',
             blockType: 'someBlock',
-            relationWithinBlock: randomDoc2.id,
             myGroup: {
               text: 'hello in spanish 1',
             },
+            relationWithinBlock: randomDoc2.id,
           },
           {
             blockName: '2',
             blockType: 'someBlock',
-            relationWithinBlock: randomDoc2.id,
             myGroup: {
               text: 'hello in spanish 2',
             },
+            relationWithinBlock: randomDoc2.id,
           },
           {
             blockName: '3',
             blockType: 'someBlock',
-            relationWithinBlock: randomDoc2.id,
             myGroup: {
               text: 'hello in spanish 3',
             },
+            relationWithinBlock: randomDoc2.id,
           },
         ]
 
         const createdEnDoc = await payload.create({
           collection: 'nested-arrays',
-          locale: 'en',
-          depth: 0,
           data: {
             arrayWithBlocks: [
               {
@@ -2561,13 +2559,13 @@ describe('Localization', () => {
               },
             ],
           },
+          depth: 0,
+          locale: 'en',
         })
 
         const updatedEsDoc = await payload.update({
-          collection: 'nested-arrays',
           id: createdEnDoc.id,
-          depth: 0,
-          locale: 'es',
+          collection: 'nested-arrays',
           data: {
             arrayWithBlocks: [
               {
@@ -2575,6 +2573,8 @@ describe('Localization', () => {
               },
             ],
           },
+          depth: 0,
+          locale: 'es',
         })
 
         const esArrayBlocks = updatedEsDoc.arrayWithBlocks[0].blocksWithinArray
@@ -2595,8 +2595,8 @@ describe('Localization', () => {
         const enDoc2 = await payload.findByID({
           id: createdEnDoc.id,
           collection: 'nested-arrays',
-          locale: 'en',
           depth: 0,
+          locale: 'en',
         })
         removeId(enDoc2.arrayWithBlocks[0].blocksWithinArray)
         expect(enDoc2.arrayWithBlocks[0].blocksWithinArray).toEqual(blocksWithinArrayEN)
@@ -2618,8 +2618,6 @@ describe('Localization', () => {
 
         const createdEnDoc = await payload.create({
           collection: 'nested-arrays',
-          locale: 'en',
-          depth: 0,
           data: {
             arrayWithLocalizedRelation: [
               {
@@ -2627,13 +2625,13 @@ describe('Localization', () => {
               },
             ],
           },
+          depth: 0,
+          locale: 'en',
         })
 
         const updatedEsDoc = await payload.update({
-          collection: 'nested-arrays',
           id: createdEnDoc.id,
-          depth: 0,
-          locale: 'es',
+          collection: 'nested-arrays',
           data: {
             arrayWithLocalizedRelation: [
               {
@@ -2642,6 +2640,8 @@ describe('Localization', () => {
               },
             ],
           },
+          depth: 0,
+          locale: 'es',
         })
 
         expect(updatedEsDoc.arrayWithLocalizedRelation).toHaveLength(1)
@@ -2654,8 +2654,8 @@ describe('Localization', () => {
         const enDoc2 = await payload.findByID({
           id: createdEnDoc.id,
           collection: 'nested-arrays',
-          locale: 'en',
           depth: 0,
+          locale: 'en',
         })
         expect(enDoc2.arrayWithLocalizedRelation).toHaveLength(1)
         expect(enDoc2.arrayWithLocalizedRelation[0].localizedRelation).toBe(randomTextDoc.id)
@@ -2666,7 +2666,6 @@ describe('Localization', () => {
       it('should update localized block', async () => {
         const doc = await payload.create({
           collection: 'blocks-fields',
-          locale: 'en',
           data: {
             content: [
               {
@@ -2680,6 +2679,7 @@ describe('Localization', () => {
               },
             ],
           },
+          locale: 'en',
         })
 
         const updated = await payload.update({
@@ -2693,16 +2693,16 @@ describe('Localization', () => {
                 // since the parent is localized, and the primary key in the block table
                 // consists only of the ID. That's why it's removed in `copyToLocale`.
                 // id: doc.content?.[0]?.id,
-                blockName: null,
                 array: [],
+                blockName: null,
                 blockType: 'blockInsideBlock',
                 content: [
                   {
                     // Same as above.
                     // id: doc.content?.[0]?.content?.[0]?.id,
-                    text: 'some-text',
                     blockName: null,
                     blockType: 'textBlock',
+                    text: 'some-text',
                   },
                 ],
               },
@@ -2719,7 +2719,6 @@ describe('Localization', () => {
       it('update specific locale should not erease the others in blocks and arrays', async () => {
         const doc = await payload.create({
           collection: 'nested',
-          locale: 'en',
           data: {
             blocks: [
               {
@@ -2734,6 +2733,7 @@ describe('Localization', () => {
               },
             ],
           },
+          locale: 'en',
         })
 
         expect(doc.blocks?.[0]?.someText).toBe('some-block-text-en')
@@ -2757,7 +2757,6 @@ describe('Localization', () => {
         const updatedDoc = await payload.update({
           id: doc.id,
           collection: 'nested',
-          locale: 'es',
           data: {
             blocks: [
               {
@@ -2774,6 +2773,7 @@ describe('Localization', () => {
               },
             ],
           },
+          locale: 'es',
         })
 
         expect(updatedDoc.blocks?.[0]?.someText).toBe('some-block-text-es')
@@ -2799,12 +2799,12 @@ describe('Localization', () => {
       it('update specific locale should not erease the others in simple fields', async () => {
         const doc = await payload.create({
           collection: 'localized-posts',
-          locale: 'en',
           data: {
-            title: 'some-localized-title',
             description: 'some-not-localized-description',
             localizedDescription: 'some-localized-description',
+            title: 'some-localized-title',
           },
+          locale: 'en',
         })
 
         expect(doc.title).toBe('some-localized-title')
@@ -2826,12 +2826,12 @@ describe('Localization', () => {
         const updatedDoc = await payload.update({
           id: doc.id,
           collection: 'localized-posts',
-          locale: 'es',
           data: {
-            title: 'some-localized-title-es',
             description: 'some-not-localized-description-es',
             localizedDescription: 'some-localized-description-es',
+            title: 'some-localized-title-es',
           },
+          locale: 'es',
         })
 
         expect(updatedDoc.title).toBe('some-localized-title-es')
@@ -2871,11 +2871,6 @@ describe('Localization', () => {
           data: {
             array: [
               {
-                relation: {
-                  value: randomDoc.id,
-                  relationTo: 'localized-posts',
-                },
-                hasManyRelation: [randomDoc.id, randomDoc2.id],
                 hasManyPolyRelation: [
                   {
                     relationTo: 'localized-posts',
@@ -2886,26 +2881,25 @@ describe('Localization', () => {
                     value: randomDoc2.id,
                   },
                 ],
+                hasManyRelation: [randomDoc.id, randomDoc2.id],
                 number: [1, 2],
-                text: ['hello', 'goodbye'],
+                relation: {
+                  relationTo: 'localized-posts',
+                  value: randomDoc.id,
+                },
                 select: ['one'],
+                text: ['hello', 'goodbye'],
               },
             ],
           },
         })
 
         await payload.update({
-          collection: 'nested-field-tables',
           id: newDoc.id,
-          locale: 'es',
+          collection: 'nested-field-tables',
           data: {
             array: [
               {
-                relation: {
-                  value: randomDoc2.id,
-                  relationTo: 'localized-posts',
-                },
-                hasManyRelation: [randomDoc2.id, randomDoc.id],
                 hasManyPolyRelation: [
                   {
                     relationTo: 'localized-posts',
@@ -2916,17 +2910,23 @@ describe('Localization', () => {
                     value: randomDoc.id,
                   },
                 ],
+                hasManyRelation: [randomDoc2.id, randomDoc.id],
+                number: [3, 4],
+                relation: {
+                  relationTo: 'localized-posts',
+                  value: randomDoc2.id,
+                },
                 select: ['two', 'three'],
                 text: ['hola', 'adios'],
-                number: [3, 4],
               },
             ],
           },
+          locale: 'es',
         })
 
         const retrieved = await payload.findByID({
-          collection: 'nested-field-tables',
           id: newDoc.id,
+          collection: 'nested-field-tables',
           depth: 0,
           locale: 'all',
         })
@@ -2938,12 +2938,12 @@ describe('Localization', () => {
         expect(retrieved.array.es[0].hasManyRelation).toEqual([randomDoc2.id, randomDoc.id])
 
         expect(retrieved.array.en[0].hasManyPolyRelation).toEqual([
-          { value: randomDoc.id, relationTo: 'localized-posts' },
-          { value: randomDoc2.id, relationTo: 'localized-posts' },
+          { relationTo: 'localized-posts', value: randomDoc.id },
+          { relationTo: 'localized-posts', value: randomDoc2.id },
         ])
         expect(retrieved.array.es[0].hasManyPolyRelation).toEqual([
-          { value: randomDoc2.id, relationTo: 'localized-posts' },
-          { value: randomDoc.id, relationTo: 'localized-posts' },
+          { relationTo: 'localized-posts', value: randomDoc2.id },
+          { relationTo: 'localized-posts', value: randomDoc.id },
         ])
 
         expect(retrieved.array.en[0].number).toEqual([1, 2])
@@ -2972,7 +2972,6 @@ describe('Localization', () => {
 
         const docEn = await payload.create({
           collection: 'nested-field-tables',
-          depth: 0,
           data: {
             blocks: [
               {
@@ -3013,6 +3012,7 @@ describe('Localization', () => {
               },
             ],
           },
+          depth: 0,
         })
 
         expect(docEn.blocks[0].nestedBlocks[0].relation.value).toBe(randomDoc.id)
@@ -3021,8 +3021,6 @@ describe('Localization', () => {
 
         const docEs = await payload.update({
           id: docEn.id,
-          depth: 0,
-          locale: 'es',
           collection: 'nested-field-tables',
           data: {
             blocks: [
@@ -3064,6 +3062,8 @@ describe('Localization', () => {
               },
             ],
           },
+          depth: 0,
+          locale: 'es',
         })
 
         expect(docEs.blocks[0].nestedBlocks[0].relation.value).toBe(randomDoc2.id)
@@ -3071,10 +3071,10 @@ describe('Localization', () => {
         expect(docEs.blocks[2].nestedBlocks[0].relation.value).toBe(randomDoc2.id)
 
         const docAll = await payload.findByID({
-          collection: 'nested-field-tables',
           id: docEn.id,
-          locale: 'all',
+          collection: 'nested-field-tables',
           depth: 0,
+          locale: 'all',
         })
 
         expect(docAll.blocks.en[0].nestedBlocks[0].relation.value).toBe(randomDoc.id)
@@ -3102,11 +3102,9 @@ describe('Localization', () => {
 
         const docEn = await payload.create({
           collection: 'nested-field-tables',
-          depth: 0,
           data: {
             blocks: [
               {
-                blockType: 'block',
                 array: [
                   {
                     relation: {
@@ -3115,9 +3113,9 @@ describe('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'block',
               },
               {
-                blockType: 'block',
                 array: [
                   {
                     relation: {
@@ -3126,9 +3124,9 @@ describe('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'block',
               },
               {
-                blockType: 'block',
                 array: [
                   {
                     relation: {
@@ -3137,9 +3135,11 @@ describe('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'block',
               },
             ],
           },
+          depth: 0,
         })
 
         expect(docEn.blocks[0].array[0].relation.value).toBe(randomDoc.id)
@@ -3148,13 +3148,10 @@ describe('Localization', () => {
 
         const docEs = await payload.update({
           id: docEn.id,
-          depth: 0,
-          locale: 'es',
           collection: 'nested-field-tables',
           data: {
             blocks: [
               {
-                blockType: 'block',
                 array: [
                   {
                     relation: {
@@ -3163,9 +3160,9 @@ describe('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'block',
               },
               {
-                blockType: 'block',
                 array: [
                   {
                     relation: {
@@ -3174,9 +3171,9 @@ describe('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'block',
               },
               {
-                blockType: 'block',
                 array: [
                   {
                     relation: {
@@ -3185,9 +3182,12 @@ describe('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'block',
               },
             ],
           },
+          depth: 0,
+          locale: 'es',
         })
 
         expect(docEs.blocks[0].array[0].relation.value).toBe(randomDoc2.id)
@@ -3195,10 +3195,10 @@ describe('Localization', () => {
         expect(docEs.blocks[2].array[0].relation.value).toBe(randomDoc2.id)
 
         const docAll = await payload.findByID({
-          collection: 'nested-field-tables',
           id: docEn.id,
-          locale: 'all',
+          collection: 'nested-field-tables',
           depth: 0,
+          locale: 'all',
         })
 
         expect(docAll.blocks.en[0].array[0].relation.value).toBe(randomDoc.id)
@@ -3215,35 +3215,35 @@ describe('Localization', () => {
       it('localized with unique should work for each locale', async () => {
         await payload.create({
           collection: 'localized-posts',
+          data: {
+            unique: 'text',
+          },
           locale: 'ar',
-          data: {
-            unique: 'text',
-          },
         })
 
         await payload.create({
           collection: 'localized-posts',
+          data: {
+            unique: 'text',
+          },
           locale: 'en',
-          data: {
-            unique: 'text',
-          },
         })
 
         await payload.create({
           collection: 'localized-posts',
-          locale: 'es',
           data: {
             unique: 'text',
           },
+          locale: 'es',
         })
 
         await expect(
           payload.create({
             collection: 'localized-posts',
-            locale: 'en',
             data: {
               unique: 'text',
             },
+            locale: 'en',
           }),
         ).rejects.toBeTruthy()
       })
@@ -3253,19 +3253,19 @@ describe('Localization', () => {
 
         await payload.create({
           collection: localizedPostsSlug,
-          locale: 'en',
           data: {
             unique: uniqueValue,
           },
+          locale: 'en',
         })
 
         try {
           await payload.create({
             collection: localizedPostsSlug,
-            locale: 'en',
             data: {
               unique: uniqueValue,
             },
+            locale: 'en',
           })
           expect.unreachable('Should have thrown a ValidationError')
         } catch (error: any) {
@@ -3288,27 +3288,27 @@ describe('Localization', () => {
 
         await payload.create({
           collection: withRequiredLocalizedFields,
-          locale: 'en',
           data: {
-            title: 'Test title 1',
-            seoTitle: uniqueValue,
             nav: {
               layout: blockData,
             },
+            seoTitle: uniqueValue,
+            title: 'Test title 1',
           },
+          locale: 'en',
         })
 
         try {
           await payload.create({
             collection: withRequiredLocalizedFields,
-            locale: 'en',
             data: {
-              title: 'Test title 2',
-              seoTitle: uniqueValue,
               nav: {
                 layout: blockData,
               },
+              seoTitle: uniqueValue,
+              title: 'Test title 2',
             },
+            locale: 'en',
           })
           expect.unreachable('Should have thrown a ValidationError')
         } catch (error: any) {
@@ -3355,23 +3355,23 @@ describe('Localization', () => {
         const doc = await payload.create({
           collection: 'localized-posts',
           data: {
-            title: 'Hello',
             group: {
               children: 'Children',
             },
-            unique: 'unique-field',
             localizedCheckbox: true,
+            title: 'Hello',
+            unique: 'unique-field',
           },
         })
 
         const req = await createLocalReq({ user }, payload)
 
         const res = (await copyDataFromLocaleHandler({
+          collectionSlug: 'localized-posts',
+          docID: doc.id,
           fromLocale: 'en',
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'localized-posts',
         })) as LocalizedPost
 
         expect(res.title).toBe('Hello')
@@ -3386,7 +3386,6 @@ describe('Localization', () => {
         // and that's where the bug occurs.
         const doc = await payload.create({
           collection: 'blocks-fields',
-          locale: 'en',
           data: {
             content: [
               {
@@ -3400,16 +3399,17 @@ describe('Localization', () => {
               },
             ],
           },
+          locale: 'en',
         })
 
         const req = await createLocalReq({ user }, payload)
 
         const res = (await copyDataFromLocaleHandler({
+          collectionSlug: 'blocks-fields',
+          docID: doc.id,
           fromLocale: 'en',
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'blocks-fields',
         })) as BlocksField
 
         expect(res.content?.[0]?.content?.[0]?.text).toBe('some-text')
@@ -3421,7 +3421,6 @@ describe('Localization', () => {
         // and that's where the bug occurs.
         const doc = await payload.create({
           collection: 'blocks-fields',
-          locale: 'en',
           data: {
             tabContent: [
               {
@@ -3430,15 +3429,16 @@ describe('Localization', () => {
               },
             ],
           },
+          locale: 'en',
         })
 
         const req = await createLocalReq({ user }, payload)
         const res = (await copyDataFromLocaleHandler({
+          collectionSlug: 'blocks-fields',
+          docID: doc.id,
           fromLocale: 'en',
           req,
           toLocale: 'pt',
-          docID: doc.id,
-          collectionSlug: 'blocks-fields',
         })) as BlocksField
 
         expect(res.tabContent?.[0]?.text).toBe('some-text')
@@ -3447,7 +3447,6 @@ describe('Localization', () => {
       it('should copy localized nested to arrays', async () => {
         const doc = await payload.create({
           collection: 'nested',
-          locale: 'en',
           data: {
             topLevelArray: [
               {
@@ -3456,16 +3455,17 @@ describe('Localization', () => {
               },
             ],
           },
+          locale: 'en',
         })
 
         const req = await createLocalReq({ user }, payload)
 
         const res = (await copyDataFromLocaleHandler({
+          collectionSlug: 'nested',
+          docID: doc.id,
           fromLocale: 'en',
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'nested',
         })) as Nested
 
         expect(res.topLevelArray?.[0]?.localizedText).toBe('some-localized-text')
@@ -3485,7 +3485,6 @@ describe('Localization', () => {
       it('should copy localized arrays', async () => {
         const doc = await payload.create({
           collection: 'nested',
-          locale: 'en',
           data: {
             topLevelArrayLocalized: [
               {
@@ -3493,16 +3492,17 @@ describe('Localization', () => {
               },
             ],
           },
+          locale: 'en',
         })
 
         const req = await createLocalReq({ user }, payload)
 
         const res = (await copyDataFromLocaleHandler({
+          collectionSlug: 'nested',
+          docID: doc.id,
           fromLocale: 'en',
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'nested',
         })) as Nested
 
         expect(res.topLevelArrayLocalized?.[0]?.text).toBe('some-text')
@@ -3555,38 +3555,38 @@ describe('Localization', () => {
         // Create a document with content in en locale
         const doc = await payload.create({
           collection: 'blocks-fields',
-          locale: 'en',
           data: {
-            title: 'English Title',
             content: [
               {
                 blockType: 'blockInsideBlock',
-                text: 'English block text',
                 content: [
                   {
                     blockType: 'textBlock',
                     text: 'Nested English text',
                   },
                 ],
+                text: 'English block text',
               },
             ],
+            title: 'English Title',
           },
+          locale: 'en',
         })
 
         // Add content to Spanish locale separately
         await payload.update({
-          collection: 'blocks-fields',
           id: doc.id,
-          locale: 'es',
+          collection: 'blocks-fields',
           data: {
-            title: 'Spanish Title',
             content: [
               {
                 blockType: 'blockInsideBlock',
                 text: 'Spanish block text',
               },
             ],
+            title: 'Spanish Title',
           },
+          locale: 'es',
         })
 
         // Verify initial state - English data should exist
@@ -3603,12 +3603,12 @@ describe('Localization', () => {
         const req = await createLocalReq({ user }, payload)
 
         await copyDataFromLocaleHandler({
+          collectionSlug: 'blocks-fields',
+          docID: doc.id,
           fromLocale: 'en',
+          overrideData: true,
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'blocks-fields',
-          overrideData: true,
         })
 
         // CRITICAL: Verify English data is NOT lost after copy operation
@@ -3626,8 +3626,8 @@ describe('Localization', () => {
         const esDocAfter = await payload.findByID({
           id: doc.id,
           collection: 'blocks-fields',
-          locale: 'es',
           draft: true,
+          locale: 'es',
         })
 
         expect(esDocAfter.title).toBe('English Title')
@@ -3638,25 +3638,25 @@ describe('Localization', () => {
         // Create a document with draft content
         const doc = await payload.create({
           collection: 'blocks-fields',
-          locale: 'en',
-          draft: true,
           data: {
-            title: 'Draft English Title',
             content: [
               {
                 blockType: 'blockInsideBlock',
                 text: 'Draft block text',
               },
             ],
+            title: 'Draft English Title',
           },
+          draft: true,
+          locale: 'en',
         })
 
         // Verify draft exists
         const draftBefore = await payload.findByID({
           id: doc.id,
           collection: 'blocks-fields',
-          locale: 'en',
           draft: true,
+          locale: 'en',
         })
 
         expect(draftBefore.title).toBe('Draft English Title')
@@ -3665,19 +3665,19 @@ describe('Localization', () => {
         const req = await createLocalReq({ user }, payload)
 
         await copyDataFromLocaleHandler({
+          collectionSlug: 'blocks-fields',
+          docID: doc.id,
           fromLocale: 'en',
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'blocks-fields',
         })
 
         // Verify the source draft is not lost
         const draftAfter = await payload.findByID({
           id: doc.id,
           collection: 'blocks-fields',
-          locale: 'en',
           draft: true,
+          locale: 'en',
         })
 
         expect(draftAfter.title).toBe('Draft English Title')
@@ -3688,35 +3688,35 @@ describe('Localization', () => {
         // Create published doc in en
         const doc = await payload.create({
           collection: 'blocks-fields',
-          locale: 'en',
           data: {
             title: 'Published EN',
           },
+          locale: 'en',
         })
 
         // Create draft with different content
         await payload.update({
-          collection: 'blocks-fields',
           id: doc.id,
-          locale: 'en',
-          draft: true,
+          collection: 'blocks-fields',
           data: {
             title: 'Draft EN',
           },
+          draft: true,
+          locale: 'en',
         })
 
         // Verify both published and draft exist with different content
         const enPublishedBefore = await payload.findByID({
           id: doc.id,
           collection: 'blocks-fields',
-          locale: 'en',
           draft: false,
+          locale: 'en',
         })
         const enDraftBefore = await payload.findByID({
           id: doc.id,
           collection: 'blocks-fields',
-          locale: 'en',
           draft: true,
+          locale: 'en',
         })
 
         expect(enPublishedBefore.title).toBe('Published EN')
@@ -3726,23 +3726,52 @@ describe('Localization', () => {
         const req = await createLocalReq({ user }, payload)
 
         await copyDataFromLocaleHandler({
+          collectionSlug: 'blocks-fields',
+          docID: doc.id,
           fromLocale: 'en',
+          overrideData: true,
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'blocks-fields',
-          overrideData: true,
         })
 
         // Verify published content in source locale is NOT overwritten
         const enPublishedAfter = await payload.findByID({
           id: doc.id,
           collection: 'blocks-fields',
-          locale: 'en',
           draft: false,
+          locale: 'en',
         })
 
         expect(enPublishedAfter.title).toBe('Published EN')
+      })
+
+      it('should copy global data to another locale', async () => {
+        // Set some initial data on global-copy-test in 'en'
+        await payload.updateGlobal({
+          slug: 'global-copy-test',
+          data: {
+            text: 'Global text en',
+          },
+          locale: 'en',
+        })
+
+        const req = await createLocalReq({ user }, payload)
+
+        await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          globalSlug: 'global-copy-test',
+          overrideData: true,
+          req,
+          toLocale: 'es',
+        })
+
+        const esGlobal = await payload.findGlobal({
+          slug: 'global-copy-test',
+          fallbackLocale: 'none',
+          locale: 'es',
+        })
+
+        expect(esGlobal.text).toBe('Global text en')
       })
     })
 
@@ -3753,8 +3782,8 @@ describe('Localization', () => {
             const result = await payload.findByID({
               id: postWithLocalizedData.id,
               collection,
-              locale: portugueseLocale,
               fallbackLocale: [spanishLocale, englishLocale],
+              locale: portugueseLocale,
             })
 
             expect(result).toBeDefined()
@@ -3765,8 +3794,8 @@ describe('Localization', () => {
             const result = await payload.findByID({
               id: postWithLocalizedData.id,
               collection,
-              locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar', spanishLocale],
+              locale: portugueseLocale,
             })
 
             expect(result).toBeDefined()
@@ -3777,8 +3806,8 @@ describe('Localization', () => {
             const result = await payload.findByID({
               id: postWithLocalizedData.id,
               collection,
-              locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar'],
+              locale: portugueseLocale,
             })
 
             expect(result).toBeDefined()
@@ -3790,8 +3819,8 @@ describe('Localization', () => {
           it('should allow fallback locale to be an array', async () => {
             const result = await payload.findGlobal({
               slug: global,
-              locale: portugueseLocale,
               fallbackLocale: [spanishLocale, englishLocale],
+              locale: portugueseLocale,
             })
 
             expect(result).toBeDefined()
@@ -3801,8 +3830,8 @@ describe('Localization', () => {
           it('should pass over fallback locales until it finds one that exists', async () => {
             const result = await payload.findGlobal({
               slug: global,
-              locale: portugueseLocale,
               fallbackLocale: ['hu', spanishLocale],
+              locale: portugueseLocale,
             })
             expect(result).toBeDefined()
             expect(result.text).toBe(spanishTitle)
@@ -3811,8 +3840,8 @@ describe('Localization', () => {
           it('should return undefined if no fallback locales exist', async () => {
             const result = await payload.findGlobal({
               slug: global,
-              locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar'],
+              locale: portugueseLocale,
             })
 
             expect(result).toBeDefined()
@@ -3906,7 +3935,7 @@ describe('Localization', () => {
             const { data } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: ['es', 'en'] },
+                query: { fallbackLocale: ['es', 'en'], locale: 'pt' },
               })
               .then((res) => res.json())
             console.log(data)
@@ -3926,7 +3955,7 @@ describe('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: ['hu', 'ar', 'es'] },
+                query: { fallbackLocale: ['hu', 'ar', 'es'], locale: 'pt' },
               })
               .then((res) => res.json())
 
@@ -3945,7 +3974,7 @@ describe('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: ['hu', 'ar'] },
+                query: { fallbackLocale: ['hu', 'ar'], locale: 'pt' },
               })
               .then((res) => res.json())
 
@@ -3964,7 +3993,7 @@ describe('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: ['es', 'en'] },
+                query: { fallbackLocale: ['es', 'en'], locale: 'pt' },
               })
               .then((res) => res.json())
 
@@ -3981,7 +4010,7 @@ describe('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: ['hu', 'ar', 'es'] },
+                query: { fallbackLocale: ['hu', 'ar', 'es'], locale: 'pt' },
               })
               .then((res) => res.json())
 
@@ -3998,7 +4027,7 @@ describe('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: ['hu', 'ar'] },
+                query: { fallbackLocale: ['hu', 'ar'], locale: 'pt' },
               })
               .then((res) => res.json())
 
@@ -4089,8 +4118,8 @@ describe('Localization', () => {
         const fallbackDoc = await payload.findByID({
           id: post1.id,
           collection,
-          locale: portugueseLocale,
           fallbackLocale: englishLocale,
+          locale: portugueseLocale,
         })
 
         expect(fallbackDoc.title).toBe(englishTitle)
@@ -4110,8 +4139,8 @@ describe('Localization', () => {
         const localizedFallback: any = await payload.findByID({
           id: postWithLocalizedData.id,
           collection,
-          locale: portugueseLocale,
           fallbackLocale: false,
+          locale: portugueseLocale,
         })
 
         expect(localizedFallback.title).not.toBeDefined()
@@ -4127,8 +4156,8 @@ describe('Localization', () => {
         })
 
         await payload.update({
-          collection: allFieldsLocalizedSlug,
           id: originalPost.id,
+          collection: allFieldsLocalizedSlug,
           data: {
             selfRelation: originalPost.id,
           },
@@ -4136,19 +4165,19 @@ describe('Localization', () => {
         })
 
         const spanishPostWithEnglishFallback = await payload.findByID({
-          collection: allFieldsLocalizedSlug,
           id: originalPost.id,
-          locale: 'es',
+          collection: allFieldsLocalizedSlug,
           fallbackLocale: 'en',
+          locale: 'es',
         })
 
         expect(spanishPostWithEnglishFallback.text).toBe('Post EN')
 
         const spanishPostWithNoFallback = await payload.findByID({
-          collection: allFieldsLocalizedSlug,
           id: originalPost.id,
-          locale: 'es',
+          collection: allFieldsLocalizedSlug,
           fallbackLocale: false,
+          locale: 'es',
         })
 
         expect(spanishPostWithNoFallback?.selfRelation?.text).toBeUndefined()
@@ -4177,11 +4206,7 @@ describe('Localization', () => {
       const doc = await payload.create({
         collection: allFieldsLocalizedSlug,
         data: {
-          t1: {
-            t2: {
-              text: 'EN Deep Text',
-            },
-          },
+          _status: 'draft',
           g1: {
             g2: {
               g2a1: [{ text: 'EN Deep 1' }, { text: 'EN Deep 2' }],
@@ -4206,15 +4231,19 @@ describe('Localization', () => {
           },
           number: 100,
           select: 'option1',
+          t1: {
+            t2: {
+              text: 'EN Deep Text',
+            },
+          },
           text: 'English text',
-          _status: 'draft',
         },
         locale: 'en',
       })
 
       const allLocalesDoc = await payload.findByID({
-        collection: allFieldsLocalizedSlug,
         id: doc.id,
+        collection: allFieldsLocalizedSlug,
         locale: 'all',
       })
 
@@ -4277,12 +4306,12 @@ describe('Localization', () => {
       const doc = await payload.create({
         collection: noLocalizedFieldsCollectionSlug,
         data: {
-          text: 'title',
           group: {
             en: {
               text: 'some text',
             },
           },
+          text: 'title',
         },
       })
 
@@ -4970,16 +4999,16 @@ describe('Localization', () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
             data: {
-              text: 'Localized Metadata EN',
               _status: 'published',
+              text: 'Localized Metadata EN',
             },
             locale: defaultLocale,
           })
 
           const esDoc = await payload.findByID({
-            locale: spanishLocale,
             id: doc.id,
             collection: allFieldsLocalizedSlug,
+            locale: spanishLocale,
           })
 
           expect(esDoc._status).toContain('draft')
@@ -4989,17 +5018,17 @@ describe('Localization', () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
             data: {
-              text: 'Localized Metadata EN',
               _status: 'published',
+              text: 'Localized Metadata EN',
             },
             locale: defaultLocale,
             publishAllLocales: true,
           })
 
           const esDoc = await payload.findByID({
-            locale: spanishLocale,
             id: doc.id,
             collection: allFieldsLocalizedSlug,
+            locale: spanishLocale,
           })
           const allLocalesDoc = await payload.findByID({
             locale: 'all',
@@ -5021,61 +5050,61 @@ describe('Localization', () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
             data: {
-              text: 'english draft 1',
               _status: 'draft',
+              text: 'english draft 1',
             },
             draft: true,
             locale: defaultLocale,
           })
           // update english published 1
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'english published 1',
               _status: 'published',
+              text: 'english published 1',
             },
             locale: defaultLocale,
           })
 
           // create spanish draft 1
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'spanish draft 1',
               _status: 'draft',
+              text: 'spanish draft 1',
             },
             draft: true,
             locale: spanishLocale,
           })
           // update spanish published 1
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'spanish published 1',
               _status: 'published',
+              text: 'spanish published 1',
             },
             locale: spanishLocale,
           })
           // update spanish draft 2
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'spanish draft 2',
               _status: 'draft',
+              text: 'spanish draft 2',
             },
             draft: true,
             locale: spanishLocale,
           })
 
           const publishedDoc = await payload.findByID({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
-            locale: 'all',
+            collection: allFieldsLocalizedSlug,
             draft: false,
+            locale: 'all',
           })
 
           expect(publishedDoc._status!.en).toBe('published')
@@ -5084,8 +5113,8 @@ describe('Localization', () => {
           expect(publishedDoc.text!.es).toBe('spanish published 1')
 
           const latestVersionDoc = await payload.findByID({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             draft: true,
             locale: 'all',
           })
@@ -5100,25 +5129,25 @@ describe('Localization', () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
             data: {
-              text: 'Localized Metadata EN',
               _status: 'published',
+              text: 'Localized Metadata EN',
             },
             locale: defaultLocale,
           })
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'Localized Metadata ES',
               _status: 'draft',
+              text: 'Localized Metadata ES',
             },
             draft: true,
             locale: spanishLocale,
           })
 
           const esPublished = await payload.find({
-            locale: spanishLocale,
             collection: allFieldsLocalizedSlug,
+            locale: spanishLocale,
             where: {
               and: [
                 {
@@ -5137,9 +5166,9 @@ describe('Localization', () => {
           expect(esPublished.totalDocs).toBe(0)
 
           const esDraft = await payload.find({
-            locale: spanishLocale,
             collection: allFieldsLocalizedSlug,
             draft: true,
+            locale: spanishLocale,
             where: {
               and: [
                 {
@@ -5160,9 +5189,9 @@ describe('Localization', () => {
           expect(esDraft.docs[0]!.text).toBe('Localized Metadata ES')
 
           const enPublished = await payload.find({
-            locale: defaultLocale,
             collection: allFieldsLocalizedSlug,
             draft: true,
+            locale: defaultLocale,
             where: {
               and: [
                 {
@@ -5188,38 +5217,38 @@ describe('Localization', () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
             data: {
-              text: 'en published',
               _status: 'published',
+              text: 'en published',
             },
             locale: defaultLocale,
           })
 
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'en draft',
               _status: 'draft',
+              text: 'en draft',
             },
             draft: true,
             locale: defaultLocale,
           })
 
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'es published',
               _status: 'published',
+              text: 'es published',
             },
             locale: spanishLocale,
           })
 
           const mainDocument = await payload.findByID({
-            locale: 'all',
             id: doc.id,
             collection: allFieldsLocalizedSlug,
             draft: false,
+            locale: 'all',
           })
 
           expect(mainDocument._status!.es).toBe('published')
@@ -5228,10 +5257,10 @@ describe('Localization', () => {
           expect(mainDocument.text!.en).toBe('en published')
 
           const latestVersion = await payload.findByID({
-            locale: 'all',
             id: doc.id,
             collection: allFieldsLocalizedSlug,
             draft: true,
+            locale: 'all',
           })
 
           expect(latestVersion._status!.es).toBe('published')
@@ -5244,38 +5273,38 @@ describe('Localization', () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
             data: {
-              text: 'en draft',
               _status: 'draft',
+              text: 'en draft',
             },
             locale: defaultLocale,
           })
 
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'es draft',
               _status: 'draft',
+              text: 'es draft',
             },
             locale: spanishLocale,
           })
 
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'en published',
               _status: 'published',
+              text: 'en published',
             },
             locale: 'en',
             publishAllLocales: true,
           })
 
           const mainDocument = await payload.findByID({
-            locale: 'all',
             id: doc.id,
             collection: allFieldsLocalizedSlug,
             draft: false,
+            locale: 'all',
           })
 
           expect(mainDocument._status!.en).toBe('published')
@@ -5284,17 +5313,17 @@ describe('Localization', () => {
           expect(mainDocument.text!.es).toBe('es draft')
 
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
-            unpublishAllLocales: true,
+            collection: allFieldsLocalizedSlug,
             data: {},
+            unpublishAllLocales: true,
           })
 
           const unpublishedDocument = await payload.findByID({
-            locale: 'all',
             id: doc.id,
             collection: allFieldsLocalizedSlug,
             draft: false,
+            locale: 'all',
           })
 
           expect(unpublishedDocument._status!.en).toBe('draft')
@@ -5313,8 +5342,8 @@ describe('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'english draft 1',
               _status: 'draft',
+              text: 'english draft 1',
             },
             draft: true,
             locale: defaultLocale,
@@ -5323,8 +5352,8 @@ describe('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'english published 1',
               _status: 'published',
+              text: 'english published 1',
             },
             locale: defaultLocale,
           })
@@ -5333,8 +5362,8 @@ describe('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'spanish draft 1',
               _status: 'draft',
+              text: 'spanish draft 1',
             },
             draft: true,
             locale: spanishLocale,
@@ -5343,8 +5372,8 @@ describe('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'spanish published 1',
               _status: 'published',
+              text: 'spanish published 1',
             },
             locale: spanishLocale,
           })
@@ -5352,8 +5381,8 @@ describe('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'spanish draft 2',
               _status: 'draft',
+              text: 'spanish draft 2',
             },
             draft: true,
             locale: spanishLocale,
@@ -5361,8 +5390,8 @@ describe('Localization', () => {
 
           const publishedDoc = await payload.findGlobal({
             slug: globalWithDraftsSlug,
-            locale: 'all',
             draft: false,
+            locale: 'all',
           })
 
           expect(publishedDoc._status!.en).toBe('published')
@@ -5388,8 +5417,8 @@ describe('Localization', () => {
           const doc = await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'en published',
               _status: 'published',
+              text: 'en published',
             },
             locale: defaultLocale,
           })
@@ -5397,8 +5426,8 @@ describe('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'en draft',
               _status: 'draft',
+              text: 'en draft',
             },
             draft: true,
             locale: defaultLocale,
@@ -5407,16 +5436,16 @@ describe('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'es published',
               _status: 'published',
+              text: 'es published',
             },
             locale: spanishLocale,
           })
 
           const mainDocument = await payload.findGlobal({
             slug: globalWithDraftsSlug,
-            locale: 'all',
             draft: false,
+            locale: 'all',
           })
 
           expect(mainDocument._status!.es).toBe('published')
@@ -5426,8 +5455,8 @@ describe('Localization', () => {
 
           const latestVersion = await payload.findGlobal({
             slug: globalWithDraftsSlug,
-            locale: 'all',
             draft: true,
+            locale: 'all',
           })
 
           expect(latestVersion._status!.es).toBe('published')
@@ -5440,8 +5469,8 @@ describe('Localization', () => {
           const doc = await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'en draft',
               _status: 'draft',
+              text: 'en draft',
             },
             locale: defaultLocale,
           })
@@ -5449,8 +5478,8 @@ describe('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'es draft',
               _status: 'draft',
+              text: 'es draft',
             },
             locale: spanishLocale,
           })
@@ -5458,8 +5487,8 @@ describe('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'en published',
               _status: 'published',
+              text: 'en published',
             },
             locale: defaultLocale,
             publishAllLocales: true,
@@ -5467,8 +5496,8 @@ describe('Localization', () => {
 
           const mainDocument = await payload.findGlobal({
             slug: globalWithDraftsSlug,
-            locale: 'all',
             draft: false,
+            locale: 'all',
           })
 
           expect(mainDocument._status!.en).toBe('published')
@@ -5478,14 +5507,14 @@ describe('Localization', () => {
 
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
-            unpublishAllLocales: true,
             data: {},
+            unpublishAllLocales: true,
           })
 
           const unpublishedDocument = await payload.findGlobal({
             slug: globalWithDraftsSlug,
-            locale: 'all',
             draft: false,
+            locale: 'all',
           })
 
           expect(unpublishedDocument._status!.en).toBe('draft')
@@ -5548,8 +5577,8 @@ describe('Localization', () => {
         const localizedFallback: any = await payload.findByID({
           id: allFieldsPostWithLocalizedData.id,
           collection: allFieldsLocalizedSlug,
-          locale: portugueseLocale,
           fallbackLocale: 'none',
+          locale: portugueseLocale,
         })
 
         expect(localizedFallback.text).not.toBeDefined()

@@ -235,7 +235,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     overrideData = false,
     req: {
       payload,
-      payload: { collections, globals },
+      payload: { collections },
       user,
     },
     req,
@@ -298,7 +298,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
   }
 
   const fields = globalSlug
-    ? globals[globalSlug].config.fields
+    ? payload.config.globals.find((g) => g.slug === globalSlug)?.fields
     : collections[collectionSlug].config.fields
 
   const fromLocaleDataWithoutID = fromLocaleData.value

@@ -167,7 +167,7 @@ export const fetchLatestVersion = async <TVersionData extends object = object>({
   const entityConfig = collectionSlug
     ? req.payload.collections[collectionSlug]?.config
     : globalSlug
-      ? req.payload.globals[globalSlug]?.config
+      ? req.payload.config.globals.find((g) => g.slug === globalSlug)
       : undefined
 
   // Only query by _status if drafts are enabled (since _status field only exists with drafts)
