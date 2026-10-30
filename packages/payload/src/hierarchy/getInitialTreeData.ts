@@ -163,10 +163,6 @@ export const getInitialTreeData = async ({
   })
 
   // Query 2: For each expanded node, fetch its children
-  // Saved expanded-node preferences store IDs as strings while resolved
-  // ancestors add the same IDs as numbers (e.g. "1" and 1). Fetch each parent
-  // only once, otherwise its children are loaded twice and render with
-  // duplicate React keys.
   for (const parentId of new Set(expandedNodeIds.map((id) => String(id)))) {
     await fetchChildrenForParent(String(parentId), {
       [parentFieldName]: { equals: parentId },
