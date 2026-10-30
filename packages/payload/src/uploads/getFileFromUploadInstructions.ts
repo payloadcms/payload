@@ -91,16 +91,15 @@ export const getFileFromUploadInstructions = async ({
       throw new APIError('Invalid upload reference.', 400)
     }
 
-    const originalFilename =
-      path.posix.basename(storageFilePath) === file.filename ? file.filename : undefined
-    const expectedKeySuffix = [receipt.filePrefix, receipt._objectKey, originalFilename]
+    const isReceiptForUploadedFilename = path.posix.basename(storageFilePath) === file.filename
+    const expectedKeySuffix = [receipt.filePrefix, receipt._objectKey, file.filename]
       .filter(Boolean)
       .join('/')
 
     if (
       (!allowOverwrite &&
         (!receipt._objectKey ||
-          !originalFilename ||
+          !isReceiptForUploadedFilename ||
           !`/${storageFilePath}`.endsWith(`/${expectedKeySuffix}`))) ||
       ('prefix' in file.uploadReference && file.uploadReference.prefix !== receipt.filePrefix) ||
       ('_objectKey' in file.uploadReference &&
@@ -109,11 +108,11 @@ export const getFileFromUploadInstructions = async ({
       throw new APIError('Invalid upload reference.', 400)
     }
 
-    providerFilename = allowOverwrite ? file.filename : originalFilename!
+    providerFilename = file.filename
     if (!allowOverwrite) {
       verifiedOriginal = {
         _objectKey: receipt._objectKey,
-        filename: originalFilename!,
+        filename: file.filename,
         key: storageFilePath,
         prefix: receipt.filePrefix,
         signedReceipt: signedReceipt as string,

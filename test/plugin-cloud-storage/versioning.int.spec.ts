@@ -552,6 +552,26 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(versionedCloudFiles.get(original!.key)).toEqual(sourceBytes)
   })
 
+  test('should keep the uploaded filename for both files when a cloud file is replaced with a crop', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const replaced = await payload.update({
+      id: created.id,
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      req: { query: { uploadEdits: halfCrop } },
+    })
+
+    expect(replaced.filename).toBe('image.png')
+    expect(replaced.original?.filename).toBe('image.png')
+  })
+
   test('should crop again from the original when the main file shares its filename', async ({
     payload,
     restClient,

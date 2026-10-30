@@ -490,6 +490,8 @@ export const generateFileData = async <T>({
       hasManagedCloudStorage && operation === 'update'
         ? (originalDoc as TypeWithID | undefined)?.id
         : undefined
+    // Extract prefix if present (added by plugin-cloud-storage)
+    const prefix = (data as Record<string, unknown>)?.prefix as string | undefined
 
     if (hasReusableOriginalMain) {
       fsSafeName = retainedOriginal!.filename
@@ -498,8 +500,6 @@ export const generateFileData = async <T>({
       !disableLocalStorage ||
       (shouldStageCloudFiles && retainedOriginal)
     ) {
-      // Extract prefix if present (added by plugin-cloud-storage)
-      const prefix = (data as Record<string, unknown>)?.prefix as string | undefined
       fsSafeName = await getSafeFileName({
         collectionSlug: collectionConfig.slug,
         desiredFilename: fsSafeName,
@@ -528,9 +528,9 @@ export const generateFileData = async <T>({
     }
     // The client already uploaded this object, so it must not be saved again.
     const isProviderObjectMain = Boolean(providerOriginal && !fileWasTransformed)
-    if (providerOriginal && !fileWasTransformed) {
-      fileData._objectKey = providerOriginal._objectKey
-      fileData.prefix = providerOriginal.prefix
+    if (isProviderObjectMain) {
+      fileData._objectKey = providerOriginal!._objectKey
+      fileData.prefix = providerOriginal!.prefix
     }
     if (hasReusableOriginalMain && retainedOriginal) {
       fileData._objectKey = retainedOriginal._objectKey
@@ -544,8 +544,10 @@ export const generateFileData = async <T>({
         (fileWasTransformed
           ? await getTransformedOriginalFilename({
               collectionSlug: collectionConfig.slug,
+              excludeDocumentID: ownDocumentID,
               hasOwnFolder: Boolean(newObjectKey),
               mainFilename: fsSafeName,
+              prefix,
               req,
               staticPath: staticPath!,
               uploadedFilename: file.name,
@@ -780,15 +782,19 @@ export const generateFileData = async <T>({
  */
 async function getTransformedOriginalFilename({
   collectionSlug,
+  excludeDocumentID,
   hasOwnFolder,
   mainFilename,
+  prefix,
   req,
   staticPath,
   uploadedFilename,
 }: {
   collectionSlug: string
+  excludeDocumentID?: number | string
   hasOwnFolder: boolean
   mainFilename: string
+  prefix?: string
   req: PayloadRequest
   staticPath: string
   uploadedFilename: string
@@ -796,7 +802,14 @@ async function getTransformedOriginalFilename({
   let filename = getSanitizedUploadFilename(uploadedFilename)
 
   while (true) {
-    filename = await getSafeFileName({ collectionSlug, desiredFilename: filename, req, staticPath })
+    filename = await getSafeFileName({
+      collectionSlug,
+      desiredFilename: filename,
+      excludeDocumentID,
+      prefix,
+      req,
+      staticPath,
+    })
     if (hasOwnFolder || filename !== mainFilename) {
       return filename
     }

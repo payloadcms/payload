@@ -108,8 +108,8 @@ export const renameFileOperation = async (
     const { newStem } = validateRename({ filename, oldFilename })
     const originalStem = path.posix.parse(oldFilename).name
     const mainStem = path.posix.parse(stored.filename as string).name
-    // The main file and the original can each extend the shared base name (`photo-cropped`,
-    // or a `photo-1` counter), so the shorter one is the base.
+    // The original's name can extend the main file's name (a local `photo` / `photo-1` counter,
+    // or a beta `photo` / `photo-original`), so the base is whichever name the other starts with.
     const oldStem = mainStem.startsWith(originalStem) ? originalStem : mainStem
     if (filename === `${oldStem}${path.posix.extname(oldFilename)}`) {
       throw new APIError('The upload already has this filename.', 400)

@@ -6,6 +6,8 @@ import type {
   TypeWithID,
 } from 'payload'
 
+import { isOriginalFileRequest } from 'payload/shared'
+
 import { buildPrefixWithObjectKey } from './buildPrefixWithObjectKey.js'
 import { buildUploadStoragePathData } from './buildStoragePathData.js'
 import { sanitizePrefix } from './sanitizePrefix.js'
@@ -131,9 +133,7 @@ const getRepresentationPrefix = ({
   filename: string
   isOriginal?: boolean
 }): string => {
-  const isOriginalFile =
-    doc.original?.filename === filename && (isOriginal || doc.filename !== filename)
-  const representation = isOriginalFile
+  const representation = isOriginalFileRequest({ doc, filename, isOriginal })
     ? doc.original!
     : (Object.values(doc.variants ?? {}).find((variant) => variant?.filename === filename) ?? doc)
   return buildPrefixWithObjectKey({

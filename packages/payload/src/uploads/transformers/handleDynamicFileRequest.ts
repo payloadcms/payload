@@ -8,6 +8,7 @@ import { NotFound } from '../../errors/NotFound.js'
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
+import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
@@ -53,14 +54,16 @@ export async function handleDynamicFileRequest({
     throw new NotFound(req.t)
   }
 
-  const isOriginalRequest =
-    resolvedDocument.original?.filename === filename &&
-    (isOriginalParam || resolvedDocument.filename !== filename)
+  const isOriginalRequest = isOriginalFileRequest({
+    doc: resolvedDocument,
+    filename,
+    isOriginal: isOriginalParam,
+  })
+  // Without transform params, a request for the stored file needs no transformer.
+  const isPlainStoredFileRequest =
+    resolvedDocument.original?.filename === filename && req.searchParams.size === 0
 
-  if (
-    isOriginalRequest ||
-    (resolvedDocument.original?.filename === filename && req.searchParams.size === 0)
-  ) {
+  if (isOriginalRequest || isPlainStoredFileRequest) {
     const permittedDocument = await withFileTransformAccessContext({
       callback: () => checkFileAccess({ collection, filename, prefix, req }),
       isTransform: false,
