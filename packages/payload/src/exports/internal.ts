@@ -43,6 +43,7 @@ export type {
   UploadTransformerInternal,
   UploadTransformTask,
 } from '../uploads/transformers/uploadTransformerBridge.js'
+export { truncateFilename } from '../uploads/truncateFilename.js'
 export { uploadContentSecurityPolicy } from '../uploads/uploadContentSecurityPolicy.js'
 export {
   batchProcessing,
