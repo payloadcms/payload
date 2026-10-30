@@ -1,4 +1,4 @@
-import type { BrowserContext, Page, Request, Route } from '@playwright/test'
+import type { BrowserContext, Page, Request, Response, Route } from '@playwright/test'
 import type { FormState } from 'payload'
 
 import { expect } from '@playwright/test'
@@ -18,7 +18,7 @@ import {
   duplicateArrayRow,
   removeArrayRow,
 } from '../__helpers/e2e/fields/array/index.js'
-import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
+import { addBlock, openBlocksDrawer } from '../__helpers/e2e/fields/blocks/index.js'
 import { saveDocAndAssert, throttleTest, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { currentFramework, test } from '../__helpers/e2e/playwright.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
@@ -123,6 +123,149 @@ test.describe('Form State', () => {
         allowedNumberOfRequests: 1,
       },
     )
+  })
+
+  test('should populate block fields added while a form-state response is pending', async ({}, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
+    let resolveFirstRequest = () => {}
+    let releaseFirstResponse = () => {}
+    const firstRequestStarted = new Promise<void>((resolve) => {
+      resolveFirstRequest = resolve
+    })
+    const responseBarrier = new Promise<void>((resolve) => {
+      releaseFirstResponse = resolve
+    })
+
+    let firstResponseHeld = false
+    let formStateRequestCount = 0
+    let formStateResponseCount = 0
+    let racePage: Page | undefined
+    let verificationPage: Page | undefined
+    const formStateRequests: FormState[] = []
+
+    const isFormStatePOST = (request: Request) =>
+      request.method() === 'POST' &&
+      (request.url() === postsUrl.create ||
+        (currentFramework === 'tanstack-start' &&
+          request.url().includes('/_serverFn/') &&
+          (request.postData() ?? '').includes('form-state')))
+
+    const readFormStateFromRequest = (request: Request): FormState | undefined => {
+      if (currentFramework === 'tanstack-start') {
+        const { data }: { data: { args: { formState?: FormState }; name: string } } = fromJSON(
+          request.postDataJSON(),
+        )
+
+        return data.name === 'form-state' ? data.args.formState : undefined
+      }
+
+      const body = request.postDataJSON() as { args: { formState?: FormState } }[]
+
+      return body[0]?.args?.formState
+    }
+
+    const formStateRouteURL = (url: URL) =>
+      url.href === postsUrl.create ||
+      (currentFramework === 'tanstack-start' && url.pathname.includes('/_serverFn/'))
+
+    const onFormStateResponse = (response: Response) => {
+      if (isFormStatePOST(response.request())) {
+        formStateResponseCount++
+      }
+    }
+
+    const interceptFormState = async (route: Route) => {
+      if (isFormStatePOST(route.request())) {
+        formStateRequestCount++
+        const formState = readFormStateFromRequest(route.request())
+        if (formState) {
+          formStateRequests.push(formState)
+        }
+
+        if (!firstResponseHeld) {
+          firstResponseHeld = true
+          const response = await route.fetch()
+          resolveFirstRequest()
+          await responseBarrier
+          await route.fulfill({ response })
+          return
+        }
+      }
+
+      await route.continue()
+    }
+
+    try {
+      const { page: testPage } = await initPage({ context, serverURL })
+      racePage = testPage
+      await testPage.goto(postsUrl.create)
+      await waitForFormReady(testPage)
+      testPage.on('response', onFormStateResponse)
+      await testPage.route(formStateRouteURL, interceptFormState)
+
+      await testPage.clock.install()
+      await testPage.locator('#field-title').fill('Before block insertion')
+      await testPage.clock.runFor(250)
+      const blocksDrawer = await openBlocksDrawer({ page: testPage, fieldName: 'blocks' })
+      await firstRequestStarted
+      await blocksDrawer
+        .locator('button.thumbnail-card[title="Text"]')
+        .evaluate((button: HTMLButtonElement) => {
+          button.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
+        })
+      await expect(testPage.locator('#field-blocks .blocks-field__row')).toHaveCount(1)
+      releaseFirstResponse()
+      await expect.poll(() => formStateResponseCount).toBe(1)
+      await expect.poll(() => formStateRequests.length).toBe(1)
+      await expect.poll(() => formStateRequests[0]?.blocks?.rows?.length ?? 0).toBe(0)
+      await testPage.clock.runFor(250)
+
+      await expect.poll(() => formStateResponseCount, { timeout: 3_000 }).toBe(2)
+      await expect.poll(() => formStateRequestCount).toBe(2)
+      await expect.poll(() => formStateRequests.length).toBe(2)
+      await expect.poll(() => formStateRequests[1]?.blocks?.rows?.length).toBe(1)
+      const blockTextField = testPage.locator('#field-blocks__0__text')
+      await expect(blockTextField).toBeVisible()
+      await expect(blockTextField).toBeEnabled()
+
+      const textSyncRequestPromise = testPage.waitForRequest((request) => {
+        if (!isFormStatePOST(request)) {
+          return false
+        }
+
+        return readFormStateFromRequest(request)?.['blocks.0.text']?.value === 'Block field value'
+      })
+      await blockTextField.fill('Block field value')
+      await testPage.clock.runFor(250)
+      const textSyncRequest = await textSyncRequestPromise
+      const textSyncResponse = await textSyncRequest.response()
+      const textSyncFormState = readFormStateFromRequest(textSyncRequest)
+      await expect.poll(() => textSyncResponse?.ok()).toBe(true)
+      await expect
+        .poll(() => textSyncFormState?.blocks?.rows?.[0]?.id)
+        .toBe(formStateRequests[1]?.blocks?.rows?.[0]?.id)
+      await expect.poll(() => textSyncFormState?.blocks?.rows?.[0]?.blockType).toBe('text')
+      await expect.poll(() => textSyncFormState?.['blocks.0.text']?.value).toBe('Block field value')
+
+      await testPage.clock.resume()
+      await saveDocAndAssert(testPage)
+      verificationPage = (await initPage({ context, serverURL })).page
+      await verificationPage.goto(testPage.url())
+
+      await expect(verificationPage.locator('#field-title')).toHaveValue('Before block insertion')
+      await expect(verificationPage.locator('#field-blocks__0__text')).toHaveValue(
+        'Block field value',
+      )
+    } finally {
+      releaseFirstResponse()
+      if (racePage && !racePage.isClosed()) {
+        racePage.off('response', onFormStateResponse)
+        await racePage.close()
+      }
+      if (verificationPage && !verificationPage.isClosed()) {
+        await verificationPage.close()
+      }
+    }
   })
 
   test('should not throw fields into an infinite rendering loop', async () => {
