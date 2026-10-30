@@ -59,11 +59,13 @@ export async function handleDynamicFileRequest({
     filename,
     isOriginal: isOriginalParam,
   })
-  // Without transform params, a request for the stored file needs no transformer.
-  const isPlainStoredFileRequest =
-    resolvedDocument.original?.filename === filename && req.searchParams.size === 0
+  // Without transform params, a stored file is served as it is, with no transformer.
+  const hasNoTransformParams = req.searchParams?.size === 0
 
-  if (isOriginalRequest || isPlainStoredFileRequest) {
+  if (
+    isOriginalRequest ||
+    (resolvedDocument.original?.filename === filename && hasNoTransformParams)
+  ) {
     const permittedDocument = await withFileTransformAccessContext({
       callback: () => checkFileAccess({ collection, filename, prefix, req }),
       isTransform: false,

@@ -542,15 +542,15 @@ export const generateFileData = async <T>({
         retainedOriginal?.filename ??
         providerOriginal?.filename ??
         (fileWasTransformed
-          ? await getTransformedOriginalFilename({
+          ? await getUnplannedSafeFileName({
+              // Without its own storage folder, the original cannot reuse the main file's name.
+              canUseName: (name) => Boolean(newObjectKey) || name !== fsSafeName,
               collectionSlug: collectionConfig.slug,
+              desiredFilename: getSanitizedUploadFilename(file.name),
               excludeDocumentID: ownDocumentID,
-              hasOwnFolder: Boolean(newObjectKey),
-              mainFilename: fsSafeName,
               prefix,
               req,
               staticPath: staticPath!,
-              uploadedFilename: file.name,
             })
           : fsSafeName)
       // A transformed original is a separate object, so it gets its own folder.
@@ -712,25 +712,17 @@ export const generateFileData = async <T>({
         let imageName = imageNameWithDimensions
 
         if (!disableLocalStorage || shouldStageCloudFiles) {
-          const prefix = (data as Record<string, unknown>)?.prefix as string | undefined
-
-          while (true) {
-            imageName = await getSafeFileName({
-              collectionSlug: collectionConfig.slug,
-              desiredFilename: imageName,
-              excludeDocumentID: ownDocumentID,
-              prefix,
-              req,
-              staticPath: disableLocalStorage ? undefined : staticPath!,
-            })
-            if (plannedSizeBuffers.get(imageName)?.equals(sizeBuffer)) {
-              break
-            }
-            if (!plannedNames.has(imageName)) {
-              break
-            }
-            imageName = incrementName(imageName)
-          }
+          imageName = await getUnplannedSafeFileName({
+            // A size with the same bytes as a planned file can share that file's name.
+            canUseName: (name) =>
+              Boolean(plannedSizeBuffers.get(name)?.equals(sizeBuffer)) || !plannedNames.has(name),
+            collectionSlug: collectionConfig.slug,
+            desiredFilename: imageName,
+            excludeDocumentID: ownDocumentID,
+            prefix,
+            req,
+            staticPath: disableLocalStorage ? undefined : staticPath!,
+          })
           plannedNames.add(imageName)
         }
 
@@ -776,41 +768,19 @@ export const generateFileData = async <T>({
   }
 }
 
-/**
- * Names the untouched upload kept next to a transformed main file. Without its own storage
- * folder the original shares the main file's folder, so it cannot reuse the main file's name.
- */
-async function getTransformedOriginalFilename({
-  collectionSlug,
-  excludeDocumentID,
-  hasOwnFolder,
-  mainFilename,
-  prefix,
-  req,
-  staticPath,
-  uploadedFilename,
+/** Finds a name that is free in storage and that `canUseName` accepts for this save. */
+async function getUnplannedSafeFileName({
+  canUseName,
+  desiredFilename,
+  ...args
 }: {
-  collectionSlug: string
-  excludeDocumentID?: number | string
-  hasOwnFolder: boolean
-  mainFilename: string
-  prefix?: string
-  req: PayloadRequest
-  staticPath: string
-  uploadedFilename: string
-}): Promise<string> {
-  let filename = getSanitizedUploadFilename(uploadedFilename)
+  canUseName: (filename: string) => boolean
+} & Parameters<typeof getSafeFileName>[0]): Promise<string> {
+  let filename = desiredFilename
 
   while (true) {
-    filename = await getSafeFileName({
-      collectionSlug,
-      desiredFilename: filename,
-      excludeDocumentID,
-      prefix,
-      req,
-      staticPath,
-    })
-    if (hasOwnFolder || filename !== mainFilename) {
+    filename = await getSafeFileName({ ...args, desiredFilename: filename })
+    if (canUseName(filename)) {
       return filename
     }
     filename = incrementName(filename)

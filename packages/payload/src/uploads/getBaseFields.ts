@@ -4,6 +4,7 @@ import type { Field } from '../fields/config/types.js'
 import type { SanitizedUploadConfig } from './types.js'
 
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
+import { shouldRequestOriginal } from './isOriginalFileRequest.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
 import { validateUploadFilename } from './validateUploadFilename.js'
 
@@ -358,26 +359,4 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     ])
   }
   return uploadFields
-}
-
-/**
- * A transformed original can share the main file's name in its own storage folder. The bare
- * filename serves the main file, so the original's URL asks for the original.
- */
-const shouldRequestOriginal = ({
-  doc,
-}: {
-  doc?: {
-    _objectKey?: null | string
-    filename?: null | string
-    original?: { _objectKey?: null | string; filename?: null | string } | null
-  }
-}): boolean => {
-  const original = doc?.original
-
-  return Boolean(
-    original?.filename &&
-    original.filename === doc?.filename &&
-    (original._objectKey ?? null) !== (doc?._objectKey ?? null),
-  )
 }

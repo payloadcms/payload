@@ -119,7 +119,6 @@ export {
   uploadRequiresServerValidation,
 } from '../uploads/getFileTypeIdentity.js'
 export { isImage } from '../uploads/isImage.js'
-export { isOriginalFileRequest } from '../uploads/isOriginalFileRequest.js'
 export { matchMimeType } from '../uploads/matchMimeType.js'
 export { appendDateTimezoneSelectFields } from '../utilities/appendDateTimezoneSelectFields.js'
 export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'

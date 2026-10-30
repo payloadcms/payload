@@ -27,6 +27,7 @@ export { getFileFromUploadInstructions } from '../uploads/getFileFromUploadInstr
 export { isXmlMimeType } from '../uploads/getFileTypeIdentity.js'
 export { getRangeRequestInfo } from '../uploads/getRangeRequestInfo.js'
 export { getSafeFileName, incrementName } from '../uploads/getSafeFilename.js'
+export { isOriginalFileRequest } from '../uploads/isOriginalFileRequest.js'
 export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
 export { externalURLInputSchema, resolveURLUploadInput } from '../uploads/resolveURLUploadInput.js'
 export type { ExternalURLInput } from '../uploads/resolveURLUploadInput.js'

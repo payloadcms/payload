@@ -6,7 +6,7 @@ import type {
   TypeWithID,
 } from 'payload'
 
-import { isOriginalFileRequest } from 'payload/shared'
+import { isOriginalFileRequest } from 'payload/internal'
 
 import { buildPrefixWithObjectKey } from './buildPrefixWithObjectKey.js'
 import { buildUploadStoragePathData } from './buildStoragePathData.js'

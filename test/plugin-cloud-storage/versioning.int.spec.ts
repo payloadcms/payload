@@ -1114,11 +1114,8 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       },
       where: { id: { equals: created.id } },
     })
-    const oldStem = path.posix.parse(originalKey).name
-    const collisionKey = path.posix.join(
-      path.posix.dirname(processedKey),
-      path.posix.basename(processedKey).replace(oldStem, 'later'),
-    )
+    // The main file takes `later.png`, so the original's counter name is the later destination.
+    const collisionKey = path.posix.join(path.posix.dirname(originalKey), 'later-1.png')
     const occupiedBytes = Buffer.from('occupied')
     versionedCloudFiles.set(collisionKey, occupiedBytes)
 

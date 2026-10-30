@@ -149,6 +149,43 @@ test.suite('File rename', { config: './config.ts' }, () => {
     expect(await readFile(path.join(transformedMediaDir, 'cover-1.png'))).toEqual(bytes)
   })
 
+  test('should keep the requested name on the main file when renaming a local crop made on update', async ({
+    payload,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: transformedMediaSlug,
+      data: { alt: 'cropped later' },
+      file: { name: 'photo.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+    const cropped = await payload.update({
+      id: created.id,
+      collection: transformedMediaSlug,
+      data: {},
+      req: {
+        query: {
+          uploadEdits: {
+            crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+            heightInPixels: 800,
+            widthInPixels: 800,
+          },
+        },
+      },
+    })
+    const renamed = await renameFileOperation({
+      id: created.id,
+      collection: payload.collections[transformedMediaSlug],
+      filename: 'cover.png',
+      overrideAccess: true,
+      req: await createPayloadRequest({ payload }),
+    })
+
+    expect(cropped.filename).not.toBe(cropped.original?.filename)
+    expect(renamed.filename).toBe('cover.png')
+    expect(renamed.original?.filename).toBe('cover-1.png')
+    expect(await readFile(path.join(transformedMediaDir, 'cover-1.png'))).toEqual(bytes)
+  })
+
   test('should rename an upload whose own name contains -original', async ({ payload }) => {
     const bytes = await readFile(imageFixture)
     const created = await payload.create({

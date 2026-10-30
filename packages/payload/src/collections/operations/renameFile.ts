@@ -106,30 +106,29 @@ export const renameFileOperation = async (
     }
 
     const { newStem } = validateRename({ filename, oldFilename })
-    const originalStem = path.posix.parse(oldFilename).name
     const mainStem = path.posix.parse(stored.filename as string).name
-    // The original's name can extend the main file's name (a local `photo` / `photo-1` counter,
-    // or a beta `photo` / `photo-original`), so the base is whichever name the other starts with.
-    const oldStem = mainStem.startsWith(originalStem) ? originalStem : mainStem
-    if (filename === `${oldStem}${path.posix.extname(oldFilename)}`) {
+    if (newStem === mainStem) {
       throw new APIError('The upload already has this filename.', 400)
     }
 
     const hasDefaultRole = ({ roles }: { roles: StoredFileRole[] }) =>
       roles.some(({ type }) => type === 'default')
-    const getNextFilename = ({ key }: { key: string }) => {
+    const getNextFilename = ({ key, roles }: { key: string; roles: StoredFileRole[] }) => {
       const previousFilename = path.posix.basename(key)
-      const suffix = previousFilename.startsWith(oldStem)
-        ? previousFilename.slice(oldStem.length)
+      if (!hasDefaultRole({ roles }) && roles.some(({ type }) => type === 'original')) {
+        return `${newStem}${path.posix.extname(previousFilename)}`
+      }
+      const suffix = previousFilename.startsWith(mainStem)
+        ? previousFilename.slice(mainStem.length)
         : `-${previousFilename}`
 
       return `${newStem}${suffix}`
     }
     // The main file keeps the requested name; other files take a counter if they collide with it.
     const plannedKeys = new Set(
-      storedFiles.filter(hasDefaultRole).map(({ key }) =>
+      storedFiles.filter(hasDefaultRole).map((file) =>
         getStoredFileIdentity({
-          key: path.posix.join(path.posix.dirname(key), getNextFilename({ key })),
+          key: path.posix.join(path.posix.dirname(file.key), getNextFilename(file)),
         }),
       ),
     )
