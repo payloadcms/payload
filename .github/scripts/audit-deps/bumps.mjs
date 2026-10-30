@@ -38,7 +38,7 @@ export function slugDependency({ dependency }) {
 /**
  * One bump per dependency, aimed at the highest fix version across its findings.
  * A major bump gets a non-major fallback only when some finding is fixed within the current major.
- * Only `fix` entries produce bumps.
+ * Only `fix` entries produce bumps. Throws when two dependencies slug to the same bump id.
  *
  * @returns {Bump[]}
  */
@@ -65,6 +65,7 @@ export function buildBumps({ report }) {
   const bumps = [...entriesByDependency].flatMap(([dependency, entries]) =>
     bumpsForDependency({ dependency, entries, report }),
   )
+  assertUniqueIds({ bumps })
 
   return bumps.sort((a, b) => a.dependency.localeCompare(b.dependency) || a.id.localeCompare(b.id))
 }
@@ -157,6 +158,20 @@ export function classifyFixes({ bumps, report }) {
   return { fixed: [...fixed].sort(), partly: [...partly].sort() }
 }
 
+// Ids name branches, artifacts and store keys, so a slug collision would mix two dependencies.
+function assertUniqueIds({ bumps }) {
+  const dependencyById = new Map()
+
+  for (const bump of bumps) {
+    if (dependencyById.has(bump.id)) {
+      throw new Error(
+        `bump id ${bump.id} is shared by ${dependencyById.get(bump.id)} and ${bump.dependency}`,
+      )
+    }
+    dependencyById.set(bump.id, bump.dependency)
+  }
+}
+
 function isReportedThrough({ finding, bump }) {
   return finding.bumps.some((entry) => entry.dependency === bump.dependency)
 }
@@ -199,12 +214,13 @@ function bumpsForDependency({ dependency, entries, report }) {
     currentMajorOf({ entry }) < currentMajorOf({ entry: lowest }) ? entry : lowest,
   )
   const currentMajor = currentMajorOf({ entry: lowestEntry })
+  const currentVersion = lowestVersionOf({ spec: lowestEntry.currentSpec })
   const target = highestVersion({ versions: entries.map((entry) => entry.version) })
-  const isMajor = majorOf({ version: target }) > currentMajor
+  const isMajor = isBreakingChange({ currentMajor, currentVersion, version: target })
   const base = {
     dependency,
     from: lowestEntry.currentSpec,
-    fromVersion: lowestVersionOf({ spec: lowestEntry.currentSpec }),
+    fromVersion: currentVersion,
     manifests,
   }
   const main = {
@@ -221,7 +237,9 @@ function bumpsForDependency({ dependency, entries, report }) {
   }
 
   const withinCurrent = entries.filter(
-    (entry) => majorOf({ version: entry.version }) === currentMajor,
+    (entry) =>
+      majorOf({ version: entry.version }) === currentMajor &&
+      !isBreakingChange({ currentMajor, currentVersion, version: entry.version }),
   )
   if (withinCurrent.length === 0) {
     return [main]
@@ -242,6 +260,20 @@ function bumpsForDependency({ dependency, entries, report }) {
   }
 
   return [main, fallback]
+}
+
+// Under semver, `^0.x` treats a minor change as breaking. Without a readable current version
+// (e.g. `catalog:`) only the major counts.
+function isBreakingChange({ currentMajor, currentVersion, version }) {
+  if (majorOf({ version }) > currentMajor) {
+    return true
+  }
+
+  return (
+    currentMajor === 0 &&
+    currentVersion !== '' &&
+    minorOf({ version }) > minorOf({ version: currentVersion })
+  )
 }
 
 function currentMajorOf({ entry }) {
@@ -268,6 +300,10 @@ function lowestVersionOf({ spec }) {
 
 function majorOf({ version }) {
   return Number.parseInt(version.split('.')[0], 10)
+}
+
+function minorOf({ version }) {
+  return Number.parseInt(version.split('.')[1] ?? '0', 10)
 }
 
 function compareVersions({ a, b }) {

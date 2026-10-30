@@ -43,7 +43,7 @@ jobs:
       matrix:
         # inputs.ref is empty on `schedule`; audit both main and 3.x.
         ref: ${{ fromJSON(inputs.ref && inputs.ref != 'both' && format('["{0}"]', inputs.ref) || '["main","3.x"]') }}
-    # A reusable workflow cannot raise permissions; the seal job lists run artifacts with actions: read.
+    # A reusable workflow cannot raise permissions; seal, seal_verify and status list run artifacts with actions: read.
     permissions:
       actions: read
       contents: read

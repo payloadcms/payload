@@ -6,6 +6,7 @@ import {
   closeStalePrs,
   commentOnFailedUnits,
   findSealedArtifacts,
+  runHousekeeping,
   runPrecheck,
 } from './github.mjs'
 
@@ -732,6 +733,54 @@ describe('commentOnFailedUnits', () => {
   })
 })
 
+describe('runHousekeeping', () => {
+  const housekeeping = (github) =>
+    runHousekeeping({
+      github,
+      outcomes: { 'non-major': 'lodash failed at build' },
+      owner: OWNER,
+      prNumbers: [3],
+      ref: REF,
+      repo: REPO,
+      unitSteps: { 'non-major': { prNumber: 4, step: 'update' } },
+    })
+
+  it('should still comment on failed units when closing a stale PR fails', async () => {
+    const github = makeGithub({ prs: { 3: stalePr() } })
+    github.rest.pulls.update.mockRejectedValue(new Error('close failed'))
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    await expect(housekeeping(github)).rejects.toThrow('close failed')
+
+    expect(github.rest.issues.createComment).toHaveBeenCalledWith(
+      expect.objectContaining({ issue_number: 4 }),
+    )
+    logger.mockRestore()
+  })
+
+  it('should report both errors when closing and commenting fail', async () => {
+    const github = makeGithub({ prs: { 3: stalePr() } })
+    github.rest.pulls.update.mockRejectedValue(new Error('close failed'))
+    github.rest.issues.createComment.mockImplementation(async ({ issue_number }) => {
+      if (issue_number === 4) {
+        throw new Error('comment failed')
+      }
+      return {}
+    })
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    await expect(housekeeping(github)).rejects.toThrow('close failed; comment failed')
+
+    logger.mockRestore()
+  })
+
+  it('should resolve when both succeed', async () => {
+    const github = makeGithub({ prs: { 3: stalePr() } })
+
+    await expect(housekeeping(github)).resolves.toBeUndefined()
+  })
+})
+
 describe('checkHeadUnchanged', () => {
   const check = ({ headSha, prs }) =>
     checkHeadUnchanged({
@@ -842,10 +891,41 @@ describe('findSealedArtifacts', () => {
     expect(sealed).toEqual({})
   })
 
-  it('should ignore a leg from a previous attempt', async () => {
+  it('should ignore a leg from a later attempt', async () => {
     const { sealed } = await seal({
       artifacts: [artifact({})],
-      jobs: [leg({ run_attempt: 1 })],
+      jobs: [leg({ run_attempt: 3 })],
+    })
+
+    expect(sealed).toEqual({})
+  })
+
+  it('should accept an artifact in the window of a leg kept from an earlier attempt', async () => {
+    const { sealed, warnings } = await seal({
+      artifacts: [artifact({ created_at: '2026-10-29T10:05:00Z', id: 400 })],
+      jobs: [
+        leg({
+          completed_at: '2026-10-29T10:10:00Z',
+          run_attempt: 1,
+          started_at: '2026-10-29T10:00:00Z',
+        }),
+      ],
+    })
+
+    expect(sealed).toEqual({ 'lodash-4': 400 })
+    expect(warnings).toEqual([])
+  })
+
+  it('should reject an artifact outside the window of a leg from an earlier attempt', async () => {
+    const { sealed } = await seal({
+      artifacts: [artifact({})],
+      jobs: [
+        leg({
+          completed_at: '2026-10-29T10:10:00Z',
+          run_attempt: 1,
+          started_at: '2026-10-29T10:00:00Z',
+        }),
+      ],
     })
 
     expect(sealed).toEqual({})

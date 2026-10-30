@@ -730,7 +730,7 @@ describe('cli', () => {
       })
 
       expect(code).toBe(1)
-      expect(stdout).toBe('::error::bumps cleared nothing: left-pad-1\n')
+      expect(stdout).toBe('::error::left-pad-1: advisory still reported through left-pad\n')
     })
 
     it('exits 0 when every bump cleared its advisories', async () => {

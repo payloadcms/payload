@@ -22,15 +22,20 @@ export async function runApplyBumps({ options }) {
   }
 }
 
-/** `check-cleared --plan --bump-ids --report`: exits 1 when a bump cleared none of its advisories. */
+/**
+ * `check-cleared --plan --bump-ids --report`: exits 1 when the re-audit still reports one of a
+ * bump's advisories through that bump's dependency.
+ */
 export async function runCheckCleared({ options }) {
   const plan = await readPlan({ options })
   const bumps = parseBumpIds({ options }).map((bumpId) => findBump({ plan, bumpId }))
   const report = await readReport({ path: requireOption({ name: 'report', options }) })
-  const uncleared = findUnclearedBumps({ bumps, report })
 
   failWithReasons({
-    reasons: uncleared.length > 0 ? [`bumps cleared nothing: ${uncleared.join(', ')}`] : [],
+    reasons: findUnclearedBumps({ bumps, report }).map((bumpId) => {
+      const { dependency } = findBump({ plan, bumpId })
+      return `${bumpId}: advisory still reported through ${dependency}`
+    }),
   })
 }
 

@@ -21,11 +21,11 @@ on:
         required: true
     secrets:
       OPENAI_API_KEY:
-        required: true
+        required: false
       AUDIT_DEPS_APP_CLIENT_ID:
-        required: true
+        required: false
       AUDIT_DEPS_APP_PRIVATE_KEY:
-        required: true
+        required: false
 
 permissions: {}
 
@@ -1068,7 +1068,7 @@ jobs:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
             const { readFile } = await import('node:fs/promises')
-            const { closeStalePrs, commentOnFailedUnits } = await import(
+            const { runHousekeeping } = await import(
               `${process.env.RUNNER_TEMP}/audit-deps-tooling/.github/scripts/audit-deps/github.mjs`
             )
 
@@ -1081,11 +1081,12 @@ jobs:
             )
             const { owner, repo } = context.repo
 
-            await closeStalePrs({ github, owner, prNumbers, ref: process.env.REF, repo })
-            await commentOnFailedUnits({
+            await runHousekeeping({
               github,
-              owner,
               outcomes: outcomes.units,
+              owner,
+              prNumbers,
+              ref: process.env.REF,
               repo,
               unitSteps: JSON.parse(process.env.UNIT_STEPS),
             })

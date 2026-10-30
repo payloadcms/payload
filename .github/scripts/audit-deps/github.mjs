@@ -81,6 +81,37 @@ export async function closeStalePrs({ github, owner, prNumbers, ref, repo }) {
 }
 
 /**
+ * Closes stale PRs and comments on failed units. A failure in one does not stop the other;
+ * the errors are thrown together after both ran.
+ */
+export async function runHousekeeping({
+  github,
+  outcomes,
+  owner,
+  prNumbers,
+  ref,
+  repo,
+  unitSteps,
+}) {
+  const tasks = [
+    () => closeStalePrs({ github, owner, prNumbers, ref, repo }),
+    () => commentOnFailedUnits({ github, outcomes, owner, repo, unitSteps }),
+  ]
+  const errors = []
+  for (const task of tasks) {
+    try {
+      await task()
+    } catch (error) {
+      errors.push(error)
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new AggregateError(errors, errors.map((error) => error?.message ?? error).join('; '))
+  }
+}
+
+/**
  * True while the PR head is still `headSha`, so a person's push after the precheck is
  * never overwritten.
  */
@@ -98,9 +129,9 @@ export async function checkHeadUnchanged({ github, headSha, owner, prNumber, rep
 }
 
 /**
- * Ids of artifacts named `<artifactPrefix><id>` that the job leg `jobNameFor(id)` of this run
- * attempt uploaded. A job that runs package scripts can upload under any name first, so an
- * artifact counts only when that leg succeeded, the artifact was created while the leg ran,
+ * Ids of artifacts named `<artifactPrefix><id>` that the latest job leg `jobNameFor(id)` up to
+ * this run attempt uploaded. A job that runs package scripts can upload under any name first, so
+ * an artifact counts only when that leg succeeded, the artifact was created while the leg ran,
  * and it is the only one that was. Every other id is left out with a warning.
  * @returns {Promise<Record<string, number>>}
  */
@@ -144,7 +175,7 @@ export async function findSealedArtifacts({
     const uploaded = leg ? candidates.filter((artifact) => isWithinLeg({ artifact, leg })) : []
     if (uploaded.length !== 1) {
       console.log(
-        `::warning::Ignoring artifact ${escapeCommandText({ text: `${artifactPrefix}${id}` })}: not uploaded by its leg in this run attempt`,
+        `::warning::Ignoring artifact ${escapeCommandText({ text: `${artifactPrefix}${id}` })}: not uploaded by its leg`,
       )
       continue
     }
@@ -154,11 +185,12 @@ export async function findSealedArtifacts({
   return sealed
 }
 
-// Jobs of a reusable workflow are listed as `<caller job> / <job>`.
+// Jobs of a reusable workflow are listed as `<caller job> / <job>`. Re-running failed jobs keeps
+// the successful legs of an earlier attempt, so those legs count too.
 function findSuccessfulLeg({ jobName, jobs, runAttempt }) {
   const legs = jobs.filter(
     (job) =>
-      job.run_attempt === runAttempt &&
+      job.run_attempt <= runAttempt &&
       (job.name === jobName || job.name?.endsWith(` / ${jobName}`)),
   )
 

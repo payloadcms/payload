@@ -458,6 +458,73 @@ describe('buildBumps per-dependency collapse', () => {
     ])
   })
 
+  it('should treat a minor change under 0.x as major', () => {
+    const report = reportFor({
+      findings: [barFinding({ advisory: 'GHSA-1', version: '0.6.0', currentSpec: '^0.5.1' })],
+    })
+
+    expect(buildBumps({ report, scope: 'consumer-facing' })).toEqual([
+      expect.objectContaining({ id: 'bar-0', isMajor: true, to: '0.6.0' }),
+    ])
+  })
+
+  it('should treat a patch change under 0.x as non-major', () => {
+    const report = reportFor({
+      findings: [barFinding({ advisory: 'GHSA-1', version: '0.5.3', currentSpec: '^0.5.1' })],
+    })
+
+    expect(buildBumps({ report, scope: 'consumer-facing' })).toEqual([
+      expect.objectContaining({ id: 'bar-0', isMajor: false, to: '0.5.3' }),
+    ])
+  })
+
+  it('should give a 0.x major a fallback only within the current minor', () => {
+    const report = reportFor({
+      findings: [
+        barFinding({ advisory: 'GHSA-1', version: '0.5.3', currentSpec: '^0.5.1' }),
+        barFinding({ advisory: 'GHSA-2', version: '0.6.0', currentSpec: '^0.5.1' }),
+      ],
+    })
+
+    const bumps = buildBumps({ report, scope: 'consumer-facing' })
+
+    expect(bumps.map((bump) => [bump.id, bump.to, bump.isMajor])).toEqual([
+      ['bar-0', '0.6.0', true],
+      ['bar-0-fallback', '0.5.3', false],
+    ])
+  })
+
+  it('should throw when two dependencies get the same bump id', () => {
+    const report = {
+      findings: [
+        finding({
+          advisory: 'GHSA-1',
+          bumps: [
+            entry({
+              dependency: '@foo/bar',
+              currentSpec: '1.0.0',
+              version: '1.0.1',
+              crossesMajor: false,
+              toMajor: 1,
+            }),
+            entry({
+              dependency: 'foo-bar',
+              currentSpec: '1.0.0',
+              version: '1.0.2',
+              crossesMajor: false,
+              toMajor: 1,
+            }),
+          ],
+        }),
+      ],
+      plan: { actions: [] },
+    }
+
+    expect(() => buildBumps({ report, scope: 'consumer-facing' })).toThrow(
+      'bump id foo-bar-1 is shared by @foo/bar and foo-bar',
+    )
+  })
+
   it('should leave fromVersion empty for catalog and compound specs', () => {
     for (const currentSpec of ['catalog:', '^1.0.0 || ^2.0.0']) {
       const report = reportFor({
