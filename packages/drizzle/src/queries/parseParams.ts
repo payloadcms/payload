@@ -16,7 +16,7 @@ import {
   sql,
 } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
-import { APIError, getFieldByPath, QueryError } from 'payload'
+import { getFieldByPath, QueryError } from 'payload'
 import {
   hasManyRelationshipOperatorSet,
   isNestedRelationshipQuery,
@@ -28,9 +28,9 @@ import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 import type { DrizzleResolvedOperator } from './operatorMap.js'
 
+import { buildInlinedInConstraint, canInlineValues } from '../utilities/buildInlinedInConstraint.js'
 import { escapeSQLValue } from '../utilities/escapeSQLValue.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
-import { isValidStringID } from '../utilities/isValidStringID.js'
 import { DistinctSymbol, isRawConstraint } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { buildOperatorConstraint } from './buildOperatorConstraint.js'
@@ -397,16 +397,27 @@ export function parseParams({
                   constraints.push(
                     wrapOperator(
                       ...queryColumns.map(({ rawColumn, value }) =>
-                        buildOperatorConstraint({
-                          adapter,
-                          column: rawColumn,
-                          field,
-                          locale,
-                          originalOperator,
-                          path: relationOrPath,
-                          resolvedOperator: queryOperator as DrizzleResolvedOperator,
-                          value,
-                        }),
+                        // Each collection of a polymorphic relationship is a separate column, so
+                        // the values would otherwise be bound once per collection
+                        adapter.limitedBoundParameters &&
+                        (queryOperator === 'in' || queryOperator === 'not_in') &&
+                        Array.isArray(value) &&
+                        canInlineValues(value)
+                          ? buildInlinedInConstraint({
+                              column: rawColumn,
+                              operator: queryOperator,
+                              values: value,
+                            })
+                          : buildOperatorConstraint({
+                              adapter,
+                              column: rawColumn,
+                              field,
+                              locale,
+                              originalOperator,
+                              path: relationOrPath,
+                              resolvedOperator: queryOperator as DrizzleResolvedOperator,
+                              value,
+                            }),
                       ),
                     ),
                   )
@@ -558,46 +569,18 @@ export function parseParams({
                 if (
                   adapter.limitedBoundParameters &&
                   (operator === 'in' || operator === 'not_in') &&
-                  relationOrPath === 'id' &&
-                  Array.isArray(queryValue)
+                  Array.isArray(queryValue) &&
+                  // Values that can't be written into the statement stay bound, except for IDs
+                  (relationOrPath === 'id' || canInlineValues(queryValue))
                 ) {
-                  let isInvalid = false
-                  for (const val of queryValue) {
-                    if (typeof val === 'number' || val === null) {
-                      continue
-                    }
-                    if (typeof val === 'string') {
-                      if (!isValidStringID(val)) {
-                        isInvalid = true
-                        break
-                      } else {
-                        continue
-                      }
-                    }
-                    isInvalid = true
-                    break
-                  }
-
-                  if (isInvalid) {
-                    throw new APIError(`Invalid ID value in ${JSON.stringify(queryValue)}`)
-                  }
-
                   constraints.push(
-                    sql.raw(
-                      `"${getTableName(resolvedColumn.table)}"."${resolvedColumn.name}" ${operator === 'in' ? 'IN' : 'NOT IN'} (${queryValue
-                        .map((e) => {
-                          if (e === null) {
-                            return `NULL`
-                          }
-
-                          if (typeof e === 'number') {
-                            return e
-                          }
-
-                          return `'${e}'`
-                        })
-                        .join(',')})`,
-                    ),
+                    buildInlinedInConstraint({
+                      column: sql.raw(
+                        `"${getTableName(resolvedColumn.table)}"."${resolvedColumn.name}"`,
+                      ),
+                      operator,
+                      values: queryValue,
+                    }),
                   )
                   break
                 }

@@ -1,12 +1,13 @@
 import type { DeleteMany } from 'payload'
 
-import { inArray } from 'drizzle-orm'
+import { getTableName, inArray, sql } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
 import { buildQuery } from './queries/buildQuery.js'
+import { buildInlinedInConstraint, canInlineValues } from './utilities/buildInlinedInConstraint.js'
 import { getTransaction } from './utilities/getTransaction.js'
 import { markWrite } from './utilities/readAfterWrite.js'
 
@@ -49,10 +50,16 @@ export const deleteMany: DeleteMany = async function deleteMany(
       where: whereArg,
     })
 
-    whereToUse = inArray(
-      table.id,
-      result.docs.map((doc) => doc.id),
-    )
+    const ids = result.docs.map((doc) => doc.id)
+
+    whereToUse =
+      this.limitedBoundParameters && canInlineValues(ids)
+        ? buildInlinedInConstraint({
+            column: sql.raw(`"${getTableName(table)}"."id"`),
+            operator: 'in',
+            values: ids,
+          })
+        : inArray(table.id, ids)
   }
 
   // No getPrimaryDb needed: db is only used for deleteWhere (a write, always routed to primary

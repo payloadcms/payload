@@ -1,3 +1,5 @@
+import type { Payload } from 'payload'
+
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -219,5 +221,189 @@ test.suite(
       expect(res.docs[0].id).toBe(simpleLocalizedDoc.id)
       expect(res.docs[0].text).toBe('Test')
     })
+
+    test('should not use bound parameters for IN on a polymorphic relationship if limitedBoundParameters: true', async ({
+      payload,
+    }) => {
+      // Each collection of the relationship is a separate column, so 60 values bind 120 parameters
+      const IN = Array.from({ length: 60 }, (_, i) => i + 1)
+
+      const restoreExecute = limitBoundParameters(payload)
+
+      try {
+        payload.db.limitedBoundParameters = false
+
+        await expect(
+          payload.find({
+            collection: 'posts',
+            pagination: false,
+            where: { 'polymorphicRelations.value': { in: IN } },
+            overrideAccess: true,
+          }),
+        ).rejects.toBeTruthy()
+
+        payload.db.limitedBoundParameters = true
+
+        await expect(
+          payload.find({
+            collection: 'posts',
+            pagination: false,
+            where: { 'polymorphicRelations.value': { in: IN } },
+            overrideAccess: true,
+          }),
+        ).resolves.toBeTruthy()
+      } finally {
+        restoreExecute()
+      }
+    })
+
+    test('should not use bound parameters for IN on other fields with ID-like values if limitedBoundParameters: true', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: 'simple',
+        data: { text: 'value-1' },
+        overrideAccess: true,
+      })
+
+      const IN = Array.from({ length: 150 }, (_, i) => `value-${i}`)
+
+      const restoreExecute = limitBoundParameters(payload)
+
+      try {
+        payload.db.limitedBoundParameters = false
+
+        await expect(
+          payload.find({
+            collection: 'simple',
+            pagination: false,
+            where: { text: { in: IN } },
+            overrideAccess: true,
+          }),
+        ).rejects.toBeTruthy()
+
+        payload.db.limitedBoundParameters = true
+
+        const res = await payload.find({
+          collection: 'simple',
+          pagination: false,
+          where: { text: { in: IN } },
+          overrideAccess: true,
+        })
+
+        expect(res.docs.map(({ id }) => id)).toStrictEqual([doc.id])
+
+        // Values that can't be written into the statement safely stay bound
+        const resWithBoundValues = await payload.find({
+          collection: 'simple',
+          pagination: false,
+          where: { text: { in: ["it's", 'value-1'] } },
+          overrideAccess: true,
+        })
+
+        expect(resWithBoundValues.docs.map(({ id }) => id)).toStrictEqual([doc.id])
+      } finally {
+        restoreExecute()
+      }
+    })
+
+    test('should not use bound parameters for the IDs found through a join if limitedBoundParameters: true', async ({
+      payload,
+    }) => {
+      const posts = await createPostsWithPolymorphicRelation({ count: 120, payload })
+
+      // The join on the relationships table resolves the matching IDs first, then loads them by ID
+      const where = { 'polymorphicRelations.relationTo': { equals: 'simple' } }
+
+      const restoreExecute = limitBoundParameters(payload)
+
+      try {
+        payload.db.limitedBoundParameters = false
+
+        await expect(
+          payload.find({ collection: 'posts', pagination: false, where, overrideAccess: true }),
+        ).rejects.toBeTruthy()
+
+        payload.db.limitedBoundParameters = true
+
+        const res = await payload.find({
+          collection: 'posts',
+          pagination: false,
+          where,
+          overrideAccess: true,
+        })
+
+        expect(res.docs.map(({ id }) => id).sort()).toStrictEqual(posts.map(({ id }) => id).sort())
+      } finally {
+        restoreExecute()
+      }
+    })
+
+    test('should not use bound parameters for the IDs deleted through a join if limitedBoundParameters: true', async ({
+      payload,
+    }) => {
+      await createPostsWithPolymorphicRelation({ count: 120, payload })
+
+      const where = { 'polymorphicRelations.relationTo': { equals: 'simple' } }
+
+      const restoreExecute = limitBoundParameters(payload)
+
+      try {
+        payload.db.limitedBoundParameters = false
+
+        await expect(payload.db.deleteMany({ collection: 'posts', where })).rejects.toBeTruthy()
+
+        payload.db.limitedBoundParameters = true
+
+        await expect(payload.db.deleteMany({ collection: 'posts', where })).resolves.toBeUndefined()
+      } finally {
+        restoreExecute()
+      }
+
+      const { totalDocs } = await payload.count({ collection: 'posts', overrideAccess: true })
+
+      expect(totalDocs).toBe(0)
+    })
   },
 )
+
+const limitBoundParameters = (payload: Payload): (() => void) => {
+  const originalExecute = payload.db.drizzle.$client.execute.bind(payload.db.drizzle.$client)
+
+  payload.db.drizzle.$client.execute = async function execute(...args) {
+    const [{ args: boundParameters }] = args as [{ args: any[] }]
+
+    if (Array.isArray(boundParameters) && boundParameters.length > 100) {
+      throw new Error('Exceeded limit of bound parameters!')
+    }
+
+    return await originalExecute(...args)
+  }
+
+  return () => {
+    payload.db.drizzle.$client.execute = originalExecute
+  }
+}
+
+const createPostsWithPolymorphicRelation = async ({
+  count,
+  payload,
+}: {
+  count: number
+  payload: Payload
+}) => {
+  const simple = await payload.create({ collection: 'simple', data: {}, overrideAccess: true })
+
+  return await Promise.all(
+    Array.from({ length: count }, (_, i) =>
+      payload.create({
+        collection: 'posts',
+        data: {
+          polymorphicRelations: [{ relationTo: 'simple', value: simple.id }],
+          title: `post ${i}`,
+        },
+        overrideAccess: true,
+      }),
+    ),
+  )
+}
