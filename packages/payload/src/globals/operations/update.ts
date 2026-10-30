@@ -230,6 +230,25 @@ export const updateOperation = async <
       throw new Forbidden(req.t)
     }
 
+    if (
+      !isSavingDraft &&
+      hasDraftsEnabled(globalConfig) &&
+      hasLiveGlobal &&
+      hasWhereAccessResult(accessResults)
+    ) {
+      // Draft access does not authorize overwriting an inaccessible live global.
+      const accessibleLiveGlobal = await payload.db.findGlobal({
+        slug,
+        locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
+        req,
+        where: accessResults,
+      })
+
+      if (!accessibleLiveGlobal || Object.keys(accessibleLiveGlobal).length === 0) {
+        throw new Forbidden(req.t)
+      }
+    }
+
     let globalJSON: JsonObject = {}
 
     if (globalVersionResult && globalVersionResult.global) {
