@@ -53,6 +53,17 @@ const recordSubmittedAuthorship =
 const wasAuthorshipSubmitted = (fieldName: AuthorshipFieldName, context: RequestContext): boolean =>
   getSubmittedAuthorship(context)?.[fieldName] === true
 
+// `beforeChange` records this before field traversal, which can seed keys on the in-flight doc, and
+// `afterRead` can add defaults — either of which would hide a first write. The flag is the reliable
+// first-write signal for globals and create-validation.
+const NEW_DOC_CONTEXT_KEY = '_isNewDoc'
+
+export const recordNewDoc = (context: RequestContext, isNew: boolean): void => {
+  context[NEW_DOC_CONTEXT_KEY] = isNew
+}
+
+const isNewDoc = (context: RequestContext): boolean => context[NEW_DOC_CONTEXT_KEY] === true
+
 const userToRelation = (req: PayloadRequest): RelationValue => {
   if (req.user?.collection && req.user.id !== undefined && req.user.id !== null) {
     return { relationTo: req.user.collection, value: req.user.id }
@@ -76,18 +87,14 @@ const setCreatedBy: FieldHook = ({
   context,
   data,
   operation,
-  originalDoc,
   overrideAccess,
   previousValue,
   req,
 }) => {
-  const hasEmptyOriginalDocument = !originalDoc || Object.keys(originalDoc).length === 0
-  // Globals always write via `update`, so their first write is detected by an empty original doc.
-  // Validation uses its own operation and represents a collection create with the same empty doc.
+  // Globals always write via `update` and validation uses its own operation, so a new doc is
+  // detected from the first-write flag `beforeChange` set before field traversal.
   const isFirstWrite =
-    operation === 'create' ||
-    (operation === 'validate' && hasEmptyOriginalDocument) ||
-    (!collection && hasEmptyOriginalDocument)
+    operation === 'create' || ((operation === 'validate' || !collection) && isNewDoc(context))
 
   if (!isFirstWrite) {
     return previousValue

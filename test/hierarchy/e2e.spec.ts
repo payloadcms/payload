@@ -1066,7 +1066,7 @@ test.describe('Hierarchy Sidebar', () => {
 
       const selectedFolderRow = page.locator('tr', { hasText: 'Orgs and Products' })
 
-      await selectedFolderRow.getByRole('checkbox').click()
+      await selectedFolderRow.getByRole('checkbox').check()
       await page.getByRole('button', { name: 'Move', exact: true }).click()
 
       const modal = page.locator('.hierarchy-modal')
@@ -1095,7 +1095,13 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(productsFolder).toHaveAttribute('aria-disabled', 'true')
       await expect(selectedFolder).toHaveAttribute('aria-disabled', 'true')
 
-      await organizationsFolder.press('Enter')
+      await organizationsFolder.getByRole('checkbox').focus()
+      await expect(organizationsFolder.getByRole('checkbox')).not.toBeFocused()
+      const expand = organizationsFolder.getByRole('button', { name: 'Orgs Only', exact: true })
+
+      await expect(expand).toBeDisabled()
+      await expand.press('Enter')
+      await expect(expand).toHaveAttribute('aria-expanded', 'false')
       await expect(modal.locator('.hierarchy-column')).toHaveCount(1)
     })
 
@@ -1104,7 +1110,7 @@ test.describe('Hierarchy Sidebar', () => {
 
       const selectedFolderRow = page.locator('tr', { hasText: 'General' })
 
-      await selectedFolderRow.getByRole('checkbox').click()
+      await selectedFolderRow.getByRole('checkbox').check()
       await page.getByRole('button', { name: 'Move', exact: true }).click()
 
       const modal = page.locator('.hierarchy-modal')
@@ -1129,7 +1135,13 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(organizationsAndProductsFolder).toHaveAttribute('aria-disabled', 'true')
       await expect(productsFolder).toHaveAttribute('aria-disabled', 'true')
 
-      await organizationsFolder.press('Enter')
+      await organizationsFolder.getByRole('checkbox').focus()
+      await expect(organizationsFolder.getByRole('checkbox')).not.toBeFocused()
+      const expand = organizationsFolder.getByRole('button', { name: 'Orgs Only', exact: true })
+
+      await expect(expand).toBeDisabled()
+      await expand.press('Enter')
+      await expect(expand).toHaveAttribute('aria-expanded', 'false')
       await expect(modal.locator('.hierarchy-column')).toHaveCount(1)
     })
 
@@ -1560,8 +1572,48 @@ test.describe('Hierarchy Sidebar', () => {
 
       await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
 
-      await modal.locator('.hierarchy-column-item', { hasText: childFolderName }).first().click()
+      const expandButton = modal.getByRole('button', { name: childFolderName, exact: true })
 
+      const childFolderRow = expandButton.locator('..')
+      const rowBounds = await childFolderRow.evaluate((row) => ({
+        height: row.clientHeight,
+        width: row.clientWidth,
+      }))
+
+      await childFolderRow.click({ position: { x: rowBounds.width - 2, y: rowBounds.height / 2 } })
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(3)
+      await expect(expandButton).toHaveAttribute('aria-expanded', 'true')
+
+      await expandButton.press('Space')
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
+      await expect(expandButton).toHaveAttribute('aria-expanded', 'false')
+      await expect(expandButton).toBeFocused()
+
+      const selectionControl = childFolderRow.getByRole('checkbox')
+
+      await modal.getByRole('checkbox', { name: parentFolderName, exact: true }).check()
+      await expect(selectionControl).not.toBeChecked()
+      await expandButton.press('Tab')
+      await expect(selectionControl).toBeFocused()
+      await selectionControl.press('Space')
+      await expect(selectionControl).toBeChecked()
+      await expect(expandButton).toHaveAttribute('aria-expanded', 'false')
+
+      await expandButton.press('Enter')
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(3)
+      await expect(expandButton).toHaveAttribute('aria-expanded', 'true')
+
+      const parentExpandButton = modal.getByRole('button', { name: parentFolderName, exact: true })
+
+      await parentExpandButton.click()
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(1)
+      await expect(parentExpandButton).toHaveAttribute('aria-expanded', 'false')
+
+      await parentExpandButton.click()
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
+      await expect(expandButton).toHaveAttribute('aria-expanded', 'false')
+
+      await expandButton.click()
       await expect(modal.locator('.hierarchy-column')).toHaveCount(3)
 
       await modal.getByRole('button', { name: 'Close' }).click()
