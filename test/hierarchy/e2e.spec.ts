@@ -1574,7 +1574,13 @@ test.describe('Hierarchy Sidebar', () => {
 
       const expandButton = modal.getByRole('button', { name: childFolderName, exact: true })
 
-      await expandButton.press('Enter')
+      const childFolderRow = expandButton.locator('..')
+      const rowBounds = await childFolderRow.evaluate((row) => ({
+        height: row.clientHeight,
+        width: row.clientWidth,
+      }))
+
+      await childFolderRow.click({ position: { x: rowBounds.width - 2, y: rowBounds.height / 2 } })
       await expect(modal.locator('.hierarchy-column')).toHaveCount(3)
       await expect(expandButton).toHaveAttribute('aria-expanded', 'true')
 
@@ -1583,7 +1589,17 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(expandButton).toHaveAttribute('aria-expanded', 'false')
       await expect(expandButton).toBeFocused()
 
-      await expandButton.click()
+      const selectionControl = childFolderRow.getByRole('checkbox')
+
+      await modal.getByRole('checkbox', { name: parentFolderName, exact: true }).check()
+      await expect(selectionControl).not.toBeChecked()
+      await expandButton.press('Tab')
+      await expect(selectionControl).toBeFocused()
+      await selectionControl.press('Space')
+      await expect(selectionControl).toBeChecked()
+      await expect(expandButton).toHaveAttribute('aria-expanded', 'false')
+
+      await expandButton.press('Enter')
       await expect(modal.locator('.hierarchy-column')).toHaveCount(3)
       await expect(expandButton).toHaveAttribute('aria-expanded', 'true')
 
