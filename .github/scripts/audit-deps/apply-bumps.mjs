@@ -28,30 +28,26 @@ export class UnsupportedSpecifierError extends Error {
 }
 
 export class NonRaisingBumpError extends Error {
-  constructor({ spec, version }) {
-    super(`Specifier "${spec}" already reaches ${version}; the bump would not raise it.`)
+  constructor({ dependency, version }) {
+    super(`Every ${dependency} specifier already reaches ${version}; the bump raises none.`)
     this.name = 'NonRaisingBumpError'
   }
 }
 
-/**
- * Keeps the range prefix of `spec` and swaps in `version`. Throws when `spec` already reaches
- * `version`, because the edit would be a no-op or a downgrade.
- */
+/** Keeps the range prefix of `spec` and swaps in `version`. */
 export function setSpecifierVersion({ spec, version }) {
   const match = SPECIFIER_PATTERN.exec(spec)
   if (!match) {
     throw new UnsupportedSpecifierError({ spec })
-  }
-  if (compareVersions({ a: match[2], b: version }) >= 0) {
-    throw new NonRaisingBumpError({ spec, version })
   }
   return `${match[1]}${version}`
 }
 
 /**
  * Edits manifests, or the pnpm catalog entry for `catalog:` specifiers, with targeted
- * text replacement so formatting survives. Does not run pnpm.
+ * text replacement so formatting survives. Does not run pnpm. A spec already at or above
+ * `bump.to` is left alone, since editing it would be a no-op or a downgrade; a bump that
+ * raises no spec throws `NonRaisingBumpError`.
  * @param {{ bumps: Array<import('./bumps.mjs').Bump>, cwd: string }} params
  * @returns {Promise<{ changes: AppliedChange[] }>}
  */
@@ -60,7 +56,8 @@ export async function applyBumps({ bumps, cwd }) {
   const changes = []
 
   for (const bump of bumps) {
-    let isCatalogEdited = false
+    const bumpChanges = []
+    let isCatalogSeen = false
 
     for (const manifest of bump.manifests) {
       const manifestPath = path.join(cwd, manifest)
@@ -71,22 +68,45 @@ export async function applyBumps({ bumps, cwd }) {
       }
 
       if (found.spec === 'catalog:') {
-        if (isCatalogEdited) {
+        if (isCatalogSeen) {
           continue
         }
-        isCatalogEdited = true
-        changes.push(await editCatalogEntry({ cwd, dependency: bump.dependency, version: bump.to }))
+        isCatalogSeen = true
+        const change = await editCatalogEntry({
+          cwd,
+          dependency: bump.dependency,
+          version: bump.to,
+        })
+        if (change) {
+          bumpChanges.push(change)
+        }
         continue
       }
 
-      const after = setSpecifierVersion({ spec: found.spec, version: bump.to })
+      const after = raiseSpecifier({ spec: found.spec, version: bump.to })
+      if (after === null) {
+        continue
+      }
       const edited = text.slice(0, found.start) + after + text.slice(found.end)
       await writeFile(manifestPath, edited)
-      changes.push({ file: manifest, after, before: found.spec, dependency: bump.dependency })
+      bumpChanges.push({ file: manifest, after, before: found.spec, dependency: bump.dependency })
     }
+
+    if (bumpChanges.length === 0) {
+      throw new NonRaisingBumpError({ dependency: bump.dependency, version: bump.to })
+    }
+    changes.push(...bumpChanges)
   }
 
   return { changes }
+}
+
+/** The raised spec, or null when `spec` already reaches `version`. */
+function raiseSpecifier({ spec, version }) {
+  const after = setSpecifierVersion({ spec, version })
+  const [, , current] = SPECIFIER_PATTERN.exec(spec)
+
+  return compareVersions({ a: current, b: version }) < 0 ? after : null
 }
 
 function findManifestSpecifier({ dependency, text }) {
@@ -128,7 +148,10 @@ async function editCatalogEntry({ cwd, dependency, version }) {
       continue
     }
     const before = match[3]
-    const after = setSpecifierVersion({ spec: before, version })
+    const after = raiseSpecifier({ spec: before, version })
+    if (after === null) {
+      return null
+    }
     lines[index] = `${match[1]}${match[2]}${after}${match[4]}${match[5]}`
     await writeFile(workspacePath, lines.join('\n'))
     return { file: WORKSPACE_FILE, after, before, dependency }

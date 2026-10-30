@@ -837,7 +837,8 @@ jobs:
           fi
           echo "bump_ids=$(jq -cn --argjson passed "$passed" --argjson selected "$SELECTED" '[$selected[] | select(. as $id | any($passed[]; . == $id))]')" >> "$GITHUB_OUTPUT"
 
-      # Runs on the branch head; a spec there that apply-bumps cannot raise to the target fails this leg.
+      # Runs on the branch head: specs already at the target stay as they are, and a bump that raises
+      # no spec, or meets a spec form it cannot edit, fails this leg.
       - name: Apply bumps
         if: steps.passed.outputs.bump_ids != '[]'
         env:

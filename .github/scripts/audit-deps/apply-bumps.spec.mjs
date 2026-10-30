@@ -172,16 +172,61 @@ describe('applyBumps', () => {
     expect(await readFile(path.join(cwd, 'a/package.json'), 'utf8')).toBe(pkg)
   })
 
-  it('throws when the catalog spec already reaches the target', async () => {
+  it('skips a manifest already at the target and raises the others', async () => {
+    const a = '{\n  "dependencies": {\n    "dep": "5.7.0"\n  }\n}\n'
+    const b = '{\n  "dependencies": {\n    "dep": "^5.6.0"\n  }\n}\n'
+    const cwd = await makeRepo({ files: { 'a/package.json': a, 'b/package.json': b } })
+
+    const { changes } = await applyBumps({
+      bumps: [bump({ to: '5.6.1', manifests: ['a/package.json', 'b/package.json'] })],
+      cwd,
+    })
+
+    expect(await readFile(path.join(cwd, 'a/package.json'), 'utf8')).toBe(a)
+    expect(await readFile(path.join(cwd, 'b/package.json'), 'utf8')).toBe(
+      b.replace('^5.6.0', '^5.6.1'),
+    )
+    expect(changes).toEqual([
+      { file: 'b/package.json', after: '^5.6.1', before: '^5.6.0', dependency: 'dep' },
+    ])
+  })
+
+  it('skips a catalog line already at the target', async () => {
+    const workspace = "catalog:\n  dep: '^5.7.0'\n"
+    const direct = '{\n  "dependencies": {\n    "dep": "5.6.0"\n  }\n}\n'
     const cwd = await makeRepo({
       files: {
         'a/package.json': '{\n  "dependencies": {\n    "dep": "catalog:"\n  }\n}\n',
+        'b/package.json': direct,
+        'pnpm-workspace.yaml': workspace,
+      },
+    })
+
+    await applyBumps({
+      bumps: [bump({ to: '5.6.1', manifests: ['a/package.json', 'b/package.json'] })],
+      cwd,
+    })
+
+    expect(await readFile(path.join(cwd, 'pnpm-workspace.yaml'), 'utf8')).toBe(workspace)
+    expect(await readFile(path.join(cwd, 'b/package.json'), 'utf8')).toBe(
+      direct.replace('5.6.0', '5.6.1'),
+    )
+  })
+
+  it('throws when every spec, catalog included, already reaches the target', async () => {
+    const cwd = await makeRepo({
+      files: {
+        'a/package.json': '{\n  "dependencies": {\n    "dep": "catalog:"\n  }\n}\n',
+        'b/package.json': '{\n  "dependencies": {\n    "dep": "^5.6.1"\n  }\n}\n',
         'pnpm-workspace.yaml': "catalog:\n  dep: '^5.7.0'\n",
       },
     })
 
     await expect(
-      applyBumps({ bumps: [bump({ to: '5.6.1', manifests: ['a/package.json'] })], cwd }),
+      applyBumps({
+        bumps: [bump({ to: '5.6.1', manifests: ['a/package.json', 'b/package.json'] })],
+        cwd,
+      }),
     ).rejects.toThrow(NonRaisingBumpError)
   })
 
