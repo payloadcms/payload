@@ -10,7 +10,7 @@ import type {
 } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
-import { promise } from './promise.js'
+import { readField } from './promise.js'
 
 type Args = {
   /**
@@ -92,40 +92,41 @@ export const traverseFields = ({
   triggerHooks = true,
 }: Args): void => {
   fields.forEach((field, fieldIndex) => {
-    fieldPromises.push(
-      promise({
-        blockData,
-        collection,
-        context,
-        currentDepth,
-        depth,
-        doc,
-        draft,
-        fallbackLocale,
-        field,
-        fieldDepth,
-        fieldIndex,
-        fieldPromises,
-        findMany,
-        flattenLocales,
-        global,
-        locale,
-        overrideAccess,
-        parentIndexPath,
-        parentIsLocalized,
-        parentPath,
-        parentSchemaPath,
-        populate,
-        populationPromises,
-        req,
-        select,
-        selectMode,
-        showHiddenFields,
-        siblingDoc,
-        siblingFields: fields,
-        triggerAccessControl,
-        triggerHooks,
-      }),
-    )
+    const fieldPromise = readField({
+      blockData,
+      collection,
+      context,
+      currentDepth,
+      depth,
+      doc,
+      draft,
+      fallbackLocale,
+      field,
+      fieldDepth,
+      fieldIndex,
+      fieldPromises,
+      findMany,
+      flattenLocales,
+      global,
+      locale,
+      overrideAccess,
+      parentIndexPath,
+      parentIsLocalized,
+      parentPath,
+      parentSchemaPath,
+      populate,
+      populationPromises,
+      req,
+      select,
+      selectMode,
+      showHiddenFields,
+      siblingDoc,
+      siblingFields: fields,
+      triggerAccessControl,
+      triggerHooks,
+    })
+    if (fieldPromise) {
+      fieldPromises.push(fieldPromise)
+    }
   })
 }
