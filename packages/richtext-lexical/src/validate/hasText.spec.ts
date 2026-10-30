@@ -1,10 +1,15 @@
-import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
+import type {
+  SerializedEditorState,
+  SerializedLexicalNode,
+  SerializedParagraphNode,
+  SerializedTextNode,
+} from 'lexical'
 
 import { describe, expect, it } from 'vitest'
 
 import { hasText } from './hasText.js'
 
-function editorState(children: SerializedLexicalNode[]): SerializedEditorState {
+function rootNode(children: SerializedLexicalNode[]): SerializedEditorState {
   return {
     root: {
       type: 'root',
@@ -17,7 +22,7 @@ function editorState(children: SerializedLexicalNode[]): SerializedEditorState {
   }
 }
 
-function paragraph(children: SerializedLexicalNode[] = []): SerializedLexicalNode {
+function paragraphNode(children: SerializedLexicalNode[] = []): SerializedParagraphNode {
   return {
     type: 'paragraph',
     children,
@@ -27,35 +32,35 @@ function paragraph(children: SerializedLexicalNode[] = []): SerializedLexicalNod
     textFormat: 0,
     textStyle: '',
     version: 1,
-  } as SerializedLexicalNode
+  }
 }
 
-function text(value: string): SerializedLexicalNode {
+function textNode(text: string): SerializedTextNode {
   return {
     type: 'text',
     detail: 0,
     format: 0,
     mode: 'normal',
     style: '',
-    text: value,
+    text,
     version: 1,
-  } as SerializedLexicalNode
+  }
 }
 
 describe('hasText', () => {
   it('should return false for a single empty paragraph', () => {
-    expect(hasText(editorState([paragraph()]))).toBe(false)
+    expect(hasText(rootNode([paragraphNode()]))).toBe(false)
   })
 
   it('should return false for multiple empty paragraphs', () => {
-    expect(hasText(editorState([paragraph(), paragraph([text('')])]))).toBe(false)
+    expect(hasText(rootNode([paragraphNode(), paragraphNode([textNode('')])]))).toBe(false)
   })
 
   it('should return true when any paragraph has text', () => {
-    expect(hasText(editorState([paragraph(), paragraph([text('Hello')])]))).toBe(true)
+    expect(hasText(rootNode([paragraphNode(), paragraphNode([textNode('Hello')])]))).toBe(true)
   })
 
-  it('should return true for content without text', () => {
-    expect(hasText(editorState([paragraph(), { type: 'upload', version: 1 }]))).toBe(true)
+  it('should return true when the root contains a non-paragraph node', () => {
+    expect(hasText(rootNode([paragraphNode(), { type: 'upload', version: 1 }]))).toBe(true)
   })
 })
