@@ -642,6 +642,27 @@ describe('Join Field', () => {
     await expect(joinField.locator('tbody .row-1')).toContainText(updatedTitle)
   })
 
+  test('should reopen the edit drawer of a joined document after closing it', async () => {
+    await page.goto(categoriesURL.edit(categoryID))
+
+    const joinField = page.locator('#field-relatedPosts.field-type.join')
+    await expect(joinField).toBeVisible()
+
+    const editButton = joinField.locator(
+      'tbody tr:first-child td:nth-child(2) button.drawer-link__doc-drawer-toggler',
+    )
+    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+
+    await editButton.click()
+    await expect(drawer).toBeVisible()
+    await drawer.locator('.doc-drawer__header-close').click()
+    await expect(drawer).toBeHidden()
+
+    await editButton.click()
+    await expect(drawer).toBeVisible()
+    await expect(drawer.locator('input[name="title"]')).toBeVisible()
+  })
+
   test('should edit joined document and update relationship table when autosave is enabled', async () => {
     const categoryVersionsDoc = await payload.create({
       collection: categoriesVersionsSlug,
