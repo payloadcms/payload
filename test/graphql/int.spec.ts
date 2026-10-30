@@ -1,10 +1,14 @@
+import type { GraphQLInputObjectType } from 'graphql'
 import type { Payload } from 'payload'
 
+import { configToSchema } from '@payloadcms/graphql'
+import { GraphQLNonNull } from 'graphql'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { Home } from './payload-types.js'
 
 import { idToString } from '../__helpers/shared/idToString.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
@@ -242,6 +246,51 @@ query {
       })
     })
 
+    describe('select projection', () => {
+      const createdPostIDs: (number | string)[] = []
+      let originalTopPosts: Home['topPosts'] | undefined
+
+      afterEach(async () => {
+        if (originalTopPosts !== undefined) {
+          await payload.db.updateGlobal({ slug: 'home', data: { topPosts: originalTopPosts } })
+          originalTopPosts = undefined
+        }
+        for (const id of createdPostIDs) {
+          await payload.delete({ collection: 'posts', id })
+        }
+        createdPostIDs.length = 0
+      })
+
+      it('should keep a relationship selection inside an aliased array', async () => {
+        originalTopPosts = (await payload.findGlobal({ slug: 'home', depth: 0 })).topPosts
+        const post = await payload.create({
+          collection: 'posts',
+          data: { title: 'Aliased array post' },
+        })
+        createdPostIDs.push(post.id)
+
+        await payload.updateGlobal({
+          slug: 'home',
+          data: { topPosts: [{ caption: 'Featured', post: post.id }] },
+        })
+
+        const query = `query {
+          Home(select: true) {
+            featured: topPosts { post { title } }
+          }
+        }`
+
+        const { data, errors } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((response) => response.json())
+
+        expect(errors).toBeUndefined()
+        expect(data.Home.featured).toEqual([
+          expect.objectContaining({ post: { title: 'Aliased array post' } }),
+        ])
+      })
+    })
+
     it('should not error when querying a global with a deleted relationship in an array', async () => {
       const post1 = await payload.create({
         collection: 'posts',
@@ -291,6 +340,18 @@ query {
         .then((res) => res.json())
 
       expect(afterDelete.errors).toBeUndefined()
+    })
+
+    describe('nullable schema types', () => {
+      it('should not mark required virtual fields as non-null in the mutation input type', () => {
+        const { schema } = configToSchema(payload.config)
+        const inputType = schema.getType('mutationVirtualFieldInput') as GraphQLInputObjectType
+        const fields = inputType.getFields()
+
+        expect(fields.requiredTitle!.type instanceof GraphQLNonNull).toBe(true)
+        expect(fields.virtualComputed!.type instanceof GraphQLNonNull).toBe(false)
+        expect(fields.virtualFromRelation!.type instanceof GraphQLNonNull).toBe(false)
+      })
     })
   })
 })

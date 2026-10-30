@@ -1,7 +1,7 @@
 ---
 title: Dropzone
 label: Dropzone
-order: 100
+order: 140
 desc: Accept files through drag, drop, and paste interactions with Payload's Dropzone component.
 keywords: ui, component, dropzone, upload, file, drag and drop
 ---
@@ -19,6 +19,8 @@ import { Dropzone } from '@payloadcms/ui'
 <ComponentPreview component="Dropzone" example="basic" />
 
 `Dropzone` does not render a file input or open the system file picker. Render those controls as children when users should be able to browse for files in addition to dropping them.
+
+It also has no awareness of Collections or existing documents, so controls such as **Create New** and **Choose from existing** must come from the surrounding field interface.
 
 When `multipleFiles` is disabled, dropping more than one file passes only the first file to `onChange`.
 

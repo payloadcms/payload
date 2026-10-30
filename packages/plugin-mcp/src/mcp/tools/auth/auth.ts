@@ -6,7 +6,7 @@ import { createLocalReq } from 'payload'
 import { toolSchemas } from '../schemas.js'
 
 export const authTool = (server: McpServer, req: PayloadRequest, verboseLogs: boolean) => {
-  const tool = async (headers?: string) => {
+  const tool = async (headers?: Record<string, string>) => {
     const payload = req.payload
 
     if (verboseLogs) {
@@ -14,18 +14,12 @@ export const authTool = (server: McpServer, req: PayloadRequest, verboseLogs: bo
     }
 
     try {
-      // Parse custom headers if provided, otherwise use empty headers
       let authHeaders = new Headers()
 
       if (headers) {
-        try {
-          const parsedHeaders = JSON.parse(headers)
-          authHeaders = new Headers(parsedHeaders)
-          if (verboseLogs) {
-            payload.logger.info(`[payload-mcp] Using custom headers: ${headers}`)
-          }
-        } catch (_ignore) {
-          payload.logger.warn(`[payload-mcp] Invalid headers JSON: ${headers}, using empty headers`)
+        authHeaders = new Headers(headers)
+        if (verboseLogs) {
+          payload.logger.info(`[payload-mcp] Using custom headers: ${JSON.stringify(headers)}`)
         }
       }
 

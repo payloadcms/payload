@@ -1,7 +1,7 @@
 ---
 title: Table
 label: Table
-order: 250
+order: 330
 desc: Display pre-rendered column data with Payload's Table component.
 keywords: ui, component, table, data, rows, columns
 ---
@@ -24,6 +24,8 @@ Keep each column's `renderedCells` array in the same order as `data`. Columns wi
 ## Rendering cells
 
 `renderedCells` accepts React nodes, so simple custom tables can format values directly. Payload also exports `DefaultCell` for rendering values from Payload field configurations. `DefaultCell` expects the Config and Translation providers available inside the Admin Panel.
+
+See [Table Cells](/docs/ui-components/table-cells) for built-in field rendering and the custom Cell Component extension point.
 
 ## Common props
 

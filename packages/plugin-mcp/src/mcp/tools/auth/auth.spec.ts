@@ -20,7 +20,7 @@ type AuthToolResult = {
   }>
 }
 
-type AuthToolHandler = (args: { headers?: string }) => Promise<AuthToolResult>
+type AuthToolHandler = (args: { headers?: Record<string, string> }) => Promise<AuthToolResult>
 
 describe('authTool', () => {
   beforeEach(() => {
@@ -70,7 +70,7 @@ describe('authTool', () => {
     }
 
     const result = await handler({
-      headers: JSON.stringify({ Authorization: 'JWT token' }),
+      headers: { Authorization: 'JWT token' },
     })
     const json = result.content[0]!.text.match(/```json\n([\s\S]*?)\n```/)?.[1]
 

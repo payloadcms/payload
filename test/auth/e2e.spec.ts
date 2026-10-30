@@ -239,7 +239,11 @@ describe('Auth', () => {
         const emailBeforeSave = await page.locator('#field-email').inputValue()
         await expect(page.locator('#force-unlock')).toBeVisible()
 
-        await page.locator('#change-password').click()
+        const changePasswordButton = page.getByRole('button', { name: /^change password$/i })
+
+        await changePasswordButton.focus()
+        await expect(changePasswordButton).toBeFocused()
+        await changePasswordButton.press('Enter')
         await page.locator('#field-password').fill('password')
 
         await expect(page.locator('#change-password')).toBeHidden()

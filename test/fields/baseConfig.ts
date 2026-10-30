@@ -110,6 +110,37 @@ export const baseConfig: Partial<Config> = {
       ],
     },
     {
+      slug: 'conditionalReference',
+      fields: [
+        {
+          name: 'testBlocks',
+          type: 'blocks',
+          admin: {
+            condition: (data) => Boolean(data.showConditionalFields),
+          },
+          blocks: [
+            {
+              slug: 'testBlock',
+              fields: [
+                {
+                  name: 'testField',
+                  type: 'text',
+                },
+              ],
+              labels: {
+                plural: 'Test Blocks',
+                singular: 'Test Block',
+              },
+            },
+          ],
+          defaultValue: [{ blockType: 'testBlock' }],
+          maxRows: 1,
+          minRows: 1,
+          required: true,
+        },
+      ],
+    },
+    {
       slug: 'localizedTextReference',
       fields: [
         {

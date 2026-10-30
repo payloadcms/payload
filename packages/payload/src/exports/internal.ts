@@ -3,6 +3,8 @@
  */
 
 export { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
+export { createSchemaBuildContext } from '../database/createSchemaBuildContext.js'
+export type { SchemaBuildContext } from '../database/createSchemaBuildContext.js'
 export { assertClientUploadAccess } from '../uploads/assertClientUploadAccess.js'
 export {
   assertClientUploadAllowed,

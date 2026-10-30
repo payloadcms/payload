@@ -453,6 +453,7 @@ export interface PostsExportsOnly {
     };
     [k: string]: unknown;
   } | null;
+  disabledForImportExport?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1528,6 +1529,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface PostsExportsOnlySelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  disabledForImportExport?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

@@ -29,6 +29,7 @@ export const uploads2Slug = 'uploads2'
 export const arrayFieldsSlug = 'array-fields'
 
 export const lexicalCustomCellSlug = 'lexical-custom-cell'
+export const lexicalCopyPasteSlug = 'lexical-copy-paste'
 export const lexicalNestedBlocksSlug = 'lexical-nested-blocks'
 export const lexicalBenchmarkSlug = 'lexical-benchmark'
 
@@ -54,5 +55,6 @@ export const collectionSlugs = [
   lexicalViewsProviderFallbackSlug,
   lexicalViewsNestedSlug,
   lexicalCustomCellSlug,
+  lexicalCopyPasteSlug,
   lexicalNestedBlocksSlug,
 ]

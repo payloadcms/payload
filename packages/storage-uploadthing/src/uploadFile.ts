@@ -1,5 +1,7 @@
+import type { Payload } from 'payload'
 import type { UTApi } from 'uploadthing/server'
 
+import { openAsBlob } from 'fs'
 import { APIError } from 'payload'
 import { UTFile } from 'uploadthing/server'
 
@@ -11,7 +13,9 @@ interface UploadFileArgs {
   clientUploadContext?: unknown
   data: Record<string, unknown>
   filename: string
+  logger: Payload['logger']
   mimeType: string
+  tempFilePath?: string
   utApi: UTApi
 }
 
@@ -21,24 +25,34 @@ export async function uploadFile({
   clientUploadContext,
   data,
   filename,
+  logger,
   mimeType,
+  tempFilePath,
   utApi,
 }: UploadFileArgs): Promise<Record<string, unknown>> {
   try {
+    const blob = tempFilePath
+      ? await openAsBlob(tempFilePath, { type: mimeType })
+      : new Blob([buffer], { type: mimeType })
+    const res = await utApi.uploadFiles(new UTFile([blob], filename), { acl })
+
+    if (res.error) {
+      throw new APIError(`Error uploading file: ${res.error.code} - ${res.error.message}`)
+    }
+
+    // Delete the replaced upload only once its replacement is stored.
     if (
       clientUploadContext &&
       typeof clientUploadContext === 'object' &&
       'key' in clientUploadContext &&
       typeof clientUploadContext.key === 'string'
     ) {
-      await utApi.deleteFiles(clientUploadContext.key)
-    }
-
-    const blob = new Blob([buffer], { type: mimeType })
-    const res = await utApi.uploadFiles(new UTFile([blob], filename), { acl })
-
-    if (res.error) {
-      throw new APIError(`Error uploading file: ${res.error.code} - ${res.error.message}`)
+      // The replacement is already stored, so a failed delete must not fail the save.
+      try {
+        await utApi.deleteFiles(clientUploadContext.key)
+      } catch (err) {
+        logger.error({ err, msg: 'Failed to delete the replaced uploadthing file' })
+      }
     }
 
     const sizes = data.sizes as Record<string, { _key?: string; filename?: string }> | undefined
