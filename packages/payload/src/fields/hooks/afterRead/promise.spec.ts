@@ -36,7 +36,7 @@ describe('afterRead synchronous scalar fields', () => {
       parentPath: '',
       parentSchemaPath: '',
       parentIndexPath: '',
-    } as Parameters<typeof promise>[0])
+    } as unknown as Parameters<typeof promise>[0])
     expect(typeof result.then).toBe('function')
     await result
   })
