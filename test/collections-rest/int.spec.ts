@@ -2220,6 +2220,14 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
       ).resolves.toBeNull()
       await expect(
         payload.findByID({
+          id: undefined as unknown as string,
+          collection: 'posts',
+          disableErrors: true,
+          overrideAccess: true,
+        }),
+      ).resolves.toBeNull()
+      await expect(
+        payload.findByID({
           id: '' as unknown as string,
           collection: 'posts',
           disableErrors: true,
