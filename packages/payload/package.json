@@ -100,6 +100,7 @@
     "pretest": "pnpm build"
   },
   "dependencies": {
+    "@date-fns/tz": "1.2.0",
     "@next/env": "^15.1.5",
     "@payloadcms/translations": "workspace:*",
     "@types/busboy": "1.5.4",
