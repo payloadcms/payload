@@ -191,23 +191,14 @@ function mergeData(
   return toLocaleData
 }
 
-const localeKeyPattern = /^[a-z]{2}(?:-[A-Za-z]{2})?$/
-
-const isLocaleMap = (value: unknown): value is Record<string, unknown> => {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return false
-  }
-
-  const keys = Object.keys(value)
-
-  return keys.length > 0 && keys.every((key) => localeKeyPattern.test(key))
-}
-
 const blockFieldsOf = (
   field: Extract<Field, { type: 'blocks' }>,
   row: Data,
+  req: PayloadRequest,
 ): Field[] | undefined => {
-  const block = field.blocks.find((item) => typeof item !== 'string' && item.slug === row.blockType)
+  const block =
+    req.payload.blocks[row.blockType] ??
+    field.blocks.find((item) => typeof item !== 'string' && item.slug === row.blockType)
 
   return typeof block === 'object' ? block.fields : undefined
 }
@@ -218,7 +209,12 @@ const blockFieldsOf = (
  * locale map and never reaches those rows, so the copied ids collide with the source
  * locale on insert. Missing ids are minted again in `beforeChange`.
  */
-const stripLocalizedRowIds = (data: Data, fields: Field[], parentIsLocalized: boolean): void => {
+const stripLocalizedRowIds = (
+  data: Data,
+  fields: Field[],
+  parentIsLocalized: boolean,
+  req: PayloadRequest,
+): void => {
   if (!data || typeof data !== 'object' || !Array.isArray(fields)) {
     return
   }
@@ -231,17 +227,11 @@ const stripLocalizedRowIds = (data: Data, fields: Field[], parentIsLocalized: bo
         if (tabHasName(tab) && data[tab.name] && typeof data[tab.name] === 'object') {
           const tabData = data[tab.name]
 
-          if (tabLocalized && isLocaleMap(tabData)) {
-            for (const localeValue of Object.values(tabData)) {
-              if (localeValue && typeof localeValue === 'object' && !Array.isArray(localeValue)) {
-                stripLocalizedRowIds(localeValue, tab.fields, true)
-              }
-            }
-          } else if (tabData && typeof tabData === 'object' && !Array.isArray(tabData)) {
-            stripLocalizedRowIds(tabData, tab.fields, tabLocalized)
+          if (tabData && typeof tabData === 'object' && !Array.isArray(tabData)) {
+            stripLocalizedRowIds(tabData, tab.fields, tabLocalized, req)
           }
         } else {
-          stripLocalizedRowIds(data, tab.fields, tabLocalized)
+          stripLocalizedRowIds(data, tab.fields, tabLocalized, req)
         }
       }
 
@@ -249,7 +239,7 @@ const stripLocalizedRowIds = (data: Data, fields: Field[], parentIsLocalized: bo
     }
 
     if ((field.type === 'row' || field.type === 'collapsible') && Array.isArray(field.fields)) {
-      stripLocalizedRowIds(data, field.fields, parentIsLocalized)
+      stripLocalizedRowIds(data, field.fields, parentIsLocalized, req)
       continue
     }
 
@@ -265,25 +255,15 @@ const stripLocalizedRowIds = (data: Data, fields: Field[], parentIsLocalized: bo
         continue
       }
 
-      if (localized && isLocaleMap(value)) {
-        for (const localeValue of Object.values(value)) {
-          if (localeValue && typeof localeValue === 'object' && !Array.isArray(localeValue)) {
-            stripLocalizedRowIds(localeValue, field.fields, true)
-          }
-        }
-      } else if (!Array.isArray(value)) {
-        stripLocalizedRowIds(value, field.fields, localized)
+      if (!Array.isArray(value)) {
+        stripLocalizedRowIds(value, field.fields, localized, req)
       }
 
       continue
     }
 
     if (field.type === 'array' || field.type === 'blocks') {
-      const sets = Array.isArray(value)
-        ? [value]
-        : localized && isLocaleMap(value)
-          ? Object.values(value)
-          : []
+      const sets = Array.isArray(value) ? [value] : []
 
       for (const rows of sets) {
         if (!Array.isArray(rows)) {
@@ -299,10 +279,10 @@ const stripLocalizedRowIds = (data: Data, fields: Field[], parentIsLocalized: bo
             delete row.id
           }
 
-          const rowFields = field.type === 'blocks' ? blockFieldsOf(field, row) : field.fields
+          const rowFields = field.type === 'blocks' ? blockFieldsOf(field, row, req) : field.fields
 
           if (Array.isArray(rowFields)) {
-            stripLocalizedRowIds(row, rowFields, localized)
+            stripLocalizedRowIds(row, rowFields, localized, req)
           }
         }
       }
@@ -310,8 +290,8 @@ const stripLocalizedRowIds = (data: Data, fields: Field[], parentIsLocalized: bo
   }
 }
 
-const removeIdIfParentIsLocalized = (data: Data, fields: Field[]): Data => {
-  stripLocalizedRowIds(data, fields, false)
+const removeIdIfParentIsLocalized = (data: Data, fields: Field[], req: PayloadRequest): Data => {
+  stripLocalizedRowIds(data, fields, false, req)
 
   return data
 }
@@ -414,7 +394,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     ? fromLocaleDataWithoutID
     : mergeData(fromLocaleDataWithoutID, toLocaleDataWithoutID, fields, req, false)
 
-  const data = removeIdIfParentIsLocalized(dataWithID, fields)
+  const data = removeIdIfParentIsLocalized(dataWithID, fields, req)
 
   return globalSlug
     ? await payload.updateGlobal({
