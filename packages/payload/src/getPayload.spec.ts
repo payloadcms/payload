@@ -125,6 +125,31 @@ describe('getPayload dev reload', () => {
     expect(payload.config).toBe(changedConfig)
   })
 
+  it('should not start a second reload while a reload is in progress', async () => {
+    const changedConfig = createConfig()
+    const configOfFirstCall = createDeferred<SanitizedConfig>()
+    const configOfSecondCall = createDeferred<SanitizedConfig>()
+
+    // The first call finds no reload flagged and awaits its config
+    const first = get(configOfFirstCall.promise)
+
+    // A change is reported and the second call starts the reload
+    onReload()
+    const second = get(configOfSecondCall.promise)
+    const reloadInProgress = (global as any)._payload.get(key).reload
+
+    // The first call gets its config while the reload is still running
+    configOfFirstCall.resolve(changedConfig)
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect((global as any)._payload.get(key).reload).toBe(reloadInProgress)
+
+    configOfSecondCall.resolve(changedConfig)
+
+    expect((await second).config).toBe(changedConfig)
+    expect((await first).config).toBe(changedConfig)
+  })
+
   it('should not reload when a call brings the config the instance runs with', async () => {
     const payload = await get(initialConfig)
 
