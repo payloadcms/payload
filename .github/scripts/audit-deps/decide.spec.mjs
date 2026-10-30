@@ -169,6 +169,18 @@ describe('decideUnitStep', () => {
   it('updates an open PR without a marker', () => {
     expect(decideUnitStep({ ...base, marker: major('7.0.3'), openPr: pr(null) })).toBe('update')
   })
+
+  it('updates a conflicted open PR with an equal marker', () => {
+    const openPr = { ...pr(major('7.0.3')), isConflicted: true }
+
+    expect(decideUnitStep({ ...base, marker: major('7.0.3'), openPr })).toBe('update')
+  })
+
+  it('blocks a conflicted open PR with foreign commits', () => {
+    const openPr = { ...pr(major('7.0.3'), true), isConflicted: true }
+
+    expect(decideUnitStep({ ...base, marker: major('7.0.3'), openPr })).toBe('blocked')
+  })
 })
 
 describe('findStalePrs', () => {

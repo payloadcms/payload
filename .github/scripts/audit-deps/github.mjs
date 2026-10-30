@@ -319,12 +319,16 @@ async function decideStepForUnit({ github, openPr, owner, plan, ref, repo, unit 
   }
 
   const marker = markerForUnit({ bumps: expectedBumps, unit })
-  const openState = openPr
+  let openState = openPr
     ? { hasForeignCommits: false, marker: parseMarker({ body: openPr.body }) }
     : null
   const rejectedPr = openPr ? null : await findRejectedPr({ github, owner, ref, repo, unit })
 
   let step = decideUnitStep({ isDefaultInputs: true, marker, openPr: openState, rejectedPr })
+  if (step === 'skip' && (await isConflicted({ github, owner, prNumber, repo }))) {
+    openState = { ...openState, isConflicted: true }
+    step = decideUnitStep({ isDefaultInputs: true, marker, openPr: openState, rejectedPr: null })
+  }
   if (step === 'update') {
     const commits = await listCommits({ github, owner, prNumber, repo })
     step = decideUnitStep({
@@ -418,6 +422,13 @@ async function findRejectedPr({ github, owner, ref, repo, unit }) {
   }
 
   return null
+}
+
+// GitHub computes mergeability lazily, so only a settled `dirty` counts as a conflict.
+async function isConflicted({ github, owner, prNumber, repo }) {
+  const { data: pr } = await github.rest.pulls.get({ owner, pull_number: prNumber, repo })
+
+  return pr?.mergeable_state === 'dirty'
 }
 
 function listCommits({ github, owner, prNumber, repo }) {

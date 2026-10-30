@@ -329,6 +329,53 @@ describe('runPrecheck', () => {
     expect(github.rest.pulls.listCommits).not.toHaveBeenCalled()
   })
 
+  it('should update a conflicted open PR whose marker is equal', async () => {
+    const github = makeGithub({
+      commits: { 1: [botCommit] },
+      openPrs: [openPr({ body: groupMarker, branch: `${PREFIX}non-major`, number: 1 })],
+      prs: { 1: { mergeable_state: 'dirty' } },
+    })
+
+    const result = await precheck({ github })
+
+    expect(result.unitSteps['non-major']).toEqual({ headSha: 'sha-1', prNumber: 1, step: 'update' })
+    expect(result.openPrMatrix).toContainEqual({ unitId: 'non-major' })
+  })
+
+  it('should skip an open PR with an equal marker while mergeability is unknown', async () => {
+    const github = makeGithub({
+      openPrs: [openPr({ body: groupMarker, branch: `${PREFIX}non-major`, number: 1 })],
+      prs: { 1: { mergeable_state: 'unknown' } },
+    })
+
+    const result = await precheck({ github })
+
+    expect(result.unitSteps['non-major'].step).toBe('skip')
+  })
+
+  it('should block a conflicted open PR with a person commit', async () => {
+    const github = makeGithub({
+      commits: { 1: [personCommit] },
+      openPrs: [openPr({ body: groupMarker, branch: `${PREFIX}non-major`, number: 1 })],
+      prs: { 1: { mergeable_state: 'dirty' } },
+    })
+
+    const result = await precheck({ github })
+
+    expect(result.unitSteps['non-major'].step).toBe('blocked')
+  })
+
+  it('should read mergeability only for an open PR that would be skipped', async () => {
+    const github = makeGithub({
+      commits: { 1: [botCommit] },
+      openPrs: [openPr({ body: 'no marker', branch: `${PREFIX}non-major`, number: 1 })],
+    })
+
+    await precheck({ github })
+
+    expect(github.rest.pulls.get).not.toHaveBeenCalled()
+  })
+
   it('should skip-reject when a person closed an unmerged PR with an equal marker', async () => {
     const github = makeGithub({
       closedBy: { 5: { type: 'User' } },

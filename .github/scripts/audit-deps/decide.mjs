@@ -11,6 +11,7 @@ const GROUP_UNIT_ID = 'non-major'
  * @typedef {object} PrState
  * @property {Marker | null} marker
  * @property {boolean} hasForeignCommits
+ * @property {boolean} [isConflicted] GitHub reports `mergeable_state: 'dirty'`
  *
  * @typedef {'dry-run' | 'create' | 'update' | 'skip' | 'skip-rejected' | 'blocked'} UnitStep
  */
@@ -56,7 +57,8 @@ export function markerForUnit({ unit, bumps }) {
 
 /**
  * Decides what to do for one unit. A closed-unmerged PR (`rejectedPr`) only blocks
- * recreation while its marker still describes the same change.
+ * recreation while its marker still describes the same change. A conflicted open PR is
+ * rebuilt on the current base even when its marker is unchanged.
  * @returns {UnitStep}
  */
 export function decideUnitStep({ isDefaultInputs, marker, openPr, rejectedPr }) {
@@ -70,7 +72,7 @@ export function decideUnitStep({ isDefaultInputs, marker, openPr, rejectedPr }) 
       : 'create'
   }
 
-  if (openPr.marker && isSameMarker({ a: openPr.marker, b: marker })) {
+  if (!openPr.isConflicted && openPr.marker && isSameMarker({ a: openPr.marker, b: marker })) {
     return 'skip'
   }
 
