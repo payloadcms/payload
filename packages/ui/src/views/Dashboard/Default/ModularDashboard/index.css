@@ -131,7 +131,7 @@
   .widget-wrapper__controls {
     position: absolute;
     top: var(--spacer-3);
-    right: var(--spacer-3);
+    inset-inline-end: var(--spacer-3);
     z-index: 10;
     display: flex;
     align-items: center;

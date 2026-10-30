@@ -1066,7 +1066,7 @@ test.describe('Hierarchy Sidebar', () => {
 
       const selectedFolderRow = page.locator('tr', { hasText: 'Orgs and Products' })
 
-      await selectedFolderRow.getByRole('checkbox').click()
+      await selectedFolderRow.getByRole('checkbox').check()
       await page.getByRole('button', { name: 'Move', exact: true }).click()
 
       const modal = page.locator('.hierarchy-modal')
@@ -1097,6 +1097,11 @@ test.describe('Hierarchy Sidebar', () => {
 
       await organizationsFolder.getByRole('checkbox').focus()
       await expect(organizationsFolder.getByRole('checkbox')).not.toBeFocused()
+      const expand = organizationsFolder.getByRole('button', { name: 'Orgs Only', exact: true })
+
+      await expect(expand).toBeDisabled()
+      await expand.press('Enter')
+      await expect(expand).toHaveAttribute('aria-expanded', 'false')
       await expect(modal.locator('.hierarchy-column')).toHaveCount(1)
     })
 
@@ -1105,7 +1110,7 @@ test.describe('Hierarchy Sidebar', () => {
 
       const selectedFolderRow = page.locator('tr', { hasText: 'General' })
 
-      await selectedFolderRow.getByRole('checkbox').click()
+      await selectedFolderRow.getByRole('checkbox').check()
       await page.getByRole('button', { name: 'Move', exact: true }).click()
 
       const modal = page.locator('.hierarchy-modal')
@@ -1132,6 +1137,11 @@ test.describe('Hierarchy Sidebar', () => {
 
       await organizationsFolder.getByRole('checkbox').focus()
       await expect(organizationsFolder.getByRole('checkbox')).not.toBeFocused()
+      const expand = organizationsFolder.getByRole('button', { name: 'Orgs Only', exact: true })
+
+      await expect(expand).toBeDisabled()
+      await expand.press('Enter')
+      await expect(expand).toHaveAttribute('aria-expanded', 'false')
       await expect(modal.locator('.hierarchy-column')).toHaveCount(1)
     })
 

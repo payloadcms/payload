@@ -69,6 +69,10 @@
   .sidebar-tabs__tooltip {
     pointer-events: auto;
 
+    &.sidebar-tabs__tooltip--focused {
+      display: block;
+    }
+
     .tooltip__caret-stroke {
       stroke: none;
     }

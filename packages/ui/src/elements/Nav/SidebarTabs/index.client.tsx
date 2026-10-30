@@ -11,6 +11,7 @@ import { SidebarTabsProvider } from '../../../providers/SidebarTabs/index.js'
 import { DelayedSpinner } from '../../DelayedSpinner/index.js'
 import { Tooltip } from '../../Tooltip/index.js'
 import { TabError } from './TabError/index.js'
+import './index.css'
 
 export type TabMetadata = {
   icon: React.ReactNode
@@ -213,8 +214,8 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
                 key={tab.slug}
                 onBlur={() => setFocusedTab(null)}
                 onClick={() => handleTabChange(tab.slug)}
-                onFocus={() => {
-                  setFocusedTab(tab.slug)
+                onFocus={(event) => {
+                  setFocusedTab(event.currentTarget.matches(':focus-visible') ? tab.slug : null)
                   setIsTooltipDismissed(false)
                 }}
                 onKeyDown={(e) => handleTabKeyDown(e, index)}
@@ -228,7 +229,12 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
                 type="button"
               >
                 <Tooltip
-                  className={`${baseClass}__tooltip`}
+                  className={[
+                    `${baseClass}__tooltip`,
+                    focusedTab === tab.slug && `${baseClass}__tooltip--focused`,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
                   position="bottom"
                   show={!isTooltipDismissed && (hoveredTab === tab.slug || focusedTab === tab.slug)}
                 >
