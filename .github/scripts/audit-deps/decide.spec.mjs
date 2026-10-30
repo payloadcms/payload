@@ -11,16 +11,29 @@ import {
 
 describe('hasForeignCommits', () => {
   it('is false when all commits are by github-actions[bot]', () => {
-    const commits = [
-      { author: { login: 'github-actions[bot]' } },
-      { author: { login: 'github-actions[bot]' } },
-    ]
+    const botCommit = {
+      author: { login: 'github-actions[bot]' },
+      committer: { login: 'github-actions[bot]' },
+    }
+    const commits = [botCommit, botCommit]
 
     expect(hasForeignCommits({ commits })).toBe(false)
   })
 
   it('is true when a person authored a commit', () => {
     const commits = [{ author: { login: 'github-actions[bot]' } }, { author: { login: 'elliot' } }]
+
+    expect(hasForeignCommits({ commits })).toBe(true)
+  })
+
+  it('is true when the bot authored but a person committed', () => {
+    const commits = [{ author: { login: 'github-actions[bot]' }, committer: { login: 'elliot' } }]
+
+    expect(hasForeignCommits({ commits })).toBe(true)
+  })
+
+  it('is true when a committer is null', () => {
+    const commits = [{ author: { login: 'github-actions[bot]' }, committer: null }]
 
     expect(hasForeignCommits({ commits })).toBe(true)
   })

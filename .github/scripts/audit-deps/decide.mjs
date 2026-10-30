@@ -88,7 +88,9 @@ export function findStalePrs({ openPrs, ref, units }) {
 }
 
 export function hasForeignCommits({ commits }) {
-  return commits.some((commit) => commit.author?.login !== BOT_LOGIN)
+  return commits.some(
+    (commit) => commit.author?.login !== BOT_LOGIN || commit.committer?.login !== BOT_LOGIN,
+  )
 }
 
 function isMarker(value) {

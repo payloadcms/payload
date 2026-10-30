@@ -11,6 +11,7 @@ const MISSING_REF_STATUSES = new Set([404, 422])
 const INACTIVE_STEPS = new Set(['skip', 'skip-rejected', 'blocked'])
 const CLOSED_PRS_PER_UNIT = 20
 const MAX_CLOSER_LOOKUPS = 5
+const COMMENT_MARKER = '<!-- audit-deps-comment -->'
 const STALE_COMMENT = 'The audit no longer needs this update.'
 const STALE_KEPT_BRANCH_COMMENT =
   'The audit no longer needs this update. The branch has commits from a person, so it was not deleted.'
@@ -21,7 +22,7 @@ const BLOCKED_COMMENT =
  * @typedef {import('./bumps.mjs').Bump} Bump
  * @typedef {import('./bumps.mjs').Unit} Unit
  * @typedef {import('./decide.mjs').UnitStep} UnitStep
- * @typedef {Record<string, { step: UnitStep, prNumber: number | null }>} UnitSteps
+ * @typedef {Record<string, { step: UnitStep, prNumber: number | null, headSha: string | null }>} UnitSteps
  */
 
 /**
@@ -36,7 +37,7 @@ export async function runPrecheck({ core, github, isDefaultInputs, owner, plan, 
       plan,
       staleNumbers: [],
       unitSteps: Object.fromEntries(
-        plan.units.map((unit) => [unit.id, { step: 'dry-run', prNumber: null }]),
+        plan.units.map((unit) => [unit.id, { headSha: null, prNumber: null, step: 'dry-run' }]),
       ),
     })
   }
@@ -69,28 +70,60 @@ export async function runPrecheck({ core, github, isDefaultInputs, owner, plan, 
  */
 export async function closeStalePrs({ github, owner, prNumbers, ref, repo }) {
   for (const prNumber of prNumbers) {
-    const { data: pr } = await github.rest.pulls.get({ owner, pull_number: prNumber, repo })
-    const branch = pr.head.ref
-    if (!branch.startsWith(`${BRANCH_PREFIX}${ref}-`) || pr.state !== 'open') {
-      continue
-    }
-
-    const hasPersonCommits = hasForeignCommits({
-      commits: await listCommits({ github, owner, prNumber, repo }),
-    })
-
-    await github.rest.issues.createComment({
-      body: hasPersonCommits ? STALE_KEPT_BRANCH_COMMENT : STALE_COMMENT,
-      issue_number: prNumber,
-      owner,
-      repo,
-    })
-    await github.rest.pulls.update({ owner, pull_number: prNumber, repo, state: 'closed' })
-
-    if (!hasPersonCommits) {
-      await deleteBranch({ branch, github, owner, repo })
+    try {
+      await closeStalePr({ github, owner, prNumber, ref, repo })
+    } catch (error) {
+      console.error(`Failed to close stale audit PR #${prNumber}: ${error?.message ?? error}`)
+      throw error
     }
   }
+}
+
+/**
+ * True while the PR head is still `headSha`, so a person's push after the precheck is
+ * never overwritten.
+ */
+export async function checkHeadUnchanged({ github, headSha, owner, prNumber, repo }) {
+  const { data: pr } = await github.rest.pulls.get({ owner, pull_number: prNumber, repo })
+
+  return pr.head.sha === headSha
+}
+
+async function closeStalePr({ github, owner, prNumber, ref, repo }) {
+  const { data: pr } = await github.rest.pulls.get({ owner, pull_number: prNumber, repo })
+  const branch = pr.head.ref
+  const isOurs = isBotPr({ owner, pr, ref, repo })
+  if (!isOurs || pr.state !== 'open') {
+    return
+  }
+
+  const hasPersonCommits = hasForeignCommits({
+    commits: await listCommits({ github, owner, prNumber, repo }),
+  })
+
+  await github.rest.issues.createComment({
+    body: withCommentMarker({ text: hasPersonCommits ? STALE_KEPT_BRANCH_COMMENT : STALE_COMMENT }),
+    issue_number: prNumber,
+    owner,
+    repo,
+  })
+  await github.rest.pulls.update({ owner, pull_number: prNumber, repo, state: 'closed' })
+
+  if (!hasPersonCommits) {
+    await deleteBranch({ branch, github, owner, repo })
+  }
+}
+
+function isBotPr({ owner, pr, ref, repo }) {
+  return (
+    pr.head.ref.startsWith(`${BRANCH_PREFIX}${ref}-`) &&
+    pr.head.repo?.full_name === `${owner}/${repo}` &&
+    pr.user?.type === 'Bot'
+  )
+}
+
+function withCommentMarker({ text }) {
+  return `${text}\n\n${COMMENT_MARKER}`
 }
 
 /**
@@ -103,10 +136,11 @@ export async function commentOnFailedUnits({ github, owner, outcomes, repo, unit
       continue
     }
 
-    const body = commentBodyFor({ reason: outcomes[unitId], step })
-    if (!body) {
+    const text = commentTextFor({ reason: outcomes[unitId], step })
+    if (!text) {
       continue
     }
+    const body = withCommentMarker({ text })
 
     const comments = await github.paginate(github.rest.issues.listComments, {
       issue_number: prNumber,
@@ -114,8 +148,10 @@ export async function commentOnFailedUnits({ github, owner, outcomes, repo, unit
       per_page: 100,
       repo,
     })
-    const lastBotComment = comments.filter((comment) => comment.user?.type === 'Bot').at(-1)
-    if (lastBotComment?.body === body) {
+    const lastOurComment = comments
+      .filter((comment) => comment.body?.includes(COMMENT_MARKER))
+      .at(-1)
+    if (lastOurComment?.body === body) {
       continue
     }
 
@@ -123,7 +159,7 @@ export async function commentOnFailedUnits({ github, owner, outcomes, repo, unit
   }
 }
 
-function commentBodyFor({ reason, step }) {
+function commentTextFor({ reason, step }) {
   if (step === 'blocked') {
     return BLOCKED_COMMENT
   }
@@ -158,9 +194,10 @@ function setOutputs({ core, plan, staleNumbers, unitSteps }) {
 
 async function decideStepForUnit({ github, openPr, owner, plan, repo, unit }) {
   const prNumber = openPr?.number ?? null
+  const headSha = openPr?.headSha ?? null
   const expectedBumps = expectedBumpsFor({ plan, unit })
   if (expectedBumps.length === 0) {
-    return { prNumber, step: 'skip' }
+    return { headSha, prNumber, step: 'skip' }
   }
 
   const marker = markerForUnit({ bumps: expectedBumps, unit })
@@ -180,7 +217,7 @@ async function decideStepForUnit({ github, openPr, owner, plan, repo, unit }) {
     })
   }
 
-  return { prNumber, step }
+  return { headSha, prNumber, step }
 }
 
 /**
@@ -220,12 +257,13 @@ async function listOpenBotPrs({ github, owner, ref, repo }) {
   })
 
   return prs
-    .filter(
-      (pr) =>
-        pr.head.ref.startsWith(`${BRANCH_PREFIX}${ref}-`) &&
-        pr.head.repo?.full_name === `${owner}/${repo}`,
-    )
-    .map((pr) => ({ body: pr.body, branch: pr.head.ref, number: pr.number }))
+    .filter((pr) => isBotPr({ owner, pr, ref, repo }))
+    .map((pr) => ({
+      body: pr.body,
+      branch: pr.head.ref,
+      headSha: pr.head.sha ?? null,
+      number: pr.number,
+    }))
 }
 
 /**
@@ -244,7 +282,7 @@ async function findRejectedPr({ github, owner, repo, unit }) {
     state: 'closed',
   })
   const candidates = data
-    .filter((pr) => pr.merged_at === null && pr.closed_at)
+    .filter((pr) => pr.merged_at === null && pr.closed_at && pr.user?.type === 'Bot')
     .sort((a, b) => Date.parse(b.closed_at) - Date.parse(a.closed_at))
     .map((pr) => ({ number: pr.number, marker: parseMarker({ body: pr.body }) }))
     .filter((pr) => pr.marker !== null)

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { formatMarker } from './decide.mjs'
-import { closeStalePrs, commentOnFailedUnits, runPrecheck } from './github.mjs'
+import { checkHeadUnchanged, closeStalePrs, commentOnFailedUnits, runPrecheck } from './github.mjs'
 
 const OWNER = 'payloadcms'
 const REPO = 'payload'
@@ -60,17 +60,40 @@ const markerOf = ({ bumps, unit }) =>
 const groupMarker = markerOf({ bumps: [lodash], unit: 'non-major' })
 const reactMarker = markerOf({ bumps: [react], unit: 'react-19' })
 
-const openPr = ({ body, branch, number }) => ({
+const HIDDEN_LINE = '<!-- audit-deps-comment -->'
+const withHiddenLine = (text) => `${text}\n\n${HIDDEN_LINE}`
+
+const openPr = ({ body, branch, number, userType = 'Bot' }) => ({
   body,
-  head: { ref: branch, repo: { full_name: `${OWNER}/${REPO}` } },
+  head: { ref: branch, repo: { full_name: `${OWNER}/${REPO}` }, sha: `sha-${number}` },
   number,
+  state: 'open',
+  user: { type: userType },
 })
 
-const closedPr = ({ body, closedAt = '2026-01-02T00:00:00Z', mergedAt = null, number }) => ({
+const closedPr = ({
+  body,
+  closedAt = '2026-01-02T00:00:00Z',
+  mergedAt = null,
+  number,
+  userType = 'Bot',
+}) => ({
   body,
   closed_at: closedAt,
   merged_at: mergedAt,
   number,
+  user: { type: userType },
+})
+
+const stalePr = ({
+  branch = `${PREFIX}gone-3`,
+  fullName = `${OWNER}/${REPO}`,
+  state = 'open',
+  userType = 'Bot',
+} = {}) => ({
+  head: { ref: branch, repo: { full_name: fullName } },
+  state,
+  user: { type: userType },
 })
 
 function makeGithub({
@@ -135,15 +158,19 @@ async function precheck({ github, isDefaultInputs = true, plan = makePlan() }) {
   }
 }
 
-const botCommit = { author: { login: 'github-actions[bot]' } }
+const botCommit = {
+  author: { login: 'github-actions[bot]' },
+  committer: { login: 'github-actions[bot]' },
+}
+const personCommit = { author: { login: 'someone' }, committer: { login: 'someone' } }
 
 describe('runPrecheck', () => {
   it('should create every unit when no PR exists', async () => {
     const result = await precheck({ github: makeGithub() })
 
     expect(result.unitSteps).toEqual({
-      'non-major': { prNumber: null, step: 'create' },
-      'react-19': { prNumber: null, step: 'create' },
+      'non-major': { headSha: null, prNumber: null, step: 'create' },
+      'react-19': { headSha: null, prNumber: null, step: 'create' },
     })
     expect(result.verifyMatrix).toEqual([{ unitId: 'non-major' }, { unitId: 'react-19' }])
     expect(result.openPrMatrix).toEqual(result.verifyMatrix)
@@ -162,7 +189,34 @@ describe('runPrecheck', () => {
     const result = await precheck({ github })
 
     expect(result.stalePrs).toEqual([2])
-    expect(result.unitSteps['non-major']).toEqual({ prNumber: 1, step: 'skip' })
+    expect(result.unitSteps['non-major']).toEqual({ headSha: 'sha-1', prNumber: 1, step: 'skip' })
+  })
+
+  it('should ignore a person-authored PR on the prefix', async () => {
+    const github = makeGithub({
+      openPrs: [
+        openPr({ body: '', branch: `${PREFIX}gone-3`, number: 2, userType: 'User' }),
+        openPr({ body: groupMarker, branch: `${PREFIX}non-major`, number: 1, userType: 'User' }),
+      ],
+    })
+
+    const result = await precheck({ github })
+
+    expect(result.stalePrs).toEqual([])
+    expect(result.unitSteps['non-major']).toEqual({ headSha: null, prNumber: null, step: 'create' })
+  })
+
+  it('should ignore the marker of a person-authored closed PR', async () => {
+    const github = makeGithub({
+      closedBy: { 5: { type: 'User' } },
+      closedPrs: {
+        [`${PREFIX}non-major`]: [closedPr({ body: groupMarker, number: 5, userType: 'User' })],
+      },
+    })
+
+    const result = await precheck({ github })
+
+    expect(result.unitSteps['non-major'].step).toBe('create')
   })
 
   it('should ignore open PRs from a fork', async () => {
@@ -190,19 +244,53 @@ describe('runPrecheck', () => {
 
     const result = await precheck({ github })
 
-    expect(result.unitSteps['non-major']).toEqual({ prNumber: 1, step: 'update' })
+    expect(result.unitSteps['non-major']).toEqual({ headSha: 'sha-1', prNumber: 1, step: 'update' })
     expect(result.openPrMatrix).toContainEqual({ unitId: 'non-major' })
+  })
+
+  it('should update an open PR whose valid marker differs', async () => {
+    const github = makeGithub({
+      commits: { 1: [botCommit] },
+      openPrs: [
+        openPr({
+          body: markerOf({ bumps: [lodash], unit: 'other-unit' }),
+          branch: `${PREFIX}non-major`,
+          number: 1,
+        }),
+      ],
+    })
+
+    const result = await precheck({ github })
+
+    expect(result.unitSteps['non-major'].step).toBe('update')
+  })
+
+  it('should block when the bot authored but a person committed', async () => {
+    const github = makeGithub({
+      commits: {
+        1: [{ author: { login: 'github-actions[bot]' }, committer: { login: 'someone' } }],
+      },
+      openPrs: [openPr({ body: 'x', branch: `${PREFIX}non-major`, number: 1 })],
+    })
+
+    const result = await precheck({ github })
+
+    expect(result.unitSteps['non-major'].step).toBe('blocked')
   })
 
   it('should block an open PR with a person commit and a changed marker', async () => {
     const github = makeGithub({
-      commits: { 1: [botCommit, { author: { login: 'someone' } }] },
+      commits: { 1: [botCommit, personCommit] },
       openPrs: [openPr({ body: 'no marker', branch: `${PREFIX}non-major`, number: 1 })],
     })
 
     const result = await precheck({ github })
 
-    expect(result.unitSteps['non-major']).toEqual({ prNumber: 1, step: 'blocked' })
+    expect(result.unitSteps['non-major']).toEqual({
+      headSha: 'sha-1',
+      prNumber: 1,
+      step: 'blocked',
+    })
     expect(result.verifyMatrix).not.toContainEqual({ unitId: 'non-major' })
   })
 
@@ -224,7 +312,11 @@ describe('runPrecheck', () => {
 
     const result = await precheck({ github })
 
-    expect(result.unitSteps['non-major']).toEqual({ prNumber: null, step: 'skip-rejected' })
+    expect(result.unitSteps['non-major']).toEqual({
+      headSha: null,
+      prNumber: null,
+      step: 'skip-rejected',
+    })
     expect(result.unitSteps['react-19'].step).toBe('create')
   })
 
@@ -282,7 +374,7 @@ describe('runPrecheck', () => {
 
     const result = await precheck({ github, plan })
 
-    expect(result.unitSteps['non-major']).toEqual({ prNumber: 1, step: 'skip' })
+    expect(result.unitSteps['non-major']).toEqual({ headSha: 'sha-1', prNumber: 1, step: 'skip' })
   })
 
   it('should include a fallback when its major is stored', async () => {
@@ -303,8 +395,8 @@ describe('runPrecheck', () => {
 
     const result = await precheck({ github, plan })
 
-    expect(result.unitSteps['non-major']).toEqual({ prNumber: 1, step: 'skip' })
-    expect(result.unitSteps['react-19']).toEqual({ prNumber: null, step: 'skip' })
+    expect(result.unitSteps['non-major']).toEqual({ headSha: 'sha-1', prNumber: 1, step: 'skip' })
+    expect(result.unitSteps['react-19']).toEqual({ headSha: null, prNumber: null, step: 'skip' })
   })
 
   it('should skip a unit with no expected bumps and keep its open PR', async () => {
@@ -318,7 +410,7 @@ describe('runPrecheck', () => {
 
     const result = await precheck({ github, plan })
 
-    expect(result.unitSteps['react-19']).toEqual({ prNumber: 7, step: 'skip' })
+    expect(result.unitSteps['react-19']).toEqual({ headSha: 'sha-7', prNumber: 7, step: 'skip' })
     expect(result.stalePrs).toEqual([])
   })
 
@@ -330,6 +422,28 @@ describe('runPrecheck', () => {
     const result = await precheck({ github })
 
     expect(result.researchMatrix).toEqual([{ bumpId: 'react-19' }])
+  })
+
+  it('should drop research bumps whose unit is blocked', async () => {
+    const github = makeGithub({
+      commits: { 1: [personCommit] },
+      openPrs: [openPr({ body: 'x', branch: `${PREFIX}non-major`, number: 1 })],
+    })
+
+    const result = await precheck({ github })
+
+    expect(result.researchMatrix).toEqual([{ bumpId: 'react-19' }])
+  })
+
+  it('should drop research bumps whose unit is skip-rejected', async () => {
+    const github = makeGithub({
+      closedBy: { 5: { type: 'User' } },
+      closedPrs: { [reactUnit.branch]: [closedPr({ body: reactMarker, number: 5 })] },
+    })
+
+    const result = await precheck({ github })
+
+    expect(result.researchMatrix).toEqual([{ bumpId: 'lodash-4' }])
   })
 
   it('should drop a stored bump that plan.research omits', async () => {
@@ -349,8 +463,8 @@ describe('runPrecheck', () => {
     const result = await precheck({ github, isDefaultInputs: false })
 
     expect(result.unitSteps).toEqual({
-      'non-major': { prNumber: null, step: 'dry-run' },
-      'react-19': { prNumber: null, step: 'dry-run' },
+      'non-major': { headSha: null, prNumber: null, step: 'dry-run' },
+      'react-19': { headSha: null, prNumber: null, step: 'dry-run' },
     })
     expect(result.stalePrs).toEqual([])
     expect(result.researchMatrix).toEqual([{ bumpId: 'lodash-4' }, { bumpId: 'react-19' }])
@@ -372,7 +486,7 @@ describe('runPrecheck', () => {
 
 describe('closeStalePrs', () => {
   const staleBranch = `${PREFIX}gone-3`
-  const open = { head: { ref: staleBranch }, state: 'open' }
+  const open = stalePr()
 
   const close = (github, prNumbers = [3]) =>
     closeStalePrs({ github, owner: OWNER, prNumbers, ref: REF, repo: REPO })
@@ -383,7 +497,7 @@ describe('closeStalePrs', () => {
     await close(github)
 
     expect(github.rest.issues.createComment).toHaveBeenCalledWith({
-      body: 'The audit no longer needs this update.',
+      body: withHiddenLine('The audit no longer needs this update.'),
       issue_number: 3,
       owner: OWNER,
       repo: REPO,
@@ -403,26 +517,67 @@ describe('closeStalePrs', () => {
 
   it('should keep the branch when a person committed to it', async () => {
     const github = makeGithub({
-      commits: { 3: [botCommit, { author: { login: 'someone' } }] },
+      commits: { 3: [botCommit, personCommit] },
       prs: { 3: open },
     })
 
     await close(github)
 
     expect(github.rest.issues.createComment.mock.calls[0][0].body).toBe(
-      'The audit no longer needs this update. The branch has commits from a person, so it was not deleted.',
+      withHiddenLine(
+        'The audit no longer needs this update. The branch has commits from a person, so it was not deleted.',
+      ),
     )
     expect(github.rest.pulls.update).toHaveBeenCalled()
     expect(github.rest.git.deleteRef).not.toHaveBeenCalled()
   })
 
   it('should not touch a PR outside the ref prefix', async () => {
-    const github = makeGithub({ prs: { 3: { head: { ref: 'feature/x' }, state: 'open' } } })
+    const github = makeGithub({ prs: { 3: stalePr({ branch: 'feature/x' }) } })
 
     await close(github)
 
     expect(github.rest.pulls.update).not.toHaveBeenCalled()
     expect(github.rest.git.deleteRef).not.toHaveBeenCalled()
+  })
+
+  it('should not touch a person-authored PR', async () => {
+    const github = makeGithub({ prs: { 3: stalePr({ userType: 'User' }) } })
+
+    await close(github)
+
+    expect(github.rest.issues.createComment).not.toHaveBeenCalled()
+    expect(github.rest.pulls.update).not.toHaveBeenCalled()
+    expect(github.rest.git.deleteRef).not.toHaveBeenCalled()
+  })
+
+  it('should not touch a PR from a fork', async () => {
+    const github = makeGithub({ prs: { 3: stalePr({ fullName: 'someone/payload' }) } })
+
+    await close(github)
+
+    expect(github.rest.pulls.update).not.toHaveBeenCalled()
+    expect(github.rest.git.deleteRef).not.toHaveBeenCalled()
+  })
+
+  it('should skip a PR that is already closed', async () => {
+    const github = makeGithub({ prs: { 3: stalePr({ state: 'closed' }) } })
+
+    await close(github)
+
+    expect(github.rest.issues.createComment).not.toHaveBeenCalled()
+    expect(github.rest.git.deleteRef).not.toHaveBeenCalled()
+  })
+
+  it('should log the PR number and rethrow when closing fails', async () => {
+    const github = makeGithub({ prs: { 3: open } })
+    github.rest.pulls.update.mockRejectedValue(new Error('nope'))
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    await expect(close(github)).rejects.toThrow('nope')
+
+    expect(logger).toHaveBeenCalledWith(expect.stringContaining('#3'))
+    logger.mockRestore()
   })
 
   it('should ignore a missing branch ref', async () => {
@@ -458,7 +613,7 @@ describe('commentOnFailedUnits', () => {
     })
 
     expect(github.rest.issues.createComment).toHaveBeenCalledWith({
-      body: "Today's run did not update this PR: lodash declined: breaking change.",
+      body: withHiddenLine("Today's run did not update this PR: lodash declined: breaking change."),
       issue_number: 4,
       owner: OWNER,
       repo: REPO,
@@ -483,12 +638,14 @@ describe('commentOnFailedUnits', () => {
     await comment({ github, unitSteps: { 'non-major': { prNumber: 4, step: 'blocked' } } })
 
     expect(github.rest.issues.createComment.mock.calls[0][0].body).toBe(
-      'The audit found a different set of updates, but this branch has commits from a person, so it was not updated.',
+      withHiddenLine(
+        'The audit found a different set of updates, but this branch has commits from a person, so it was not updated.',
+      ),
     )
   })
 
-  it('should not repeat an identical last bot comment', async () => {
-    const body = "Today's run did not update this PR: build failed."
+  it('should not repeat an identical last comment of ours', async () => {
+    const body = withHiddenLine("Today's run did not update this PR: build failed.")
     const github = makeGithub({
       comments: {
         4: [
@@ -507,10 +664,35 @@ describe('commentOnFailedUnits', () => {
     expect(github.rest.issues.createComment).not.toHaveBeenCalled()
   })
 
+  it('should ignore another bot comment when deduping', async () => {
+    const body = withHiddenLine("Today's run did not update this PR: build failed.")
+    const github = makeGithub({
+      comments: {
+        4: [
+          { body, user: { type: 'Bot' } },
+          { body: 'coverage report', user: { type: 'Bot' } },
+        ],
+      },
+    })
+
+    await comment({
+      github,
+      outcomes: { 'non-major': 'build failed' },
+      unitSteps: { 'non-major': { prNumber: 4, step: 'skip' } },
+    })
+
+    expect(github.rest.issues.createComment).not.toHaveBeenCalled()
+  })
+
   it('should comment again when the reason changed', async () => {
     const github = makeGithub({
       comments: {
-        4: [{ body: "Today's run did not update this PR: old reason.", user: { type: 'Bot' } }],
+        4: [
+          {
+            body: withHiddenLine("Today's run did not update this PR: old reason."),
+            user: { type: 'Bot' },
+          },
+        ],
       },
     })
 
@@ -521,5 +703,24 @@ describe('commentOnFailedUnits', () => {
     })
 
     expect(github.rest.issues.createComment).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('checkHeadUnchanged', () => {
+  const check = ({ headSha, prs }) =>
+    checkHeadUnchanged({
+      github: makeGithub({ prs }),
+      headSha,
+      owner: OWNER,
+      prNumber: 3,
+      repo: REPO,
+    })
+
+  it('should be true when the head sha is unchanged', async () => {
+    expect(await check({ headSha: 'abc', prs: { 3: { head: { sha: 'abc' } } } })).toBe(true)
+  })
+
+  it('should be false when the head sha moved', async () => {
+    expect(await check({ headSha: 'abc', prs: { 3: { head: { sha: 'def' } } } })).toBe(false)
   })
 })
