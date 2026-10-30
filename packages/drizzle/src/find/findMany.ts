@@ -175,7 +175,7 @@ export const findMany = async function find({
       const ids = selectDistinctResult.map(({ id }) => id)
 
       findManyArgs.where =
-        adapter.limitedBoundParameters && canInlineValues(ids)
+        adapter.limitedBoundParameters && canInlineValues({ values: ids })
           ? buildInlinedInConstraint({
               column: sql.raw(`"${getTableName(adapter.tables[tableName])}"."id"`),
               operator: 'in',

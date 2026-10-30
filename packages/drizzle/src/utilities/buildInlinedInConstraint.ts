@@ -5,16 +5,12 @@ import { APIError } from 'payload'
 
 import { isValidStringID } from './isValidStringID.js'
 
-const isInlinableValue = (value: unknown): boolean =>
-  value === null ||
-  (typeof value === 'number' && Number.isFinite(value)) ||
-  (typeof value === 'string' && isValidStringID(value))
-
 /**
  * Whether `buildInlinedInConstraint` accepts all of the values: numbers, `null` and strings in the
  * format of an ID, which are safe to write into the statement.
  */
-export const canInlineValues = (values: unknown[]): boolean => values.every(isInlinableValue)
+export const canInlineValues = ({ values }: { values: unknown[] }): boolean =>
+  values.every(isInlinableValue)
 
 /**
  * Builds an `IN` / `NOT IN` constraint that writes the values into the statement instead of binding
@@ -30,7 +26,7 @@ export const buildInlinedInConstraint = ({
   operator: 'in' | 'not_in'
   values: unknown[]
 }): SQL => {
-  if (!canInlineValues(values)) {
+  if (!canInlineValues({ values })) {
     throw new APIError(`Invalid ID value in ${JSON.stringify(values)}`)
   }
 
@@ -44,3 +40,8 @@ export const buildInlinedInConstraint = ({
 
   return sql`${column} ${sql.raw(operator === 'in' ? 'IN' : 'NOT IN')} (${sql.raw(inlinedValues.join(','))})`
 }
+
+const isInlinableValue = (value: unknown): boolean =>
+  value === null ||
+  (typeof value === 'number' && Number.isFinite(value)) ||
+  (typeof value === 'string' && isValidStringID(value))

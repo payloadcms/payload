@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 
+import { sql } from '@payloadcms/db-sqlite'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -304,6 +305,66 @@ test.suite(
         expect(resWithBoundValues.docs.map(({ id }) => id)).toStrictEqual([doc.id])
       } finally {
         restoreExecute()
+      }
+    })
+
+    test('should match null in IN the same way when limitedBoundParameters: true', async ({
+      payload,
+    }) => {
+      const docs = await Promise.all(
+        [null, 'value-1', 'other'].map((text) =>
+          payload.create({ collection: 'simple', data: { text }, overrideAccess: true }),
+        ),
+      )
+
+      const findIDs = async () => {
+        const res = await payload.find({
+          collection: 'simple',
+          pagination: false,
+          where: { text: { in: [null, 'value-1'] } },
+          overrideAccess: true,
+        })
+
+        return res.docs.map(({ id }) => id).sort()
+      }
+
+      payload.db.limitedBoundParameters = false
+
+      const expectedIDs = await findIDs()
+
+      payload.db.limitedBoundParameters = true
+
+      expect(expectedIDs).toStrictEqual([docs[0]!.id, docs[1]!.id].sort())
+      expect(await findIDs()).toStrictEqual(expectedIDs)
+    })
+
+    test('should apply operator handlers instead of inlining IN values when limitedBoundParameters: true', async ({
+      payload,
+    }) => {
+      await payload.create({
+        collection: 'simple',
+        data: { text: 'value-1' },
+        overrideAccess: true,
+      })
+
+      const originalOperatorHandlers = payload.db.operatorHandlers
+
+      payload.db.limitedBoundParameters = true
+      payload.db.operatorHandlers = [
+        { name: 'match-nothing', build: () => sql`0 = 1`, fieldTypes: ['text'], operators: ['in'] },
+      ]
+
+      try {
+        const res = await payload.find({
+          collection: 'simple',
+          pagination: false,
+          where: { text: { in: ['value-1'] } },
+          overrideAccess: true,
+        })
+
+        expect(res.docs).toHaveLength(0)
+      } finally {
+        payload.db.operatorHandlers = originalOperatorHandlers
       }
     })
 

@@ -33,7 +33,7 @@ import { escapeSQLValue } from '../utilities/escapeSQLValue.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { DistinctSymbol, isRawConstraint } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
-import { buildOperatorConstraint } from './buildOperatorConstraint.js'
+import { buildOperatorConstraint, hasOperatorHandler } from './buildOperatorConstraint.js'
 import { getTableAlias } from './getTableAlias.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { resolveRelationshipPath } from './resolveRelationshipPath.js'
@@ -402,7 +402,12 @@ export function parseParams({
                         adapter.limitedBoundParameters &&
                         (queryOperator === 'in' || queryOperator === 'not_in') &&
                         Array.isArray(value) &&
-                        canInlineValues(value)
+                        canInlineValues({ values: value }) &&
+                        !hasOperatorHandler({
+                          adapter,
+                          field,
+                          resolvedOperator: queryOperator,
+                        })
                           ? buildInlinedInConstraint({
                               column: rawColumn,
                               operator: queryOperator,
@@ -555,35 +560,37 @@ export function parseParams({
                   break
                 }
 
-                let constraint = buildOperatorConstraint({
-                  adapter,
-                  column: resolvedColumn,
-                  field,
-                  locale,
-                  originalOperator,
-                  path: relationOrPath,
-                  resolvedOperator: queryOperator as DrizzleResolvedOperator,
-                  value: resolvedQueryValue,
-                })
-
-                if (
+                // `resolvedQueryValue` leaves out `null`, which `orConditions` matches with IS NULL
+                const shouldInlineValues =
                   adapter.limitedBoundParameters &&
                   (operator === 'in' || operator === 'not_in') &&
-                  Array.isArray(queryValue) &&
+                  Array.isArray(resolvedQueryValue) &&
                   // Values that can't be written into the statement stay bound, except for IDs
-                  (relationOrPath === 'id' || canInlineValues(queryValue))
-                ) {
-                  constraints.push(
-                    buildInlinedInConstraint({
+                  (relationOrPath === 'id' || canInlineValues({ values: resolvedQueryValue })) &&
+                  !hasOperatorHandler({
+                    adapter,
+                    field,
+                    resolvedOperator: queryOperator as DrizzleResolvedOperator,
+                  })
+
+                let constraint = shouldInlineValues
+                  ? buildInlinedInConstraint({
                       column: sql.raw(
                         `"${getTableName(resolvedColumn.table)}"."${resolvedColumn.name}"`,
                       ),
-                      operator,
-                      values: queryValue,
-                    }),
-                  )
-                  break
-                }
+                      operator: operator as 'in' | 'not_in',
+                      values: resolvedQueryValue as unknown[],
+                    })
+                  : buildOperatorConstraint({
+                      adapter,
+                      column: resolvedColumn,
+                      field,
+                      locale,
+                      originalOperator,
+                      path: relationOrPath,
+                      resolvedOperator: queryOperator as DrizzleResolvedOperator,
+                      value: resolvedQueryValue,
+                    })
 
                 if (orConditions.length) {
                   orConditions.push(constraint)

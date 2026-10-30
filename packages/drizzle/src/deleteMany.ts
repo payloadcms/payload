@@ -53,7 +53,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
     const ids = result.docs.map((doc) => doc.id)
 
     whereToUse =
-      this.limitedBoundParameters && canInlineValues(ids)
+      this.limitedBoundParameters && canInlineValues({ values: ids })
         ? buildInlinedInConstraint({
             column: sql.raw(`"${getTableName(table)}"."id"`),
             operator: 'in',
