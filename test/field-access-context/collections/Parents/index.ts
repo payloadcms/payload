@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { childrenSlug, parentsSlug, recordAccess } from '../../shared.js'
+import { childrenSlug, ownerScopedBlockSlug, parentsSlug, recordAccess } from '../../shared.js'
 
 export const Parents: CollectionConfig = {
   slug: parentsSlug,
@@ -78,6 +78,11 @@ export const Parents: CollectionConfig = {
       name: 'child',
       relationTo: childrenSlug,
       type: 'relationship',
+    },
+    {
+      name: 'ownerScopedBlocks',
+      type: 'blocks',
+      blocks: [ownerScopedBlockSlug],
     },
   ],
 }
