@@ -51,6 +51,7 @@ export async function runPrecheck({ core, github, isDefaultInputs, owner, plan, 
       openPr: openPrs.find((pr) => pr.branch === unit.branch) ?? null,
       owner,
       plan,
+      ref,
       repo,
       unit,
     })
@@ -84,9 +85,16 @@ export async function closeStalePrs({ github, owner, prNumbers, ref, repo }) {
  * never overwritten.
  */
 export async function checkHeadUnchanged({ github, headSha, owner, prNumber, repo }) {
-  const { data: pr } = await github.rest.pulls.get({ owner, pull_number: prNumber, repo })
+  try {
+    const { data: pr } = await github.rest.pulls.get({ owner, pull_number: prNumber, repo })
 
-  return pr.head.sha === headSha
+    return pr.head.sha === headSha
+  } catch (error) {
+    console.log(
+      `::warning::Could not read head of audit PR #${prNumber}: ${error?.message ?? error}`,
+    )
+    return false
+  }
 }
 
 async function closeStalePr({ github, owner, prNumber, ref, repo }) {
@@ -192,7 +200,7 @@ function setOutputs({ core, plan, staleNumbers, unitSteps }) {
   core.setOutput('stale_prs', JSON.stringify(staleNumbers))
 }
 
-async function decideStepForUnit({ github, openPr, owner, plan, repo, unit }) {
+async function decideStepForUnit({ github, openPr, owner, plan, ref, repo, unit }) {
   const prNumber = openPr?.number ?? null
   const headSha = openPr?.headSha ?? null
   const expectedBumps = expectedBumpsFor({ plan, unit })
@@ -204,7 +212,7 @@ async function decideStepForUnit({ github, openPr, owner, plan, repo, unit }) {
   const openState = openPr
     ? { hasForeignCommits: false, marker: parseMarker({ body: openPr.body }) }
     : null
-  const rejectedPr = openPr ? null : await findRejectedPr({ github, owner, repo, unit })
+  const rejectedPr = openPr ? null : await findRejectedPr({ github, owner, ref, repo, unit })
 
   let step = decideUnitStep({ isDefaultInputs: true, marker, openPr: openState, rejectedPr })
   if (step === 'update') {
@@ -271,7 +279,7 @@ async function listOpenBotPrs({ github, owner, ref, repo }) {
  * a marker. Bot closes and unknown closers do not, because a missed security PR costs more
  * than a duplicate.
  */
-async function findRejectedPr({ github, owner, repo, unit }) {
+async function findRejectedPr({ github, owner, ref, repo, unit }) {
   const { data } = await github.rest.pulls.list({
     direction: 'desc',
     head: `${owner}:${unit.branch}`,
@@ -282,7 +290,7 @@ async function findRejectedPr({ github, owner, repo, unit }) {
     state: 'closed',
   })
   const candidates = data
-    .filter((pr) => pr.merged_at === null && pr.closed_at && pr.user?.type === 'Bot')
+    .filter((pr) => pr.merged_at === null && pr.closed_at && isBotPr({ owner, pr, ref, repo }))
     .sort((a, b) => Date.parse(b.closed_at) - Date.parse(a.closed_at))
     .map((pr) => ({ number: pr.number, marker: parseMarker({ body: pr.body }) }))
     .filter((pr) => pr.marker !== null)

@@ -73,13 +73,16 @@ const openPr = ({ body, branch, number, userType = 'Bot' }) => ({
 
 const closedPr = ({
   body,
+  branch = `${PREFIX}non-major`,
   closedAt = '2026-01-02T00:00:00Z',
+  fullName = `${OWNER}/${REPO}`,
   mergedAt = null,
   number,
   userType = 'Bot',
 }) => ({
   body,
   closed_at: closedAt,
+  head: { ref: branch, repo: { full_name: fullName } },
   merged_at: mergedAt,
   number,
   user: { type: userType },
@@ -204,6 +207,21 @@ describe('runPrecheck', () => {
 
     expect(result.stalePrs).toEqual([])
     expect(result.unitSteps['non-major']).toEqual({ headSha: null, prNumber: null, step: 'create' })
+  })
+
+  it('should ignore the marker of a closed PR from a fork', async () => {
+    const github = makeGithub({
+      closedBy: { 5: { type: 'User' } },
+      closedPrs: {
+        [`${PREFIX}non-major`]: [
+          closedPr({ body: groupMarker, fullName: 'someone/payload', number: 5 }),
+        ],
+      },
+    })
+
+    const result = await precheck({ github })
+
+    expect(result.unitSteps['non-major'].step).toBe('create')
   })
 
   it('should ignore the marker of a person-authored closed PR', async () => {
@@ -438,7 +456,9 @@ describe('runPrecheck', () => {
   it('should drop research bumps whose unit is skip-rejected', async () => {
     const github = makeGithub({
       closedBy: { 5: { type: 'User' } },
-      closedPrs: { [reactUnit.branch]: [closedPr({ body: reactMarker, number: 5 })] },
+      closedPrs: {
+        [reactUnit.branch]: [closedPr({ body: reactMarker, branch: reactUnit.branch, number: 5 })],
+      },
     })
 
     const result = await precheck({ github })
@@ -722,5 +742,23 @@ describe('checkHeadUnchanged', () => {
 
   it('should be false when the head sha moved', async () => {
     expect(await check({ headSha: 'abc', prs: { 3: { head: { sha: 'def' } } } })).toBe(false)
+  })
+
+  it('should warn and be false when the API call fails', async () => {
+    const github = makeGithub()
+    github.rest.pulls.get.mockRejectedValue(new Error('network down'))
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    const result = await checkHeadUnchanged({
+      github,
+      headSha: 'abc',
+      owner: OWNER,
+      prNumber: 3,
+      repo: REPO,
+    })
+
+    expect(result).toBe(false)
+    expect(log).toHaveBeenCalledWith(expect.stringMatching(/^::warning::.*#3/))
+    log.mockRestore()
   })
 })
