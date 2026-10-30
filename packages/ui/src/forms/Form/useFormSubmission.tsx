@@ -413,12 +413,13 @@ export const useFormSubmission = ({
             if (
               !isMountedRef.current &&
               formSequenceRef.current === successSequence &&
-              resetSequenceRef.current === successResetSequence + 1 &&
-              !redirect &&
-              !disableToast
+              resetSequenceRef.current === successResetSequence + 1
             ) {
               preservePromiseToast = true
-              successToast(json.message || t('general:submissionSuccessful'))
+              if (!redirect && !disableToast) {
+                successToast(json.message || t('general:submissionSuccessful'))
+              }
+              return { res }
             }
             return submissionType !== 'autosave' && !requestContext.isQueueReset()
               ? { res }

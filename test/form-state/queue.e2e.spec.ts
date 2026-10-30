@@ -27,6 +27,124 @@ test.describe('Shared form request queue', () => {
     await page.unrouteAll({ behavior: 'ignoreErrors' })
   })
 
+  test('should keep the success toast when onSuccess closes the form', async ({ page }) => {
+    await page.route('**/api/form-request', (route) =>
+      route.fulfill({ json: { message: 'Saved request' } }),
+    )
+    await page.route('**/api/form-request-reset', async (route) => {
+      await expect(page.locator('#request-title')).toHaveCount(0)
+      await route.fulfill({ json: {} })
+    })
+    await page.goto(`${serverURL}/admin/form-requests?scenario=unmount`)
+    await page.getByRole('button', { name: 'Submit request', exact: true }).click()
+    await expect(page.getByTestId('submission-result')).not.toHaveText('Not submitted')
+    await expect(page.getByText('Saved request', { exact: true })).toBeVisible()
+  })
+
+  test('should return the completed response when onSuccess closes the form', async ({ page }) => {
+    await page.route('**/api/form-request', (route) =>
+      route.fulfill({ json: { message: 'Saved request' }, status: 201 }),
+    )
+    await page.route('**/api/form-request-reset', async (route) => {
+      await expect(page.locator('#request-title')).toHaveCount(0)
+      await route.fulfill({ json: {} })
+    })
+    await page.goto(`${serverURL}/admin/form-requests?scenario=unmount`)
+    await page.getByRole('button', { name: 'Submit request', exact: true }).click()
+    await expect(page.getByTestId('submission-result')).toHaveText('201')
+  })
+
+  for (const status of [200, 400]) {
+    test(`should keep the custom response handler's ${status < 400 ? 'success' : 'error'} toast after closing the form`, async ({
+      page,
+    }) => {
+      await page.route('**/api/form-request', (route) =>
+        route.fulfill({ json: { message: 'Handled response' }, status }),
+      )
+      await page.route('**/api/form-request-reset', async (route) => {
+        await expect(page.locator('#request-title')).toHaveCount(0)
+        await route.fulfill({ json: {} })
+      })
+      await page.goto(`${serverURL}/admin/form-requests?scenario=custom-response`)
+      await page.getByRole('button', { name: 'Submit request', exact: true }).click()
+      await expect(page.getByTestId('submission-result')).not.toHaveText('Not submitted')
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+          ),
+      )
+      await expect(page.getByText('Handled response', { exact: true })).toBeVisible()
+      await expect(page.locator('[data-sonner-toast]')).toHaveAttribute('data-removed', 'false')
+    })
+  }
+
+  test('should show an error thrown by a custom response handler after closing the form', async ({
+    page,
+  }) => {
+    await page.route('**/api/form-request', (route) =>
+      route.fulfill({ json: { message: 'Saved request' } }),
+    )
+    await page.route('**/api/form-request-reset', async (route) => {
+      await expect(page.locator('#request-title')).toHaveCount(0)
+      await route.fulfill({ json: {} })
+    })
+    await page.goto(`${serverURL}/admin/form-requests?scenario=custom-response-error`)
+    const consoleListeners = page.listeners('console')
+
+    page.removeAllListeners('console')
+    page.on('console', (message) => {
+      if (message.text().startsWith('Error submitting form Error: Response handler failed')) {
+        return
+      }
+
+      consoleListeners.forEach((listener) => listener(message))
+    })
+    await page.getByRole('button', { name: 'Submit request', exact: true }).click()
+    await expect(page.getByTestId('submission-result')).not.toHaveText('Not submitted')
+    await expect(
+      page.locator('[data-sonner-toast]').getByText('Response handler failed', { exact: true }),
+    ).toBeVisible()
+  })
+
+  for (const action of ['Reset form', 'Close form']) {
+    test(`should ignore a response canceled by ${action.toLowerCase()} before it arrives`, async ({
+      page,
+    }) => {
+      const captured = Promise.withResolvers<void>()
+      const released = Promise.withResolvers<void>()
+
+      releases.add(released.resolve)
+      await page.route('**/api/form-request', async (route) => {
+        captured.resolve()
+        await released.promise
+        await route.fulfill({ json: { message: 'Canceled response' } })
+      })
+      await page.goto(`${serverURL}/admin/form-requests?scenario=unmount`)
+      await page.getByRole('button', { name: 'Submit request', exact: true }).click()
+      await captured.promise
+      await page.getByRole('button', { name: action, exact: true }).click()
+      released.resolve()
+      await expect(page.getByTestId('submission-result')).toHaveText('No response')
+      await expect(page.locator('[data-sonner-toast]')).toHaveCount(0)
+    })
+  }
+
+  for (const scenario of ['reset', 'reset-unmount']) {
+    test(`should dismiss the submitting toast when onSuccess performs a ${scenario}`, async ({
+      page,
+    }) => {
+      await page.route('**/api/form-request', (route) =>
+        route.fulfill({ json: { message: 'Canceled response' } }),
+      )
+      await page.route('**/api/form-request-reset', (route) => route.fulfill({ json: {} }))
+      await page.goto(`${serverURL}/admin/form-requests?scenario=${scenario}`)
+      await page.getByRole('button', { name: 'Submit request', exact: true }).click()
+      await expect(page.getByTestId('submission-result')).toHaveText('No response')
+      await expect(page.locator('[data-sonner-toast]')).toHaveCount(0)
+    })
+  }
+
   test('should notify field context subscribers only when fields change', async ({ page }) => {
     await page.goto(`${serverURL}/admin/form-requests?scenario=context`)
     await expect(page.locator('#request-title')).toHaveValue('Initial value')

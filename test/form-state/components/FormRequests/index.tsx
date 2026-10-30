@@ -1,5 +1,6 @@
 'use client'
 
+import type { FormProps } from '@payloadcms/ui'
 import type { FormState } from 'payload'
 
 import {
@@ -12,7 +13,7 @@ import {
   useSearchParams,
 } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const initialState: FormState = { title: { value: 'Initial value' } }
 const fieldOptions = { path: 'title' }
@@ -20,6 +21,8 @@ const fieldOptions = { path: 'title' }
 export function FormRequests() {
   const scenario = useSearchParams().get('scenario')
   const formRef = useRef<ReturnType<typeof useForm>>(null)
+  const [isOpen, setIsOpen] = useState(true)
+  const [submissionResult, setSubmissionResult] = useState('Not submitted')
   const { config } = useConfig()
   const action = formatAdminURL({ apiRoute: config.routes.api, path: '/form-request' })
   const resetAction = formatAdminURL({ apiRoute: config.routes.api, path: '/form-request-reset' })
@@ -53,28 +56,75 @@ export function FormRequests() {
         formRef.current?.replaceState({ title: { value: 'Reset value' } })
       }
 
+      if (scenario === 'unmount' || scenario === 'reset-unmount') {
+        if (scenario === 'reset-unmount') {
+          formRef.current?.replaceState(initialState)
+        }
+
+        setIsOpen(false)
+        await fetch(resetAction)
+      }
+
       return json.state
     },
     [resetAction, scenario],
   )
 
+  const handleResponse = useCallback<NonNullable<FormProps['handleResponse']>>(
+    async (response, successToast, errorToast) => {
+      const json = await response.json()
+
+      if (scenario === 'custom-response-error') {
+        setIsOpen(false)
+        await fetch(resetAction)
+        throw new Error('Response handler failed')
+      }
+
+      if (response.ok) {
+        successToast(json.message)
+      } else {
+        errorToast(json.message)
+      }
+
+      setIsOpen(false)
+      await fetch(resetAction)
+    },
+    [resetAction, scenario],
+  )
+
+  const onComplete = useCallback(({ status }: { status: number | undefined }) => {
+    setSubmissionResult(status === undefined ? 'No response' : String(status))
+  }, [])
+
   return (
-    <Form
-      action={action}
-      initialState={scenario === 'empty' ? undefined : initialState}
-      method="POST"
-      onChange={onChangeHandlers}
-      onSuccess={onSuccess}
-      waitForAutocomplete={scenario === 'autocomplete'}
-    >
-      <RequestControls onReady={onReady} scenario={scenario} />
-      {scenario === 'context' && (
-        <>
-          <ContextControls />
-          <ContextObserver />
-        </>
+    <>
+      <output data-testid="submission-result">{submissionResult}</output>
+      <button onClick={() => setIsOpen(false)} type="button">
+        Close form
+      </button>
+      <button onClick={() => formRef.current?.replaceState(initialState)} type="button">
+        Reset form
+      </button>
+      {isOpen && (
+        <Form
+          action={action}
+          handleResponse={scenario?.startsWith('custom-response') ? handleResponse : undefined}
+          initialState={scenario === 'empty' ? undefined : initialState}
+          method="POST"
+          onChange={onChangeHandlers}
+          onSuccess={onSuccess}
+          waitForAutocomplete={scenario === 'autocomplete'}
+        >
+          <RequestControls onComplete={onComplete} onReady={onReady} scenario={scenario} />
+          {scenario === 'context' && (
+            <>
+              <ContextControls />
+              <ContextObserver />
+            </>
+          )}
+        </Form>
       )}
-    </Form>
+    </>
   )
 }
 
@@ -109,9 +159,11 @@ const ContextObserver = memo(function ContextObserver() {
 })
 
 function RequestControls({
+  onComplete,
   onReady,
   scenario,
 }: {
+  onComplete: (args: { status: number | undefined }) => void
   onReady: (args: { form: ReturnType<typeof useForm> }) => void
   scenario: null | string
 }) {
@@ -143,7 +195,7 @@ function RequestControls({
             setValue('Autofilled value')
           }
 
-          void submission
+          void submission.then((result) => onComplete({ status: result?.res?.status }))
         }}
         type="button"
       >
