@@ -2,6 +2,7 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { AuthenticatedUser, UserSession } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
+import { defaultRefreshTokenExpiration } from '../collections/config/defaults.js'
 import { appendNonTrashedFilter } from '../utilities/appendNonTrashedFilter.js'
 import { assertNoValidationWrite } from '../utilities/assertNoValidationWrite.js'
 import { getFieldsToSign } from './getFieldsToSign.js'
@@ -55,15 +56,8 @@ export const redeemRefreshToken = async ({
 
   const contents = readRefreshToken({ refreshToken, req })
   const collectionConfig = contents && req.payload.collections[contents.collection]?.config
-  // Without auth.refreshTokens, sessions have no refreshCount to check refresh tokens against
-  const refreshTokens = collectionConfig?.auth.refreshTokens
 
-  if (
-    !contents ||
-    !collectionConfig ||
-    !refreshTokens ||
-    (collection && collection !== contents.collection)
-  ) {
+  if (!contents || !collectionConfig || (collection && collection !== contents.collection)) {
     return null
   }
 
@@ -95,7 +89,7 @@ export const redeemRefreshToken = async ({
     await extendSession({
       collectionConfig,
       req,
-      sessionExpiration: refreshTokens.expiration,
+      sessionExpiration: getRefreshTokenExpiration(collectionConfig),
       sid: session.id,
       user,
     })
@@ -123,6 +117,12 @@ export const redeemRefreshToken = async ({
     user,
   }
 }
+
+/** How many seconds a session with a refresh token lasts from each refresh. */
+export const getRefreshTokenExpiration = (collectionConfig: SanitizedCollectionConfig): number =>
+  collectionConfig.auth.refreshTokens
+    ? collectionConfig.auth.refreshTokens.expiration
+    : defaultRefreshTokenExpiration
 
 export const createRefreshToken = ({
   collectionConfig,

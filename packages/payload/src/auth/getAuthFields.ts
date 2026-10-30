@@ -5,7 +5,7 @@ import { accountLockFields } from './baseFields/accountLock.js'
 import { getAPIKeyFields } from './baseFields/apiKey.js'
 import { baseAuthFields, resetPasswordRequestedAtField } from './baseFields/auth.js'
 import { emailFieldConfig } from './baseFields/email.js'
-import { refreshTokenSessionsFieldConfig, sessionsFieldConfig } from './baseFields/sessions.js'
+import { sessionsFieldConfig } from './baseFields/sessions.js'
 import { usernameFieldConfig } from './baseFields/username.js'
 import { verificationFields } from './baseFields/verification.js'
 
@@ -62,9 +62,7 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType, fields: Field[] 
     }
 
     if (authConfig.useSessions) {
-      authFields.push(
-        authConfig.refreshTokens ? refreshTokenSessionsFieldConfig : sessionsFieldConfig,
-      )
+      authFields.push(sessionsFieldConfig)
     }
   }
 

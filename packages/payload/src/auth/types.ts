@@ -161,10 +161,10 @@ export type UserSession = {
   id: string
   /**
    * How many times the session was refreshed with a refresh token. Refresh tokens remember it, so
-   * the latest one can be told apart from older ones. Only with `auth.refreshTokens`.
+   * the latest one can be told apart from older ones.
    */
   refreshCount?: null | number
-  /** When the session was last refreshed with a refresh token. Only with `auth.refreshTokens`. */
+  /** When the session was last refreshed with a refresh token. */
   refreshedAt?: Date | null | string
 }
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
@@ -308,8 +308,7 @@ export interface IncomingAuthType {
    * which the refresh operation trades for a new token and a new refresh token. Each refresh token
    * is meant to be used once. The one from right before still works for 30 seconds after a refresh,
    * for clients that refresh twice at once. When a used one comes back otherwise, its session is
-   * logged out. Requires `useSessions`, and adds two fields to sessions, so Postgres and SQLite need
-   * a migration.
+   * logged out. Requires `useSessions`.
    *
    * Refresh tokens don't expire on their own. They work as long as their login session, which lasts
    * `expiration` from the last refresh instead of `tokenExpiration`.

@@ -283,8 +283,6 @@ Refresh tokens don't expire on their own. They work as long as their session, wh
 
 Each refresh token is meant to be used once, so store the new one after every refresh. For 30 seconds after a refresh, the refresh token from right before it still works, so clients that refresh twice at once stay logged in. If a used refresh token comes back otherwise, Payload treats it as copied and logs out its session. Logging out ends refresh tokens too. They require `useSessions`, and aren't returned with `removeTokenFromResponses`.
 
-Refresh tokens add two fields to each session, `refreshCount` and `refreshedAt`, so Postgres and SQLite need a [migration](../database/migrations) after enabling them.
-
 ## Operations
 
 All auth-related operations are available via Payload's REST, Local, and GraphQL APIs. These operations are automatically added to your Collection when you enable Authentication. [More details](./operations).

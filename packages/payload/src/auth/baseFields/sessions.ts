@@ -28,14 +28,6 @@ export const sessionsFieldConfig: ArrayField = {
       type: 'date',
       required: true,
     },
-  ],
-}
-
-/** The sessions field of collections with `auth.refreshTokens`, which also tracks their refreshes. */
-export const refreshTokenSessionsFieldConfig: ArrayField = {
-  ...sessionsFieldConfig,
-  fields: [
-    ...sessionsFieldConfig.fields,
     {
       name: 'refreshCount',
       type: 'number',
