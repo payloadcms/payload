@@ -308,6 +308,59 @@ test.suite(
       }
     })
 
+    test('should not use bound parameters for NOT IN on a relationship if limitedBoundParameters: true', async ({
+      payload,
+    }) => {
+      const [excludedCategory, otherCategory] = await Promise.all(
+        ['excluded', 'other'].map((title) =>
+          payload.create({ collection: 'categories', data: { title }, overrideAccess: true }),
+        ),
+      )
+
+      const [, postWithOtherCategory, postWithoutCategory] = await Promise.all(
+        [excludedCategory!.id, otherCategory!.id, undefined].map((category, i) =>
+          payload.create({
+            collection: 'posts',
+            data: { category, title: `post ${i}` },
+            overrideAccess: true,
+          }),
+        ),
+      )
+
+      // Each ID is queried both as a number and as a string, so 61 IDs bind 122 parameters
+      const NOT_IN = [excludedCategory!.id, ...Array.from({ length: 60 }, (_, i) => 100000 + i)]
+
+      const restoreExecute = limitBoundParameters(payload)
+
+      try {
+        payload.db.limitedBoundParameters = false
+
+        await expect(
+          payload.find({
+            collection: 'posts',
+            pagination: false,
+            where: { category: { not_in: NOT_IN } },
+            overrideAccess: true,
+          }),
+        ).rejects.toBeTruthy()
+
+        payload.db.limitedBoundParameters = true
+
+        const res = await payload.find({
+          collection: 'posts',
+          pagination: false,
+          where: { category: { not_in: NOT_IN } },
+          overrideAccess: true,
+        })
+
+        expect(res.docs.map(({ id }) => id).sort()).toStrictEqual(
+          [postWithOtherCategory!.id, postWithoutCategory!.id].sort(),
+        )
+      } finally {
+        restoreExecute()
+      }
+    })
+
     test('should match null in IN the same way when limitedBoundParameters: true', async ({
       payload,
     }) => {

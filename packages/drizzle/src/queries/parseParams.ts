@@ -454,8 +454,19 @@ export function parseParams({
                   Array.isArray(queryValue) &&
                   queryOperator === 'not_in'
                 ) {
+                  const notInConstraint =
+                    adapter.limitedBoundParameters &&
+                    canInlineValues({ values: queryValue }) &&
+                    !hasOperatorHandler({ adapter, field, resolvedOperator: 'not_in' })
+                      ? buildInlinedInConstraint({
+                          column: sql.raw(`"${getTableName(table)}"."${table[columnName].name}"`),
+                          operator: 'not_in',
+                          values: queryValue,
+                        })
+                      : notInArray(table[columnName], queryValue)
+
                   constraints.push(
-                    sql`(${notInArray(table[columnName], queryValue)} OR
+                    sql`(${notInConstraint} OR
                     ${table[columnName]}
                     IS
                     NULL)`,
