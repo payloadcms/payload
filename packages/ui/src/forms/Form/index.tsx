@@ -198,6 +198,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.fields = formState
 
   const prevFormState = useRef(formState)
+  const prevInitialStateRef = useRef(initialState)
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -846,12 +847,17 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useEffect(() => {
     if (initialState) {
-      contextRef.current = { ...initContextState }
-      dispatchFields({
-        type: 'REPLACE_STATE',
-        optimize: false,
-        state: initialState,
-      })
+      if (!prevInitialStateRef.current || !dequal(prevInitialStateRef.current, initialState)) {
+        prevInitialStateRef.current = initialState
+        contextRef.current = { ...initContextState }
+        dispatchFields({
+          type: 'REPLACE_STATE',
+          optimize: false,
+          state: initialState,
+        })
+      }
+    } else {
+      prevInitialStateRef.current = undefined
     }
   }, [initialState, dispatchFields])
 
