@@ -287,16 +287,17 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         return
       }
 
+      if (columns[columnIndex + 1]?.parentId === itemId) {
+        setExpandedPath(expandedPath.slice(0, columnIndex))
+        setColumns(columns.slice(0, columnIndex + 1))
+        return
+      }
+
       // Update expanded path - keep path up to this column, add new item
       const newExpandedPath = [...expandedPath.slice(0, columnIndex), itemId]
       setExpandedPath(newExpandedPath)
 
       // Remove columns to the right and add new loading column
-      if (columns[columnIndex + 1]?.parentId === itemId) {
-        setColumns(columns.slice(0, columnIndex + 2))
-        return
-      }
-
       const newColumns = columns.slice(0, columnIndex + 1)
       newColumns.push({
         hasNextPage: false,

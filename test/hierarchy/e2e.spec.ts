@@ -1572,8 +1572,32 @@ test.describe('Hierarchy Sidebar', () => {
 
       await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
 
-      await modal.locator('.hierarchy-column-item', { hasText: childFolderName }).first().click()
+      const expandButton = modal.getByRole('button', { name: childFolderName, exact: true })
 
+      await expandButton.press('Enter')
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(3)
+      await expect(expandButton).toHaveAttribute('aria-expanded', 'true')
+
+      await expandButton.press('Space')
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
+      await expect(expandButton).toHaveAttribute('aria-expanded', 'false')
+      await expect(expandButton).toBeFocused()
+
+      await expandButton.click()
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(3)
+      await expect(expandButton).toHaveAttribute('aria-expanded', 'true')
+
+      const parentExpandButton = modal.getByRole('button', { name: parentFolderName, exact: true })
+
+      await parentExpandButton.click()
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(1)
+      await expect(parentExpandButton).toHaveAttribute('aria-expanded', 'false')
+
+      await parentExpandButton.click()
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
+      await expect(expandButton).toHaveAttribute('aria-expanded', 'false')
+
+      await expandButton.click()
       await expect(modal.locator('.hierarchy-column')).toHaveCount(3)
 
       await modal.getByRole('button', { name: 'Close' }).click()
