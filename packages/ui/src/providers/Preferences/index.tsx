@@ -48,6 +48,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   const scheduledMergedUpdates = useRef<Record<string, Promise<void>>>({})
   const pendingWrites = useRef<Record<string, number>>({})
   const updateQueues = useRef<Record<string, Promise<void>>>({})
+  const latestWrites = useRef<Record<string, Promise<void>>>({})
   const { config } = useConfig()
   const { user } = useAuth()
   const { i18n } = useTranslation()
@@ -63,6 +64,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
       pendingUpdate.current = {}
       pendingWrites.current = {}
       updateQueues.current = {}
+      latestWrites.current = {}
     }
   }, [user])
 
@@ -145,6 +147,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
           )
         })
 
+        latestWrites.current[key] = update
         updateQueues.current[key] = update.catch(() => undefined)
         try {
           await update
@@ -159,13 +162,18 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         pendingWrites.current[key] = (pendingWrites.current[key] ?? 0) + 1
 
         try {
-          await requests.post(
-            formatAdminURL({
-              apiRoute: api,
-              path: `/payload-preferences/${key}`,
-            }),
-            requestOptions(value, i18n.language),
-          )
+          const update = requests
+            .post(
+              formatAdminURL({
+                apiRoute: api,
+                path: `/payload-preferences/${key}`,
+              }),
+              requestOptions(value, i18n.language),
+            )
+            .then(() => undefined)
+
+          latestWrites.current[key] = update
+          await update
         } finally {
           pendingWrites.current[key] -= 1
         }
@@ -188,7 +196,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         }
 
         if (dequal(newValue, currentPreference)) {
-          await updateQueues.current[key]
+          await latestWrites.current[key]
           return
         }
 
@@ -199,7 +207,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         }
       } else {
         if (newValue === currentPreference) {
-          await updateQueues.current[key]
+          await latestWrites.current[key]
           return
         }
 
@@ -217,6 +225,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
 
         delete pendingUpdate.current[key]
         preferencesRef.current[key] = nextValue
+        pendingWrites.current[key] = (pendingWrites.current[key] ?? 0) + 1
 
         const previousUpdate = updateQueues.current[key] ?? Promise.resolve()
         const update = previousUpdate.then(() =>
@@ -229,11 +238,15 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
           ),
         )
 
-        updateQueues.current[key] = update.then(
-          () => undefined,
-          () => undefined,
-        )
-        await update
+        const latestWrite = update.then(() => undefined)
+
+        latestWrites.current[key] = latestWrite
+        updateQueues.current[key] = latestWrite.catch(() => undefined)
+        try {
+          await update
+        } finally {
+          pendingWrites.current[key] -= 1
+        }
       }
 
       // Callers coalesced into the same batch must all await its persisted write.
