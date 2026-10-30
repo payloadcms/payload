@@ -4050,6 +4050,14 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
               slug: autoSaveGlobalSlug,
             }),
           ).rejects.toBeInstanceOf(NotFound)
+
+          await expect(
+            payload.findGlobalVersionByID({
+              id: invalidID as string,
+              slug: autoSaveGlobalSlug,
+              disableErrors: true,
+            }),
+          ).resolves.toBeNull()
         }
       })
 
