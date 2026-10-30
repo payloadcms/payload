@@ -1,6 +1,9 @@
-import type { Client, JsonSchemaType } from '@modelcontextprotocol/client'
+import type { JsonSchemaType, OAuthClientProvider } from '@modelcontextprotocol/client'
+import type { MCPOAuthConfig } from '@payloadcms/plugin-mcp'
 import type { Payload, PayloadRequest, UploadInstructions } from 'payload'
 
+import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client'
+import { createHash, randomUUID } from 'crypto'
 import { readFile } from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -102,6 +105,50 @@ function draft2020Violations(schema: unknown, rootPath: string): string[] {
   walk(schema, rootPath)
   return errors
 }
+const enableOAuth = (
+  payload: Payload,
+  oauth: MCPOAuthConfig = { type: 'external', authorizationServers: ['https://auth.example.com'] },
+) => {
+  const plugin = payload.config.plugins?.find(
+    (plugin) => plugin.slug === '@payloadcms/plugin-mcp',
+  ) as any
+  plugin.sanitizedOptions.oauth = oauth
+  onTestFinished(() => {
+    delete plugin.sanitizedOptions.oauth
+  })
+}
+const getLoginToken = async (restClient: RESTClient): Promise<string> => {
+  const { token } = await restClient
+    .POST('/users/login', {
+      body: JSON.stringify({ email: devUser.email, password: devUser.password }),
+    })
+    .then((res) => res.json())
+
+  return token
+}
+const postInitialize = ({
+  authorization,
+  restClient,
+}: {
+  authorization?: string
+  restClient: RESTClient
+}) =>
+  restClient.POST('/mcp', {
+    body: JSON.stringify({
+      id: 1,
+      jsonrpc: '2.0',
+      method: 'initialize',
+      params: {
+        capabilities: {},
+        clientInfo: { name: 'oauth-test', version: '1.0.0' },
+        protocolVersion: '2025-11-25',
+      },
+    }),
+    headers: {
+      Accept: 'application/json, text/event-stream',
+      ...(authorization ? { Authorization: authorization } : {}),
+    },
+  })
 test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests: false }, () => {
   describe.for(protocolEras)('$label', ({ protocolEra }) => {
     const { it, testModern } = createMcpTests({ protocolEra })
@@ -368,51 +415,6 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
       })
     })
     test.describe('OAuth', () => {
-      const enableOAuth = (payload: Payload, options: Record<string, unknown> = {}) => {
-        const plugin = payload.config.plugins?.find(
-          (plugin) => plugin.slug === '@payloadcms/plugin-mcp',
-        ) as any
-        plugin.sanitizedOptions.oauth = {
-          authorizationServers: ['https://auth.example.com'],
-          ...options,
-        }
-        onTestFinished(() => {
-          delete plugin.sanitizedOptions.oauth
-        })
-      }
-      const postInitialize = ({
-        authorization,
-        restClient,
-      }: {
-        authorization?: string
-        restClient: RESTClient
-      }) =>
-        restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'initialize',
-            params: {
-              capabilities: {},
-              clientInfo: { name: 'oauth-test', version: '1.0.0' },
-              protocolVersion: '2025-11-25',
-            },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            ...(authorization ? { Authorization: authorization } : {}),
-          },
-        })
-      const getLoginToken = async (restClient: RESTClient): Promise<string> => {
-        const { token } = await restClient
-          .POST('/users/login', {
-            body: JSON.stringify({ email: devUser.email, password: devUser.password }),
-          })
-          .then((res) => res.json())
-
-        return token
-      }
-
       it('should challenge requests without an authenticated user', async ({
         payload,
         restClient,
@@ -445,6 +447,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         restClient,
       }) => {
         enableOAuth(payload, {
+          type: 'external',
           authorizationServers: ({ req }: { req: PayloadRequest }) => [
             `${new URL(req.url!).origin}/issuer/`,
           ],
@@ -458,6 +461,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
       })
       it('should tell clients which scopes to request', async ({ payload, restClient }) => {
         enableOAuth(payload, {
+          type: 'external',
           authorizationServers: ['https://auth.example.com'],
           scopes: ['openid', 'email'],
         })
@@ -478,8 +482,9 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         restClient,
       }) => {
         enableOAuth(payload, {
-          resource: ({ req }: { req: PayloadRequest }) =>
-            `https://${req.headers.get('x-forwarded-host')}/api/mcp`,
+          type: 'external',
+          authorizationServers: ['https://auth.example.com'],
+          resource: ({ req }) => `https://${req.headers.get('x-forwarded-host')}/api/mcp`,
         })
         const headers = { 'X-Forwarded-Host': 'mcp.example.com' }
 
@@ -503,6 +508,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         payload,
       }) => {
         enableOAuth(payload, {
+          type: 'external',
           authorizationServers: ['https://auth.example.com'],
           resource: 'https://mcp.example.com/api/mcp',
         })
@@ -553,7 +559,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
                 }
               : null,
         )
-        enableOAuth(payload, { authenticate })
+        enableOAuth(payload, { type: 'builtin', authenticate })
 
         const authenticated = await postInitialize({
           authorization: 'Bearer opaque-token',
@@ -573,7 +579,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         payload,
       }) => {
         const authenticate = vi.fn(() => null)
-        enableOAuth(payload, { authenticate })
+        enableOAuth(payload, { type: 'builtin', authenticate })
 
         const client = await mcp.connect(await getApiKey())
         await client.listTools()
@@ -590,7 +596,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         restClient,
       }) => {
         const authenticate = vi.fn(() => null)
-        enableOAuth(payload, { authenticate })
+        enableOAuth(payload, { type: 'builtin', authenticate })
         const token = await getLoginToken(restClient)
 
         const response = await postInitialize({ authorization: `Bearer ${token}`, restClient })
@@ -4207,6 +4213,344 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           expect(doc).not.toHaveProperty('uiField')
         })
       })
+    })
+  })
+  test.describe('OAuth authorization server', () => {
+    const redirectURI = 'http://localhost:33418/callback'
+
+    const getUser = ({
+      accessToken,
+      restClient,
+    }: {
+      accessToken: string
+      restClient: RESTClient
+    }) =>
+      restClient
+        .GET('/users/me', { auth: false, headers: { Authorization: `JWT ${accessToken}` } })
+        .then((res) => res.json())
+        .then(({ user }) => user)
+
+    // The browser of a logged-in user sends its login cookie
+    const getBrowserHeaders = async (restClient: RESTClient) => ({
+      Cookie: `payload-token=${await getLoginToken(restClient)}`,
+      'Sec-Fetch-Site': 'same-origin',
+    })
+
+    const getConsent = ({
+      headers,
+      query,
+      restClient,
+    }: {
+      headers: HeadersInit
+      query: string
+      restClient: RESTClient
+    }) =>
+      restClient
+        .GET(`/mcp/oauth/authorize${query}`, { auth: false, headers })
+        .then((res) => res.text())
+        .then((page) => /name="consent" type="hidden" value="([^"]+)"/.exec(page)![1]!)
+
+    const allow = ({
+      consent,
+      headers,
+      restClient,
+    }: {
+      consent: string
+      headers: Record<string, string>
+      restClient: RESTClient
+    }) =>
+      restClient.POST('/mcp/oauth/authorize', {
+        auth: false,
+        body: new URLSearchParams({ consent, decision: 'allow' }).toString(),
+        headers: { ...headers, 'Content-Type': 'application/x-www-form-urlencoded' },
+      })
+
+    // What the user's browser does: open the sign-in link while logged in, then click Allow
+    const approve = async ({ query, restClient }: { query: string; restClient: RESTClient }) => {
+      const headers = await getBrowserHeaders(restClient)
+      const consent = await getConsent({ headers, query, restClient })
+      const response = await allow({ consent, headers, restClient })
+
+      return new URL(response.headers.get('Location')!).searchParams.get('code')!
+    }
+
+    const register = (restClient: RESTClient) =>
+      restClient
+        .POST('/mcp/oauth/register', {
+          body: JSON.stringify({ client_name: 'Test client', redirect_uris: [redirectURI] }),
+        })
+        .then((res) => res.json())
+
+    // What an MCP client does to sign in, up to receiving the authorization code
+    const startSignIn = async (restClient: RESTClient) => {
+      const { client_id } = await register(restClient)
+      const codeVerifier = `${randomUUID()}${randomUUID()}`
+      const code = await approve({
+        query: `?${new URLSearchParams({
+          client_id,
+          code_challenge: createHash('sha256').update(codeVerifier).digest('base64url'),
+          code_challenge_method: 'S256',
+          redirect_uri: redirectURI,
+          response_type: 'code',
+        })}`,
+        restClient,
+      })
+
+      return { client_id, code, codeVerifier }
+    }
+
+    const requestToken = ({
+      params,
+      restClient,
+    }: {
+      params: Record<string, string>
+      restClient: RESTClient
+    }) =>
+      restClient.POST('/mcp/oauth/token', {
+        body: new URLSearchParams(params).toString(),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      })
+
+    const signIn = async (restClient: RESTClient) => {
+      const { client_id, code, codeVerifier } = await startSignIn(restClient)
+      const tokens = await requestToken({
+        params: {
+          client_id,
+          code,
+          code_verifier: codeVerifier,
+          grant_type: 'authorization_code',
+          redirect_uri: redirectURI,
+        },
+        restClient,
+      }).then((res) => res.json())
+
+      return { client_id, tokens }
+    }
+
+    test('should sign MCP clients in through the admin login', async ({ payload, restClient }) => {
+      enableOAuth(payload, { type: 'builtin' })
+      let authorizationURL: URL | undefined
+      let clientInformation: Awaited<ReturnType<OAuthClientProvider['clientInformation']>>
+      let codeVerifier = ''
+      let tokens: Awaited<ReturnType<OAuthClientProvider['tokens']>>
+      const authProvider: OAuthClientProvider = {
+        clientInformation: () => clientInformation,
+        clientMetadata: { client_name: 'Test client', redirect_uris: [redirectURI] },
+        codeVerifier: () => codeVerifier,
+        redirectToAuthorization: (url) => {
+          authorizationURL = url
+        },
+        redirectUrl: redirectURI,
+        saveClientInformation: (information) => {
+          clientInformation = information
+        },
+        saveCodeVerifier: (verifier) => {
+          codeVerifier = verifier
+        },
+        saveTokens: (newTokens) => {
+          tokens = newTokens
+        },
+        tokens: () => tokens,
+      }
+      // The client's own HTTP calls. Only /api is served in-process, so anything else is a 404.
+      const fetch = async (url: string | URL, init?: RequestInit) => {
+        const { pathname, search } = new URL(url)
+
+        if (!pathname.startsWith('/api/')) {
+          return new Response(null, { status: 404 })
+        }
+
+        const apiPath = `${pathname.slice('/api'.length)}${search}` as `/${string}`
+        return init?.method === 'POST'
+          ? restClient.POST(apiPath, { ...init, auth: false })
+          : restClient.GET(apiPath, { ...init, auth: false })
+      }
+      const mcpURL = new URL(`${restClient.serverURL}/api/mcp`)
+
+      const signInTransport = new StreamableHTTPClientTransport(mcpURL, { authProvider, fetch })
+
+      await expect(
+        new Client({ name: 'oauth-test', version: '1.0.0' }).connect(signInTransport),
+      ).rejects.toThrow('Unauthorized')
+      await signInTransport.finishAuth(
+        await approve({ query: authorizationURL!.search, restClient }),
+      )
+
+      const client = new Client({ name: 'oauth-test', version: '1.0.0' })
+      await client.connect(new StreamableHTTPClientTransport(mcpURL, { authProvider, fetch }))
+      onTestFinished(() => client.close())
+
+      const { tools } = await client.listTools()
+      expect(tools.some((tool) => tool.name === 'findDocuments')).toBe(true)
+    })
+
+    test('should only issue tokens to the client that started the sign-in', async ({
+      payload,
+      restClient,
+    }) => {
+      enableOAuth(payload, { type: 'builtin' })
+      const { client_id, code, codeVerifier } = await startSignIn(restClient)
+      const redeem = (verifier: string) =>
+        requestToken({
+          params: {
+            client_id,
+            code,
+            code_verifier: verifier,
+            grant_type: 'authorization_code',
+            redirect_uri: redirectURI,
+          },
+          restClient,
+        })
+
+      expect((await redeem('wrong-verifier')).status).toBe(400)
+      expect((await redeem(codeVerifier)).status).toBe(200)
+    })
+
+    test('should give clients new tokens for their refresh token', async ({
+      payload,
+      restClient,
+    }) => {
+      enableOAuth(payload, { type: 'builtin' })
+      const { client_id, tokens } = await signIn(restClient)
+      const refresh = (clientID: string) =>
+        requestToken({
+          params: {
+            client_id: clientID,
+            grant_type: 'refresh_token',
+            refresh_token: tokens.refresh_token,
+          },
+          restClient,
+        })
+
+      // Only the client the refresh token was issued to can use it
+      expect((await refresh('another-client')).status).toBe(400)
+
+      const refreshed = await refresh(client_id).then((res) => res.json())
+
+      expect(refreshed.refresh_token).not.toBe(tokens.refresh_token)
+      expect(
+        (await postInitialize({ authorization: `Bearer ${refreshed.access_token}`, restClient }))
+          .status,
+      ).toBe(200)
+    })
+
+    test('should sign clients out when a used refresh token comes back later', async ({
+      payload,
+      restClient,
+    }) => {
+      enableOAuth(payload, { type: 'builtin' })
+      const { client_id, tokens } = await signIn(restClient)
+      const refresh = (refreshToken: string) =>
+        requestToken({
+          params: { client_id, grant_type: 'refresh_token', refresh_token: refreshToken },
+          restClient,
+        })
+
+      vi.useFakeTimers({ now: Date.now() + 3 * 60 * 60 * 1000, toFake: ['Date'] })
+      onTestFinished(() => vi.useRealTimers())
+
+      const refreshed = await refresh(tokens.refresh_token).then((res) => res.json())
+
+      // Right after a refresh, the client may be refreshing twice at once
+      expect((await refresh(tokens.refresh_token)).status).toBe(200)
+
+      vi.useFakeTimers({ now: Date.now() + 60 * 1000, toFake: ['Date'] })
+
+      expect((await refresh(tokens.refresh_token)).status).toBe(400)
+      expect((await refresh(refreshed.refresh_token)).status).toBe(400)
+      expect(
+        (await postInitialize({ authorization: `Bearer ${refreshed.access_token}`, restClient }))
+          .status,
+      ).toBe(401)
+    })
+
+    test('should only accept access tokens for MCP', async ({ payload, restClient }) => {
+      enableOAuth(payload, { type: 'builtin' })
+      const { tokens } = await signIn(restClient)
+
+      expect(
+        (await postInitialize({ authorization: `Bearer ${tokens.access_token}`, restClient }))
+          .status,
+      ).toBe(200)
+      expect(await getUser({ accessToken: tokens.access_token, restClient })).toBeNull()
+    })
+
+    test("should only let the browser's login allow MCP clients", async ({
+      payload,
+      restClient,
+    }) => {
+      enableOAuth(payload, { type: 'builtin' })
+      const { tokens } = await signIn(restClient)
+      const { client_id } = await register(restClient)
+      const query = `?${new URLSearchParams({
+        client_id,
+        code_challenge: 'challenge',
+        code_challenge_method: 'S256',
+        redirect_uri: redirectURI,
+        response_type: 'code',
+      })}`
+      const consent = await getConsent({
+        headers: await getBrowserHeaders(restClient),
+        query,
+        restClient,
+      })
+
+      // An MCP client's own access token, in the header or as the login cookie
+      for (const headers of [
+        { Authorization: `Bearer ${tokens.access_token}` },
+        { Cookie: `payload-token=${tokens.access_token}`, 'Sec-Fetch-Site': 'same-origin' },
+      ]) {
+        const signInPage = await restClient.GET(`/mcp/oauth/authorize${query}`, {
+          auth: false,
+          headers,
+        })
+
+        expect(signInPage.headers.get('Location')).toContain('/admin/login')
+        expect((await allow({ consent, headers, restClient })).status).toBe(400)
+      }
+    })
+
+    test("should base the login server's issuer on oauth.resource", async ({
+      payload,
+      restClient,
+    }) => {
+      enableOAuth(payload, {
+        type: 'builtin',
+        resource: ({ req }) => `https://${req.headers.get('x-forwarded-host')}/api/mcp`,
+      })
+      const headers = { 'X-Forwarded-Host': 'mcp.example.com' }
+
+      const metadata = await restClient
+        .GET('/mcp/oauth-protected-resource', { auth: false, headers })
+        .then((res) => res.json())
+      const discovery = await restClient
+        .GET('/mcp/oauth/.well-known/openid-configuration', { auth: false, headers })
+        .then((res) => res.json())
+
+      expect(metadata.authorization_servers).toEqual(['https://mcp.example.com/api/mcp/oauth'])
+      expect(discovery.issuer).toBe('https://mcp.example.com/api/mcp/oauth')
+    })
+
+    test('should send users who are not logged in to the admin login', async ({
+      payload,
+      restClient,
+    }) => {
+      enableOAuth(payload, { type: 'builtin' })
+      const { client_id } = await register(restClient)
+      const query = `?${new URLSearchParams({
+        client_id,
+        code_challenge: 'challenge',
+        code_challenge_method: 'S256',
+        redirect_uri: redirectURI,
+        response_type: 'code',
+      })}`
+
+      const response = await restClient.GET(`/mcp/oauth/authorize${query}`, { auth: false })
+
+      expect(response.status).toBe(302)
+      expect(response.headers.get('Location')).toBe(
+        `/admin/login?redirect=${encodeURIComponent(`/api/mcp/oauth/authorize${query}`)}`,
+      )
     })
   })
 })

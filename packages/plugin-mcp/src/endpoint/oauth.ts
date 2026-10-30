@@ -40,10 +40,11 @@ export const oauthProtectedResourceHandler =
  * metadata, which starts the client's OAuth flow.
  */
 export const oauthChallenge = ({ req }: { req: PayloadRequest }): Response => {
+  const { oauth } = getPluginConfig({ config: req.payload.config })
   const response = bearerAuthChallengeResponse(
     new OAuthError(OAuthErrorCode.InvalidToken, req.t('error:unauthorized')),
     {
-      requiredScopes: getPluginConfig({ config: req.payload.config }).oauth?.scopes,
+      requiredScopes: oauth?.type === 'external' ? oauth.scopes : undefined,
       resourceMetadataUrl: `${getMCPResource({ req })}/oauth-protected-resource`,
     },
   )
@@ -55,9 +56,9 @@ export const oauthChallenge = ({ req }: { req: PayloadRequest }): Response => {
 }
 
 /**
- * The MCP endpoint's address, as advertised in the metadata's `resource`. The metadata link is
- * based on it. Clients send it when they sign in, and authorization servers that support it put it
- * in the access token's audience.
+ * The MCP endpoint's address, as advertised in the metadata's `resource`. The metadata link and
+ * the built-in authorization server's issuer are based on it. Clients send it when they sign in,
+ * and authorization servers that support it put it in the access token's audience.
  */
 export const getMCPResource = ({ req }: { req: PayloadRequest }): string => {
   const { config } = req.payload
@@ -72,23 +73,25 @@ export const getMCPResource = ({ req }: { req: PayloadRequest }): string => {
 
 const getMetadataResponse = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
   const { config } = req.payload
-  const pluginConfig = getPluginConfig({ config })
+  const { oauth } = getPluginConfig({ config })
 
-  if (!pluginConfig.oauth) {
+  if (!oauth) {
     return new Response(null, { status: 404 })
   }
 
-  const { authorizationServers, scopes } = pluginConfig.oauth
+  const resource = getMCPResource({ req })
 
   return Response.json(
     {
       authorization_servers:
-        typeof authorizationServers === 'function'
-          ? await authorizationServers({ req })
-          : authorizationServers,
+        oauth.type === 'builtin'
+          ? [`${resource}/oauth`]
+          : typeof oauth.authorizationServers === 'function'
+            ? await oauth.authorizationServers({ req })
+            : oauth.authorizationServers,
       bearer_methods_supported: ['header'],
-      resource: getMCPResource({ req }),
-      scopes_supported: scopes,
+      resource,
+      scopes_supported: oauth.type === 'external' ? oauth.scopes : undefined,
     } satisfies OAuthProtectedResourceMetadata,
     // Public document, readable by browser-based MCP clients on any origin. Not cached, since its
     // URLs can depend on the request.
