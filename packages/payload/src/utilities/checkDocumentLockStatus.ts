@@ -111,27 +111,41 @@ type BulkLockArgs = {
   req: PayloadRequest
 }
 
+// Keeps each lock query, and the lookup of the locks it matched, below the 100 bound parameters
+// Cloudflare D1 allows per statement
+const LOCK_QUERY_BATCH_SIZE = 50
+
 /**
- * Matches `document.value` in memory instead of querying it with `in`: `document` relates to every
- * collection, so SQL adapters compare the ids against one column per collection, which exceeds the
- * bound parameter limit of Cloudflare D1 (100) even for small batches.
+ * Queries the locks of the given documents in batches. Each id is compared with an object
+ * `equals`, because `document` relates to every collection and a plain `document.value` query
+ * compares the ids against one column per collection.
  */
 const findDocumentLocks = async ({
   collectionSlug,
   ids,
   req,
 }: BulkLockArgs): Promise<(JsonObject & TypeWithID)[]> => {
-  const idsToMatch = new Set(ids.map(String))
+  const lockedDocs: (JsonObject & TypeWithID)[] = []
 
-  const { docs }: PaginatedDocs<JsonObject & TypeWithID> = await req.payload.db.find({
-    collection: lockedDocumentsCollectionSlug,
-    limit: 0,
-    pagination: false,
-    sort: '-updatedAt',
-    where: { 'document.relationTo': { equals: collectionSlug } },
-  })
+  for (let i = 0; i < ids.length; i += LOCK_QUERY_BATCH_SIZE) {
+    const batch = ids.slice(i, i + LOCK_QUERY_BATCH_SIZE)
 
-  return docs.filter((lockedDoc) => idsToMatch.has(String(lockedDoc.document?.value)))
+    const { docs }: PaginatedDocs<JsonObject & TypeWithID> = await req.payload.db.find({
+      collection: lockedDocumentsCollectionSlug,
+      limit: 0,
+      pagination: false,
+      sort: '-updatedAt',
+      where: {
+        or: batch.map((value) => ({
+          document: { equals: { relationTo: collectionSlug, value } },
+        })),
+      },
+    })
+
+    lockedDocs.push(...docs)
+  }
+
+  return lockedDocs
 }
 
 const isLockingAvailable = (collectionSlug: string, req: PayloadRequest): boolean => {

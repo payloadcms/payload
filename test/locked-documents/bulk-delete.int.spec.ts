@@ -1,10 +1,56 @@
+import type { Payload } from 'payload'
+
 import { NotFound } from 'payload'
 import { expect } from 'vitest'
+
+import type { User } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { postsSlug, simpleSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
+
+const createLockedDocuments = async ({
+  count,
+  payload,
+  userID,
+}: {
+  count: number
+  payload: Payload
+  userID: User['id']
+}): Promise<(number | string)[]> => {
+  const ids: (number | string)[] = []
+
+  for (let i = 0; i < count; i++) {
+    const doc = await payload.create({
+      collection: simpleSlug,
+      data: {
+        fieldA: `bulk delete ${i}`,
+      },
+      overrideAccess: true,
+    })
+
+    await payload.create({
+      collection: lockedDocumentCollection,
+      data: {
+        document: {
+          relationTo: simpleSlug,
+          value: doc.id,
+        },
+        globalSlug: undefined,
+        user: {
+          relationTo: 'users',
+          value: userID,
+        },
+      },
+      overrideAccess: true,
+    })
+
+    ids.push(doc.id)
+  }
+
+  return ids
+}
 
 test.suite('Locked documents - bulk delete', { config: './config.ts' }, () => {
   // Bulk delete resolves the lock state of the whole batch in a single query, rather than one
@@ -132,35 +178,7 @@ test.suite('Locked documents - bulk delete', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
 
-    const ids: (number | string)[] = []
-
-    for (let i = 0; i < 20; i++) {
-      const doc = await payload.create({
-        collection: simpleSlug,
-        data: {
-          fieldA: `bulk delete ${i}`,
-        },
-        overrideAccess: true,
-      })
-
-      await payload.create({
-        collection: lockedDocumentCollection,
-        data: {
-          document: {
-            relationTo: simpleSlug,
-            value: doc.id,
-          },
-          globalSlug: undefined,
-          user: {
-            relationTo: 'users',
-            value: user.id,
-          },
-        },
-        overrideAccess: true,
-      })
-
-      ids.push(doc.id)
-    }
+    const ids = await createLockedDocuments({ count: 20, payload, userID: user.id })
 
     const { docs, errors } = await payload.delete({
       collection: simpleSlug,
@@ -184,5 +202,45 @@ test.suite('Locked documents - bulk delete', { config: './config.ts' }, () => {
     })
 
     expect(totalDocs).toBe(0)
+  })
+
+  // Only the locks of the deleted documents may be loaded: loading every lock of the collection
+  // binds all of their ids in a follow-up query
+  test('should release a lock when its collection holds more locks than the bound parameter limit of D1', async ({
+    payload,
+  }) => {
+    const user = await payload.create({
+      collection: 'users',
+      data: {
+        email: 'bulk-delete-many-locks@payloadcms.com',
+        password: 'test',
+      },
+      overrideAccess: true,
+    })
+
+    const ids = await createLockedDocuments({ count: 120, payload, userID: user.id })
+
+    const { docs, errors } = await payload.delete({
+      collection: simpleSlug,
+      overrideLock: false,
+      user,
+      where: {
+        id: { equals: ids[0] },
+      },
+      overrideAccess: true,
+    })
+
+    expect(errors).toHaveLength(0)
+    expect(docs).toHaveLength(1)
+
+    const { totalDocs } = await payload.count({
+      collection: lockedDocumentCollection,
+      overrideAccess: true,
+      where: {
+        'document.relationTo': { equals: simpleSlug },
+      },
+    })
+
+    expect(totalDocs).toBe(ids.length - 1)
   })
 })
