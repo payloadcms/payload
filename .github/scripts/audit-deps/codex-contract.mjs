@@ -1,6 +1,3 @@
-import { formatAdvisoryMarker } from './report.mjs'
-import { GHSA_PATTERN, stripHtmlComments } from './sanitize.mjs'
-
 /**
  * @typedef {object} ResearchResult
  * @property {'apply' | 'decline'} decision
@@ -9,9 +6,9 @@ import { GHSA_PATTERN, stripHtmlComments } from './sanitize.mjs'
  * @property {string} reason non-empty for `decline`
  */
 
-const MAX_BODY_LENGTH = 60000
 const MAX_RESEARCH_STRING_LENGTH = 4000
 const MAX_BREAKING_CHANGES = 30
+const MAX_FILES_CHECKED = 100
 const FRONTMATTER_PATTERN = /^---\r?\n[\s\S]*?\r?\n---\r?\n/
 const UNFILLED_TOKEN_PATTERN = /\{\{[^}]*\}\}/
 
@@ -60,13 +57,16 @@ export function parseResearchResult({ text }) {
   const { breakingChanges, decision, filesChecked, reason } = result
 
   if (decision !== 'apply' && decision !== 'decline') {
-    throw new Error(`codex result has an unknown decision: ${decision}`)
+    throw new Error('codex result has an unknown decision')
   }
   if (decision === 'decline' && reason.trim() === '') {
     throw new Error('codex result declines without a reason')
   }
   if (breakingChanges.length > MAX_BREAKING_CHANGES) {
     throw new Error(`codex result has more than ${MAX_BREAKING_CHANGES} breakingChanges`)
+  }
+  if (filesChecked.length > MAX_FILES_CHECKED) {
+    throw new Error(`codex result has more than ${MAX_FILES_CHECKED} filesChecked entries`)
   }
 
   const isMalformedChange = (item) =>
@@ -93,70 +93,6 @@ export function parseResearchResult({ text }) {
     filesChecked,
     reason,
   }
-}
-
-/** Fills `{{key}}` tokens in the template and appends the skill without its frontmatter. */
-export function buildPrompt({ context, skill, template }) {
-  const values = {
-    ...context,
-    fixable: context.fixable.map((advisory) => `- ${advisory}`).join('\n'),
-  }
-
-  return fillTemplate({ skill, template, values })
-}
-
-/** Validates Codex's untrusted final message against the schema and the fixable set. */
-export function parseCodexResult({ fixable, text }) {
-  let result
-  try {
-    result = JSON.parse(text)
-  } catch {
-    throw new Error('codex result is not valid JSON')
-  }
-
-  if (
-    !Array.isArray(result?.fixedAdvisories) ||
-    !Array.isArray(result.needsPerson) ||
-    typeof result.body !== 'string'
-  ) {
-    throw new Error('codex result is missing required fields')
-  }
-
-  const { body, fixedAdvisories } = result
-
-  const malformed = fixedAdvisories.filter(
-    (advisory) => typeof advisory !== 'string' || !GHSA_PATTERN.test(advisory),
-  )
-  if (malformed.length > 0) {
-    throw new Error(`malformed GHSA in fixedAdvisories: ${malformed.join(', ')}`)
-  }
-
-  const outside = fixedAdvisories.filter((advisory) => !fixable.includes(advisory))
-  if (outside.length > 0) {
-    throw new Error(`claims outside fixable set: ${outside.join(', ')}`)
-  }
-
-  if (body.trim() === '') {
-    throw new Error('codex result body is empty')
-  }
-  if (body.length > MAX_BODY_LENGTH) {
-    throw new Error(`codex result body exceeds ${MAX_BODY_LENGTH} characters`)
-  }
-
-  return { body, fixedAdvisories }
-}
-
-/** Assembles the PR body: trusted table first, sanitized agent text, trusted marker last. */
-export function buildPrBody({ body, changeTable, fixable }) {
-  return (
-    '## Changes\n\n' +
-    changeTable +
-    '\n\n---\n\n## Agent analysis\n\n' +
-    stripHtmlComments({ text: body }).trim() +
-    '\n\n' +
-    formatAdvisoryMarker({ advisories: fixable }) +
-    '\n'
-  )
 }
 
 /** Single pass so a substituted value is never re-scanned for tokens. */

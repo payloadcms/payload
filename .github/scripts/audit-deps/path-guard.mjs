@@ -6,7 +6,6 @@ import { promisify } from 'node:util'
 const execFileAsync = promisify(execFile)
 
 const MAX_BUFFER = 64 * 1024 * 1024
-const NUMSTAT_RECORD_PATTERN = /^(?:\d+|-)\t(?:\d+|-)\t([\s\S]+)$/
 const ROOT_ONLY_FILES = new Set(['pnpm-lock.yaml', 'pnpm-workspace.yaml'])
 const UNSAFE_SEGMENTS = new Set(['', '.', '..', '.git'])
 const WRITE_STATUS_CODES = new Set(['M', 'A', '?'])
@@ -37,17 +36,6 @@ export function findDisallowedChanges({ changes }) {
 }
 
 /**
- * Stricter than `findDisallowedChanges`: a patch may only edit existing files in place,
- * so every `--summary` line (create, delete, rename, copy, mode change, rewrite) is a reason.
- */
-export function findDisallowedPatchChanges({ changes, summaryLines }) {
-  return [
-    ...findDisallowedChanges({ changes }),
-    ...summaryLines.map((line) => `${line}: not allowed in a patch`),
-  ]
-}
-
-/**
  * Lists tracked, untracked, and ignored working tree changes. A rename yields the destination
  * (added) plus the source (deleted); a copy yields the destination plus its unchanged source.
  */
@@ -67,26 +55,6 @@ export async function listWorkingTreeChanges({ cwd }) {
   )
 
   return withSymlinkFlags({ cwd, entries: parseStatusOutput({ stdout }) })
-}
-
-/**
- * Reads the paths a patch touches with `git apply` itself, so the guard parses the patch
- * exactly as apply does. Never applies the patch.
- */
-export async function listPatchChanges({ cwd, patchPath }) {
-  const { stdout } = await execFileAsync(
-    'git',
-    ['apply', '--numstat', '-z', '--summary', patchPath],
-    { cwd, maxBuffer: MAX_BUFFER },
-  )
-
-  const { paths, summaryLines } = parseApplyOutput({ stdout })
-  const changes = await withSymlinkFlags({
-    cwd,
-    entries: paths.map((path) => ({ path, status: 'M' })),
-  })
-
-  return { changes, summaryLines }
 }
 
 function isAllowedPath({ path }) {
@@ -155,31 +123,6 @@ function parseStatusOutput({ stdout }) {
   }
 
   return entries
-}
-
-/**
- * Layout of `git apply --numstat -z --summary`: numstat records `<added>\t<deleted>\t<path>\0`
- * with raw paths, then summary lines with quoted paths, each ending in `\n`. Numstat names only
- * the destination of a rename or copy; the source appears in its summary line.
- */
-function parseApplyOutput({ stdout }) {
-  const tokens = stdout.split('\0')
-  const summary = tokens.pop() ?? ''
-
-  const paths = tokens.map((record) => {
-    const match = record.match(NUMSTAT_RECORD_PATTERN)
-    if (!match) {
-      throw new Error(`unexpected git apply --numstat record: ${JSON.stringify(record)}`)
-    }
-    return match[1]
-  })
-
-  const summaryLines = summary
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-
-  return { paths, summaryLines }
 }
 
 function withSymlinkFlags({ cwd, entries }) {

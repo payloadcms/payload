@@ -97,16 +97,17 @@ describe('buildResearchPrompt', () => {
   })
 
   it('does not rescan substituted values or the skill for tokens', () => {
-    expect(() =>
-      buildResearchPrompt({
-        bump: { ...bump, dependency: '{{ref}}' },
-        evidencePaths,
-        hasNotes: true,
-        ref: 'main',
-        skill: `${skill}\nuse \${{ github.sha }}\n`,
-        template: '{{dependency}}',
-      }),
-    ).not.toThrow()
+    const prompt = buildResearchPrompt({
+      bump: { ...bump, dependency: '{{ref}}' },
+      evidencePaths,
+      hasNotes: true,
+      ref: 'main',
+      skill: `${skill}\nuse \${{ github.sha }}\n`,
+      template: '{{dependency}}',
+    })
+
+    expect(prompt.startsWith('{{ref}}\n')).toBe(true)
+    expect(prompt).toContain('${{ github.sha }}')
   })
 
   it('fills the real template with no unfilled token and states the hard rules', () => {
@@ -121,8 +122,11 @@ describe('buildResearchPrompt', () => {
 
     expect(prompt).not.toMatch(/\{\{\w+\}\}/)
     expect(prompt).toContain('Never edit files')
-    expect(prompt).toContain('npm diff --diff=@sentry/nextjs@9.5.0 --diff=@sentry/nextjs@10.54.0')
+    expect(prompt).toContain(
+      `npm diff --diff='@sentry/nextjs@9.5.0' --diff='@sentry/nextjs@10.54.0'`,
+    )
     expect(prompt).toContain('--cache=/tmp/audit-deps/npm-cache')
+    expect(prompt).toContain('JSON matching the schema and nothing else')
   })
 })
 
@@ -163,10 +167,23 @@ describe('parseResearchResult', () => {
     },
   )
 
-  it('rejects an unknown decision', () => {
-    expect(() => parseResearchResult({ text: validResult({ decision: 'maybe' }) })).toThrow(
-      /decision/,
-    )
+  it('rejects an unknown decision without echoing it', () => {
+    const decision = 'maybe::warning::forged'
+
+    expect(() => parseResearchResult({ text: validResult({ decision }) })).toThrow(/decision/)
+    expect(() => parseResearchResult({ text: validResult({ decision }) })).not.toThrow(/forged/)
+  })
+
+  it('rejects more than 100 filesChecked entries', () => {
+    const filesChecked = Array.from({ length: 101 }, (_, index) => `src/${index}.ts`)
+
+    expect(() => parseResearchResult({ text: validResult({ filesChecked }) })).toThrow(/100/)
+  })
+
+  it('accepts exactly 100 filesChecked entries', () => {
+    const filesChecked = Array.from({ length: 100 }, (_, index) => `src/${index}.ts`)
+
+    expect(() => parseResearchResult({ text: validResult({ filesChecked }) })).not.toThrow()
   })
 
   it('rejects decline with an empty or blank reason', () => {
