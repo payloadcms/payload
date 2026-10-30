@@ -104,3 +104,37 @@ export const checkDocumentLockStatus = async ({
     where: lockedDocumentQuery,
   })
 }
+
+/**
+ * Releases every lock held by the given users. Must run before the users themselves are deleted:
+ * SQL adapters cascade the lock's user relationship away with the user, which would otherwise
+ * leave behind a lock that belongs to no one.
+ */
+export const deleteUserDocumentLocks = async ({
+  collectionSlug,
+  ids,
+  req,
+}: {
+  collectionSlug: string
+  ids: (number | string)[]
+  req: PayloadRequest
+}): Promise<void> => {
+  const { payload } = req
+
+  if (
+    !ids.length ||
+    !payload.collections?.[lockedDocumentsCollectionSlug] ||
+    !payload.collections?.[collectionSlug]?.config?.auth
+  ) {
+    return
+  }
+
+  await payload.db.deleteMany({
+    collection: lockedDocumentsCollectionSlug,
+    // Not passing req fails on postgres
+    req: payload.db.name === 'mongoose' ? undefined : req,
+    where: {
+      and: [{ 'user.relationTo': { equals: collectionSlug } }, { 'user.value': { in: ids } }],
+    },
+  })
+}
