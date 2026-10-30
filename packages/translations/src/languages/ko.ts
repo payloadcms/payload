@@ -520,6 +520,7 @@ export const koTranslations: DefaultTranslationsObject = {
     selectValue: '값 선택',
     settings: '설정',
     showAllLabel: '{{label}} 모두 표시',
+    showingCurrentOfTotal: '{{total}}개 중 {{current}}개 표시',
     shownInTable: '표에 표시됨',
     showSidebar: '사이드바 표시',
     skipToContent: '본문으로 건너뛰기',

@@ -525,6 +525,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     selectValue: 'Ընտրեք արժեք',
     settings: 'Կարգավորումներ',
     showAllLabel: 'Ցուցադրել բոլոր {{label}}-ները',
+    showingCurrentOfTotal: 'Ցուցադրվում է {{current}}-ը {{total}}-ից',
     shownInTable: 'Արտացոլված է աղյուսակում',
     showSidebar: 'Ցուցադրել կողային վահանակը',
     skipToContent: 'Անցնել բովանդակությանը',

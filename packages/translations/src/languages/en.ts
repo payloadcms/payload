@@ -523,6 +523,7 @@ export const enTranslations = {
     selectValue: 'Select a value',
     settings: 'Settings',
     showAllLabel: 'Show all {{label}}',
+    showingCurrentOfTotal: 'Showing {{current}} of {{total}}',
     shownInTable: 'Shown in table',
     showSidebar: 'Show sidebar',
     skipToContent: 'Skip to content',

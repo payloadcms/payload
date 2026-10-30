@@ -503,6 +503,7 @@ export const thTranslations: DefaultTranslationsObject = {
     selectValue: 'เลือกค่า',
     settings: 'การตั้งค่า',
     showAllLabel: 'แสดง {{label}} ทั้งหมด',
+    showingCurrentOfTotal: 'แสดง {{current}} จาก {{total}}',
     shownInTable: 'แสดงในตาราง',
     showSidebar: 'แสดงแถบด้านข้าง',
     skipToContent: 'ข้ามไปยังเนื้อหา',

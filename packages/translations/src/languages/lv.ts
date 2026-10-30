@@ -522,6 +522,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     selectValue: 'Atlasīt vērtību',
     settings: 'Iestatījumi',
     showAllLabel: 'Rādīt visus {{label}}',
+    showingCurrentOfTotal: 'Rāda {{current}} no {{total}}',
     shownInTable: 'Parādīts tabulā',
     showSidebar: 'Rādīt sānu joslu',
     skipToContent: 'Pāriet uz saturu',

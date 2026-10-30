@@ -515,6 +515,7 @@ export const taTranslations: DefaultTranslationsObject = {
     selectValue: 'ஒரு மதிப்பைத் தேர்ந்தெடு',
     settings: 'அமைப்புகள்',
     showAllLabel: 'அனைத்து {{label}}-ஐக் காட்டு',
+    showingCurrentOfTotal: '{{total}}-இல் {{current}} காட்டப்படுகிறது',
     shownInTable: 'அட்டவணையில் காண்பிக்கப்பட்டுள்ளது',
     showSidebar: 'விளைவு பட்டியலை காட்டு',
     skipToContent: 'உள்ளடக்கத்திற்குச் செல்லவும்',

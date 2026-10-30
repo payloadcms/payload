@@ -10,6 +10,7 @@
     color: var(--color-text-secondary);
     white-space: nowrap;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--spacer-1);
   }

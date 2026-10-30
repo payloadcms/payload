@@ -524,6 +524,7 @@ export const svTranslations: DefaultTranslationsObject = {
     selectValue: 'Välj ett värde',
     settings: 'Inställningar',
     showAllLabel: 'Visa alla {{label}}',
+    showingCurrentOfTotal: 'Visar {{current}} av {{total}}',
     shownInTable: 'Visas i tabell',
     showSidebar: 'Visa sidofält',
     skipToContent: 'Hoppa till innehåll',

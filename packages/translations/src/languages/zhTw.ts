@@ -496,6 +496,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     selectValue: '請選取一個值',
     settings: '設定',
     showAllLabel: '顯示所有 {{label}}',
+    showingCurrentOfTotal: '已顯示 {{current}} 筆，共 {{total}} 筆',
     shownInTable: '以表格方式顯示',
     showSidebar: '顯示側邊欄',
     skipToContent: '跳至內容',
