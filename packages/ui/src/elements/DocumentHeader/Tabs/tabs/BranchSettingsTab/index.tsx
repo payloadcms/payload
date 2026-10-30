@@ -20,14 +20,16 @@ export const BranchSettingsTab: React.FC<{ path?: string } & DocumentTabServerPr
   path,
   req,
 }) => (
-  <DocumentTabLink
-    adminRoute={req.payload.config.routes.admin}
-    ariaLabel={req.i18n.t('branching:branchSettings')}
-    baseClass={baseClass}
-    href={path ?? '/manage'}
-  >
-    <span className={`${baseClass}__label`}>
-      <GearIcon />
-    </span>
-  </DocumentTabLink>
+  <li>
+    <DocumentTabLink
+      adminRoute={req.payload.config.routes.admin}
+      ariaLabel={req.i18n.t('branching:branchSettings')}
+      baseClass={baseClass}
+      href={path ?? '/manage'}
+    >
+      <span className={`${baseClass}__label`}>
+        <GearIcon />
+      </span>
+    </DocumentTabLink>
+  </li>
 )

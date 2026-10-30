@@ -113,6 +113,9 @@
     z-index: 1;
     flex: 0 1 auto;
     margin-inline-end: auto;
+    margin-block: calc(-1 * var(--spacer-1));
+    padding-block: var(--spacer-1);
+    min-inline-size: var(--spacer-4);
     pointer-events: all;
     color: var(--color-text);
 
