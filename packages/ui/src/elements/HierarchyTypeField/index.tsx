@@ -24,9 +24,7 @@ export const HierarchyTypeField: React.FC<HierarchyTypeFieldProps> = ({
     field,
     field: {
       name,
-      admin: { className, isClearable = true, isSortable = true, placeholder } = {} as NonNullable<
-        SelectFieldClientProps['field']['admin']
-      >,
+      admin: { className, isClearable = true, isSortable = true, placeholder } = {},
       hasMany = false,
       label,
       localized,

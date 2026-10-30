@@ -101,10 +101,26 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
     })
 
     test('should sort by multiple fields', async ({ payload, restClient }) => {
-      const doc1 = await payload.create({ collection: 'sort', data: { title: 'a', number: 1 }, overrideAccess: true })
-      const doc2 = await payload.create({ collection: 'sort', data: { title: 'b', number: 1 }, overrideAccess: true })
-      const doc3 = await payload.create({ collection: 'sort', data: { title: 'a', number: 2 }, overrideAccess: true })
-      const doc4 = await payload.create({ collection: 'sort', data: { title: 'b', number: 3 }, overrideAccess: true })
+      const doc1 = await payload.create({
+        collection: 'sort',
+        data: { title: 'a', number: 1 },
+        overrideAccess: true,
+      })
+      const doc2 = await payload.create({
+        collection: 'sort',
+        data: { title: 'b', number: 1 },
+        overrideAccess: true,
+      })
+      const doc3 = await payload.create({
+        collection: 'sort',
+        data: { title: 'a', number: 2 },
+        overrideAccess: true,
+      })
+      const doc4 = await payload.create({
+        collection: 'sort',
+        data: { title: 'b', number: 3 },
+        overrideAccess: true,
+      })
 
       const query = `query {
         Sorts(sort: "title, number") {
@@ -1177,7 +1193,11 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
           overrideAccess: true,
         })
 
-        await payload.delete({ collection: 'relation', id: relation_1_draft.id, overrideAccess: true })
+        await payload.delete({
+          collection: 'relation',
+          id: relation_1_draft.id,
+          overrideAccess: true,
+        })
 
         const query = `query {
           Posts(draft:true,where: { title: { equals: "post with relations in draft" }}) {
@@ -1462,9 +1482,7 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
       expect(errors[2].message).toEqual('The following field is invalid: Email')
       expect(errors[2].path[0]).toEqual('test4')
       expect(errors[2].extensions.name).toEqual('ValidationError')
-      expect(errors[2].extensions.data.errors[0].message).toEqual(
-        'Please enter a valid email address.',
-      )
+      expect(errors[2].extensions.data.errors[0].message).toEqual('This field is required.')
       expect(errors[2].extensions.data.errors[0].path).toEqual('email')
     })
 

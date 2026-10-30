@@ -212,7 +212,11 @@ export const email: EmailFieldValidation = (
   const emailRegex =
     /^(?!.*\.\.)[\w!#$%&'*+/=?^`{|}~-](?:[\w!#$%&'*+/=?^`{|}~.-]*[\w!#$%&'*+/=?^`{|}~-])?@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
 
-  if ((value && !emailRegex.test(value)) || (!value && required)) {
+  if (!value && required) {
+    return t('validation:required')
+  }
+
+  if (value && !emailRegex.test(value)) {
     return t('validation:emailAddress')
   }
 
@@ -388,7 +392,7 @@ export const date: DateFieldValidation = (
   }
 
   if (value) {
-    return t('validation:notValidDate', { value })
+    return t('validation:notValidDate', { value: String(value) })
   }
 
   if (required) {
@@ -482,11 +486,11 @@ export const number: NumberFieldValidation = (
     const numberValue = parseFloat(number as unknown as string)
 
     if (typeof max === 'number' && numberValue > max) {
-      return t('validation:greaterThanMax', { label: t('general:value'), max, value })
+      return t('validation:greaterThanMax', { label: t('general:value'), max, value: numberValue })
     }
 
     if (typeof min === 'number' && numberValue < min) {
-      return t('validation:lessThanMin', { label: t('general:value'), min, value })
+      return t('validation:lessThanMin', { label: t('general:value'), min, value: numberValue })
     }
   }
 

@@ -293,6 +293,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     and: 'і',
     anotherUser: 'Інший користувач',
     anotherUserTakenOver: 'Інший користувач взяв на себе редагування цього документа.',
+    apiResponse: 'Відповідь API',
     applyChanges: 'Застосувати зміни',
     ascending: 'В порядку зростання',
     auto: 'Авто',
@@ -362,6 +363,13 @@ export const ukTranslations: DefaultTranslationsObject = {
     documentModified: 'Документ змінено',
     documentOutOfDate: 'Цей документ нещодавно оновив інший користувач. Ваш перегляд застарів.',
     documents: 'Документи',
+    dragCancelled: 'Перетягування {{label}} скасовано.',
+    dragDropped: '{{label}} відпущено. Позиція {{position}} із {{count}}.',
+    dragInstructions:
+      'Натисніть Space або Enter, щоб захопити рядок. Використовуйте стрілки для переміщення. З VoiceOver вимкніть Quick Nav і використовуйте Command + стрілки. Натисніть Space або Enter, щоб відпустити, або Escape, щоб скасувати.',
+    dragMoved: '{{label}}: {{direction}}. Позиція {{position}} із {{count}}.',
+    dragPickedUp: '{{label}} захоплено. Позиція {{position}} із {{count}}.',
+    dragToMove: 'Перетягніть для переміщення',
     dragToReorder: 'Перетягніть, щоб змінити порядок',
     duplicate: 'Дублювати',
     duplicateWithoutSaving: 'Дублювання без збереження змін',
@@ -476,6 +484,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Перебудова індексів для всіх {{collections}}.',
     reloadDocument: 'Перезавантажити документ',
     remove: 'Видалити',
+    removeFilter: 'Видалити фільтр',
     rename: 'Перейменувати',
     replaceRow: 'Замінити рядок',
     requiredFields: 'Поля, позначені *, є обов’язковими.',
@@ -567,6 +576,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     yes: 'Так',
   },
   hierarchy: {
+    folderLocation: 'Розташування папки',
     goTo: 'Перейти до "{{name}}"',
     itemsMovedTo: '{{title}} перейшов до {{destination}}',
     itemsMovedToRoot: '{{title}} переміщено в корінь',
@@ -702,6 +712,10 @@ export const ukTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Ви бажаєте опублікувати всі {{label}} у вибірці. Ви впевнені?',
     aboutToRestore:
       'Ви бажаєте відновити цей документ {{label}} до стану, в якому він знаходився {{versionDate}}. Ви впевнені?',
+    aboutToRestoreAsDraft:
+      'Відновіть вміст від {{versionDate}} як чернетку. Опублікований вміст залишатиметься незмінним, доки ви не опублікуєте його з редактора.',
+    aboutToRestoreAsDraftAllLocales:
+      'Відновіть вміст від {{versionDate}} як чернетку для всіх мовних версій. Опублікований вміст залишатиметься незмінним, доки ви не опублікуєте його з редактора.',
     aboutToRestoreGlobal:
       'Ви бажаєте відновити глобальний запис {{label}} до стану, в якому він знаходився {{versionDate}}. Ви впевнені?',
     aboutToRevertToPublished:

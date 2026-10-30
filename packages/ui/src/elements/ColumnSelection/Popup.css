@@ -151,7 +151,7 @@
 
     &:focus-visible {
       outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
-      outline-offset: calc(-1 * var(--accessibility-outline-offset));
+      outline-offset: var(--accessibility-outline-inset);
     }
   }
 
@@ -189,7 +189,7 @@
     &:focus-visible {
       opacity: 1;
       outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
-      outline-offset: calc(-1 * var(--accessibility-outline-offset));
+      outline-offset: var(--accessibility-outline-inset);
     }
 
     &:active {
@@ -228,5 +228,9 @@
     height: var(--stroke-width-medium);
     background: var(--color-icon);
     margin-inline: var(--spacer-3);
+  }
+
+  html[data-enhanced-contrast] .column-selector__search-bar {
+    outline: var(--stroke-width-small) solid var(--color-border-control);
   }
 }

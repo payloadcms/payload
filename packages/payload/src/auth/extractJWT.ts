@@ -48,6 +48,24 @@ const extractionMethods: Record<string, ExtractionMethod> = {
       return cookieToken
     }
 
+    // Sec-Fetch-Site is omitted by browsers for same-origin navigations over plain HTTP on
+    // non-localhost hosts (it is only sent to potentially trustworthy origins). Its absence is
+    // therefore inconclusive rather than cross-site — fall back to validating the Referer
+    // header's origin against the same csrf allowlist.
+    if (!secFetchSite) {
+      const referer = headers.get('Referer')
+
+      if (referer) {
+        try {
+          if (payload.config.csrf.includes(new URL(referer).origin)) {
+            return cookieToken
+          }
+        } catch {
+          // Malformed Referer — fall through to reject
+        }
+      }
+    }
+
     // Reject cross-site requests and missing header (non-browser clients)
     return null
   },

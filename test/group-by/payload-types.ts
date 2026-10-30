@@ -198,6 +198,10 @@ export interface Post {
   checkbox?: boolean | null;
   date?: string | null;
   tab1Field?: string | null;
+  meta?: {
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+  };
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -505,6 +509,12 @@ export interface PostsSelect<T extends boolean = true> {
   checkbox?: T;
   date?: T;
   tab1Field?: T;
+  meta?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+      };
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

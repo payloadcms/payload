@@ -32,6 +32,8 @@ import {
   apiKeysSlug,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
+  passwordCustomValidateSlug,
+  passwordMinLengthSlug,
   preferencesSlug,
   publicUsersSlug,
   rotateSecretLoginSlug,
@@ -357,6 +359,54 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         expect(updatedUser?.salt).not.toBe(existingSalt)
       })
 
+      test('should rehash a 100k password hash to 600k after login', async ({ payload }) => {
+        const testEmail = '100k-password-hash@example.com'
+        const testPassword = 'test-password'
+        const existingSalt = crypto.randomBytes(32).toString('hex')
+        const existingHash = `pbkdf2-sha256-100k-v1:${crypto
+          .pbkdf2Sync(testPassword, existingSalt, 100000, 32, 'sha256')
+          .toString('hex')}`
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+          overrideAccess: true,
+        })
+        createdUserIDs.push(user.id)
+
+        await payload.db.updateOne({
+          id: user.id,
+          collection: slug,
+          data: {
+            hash: existingHash,
+            salt: existingSalt,
+          },
+        })
+
+        await payload.login({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+          overrideAccess: true,
+        })
+
+        const updatedUser = await payload.db.findOne({
+          collection: slug,
+          select: {
+            hash: true,
+          },
+          where: {
+            id: { equals: user.id },
+          },
+        })
+
+        expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v1:[a-f0-9]{64}$/)
+      })
+
       test('should preserve a password changed during login', async ({ payload }) => {
         const testEmail = 'password-change-during-login@example.com'
         const testPassword = 'test-password'
@@ -628,7 +678,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       try {
         traverseFields({ fields: [], fillEmpty: false, ref: sharedData })
         transformForWrite({
-          adapter: payload.db as DrizzleAdapter,
+          adapter: payload.db,
           data: drizzleData,
           fields: [],
           tableName: 'session_users',
@@ -2539,6 +2589,91 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       ).rejects.toThrow('Token is either invalid or has expired.')
     })
 
+    test.describe('reset password with a password field override', () => {
+      const userEmail = 'password-override@payloadcms.com'
+
+      test.afterEach(async ({ payload }) => {
+        for (const collection of [passwordMinLengthSlug, passwordCustomValidateSlug] as const) {
+          await payload.delete({
+            collection,
+            overrideAccess: true,
+            where: { email: { equals: userEmail } },
+          })
+        }
+      })
+
+      test('should reject a new password shorter than the field minLength', async ({ payload }) => {
+        await payload.create({
+          collection: passwordMinLengthSlug,
+          data: { email: userEmail, password: 'longenough1' },
+          overrideAccess: true,
+        })
+
+        const token = await payload.forgotPassword({
+          collection: passwordMinLengthSlug,
+          data: { email: userEmail },
+          disableEmail: true,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.resetPassword({
+            collection: passwordMinLengthSlug,
+            data: { password: 'abc', token },
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('The following field is invalid: password')
+      })
+
+      test('should reject a new password that fails the field custom validate', async ({
+        payload,
+      }) => {
+        await payload.create({
+          collection: passwordCustomValidateSlug,
+          data: { email: userEmail, password: 'hasnumber1' },
+          overrideAccess: true,
+        })
+
+        const token = await payload.forgotPassword({
+          collection: passwordCustomValidateSlug,
+          data: { email: userEmail },
+          disableEmail: true,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.resetPassword({
+            collection: passwordCustomValidateSlug,
+            data: { password: 'nonumber', token },
+            overrideAccess: true,
+          }),
+        ).rejects.toThrow('The following field is invalid: password')
+      })
+
+      test('should accept a new password that meets the field minLength', async ({ payload }) => {
+        await payload.create({
+          collection: passwordMinLengthSlug,
+          data: { email: userEmail, password: 'longenough1' },
+          overrideAccess: true,
+        })
+
+        const token = await payload.forgotPassword({
+          collection: passwordMinLengthSlug,
+          data: { email: userEmail },
+          disableEmail: true,
+          overrideAccess: true,
+        })
+
+        const reset = await payload.resetPassword({
+          collection: passwordMinLengthSlug,
+          data: { password: 'longenough2', token },
+          overrideAccess: true,
+        })
+
+        expect(reset.user.email).toBe(userEmail)
+      })
+    })
+
     test.describe('Login Attempts', () => {
       const createdLoginAttemptUsers: Array<{
         collection: typeof publicUsersSlug | typeof slug
@@ -3074,7 +3209,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       expect(decodedRefreshed.sid).toStrictEqual(decoded.sid)
 
       expect(new Date(matchedSession?.expiresAt as unknown as string).getTime()).toBeLessThan(
-        new Date(matchedRefreshedSession?.expiresAt as unknown as string).getTime(),
+        new Date(matchedRefreshedSession?.expiresAt).getTime(),
       )
     })
 
