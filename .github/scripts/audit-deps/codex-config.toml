@@ -25,3 +25,4 @@ enabled = true
 PNPM_HOME = "/tmp/audit-deps/pnpm-home"
 XDG_CACHE_HOME = "/tmp/audit-deps/cache"
 XDG_DATA_HOME = "/tmp/audit-deps/data"
+npm_config_cache = "/tmp/audit-deps/npm-cache"

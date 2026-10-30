@@ -272,6 +272,7 @@ describe('assets', () => {
     expect(toml.match(/= "write"/g)).toHaveLength(1)
     expect(toml).toContain('"/tmp/audit-deps" = "write"')
     expect(toml).toContain('PNPM_HOME = "/tmp/audit-deps/pnpm-home"')
+    expect(toml).toContain('npm_config_cache = "/tmp/audit-deps/npm-cache"')
     for (const host of [
       'registry.npmjs.org',
       'github.com',

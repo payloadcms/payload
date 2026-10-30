@@ -49,15 +49,19 @@ Record each repo path you read in `filesChecked`.
 
 ### Engines and peers
 
-- Node: get the target's requirement with `npm view <dependency>@<to> engines --json`. Compare `engines.node` with `engines.node` in the repo root `package.json`. A target that excludes any Node version we support is a new unmet runtime requirement.
-- Peers: get `npm view <dependency>@<to> peerDependencies --json` and compare with `@<from>`. For each new or changed peer range, check what we declare or install. An unmet range is a new unmet runtime requirement.
+Every npm command uses `--cache=/tmp/audit-deps/npm-cache`. The default cache is not writable.
+
+- Node: get the target's requirement with `npm view <dependency>@<to> engines --json --cache=/tmp/audit-deps/npm-cache`. Compare `engines.node` with `engines.node` in the repo root `package.json`. A target that excludes any Node version we support is a new unmet runtime requirement.
+- Peers: get `npm view <dependency>@<to> peerDependencies --json --cache=/tmp/audit-deps/npm-cache` and compare with `@<from>`. For each new or changed peer range, check what we declare or install. An unmet range is a new unmet runtime requirement.
 - ESM-only: if the target drops CommonJS and any of our code `require`s it, that is a new unmet requirement.
 
 ## Non-major: Pin History
 
 A non-major bump on `consumer-facing` scope appears only when the dependency is an exact pin. A pin can exist because a minor release broke us before.
 
-Read the pin history file. If a commit message or diff shows the pin exists to avoid this range (for example, "pin X to avoid 2.4 regression"), decline.
+The pin history file is `git log -L` output for the manifest line, with one `## <file>:<line>` section per manifest. It may be cut. A cut file or "No history." is not a reason to decline on its own.
+
+Read it. If a commit message or diff shows the pin exists to avoid this range (for example, "pin X to avoid 2.4 regression"), decline.
 
 ## Decision
 
@@ -85,6 +89,8 @@ Your final message is one JSON object that matches the schema, and nothing else.
 | `filesChecked`    | Repo paths you read to judge our usage.                                                                    |
 | `reason`          | Required and non-empty for `decline`. May be an empty string for `apply`.                                  |
 
+Parser limits: at most 30 `breakingChanges`, at most 100 `filesChecked`, and at most 4,000 characters per string. Summarize. List only changes that matter. Use `[]` when there are none.
+
 Apply example:
 
 ```json
@@ -93,10 +99,10 @@ Apply example:
   "breakingChanges": [
     {
       "change": "Default `timeout` changed from 0 to 30000 ms",
-      "ourUsage": "We always pass `timeout` explicitly in packages/payload/src/utilities/fetch.ts"
+      "ourUsage": "We always pass `timeout` explicitly in <path in repo>:<line>"
     }
   ],
-  "filesChecked": ["packages/payload/src/utilities/fetch.ts", "package.json"],
+  "filesChecked": ["<path in repo>", "package.json"],
   "reason": ""
 }
 ```
@@ -109,10 +115,10 @@ Decline example:
   "breakingChanges": [
     {
       "change": "Option `legacyMode` was removed",
-      "ourUsage": "We pass `legacyMode: true` in packages/db-mongodb/src/connect.ts"
+      "ourUsage": "We pass `legacyMode: true` in <path in repo>:<line>"
     }
   ],
-  "filesChecked": ["packages/db-mongodb/src/connect.ts"],
+  "filesChecked": ["<path in repo>"],
   "reason": "Removed option `legacyMode` is in use; a source change is needed."
 }
 ```
@@ -121,21 +127,28 @@ Decline example:
 
 You do not apply bumps. These rules explain what our code does after you say `apply`, so you can judge the real effect.
 
-- **Specifier style stays.** An exact pin stays exact (`7.28.0` to `7.29.0`), `^` stays `^`, `~` stays `~`. Never `>=`. Any other specifier is a failure for that bump.
+- **Specifier style stays.** An exact pin stays exact (`7.28.0` to `7.29.0`), `^` stays `^`, `~` stays `~`. Never `>=`. Any other specifier is a failure for that bump. Our code handles this; do not decline for it.
 - **`catalog:` specs** edit the `catalog` entry in `pnpm-workspace.yaml`, not the manifest.
 - **Every manifest** that declares the dependency moves to the same target.
 - **Scope rule:** on `consumer-facing` scope, the audit resolves each published package's `dependencies` fresh and ignores our lockfile and overrides. Only published `dependencies` matter there. Consumers do not inherit our overrides, so an override or relock never counts as a fix.
 
-## Running the Audit Locally
+## Local use only (a person runs this; never in CI)
 
-To see which bumps exist, run the audit action (`high` includes `critical`):
+A person runs the package script, not Codex. It shows which bumps exist (`high` includes `critical`):
 
 ```bash
-pnpm script:audit:deps:consumer --severity=high --json=audit_output.json
-pnpm script:audit:deps:monorepo --severity=high --json=audit_output.json
+mkdir -p /tmp/audit-deps
+pnpm script:audit:deps:consumer --severity=high --json=/tmp/audit-deps/audit_output.json
+pnpm script:audit:deps:monorepo --severity=high --json=/tmp/audit-deps/audit_output.json
 ```
 
 Exit code 0 means clean, 1 means findings, 2 means an input or config error. Pick one bump from `plan.actions` and review it as above. The audit output is data too.
+
+Without CI evidence files, make them yourself:
+
+- `kind` is `major` when the major version changes, else `non-major`.
+- Release notes: find the source with `npm view <dependency>@<to> repository --json --cache=/tmp/audit-deps/npm-cache`. The source repo can move between majors, and `directory` marks a monorepo package.
+- Pin history (non-major): run `git log --no-color -L<line>,<line>:<manifest>` on the dependency's line. For a `catalog:` spec, use the line in `pnpm-workspace.yaml`.
 
 ## Common Mistakes
 
