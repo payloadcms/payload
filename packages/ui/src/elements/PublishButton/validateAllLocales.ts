@@ -18,6 +18,7 @@ import { requests } from '../../utilities/api.js'
 
 type DocumentValidationRequestArgs = {
   body: Data
+  branch?: string
   endpoint: string
   locales: string[]
   signal?: AbortSignal
@@ -52,6 +53,7 @@ function projectValidationDataForSiblingLocales({
 export async function validateDocumentLocales({
   activeLocale,
   blocksMap,
+  branch,
   data,
   endpoint,
   fields,
@@ -60,6 +62,7 @@ export async function validateDocumentLocales({
 }: {
   activeLocale: string
   blocksMap: Record<string, ClientBlock>
+  branch?: string
   data: Data
   endpoint: string
   fields: ClientField[]
@@ -77,6 +80,7 @@ export async function validateDocumentLocales({
     validationResults.push(
       await requestDocumentValidation({
         body: data,
+        branch,
         endpoint,
         locales: [activeLocale],
         signal,
@@ -94,6 +98,7 @@ export async function validateDocumentLocales({
           data,
           fields,
         }),
+        branch,
         endpoint,
         locales: siblingLocales,
         signal,
@@ -111,12 +116,13 @@ export async function validateDocumentLocales({
 
 async function requestDocumentValidation({
   body,
+  branch,
   endpoint,
   locales,
   signal,
 }: DocumentValidationRequestArgs): Promise<ValidationResult> {
   const query = qs.stringify(
-    { locale: locales },
+    { branch, locale: locales },
     {
       addQueryPrefix: true,
       arrayFormat: 'repeat',

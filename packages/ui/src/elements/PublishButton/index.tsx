@@ -181,6 +181,7 @@ export function PublishButton({
         validation = await validateDocumentLocales({
           activeLocale: localeCode,
           blocksMap,
+          branch,
           data: { ...getData(), _status: 'published' },
           endpoint: formatAdminURL({ apiRoute: api, path: validationPath }),
           fields: entityConfig?.fields ?? [],
