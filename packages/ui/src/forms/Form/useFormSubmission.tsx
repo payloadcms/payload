@@ -56,97 +56,101 @@ export const useFormSubmission = ({
   const {
     action,
     beforeSubmit,
-    disabled: disabledFromProps,
+    disabled: isDisabledFromProps,
     disableSuccessStatus,
     disableValidationOnSubmit,
     handleResponse,
     onSubmit,
     onSuccess,
     redirect,
-    submitted: submittedFromProps,
+    submitted: isSubmittedFromProps,
     waitForAutocomplete,
   } = props
-  const method = 'method' in props ? props?.method : undefined
+
   const { docConfig } = useDocumentInfo()
-  const validateDrafts = hasDraftValidationEnabled(docConfig)
   const router = useRouter()
   const { startRouteTransition } = useRouteTransition()
   const { i18n, t } = useTranslation()
   const onNonFieldError = useFormErrorHandler()
 
-  /**
-   * A ref that can be read within the `setModified` interceptor.
-   * Dependents of this state can read it immediately without needing to wait for a render cycle.
-   */
-  const backgroundProcessingRef = useRef(false)
+  const [isModified, _setModified] = useState(false)
 
-  /**
-   * Flag to track if the form was modified _during a submission_, e.g. while autosave is running.
-   * Useful in order to avoid resetting `modified` to false wrongfully after a submit.
-   * For example, if the user modifies a field while the a background process (autosave) is running,
-   * we need to ensure that after the submit completes, the `modified` state remains true.
-   */
-  const modifiedWhileProcessingRef = useRef(false)
+  const [isDisabled, setDisabled] = useState(isDisabledFromProps || false)
 
-  const [modified, _setModified] = useState(false)
-
-  /**
-   * Intercept the `setModified` method to track whether the event happened during background processing.
-   * See the `modifiedWhileProcessingRef` ref for more details.
-   */
-  const setModified = useCallback((modified: boolean) => {
-    if (backgroundProcessingRef.current) {
-      modifiedWhileProcessingRef.current = true
-    }
-
-    _setModified(modified)
-  }, [])
-
-  const latestExplicitSubmitRef = useRef<Promise<boolean> | undefined>(undefined)
-  const unmountedRequestScopeRef = useRef<unknown>(undefined)
-
-  useEffect(() => {
-    unmountedRequestScopeRef.current = undefined
-
-    return () => {
-      // Capture the active scope before Form's unmount cleanup resets the queue.
-      unmountedRequestScopeRef.current = requestScopeRef.current
-    }
-  }, [requestScopeRef])
-
-  const [disabled, setDisabled] = useState(disabledFromProps || false)
-
-  const [submitted, setSubmitted] = useState(false)
+  const [isSubmitted, setSubmitted] = useState(false)
 
   const [successfulSubmitCount, setSuccessfulSubmitCount] = useState(0)
 
-  const [processing, setProcessing] = useState(false)
+  const [isProcessing, setProcessing] = useState(false)
 
   /**
    * Determines whether the form is processing asynchronously in the background, e.g. autosave is running.
    * Useful to determine whether to disable the form or queue other processes while in flight, e.g. disable manual submits while an autosave is running.
    */
-  const [backgroundProcessing, _setBackgroundProcessing] = useState(false)
+  const [isBackgroundProcessing, _setBackgroundProcessing] = useState(false)
+
+  /**
+   * A ref that can be read within the `setModified` interceptor.
+   * Dependents of this state can read it immediately without needing to wait for a render cycle.
+   */
+  const isBackgroundProcessingRef = useRef(false)
+
+  /**
+   * Flag to track if the form was modified _during a submission_, e.g. while autosave is running.
+   * Useful in order to avoid resetting `isModified` to false wrongfully after a submit.
+   * For example, if the user modifies a field while the a background process (autosave) is running,
+   * we need to ensure that after the submit completes, the `isModified` state remains true.
+   */
+  const isModifiedWhileProcessing = useRef(false)
+
+  const latestExplicitSubmit = useRef<Promise<boolean> | undefined>(undefined)
+  const requestAtUnmount = useRef<unknown>(undefined)
+  const submitFocus = useRef<HTMLElement | null>(null)
+  const isDisabledFromPropsRef = useRef(isDisabledFromProps)
+
+  isDisabledFromPropsRef.current = isDisabledFromProps
+
+  const method = 'method' in props ? props?.method : undefined
+  const validateDrafts = hasDraftValidationEnabled(docConfig)
+
+  /**
+   * Intercept the `setModified` method to track whether the event happened during background processing.
+   * See the `isModifiedWhileProcessing` ref for more details.
+   */
+  const setModified = useCallback((isModified: boolean) => {
+    if (isBackgroundProcessingRef.current) {
+      isModifiedWhileProcessing.current = true
+    }
+
+    _setModified(isModified)
+  }, [])
+
+  useEffect(() => {
+    requestAtUnmount.current = undefined
+
+    return () => {
+      // Capture the active scope before Form's unmount cleanup resets the queue.
+      requestAtUnmount.current = requestScopeRef.current
+    }
+  }, [requestScopeRef])
 
   /**
    * Intercept the `setBackgroundProcessing` method to keep the ref in sync.
-   * See the `backgroundProcessingRef` for more details.
+   * See the `isBackgroundProcessingRef` ref for more details.
    */
-  const setBackgroundProcessing = useCallback((backgroundProcessing: boolean) => {
-    backgroundProcessingRef.current = backgroundProcessing
-    _setBackgroundProcessing(backgroundProcessing)
+  const setBackgroundProcessing = useCallback((isBackgroundProcessing: boolean) => {
+    isBackgroundProcessingRef.current = isBackgroundProcessing
+    _setBackgroundProcessing(isBackgroundProcessing)
   }, [])
 
-  const submitFocusRef = useRef<HTMLElement | null>(null)
-
   useEffect(() => {
-    if (processing) {
+    if (isProcessing) {
       return
     }
 
-    const previousFocus = submitFocusRef.current
+    const previousFocus = submitFocus.current
 
-    submitFocusRef.current = null
+    submitFocus.current = null
     if (
       previousFocus?.isConnected &&
       document.activeElement === document.body &&
@@ -155,15 +159,11 @@ export const useFormSubmission = ({
     ) {
       previousFocus.focus({ preventScroll: true })
     }
-  }, [processing])
-
-  const disabledFromPropsRef = useRef(disabledFromProps)
-
-  disabledFromPropsRef.current = disabledFromProps
+  }, [isProcessing])
 
   const restoreRequestState = useCallback(() => {
     setProcessing(false)
-    setDisabled(disabledFromPropsRef.current || false)
+    setDisabled(isDisabledFromPropsRef.current || false)
     setBackgroundProcessing(false)
   }, [setBackgroundProcessing])
 
@@ -190,7 +190,7 @@ export const useFormSubmission = ({
 
       const disableToast = disableSuccessStatusFromArgs ?? disableSuccessStatus
 
-      modifiedWhileProcessingRef.current = false
+      isModifiedWhileProcessing.current = false
 
       // create new toast promise which will resolve manually later
       let errorToast, successToast
@@ -231,7 +231,7 @@ export const useFormSubmission = ({
           const activeElement = document.activeElement
 
           // Disabling the active field drops browser focus to the body.
-          submitFocusRef.current =
+          submitFocus.current =
             activeElement instanceof HTMLElement && formRef.current?.contains(activeElement)
               ? activeElement
               : null
@@ -367,10 +367,10 @@ export const useFormSubmission = ({
             return
           }
 
-          if (res.status < 400 && !modifiedWhileProcessingRef.current) {
+          if (res.status < 400 && !isModifiedWhileProcessing.current) {
             setModified(false)
           }
-          modifiedWhileProcessingRef.current = false
+          isModifiedWhileProcessing.current = false
 
           setDisabled(false)
 
@@ -408,7 +408,7 @@ export const useFormSubmission = ({
               })
 
               if (!requestContext.isCurrent()) {
-                if (unmountedRequestScopeRef.current === successScope) {
+                if (requestAtUnmount.current === successScope) {
                   preservePromiseToast = true
                   if (!redirect && !disableToast) {
                     successToast(json.message || t('general:submissionSuccessful'))
@@ -595,7 +595,7 @@ export const useFormSubmission = ({
       })
 
       if (options?.submissionType !== 'autosave') {
-        latestExplicitSubmitRef.current = resultPromise.then(
+        latestExplicitSubmit.current = resultPromise.then(
           () => didSucceed,
           () => didSucceed,
         )
@@ -604,15 +604,15 @@ export const useFormSubmission = ({
       const result = await resultPromise
 
       if (result.status === 'superseded' && options?.submissionType === 'autosave') {
-        let explicitSubmit = latestExplicitSubmitRef.current
+        let explicitSubmit = latestExplicitSubmit.current
         let didExplicitSubmitSucceed = true
 
         while (explicitSubmit !== undefined) {
           didExplicitSubmitSucceed = await explicitSubmit
-          if (explicitSubmit === latestExplicitSubmitRef.current) {
+          if (explicitSubmit === latestExplicitSubmit.current) {
             break
           }
-          explicitSubmit = latestExplicitSubmitRef.current
+          explicitSubmit = latestExplicitSubmit.current
         }
 
         if (!didExplicitSubmitSucceed && requestScope === requestScopeRef.current) {
@@ -626,22 +626,22 @@ export const useFormSubmission = ({
   )
 
   useEffect(() => {
-    if (typeof disabledFromProps === 'boolean') {
-      setDisabled(disabledFromProps)
+    if (typeof isDisabledFromProps === 'boolean') {
+      setDisabled(isDisabledFromProps)
     }
-  }, [disabledFromProps])
+  }, [isDisabledFromProps])
 
   useEffect(() => {
-    if (typeof submittedFromProps === 'boolean') {
-      setSubmitted(submittedFromProps)
+    if (typeof isSubmittedFromProps === 'boolean') {
+      setSubmitted(isSubmittedFromProps)
     }
-  }, [submittedFromProps])
+  }, [isSubmittedFromProps])
 
   return {
-    backgroundProcessing,
-    disabled,
-    modified,
-    processing,
+    backgroundProcessing: isBackgroundProcessing,
+    disabled: isDisabled,
+    modified: isModified,
+    processing: isProcessing,
     restoreRequestState,
     setBackgroundProcessing,
     setDisabled,
@@ -649,7 +649,7 @@ export const useFormSubmission = ({
     setProcessing,
     setSubmitted,
     submit,
-    submitted,
+    submitted: isSubmitted,
     successfulSubmitCount,
   }
 }
