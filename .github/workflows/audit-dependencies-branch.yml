@@ -33,8 +33,10 @@ env:
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
-# Trusted tooling and every artifact live under $RUNNER_TEMP, outside the worktree, so a
-# patch or Codex cannot overwrite what later steps execute.
+# Trusted tooling and every artifact live under $RUNNER_TEMP, outside the worktree, so neither
+# Codex nor a bump's file changes can overwrite what later steps execute.
+# Artifacts: audit-plan-<ref> (report, plan, store), research-<ref>-<bumpId> (<bumpId>.json),
+# verify-<ref>-<unitId> (<unitId>.json), pr-<ref>-<unitId> (<unitId>.json).
 jobs:
   precheck:
     runs-on: ubuntu-26.04
@@ -43,11 +45,11 @@ jobs:
       pull-requests: read
     outputs:
       base_sha: ${{ steps.base.outputs.sha }}
-      fixable: ${{ steps.summarize.outputs.fixable }}
-      has_findings: ${{ steps.summarize.outputs.has_findings }}
-      has_foreign_commits: ${{ steps.decide.outputs.has_foreign_commits }}
-      next_step: ${{ steps.decide.outputs.next_step }}
-      pr_number: ${{ steps.decide.outputs.pr_number }}
+      open_pr_matrix: ${{ steps.decide.outputs.open_pr_matrix }}
+      research_matrix: ${{ steps.decide.outputs.research_matrix }}
+      stale_prs: ${{ steps.decide.outputs.stale_prs }}
+      unit_steps: ${{ steps.decide.outputs.unit_steps }}
+      verify_matrix: ${{ steps.decide.outputs.verify_matrix }}
     steps:
       - name: Checkout ${{ inputs.ref }}
         uses: actions/checkout@v5
@@ -82,57 +84,87 @@ jobs:
 
       - name: Run audit dependencies action
         uses: ./.github/actions/audit-dependencies
-        # Findings exit non-zero; the summarize step validates the report instead.
+        # Findings exit non-zero; the plan step validates the report instead.
         continue-on-error: true
         with:
           scope: ${{ inputs.scope }}
           severity: ${{ inputs.severity }}
           json: ${{ runner.temp }}/audit_output.json
 
-      - name: Summarize findings
-        id: summarize
-        env:
-          SCOPE: ${{ inputs.scope }}
-        run: >-
-          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" summarize
-          --report="$RUNNER_TEMP/audit_output.json"
-          --scope="$SCOPE"
+      # Each run saves a new key, so the prefix restores the newest store for this ref.
+      - name: Restore decision store
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ runner.temp }}/audit-deps-store
+          key: audit-deps-store-${{ inputs.ref }}-${{ github.run_id }}
+          restore-keys: audit-deps-store-${{ inputs.ref }}-
 
-      - name: Decide next step
+      - name: Plan bumps and units
+        env:
+          REF: ${{ inputs.ref }}
+          SCOPE: ${{ inputs.scope }}
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/audit-plan"
+          store="$RUNNER_TEMP/audit-deps-store/store.json"
+          mkdir -p "$out"
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" plan \
+            --report="$RUNNER_TEMP/audit_output.json" \
+            --scope="$SCOPE" \
+            --ref="$REF" \
+            --store="$store" \
+            --cwd="$GITHUB_WORKSPACE" \
+            --out="$out/plan.json"
+          cp "$RUNNER_TEMP/audit_output.json" "$out/audit_output.json"
+          if [ -f "$store" ]; then
+            cp "$store" "$out/store.json"
+          fi
+
+      - name: Decide unit steps
         id: decide
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          FIXABLE: ${{ steps.summarize.outputs.fixable }}
           IS_DEFAULT_INPUTS: ${{ inputs.is-default-inputs }}
           REF: ${{ inputs.ref }}
         with:
           github-token: ${{ github.token }}
           script: |
+            const { readFile } = await import('node:fs/promises')
             const { runPrecheck } = await import(
               `${process.env.RUNNER_TEMP}/audit-deps-tooling/.github/scripts/audit-deps/github.mjs`
             )
 
+            const plan = JSON.parse(
+              await readFile(`${process.env.RUNNER_TEMP}/audit-plan/plan.json`, 'utf8'),
+            )
+
             await runPrecheck({
               core,
-              fixable: JSON.parse(process.env.FIXABLE),
               github,
               isDefaultInputs: process.env.IS_DEFAULT_INPUTS === 'true',
               owner: context.repo.owner,
+              plan,
               ref: process.env.REF,
               repo: context.repo.repo,
             })
 
-      - name: Upload audit report
+      - name: Upload plan
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: audit-report-${{ inputs.ref }}
-          path: ${{ runner.temp }}/audit_output.json
+          name: audit-plan-${{ inputs.ref }}
+          path: ${{ runner.temp }}/audit-plan
           if-no-files-found: error
           retention-days: 7
 
-  fix:
+  research:
+    name: research (${{ matrix.bumpId }})
     needs: precheck
-    if: contains(fromJSON('["create","update","dry-run"]'), needs.precheck.outputs.next_step)
+    if: needs.precheck.outputs.research_matrix != '[]'
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include: ${{ fromJSON(needs.precheck.outputs.research_matrix) }}
     # codex-action drop-sudo fails on ubuntu-26.04: https://github.com/openai/codex-action/issues/188
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -140,13 +172,14 @@ jobs:
     environment: audit-deps
     permissions:
       contents: read
-    outputs:
-      has_patch: ${{ steps.patch.outputs.has_patch }}
     steps:
+      # Evidence runs `git log -L` on the pinned line, so the full history is needed.
       - name: Checkout ${{ inputs.ref }}
         uses: actions/checkout@v5
         with:
           ref: ${{ needs.precheck.outputs.base_sha }}
+          fetch-depth: 0
+          filter: blob:none
           persist-credentials: false
 
       # Codex reads its inputs from .audit-deps/; this keeps them out of its git status.
@@ -171,32 +204,44 @@ jobs:
           # Untrusted code runs in this job; a post-job cache save would publish a store it could alter.
           pnpm-restore-cache: false
 
-      - name: Download audit report
+      - name: Download plan
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: audit-report-${{ inputs.ref }}
-          path: .audit-deps
+          name: audit-plan-${{ inputs.ref }}
+          path: ${{ runner.temp }}/audit-plan
+
+      # The read-only token only raises GitHub API rate limits; Codex never sees it.
+      - name: Fetch evidence
+        env:
+          BUMP_ID: ${{ matrix.bumpId }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" evidence
+          --plan="$RUNNER_TEMP/audit-plan/plan.json"
+          --bump="$BUMP_ID"
+          --cwd="$GITHUB_WORKSPACE"
+          --out-dir="$GITHUB_WORKSPACE/.audit-deps/evidence"
 
       - name: Build prompt
         env:
-          FIXABLE: ${{ needs.precheck.outputs.fixable }}
+          BUMP_ID: ${{ matrix.bumpId }}
           REF: ${{ inputs.ref }}
-          SCOPE: ${{ inputs.scope }}
-          SEVERITY: ${{ inputs.severity }}
         run: >-
-          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" build-prompt
-          --report=.audit-deps/audit_output.json
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" build-research-prompt
+          --plan="$RUNNER_TEMP/audit-plan/plan.json"
+          --bump="$BUMP_ID"
           --template="$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/prompt.md"
           --skill="$RUNNER_TEMP/audit-deps-tooling/.agents/skills/audit-dependencies/SKILL.md"
+          --evidence-dir="$GITHUB_WORKSPACE/.audit-deps/evidence"
           --ref="$REF"
-          --scope="$SCOPE"
-          --severity="$SEVERITY"
-          --fixable="$FIXABLE"
-          --out=.audit-deps/prompt.md
+          --out="$GITHUB_WORKSPACE/.audit-deps/prompt.md"
 
+      # /tmp/audit-deps is the only path the Codex profile can write, so it must exist first.
       - name: Write Codex config
         run: |
-          mkdir -p "$RUNNER_TEMP/codex-home"
+          set -euo pipefail
+          mkdir -p /tmp/audit-deps/npm-cache /tmp/audit-deps/pnpm-home /tmp/audit-deps/cache /tmp/audit-deps/data
+          mkdir -p "$RUNNER_TEMP/research" "$RUNNER_TEMP/codex-home"
           cp "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/codex-config.toml" "$RUNNER_TEMP/codex-home/config.toml"
           # An untrusted project skips the checkout's .codex/config.toml, which starts MCP servers
           # (`pnpm dlx @playwright/mcp@latest`) that this run must not load.
@@ -223,7 +268,7 @@ jobs:
           permission-profile: audit-deps
           codex-home: ${{ runner.temp }}/codex-home
           output-schema-file: ${{ runner.temp }}/audit-deps-tooling/.github/scripts/audit-deps/codex-output.schema.json
-          output-file: ${{ runner.temp }}/codex-result.json
+          output-file: ${{ runner.temp }}/research/${{ matrix.bumpId }}.json
           safety-strategy: drop-sudo
 
       # Runs even when Codex fails or times out, so checkout's post step never runs git on a
@@ -248,35 +293,27 @@ jobs:
           fi
           tar -C "$GITHUB_WORKSPACE" -xf "$RUNNER_TEMP/git.tar"
 
-      # The -c flags and env stay as defense in depth; diffing against HEAD also captures staged changes.
-      - name: Save patch
-        id: patch
-        env:
-          GIT_CONFIG_GLOBAL: /dev/null
-          GIT_CONFIG_NOSYSTEM: '1'
-        run: |
-          set -euo pipefail
-          git -c core.hooksPath=/dev/null -c core.fsmonitor=false -c diff.external= -c core.attributesFile=/dev/null \
-            diff HEAD --binary --no-ext-diff --no-textconv > "$RUNNER_TEMP/fix.patch"
-          if [ -s "$RUNNER_TEMP/fix.patch" ]; then
-            echo "has_patch=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_patch=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Upload fix
+      # The runner may be changed by Codex, so the result is only uploaded; later jobs validate it.
+      - name: Upload research result
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: audit-fix-${{ inputs.ref }}
-          path: |
-            ${{ runner.temp }}/fix.patch
-            ${{ runner.temp }}/codex-result.json
+          name: research-${{ inputs.ref }}-${{ matrix.bumpId }}
+          path: ${{ runner.temp }}/research/${{ matrix.bumpId }}.json
           if-no-files-found: error
           retention-days: 7
 
   verify:
-    needs: [precheck, fix]
-    if: needs.fix.outputs.has_patch == 'true'
+    name: verify (${{ matrix.unitId }})
+    needs: [precheck, research]
+    # Runs after failed research legs too; a bump without a valid result is not applied.
+    if: >-
+      !cancelled() &&
+      needs.precheck.result == 'success' &&
+      needs.precheck.outputs.verify_matrix != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.precheck.outputs.verify_matrix) }}
     runs-on: ubuntu-26.04
     permissions:
       contents: read
@@ -305,113 +342,247 @@ jobs:
           # Untrusted code runs in this job; a post-job cache save would publish a store it could alter.
           pnpm-restore-cache: false
 
-      - name: Download audit report
+      - name: Download plan
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: audit-report-${{ inputs.ref }}
-          path: ${{ runner.temp }}/audit-report
+          name: audit-plan-${{ inputs.ref }}
+          path: ${{ runner.temp }}/audit-plan
 
-      - name: Download fix
+      - name: Download research results
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: audit-fix-${{ inputs.ref }}
-          path: ${{ runner.temp }}/audit-fix
+          pattern: research-${{ inputs.ref }}-*
+          path: ${{ runner.temp }}/research
+          merge-multiple: true
 
-      - name: Check patch paths
-        run: >-
-          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" patch-guard
-          --cwd="$GITHUB_WORKSPACE"
-          --patch="$RUNNER_TEMP/audit-fix/fix.patch"
-
-      - name: Apply patch
-        run: git apply --binary "$RUNNER_TEMP/audit-fix/fix.patch"
-
-      - name: Check changed paths
-        run: >-
-          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" path-guard
-          --cwd="$GITHUB_WORKSPACE"
-
-      - name: Check manifest changes
+      # An invalid result only logs here; select-bumps drops it and the status job reports it.
+      - name: Check research results
         env:
-          SCOPE: ${{ inputs.scope }}
-        run: >-
-          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" content-guard
-          --cwd="$GITHUB_WORKSPACE"
-          --report="$RUNNER_TEMP/audit-report/audit_output.json"
-          --scope="$SCOPE"
-
-      # Proves the lockfile comes from the base lockfile plus the patched manifests, with no hand edits.
-      - name: Check lockfile regenerates cleanly
-        env:
-          SCOPE: ${{ inputs.scope }}
+          UNIT_ID: ${{ matrix.unitId }}
         run: |
           set -euo pipefail
-          cp pnpm-lock.yaml "$RUNNER_TEMP/codex-lock.yaml"
-
-          if [ "$SCOPE" = "consumer-facing" ]; then
-            git show HEAD:pnpm-lock.yaml > pnpm-lock.yaml
-            pnpm install --lockfile-only --ignore-scripts
-            if ! cmp -s "$RUNNER_TEMP/codex-lock.yaml" pnpm-lock.yaml; then
-              echo "::error::pnpm-lock.yaml differs from a regeneration of the base lockfile with the patched manifests"
-              exit 1
+          cli="$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs"
+          plan="$RUNNER_TEMP/audit-plan/plan.json"
+          jq -r --arg unit "$UNIT_ID" '.units[] | select(.id == $unit) | .bumpIds[]' "$plan" > "$RUNNER_TEMP/unit-bump-ids"
+          while IFS= read -r bump_id; do
+            result="$RUNNER_TEMP/research/$bump_id.json"
+            if [ ! -f "$result" ]; then
+              echo "No research result for $bump_id; it is not applied."
+              continue
             fi
-            exit 0
+            node "$cli" check-research --result="$result" || echo "Research result for $bump_id is invalid; it is not applied."
+          done < "$RUNNER_TEMP/unit-bump-ids"
+
+      - name: Select bumps
+        id: select
+        env:
+          UNIT_ID: ${{ matrix.unitId }}
+        run: >-
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" select-bumps
+          --plan="$RUNNER_TEMP/audit-plan/plan.json"
+          --unit="$UNIT_ID"
+          --research-dir="$RUNNER_TEMP/research"
+
+      - name: Record empty result
+        if: steps.select.outputs.bump_ids == '[]'
+        env:
+          UNIT_ID: ${{ matrix.unitId }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/verify"
+          echo '{ "passed": [], "failed": [] }' > "$RUNNER_TEMP/verify/$UNIT_ID.json"
+
+      # Records the failing step instead of failing, so a group can retry each bump alone.
+      - name: Apply bumps
+        id: prepare
+        if: steps.select.outputs.bump_ids != '[]'
+        env:
+          BUMP_IDS: ${{ steps.select.outputs.bump_ids }}
+          UNIT_STEP: ${{ fromJSON(needs.precheck.outputs.unit_steps)[matrix.unitId].step }}
+        run: |
+          set -euo pipefail
+          cli="$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs"
+          failed_step=''
+          run_step() {
+            failed_step="$1"
+            shift
+            "$@" || return 1
+            failed_step=''
+          }
+
+          run_step apply-bumps node "$cli" apply-bumps --plan="$RUNNER_TEMP/audit-plan/plan.json" --bump-ids="$BUMP_IDS" --cwd="$GITHUB_WORKSPACE" &&
+            run_step lockfile pnpm install --lockfile-only --ignore-scripts &&
+            run_step path-guard node "$cli" path-guard --cwd="$GITHUB_WORKSPACE" ||
+            true
+
+          should_preview=false
+          if [ -z "$failed_step" ] && [ "$UNIT_STEP" = dry-run ]; then
+            should_preview=true
           fi
+          echo "failed_step=$failed_step" >> "$GITHUB_OUTPUT"
+          echo "should_preview=$should_preview" >> "$GITHUB_OUTPUT"
 
-          # Relocks cannot be replayed from the base lockfile, and monorepo scope never opens a PR.
-          pnpm install --lockfile-only --ignore-scripts
-          if ! diff -q "$RUNNER_TEMP/codex-lock.yaml" pnpm-lock.yaml; then
-            echo "::error::pnpm-lock.yaml differs from a clean regeneration of the patched manifests"
-            exit 1
-          fi
-
-      # Dependency code from here on is unreviewed, so this job holds no secrets and saves no caches.
-      # It runs only after every guard passed.
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: Re-run audit (unfixable findings expected)
+      # Dry runs open no PR, so the body is previewed here, before any package script runs.
+      - name: Re-run audit without install (unfixable findings expected)
+        if: steps.prepare.outputs.should_preview == 'true'
         uses: ./.github/actions/audit-dependencies
         continue-on-error: true
         with:
           scope: ${{ inputs.scope }}
           severity: ${{ inputs.severity }}
-          json: ${{ runner.temp }}/reaudit.json
+          json: ${{ runner.temp }}/preview-audit.json
 
-      - name: Check claimed fixes
+      - name: Build PR body preview
+        id: preview
+        if: steps.prepare.outputs.should_preview == 'true'
         env:
-          FIXABLE: ${{ needs.precheck.outputs.fixable }}
+          BUMP_IDS: ${{ steps.select.outputs.bump_ids }}
+          GITHUB_TOKEN: ${{ github.token }}
+          REF: ${{ inputs.ref }}
+          SCOPE: ${{ inputs.scope }}
+          SEVERITY: ${{ inputs.severity }}
+          UNIT_ID: ${{ matrix.unitId }}
         run: >-
-          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" check-fixed
-          --report="$RUNNER_TEMP/reaudit.json"
-          --result="$RUNNER_TEMP/audit-fix/codex-result.json"
-          --fixable="$FIXABLE"
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" pr-body
+          --plan="$RUNNER_TEMP/audit-plan/plan.json"
+          --unit="$UNIT_ID"
+          --bump-ids="$BUMP_IDS"
+          --report="$RUNNER_TEMP/preview-audit.json"
+          --research-dir="$RUNNER_TEMP/research"
+          --scope="$SCOPE"
+          --severity="$SEVERITY"
+          --ref="$REF"
+          --run-url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          --cwd="$GITHUB_WORKSPACE"
+          --out="$RUNNER_TEMP/pr-body.md"
 
-      - name: Build core
-        run: pnpm run build:core
-
-      - name: Build changed packages
+      - name: Add PR body preview to job summary
+        if: steps.prepare.outputs.should_preview == 'true'
+        env:
+          IS_DRAFT: ${{ steps.preview.outputs.is_draft }}
+          TITLE: ${{ steps.preview.outputs.title }}
+          UNIT_ID: ${{ matrix.unitId }}
         run: |
           set -euo pipefail
-          git diff --name-only -z HEAD -- ':(glob)packages/*/package.json' > "$RUNNER_TEMP/changed-manifests"
-          while IFS= read -r -d '' manifest; do
-            name="$(jq -r '.name // empty' "$manifest")"
-            if [ -z "$name" ]; then
-              echo "::error::$manifest has no name"
-              exit 1
-            fi
-            pnpm turbo build --filter="$name"
-          done < "$RUNNER_TEMP/changed-manifests"
+          {
+            printf '## PR preview: %s\n\n' "$UNIT_ID"
+            printf '**Title:** %s\n\n**Draft:** %s\n\n' "$TITLE" "$IS_DRAFT"
+            cat "$RUNNER_TEMP/pr-body.md"
+            printf '\n'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Dependency code from here on is unreviewed, so this job holds no secrets and saves no caches.
+      # A group that fails retries each bump alone from a clean checkout and keeps the passing ids.
+      - name: Verify bumps
+        if: steps.select.outputs.bump_ids != '[]'
+        env:
+          BUMP_IDS: ${{ steps.select.outputs.bump_ids }}
+          PREPARE_FAILED_STEP: ${{ steps.prepare.outputs.failed_step }}
+          SCOPE: ${{ inputs.scope }}
+          SEVERITY: ${{ inputs.severity }}
+          UNIT_ID: ${{ matrix.unitId }}
+        run: |
+          set -euo pipefail
+          cli="$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs"
+          plan="$RUNNER_TEMP/audit-plan/plan.json"
+          reaudit="$RUNNER_TEMP/reaudit.json"
+          failed_step=''
+          passed='[]'
+          failed='[]'
+
+          run_step() {
+            failed_step="$1"
+            shift
+            "$@" || return 1
+            failed_step=''
+          }
+
+          # Exit 1 means other advisories remain; only a config error or a missing report fails.
+          run_audit() {
+            local code=0
+            rm -f "$reaudit"
+            INPUT_SCOPE="$SCOPE" INPUT_SEVERITY="$SEVERITY" INPUT_JSON="$reaudit" \
+              node "$GITHUB_WORKSPACE/.github/actions/audit-dependencies/dist/index.js" || code=$?
+            [ "$code" -le 1 ] && [ -s "$reaudit" ]
+          }
+
+          build_changed() {
+            local manifest name
+            pnpm run build:core || return 1
+            git diff --name-only -z HEAD -- ':(glob)packages/*/package.json' > "$RUNNER_TEMP/changed-manifests" || return 1
+            while IFS= read -r -d '' manifest; do
+              name="$(jq -r '.name // empty' "$manifest")" || return 1
+              if [ -z "$name" ]; then
+                echo "::error::$manifest has no name"
+                return 1
+              fi
+              pnpm turbo build --filter="$name" || return 1
+            done < "$RUNNER_TEMP/changed-manifests"
+          }
+
+          reset_worktree() {
+            git -c core.hooksPath=/dev/null reset -q --hard HEAD && git clean -ffdxq
+          }
+
+          prepare() {
+            run_step apply-bumps node "$cli" apply-bumps --plan="$plan" --bump-ids="$1" --cwd="$GITHUB_WORKSPACE" &&
+              run_step lockfile pnpm install --lockfile-only --ignore-scripts &&
+              run_step path-guard node "$cli" path-guard --cwd="$GITHUB_WORKSPACE"
+          }
+
+          check() {
+            run_step install pnpm install --frozen-lockfile &&
+              run_step re-audit run_audit &&
+              run_step check-cleared node "$cli" check-cleared --plan="$plan" --bump-ids="$1" --report="$reaudit" &&
+              run_step build build_changed
+          }
+
+          mapfile -t ids < <(jq -r '.[]' <<< "$BUMP_IDS")
+
+          if [ -z "$PREPARE_FAILED_STEP" ] && check "$BUMP_IDS"; then
+            passed="$BUMP_IDS"
+          elif [ "${#ids[@]}" -eq 1 ]; then
+            failed="$(jq -cn --arg id "${ids[0]}" --arg step "${PREPARE_FAILED_STEP:-$failed_step}" '[{ bumpId: $id, step: $step }]')"
+          else
+            echo "The group failed at ${PREPARE_FAILED_STEP:-$failed_step}; verifying each bump alone."
+            for bump_id in "${ids[@]}"; do
+              one="$(jq -cn --arg id "$bump_id" '[$id]')"
+              if run_step reset reset_worktree && prepare "$one" && check "$one"; then
+                passed="$(jq -c --arg id "$bump_id" '. + [$id]' <<< "$passed")"
+              else
+                failed="$(jq -c --arg id "$bump_id" --arg step "$failed_step" '. + [{ bumpId: $id, step: $step }]' <<< "$failed")"
+              fi
+            done
+          fi
+
+          jq -r '.[] | "::warning::\(.bumpId) failed at \(.step)"' <<< "$failed"
+          mkdir -p "$RUNNER_TEMP/verify"
+          jq -n --argjson passed "$passed" --argjson failed "$failed" '{ passed: $passed, failed: $failed }' > "$RUNNER_TEMP/verify/$UNIT_ID.json"
+
+      - name: Upload verify result
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: verify-${{ inputs.ref }}-${{ matrix.unitId }}
+          path: ${{ runner.temp }}/verify/${{ matrix.unitId }}.json
+          if-no-files-found: error
+          retention-days: 7
 
   open_pr:
-    needs: [precheck, fix, verify]
-    if: needs.verify.result == 'success' && contains(fromJSON('["create","update"]'), needs.precheck.outputs.next_step)
+    name: open_pr (${{ matrix.unitId }})
+    needs: [precheck, verify]
+    if: >-
+      !cancelled() &&
+      needs.precheck.result == 'success' &&
+      inputs.is-default-inputs &&
+      needs.precheck.outputs.open_pr_matrix != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.precheck.outputs.open_pr_matrix) }}
     runs-on: ubuntu-26.04
     environment: audit-deps
     permissions:
       contents: read
-    outputs:
-      pr_url: ${{ steps.cpr.outputs.pull-request-url }}
     steps:
       # create-pull-request sets its own credential from its token input, so none is persisted here.
       - name: Checkout ${{ inputs.ref }}
@@ -431,58 +602,134 @@ jobs:
           git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
           git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
 
-      - name: Download audit report
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          # This job holds the App token, so it reads no cache an untrusted job could have written.
+          pnpm-restore-cache: false
+
+      - name: Download plan
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: audit-report-${{ inputs.ref }}
-          path: ${{ runner.temp }}/audit-report
+          name: audit-plan-${{ inputs.ref }}
+          path: ${{ runner.temp }}/audit-plan
 
-      - name: Download fix
+      - name: Download research results
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: audit-fix-${{ inputs.ref }}
-          path: ${{ runner.temp }}/audit-fix
+          pattern: research-${{ inputs.ref }}-*
+          path: ${{ runner.temp }}/research
+          merge-multiple: true
 
-      # This job pushes, so it repeats the guards instead of trusting the verify job.
-      - name: Check patch paths
+      - name: Download verify result
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: verify-${{ inputs.ref }}-${{ matrix.unitId }}
+          path: ${{ runner.temp }}/verify
+
+      - name: Select bumps
+        id: select
+        env:
+          UNIT_ID: ${{ matrix.unitId }}
         run: >-
-          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" patch-guard
-          --cwd="$GITHUB_WORKSPACE"
-          --patch="$RUNNER_TEMP/audit-fix/fix.patch"
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" select-bumps
+          --plan="$RUNNER_TEMP/audit-plan/plan.json"
+          --unit="$UNIT_ID"
+          --research-dir="$RUNNER_TEMP/research"
 
-      - name: Apply patch
-        run: git apply --binary "$RUNNER_TEMP/audit-fix/fix.patch"
+      # Verify ran package scripts, so its ids count only when this job selected them too.
+      - name: Check verified bumps
+        id: passed
+        env:
+          SELECTED: ${{ steps.select.outputs.bump_ids }}
+          UNIT_ID: ${{ matrix.unitId }}
+        run: |
+          set -euo pipefail
+          passed="$(jq -c '.passed' "$RUNNER_TEMP/verify/$UNIT_ID.json")"
+          if ! jq -en --argjson passed "$passed" --argjson selected "$SELECTED" '
+            ($passed | type) == "array"
+            and all($passed[]; type == "string" and (. as $id | any($selected[]; . == $id)))
+            and ($passed | length) == ($passed | unique | length)
+          ' > /dev/null; then
+            echo "::error::The verify result for $UNIT_ID lists bumps this job did not select"
+            exit 1
+          fi
+          echo "bump_ids=$(jq -cn --argjson passed "$passed" --argjson selected "$SELECTED" '[$selected[] | select(. as $id | any($passed[]; . == $id))]')" >> "$GITHUB_OUTPUT"
+
+      - name: Apply bumps
+        if: steps.passed.outputs.bump_ids != '[]'
+        env:
+          BUMP_IDS: ${{ steps.passed.outputs.bump_ids }}
+        run: >-
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" apply-bumps
+          --plan="$RUNNER_TEMP/audit-plan/plan.json"
+          --bump-ids="$BUMP_IDS"
+          --cwd="$GITHUB_WORKSPACE"
+
+      # No package code runs in this job, which is why it may hold the App token later.
+      - name: Regenerate lockfile
+        if: steps.passed.outputs.bump_ids != '[]'
+        run: pnpm install --lockfile-only --ignore-scripts
 
       - name: Check changed paths
+        if: steps.passed.outputs.bump_ids != '[]'
         run: >-
           node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" path-guard
           --cwd="$GITHUB_WORKSPACE"
 
-      - name: Check manifest changes
-        env:
-          SCOPE: ${{ inputs.scope }}
-        run: >-
-          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" content-guard
-          --cwd="$GITHUB_WORKSPACE"
-          --report="$RUNNER_TEMP/audit-report/audit_output.json"
-          --scope="$SCOPE"
+      - name: Re-run audit without install (unfixable findings expected)
+        if: steps.passed.outputs.bump_ids != '[]'
+        uses: ./.github/actions/audit-dependencies
+        continue-on-error: true
+        with:
+          scope: ${{ inputs.scope }}
+          severity: ${{ inputs.severity }}
+          json: ${{ runner.temp }}/reaudit.json
 
       - name: Build PR body
+        id: body
+        if: steps.passed.outputs.bump_ids != '[]'
         env:
-          FIXABLE: ${{ needs.precheck.outputs.fixable }}
+          BUMP_IDS: ${{ steps.passed.outputs.bump_ids }}
+          GITHUB_TOKEN: ${{ github.token }}
+          REF: ${{ inputs.ref }}
           SCOPE: ${{ inputs.scope }}
+          SEVERITY: ${{ inputs.severity }}
+          UNIT_ID: ${{ matrix.unitId }}
         run: >-
           node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" pr-body
-          --cwd="$GITHUB_WORKSPACE"
-          --report="$RUNNER_TEMP/audit-report/audit_output.json"
+          --plan="$RUNNER_TEMP/audit-plan/plan.json"
+          --unit="$UNIT_ID"
+          --bump-ids="$BUMP_IDS"
+          --report="$RUNNER_TEMP/reaudit.json"
+          --research-dir="$RUNNER_TEMP/research"
           --scope="$SCOPE"
-          --fixable="$FIXABLE"
-          --result="$RUNNER_TEMP/audit-fix/codex-result.json"
+          --severity="$SEVERITY"
+          --ref="$REF"
+          --run-url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          --cwd="$GITHUB_WORKSPACE"
           --out="$RUNNER_TEMP/pr-body.md"
+
+      - name: Read unit branch
+        id: branch
+        if: steps.passed.outputs.bump_ids != '[]'
+        env:
+          REF: ${{ inputs.ref }}
+          UNIT_ID: ${{ matrix.unitId }}
+        run: |
+          set -euo pipefail
+          branch="$(jq -r --arg unit "$UNIT_ID" '.units[] | select(.id == $unit) | .branch' "$RUNNER_TEMP/audit-plan/plan.json")"
+          if [[ "$branch" != "ci/audit-deps-fix-$REF-"* || ! "$branch" =~ ^[A-Za-z0-9._/-]+$ ]]; then
+            echo "::error::Unit $UNIT_ID has no valid branch"
+            exit 1
+          fi
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
 
       # Minted only after every guard passed, so no earlier step can reach the write token.
       - name: Mint App token
         id: app-token
+        if: steps.passed.outputs.bump_ids != '[]'
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           client-id: ${{ secrets.AUDIT_DEPS_APP_CLIENT_ID }}
@@ -490,16 +737,50 @@ jobs:
           permission-contents: write
           permission-pull-requests: write
 
+      # A person's push after the precheck must not be overwritten; the next run marks it blocked.
+      - name: Check PR head is unchanged
+        if: >-
+          steps.passed.outputs.bump_ids != '[]' &&
+          fromJSON(needs.precheck.outputs.unit_steps)[matrix.unitId].step == 'update'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          HEAD_SHA: ${{ fromJSON(needs.precheck.outputs.unit_steps)[matrix.unitId].headSha }}
+          PR_NUMBER: ${{ fromJSON(needs.precheck.outputs.unit_steps)[matrix.unitId].prNumber }}
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const { checkHeadUnchanged } = await import(
+              `${process.env.RUNNER_TEMP}/audit-deps-tooling/.github/scripts/audit-deps/github.mjs`
+            )
+
+            const prNumber = Number(process.env.PR_NUMBER)
+            if (!Number.isInteger(prNumber) || prNumber <= 0) {
+              throw new Error(`invalid PR number: ${process.env.PR_NUMBER}`)
+            }
+
+            const isUnchanged = await checkHeadUnchanged({
+              github,
+              headSha: process.env.HEAD_SHA,
+              owner: context.repo.owner,
+              prNumber,
+              repo: context.repo.repo,
+            })
+            if (!isUnchanged) {
+              core.setFailed(`PR #${prNumber} changed after the precheck, so it was not updated`)
+            }
+
       - name: Create pull request
         id: cpr
+        if: steps.passed.outputs.bump_ids != '[]'
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         with:
           token: ${{ steps.app-token.outputs.token }}
-          branch: ci/audit-deps-fix-${{ inputs.ref }}
+          branch: ${{ steps.branch.outputs.branch }}
           base: ${{ inputs.ref }}
-          title: "${{ inputs.ref == '3.x' && 'fix(deps): resolve high severity audit vulnerabilities (3.x)' || 'fix(deps): resolve high severity audit vulnerabilities' }}"
-          commit-message: 'fix(deps): resolve high severity audit vulnerabilities'
+          title: ${{ steps.body.outputs.title }}
+          commit-message: ${{ steps.body.outputs.title }}
           body-path: ${{ runner.temp }}/pr-body.md
+          draft: ${{ steps.body.outputs.is_draft == 'true' }}
           labels: dependencies
           author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
@@ -510,9 +791,35 @@ jobs:
             pnpm-lock.yaml
             pnpm-workspace.yaml
 
+      # Precheck only knows PRs that already existed; this lets the summary link new ones.
+      - name: Record PR number
+        if: steps.cpr.outputs.pull-request-number != ''
+        env:
+          IS_DRAFT: ${{ steps.body.outputs.is_draft }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+          UNIT_ID: ${{ matrix.unitId }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/pr"
+          jq -n --arg unitId "$UNIT_ID" --argjson prNumber "$PR_NUMBER" --argjson isDraft "$IS_DRAFT" \
+            '{ unitId: $unitId, prNumber: $prNumber, isDraft: $isDraft }' > "$RUNNER_TEMP/pr/$UNIT_ID.json"
+
+      - name: Upload PR number
+        if: steps.cpr.outputs.pull-request-number != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pr-${{ inputs.ref }}-${{ matrix.unitId }}
+          path: ${{ runner.temp }}/pr/${{ matrix.unitId }}.json
+          if-no-files-found: error
+          retention-days: 7
+
   housekeeping:
-    needs: precheck
-    if: contains(fromJSON('["close","blocked"]'), needs.precheck.outputs.next_step)
+    needs: [precheck, research, verify]
+    # Skipped on cancel: missing results would read as failures and post wrong comments.
+    if: >-
+      !cancelled() &&
+      needs.precheck.result == 'success' &&
+      inputs.is-default-inputs
     runs-on: ubuntu-26.04
     environment: audit-deps
     permissions:
@@ -529,6 +836,40 @@ jobs:
           git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
           git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
 
+      - name: Download plan
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: audit-plan-${{ inputs.ref }}
+          path: ${{ runner.temp }}/audit-plan
+
+      - name: Download research results
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: research-${{ inputs.ref }}-*
+          path: ${{ runner.temp }}/research
+          merge-multiple: true
+
+      - name: Download verify results
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: verify-${{ inputs.ref }}-*
+          path: ${{ runner.temp }}/verify
+          merge-multiple: true
+
+      # The status job writes the run summary; this copy only feeds the PR comments.
+      - name: Collect outcomes
+        env:
+          UNIT_STEPS: ${{ needs.precheck.outputs.unit_steps }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$UNIT_STEPS" > "$RUNNER_TEMP/unit-steps.json"
+          GITHUB_STEP_SUMMARY=/dev/null node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" outcomes \
+            --plan="$RUNNER_TEMP/audit-plan/plan.json" \
+            --research-dir="$RUNNER_TEMP/research" \
+            --verify-dir="$RUNNER_TEMP/verify" \
+            --unit-steps="$RUNNER_TEMP/unit-steps.json" \
+            --out="$RUNNER_TEMP/outcomes.json"
+
       - name: Mint App token
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
@@ -538,112 +879,171 @@ jobs:
           permission-contents: write
           permission-pull-requests: write
 
-      - name: Close or comment on PR
+      - name: Close stale PRs and comment on failed units
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          FIXABLE: ${{ needs.precheck.outputs.fixable }}
-          HAS_FOREIGN_COMMITS: ${{ needs.precheck.outputs.has_foreign_commits }}
-          NEXT_STEP: ${{ needs.precheck.outputs.next_step }}
-          PR_NUMBER: ${{ needs.precheck.outputs.pr_number }}
           REF: ${{ inputs.ref }}
+          STALE_PRS: ${{ needs.precheck.outputs.stale_prs }}
+          UNIT_STEPS: ${{ needs.precheck.outputs.unit_steps }}
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
-            const { closeStalePr, commentBlocked } = await import(
+            const { readFile } = await import('node:fs/promises')
+            const { closeStalePrs, commentOnFailedUnits } = await import(
               `${process.env.RUNNER_TEMP}/audit-deps-tooling/.github/scripts/audit-deps/github.mjs`
             )
 
-            const prNumber = Number(process.env.PR_NUMBER)
-            if (!Number.isInteger(prNumber) || prNumber <= 0) {
-              throw new Error(`invalid PR number: ${process.env.PR_NUMBER}`)
+            const prNumbers = JSON.parse(process.env.STALE_PRS)
+            if (!Array.isArray(prNumbers) || !prNumbers.every((n) => Number.isInteger(n) && n > 0)) {
+              throw new Error(`invalid stale PR numbers: ${process.env.STALE_PRS}`)
             }
-
+            const outcomes = JSON.parse(
+              await readFile(`${process.env.RUNNER_TEMP}/outcomes.json`, 'utf8'),
+            )
             const { owner, repo } = context.repo
 
-            if (process.env.NEXT_STEP === 'close') {
-              await closeStalePr({
-                github,
-                // Anything but an explicit 'false' keeps the branch.
-                hasForeignCommits: process.env.HAS_FOREIGN_COMMITS !== 'false',
-                owner,
-                prNumber,
-                ref: process.env.REF,
-                repo,
-              })
-            } else {
-              await commentBlocked({
-                fixable: JSON.parse(process.env.FIXABLE),
-                github,
-                owner,
-                prNumber,
-                repo,
-              })
-            }
+            await closeStalePrs({ github, owner, prNumbers, ref: process.env.REF, repo })
+            await commentOnFailedUnits({
+              github,
+              owner,
+              outcomes: outcomes.units,
+              repo,
+              unitSteps: JSON.parse(process.env.UNIT_STEPS),
+            })
 
   status:
-    needs: [precheck, fix, verify, open_pr, housekeeping]
+    needs: [precheck, research, verify, open_pr, housekeeping]
     if: always()
     runs-on: ubuntu-26.04
     permissions: {}
     steps:
-      - name: Download fix result
-        if: needs.fix.result == 'success' && needs.fix.outputs.has_patch == 'false'
+      - name: Checkout tooling
+        if: needs.precheck.result == 'success'
+        env:
+          TOOLING_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tooling="$RUNNER_TEMP/audit-deps-tooling"
+          git clone -q --filter=blob:none --no-checkout --depth=1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$tooling"
+          git -C "$tooling" sparse-checkout set --no-cone /.github/scripts/audit-deps/ /.agents/skills/audit-dependencies/
+          git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
+          git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
+
+      - name: Download plan
+        if: needs.precheck.result == 'success'
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: audit-fix-${{ inputs.ref }}
-          path: ${{ runner.temp }}/audit-fix
+          name: audit-plan-${{ inputs.ref }}
+          path: ${{ runner.temp }}/audit-plan
 
-      - name: Report status
+      - name: Download research results
+        if: needs.precheck.result == 'success'
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: research-${{ inputs.ref }}-*
+          path: ${{ runner.temp }}/research
+          merge-multiple: true
+
+      - name: Download verify results
+        if: needs.precheck.result == 'success'
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: verify-${{ inputs.ref }}-*
+          path: ${{ runner.temp }}/verify
+          merge-multiple: true
+
+      - name: Download PR numbers
+        if: needs.precheck.result == 'success'
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: pr-${{ inputs.ref }}-*
+          path: ${{ runner.temp }}/prs
+          merge-multiple: true
+
+      # Only default-input runs on main write the store; a cancelled run may lack results.
+      - name: Update decision store
+        if: needs.precheck.result == 'success' && inputs.is-default-inputs && !cancelled()
         env:
-          # Any job other than success or skipped fails the run; precheck must succeed.
-          HAS_UNSUCCESSFUL_JOB: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || needs.precheck.result != 'success' }}
-          HAS_FINDINGS: ${{ needs.precheck.outputs.has_findings }}
-          NEXT_STEP: ${{ needs.precheck.outputs.next_step }}
-          PR_NUMBER: ${{ needs.precheck.outputs.pr_number }}
-          PR_URL: ${{ needs.open_pr.outputs.pr_url }}
           REF: ${{ inputs.ref }}
         run: |
           set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/audit-deps-store"
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" store-update \
+            --store="$RUNNER_TEMP/audit-plan/store.json" \
+            --plan="$RUNNER_TEMP/audit-plan/plan.json" \
+            --research-dir="$RUNNER_TEMP/research" \
+            --verify-dir="$RUNNER_TEMP/verify" \
+            --ref="$REF" \
+            --out="$RUNNER_TEMP/audit-deps-store/store.json"
 
-          pr_link="$PR_URL"
-          if [ -z "$pr_link" ] && [ -n "$PR_NUMBER" ]; then
-            pr_link="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$PR_NUMBER"
+      - name: Save decision store
+        if: needs.precheck.result == 'success' && inputs.is-default-inputs && !cancelled()
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ runner.temp }}/audit-deps-store
+          key: audit-deps-store-${{ inputs.ref }}-${{ github.run_id }}
+
+      - name: Summarize outcomes
+        id: outcomes
+        if: needs.precheck.result == 'success'
+        env:
+          UNIT_STEPS: ${{ needs.precheck.outputs.unit_steps }}
+        run: |
+          set -euo pipefail
+          steps_file="$RUNNER_TEMP/unit-steps.json"
+          printf '%s' "$UNIT_STEPS" > "$steps_file"
+          # PRs opened in this run are added so the summary links them.
+          for pr in "$RUNNER_TEMP"/prs/*.json; do
+            [ -f "$pr" ] || continue
+            jq --slurpfile pr "$pr" '
+              ($pr[0]) as $p
+              | if ($p.unitId | type) == "string" and has($p.unitId) and ($p.prNumber | type) == "number"
+                then .[$p.unitId].prNumber = $p.prNumber
+                else .
+                end
+            ' "$steps_file" > "$steps_file.next"
+            mv "$steps_file.next" "$steps_file"
+          done
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" outcomes \
+            --plan="$RUNNER_TEMP/audit-plan/plan.json" \
+            --research-dir="$RUNNER_TEMP/research" \
+            --verify-dir="$RUNNER_TEMP/verify" \
+            --unit-steps="$steps_file" \
+            --out="$RUNNER_TEMP/outcomes.json"
+
+      - name: Report status
+        if: always()
+        env:
+          # Any job other than success or skipped fails the run; precheck must succeed.
+          HAS_FAILED_JOB: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || needs.precheck.result != 'success' }}
+          IS_RED: ${{ steps.outcomes.outputs.is_red }}
+          REF: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          plan="$RUNNER_TEMP/audit-plan/plan.json"
+
+          if [ -f "$plan" ]; then
+            no_fix_count="$(jq '.noFix | length' "$plan")"
+            if [ "$no_fix_count" -gt 0 ]; then
+              echo "::warning::$no_fix_count advisories on $REF have no fix; see the run summary"
+            fi
           fi
 
-          line="**$REF**: next step \`${NEXT_STEP:-unknown}\`"
-          if [ -n "$pr_link" ]; then
-            line="$line, PR: $pr_link"
-          fi
-          echo "$line" >> "$GITHUB_STEP_SUMMARY"
+          for pr in "$RUNNER_TEMP"/prs/*.json; do
+            [ -f "$pr" ] || continue
+            number="$(jq -r 'select(.isDraft == true) | .prNumber | select(type == "number")' "$pr")"
+            if [ -n "$number" ]; then
+              echo "::warning::Draft PR on $REF needs review (no release notes for a major): $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$number"
+            fi
+          done
 
-          # Codex output is untrusted; it reaches the summary only through jq.
-          result="$RUNNER_TEMP/audit-fix/codex-result.json"
-          if [ -f "$result" ]; then
-            {
-              printf '\n### Needs a Person\n\n'
-              jq -r '.needsPerson[]? | "- \(.advisory) (\(.module), \(.dependency)): \(.reason)" | gsub("[\r\n]+"; " ")' "$result" \
-                || echo "codex-result.json could not be read"
-            } >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-          if [ "$HAS_UNSUCCESSFUL_JOB" = "true" ]; then
+          if [ "$HAS_FAILED_JOB" = true ]; then
             echo "::error::A job failed for $REF"
             exit 1
           fi
 
-          if [ "$HAS_FINDINGS" != "true" ]; then
-            exit 0
+          # Declined, failed, or stored bumps and blocked units keep the run red.
+          if [ "$IS_RED" != false ]; then
+            echo "::error::Some bumps on $REF were not applied; see the run summary"
+            exit 1
           fi
-
-          # Findings with a fix PR to review do not fail the run.
-          case "$NEXT_STEP" in
-            create | update | skip)
-              if [ -n "$pr_link" ]; then
-                echo "::warning::Audit has findings for $REF; fix PR: $pr_link"
-                exit 0
-              fi
-              ;;
-          esac
-
-          echo "::error::Audit has findings for $REF and no fix PR"
-          exit 1
