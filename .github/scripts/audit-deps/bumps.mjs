@@ -25,7 +25,8 @@
  * @property {string} reason
  */
 
-const RELOCK_REASON = 'Needs an override or relock; consumers do not get our overrides.'
+const CONSUMER_RELOCK_REASON = 'Needs an override or relock; consumers do not get our overrides.'
+const MONOREPO_RELOCK_REASON = 'Not handled: needs a relock or override.'
 
 export function slugDependency({ dependency }) {
   return dependency
@@ -35,13 +36,14 @@ export function slugDependency({ dependency }) {
 }
 
 /**
- * One bump per dependency and target major, aimed at the highest version any finding needs.
- * Only `fix` entries produce bumps; `scope` is already applied by the audit that wrote the report.
+ * One bump per dependency, aimed at the highest fix version across its findings.
+ * A major bump gets a non-major fallback only when some finding is fixed within the current major.
+ * Only `fix` entries produce bumps.
  *
  * @returns {Bump[]}
  */
 export function buildBumps({ report }) {
-  const groups = new Map()
+  const entriesByDependency = new Map()
 
   for (const finding of report.findings) {
     for (const entry of finding.bumps) {
@@ -49,54 +51,20 @@ export function buildBumps({ report }) {
         continue
       }
 
-      const toMajor = majorOf({ version: entry.fix.version })
-      const isMajor = entry.fix.crossesMajor === true
-      const key = `${entry.dependency}\0${isMajor}\0${toMajor}`
-      const group = groups.get(key) ?? {
-        advisories: new Set(),
-        dependency: entry.dependency,
-        from: entry.currentSpec,
-        isMajor,
-        to: entry.fix.version,
-        toMajor,
-      }
-
-      group.advisories.add(finding.advisory)
-      if (compareVersions({ a: entry.fix.version, b: group.to }) > 0) {
-        group.to = entry.fix.version
-      }
-      groups.set(key, group)
+      const entries = entriesByDependency.get(entry.dependency) ?? []
+      entries.push({
+        advisory: finding.advisory,
+        currentSpec: entry.currentSpec,
+        fromMajor: entry.fix.fromMajor,
+        version: entry.fix.version,
+      })
+      entriesByDependency.set(entry.dependency, entries)
     }
   }
 
-  const majorByDependency = new Map()
-  for (const group of groups.values()) {
-    if (!group.isMajor) {
-      continue
-    }
-    const current = majorByDependency.get(group.dependency)
-    if (current === undefined || group.toMajor > current) {
-      majorByDependency.set(group.dependency, group.toMajor)
-    }
-  }
-
-  const bumps = [...groups.values()].map((group) => {
-    const slug = slugDependency({ dependency: group.dependency })
-    const fallbackMajor = group.isMajor ? undefined : majorByDependency.get(group.dependency)
-    const hasMajorSibling = fallbackMajor !== undefined
-
-    return {
-      id: hasMajorSibling ? `${slug}-${group.toMajor}-fallback` : `${slug}-${group.toMajor}`,
-      advisories: [...group.advisories].sort(),
-      dependency: group.dependency,
-      fallbackFor: hasMajorSibling ? `${slug}-${fallbackMajor}` : null,
-      from: group.from,
-      fromVersion: lowestVersionOf({ spec: group.from }),
-      isMajor: group.isMajor,
-      manifests: manifestsFor({ dependency: group.dependency, report }),
-      to: group.to,
-    }
-  })
+  const bumps = [...entriesByDependency].flatMap(([dependency, entries]) =>
+    bumpsForDependency({ dependency, entries, report }),
+  )
 
   return bumps.sort((a, b) => a.dependency.localeCompare(b.dependency) || a.id.localeCompare(b.id))
 }
@@ -140,14 +108,14 @@ export function buildUnits({ bumps, ref }) {
  *
  * @returns {NoFix[]}
  */
-export function listNoFix({ report }) {
+export function listNoFix({ report, scope }) {
   return report.findings
     .filter((finding) => !finding.bumps.some((entry) => entry.fix?.status === 'fix'))
     .map((finding) => ({
       advisory: finding.advisory,
       affects: finding.originPackages ?? [],
       module: finding.package,
-      reason: noFixReason({ finding }),
+      reason: noFixReason({ finding, scope }),
       severity: finding.severity,
       through: throughFor({ finding }),
     }))
@@ -193,9 +161,9 @@ function isReportedThrough({ finding, bump }) {
   return finding.bumps.some((entry) => entry.dependency === bump.dependency)
 }
 
-function noFixReason({ finding }) {
+function noFixReason({ finding, scope }) {
   if (finding.bumps.some((entry) => entry.fix?.status === 'relock')) {
-    return RELOCK_REASON
+    return scope === 'monorepo' ? MONOREPO_RELOCK_REASON : CONSUMER_RELOCK_REASON
   }
 
   const dependencies = [...new Set(finding.bumps.map((entry) => entry.dependency))]
@@ -224,10 +192,78 @@ function branchFor({ ref, suffix }) {
   return `ci/audit-deps-fix-${ref}-${suffix}`
 }
 
+function bumpsForDependency({ dependency, entries, report }) {
+  const slug = slugDependency({ dependency })
+  const manifests = manifestsFor({ dependency, report })
+  const lowestEntry = entries.reduce((lowest, entry) =>
+    currentMajorOf({ entry }) < currentMajorOf({ entry: lowest }) ? entry : lowest,
+  )
+  const currentMajor = currentMajorOf({ entry: lowestEntry })
+  const target = highestVersion({ versions: entries.map((entry) => entry.version) })
+  const isMajor = majorOf({ version: target }) > currentMajor
+  const base = {
+    dependency,
+    from: lowestEntry.currentSpec,
+    fromVersion: lowestVersionOf({ spec: lowestEntry.currentSpec }),
+    manifests,
+  }
+  const main = {
+    ...base,
+    id: `${slug}-${majorOf({ version: target })}`,
+    advisories: sortedUnique({ values: entries.map((entry) => entry.advisory) }),
+    fallbackFor: null,
+    isMajor,
+    to: target,
+  }
+
+  if (!isMajor) {
+    return [main]
+  }
+
+  const withinCurrent = entries.filter(
+    (entry) => majorOf({ version: entry.version }) === currentMajor,
+  )
+  if (withinCurrent.length === 0) {
+    return [main]
+  }
+
+  const fallbackTarget = highestVersion({ versions: withinCurrent.map((entry) => entry.version) })
+  const fallback = {
+    ...base,
+    id: `${slug}-${currentMajor}-fallback`,
+    advisories: sortedUnique({
+      values: entries
+        .filter((entry) => compareVersions({ a: entry.version, b: fallbackTarget }) <= 0)
+        .map((entry) => entry.advisory),
+    }),
+    fallbackFor: main.id,
+    isMajor: false,
+    to: fallbackTarget,
+  }
+
+  return [main, fallback]
+}
+
+function currentMajorOf({ entry }) {
+  const version = lowestVersionOf({ spec: entry.currentSpec })
+
+  return version ? majorOf({ version }) : entry.fromMajor
+}
+
+function highestVersion({ versions }) {
+  return versions.reduce((highest, version) =>
+    compareVersions({ a: version, b: highest }) > 0 ? version : highest,
+  )
+}
+
+function sortedUnique({ values }) {
+  return [...new Set(values)].sort()
+}
+
 function lowestVersionOf({ spec }) {
   const version = spec.replace(/^[\^~=]+/, '')
 
-  return /^\d/.test(version) ? version : ''
+  return /^\d+(\.\d+)*(-[\w.]+)?$/.test(version) ? version : ''
 }
 
 function majorOf({ version }) {

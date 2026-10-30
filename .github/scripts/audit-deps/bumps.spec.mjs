@@ -296,8 +296,11 @@ describe('listNoFix', () => {
       plan: { actions: [] },
     }
 
-    expect(listNoFix({ report, scope: 'monorepo' })[0].reason).toBe(
+    expect(listNoFix({ report, scope: 'consumer-facing' })[0].reason).toBe(
       'Needs an override or relock; consumers do not get our overrides.',
+    )
+    expect(listNoFix({ report, scope: 'monorepo' })[0].reason).toBe(
+      'Not handled: needs a relock or override.',
     )
   })
 })
@@ -376,5 +379,132 @@ describe('classifyFixes', () => {
     }
 
     expect(classifyFixes({ bumps: storage, report })).toEqual({ fixed: [], partly: ['GHSA-uuid'] })
+  })
+})
+
+describe('buildBumps per-dependency collapse', () => {
+  function barFinding({ advisory, version, currentSpec = '~3.0.0' }) {
+    const toMajor = Number.parseInt(version, 10)
+    const crossesMajor = toMajor > Number.parseInt(currentSpec.replace(/^[\^~=]+/, ''), 10)
+
+    return finding({
+      advisory,
+      bumps: [entry({ dependency: 'bar', currentSpec, version, crossesMajor, toMajor })],
+    })
+  }
+
+  function reportFor({ findings }) {
+    return {
+      findings,
+      plan: { actions: [{ type: 'bump', dependency: 'bar', manifests: ['a/package.json'] }] },
+    }
+  }
+
+  it('should subsume lower majors into one bump', () => {
+    const report = reportFor({
+      findings: [
+        barFinding({ advisory: 'GHSA-1', version: '4.0.0' }),
+        barFinding({ advisory: 'GHSA-2', version: '5.0.0' }),
+      ],
+    })
+
+    const bumps = buildBumps({ report, scope: 'consumer-facing' })
+
+    expect(bumps.map((bump) => bump.id)).toEqual(['bar-5'])
+    expect(bumps[0].advisories).toEqual(['GHSA-1', 'GHSA-2'])
+  })
+
+  it('should give mixed current majors one bump and no fallback', () => {
+    const report = reportFor({
+      findings: [
+        barFinding({ advisory: 'GHSA-1', version: '4.0.0', currentSpec: '^3.0.0' }),
+        barFinding({ advisory: 'GHSA-1', version: '4.0.0', currentSpec: '^4.0.0' }),
+      ],
+    })
+
+    const bumps = buildBumps({ report, scope: 'consumer-facing' })
+
+    expect(bumps.map((bump) => bump.id)).toEqual(['bar-4'])
+    expect(bumps[0]).toMatchObject({ fromVersion: '3.0.0', isMajor: true })
+  })
+
+  it('should list every advisory on the main bump and only lower ones on the fallback', () => {
+    const report = reportFor({
+      findings: [
+        barFinding({ advisory: 'GHSA-1', version: '3.4.1' }),
+        barFinding({ advisory: 'GHSA-2', version: '4.0.0' }),
+      ],
+    })
+
+    const bumps = buildBumps({ report, scope: 'consumer-facing' })
+
+    expect(bumps.find((bump) => bump.id === 'bar-4').advisories).toEqual(['GHSA-1', 'GHSA-2'])
+    expect(bumps.find((bump) => bump.id === 'bar-3-fallback').advisories).toEqual(['GHSA-1'])
+  })
+
+  it('should put fallback bumps in the group unit', () => {
+    const report = reportFor({
+      findings: [
+        barFinding({ advisory: 'GHSA-1', version: '3.4.1' }),
+        barFinding({ advisory: 'GHSA-2', version: '4.0.0' }),
+      ],
+    })
+    const bumps = buildBumps({ report, scope: 'consumer-facing' })
+    const units = buildUnits({ bumps, ref: 'main' })
+
+    expect(units.map((unit) => [unit.id, unit.bumpIds])).toEqual([
+      ['non-major', ['bar-3-fallback']],
+      ['bar-4', ['bar-4']],
+    ])
+  })
+
+  it('should leave fromVersion empty for catalog and compound specs', () => {
+    for (const currentSpec of ['catalog:', '^1.0.0 || ^2.0.0']) {
+      const report = reportFor({
+        findings: [
+          finding({
+            advisory: 'GHSA-1',
+            bumps: [
+              entry({
+                dependency: 'bar',
+                currentSpec,
+                version: '1.2.0',
+                crossesMajor: false,
+                toMajor: 1,
+              }),
+            ],
+          }),
+        ],
+      })
+
+      expect(buildBumps({ report, scope: 'consumer-facing' })[0].fromVersion).toBe('')
+    }
+  })
+})
+
+describe('classifyFixes uncleared', () => {
+  it('should leave an advisory in neither list when its own dependency still reports it', () => {
+    const bumps = buildBumps({ report: buildReport(), scope: 'consumer-facing' }).filter(
+      (bump) => bump.dependency === 'csv-parse',
+    )
+    const report = {
+      findings: [
+        finding({
+          advisory: 'GHSA-csv',
+          bumps: [
+            entry({
+              dependency: 'csv-parse',
+              currentSpec: '5.6.0',
+              version: '7.0.2',
+              crossesMajor: true,
+              toMajor: 7,
+            }),
+          ],
+        }),
+      ],
+      plan: { actions: [] },
+    }
+
+    expect(classifyFixes({ bumps, report })).toEqual({ fixed: [], partly: [] })
   })
 })
