@@ -29,6 +29,7 @@ describe('getPayload dev reload', () => {
 
   let onReload: () => void
   let strategy: DevReloadStrategy
+  let initialConfig: SanitizedConfig
 
   const get = (config: Promise<SanitizedConfig> | SanitizedConfig) =>
     getPayload({ config, devReloadStrategy: strategy, disableDBConnect: true, key })
@@ -44,19 +45,21 @@ describe('getPayload dev reload', () => {
       },
     }
 
+    initialConfig = createConfig()
+
     // Seed the cache with an initialized instance, so getPayload skips BasePayload.init
     ;(global as any)._payload.set(key, {
       devReloadCleanup: null,
       devReloadStrategy: null,
       initializedCrons: false,
-      payload: { config: createConfig(), db: {} } as unknown as Payload,
+      payload: { config: initialConfig, db: {} } as unknown as Payload,
       promise: null,
       reload: false,
       reloadQueued: false,
     })
 
     // Connects the strategy
-    await get(createConfig())
+    await get(initialConfig)
   })
 
   afterEach(() => {
@@ -103,8 +106,28 @@ describe('getPayload dev reload', () => {
     pendingConfig.resolve(firstChange)
     await reloading
 
-    const payload = await get(createConfig())
+    // The module system returns the same config object until the config file changes
+    const payload = await get(firstChange)
 
     expect(payload.config).toBe(firstChange)
+  })
+
+  it('should reload when a call brings a newer config after the reported change was used up', async () => {
+    // A request imported the config before the file changed, and calls getPayload with it only
+    // after the change is reported: it uses up the reported change on the config from before it
+    onReload()
+    expect((await get(initialConfig)).config).toBe(initialConfig)
+
+    // The next call brings the changed config, with no change reported any more
+    const changedConfig = createConfig()
+    const payload = await get(changedConfig)
+
+    expect(payload.config).toBe(changedConfig)
+  })
+
+  it('should not reload when a call brings the config the instance runs with', async () => {
+    const payload = await get(initialConfig)
+
+    expect(payload.config).toBe(initialConfig)
   })
 })

@@ -1394,6 +1394,17 @@ export const getPayload = async (
       await cached.payload._initializeCrons()
     }
 
+    if (cached.devReloadStrategy && cached.reload === false) {
+      // A call can bring a config built after the one this instance runs with, yet find no reload
+      // flagged: the change was reported while an earlier call was still importing the config from
+      // before the change, and that call used the flag to reload with the older config. A different
+      // config object is a change too. Module caching keeps the object the same until it changes.
+      const config = await options.config
+      if (config !== cached.payload.config) {
+        cached.reload = true
+      }
+    }
+
     if (cached.reload === true) {
       let resolve!: () => void
 
