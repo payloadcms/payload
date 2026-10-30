@@ -103,7 +103,7 @@ jobs:
           ref: ${{ inputs.ref }}
           persist-credentials: false
 
-      # Later jobs check out this commit, so all of them see the base the audit ran on.
+      # research and verify check out this commit, so both see the base the audit ran on.
       - name: Record base commit
         id: base
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -747,11 +747,12 @@ jobs:
     permissions:
       contents: read
     steps:
-      # create-pull-request sets its own credential from its token input, so none is persisted here.
+      # The branch head, not base_sha: the lockfile is regenerated on the current base, not
+      # text-merged onto it. create-pull-request sets its own credential, so none is persisted.
       - name: Checkout ${{ inputs.ref }}
         uses: actions/checkout@v5
         with:
-          ref: ${{ needs.precheck.outputs.base_sha }}
+          ref: ${{ inputs.ref }}
           persist-credentials: false
 
       - name: Checkout tooling
@@ -836,6 +837,7 @@ jobs:
           fi
           echo "bump_ids=$(jq -cn --argjson passed "$passed" --argjson selected "$SELECTED" '[$selected[] | select(. as $id | any($passed[]; . == $id))]')" >> "$GITHUB_OUTPUT"
 
+      # Runs on the branch head; a spec there that apply-bumps cannot edit fails this leg.
       - name: Apply bumps
         if: steps.passed.outputs.bump_ids != '[]'
         env:
