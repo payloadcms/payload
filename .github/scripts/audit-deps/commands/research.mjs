@@ -15,6 +15,7 @@ import {
   readPlan,
   readResearchResults,
   readToken,
+  readUnitSteps,
   requireOption,
   writeOutputs,
 } from './shared.mjs'
@@ -99,31 +100,35 @@ export async function runCheckResearch({ options }) {
 }
 
 /**
- * `select-bumps --plan --unit --research-dir`: outputs `bump_ids`. The group takes applied
- * non-majors plus applied fallbacks whose major was declined now or on an earlier run.
+ * `select-bumps --plan --unit --research-dir --unit-steps`: outputs `bump_ids`. The group takes
+ * applied non-majors plus applied fallbacks whose major was declined now, on an earlier run, or
+ * by a person closing its PR.
  */
 export async function runSelectBumps({ options }) {
   const plan = await readPlan({ options })
   const unit = findUnit({ plan, unitId: requireOption({ name: 'unit', options }) })
+  const unitSteps = await readUnitSteps({ options })
   const research = await readResearchResults({
     bumpIds: plan.bumps.map((bump) => bump.id),
     researchDir: requireOption({ name: 'research-dir', options }),
   })
 
   await writeOutputs({
-    values: { bump_ids: JSON.stringify(selectUnitBumpIds({ plan, research, unit })) },
+    values: { bump_ids: JSON.stringify(selectUnitBumpIds({ plan, research, unit, unitSteps })) },
   })
 }
 
-/** Bump ids of `unit` that the pipeline applies, from today's research and the store. */
-function selectUnitBumpIds({ plan, research, unit }) {
+/** Bump ids of `unit` that the pipeline applies, from today's research, the store and precheck. */
+function selectUnitBumpIds({ plan, research, unit, unitSteps }) {
   return unit.bumpIds.filter((bumpId) => {
     if (research[bumpId]?.decision !== 'apply') {
       return false
     }
 
     const bump = findBump({ plan, bumpId })
-    return !bump.fallbackFor || isMajorDeclined({ majorId: bump.fallbackFor, plan, research })
+    return (
+      !bump.fallbackFor || isMajorDeclined({ majorId: bump.fallbackFor, plan, research, unitSteps })
+    )
   })
 }
 

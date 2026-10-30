@@ -484,9 +484,16 @@ describe('cli', () => {
   })
 
   describe('select-bumps', () => {
-    const selectBumps = async ({ plan, unit }) => {
+    const selectBumps = async ({ plan, unit, unitSteps = {} }) => {
+      const steps = await writeJson({ name: 'unit-steps.json', value: unitSteps })
       const { code } = await run({
-        args: ['select-bumps', `--plan=${plan}`, `--unit=${unit}`, `--research-dir=${researchDir}`],
+        args: [
+          'select-bumps',
+          `--plan=${plan}`,
+          `--unit=${unit}`,
+          `--research-dir=${researchDir}`,
+          `--unit-steps=${steps}`,
+        ],
       })
       const outputs = await readOutputs()
       await rm(outputFile, { force: true })
@@ -523,6 +530,41 @@ describe('cli', () => {
       expect((await selectBumps({ plan, unit: 'non-major' })).bumpIds).toEqual([
         'csv-parse-5-fallback',
       ])
+    })
+
+    it('treats a person-rejected major as declined', async () => {
+      await initRepo()
+      const { plan } = await makePlan()
+      await writeResearch({ bumpId: 'csv-parse-5-fallback', value: research() })
+      await writeResearch({ bumpId: 'left-pad-1', value: research() })
+
+      const { bumpIds } = await selectBumps({
+        plan,
+        unit: 'non-major',
+        unitSteps: {
+          'csv-parse-7': { headSha: null, prNumber: null, step: 'skip-rejected' },
+          'non-major': { headSha: null, prNumber: null, step: 'create' },
+        },
+      })
+
+      expect(bumpIds).toEqual(['csv-parse-5-fallback', 'left-pad-1'])
+    })
+
+    it('exits 1 without --unit-steps', async () => {
+      await initRepo()
+      const { plan } = await makePlan()
+
+      const { code, stdout } = await run({
+        args: [
+          'select-bumps',
+          `--plan=${plan}`,
+          '--unit=non-major',
+          `--research-dir=${researchDir}`,
+        ],
+      })
+
+      expect(code).toBe(1)
+      expect(stdout).toContain('missing --unit-steps')
     })
 
     it('keeps the fallback out when the major applies', async () => {
@@ -1059,6 +1101,27 @@ describe('cli', () => {
       })
       expect(outcomes.units).toEqual({})
       expect(outputs).toEqual({ is_red: 'false' })
+    })
+
+    it('applies the fallback of a person-rejected major', async () => {
+      await initRepo()
+      const { plan } = await makePlan()
+      await writeResearch({ bumpId: 'csv-parse-5-fallback', value: research() })
+      await writeFile(
+        path.join(verifyDir, 'non-major.json'),
+        JSON.stringify({ failed: [], passed: ['csv-parse-5-fallback'] }),
+      )
+
+      const { outcomes } = await runOutcomes({
+        plan,
+        unitSteps: {
+          'csv-parse-7': { prNumber: null, step: 'skip-rejected' },
+          'non-major': { prNumber: 12, step: 'update' },
+        },
+      })
+
+      expect(statusById({ outcomes })['csv-parse-5-fallback']).toEqual(['applied', ''])
+      expect(statusById({ outcomes })['csv-parse-7'][0]).toBe('rejected')
     })
 
     it('fails a fallback that joins the group but fails verify', async () => {

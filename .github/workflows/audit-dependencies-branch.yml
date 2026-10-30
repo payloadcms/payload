@@ -484,11 +484,15 @@ jobs:
         id: select
         env:
           UNIT_ID: ${{ matrix.unitId }}
-        run: >-
-          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" select-bumps
-          --plan="$RUNNER_TEMP/audit-plan/plan.json"
-          --unit="$UNIT_ID"
-          --research-dir="$RUNNER_TEMP/research"
+          UNIT_STEPS: ${{ needs.precheck.outputs.unit_steps }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$UNIT_STEPS" > "$RUNNER_TEMP/unit-steps.json"
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" select-bumps \
+            --plan="$RUNNER_TEMP/audit-plan/plan.json" \
+            --unit="$UNIT_ID" \
+            --research-dir="$RUNNER_TEMP/research" \
+            --unit-steps="$RUNNER_TEMP/unit-steps.json"
 
       - name: Record empty result
         if: steps.select.outputs.bump_ids == '[]'
@@ -797,11 +801,15 @@ jobs:
         id: select
         env:
           UNIT_ID: ${{ matrix.unitId }}
-        run: >-
-          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" select-bumps
-          --plan="$RUNNER_TEMP/audit-plan/plan.json"
-          --unit="$UNIT_ID"
-          --research-dir="$RUNNER_TEMP/research"
+          UNIT_STEPS: ${{ needs.precheck.outputs.unit_steps }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$UNIT_STEPS" > "$RUNNER_TEMP/unit-steps.json"
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" select-bumps \
+            --plan="$RUNNER_TEMP/audit-plan/plan.json" \
+            --unit="$UNIT_ID" \
+            --research-dir="$RUNNER_TEMP/research" \
+            --unit-steps="$RUNNER_TEMP/unit-steps.json"
 
       # Verify ran package scripts, so its ids count only when this job selected them too.
       - name: Check verified bumps

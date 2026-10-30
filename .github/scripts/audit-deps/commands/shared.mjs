@@ -93,13 +93,31 @@ export function findStoredEntry({ plan, bump }) {
   )
 }
 
-/** A major counts as declined when Codex declined it today or the store holds an outcome for it. */
-export function isMajorDeclined({ majorId, plan, research }) {
+/**
+ * A major counts as declined when Codex declined it today, the store holds an outcome for it,
+ * or a person closed its PR (its unit step is `skip-rejected`).
+ */
+export function isMajorDeclined({ majorId, plan, research, unitSteps }) {
   const major = findBump({ plan, bumpId: majorId })
+  const majorUnit = plan.units.find(
+    (unit) => unit.kind === 'major' && unit.bumpIds.includes(majorId),
+  )
 
   return (
-    research[majorId]?.decision === 'decline' || findStoredEntry({ plan, bump: major }) !== null
+    research[majorId]?.decision === 'decline' ||
+    findStoredEntry({ plan, bump: major }) !== null ||
+    (majorUnit !== undefined && unitSteps[majorUnit.id]?.step === 'skip-rejected')
   )
+}
+
+/** Reads precheck's `unit_steps` JSON file: `{ [unitId]: { step, prNumber, headSha } }`. */
+export async function readUnitSteps({ options }) {
+  const value = await readJson({ file: requireOption({ name: 'unit-steps', options }) })
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error('--unit-steps must be a JSON object keyed by unit id')
+  }
+
+  return value
 }
 
 /**

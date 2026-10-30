@@ -5,10 +5,10 @@ import {
   findBump,
   findStoredEntry,
   isMajorDeclined,
-  readJson,
   readOptionalText,
   readPlan,
   readResearchResults,
+  readUnitSteps,
   readVerifyResult,
   renderNoFixList,
   repoUrlFromEnv,
@@ -89,7 +89,7 @@ export async function runStoreUpdate({ options }) {
  */
 export async function runOutcomes({ options }) {
   const plan = await readPlan({ options })
-  const unitSteps = await readUnitSteps({ file: requireOption({ name: 'unit-steps', options }) })
+  const unitSteps = await readUnitSteps({ options })
   const verifyDir = requireOption({ name: 'verify-dir', options })
   const research = await readResearchResults({
     bumpIds: plan.bumps.map((bump) => bump.id),
@@ -102,7 +102,14 @@ export async function runOutcomes({ options }) {
     const verify = await readVerifyResult({ unit, verifyDir })
     const step = unitSteps[unit.id]?.step
     const results = unit.bumpIds.map((bumpId) =>
-      decideBumpOutcome({ bump: findBump({ plan, bumpId }), plan, research, step, verify }),
+      decideBumpOutcome({
+        bump: findBump({ plan, bumpId }),
+        plan,
+        research,
+        step,
+        unitSteps,
+        verify,
+      }),
     )
     bumps.push(...results)
 
@@ -139,7 +146,7 @@ export async function runOutcomes({ options }) {
  * skipped or blocked unit, then research and verify.
  * `commentReason` is the text for a PR comment, or null when the bump needs none.
  */
-function decideBumpOutcome({ bump, plan, research, step, verify }) {
+function decideBumpOutcome({ bump, plan, research, step, unitSteps, verify }) {
   const label = toSummaryText({ text: `${bump.dependency} ${bump.to}`, maxLength: 200 })
   const outcome = ({ status, reason = '', commentReason = null }) => ({
     bumpId: bump.id,
@@ -156,7 +163,10 @@ function decideBumpOutcome({ bump, plan, research, step, verify }) {
     return outcome(UNIT_STEP_OUTCOMES[step])
   }
 
-  if (bump.fallbackFor && !isMajorDeclined({ majorId: bump.fallbackFor, plan, research })) {
+  if (
+    bump.fallbackFor &&
+    !isMajorDeclined({ majorId: bump.fallbackFor, plan, research, unitSteps })
+  ) {
     const major = findBump({ plan, bumpId: bump.fallbackFor })
     return outcome({
       status: 'skipped',
@@ -209,15 +219,6 @@ function decideBumpOutcome({ bump, plan, research, step, verify }) {
 // A comment wraps the reason in a sentence that ends with its own period.
 function toCommentText({ text }) {
   return toSummaryText({ text }).replace(/[.\s]+$/, '')
-}
-
-async function readUnitSteps({ file }) {
-  const value = await readJson({ file })
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error('--unit-steps must be a JSON object keyed by unit id')
-  }
-
-  return value
 }
 
 function renderOutcomesSummary({ outcomes, plan, unitSteps }) {

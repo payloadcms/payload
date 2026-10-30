@@ -43,25 +43,36 @@ export async function runPrecheck({ core, github, isDefaultInputs, owner, plan, 
   }
 
   const openPrs = await listOpenBotPrs({ github, owner, ref, repo })
-  const unitSteps = {}
+  const stepsById = new Map()
+  const rejectedMajorIds = new Set()
 
-  for (const unit of plan.units) {
-    unitSteps[unit.id] = await decideStepForUnit({
+  // Majors go first: a person-rejected major lets its fallback into the group's expected marker.
+  const majorsFirst = [
+    ...plan.units.filter((unit) => unit.kind === 'major'),
+    ...plan.units.filter((unit) => unit.kind !== 'major'),
+  ]
+  for (const unit of majorsFirst) {
+    const unitStep = await decideStepForUnit({
       github,
       openPr: openPrs.find((pr) => pr.branch === unit.branch) ?? null,
       owner,
       plan,
       ref,
+      rejectedMajorIds,
       repo,
       unit,
     })
+    stepsById.set(unit.id, unitStep)
+    if (unit.kind === 'major' && unitStep.step === 'skip-rejected') {
+      unit.bumpIds.forEach((bumpId) => rejectedMajorIds.add(bumpId))
+    }
   }
 
   return setOutputs({
     core,
     plan,
     staleNumbers: findStalePrs({ openPrs, ref, units: plan.units }),
-    unitSteps,
+    unitSteps: Object.fromEntries(plan.units.map((unit) => [unit.id, stepsById.get(unit.id)])),
   })
 }
 
@@ -310,10 +321,19 @@ function setOutputs({ core, plan, staleNumbers, unitSteps }) {
   core.setOutput('stale_prs', JSON.stringify(staleNumbers))
 }
 
-async function decideStepForUnit({ github, openPr, owner, plan, ref, repo, unit }) {
+async function decideStepForUnit({
+  github,
+  openPr,
+  owner,
+  plan,
+  ref,
+  rejectedMajorIds,
+  repo,
+  unit,
+}) {
   const prNumber = openPr?.number ?? null
   const headSha = openPr?.headSha ?? null
-  const expectedBumps = expectedBumpsFor({ plan, unit })
+  const expectedBumps = expectedBumpsFor({ plan, rejectedMajorIds, unit })
   if (expectedBumps.length === 0) {
     return { headSha, prNumber, step: 'skip' }
   }
@@ -343,11 +363,11 @@ async function decideStepForUnit({ github, openPr, owner, plan, ref, repo, unit 
 }
 
 /**
- * Group: non-major bumps without a fresh stored outcome, plus fallbacks whose major has one.
- * Major: the bump unless it has a fresh stored outcome.
+ * Group: non-major bumps without a fresh stored outcome, plus fallbacks whose major has one or
+ * is in `rejectedMajorIds`. Major: the bump unless it has a fresh stored outcome.
  * @returns {Bump[]}
  */
-function expectedBumpsFor({ plan, unit }) {
+function expectedBumpsFor({ plan, rejectedMajorIds, unit }) {
   const bumpsById = new Map(plan.bumps.map((bump) => [bump.id, bump]))
   const isStored = (bump) =>
     plan.stored.some((entry) => entry.dependency === bump.dependency && entry.to === bump.to)
@@ -365,7 +385,7 @@ function expectedBumpsFor({ plan, unit }) {
       return true
     }
     const major = bumpsById.get(bump.fallbackFor)
-    return Boolean(major) && isStored(major)
+    return Boolean(major) && (isStored(major) || rejectedMajorIds.has(major.id))
   })
 }
 

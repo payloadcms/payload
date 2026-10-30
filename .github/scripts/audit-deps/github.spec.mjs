@@ -471,6 +471,44 @@ describe('runPrecheck', () => {
     expect(result.unitSteps['react-19']).toEqual({ headSha: null, prNumber: null, step: 'skip' })
   })
 
+  describe('with a person-rejected major', () => {
+    const plan = makePlan({
+      bumps: [react, reactFallback],
+      units: [groupUnit(['react-18-fallback']), reactUnit],
+    })
+    const rejectedMajor = {
+      closedBy: { 5: { type: 'User' } },
+      closedPrs: {
+        [reactUnit.branch]: [closedPr({ body: reactMarker, branch: reactUnit.branch, number: 5 })],
+      },
+    }
+
+    it('should create the group with the fallback and research it', async () => {
+      const result = await precheck({ github: makeGithub(rejectedMajor), plan })
+
+      expect(result.unitSteps['react-19'].step).toBe('skip-rejected')
+      expect(result.unitSteps['non-major'].step).toBe('create')
+      expect(result.researchMatrix).toEqual([{ bumpId: 'react-18-fallback' }])
+    })
+
+    it('should put the fallback in the group expected marker', async () => {
+      const github = makeGithub({
+        ...rejectedMajor,
+        openPrs: [
+          openPr({
+            body: markerOf({ bumps: [reactFallback], unit: 'non-major' }),
+            branch: `${PREFIX}non-major`,
+            number: 1,
+          }),
+        ],
+      })
+
+      const result = await precheck({ github, plan })
+
+      expect(result.unitSteps['non-major']).toEqual({ headSha: 'sha-1', prNumber: 1, step: 'skip' })
+    })
+  })
+
   it('should skip a unit with no expected bumps and keep its open PR', async () => {
     const plan = makePlan({
       stored: [{ dependency: 'react', to: '19.0.0' }],
