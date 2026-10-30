@@ -12,6 +12,7 @@ export const createMigrateCommand = defineCLICommand({
     const result = await adapter.migrate({
       forceAcceptWarning: args.forceAcceptWarning,
       shouldPrompt: !isJSON,
+      skipLock: args.skipLock,
     })
 
     if (!isJSON) {
@@ -23,5 +24,8 @@ export const createMigrateCommand = defineCLICommand({
   helpGroup: 'Migration commands',
   input: strictObject({
     forceAcceptWarning: z.optional(z.boolean()).check(z.describe('Skip the migration warning.')),
+    skipLock: z
+      .optional(z.boolean())
+      .check(z.describe('Disable locking for a single-instance schema bootstrap.')),
   }),
 })

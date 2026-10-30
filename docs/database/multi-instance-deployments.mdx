@@ -1,0 +1,164 @@
+---
+title: Multi-Instance Migration Deployments
+label: Multi-Instance Deployments
+order: 25
+keywords: database, migrations, locking, kubernetes, horizontal scaling, deployment, documentation, Content Management System, cms, headless, typescript, node, react, nextjs
+desc: Learn how to safely run Payload migrations in horizontally scaled environments.
+---
+
+When running Payload in horizontally scaled environments (Kubernetes, ECS, multiple Lambda instances), special consideration is needed for database migrations.
+
+## Problem
+
+If multiple instances start simultaneously and attempt to run migrations, race conditions can occur:
+
+- Multiple instances check for pending migrations
+- All see the same pending migrations
+- All attempt to run them simultaneously
+- Database deadlocks or errors occur
+
+## Solution: Migration Locking
+
+Payload 3.x includes automatic migration locking to prevent concurrent migration execution.
+
+### How It Works
+
+1. Before running migrations, each instance attempts to acquire a lock
+2. Only one instance can hold the lock at a time
+3. Other instances detect the lock and skip migration execution
+4. The lock is automatically released when migrations complete
+5. Stale locks (from crashed instances) are detected and cleared after 5 minutes
+
+### Requirements
+
+**Transaction support is required** for migration locking. If transactions are disabled:
+
+- Lock mechanism is skipped
+- Migrations run without coordination (not safe for multi-instance)
+- Warning is logged
+
+All database adapters support transactions by default.
+
+### Upgrading from Previous Versions
+
+When upgrading to a Payload version that includes migration locking:
+
+**First migration run after upgrade:**
+
+- The migration lock global doesn't exist in the database yet
+- Migrations will run **without locking** on the first execution
+- A warning will be logged: "Migration lock global not initialized"
+- This is expected behavior and safe for single-instance deployments
+
+**After first migration:**
+
+- The lock global is created during the first migration run
+- All subsequent migrations will use the locking mechanism
+- Multi-instance coordination is fully active
+
+**For multi-instance deployments during upgrade:**
+
+- Use a separate migration step (see below) to run migrations once before scaling
+- Or temporarily scale down to a single instance for the first migration after upgrade
+- Once the lock global exists, scale back up safely
+
+## Deployment Strategies
+
+### Preferred: Separate Migration Step
+
+Run migrations as a dedicated step before scaling application instances:
+
+**Kubernetes Init Container:**
+
+```yaml
+initContainers:
+  - name: run-migrations
+    image: myapp:latest
+    command: ['payload', 'migrate']
+```
+
+**CI/CD Pipeline:**
+
+```yaml
+steps:
+  - name: Run Migrations
+    run: payload migrate
+  - name: Deploy Application
+    run: kubectl rollout restart deployment/myapp
+```
+
+**ECS/Fargate Task:**
+
+```json
+{
+  "family": "myapp-migrate",
+  "containerDefinitions": [
+    {
+      "name": "migrate",
+      "command": ["payload", "migrate"]
+    }
+  ]
+}
+```
+
+### Alternative: Startup with Locking
+
+Let application instances run migrations on startup (locking ensures coordination):
+
+```typescript
+// In your server startup
+await payload.init({ config })
+await payload.db.migrate()
+await startServer()
+```
+
+**Considerations:**
+
+- Slower startup (instances wait for lock)
+- First instance runs migrations, others skip
+- Suitable for small-scale deployments
+
+## Troubleshooting
+
+### Check Lock Status
+
+```bash
+payload migrate:status
+```
+
+Shows:
+
+- Migration history
+- Lock state (locked/unlocked)
+- Instance holding lock
+- Lock expiration time
+
+### Clear Stuck Lock
+
+If an instance crashes mid-migration:
+
+```bash
+payload migrate:unlock
+```
+
+Force releases the lock. Always check `migrate:status` first to understand lock state.
+
+### Lock Timeout
+
+Default: 5 minutes
+
+If migrations take longer:
+
+- Lock expires while migrations run
+- Another instance might acquire lock
+- Second instance fails due to migration records
+
+**Solution:** Break long migrations into smaller batches.
+
+## Best Practices
+
+1. **Prefer separate migration step** in production
+2. **Test migrations** in staging with multi-instance setup
+3. **Monitor lock timeout** for long-running migrations
+4. **Use `migrate:status`** to diagnose issues
+5. **Ensure transactions enabled** for multi-instance deployments
