@@ -8,7 +8,6 @@ import React from 'react'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
 import { HierarchySidebarTab } from '../../../exports/client/index.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
-import { normalizeExpandedNodeIds } from '../../../utilities/normalizeExpandedNodeIds.js'
 import { RenderServerComponent } from '../../RenderServerComponent/index.js'
 
 export type HierarchySidebarTabServerProps = {
@@ -155,17 +154,13 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
         }
       }
 
-      // Merge ancestor IDs with existing expanded nodes.
+      // Merge ancestor IDs with existing expanded nodes
+      const expandedSet = new Set(initialExpandedNodes)
+      ancestorIds.forEach((id) => expandedSet.add(id))
       // Include the selected node itself so its own children are loaded.
-      initialExpandedNodes = [...initialExpandedNodes, ...ancestorIds, selectedNodeId]
+      expandedSet.add(selectedNodeId)
+      initialExpandedNodes = Array.from(expandedSet)
     }
-
-    // Saved preferences can already hold the same ID as both "1" and 1
-    initialExpandedNodes = normalizeExpandedNodeIds({
-      collectionSlug: hierarchyCollectionSlug,
-      ids: initialExpandedNodes,
-      payload,
-    })
 
     const baseFilterFn =
       collectionConfig?.admin?.baseFilter ?? collectionConfig?.admin?.baseListFilter
