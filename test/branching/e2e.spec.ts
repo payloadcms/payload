@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Page, Response } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -18,6 +18,7 @@ import {
   branchMergesSlug,
   headerGlobalSlug,
   homepageGlobalSlug,
+  localizedSlug,
   mediaSlug,
   nestedSlug,
   pagesSlug,
@@ -106,6 +107,7 @@ test.describe('Branching', () => {
     // Shadow rows are addressed by their real primary key, so these deletes
     // bypass branch resolution rather than writing tombstones.
     for (const collection of [
+      localizedSlug,
       mediaSlug,
       nestedSlug,
       pagesSlug,
@@ -1683,6 +1685,94 @@ test.describe('Branching', () => {
         new RegExp(`branch=${branchSlug}`),
       )
     })
+  })
+
+  test('should publish all locales on a branch-only document', async () => {
+    const localizedURL = new AdminUrlUtil(serverURL, localizedSlug)
+    const doc = await payload.create({
+      branch: branchSlug,
+      collection: localizedSlug,
+      data: { title: 'Branch-only English draft' },
+      draft: true,
+      locale: 'en',
+    })
+
+    await payload.update({
+      id: doc.id,
+      branch: branchSlug,
+      collection: localizedSlug,
+      data: { title: 'Borrador solo en la rama' },
+      draft: true,
+      locale: 'es',
+    })
+
+    await page.goto(localizedURL.list)
+    await switchBranch({ name: branchName, page })
+    await gotoAndWaitForForm(page, localizedURL.edit(doc.id))
+    await expect(page.locator('#field-title')).toHaveValue('Branch-only English draft')
+
+    const validationRequests: { branch: null | string; locales: string[]; status: number }[] = []
+    const recordValidation = (response: Response) => {
+      const url = new URL(response.url())
+
+      if (
+        url.pathname === `/api/${localizedSlug}/${doc.id}/validate` &&
+        response.request().method() === 'POST'
+      ) {
+        validationRequests.push({
+          branch: url.searchParams.get('branch'),
+          locales: url.searchParams.getAll('locale'),
+          status: response.status(),
+        })
+      }
+    }
+
+    page.on('response', recordValidation)
+
+    try {
+      await page.getByRole('button', { name: 'More options: Publish', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Publish all locales', exact: true }).click()
+
+      await expect
+        .poll(() => validationRequests)
+        .toEqual([
+          { branch: branchSlug, locales: ['en'], status: 200 },
+          { branch: branchSlug, locales: ['es'], status: 200 },
+        ])
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await expect
+        .poll(async () => {
+          const published = await payload.find({
+            branch: branchSlug,
+            collection: localizedSlug,
+            draft: false,
+            fallbackLocale: false,
+            locale: 'all',
+            where: { id: { equals: doc.id } },
+          })
+
+          return published.docs[0]
+        })
+        .toMatchObject({
+          _status: { en: 'published', es: 'published' },
+          title: { en: 'Branch-only English draft', es: 'Borrador solo en la rama' },
+        })
+
+      await expect
+        .poll(async () => {
+          const onMain = await payload.find({
+            branch: 'main',
+            collection: localizedSlug,
+            draft: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          return onMain.docs
+        })
+        .toHaveLength(0)
+    } finally {
+      page.off('response', recordValidation)
+    }
   })
 
   test.describe('Drafts saved from the admin panel', () => {
