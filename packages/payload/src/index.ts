@@ -1250,6 +1250,16 @@ type CachedPayload = {
   payload: null | Payload
   promise: null | Promise<Payload>
   reload: boolean | Promise<void>
+  /**
+   * Set when a change is reported while a reload is in progress. That reload may already
+   * have read the previous config, so another reload runs on the next `getPayload` call.
+   */
+  reloadQueued: boolean
+  /**
+   * Configs that a reload has replaced. A call that imported one of them before the change is
+   * older than the instance, so it never reloads back to it.
+   */
+  replacedConfigs: WeakSet<SanitizedConfig>
 }
 
 let _cached: Map<string, CachedPayload> = (global as any)._payload
@@ -1313,6 +1323,7 @@ function connectDevReload({
   try {
     cached.devReloadCleanup = strategy.connect(() => {
       if (cached.reload instanceof Promise) {
+        cached.reloadQueued = true
         return
       }
       cached.reload = true
@@ -1366,6 +1377,8 @@ export const getPayload = async (
       payload: null,
       promise: null,
       reload: false,
+      reloadQueued: false,
+      replacedConfigs: new WeakSet(),
     }
     _cached.set(options.key ?? 'default', cached)
   } else {
@@ -1387,6 +1400,27 @@ export const getPayload = async (
       await cached.payload._initializeCrons()
     }
 
+    if (cached.devReloadStrategy && cached.reload !== true) {
+      // A call can bring a config built after the one this instance runs with, yet find no reload
+      // flagged: the change was reported while an earlier call was still importing the config from
+      // before the change, and that call used the flag to reload with the older config. A different
+      // config object is a change too. Module caching keeps the object the same until it changes.
+      const config = await options.config
+      // A reload may be in progress, started before this call or while it awaited its config: wait
+      // for it instead of starting a second, concurrent reload, then compare with its result.
+      // A call that waited for the same reload may start the next one before this call resumes.
+      while (cached.reload instanceof Promise) {
+        await cached.reload
+      }
+      if (
+        cached.reload === false &&
+        config !== cached.payload.config &&
+        !cached.replacedConfigs.has(config)
+      ) {
+        cached.reload = true
+      }
+    }
+
     if (cached.reload === true) {
       let resolve!: () => void
 
@@ -1394,6 +1428,7 @@ export const getPayload = async (
       // we can ensure that all subsequent calls will wait for the first reload to finish. So if we set it here, the 2nd call of getPayload
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
+      cached.reloadQueued = false
       const config = await options.config
 
       // Reload the payload instance after a config change (triggered by HMR in development).
@@ -1406,10 +1441,21 @@ export const getPayload = async (
       // Example scenario: If the frontend calls getPayload() without importMap first, followed by the admin
       // panel calling it with importMap, we'd incorrectly skip generation for the admin panel's needs.
       // By always regenerating on reload, we ensure the import map stays in sync with the updated config.
-      await reload(config, cached.payload, false, options)
+      if (cached.replacedConfigs.has(config)) {
+        // This call imported its config before the change it reports: keep the reload for a call
+        // that brings the newer config instead of going back to an older one.
+        cached.reload = true
+      } else {
+        const replacedConfig = cached.payload.config
+        await reload(config, cached.payload, false, options)
+        if (replacedConfig !== config) {
+          cached.replacedConfigs.add(replacedConfig)
+        }
+        cached.reload = cached.reloadQueued
+      }
 
+      cached.reloadQueued = false
       resolve()
-      cached.reload = false
     }
 
     if (cached.reload instanceof Promise) {
