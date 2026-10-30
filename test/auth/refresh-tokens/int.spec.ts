@@ -70,6 +70,22 @@ test.suite('Refresh tokens', { config: './config.ts' }, () => {
     expect(await getUser({ restClient, token: refreshed.refreshedToken })).toBeNull()
   })
 
+  test('should log out the session when an older refresh token comes back right after a refresh', async ({
+    restClient,
+  }) => {
+    const login = await restClient.login({ slug: collectionSlug, credentials: devUser })
+    const first = await refresh({ refreshToken: login.refreshToken, restClient }).then((res) =>
+      res.json(),
+    )
+    const second = await refresh({ refreshToken: first.refreshToken, restClient }).then((res) =>
+      res.json(),
+    )
+
+    // Like a refresh token copied a while ago, from before the refresh right before this one
+    expect((await refresh({ refreshToken: login.refreshToken, restClient })).status).toBe(403)
+    expect((await refresh({ refreshToken: second.refreshToken, restClient })).status).toBe(403)
+  })
+
   test('should stay logged in after refreshing twice at once', async ({ payload, restClient }) => {
     const login = await restClient.login({ slug: collectionSlug, credentials: devUser })
 

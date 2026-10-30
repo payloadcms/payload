@@ -4,7 +4,7 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { getFieldsToSign } from './getFieldsToSign.js'
 import { jwtSign } from './jwt.js'
-import { createRefreshToken, getRefreshTokenExpiration } from './redeemRefreshToken.js'
+import { createRefreshToken } from './redeemRefreshToken.js'
 import { addSessionToUser } from './sessions.js'
 
 /**
@@ -24,8 +24,8 @@ export const createAuthToken = async ({
   req: PayloadRequest
   /**
    * Also return a refresh token for the session, which `redeemRefreshToken` trades for a new token.
-   * The session then lasts `auth.refreshTokens.expiration` from each refresh, or 30 days when the
-   * collection doesn't enable refresh tokens. Requires `auth.useSessions`.
+   * The session then lasts `auth.refreshTokens.expiration` from each refresh. Only works when the
+   * collection enables `auth.refreshTokens`.
    */
   shouldCreateRefreshToken?: boolean
   user: AuthenticatedUser
@@ -39,13 +39,13 @@ export const createAuthToken = async ({
   sid?: string
   token: string
 }> => {
+  const refreshTokens = shouldCreateRefreshToken && collectionConfig.auth.refreshTokens
+
   const { session, sid } = await addSessionToUser({
     collectionConfig,
     payload: req.payload,
     req,
-    sessionExpiration: shouldCreateRefreshToken
-      ? getRefreshTokenExpiration(collectionConfig)
-      : undefined,
+    sessionExpiration: refreshTokens ? refreshTokens.expiration : undefined,
     user,
   })
 
@@ -58,7 +58,7 @@ export const createAuthToken = async ({
   return {
     exp,
     refreshToken:
-      shouldCreateRefreshToken && session
+      refreshTokens && session
         ? createRefreshToken({ collectionConfig, req, session, userID: user.id })
         : undefined,
     sid,

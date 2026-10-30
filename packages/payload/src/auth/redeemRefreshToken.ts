@@ -2,7 +2,6 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { AuthenticatedUser, UserSession } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
-import { defaultRefreshTokenExpiration } from '../collections/config/defaults.js'
 import { appendNonTrashedFilter } from '../utilities/appendNonTrashedFilter.js'
 import { assertNoValidationWrite } from '../utilities/assertNoValidationWrite.js'
 import { getFieldsToSign } from './getFieldsToSign.js'
@@ -10,25 +9,25 @@ import { jwtSign } from './jwt.js'
 import { extendSession, removeExpiredSessions, revokeSession } from './sessions.js'
 
 /**
- * How long an already used refresh token still works, in milliseconds. Clients that send requests
- * in parallel can refresh twice at once.
+ * How long the refresh token from right before the latest refresh still works, in milliseconds.
+ * Clients that send requests in parallel can refresh twice at once.
  */
 const reuseInterval = 30 * 1000
 
 /** What a refresh token points to. It's encrypted, so clients can't read or change it. */
 type RefreshTokenContents = {
   collection: string
-  /** The session's `expiresAt` when the refresh token was created. Every refresh moves it. */
-  expiresAt: number
+  /** The session's `refreshCount` when the refresh token was created. */
+  refreshCount: number
   sid: string
   userID: number | string
 }
 
 /**
  * Trades a refresh token from `createAuthToken` or an earlier refresh for a new token and a new
- * refresh token. Every refresh moves the session's `expiresAt`, which the refresh token remembers,
- * so a refresh token with an outdated one was already used. That means it was copied, and its
- * session is logged out.
+ * refresh token. Every refresh counts up the session's `refreshCount`, which the refresh token
+ * remembers, so a refresh token with an older count was already used. That means it was copied, and
+ * its session is logged out.
  *
  * The refresh operation uses it when it gets a refresh token. Plugins can also call it directly,
  * since it needs nothing but the refresh token.
@@ -56,8 +55,15 @@ export const redeemRefreshToken = async ({
 
   const contents = readRefreshToken({ refreshToken, req })
   const collectionConfig = contents && req.payload.collections[contents.collection]?.config
+  // Without auth.refreshTokens, sessions have no refreshCount to check refresh tokens against
+  const refreshTokens = collectionConfig?.auth.refreshTokens
 
-  if (!contents || !collectionConfig || (collection && collection !== contents.collection)) {
+  if (
+    !contents ||
+    !collectionConfig ||
+    !refreshTokens ||
+    (collection && collection !== contents.collection)
+  ) {
     return null
   }
 
@@ -77,23 +83,26 @@ export const redeemRefreshToken = async ({
     return null
   }
 
-  const expiration = getRefreshTokenExpiration(collectionConfig)
-  const sessionExpiresAt = new Date(session.expiresAt).getTime()
-  const refreshedAt = sessionExpiresAt - expiration * 1000
+  const refreshCount = session.refreshCount ?? 0
+  const refreshedAt = session.refreshedAt ? new Date(session.refreshedAt).getTime() : 0
 
-  // Usually the refresh token's expiresAt matches the session's exactly. But when a client refreshes
-  // twice at the same time, each refresh saves a new expiresAt, a few milliseconds apart, and only
-  // the last save is kept. So that both new refresh tokens keep working, a refresh token counts as
-  // current when it's less than 30 seconds off.
-  if (sessionExpiresAt - contents.expiresAt < reuseInterval) {
+  if (contents.refreshCount === refreshCount) {
+    // Refreshes at the same moment all save the same count, so their refresh tokens all stay current
+    session.refreshCount = refreshCount + 1
+    session.refreshedAt = new Date()
+
+    // Saves the session with its new count, too
     await extendSession({
       collectionConfig,
       req,
-      sessionExpiration: expiration,
+      sessionExpiration: refreshTokens.expiration,
       sid: session.id,
       user,
     })
-  } else if (Date.now() - refreshedAt >= reuseInterval) {
+  } else if (
+    contents.refreshCount !== refreshCount - 1 ||
+    Date.now() - refreshedAt >= reuseInterval
+  ) {
     await revokeSession({ collectionConfig, payload: req.payload, req, sid: session.id, user })
 
     return null
@@ -115,12 +124,6 @@ export const redeemRefreshToken = async ({
   }
 }
 
-/** How many seconds a session with a refresh token lasts from each refresh. */
-export const getRefreshTokenExpiration = (collectionConfig: SanitizedCollectionConfig): number =>
-  collectionConfig.auth.refreshTokens
-    ? collectionConfig.auth.refreshTokens.expiration
-    : defaultRefreshTokenExpiration
-
 export const createRefreshToken = ({
   collectionConfig,
   req,
@@ -135,7 +138,7 @@ export const createRefreshToken = ({
   req.payload.encrypt(
     JSON.stringify({
       collection: collectionConfig.slug,
-      expiresAt: new Date(session.expiresAt).getTime(),
+      refreshCount: session.refreshCount ?? 0,
       sid: session.id,
       userID,
     } satisfies RefreshTokenContents),
