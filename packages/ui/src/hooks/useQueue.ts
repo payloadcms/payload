@@ -45,7 +45,9 @@ const initializeQueue = (): Queue => {
     isActive = true
 
     const resetCountAtStart = resetCount
+
     const isQueueReset = () => resetCount !== resetCountAtStart
+
     const context: QueueContext = {
       isCurrent: () => !isQueueReset(),
       isQueueReset,
@@ -82,10 +84,12 @@ const initializeQueue = (): Queue => {
   const schedule = <T>(task: QueueTask<T>): Promise<QueueResult<T>> => {
     let resolve!: (result: QueueResult<T>) => void
     let reject!: (reason: unknown) => void
+
     const result = new Promise<QueueResult<T>>((resolvePromise, rejectPromise) => {
       resolve = resolvePromise
       reject = rejectPromise
     })
+
     const entry: PendingEntry = {
       priority: task.priority ?? Infinity,
       reject,
