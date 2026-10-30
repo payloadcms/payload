@@ -426,6 +426,8 @@ test.suite(
     }) => {
       const posts = await createPostsWithPolymorphicRelation({ count: 120, payload })
 
+      await createPostRelatedToCategory({ payload })
+
       // The join on the relationships table resolves the matching IDs first, then loads them by ID
       const where = { 'polymorphicRelations.relationTo': { equals: 'simple' } }
 
@@ -458,6 +460,8 @@ test.suite(
     }) => {
       await createPostsWithPolymorphicRelation({ count: 120, payload })
 
+      const postRelatedToCategory = await createPostRelatedToCategory({ payload })
+
       const where = { 'polymorphicRelations.relationTo': { equals: 'simple' } }
 
       const restoreExecute = limitBoundParameters(payload)
@@ -474,9 +478,13 @@ test.suite(
         restoreExecute()
       }
 
-      const { totalDocs } = await payload.count({ collection: 'posts', overrideAccess: true })
+      const { docs } = await payload.find({
+        collection: 'posts',
+        pagination: false,
+        overrideAccess: true,
+      })
 
-      expect(totalDocs).toBe(0)
+      expect(docs.map(({ id }) => id)).toStrictEqual([postRelatedToCategory.id])
     })
   },
 )
@@ -520,4 +528,21 @@ const createPostsWithPolymorphicRelation = async ({
       }),
     ),
   )
+}
+
+const createPostRelatedToCategory = async ({ payload }: { payload: Payload }) => {
+  const category = await payload.create({
+    collection: 'categories',
+    data: { title: 'category' },
+    overrideAccess: true,
+  })
+
+  return await payload.create({
+    collection: 'posts',
+    data: {
+      polymorphicRelations: [{ relationTo: 'categories', value: category.id }],
+      title: 'post related to a category',
+    },
+    overrideAccess: true,
+  })
 }
