@@ -151,6 +151,38 @@ describe('getPayload dev reload', () => {
     expect((await first).config).toBe(changedConfig)
   })
 
+  it('should compare the config after every reload that ran while the call waited', async () => {
+    const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
+    const configOfFirstCall = createDeferred<SanitizedConfig>()
+    const configOfSecondCall = createDeferred<SanitizedConfig>()
+    const configOfReloadingCall = createDeferred<SanitizedConfig>()
+    const secondChange = createConfig()
+    const thirdChange = createConfig()
+
+    // Two calls find no reload flagged and await their configs
+    const first = get(configOfFirstCall.promise)
+    const second = get(configOfSecondCall.promise)
+
+    // A change is reported and a third call starts the reload
+    onReload()
+    const reloading = get(configOfReloadingCall.promise)
+
+    // Both calls get their configs while the reload runs, the second one first
+    configOfSecondCall.resolve(secondChange)
+    await flush()
+    configOfFirstCall.resolve(thirdChange)
+    await flush()
+
+    // Another change is reported before the reload ends, so the second call starts the next one
+    onReload()
+    configOfReloadingCall.resolve(secondChange)
+    await reloading
+    await second
+
+    // The first call waited for both reloads and still brings a newer config
+    expect((await first).config).toBe(thirdChange)
+  })
+
   it('should not reload back to a config that a reload replaced', async () => {
     const changedConfig = createConfig()
 

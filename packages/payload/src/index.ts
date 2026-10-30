@@ -1408,7 +1408,8 @@ export const getPayload = async (
       const config = await options.config
       // A reload may be in progress, started before this call or while it awaited its config: wait
       // for it instead of starting a second, concurrent reload, then compare with its result.
-      if (cached.reload instanceof Promise) {
+      // A call that waited for the same reload may start the next one before this call resumes.
+      while (cached.reload instanceof Promise) {
         await cached.reload
       }
       if (
