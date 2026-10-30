@@ -26,6 +26,8 @@ export type ReducedField = {
   field: ClientField
   /** The field path (e.g. "title" or "author.name") */
   fieldPath: string
+  /** The field sits inside an array, so one document can hold many values for it. */
+  insideArray?: boolean
   label: React.ReactNode
   operators: {
     label: string
