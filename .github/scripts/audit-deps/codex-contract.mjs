@@ -1,4 +1,5 @@
 import { formatAdvisoryMarker } from './report.mjs'
+import { stripHtmlComments } from './sanitize.mjs'
 
 const GHSA_PATTERN = /^GHSA(-[23456789cfghjmpqrvwx]{4}){3}$/
 const MAX_BODY_LENGTH = 60000
@@ -77,22 +78,4 @@ export function buildPrBody({ body, changeTable, fixable }) {
     formatAdvisoryMarker({ advisories: fixable }) +
     '\n'
   )
-}
-
-/**
- * Removes every HTML comment, not only audit-deps markers, because hidden text can steer
- * later AI reviewers. Repeats until stable to defeat nesting like `<!-<!-- -->-`.
- */
-function stripHtmlComments({ text }) {
-  let current = text
-  let previous
-  do {
-    previous = current
-    current = current
-      .replace(/<!--[\s\S]*?-->/g, '')
-      .replaceAll('<!--', '')
-      .replaceAll('-->', '')
-  } while (current !== previous)
-
-  return current
 }
