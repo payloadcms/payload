@@ -220,7 +220,7 @@ export const updateOperation = async <
       req,
       where: query,
     })
-    const { global, globalExists } = globalVersionResult || {}
+    const { global, globalExists, hasLiveGlobal } = globalVersionResult || {}
 
     if (
       hasWhereAccessResult(accessResults) &&
@@ -228,6 +228,25 @@ export const updateOperation = async <
       (!global || Object.keys(global).length === 0)
     ) {
       throw new Forbidden(req.t)
+    }
+
+    if (
+      !isSavingDraft &&
+      hasDraftsEnabled(globalConfig) &&
+      hasLiveGlobal &&
+      hasWhereAccessResult(accessResults)
+    ) {
+      // Draft access does not authorize overwriting an inaccessible live global.
+      const accessibleLiveGlobal = await payload.db.findGlobal({
+        slug,
+        locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
+        req,
+        where: accessResults,
+      })
+
+      if (!accessibleLiveGlobal || Object.keys(accessibleLiveGlobal).length === 0) {
+        throw new Forbidden(req.t)
+      }
     }
 
     let globalJSON: JsonObject = {}
@@ -528,7 +547,7 @@ export const updateOperation = async <
       // Ensure updatedAt date is always updated
       dataToUpdate.updatedAt = now
 
-      if (globalExists) {
+      if (hasLiveGlobal) {
         resultWithLocales = await payload.db.updateGlobal({
           slug,
           data: dataToUpdate,
