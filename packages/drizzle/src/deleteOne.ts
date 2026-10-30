@@ -47,7 +47,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     docToDelete = await db.query[tableName].findFirst({
       where: eq(this.tables[tableName].id, selectDistinctResult[0].id),
     })
-  } else {
+  } else if (!joins.length) {
     const findManyArgs = buildFindManyArgs({
       adapter: this,
       depth: 0,
