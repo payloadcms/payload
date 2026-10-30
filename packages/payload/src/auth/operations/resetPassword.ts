@@ -166,7 +166,11 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       req,
     })
 
-    await authenticateLocalStrategy({ doc, password: data.password })
+    await authenticateLocalStrategy({
+      doc,
+      password: data.password,
+      passwordHashIterations: payload.config.auth.passwordHashIterations,
+    })
 
     user = doc as AuthenticatedUser
     user.collection = collectionConfig.slug

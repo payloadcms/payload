@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "4.0.0-beta.5",
+  "version": "4.0.0-beta.6",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -125,6 +125,7 @@
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:a11y": "pnpm runts ./test/runE2E.ts a11y",
     "test:a11y:audit": "pnpm runts ./test/runE2E.ts a11y --audit",
+    "test:a11y:report": "cross-env A11Y_REPORT_DIR=.temp/a11y-reports pnpm test:a11y --workers=1",
     "test:a11y:screen-reader": "pnpm runts ./test/runE2E.ts a11y --screen-reader",
     "test:components": "vitest run --project components",
     "test:e2e": "pnpm runts ./test/runE2E.ts",
@@ -188,7 +189,7 @@
     "cross-env": "catalog:",
     "dotenv": "catalog:",
     "drizzle-kit": "0.31.7",
-    "drizzle-orm": "0.44.7",
+    "drizzle-orm": "0.45.2",
     "escape-html": "^1.0.3",
     "execa": "5.1.1",
     "form-data": "3.0.4",
@@ -206,7 +207,7 @@
     "oxlint": "1.88.0",
     "oxlint-tsgolint": "7.0.2004",
     "p-limit": "^5.0.0",
-    "pg": "8.16.3",
+    "pg": "8.20.0",
     "postcss": "^8.4.49",
     "react": "catalog:",
     "react-dom": "catalog:",

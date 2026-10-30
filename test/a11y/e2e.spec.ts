@@ -569,6 +569,19 @@ test.describe('Admin accessibility', () => {
   test.describe('Document editing with touch input', () => {
     test.use({ hasTouch: true })
 
+    test('should clear a selected value by tapping the shared clear button', async ({ page }) => {
+      await gotoCreatePost({ page, postsURL })
+      const field = page.locator('#field-status')
+      const clear = field.getByRole('button', { name: 'Clear', exact: true })
+
+      await expect(field.locator('.rs__single-value')).toHaveText('Draft')
+      await clear.tap()
+      await expect(field.locator('.rs__single-value')).toHaveCount(0)
+      await expect(clear).toBeHidden()
+      await expect(field.getByRole('combobox')).toHaveAttribute('aria-expanded', 'false')
+      await scanA11y({ name: 'select cleared with touch', page })
+    })
+
     test('should clear a selected timezone with touch and keyboard and retain input focus', async ({
       page,
     }) => {

@@ -1599,6 +1599,8 @@ export {
 export { generateImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 export type { ImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 export { genImportMapIterateFields } from './cli/commands/generateImportMap/iterateFields.js'
+export { registerCLIExitCodeHandler } from './cli/runtime/exitCodeHandlers.js'
+export type { CLIExitCodeHandler } from './cli/runtime/exitCodeHandlers.js'
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
