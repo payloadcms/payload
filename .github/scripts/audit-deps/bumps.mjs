@@ -35,6 +35,21 @@ export function slugDependency({ dependency }) {
     .toLowerCase()
 }
 
+/** Compares major.minor.patch; negative when `a` is lower. */
+export function compareVersions({ a, b }) {
+  const partsA = a.split(/[.-]/).map((part) => Number.parseInt(part, 10) || 0)
+  const partsB = b.split(/[.-]/).map((part) => Number.parseInt(part, 10) || 0)
+
+  for (let index = 0; index < 3; index++) {
+    const difference = (partsA[index] ?? 0) - (partsB[index] ?? 0)
+    if (difference !== 0) {
+      return difference
+    }
+  }
+
+  return 0
+}
+
 /**
  * One bump per dependency, aimed at the highest fix version across its findings.
  * A major bump gets a non-major fallback only when some finding is fixed within the current major.
@@ -304,18 +319,4 @@ function majorOf({ version }) {
 
 function minorOf({ version }) {
   return Number.parseInt(version.split('.')[1] ?? '0', 10)
-}
-
-function compareVersions({ a, b }) {
-  const partsA = a.split(/[.-]/).map((part) => Number.parseInt(part, 10) || 0)
-  const partsB = b.split(/[.-]/).map((part) => Number.parseInt(part, 10) || 0)
-
-  for (let index = 0; index < 3; index++) {
-    const difference = (partsA[index] ?? 0) - (partsB[index] ?? 0)
-    if (difference !== 0) {
-      return difference
-    }
-  }
-
-  return 0
 }

@@ -1,6 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
+import { compareVersions } from './bumps.mjs'
+
 /**
  * @typedef {object} AppliedChange
  * @property {string} file repo-relative path of the edited file
@@ -25,11 +27,24 @@ export class UnsupportedSpecifierError extends Error {
   }
 }
 
-/** Keeps the range prefix of `spec` and swaps in `version`. */
+export class NonRaisingBumpError extends Error {
+  constructor({ spec, version }) {
+    super(`Specifier "${spec}" already reaches ${version}; the bump would not raise it.`)
+    this.name = 'NonRaisingBumpError'
+  }
+}
+
+/**
+ * Keeps the range prefix of `spec` and swaps in `version`. Throws when `spec` already reaches
+ * `version`, because the edit would be a no-op or a downgrade.
+ */
 export function setSpecifierVersion({ spec, version }) {
   const match = SPECIFIER_PATTERN.exec(spec)
   if (!match) {
     throw new UnsupportedSpecifierError({ spec })
+  }
+  if (compareVersions({ a: match[2], b: version }) >= 0) {
+    throw new NonRaisingBumpError({ spec, version })
   }
   return `${match[1]}${version}`
 }

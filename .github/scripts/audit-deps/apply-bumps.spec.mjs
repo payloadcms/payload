@@ -4,7 +4,12 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { applyBumps, setSpecifierVersion, UnsupportedSpecifierError } from './apply-bumps.mjs'
+import {
+  applyBumps,
+  NonRaisingBumpError,
+  setSpecifierVersion,
+  UnsupportedSpecifierError,
+} from './apply-bumps.mjs'
 
 function bump({ dependency = 'dep', to, manifests }) {
   return {
@@ -152,6 +157,43 @@ describe('applyBumps', () => {
     await expect(
       applyBumps({ bumps: [bump({ to: '7.0.3', manifests: ['a/package.json'] })], cwd }),
     ).rejects.toThrow(UnsupportedSpecifierError)
+  })
+
+  it.each([
+    ['5.7.0', '5.6.1'],
+    ['5.6.1', '5.6.1'],
+  ])('throws when the manifest spec %s already reaches %s', async (spec, to) => {
+    const pkg = `{\n  "dependencies": {\n    "dep": "${spec}"\n  }\n}\n`
+    const cwd = await makeRepo({ files: { 'a/package.json': pkg } })
+
+    await expect(
+      applyBumps({ bumps: [bump({ to, manifests: ['a/package.json'] })], cwd }),
+    ).rejects.toThrow(NonRaisingBumpError)
+    expect(await readFile(path.join(cwd, 'a/package.json'), 'utf8')).toBe(pkg)
+  })
+
+  it('throws when the catalog spec already reaches the target', async () => {
+    const cwd = await makeRepo({
+      files: {
+        'a/package.json': '{\n  "dependencies": {\n    "dep": "catalog:"\n  }\n}\n',
+        'pnpm-workspace.yaml': "catalog:\n  dep: '^5.7.0'\n",
+      },
+    })
+
+    await expect(
+      applyBumps({ bumps: [bump({ to: '5.6.1', manifests: ['a/package.json'] })], cwd }),
+    ).rejects.toThrow(NonRaisingBumpError)
+  })
+
+  it('raises a range spec below the target', async () => {
+    const pkg = '{\n  "dependencies": {\n    "dep": "^5.6.0"\n  }\n}\n'
+    const cwd = await makeRepo({ files: { 'a/package.json': pkg } })
+
+    await applyBumps({ bumps: [bump({ to: '5.6.1', manifests: ['a/package.json'] })], cwd })
+
+    expect(await readFile(path.join(cwd, 'a/package.json'), 'utf8')).toBe(
+      pkg.replace('^5.6.0', '^5.6.1'),
+    )
   })
 
   it('throws when the manifest does not declare the dependency', async () => {
