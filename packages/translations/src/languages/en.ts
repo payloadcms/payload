@@ -511,10 +511,15 @@ export const enTranslations = {
   upload: {
     addFile: 'Add file',
     addFiles: 'Add files',
+    aspectRatio: 'Aspect Ratio',
+    aspectRatioCustom: 'Custom',
+    aspectRatioFreeform: 'Freeform',
+    aspectRatioOriginal: 'Original image',
     bulkUpload: 'Bulk Upload',
     crop: 'Crop',
     cropToolDescription:
       'Drag the corners of the selected area, draw a new area or adjust the values below.',
+    customAspectRatio: 'Custom ratio',
     download: 'Download',
     dragAndDrop: 'Drag and drop a file',
     dragAndDropHere: 'or drag and drop a file here',
@@ -527,6 +532,7 @@ export const enTranslations = {
     focalPointDescription:
       'Drag the focal point directly on the preview or adjust the values below.',
     height: 'Height',
+    invalidAspectRatio: 'Enter a ratio as width:height, for example 16:9.',
     lessInfo: 'Less info',
     moreInfo: 'More info',
     noFile: 'No file',

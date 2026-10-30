@@ -508,10 +508,15 @@ export const ukTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Додати файл',
     addFiles: 'Додати файли',
+    aspectRatio: 'Співвідношення сторін',
+    aspectRatioCustom: 'Власне',
+    aspectRatioFreeform: 'Вільне',
+    aspectRatioOriginal: 'Оригінальне зображення',
     bulkUpload: 'Масове завантаження',
     crop: 'Обрізати',
     cropToolDescription:
       'Перетягніть кути обраної області, намалюйте нову область або скоригуйте значення нижче.',
+    customAspectRatio: 'Власне співвідношення',
     download: 'Завантажити',
     dragAndDrop: 'Перемістіть файл',
     dragAndDropHere: 'або перемістіть сюди файл',
@@ -524,6 +529,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Перетягніть точку фокусу безпосередньо на попередньому перегляді або налаштуйте значення нижче.',
     height: 'Висота',
+    invalidAspectRatio: 'Введіть співвідношення у форматі ширина:висота, наприклад 16:9.',
     lessInfo: 'Менше інформації',
     moreInfo: 'Більше інформації',
     noFile: 'Немає файлу',

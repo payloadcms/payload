@@ -502,10 +502,15 @@ export const faTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'افزودن فایل',
     addFiles: 'افزودن فایل‌ها',
+    aspectRatio: 'نسبت ابعاد',
+    aspectRatioCustom: 'سفارشی',
+    aspectRatioFreeform: 'آزاد',
+    aspectRatioOriginal: 'تصویر اصلی',
     bulkUpload: 'آپلود گروهی',
     crop: 'برش',
     cropToolDescription:
       'گوشه‌های ناحیه انتخاب شده را بکشید، یک ناحیه جدید رسم کنید یا مقادیر زیر را تنظیم نمایید.',
+    customAspectRatio: 'نسبت سفارشی',
     download: 'دانلود',
     dragAndDrop: 'یک فایل را اینجا بکشید و رها کنید',
     dragAndDropHere: 'یا یک فایل را اینجا بکشید و رها کنید',
@@ -517,6 +522,7 @@ export const faTranslations: DefaultTranslationsObject = {
     focalPoint: 'نقطه کانونی',
     focalPointDescription: 'نقطه کانونی را مستقیماً روی تصویر بکشید یا مقادیر زیر را تنظیم کنید.',
     height: 'ارتفاع',
+    invalidAspectRatio: 'نسبت را به صورت عرض:ارتفاع وارد کنید، مثلاً 16:9.',
     lessInfo: 'اطلاعات کمتر',
     moreInfo: 'اطلاعات بیشتر',
     noFile: 'فایلی وجود ندارد',

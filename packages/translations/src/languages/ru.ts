@@ -514,10 +514,15 @@ export const ruTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Добавить файл',
     addFiles: 'Добавить файлы',
+    aspectRatio: 'Соотношение сторон',
+    aspectRatioCustom: 'Пользовательское',
+    aspectRatioFreeform: 'Свободное',
+    aspectRatioOriginal: 'Исходное изображение',
     bulkUpload: 'Массовая загрузка',
     crop: 'Обрезать',
     cropToolDescription:
       'Перетащите углы выбранной области, нарисуйте новую область или отрегулируйте значения ниже.',
+    customAspectRatio: 'Пользовательское соотношение',
     download: 'Скачать',
     dragAndDrop: 'Перетащите файл',
     dragAndDropHere: 'или перетащите файл сюда',
@@ -530,6 +535,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Перетащите фокусное расстояние прямо на предварительный просмотр или отрегулируйте значения ниже.',
     height: 'Высота',
+    invalidAspectRatio: 'Введите соотношение в формате ширина:высота, например 16:9.',
     lessInfo: 'Меньше информации',
     moreInfo: 'Больше информации',
     noFile: 'Нет файла',
