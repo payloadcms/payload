@@ -3,9 +3,10 @@ const MAX_PAGES = 5
 const PAGE_SIZE = 100
 const MAX_COMMITS = 10
 const DEFAULT_EVIDENCE_BUDGET = 120000
-const BOT_PATTERN = /(\[bot\]$|^renovate|^dependabot|^github-actions)/i
+const BOT_PATTERN = /(\[bot\]$|^(renovate|dependabot|github-actions)$)/i
 const VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/
-const HEADING_PATTERN = /^#{1,3}\s+(.*)$/
+const STRICT_VERSION_PATTERN = /^\d+\.\d+\.\d+$/
+const HEADING_PATTERN = /^(#{1,3})\s+(.*)$/
 
 /**
  * @typedef {object} Repo
@@ -51,18 +52,21 @@ export async function fetchWeeklyDownloads({ fetch, name, version }) {
   return typeof count === 'number' ? count : null
 }
 
-/** @returns {Promise<string | null>} */
+/**
+ * Resolves the first existing tag among v<ver>, <ver>, <name>@<ver>, <dir>-v<ver>.
+ * @returns {Promise<string | null>}
+ */
 export async function findTag({ fetch, repo, name, version, token }) {
   if (!repo) {
     return null
   }
-  const tags = await listTags({ fetch, repo, token })
-  return pickTag({ tags, repo, name, version })?.name ?? null
+  return createTagResolver({ fetch, repo, name, token })(version)
 }
 
 /**
- * Release notes for one bump. Majors list X.0.0 releases in (from, to]; with `includeMinors`
- * every other release in range follows them. Non-majors list only the `to` release.
+ * Release notes for one bump. Majors list X.0.0 versions in (from, to], taken from the npm
+ * packument; with `includeMinors` the other releases in range follow. Non-majors list only
+ * the `to` release. Each version uses its GitHub release, else its CHANGELOG.md section.
  * @returns {Promise<{
  *   entries: NoteEntry[],
  *   links: { releases: string | null, changelog: string | null, compare: string | null },
@@ -80,45 +84,65 @@ export async function fetchReleaseNotes({
   token,
 }) {
   const links = { releases: null, changelog: null, compare: null }
-  if (!repo) {
+  if (!repo || !isStrictVersion({ version: from }) || !isStrictVersion({ version: to })) {
     return { entries: [], links, source: 'none' }
   }
 
   const repoUrl = `https://github.com/${repo.owner}/${repo.name}`
   links.releases = `${repoUrl}/releases`
 
-  const tags = await listTags({ fetch, repo, token })
-  const fromTag = pickTag({ tags, repo, name, version: from })
-  const toTag = pickTag({ tags, repo, name, version: to })
+  const resolveTag = createTagResolver({ fetch, repo, name, token })
+  const [fromTag, toTag] = await Promise.all([resolveTag(from), resolveTag(to)])
   if (fromTag && toTag) {
-    links.compare = `${repoUrl}/compare/${fromTag.name}...${toTag.name}`
+    links.compare = `${repoUrl}/compare/${fromTag}...${toTag}`
   }
 
-  const select = (candidates) => selectEntries({ candidates, from, to, isMajor, includeMinors })
+  const shouldIncludeMinors = isMajor && includeMinors
+  const targets = isMajor ? await listMajorVersions({ fetch, name, from, to }) : [to]
+  const released = await Promise.all(
+    targets.map(async (version) => {
+      const tag = await resolveTag(version)
+      return tag ? fetchTagRelease({ fetch, repo, tag, version, token }) : null
+    }),
+  )
+  const releasedVersions = new Set(released.filter(Boolean).map((entry) => entry.version))
+  const missingVersions = targets.filter((version) => !releasedVersions.has(version))
 
-  const releaseEntries = select(await fetchReleaseCandidates({ fetch, repo, name, token }))
-  if (releaseEntries.length > 0) {
-    return { entries: releaseEntries, links, source: 'releases' }
+  const listedMinors = shouldIncludeMinors
+    ? (await fetchReleaseCandidates({ fetch, repo, name, token })).filter((candidate) =>
+        isMinorInRange({ version: candidate.version, from, to }),
+      )
+    : []
+
+  const needsChangelog =
+    missingVersions.length > 0 || (shouldIncludeMinors && listedMinors.length === 0)
+  const sections = []
+  if (needsChangelog) {
+    const changelogPath = repo.directory ? `${repo.directory}/CHANGELOG.md` : 'CHANGELOG.md'
+    const text = await getText({
+      fetch,
+      url: `${GITHUB_API}/repos/${repo.owner}/${repo.name}/contents/${encodeURI(changelogPath)}`,
+      token,
+      accept: 'application/vnd.github.raw+json',
+    })
+    if (text !== null) {
+      links.changelog = `${repoUrl}/blob/HEAD/${changelogPath}`
+      sections.push(...cutChangelog({ text, url: links.changelog }))
+    }
   }
 
-  const changelogPath = repo.directory ? `${repo.directory}/CHANGELOG.md` : 'CHANGELOG.md'
-  const changelogText = await getText({
-    fetch,
-    url: `${GITHUB_API}/repos/${repo.owner}/${repo.name}/contents/${encodeURI(changelogPath)}`,
-    token,
-    accept: 'application/vnd.github.raw+json',
+  const releaseEntries = [...released.filter(Boolean), ...toEntries({ candidates: listedMinors })]
+  const shouldTakeChangelogMinors = shouldIncludeMinors && listedMinors.length === 0
+  const changelogEntries = toEntries({
+    candidates: dedupeByVersion({ candidates: sections }).filter(
+      (section) =>
+        missingVersions.includes(section.version) ||
+        (shouldTakeChangelogMinors && isMinorInRange({ version: section.version, from, to })),
+    ),
   })
-  if (changelogText === null) {
-    return { entries: [], links, source: 'none' }
-  }
 
-  links.changelog = `${repoUrl}/blob/HEAD/${changelogPath}`
-  const changelogEntries = select(cutChangelog({ text: changelogText, url: links.changelog }))
-  return {
-    entries: changelogEntries,
-    links,
-    source: changelogEntries.length > 0 ? 'changelog' : 'none',
-  }
+  const entries = sortEntries({ entries: [...releaseEntries, ...changelogEntries] })
+  return { entries, links, source: pickSource({ releaseEntries, changelogEntries }) }
 }
 
 /**
@@ -147,26 +171,29 @@ export async function fetchCommits({ fetch, repo, name, from, to, token }) {
     }
   }
 
-  const tags = await listTags({ fetch, repo, token })
-  const fromTag = pickTag({ tags, repo, name, version: from })
-  const toTag = pickTag({ tags, repo, name, version: to })
+  const resolveTag = createTagResolver({ fetch, repo, name, token })
+  const [fromTag, toTag] = await Promise.all([resolveTag(from), resolveTag(to)])
   if (!fromTag || !toTag) {
     return empty
   }
 
-  const compareUrl = `https://github.com/${repo.owner}/${repo.name}/compare/${fromTag.name}...${toTag.name}`
-  const rawCommits = repo.directory
+  const compareUrl = `https://github.com/${repo.owner}/${repo.name}/compare/${fromTag}...${toTag}`
+  const fetched = repo.directory
     ? await fetchPathCommits({ fetch, repo, fromTag, toTag, token })
     : await fetchCompareCommits({ fetch, repo, fromTag, toTag, token })
-  if (!rawCommits) {
+  if (!fetched) {
     return empty
   }
 
-  const humanCommits = rawCommits.filter((commit) => !isBotCommit({ commit }))
+  const humanCommits = fetched.commits.filter((commit) => !isBotCommit({ commit }))
+  const botCount = fetched.commits.length - humanCommits.length
   return {
     ...empty,
     commits: humanCommits.slice(0, MAX_COMMITS).map(toCommitSummary),
-    total: humanCommits.length,
+    total:
+      typeof fetched.totalCommits === 'number'
+        ? Math.max(humanCommits.length, fetched.totalCommits - botCount)
+        : humanCommits.length,
     compareUrl,
   }
 }
@@ -255,12 +282,93 @@ function tagPrefixes({ repo, name }) {
   )
 }
 
-function pickTag({ tags, repo, name, version }) {
-  const names = new Set(tags.map((tag) => tag.name))
-  const match = tagPrefixes({ repo, name })
-    .map((prefix) => `${prefix}${version}`)
-    .find((candidate) => names.has(candidate))
-  return tags.find((tag) => tag.name === match) ?? null
+/** Returns a memoized `(version) => tag | null` that probes each candidate via the git ref API. */
+function createTagResolver({ fetch, repo, name, token }) {
+  const cache = new Map()
+
+  const resolveOne = async (version) => {
+    for (const prefix of tagPrefixes({ repo, name })) {
+      const tag = `${prefix}${version}`
+      const ref = await getJson({
+        fetch,
+        url: `${GITHUB_API}/repos/${repo.owner}/${repo.name}/git/ref/tags/${encodeURIComponent(tag)}`,
+        token,
+      })
+      if (ref) {
+        return tag
+      }
+    }
+    return null
+  }
+
+  return (version) => {
+    if (!cache.has(version)) {
+      cache.set(version, resolveOne(version))
+    }
+    return cache.get(version)
+  }
+}
+
+async function fetchTagRelease({ fetch, repo, tag, version, token }) {
+  const release = await getJson({
+    fetch,
+    url: `${GITHUB_API}/repos/${repo.owner}/${repo.name}/releases/tags/${encodeURIComponent(tag)}`,
+    token,
+  })
+  const text = (release?.body ?? '').trim()
+  if (!release || release.draft || !text) {
+    return null
+  }
+  return { version, url: release.html_url ?? '', text, isMajor: isMajorRelease({ version }) }
+}
+
+async function listMajorVersions({ fetch, name, from, to }) {
+  const packument = await getJson({ fetch, url: `https://registry.npmjs.org/${encodeName(name)}` })
+  const versions = new Set(Object.keys(packument?.versions ?? {}))
+  versions.add(to)
+
+  return [...versions].filter(
+    (version) =>
+      isStrictVersion({ version }) &&
+      isMajorRelease({ version }) &&
+      compareVersions({ a: version, b: from }) > 0 &&
+      compareVersions({ a: version, b: to }) <= 0,
+  )
+}
+
+function isMinorInRange({ version, from, to }) {
+  return (
+    !isMajorRelease({ version }) &&
+    compareVersions({ a: version, b: from }) > 0 &&
+    compareVersions({ a: version, b: to }) <= 0
+  )
+}
+
+function isStrictVersion({ version }) {
+  return STRICT_VERSION_PATTERN.test(version)
+}
+
+function dedupeByVersion({ candidates }) {
+  const byVersion = new Map()
+  for (const candidate of candidates) {
+    if (!byVersion.has(candidate.version)) {
+      byVersion.set(candidate.version, candidate)
+    }
+  }
+  return [...byVersion.values()]
+}
+
+function toEntries({ candidates }) {
+  return candidates
+    .filter((candidate) => isStrictVersion({ version: candidate.version }))
+    .map((candidate) => ({ ...candidate, isMajor: isMajorRelease({ version: candidate.version }) }))
+}
+
+function pickSource({ releaseEntries, changelogEntries }) {
+  if (changelogEntries.length > 0) {
+    return 'changelog'
+  }
+  return releaseEntries.length > 0 ? 'releases' : 'none'
 }
 
 function versionFromTag({ tag, repo, name }) {
@@ -274,16 +382,6 @@ function versionFromTag({ tag, repo, name }) {
     }
   }
   return null
-}
-
-async function listTags({ fetch, repo, token }) {
-  const pages = await listPages({
-    fetch,
-    token,
-    url: (page) =>
-      `${GITHUB_API}/repos/${repo.owner}/${repo.name}/tags?per_page=${PAGE_SIZE}&page=${page}`,
-  })
-  return pages.filter((tag) => typeof tag?.name === 'string')
 }
 
 async function fetchReleaseCandidates({ fetch, repo, name, token }) {
@@ -318,12 +416,16 @@ async function listPages({ fetch, url, token }) {
   return items
 }
 
-async function fetchCompareCommits({ fetch, repo, fromTag, toTag }) {
+async function fetchCompareCommits({ fetch, repo, fromTag, toTag, token }) {
   const data = await getJson({
     fetch,
-    url: `${GITHUB_API}/repos/${repo.owner}/${repo.name}/compare/${encodeURIComponent(fromTag.name)}...${encodeURIComponent(toTag.name)}`,
+    url: `${GITHUB_API}/repos/${repo.owner}/${repo.name}/compare/${encodeURIComponent(fromTag)}...${encodeURIComponent(toTag)}?per_page=${PAGE_SIZE}`,
+    token,
   })
-  return Array.isArray(data?.commits) ? data.commits : null
+  if (!Array.isArray(data?.commits)) {
+    return null
+  }
+  return { commits: data.commits, totalCommits: data.total_commits }
 }
 
 async function fetchPathCommits({ fetch, repo, fromTag, toTag, token }) {
@@ -331,7 +433,7 @@ async function fetchPathCommits({ fetch, repo, fromTag, toTag, token }) {
     [fromTag, toTag].map((tag) =>
       getJson({
         fetch,
-        url: `${GITHUB_API}/repos/${repo.owner}/${repo.name}/commits/${encodeURIComponent(tag.name)}`,
+        url: `${GITHUB_API}/repos/${repo.owner}/${repo.name}/commits/${encodeURIComponent(tag)}`,
         token,
       }),
     ),
@@ -342,21 +444,21 @@ async function fetchPathCommits({ fetch, repo, fromTag, toTag, token }) {
     return null
   }
 
-  const query = new URLSearchParams({
-    path: repo.directory,
-    since,
-    until,
-    per_page: String(PAGE_SIZE),
-  })
-  const commits = await getJson({
+  const commits = await listPages({
     fetch,
-    url: `${GITHUB_API}/repos/${repo.owner}/${repo.name}/commits?${query}`,
     token,
+    url: (page) => {
+      const query = new URLSearchParams({
+        path: repo.directory,
+        since,
+        until,
+        per_page: String(PAGE_SIZE),
+        page: String(page),
+      })
+      return `${GITHUB_API}/repos/${repo.owner}/${repo.name}/commits?${query}`
+    },
   })
-  if (!Array.isArray(commits)) {
-    return null
-  }
-  return commits.filter((commit) => commit.sha !== fromCommit.sha)
+  return { commits: commits.filter((commit) => commit.sha !== fromCommit.sha), totalCommits: null }
 }
 
 function isBotCommit({ commit }) {
@@ -388,25 +490,7 @@ function compareVersions({ a, b }) {
   return 0
 }
 
-function selectEntries({ candidates, from, to, isMajor, includeMinors }) {
-  const byVersion = new Map()
-  for (const candidate of candidates) {
-    if (!byVersion.has(candidate.version)) {
-      byVersion.set(candidate.version, candidate)
-    }
-  }
-
-  const entries = [...byVersion.values()]
-    .filter((candidate) => compareVersions({ a: candidate.version, b: from }) > 0)
-    .filter((candidate) => compareVersions({ a: candidate.version, b: to }) <= 0)
-    .map((candidate) => ({ ...candidate, isMajor: isMajorRelease({ version: candidate.version }) }))
-    .filter((entry) => {
-      if (!isMajor) {
-        return entry.version === to
-      }
-      return entry.isMajor || includeMinors
-    })
-
+function sortEntries({ entries }) {
   const newestFirst = (a, b) => compareVersions({ a: b.version, b: a.version })
   return [
     ...entries.filter((entry) => entry.isMajor).sort(newestFirst),
@@ -419,15 +503,22 @@ function isMajorRelease({ version }) {
   return minor === 0 && patch === 0
 }
 
-/** Splits a changelog at headings that carry a semver, in any of `#`, `##`, `###`. */
+/** Splits a changelog at the shallowest heading level that carries a semver. */
 function cutChangelog({ text, url }) {
+  const lines = text.split('\n')
+  const versionLevels = lines
+    .map((line) => line.match(HEADING_PATTERN))
+    .filter((heading) => heading?.[2].match(VERSION_PATTERN))
+    .map((heading) => heading[1].length)
+  const sectionLevel = Math.min(...versionLevels)
+
   const sections = []
   let current = null
 
-  for (const line of text.split('\n')) {
+  for (const line of lines) {
     const heading = line.match(HEADING_PATTERN)
-    const version = heading?.[1].match(VERSION_PATTERN)?.[0]
-    if (version) {
+    const version = heading?.[2].match(VERSION_PATTERN)?.[0]
+    if (version && heading[1].length === sectionLevel) {
       current = { version, url, lines: [] }
       sections.push(current)
       continue
