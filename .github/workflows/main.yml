@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   changes:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: read
@@ -31,8 +31,11 @@ jobs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       needs_tests: ${{ steps.filter.outputs.needs_tests }}
       needs_visual: ${{ steps.filter.outputs.needs_visual }}
+      needs_a11y: ${{ steps.a11y_filter.outputs.needs_a11y }}
+      a11y_files: ${{ steps.a11y_report_files.outputs.files }}
       templates: ${{ steps.filter.outputs.templates }}
       build_approvals: ${{ steps.filter.outputs.build_approvals }}
+      needs_sbom: ${{ steps.filter.outputs.needs_sbom }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
@@ -44,6 +47,8 @@ jobs:
         with:
           filters: |
             needs_build:
+              - '.github/filters/a11y.yml'
+              - '.github/scripts/a11y/**'
               - '.github/workflows/main.yml'
               - '.github/actions/start-services/**'
               - '.github/actions/setup/**'
@@ -54,13 +59,17 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'package.json'
               - 'templates/**'
+              - 'vitest.config.ts'
             needs_tests:
+              - '.github/filters/a11y.yml'
+              - '.github/scripts/a11y/**'
               - '.github/workflows/main.yml'
               - '.github/actions/start-services/**'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
               - 'package.json'
+              - 'vitest.config.ts'
             templates:
               - 'templates/**'
             # Also gates tests-unit via its own `if`. Excludes plain `packages/**/*.ts` changes on
@@ -101,20 +110,53 @@ jobs:
               # the root lockfile; that, plus the allowlist itself, is what can introduce drift.
               - 'pnpm-lock.yaml'
               - 'packages/create-payload-app/src/lib/configure-pnpm-builds.ts'
+            # Inputs of the release SBOMs (the dependency graph, the pnpm version, the generator) and this job.
+            needs_sbom:
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'packages/*/package.json'
+              - '.tool-versions'
+              - 'tools/releaser/src/release-sbom.ts'
+              - 'tools/releaser/src/lib/sbom/**'
+              - 'tools/releaser/src/lib/publishList.ts'
+              - 'tools/releaser/src/lib/getPackageDetails.ts'
+              - 'tools/releaser/package.json'
+              - 'tools/constants/**'
+              - 'package.json'
+              - '.github/actions/setup/**'
+              - '.github/workflows/main.yml'
+      - name: Filter accessibility changes
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        id: a11y_filter
+        with:
+          list-files: json
+          filters: .github/filters/a11y.yml
+
+      - name: Bound accessibility report file list
+        id: a11y_report_files
+        continue-on-error: true
+        # The full JSON list travels through stdin, never an argument or environment variable.
+        run: |
+          node .github/scripts/a11y/matched-files.mjs <<'A11Y_MATCHED_FILES_JSON'
+          ${{ steps.a11y_filter.outputs.needs_a11y_files }}
+          A11Y_MATCHED_FILES_JSON
+
       - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "needs_visual: ${{ steps.filter.outputs.needs_visual }}"
+          echo "needs_a11y: ${{ steps.a11y_filter.outputs.needs_a11y }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
           echo "build_approvals: ${{ steps.filter.outputs.build_approvals }}"
+          echo "needs_sbom: ${{ steps.filter.outputs.needs_sbom }}"
 
   # Detects upstream Next.js canary publishes that are missing `@next/env` or
   # `@next/eslint-plugin-next` for the same version (would break
   # `pnpm create next-app@canary` with `ERR_PNPM_NO_MATCHING_VERSION`).
   probe-next-canary:
     name: probe-next-canary
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: changes
     if: needs.changes.outputs.needs_tests == 'true'
     outputs:
@@ -157,7 +199,7 @@ jobs:
           fi
 
   lint:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v5
         with:
@@ -166,40 +208,21 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
 
+      - name: Check formatting
+        run: pnpm format:check
+
       - name: Lint TypeScript/JavaScript
-        run: pnpm lint -- --quiet
+        run: pnpm lint --quiet
         env:
           NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
       - name: Lint CSS
-        env:
-          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.sha }}
-        run: |
-          if [ -z "$BASE_SHA" ] || ! git cat-file -e "$BASE_SHA" 2>/dev/null; then
-            echo "No usable base commit found, linting all CSS files"
-            pnpm run lint:css
-            exit $?
-          fi
-
-          changed_css_files=()
-          while IFS= read -r file; do
-            changed_css_files+=("$file")
-          done < <(git diff --name-only --diff-filter=ACMR "$BASE_SHA...$HEAD_SHA" -- 'packages/ui/src/**/*.css' 'templates/**/*.css')
-
-          if [ ${#changed_css_files[@]} -eq 0 ]; then
-            echo "No changed CSS files, skipping stylelint"
-            exit 0
-          fi
-
-          echo "Linting changed CSS files:"
-          printf '  %s\n' "${changed_css_files[@]}"
-          pnpm exec stylelint "${changed_css_files[@]}"
+        run: pnpm run lint:css
 
   build:
     needs: changes
-    if: needs.changes.outputs.needs_build == 'true'
-    runs-on: ubuntu-24.04
+    if: needs.changes.outputs.needs_build == 'true' || needs.changes.outputs.needs_a11y == 'true'
+    runs-on: ubuntu-26.04
 
     steps:
       - uses: actions/checkout@v5
@@ -228,8 +251,28 @@ jobs:
           path: packages/*/dist
           key: dist-${{ github.sha }}
 
+  # Catches SBOM generation regressions before a release. Push to main only, not part of all-green.
+  sbom:
+    needs: changes
+    if: github.event_name == 'push' && needs.changes.outputs.needs_sbom == 'true'
+    runs-on: ubuntu-26.04
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+
+      - name: Generate SBOMs
+        run: pnpm release-sbom --out-dir "$RUNNER_TEMP/sboms"
+
   tests-unit:
-    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true' || needs.changes.outputs.needs_visual == 'true'
     steps:
@@ -245,8 +288,17 @@ jobs:
         env:
           NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
+      - name: Browser setup
+        uses: ./.github/actions/setup-playwright
+
+      - name: Component Tests
+        run: pnpm test:components
+
   tests-types:
-    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
     steps:
@@ -265,7 +317,7 @@ jobs:
   # Generate the integration test matrix from TypeScript config
   int-matrix:
     name: Setup Int Matrix
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       matrix: ${{ steps.generate.outputs.matrix }}
     steps:
@@ -286,7 +338,10 @@ jobs:
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   tests-int:
-    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-26.04
     needs: [changes, build, int-matrix, probe-next-canary]
     if: needs.changes.outputs.needs_tests == 'true'
     name: int-${{ matrix.database }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
@@ -337,7 +392,7 @@ jobs:
   # Generate the E2E test matrix from TypeScript config
   e2e-matrix:
     name: Setup E2E Matrix
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       matrix: ${{ steps.generate.outputs.matrix }}
     steps:
@@ -359,10 +414,13 @@ jobs:
 
   # Prepare prod test environment once, shared by all E2E shards
   e2e-prep:
+    permissions:
+      actions: read
+      contents: read
     name: E2E Prep
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [changes, build]
-    if: needs.changes.outputs.needs_tests == 'true'
+    if: needs.changes.outputs.needs_tests == 'true' || needs.changes.outputs.needs_a11y == 'true'
     steps:
       - uses: actions/checkout@v5
 
@@ -387,9 +445,13 @@ jobs:
           if-no-files-found: error
 
   tests-e2e:
-    runs-on: ubuntu-24.04
-    needs: [e2e-matrix, e2e-prep]
-    name: E2E - ${{ matrix.suite }} [${{ matrix.framework }}]${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.cacheComponents && ' [cacheComponents]' || '' }}
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-26.04
+    needs: [changes, e2e-matrix, e2e-prep]
+    if: needs.changes.outputs.needs_tests == 'true'
+    name: E2E - ${{ matrix.suite || 'all suites' }} [${{ matrix.framework }}]${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.disableCacheComponents && ' [without cacheComponents]' || '' }}
     timeout-minutes: 45
     # TanStack Start suites are optional for now: their failures must not block the
     # `all-green` gate. `matrix.optional` is true for tanstack-start entries (see e2e-matrix.ts).
@@ -399,7 +461,7 @@ jobs:
       matrix: ${{ fromJson(needs.e2e-matrix.outputs.matrix) }}
     env:
       SUITE_NAME: ${{ matrix.suite }}
-      PAYLOAD_CACHE_COMPONENTS: ${{ matrix.cacheComponents && 'true' || '' }}
+      PAYLOAD_DISABLE_CACHE_COMPONENTS: ${{ matrix.disableCacheComponents && 'true' || '' }}
       PAYLOAD_FRAMEWORK: ${{ matrix.framework }}
     steps:
       - uses: actions/checkout@v5
@@ -448,6 +510,9 @@ jobs:
         # - shards: Number of CI runners to split this suite across
         # - framework: Framework adapter used to boot the test app (default: next)
         # - parallel: Whether tests within the suite can run concurrently (default: false)
+        # - disableCacheComponents: Whether to disable Next.js `cacheComponents` (default: false)
+        # - grep: Only run matching tests. An entry with an empty `file` runs them from every suite
+        #   (used to run `@also-without-cache-components` tests with cacheComponents disabled)
         #
         # Flags explained:
         # - --fully-parallel: Enables test-level sharding (distributes individual tests across shards,
@@ -476,7 +541,7 @@ jobs:
         # `visual-regression` job (gated on `needs_visual`), never by this unconditional matrix —
         # otherwise a `@visual` test would also run here on every PR that touches test/packages
         # code, including under the tanstack-start framework it was never baselined against.
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json pnpm test:e2e:prod:server:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel --grep-invert="@visual"${{ matrix.parallel == false && ' --workers=1' || '' }}
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json pnpm test:e2e:prod:server:run ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel --grep-invert="@visual"${{ matrix.parallel == false && ' --workers=1' || '' }}${{ matrix.grep && format(' --grep="{0}"', matrix.grep) || '' }}
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
@@ -485,7 +550,7 @@ jobs:
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: test-results-${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}${{ matrix.cacheComponents && '_cc' || '' }}
+          name: test-results-${{ matrix.suite || 'all-suites' }}_${{ matrix.framework }}_${{ matrix.shard }}${{ matrix.disableCacheComponents && '_without-cc' || '' }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
@@ -496,6 +561,86 @@ jobs:
       #     report-file: results_${{ matrix.suite }}.json
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
+
+  tests-a11y:
+    permissions:
+      actions: read
+      contents: read
+    name: Accessibility [${{ matrix.framework }}]
+    runs-on: ubuntu-26.04
+    needs: [changes, e2e-prep]
+    if: needs.changes.outputs.needs_a11y == 'true'
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: [next, tanstack-start]
+    env:
+      PAYLOAD_FRAMEWORK: ${{ matrix.framework }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          restore-build: true
+
+      - name: Download prepared test environment
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: e2e-prep-${{ github.sha }}
+          path: .
+
+      - name: Extract prepared test environment
+        shell: bash
+        run: |
+          tar --zstd -xf e2e-prep.tar.zst
+          rm e2e-prep.tar.zst
+
+      - name: Start services
+        uses: ./.github/actions/start-services
+        with:
+          database: mongodb
+
+      - name: Setup Playwright
+        uses: ./.github/actions/setup-playwright
+        timeout-minutes: 10
+
+      - name: Accessibility tests
+        id: a11y_tests
+        run: pnpm test:e2e:prod:server:run a11y --workers=1 --grep-invert="@visual"
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_a11y_${{ matrix.framework }}_1.json
+          A11Y_REPORT_PATH: ${{ github.workspace }}/test/test-results/a11y-summary.md
+          A11Y_MATCHED_FILES: ${{ needs.changes.outputs.a11y_files }}
+          NEXT_TELEMETRY_DISABLED: 1
+          PAYLOAD_DATABASE: mongodb
+
+      - id: a11y_evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: test-results-a11y_${{ matrix.framework }}_${{ github.run_attempt }}
+          path: test/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Publish accessibility workflow summary
+        if: always()
+        continue-on-error: true
+        env:
+          A11Y_TEST_OUTCOME: ${{ steps.a11y_tests.outcome }}
+          A11Y_EVIDENCE_URL: ${{ steps.a11y_evidence.outputs.artifact-url }}
+        run: node .github/scripts/a11y/report.mjs test/test-results/a11y-summary.md
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        continue-on-error: true
+        with:
+          name: a11y-summary-${{ matrix.framework }}-${{ github.run_attempt }}
+          path: test/test-results/a11y-summary.md
+          if-no-files-found: warn
+          retention-days: 7
 
   # Runs `@visual`-tagged e2e tests (screenshot comparisons against baselines).
   # If this fails, reproduce locally with `pnpm test:visual`; update an intentional baseline with
@@ -508,7 +653,7 @@ jobs:
   # `packages/*/dist` (plain compiled JS, no native bindings) from the `build` job's cache.
   visual-regression:
     name: Visual Regression
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_visual == 'true'
     timeout-minutes: 30
@@ -579,7 +724,8 @@ jobs:
       - name: Install dependencies
         run: |
           docker exec visual-regression bash -lc "
-            apt-get update -qq && apt-get install -y -qq build-essential python3 > /dev/null &&
+            apt-get update -qq -o Acquire::Retries=5 &&
+            apt-get install -y -qq -o Acquire::Retries=5 build-essential python3 > /dev/null &&
             npm install -g pnpm@\$(grep '^pnpm ' .tool-versions | awk '{print \$2}') &&
             # --location=user avoids writing storeDir into pnpm-workspace.yaml, which pnpm
             # does by default when the cwd is a workspace root.
@@ -610,7 +756,10 @@ jobs:
 
   # Build listed templates with packed local packages and then runs their int and e2e tests
   build-and-test-templates:
-    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_build == 'true'
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
@@ -690,7 +839,7 @@ jobs:
   # Fails if create-payload-app's build-script allowlist drifts from the blank template's deps:
   # scaffolds blank, installs it standalone under pnpm v11, and asserts no ERR_PNPM_IGNORED_BUILDS.
   check-template-build-approvals:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.build_approvals == 'true'
     steps:
@@ -703,7 +852,10 @@ jobs:
         run: pnpm --filter scripts check-template-build-approvals
 
   tests-type-generation:
-    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
     steps:
@@ -727,7 +879,7 @@ jobs:
   # concurrent CI runs and removing the need for shared credentials.
   tests-content-api:
     name: Content API Tests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     # Skip fork PRs: this job uses credentials fork workflows must not reach.
     if: needs.changes.outputs.needs_tests == 'true' && github.event.pull_request.head.repo.fork == false
@@ -736,6 +888,7 @@ jobs:
     # with --shard); `test:int:summary` cannot shard.
     continue-on-error: true
     permissions:
+      actions: read
       id-token: write
       contents: read
     services:
@@ -859,7 +1012,7 @@ jobs:
   all-green:
     name: All Green
     if: always()
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs:
       [
         lint,
@@ -867,7 +1020,9 @@ jobs:
         build-and-test-templates,
         tests-unit,
         tests-int,
+        e2e-prep,
         tests-e2e,
+        tests-a11y,
         tests-types,
         tests-type-generation,
         tests-content-api,
@@ -880,7 +1035,7 @@ jobs:
 
   publish-canary:
     name: Publish Canary
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: ${{ needs.all-green.result == 'success' && github.ref_name == 'main' }}
     needs:
       - all-green
@@ -891,7 +1046,7 @@ jobs:
           echo github.ref: ${{ github.ref }}
           echo isV3: ${{ github.ref == 'refs/heads/main' }}
   analyze:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: [changes, build]
     timeout-minutes: 5
     permissions:

@@ -12,6 +12,7 @@ import { accessResolver } from './resolvers/auth/access.js'
 import { buildFallbackLocaleInputType } from './schema/buildFallbackLocaleInputType.js'
 import { buildLocaleInputType } from './schema/buildLocaleInputType.js'
 import { buildPoliciesType } from './schema/buildPoliciesType.js'
+import { buildValidationResultType } from './schema/buildValidationResultType.js'
 import { initCollections } from './schema/initCollections.js'
 import { initGlobals } from './schema/initGlobals.js'
 import { wrapCustomFields } from './utilities/wrapCustomResolver.js'
@@ -49,6 +50,7 @@ export function configToSchema(config: SanitizedConfig): {
       blockTypes: {},
       groupTypes: {},
       tabTypes: {},
+      validationResultType: buildValidationResultType(),
     },
   }
 

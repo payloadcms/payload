@@ -1,11 +1,24 @@
 name: audit-dependencies
 
 on:
-  # Monday at 2am EST
+  # Daily at 2am EST
   schedule:
-    - cron: '0 7 * * 1'
+    - cron: '0 7 * * *'
   workflow_dispatch:
     inputs:
+      ref:
+        description: Which branch to audit
+        type: choice
+        required: true
+        options:
+          - both
+          - main
+          - 3.x
+        default: both
+      scope:
+        description: Which surface to audit (consumer-facing or monorepo)
+        required: false
+        default: consumer-facing
       audit-level:
         description: The level of audit to run (low, moderate, high, critical)
         required: false
@@ -21,13 +34,29 @@ env:
 
 jobs:
   audit:
-    runs-on: ubuntu-24.04
+    name: audit (${{ matrix.ref }})
+    runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # inputs.ref is empty on `schedule`; audit both main and 3.x.
+        ref: ${{ fromJSON(inputs.ref && inputs.ref != 'both' && format('["{0}"]', inputs.ref) || '["main","3.x"]') }}
     steps:
-      - name: Checkout
+      - name: Checkout ${{ matrix.ref }}
         uses: actions/checkout@v5
+        with:
+          ref: ${{ matrix.ref }}
       - name: Setup
         uses: ./.github/actions/setup
+        with:
+          # The audit resolves each package's dependencies fresh; a full
+          # workspace install is not needed.
+          pnpm-run-install: false
 
-      - name: Run audit dependencies script
+      - name: Run audit dependencies action
         id: audit_dependencies
-        run: ./.github/workflows/audit-dependencies.sh ${{ inputs.audit-level }}
+        uses: ./.github/actions/audit-dependencies
+        with:
+          # inputs.* are empty on `schedule`; fall back to the action defaults.
+          scope: ${{ inputs.scope || 'consumer-facing' }}
+          severity: ${{ inputs.audit-level || 'high' }}

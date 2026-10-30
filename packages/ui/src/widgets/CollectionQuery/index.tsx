@@ -37,6 +37,9 @@ const emptyFieldPaths: CollectionFieldPaths = {
   sortableFieldPaths: new Set<string>(),
 }
 
+/**
+ * @internal - may change or be removed without a major version bump
+ */
 export async function CollectionQueryWidget({
   req,
   widgetData,
@@ -92,7 +95,7 @@ export async function CollectionQueryWidget({
       where,
     })
 
-    docs = result.docs as QueryDoc[]
+    docs = result.docs
   } catch (err) {
     payload.logger.error({
       err,

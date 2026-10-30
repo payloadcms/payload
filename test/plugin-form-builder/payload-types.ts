@@ -121,6 +121,8 @@ export interface Config {
   locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -155,6 +157,14 @@ export interface Page {
   title: string;
   slug: string;
   form?: (string | null) | Form;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -183,9 +193,6 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
-  /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
-   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: LexicalRichText<LexicalNodes_0568D85A>;
   redirect?: {
@@ -196,9 +203,6 @@ export interface Form {
     } | null;
     url?: string | null;
   };
-  /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
-   */
   emails?:
     | {
         emailTo?: string | null;
@@ -207,14 +211,19 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
         message?: LexicalRichText<LexicalNodes_0568D85A> | null;
         id?: string | null;
       }[]
     | null;
   custom?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -377,13 +386,7 @@ export interface Textarea {
 export interface Upload {
   name: string;
   label?: string | null;
-  /**
-   * Select which upload collection to store files in
-   */
   uploadCollection: 'media' | 'documents';
-  /**
-   * Restrict allowed file types (e.g., image/*, application/pdf). Leave empty to allow all types.
-   */
   mimeTypes?:
     | {
         mimeType: string;
@@ -391,9 +394,6 @@ export interface Upload {
       }[]
     | null;
   width?: number | null;
-  /**
-   * Maximum file size in bytes. Leave empty for no limit.
-   */
   maxFileSize?: number | null;
   required?: boolean | null;
   multiple?: boolean | null;
@@ -436,6 +436,14 @@ export interface Date {
 export interface User {
   id: string;
   roles?: 'admin'[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -443,6 +451,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -461,6 +470,14 @@ export interface User {
  */
 export interface Media {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -480,6 +497,14 @@ export interface Media {
 export interface Document {
   id: string;
   alt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -525,9 +550,6 @@ export interface FormSubmission {
   payment?: {
     field?: string | null;
     status?: string | null;
-    /**
-     * Amount in cents
-     */
     amount?: number | null;
     paymentProcessor?: string | null;
     creditCard?: {
@@ -538,6 +560,14 @@ export interface FormSubmission {
     stripeCheckoutSession?: string | null;
   };
   custom?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -639,6 +669,8 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   form?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -648,6 +680,8 @@ export interface PagesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   roles?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -655,6 +689,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -670,6 +705,8 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -688,6 +725,8 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface DocumentsSelect<T extends boolean = true> {
   alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -893,6 +932,8 @@ export interface FormsSelect<T extends boolean = true> {
         id?: T;
       };
   custom?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -933,6 +974,8 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
         stripeCheckoutSession?: T;
       };
   custom?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -985,6 +1028,39 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'pages' | 'users' | 'media' | 'documents' | 'forms' | 'form-submissions';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?: ('pages' | 'users' | 'media' | 'documents' | 'forms' | 'form-submissions')[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

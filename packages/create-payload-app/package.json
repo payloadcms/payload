@@ -1,12 +1,7 @@
 {
   "name": "create-payload-app",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-beta.6",
   "homepage": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/create-payload-app"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -16,8 +11,21 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/create-payload-app"
+  },
+  "bin": {
+    "create-payload-app": "bin/cli.js"
+  },
+  "files": [
+    "package.json",
+    "dist",
+    "bin"
+  ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     "./types": {
       "import": "./src/types.ts",
@@ -39,21 +47,11 @@
       "types": "./src/utils/*"
     }
   },
-  "bin": {
-    "create-payload-app": "bin/cli.js"
-  },
-  "files": [
-    "package.json",
-    "dist",
-    "bin"
-  ],
   "scripts": {
     "build": "pnpm pack-template-files && pnpm typecheck && pnpm build:swc",
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "pack-template-files": "node --no-deprecation --import @swc-node/register/esm-register src/scripts/pack-template-files.ts",
     "test": "vitest --run",
     "typecheck": "tsc"
@@ -70,10 +68,10 @@
     "figures": "^6.1.0",
     "fs-extra": "^9.0.1",
     "globby": "11.1.0",
-    "prettier": "^3.5.0",
+    "oxfmt": "^0.73.0",
     "tar": "^7.5.22",
     "terminal-link": "^2.1.1",
-    "ts-morph": "^21.0.1"
+    "ts-morph": "^28.0.0"
   },
   "devDependencies": {
     "@types/esprima": "^4.0.6",
@@ -81,6 +79,6 @@
     "@types/node": "24.12.3"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }

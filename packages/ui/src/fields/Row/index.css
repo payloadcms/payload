@@ -29,6 +29,7 @@
       }
     }
 
+    /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
     @media (max-width: 1024px) {
       .row__fields {
         flex-direction: column;
@@ -39,6 +40,7 @@
         > * {
           margin-left: 0;
           margin-right: 0;
+          /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
           width: 100% !important;
           padding-left: 0;
           padding-right: 0;

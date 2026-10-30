@@ -12,14 +12,13 @@
       border: var(--stroke-width-small) solid var(--field-color-border);
       border-radius: var(--field-border-radius);
       color: var(--color-text);
-      font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);
       font-weight: var(--text-body-medium-font-weight);
       line-height: var(--text-body-medium-line-height);
       -webkit-appearance: none;
       appearance: none;
       height: auto;
-      padding-block: calc(var(--spacer-1) + 1px);
+      padding-block: calc(var(--spacer-1) - var(--stroke-width-small));
       padding-inline: var(--field-padding-inline) var(--spacer-5);
       flex-wrap: wrap;
       gap: var(--spacer-1);
@@ -60,7 +59,9 @@
 
     .rs__input-container {
       color: var(--color-text);
-      height: var(--text-body-medium-line-height);
+      height: var(--spacer-4);
+      min-width: var(--spacer-4);
+      grid-template-columns: 0 minmax(var(--spacer-4), min-content);
       margin: 0;
       padding: 0;
     }
@@ -113,14 +114,12 @@
   .rs__group-heading {
     color: var(--color-text-tertiary);
     padding: var(--spacer-2-5) var(--spacer-3) var(--spacer-1);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
   }
 
   .rs__option {
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -135,6 +134,11 @@
 
   .rs__option--is-selected {
     background-color: var(--color-bg-selected);
+  }
+
+  .rs__option--is-disabled {
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
   }
 
   .react-select--error {
@@ -155,5 +159,9 @@
     div.rs__control {
       border-color: var(--field-color-border-focus);
     }
+  }
+
+  html[data-enhanced-contrast] :is(.rs__option--is-focused, .rs__option--is-selected) {
+    --color-text-secondary: var(--color-text);
   }
 }

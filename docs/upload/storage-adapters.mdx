@@ -114,11 +114,17 @@ export default buildConfig({
 | ---------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------- |
 | `enabled`              | Whether or not to enable the plugin                                                                       | `true`                        |
 | `collections`          | Collections to apply the Vercel Blob adapter to                                                           |                               |
-| `addRandomSuffix`      | Add a random suffix to the uploaded file name in Vercel Blob storage                                      | `false`                       |
+| `addRandomSuffix`      | Must be `false` or omitted; enabled adapters with configured collections reject `true`.                   | `false`                       |
 | `cacheControlMaxAge`   | Cache-Control max-age in seconds                                                                          | `365 * 24 * 60 * 60` (1 Year) |
 | `token`                | Vercel Blob storage read/write token                                                                      | `''`                          |
 | `clientUploads`        | Upload directly to Vercel Blob instead of through Payload.                                                |                               |
 | `useCompositePrefixes` | Always combine collection prefix with document prefix, even when the document prefix already contains it. | `false`                       |
+
+### Migrating Random Suffix Uploads
+
+Remove `addRandomSuffix: true` or set it to `false`. Payload records exact storage paths for the current file, original, and stored variants, and uses those paths for reads, rollback, and deletion. Provider-assigned suffixes change these paths after upload and are incompatible with this lifecycle. New managed uploads already use distinct `_objectKey` folders to avoid overwriting retained objects.
+
+An enabled Vercel Blob adapter with configured collections rejects this option during initialization, before any upload or copy. Explicitly disabled adapters and adapters disabled by a missing token retain their existing behavior. Changing the option does not rename existing blobs; if their actual paths differ from saved file metadata, migrate those paths and metadata together.
 
 ## S3 Storage
 
@@ -446,7 +452,21 @@ If you need to create a custom storage adapter, you can use the [`@payloadcms/pl
 Reference any of the existing storage adapters for guidance on how this should be structured. Create an adapter following the `GeneratedAdapter` interface. Then, pass the adapter to the `cloudStorage` plugin.
 
 ```ts
+type FileOperationArgs = {
+  collection: SanitizedCollectionConfig
+  from: string
+  to: string
+  mimeType?: string
+  req: PayloadRequest
+}
+
 export interface GeneratedAdapter {
+  copyFile: (args: FileOperationArgs) => Promise<void>
+  deleteFile: (args: {
+    collection: CollectionConfig
+    req: PayloadRequest
+    storageFilePath: string
+  }) => Promise<void> | void
   /**
    * Additional fields to be injected into the base
    * collection and image sizes
@@ -460,12 +480,29 @@ export interface GeneratedAdapter {
   handleUpload: HandleUpload
   name: string
   onInit?: () => void
+  moveFile?: (args: FileOperationArgs) => Promise<void>
   staticHandler: StaticHandler
   uploadInstructions?: UploadInstructionsCapability
 }
 ```
 
+`from` and `to` are complete storage keys, including prefixes. `copyFile` must leave the source in place, reject an occupied destination, and resolve only after the destination can be read. The optional `moveFile` method remains available to adapters, but core file rename always copies first and defers source deletion until the document update and its database transaction succeed. The key-based contract applies to path-addressed storage; an adapter using provider-assigned IDs needs a compatible mapping before it can support file versioning.
+
+If a copy creates a destination and then fails its readability check or a post-copy permissions update, the adapter must remove that failed destination before rejecting. Cleanup must target only the object created by that attempt, using a returned generation, version ID, or ETag condition where supported. Never delete an occupied destination after a create-only operation rejects. If cleanup also fails, preserve the original copy error and log the exact remaining storage path for manual cleanup. The first-party adapters follow this contract, including incomplete S3 multipart uploads and Vercel Blob's streamed fallback.
+
+Custom adapters must implement `deleteFile` for upload rollback and cleanup of unreferenced objects. Its `storageFilePath` is the complete object path, including prefixes and `_objectKey`; delete that exact object without requiring a saved document. Failed uploads may need cleanup before a document exists, and version pruning may remove the last document reference before cleanup runs. The plugin rejects enabled adapters without `deleteFile` during configuration.
+
+`handleDelete` retains its document-based contract: when it is used for legacy document deletion, it receives the saved file document along with the filename and resolved storage path. An adapter that only needs the storage path can share its deletion implementation between `deleteFile` and `handleDelete`, as the first-party adapters do.
+
+An explicit file rename copies stored objects to new current keys and keeps the source readable while the database operation is pending. After the document update and its database transaction succeed, Payload removes only source objects with no remaining document or version references. A failed rename preserves the sources and removes staged copies that no persisted document or version references. This applies with or without versions and regardless of whether the adapter supplies `moveFile`. A process crash before cleanup may leave extra objects, but committed source references remain readable.
+
+The first-party S3 adapter uses single or multipart server-side copy. The R2 Workers binding supports ordinary uploads and reads without S3 credentials, but copy-dependent file versioning operations require `copyCredentials` with an R2 account ID, bucket, S3 access key ID, and secret. Azure copies through authenticated source and destination streams, so private sources work but copy traffic passes through the Payload server. GCS uses its provider copy API; Vercel Blob uses its provider copy API with exact destination pathnames. Grant each adapter read and write access to the source and destination, plus object metadata and tag access where used. S3 multipart copy also needs permission to abort incomplete multipart uploads, and copy cleanup needs permission to delete objects (including specific object versions when S3 bucket versioning is enabled); KMS-encrypted S3 objects need the corresponding decrypt and encrypt permissions.
+
+Payload removes versioned upload objects only after their last document or saved version reference is gone and the database operation has committed. If an object deletion fails, Payload logs the complete storage key and leaves the object in place. Before retrying manually, check the current file, original, and stored variants in every current document and retained version. Each representation's `filename`, `prefix`, and `_objectKey` identify its location through the configured adapter's path resolver. Remove the failed object through the storage provider only when none of these locations resolves to its exact key. Failed deletions are not retried automatically.
+
 When providing upload instructions, set `uploadInstructions.useInAdmin` to `true` when the Admin panel should use them instead of attaching the whole file to the document request. This is useful for direct-to-storage uploads and for flows such as chunked uploads that still pass through Payload.
+
+`staticHandler` receives `params.operation`: `'read'` for an ordinary file request (treat a missing value as `'read'`, for backward compatibility), or `'transform'` when Payload is reading the file's bytes on behalf of a [file transformer](./transformers), which only happens when at least one transformer is configured. For `'transform'`, return the full object body rather than a redirect to a signed/public URL, and skip `Range` handling, conditional/ETag short-circuiting, and `modifyResponseHeaders` — Payload applies headers once, on the final response, after every transformer has run. The five first-party adapters already implement this; a custom adapter only needs to branch on `operation` if it currently redirects to an external URL for `'read'`.
 
 ```ts
 import { buildConfig } from 'payload'
@@ -488,15 +525,106 @@ export default buildConfig({
 })
 ```
 
+### Upload receipts#custom-upload-receipts
+
+When the browser uploads directly to your storage provider, the document request only carries an `uploadReference` that says where the file went. Set `uploadInstructions.requiresUploadReceipt` to `true` so that Payload only accepts references it signed. Sign them with `resolveSignedURLKey` from `@payloadcms/plugin-cloud-storage/utilities` and return its `uploadReference` from `generate`:
+
+```ts
+import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
+
+const adapter: GeneratedAdapter = {
+  // ...
+  uploadInstructions: {
+    enabled: true,
+    generate: async ({
+      collectionSlug,
+      docPrefix,
+      filename,
+      filesize,
+      mimeType,
+      req,
+    }) => {
+      // Check access before issuing an upload URL.
+      const { sanitizedFilename, storageFilePath, uploadReference } =
+        await resolveSignedURLKey({
+          adapterData: { providerUploadID: 'upload-123' },
+          collectionPrefix: 'media',
+          collectionSlug,
+          docPrefix,
+          filename,
+          req,
+        })
+
+      return {
+        type: 'http',
+        file: {
+          filename: sanitizedFilename,
+          mimeType,
+          size: filesize,
+          uploadReference,
+        },
+        request: {
+          method: 'PUT',
+          url: await createProviderUploadURL(storageFilePath),
+        },
+      }
+    },
+    requiresUploadReceipt: true,
+    useInAdmin: true,
+  },
+}
+```
+
+The receipt binds the upload to the user, collection, filename, and storage key, and expires after six hours. Upload the file to the returned `storageFilePath`; Payload rejects a receipt whose key does not end with `<prefix>/<_objectKey>/<original filename>`.
+
+Payload rebuilds `uploadReference` from the verified receipt before calling your upload handlers. Handlers receive `_objectKey`, `prefix`, `signedReceipt`, `adapterData`, and `clientData`:
+
+- `adapterData` is optional data your adapter needs back after the upload, such as a provider upload ID. Payload signs it into the receipt, so the browser cannot change it. It is not stored on the document.
+- `clientData` holds any other fields the browser added to `uploadReference`, such as an object ID the provider returned after the upload. Payload does not verify or read them, so check them before use, for example against `adapterData`. `clientData` is also set when receipts are off.
+
+```ts
+import type { UploadReference } from '@payloadcms/plugin-cloud-storage/types'
+
+staticHandler: async (req, { params }) => {
+  // Set only when Payload fetches a client upload; ordinary file reads have no reference.
+  const uploadReference = params.uploadReference as UploadReference | undefined
+
+  if (uploadReference) {
+    const { adapterData, clientData } = uploadReference
+    const expectedObjectID = await lookUpObjectID(adapterData?.providerUploadID)
+
+    if (clientData?.providerObjectID !== expectedObjectID) {
+      throw new Error('Upload does not match the signed upload ID')
+    }
+  }
+  // ...
+},
+```
+
+Instead of checking `clientData` with the provider in the handler, you can sign a value that exists only after the upload. To do this, call `resignClientUploadReceipt` from an endpoint your adapter's client handler calls after the upload, and send the new receipt with the document. It adds to `adapterData` and keeps every other field, including the user and expiry, so it only works before the receipt expires and, for a logged-in user, only in a request from that user. If your access check allows uploads without a login, anyone who has the receipt can re-sign it, so check ownership in your endpoint if you need it. The first receipt is still valid, so the browser can send it instead. If the field you add is required, reject the upload in your handler when it is missing.
+
+```ts
+import { resignClientUploadReceipt } from '@payloadcms/plugin-cloud-storage/utilities'
+
+// In your upload-complete endpoint, after confirming the object with the provider:
+const signedReceipt = resignClientUploadReceipt({
+  adapterData: { providerObjectID },
+  collectionSlug,
+  req,
+  signedReceipt: uploadReference.signedReceipt,
+})
+```
+
+Client uploads keep an [original and file history](./overview#file-versioning) only when a receipt is verified. Without `requiresUploadReceipt`, Payload does not verify `_objectKey`, `prefix`, or `signedReceipt`, and the upload has no original or file history.
+
 ## Plugin options
 
 This plugin is configurable to work across many different Payload collections. A `*` denotes that the property is required.
 
-| Option               | Type                                | Description                                                                                                                                                                                                   |
-| -------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `alwaysInsertFields` | `boolean`                           | When enabled, fields (like the prefix field) will always be inserted into the collection schema regardless of whether the plugin is enabled. This will be enabled by default in Payload v4. Default: `false`. |
-| `collections` \*     | `Record<string, CollectionOptions>` | Object with keys set to the slug of collections you want to enable the plugin for, and values set to collection-specific options.                                                                             |
-| `enabled`            | `boolean`                           | To conditionally enable/disable plugin. Default: `true`.                                                                                                                                                      |
+| Option           | Type                                | Description                                                                                                                       |
+| ---------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `collections` \* | `Record<string, CollectionOptions>` | Object with keys set to the slug of collections you want to enable the plugin for, and values set to collection-specific options. |
+| `enabled`        | `boolean`                           | To conditionally enable/disable plugin. Default: `true`.                                                                          |
 
 ## Collection-specific options
 

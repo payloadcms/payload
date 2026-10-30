@@ -72,13 +72,14 @@ type ActionsProps = {
 export function Actions({ className }: ActionsProps) {
   const { getEntityConfig } = useConfig()
   const { t } = useTranslation()
-  const { collectionSlug, hasPublishPermission, hasSavePermission, saveAllDocs } = useFormsManager()
+  const { collectionSlug, hasPublishPermission, hasSavePermission, isInitializing, saveAllDocs } =
+    useFormsManager()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   return (
     <div className={[`${baseClass}__buttons`, className].filter(Boolean).join(' ')}>
-      {collectionConfig?.versions?.drafts && hasSavePermission ? (
+      {collectionConfig?.versions?.drafts && hasSavePermission && !isInitializing ? (
         <Button
           buttonStyle="secondary"
           onClick={() => void saveAllDocs({ overrides: { _status: 'draft' } })}
@@ -86,13 +87,13 @@ export function Actions({ className }: ActionsProps) {
           {t('version:saveDraft')}
         </Button>
       ) : null}
-      {collectionConfig?.versions?.drafts && hasPublishPermission ? (
+      {collectionConfig?.versions?.drafts && hasPublishPermission && !isInitializing ? (
         <Button onClick={() => void saveAllDocs({ overrides: { _status: 'published' } })}>
           {t('version:publish')}
         </Button>
       ) : null}
 
-      {!collectionConfig?.versions?.drafts && hasSavePermission ? (
+      {!collectionConfig?.versions?.drafts && hasSavePermission && !isInitializing ? (
         <Button onClick={() => void saveAllDocs()}>{t('general:save')}</Button>
       ) : null}
     </div>

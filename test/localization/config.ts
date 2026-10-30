@@ -13,6 +13,11 @@ import { ArrayCollection } from './collections/Array/index.js'
 import { ArrayWithFallbackCollection } from './collections/ArrayWithFallback/index.js'
 import { BlocksCollection } from './collections/Blocks/index.js'
 import { Group } from './collections/Group/index.js'
+import {
+  getLocaleValidationFields,
+  LocaleValidation,
+  LocaleValidationBlock,
+} from './collections/LocaleValidation/index.js'
 import { LocalizedDateFields } from './collections/LocalizedDateFields/index.js'
 import { LocalizedDrafts } from './collections/LocalizedDrafts/index.js'
 import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
@@ -30,6 +35,7 @@ import {
   globalWithDraftsSlug,
   hungarianLocale,
   localeRestrictedSlug,
+  localeValidationGlobalSlug,
   localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
@@ -88,6 +94,7 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname),
       },
     },
+    blocks: [LocaleValidationBlock],
     collections: [
       RichTextCollection,
       BlocksCollection,
@@ -96,6 +103,7 @@ export default buildConfigWithDefaults({
       LocalizedDrafts,
       LocalizedDateFields,
       AllFieldsLocalized,
+      LocaleValidation,
       {
         slug: 'users',
         admin: {
@@ -585,6 +593,11 @@ export default buildConfigWithDefaults({
     ],
     globals: [
       {
+        slug: localeValidationGlobalSlug,
+        fields: getLocaleValidationFields(),
+        versions: false,
+      },
+      {
         slug: 'global-array',
         fields: [
           {
@@ -608,6 +621,13 @@ export default buildConfigWithDefaults({
             name: 'text',
             type: 'text',
             localized: true,
+          },
+          {
+            name: 'localizedTextWithLength',
+            type: 'text',
+            localized: true,
+            maxLength: 20,
+            minLength: 5,
           },
         ],
         versions: false,
@@ -821,6 +841,7 @@ export default buildConfigWithDefaults({
       data: {
         title: englishTitle,
       },
+      overrideAccess: true,
     })
 
     const localizedPost = await payload.create({
@@ -828,6 +849,7 @@ export default buildConfigWithDefaults({
       data: {
         title: englishTitle,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -836,6 +858,7 @@ export default buildConfigWithDefaults({
         date: new Date().toISOString(),
         localizedDate: new Date().toISOString(),
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -845,6 +868,7 @@ export default buildConfigWithDefaults({
         password: devUser.password,
         relation: localizedPost.id,
       },
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -854,6 +878,7 @@ export default buildConfigWithDefaults({
         title: spanishTitle,
       },
       locale: spanishLocale,
+      overrideAccess: true,
     })
 
     const localizedRelation = await payload.create({
@@ -861,6 +886,7 @@ export default buildConfigWithDefaults({
       data: {
         title: relationEnglishTitle,
       },
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -870,6 +896,7 @@ export default buildConfigWithDefaults({
         title: relationSpanishTitle,
       },
       locale: spanishLocale,
+      overrideAccess: true,
     })
 
     const localizedRelation2 = await payload.create({
@@ -877,6 +904,7 @@ export default buildConfigWithDefaults({
       data: {
         title: relationEnglishTitle2,
       },
+      overrideAccess: true,
     })
     await payload.update({
       id: localizedPost.id,
@@ -885,6 +913,7 @@ export default buildConfigWithDefaults({
         title: relationSpanishTitle2,
       },
       locale: spanishLocale,
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -898,6 +927,7 @@ export default buildConfigWithDefaults({
         ],
         relationship: localizedRelation.id,
       },
+      overrideAccess: true,
     })
     const relationshipLocalized = await payload.create({
       collection: relationshipLocalizedSlug,
@@ -916,6 +946,7 @@ export default buildConfigWithDefaults({
         relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
       },
       locale: 'en',
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -925,6 +956,7 @@ export default buildConfigWithDefaults({
         relationMultiRelationTo: { relationTo: collection, value: localizedPost.id },
       },
       locale: 'es',
+      overrideAccess: true,
     })
 
     const globalArray = await payload.updateGlobal({
@@ -939,6 +971,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
+      overrideAccess: true,
     })
 
     await payload.updateGlobal({
@@ -950,6 +983,7 @@ export default buildConfigWithDefaults({
         })),
       },
       locale: 'es',
+      overrideAccess: true,
     })
   },
 })

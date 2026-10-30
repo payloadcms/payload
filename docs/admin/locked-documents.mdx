@@ -72,6 +72,7 @@ By default, `overrideLock` is set to `true`, which means that document locks are
 ```ts
 const result = await payload.update({
   collection: 'posts',
+  overrideAccess: true,
   id: '123',
   data: {
     title: 'New title',

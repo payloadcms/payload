@@ -44,7 +44,8 @@ describe('Nested Docs Plugin', () => {
           parent,
           title,
         },
-      }) as unknown as Promise<PayloadPage>
+        overrideAccess: true,
+      })
     }
 
     const parentPage = await createPage({ slug: 'parent-slug' })

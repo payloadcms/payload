@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormField, UIField } from 'payload'
+import type { UIField } from 'payload'
 
 import { useAllFormFields, useForm, useTranslation } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -41,13 +41,10 @@ export const OverviewComponent: React.FC<OverviewProps> = ({
   const titlePath = titlePathFromContext || 'meta.title'
   const imagePath = imagePathFromContext || 'meta.image'
 
-  const [
-    {
-      [descriptionPath]: { value: metaDesc } = {} as FormField,
-      [imagePath]: { value: metaImage } = {} as FormField,
-      [titlePath]: { value: metaTitle } = {} as FormField,
-    },
-  ] = useAllFormFields()
+  const [fields] = useAllFormFields()
+  const metaDesc = fields[descriptionPath]?.value
+  const metaImage = fields[imagePath]?.value
+  const metaTitle = fields[titlePath]?.value
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
   const [titleIsValid, setTitleIsValid] = useState<boolean | undefined>()

@@ -9,7 +9,7 @@ export const Route = createFileRoute('/_frontend/')({
 
 function HomePage() {
   return (
-    <div className="home">
+    <div className="home" data-test="payload-ui-barrel-sentinel">
       <div className="content">
         <picture>
           <source srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-favicon.svg" />

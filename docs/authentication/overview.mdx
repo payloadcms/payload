@@ -82,13 +82,40 @@ valid and are rewritten to the current scheme after the next successful login, w
 new `salt`. Treat the stored format as internal and read these fields through Payload rather than
 deriving them yourself.
 
+New hashes use 600,000 iterations by default. Some environments, such as Cloudflare Workers, do not
+support more than 100,000 iterations. To support them, set `auth.passwordHashIterations` in your
+Payload Config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  auth: {
+    passwordHashIterations: 100000,
+  },
+  // ...
+})
+```
+
+Each iteration count uses its own scheme prefix, so hashes created with either count can be
+verified. After a successful login, a hash with a different count is rehashed with the configured
+count.
+
+<Banner type="warning">
+  **Note:** An environment limited to 100,000 iterations cannot verify existing
+  600,000-iteration hashes. Those users cannot log in there until they reset
+  their passwords. A user who logs in one time through a Node.js deployment with
+  `passwordHashIterations: 100000` also gets a new hash that the environment can
+  verify.
+</Banner>
+
 The following options are available:
 
 | Option                         | Description                                                                                                                                                                                                                 |
 | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`cookies`**                  | Set cookie options, including `secure`, `sameSite`, and `domain`. For advanced users.                                                                                                                                       |
 | **`depth`**                    | How many levels deep a `user` document should be populated when creating the JWT and binding the `user` to the `req`. Defaults to `0` and should only be modified if absolutely necessary, as this will affect performance. |
-| **`disableLocalStrategy`**     | Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.                                                                             |
+| **`disableLocalStrategy`**     | Set to `true` to disable local authentication, `false` (default) to keep it enabled, or an object to retain auth fields while disabling it. [More details](#disable-local-strategy).                                        |
 | **`forgotPassword`**           | Customize the way that the `forgotPassword` operation functions. [More details](./email#forgot-password).                                                                                                                   |
 | **`lockTime`**                 | Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                  |
 | **`loginWithUsername`**        | Ability to allow users to login with username/password. [More](/docs/authentication/overview#login-with-username)                                                                                                           |
@@ -99,6 +126,27 @@ The following options are available:
 | **`useAPIKey`**                | Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection. [More details](./api-keys).                                                                                |
 | **`useSessions`**              | True by default. Set to `false` to use stateless JWTs for authentication instead of sessions. Stateless JWTs cannot be revoked, so they stay valid until `tokenExpiration` even after a password change.                    |
 | **`verify`**                   | Set to `true` or pass an object with verification options to require users to verify by email before they are allowed to log into your app. [More details](./email#email-verification).                                     |
+
+### Disable Local Strategy
+
+The built-in local strategy authenticates users with an email or username and password. It is enabled by default. Set `disableLocalStrategy` to `true` to disable it, or to `false` to explicitly keep it enabled. Only disable the local strategy if you have configured another authentication method, such as [API keys](./api-keys) or a [custom strategy](./custom-strategies).
+
+You can also pass an object to disable the local strategy while retaining its auth fields:
+
+```ts
+{
+  slug: 'users',
+  auth: {
+    disableLocalStrategy: {
+      enableFields: true,
+      optionalPassword: true,
+    },
+  },
+}
+```
+
+- `enableFields` retains the local auth fields in the database and generated types.
+- `optionalPassword` makes the password field optional when auth fields are retained.
 
 ### Login With Username
 

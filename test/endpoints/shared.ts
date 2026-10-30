@@ -13,3 +13,5 @@ export const noEndpointsCollectionSlug = 'no-endpoints'
 export const noEndpointsGlobalSlug = 'global-no-endpoints'
 
 export const customCorsEndpoint = 'custom-cors'
+
+export const customAPIRoute = '/custom-api'

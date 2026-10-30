@@ -12,7 +12,7 @@ const stat = promisify(fs.stat)
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/payload--cloud', () => {
+test.suite('@payloadcms/payload--cloud', { config: './config.ts' }, () => {
   test.describe('tests', () => {
     test.todo('payload-cloud tests')
 
@@ -71,6 +71,7 @@ test.suite({ config: './config.ts' })('@payloadcms/payload--cloud', () => {
         await payload.delete({
           collection: 'documents',
           id: doc.id,
+          overrideAccess: true,
         })
       },
     )

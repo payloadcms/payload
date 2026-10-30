@@ -8,6 +8,7 @@ export function setHandlePosition(
   leftOffset: number = 0, // SPACE
 ) {
   if (!targetElem) {
+    handleElem.style.visibility = 'hidden'
     handleElem.style.opacity = '0'
     handleElem.style.transform = 'translate(-10000px, -10000px)'
     return
@@ -45,5 +46,6 @@ export function setHandlePosition(
   const left = leftOffset
 
   handleElem.style.opacity = '1'
+  handleElem.style.visibility = 'visible'
   handleElem.style.transform = `translate(${left}px, ${top}px)`
 }

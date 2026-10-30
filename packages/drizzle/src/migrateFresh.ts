@@ -2,7 +2,7 @@ import type { MigrationResult } from 'payload'
 
 import {
   commitTransaction,
-  createLocalReq,
+  createPayloadRequest,
   initTransaction,
   killTransaction,
   readMigrationFiles,
@@ -51,7 +51,7 @@ export async function migrateFresh(
     msg: `Found ${migrationFiles.length} migration files.`,
   })
 
-  const req = await createLocalReq({}, payload)
+  const req = await createPayloadRequest({ payload })
   const migrated: string[] = []
 
   if ('createExtensions' in this && typeof this.createExtensions === 'function') {
@@ -72,6 +72,7 @@ export async function migrateFresh(
           name: migration.name,
           batch: 1,
         },
+        overrideAccess: true,
         req,
       })
       await commitTransaction(req)

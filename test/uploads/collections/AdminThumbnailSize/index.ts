@@ -12,18 +12,6 @@ export const AdminThumbnailSize: CollectionConfig = {
   upload: {
     staticDir: path.resolve(dirname, 'test/uploads/media'),
     adminThumbnail: 'small',
-    imageSizes: [
-      {
-        name: 'small',
-        width: 100,
-        height: 100,
-      },
-      {
-        name: 'medium',
-        width: 200,
-        height: 200,
-      },
-    ],
   },
   fields: [],
   versions: false,

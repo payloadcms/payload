@@ -1,11 +1,11 @@
 /// <reference types="vite/client" />
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. MODIFY AT YOUR OWN RISK. */
 
 import { payloadLayoutRoute } from '@payloadcms/tanstack-start/client'
 import { createFileRoute } from '@tanstack/react-router'
 
 import { HydrationMarker } from '../components/HydrationMarker/index.js'
 import { getLayoutDataFn, serverFunctionHandler } from './_payload/server.functions.js'
-import styles from './payload.css?url'
 
 const { component: PayloadProviders, loader } = payloadLayoutRoute({
   load: getLayoutDataFn,
@@ -16,7 +16,6 @@ export const Route = createFileRoute('/_payload')({
   component: PayloadLayout,
   head: () => ({
     links: [
-      { rel: 'stylesheet', href: styles },
       {
         rel: 'preconnect',
         href: 'https://fonts.googleapis.com',

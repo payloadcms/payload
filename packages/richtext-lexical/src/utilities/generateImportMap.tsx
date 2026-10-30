@@ -3,11 +3,11 @@ import type { RichTextAdapter } from 'payload'
 import { genImportMapIterateFields } from 'payload'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
-import type { LexicalEditorProps } from '../types/index.js'
+import type { LexicalEditorArgs } from '../types/index.js'
 
 export const getGenerateImportMap =
   (args: {
-    lexicalEditorArgs?: LexicalEditorProps
+    lexicalEditorArgs?: LexicalEditorArgs
     resolvedFeatureMap: ResolvedServerFeatureMap
   }): RichTextAdapter['generateImportMap'] =>
   ({ addToImportMap, baseDir, config, importMap, imports }) => {

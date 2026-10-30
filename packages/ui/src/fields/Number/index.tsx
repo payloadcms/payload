@@ -1,5 +1,5 @@
 'use client'
-import type { NumberFieldClientComponent, NumberFieldClientProps } from 'payload'
+import type { NumberFieldClientProps } from 'payload'
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -13,16 +13,11 @@ import './index.css'
 
 export { NumberInput, type NumberInputProps }
 
-const NumberFieldComponent: NumberFieldClientComponent = (props) => {
+const NumberFieldComponent: React.FC<NumberFieldClientProps> = (props) => {
   const {
     field,
     field: {
-      admin: {
-        className,
-        description,
-        placeholder,
-        step = 1,
-      } = {} as NumberFieldClientProps['field']['admin'],
+      admin: { className, description, placeholder, step = 1 } = {},
       hasMany = false,
       label,
       localized,

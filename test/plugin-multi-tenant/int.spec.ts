@@ -4,11 +4,12 @@ import { ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 import type { Relationship } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
+import { multiTenantPostsAccessResultEvents } from './config.base.js'
 import {
   autosaveGlobalSlug,
   menuSlug,
@@ -20,10 +21,12 @@ import {
 
 let token: string
 
-test.suite({
+const suiteOptions = {
   config: './config.ts',
   resetBetweenTests: false,
-})('@payloadcms/plugin-multi-tenant', () => {
+}
+
+test.suite('@payloadcms/plugin-multi-tenant', suiteOptions, () => {
   test.beforeAll(async ({ restClientInstance: restClient }) => {
     const data = await restClient
       .POST('/users/login', {
@@ -45,6 +48,7 @@ test.suite({
           name: 'tenant1',
           domain: 'tenant1.com',
         },
+        overrideAccess: true,
       })
 
       expect(tenant1).toHaveProperty('id')
@@ -59,6 +63,7 @@ test.suite({
       test.beforeEach(async ({ payload }) => {
         anchorBarRelationships = await payload.find({
           collection: 'relationships',
+          overrideAccess: true,
           where: {
             'tenant.name': {
               equals: 'Anchor Bar',
@@ -68,6 +73,7 @@ test.suite({
 
         blueDogRelationships = await payload.find({
           collection: 'relationships',
+          overrideAccess: true,
           where: {
             'tenant.name': {
               equals: 'Blue Dog',
@@ -93,6 +99,7 @@ test.suite({
             relationship: anchorBarRelationships.docs[0].id,
             tenant: anchorBarTenantID,
           },
+          overrideAccess: true,
           req: {
             headers: new Headers([['cookie', `payload-tenant=${anchorBarTenantID}`]]),
           },
@@ -114,6 +121,7 @@ test.suite({
               relationship: blueDogRelationships.docs[0].id,
               tenant: anchorBarTenantID,
             },
+            overrideAccess: true,
             req: {
               headers: new Headers([['cookie', `payload-tenant=${anchorBarTenantID}`]]),
             },
@@ -134,6 +142,7 @@ test.suite({
               relationship: blueDogRelationships.docs[0].id,
               tenant: anchorBarTenantID,
             },
+            overrideAccess: true,
             req: {},
           }),
         ).rejects.toThrow('The following field is invalid: Relationship')
@@ -153,16 +162,19 @@ test.suite({
           password: 'test',
           tenants: [],
         },
+        overrideAccess: true,
       })
 
       // Create a tenant and document for testing
       const tenant = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Test Tenant', domain: 'test-tenant.test' },
+        overrideAccess: true,
       })
       const doc = await payload.create({
         collection: relationshipsSlug,
         data: { tenant: tenant.id, title: 'Test Doc' },
+        overrideAccess: true,
       })
 
       // User with no tenants should get a Forbidden error (clean rejection)
@@ -177,9 +189,9 @@ test.suite({
       ).rejects.toThrow('You are not allowed to perform this action.')
 
       // Cleanup
-      await payload.delete({ id: doc.id, collection: relationshipsSlug })
-      await payload.delete({ id: tenant.id, collection: tenantsSlug })
-      await payload.delete({ id: noTenantUser.id, collection: usersSlug })
+      await payload.delete({ id: doc.id, collection: relationshipsSlug, overrideAccess: true })
+      await payload.delete({ id: tenant.id, collection: tenantsSlug, overrideAccess: true })
+      await payload.delete({ id: noTenantUser.id, collection: usersSlug, overrideAccess: true })
     })
 
     test('should allow user with no tenants to access their own user document', async ({
@@ -193,6 +205,7 @@ test.suite({
           password: 'test',
           tenants: [],
         },
+        overrideAccess: true,
       })
 
       // User should be able to find themselves
@@ -207,7 +220,7 @@ test.suite({
       expect(result.docs[0]?.id).toBe(noTenantUser.id)
 
       // Cleanup
-      await payload.delete({ id: noTenantUser.id, collection: usersSlug })
+      await payload.delete({ id: noTenantUser.id, collection: usersSlug, overrideAccess: true })
     })
 
     test('should allow admin with empty tenants array to access all documents', async ({
@@ -219,19 +232,22 @@ test.suite({
         data: {
           email: 'admin-empty-tenants@test.com',
           password: 'test',
-          tenants: [],
           roles: ['admin'],
+          tenants: [],
         },
+        overrideAccess: true,
       })
 
       // Create a tenant and document
       const tenant = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Admin Test Tenant', domain: 'admin-test.test' },
+        overrideAccess: true,
       })
       const doc = await payload.create({
         collection: relationshipsSlug,
         data: { tenant: tenant.id, title: 'Admin Test Doc' },
+        overrideAccess: true,
       })
 
       // Admin should have access (userHasAccessToAllTenants returns true for super-admin)
@@ -245,9 +261,9 @@ test.suite({
       expect(result.docs).toHaveLength(1)
 
       // Cleanup
-      await payload.delete({ id: doc.id, collection: relationshipsSlug })
-      await payload.delete({ id: tenant.id, collection: tenantsSlug })
-      await payload.delete({ id: adminUser.id, collection: usersSlug })
+      await payload.delete({ id: doc.id, collection: relationshipsSlug, overrideAccess: true })
+      await payload.delete({ id: tenant.id, collection: tenantsSlug, overrideAccess: true })
+      await payload.delete({ id: adminUser.id, collection: usersSlug, overrideAccess: true })
     })
   })
 
@@ -259,10 +275,12 @@ test.suite({
       const tenantA = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Tenant A', domain: 'tenant-a.test' },
+        overrideAccess: true,
       })
       const tenantB = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Tenant B', domain: 'tenant-b.test' },
+        overrideAccess: true,
       })
 
       // Create a user assigned ONLY to Tenant A
@@ -273,12 +291,14 @@ test.suite({
           password: 'test',
           tenants: [{ tenant: tenantA.id }],
         },
+        overrideAccess: true,
       })
 
       // Create a document in Tenant B (user should NOT have access)
       const doc = await payload.create({
         collection: relationshipsSlug,
         data: { tenant: tenantB.id, title: 'Tenant B Doc' },
+        overrideAccess: true,
       })
 
       // Fetch user from database - this returns a user WITHOUT .collection property
@@ -286,6 +306,7 @@ test.suite({
       const fetchedUser = await payload.findByID({
         id: user.id,
         collection: usersSlug,
+        overrideAccess: true,
       })
 
       // User from Tenant A should NOT be able to access Tenant B's document
@@ -299,10 +320,10 @@ test.suite({
       expect(result.docs).toHaveLength(0)
 
       // Cleanup
-      await payload.delete({ id: doc.id, collection: relationshipsSlug })
-      await payload.delete({ id: user.id, collection: usersSlug })
-      await payload.delete({ id: tenantA.id, collection: tenantsSlug })
-      await payload.delete({ id: tenantB.id, collection: tenantsSlug })
+      await payload.delete({ id: doc.id, collection: relationshipsSlug, overrideAccess: true })
+      await payload.delete({ id: user.id, collection: usersSlug, overrideAccess: true })
+      await payload.delete({ id: tenantA.id, collection: tenantsSlug, overrideAccess: true })
+      await payload.delete({ id: tenantB.id, collection: tenantsSlug, overrideAccess: true })
     })
   })
 
@@ -317,10 +338,12 @@ test.suite({
       tenantA = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Membership Tenant A', domain: 'membership-a.test' },
+        overrideAccess: true,
       })
       tenantB = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Membership Tenant B', domain: 'membership-b.test' },
+        overrideAccess: true,
       })
       // @ts-expect-error The generated user type contains more fields than this test needs.
       tenantMemberUser = await payload.create({
@@ -330,26 +353,27 @@ test.suite({
           password: 'test',
           tenants: [{ tenant: tenantA.id }],
         },
+        overrideAccess: true,
       })
     })
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdRelationshipIDs) {
-        await payload.delete({ id, collection: relationshipsSlug })
+        await payload.delete({ id, collection: relationshipsSlug, overrideAccess: true })
       }
       createdRelationshipIDs.length = 0
 
       for (const id of createdAutosaveIDs) {
-        await payload.delete({ id, collection: autosaveGlobalSlug })
+        await payload.delete({ id, collection: autosaveGlobalSlug, overrideAccess: true })
       }
       createdAutosaveIDs.length = 0
 
-      await payload.delete({ id: tenantMemberUser.id, collection: usersSlug })
-      await payload.delete({ id: tenantA.id, collection: tenantsSlug })
-      await payload.delete({ id: tenantB.id, collection: tenantsSlug })
+      await payload.delete({ id: tenantMemberUser.id, collection: usersSlug, overrideAccess: true })
+      await payload.delete({ id: tenantA.id, collection: tenantsSlug, overrideAccess: true })
+      await payload.delete({ id: tenantB.id, collection: tenantsSlug, overrideAccess: true })
     })
 
-    const loginAsTenantMember = async (restClient: NextRESTClient): Promise<string> => {
+    const loginAsTenantMember = async (restClient: RESTClient): Promise<string> => {
       const result = await restClient
         .POST('/users/login', {
           auth: false,
@@ -408,6 +432,7 @@ test.suite({
 
       const written = await payload.find({
         collection: relationshipsSlug,
+        overrideAccess: true,
         where: { title: { equals: 'Tenant B REST document' } },
       })
 
@@ -440,6 +465,7 @@ test.suite({
         id: ownDocument.id,
         collection: relationshipsSlug,
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(unchangedDocument.tenant).toBe(tenantA.id)
@@ -461,6 +487,7 @@ test.suite({
 
       const written = await payload.find({
         collection: autosaveGlobalSlug,
+        overrideAccess: true,
         where: { title: { equals: 'Tenant B REST draft' } },
       })
 
@@ -577,19 +604,26 @@ test.suite({
       const tenant = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Cleanup Tenant', domain: 'cleanup-tenant.test' },
+        overrideAccess: true,
       })
 
       await payload.create({
         collection: menuSlug,
         data: { tenant: tenant.id, title: 'Cleanup Menu' },
+        overrideAccess: true,
       })
 
-      const deletedTenant = await payload.delete({ id: tenant.id, collection: tenantsSlug })
+      const deletedTenant = await payload.delete({
+        id: tenant.id,
+        collection: tenantsSlug,
+        overrideAccess: true,
+      })
 
       expect(deletedTenant.id).toBe(tenant.id)
 
       const remainingTenants = await payload.find({
         collection: tenantsSlug,
+        overrideAccess: true,
         where: { id: { equals: tenant.id } },
       })
 
@@ -598,23 +632,75 @@ test.suite({
   })
 
   test.describe('hasMany tenant field filtering', () => {
+    test('should use update access for validation when an access result callback is configured', async ({
+      payload,
+    }) => {
+      const adminUser = await payload
+        .find({
+          collection: usersSlug,
+          limit: 1,
+          overrideAccess: true,
+          where: { email: { equals: devUser.email } },
+        })
+        .then(({ docs }) => docs[0])
+      const tenant = await payload
+        .find({
+          collection: tenantsSlug,
+          limit: 1,
+          overrideAccess: true,
+        })
+        .then(({ docs }) => docs[0])
+
+      multiTenantPostsAccessResultEvents.length = 0
+
+      await expect(
+        payload.validate({
+          collection: multiTenantPostsSlug,
+          context: { allowMultiTenantPostUpdate: false },
+          data: { tenant: [tenant.id], title: 'Denied candidate' },
+          locale: 'en',
+          overrideAccess: false,
+          user: adminUser,
+        }),
+      ).rejects.toMatchObject({ status: 403 })
+
+      await expect(
+        payload.validate({
+          collection: multiTenantPostsSlug,
+          context: { allowMultiTenantPostUpdate: true },
+          data: { tenant: [tenant.id], title: 'Allowed candidate' },
+          locale: 'en',
+          overrideAccess: false,
+          user: adminUser,
+        }),
+      ).resolves.toMatchObject({ valid: true })
+
+      expect(multiTenantPostsAccessResultEvents).toEqual([
+        { accessKey: 'validate', accessResult: false },
+        { accessKey: 'validate', accessResult: true },
+      ])
+    })
+
     test('should not double-wrap tenant arrays in filterOptions', async ({ payload }) => {
       const tenant1 = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Tenant 1', domain: 'tenant1.test' },
+        overrideAccess: true,
       })
       const tenant2 = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Tenant 2', domain: 'tenant2.test' },
+        overrideAccess: true,
       })
 
       // Create a post with multiple tenants (hasMany: true)
       const post = await payload.create({
         collection: multiTenantPostsSlug,
         data: {
-          title: 'Multi-tenant post',
           tenant: [tenant1.id, tenant2.id],
+          title: 'Multi-tenant post',
         },
+        overrideAccess: true,
       })
 
       // Get the parent relationship field
@@ -634,9 +720,9 @@ test.suite({
       expect(Array.isArray(filter.tenant.in[1])).toBe(false)
 
       // Cleanup
-      await payload.delete({ id: post.id, collection: multiTenantPostsSlug })
-      await payload.delete({ id: tenant1.id, collection: tenantsSlug })
-      await payload.delete({ id: tenant2.id, collection: tenantsSlug })
+      await payload.delete({ id: post.id, collection: multiTenantPostsSlug, overrideAccess: true })
+      await payload.delete({ id: tenant1.id, collection: tenantsSlug, overrideAccess: true })
+      await payload.delete({ id: tenant2.id, collection: tenantsSlug, overrideAccess: true })
     })
   })
 })

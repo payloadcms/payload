@@ -1,9 +1,5 @@
 'use client'
-import type {
-  EmailFieldClientComponent,
-  EmailFieldClientProps,
-  EmailFieldValidation,
-} from 'payload'
+import type { EmailFieldClientProps, EmailFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
@@ -11,24 +7,22 @@ import React, { useCallback, useMemo } from 'react'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
+import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.css'
 
-const EmailFieldComponent: EmailFieldClientComponent = (props) => {
+const EmailFieldComponent: React.FC<EmailFieldClientProps> = (props) => {
   const {
     field,
     field: {
-      admin: {
-        autoComplete,
-        className,
-        description,
-        placeholder,
-      } = {} as EmailFieldClientProps['field']['admin'],
+      admin: { autoComplete, className, description, placeholder } = {},
       label,
       localized,
       required,
@@ -61,6 +55,10 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const { uuid } = useForm()
+  const editDepth = useEditDepth()
+  const errorID = showError ? generateFieldID(path, editDepth, uuid, 'field-error') : undefined
+
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
@@ -79,7 +77,13 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            hasRequiredAccessibleState
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
@@ -88,9 +92,10 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
           Fallback={<FieldError path={path} showError={showError} />}
         />
         {BeforeInput}
-        {/* disable eslint here because the label is dynamic */}
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
+          aria-describedby={errorID}
+          aria-invalid={showError || undefined}
           autoComplete={autoComplete}
           className="form-input"
           disabled={readOnly || disabled}

@@ -8,13 +8,17 @@ export const getNavPrefs = cache(async (req: PayloadRequest): Promise<NavPrefere
     return { activeTab: undefined, groups: {}, open: true }
   }
 
+  // Navigation renders alongside document creation and must not join its transaction.
+  const preferencesReq = { ...req, transactionID: undefined }
+
   const navPrefs = await req.payload
     .find({
       collection: 'payload-preferences',
       depth: 0,
       limit: 1,
+      overrideAccess: true,
       pagination: false,
-      req,
+      req: preferencesReq,
       where: {
         and: [
           {
@@ -42,8 +46,9 @@ export const getNavPrefs = cache(async (req: PayloadRequest): Promise<NavPrefere
       collection: 'payload-preferences',
       depth: 0,
       limit: 1,
+      overrideAccess: true,
       pagination: false,
-      req,
+      req: preferencesReq,
       where: {
         and: [
           {
