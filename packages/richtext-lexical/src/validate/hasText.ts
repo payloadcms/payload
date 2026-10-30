@@ -25,18 +25,9 @@ export function hasText(
 
     const paragraphNode = node as SerializedParagraphNode
 
-    if (!paragraphNode?.children || paragraphNode?.children?.length === 0) {
-      return true
-    }
-
-    if (paragraphNode?.children?.length === 1) {
-      const paragraphNodeChild = paragraphNode?.children[0]
-      if (paragraphNodeChild?.type === 'text') {
-        return !(paragraphNodeChild as SerializedTextNode | undefined)?.['text']?.length
-      }
-    }
-
-    return false
+    return (paragraphNode?.children ?? []).every(
+      (child) => child?.type === 'text' && !(child as SerializedTextNode)?.text?.length,
+    )
   })
 
   if (hasOnlyEmptyParagraphs) {

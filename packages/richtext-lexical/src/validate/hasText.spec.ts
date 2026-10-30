@@ -56,6 +56,18 @@ describe('hasText', () => {
     expect(hasText(rootNode([paragraphNode(), paragraphNode([textNode('')])]))).toBe(false)
   })
 
+  it('should return false for a paragraph with several empty text nodes', () => {
+    expect(hasText(rootNode([paragraphNode(), paragraphNode([textNode(''), textNode('')])]))).toBe(
+      false,
+    )
+  })
+
+  it('should return true for a paragraph with a non-text child', () => {
+    expect(
+      hasText(rootNode([paragraphNode([textNode(''), { type: 'linebreak', version: 1 }])])),
+    ).toBe(true)
+  })
+
   it('should return true when any paragraph has text', () => {
     expect(hasText(rootNode([paragraphNode(), paragraphNode([textNode('Hello')])]))).toBe(true)
   })
