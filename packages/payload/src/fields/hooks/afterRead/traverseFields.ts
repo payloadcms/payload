@@ -10,7 +10,7 @@ import type {
 } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
-import { promise } from './promise.js'
+import { readField } from './promise.js'
 
 type Args = {
   /**
@@ -92,7 +92,7 @@ export const traverseFields = ({
   triggerHooks = true,
 }: Args): void => {
   fields.forEach((field, fieldIndex) => {
-    const fieldPromise = promise({
+    const fieldPromise = readField({
       blockData,
       collection,
       context,

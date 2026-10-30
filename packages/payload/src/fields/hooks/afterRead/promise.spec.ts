@@ -5,6 +5,7 @@ import type { Field } from '../../config/types.js'
 import type { AfterReadArgs } from './index.js'
 
 import { afterRead } from './index.js'
+import { promise } from './promise.js'
 
 const read = (fields: Field[], doc: Record<string, unknown>, overrides = {}) =>
   afterRead({
@@ -26,6 +27,20 @@ const read = (fields: Field[], doc: Record<string, unknown>, overrides = {}) =>
   } as unknown as AfterReadArgs<Record<string, unknown>>)
 
 describe('afterRead synchronous scalar fields', () => {
+  it('should keep the exported afterReadPromise API asynchronous', async () => {
+    const result = promise({
+      field: { name: 'title', type: 'text' },
+      fieldIndex: 0,
+      fieldDepth: 0,
+      siblingDoc: { title: 'Hello' },
+      parentPath: '',
+      parentSchemaPath: '',
+      parentIndexPath: '',
+    } as Parameters<typeof promise>[0])
+    expect(typeof result.then).toBe('function')
+    await result
+  })
+
   it.each(['en', 'de', 'ja'])(
     'should avoid per-field promises for %s localized scalar fields',
     async (locale) => {

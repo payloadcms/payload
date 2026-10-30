@@ -79,7 +79,10 @@ type Args = {
 // - Execute read access control
 // - Populate relationships
 
-export const promise = ({
+// Keep the exported afterReadPromise API asynchronous. Internal traversal can avoid no-op promises.
+export const promise = async (args: Args): Promise<void> => readField(args)
+
+export const readField = ({
   blockData,
   collection,
   context,
