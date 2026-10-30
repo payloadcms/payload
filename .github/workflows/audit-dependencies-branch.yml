@@ -37,14 +37,54 @@ env:
 # Codex nor a bump's file changes can overwrite what later steps execute.
 # Artifacts: audit-plan-<ref> (report, plan, store), research-<ref>-<bumpId> (<bumpId>.json),
 # verify-<ref>-<unitId> (<unitId>.json), pr-<ref>-<unitId> (<unitId>.json).
+# verify runs package scripts that can reach the runtime token and write caches and artifacts,
+# so only verify uses the pnpm cache, and plan and research results are downloaded by id.
 jobs:
+  # A cache entry may come from a job that ran package scripts, and restore can extract it to
+  # any path, so it is restored here, with nothing to steal, and only checked JSON leaves.
+  store:
+    runs-on: ubuntu-26.04
+    permissions: {}
+    outputs:
+      store: ${{ steps.validate.outputs.store }}
+    steps:
+      # Each run saves a new key, so the prefix restores the newest store for this ref. A failed
+      # restore only costs a re-research, so it falls back to an empty store.
+      - name: Restore decision store
+        continue-on-error: true
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ runner.temp }}/audit-deps-store
+          key: audit-deps-store-${{ inputs.ref }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: audit-deps-store-${{ inputs.ref }}-
+
+      - name: Validate decision store
+        id: validate
+        run: |
+          set -euo pipefail
+          file="$RUNNER_TEMP/audit-deps-store/store.json"
+          store='{"entries":[]}'
+          if [ -f "$file" ] && [ ! -L "$file" ] && [ "$(stat -c %s "$file")" -le 262144 ]; then
+            # Slurp so the file holds exactly one document and the output stays one line.
+            if checked="$(jq -cs 'if length == 1 and (.[0] | type) == "object" and (.[0].entries | type) == "array" then { entries: .[0].entries } else error("bad shape") end' "$file")"; then
+              store="$checked"
+            else
+              echo "::warning::The decision store is not valid; starting from an empty store"
+            fi
+          elif [ -e "$file" ] || [ -L "$file" ]; then
+            echo "::warning::The decision store is not a regular file of at most 256 KB; starting from an empty store"
+          fi
+          echo "store=$store" >> "$GITHUB_OUTPUT"
+
   precheck:
+    needs: store
     runs-on: ubuntu-26.04
     permissions:
       contents: read
       pull-requests: read
     outputs:
       base_sha: ${{ steps.base.outputs.sha }}
+      plan_artifact_id: ${{ steps.upload-plan.outputs.artifact-id }}
       open_pr_matrix: ${{ steps.decide.outputs.open_pr_matrix }}
       research_matrix: ${{ steps.decide.outputs.research_matrix }}
       stale_prs: ${{ steps.decide.outputs.stale_prs }}
@@ -81,6 +121,8 @@ jobs:
           # The audit resolves each package's dependencies fresh; a full
           # workspace install is not needed.
           pnpm-run-install: false
+          # Only verify uses the pnpm cache; any job that ran package scripts could have written it.
+          pnpm-restore-cache: false
 
       - name: Run audit dependencies action
         uses: ./.github/actions/audit-dependencies
@@ -91,13 +133,13 @@ jobs:
           severity: ${{ inputs.severity }}
           json: ${{ runner.temp }}/audit_output.json
 
-      # Each run saves a new key, so the prefix restores the newest store for this ref.
-      - name: Restore decision store
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ${{ runner.temp }}/audit-deps-store
-          key: audit-deps-store-${{ inputs.ref }}-${{ github.run_id }}
-          restore-keys: audit-deps-store-${{ inputs.ref }}-
+      - name: Write decision store
+        env:
+          STORE: ${{ needs.store.outputs.store }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/audit-deps-store"
+          printf '%s' "$STORE" > "$RUNNER_TEMP/audit-deps-store/store.json"
 
       - name: Plan bumps and units
         env:
@@ -149,6 +191,7 @@ jobs:
             })
 
       - name: Upload plan
+        id: upload-plan
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: audit-plan-${{ inputs.ref }}
@@ -204,10 +247,12 @@ jobs:
           # Untrusted code runs in this job; a post-job cache save would publish a store it could alter.
           pnpm-restore-cache: false
 
+      # An empty artifact-ids input downloads every artifact, so the step needs an id.
       - name: Download plan
+        if: needs.precheck.outputs.plan_artifact_id != ''
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: audit-plan-${{ inputs.ref }}
+          artifact-ids: ${{ needs.precheck.outputs.plan_artifact_id }}
           path: ${{ runner.temp }}/audit-plan
 
       # The read-only token only raises GitHub API rate limits; Codex never sees it.
@@ -302,19 +347,65 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  # Fixes the research artifact ids before any job of this ref runs package scripts, so a later
+  # upload under the same name is never read.
+  seal:
+    needs: [precheck, research]
+    if: always() && needs.precheck.result == 'success'
+    runs-on: ubuntu-26.04
+    permissions:
+      actions: read
+    outputs:
+      research_artifact_ids: ${{ steps.list.outputs.research_artifact_ids }}
+      research_artifacts: ${{ steps.list.outputs.research_artifacts }}
+    steps:
+      - name: List research artifacts
+        id: list
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          REF: ${{ inputs.ref }}
+          RESEARCH_MATRIX: ${{ needs.precheck.outputs.research_matrix }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const prefix = `research-${process.env.REF}-`
+            const expected = new Set(JSON.parse(process.env.RESEARCH_MATRIX).map((entry) => entry.bumpId))
+            const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+              owner: context.repo.owner,
+              per_page: 100,
+              repo: context.repo.repo,
+              run_id: context.runId,
+            })
+
+            // A re-run attempt can list the same name twice; the newest upload wins.
+            const ids = {}
+            for (const artifact of artifacts) {
+              const bumpId = artifact.name.startsWith(prefix) ? artifact.name.slice(prefix.length) : null
+              if (artifact.expired || !expected.has(bumpId)) {
+                continue
+              }
+              ids[bumpId] = Math.max(ids[bumpId] ?? 0, artifact.id)
+            }
+
+            core.setOutput('research_artifacts', JSON.stringify(ids))
+            core.setOutput('research_artifact_ids', Object.values(ids).join(','))
+
   verify:
     name: verify (${{ matrix.unitId }})
-    needs: [precheck, research]
+    needs: [precheck, research, seal]
     # Runs after failed research legs too; a bump without a valid result is not applied.
     if: >-
       !cancelled() &&
       needs.precheck.result == 'success' &&
+      needs.seal.result == 'success' &&
       needs.precheck.outputs.verify_matrix != '[]'
     strategy:
       fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.precheck.outputs.verify_matrix) }}
     runs-on: ubuntu-26.04
+    # A group retry runs one install and build per bump.
+    timeout-minutes: 120
     permissions:
       contents: read
     steps:
@@ -342,16 +433,20 @@ jobs:
           # Untrusted code runs in this job; a post-job cache save would publish a store it could alter.
           pnpm-restore-cache: false
 
+      # An empty artifact-ids input downloads every artifact, so the step needs an id.
       - name: Download plan
+        if: needs.precheck.outputs.plan_artifact_id != ''
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: audit-plan-${{ inputs.ref }}
+          artifact-ids: ${{ needs.precheck.outputs.plan_artifact_id }}
           path: ${{ runner.temp }}/audit-plan
 
+      # Ids come from seal; a bump without one has no result and is not applied.
       - name: Download research results
+        if: needs.seal.outputs.research_artifact_ids != ''
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          pattern: research-${{ inputs.ref }}-*
+          artifact-ids: ${{ needs.seal.outputs.research_artifact_ids }}
           path: ${{ runner.temp }}/research
           merge-multiple: true
 
@@ -569,10 +664,11 @@ jobs:
 
   open_pr:
     name: open_pr (${{ matrix.unitId }})
-    needs: [precheck, verify]
+    needs: [precheck, seal, verify]
     if: >-
       !cancelled() &&
       needs.precheck.result == 'success' &&
+      needs.seal.result == 'success' &&
       inputs.is-default-inputs &&
       needs.precheck.outputs.open_pr_matrix != '[]'
     strategy:
@@ -609,16 +705,20 @@ jobs:
           # This job holds the App token, so it reads no cache an untrusted job could have written.
           pnpm-restore-cache: false
 
+      # An empty artifact-ids input downloads every artifact, so the step needs an id.
       - name: Download plan
+        if: needs.precheck.outputs.plan_artifact_id != ''
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: audit-plan-${{ inputs.ref }}
+          artifact-ids: ${{ needs.precheck.outputs.plan_artifact_id }}
           path: ${{ runner.temp }}/audit-plan
 
+      # Ids come from seal; a bump without one has no result and is not applied.
       - name: Download research results
+        if: needs.seal.outputs.research_artifact_ids != ''
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          pattern: research-${{ inputs.ref }}-*
+          artifact-ids: ${{ needs.seal.outputs.research_artifact_ids }}
           path: ${{ runner.temp }}/research
           merge-multiple: true
 
@@ -814,11 +914,12 @@ jobs:
           retention-days: 7
 
   housekeeping:
-    needs: [precheck, research, verify]
-    # Skipped on cancel: missing results would read as failures and post wrong comments.
+    needs: [precheck, research, seal, verify]
+    # Skipped on cancel or without seal: missing results would read as failures and post wrong comments.
     if: >-
       !cancelled() &&
       needs.precheck.result == 'success' &&
+      needs.seal.result == 'success' &&
       inputs.is-default-inputs
     runs-on: ubuntu-26.04
     environment: audit-deps
@@ -836,16 +937,20 @@ jobs:
           git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
           git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
 
+      # An empty artifact-ids input downloads every artifact, so the step needs an id.
       - name: Download plan
+        if: needs.precheck.outputs.plan_artifact_id != ''
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: audit-plan-${{ inputs.ref }}
+          artifact-ids: ${{ needs.precheck.outputs.plan_artifact_id }}
           path: ${{ runner.temp }}/audit-plan
 
+      # Ids come from seal; a bump without one has no result and is not applied.
       - name: Download research results
+        if: needs.seal.outputs.research_artifact_ids != ''
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          pattern: research-${{ inputs.ref }}-*
+          artifact-ids: ${{ needs.seal.outputs.research_artifact_ids }}
           path: ${{ runner.temp }}/research
           merge-multiple: true
 
@@ -912,7 +1017,7 @@ jobs:
             })
 
   status:
-    needs: [precheck, research, verify, open_pr, housekeeping]
+    needs: [store, precheck, research, seal, verify, open_pr, housekeeping]
     if: always()
     runs-on: ubuntu-26.04
     permissions: {}
@@ -929,18 +1034,19 @@ jobs:
           git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
           git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
 
+      # An empty artifact-ids input downloads every artifact, so each step needs ids.
       - name: Download plan
-        if: needs.precheck.result == 'success'
+        if: needs.precheck.result == 'success' && needs.precheck.outputs.plan_artifact_id != ''
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: audit-plan-${{ inputs.ref }}
+          artifact-ids: ${{ needs.precheck.outputs.plan_artifact_id }}
           path: ${{ runner.temp }}/audit-plan
 
       - name: Download research results
-        if: needs.precheck.result == 'success'
+        if: needs.precheck.result == 'success' && needs.seal.outputs.research_artifact_ids != ''
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          pattern: research-${{ inputs.ref }}-*
+          artifact-ids: ${{ needs.seal.outputs.research_artifact_ids }}
           path: ${{ runner.temp }}/research
           merge-multiple: true
 
@@ -960,9 +1066,10 @@ jobs:
           path: ${{ runner.temp }}/prs
           merge-multiple: true
 
-      # Only default-input runs on main write the store; a cancelled run may lack results.
+      # Only default-input runs on main write the store; success() keeps a failed download or
+      # update from saving a partial store.
       - name: Update decision store
-        if: needs.precheck.result == 'success' && inputs.is-default-inputs && !cancelled()
+        if: success() && needs.precheck.result == 'success' && inputs.is-default-inputs == true
         env:
           REF: ${{ inputs.ref }}
         run: |
@@ -977,11 +1084,11 @@ jobs:
             --out="$RUNNER_TEMP/audit-deps-store/store.json"
 
       - name: Save decision store
-        if: needs.precheck.result == 'success' && inputs.is-default-inputs && !cancelled()
+        if: success() && needs.precheck.result == 'success' && inputs.is-default-inputs == true
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ runner.temp }}/audit-deps-store
-          key: audit-deps-store-${{ inputs.ref }}-${{ github.run_id }}
+          key: audit-deps-store-${{ inputs.ref }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Summarize outcomes
         id: outcomes

@@ -20,6 +20,8 @@ import {
 } from './shared.mjs'
 
 const RED_STATUSES = new Set(['declined', 'failed', 'stored'])
+// These steps fail mostly on registry or network errors, so a failure there is retried next run.
+const UNSTORED_VERIFY_STEPS = new Set(['lockfile', 'install'])
 const UNIT_STEP_OUTCOMES = {
   blocked: { status: 'skipped', reason: 'the PR branch has commits from a person' },
   skip: { status: 'skipped', reason: 'the open PR is up to date' },
@@ -39,7 +41,8 @@ const UNIT_STEP_OUTCOMES = {
 
 /**
  * `store-update --store --plan --research-dir --verify-dir --ref --out`: drops expired
- * entries, then records today's Codex declines and verify failures. `--store` may be missing.
+ * entries, then records today's Codex declines and verify failures (except at lockfile or
+ * install). `--store` may be missing.
  */
 export async function runStoreUpdate({ options }) {
   const plan = await readPlan({ options })
@@ -66,6 +69,9 @@ export async function runStoreUpdate({ options }) {
   for (const unit of plan.units) {
     const verify = await readVerifyResult({ unit, verifyDir })
     for (const { bumpId, step } of verify?.failed ?? []) {
+      if (UNSTORED_VERIFY_STEPS.has(step)) {
+        continue
+      }
       const { dependency, to } = findBump({ plan, bumpId })
       updates.push({ ref, dependency, to, outcome: 'failed', reason: `failed at ${step}`, at })
     }

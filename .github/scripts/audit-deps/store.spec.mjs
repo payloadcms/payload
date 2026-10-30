@@ -37,6 +37,12 @@ describe('store', () => {
     expect(pruneStore({ entries, now }).map((e) => e.dependency)).toEqual(['b'])
   })
 
+  it('prunes entries dated in the future', () => {
+    const entries = [entry({ at: daysAgo(-1) }), entry({ dependency: 'b', at: now.toISOString() })]
+
+    expect(pruneStore({ entries, now }).map((e) => e.dependency)).toEqual(['b'])
+  })
+
   it('finds an outcome by ref, dependency, and to', () => {
     expect(
       findStoredOutcome({ entries: [entry()], ref: 'main', dependency: 'csv-parse', to: '7.0.2' }),
@@ -80,6 +86,18 @@ describe('selectResearchBumps', () => {
     const result = selectResearchBumps({
       bumps,
       entries: [entry({ at: daysAgo(31) })],
+      ref: 'main',
+      now,
+    })
+
+    expect(result.research).toEqual(bumps)
+  })
+
+  it('ignores entries dated in the future', () => {
+    const bumps = [bump('csv-parse-7', 'csv-parse', '7.0.2')]
+    const result = selectResearchBumps({
+      bumps,
+      entries: [entry({ at: daysAgo(-365) })],
       ref: 'main',
       now,
     })

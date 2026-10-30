@@ -808,6 +808,37 @@ describe('cli', () => {
     ])
   })
 
+  it('store-update skips verify failures at the lockfile and install steps', async () => {
+    await initRepo()
+    const { plan } = await makePlan()
+    await writeFile(
+      path.join(verifyDir, 'non-major.json'),
+      JSON.stringify({
+        failed: [
+          { bumpId: 'csv-parse-5-fallback', step: 'lockfile' },
+          { bumpId: 'left-pad-1', step: 'install' },
+        ],
+        passed: [],
+      }),
+    )
+    const out = outFile('store.next.json')
+
+    const { code } = await run({
+      args: [
+        'store-update',
+        `--store=${outFile('missing-store.json')}`,
+        `--plan=${plan}`,
+        `--research-dir=${researchDir}`,
+        `--verify-dir=${verifyDir}`,
+        '--ref=main',
+        `--out=${out}`,
+      ],
+    })
+
+    expect(code).toBe(0)
+    expect(JSON.parse(await readFile(out, 'utf8')).entries).toEqual([])
+  })
+
   it('store-update drops verify ids outside the unit and renames odd step names', async () => {
     await initRepo()
     const { plan } = await makePlan()

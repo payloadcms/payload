@@ -24,7 +24,7 @@ export function writeStore({ entries }) {
   return `${JSON.stringify({ entries }, null, 2)}\n`
 }
 
-/** Drops entries older than 30 days. */
+/** Drops entries older than 30 days or dated after `now`. */
 export function pruneStore({ entries, now = new Date() }) {
   return entries.filter((entry) => isFresh({ entry, now }))
 }
@@ -85,6 +85,9 @@ function isEntry(value) {
   )
 }
 
+// A future date would keep a forged entry fresh forever, so it counts as expired.
 function isFresh({ entry, now }) {
-  return now.getTime() - Date.parse(entry.at) <= EXPIRY_MS
+  const age = now.getTime() - Date.parse(entry.at)
+
+  return age >= 0 && age <= EXPIRY_MS
 }
