@@ -56,6 +56,7 @@ describe('getPayload dev reload', () => {
       promise: null,
       reload: false,
       reloadQueued: false,
+      replacedConfigs: new WeakSet(),
     })
 
     // Connects the strategy
@@ -148,6 +149,34 @@ describe('getPayload dev reload', () => {
 
     expect((await second).config).toBe(changedConfig)
     expect((await first).config).toBe(changedConfig)
+  })
+
+  it('should not reload back to a config that a reload replaced', async () => {
+    const changedConfig = createConfig()
+
+    onReload()
+    expect((await get(changedConfig)).config).toBe(changedConfig)
+
+    // A request that imported the config before the change calls getPayload only now
+    const payload = await get(initialConfig)
+
+    expect(payload.config).toBe(changedConfig)
+  })
+
+  it('should keep a reported change for a newer config when a call brings a replaced one', async () => {
+    const firstChange = createConfig()
+
+    onReload()
+    expect((await get(firstChange)).config).toBe(firstChange)
+
+    // The file changes again, but the next call still brings the config from before the first change
+    onReload()
+    expect((await get(initialConfig)).config).toBe(firstChange)
+
+    const secondChange = createConfig()
+    const payload = await get(secondChange)
+
+    expect(payload.config).toBe(secondChange)
   })
 
   it('should not reload when a call brings the config the instance runs with', async () => {
