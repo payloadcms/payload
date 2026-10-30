@@ -4,6 +4,7 @@ import type { Payload } from 'payload'
 import { readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { createPayloadRequest } from 'payload'
+import sharp from 'sharp'
 import { expect, vi } from 'vitest'
 
 /* eslint-disable payload/no-relative-monorepo-imports -- Exercise the internal cleanup lifecycle against saved documents and versions. */
@@ -102,7 +103,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       let nested: { id: number | string; storageMarker?: null | string } | undefined
       hooks.afterChange = [
         async ({ doc, req: hookReq }) => {
-          if (doc.filename !== 'outer-original.png' || hookReq.context.skipCloudStorage) {
+          if (doc.filename !== 'outer.png' || hookReq.context.skipCloudStorage) {
             return
           }
           expect(hookReq).toBe(req)
@@ -202,10 +203,10 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
           if (hookReq.context.skipCloudStorage) {
             return
           }
-          if (doc.filename === 'nested-failed-original.png') {
+          if (doc.filename === 'nested-failed.png') {
             throw new Error('Nested cloud hook failed')
           }
-          if (doc.filename !== 'outer-original.png') {
+          if (doc.filename !== 'outer.png') {
             return
           }
           const metadata = hookReq.context._payloadManagedCloudMetadata
@@ -296,8 +297,8 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     })
     const after = await getStoredFiles({ id: created.id, payload })
 
-    expect(renamed.filename).toBe('renamed-original.png')
-    expect(renamed.url).toContain('/renamed-original.png')
+    expect(renamed.filename).toBe('renamed.png')
+    expect(renamed.url).toContain('/renamed.png')
     expect(renamed.storageMarker).toBe(created.storageMarker)
     expect(after[0]!.key).not.toBe(oldKey)
     expect(versionedCloudFiles.get(after[0]!.key)).toEqual(bytes)
@@ -320,7 +321,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
     const source = (await getStoredFiles({ id: created.id, payload }))[0]!.key
-    const destination = path.posix.join(path.posix.dirname(source), 'occupied-original.png')
+    const destination = path.posix.join(path.posix.dirname(source), 'occupied.png')
     const sourceBytes = Buffer.from(versionedCloudFiles.get(source)!)
     const occupiedBytes = Buffer.from('occupied bytes')
 
@@ -362,14 +363,14 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       payload,
     })
 
-    expect(created.filename).toBe('image-original.png')
+    expect(created.filename).toBe('image.png')
     expect(created.original?.filename).toBe(created.filename)
     expect(created.original?.url).toBe(created.url)
     expect(created._objectKey).toEqual(expect.any(String))
     expect(created.original?._objectKey).toBe(created._objectKey)
     expect(files).toEqual([
       {
-        key: expect.stringMatching(/image-original\.png$/),
+        key: expect.stringMatching(/image\.png$/),
         roles: [{ type: 'original' }, { type: 'default' }],
       },
     ])
@@ -385,6 +386,212 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
 
     expect(stored._objectKey).toBeTruthy()
     expect(stored.original?._objectKey).toBe(stored._objectKey)
+  })
+
+  const halfCrop = {
+    crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+    heightInPixels: 800,
+    widthInPixels: 800,
+  }
+
+  test('should store the original in its own folder when a new cloud upload is cropped', async ({
+    payload,
+  }) => {
+    const sourceBytes = await readFile(firstFile)
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      req: { query: { uploadEdits: halfCrop } },
+    })
+    const files = await getStoredFiles({ id: created.id, payload })
+    const main = files.find((file) => file.roles.some((role) => role.type === 'default'))
+    const original = files.find((file) => file.roles.some((role) => role.type === 'original'))
+
+    expect(created.filename).toBe('image.png')
+    expect(created.original?.filename).toBe('image.png')
+    expect(main?.key).not.toBe(original?.key)
+    expect(versionedCloudFiles.get(original!.key)).toEqual(sourceBytes)
+    expect(versionedCloudFiles.get(main!.key)).not.toEqual(sourceBytes)
+  })
+
+  test('should serve the main file by default and the original with original=true', async ({
+    payload,
+    restClient,
+  }) => {
+    const sourceBytes = await readFile(firstFile)
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      req: { query: { uploadEdits: halfCrop } },
+    })
+    const files = await getStoredFiles({ id: created.id, payload })
+    const main = files.find((file) => file.roles.some((role) => role.type === 'default'))
+    const originalURL = new URL(created.original!.url!, 'http://localhost')
+
+    const mainResponse = await restClient.GET(`/${versionedCloudMediaSlug}/file/image.png`)
+    const originalResponse = await restClient.GET(
+      `${originalURL.pathname.replace(/^\/api/, '')}${originalURL.search}`,
+    )
+
+    expect(originalURL.searchParams.get('original')).toBe('true')
+    expect(new URL(created.url!, 'http://localhost').searchParams.has('original')).toBe(false)
+    expect(Buffer.from(await mainResponse.arrayBuffer())).toEqual(
+      versionedCloudFiles.get(main!.key),
+    )
+    expect(Buffer.from(await originalResponse.arrayBuffer())).toEqual(sourceBytes)
+  })
+
+  test('should apply read access to original=true requests', async ({ payload, restClient }) => {
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      req: { query: { uploadEdits: halfCrop } },
+    })
+    const originalURL = new URL(created.original!.url!, 'http://localhost')
+    const access = payload.collections[versionedCloudMediaSlug].config.access
+    const read = access.read
+
+    try {
+      access.read = () => false
+      const denied = await restClient.GET(
+        `${originalURL.pathname.replace(/^\/api/, '')}${originalURL.search}`,
+      )
+
+      expect(originalURL.searchParams.get('original')).toBe('true')
+      expect(denied.status).toBe(403)
+    } finally {
+      access.read = read
+    }
+  })
+
+  test('should serve the main file when original is not true', async ({ payload, restClient }) => {
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      req: { query: { uploadEdits: halfCrop } },
+    })
+    const files = await getStoredFiles({ id: created.id, payload })
+    const main = files.find((file) => file.roles.some((role) => role.type === 'default'))
+
+    const response = await restClient.GET(`/${versionedCloudMediaSlug}/file/image.png?original=yes`)
+
+    expect(response.status).toBe(200)
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(versionedCloudFiles.get(main!.key))
+  })
+
+  test('should still serve a beta cloud document whose original is named -original', async ({
+    payload,
+    restClient,
+  }) => {
+    const sourceBytes = await readFile(firstFile)
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      req: { query: { uploadEdits: halfCrop } },
+    })
+    const stored = await payload.db.findOne({
+      collection: versionedCloudMediaSlug,
+      where: { id: { equals: created.id } },
+    })
+    const files = getStoredCloudFiles(stored)
+    const main = files.find((file) => file.roles.some((role) => role.type === 'default'))
+    const original = files.find((file) => file.roles.some((role) => role.type === 'original'))
+    const betaOriginalKey = path.posix.join(path.posix.dirname(main!.key), 'image-original.png')
+    versionedCloudFiles.set(betaOriginalKey, versionedCloudFiles.get(original!.key)!)
+    versionedCloudFiles.delete(original!.key)
+    await payload.db.updateOne({
+      collection: versionedCloudMediaSlug,
+      data: {
+        original: {
+          ...stored!.original,
+          _objectKey: stored!._objectKey,
+          filename: 'image-original.png',
+          url: `/api/${versionedCloudMediaSlug}/file/image-original.png`,
+        },
+      },
+      where: { id: { equals: created.id } },
+    })
+
+    const read = await payload.findByID({ id: created.id, collection: versionedCloudMediaSlug })
+    const response = await restClient.GET(`/${versionedCloudMediaSlug}/file/image-original.png`)
+
+    expect(read.original?.filename).toBe('image-original.png')
+    expect(read.original?.url).not.toContain('original=')
+    expect(response.status).toBe(200)
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(sourceBytes)
+  })
+
+  test('should keep the filename when a cloud upload is cropped on update', async ({
+    payload,
+    restClient,
+  }) => {
+    const sourceBytes = await readFile(firstFile)
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const crop = await restClient.PATCH(`/${versionedCloudMediaSlug}/${created.id}`, {
+      body: JSON.stringify({}),
+      query: { uploadEdits: halfCrop },
+    })
+    const cropped = (await crop.json()).doc as typeof created
+    const files = await getStoredFiles({ id: created.id, payload })
+    const main = files.find((file) => file.roles.some((role) => role.type === 'default'))
+    const original = files.find((file) => file.roles.some((role) => role.type === 'original'))
+
+    expect(crop.status).toBe(200)
+    expect(cropped.filename).toBe('image.png')
+    expect(cropped.original?.filename).toBe('image.png')
+    expect(main?.key).not.toBe(original?.key)
+    expect(versionedCloudFiles.get(original!.key)).toEqual(sourceBytes)
+  })
+
+  test('should keep the uploaded filename for both files when a cloud file is replaced with a crop', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+    })
+    const replaced = await payload.update({
+      id: created.id,
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      req: { query: { uploadEdits: halfCrop } },
+    })
+
+    expect(replaced.filename).toBe('image.png')
+    expect(replaced.original?.filename).toBe('image.png')
+  })
+
+  test('should crop again from the original when the main file shares its filename', async ({
+    payload,
+    restClient,
+  }) => {
+    const { width } = await sharp(firstFile).metadata()
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      req: { query: { uploadEdits: halfCrop } },
+    })
+    const recrop = await restClient.PATCH(`/${versionedCloudMediaSlug}/${created.id}`, {
+      body: JSON.stringify({}),
+      query: { uploadEdits: halfCrop },
+    })
+    const recropped = (await recrop.json()).doc as typeof created
+
+    expect(recrop.status).toBe(200)
+    expect(recropped.filename).toBe('image.png')
+    expect(recropped.width).toBe(Math.round(width! / 2))
   })
 
   test('should reset a cloud crop to the retained original without another upload', async ({
@@ -771,7 +978,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     ).toEqual(firstFiles)
     expect([...versionedCloudFiles.keys()]).toEqual([firstKey])
     expect(versionedCloudFiles.get(firstKey)).toEqual(await readFile(firstFile))
-    expect(versionedCloudCalls.deletes).toEqual([expect.stringMatching(/small-original\.png$/)])
+    expect(versionedCloudCalls.deletes).toEqual([expect.stringMatching(/small\.png$/)])
   })
 
   test('should delete an unversioned cloud file after removing it from the document', async ({
@@ -820,7 +1027,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       })
       const oldKey = [...versionedCloudFiles.keys()][0]!
       const bytes = Buffer.from(versionedCloudFiles.get(oldKey)!)
-      const newKey = path.posix.join(path.posix.dirname(oldKey), 'moved-original.png')
+      const newKey = path.posix.join(path.posix.dirname(oldKey), 'moved.png')
       const commitTransaction = payload.db.commitTransaction
       let hasCheckedPendingRename = false
 
@@ -845,7 +1052,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
           overrideAccess: true,
         })
 
-        expect(renamed.filename).toBe('moved-original.png')
+        expect(renamed.filename).toBe('moved.png')
         expect(hasCheckedPendingRename).toBe(true)
         expect(versionedCloudCalls.moves).toBe(0)
         expect(versionedCloudFiles.has(oldKey)).toBe(false)
@@ -880,7 +1087,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
         await getStoredFiles({ id: created.id, collection: unversionedCloudMediaSlug, payload })
       )[0]!.key
 
-      expect(renamed.filename).toBe('moved-original.png')
+      expect(renamed.filename).toBe('moved.png')
       expect(versionedCloudCalls.moves).toBe(0)
       expect(versionedCloudFiles.has(oldKey)).toBe(false)
       expect(versionedCloudFiles.get(newKey)).toEqual(await readFile(firstFile))
@@ -907,11 +1114,8 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       },
       where: { id: { equals: created.id } },
     })
-    const oldStem = path.posix.parse(originalKey).name.replace(/-original$/, '')
-    const collisionKey = path.posix.join(
-      path.posix.dirname(processedKey),
-      path.posix.basename(processedKey).replace(oldStem, 'later'),
-    )
+    // The main file takes `later.png`, so the original's counter name is the later destination.
+    const collisionKey = path.posix.join(path.posix.dirname(originalKey), 'later-1.png')
     const occupiedBytes = Buffer.from('occupied')
     versionedCloudFiles.set(collisionKey, occupiedBytes)
 
@@ -928,9 +1132,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(versionedCloudFiles.get(originalKey)).toEqual(await readFile(firstFile))
     expect(versionedCloudCalls.moves).toBe(0)
     expect(versionedCloudFiles.has(processedKey)).toBe(true)
-    expect([...versionedCloudFiles.keys()].some((key) => key.endsWith('/later-original.png'))).toBe(
-      false,
-    )
+    expect([...versionedCloudFiles.keys()].some((key) => key.endsWith('/later.png'))).toBe(false)
     const saved = await payload.db.findOne({
       collection: unversionedCloudMediaSlug,
       where: { id: { equals: created.id } },
@@ -953,9 +1155,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       payload.db.commitTransaction = async () => {
         expect(versionedCloudFiles.get(oldKey)).toEqual(await readFile(firstFile))
         expect(
-          versionedCloudFiles.get(
-            path.posix.join(path.posix.dirname(oldKey), 'uncommitted-original.png'),
-          ),
+          versionedCloudFiles.get(path.posix.join(path.posix.dirname(oldKey), 'uncommitted.png')),
         ).toEqual(await readFile(firstFile))
         throw new Error('Cloud test commit failed')
       }
@@ -974,9 +1174,9 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       }
 
       expect(versionedCloudFiles.has(oldKey)).toBe(true)
-      expect(
-        [...versionedCloudFiles.keys()].some((key) => key.endsWith('/uncommitted-original.png')),
-      ).toBe(false)
+      expect([...versionedCloudFiles.keys()].some((key) => key.endsWith('/uncommitted.png'))).toBe(
+        false,
+      )
       const saved = await payload.db.findOne({
         collection: unversionedCloudMediaSlug,
         where: { id: { equals: created.id } },
@@ -1128,7 +1328,7 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
     const current = (await getStoredFiles({ id: created.id, payload }))[0]!.key
-    const destination = current.replace(/[^/]+$/, 'occupied-original.png')
+    const destination = current.replace(/[^/]+$/, 'occupied.png')
     const occupiedBytes = Buffer.from('another file')
     versionedCloudFiles.set(destination, occupiedBytes)
 

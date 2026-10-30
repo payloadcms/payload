@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
+import type { StoredFileRole } from '../../uploads/fileVersioning/types.js'
 import type { Collection } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -20,7 +21,7 @@ import {
   runFileOperationPlan,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { copyLocalFile } from '../../uploads/fileVersioning/localStorage.js'
-import { getOriginalFilename, normalizeStorageKey } from '../../uploads/fileVersioning/naming.js'
+import { normalizeStorageKey } from '../../uploads/fileVersioning/naming.js'
 import {
   collectStoredFiles,
   getStoredFileIdentity,
@@ -105,34 +106,36 @@ export const renameFileOperation = async (
     }
 
     const { newStem } = validateRename({ filename, oldFilename })
-    const originalStem = path.posix.parse(oldFilename).name
-    const originalMarkerIndex = originalStem.lastIndexOf('-original')
-    const oldStem =
-      originalMarkerIndex > 0
-        ? originalStem.slice(0, originalMarkerIndex)
-        : path.posix.parse(stored.filename as string).name
-    if (filename === `${oldStem}${path.posix.extname(oldFilename)}`) {
+    const mainStem = path.posix.parse(stored.filename as string).name
+    if (newStem === mainStem) {
       throw new APIError('The upload already has this filename.', 400)
     }
 
-    const originalFilename = getOriginalFilename({ filename })
+    const hasDefaultRole = ({ roles }: { roles: StoredFileRole[] }) =>
+      roles.some(({ type }) => type === 'default')
+    const getNextFilename = ({ key, roles }: { key: string; roles: StoredFileRole[] }) => {
+      const previousFilename = path.posix.basename(key)
+      if (!hasDefaultRole({ roles }) && roles.some(({ type }) => type === 'original')) {
+        return `${newStem}${path.posix.extname(previousFilename)}`
+      }
+      const suffix = previousFilename.startsWith(mainStem)
+        ? previousFilename.slice(mainStem.length)
+        : `-${previousFilename}`
+
+      return `${newStem}${suffix}`
+    }
+    // The main file keeps the requested name; other files take a counter if they collide with it.
     const plannedKeys = new Set(
-      storedFiles
-        .filter(({ roles }) => roles.some(({ type }) => type === 'original'))
-        .map(({ key }) =>
-          getStoredFileIdentity({
-            key: path.posix.join(path.posix.dirname(key), originalFilename),
-          }),
-        ),
+      storedFiles.filter(hasDefaultRole).map((file) =>
+        getStoredFileIdentity({
+          key: path.posix.join(path.posix.dirname(file.key), getNextFilename(file)),
+        }),
+      ),
     )
     const replacements = new Map<string, string>()
     for (const file of storedFiles) {
-      const previousFilename = path.posix.basename(file.key)
-      const hasOriginalRole = file.roles.some(({ type }) => type === 'original')
-      const suffix = previousFilename.startsWith(oldStem)
-        ? previousFilename.slice(oldStem.length)
-        : `-${previousFilename}`
-      let nextFilename = hasOriginalRole ? originalFilename : `${newStem}${suffix}`
+      const isMainFile = hasDefaultRole(file)
+      let nextFilename = getNextFilename(file)
       const directory = path.posix.dirname(file.key)
       let nextKey = path.posix.join(directory, nextFilename)
       let nextIdentity = getStoredFileIdentity({
@@ -141,7 +144,7 @@ export const renameFileOperation = async (
       const extension = path.posix.extname(nextFilename)
       const stem = nextFilename.slice(0, -extension.length || undefined)
       let collisionNumber = 1
-      while (!hasOriginalRole && plannedKeys.has(nextIdentity)) {
+      while (!isMainFile && plannedKeys.has(nextIdentity)) {
         nextFilename = `${stem}-${collisionNumber}${extension}`
         nextKey = path.posix.join(directory, nextFilename)
         nextIdentity = getStoredFileIdentity({

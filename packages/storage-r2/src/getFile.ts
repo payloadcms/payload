@@ -14,6 +14,7 @@ interface GetFileArgs {
   doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
+  isOriginal?: boolean
   operation?: FileHandlerOperation
   prefix: string
   req: PayloadRequest
@@ -29,6 +30,7 @@ export async function getFile({
   doc,
   filename,
   incomingHeaders,
+  isOriginal,
   operation = 'read',
   prefix = '',
   req,
@@ -43,6 +45,7 @@ export async function getFile({
       collectionPrefix: prefix,
       doc,
       filename,
+      isOriginal,
       req,
       uploadReference,
       useCompositePrefixes,
