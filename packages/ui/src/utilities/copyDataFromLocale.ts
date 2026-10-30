@@ -7,7 +7,6 @@ import {
   type FlattenedBlock,
   type PayloadRequest,
   type ServerFunction,
-  traverseFields,
 } from 'payload'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 
@@ -192,21 +191,107 @@ function mergeData(
   return toLocaleData
 }
 
+const blockFieldsOf = (
+  field: Extract<Field, { type: 'blocks' }>,
+  row: Data,
+  req: PayloadRequest,
+): Field[] | undefined => {
+  const block =
+    req.payload.blocks[row.blockType] ??
+    field.blocks.find((item) => typeof item !== 'string' && item.slug === row.blockType)
+
+  return typeof block === 'object' ? block.fields : undefined
+}
+
 /**
- * We don't have to recursively remove all ids,
- * just the ones from the fields inside a localized array or block.
+ * Drops array and block row ids that live inside a localized field.
+ * `find` returns one flat locale. `traverseFields` treats a localized group as a
+ * locale map and never reaches those rows, so the copied ids collide with the source
+ * locale on insert. Missing ids are minted again in `beforeChange`.
  */
-function removeIdIfParentIsLocalized(data: Data, fields: Field[]): Data {
-  traverseFields({
-    callback: ({ parentIsLocalized, ref }) => {
-      if (parentIsLocalized) {
-        delete (ref as { id: unknown }).id
+const stripLocalizedRowIds = (
+  data: Data,
+  fields: Field[],
+  parentIsLocalized: boolean,
+  req: PayloadRequest,
+): void => {
+  if (!data || typeof data !== 'object' || !Array.isArray(fields)) {
+    return
+  }
+
+  for (const field of fields) {
+    if (field.type === 'tabs') {
+      for (const tab of field.tabs) {
+        const tabLocalized = parentIsLocalized || tab.localized === true
+
+        if (tabHasName(tab) && data[tab.name] && typeof data[tab.name] === 'object') {
+          const tabData = data[tab.name]
+
+          if (tabData && typeof tabData === 'object' && !Array.isArray(tabData)) {
+            stripLocalizedRowIds(tabData, tab.fields, tabLocalized, req)
+          }
+        } else {
+          stripLocalizedRowIds(data, tab.fields, tabLocalized, req)
+        }
       }
-    },
-    fields,
-    fillEmpty: false,
-    ref: data,
-  })
+
+      continue
+    }
+
+    if ((field.type === 'row' || field.type === 'collapsible') && Array.isArray(field.fields)) {
+      stripLocalizedRowIds(data, field.fields, parentIsLocalized, req)
+      continue
+    }
+
+    if (!('name' in field) || !field.name || data[field.name] == null) {
+      continue
+    }
+
+    const value = data[field.name]
+    const localized = parentIsLocalized || field.localized === true
+
+    if (field.type === 'group') {
+      if (!value || typeof value !== 'object') {
+        continue
+      }
+
+      if (!Array.isArray(value)) {
+        stripLocalizedRowIds(value, field.fields, localized, req)
+      }
+
+      continue
+    }
+
+    if (field.type === 'array' || field.type === 'blocks') {
+      const sets = Array.isArray(value) ? [value] : []
+
+      for (const rows of sets) {
+        if (!Array.isArray(rows)) {
+          continue
+        }
+
+        for (const row of rows) {
+          if (!row || typeof row !== 'object') {
+            continue
+          }
+
+          if (localized) {
+            delete row.id
+          }
+
+          const rowFields = field.type === 'blocks' ? blockFieldsOf(field, row, req) : field.fields
+
+          if (Array.isArray(rowFields)) {
+            stripLocalizedRowIds(row, rowFields, localized, req)
+          }
+        }
+      }
+    }
+  }
+}
+
+const removeIdIfParentIsLocalized = (data: Data, fields: Field[], req: PayloadRequest): Data => {
+  stripLocalizedRowIds(data, fields, false, req)
 
   return data
 }
@@ -309,7 +394,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     ? fromLocaleDataWithoutID
     : mergeData(fromLocaleDataWithoutID, toLocaleDataWithoutID, fields, req, false)
 
-  const data = removeIdIfParentIsLocalized(dataWithID, fields)
+  const data = removeIdIfParentIsLocalized(dataWithID, fields, req)
 
   return globalSlug
     ? await payload.updateGlobal({
