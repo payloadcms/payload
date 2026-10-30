@@ -36,6 +36,9 @@ const LOCAL_API_OPERATIONS = new Set([
 
 const JOBS_LOCAL_API_OPERATIONS = new Set(['cancel', 'cancelByID', 'queue', 'run', 'runByID'])
 
+const REVIEW_HINT =
+  'Payload 4 defaults `overrideAccess` to `false`, so unless the options already set it, this call now enforces access control. Set `overrideAccess` explicitly.'
+
 /**
  * Adds an explicit `overrideAccess: true` to Local API calls that omit it,
  * preserving the Payload 3 default of skipping access control now that
@@ -57,6 +60,7 @@ export const addOverrideAccessTrue: Transform = {
   name: 'add-override-access-true',
   apply: ({ project }) => {
     const filesChanged = new Set<string>()
+    const notes: string[] = []
 
     for (const sourceFile of project.getSourceFiles()) {
       const insertions: Insertion[] = []
@@ -92,7 +96,12 @@ export const addOverrideAccessTrue: Transform = {
 
         const object = firstArg && getObjectLiteral({ node: firstArg })
 
+        // The options are built elsewhere, so the call site cannot be edited safely.
+        // Report it rather than skip it silently: the default flips to `false` there.
         if (!object) {
+          notes.push(
+            `${sourceFile.getFilePath()}:${node.getStartLineNumber()}: \`${callee.getText()}()\` was not changed because its argument is not an object literal. ${REVIEW_HINT}`,
+          )
           return
         }
 
@@ -100,8 +109,11 @@ export const addOverrideAccessTrue: Transform = {
           return
         }
 
-        // A spread may already carry the property. Refuse to guess.
+        // A spread may already carry the property. Refuse to guess, but report it.
         if (object.getProperties().some((property) => Node.isSpreadAssignment(property))) {
+          notes.push(
+            `${sourceFile.getFilePath()}:${node.getStartLineNumber()}: \`${callee.getText()}()\` was not changed because its options contain a spread that may already set \`overrideAccess\`. ${REVIEW_HINT}`,
+          )
           return
         }
 
@@ -121,10 +133,13 @@ export const addOverrideAccessTrue: Transform = {
       filesChanged.add(sourceFile.getFilePath())
     }
 
-    return { filesChanged: [...filesChanged] }
+    return {
+      filesChanged: [...filesChanged],
+      ...(notes.length > 0 ? { notes } : {}),
+    }
   },
   description:
-    'Add an explicit `overrideAccess: true` to Local API calls that omit it. Payload 4 changes the default to `false`; `true` preserves the Payload 3 default of skipping access control. Review each inserted value and switch to `false` wherever the operation acts on behalf of a user.',
+    'Add an explicit `overrideAccess: true` to Local API calls that omit it. Payload 4 changes the default to `false`; `true` preserves the Payload 3 default of skipping access control. Review each inserted value and switch to `false` wherever the operation acts on behalf of a user. Calls whose options are spread or not an object literal are left unchanged and reported for manual review.',
 }
 
 type Insertion = {
