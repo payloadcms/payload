@@ -1,7 +1,5 @@
 import { readFile } from 'node:fs/promises'
 
-const ADVISORY_MARKER_PATTERN = /<!-- audit-deps-advisories: ([^>]*?) -->/
-
 /**
  * Reads the audit report written by the audit-dependencies action.
  * Throws a single error for missing files, bad JSON, and wrong shape so callers fail closed.
@@ -32,25 +30,6 @@ export function selectFixableAdvisories({ report, scope }) {
     .map((finding) => finding.advisory)
 
   return sortedUnique({ values: advisories })
-}
-
-export function findUnfixedClaims({ claimed, report }) {
-  const reported = new Set(report.findings.map((finding) => finding.advisory))
-
-  return sortedUnique({ values: claimed.filter((advisory) => reported.has(advisory)) })
-}
-
-export function formatAdvisoryMarker({ advisories }) {
-  return `<!-- audit-deps-advisories: ${sortedUnique({ values: advisories }).join(',')} -->`
-}
-
-export function parseAdvisoryMarker({ body }) {
-  const match = body?.match(ADVISORY_MARKER_PATTERN)
-  if (!match) {
-    return null
-  }
-
-  return sortedUnique({ values: match[1].split(',').filter(Boolean) })
 }
 
 function sortedUnique({ values }) {

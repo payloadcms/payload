@@ -3,13 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import {
-  findUnfixedClaims,
-  formatAdvisoryMarker,
-  parseAdvisoryMarker,
-  readReport,
-  selectFixableAdvisories,
-} from './report.mjs'
+import { readReport, selectFixableAdvisories } from './report.mjs'
 
 function makeFinding({ advisory, status }) {
   return {
@@ -117,43 +111,5 @@ describe('readReport', () => {
     await expect(readReport({ path: file })).rejects.toThrow(
       `audit report missing or invalid: ${file}`,
     )
-  })
-})
-
-describe('findUnfixedClaims', () => {
-  it('findUnfixedClaims returns claims still reported', () => {
-    const report = makeReport({ findings: [makeFinding({ advisory: 'B', status: 'fix' })] })
-
-    expect(findUnfixedClaims({ claimed: ['A', 'B'], report })).toEqual(['B'])
-  })
-
-  it('findUnfixedClaims returns sorted output', () => {
-    const report = makeReport({
-      findings: [
-        makeFinding({ advisory: 'C', status: 'fix' }),
-        makeFinding({ advisory: 'B', status: 'fix' }),
-      ],
-    })
-
-    expect(findUnfixedClaims({ claimed: ['C', 'B'], report })).toEqual(['B', 'C'])
-  })
-})
-
-describe('advisory marker', () => {
-  it('marker round-trips', () => {
-    const body = 'x\n' + formatAdvisoryMarker({ advisories: ['B', 'A'] })
-
-    expect(parseAdvisoryMarker({ body })).toEqual(['A', 'B'])
-  })
-
-  it('formatAdvisoryMarker uses the sorted, comma-joined format', () => {
-    expect(formatAdvisoryMarker({ advisories: ['B', 'A'] })).toBe(
-      '<!-- audit-deps-advisories: A,B -->',
-    )
-  })
-
-  it('parseAdvisoryMarker returns null without marker', () => {
-    expect(parseAdvisoryMarker({ body: 'no marker here' })).toBeNull()
-    expect(parseAdvisoryMarker({ body: null })).toBeNull()
   })
 })
