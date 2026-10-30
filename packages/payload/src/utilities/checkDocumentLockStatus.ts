@@ -1,6 +1,6 @@
 import type { TypeWithID } from '../collections/config/types.js'
 import type { PaginatedDocs } from '../database/types.js'
-import type { JsonObject, PayloadRequest, Where } from '../types/index.js'
+import type { JsonObject, PayloadRequest } from '../types/index.js'
 
 import { Locked } from '../errors/index.js'
 import { lockedDocumentsCollectionSlug } from '../locked-documents/config.js'
@@ -111,9 +111,28 @@ type BulkLockArgs = {
   req: PayloadRequest
 }
 
-const buildBulkLockedDocumentQuery = (collectionSlug: string, ids: (number | string)[]): Where => ({
-  and: [{ 'document.relationTo': { equals: collectionSlug } }, { 'document.value': { in: ids } }],
-})
+/**
+ * Matches `document.value` in memory instead of querying it with `in`: `document` relates to every
+ * collection, so SQL adapters compare the ids against one column per collection, which exceeds the
+ * bound parameter limit of Cloudflare D1 (100) even for small batches.
+ */
+const findDocumentLocks = async ({
+  collectionSlug,
+  ids,
+  req,
+}: BulkLockArgs): Promise<(JsonObject & TypeWithID)[]> => {
+  const idsToMatch = new Set(ids.map(String))
+
+  const { docs }: PaginatedDocs<JsonObject & TypeWithID> = await req.payload.db.find({
+    collection: lockedDocumentsCollectionSlug,
+    limit: 0,
+    pagination: false,
+    sort: '-updatedAt',
+    where: { 'document.relationTo': { equals: collectionSlug } },
+  })
+
+  return docs.filter((lockedDoc) => idsToMatch.has(String(lockedDoc.document?.value)))
+}
 
 const isLockingAvailable = (collectionSlug: string, req: PayloadRequest): boolean => {
   const { payload } = req
@@ -149,13 +168,7 @@ export const getLockedDocumentIds = async ({
   const { payload } = req
   const lockDocumentsProp = payload.collections?.[collectionSlug]?.config?.lockDocuments
 
-  const lockedDocumentResult: PaginatedDocs<JsonObject & TypeWithID> = await payload.db.find({
-    collection: lockedDocumentsCollectionSlug,
-    limit: 0,
-    pagination: false,
-    sort: '-updatedAt',
-    where: buildBulkLockedDocumentQuery(collectionSlug, ids),
-  })
+  const lockedDocs = await findDocumentLocks({ collectionSlug, ids, req })
 
   const lockDuration =
     typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
@@ -165,7 +178,7 @@ export const getLockedDocumentIds = async ({
   const now = new Date().getTime()
   const resolved = new Set<string>()
 
-  for (const lockedDoc of lockedDocumentResult?.docs ?? []) {
+  for (const lockedDoc of lockedDocs) {
     const documentId = String(lockedDoc.document?.value)
 
     // Sorted by -updatedAt, so the first row seen for an id is its most recent lock
@@ -203,10 +216,16 @@ export const deleteDocumentLocks = async ({
     return
   }
 
+  const lockedDocs = await findDocumentLocks({ collectionSlug, ids, req })
+
+  if (!lockedDocs.length) {
+    return
+  }
+
   await payload.db.deleteMany({
     collection: lockedDocumentsCollectionSlug,
     // Not passing req fails on postgres
     req: payload.db.name === 'mongoose' ? undefined : req,
-    where: buildBulkLockedDocumentQuery(collectionSlug, ids),
+    where: { id: { in: lockedDocs.map(({ id }) => id) } },
   })
 }

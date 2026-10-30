@@ -2,7 +2,7 @@ import { NotFound } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { postsSlug } from './slugs.js'
+import { postsSlug, simpleSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
@@ -116,5 +116,73 @@ test.suite('Locked documents - bulk delete', { config: './config.ts' }, () => {
         overrideAccess: true,
       }),
     ).rejects.toBeInstanceOf(NotFound)
+  })
+
+  // `document` relates to every collection, so a lock query on `document.value` binds the ids once
+  // per collection. Cloudflare D1 caps a statement at 100 bound parameters.
+  test('should release the locks of a batch that exceeds the bound parameter limit of D1', async ({
+    payload,
+  }) => {
+    const user = await payload.create({
+      collection: 'users',
+      data: {
+        email: 'bulk-delete-many@payloadcms.com',
+        password: 'test',
+      },
+      overrideAccess: true,
+    })
+
+    const ids: (number | string)[] = []
+
+    for (let i = 0; i < 20; i++) {
+      const doc = await payload.create({
+        collection: simpleSlug,
+        data: {
+          fieldA: `bulk delete ${i}`,
+        },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: lockedDocumentCollection,
+        data: {
+          document: {
+            relationTo: simpleSlug,
+            value: doc.id,
+          },
+          globalSlug: undefined,
+          user: {
+            relationTo: 'users',
+            value: user.id,
+          },
+        },
+        overrideAccess: true,
+      })
+
+      ids.push(doc.id)
+    }
+
+    const { docs, errors } = await payload.delete({
+      collection: simpleSlug,
+      overrideLock: false,
+      user,
+      where: {
+        id: { in: ids },
+      },
+      overrideAccess: true,
+    })
+
+    expect(errors).toHaveLength(0)
+    expect(docs).toHaveLength(ids.length)
+
+    const { totalDocs } = await payload.count({
+      collection: lockedDocumentCollection,
+      overrideAccess: true,
+      where: {
+        'document.relationTo': { equals: simpleSlug },
+      },
+    })
+
+    expect(totalDocs).toBe(0)
   })
 })
