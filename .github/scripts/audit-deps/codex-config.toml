@@ -1,0 +1,28 @@
+default_permissions = "audit-deps"
+
+[features]
+network_proxy = true
+
+[permissions.audit-deps]
+extends = ":read-only"
+
+# The only writable path: npm and pnpm caches and scratch output.
+[permissions.audit-deps.filesystem]
+"/tmp/audit-deps" = "write"
+
+[permissions.audit-deps.network]
+enabled = true
+
+[permissions.audit-deps.network.domains]
+"registry.npmjs.org" = "allow"
+"github.com" = "allow"
+"api.github.com" = "allow"
+"raw.githubusercontent.com" = "allow"
+
+# Setup points PNPM_HOME outside the profile's writable roots, and drop-sudo drops step env, so
+# every Codex command gets pnpm's home and caches under /tmp.
+[shell_environment_policy.set]
+PNPM_HOME = "/tmp/audit-deps/pnpm-home"
+XDG_CACHE_HOME = "/tmp/audit-deps/cache"
+XDG_DATA_HOME = "/tmp/audit-deps/data"
+npm_config_cache = "/tmp/audit-deps/npm-cache"

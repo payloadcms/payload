@@ -28,35 +28,35 @@ on:
         required: false
         default: false
 
-env:
-  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
-  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+# Overlapping scheduled and dispatched runs would race on the same PR branches; queue them.
+concurrency:
+  group: audit-dependencies
+  cancel-in-progress: false
 
 jobs:
   audit:
     name: audit (${{ matrix.ref }})
-    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
+      # One ref's verify runs package scripts and must not overlap the other ref's research and seal.
+      max-parallel: 1
       matrix:
         # inputs.ref is empty on `schedule`; audit both main and 3.x.
         ref: ${{ fromJSON(inputs.ref && inputs.ref != 'both' && format('["{0}"]', inputs.ref) || '["main","3.x"]') }}
-    steps:
-      - name: Checkout ${{ matrix.ref }}
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ matrix.ref }}
-      - name: Setup
-        uses: ./.github/actions/setup
-        with:
-          # The audit resolves each package's dependencies fresh; a full
-          # workspace install is not needed.
-          pnpm-run-install: false
-
-      - name: Run audit dependencies action
-        id: audit_dependencies
-        uses: ./.github/actions/audit-dependencies
-        with:
-          # inputs.* are empty on `schedule`; fall back to the action defaults.
-          scope: ${{ inputs.scope || 'consumer-facing' }}
-          severity: ${{ inputs.audit-level || 'high' }}
+    # A reusable workflow cannot raise permissions; seal, seal_verify and status list run artifacts with actions: read.
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: read
+    uses: ./.github/workflows/audit-dependencies-branch.yml
+    with:
+      ref: ${{ matrix.ref }}
+      # inputs.* are empty on `schedule`; fall back to the defaults.
+      scope: ${{ inputs.scope || 'consumer-facing' }}
+      severity: ${{ inputs.audit-level || 'high' }}
+      # Only runs from main may change PRs; runs from other branches are dry runs.
+      is-default-inputs: ${{ github.ref == 'refs/heads/main' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'high') == 'high' }}
+    secrets:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      AUDIT_DEPS_APP_CLIENT_ID: ${{ secrets.AUDIT_DEPS_APP_CLIENT_ID }}
+      AUDIT_DEPS_APP_PRIVATE_KEY: ${{ secrets.AUDIT_DEPS_APP_PRIVATE_KEY }}

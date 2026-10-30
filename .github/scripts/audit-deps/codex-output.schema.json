@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["decision", "breakingChanges", "filesChecked", "reason"],
+  "properties": {
+    "decision": {
+      "type": "string",
+      "enum": ["apply", "decline"]
+    },
+    "breakingChanges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["change", "ourUsage"],
+        "properties": {
+          "change": { "type": "string" },
+          "ourUsage": { "type": "string" }
+        }
+      }
+    },
+    "filesChecked": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "reason": { "type": "string" }
+  }
+}
