@@ -49,6 +49,7 @@ import {
 } from '../../../versions/allLocalesPublicationStatus.js'
 import { getLocalizedDraftStatus } from '../../../versions/drafts/getLocalizedDraftStatus.js'
 import { hasNonLocalizedDataChanged } from '../../../versions/drafts/hasNonLocalizedDataChanged.js'
+import { normalizeLocalizedStatus } from '../../../versions/normalizeLocalizedStatus.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -353,19 +354,13 @@ export const updateDocument = async <
     hasLocalizeStatusEnabled(collectionConfig) &&
     typeof result._status === 'string'
   ) {
-    const statusStr = result._status
-    result._status =
-      docWithLocales._status &&
-      typeof docWithLocales._status === 'object' &&
-      !Array.isArray(docWithLocales._status)
-        ? { ...docWithLocales._status }
-        : {}
-
-    const localesToUpdate = locale === 'all' ? config.localization.localeCodes : [locale]
-
-    for (const localeCode of localesToUpdate) {
-      ;(result._status as Record<string, unknown>)[localeCode] = statusStr
-    }
+    result._status = normalizeLocalizedStatus({
+      existingStatus: docWithLocales._status,
+      hasAuthorizedPublicationStatus,
+      locale,
+      localeCodes: config.localization.localeCodes,
+      status: result._status,
+    })
   }
 
   const shouldDraftAllLocales =

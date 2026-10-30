@@ -48,6 +48,7 @@ import {
 import { getLocalizedDraftStatus } from '../../versions/drafts/getLocalizedDraftStatus.js'
 import { hasNonLocalizedDataChanged } from '../../versions/drafts/hasNonLocalizedDataChanged.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
+import { normalizeLocalizedStatus } from '../../versions/normalizeLocalizedStatus.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
@@ -379,19 +380,13 @@ export const updateOperation = async <
       hasLocalizeStatusEnabled(globalConfig) &&
       typeof result._status === 'string'
     ) {
-      const statusStr = result._status
-      result._status =
-        globalJSON._status &&
-        typeof globalJSON._status === 'object' &&
-        !Array.isArray(globalJSON._status)
-          ? { ...globalJSON._status }
-          : {}
-
-      const localesToUpdate = locale === 'all' ? config.localization.localeCodes : [locale!]
-
-      for (const localeCode of localesToUpdate) {
-        ;(result._status as Record<string, unknown>)[localeCode] = statusStr
-      }
+      result._status = normalizeLocalizedStatus({
+        existingStatus: globalJSON._status,
+        hasAuthorizedPublicationStatus,
+        locale: locale!,
+        localeCodes: config.localization.localeCodes,
+        status: result._status,
+      })
     }
 
     const localization = config?.localization

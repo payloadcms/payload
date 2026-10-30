@@ -5126,6 +5126,61 @@ describe('Localization', () => {
         expect(published._status.xx).not.toBe('published')
       })
 
+      it('should preserve inaccessible collection locales when unpublishing with locale all', async () => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'published', title: 'filtered published' },
+          locale: 'xx',
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAccessSlug })
+
+        const updated = await payload.update({
+          id: doc.id,
+          collection: publicationAccessSlug as any,
+          data: {},
+          locale: 'all',
+          unpublishAllLocales: true,
+        })
+        expect(updated._status.xx).toBe('published')
+
+        const unpublished = await payload.findByID({
+          id: doc.id,
+          collection: publicationAccessSlug as any,
+          draft: false,
+          locale: 'all',
+        })
+        expect(unpublished._status[defaultLocale]).toBe('draft')
+        expect(unpublished._status[spanishLocale]).toBe('draft')
+        expect(unpublished._status.xx).toBe('published')
+      })
+
+      it('should preserve inaccessible global locales when unpublishing with locale all', async () => {
+        await payload.updateGlobal({
+          slug: globalWithDraftsSlug,
+          data: { _status: 'published', text: 'filtered published' },
+          locale: 'xx',
+          publishAllLocales: false,
+        })
+
+        const updated = await payload.updateGlobal({
+          slug: globalWithDraftsSlug,
+          data: {},
+          locale: 'all',
+          unpublishAllLocales: true,
+        })
+        expect(updated._status.xx).toBe('published')
+
+        const unpublished = await payload.findGlobal({
+          slug: globalWithDraftsSlug,
+          draft: false,
+          locale: 'all',
+        })
+        expect(unpublished._status[defaultLocale]).toBe('draft')
+        expect(unpublished._status[spanishLocale]).toBe('draft')
+        expect(unpublished._status.xx).toBe('published')
+      })
+
       it('should expose publishAllLocales intent to collection hooks', async () => {
         const doc = await payload.create({
           collection: publicationHookSlug as any,
