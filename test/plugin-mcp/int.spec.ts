@@ -1,5 +1,5 @@
 import type { Client, JsonSchemaType } from '@modelcontextprotocol/client'
-import type { UploadInstructions } from 'payload'
+import type { Payload, PayloadRequest, UploadInstructions } from 'payload'
 
 import { readFile } from 'fs/promises'
 import path from 'path'
@@ -9,6 +9,7 @@ import { describe, expect, onTestFinished, vi } from 'vitest'
 import type { TestFileServer } from '../__helpers/shared/startTestFileServer.js'
 
 import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
+import { devUser } from '../credentials.js'
 import { getToolDoc, getToolText } from './helpers/mcpClient.js'
 import { createMcpTests, protocolEras, test } from './helpers/mcpFixtures.js'
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -312,6 +313,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         })
         const json: any = await response.json()
         expect(response.status).toBe(401)
+        expect(response.headers.get('WWW-Authenticate')).toBeNull()
         expect(json?.errors).toBeDefined()
         expect(json.errors[0].message).toBe(
           'Unauthorized, you must be logged in to make this request.',
@@ -336,6 +338,162 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(json.errors[0].message).toBe(
           'Unauthorized, you must be logged in to make this request.',
         )
+      })
+    })
+    test.describe('OAuth', () => {
+      const enableOAuth = (
+        payload: Payload,
+        oauth: Record<string, unknown> = { authorizationServers: ['https://auth.example.com'] },
+      ) => {
+        const plugin = payload.config.plugins?.find(
+          (plugin) => plugin.slug === '@payloadcms/plugin-mcp',
+        ) as any
+        plugin.sanitizedOptions.oauth = oauth
+        onTestFinished(() => {
+          delete plugin.sanitizedOptions.oauth
+        })
+      }
+
+      it('should challenge requests without an authenticated user', async ({
+        payload,
+        restClient,
+      }) => {
+        enableOAuth(payload)
+        const postWithAuthorization = (authorization?: string) =>
+          restClient.POST('/mcp', {
+            body: JSON.stringify({
+              id: 1,
+              jsonrpc: '2.0',
+              method: 'initialize',
+              params: {
+                capabilities: {},
+                clientInfo: { name: 'oauth-test', version: '1.0.0' },
+                protocolVersion: '2025-11-25',
+              },
+            }),
+            headers: {
+              Accept: 'application/json, text/event-stream',
+              ...(authorization ? { Authorization: authorization } : {}),
+            },
+          })
+        const challenge = `Bearer error="invalid_token", error_description="Unauthorized, you must be logged in to make this request.", resource_metadata="${restClient.serverURL}/api/mcp/oauth-protected-resource"`
+
+        for (const authorization of [undefined, 'Bearer invalid-token']) {
+          const response = await postWithAuthorization(authorization)
+          expect(response.status).toBe(401)
+          expect(response.headers.get('WWW-Authenticate')).toBe(challenge)
+          expect(response.headers.get('Access-Control-Expose-Headers')).toBe('WWW-Authenticate')
+        }
+
+        const metadata = await restClient.GET('/mcp/oauth-protected-resource')
+        expect(metadata.headers.get('Access-Control-Allow-Origin')).toBe('*')
+        await expect(metadata.json()).resolves.toEqual({
+          authorization_servers: ['https://auth.example.com'],
+          bearer_methods_supported: ['header'],
+          resource: `${restClient.serverURL}/api/mcp`,
+        })
+
+        const { token } = await restClient
+          .POST('/users/login', {
+            body: JSON.stringify({ email: devUser.email, password: devUser.password }),
+          })
+          .then((res) => res.json())
+        expect((await postWithAuthorization(`Bearer ${token}`)).status).toBe(200)
+      })
+      it('should serve authorization servers returned by a function of the request', async ({
+        payload,
+        restClient,
+      }) => {
+        enableOAuth(payload, {
+          authorizationServers: ({ req }: { req: PayloadRequest }) => [
+            `${new URL(req.url!).origin}/issuer/`,
+          ],
+        })
+
+        const metadata = await restClient
+          .GET('/mcp/oauth-protected-resource')
+          .then((res) => res.json())
+
+        expect(metadata.authorization_servers).toEqual([`${restClient.serverURL}/issuer/`])
+      })
+      it('should tell clients which scopes to request', async ({ payload, restClient }) => {
+        enableOAuth(payload, {
+          authorizationServers: ['https://auth.example.com'],
+          scopes: ['openid', 'email'],
+        })
+
+        const challenge = await restClient.POST('/mcp', {
+          body: JSON.stringify({ id: 1, jsonrpc: '2.0', method: 'tools/list', params: {} }),
+          headers: { Accept: 'application/json, text/event-stream' },
+        })
+        const metadata = await restClient
+          .GET('/mcp/oauth-protected-resource')
+          .then((res) => res.json())
+
+        expect(challenge.headers.get('WWW-Authenticate')).toContain('scope="openid email"')
+        expect(metadata.scopes_supported).toEqual(['openid', 'email'])
+      })
+      it('should base the metadata on oauth.resource when it is a function', async ({
+        payload,
+        restClient,
+      }) => {
+        enableOAuth(payload, {
+          resource: ({ req }: { req: PayloadRequest }) =>
+            `https://${req.headers.get('x-forwarded-host')}/api/mcp`,
+        })
+        const headers = { 'X-Forwarded-Host': 'mcp.example.com' }
+
+        const challenge = await restClient.POST('/mcp', {
+          auth: false,
+          body: JSON.stringify({ id: 1, jsonrpc: '2.0', method: 'tools/list', params: {} }),
+          headers: { ...headers, Accept: 'application/json, text/event-stream' },
+        })
+        const metadata = await restClient
+          .GET('/mcp/oauth-protected-resource', { auth: false, headers })
+          .then((res) => res.json())
+
+        expect(challenge.headers.get('WWW-Authenticate')).toContain(
+          'resource_metadata="https://mcp.example.com/api/mcp/oauth-protected-resource"',
+        )
+        expect(metadata.resource).toBe('https://mcp.example.com/api/mcp')
+      })
+      it('should tell auth strategies which address MCP access tokens are for', async ({
+        getApiKey,
+        mcp,
+        payload,
+      }) => {
+        enableOAuth(payload, {
+          authorizationServers: ['https://auth.example.com'],
+          resource: 'https://mcp.example.com/api/mcp',
+        })
+        const apiKeyStrategy = payload.authStrategies.find(({ name }) => name === 'users-api-key')!
+        const { authenticate } = apiKeyStrategy
+        const resources: Array<string | undefined> = []
+        const spy = vi.spyOn(apiKeyStrategy, 'authenticate').mockImplementation((args) => {
+          resources.push(args.req?.context.mcp?.resource)
+          return authenticate(args)
+        })
+        onTestFinished(() => spy.mockRestore())
+
+        await mcp.rawPost({
+          apiKey: await getApiKey(),
+          body: { id: 1, jsonrpc: '2.0', method: 'tools/list', params: {} },
+        })
+
+        // plugin-mcp's own check, which decides the MCP user, runs last
+        expect(resources.at(-1)).toBe('https://mcp.example.com/api/mcp')
+      })
+      it('should run requests as the authenticated user', async ({
+        getLimitedApiKey,
+        mcp,
+        payload,
+      }) => {
+        enableOAuth(payload)
+        const client = await mcp.connect(await getLimitedApiKey())
+        const { tools } = await client.listTools()
+
+        expect(tools.some((tool) => tool.name === 'findDocuments')).toBe(true)
+        expect(tools.some((tool) => tool.name === 'updateGlobal')).toBe(false)
       })
     })
     test.describe('List', () => {

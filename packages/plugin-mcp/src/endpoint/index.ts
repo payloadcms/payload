@@ -11,6 +11,7 @@ import { APIError } from 'payload'
 import { buildMcpServer } from '../mcp/buildMcpServer.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 import { getAuthorizedMCP } from './access.js'
+import { getMCPResource, oauthChallenge } from './oauth.js'
 
 export const mcpEndpoint: PayloadHandler = async (req) => {
   if (!req.url) {
@@ -18,6 +19,8 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
   }
 
   req.payloadAPI = 'MCP' as const
+  // Lets auth strategies check that an OAuth access token was issued for this MCP server
+  req.context.mcp = { resource: getMCPResource({ req }) }
 
   const pluginConfig = getPluginConfig({ config: req.payload.config })
   const overrideAccessParam = new URL(req.url).searchParams.get('overrideAccess')
@@ -34,6 +37,11 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
   }
 
   const authorizedMCP = await getAuthorizedMCP({ overrideAccess, req })
+
+  if (pluginConfig.oauth && !req.user) {
+    return oauthChallenge({ req })
+  }
+
   const maxRequestBodySize = pluginConfig.mcp?.maxRequestBodySize
   // Payload augments the original web-standard Request in place.
   const mcpRequest = req as PayloadRequest & Request
