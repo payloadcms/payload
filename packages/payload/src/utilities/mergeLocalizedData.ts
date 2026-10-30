@@ -94,6 +94,8 @@ export function mergeLocalizedData({
                 // Preserve existing value if new value is not a valid object
                 result[field.name] = existingValue
               }
+            } else if (newValue === null) {
+              result[field.name] = null
             } else if (Array.isArray(newValue)) {
               // Non-localized array - still process children for any localized fields
               result[field.name] = newValue.map((newItem: JsonObject, index: number) => {
@@ -134,6 +136,8 @@ export function mergeLocalizedData({
                 // Preserve existing value if new value is not a valid object
                 result[field.name] = existingValue
               }
+            } else if (newValue === null) {
+              result[field.name] = null
             } else if (Array.isArray(newValue)) {
               // Non-localized blocks - still process children for any localized fields
               result[field.name] = newValue.map((newBlockData: JsonObject, index: number) => {
