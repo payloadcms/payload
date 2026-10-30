@@ -602,6 +602,31 @@ describe('issue reference neutralizing', () => {
     expect(body).toContain('https://redirect.github.com/a/b/issues/1')
     expect(body).not.toContain('see https://github.com/a/b/issues/1')
   })
+
+  it('should neutralize Codex reason and advisory description', () => {
+    const text = 'see #123 and https://github.com/x/y/issues/1'
+    const body = renderCsv({
+      details: {
+        ...csvDetails,
+        advisories: [{ ...csvDetails.advisories[0], description: text, summary: text }],
+      },
+      research: { ...csvResearch, reason: text },
+    })
+
+    expect(body).not.toMatch(/#\d/)
+    expect(body).not.toContain('https://github.com/x/y/issues/1')
+    expect(body.match(/#​123/g)?.length).toBeGreaterThanOrEqual(3)
+    expect(body).toContain('https://redirect.github.com/x/y/issues/1')
+  })
+
+  it('should leave links built by our code unchanged', () => {
+    const body = renderCsv()
+
+    expect(body).toContain(`](${compareUrl})`)
+    expect(body).toContain('https://github.com/adaltas/node-csv/commit/eb4d148aaaaaaaa')
+    expect(body).toContain(ghsaUrl)
+    expect(body).toContain(runUrl)
+  })
 })
 
 describe('cell formatting', () => {

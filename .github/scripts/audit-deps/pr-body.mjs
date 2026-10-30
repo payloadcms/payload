@@ -1,11 +1,5 @@
 import { formatMarker, markerForUnit } from './decide.mjs'
-import {
-  closeOpenFence,
-  escapeTableCell,
-  GHSA_PATTERN,
-  neutralizeIssueRefs,
-  sanitizeOutsideText,
-} from './sanitize.mjs'
+import { closeOpenFence, escapeTableCell, GHSA_PATTERN, sanitizeOutsideText } from './sanitize.mjs'
 
 const MAX_BODY_LENGTH = 60000
 const MAX_NOTES_LENGTH = 8000
@@ -363,9 +357,7 @@ function renderNotes({ detail }) {
     const version = oneLine({ text: entry.version, maxLength: 40 })
     const title = url ? `[${version}](${url})` : version
     const text = demoteHeadings({
-      text: neutralizeIssueRefs({
-        text: sanitizeOutsideText({ text: entry.text, maxLength: Infinity }),
-      }),
+      text: sanitizeOutsideText({ text: entry.text, maxLength: Infinity }),
     }).trim()
     const isTooLong = text.length > remaining
     const kept = isTooLong ? `${text.slice(0, Math.max(0, remaining - 1))}…` : text
@@ -414,9 +406,7 @@ function renderCommits({ detail }) {
   for (const commit of shown) {
     const sha = commit.sha.slice(0, 7)
     const label = safeUrl({ url: commit.url }) ? `[${sha}](${commit.url})` : sha
-    const message = neutralizeIssueRefs({
-      text: oneLine({ text: String(commit.message ?? '').split('\n')[0], maxLength: 200 }),
-    })
+    const message = oneLine({ text: String(commit.message ?? '').split('\n')[0], maxLength: 200 })
     lines.push(`- ${label} ${message}`)
   }
 

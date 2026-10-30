@@ -2,7 +2,7 @@ import { appendFile, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { parseResearchResult } from '../codex-contract.mjs'
-import { neutralizeIssueRefs, sanitizeOutsideText } from '../sanitize.mjs'
+import { sanitizeOutsideText } from '../sanitize.mjs'
 
 const DEFAULT_SERVER_URL = 'https://github.com'
 const DEFAULT_REPOSITORY = 'payloadcms/payload'
@@ -202,11 +202,9 @@ export async function readVerifyResult({ unit, verifyDir }) {
 
 /** Outside text for a single summary or comment line. */
 export function toSummaryText({ text, maxLength = 500 }) {
-  return neutralizeIssueRefs({
-    text: sanitizeOutsideText({ text, maxLength })
-      .replace(/\s*\r?\n\s*/g, ' ')
-      .trim(),
-  })
+  return sanitizeOutsideText({ text, maxLength })
+    .replace(/\s*\r?\n\s*/g, ' ')
+    .trim()
 }
 
 /** Markdown lines for the no-fix list; empty when there is none. */

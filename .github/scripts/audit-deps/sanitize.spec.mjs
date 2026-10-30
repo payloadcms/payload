@@ -43,12 +43,30 @@ describe('sanitizeOutsideText', () => {
 
     expect(result).toBe('abcd…')
   })
+
+  it('should neutralize issue refs and github links', () => {
+    expect(clean('fix #12 https://github.com/a/b/issues/1')).toBe(
+      'fix #​12 https://redirect.github.com/a/b/issues/1',
+    )
+  })
+
+  it('should keep the result within maxLength after neutralizing', () => {
+    expect(clean('#1 #2 #3 #4 #5 #6', 8).length).toBeLessThanOrEqual(8)
+  })
 })
 
 describe('neutralizeIssueRefs', () => {
   it('should break refs and redirect github links', () => {
     expect(neutralizeIssueRefs({ text: '#1 a/b#2 https://github.com/x' })).toBe(
       '#​1 a/b#​2 https://redirect.github.com/x',
+    )
+  })
+
+  it('should rewrite mixed-case and www hosts', () => {
+    const text = 'https://www.github.com/a HTTPS://GitHub.com/b https://GITHUB.COM/c'
+
+    expect(neutralizeIssueRefs({ text })).toBe(
+      'https://redirect.github.com/a https://redirect.github.com/b https://redirect.github.com/c',
     )
   })
 })

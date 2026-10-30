@@ -2,6 +2,7 @@ const ZERO_WIDTH_SPACE = '​'
 const MENTION_PATTERN = /(^|[^\w@])@(?=\w)/g
 const FENCE_PATTERN = /^ {0,3}(`{3,}|~{3,})(.*)$/
 const STRUCTURAL_TAG_PATTERN = /<(\/?)(details|summary)/gi
+const GITHUB_URL_PATTERN = /https:\/\/(www\.)?github\.com\//gi
 
 /**
  * Cleans text from outside the repo (advisories, release notes, commits, Codex) before it
@@ -9,9 +10,11 @@ const STRUCTURAL_TAG_PATTERN = /<(\/?)(details|summary)/gi
  * tags, and cuts at `maxLength`.
  */
 export function sanitizeOutsideText({ text, maxLength }) {
-  const cleaned = stripHtmlComments({ text: String(text ?? '') })
-    .replace(MENTION_PATTERN, `$1@${ZERO_WIDTH_SPACE}`)
-    .replace(STRUCTURAL_TAG_PATTERN, '&lt;$1$2')
+  const cleaned = neutralizeIssueRefs({
+    text: stripHtmlComments({ text: String(text ?? '') })
+      .replace(MENTION_PATTERN, `$1@${ZERO_WIDTH_SPACE}`)
+      .replace(STRUCTURAL_TAG_PATTERN, '&lt;$1$2'),
+  })
 
   if (cleaned.length <= maxLength) {
     return cleaned
@@ -28,7 +31,7 @@ export const GHSA_PATTERN = /^GHSA(-[23456789cfghjmpqrvwx]{4}){3}$/
 export function neutralizeIssueRefs({ text }) {
   return text
     .replace(/#(?=\d)/g, `#${ZERO_WIDTH_SPACE}`)
-    .replaceAll('https://github.com/', 'https://redirect.github.com/')
+    .replace(GITHUB_URL_PATTERN, 'https://redirect.github.com/')
 }
 
 /** Appends the closing fence for a fenced code block left open, per CommonMark fence rules. */
