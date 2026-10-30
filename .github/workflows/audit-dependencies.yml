@@ -38,6 +38,8 @@ jobs:
     name: audit (${{ matrix.ref }})
     strategy:
       fail-fast: false
+      # One ref's verify runs package scripts and must not overlap the other ref's research and seal.
+      max-parallel: 1
       matrix:
         # inputs.ref is empty on `schedule`; audit both main and 3.x.
         ref: ${{ fromJSON(inputs.ref && inputs.ref != 'both' && format('["{0}"]', inputs.ref) || '["main","3.x"]') }}
