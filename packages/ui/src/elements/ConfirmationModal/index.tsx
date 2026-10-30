@@ -1,7 +1,7 @@
 'use client'
 import type { ComponentProps } from 'react'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import {
   DialogBody,
@@ -41,9 +41,18 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
     onCancel,
     onConfirm,
   } = props
+  const modalFocusTrapOptions = useMemo(
+    () => ({
+      ...focusTrapOptions,
+      initialFocus:
+        focusTrapOptions?.initialFocus ??
+        (() => document.getElementById(`${modalSlug}-cancel`) ?? false),
+    }),
+    [focusTrapOptions, modalSlug],
+  )
 
   return (
-    <DialogModal className={className} focusTrapOptions={focusTrapOptions} slug={modalSlug}>
+    <DialogModal className={className} focusTrapOptions={modalFocusTrapOptions} slug={modalSlug}>
       <DialogHeader showClose title={heading} />
       <DialogBody>
         <div className="confirmation-modal__body">

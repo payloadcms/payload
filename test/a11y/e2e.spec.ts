@@ -493,7 +493,7 @@ test.describe('Admin accessibility', () => {
             .filter({ hasText: /successfully|saved|published/i })
             .last()
           await expect(notification).toBeVisible()
-          const liveRegion = workflowPage.getByRole('region', { name: 'Notifications alt+T' })
+          const liveRegion = notification.getByRole('status')
           await expect(liveRegion).toHaveAttribute('aria-live', 'polite')
           await expect(liveRegion).toContainText(/successfully|saved|published/i)
           await workflowPage.reload()

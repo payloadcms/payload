@@ -166,6 +166,7 @@ export const SingleRelationshipDiff: React.FC<{
     const toHTML = ToComponent ? ReactDOMServer.renderToStaticMarkup(ToComponent) : '<p></p>'
 
     const diff = getHTMLDiffComponents({
+      deletedLabel: i18n.t('general:deleted'),
       fromHTML,
       toHTML,
       tokenizeByCharacter: false,
@@ -281,6 +282,7 @@ const ManyRelationshipDiff: React.FC<{
     const toHTML = hasTo ? ReactDOMServer.renderToStaticMarkup(<>{toNodes}</>) : ''
 
     const diff = getHTMLDiffComponents({
+      deletedLabel: i18n.t('general:deleted'),
       fromHTML,
       toHTML,
       tokenizeByCharacter: false,
