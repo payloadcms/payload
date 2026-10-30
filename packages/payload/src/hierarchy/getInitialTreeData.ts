@@ -167,8 +167,10 @@ export const getInitialTreeData = async ({
   // ancestors add the same IDs as numbers (e.g. "1" and 1). Fetch each parent
   // only once, otherwise its children are loaded twice and render with
   // duplicate React keys.
-  for (const parentId of new Set(expandedNodeIds.map((id) => String(id)))) {
-    await fetchChildrenForParent(String(parentId), {
+  const uniqueExpandedParentIds = new Set(expandedNodeIds.map(String))
+
+  for (const parentId of uniqueExpandedParentIds) {
+    await fetchChildrenForParent(parentId, {
       [parentFieldName]: { equals: parentId },
     })
   }
