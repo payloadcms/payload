@@ -498,6 +498,8 @@ jobs:
         uses: ./.github/actions/start-services
         with:
           database: mongodb
+          storage: ${{ startsWith(matrix.suite, 'storage-') || startsWith(matrix.suite, 'plugin-cloud-storage') || startsWith(matrix.suite, 'plugin-import-export') }}
+          redis: false
 
       - name: Setup Playwright
         uses: ./.github/actions/setup-playwright
