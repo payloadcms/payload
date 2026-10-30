@@ -1,26 +1,28 @@
 {
   "type": "object",
   "additionalProperties": false,
-  "required": ["fixedAdvisories", "needsPerson", "body"],
+  "required": ["decision", "breakingChanges", "filesChecked", "reason"],
   "properties": {
-    "fixedAdvisories": {
-      "type": "array",
-      "items": { "type": "string" }
+    "decision": {
+      "type": "string",
+      "enum": ["apply", "decline"]
     },
-    "needsPerson": {
+    "breakingChanges": {
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["advisory", "module", "dependency", "reason"],
+        "required": ["change", "ourUsage"],
         "properties": {
-          "advisory": { "type": "string" },
-          "module": { "type": "string" },
-          "dependency": { "type": "string" },
-          "reason": { "type": "string" }
+          "change": { "type": "string" },
+          "ourUsage": { "type": "string" }
         }
       }
     },
-    "body": { "type": "string" }
+    "filesChecked": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "reason": { "type": "string" }
   }
 }

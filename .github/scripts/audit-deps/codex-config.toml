@@ -4,7 +4,11 @@ default_permissions = "audit-deps"
 network_proxy = true
 
 [permissions.audit-deps]
-extends = ":workspace"
+extends = ":read-only"
+
+# The only writable path: npm and pnpm caches and scratch output.
+[permissions.audit-deps.filesystem]
+"/tmp/audit-deps" = "write"
 
 [permissions.audit-deps.network]
 enabled = true
