@@ -5,12 +5,12 @@ import { promisify } from 'node:util'
 
 import { buildResearchPrompt, parseResearchResult } from '../codex-contract.mjs'
 import { buildCodexEvidence, fetchPackageMeta, fetchReleaseNotes } from '../upstream.mjs'
-import { parseCatalog } from './plan.mjs'
 import {
   createFetch,
   findBump,
-  findStoredEntry,
   findUnit,
+  isMajorDeclined,
+  parseCatalog,
   readJson,
   readPlan,
   readResearchResults,
@@ -25,6 +25,9 @@ const MAX_BUFFER = 64 * 1024 * 1024
 const MAX_PIN_HISTORY_LENGTH = 20000
 const WORKSPACE_FILE = 'pnpm-workspace.yaml'
 const MAJOR_PIN_HISTORY = 'Not applicable: major bump.\n'
+const PIN_HISTORY_CUT_NOTE = `\n… cut at ${MAX_PIN_HISTORY_LENGTH} characters\n`
+// Pin lookup order; the first section that declares the dependency wins.
+const PIN_SECTIONS = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']
 
 /**
  * `evidence --plan --bump --cwd --out-dir`: writes notes.md, pin-history.txt and
@@ -113,7 +116,7 @@ export async function runSelectBumps({ options }) {
 }
 
 /** Bump ids of `unit` that the pipeline applies, from today's research and the store. */
-export function selectUnitBumpIds({ plan, research, unit }) {
+function selectUnitBumpIds({ plan, research, unit }) {
   return unit.bumpIds.filter((bumpId) => {
     if (research[bumpId]?.decision !== 'apply') {
       return false
@@ -122,14 +125,6 @@ export function selectUnitBumpIds({ plan, research, unit }) {
     const bump = findBump({ plan, bumpId })
     return !bump.fallbackFor || isMajorDeclined({ majorId: bump.fallbackFor, plan, research })
   })
-}
-
-export function isMajorDeclined({ majorId, plan, research }) {
-  const major = findBump({ plan, bumpId: majorId })
-
-  return (
-    research[majorId]?.decision === 'decline' || findStoredEntry({ plan, bump: major }) !== null
-  )
 }
 
 /**
@@ -169,15 +164,33 @@ async function readPinHistory({ bump, cwd }) {
   const history = `${sections.join('\n\n')}\n`
   return history.length <= MAX_PIN_HISTORY_LENGTH
     ? history
-    : `${history.slice(0, MAX_PIN_HISTORY_LENGTH)}\n… cut at ${MAX_PIN_HISTORY_LENGTH} characters\n`
+    : `${history.slice(0, MAX_PIN_HISTORY_LENGTH - PIN_HISTORY_CUT_NOTE.length)}${PIN_HISTORY_CUT_NOTE}`
 }
 
+/** The declaring line in the first of PIN_SECTIONS that has the dependency; sections are flat. */
 function findManifestLine({ dependency, text }) {
-  const pattern = new RegExp(`^\\s*"${escapeRegExp(dependency)}"\\s*:\\s*"([^"]*)"`)
-  const lines = text.split('\n')
-  const index = lines.findIndex((line) => pattern.test(line))
+  const entryPattern = new RegExp(`^\\s*"${escapeRegExp(dependency)}"\\s*:\\s*"([^"]*)"`)
+  const declarations = new Map()
+  let section = null
 
-  return index === -1 ? null : { line: index + 1, spec: pattern.exec(lines[index])[1] }
+  text.split('\n').forEach((line, index) => {
+    const opening = /^\s*"([^"]+)"\s*:\s*\{\s*$/.exec(line)
+    if (opening) {
+      section = opening[1]
+      return
+    }
+    if (/^\s*\}/.test(line)) {
+      section = null
+      return
+    }
+    const entry = entryPattern.exec(line)
+    if (entry && section && !declarations.has(section)) {
+      declarations.set(section, { line: index + 1, spec: entry[1] })
+    }
+  })
+
+  const found = PIN_SECTIONS.find((name) => declarations.has(name))
+  return found ? declarations.get(found) : null
 }
 
 async function findCatalogTarget({ bump, cwd }) {

@@ -1,10 +1,10 @@
 import { writeFile } from 'node:fs/promises'
 
 import { mergeStore, pruneStore, readStore, writeStore } from '../store.mjs'
-import { isMajorDeclined } from './research.mjs'
 import {
   findBump,
   findStoredEntry,
+  isMajorDeclined,
   readJson,
   readOptionalText,
   readPlan,
@@ -129,7 +129,8 @@ export async function runOutcomes({ options }) {
 }
 
 /**
- * The unit step wins over everything: skipped units never ran research or verify.
+ * Order: rejected unit, unused fallback, fresh stored outcome (red even in a skipped unit),
+ * skipped or blocked unit, then research and verify.
  * `commentReason` is the text for a PR comment, or null when the bump needs none.
  */
 function decideBumpOutcome({ bump, plan, research, step, verify }) {
@@ -145,8 +146,18 @@ function decideBumpOutcome({ bump, plan, research, step, verify }) {
   const failed = ({ reason, failedStep }) =>
     outcome({ status: 'failed', reason, commentReason: `${label} failed at ${failedStep}` })
 
-  if (Object.hasOwn(UNIT_STEP_OUTCOMES, step ?? '')) {
+  if (step === 'skip-rejected') {
     return outcome(UNIT_STEP_OUTCOMES[step])
+  }
+
+  if (bump.fallbackFor && !isMajorDeclined({ majorId: bump.fallbackFor, plan, research })) {
+    const major = findBump({ plan, bumpId: bump.fallbackFor })
+    return outcome({
+      status: 'skipped',
+      reason: toSummaryText({
+        text: `not needed: ${major.dependency} ${major.to} is in its own unit`,
+      }),
+    })
   }
 
   const stored = findStoredEntry({ plan, bump })
@@ -155,8 +166,16 @@ function decideBumpOutcome({ bump, plan, research, step, verify }) {
     return outcome({
       status: 'stored',
       reason: toSummaryText({ text: `${stored.outcome} on an earlier run: ${stored.reason}` }),
-      commentReason: `${label} was declined or failed on an earlier run: ${storedReason}`,
+      // A skip unit's PR is unchanged, so its stored bump was already reported.
+      commentReason:
+        step === 'skip'
+          ? null
+          : `${label} was declined or failed on an earlier run: ${storedReason}`,
     })
+  }
+
+  if (Object.hasOwn(UNIT_STEP_OUTCOMES, step ?? '')) {
+    return outcome(UNIT_STEP_OUTCOMES[step])
   }
 
   const result = research[bump.id]
@@ -170,14 +189,6 @@ function decideBumpOutcome({ bump, plan, research, step, verify }) {
       commentReason: `${label} was declined: ${toCommentText({ text: result.reason })}`,
     })
   }
-  if (bump.fallbackFor && !isMajorDeclined({ majorId: bump.fallbackFor, plan, research })) {
-    const major = findBump({ plan, bumpId: bump.fallbackFor })
-    return outcome({
-      status: 'skipped',
-      reason: toSummaryText({ text: `not needed: ${major.dependency} ${major.to} applies` }),
-    })
-  }
-
   const failure = verify?.failed.find((candidate) => candidate.bumpId === bump.id)
   if (failure) {
     return failed({ reason: `failed at ${failure.step}`, failedStep: failure.step })

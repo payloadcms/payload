@@ -6,7 +6,8 @@ import { neutralizeIssueRefs, sanitizeOutsideText } from '../sanitize.mjs'
 
 const DEFAULT_SERVER_URL = 'https://github.com'
 const DEFAULT_REPOSITORY = 'payloadcms/payload'
-const STEP_PATTERN = /^[\w:.-]{1,40}$/
+const STEP_PATTERN = /^[a-z][\w:.-]{0,39}$/i
+const CATALOG_ENTRY_PATTERN = /^\s+(['"]?)(.+?)\1\s*:\s*(['"]?)([^'"#\s]+)\3\s*(#.*)?$/
 
 /**
  * @typedef {object} Plan
@@ -90,6 +91,40 @@ export function findStoredEntry({ plan, bump }) {
       (entry) => entry.dependency === bump.dependency && entry.to === bump.to,
     ) ?? null
   )
+}
+
+/** A major counts as declined when Codex declined it today or the store holds an outcome for it. */
+export function isMajorDeclined({ majorId, plan, research }) {
+  const major = findBump({ plan, bumpId: majorId })
+
+  return (
+    research[majorId]?.decision === 'decline' || findStoredEntry({ plan, bump: major }) !== null
+  )
+}
+
+/**
+ * Top-level `catalog:` block of pnpm-workspace.yaml as name to `{ spec, line }` (1-based).
+ * @returns {Map<string, { spec: string, line: number }>}
+ */
+export function parseCatalog({ text }) {
+  const lines = text.split('\n')
+  const catalog = new Map()
+  const start = lines.findIndex((line) => /^catalog:\s*(#.*)?$/.test(line))
+  if (start === -1) {
+    return catalog
+  }
+
+  for (let index = start + 1; index < lines.length; index++) {
+    if (/^\S/.test(lines[index])) {
+      break
+    }
+    const match = CATALOG_ENTRY_PATTERN.exec(lines[index])
+    if (match) {
+      catalog.set(match[2], { spec: match[4], line: index + 1 })
+    }
+  }
+
+  return catalog
 }
 
 export function parseBumpIds({ options }) {

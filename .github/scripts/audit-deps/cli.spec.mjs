@@ -213,8 +213,13 @@ describe('cli', () => {
   }
 
   // Clears outputs and summary by default so later assertions see only the command under test.
-  const makePlan = async ({ storeEntries = [], ref = 'main', shouldKeepOutputs = false } = {}) => {
-    const report = await writeJson({ name: 'report.json', value: fullReport() })
+  const makePlan = async ({
+    report: reportValue = fullReport(),
+    storeEntries = [],
+    ref = 'main',
+    shouldKeepOutputs = false,
+  } = {}) => {
+    const report = await writeJson({ name: 'report.json', value: reportValue })
     const store = await writeJson({ name: 'store.json', value: { entries: storeEntries } })
     const out = outFile('plan.json')
 
@@ -308,12 +313,17 @@ describe('cli', () => {
       await makePlan({
         shouldKeepOutputs: true,
         storeEntries: [
-          storeEntry({ dependency: 'left-pad', to: '1.0.1', reason: 'bad <!-- x --> @bob' }),
+          storeEntry({
+            dependency: 'left-pad',
+            to: '1.0.1',
+            outcome: 'declined<!-- y -->',
+            reason: 'bad <!-- x --> @bob',
+          }),
         ],
       })
 
       const summary = await readFile(summaryFile, 'utf8')
-      expect(summary).toContain('left-pad 1.0.1: declined')
+      expect(summary).toContain('left-pad 1.0.1: declined on ')
       expect(summary).toContain(`@${ZERO_WIDTH_SPACE}bob`)
       expect(summary).not.toContain('<!--')
       expect(summary).toContain(`${GHSA_NONE} (high) in old-lib: No old-lib release fixes it.`)
@@ -357,6 +367,40 @@ describe('cli', () => {
       const { read } = await runEvidence({ bumpId: 'zod-3' })
 
       expect(await read('pin-history.txt')).toContain('zod: ^3.22.0')
+    })
+
+    it('prefers the dependencies line over other sections', async () => {
+      await initRepo()
+      await writeFile(
+        path.join(dir, MANIFEST),
+        JSON.stringify(
+          {
+            name: '@payloadcms/ui',
+            peerDependencies: { 'left-pad': '^1.0.0' },
+            dependencies: { 'csv-parse': '5.6.0', 'left-pad': '1.0.0', zod: 'catalog:' },
+          },
+          null,
+          2,
+        ),
+      )
+      await git(['commit', '-qam', 'add peer'])
+
+      const { read } = await runEvidence({ bumpId: 'left-pad-1' })
+
+      expect(await read('pin-history.txt')).toMatch(/^## packages\/ui\/package\.json:8\n/)
+    })
+
+    it('cuts the pin history to 20,000 characters including the cut note', async () => {
+      await initRepo()
+      const messageFile = outFile('message.txt')
+      await writeFile(messageFile, `pin\n\n${'long line of history\n'.repeat(2000)}`)
+      await git(['commit', '-q', '--amend', '-F', messageFile])
+
+      const { read } = await runEvidence({ bumpId: 'left-pad-1' })
+
+      const history = await read('pin-history.txt')
+      expect(history.length).toBeLessThanOrEqual(20000)
+      expect(history.endsWith('… cut at 20000 characters\n')).toBe(true)
     })
 
     it('writes release notes and no pin history for a major', async () => {
@@ -764,6 +808,81 @@ describe('cli', () => {
     ])
   })
 
+  it('store-update drops verify ids outside the unit and renames odd step names', async () => {
+    await initRepo()
+    const { plan } = await makePlan()
+    await writeFile(
+      path.join(verifyDir, 'non-major.json'),
+      JSON.stringify({
+        failed: [
+          { bumpId: 'csv-parse-7', step: 'build' },
+          { bumpId: 'left-pad-1', step: 'build\n::warning::forged' },
+        ],
+        passed: [],
+      }),
+    )
+    const out = outFile('store.next.json')
+
+    await run({
+      args: [
+        'store-update',
+        `--store=${outFile('missing-store.json')}`,
+        `--plan=${plan}`,
+        `--research-dir=${researchDir}`,
+        `--verify-dir=${verifyDir}`,
+        '--ref=main',
+        `--out=${out}`,
+      ],
+    })
+
+    const { entries } = JSON.parse(await readFile(out, 'utf8'))
+    expect(entries.map(({ dependency, reason }) => [dependency, reason])).toEqual([
+      ['left-pad', 'failed at verify'],
+    ])
+  })
+
+  it('exits 1 when an output value contains a line break', async () => {
+    await initRepo()
+    const { plan } = await makePlan({
+      report: makeReport({
+        findings: [
+          finding({
+            advisory: GHSA_CSV_MAJOR,
+            bumps: [
+              fixEntry({
+                dependency: 'evil\nname',
+                currentSpec: '1.0.0',
+                version: '2.0.0',
+                fromMajor: 1,
+              }),
+            ],
+          }),
+        ],
+      }),
+    })
+    const report = await writeJson({ name: 'reaudit.json', value: makeReport({ findings: [] }) })
+
+    const { code, stdout } = await run({
+      args: [
+        'pr-body',
+        `--plan=${plan}`,
+        '--unit=evil-name-2',
+        '--bump-ids=["evil-name-2"]',
+        `--report=${report}`,
+        `--research-dir=${researchDir}`,
+        '--scope=consumer-facing',
+        '--severity=high',
+        '--ref=main',
+        '--run-url=https://github.com/payloadcms/payload/actions/runs/1',
+        `--cwd=${dir}`,
+        `--out=${outFile('body.md')}`,
+      ],
+    })
+
+    expect(code).toBe(1)
+    expect(stdout).toBe('::error::output title contains a line break\n')
+  })
+
   describe('outcomes', () => {
     const runOutcomes = async ({ plan, unitSteps }) => {
       const steps = await writeJson({ name: 'unit-steps.json', value: unitSteps })
@@ -834,7 +953,7 @@ describe('cli', () => {
       expect(summary).toContain('https://github.com/payloadcms/payload/pull/12')
     })
 
-    it('maps skipped and rejected units without turning red', async () => {
+    it('maps skipped and rejected units, and keeps a stored bump red without a comment', async () => {
       await initRepo()
       const { plan } = await makePlan({
         storeEntries: [storeEntry({ dependency: 'zod', to: '3.25.0' })],
@@ -852,10 +971,104 @@ describe('cli', () => {
         'skipped',
         'rejected',
         'skipped',
-        'skipped',
+        'stored',
       ])
       expect(outcomes.units).toEqual({})
+      expect(outputs).toEqual({ is_red: 'true' })
+    })
+
+    it('rejects a skip-rejected unit without turning red', async () => {
+      await initRepo()
+      const { plan } = await makePlan()
+
+      const { outcomes, outputs } = await runOutcomes({
+        plan,
+        unitSteps: {
+          'csv-parse-7': { prNumber: null, step: 'skip-rejected' },
+          'non-major': { prNumber: 12, step: 'skip' },
+        },
+      })
+
+      expect(statusById({ outcomes })['csv-parse-7'][0]).toBe('rejected')
       expect(outputs).toEqual({ is_red: 'false' })
+    })
+
+    it('skips a declined fallback when its major applies, and stays green', async () => {
+      await initRepo()
+      const { plan } = await makePlan()
+      await writeResearch({ bumpId: 'csv-parse-7', value: research() })
+      await writeResearch({
+        bumpId: 'csv-parse-5-fallback',
+        value: research({ decision: 'decline', reason: 'x' }),
+      })
+      await writeResearch({ bumpId: 'left-pad-1', value: research() })
+      await writeResearch({ bumpId: 'zod-3', value: research() })
+      await writeFile(
+        path.join(verifyDir, 'non-major.json'),
+        JSON.stringify({ failed: [], passed: ['left-pad-1', 'zod-3'] }),
+      )
+      await writeFile(
+        path.join(verifyDir, 'csv-parse-7.json'),
+        JSON.stringify({ failed: [], passed: ['csv-parse-7'] }),
+      )
+
+      const { outcomes, outputs } = await runOutcomes({
+        plan,
+        unitSteps: {
+          'csv-parse-7': { prNumber: 7, step: 'update' },
+          'non-major': { prNumber: 12, step: 'update' },
+        },
+      })
+
+      expect(statusById({ outcomes })).toEqual({
+        'csv-parse-5-fallback': ['skipped', 'not needed: csv-parse 7.0.2 is in its own unit'],
+        'csv-parse-7': ['applied', ''],
+        'left-pad-1': ['applied', ''],
+        'zod-3': ['applied', ''],
+      })
+      expect(outcomes.units).toEqual({})
+      expect(outputs).toEqual({ is_red: 'false' })
+    })
+
+    it('fails a fallback that joins the group but fails verify', async () => {
+      await initRepo()
+      const { plan } = await makePlan()
+      await writeResearch({
+        bumpId: 'csv-parse-7',
+        value: research({ decision: 'decline', reason: 'x' }),
+      })
+      await writeResearch({ bumpId: 'csv-parse-5-fallback', value: research() })
+      await writeFile(
+        path.join(verifyDir, 'non-major.json'),
+        JSON.stringify({
+          failed: [{ bumpId: 'csv-parse-5-fallback', step: 'install' }],
+          passed: [],
+        }),
+      )
+
+      const { outcomes } = await runOutcomes({
+        plan,
+        unitSteps: { 'non-major': { prNumber: 12, step: 'update' } },
+      })
+
+      expect(statusById({ outcomes })['csv-parse-5-fallback']).toEqual([
+        'failed',
+        'failed at install',
+      ])
+    })
+
+    it('fails an applied bump with no verify result', async () => {
+      await initRepo()
+      const { plan } = await makePlan()
+      await writeResearch({ bumpId: 'left-pad-1', value: research() })
+
+      const { outcomes } = await runOutcomes({
+        plan,
+        unitSteps: { 'non-major': { prNumber: 12, step: 'update' } },
+      })
+
+      expect(statusById({ outcomes })['left-pad-1']).toEqual(['failed', 'no verify result'])
+      expect(outcomes.units['non-major']).toContain('left-pad 1.0.1 failed at verify')
     })
 
     it('turns red for a blocked unit', async () => {

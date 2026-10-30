@@ -4,6 +4,7 @@ import { buildBumps, buildUnits, listNoFix } from '../bumps.mjs'
 import { readReport } from '../report.mjs'
 import { readStore, selectResearchBumps } from '../store.mjs'
 import {
+  parseCatalog,
   readOptionalText,
   renderNoFixList,
   requireOption,
@@ -15,7 +16,6 @@ import {
 
 const WORKSPACE_FILE = 'pnpm-workspace.yaml'
 const CATALOG_SPEC = 'catalog:'
-const CATALOG_ENTRY_PATTERN = /^\s+(['"]?)(.+?)\1\s*:\s*(['"]?)([^'"#\s]+)\3\s*(#.*)?$/
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(-[\w.]+)?$/
 
 /**
@@ -50,31 +50,6 @@ export async function runPlan({ options }) {
   await writeSummary({ markdown: renderPlanSummary({ plan, ref }) })
 }
 
-/**
- * Top-level `catalog:` block of pnpm-workspace.yaml as name to `{ spec, line }` (1-based).
- * @returns {Map<string, { spec: string, line: number }>}
- */
-export function parseCatalog({ text }) {
-  const lines = text.split('\n')
-  const catalog = new Map()
-  const start = lines.findIndex((line) => /^catalog:\s*(#.*)?$/.test(line))
-  if (start === -1) {
-    return catalog
-  }
-
-  for (let index = start + 1; index < lines.length; index++) {
-    if (/^\S/.test(lines[index])) {
-      break
-    }
-    const match = CATALOG_ENTRY_PATTERN.exec(lines[index])
-    if (match) {
-      catalog.set(match[2], { spec: match[4], line: index + 1 })
-    }
-  }
-
-  return catalog
-}
-
 function withCatalogVersion({ bump, catalog }) {
   if (bump.fromVersion || bump.from !== CATALOG_SPEC) {
     return bump
@@ -103,8 +78,10 @@ function renderPlanSummary({ plan, ref }) {
     lines.push('', '### Stored outcomes', '')
     for (const entry of plan.stored) {
       const name = toSummaryText({ text: `${entry.dependency} ${entry.to}`, maxLength: 200 })
+      const outcome = toSummaryText({ text: entry.outcome, maxLength: 20 })
+      const date = toSummaryText({ text: entry.at.slice(0, 10), maxLength: 10 })
       const reason = toSummaryText({ text: entry.reason })
-      lines.push(`- ${name}: ${entry.outcome} on ${entry.at.slice(0, 10)}: ${reason}`)
+      lines.push(`- ${name}: ${outcome} on ${date}: ${reason}`)
     }
   }
 
