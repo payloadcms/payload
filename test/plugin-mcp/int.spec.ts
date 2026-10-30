@@ -320,6 +320,32 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           'Unauthorized, you must be logged in to make this request.',
         )
       })
+      it('should run the auth strategies once per MCP request', async ({
+        getApiKey,
+        mcp,
+        payload,
+      }) => {
+        const apiKeyStrategy = payload.authStrategies.find(({ name }) => name === 'users-api-key')!
+        const authenticate = vi.spyOn(apiKeyStrategy, 'authenticate')
+        onTestFinished(() => authenticate.mockRestore())
+
+        const response = await mcp.rawPost({
+          apiKey: await getApiKey(),
+          body: {
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'initialize',
+            params: {
+              capabilities: {},
+              clientInfo: { name: 'auth-count-test', version: '1.0.0' },
+              protocolVersion: '2025-11-25',
+            },
+          },
+        })
+
+        expect(response.status).toBe(200)
+        expect(authenticate).toHaveBeenCalledTimes(1)
+      })
       it('should not accept Bearer API keys for default API-key auth', async ({
         getApiKey,
         restClient,
