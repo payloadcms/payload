@@ -6,6 +6,7 @@ import { validate as uuidValidate } from 'uuid'
 
 import type { DrizzleAdapter } from '../types.js'
 
+import { escapeLikeValue } from '../utilities/escapeLikeValue.js'
 import { getCollectionIdType } from '../utilities/getCollectionIdType.js'
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
@@ -265,10 +266,10 @@ export const sanitizeQueryValue = ({
       ['number', 'text'].includes(field.type)
     ) {
       // For hasMany text/number/select fields with array values, wrap each element with % for LIKE matching
-      formattedValue = formattedValue.map((val) => `%${val}%`)
+      formattedValue = formattedValue.map((val) => `%${escapeLikeValue(val)}%`)
     } else if (!Array.isArray(formattedValue)) {
       // For non-array values, wrap with % for LIKE matching
-      formattedValue = `%${formattedValue}%`
+      formattedValue = `%${escapeLikeValue(formattedValue)}%`
     }
   }
 
