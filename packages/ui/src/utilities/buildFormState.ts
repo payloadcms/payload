@@ -72,7 +72,7 @@ export const buildFormStateHandler: ServerFunction<
   try {
     if (branch) {
       req.branch = branch
-      resetBranchState(req)
+      resetBranchState({ req: req })
       await assertBranchReadable({ req })
     }
 
