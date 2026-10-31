@@ -76,11 +76,12 @@ export const buildJoinAggregation = async ({
   const aggregate: PipelineStage[] = []
   const outerBranchReadState = resolveBranchReadState({ branch, collectionSlug: collection, req })
   const canonicalParentField = '__payloadJoinParentID'
-  const localField = outerBranchReadState.useBranching
-    ? canonicalParentField
-    : versions
-      ? 'parent'
-      : '_id'
+  let localField = versions ? 'parent' : '_id'
+
+  if (outerBranchReadState.useBranching) {
+    localField = canonicalParentField
+  }
+
   const rootIDExpression = outerBranchReadState.useBranching ? `$${canonicalParentField}` : '$_id'
   const polymorphicJoinsConfig = adapter.payload.collections[collection]?.config?.polymorphicJoins
 
