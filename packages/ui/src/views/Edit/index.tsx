@@ -741,7 +741,7 @@ export function DefaultEditView({
           initialState={!isInitializing && initialState}
           isDocumentForm={true}
           isInitializing={isInitializing}
-          key={`${isLocked}`}
+          key={`${isLocked}:${branch ?? ''}`}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSubmit={() => {
