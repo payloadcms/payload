@@ -2,6 +2,7 @@ import type { PayloadRequest } from '../types/index.js'
 import type { BranchOperation, SanitizedBranchingConfig } from './types.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
+import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { extractRelationshipID } from '../utilities/extractRelationshipID.js'
 import { branchesCollectionSlug, MAIN_BRANCH } from './types.js'
 
@@ -271,7 +272,8 @@ export const loadBranchOperation = async ({
  * serve one branch's document to the other.
  */
 export const isolateBranchState = (req: PayloadRequest): PayloadRequest => {
-  const isolated = { ...req, context: { ...req.context }, headers: req.headers } as PayloadRequest
+  const isolated = isolateObjectProperty(req, ['branch', 'context', 'payloadDataLoader'])
+  isolated.context = { ...req.context }
 
   resetBranchState(isolated)
   isolated.payloadDataLoader = getDataLoader(isolated)
