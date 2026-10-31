@@ -6067,6 +6067,250 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
       expect(inSpanish.totalDocs).toBe(0)
     })
   })
+
+  test.describe('preservation of unedited locales during update', () => {
+    test('should preserve unedited locale translations when updating document in drafts', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: localizedDraftsSlug,
+        data: {
+          title: 'Initial English',
+        },
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+
+      // Add Spanish translation
+      await payload.update({
+        id: doc.id,
+        collection: localizedDraftsSlug,
+        data: {
+          title: 'Spanish Translation',
+        },
+        locale: spanishLocale,
+        overrideAccess: true,
+      })
+
+      // Update English title again
+      await payload.update({
+        id: doc.id,
+        collection: localizedDraftsSlug,
+        data: {
+          title: 'Updated English',
+        },
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+
+      const withAllLocales: any = await payload.findByID({
+        id: doc.id,
+        collection: localizedDraftsSlug,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(withAllLocales.title[defaultLocale]).toBe('Updated English')
+      expect(withAllLocales.title[spanishLocale]).toBe('Spanish Translation')
+    })
+
+    test('should preserve unedited locale translations when updating globals', async ({
+      payload,
+    }) => {
+      await payload.updateGlobal({
+        slug: globalWithDraftsSlug,
+        data: { text: 'Global English v1' },
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+
+      await payload.updateGlobal({
+        slug: globalWithDraftsSlug,
+        data: { text: 'Global Spanish v1' },
+        locale: spanishLocale,
+        overrideAccess: true,
+      })
+
+      await payload.updateGlobal({
+        slug: globalWithDraftsSlug,
+        data: { text: 'Global English v2' },
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+
+      const globalWithAll: any = await payload.findGlobal({
+        slug: globalWithDraftsSlug,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(globalWithAll.text[defaultLocale]).toBe('Global English v2')
+      expect(globalWithAll.text[spanishLocale]).toBe('Global Spanish v1')
+    })
+
+    test('should preserve unedited locale translations during bulk update with where query', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: localizedDraftsSlug,
+        data: {
+          title: 'Bulk Target EN',
+        },
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: localizedDraftsSlug,
+        data: {
+          title: 'Bulk Target ES',
+        },
+        locale: spanishLocale,
+        overrideAccess: true,
+      })
+
+      // Bulk update matching English title
+      const bulkResult = await payload.update({
+        collection: localizedDraftsSlug,
+        where: {
+          title: {
+            equals: 'Bulk Target EN',
+          },
+        },
+        data: {
+          title: 'Bulk Target EN Updated',
+        },
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+
+      expect(bulkResult.docs.length).toBeGreaterThanOrEqual(1)
+
+      const withAllLocales: any = await payload.findByID({
+        id: doc.id,
+        collection: localizedDraftsSlug,
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(withAllLocales.title[defaultLocale]).toBe('Bulk Target EN Updated')
+      expect(withAllLocales.title[spanishLocale]).toBe('Bulk Target ES')
+    })
+
+    test('should preserve locale B values when updating top-level fields, arrays, and blocks in locale A', async ({
+      payload,
+    }) => {
+      // 1. Create document in Locale A (en) with top-level field, array, and block
+      const doc = await payload.create({
+        collection: allFieldsLocalizedSlug,
+        data: {
+          nonLocalizedArray: [{ localizedItem: 'EN Array Item 1' }],
+          localizedBlocks: [{ blockType: 'localizedTextBlock', text: 'EN Block Text 1' }],
+          text: 'English text v1',
+        },
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+
+      // 2. Populate Locale B (es) with distinct values
+      await payload.update({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        data: {
+          nonLocalizedArray: [
+            { id: (doc.nonLocalizedArray as any)[0].id, localizedItem: 'ES Array Item 1' },
+          ],
+          localizedBlocks: [{ blockType: 'localizedTextBlock', text: 'ES Block Text 1' }],
+          text: 'Spanish text v1',
+        },
+        locale: spanishLocale,
+        overrideAccess: true,
+      })
+
+      // 3. Update ONLY top-level field in Locale A (en)
+      await payload.update({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        data: {
+          text: 'English text v2',
+        },
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+
+      // Verify Locale B (es) is completely untouched
+      let docInSpanish: any = await payload.findByID({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        locale: spanishLocale,
+        overrideAccess: true,
+      })
+      expect(docInSpanish.text).toBe('Spanish text v1')
+      expect(docInSpanish.nonLocalizedArray[0].localizedItem).toBe('ES Array Item 1')
+      expect(docInSpanish.localizedBlocks[0].text).toBe('ES Block Text 1')
+
+      // 4. Update ONLY an array item in Locale A (en)
+      await payload.update({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        data: {
+          nonLocalizedArray: [
+            { id: (doc.nonLocalizedArray as any)[0].id, localizedItem: 'EN Array Item 2' },
+          ],
+        },
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+
+      // Verify Locale B (es) array & other fields remain preserved
+      docInSpanish = await payload.findByID({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        locale: spanishLocale,
+        overrideAccess: true,
+      })
+      expect(docInSpanish.text).toBe('Spanish text v1')
+      expect(docInSpanish.nonLocalizedArray[0].localizedItem).toBe('ES Array Item 1')
+      expect(docInSpanish.localizedBlocks[0].text).toBe('ES Block Text 1')
+
+      // 5. Update ONLY a block in Locale A (en)
+      await payload.update({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        data: {
+          localizedBlocks: [{ blockType: 'localizedTextBlock', text: 'EN Block Text 2' }],
+        },
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
+
+      // Final verification: Locale B (es) is intact across all field types
+      docInSpanish = await payload.findByID({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        locale: spanishLocale,
+        overrideAccess: true,
+      })
+      expect(docInSpanish.text).toBe('Spanish text v1')
+      expect(docInSpanish.nonLocalizedArray[0].localizedItem).toBe('ES Array Item 1')
+      expect(docInSpanish.localizedBlocks[0].text).toBe('ES Block Text 1')
+
+      // 6. Verify locale: 'all' reflects all current values for both locales
+      const docWithAll: any = await payload.findByID({
+        id: doc.id,
+        collection: allFieldsLocalizedSlug,
+        locale: 'all',
+        overrideAccess: true,
+      })
+      expect(docWithAll.text[defaultLocale]).toBe('English text v2')
+      expect(docWithAll.text[spanishLocale]).toBe('Spanish text v1')
+      expect(docWithAll.nonLocalizedArray[0].localizedItem[defaultLocale]).toBe('EN Array Item 2')
+      expect(docWithAll.nonLocalizedArray[0].localizedItem[spanishLocale]).toBe('ES Array Item 1')
+      expect(docWithAll.localizedBlocks[defaultLocale][0].text).toBe('EN Block Text 2')
+      expect(docWithAll.localizedBlocks[spanishLocale][0].text).toBe('ES Block Text 1')
+    })
+  })
 })
 
 async function createLocalizedPost(

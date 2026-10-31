@@ -212,23 +212,53 @@ export const updateOperation = async <
     // /////////////////////////////////////
     // 2. Retrieve document
     // /////////////////////////////////////
-    const globalVersionResult = await getLatestGlobalVersion({
-      slug,
-      config: globalConfig,
-      locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
-      payload,
-      req,
-      where: query,
-    })
-    const { global, globalExists } = globalVersionResult || {}
+    const hasWherePolicy = hasWhereAccessResult(accessResults)
+    let globalVersionResult
 
-    if (
-      hasWhereAccessResult(accessResults) &&
-      globalExists &&
-      (!global || Object.keys(global).length === 0)
-    ) {
-      throw new Forbidden(req.t)
+    if (hasWherePolicy) {
+      // Evaluate access query with request locale
+      globalVersionResult = await getLatestGlobalVersion({
+        slug,
+        config: globalConfig,
+        locale: locale!,
+        payload,
+        req,
+        where: query,
+      })
+
+      const { global, globalExists } = globalVersionResult || {}
+
+      if (
+        globalExists &&
+        (!global || Object.keys(global).length === 0)
+      ) {
+        throw new Forbidden(req.t)
+      }
+
+      // Fetch all locales with no where constraints
+      if ((config?.localization || publishAllLocales || unpublishAllLocales) && locale !== 'all') {
+        globalVersionResult = await getLatestGlobalVersion({
+          slug,
+          config: globalConfig,
+          locale: 'all',
+          payload,
+          req,
+          where: undefined,
+        })
+      }
+    } else {
+      globalVersionResult = await getLatestGlobalVersion({
+        slug,
+        config: globalConfig,
+        locale:
+          config?.localization || publishAllLocales || unpublishAllLocales ? 'all' : locale!,
+        payload,
+        req,
+        where: undefined,
+      })
     }
+
+    const { global, globalExists } = globalVersionResult || {}
 
     let globalJSON: JsonObject = {}
 

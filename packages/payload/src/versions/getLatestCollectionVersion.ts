@@ -34,7 +34,7 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
     const { docs } = await payload.db.findVersions<T>({
       collection: config.slug,
       limit: 1,
-      locale: req?.locale || query.locale,
+      locale: query.locale ?? req?.locale,
       pagination: false,
       req,
       sort: '-updatedAt',
