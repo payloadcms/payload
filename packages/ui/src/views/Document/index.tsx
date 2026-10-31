@@ -12,6 +12,7 @@ import type {
 
 import { isolateObjectProperty, logError } from 'payload'
 import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled, MAIN_BRANCH } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React from 'react'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
@@ -130,7 +131,10 @@ export const renderDocument = async ({
     if (collectionSlug) {
       const redirectURL = formatAdminURL({
         adminRoute,
-        path: `/collections/${collectionSlug}?notFound=${encodeURIComponent(idFromArgs)}`,
+        path: `/collections/${collectionSlug}${qs.stringify(
+          { branch: req.branch !== MAIN_BRANCH ? req.branch : undefined, notFound: idFromArgs },
+          { addQueryPrefix: true },
+        )}`,
       })
       req.server.redirect(redirectURL)
     } else {
@@ -382,7 +386,10 @@ export const renderDocument = async ({
       if (!drawerSlug && redirectAfterCreate !== false) {
         const redirectURL = formatAdminURL({
           adminRoute,
-          path: `/collections/${collectionSlug}/${doc.id}`,
+          path: `/collections/${collectionSlug}/${doc.id}${qs.stringify(
+            { branch: req.branch !== MAIN_BRANCH ? req.branch : undefined, locale: locale?.code },
+            { addQueryPrefix: true },
+          )}`,
         })
 
         req.server.redirect(redirectURL)

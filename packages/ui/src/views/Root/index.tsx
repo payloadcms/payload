@@ -13,7 +13,12 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { applyLocaleFiltering, formatAdminURL, stripTrailingSlash } from 'payload/shared'
+import {
+  applyLocaleFiltering,
+  formatAdminURL,
+  MAIN_BRANCH,
+  stripTrailingSlash,
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
@@ -83,7 +88,6 @@ export const renderRoot = async ({
     },
     routes: { admin: adminRoute },
   } = config
-  const adminRouteURL = formatAdminURL({ adminRoute })
 
   const params = await paramsPromise
 
@@ -102,6 +106,14 @@ export const renderRoot = async ({
   let globalConfig: SanitizedGlobalConfig = undefined
 
   const searchParams = await searchParamsPromise
+  const branch =
+    config.branching?.enabled && typeof searchParams.branch === 'string'
+      ? searchParams.branch
+      : undefined
+  const adminRouteURL = `${formatAdminURL({ adminRoute })}${qs.stringify(
+    { branch: branch && branch !== MAIN_BRANCH ? branch : undefined },
+    { addQueryPrefix: true },
+  )}`
 
   // Redirect `${adminRoute}/collections` to `${adminRoute}`
   if (isCollectionRoute) {

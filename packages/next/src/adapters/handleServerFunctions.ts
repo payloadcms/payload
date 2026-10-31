@@ -3,6 +3,6 @@ import { createServerFunctionHandler } from '@payloadcms/ui/utilities/handleServ
 import { initAdminContext } from '../utilities/initAdminContext.js'
 
 export const handleServerFunctions = createServerFunctionHandler({
-  initAdminContext: ({ configPromise, importMap }) =>
-    initAdminContext({ configPromise, importMap, key: 'RootLayout' }),
+  initAdminContext: ({ configPromise, importMap, requestURL }) =>
+    initAdminContext({ configPromise, importMap, key: 'RootLayout', requestURL }),
 })

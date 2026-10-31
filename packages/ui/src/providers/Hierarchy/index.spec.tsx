@@ -25,7 +25,8 @@ vi.mock('../Preferences/index.js', () => ({
   usePreferences: () => ({ setPreference: vi.fn() }),
 }))
 
-vi.mock('../RouterAdapter/index.js', () => ({
+vi.mock('../RouterAdapter/index.js', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../RouterAdapter/index.js')>()),
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }))
 
