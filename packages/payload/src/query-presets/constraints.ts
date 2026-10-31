@@ -83,7 +83,12 @@ export const getConstraints = (config: Config): Field => ({
                     data?.access?.[constraintOperation]?.constraint === 'specificUsers' &&
                     req.user
                   ) {
-                    return [...(data?.access?.[constraintOperation]?.users || []), req.user.id]
+                    const users = data?.access?.[constraintOperation]?.users || []
+                    const isUserPresent = users.some(
+                      (user) => (typeof user === 'object' ? user?.id : user) === req.user!.id,
+                    )
+
+                    return isUserPresent ? users : [...users, req.user.id]
                   }
                 },
               ],
