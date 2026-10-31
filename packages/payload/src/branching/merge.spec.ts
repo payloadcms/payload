@@ -7,6 +7,13 @@ import { mergeBranch } from './merge.js'
 import { restoreBranchAfterMerge } from './merge/branchMergeStatus.js'
 import { prepareMerge } from './merge/prepareMerge.js'
 
+vi.mock('./discard.js', () => ({ discardBranchChanges: vi.fn() }))
+vi.mock('./assertBranchUpdateAccess.js', () => ({ assertBranchUpdateAccess: vi.fn() }))
+vi.mock('./resolveBranch.js', () => ({ refreshBranchState: vi.fn() }))
+vi.mock('./merge/executeMerge.js', () => ({
+  executeMerge: vi.fn(),
+  unknownMergeCommitResultContextKey: 'unknown',
+}))
 vi.mock('./merge/branchMergeStatus.js', () => ({
   beginBranchMerge: vi.fn(),
   restoreBranchAfterMerge: vi.fn(),
