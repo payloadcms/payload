@@ -37,7 +37,7 @@ let serverURL: string
 
 /**
  * Switches the admin panel onto a branch through the header switcher, and waits
- * for the preference write the server reads the branch back from.
+ * for the URL navigation and the preference write to finish.
  *
  * Returns early when the panel is already on `name`: selecting the active branch
  * is a no-op in the provider, so waiting for a preference write there would hang
@@ -64,6 +64,20 @@ async function switchBranch({ name, page }: { name: string; page: Page }): Promi
   await preferenceUpdate
 
   await expect(label).toHaveText(name)
+  await expect
+    .poll(() => new URL(page.url()).searchParams.get('branch'))
+    .toBe(name === 'main' ? null : branchSlug)
+}
+
+function withCurrentBranch({ href, page }: { href: string; page: Page }): string {
+  const url = new URL(href)
+  const branch = new URL(page.url()).searchParams.get('branch')
+
+  if (branch) {
+    url.searchParams.set('branch', branch)
+  }
+
+  return url.href
 }
 
 test.describe('Branching', () => {
@@ -81,7 +95,12 @@ test.describe('Branching', () => {
       where: { slug: { equals: branchSlug } },
     })
 
-    await page.goto(`${serverURL}/admin/collections/payload-branches/${branch.docs[0]!.id}`)
+    await page.goto(
+      withCurrentBranch({
+        page,
+        href: `${serverURL}/admin/collections/payload-branches/${branch.docs[0]!.id}`,
+      }),
+    )
   }
 
   test.beforeAll(async ({ browser }, testInfo) => {
@@ -100,6 +119,10 @@ test.describe('Branching', () => {
 
     const context = await browser.newContext()
     ;({ page } = await initPage({ context, serverURL }))
+  })
+
+  test.beforeEach(async () => {
+    await page.goto(`${serverURL}/admin`)
   })
 
   test.afterEach(async () => {
@@ -212,9 +235,9 @@ test.describe('Branching', () => {
     }
 
     test('should upload and render media created on a branch', async () => {
-      await page.goto(mediaURL.list)
+      await page.goto(withCurrentBranch({ page, href: mediaURL.list }))
       await switchBranch({ name: branchName, page })
-      await gotoAndWaitForForm(page, mediaURL.create)
+      await gotoAndWaitForForm(page, withCurrentBranch({ page, href: mediaURL.create }))
       await page.setInputFiles(
         '.file-manager input[type="file"]',
         path.resolve(dirname, '../uploads/image.png'),
@@ -234,7 +257,7 @@ test.describe('Branching', () => {
       await expect.poll(() => response.ok()).toBe(true)
       await expect.poll(() => new URL(response.url()).searchParams.get('branch')).toBe(branchSlug)
 
-      const documentID = page.url().split('/').pop()!
+      const documentID = new URL(page.url()).pathname.split('/').pop()!
       const [onBranch, onMain] = await Promise.all([
         payload.find({
           branch: branchSlug,
@@ -256,7 +279,7 @@ test.describe('Branching', () => {
     })
 
     test('should render separate files after replacing main media on a branch', async () => {
-      await gotoAndWaitForForm(page, mediaURL.create)
+      await gotoAndWaitForForm(page, withCurrentBranch({ page, href: mediaURL.create }))
       await page.setInputFiles(
         '.file-manager input[type="file"]',
         path.resolve(dirname, '../uploads/image.png'),
@@ -264,7 +287,7 @@ test.describe('Branching', () => {
       await page.locator('#field-alt').fill('Main image')
       await saveDocAndAssert(page)
 
-      const documentID = page.url().split('/').pop()!
+      const documentID = new URL(page.url()).pathname.split('/').pop()!
       const originalResult = await payload.find({
         collection: mediaSlug,
         pagination: false,
@@ -272,9 +295,9 @@ test.describe('Branching', () => {
       })
       const original = originalResult.docs[0]!
 
-      await page.goto(mediaURL.list)
+      await page.goto(withCurrentBranch({ page, href: mediaURL.list }))
       await switchBranch({ name: branchName, page })
-      await gotoAndWaitForForm(page, mediaURL.edit(documentID))
+      await gotoAndWaitForForm(page, withCurrentBranch({ page, href: mediaURL.edit(documentID) }))
       await page.locator('#field-alt').fill('Branch metadata edit')
 
       const metadataSaveResponse = page.waitForResponse((response) => {
@@ -363,7 +386,7 @@ test.describe('Branching', () => {
     })
 
     test('should restore the previous media file after merging a branch replacement', async () => {
-      await gotoAndWaitForForm(page, versionedMediaURL.create)
+      await gotoAndWaitForForm(page, withCurrentBranch({ page, href: versionedMediaURL.create }))
       await page.setInputFiles(
         '.file-manager input[type="file"]',
         path.resolve(dirname, '../uploads/image.png'),
@@ -371,7 +394,7 @@ test.describe('Branching', () => {
       await page.locator('#field-alt').fill('Original versioned image')
       await saveDocAndAssert(page)
 
-      const documentID = page.url().split('/').pop()!
+      const documentID = new URL(page.url()).pathname.split('/').pop()!
       const originalVersions = (await payload.findVersions({
         branch: false,
         collection: versionedMediaSlug,
@@ -386,9 +409,12 @@ test.describe('Branching', () => {
 
       expect(originalVersion).toBeDefined()
 
-      await page.goto(versionedMediaURL.list)
+      await page.goto(withCurrentBranch({ page, href: versionedMediaURL.list }))
       await switchBranch({ name: branchName, page })
-      await gotoAndWaitForForm(page, versionedMediaURL.edit(documentID))
+      await gotoAndWaitForForm(
+        page,
+        withCurrentBranch({ page, href: versionedMediaURL.edit(documentID) }),
+      )
       await page.locator('.file-toolbar__filename-btn').click()
       await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
       await page.setInputFiles(
@@ -407,7 +433,9 @@ test.describe('Branching', () => {
       await switchBranch({ name: 'main', page })
       const editURL = versionedMediaURL.edit(documentID)
 
-      await page.goto(`${editURL}/versions/${originalVersion!.id}`)
+      await page.goto(
+        withCurrentBranch({ page, href: `${editURL}/versions/${originalVersion!.id}` }),
+      )
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
       await page.getByRole('button', { name: 'Restore this version' }).click()
       await page.getByRole('button', { name: 'Confirm' }).click()
@@ -426,6 +454,41 @@ test.describe('Branching', () => {
     })
   })
 
+  test('should preserve shareable branch URLs across navigation and history', async () => {
+    const post = await payload.create({ collection: postsSlug, data: { title: 'Main content' } })
+
+    await payload.update({
+      id: post.id,
+      branch: branchSlug,
+      collection: postsSlug,
+      data: { title: 'Branch content' },
+    })
+    await page.goto(`${postsURL.list}?branch=${branchSlug}`)
+    await expect(page.locator('.branch-selector__trigger-name')).toHaveText(branchName)
+
+    const link = page.locator('.table a', { hasText: 'Branch content' }).first()
+
+    await expect(link).toHaveAttribute('href', new RegExp(`branch=${branchSlug}`))
+    await link.focus()
+    await page.keyboard.press('Enter')
+    await expect(page.locator('#field-title')).toHaveValue('Branch content')
+    await expect.poll(() => new URL(page.url()).searchParams.get('branch')).toBe(branchSlug)
+
+    const sharedURL = page.url()
+
+    await switchBranch({ name: 'main', page })
+    await expect(page.locator('#field-title')).toHaveValue('Main content')
+    await page.goBack()
+    await expect(page.locator('#field-title')).toHaveValue('Branch content')
+    await page.goForward()
+    await expect(page.locator('#field-title')).toHaveValue('Main content')
+    await page.goto(sharedURL)
+    await expect(page.locator('#field-title')).toHaveValue('Branch content')
+    await page.goto(postsURL.edit(post.id))
+    await expect(page.locator('#field-title')).toHaveValue('Main content')
+    await expect(page.locator('.branch-selector__trigger-name')).toHaveText('main')
+  })
+
   test.describe('Canonical document identity', () => {
     test('should keep the main document ID after editing the document on a branch', async () => {
       const post = await payload.create({
@@ -433,10 +496,10 @@ test.describe('Branching', () => {
         data: { title: 'Autumn Sale' },
       })
 
-      await page.goto(postsURL.list)
+      await page.goto(withCurrentBranch({ page, href: postsURL.list }))
       await switchBranch({ name: branchName, page })
 
-      await page.goto(postsURL.edit(post.id))
+      await page.goto(withCurrentBranch({ page, href: postsURL.edit(post.id) }))
       await expect(page.locator('.branch-selector__trigger-name')).toHaveText(branchName)
       await page.locator('#field-title').fill('Halloween Sale')
 
@@ -478,7 +541,7 @@ test.describe('Branching', () => {
       // shadow row's primary key.
       expect(page.url()).toContain(String(post.id))
 
-      await page.goto(postsURL.list)
+      await page.goto(withCurrentBranch({ page, href: postsURL.list }))
 
       const row = page.locator('.table .row-1')
       await expect(row.locator('.cell-title')).toContainText('Halloween Sale')
@@ -487,7 +550,7 @@ test.describe('Branching', () => {
       // branch's copy of the document.
       await expect(row.locator('a').first()).toHaveAttribute(
         'href',
-        new RegExp(`/${postsSlug}/${post.id}$`),
+        new RegExp(`/${postsSlug}/${post.id}[?]branch=${branchSlug}$`),
       )
     })
 
@@ -504,7 +567,7 @@ test.describe('Branching', () => {
         data: { title: 'Halloween Sale' },
       })
 
-      await page.goto(postsURL.list)
+      await page.goto(withCurrentBranch({ page, href: postsURL.list }))
       await switchBranch({ name: branchName, page })
 
       await page.locator('.table .row-1 a').first().click()
@@ -533,7 +596,7 @@ test.describe('Branching', () => {
         data: { title: 'Halloween Sale' },
       })
 
-      await page.goto(postsURL.list)
+      await page.goto(withCurrentBranch({ page, href: postsURL.list }))
       await switchBranch({ name: branchName, page })
       await expect(page.locator('.table .row-1 .cell-title')).toContainText('Halloween Sale')
 
@@ -701,7 +764,7 @@ test.describe('Branching', () => {
 
       await expect(current.locator('a')).toHaveAttribute(
         'href',
-        new RegExp(`/payload-branches/${branch.docs[0]!.id}$`),
+        new RegExp(`/payload-branches/${branch.docs[0]!.id}[?]branch=${branchSlug}$`),
       )
       await expect(current.locator('.btn')).toContainText('Merge')
 
@@ -909,7 +972,7 @@ test.describe('Branching', () => {
 
       // From the switcher there is no selection to make, so the count has to be
       // fetched and the way to narrow it has to be offered.
-      await page.goto(postsURL.list)
+      await page.goto(withCurrentBranch({ page, href: postsURL.list }))
       await switchBranch({ name: branchName, page })
       await page.locator('.branch-selector__trigger').click()
       await page.locator('.branch-selector__current .btn').click()
@@ -925,7 +988,7 @@ test.describe('Branching', () => {
 
       await expect(page.locator('.merge-branch-modal__review')).toHaveAttribute(
         'href',
-        new RegExp(`/payload-branches/${branch.docs[0]!.id}$`),
+        new RegExp(`/payload-branches/${branch.docs[0]!.id}[?]branch=${branchSlug}$`),
       )
     })
 
@@ -985,9 +1048,9 @@ test.describe('Branching', () => {
         },
       })
 
-      await page.goto(nestedURL.list)
+      await page.goto(withCurrentBranch({ page, href: nestedURL.list }))
       await switchBranch({ name: branchName, page })
-      await page.goto(nestedURL.edit(main.id))
+      await page.goto(withCurrentBranch({ page, href: nestedURL.edit(main.id) }))
 
       await page.locator('#field-items__0__label').fill('branch item')
       await page.locator('#field-layout__0__heading').fill('branch hero')
@@ -1038,7 +1101,7 @@ test.describe('Branching', () => {
     test('should raise exactly one merge modal from the branch switcher', async () => {
       await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Treat' } })
 
-      await page.goto(postsURL.list)
+      await page.goto(withCurrentBranch({ page, href: postsURL.list }))
       await switchBranch({ name: branchName, page })
       await page.locator('.branch-selector__trigger').click()
       await page.locator('.branch-selector__current .btn').click()
@@ -1645,9 +1708,12 @@ test.describe('Branching', () => {
       locale: 'en',
     })
 
-    await page.goto(localizedURL.list)
+    await page.goto(withCurrentBranch({ page, href: localizedURL.list }))
     await switchBranch({ name: branchName, page })
-    await gotoAndWaitForForm(page, `${localizedURL.edit(doc.id)}?locale=en`)
+    await gotoAndWaitForForm(
+      page,
+      withCurrentBranch({ page, href: `${localizedURL.edit(doc.id)}?locale=en` }),
+    )
     await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
     await page.locator('#copy-locale-data__button').click()
     await expect(page.locator('.copy-locale-data__content')).toBeVisible()
@@ -1693,21 +1759,31 @@ test.describe('Branching', () => {
         data: { _status: 'published', title: 'Halloween Page' },
       })
 
-      await page.goto(pagesURL.edit(page1.id))
+      await page.goto(withCurrentBranch({ page, href: pagesURL.edit(page1.id) }))
       await switchBranch({ name: branchName, page })
 
-      // Asserted on the response the tab actually renders, rather than on the Monaco
-      // editor's virtualized text.
-      const loaded = page.waitForResponse(
-        (response) =>
-          response.url().includes(`/api/${pagesSlug}/${page1.id}`) &&
-          response.url().includes(`branch=${branchSlug}`) &&
-          response.ok(),
-      )
+      // The first inspector fetch can be cancelled when its origin initializes.
+      // Wait for a response whose body completed, rather than an aborted request.
+      let json: { title?: string }
+      const loaded = page.waitForResponse(async (response) => {
+        if (
+          !response.url().includes(`/api/${pagesSlug}/${page1.id}`) ||
+          !response.url().includes(`branch=${branchSlug}`) ||
+          !response.ok()
+        ) {
+          return false
+        }
 
-      await page.goto(`${pagesURL.edit(page1.id)}/api`)
+        try {
+          json = await response.json()
+          return true
+        } catch {
+          return false
+        }
+      })
 
-      const json = (await (await loaded).json()) as { title?: string }
+      await page.goto(withCurrentBranch({ page, href: `${pagesURL.edit(page1.id)}/api` }))
+      await loaded
 
       expect(json.title).toBe('Halloween Page')
 
@@ -1728,10 +1804,10 @@ test.describe('Branching', () => {
     })
 
     async function saveDraftOnBranch(title: string) {
-      await page.goto(pagesURL.create)
+      await page.goto(withCurrentBranch({ page, href: pagesURL.create }))
       await switchBranch({ name: branchName, page })
 
-      await page.goto(pagesURL.create)
+      await page.goto(withCurrentBranch({ page, href: pagesURL.create }))
       await page.locator('#field-title').fill(title)
 
       const saved = page.waitForResponse(
