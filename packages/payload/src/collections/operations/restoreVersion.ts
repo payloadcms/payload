@@ -84,7 +84,7 @@ export const restoreVersionOperation = async <
     showHiddenFields,
   } = args
   let shouldCommit = false
-  const branch = resolveBranch(req)
+  const branch = resolveBranch({ req: req })
   const isBranchableCollection =
     payload.config.branching?.branchableCollections.has(collectionConfig.slug) ?? false
   const isBranchingDocument = branch !== MAIN_BRANCH && isBranchableCollection
@@ -436,14 +436,14 @@ export const restoreVersionOperation = async <
     }
 
     if (isBranchingDocument) {
-      refreshRequestDataLoader(req)
+      refreshRequestDataLoader({ req: req })
     }
 
     return result
   } catch (error: unknown) {
     if (shouldCommit) {
       await killTransaction(req)
-      resetBranchState(req)
+      resetBranchState({ req: req })
     }
 
     if (hasFileOperationScope) {

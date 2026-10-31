@@ -108,7 +108,7 @@ export const RenderBranchProvider = async ({
   // Already resolved from the URL during request initialization,
   // so this is a read of what every query on this request actually used —
   // not a second source of truth that could disagree with the data on screen.
-  const activeBranch = resolveBranch(req)
+  const activeBranch = resolveBranch({ req: req })
 
   return (
     <BranchProvider

@@ -60,7 +60,7 @@ export const prepareMerge = async ({
   user?: NonNullable<PayloadRequest['user']>
 }): Promise<PreparedMerge> => {
   const req = incomingReq
-    ? withoutBranch(incomingReq)
+    ? withoutBranch({ req: incomingReq })
     : await createPayloadRequest({ branch: false, payload, user })
 
   if (user) {
