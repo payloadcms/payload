@@ -187,64 +187,60 @@ export const runMergePreflight = async ({
           ],
         }
 
-        if (proposed.previousData) {
-          currentDoc = proposed.previousData
+        const mainDoc =
+          operation === 'delete'
+            ? await payload.db.findOne({
+                branch: false,
+                collection: collectionSlug,
+                locale: proposed.locale,
+                req: proposed.req,
+                where,
+              })
+            : await getLatestCollectionVersion({
+                id: resolved.docID,
+                config: collectionConfig,
+                payload,
+                query: {
+                  branch: false,
+                  collection: collectionSlug,
+                  locale: proposed.locale,
+                  where,
+                },
+                req: proposed.req,
+              })
 
-          if (hasWhereAccessResult(result)) {
-            if (whereReferencesBranchMetadata(result)) {
-              deny()
-              break
-            }
+        currentDoc = mainDoc ?? {}
 
-            const precedingRowID = item.previousWrite?.data.id
-            const permittedPreviousState =
-              precedingRowID === undefined
-                ? null
-                : await payload.db.findOne({
-                    branch: false,
-                    collection: collectionSlug,
-                    locale: proposed.locale,
-                    req: proposed.req,
-                    where: {
-                      and: [
-                        result,
-                        { [branchField]: { equals: resolved.change.branch } },
-                        { id: { equals: precedingRowID } },
-                      ],
-                    },
-                  })
+        if (hasWhereAccessResult(result) && !mainDoc) {
+          deny()
+          break
+        }
 
-            if (!permittedPreviousState) {
-              deny()
-              break
-            }
+        if (proposed.previousData && hasWhereAccessResult(result)) {
+          if (whereReferencesBranchMetadata(result)) {
+            deny()
+            break
           }
-        } else {
-          const mainDoc =
-            operation === 'delete'
-              ? await payload.db.findOne({
+
+          const precedingRowID = item.previousWrite?.data.id
+          const permittedPreviousState =
+            precedingRowID === undefined
+              ? null
+              : await payload.db.findOne({
                   branch: false,
                   collection: collectionSlug,
                   locale: proposed.locale,
                   req: proposed.req,
-                  where,
-                })
-              : await getLatestCollectionVersion({
-                  id: resolved.docID,
-                  config: collectionConfig,
-                  payload,
-                  query: {
-                    branch: false,
-                    collection: collectionSlug,
-                    locale: proposed.locale,
-                    where,
+                  where: {
+                    and: [
+                      result,
+                      { [branchField]: { equals: resolved.change.branch } },
+                      { id: { equals: precedingRowID } },
+                    ],
                   },
-                  req: proposed.req,
                 })
 
-          currentDoc = mainDoc ?? {}
-
-          if (hasWhereAccessResult(result) && !mainDoc) {
+          if (!permittedPreviousState) {
             deny()
             break
           }
