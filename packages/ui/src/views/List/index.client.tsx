@@ -46,6 +46,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const {
     AfterList,
     AfterListTable,
+    baseFilter,
     beforeActions,
     BeforeList,
     BeforeListTable,
@@ -478,6 +479,7 @@ export function DefaultListView(props: ListViewClientProps) {
                   smallBreak ? (
                     <div className={`${baseClass}__list-selection`}>
                       <ListSelection
+                        baseFilter={baseFilter}
                         collectionConfig={collectionConfig}
                         disableBulkDelete={disableBulkDelete}
                         disableBulkEdit={disableBulkEdit}
