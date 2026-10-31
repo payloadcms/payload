@@ -282,7 +282,7 @@ test.suite(
         expect(beforeMerge).not.toHaveBeenCalled()
         expect(req.context).toBe(initialContext)
         expect(req.transactionID).toBe(initialTransactionID)
-        expect(resolveBranch(req)).toBe(branch)
+        expect(resolveBranch({ req: req })).toBe(branch)
       })
 
       test('should reject writes made with the validation request', async () => {
@@ -365,13 +365,13 @@ test.suite(
         await payload.branches.merge({ branch, req: branchReq })
 
         expect(hookRequests.length).toBeGreaterThan(0)
-        expect(hookRequests.every((req) => resolveBranch(req) === 'main')).toBe(true)
+        expect(hookRequests.every((req) => resolveBranch({ req: req }) === 'main')).toBe(true)
         expect(
           hookRequests.every(
             (req) => (req.context as Record<string, unknown>)._branchBypass === undefined,
           ),
         ).toBe(true)
-        expect(resolveBranch(branchReq)).toBe(branch)
+        expect(resolveBranch({ req: branchReq })).toBe(branch)
       })
     })
   },
