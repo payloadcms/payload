@@ -1,0 +1,8 @@
+# Makes apps/cms its own pnpm workspace root, separate from the monorepo workspace.
+# The Docker build appends `overrides` here that point payload/@payloadcms/* at
+# tarballs packed from this branch's packages/ sources.
+verifyDepsBeforeRun: false
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true

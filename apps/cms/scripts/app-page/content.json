@@ -1,0 +1,414 @@
+{
+  "en": {
+    "title": "Your gem trade assistant, in your pocket",
+    "summary": "VgemsAI is Vigor's app for jewelry retailers, designers, manufacturers and online sellers. Ask Vigor AI about stones and settings, see which trade shows are on around the world, browse the catalog and follow the prices that move the market, on iPhone and iPad.",
+    "status": "In development · Public beta on TestFlight",
+    "highlights": [
+      {
+        "icon": "assistant",
+        "title": "Answers in seconds",
+        "text": "Ask Vigor AI about gemstones, grades, metals and Vigor's services, in your own language."
+      },
+      {
+        "icon": "events",
+        "title": "Shows happening now",
+        "text": "See which trade shows are on around the world right now, where they are and how many days are left."
+      },
+      {
+        "icon": "account",
+        "title": "One account",
+        "text": "The same email and password work in the app and on this website."
+      },
+      {
+        "icon": "security",
+        "title": "Private and secure",
+        "text": "No ads and no tracking. Log in with Face ID or a passkey, and delete your account whenever you like."
+      }
+    ],
+    "features": {
+      "title": "What's inside",
+      "intro": "VgemsAI brings Vigor's wholesale service to your phone, from your first question to the show floor.",
+      "items": [
+        {
+          "icon": "assistant",
+          "title": "Vigor AI assistant",
+          "text": "Ask about cuts, grades, certification, metals and care, or about what Vigor can source or make for you. Vigor AI answers in the language you write in, and your account manager can follow up on what you asked."
+        },
+        {
+          "icon": "events",
+          "title": "Events and trade shows",
+          "text": "Upcoming fairs and exhibitions as a list or on a map, with the venue, booth, local times and directions. Shows that are on right now come first on the home screen, with the days left."
+        },
+        {
+          "icon": "products",
+          "title": "Product catalog",
+          "text": "Browse loose stones and finished jewelry by category and material, save favorites to your wishlist, and build a cart to prepare your quote request."
+        },
+        {
+          "icon": "research",
+          "title": "Market research",
+          "text": "Follow gold, silver, platinum, palladium and the other materials that move jewelry prices, with ten-year charts, and test your instinct with up-or-down calls for the month ahead."
+        },
+        {
+          "icon": "widgets",
+          "title": "Home Screen widgets",
+          "text": "Your next event, featured products and material prices at a glance, and a shortcut that opens Vigor AI straight away."
+        },
+        {
+          "icon": "security",
+          "title": "Secure sign-in",
+          "text": "Log in with Face ID, Touch ID or a passkey, with an emailed code when you sign in on a new device. Your password is never stored, and you can delete your account in the app at any time."
+        }
+      ]
+    },
+    "beta": {
+      "title": "Join the beta",
+      "text": "VgemsAI is still in development. We're adding features and connecting live data, so some sections, such as the product catalog and market prices, show preview content for now.\n\nThe beta is free and runs on Apple's TestFlight. Join it, try the app on your own buying trips, and tell us what would make it more useful.",
+      "steps": [
+        { "text": "Install TestFlight from the App Store on your iPhone or iPad." },
+        { "text": "Open the beta invitation on the same device, accept it, then install VgemsAI." },
+        { "text": "Open VgemsAI and sign up with your business details, or log in with your Vigor website account." },
+        { "text": "Send us feedback straight from the app: take a screenshot and share it as beta feedback in TestFlight." }
+      ],
+      "note": "Works on iPhone and iPad with iOS 26.5 or later."
+    },
+    "faq": {
+      "title": "Questions and answers",
+      "items": [
+        {
+          "question": "Who is VgemsAI for?",
+          "answer": "Trade customers: jewelry retailers, designers, manufacturers and online sellers who buy from Vigor, or would like to."
+        },
+        {
+          "question": "What does it cost?",
+          "answer": "The beta is free. Wholesale prices, orders and payments are handled by our team, not in the app."
+        },
+        {
+          "question": "Do I need an account?",
+          "answer": "Yes, to chat with Vigor AI and keep your company details up to date. Sign up in the app or on this website: one account works in both."
+        },
+        {
+          "question": "Is everything in the app final?",
+          "answer": "Not yet. During the beta, some products and market prices are examples, and Vigor AI's answers can be wrong. Always confirm the details with your account manager before you order."
+        },
+        {
+          "question": "What happens to my data?",
+          "answer": "Your signup details go to our wholesale team so they can help you, and your chats are kept for 90 days. We don't sell your data or show ads. The Privacy Policy explains the details."
+        },
+        {
+          "question": "How do I report a problem or suggest an idea?",
+          "answer": "During the beta, take a screenshot and share it as beta feedback in TestFlight, or write to us from the contact page."
+        }
+      ]
+    }
+  },
+  "es": {
+    "title": "Su asistente para el comercio de gemas, en el bolsillo",
+    "summary": "VgemsAI es la app de Vigor para joyerías, diseñadores, fabricantes y vendedores en línea. Pregunte a Vigor AI sobre piedras y engastes, vea qué ferias del sector se celebran ahora en todo el mundo, explore el catálogo y siga los precios que mueven el mercado, en iPhone y iPad.",
+    "status": "En desarrollo · Beta pública en TestFlight",
+    "highlights": [
+      {
+        "icon": "assistant",
+        "title": "Respuestas en segundos",
+        "text": "Pregunte a Vigor AI sobre gemas, calidades, metales y los servicios de Vigor, en su propio idioma."
+      },
+      {
+        "icon": "events",
+        "title": "Ferias en curso",
+        "text": "Vea qué ferias del sector se celebran ahora en todo el mundo, dónde son y cuántos días quedan."
+      },
+      {
+        "icon": "account",
+        "title": "Una sola cuenta",
+        "text": "El mismo correo y la misma contraseña sirven en la app y en este sitio web."
+      },
+      {
+        "icon": "security",
+        "title": "Privada y segura",
+        "text": "Sin anuncios ni rastreo. Inicie sesión con Face ID o una llave de acceso, y elimine su cuenta cuando quiera."
+      }
+    ],
+    "features": {
+      "title": "Qué incluye",
+      "intro": "VgemsAI lleva el servicio mayorista de Vigor a su teléfono, desde su primera pregunta hasta el recinto ferial.",
+      "items": [
+        {
+          "icon": "assistant",
+          "title": "Asistente Vigor AI",
+          "text": "Pregunte sobre tallas, calidades, certificación, metales y cuidados, o sobre lo que Vigor puede conseguir o fabricar para usted. Vigor AI responde en el idioma en que usted escribe, y su gestor de cuenta puede dar seguimiento a sus consultas."
+        },
+        {
+          "icon": "events",
+          "title": "Eventos y ferias",
+          "text": "Las próximas ferias y exposiciones en una lista o en un mapa, con el recinto, el stand, la hora local y cómo llegar. Las ferias en curso aparecen primero en la pantalla de inicio, con los días que quedan."
+        },
+        {
+          "icon": "products",
+          "title": "Catálogo de productos",
+          "text": "Explore gemas sueltas y joyería terminada por categoría y material, guarde sus favoritos en la lista de deseos y prepare un carrito para su solicitud de cotización."
+        },
+        {
+          "icon": "research",
+          "title": "Estudio de mercado",
+          "text": "Siga el oro, la plata, el platino, el paladio y los demás materiales que mueven los precios de la joyería, con gráficos de diez años, y ponga a prueba su intuición prediciendo si subirán o bajarán el próximo mes."
+        },
+        {
+          "icon": "widgets",
+          "title": "Widgets de la pantalla de inicio",
+          "text": "Su próximo evento, productos destacados y precios de materiales de un vistazo, y un acceso directo que abre Vigor AI al instante."
+        },
+        {
+          "icon": "security",
+          "title": "Inicio de sesión seguro",
+          "text": "Inicie sesión con Face ID, Touch ID o una llave de acceso, con un código por correo cuando entre desde un dispositivo nuevo. Su contraseña nunca se guarda y puede eliminar su cuenta desde la app en cualquier momento."
+        }
+      ]
+    },
+    "beta": {
+      "title": "Únase a la beta",
+      "text": "VgemsAI todavía está en desarrollo. Estamos añadiendo funciones y conectando datos en tiempo real, por lo que algunas secciones, como el catálogo de productos y los precios del mercado, muestran contenido de ejemplo por ahora.\n\nLa beta es gratuita y funciona con TestFlight de Apple. Únase, pruebe la app en sus propios viajes de compra y cuéntenos qué la haría más útil.",
+      "steps": [
+        { "text": "Instale TestFlight desde el App Store en su iPhone o iPad." },
+        { "text": "Abra la invitación a la beta en el mismo dispositivo, acéptela e instale VgemsAI." },
+        { "text": "Abra VgemsAI y regístrese con los datos de su empresa, o inicie sesión con su cuenta del sitio web de Vigor." },
+        { "text": "Envíenos sus comentarios directamente desde la app: haga una captura de pantalla y compártala como comentario de la beta en TestFlight." }
+      ],
+      "note": "Funciona en iPhone y iPad con iOS 26.5 o posterior."
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "items": [
+        {
+          "question": "¿Para quién es VgemsAI?",
+          "answer": "Para clientes del sector: joyerías, diseñadores, fabricantes y vendedores en línea que compran a Vigor o quieren hacerlo."
+        },
+        {
+          "question": "¿Cuánto cuesta?",
+          "answer": "La beta es gratuita. Los precios mayoristas, los pedidos y los pagos los gestiona nuestro equipo, no la app."
+        },
+        {
+          "question": "¿Necesito una cuenta?",
+          "answer": "Sí, para chatear con Vigor AI y mantener al día los datos de su empresa. Regístrese en la app o en este sitio web: una sola cuenta sirve para ambos."
+        },
+        {
+          "question": "¿Es definitivo todo lo que muestra la app?",
+          "answer": "Todavía no. Durante la beta, algunos productos y precios del mercado son de ejemplo, y las respuestas de Vigor AI pueden contener errores. Confirme siempre los detalles con su gestor de cuenta antes de hacer un pedido."
+        },
+        {
+          "question": "¿Qué pasa con mis datos?",
+          "answer": "Los datos de su registro llegan a nuestro equipo mayorista para que pueda ayudarle, y sus chats se conservan durante 90 días. No vendemos sus datos ni mostramos anuncios. La Política de privacidad lo explica en detalle."
+        },
+        {
+          "question": "¿Cómo informo de un problema o propongo una idea?",
+          "answer": "Durante la beta, haga una captura de pantalla y compártala como comentario de la beta en TestFlight, o escríbanos desde la página de contacto."
+        }
+      ]
+    }
+  },
+  "fr": {
+    "title": "Votre assistant du négoce de pierres, dans votre poche",
+    "summary": "VgemsAI est l'app de Vigor pour les bijoutiers, créateurs, fabricants et vendeurs en ligne. Interrogez Vigor AI sur les pierres et les montures, voyez quels salons professionnels ont lieu en ce moment dans le monde, parcourez le catalogue et suivez les prix qui font bouger le marché, sur iPhone et iPad.",
+    "status": "En développement · Bêta publique sur TestFlight",
+    "highlights": [
+      {
+        "icon": "assistant",
+        "title": "Des réponses en quelques secondes",
+        "text": "Interrogez Vigor AI sur les pierres, les qualités, les métaux et les services de Vigor, dans votre langue."
+      },
+      {
+        "icon": "events",
+        "title": "Les salons en cours",
+        "text": "Voyez quels salons professionnels ont lieu en ce moment dans le monde, où ils se tiennent et combien de jours il reste."
+      },
+      {
+        "icon": "account",
+        "title": "Un seul compte",
+        "text": "La même adresse e-mail et le même mot de passe fonctionnent dans l'app et sur ce site."
+      },
+      {
+        "icon": "security",
+        "title": "Privée et sécurisée",
+        "text": "Ni publicité ni pistage. Connectez-vous avec Face ID ou une clé d'identification, et supprimez votre compte quand vous le souhaitez."
+      }
+    ],
+    "features": {
+      "title": "Ce que contient l'app",
+      "intro": "VgemsAI met le service de gros de Vigor dans votre téléphone, de votre première question jusqu'aux allées du salon.",
+      "items": [
+        {
+          "icon": "assistant",
+          "title": "Assistant Vigor AI",
+          "text": "Posez vos questions sur les tailles, les qualités, la certification, les métaux et l'entretien, ou sur ce que Vigor peut trouver ou fabriquer pour vous. Vigor AI répond dans la langue dans laquelle vous écrivez, et votre chargé de compte peut donner suite à vos demandes."
+        },
+        {
+          "icon": "events",
+          "title": "Événements et salons",
+          "text": "Les prochains salons et expositions en liste ou sur une carte, avec le lieu, le stand, l'heure locale et l'itinéraire. Les salons en cours apparaissent en premier sur l'écran d'accueil, avec les jours restants."
+        },
+        {
+          "icon": "products",
+          "title": "Catalogue de produits",
+          "text": "Parcourez les pierres non serties et les bijoux finis par catégorie et par matière, enregistrez vos favoris et préparez un panier pour votre demande de devis."
+        },
+        {
+          "icon": "research",
+          "title": "Études de marché",
+          "text": "Suivez l'or, l'argent, le platine, le palladium et les autres matières qui influencent le prix des bijoux, avec des graphiques sur dix ans, et mettez votre intuition à l'épreuve en pariant sur la hausse ou la baisse du mois à venir."
+        },
+        {
+          "icon": "widgets",
+          "title": "Widgets de l'écran d'accueil",
+          "text": "Votre prochain événement, des produits phares et le prix des matières en un coup d'œil, plus un raccourci qui ouvre directement Vigor AI."
+        },
+        {
+          "icon": "security",
+          "title": "Connexion sécurisée",
+          "text": "Connectez-vous avec Face ID, Touch ID ou une clé d'identification, avec un code envoyé par e-mail sur un nouvel appareil. Votre mot de passe n'est jamais stocké, et vous pouvez supprimer votre compte depuis l'app à tout moment."
+        }
+      ]
+    },
+    "beta": {
+      "title": "Rejoignez la bêta",
+      "text": "VgemsAI est encore en développement. Nous ajoutons des fonctionnalités et branchons des données en direct : certaines sections, comme le catalogue de produits et les prix du marché, affichent pour l'instant un contenu d'exemple.\n\nLa bêta est gratuite et passe par TestFlight d'Apple. Rejoignez-la, essayez l'app lors de vos propres voyages d'achat et dites-nous ce qui la rendrait plus utile.",
+      "steps": [
+        { "text": "Installez TestFlight depuis l'App Store sur votre iPhone ou iPad." },
+        { "text": "Ouvrez l'invitation à la bêta sur le même appareil, acceptez-la, puis installez VgemsAI." },
+        { "text": "Ouvrez VgemsAI et inscrivez-vous avec les coordonnées de votre entreprise, ou connectez-vous avec votre compte du site Vigor." },
+        { "text": "Envoyez-nous vos remarques depuis l'app : faites une capture d'écran et partagez-la comme commentaire sur la bêta dans TestFlight." }
+      ],
+      "note": "Fonctionne sur iPhone et iPad avec iOS 26.5 ou version ultérieure."
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "items": [
+        {
+          "question": "À qui s'adresse VgemsAI ?",
+          "answer": "Aux clients professionnels : bijoutiers, créateurs, fabricants et vendeurs en ligne qui achètent chez Vigor, ou souhaitent le faire."
+        },
+        {
+          "question": "Combien ça coûte ?",
+          "answer": "La bêta est gratuite. Les prix de gros, les commandes et les paiements sont gérés par notre équipe, pas dans l'app."
+        },
+        {
+          "question": "Ai-je besoin d'un compte ?",
+          "answer": "Oui, pour discuter avec Vigor AI et tenir à jour les coordonnées de votre entreprise. Inscrivez-vous dans l'app ou sur ce site : un seul compte fonctionne partout."
+        },
+        {
+          "question": "Tout ce que montre l'app est-il définitif ?",
+          "answer": "Pas encore. Pendant la bêta, certains produits et prix du marché sont des exemples, et les réponses de Vigor AI peuvent être erronées. Confirmez toujours les détails avec votre chargé de compte avant de commander."
+        },
+        {
+          "question": "Que deviennent mes données ?",
+          "answer": "Les informations de votre inscription sont transmises à notre équipe commerciale pour qu'elle puisse vous aider, et vos conversations sont conservées 90 jours. Nous ne vendons pas vos données et n'affichons pas de publicité. La Politique de confidentialité donne tous les détails."
+        },
+        {
+          "question": "Comment signaler un problème ou proposer une idée ?",
+          "answer": "Pendant la bêta, faites une capture d'écran et partagez-la comme commentaire sur la bêta dans TestFlight, ou écrivez-nous depuis la page de contact."
+        }
+      ]
+    }
+  },
+  "zh-Hant": {
+    "title": "您的寶石貿易助理，隨身攜帶",
+    "summary": "VgemsAI 是 Vigor 為珠寶零售商、設計師、製造商及網店賣家而設的應用程式。向 Vigor AI 查詢寶石與鑲嵌，掌握全球各地正在舉行的行業展覽，瀏覽產品目錄，並追蹤影響市場的價格；iPhone 及 iPad 均可使用。",
+    "status": "開發中 · TestFlight 公開測試",
+    "highlights": [
+      {
+        "icon": "assistant",
+        "title": "數秒即有答案",
+        "text": "以您慣用的語言，向 Vigor AI 查詢寶石、等級、金屬及 Vigor 的服務。"
+      },
+      {
+        "icon": "events",
+        "title": "正在舉行的展覽",
+        "text": "即時查看全球各地正在舉行的行業展覽、地點及剩餘日數。"
+      },
+      {
+        "icon": "account",
+        "title": "一個帳戶通用",
+        "text": "應用程式與本網站使用同一個電郵及密碼。"
+      },
+      {
+        "icon": "security",
+        "title": "私隱與安全",
+        "text": "沒有廣告，亦不作追蹤。可使用 Face ID 或通行密鑰登入，並可隨時刪除帳戶。"
+      }
+    ],
+    "features": {
+      "title": "應用程式功能",
+      "intro": "由您的第一個問題到展覽現場，VgemsAI 把 Vigor 的批發服務帶到您的手機。",
+      "items": [
+        {
+          "icon": "assistant",
+          "title": "Vigor AI 助理",
+          "text": "查詢切割、等級、證書、金屬及保養，或 Vigor 可為您採購或製作的產品。Vigor AI 會以您書寫的語言回覆，您的客戶經理亦可跟進您的查詢。"
+        },
+        {
+          "icon": "events",
+          "title": "活動與行業展覽",
+          "text": "以列表或地圖查看即將舉行的展銷會及展覽，附場地、攤位、當地時間及路線。正在舉行的展覽會優先顯示在主畫面，並標示剩餘日數。"
+        },
+        {
+          "icon": "products",
+          "title": "產品目錄",
+          "text": "按類別及材質瀏覽裸石與成品珠寶，把心儀產品加入願望清單，並以購物車準備您的報價查詢。"
+        },
+        {
+          "icon": "research",
+          "title": "市場研究",
+          "text": "追蹤黃金、白銀、鉑金、鈀金及其他影響珠寶價格的材料，附十年走勢圖，更可預測下個月的升跌，考驗您的判斷。"
+        },
+        {
+          "icon": "widgets",
+          "title": "主畫面小工具",
+          "text": "一眼看清下一個活動、精選產品及材料價格，並可一按直接開啟 Vigor AI。"
+        },
+        {
+          "icon": "security",
+          "title": "安全登入",
+          "text": "使用 Face ID、Touch ID 或通行密鑰登入；在新裝置登入時，我們會以電郵發送驗證碼。系統從不儲存您的密碼，您亦可隨時在應用程式內刪除帳戶。"
+        }
+      ]
+    },
+    "beta": {
+      "title": "參加測試版",
+      "text": "VgemsAI 仍在開發中。我們正陸續加入新功能並接入即時數據，因此產品目錄及市場價格等部分暫時顯示示範內容。\n\n測試版免費，透過 Apple 的 TestFlight 提供。歡迎加入，在您的採購行程中試用，並告訴我們如何令它更好用。",
+      "steps": [
+        { "text": "在 iPhone 或 iPad 的 App Store 下載 TestFlight。" },
+        { "text": "在同一部裝置開啟測試邀請，接受後安裝 VgemsAI。" },
+        { "text": "開啟 VgemsAI，以公司資料註冊，或以 Vigor 網站帳戶登入。" },
+        { "text": "直接在應用程式內提供意見：截取畫面，再透過 TestFlight 分享測試意見。" }
+      ],
+      "note": "適用於 iOS 26.5 或以上版本的 iPhone 及 iPad。"
+    },
+    "faq": {
+      "title": "常見問題",
+      "items": [
+        {
+          "question": "VgemsAI 適合甚麼人使用？",
+          "answer": "業界客戶：向 Vigor 採購或有意採購的珠寶零售商、設計師、製造商及網店賣家。"
+        },
+        {
+          "question": "需要付費嗎？",
+          "answer": "測試版免費。批發價格、訂單及付款均由我們的團隊處理，而非透過應用程式。"
+        },
+        {
+          "question": "需要帳戶嗎？",
+          "answer": "需要，才可與 Vigor AI 對話及更新公司資料。您可在應用程式或本網站註冊，同一個帳戶兩邊通用。"
+        },
+        {
+          "question": "應用程式內的資料是否已是最終版本？",
+          "answer": "尚未。測試期間，部分產品及市場價格屬示範資料，而 Vigor AI 的回答亦可能有誤。落單前請務必與您的客戶經理確認細節。"
+        },
+        {
+          "question": "我的資料會如何處理？",
+          "answer": "您的註冊資料會交給我們的批發團隊，以便為您提供協助；對話紀錄會保留 90 日。我們不會出售您的資料，亦不會顯示廣告。詳情請參閱私隱政策。"
+        },
+        {
+          "question": "如何回報問題或提出建議？",
+          "answer": "測試期間，請截取畫面並透過 TestFlight 分享測試意見，或經聯絡頁面與我們聯繫。"
+        }
+      ]
+    }
+  }
+}

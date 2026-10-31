@@ -33,9 +33,11 @@ jobs:
             style
             templates
             test
+          # Payload's packages, plus `cms` for this fork's own app in apps/cms
           scopes: |
             cpa
             claude
+            cms
             codemod
             db-\*
             db-d1-sqlite

@@ -1,0 +1,17 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+next-env.d.ts
+*.tsbuildinfo
+
+# local env files
+.env
+.env*.local
+
+# uploads written in local development
+/media
+
+# local package tarballs (see scripts/pack-local-packages.mjs)
+/local-packages
