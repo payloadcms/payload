@@ -7,6 +7,7 @@ import { MergeBranchModal } from './index.js'
 
 const closeMerge = vi.hoisted(() => vi.fn())
 const refresh = vi.hoisted(() => vi.fn())
+const serverFunction = vi.hoisted(() => vi.fn())
 const modalState = vi.hoisted(() => ({ isOpen: true }))
 
 vi.mock('sonner', () => ({
@@ -34,7 +35,7 @@ vi.mock('../../providers/RouteTransition/index.js', () => ({
   }),
 }))
 vi.mock('../../providers/ServerFunctions/index.js', () => ({
-  useServerFunctions: () => ({ serverFunction: vi.fn() }),
+  useServerFunctions: () => ({ serverFunction }),
 }))
 vi.mock('../../providers/Translation/index.js', () => ({
   useTranslation: () => ({
