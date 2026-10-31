@@ -23,3 +23,31 @@ test('should retain version parent identity alongside sibling OR', () => {
     and: [{ or }, { or: [{ _branchParent: { equals: 'canonical' } }, {}] }],
   })
 })
+
+test.each(['not_equals', 'not_in'])(
+  'should require canonical identity presence for %s constraints',
+  (operator) => {
+    const constraint = { [operator]: operator === 'not_in' ? ['hidden'] : 'hidden' }
+
+    expect(rewriteBranchIDs({ id: constraint })).toEqual({
+      and: [
+        {
+          or: [
+            { and: [{ _branchDocID: { exists: true } }, { _branchDocID: constraint }] },
+            { and: [{ _branchDocID: { exists: false } }, { id: constraint }] },
+          ],
+        },
+      ],
+    })
+    expect(rewriteBranchVersionParents({ parent: constraint })).toEqual({
+      and: [
+        {
+          or: [
+            { and: [{ _branchParent: { exists: true } }, { _branchParent: constraint }] },
+            { and: [{ _branchParent: { exists: false } }, { parent: constraint }] },
+          ],
+        },
+      ],
+    })
+  },
+)

@@ -46,11 +46,14 @@ const rewriteIdentity = ({
 
     if (key === identityKey) {
       const constraint = value as WhereField
+      const hasNegativeConstraint = 'not_equals' in constraint || 'not_in' in constraint
 
       identityClauses.push({
         or: [
-          { [canonicalField]: constraint },
-          matchRawIdentity
+          hasNegativeConstraint
+            ? { and: [{ [canonicalField]: { exists: true } }, { [canonicalField]: constraint }] }
+            : { [canonicalField]: constraint },
+          matchRawIdentity && !hasNegativeConstraint
             ? { [identityKey]: constraint }
             : { and: [{ [canonicalField]: { exists: false } }, { [identityKey]: constraint }] },
         ],
