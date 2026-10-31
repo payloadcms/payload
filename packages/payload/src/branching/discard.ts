@@ -14,6 +14,7 @@ import {
   beginDeferredCleanupScope,
   clearDeferredCleanupScope,
   flushDeferredCleanupScope,
+  scheduleAfterTransactionCommit,
 } from '../utilities/transactionCallbacks.js'
 import { assertBranchActionAccess } from './assertBranchActionAccess.js'
 import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
@@ -369,7 +370,15 @@ const discardBranchChangesInternal = async (
         await scheduleUnreferencedFileCleanup({ candidates, collection: collectionConfig, req })
 
         if (!collectionConfig.upload.fileOperations) {
-          await collectionConfig.upload.deleteFiles?.({ req, retainedDoc, sourceDoc })
+          const deleteFiles = async () => {
+            await collectionConfig.upload.deleteFiles?.({ req, retainedDoc, sourceDoc })
+          }
+
+          if (await req.transactionID) {
+            await scheduleAfterTransactionCommit({ callback: deleteFiles, req })
+          } else {
+            await deleteFiles()
+          }
         }
       } else {
         await deleteUploadFilesExclusiveToDocument({
