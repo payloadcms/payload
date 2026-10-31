@@ -1081,5 +1081,14 @@ const copyReferencedValue = ({ value }: { value: unknown }): unknown => {
     return value.map((item) => (item && typeof item === 'object' ? { ...item } : item))
   }
 
-  return value && typeof value === 'object' ? { ...value } : value
+  if (!value || typeof value !== 'object') {
+    return value
+  }
+
+  // A join value holds its documents in `docs`
+  const { docs } = value as { docs?: unknown }
+
+  return Array.isArray(docs)
+    ? { ...value, docs: copyReferencedValue({ value: docs }) }
+    : { ...value }
 }
