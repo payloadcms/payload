@@ -327,7 +327,13 @@ export const resolveBranchDelete = async ({
     await req.payload.db.deleteMany({
       collection: branchChangesCollectionSlug,
       req,
-      where: { and: [{ branch: { equals: branch } }, { 'doc.value': { equals: targetID } }] },
+      where: {
+        and: [
+          { branch: { equals: branch } },
+          { 'doc.relationTo': { equals: collectionSlug } },
+          { 'doc.value': { equals: targetID } },
+        ],
+      },
     })
 
     matchingBranchDeleteOperation?.onResolved({ doc: target, tombstoned: false })
@@ -355,7 +361,13 @@ export const resolveBranchDelete = async ({
     await req.payload.db.deleteMany({
       collection: branchChangesCollectionSlug,
       req,
-      where: { and: [{ branch: { equals: branch } }, { 'doc.value': { equals: canonicalID } }] },
+      where: {
+        and: [
+          { branch: { equals: branch } },
+          { 'doc.relationTo': { equals: collectionSlug } },
+          { 'doc.value': { equals: canonicalID } },
+        ],
+      },
     })
 
     await req.payload.create({
@@ -409,7 +421,11 @@ export const resolveBranchDelete = async ({
           collection: branchChangesCollectionSlug,
           req: createReq,
           where: {
-            and: [{ branch: { equals: branch } }, { 'doc.value': { equals: canonicalID } }],
+            and: [
+              { branch: { equals: branch } },
+              { 'doc.relationTo': { equals: collectionSlug } },
+              { 'doc.value': { equals: canonicalID } },
+            ],
           },
         })
 
