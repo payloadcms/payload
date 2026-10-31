@@ -6,6 +6,7 @@ import type { Collection } from '../config/types.js'
 import type { FindOptions } from './local/find.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { branchParentField } from '../../branching/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
@@ -272,6 +273,12 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     overrideAccess,
     result,
   })
+
+  if (!req.context._branchBypass) {
+    for (const doc of result.docs) {
+      Reflect.deleteProperty(doc, branchParentField)
+    }
+  }
 
   return result
 }

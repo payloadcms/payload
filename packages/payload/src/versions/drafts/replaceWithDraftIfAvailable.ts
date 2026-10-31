@@ -7,6 +7,7 @@ import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../types.js'
 
 import { hasWhereAccessResult } from '../../auth/index.js'
+import { resolveBranchRowID } from '../../branching/resolveBranchRowID.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { docHasTimestamps } from '../../types/index.js'
 import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
@@ -101,9 +102,15 @@ export const findDraftVersion = async <T extends TypeWithID>({
   }
 
   if (entityType === 'collection') {
+    // On a branch, versions hang off the branch's own copy of the document, so
+    // `parent` is that row's primary key rather than the canonical ID.
     queryToBuild.and!.push({
       parent: {
-        equals: doc.id,
+        equals: await resolveBranchRowID({
+          id: doc.id,
+          collectionSlug: entity.slug,
+          req,
+        }),
       },
     })
   }

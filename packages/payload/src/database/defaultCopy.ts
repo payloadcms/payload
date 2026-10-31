@@ -21,6 +21,7 @@ export const defaultCopy: Copy = async function defaultCopy({ collection, data =
   }
 
   const sourceDocument = await this.findOne({
+    branch: false,
     collection,
     req,
     where,

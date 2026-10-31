@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
+import {
+  appendGlobalVersionToQueryKey,
+  appendVersionToQueryKey,
+} from './appendVersionToQueryKey.js'
 
 describe('appendVersionToQueryKey', () => {
   it.each(['aNd', 'oR'])(
@@ -27,4 +30,50 @@ describe('appendVersionToQueryKey', () => {
       })
     },
   )
+
+  it('should map collection IDs to the version parent', () => {
+    expect(
+      appendVersionToQueryKey({
+        id: {
+          equals: 'example',
+        },
+      }),
+    ).toStrictEqual({
+      parent: {
+        equals: 'example',
+      },
+    })
+  })
+
+  it('should reject global ID constraints without treating the ID as a version field', () => {
+    expect(
+      appendGlobalVersionToQueryKey({
+        or: [
+          {
+            id: {
+              equals: 'example',
+            },
+          },
+          {
+            title: {
+              equals: 'allowed',
+            },
+          },
+        ],
+      }),
+    ).toStrictEqual({
+      or: [
+        {
+          id: {
+            exists: false,
+          },
+        },
+        {
+          'version.title': {
+            equals: 'allowed',
+          },
+        },
+      ],
+    })
+  })
 })
