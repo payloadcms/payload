@@ -1193,6 +1193,43 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
     })
 
+    test('should remove draft-only fields when reverting to published', async () => {
+      test.setTimeout(60000)
+      await page.goto(url.create)
+      await expect(page.locator('#field-title')).toBeVisible()
+
+      // Create and publish a document without the optional field.
+      await page.locator('#field-title').fill('revert missing field test')
+      await page.locator('#field-description').fill('published description')
+      await page.locator('#action-save-draft').click()
+      await expect(page).not.toHaveURL(/\/create(?:\?|$)/, { timeout: 15000 })
+
+      // Publish the document so a published version exists.
+      await page.getByRole('button', { name: /Publish in English/ }).click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+      // Add the optional field only in the draft.
+      await page.locator('#field-revertTestField').fill('draft-only value')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Revert to the published version.
+      await page.locator('#action-revert-to-published').click()
+      await page.locator('[id^=confirm-revert-] [data-dialog-action="confirm"]').click()
+      await expect(page.locator('.payload-toast-container')).toContainText(/restored successfully/i)
+
+      // The draft-only field should be empty after reverting.
+      await expect(page.locator('#field-revertTestField')).toHaveValue('')
+
+      const documentID = new URL(page.url()).pathname.split('/').filter(Boolean).pop()
+
+      const response = await page.request.get(`${serverURL}/api/draft-posts/${documentID}`)
+
+      expect(response.ok()).toBeTruthy()
+
+      const document = await response.json()
+      expect(document.revertTestField).toBeUndefined()
+    })
+
     test('collection — autosave should only update the current document', async () => {
       await page.goto(autosaveURL.create)
       await expect(page.locator('#field-title')).toBeEnabled()
