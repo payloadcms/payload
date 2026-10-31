@@ -78,6 +78,7 @@ export const ChangedDocuments: React.FC<{
 
   // Read inside the loader without making it a dependency, so a completed load
   // doesn't re-create the callback and re-trigger observers.
+  const inFlight = useRef(new Set<string>())
   const loadedRef = useRef(loaded)
   useEffect(() => {
     loadedRef.current = loaded
@@ -85,10 +86,11 @@ export const ChangedDocuments: React.FC<{
 
   const load = useCallback(
     async (change: BranchChange) => {
-      if (loadedRef.current[change.id]) {
+      if (inFlight.current.has(change.id) || loadedRef.current[change.id]) {
         return
       }
 
+      inFlight.current.add(change.id)
       setLoaded((prev) => ({ ...prev, [change.id]: { status: 'loading' } }))
 
       try {
@@ -106,6 +108,8 @@ export const ChangedDocuments: React.FC<{
         setLoaded((prev) => ({ ...prev, [change.id]: { result, status: 'ready' } }))
       } catch (_err) {
         setLoaded((prev) => ({ ...prev, [change.id]: { status: 'error' } }))
+      } finally {
+        inFlight.current.delete(change.id)
       }
     },
     [branch, serverFunction],
