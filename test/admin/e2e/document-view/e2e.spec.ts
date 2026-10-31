@@ -45,6 +45,7 @@ import {
   placeholderCollectionSlug,
   postsCollectionSlug,
   reorderTabsSlug,
+  uploadCollectionSlug,
 } from '../../slugs.js'
 process.env.NEXT_BASE_PATH = BASE_PATH
 
@@ -110,6 +111,60 @@ describe('Document View', () => {
     })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+  })
+
+  test('upload field updates when its form value changes programmatically', async () => {
+    const firstUpload = await payload.create({
+      collection: uploadCollectionSlug,
+      data: {
+        title: 'First upload',
+      },
+      filePath: path.resolve(dirname, '../uploads/image.jpg'),
+      overrideAccess: true,
+    })
+
+    const secondUpload = await payload.create({
+      collection: uploadCollectionSlug,
+      data: {
+        title: 'Second upload',
+      },
+      filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
+    })
+
+    const post = await createPost({
+      upload: firstUpload.id,
+    })
+
+    await page.goto(postsUrl.edit(post.id))
+
+    await expect(page.getByRole('tab', { name: 'Tab 1' })).toBeVisible()
+    await expect(page.getByText('Demo UI Field')).toBeVisible()
+
+    const uploadField = page.locator('#field-upload')
+
+    await expect(uploadField).toContainText('image.jpg')
+
+    // Directly switch from the first upload to the second.
+    await page.getByTestId('upload-target-id').fill(String(secondUpload.id))
+    await page.getByTestId('update-upload').click()
+
+    // The UI should display only the newly selected upload.
+    await expect(uploadField).toContainText('image.png')
+    await expect(uploadField).not.toContainText('image.jpg')
+
+    // Clear the Upload field.
+    await page.getByTestId('upload-target-id').fill('')
+    await page.getByTestId('update-upload').click()
+
+    await expect(uploadField).not.toContainText('image.png')
+
+    // Set the upload field again after clearing it.
+    await page.getByTestId('upload-target-id').fill(String(firstUpload.id))
+    await page.getByTestId('update-upload').click()
+
+    await expect(uploadField).toContainText('image.jpg')
+    await expect(uploadField).not.toContainText('image.png')
   })
 
   describe('API view', () => {
