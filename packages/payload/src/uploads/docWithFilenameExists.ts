@@ -4,6 +4,12 @@ import { buildFilenameWhere } from './transformers/resolveUploadDocument.js'
 
 type Args = {
   collectionSlug: string
+  /**
+   * When provided, this document ID is excluded from the filename lookup.
+   * Use this during update operations so a document does not collide with its
+   * own existing filename and receive a spurious `-1` suffix.
+   */
+  docId?: number | string
   filename: string
   matchAnyPrefix?: boolean
   path: string
@@ -13,6 +19,7 @@ type Args = {
 
 export const docWithFilenameExists = async ({
   collectionSlug,
+  docId,
   filename,
   matchAnyPrefix = false,
   prefix,
@@ -32,6 +39,10 @@ export const docWithFilenameExists = async ({
     !matchAnyPrefix && typeof prefix === 'string' && hasPrefixField
       ? { and: [filenameCondition, { prefix: { equals: prefix } }] }
       : filenameCondition
+
+  if (docId !== undefined) {
+    where.id = { not_equals: docId }
+  }
 
   const doc = await req.payload.db.findOne({
     collection: collectionSlug,
