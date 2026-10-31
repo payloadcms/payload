@@ -640,6 +640,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     addFile: 'Додај датотеку',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Masovno otpremanje',
+    cancelUpload: 'Откажи отпремање',
     copyLinkToFile: 'Kopiraj vezu ka fajlu',
     copyURL: 'Копирај URL',
     crop: 'Исеците слику',
@@ -661,6 +662,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     fileSize: 'Величина датотеке',
     filesToUpload: 'Fajlovi za otpremanje',
     fileToUpload: 'Fajl za otpremanje',
+    finishSaving: 'Заврши чување',
     focalPoint: 'Централна тачка',
     focalPointDescription:
       'Превуците средишњу тачку директно на преглед или прилагодите вредности испод.',
@@ -675,12 +677,27 @@ export const rsTranslations: DefaultTranslationsObject = {
     previewSizes: 'Величине прегледа',
     renameFile: 'Преименујте фајл',
     replaceFile: 'Замените датотеку',
+    resumingFile: 'Наставља се {{filename}}',
+    savingInBackground: 'Отпремање ће се завршити у позадини и документ ће тада бити сачуван.',
     selectCollectionToBrowse: 'Одаберите колекцију за преглед',
     selectFile: 'Одаберите датотеку',
     setCropArea: 'Поставите подручје за исечену слику',
     setFocalPoint: 'Поставите централну тачку',
     sizes: 'Величине',
     sizesFor: 'Величине за {{label}}',
+    uploadFileMismatch: 'Изабрана датотека не одговара прекинутом отпремању.',
+    uploadingFile: 'Отпремање датотеке {{filename}}',
+    uploadingFileProgress: 'Отпремање датотеке {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Отпремање је још у току. Ако сада напустите страницу, биће прекинуто.',
+    uploadInterrupted: 'Отпремање датотеке {{filename}} је прекинуто.',
+    uploadInterruptedWillSave:
+      'Отпремање датотеке {{filename}} је прекинуто. Документ ће бити сачуван када се заврши.',
+    uploadReadyToFinishSaving:
+      'Датотека {{filename}} је отпремљена. Отворите образац да завршите чување.',
+    uploadSavedInBackground: 'Отпремање је завршено и документ је сачуван.',
+    uploadStorageRejectedSegments:
+      'Складиште није прихватило ниједан део отпремања. Проверите CORS смернице bucket-а.',
     width: 'Ширина',
   },
   validation: {

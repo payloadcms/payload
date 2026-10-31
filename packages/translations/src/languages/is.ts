@@ -639,6 +639,7 @@ export const isTranslations: DefaultTranslationsObject = {
     addFile: 'Bæta við skrá',
     addFiles: 'Bæta við skrám',
     bulkUpload: 'Magn upphal',
+    cancelUpload: 'Hætta við upphleðslu',
     copyLinkToFile: 'Afrita hlekk á skrá',
     copyURL: 'Afrita URL',
     crop: 'Skera',
@@ -660,6 +661,7 @@ export const isTranslations: DefaultTranslationsObject = {
     fileSize: 'Skráarstærð',
     filesToUpload: 'Skrár til að hlaða upp',
     fileToUpload: 'Skrá til að hlaða upp',
+    finishSaving: 'Ljúka vistun',
     focalPoint: 'Brennipunktur',
     focalPointDescription:
       'Dragðu brennipunktinn beint á forskoðunina eða stilltu gildin hér að neðan.',
@@ -674,12 +676,26 @@ export const isTranslations: DefaultTranslationsObject = {
     previewSizes: 'Forskoðunarstærðir',
     renameFile: 'Endurnefna skrá',
     replaceFile: 'Skipta út skrá',
+    resumingFile: 'Held áfram með {{filename}}',
+    savingInBackground: 'Upphleðslan klárast í bakgrunni og skjalið verður þá vistað.',
     selectCollectionToBrowse: 'Veldu safn til að skoða',
     selectFile: 'Veldu skrá',
     setCropArea: 'Stilla klippingarsvæði',
     setFocalPoint: 'Stilla brennipunkt',
     sizes: 'Stærðir',
     sizesFor: 'Stærðir fyrir {{label}}',
+    uploadFileMismatch: 'Valin skrá passar ekki við rofna upphleðslu.',
+    uploadingFile: 'Hleð upp {{filename}}',
+    uploadingFileProgress: 'Hleð upp {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning: 'Upphleðsla er enn í gangi. Ef þú ferð núna verður hún rofin.',
+    uploadInterrupted: 'Upphleðsla {{filename}} var rofin.',
+    uploadInterruptedWillSave:
+      'Upphleðsla {{filename}} var rofin. Skjalið verður vistað þegar henni lýkur.',
+    uploadReadyToFinishSaving:
+      '{{filename}} hefur verið hlaðið upp. Opnaðu eyðublaðið til að ljúka vistun.',
+    uploadSavedInBackground: 'Upphleðslu lauk og skjalið var vistað.',
+    uploadStorageRejectedSegments:
+      'Geymslan tók ekki við neinum hlutum upphleðslunnar. Athugaðu CORS-stefnu bucket.',
     width: 'Breidd',
   },
   validation: {

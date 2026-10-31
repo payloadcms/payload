@@ -128,6 +128,7 @@ export function EditForm({
             <FileManager
               collectionSlug={collectionConfig.slug}
               initialState={initialState}
+              isUploadStartedOnSelect={false}
               resetUploadEdits={resetUploadEdits}
               updateUploadEdits={updateUploadEdits}
               uploadConfig={collectionConfig.upload}

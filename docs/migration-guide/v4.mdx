@@ -2022,6 +2022,12 @@ azureStorage({
 
 Run `npx @payloadcms/codemod --transform migrate-azure-chunk-large-files` to remove the flag automatically (it collapses `clientUploads: { chunkLargeFiles: true }` to `clientUploads: true` and keeps any other `clientUploads` options).
 
+### Upload instructions require client uploads or local storage
+
+`POST /api/upload-instructions` now returns `400` for a collection that has neither client uploads nor local storage, for example `s3Storage()` without `clientUploads`. Previously it returned a URL on Payload itself and kept the file in the server's temporary directory, which failed whenever the following document request reached a different server.
+
+The Admin Panel is not affected. If a custom client uses upload instructions for such a collection, send the file with the document request instead (multipart `file` field), or enable client uploads on the storage adapter. Collections with local storage keep working as before.
+
 ### Sharp is now an optional file transformer #sharp-moved-out-of-core-into-payloadcmstransformer-sharp
 
 Image resizing is no longer built into `payload` itself. It now ships as an official [file transformer](../upload/transformers), `@payloadcms/transformer-sharp`, that you register under `upload.transformers`.

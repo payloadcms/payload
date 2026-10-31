@@ -642,6 +642,7 @@ export const viTranslations: DefaultTranslationsObject = {
     addFile: 'Thêm tập tin',
     addFiles: 'Thêm tệp',
     bulkUpload: 'Tải lên số lượng lớn',
+    cancelUpload: 'Hủy tải lên',
     copyLinkToFile: 'Sao chép liên kết đến tệp',
     copyURL: 'Sao chép URL',
     crop: 'Cắt xén',
@@ -663,6 +664,7 @@ export const viTranslations: DefaultTranslationsObject = {
     fileSize: 'Dung lượng file',
     filesToUpload: 'Tệp để Tải lên',
     fileToUpload: 'Tệp để Tải lên',
+    finishSaving: 'Hoàn tất lưu',
     focalPoint: 'Điểm trọng tâm',
     focalPointDescription:
       'Kéo điểm tiêu điểm trực tiếp trên ảnh xem trước hoặc điều chỉnh giá trị bên dưới.',
@@ -677,12 +679,27 @@ export const viTranslations: DefaultTranslationsObject = {
     previewSizes: 'Kích cỡ xem trước',
     renameFile: 'Đổi tên tệp',
     replaceFile: 'Thay thế tệp',
+    resumingFile: 'Đang tiếp tục {{filename}}',
+    savingInBackground:
+      'Quá trình tải lên sẽ hoàn tất ở chế độ nền và tài liệu sẽ được lưu khi đó.',
     selectCollectionToBrowse: 'Chọn một Collection để tìm',
     selectFile: 'Chọn một file',
     setCropArea: 'Đặt khu vực cắt',
     setFocalPoint: 'Đặt điểm tiêu điểm',
     sizes: 'Các độ phân giải',
     sizesFor: 'Kích thước cho {{label}}',
+    uploadFileMismatch: 'Tệp đã chọn không khớp với lần tải lên bị gián đoạn.',
+    uploadingFile: 'Đang tải lên {{filename}}',
+    uploadingFileProgress: 'Đang tải lên {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Một lượt tải lên vẫn đang diễn ra. Rời đi bây giờ sẽ làm gián đoạn nó.',
+    uploadInterrupted: 'Quá trình tải lên {{filename}} đã bị gián đoạn.',
+    uploadInterruptedWillSave:
+      'Quá trình tải lên {{filename}} đã bị gián đoạn. Tài liệu sẽ được lưu khi hoàn tất.',
+    uploadReadyToFinishSaving: '{{filename}} đã tải lên xong. Mở biểu mẫu để hoàn tất lưu.',
+    uploadSavedInBackground: 'Tải lên đã hoàn tất và tài liệu đã được lưu.',
+    uploadStorageRejectedSegments:
+      'Bộ lưu trữ không chấp nhận phần tải lên nào. Hãy kiểm tra chính sách CORS của bucket.',
     width: 'Chiều rộng',
   },
   validation: {

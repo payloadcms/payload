@@ -641,6 +641,7 @@ export const plTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj plik',
     addFiles: 'Dodaj pliki',
     bulkUpload: 'Załaduj masowo',
+    cancelUpload: 'Anuluj przesyłanie',
     copyLinkToFile: 'Kopiuj link do pliku',
     copyURL: 'Kopiuj URL',
     crop: 'Przytnij',
@@ -662,6 +663,7 @@ export const plTranslations: DefaultTranslationsObject = {
     fileSize: 'Rozmiar pliku',
     filesToUpload: 'Pliki do przesłania',
     fileToUpload: 'Plik do przesłania',
+    finishSaving: 'Dokończ zapisywanie',
     focalPoint: 'Punkt centralny',
     focalPointDescription:
       'Przeciągnij punkt centralny bezpośrednio na podglądzie lub dostosuj wartości poniżej.',
@@ -676,12 +678,26 @@ export const plTranslations: DefaultTranslationsObject = {
     previewSizes: 'Rozmiary podglądu',
     renameFile: 'Zmień nazwę pliku',
     replaceFile: 'Zastąp plik',
+    resumingFile: 'Wznawianie {{filename}}',
+    savingInBackground: 'Przesyłanie zakończy się w tle, a dokument zostanie wtedy zapisany.',
     selectCollectionToBrowse: 'Wybierz kolekcję aby przejrzeć',
     selectFile: 'Wybierz plik',
     setCropArea: 'Ustaw obszar kadrowania',
     setFocalPoint: 'Ustawić punkt ogniskowy',
     sizes: 'Rozmiary',
     sizesFor: 'Rozmiary dla {{label}}',
+    uploadFileMismatch: 'Wybrany plik nie pasuje do przerwanego przesyłania.',
+    uploadingFile: 'Przesyłanie {{filename}}',
+    uploadingFileProgress: 'Przesyłanie {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning: 'Przesyłanie nadal trwa. Opuszczenie strony teraz je przerwie.',
+    uploadInterrupted: 'Przesyłanie pliku {{filename}} zostało przerwane.',
+    uploadInterruptedWillSave:
+      'Przesyłanie pliku {{filename}} zostało przerwane. Dokument zostanie zapisany po jego zakończeniu.',
+    uploadReadyToFinishSaving:
+      'Plik {{filename}} został przesłany. Otwórz formularz, aby dokończyć zapisywanie.',
+    uploadSavedInBackground: 'Przesyłanie zakończone, a dokument został zapisany.',
+    uploadStorageRejectedSegments:
+      'Magazyn nie przyjął żadnej części przesyłania. Sprawdź zasady CORS bucketu.',
     width: 'Szerokość',
   },
   validation: {

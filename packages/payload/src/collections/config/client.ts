@@ -47,7 +47,10 @@ export type ServerOnlyUploadProperties = keyof Pick<
 >
 
 type ClientUploadConfig = {
-  uploadInstructions: Pick<UploadInstructionsCapability, 'useInAdmin'>
+  uploadInstructions: {
+    /** Whether the adapter supports resumable, segmented upload sessions. @experimental */
+    supportsSegmentedUploads: boolean
+  } & Pick<UploadInstructionsCapability, 'useInAdmin'>
 } & Omit<SanitizedUploadConfig, 'fileOperations' | 'uploadInstructions'>
 
 export type ClientCollectionConfig = {
@@ -291,6 +294,7 @@ export const createClientCollectionConfig = ({
 
         clientCollection.upload = {
           uploadInstructions: {
+            supportsSegmentedUploads: Boolean(collection.upload.uploadInstructions?.segmented),
             useInAdmin: collection.upload.uploadInstructions?.useInAdmin ?? false,
           },
         } as ClientUploadConfig

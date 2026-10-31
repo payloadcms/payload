@@ -649,6 +649,7 @@ export const itTranslations: DefaultTranslationsObject = {
     addFile: 'Aggiungi file',
     addFiles: 'Aggiungi File',
     bulkUpload: 'Caricamento in Blocco',
+    cancelUpload: 'Annulla caricamento',
     copyLinkToFile: 'Copia link al file',
     copyURL: 'Copia URL',
     crop: 'Raccolto',
@@ -670,6 +671,7 @@ export const itTranslations: DefaultTranslationsObject = {
     fileSize: 'Dimensione File',
     filesToUpload: 'File da caricare',
     fileToUpload: 'File da caricare',
+    finishSaving: 'Completa il salvataggio',
     focalPoint: 'Punto Focale',
     focalPointDescription:
       "Trascina il punto focale direttamente sull'anteprima o regola i valori sottostanti.",
@@ -684,12 +686,27 @@ export const itTranslations: DefaultTranslationsObject = {
     previewSizes: 'Anteprime Dimensioni',
     renameFile: 'Rinomina file',
     replaceFile: 'Sostituisci file',
+    resumingFile: 'Ripresa di {{filename}}',
+    savingInBackground:
+      'Il caricamento terminerà in background e il documento verrà salvato in quel momento.',
     selectCollectionToBrowse: 'Seleziona una Collezione da Sfogliare',
     selectFile: 'Seleziona un file',
     setCropArea: 'Imposta area di ritaglio',
     setFocalPoint: 'Imposta punto focale',
     sizes: 'Formati',
     sizesFor: 'Dimensioni per {{label}}',
+    uploadFileMismatch: 'Il file selezionato non corrisponde al caricamento interrotto.',
+    uploadingFile: 'Caricamento di {{filename}}',
+    uploadingFileProgress: 'Caricamento di {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning: 'Un caricamento è ancora in corso. Uscire ora lo interromperà.',
+    uploadInterrupted: 'Il caricamento di {{filename}} è stato interrotto.',
+    uploadInterruptedWillSave:
+      'Il caricamento di {{filename}} è stato interrotto. Il documento verrà salvato al termine.',
+    uploadReadyToFinishSaving:
+      '{{filename}} è stato caricato. Apri il modulo per completare il salvataggio.',
+    uploadSavedInBackground: 'Il caricamento è terminato e il documento è stato salvato.',
+    uploadStorageRejectedSegments:
+      'Lo storage non ha accettato alcuna parte del caricamento. Controlla la policy CORS del bucket.',
     width: 'Larghezza',
   },
   validation: {

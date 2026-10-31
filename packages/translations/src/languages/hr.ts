@@ -641,6 +641,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteku',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Masovno dodavanje',
+    cancelUpload: 'Otkaži prijenos',
     copyLinkToFile: 'Kopirajte poveznicu na datoteku',
     copyURL: 'Kopirajte URL',
     crop: 'Izreži',
@@ -662,6 +663,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     fileSize: 'Veličina datoteke',
     filesToUpload: 'Datoteke za učitavanje',
     fileToUpload: 'Datoteka za prijenos',
+    finishSaving: 'Dovrši spremanje',
     focalPoint: 'Središnja točka',
     focalPointDescription:
       'Povucite središnju točku izravno na pregledu ili prilagodite vrijednosti ispod.',
@@ -676,12 +678,26 @@ export const hrTranslations: DefaultTranslationsObject = {
     previewSizes: 'Veličine pregleda',
     renameFile: 'Preimenujte datoteku',
     replaceFile: 'Zamijenite datoteku',
+    resumingFile: 'Nastavljanje {{filename}}',
+    savingInBackground: 'Prijenos će završiti u pozadini i dokument će tada biti spremljen.',
     selectCollectionToBrowse: 'Odaberite kolekciju za pregled',
     selectFile: 'Odaberite datoteku',
     setCropArea: 'Postavi područje usjeva',
     setFocalPoint: 'Postavi fokusnu točku',
     sizes: 'Veličine',
     sizesFor: 'Veličine za {{label}}',
+    uploadFileMismatch: 'Odabrana datoteka ne odgovara prekinutom prijenosu.',
+    uploadingFile: 'Prijenos datoteke {{filename}}',
+    uploadingFileProgress: 'Prijenos datoteke {{filename}}: {{percent}} %',
+    uploadInProgressLeaveWarning: 'Prijenos je još u tijeku. Ako sada odete, bit će prekinut.',
+    uploadInterrupted: 'Prijenos datoteke {{filename}} je prekinut.',
+    uploadInterruptedWillSave:
+      'Prijenos datoteke {{filename}} je prekinut. Dokument će biti spremljen kada završi.',
+    uploadReadyToFinishSaving:
+      'Datoteka {{filename}} je prenesena. Otvorite obrazac da dovršite spremanje.',
+    uploadSavedInBackground: 'Prijenos je završen i dokument je spremljen.',
+    uploadStorageRejectedSegments:
+      'Pohrana nije prihvatila nijedan dio prijenosa. Provjerite CORS pravila bucketa.',
     width: 'Širina',
   },
   validation: {
