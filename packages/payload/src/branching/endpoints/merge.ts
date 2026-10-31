@@ -5,6 +5,7 @@ import type { MergeProgress } from '../types.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { mergeBranch } from '../merge.js'
 import { isolateBranchState } from '../resolveBranch.js'
 import { branchesCollectionSlug } from '../types.js'
@@ -110,13 +111,33 @@ const streamMerge = ({
   const { payload, user } = req
   const encoder = new TextEncoder()
 
+  let isClosed = false
+  const close = (controller?: ReadableStreamDefaultController<Uint8Array>) => {
+    if (isClosed) {
+      return
+    }
+
+    isClosed = true
+    try {
+      controller?.close()
+    } catch {
+      // A cancelled consumer has already closed its controller.
+    }
+  }
+
   const stream = new ReadableStream<Uint8Array>({
+    cancel() {
+      close()
+    },
     async start(controller) {
-      const send = (event: MergeStreamEvent) =>
-        controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`))
+      const send = (event: MergeStreamEvent) => {
+        if (!isClosed) {
+          controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`))
+        }
+      }
 
       try {
-        const mergeReq = isolateBranchState({ req: req })
+        const mergeReq = isolateObjectProperty(isolateBranchState({ req }), 'transactionID')
 
         delete mergeReq.transactionID
 
@@ -142,7 +163,7 @@ const streamMerge = ({
           message: err instanceof Error ? err.message : 'Unknown error',
         })
       } finally {
-        controller.close()
+        close(controller)
       }
     },
   })
