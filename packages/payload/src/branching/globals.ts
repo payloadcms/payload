@@ -1,7 +1,6 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
 import { scheduleAfterTransactionRollback } from '../utilities/transactionCallbacks.js'
-
 import { loadBranchRow, resolveBranch, setBranchRow } from './resolveBranch.js'
 import {
   branchChangesCollectionSlug,
