@@ -99,6 +99,12 @@ describe('buildRawSchema', () => {
       }),
     )
 
+    const slugIndex = Object.values(localesTable.indexes ?? {}).find(
+      (index) => index.on.includes('slug') && index.unique,
+    )!
+
+    expect(adapter.fieldConstraints.articles_locales[slugIndex.name]).toBe('slug')
+
     const versionLocalesTable = adapter.rawTables._articles_versions_locales
 
     expect(versionLocalesTable.columns._branch).toMatchObject({
@@ -113,6 +119,37 @@ describe('buildRawSchema', () => {
         unique: false,
       }),
     )
+  })
+
+  it('should map branch-scoped unique constraints to their configured field paths', () => {
+    const config = sanitizeConfig({
+      branching: true,
+      collections: [
+        {
+          slug: 'articles',
+          fields: [
+            { name: 'code', type: 'text', unique: true },
+            {
+              name: 'details',
+              type: 'group',
+              fields: [{ name: 'reference', type: 'text', unique: true }],
+            },
+          ],
+        },
+      ],
+    } as Config)
+    const adapter = createAdapter(config)
+
+    buildRawSchema({ adapter, setColumnID })
+
+    const indexes = Object.values(adapter.rawTables.articles.indexes ?? {})
+    const codeIndex = indexes.find((index) => index.on.includes('code') && index.unique)!
+    const referenceIndex = indexes.find(
+      (index) => index.on.includes('details_reference') && index.unique,
+    )!
+
+    expect(adapter.fieldConstraints.articles[codeIndex.name]).toBe('code')
+    expect(adapter.fieldConstraints.articles[referenceIndex.name]).toBe('details.reference')
   })
 
   it('should create suffixed block tables for different schemas with the same slug', async () => {
