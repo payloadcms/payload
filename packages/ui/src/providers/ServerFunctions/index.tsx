@@ -145,10 +145,15 @@ export const useServerFunctions = () => {
 export const ServerFunctionsProvider: React.FC<{
   children: React.ReactNode
   serverFunction: ServerFunctionClient
-}> = ({ children, serverFunction }) => {
-  if (!serverFunction) {
+}> = ({ children, serverFunction: serverFunctionFromProps }) => {
+  if (!serverFunctionFromProps) {
     throw new Error('ServerFunctionsProvider requires a serverFunction prop')
   }
+
+  const serverFunction = useCallback<ServerFunctionClient>(
+    (args) => serverFunctionFromProps({ ...args, requestURL: window.location.href }),
+    [serverFunctionFromProps],
+  )
 
   const getDocumentSlots = useCallback<GetDocumentSlots>(
     async ({ signal: _signal, ...args }) =>

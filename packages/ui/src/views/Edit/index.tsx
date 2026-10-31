@@ -2,7 +2,8 @@
 
 import type { DocumentViewClientProps, User } from 'payload'
 
-import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
+import { branchesCollectionSlug, formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -368,7 +369,15 @@ export function DefaultEditView({
         // Redirect to the same locale if it's been set
         const redirectRoute = formatAdminURL({
           adminRoute,
-          path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
+          path: `/collections/${collectionSlug}/${document?.id}${qs.stringify(
+            {
+              ...(locale ? { locale } : {}),
+              ...(collectionSlug === branchesCollectionSlug && document?.slug
+                ? { branch: document.slug }
+                : {}),
+            },
+            { addQueryPrefix: true },
+          )}`,
         })
 
         void startRouteTransition(() => router.push(redirectRoute))

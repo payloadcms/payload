@@ -200,7 +200,7 @@ export async function initAdminContext({
   }
 
   const result = cache
-    ? await cache.getRequest(createContext, key!, overrides)
+    ? await cache.getRequest(createContext, key!, overrides, requestURL)
     : await createContext()
 
   return {
