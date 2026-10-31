@@ -173,7 +173,11 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
           ? req.query.branch
           : undefined)
 
-    if (currentBranch !== undefined && currentBranch !== targetBranch) {
+    const isBypassChanging =
+      Boolean((req.context as Record<string, unknown> | undefined)?._branchBypass) !==
+      (branch === false)
+
+    if ((currentBranch !== undefined && currentBranch !== targetBranch) || isBypassChanging) {
       req = isolateObjectProperty(req, ['branch', 'context', 'payloadDataLoader'])
       req.context = { ...req.context }
       resetBranchState(req as PayloadRequest)
