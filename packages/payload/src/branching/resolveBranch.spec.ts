@@ -54,7 +54,7 @@ test('should preserve native Request properties when isolating a branch', async 
     }),
     { branch: 'campaign', context: {} },
   ) as unknown as PayloadRequest
-  const isolated = isolateBranchState(req)
+  const isolated = isolateBranchState({ req: req })
 
   expect(isolated.url).toBe(req.url)
   expect(isolated.method).toBe('POST')

@@ -462,7 +462,7 @@ export const resolveBranchOwnVersions = async ({
     return unscoped
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch = branchOverride ?? resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return { and: [unscoped, { [branchField]: { equals: MAIN_BRANCH } }] }

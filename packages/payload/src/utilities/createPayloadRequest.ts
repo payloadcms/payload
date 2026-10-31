@@ -166,7 +166,7 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
   if (branch !== undefined) {
     const targetBranch = branch === false ? MAIN_BRANCH : branch
     const currentBranch =
-      peekResolvedBranch(req) ??
+      peekResolvedBranch({ req: req }) ??
       (typeof req.branch === 'string'
         ? req.branch
         : typeof req.query?.branch === 'string'
@@ -180,7 +180,7 @@ export const createPayloadRequest: CreatePayloadRequest = async ({
     if ((currentBranch !== undefined && currentBranch !== targetBranch) || isBypassChanging) {
       req = isolateObjectProperty(req, ['branch', 'context', 'payloadDataLoader'])
       req.context = { ...req.context }
-      resetBranchState(req as PayloadRequest)
+      resetBranchState({ req: req as PayloadRequest })
       shouldCreateIsolatedDataLoader = true
     }
 
