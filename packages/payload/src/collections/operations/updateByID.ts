@@ -421,7 +421,7 @@ const updateByIDOperationWithLifecycleAttempt = async <
       trash,
     })
     let { docWithLocales } = authorizedDocument
-    const branch = resolveBranch(req)
+    const branch = resolveBranch({ req: req })
     const isBranchingDocument =
       branch !== MAIN_BRANCH &&
       req.payload.config.branching?.branchableCollections.has(collectionConfig.slug)
@@ -605,7 +605,7 @@ const updateByIDOperationWithLifecycleAttempt = async <
     }
 
     if (isBranchingDocument) {
-      refreshRequestDataLoader(req)
+      refreshRequestDataLoader({ req: req })
     }
 
     if (hasFileOperationScope) {
@@ -630,7 +630,7 @@ const updateByIDOperationWithLifecycleAttempt = async <
     if (shouldCommit) {
       await killTransaction(args.req)
       if (didResolveBranchFork) {
-        resetBranchState(args.req)
+        resetBranchState({ req: args.req })
       }
 
       if (shouldRollbackArtifacts) {

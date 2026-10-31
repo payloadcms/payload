@@ -118,7 +118,11 @@ export const POST =
     // error body: the request is refused before any operation is parsed.
     try {
       await assertBranchReadable({ req })
-    } catch (_err) {
+    } catch (error) {
+      if (!(error && typeof error === 'object' && 'status' in error && error.status === 403)) {
+        throw error
+      }
+
       return new Response(null, {
         headers: headersWithCors({ headers: new Headers(), req }),
         status: 403,

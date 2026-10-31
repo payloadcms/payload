@@ -1,3 +1,5 @@
+import type { PayloadRequest } from '../../types/index.js'
+
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 const mergeBranch = vi.hoisted(() => vi.fn())
@@ -99,5 +101,34 @@ describe('scheduleMerge task user identity', () => {
 
     expect(findByID).not.toHaveBeenCalled()
     expect(mergeBranch).not.toHaveBeenCalled()
+  })
+})
+
+test('should retain partial merge success and blocked details in scheduled task output', async () => {
+  const result = {
+    blocked: [{ changeID: 'blocked', message: 'Denied' }],
+    canMerge: true,
+    mergeable: [],
+    merged: [{ changeID: 'applied' }],
+    validationErrors: [],
+    warnings: [],
+  }
+  const req = {
+    context: {},
+    payload: {
+      findByID: vi.fn(async () => ({ id: 'user' })),
+      find: vi.fn(async () => ({ docs: [] })),
+    },
+  } as unknown as PayloadRequest
+
+  mergeBranch.mockResolvedValue(result as never)
+
+  const output = await runScheduleMergeTask({
+    input: { branch: 'campaign', user: { relationTo: 'users', value: 'user' } },
+    req,
+  })
+
+  expect(output).toEqual({
+    output: { blocked: result.blocked, merged: 1, validationErrors: [], warnings: [] },
   })
 })
