@@ -348,34 +348,11 @@ export const promise = async ({
       }
     }
 
-    let virtualPopulationPromise: Promise<void> | undefined
-
-    if (
-      'virtual' in field &&
-      typeof field.virtual === 'string' &&
-      (!field.hidden || showHiddenFields)
-    ) {
-      virtualPopulationPromise = virtualFieldPopulationPromise({
-        name: field.name,
-        draft,
-        fallbackLocale: fallbackLocale!,
-        fields: (collection || global)!.flattenedFields,
-        locale: locale!,
-        overrideAccess,
-        ref: doc,
-        req,
-        segments: field.virtual.split('.'),
-        showHiddenFields,
-        siblingDoc,
-      })
-
-      populationPromises.push(virtualPopulationPromise)
-    }
-
     // Execute access control
     let allowDefaultValue = true
+    let canReadField = true
     if (triggerAccessControl && field.access && field.access.read) {
-      const canReadField = overrideAccess
+      canReadField = overrideAccess
         ? true
         : await field.access.read(
             collection
@@ -403,6 +380,31 @@ export const promise = async ({
         allowDefaultValue = false
         delete siblingDoc[field.name!]
       }
+    }
+
+    let virtualPopulationPromise: Promise<void> | undefined
+
+    if (
+      'virtual' in field &&
+      typeof field.virtual === 'string' &&
+      canReadField &&
+      (!field.hidden || showHiddenFields)
+    ) {
+      virtualPopulationPromise = virtualFieldPopulationPromise({
+        name: field.name,
+        draft,
+        fallbackLocale: fallbackLocale!,
+        fields: (collection || global)!.flattenedFields,
+        locale: locale!,
+        overrideAccess,
+        ref: doc,
+        req,
+        segments: field.virtual.split('.'),
+        showHiddenFields,
+        siblingDoc,
+      })
+
+      populationPromises.push(virtualPopulationPromise)
     }
 
     // Set defaultValue on the field for globals being returned without being first created
@@ -442,7 +444,21 @@ export const promise = async ({
       // A virtual field with a reference only has a value once it has been resolved
       populationPromises.push(
         virtualPopulationPromise
-          ? virtualPopulationPromise.then(populateRelationship)
+          ? virtualPopulationPromise.then(() => {
+              // The value belongs to the related document, which is shared by the request, and
+              // populating it would change that document
+              const value = siblingDoc[field.name]
+
+              if (Array.isArray(value)) {
+                siblingDoc[field.name] = value.map((item) =>
+                  item && typeof item === 'object' ? { ...item } : item,
+                )
+              } else if (value && typeof value === 'object') {
+                siblingDoc[field.name] = { ...value }
+              }
+
+              return populateRelationship()
+            })
           : populateRelationship(),
       )
     }

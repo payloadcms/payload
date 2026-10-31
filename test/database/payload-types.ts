@@ -789,6 +789,11 @@ export interface VirtualRelation {
   postLocalized?: string | null;
   postCategory?: (string | null) | Category;
   postCategories?: (string | Category)[] | null;
+  postCategoryPoly?: {
+    relationTo: 'categories';
+    value: string | Category;
+  } | null;
+  postCategoryReadDenied?: (string | null) | Category;
   post?: (string | null) | Post;
   posts?: (string | Post)[] | null;
   customID?: (string | null) | CustomId;
@@ -1639,6 +1644,8 @@ export interface VirtualRelationsSelect<T extends boolean = true> {
   postLocalized?: T;
   postCategory?: T;
   postCategories?: T;
+  postCategoryPoly?: T;
+  postCategoryReadDenied?: T;
   post?: T;
   posts?: T;
   customID?: T;

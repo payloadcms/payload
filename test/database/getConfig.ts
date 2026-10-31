@@ -804,6 +804,19 @@ export const getConfig: () => Partial<Config> = () => ({
           virtual: 'post.categories',
         },
         {
+          name: 'postCategoryPoly',
+          type: 'relationship',
+          relationTo: ['categories'],
+          virtual: 'post.categoryPoly',
+        },
+        {
+          name: 'postCategoryReadDenied',
+          type: 'relationship',
+          access: { read: () => false },
+          relationTo: 'categories',
+          virtual: 'post.category',
+        },
+        {
           name: 'post',
           type: 'relationship',
           relationTo: 'posts',
