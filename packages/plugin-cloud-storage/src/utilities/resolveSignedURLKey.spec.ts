@@ -62,6 +62,7 @@ describe('resolveSignedURLKey', () => {
       req,
     })
   })
+
   it('should check collisions within the prefix when filename is unique per prefix', async () => {
     vi.mocked(getSafeFileName).mockResolvedValue('logo.png')
 
