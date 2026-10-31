@@ -164,7 +164,12 @@ export const MergeBranchModal: React.FC = () => {
   }
 
   return (
-    <DialogModal className={baseClass} closeOnBlur={!isMerging} slug={mergeBranchModalSlug}>
+    <DialogModal
+      className={baseClass}
+      closeOnBlur={!isMerging}
+      size="medium"
+      slug={mergeBranchModalSlug}
+    >
       <DialogHeader showClose={!isMerging} title={title} />
       <DialogBody>
         {!hasOutcome && (
