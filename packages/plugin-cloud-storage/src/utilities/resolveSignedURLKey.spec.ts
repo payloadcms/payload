@@ -124,4 +124,29 @@ describe('resolveSignedURLKey', () => {
       req: reqWithCompoundIndex,
     })
   })
+
+  it('should check collisions globally when filename is not unique per prefix', async () => {
+    const reqWithoutCompoundIndex = {
+      payload: {
+        collections: {
+          media: { config: { upload: {} } },
+        },
+      },
+    } as never
+
+    await resolveSignedURLKey({
+      collectionPrefix: 'media',
+      collectionSlug: 'media',
+      docPrefix: 'site-b',
+      filename: 'logo.png',
+      req: reqWithoutCompoundIndex,
+    })
+
+    expect(getSafeFileName).toHaveBeenCalledWith({
+      collectionSlug: 'media',
+      desiredFilename: 'logo-original.png',
+      prefix: undefined,
+      req: reqWithoutCompoundIndex,
+    })
+  })
 })
