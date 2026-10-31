@@ -217,7 +217,7 @@ const rememberGlobalChange = async ({
 
   if (await req.transactionID) {
     await scheduleAfterTransactionRollback({
-      callback: () => {
+      callback: async () => {
         recorded.delete(key)
       },
       req,
