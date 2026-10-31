@@ -4,6 +4,7 @@ import type { BlockedChange } from './preflight.js'
 import type { MergeableChange, MergeProgress, MergeWarning } from './types.js'
 import type { BranchMergeValidationError } from './validation.js'
 
+import { scheduleAfterTransactionRollback } from '../utilities/transactionCallbacks.js'
 import { assertBranchUpdateAccess } from './assertBranchUpdateAccess.js'
 import { discardBranchChanges } from './discard.js'
 import { beginBranchMerge, restoreBranchAfterMerge } from './merge/branchMergeStatus.js'
@@ -137,6 +138,13 @@ export const mergeBranch = async (
       result.merged.push(...cleanupRetry.retried)
 
       if (applicable.length === 0 && applicableGlobals.length === 0) {
+        if (await req.transactionID) {
+          await scheduleAfterTransactionRollback({
+            callback: () => restoreBranchAfterMerge({ branchDocID: branchDoc.id, payload, req }),
+            req,
+          })
+        }
+
         const remaining = await payload.count({
           collection: branchChangesCollectionSlug,
           overrideAccess: true,
