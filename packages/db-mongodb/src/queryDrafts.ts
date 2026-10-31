@@ -103,7 +103,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   const projection = buildProjectionFromSelect({
     adapter: this,
     fields,
-    select: withBranchVersionSelect({ collectionSlug, req, select }),
+    select: withBranchVersionSelect({ branch, collectionSlug, req, select }),
   })
 
   const session = await getSession(this, req)

@@ -116,6 +116,13 @@ test.suite('Branching: versions', { config: './config.ts', resetBetweenTests: fa
         where: { parent: { equals: doc.id } },
       })
 
+      const branchVersionsAfter = await payload.countVersions({
+        branch,
+        collection: maxVersionsSlug,
+        where: { and: [{ parent: { equals: doc.id } }, { _branch: { equals: branch } }] },
+      })
+
+      expect(branchVersionsAfter.totalDocs).toBeLessThanOrEqual(2)
       expect(mainVersionsAfter.totalDocs).toBe(mainVersionsBefore.totalDocs)
 
       // And main's document still reads as main's.
