@@ -93,7 +93,17 @@ export const useScheduleBranchMerge = ({
       setIsScheduling(true)
 
       try {
-        await serverFunction({ name: 'schedule-merge', args: { deleteID } })
+        const result = (await serverFunction({
+          name: 'schedule-merge',
+          args: { deleteID },
+        })) as { error?: string }
+
+        if (result?.error) {
+          toast.error(result.error)
+
+          return
+        }
+
         await loadUpcoming()
         toast.success(t('general:deletedSuccessfully'))
       } catch (_err) {
