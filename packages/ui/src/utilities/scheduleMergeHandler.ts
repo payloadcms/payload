@@ -227,7 +227,7 @@ export const scheduleMergeHandler: ServerFunction<ScheduleMergeHandlerArgs> = as
         req,
       })
 
-      await payload.delete({
+      const deletion = await payload.delete({
         collection: 'payload-jobs',
         overrideAccess: true,
         req,
@@ -236,6 +236,10 @@ export const scheduleMergeHandler: ServerFunction<ScheduleMergeHandlerArgs> = as
           jobID: deleteID,
         }),
       })
+
+      if (deletion.errors.length > 0 || deletion.docs.length !== 1) {
+        throw new Error('The scheduled merge is no longer queued or could not be deleted.')
+      }
 
       return { message: i18n.t('general:success') }
     }
