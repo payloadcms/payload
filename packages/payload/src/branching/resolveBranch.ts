@@ -2,7 +2,6 @@ import type { PayloadRequest } from '../types/index.js'
 import type { BranchOperation, SanitizedBranchingConfig } from './types.js'
 
 import { extractRelationshipID } from '../utilities/extractRelationshipID.js'
-
 import { branchesCollectionSlug, MAIN_BRANCH } from './types.js'
 
 /**
@@ -116,7 +115,7 @@ const resolveBranchFromRequest = (req: PayloadRequest): string | undefined => {
 export const loadBranchManifest = async (
   req: PayloadRequest,
 ): Promise<Map<string, (number | string)[]>> => {
-  const branch = resolveBranch(req)
+  const branch = resolveBranch({ req })
   const context = req.context as Record<string, unknown> | undefined
   const state = context?.[stateKey] as BranchState | undefined
 
@@ -222,7 +221,7 @@ export const loadBranchOperation = async ({
   docID: number | string
   req: PayloadRequest
 }): Promise<BranchOperation | undefined> => {
-  const branch = resolveBranch(req)
+  const branch = resolveBranch({ req })
   const state = (req.context as Record<string, unknown> | undefined)?.[stateKey] as
     | BranchState
     | undefined
