@@ -1536,6 +1536,8 @@ export type {
   CollectionAdminOptions,
   CollectionConfig,
   DataFromCollectionSlug,
+  DraftDataFromCollection,
+  DraftDataFromCollectionSlug,
   HookOperationType,
   IDTypeForCollectionSlug,
   MeHook as CollectionMeHook,
