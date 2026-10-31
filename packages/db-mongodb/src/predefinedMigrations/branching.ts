@@ -1,7 +1,7 @@
 const imports = `import { migrateBranching } from '@payloadcms/db-mongodb/migration-utils'`
-const upSQL = `  await migrateBranching({
+const upSQL = `  // Index synchronization must run outside the migration transaction.
+  await migrateBranching({
     payload,
-    session,
   })
 `
 

@@ -140,7 +140,7 @@ export const assertBranchCreatedDeleteUnreferenced = async ({
     return doc
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch = branchOverride ?? resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return doc
@@ -207,7 +207,7 @@ export const resolveBranchDelete = async ({
     return { tombstoned: false }
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch = branchOverride ?? resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return { tombstoned: false }
@@ -367,7 +367,13 @@ export const resolveBranchDelete = async ({
     await req.payload.db.deleteMany({
       collection: branchChangesCollectionSlug,
       req,
-      where: { and: [{ branch: { equals: branch } }, { 'doc.value': { equals: targetID } }] },
+      where: {
+        and: [
+          { branch: { equals: branch } },
+          { 'doc.relationTo': { equals: collectionSlug } },
+          { 'doc.value': { equals: targetID } },
+        ],
+      },
     })
 
     matchingBranchDeleteOperation?.onResolved({ doc: target, tombstoned: false })
@@ -395,7 +401,13 @@ export const resolveBranchDelete = async ({
     await req.payload.db.deleteMany({
       collection: branchChangesCollectionSlug,
       req,
-      where: { and: [{ branch: { equals: branch } }, { 'doc.value': { equals: canonicalID } }] },
+      where: {
+        and: [
+          { branch: { equals: branch } },
+          { 'doc.relationTo': { equals: collectionSlug } },
+          { 'doc.value': { equals: canonicalID } },
+        ],
+      },
     })
 
     await req.payload.create({
@@ -449,7 +461,11 @@ export const resolveBranchDelete = async ({
           collection: branchChangesCollectionSlug,
           req: createReq,
           where: {
-            and: [{ branch: { equals: branch } }, { 'doc.value': { equals: canonicalID } }],
+            and: [
+              { branch: { equals: branch } },
+              { 'doc.relationTo': { equals: collectionSlug } },
+              { 'doc.value': { equals: canonicalID } },
+            ],
           },
         })
 
@@ -469,6 +485,7 @@ export const resolveBranchDelete = async ({
           req: createReq,
         })
       },
+      operation: 'delete',
       req: req as PayloadRequest,
       useAmbientTransaction,
     })
