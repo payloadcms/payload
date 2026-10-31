@@ -8983,6 +8983,91 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
       expect(exportedDoc).toBeDefined()
     })
+
+    test('should include array columns from later batches in a streamed CSV download', async ({
+      payload,
+      restClient,
+    }) => {
+      const marker = `Later Batch Array ${Date.now()}`
+
+      await payload.create({
+        collection: 'pages',
+        data: {
+          _status: 'published',
+          array: [{ field1: 'only', field2: 'one' }],
+          title: `${marker} 0`,
+        },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: 'pages',
+        data: {
+          _status: 'published',
+          array: [{ field1: 'only', field2: 'one' }],
+          title: `${marker} 1`,
+        },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: 'pages',
+        data: {
+          _status: 'published',
+          array: [
+            { field1: 'a', field2: '1' },
+            { field1: 'b', field2: '2' },
+            { field1: 'c', field2: '3' },
+          ],
+          title: `${marker} long`,
+        },
+        overrideAccess: true,
+      })
+
+      const response = await restClient.POST('/exports/download', {
+        body: JSON.stringify({
+          data: {
+            batchSize: 2,
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'array'],
+            format: 'csv',
+            sort: 'title',
+            where: { title: { contains: marker } },
+          },
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      expect(response.status).toBe(200)
+      expect(response.headers.get('content-type')).toMatch(/text\/csv/)
+
+      const rows = await readCSV(Buffer.from(await response.arrayBuffer()))
+
+      expect(rows).toHaveLength(3)
+
+      const header = Object.keys(rows[0])
+      expect(header).toContain('array_0_field1')
+      expect(header).toContain('array_1_field1')
+      expect(header).toContain('array_2_field1')
+      expect(header).toContain('array_2_field2')
+
+      const longRow = rows.find((row) => row.title === `${marker} long`)
+      expect(longRow?.array_0_field1).toBe('a')
+      expect(longRow?.array_1_field1).toBe('b')
+      expect(longRow?.array_1_field2).toBe('2')
+      expect(longRow?.array_2_field1).toBe('c')
+      expect(longRow?.array_2_field2).toBe('3')
+
+      const shortRow = rows.find((row) => row.title === `${marker} 0`)
+      expect(shortRow?.array_0_field1).toBe('only')
+      expect(shortRow?.array_2_field1).toBe('')
+
+      await payload.delete({
+        collection: 'pages',
+        overrideAccess: true,
+        where: { title: { contains: marker } },
+      })
+    })
   })
 
   test.describe('concurrent operations', () => {
