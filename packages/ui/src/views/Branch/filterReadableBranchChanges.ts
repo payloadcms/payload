@@ -35,7 +35,7 @@ export async function filterReadableBranchChanges({
       disableErrors: true,
       draft: Boolean(entityConfig.versions?.drafts),
       overrideAccess: false,
-      req: isolateBranchState(req),
+      req: isolateBranchState({ req: req }),
       user: req.user,
     }
 
