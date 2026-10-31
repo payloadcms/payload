@@ -25,7 +25,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
   const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug, versions: true })
 
   const versionBranch = req?.payload?.config?.branching?.branchableGlobals?.has(globalSlug)
-    ? resolveBranch(req as never)
+    ? resolveBranch({ req: req as never })
     : MAIN_BRANCH
 
   const data = {

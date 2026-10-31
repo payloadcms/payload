@@ -10,7 +10,7 @@ export const appendBranchToFileURL = ({
   req: PayloadRequest
   url: null | string
 }): null | string => {
-  const branch = resolveBranch(req)
+  const branch = resolveBranch({ req: req })
 
   if (!url || branch === MAIN_BRANCH) {
     return url

@@ -694,7 +694,7 @@ export const executeMerge = async ({
     }
 
     if (incomingReq) {
-      refreshBranchState(incomingReq)
+      refreshBranchState({ req: incomingReq })
     }
   }
 
