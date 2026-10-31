@@ -1928,6 +1928,84 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       expect(missResult).toBeFalsy()
     })
 
+    test('should query not_like on partial value', async ({ payload }) => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'dog-unique-test' },
+        overrideAccess: true,
+      })
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'cat-unique-test' },
+        overrideAccess: true,
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        overrideAccess: true,
+        pagination: false,
+        where: { text: { not_like: 'CAT-unique' } },
+      })
+      const docIDs = docs.map(({ id }) => id)
+
+      expect(docIDs).toContain(hit.id)
+      expect(docIDs).not.toContain(miss.id)
+    })
+
+    test('should query not_like with multiple words', async ({ payload }) => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'echo foxtrot' },
+        overrideAccess: true,
+      })
+      const missFirstWord = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'alpha bravo' },
+        overrideAccess: true,
+      })
+      const missSecondWord = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'charlie delta' },
+        overrideAccess: true,
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        overrideAccess: true,
+        pagination: false,
+        where: { text: { not_like: 'alpha delta' } },
+      })
+      const docIDs = docs.map(({ id }) => id)
+
+      expect(docIDs).toContain(hit.id)
+      expect(docIDs).not.toContain(missFirstWord.id)
+      expect(docIDs).not.toContain(missSecondWord.id)
+    })
+
+    test('should query not_like including documents without a value', async ({ payload }) => {
+      const withoutValue = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'text' },
+        overrideAccess: true,
+      })
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'text', overrideLength: 'cat-unique-test' },
+        overrideAccess: true,
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        overrideAccess: true,
+        pagination: false,
+        where: { overrideLength: { not_like: 'cat' } },
+      })
+      const docIDs = docs.map(({ id }) => id)
+
+      expect(docIDs).toContain(withoutValue.id)
+      expect(docIDs).not.toContain(miss.id)
+    })
+
     test('should query hasMany within an array', async ({ payload }) => {
       const docFirst = await payload.create({
         collection: 'text-fields',
