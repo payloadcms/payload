@@ -1,3 +1,4 @@
+import { getTableName } from 'drizzle-orm'
 import { APIError } from 'payload'
 
 import type { CreateJSONQueryArgs } from '../../types.js'
@@ -8,12 +9,19 @@ import { parseJSONPathSegment } from '../../utilities/parseJSONPathSegment.js'
 const operatorMap: Record<string, string> = {
   contains: '~',
   equals: '==',
+  greater_than: '>',
+  greater_than_equal: '>=',
   in: 'in',
+  less_than: '<',
+  less_than_equal: '<=',
   like: 'like_regex',
   not_equals: '!=',
   not_in: 'in',
   not_like: '!like_regex',
 }
+
+const NUMERIC_REGEX = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:e[+-]?\d+)?$/i
+const RANGE_OPERATORS = ['greater_than', 'greater_than_equal', 'less_than', 'less_than_equal']
 
 const sanitizeValue = (value: unknown, operator?: string): string => {
   if (value === null) {
@@ -32,6 +40,10 @@ const sanitizeValue = (value: unknown, operator?: string): string => {
     throw new APIError(`${value} is not allowed as a JSON query value`, 400)
   }
 
+  if (operator && RANGE_OPERATORS.includes(operator) && NUMERIC_REGEX.test(value.trim())) {
+    return value.trim()
+  }
+
   const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
 
   const prefix = ['like', 'not_like'].includes(operator ?? '') ? '(?i)' : ''
@@ -40,7 +52,14 @@ const sanitizeValue = (value: unknown, operator?: string): string => {
 }
 
 export const createJSONQuery = ({ column, operator, pathSegments, value }: CreateJSONQueryArgs) => {
-  const columnName = typeof column === 'object' ? column.name : column
+  const columnName =
+    typeof column === 'object' && column !== null
+      ? column.table
+        ? `"${getTableName(column.table)}"."${column.name}"`
+        : `"${column.name}"`
+      : typeof column === 'string'
+        ? column
+        : ''
   const jsonPaths = pathSegments
     .slice(1)
     .map((key) => {
@@ -64,8 +83,10 @@ export const createJSONQuery = ({ column, operator, pathSegments, value }: Creat
     const mappedOperator = operatorMap[operator]
 
     sql = `NOT jsonb_path_exists(${columnName}, '${fullPath} ? (@ ${mappedOperator.substring(1)} ${sanitizeValue(value, operator)})')`
-  } else {
+  } else if (operator in operatorMap) {
     sql = `jsonb_path_exists(${columnName}, '${fullPath} ? (@ ${operatorMap[operator]} ${sanitizeValue(value, operator)})')`
+  } else {
+    throw new APIError(`Operator ${operator} is not supported for JSON queries`, 400)
   }
 
   return sql
