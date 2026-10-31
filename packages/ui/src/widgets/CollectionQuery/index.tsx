@@ -90,6 +90,7 @@ export async function CollectionQueryWidget({
       depth: 0,
       limit,
       overrideAccess: false,
+      req,
       sort,
       user,
       where,
