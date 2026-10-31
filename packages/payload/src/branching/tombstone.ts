@@ -445,6 +445,7 @@ export const resolveBranchDelete = async ({
           req: createReq,
         })
       },
+      operation: 'delete',
       req: req as PayloadRequest,
       useAmbientTransaction,
     })
