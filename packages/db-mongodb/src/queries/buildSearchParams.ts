@@ -32,6 +32,7 @@ import type { OperatorMapKey } from './operatorMap.js'
 import { getCollection } from '../utilities/getEntity.js'
 import { isObjectID } from '../utilities/isObjectID.js'
 import { buildBranchVisibilityStages } from './buildBranchVisibility.js'
+import { buildRelatedQueryPipeline } from './buildRelatedQueryPipeline.js'
 import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
@@ -39,79 +40,6 @@ type SearchParam = {
   path?: string
   rawQuery?: unknown
   value?: unknown
-}
-
-const resolveRelatedBranchQuery = async ({
-  branch,
-  collectionSlug,
-  payload,
-  req,
-  where,
-}: {
-  branch?: false | string
-  collectionSlug: string
-  payload: Payload
-  req?: Partial<PayloadRequest>
-  where: Where
-}) => {
-  const adapter = payload.db as MongooseAdapter
-  const branchReadState = resolveBranchReadState({ branch, collectionSlug, req })
-  const resolvedWhere = branchReadState.useBranching
-    ? rewriteBranchIDs(where)
-    : await resolveBranchQuery({ branch, collectionSlug, req, where })
-
-  return {
-    branchVisibility: branchReadState.useBranching
-      ? buildBranchVisibilityStages({
-          adapter,
-          branch: branchReadState.branch,
-          collectionSlug,
-        })
-      : [],
-    where: resolvedWhere ?? {},
-  }
-}
-
-const findRelatedDocuments = async ({
-  branchVisibility,
-  Model,
-  projection,
-  query,
-}: {
-  branchVisibility: PipelineStage[]
-  Model: CollectionModel
-  projection: Record<string, boolean>
-  query: Record<string, unknown>
-}) => {
-  if (branchVisibility.length) {
-    return Model.aggregate([{ $match: query }, ...branchVisibility, { $project: projection }])
-  }
-
-  return Model.find(query).lean().select(projection)
-}
-
-const findRelatedDistinctValues = async ({
-  branchVisibility,
-  Model,
-  path,
-  query,
-}: {
-  branchVisibility: PipelineStage[]
-  Model: CollectionModel
-  path: string
-  query: Record<string, unknown>
-}) => {
-  if (!branchVisibility.length) {
-    return Model.distinct(path, query)
-  }
-
-  return Model.aggregate([
-    { $match: query },
-    ...branchVisibility,
-    { $project: { value: `$${path}` } },
-    { $unwind: '$value' },
-    { $group: { _id: '$value' } },
-  ]).then((results) => results.map(({ _id }) => _id))
 }
 
 /**
@@ -779,4 +707,79 @@ async function buildJoinContainsSearchParam({
     path: '_id',
     value: { $in: parentIDs },
   }
+}
+
+const resolveRelatedBranchQuery = async ({
+  branch,
+  collectionSlug,
+  payload,
+  req,
+  where,
+}: {
+  branch?: false | string
+  collectionSlug: string
+  payload: Payload
+  req?: Partial<PayloadRequest>
+  where: Where
+}) => {
+  const adapter = payload.db as MongooseAdapter
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug, req })
+  const resolvedWhere = branchReadState.useBranching
+    ? rewriteBranchIDs(where)
+    : await resolveBranchQuery({ branch, collectionSlug, req, where })
+
+  return {
+    branchVisibility: branchReadState.useBranching
+      ? buildBranchVisibilityStages({
+          adapter,
+          branch: branchReadState.branch,
+          collectionSlug,
+        })
+      : [],
+    where: resolvedWhere ?? {},
+  }
+}
+
+const findRelatedDocuments = async ({
+  branchVisibility,
+  Model,
+  projection,
+  query,
+}: {
+  branchVisibility: PipelineStage[]
+  Model: CollectionModel
+  projection: Record<string, boolean>
+  query: Record<string, unknown>
+}) => {
+  if (branchVisibility.length) {
+    return Model.aggregate([
+      ...buildRelatedQueryPipeline({ branchVisibility, query }),
+      { $project: projection },
+    ])
+  }
+
+  return Model.find(query).lean().select(projection)
+}
+
+const findRelatedDistinctValues = async ({
+  branchVisibility,
+  Model,
+  path,
+  query,
+}: {
+  branchVisibility: PipelineStage[]
+  Model: CollectionModel
+  path: string
+  query: Record<string, unknown>
+}) => {
+  if (!branchVisibility.length) {
+    return Model.distinct(path, query)
+  }
+
+  return Model.aggregate([
+    ...buildRelatedQueryPipeline({ branchVisibility, query }),
+    { $project: { value: `$${path}` } },
+    { $unwind: '$value' },
+    { $group: { _id: '$value' } },
+  ]).then((results) => results.map(({ _id }) => _id))
 }

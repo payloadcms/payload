@@ -74,6 +74,15 @@ export const buildJoinAggregation = async ({
   }
 
   const aggregate: PipelineStage[] = []
+  const outerBranchReadState = resolveBranchReadState({ branch, collectionSlug: collection, req })
+  const canonicalParentField = '__payloadJoinParentID'
+  let localField = versions ? 'parent' : '_id'
+
+  if (outerBranchReadState.useBranching) {
+    localField = canonicalParentField
+  }
+
+  const rootIDExpression = outerBranchReadState.useBranching ? `$${canonicalParentField}` : '$_id'
   const polymorphicJoinsConfig = adapter.payload.collections[collection]?.config?.polymorphicJoins
 
   if (!polymorphicJoinsConfig) {
@@ -203,7 +212,7 @@ export const buildJoinAggregation = async ({
           as: alias,
           from: JoinModel.collection.name,
           let: {
-            root_id_: '$_id',
+            root_id_: rootIDExpression,
           },
           pipeline: [
             ...basePipeline,
@@ -239,7 +248,7 @@ export const buildJoinAggregation = async ({
             as: `${as}.totalDocs.${alias}`,
             from: JoinModel.collection.name,
             let: {
-              root_id_: '$_id',
+              root_id_: rootIDExpression,
             },
             pipeline: [
               ...basePipeline,
@@ -469,7 +478,7 @@ export const buildJoinAggregation = async ({
               as: `${as}.totalDocs`,
               foreignField,
               from: JoinModel.collection.name,
-              localField: versions ? 'parent' : '_id',
+              localField,
               pipeline: [
                 {
                   $match,
@@ -504,7 +513,7 @@ export const buildJoinAggregation = async ({
                 as: `${as}.docs`,
                 foreignField: `${foreignFieldPrefix}${join.field.on}${code}${polymorphicSuffix}`,
                 from: JoinModel.collection.name,
-                localField: versions ? 'parent' : '_id',
+                localField,
                 pipeline,
               },
             },
@@ -568,7 +577,7 @@ export const buildJoinAggregation = async ({
               as: `${as}.docs`,
               foreignField: `${foreignFieldPrefix}${foreignField}`,
               from: JoinModel.collection.name,
-              localField: versions ? 'parent' : '_id',
+              localField,
               pipeline,
             },
           },
@@ -603,6 +612,17 @@ export const buildJoinAggregation = async ({
         }
       }
     }
+  }
+
+  if (aggregate.length && outerBranchReadState.useBranching) {
+    aggregate.unshift({
+      $set: {
+        [canonicalParentField]: versions
+          ? { $ifNull: ['$_branchParent', '$parent'] }
+          : { $ifNull: ['$_branchDocID', '$_id'] },
+      },
+    })
+    aggregate.push({ $unset: canonicalParentField })
   }
 
   return aggregate

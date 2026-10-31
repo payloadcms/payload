@@ -2,7 +2,7 @@
 
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { SearchResult } from './types.js'
 
@@ -52,6 +52,22 @@ export const useHierarchySearch = ({
   const locale = currentLocale?.code
   const branch = useBranchParam()
 
+  const requestGeneration = useRef(0)
+
+  useEffect(() => {
+    requestGeneration.current += 1
+    setResults([])
+    setHasNextPage(false)
+    setTotalDocs(0)
+    setPage(1)
+    setCurrentQuery('')
+    setIsLoading(false)
+
+    return () => {
+      requestGeneration.current += 1
+    }
+  }, [branch, collectionSlug, locale])
+
   const fetchResults = useCallback(
     async ({
       append,
@@ -62,6 +78,8 @@ export const useHierarchySearch = ({
       pageToFetch: number
       query: string
     }) => {
+      const generation = ++requestGeneration.current
+
       setIsLoading(true)
 
       try {
@@ -97,6 +115,10 @@ export const useHierarchySearch = ({
         }
 
         const data = await response.json()
+
+        if (generation !== requestGeneration.current) {
+          return
+        }
         const docs: SearchResult[] = (data.docs || []).map((doc: Record<string, unknown>) => ({
           ...doc,
           path: doc[titlePathField] || '',
@@ -108,13 +130,15 @@ export const useHierarchySearch = ({
         setPage(pageToFetch)
         setCurrentQuery(query)
       } catch {
-        if (!append) {
+        if (generation === requestGeneration.current && !append) {
           setResults([])
           setHasNextPage(false)
           setTotalDocs(0)
         }
       } finally {
-        setIsLoading(false)
+        if (generation === requestGeneration.current) {
+          setIsLoading(false)
+        }
       }
     },
     [
@@ -146,6 +170,8 @@ export const useHierarchySearch = ({
   }, [isLoading, hasNextPage, currentQuery, page, fetchResults])
 
   const clearResults = useCallback(() => {
+    requestGeneration.current += 1
+    setIsLoading(false)
     setResults([])
     setHasNextPage(false)
     setTotalDocs(0)

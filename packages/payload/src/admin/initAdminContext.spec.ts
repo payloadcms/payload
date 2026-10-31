@@ -324,7 +324,12 @@ describe('initAdminContext', () => {
     })
 
     expect(cache.getPartial).toHaveBeenCalledOnce()
-    expect(cache.getRequest).toHaveBeenCalledWith(expect.any(Function), 'initPage', undefined)
+    expect(cache.getRequest).toHaveBeenCalledWith(
+      expect.any(Function),
+      'initPage',
+      undefined,
+      undefined,
+    )
   })
 
   it('requires a key when cache is supplied', async () => {
@@ -412,6 +417,29 @@ describe('initAdminContext', () => {
     expect(getAccessResults).toHaveBeenCalledTimes(2)
     expect(repeatedRootLayoutResult.permissions).toBe(rootLayoutResult.permissions)
     expect(repeatedRootLayoutResult.user).toBe(rootLayoutResult.user)
+  })
+
+  it('should resolve separate URL scopes when reusing the same request cache key', async () => {
+    const args = {
+      cache: createReusingCache(),
+      configPromise: config,
+      importMap,
+      key: 'serverFunction',
+      serverAdapter,
+    }
+
+    const first = await initAdminContext({
+      ...args,
+      requestURL: 'http://localhost/admin?branch=first',
+    })
+    const second = await initAdminContext({
+      ...args,
+      requestURL: 'http://localhost/admin?branch=second',
+    })
+
+    expect(first.req.query.branch).toBe('first')
+    expect(second.req.query.branch).toBe('second')
+    expect(authenticate).toHaveBeenCalledOnce()
   })
 
   it('should keep the complete req.user and return the user with read access', async () => {

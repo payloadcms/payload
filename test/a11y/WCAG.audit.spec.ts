@@ -2931,7 +2931,7 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
-    test('should open draft restoration by keyboard in enhanced contrast themes and return focus after cancellation', async ({}, testInfo) => {
+    test('should open draft restoration by keyboard in enhanced contrast themes and return focus after cancellation', async () => {
       await inContrastThemes({
         page,
         run: async () => {
@@ -2950,7 +2950,7 @@ test.describe('WCAG 2.2 Level AA', () => {
           const scan = await runAxeScan({
             include: ['[data-payload-modal-slug="restore-version"]'],
             page,
-            testInfo,
+            testInfo: test.info(),
           })
 
           expect(scan.violations).toEqual([])
@@ -7711,6 +7711,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await modal
         .locator('.hierarchy-column-item')
         .filter({ hasText: /^Accessibility folder$/ })
+        .getByRole('button', { name: 'Accessibility folder', exact: true })
         .press('Enter')
       const columns = modal.locator('.hierarchy-column')
 
@@ -9596,7 +9597,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         formatAdminURL({ adminRoute: '/admin', path: `/collections/media/${doc.id}`, serverURL }),
       )
       await waitForFormReady(page)
-      await page.locator('.file-toolbar__filename-btn').click()
+      await page.getByRole('button', { name: doc.filename, exact: true }).click()
       await page.getByRole('menuitem', { name: 'Replace file', exact: true }).click()
       await page.mouse.move(0, 0)
       const cancel = page.locator('.file-manager__remove')

@@ -1,25 +1,17 @@
 import type { Payload } from 'payload'
 
 import path from 'path'
-
 import { commitTransaction, createPayloadRequest } from 'payload'
-
 import { fileURLToPath } from 'url'
-
 import { expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { databaseAdapterSupportsTransactions } from '../__helpers/shared/databaseAdapterCapabilities.js'
-
 import { mongooseList } from '../__helpers/shared/isMongoose.js'
-
 import { devUser } from '../credentials.js'
-
 import { branchChangesSlug, branchesSlug, mediaSlug } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -414,7 +406,7 @@ test.suite('Branching: uploads', { config: './config.ts', resetBetweenTests: fal
       ])
 
       expect(branchFileResponse.status).toBe(200)
-      expect(mainFileResponse.status).toBe(404)
+      expect(mainFileResponse.status).toBe(403)
     })
 
     test.options(

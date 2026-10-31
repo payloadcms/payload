@@ -1,15 +1,12 @@
 import type { Payload } from 'payload'
 
 import { createPayloadRequest } from 'payload'
-
 import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -18,7 +15,6 @@ import {
   postsSlug,
   uniqueSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -289,12 +285,6 @@ test.suite('Branching: writes', { config: './config.ts', resetBetweenTests: fals
         data: { title: 'forked on branch' },
       })
 
-      const shadow = await payload.db.findOne({
-        branch: false,
-        collection: postsSlug,
-        req: await createPayloadRequest({ branch: false, payload }),
-        where: { _branch: { equals: 'cow' } },
-      })
       const req = await createPayloadRequest({ branch: 'cow', payload })
       const updated = await payload.db.updateOne({
         branch: 'cow',
@@ -302,7 +292,7 @@ test.suite('Branching: writes', { config: './config.ts', resetBetweenTests: fals
         data: { title: 'atomic branch edit' },
         options: { atomic: true },
         req,
-        where: { id: { equals: shadow!.id } },
+        where: { _branchDocID: { equals: mainDocID } },
       })
 
       expect(String(updated.id)).toBe(String(mainDocID))

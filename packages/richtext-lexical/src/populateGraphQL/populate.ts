@@ -41,7 +41,7 @@ export const populate: PopulateFn = async ({
 
   const doc = await req.payloadDataLoader?.load(
     createDataloaderCacheKey({
-      branch: resolveBranch(req),
+      branch: resolveBranch({ req: req }),
       collectionSlug,
       currentDepth: currentDepth! + 1,
       depth,

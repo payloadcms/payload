@@ -476,7 +476,7 @@ export const applyChange = async ({
     }
 
     const applyCreateWrites = async () => {
-      const branchMergeStorageReq = withoutBranch(req)
+      const branchMergeStorageReq = withoutBranch({ req: req })
       const createTargetReq = mainWriteReq
 
       // Updated in place rather than recreated. The row already holds the ID that
@@ -703,7 +703,7 @@ const withLocale = ({
   locale: string
   req: PayloadRequest
 }): PayloadRequest => {
-  const isolated = isolateBranchState(req)
+  const isolated = isolateBranchState({ req: req })
 
   isolated.locale = locale
 

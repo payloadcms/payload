@@ -188,23 +188,33 @@ export const BranchChanges: React.FC<{
             <MergeLedger events={mergeEvents} />
             {historyTotalPages > 1 && (
               <nav className={`${baseClass}__history-pages`}>
-                <Link
-                  aria-disabled={historyPage <= 1}
-                  className={`${baseClass}__history-page`}
-                  href={`?historyPage=${historyPage - 1}`}
-                >
-                  {t('general:previous')}
-                </Link>
+                {historyPage <= 1 ? (
+                  <span aria-disabled="true" className={`${baseClass}__history-page`}>
+                    {t('general:previous')}
+                  </span>
+                ) : (
+                  <Link
+                    className={`${baseClass}__history-page`}
+                    href={`?historyPage=${historyPage - 1}`}
+                  >
+                    {t('general:previous')}
+                  </Link>
+                )}
                 <span className={`${baseClass}__history-position`}>
                   {t('branching:historyPageOf', { page: historyPage, total: historyTotalPages })}
                 </span>
-                <Link
-                  aria-disabled={historyPage >= historyTotalPages}
-                  className={`${baseClass}__history-page`}
-                  href={`?historyPage=${historyPage + 1}`}
-                >
-                  {t('general:next')}
-                </Link>
+                {historyPage >= historyTotalPages ? (
+                  <span aria-disabled="true" className={`${baseClass}__history-page`}>
+                    {t('general:next')}
+                  </span>
+                ) : (
+                  <Link
+                    className={`${baseClass}__history-page`}
+                    href={`?historyPage=${historyPage + 1}`}
+                  >
+                    {t('general:next')}
+                  </Link>
+                )}
               </nav>
             )}
           </section>

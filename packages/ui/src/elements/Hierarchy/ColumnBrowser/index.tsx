@@ -153,9 +153,11 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         return
       }
 
+      const loadingColumn = { ...columns[columnIndex], isLoading: true }
+
       setColumns((prev) => {
         const updated = [...prev]
-        updated[columnIndex] = { ...updated[columnIndex], isLoading: true }
+        updated[columnIndex] = loadingColumn
         return updated
       })
 
@@ -164,7 +166,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
 
         setColumns((prev) => {
           const updated = [...prev]
-          if (updated[columnIndex]) {
+          if (updated[columnIndex] === loadingColumn) {
             updated[columnIndex] = {
               ...updated[columnIndex],
               hasNextPage,
@@ -179,7 +181,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
       } catch {
         setColumns((prev) => {
           const updated = [...prev]
-          if (updated[columnIndex]) {
+          if (updated[columnIndex] === loadingColumn) {
             updated[columnIndex] = { ...updated[columnIndex], isLoading: false }
           }
           return updated
@@ -291,18 +293,19 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         return
       }
 
+      if (columns[columnIndex + 1]?.parentId === itemId) {
+        setExpandedPath(expandedPath.slice(0, columnIndex))
+        setColumns(columns.slice(0, columnIndex + 1))
+        return
+      }
+
       // Update expanded path - keep path up to this column, add new item
       const newExpandedPath = [...expandedPath.slice(0, columnIndex), itemId]
       setExpandedPath(newExpandedPath)
 
       // Remove columns to the right and add new loading column
-      if (columns[columnIndex + 1]?.parentId === itemId) {
-        setColumns(columns.slice(0, columnIndex + 2))
-        return
-      }
-
       const newColumns = columns.slice(0, columnIndex + 1)
-      newColumns.push({
+      const loadingColumn: ColumnState = {
         hasNextPage: false,
         isLoading: true,
         items: [],
@@ -310,7 +313,8 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         parentId: itemId,
         parentTitle: item.title,
         totalDocs: 0,
-      })
+      }
+      newColumns.push(loadingColumn)
 
       setColumns(newColumns)
 
@@ -322,14 +326,12 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
           const updated = [...prev]
           const targetIndex = columnIndex + 1
 
-          if (updated[targetIndex]?.parentId === itemId) {
+          if (updated[targetIndex] === loadingColumn) {
             updated[targetIndex] = {
+              ...loadingColumn,
               hasNextPage,
               isLoading: false,
               items,
-              page: 1,
-              parentId: itemId,
-              parentTitle: item.title,
               totalDocs,
             }
           }
@@ -341,16 +343,8 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
           const updated = [...prev]
           const targetIndex = columnIndex + 1
 
-          if (updated[targetIndex]?.parentId === itemId) {
-            updated[targetIndex] = {
-              hasNextPage: false,
-              isLoading: false,
-              items: [],
-              page: 1,
-              parentId: itemId,
-              parentTitle: item.title,
-              totalDocs: 0,
-            }
+          if (updated[targetIndex] === loadingColumn) {
+            updated[targetIndex] = { ...loadingColumn, isLoading: false }
           }
 
           return updated
@@ -370,9 +364,11 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
       const nextPage = column.page + 1
 
       // Set loading state
+      const loadingColumn = { ...column, isLoading: true }
+
       setColumns((prev) => {
         const updated = [...prev]
-        updated[columnIndex] = { ...updated[columnIndex], isLoading: true }
+        updated[columnIndex] = loadingColumn
         return updated
       })
 
@@ -385,7 +381,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         setColumns((prev) => {
           const updated = [...prev]
 
-          if (updated[columnIndex]) {
+          if (updated[columnIndex] === loadingColumn) {
             updated[columnIndex] = {
               ...updated[columnIndex],
               hasNextPage,
@@ -401,7 +397,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         setColumns((prev) => {
           const updated = [...prev]
 
-          if (updated[columnIndex]) {
+          if (updated[columnIndex] === loadingColumn) {
             updated[columnIndex] = { ...updated[columnIndex], isLoading: false }
           }
 

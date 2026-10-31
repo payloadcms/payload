@@ -1,5 +1,6 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
+import { scheduleAfterTransactionRollback } from '../utilities/transactionCallbacks.js'
 import { loadBranchRow, resolveBranch, setBranchRow } from './resolveBranch.js'
 import {
   branchChangesCollectionSlug,
@@ -32,7 +33,7 @@ const activeBranch = ({ branch, globalSlug, req }: BaseArgs): null | string => {
     return null
   }
 
-  return branch === false ? null : (branch ?? resolveBranch(req as PayloadRequest))
+  return branch === false ? null : (branch ?? resolveBranch({ req: req as PayloadRequest }))
 }
 
 /**
@@ -73,10 +74,8 @@ export const branchGlobalNeedsBothRows = (args: BaseArgs): boolean => {
 }
 
 /** Picks the branch's copy of a global when it has one, else main's. */
-export const pickBranchGlobal = <T extends Record<string, unknown>>(
-  docs: T[],
-  branch: string,
-): T | undefined => docs.find((doc) => doc?.[branchField] === branch) ?? docs[0]
+export const pickBranchGlobal = <T extends object>(docs: T[], branch: string): T | undefined =>
+  docs.find((doc) => (doc as Record<string, unknown>)?.[branchField] === branch) ?? docs[0]
 
 /**
  * The branch a global write should be scoped to, or `null` on main.
@@ -116,7 +115,7 @@ export const recordBranchGlobalChange = async ({
   if (req!.payload!.db.upsertBranchGlobalChange) {
     await req!.payload!.db.upsertBranchGlobalChange({ branch, globalSlug, req })
     await reopenBranchForGlobalChange({ branch, req: req as PayloadRequest })
-    recorded.add(key)
+    await rememberGlobalChange({ key, recorded, req: req as PayloadRequest })
 
     return
   }
@@ -133,7 +132,8 @@ export const recordBranchGlobalChange = async ({
   })
 
   if (existing.docs.length) {
-    recorded.add(key)
+    await reopenBranchForGlobalChange({ branch, req: req as PayloadRequest })
+    await rememberGlobalChange({ key, recorded, req: req as PayloadRequest })
 
     return
   }
@@ -150,7 +150,8 @@ export const recordBranchGlobalChange = async ({
     req: req as PayloadRequest,
   })
 
-  recorded.add(key)
+  await reopenBranchForGlobalChange({ branch, req: req as PayloadRequest })
+  await rememberGlobalChange({ key, recorded, req: req as PayloadRequest })
 }
 
 const reopenBranchForGlobalChange = async ({
@@ -201,4 +202,29 @@ export const resolveBranchGlobalVersionQuery = ({
   const base = where && Object.keys(where).length ? [where] : []
 
   return { and: [...base, { [branchField]: { equals: active } }] }
+}
+
+const rememberGlobalChange = async ({
+  key,
+  recorded,
+  req,
+}: {
+  key: string
+  recorded: Set<string>
+  req: PayloadRequest
+}): Promise<Set<string>> => {
+  recorded.add(key)
+
+  if (await req.transactionID) {
+    await scheduleAfterTransactionRollback({
+      callback: () => {
+        recorded.delete(key)
+
+        return Promise.resolve()
+      },
+      req,
+    })
+  }
+
+  return recorded
 }

@@ -1,13 +1,18 @@
 'use client'
 
 import { branchesCollectionSlug, MAIN_BRANCH, PREFERENCE_KEYS } from 'payload/shared'
-import React, { createContext, use, useCallback, useEffect, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
+import { confirmNavigation } from '../../elements/LeaveWithoutSaving/confirmNavigation.js'
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import { getBranchURL } from '../../utilities/getBranchURL.js'
 import { useConfig } from '../Config/index.js'
 import { useDocumentEvents } from '../DocumentEvents/index.js'
 import { usePreferences } from '../Preferences/index.js'
-import { useRouter } from '../RouterAdapter/index.js'
+import { RouterAdapterContext, useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
+import { useTranslation } from '../Translation/index.js'
 
 export type BranchOption = {
   /** Absent for `main`, which is a sentinel rather than a document. */
@@ -24,7 +29,7 @@ export type BranchOption = {
 }
 
 export type BranchContext = {
-  /** Slug of the branch every read on this request resolved through. */
+  /** Selected branch, including the optimistic switcher label during navigation. */
   activeBranch: string
   /** Branches the user can read, excluding `main`. */
   branches: BranchOption[]
@@ -36,6 +41,8 @@ export type BranchContext = {
    */
   setBranch: (slug: string, options?: { refresh?: boolean }) => void
 }
+
+const RequestBranchContext = createContext<string>(MAIN_BRANCH)
 
 const Context = createContext<BranchContext>({
   activeBranch: MAIN_BRANCH,
@@ -49,6 +56,8 @@ export type BranchProviderProps = {
   activeBranch: string
   branches: BranchOption[]
   children: React.ReactNode
+  /** Request origin, including when no serverURL is configured. */
+  origin?: string
   /**
    * Set when the request resolved to a branch the user can no longer see, so
    * the stored preference pointing at it can be cleared.
@@ -56,26 +65,27 @@ export type BranchProviderProps = {
   staleBranch?: null | string
 }
 
-/**
- * Holds the active branch for the admin UI.
- *
- * The selection lives in the user's `nav` preference and nowhere else, so it
- * follows them between browsers and machines. The server resolves it during
- * request initialization, which is why switching is a preference write followed
- * by a refresh rather than any client-side state that has to be kept in sync.
- */
+/** Holds the request branch and preserves it in admin links and navigation. */
 export const BranchProvider: React.FC<BranchProviderProps> = ({
   activeBranch: activeBranchFromServer,
   branches,
   children,
+  origin,
   staleBranch,
 }) => {
   const {
-    config: { branching },
+    config: {
+      branching,
+      routes: { admin: adminRoute },
+      serverURL,
+    },
   } = useConfig()
 
   const { setPreference } = usePreferences()
+  const { t } = useTranslation()
+  const selectionGeneration = useRef(0)
   const router = useRouter()
+  const routerContext = use(RouterAdapterContext)
   const { startRouteTransition } = useRouteTransition()
 
   const isEnabled = Boolean(branching?.enabled)
@@ -91,29 +101,61 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
     setActiveBranchState(activeBranchFromServer)
   }
 
+  const navigateToBranch = useCallback(
+    ({ branch, shouldReplace = false }: { branch: string; shouldReplace?: boolean }) =>
+      startRouteTransition(() => {
+        const url = new URL(window.location.href)
+
+        if (branch === MAIN_BRANCH) {
+          url.searchParams.delete('branch')
+        } else {
+          url.searchParams.set('branch', branch)
+        }
+
+        const href = `${url.pathname}${url.search}${url.hash}`
+
+        return shouldReplace
+          ? router.replace(href, { scroll: false })
+          : router.push(href, { scroll: false })
+      }),
+    [router, startRouteTransition],
+  )
+
   const setBranch = useCallback(
     (slug: string, { refresh = true }: { refresh?: boolean } = {}) => {
       if (slug === activeBranch) {
         return
       }
 
-      setActiveBranchState(slug)
+      confirmNavigation({
+        navigate: () => {
+          const generation = ++selectionGeneration.current
 
-      // Merged, not replaced: the `nav` preference also carries nav state, and
-      // a plain write would drop it. Awaited before refreshing, because the
-      // server re-reads this preference to resolve the branch — refreshing first
-      // would race the write and re-render against the branch we just left.
-      void (async () => {
-        await setPreference(PREFERENCE_KEYS.NAV, { branch: slug }, true)
+          setActiveBranchState(slug)
 
-        if (refresh) {
-          await startRouteTransition(() => {
-            router.refresh()
-          })
-        }
-      })()
+          // Merge the selection without replacing other navigation preferences.
+          void (async () => {
+            try {
+              await setPreference(PREFERENCE_KEYS.NAV, { branch: slug }, true)
+
+              if (generation !== selectionGeneration.current) {
+                return
+              }
+
+              if (refresh) {
+                await navigateToBranch({ branch: slug })
+              }
+            } catch (_error) {
+              if (generation === selectionGeneration.current) {
+                setActiveBranchState(activeBranchFromServer)
+                toast.error(t('error:unspecific'))
+              }
+            }
+          })()
+        },
+      })
     },
-    [activeBranch, router, setPreference, startRouteTransition],
+    [activeBranch, activeBranchFromServer, navigateToBranch, setPreference, t],
   )
 
   // Creating a branch is a declaration of intent to work on it, so the switch
@@ -136,10 +178,26 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
     }
   }
 
+  const handleCreatedPreferenceError = useEffectEvent(() => {
+    setActiveBranchState(activeBranchFromServer)
+    toast.error(t('error:unspecific'))
+  })
+
+  const navigateToCreatedBranch = useEffectEvent(({ branch }: { branch: string }) => {
+    if (new URL(window.location.href).searchParams.get('branch') !== branch) {
+      return navigateToBranch({ branch, shouldReplace: true })
+    }
+  })
+
   useEffect(() => {
     if (createdSlug) {
-      // The create view redirects immediately, so persist the selection without refreshing.
+      // The full create view already redirects with the new branch. Drawers
+      // need to update the current URL as well, without adding a history entry.
       void setPreference(PREFERENCE_KEYS.NAV, { branch: createdSlug }, true)
+        .then(() => navigateToCreatedBranch({ branch: createdSlug }))
+        .catch(() => {
+          handleCreatedPreferenceError()
+        })
     }
   }, [createdSlug, setPreference])
 
@@ -147,21 +205,47 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
   // the next request starts clean on main instead of resurrecting it.
   useEffect(() => {
     if (staleBranch) {
-      void setPreference(PREFERENCE_KEYS.NAV, { branch: MAIN_BRANCH }, true)
+      void setPreference(PREFERENCE_KEYS.NAV, { branch: MAIN_BRANCH }, true).catch(() => {
+        toast.error(t('error:unspecific'))
+      })
     }
-  }, [setPreference, staleBranch])
+  }, [setPreference, staleBranch, t])
+
+  const navigationContext = useMemo(() => {
+    if (!routerContext || !isEnabled) {
+      return routerContext
+    }
+
+    return {
+      ...routerContext,
+      resolveHref: (href: string) =>
+        getBranchURL({
+          adminRoute,
+          branch: activeBranchFromServer,
+          currentURL: new URL(
+            `${routerContext.pathname}?${routerContext.searchParams.toString()}`,
+            origin || serverURL || 'http://payload.local',
+          ).href,
+          href,
+        }),
+    }
+  }, [activeBranchFromServer, adminRoute, isEnabled, origin, routerContext, serverURL])
 
   return (
-    <Context
-      value={{
-        activeBranch,
-        branches,
-        isEnabled,
-        setBranch,
-      }}
-    >
-      {children}
-    </Context>
+    <RouterAdapterContext value={navigationContext}>
+      <RequestBranchContext value={activeBranchFromServer}>
+        <Context
+          value={{
+            activeBranch,
+            branches,
+            isEnabled,
+            setBranch,
+          }}
+        >
+          {children}
+        </Context>
+      </RequestBranchContext>
+    </RouterAdapterContext>
   )
 }
 
@@ -176,9 +260,12 @@ export const useBranch = (): BranchContext => use(Context)
  * a parameter that changes nothing.
  */
 export const useBranchParam = (): string | undefined => {
-  const { activeBranch, isEnabled } = useBranch()
+  const { isEnabled } = useBranch()
+  const requestBranch = use(RequestBranchContext)
 
-  return isEnabled && activeBranch !== MAIN_BRANCH ? activeBranch : undefined
+  // Actions must use the branch that produced the displayed data until the new
+  // server render arrives, even while the selector shows an optimistic choice.
+  return isEnabled && requestBranch !== MAIN_BRANCH ? requestBranch : undefined
 }
 
 /**

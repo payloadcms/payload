@@ -69,6 +69,7 @@ export const GroupedDocumentGrid: React.FC<GroupedDocumentGridProps> = ({
             documentURLs={documentURLs}
             enableRowSelections={enableRowSelections}
             hierarchyParentFieldName={hierarchyParentFieldName}
+            id={`payload-table-${collectionSlug}-${encodeURIComponent(value)}`}
             useAsThumbnail={collectionConfig.admin.useAsThumbnail}
             useAsTitle={collectionConfig.admin.useAsTitle}
             viewType={viewType}

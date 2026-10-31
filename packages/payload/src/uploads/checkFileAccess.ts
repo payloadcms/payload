@@ -22,6 +22,9 @@ export const checkFileAccess = async ({
     throw new Forbidden(req.t)
   }
   const { config } = collection
+  const branching = req.payload.config?.branching
+  const shouldCheckBranchVisibility =
+    branching?.enabled === true && branching.branchableCollections.has(config.slug)
 
   const accessResult = await executeAccess(
     { id: documentID, slug: config.slug, data: { filename }, isReadingStaticFile: true, req },
@@ -38,7 +41,7 @@ export const checkFileAccess = async ({
     constraints.push({ prefix: { equals: prefix } })
   }
 
-  if (constraints.length > 0 || documentID !== undefined) {
+  if (constraints.length > 0 || documentID !== undefined || shouldCheckBranchVisibility) {
     const doc =
       documentID === undefined
         ? await resolveUploadDocument({

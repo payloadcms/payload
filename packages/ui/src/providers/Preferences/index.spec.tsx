@@ -16,8 +16,8 @@ vi.mock('../../utilities/api.js', () => ({ requests: { post: mocks.post } }))
 
 test('should keep all merged callers pending until the shared write completes', async () => {
   let preferences: ReturnType<typeof usePreferences>
-  let finishWrite: () => void
-  const persisted = new Promise<void>((resolve) => {
+  let finishWrite: (response: Response) => void
+  const persisted = new Promise<Response>((resolve) => {
     finishWrite = resolve
   })
 
@@ -43,7 +43,7 @@ test('should keep all merged callers pending until the shared write completes', 
   expect(settled).not.toHaveBeenCalled()
   expect(JSON.parse(mocks.post.mock.calls[0][1].body).value).toEqual({ first: true, second: true })
 
-  finishWrite!()
+  finishWrite!(new Response(null, { status: 200 }))
   await Promise.all([first, second])
   expect(settled).toHaveBeenCalledTimes(2)
 })
@@ -51,7 +51,7 @@ test('should keep all merged callers pending until the shared write completes', 
 test('should reject all merged callers when persistence fails', async () => {
   let preferences: ReturnType<typeof usePreferences>
   let rejectWrite: (error: Error) => void
-  const persisted = new Promise<void>((_resolve, reject) => {
+  const persisted = new Promise<Response>((_resolve, reject) => {
     rejectWrite = reject
   })
 
@@ -85,8 +85,8 @@ test('should reject all merged callers when persistence fails', async () => {
 
 test('should await an identical value while its write is in progress', async () => {
   let preferences: ReturnType<typeof usePreferences>
-  let finishWrite: () => void
-  const persisted = new Promise<void>((resolve) => {
+  let finishWrite: (response: Response) => void
+  const persisted = new Promise<Response>((resolve) => {
     finishWrite = resolve
   })
 
@@ -112,7 +112,7 @@ test('should await an identical value while its write is in progress', async () 
 
   await new Promise((resolve) => setTimeout(resolve, 20))
   expect(settled).not.toHaveBeenCalled()
-  finishWrite!()
+  finishWrite!(new Response(null, { status: 200 }))
   await Promise.all([first, second])
   expect(mocks.post).toHaveBeenCalledOnce()
 })
@@ -122,7 +122,7 @@ test.each([{ selected: true }, true])(
   async (value) => {
     let preferences: ReturnType<typeof usePreferences>
     let rejectWrite: (error: Error) => void
-    const persisted = new Promise<void>((_resolve, reject) => {
+    const persisted = new Promise<Response>((_resolve, reject) => {
       rejectWrite = reject
     })
 
@@ -163,8 +163,8 @@ test.each([{ selected: true }, 'grid'])(
   'should await an identical merged value while a non-merged write is pending (%j)',
   async (value) => {
     let preferences: ReturnType<typeof usePreferences>
-    let finishWrite: () => void
-    const persisted = new Promise<void>((resolve) => {
+    let finishWrite: (response: Response) => void
+    const persisted = new Promise<Response>((resolve) => {
       finishWrite = resolve
     })
 
@@ -188,7 +188,7 @@ test.each([{ selected: true }, 'grid'])(
     await new Promise((resolve) => setTimeout(resolve, 20))
     expect(settled).not.toHaveBeenCalled()
 
-    finishWrite!()
+    finishWrite!(new Response(null, { status: 200 }))
     await Promise.all([first, second])
     expect(settled).toHaveBeenCalledOnce()
     expect(mocks.post).toHaveBeenCalledOnce()
@@ -200,7 +200,7 @@ test.each([{ selected: true }, 'grid'])(
   async (value) => {
     let preferences: ReturnType<typeof usePreferences>
     let rejectWrite: (error: Error) => void
-    const persisted = new Promise<void>((_resolve, reject) => {
+    const persisted = new Promise<Response>((_resolve, reject) => {
       rejectWrite = reject
     })
 
@@ -236,12 +236,12 @@ test.each([{ selected: true }, 'grid'])(
 
 test('should ignore stale hydration until all queued merged writes finish', async () => {
   let preferences: ReturnType<typeof usePreferences>
-  let finishFirstWrite: () => void
-  let finishSecondWrite: () => void
-  const firstWrite = new Promise<void>((resolve) => {
+  let finishFirstWrite: (response: Response) => void
+  let finishSecondWrite: (response: Response) => void
+  const firstWrite = new Promise<Response>((resolve) => {
     finishFirstWrite = resolve
   })
-  const secondWrite = new Promise<void>((resolve) => {
+  const secondWrite = new Promise<Response>((resolve) => {
     finishSecondWrite = resolve
   })
 
@@ -269,7 +269,7 @@ test('should ignore stale hydration until all queued merged writes finish', asyn
   await vi.waitFor(async () =>
     expect(await preferences!.getPreference('view')).toEqual({ first: true, second: true }),
   )
-  finishFirstWrite!()
+  finishFirstWrite!(new Response(null, { status: 200 }))
   await first
   await vi.waitFor(() => expect(mocks.post).toHaveBeenCalledTimes(2))
   expect(JSON.parse(mocks.post.mock.calls[1][1].body).value).toEqual({ first: true, second: true })
@@ -277,8 +277,36 @@ test('should ignore stale hydration until all queued merged writes finish', asyn
   preferences!.syncPreference('view', {})
   expect(await preferences!.getPreference('view')).toEqual({ first: true, second: true })
 
-  finishSecondWrite!()
+  finishSecondWrite!(new Response(null, { status: 200 }))
   await second
   preferences!.syncPreference('view', { refreshed: true })
   expect(await preferences!.getPreference('view')).toEqual({ refreshed: true })
+})
+
+test('should reject an HTTP failure and retry the same preference value', async () => {
+  let preferences: ReturnType<typeof usePreferences>
+  mocks.post
+    .mockReset()
+    .mockResolvedValueOnce(new Response(null, { status: 500 }))
+    .mockResolvedValueOnce(new Response(null, { status: 200 }))
+
+  function Consumer() {
+    preferences = usePreferences()
+    return null
+  }
+
+  await render(
+    <PreferencesProvider>
+      <Consumer />
+    </PreferencesProvider>,
+  )
+  preferences!.syncPreference('view', {})
+
+  await expect(preferences!.setPreference('view', { branch: 'feature' }, true)).rejects.toThrow(
+    '500',
+  )
+  preferences!.syncPreference('view', {})
+  await preferences!.setPreference('view', { branch: 'feature' }, true)
+
+  expect(mocks.post).toHaveBeenCalledTimes(2)
 })

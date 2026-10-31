@@ -3,7 +3,12 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateOne } from 'payload'
 
 import { and, eq } from 'drizzle-orm'
-import { applyBranchIDProjection, resolveBranchRowID, withBranchIDSelect } from 'payload'
+import {
+  applyBranchIDProjection,
+  resolveBranchQuery,
+  resolveBranchRowID,
+  withBranchIDSelect,
+} from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, PostgresDB } from './types.js'
@@ -45,10 +50,13 @@ export const updateOne: UpdateOne = async function updateOne(
   const db = getPrimaryDb(this, await getTransaction(this, req))
 
   if (!idToUpdate) {
+    whereArg = await resolveBranchQuery({ branch, collectionSlug, req, where: whereArg })
+
     const { joins, selectFields, where } = buildQuery({
       adapter: this,
       fields: collection.flattenedFields,
       locale,
+      req,
       tableName,
       where: whereArg,
     })

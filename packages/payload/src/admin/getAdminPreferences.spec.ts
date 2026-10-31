@@ -8,7 +8,7 @@ import { getRequestBranch } from './getRequestBranch.js'
 describe('navigation preference compatibility', () => {
   it.each([
     { branch: undefined, expectedBranch: 'main', isBranchingEnabled: true },
-    { branch: 'fall-campaign', expectedBranch: 'fall-campaign', isBranchingEnabled: true },
+    { branch: 'fall-campaign', expectedBranch: 'main', isBranchingEnabled: true },
     { branch: 'fall-campaign', expectedBranch: 'main', isBranchingEnabled: false },
   ])(
     'should preserve navigation state with branching $isBranchingEnabled and branch $expectedBranch',

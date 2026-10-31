@@ -1,54 +1,56 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, test } from 'vitest'
 
-import { projectBranchIDs, rewriteBranchIDs } from './branchIDs.js'
+import { projectBranchIDs, rewriteBranchIDs, rewriteBranchVersionParents } from './branchIDs.js'
 
-describe('rewriteBranchIDs', () => {
-  it('should leave a query with no id constraint untouched', () => {
-    expect(rewriteBranchIDs({ title: { equals: 'hi' } })).toEqual({ title: { equals: 'hi' } })
-  })
+test.each([true, false])(
+  'should AND identity with sibling OR regardless of key order (%s)',
+  (isIdentityFirst) => {
+    const or = [{ title: { equals: 'Allowed' } }]
+    const where = isIdentityFirst
+      ? { id: { equals: 'canonical' }, or }
+      : { or, id: { equals: 'canonical' } }
 
-  it('should match either a shadow row canonical id or a main row own id', () => {
-    expect(rewriteBranchIDs({ id: { equals: 7 } })).toEqual({
-      or: [
-        { _branchDocID: { equals: 7 } },
-        { and: [{ _branchDocID: { exists: false } }, { id: { equals: 7 } }] },
-      ],
+    expect(rewriteBranchIDs(where)).toMatchObject({
+      and: [{ or }, { or: [{ _branchDocID: { equals: 'canonical' } }, {}] }],
     })
+  },
+)
+
+test('should retain version parent identity alongside sibling OR', () => {
+  const or = [{ 'version.title': { equals: 'Allowed' } }]
+
+  expect(rewriteBranchVersionParents({ parent: { equals: 'canonical' }, or })).toMatchObject({
+    and: [{ or }, { or: [{ _branchParent: { equals: 'canonical' } }, {}] }],
   })
+})
 
-  it('should rewrite id constraints nested inside and/or', () => {
-    const result = rewriteBranchIDs({
-      and: [{ title: { equals: 'x' } }, { or: [{ id: { in: [1, 2] } }] }],
-    })
+test.each(['not_equals', 'not_in'])(
+  'should require canonical identity presence for %s constraints',
+  (operator) => {
+    const constraint = { [operator]: operator === 'not_in' ? ['hidden'] : 'hidden' }
 
-    expect(result).toEqual({
+    expect(rewriteBranchIDs({ id: constraint })).toEqual({
       and: [
-        { title: { equals: 'x' } },
         {
           or: [
-            {
-              or: [
-                { _branchDocID: { in: [1, 2] } },
-                { and: [{ _branchDocID: { exists: false } }, { id: { in: [1, 2] } }] },
-              ],
-            },
+            { and: [{ _branchDocID: { exists: true } }, { _branchDocID: constraint }] },
+            { and: [{ _branchDocID: { exists: false } }, { id: constraint }] },
           ],
         },
       ],
     })
-  })
-
-  it('should preserve sibling constraints alongside a rewritten id', () => {
-    const result = rewriteBranchIDs({ id: { equals: 3 }, title: { equals: 'x' } })
-
-    expect(result.title).toEqual({ equals: 'x' })
-    expect(result.or).toHaveLength(2)
-  })
-
-  it('should pass through undefined', () => {
-    expect(rewriteBranchIDs(undefined)).toBeUndefined()
-  })
-})
+    expect(rewriteBranchVersionParents({ parent: constraint })).toEqual({
+      and: [
+        {
+          or: [
+            { and: [{ _branchParent: { exists: true } }, { _branchParent: constraint }] },
+            { and: [{ _branchParent: { exists: false } }, { parent: constraint }] },
+          ],
+        },
+      ],
+    })
+  },
+)
 
 describe('projectBranchIDs', () => {
   it('should replace a shadow row id with its canonical id', () => {
@@ -67,5 +69,21 @@ describe('projectBranchIDs', () => {
     const docs = [{ _branchDocID: null, id: 1 }, { id: 2 }]
 
     expect(projectBranchIDs(docs).map((doc) => doc.id)).toEqual([1, 2])
+  })
+})
+
+test('should preserve non-identity filters and undefined input', () => {
+  expect(rewriteBranchIDs(undefined)).toBeUndefined()
+  expect(rewriteBranchIDs({ title: { equals: 'hi' } })).toEqual({ title: { equals: 'hi' } })
+})
+
+test('should retain nested AND and OR filters while rewriting identity', () => {
+  expect(
+    rewriteBranchIDs({ and: [{ title: { equals: 'x' } }, { or: [{ id: { in: [1, 2] } }] }] }),
+  ).toMatchObject({
+    and: [
+      { title: { equals: 'x' } },
+      { or: [{ and: [{ or: [{ _branchDocID: { in: [1, 2] } }, {}] }] }] },
+    ],
   })
 })

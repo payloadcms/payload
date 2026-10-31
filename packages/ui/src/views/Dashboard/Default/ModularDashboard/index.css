@@ -34,7 +34,7 @@
       width: 100% !important;
     }
 
-    .modular-dashboard .widget-wrapper__size-btn {
+    .modular-dashboard .popup:has(.widget-wrapper__size-btn) {
       display: none;
     }
   }
@@ -131,11 +131,19 @@
   .widget-wrapper__controls {
     position: absolute;
     top: var(--spacer-3);
-    right: var(--spacer-3);
+    inset-inline-end: var(--spacer-3);
     z-index: 10;
     display: flex;
     align-items: center;
     gap: var(--spacer-2);
+    flex-wrap: wrap;
+    inset-inline-start: var(--spacer-3);
+    justify-content: flex-end;
+    pointer-events: none;
+
+    > * {
+      pointer-events: auto;
+    }
   }
 
   .widget-wrapper__size-btn {

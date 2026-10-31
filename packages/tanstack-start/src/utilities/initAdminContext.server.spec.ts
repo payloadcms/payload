@@ -45,6 +45,20 @@ describe('initAdminContext', () => {
     })
   })
 
+  it('should use the admin page URL supplied by a server action', async () => {
+    await initAdminContext({
+      configPromise: Promise.resolve({} as never),
+      importMap: {},
+      requestURL: 'http://localhost/admin/collections/posts?branch=campaign&locale=es',
+    })
+
+    expect(initPayloadAdminContext).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestURL: 'http://localhost/admin/collections/posts?branch=campaign&locale=es',
+      }),
+    )
+  })
+
   it('should forward an explicit server adapter', async () => {
     const serverAdapter = {
       getHeaders: vi.fn(),

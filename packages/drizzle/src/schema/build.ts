@@ -341,6 +341,13 @@ export const buildTable = ({
         on: columns,
         unique: disableUnique ? false : index.unique,
       }
+
+      const userFields = index.fields.filter(({ path }) => path !== branchField)
+
+      if (!disableUnique && index.unique && userFields.length === 1) {
+        adapter.fieldConstraints[tableToUse.name] ??= {}
+        adapter.fieldConstraints[tableToUse.name][indexName] = userFields[0].path
+      }
     }
   }
 

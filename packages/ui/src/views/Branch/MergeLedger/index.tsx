@@ -15,6 +15,7 @@ import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { formatDate } from '../../../utilities/formatDocTitle/formatDateTitle.js'
 import './index.css'
 
 const baseClass = 'merge-ledger'
@@ -76,7 +77,9 @@ export const MergeLedger: React.FC<{ events: MergeEvent[] }> = ({ events }) => {
       key: string
       mergeID: string
     }) => {
-      if (loadedRef.current[key]) {
+      const previous = loadedRef.current[key]
+
+      if (previous && previous.status !== 'error') {
         return
       }
 
@@ -133,9 +136,11 @@ export const MergeLedger: React.FC<{ events: MergeEvent[] }> = ({ events }) => {
           <header className={`${baseClass}__header`}>
             <h3 className={`${baseClass}__when`}>
               {t('branching:mergedOn', {
-                date: new Date(event.mergedAt).toLocaleString(undefined, {
-                  dateStyle: 'medium',
-                  timeStyle: 'short',
+                date: formatDate({
+                  date: event.mergedAt,
+                  i18n,
+                  pattern: config.admin.dateFormat,
+                  timezone: config.admin.timezones.defaultTimezone,
                 }),
               })}
             </h3>

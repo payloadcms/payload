@@ -470,9 +470,20 @@ export const traverseFields = ({
 
           let joinQueryWhere: Where
 
-          const currentIDRaw = sql.raw(
-            `"${getNameFromDrizzleTable(currentIDColumn.table)}"."${currentIDColumn.name}"`,
+          const parentUsesBranching = collectionSlug
+            ? resolveBranchReadState({ collectionSlug, req }).useBranching
+            : false
+          const canonicalIDColumn = parentUsesBranching
+            ? adapter.tables[currentTableName][versions ? '_branchParent' : '_branchDocID']
+            : undefined
+          // Correlated constraints must reference the outer query's alias, without its schema.
+          const currentTableIdentifier = sql.identifier(
+            getNameFromDrizzleTable(currentIDColumn.table),
           )
+          const currentIDExpression = sql`${currentTableIdentifier}.${sql.identifier(currentIDColumn.name)}`
+          const currentIDRaw = canonicalIDColumn
+            ? sql`COALESCE(${currentTableIdentifier}.${sql.identifier(canonicalIDColumn.name)}, ${currentIDExpression})`
+            : currentIDExpression
 
           if (Array.isArray(field.targetField.relationTo)) {
             joinQueryWhere = {

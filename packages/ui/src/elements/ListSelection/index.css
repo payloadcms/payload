@@ -2,6 +2,12 @@
   .list-selection {
     display: flex;
     margin-left: auto;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-block: var(--spacer-1);
+    padding-inline-end: var(--spacer-1);
+    scroll-padding-inline: var(--spacer-1);
     color: var(--color-text-secondary);
     gap: var(--spacer-1);
     align-items: center;
@@ -9,10 +15,12 @@
 
   .list-selection__count {
     margin-right: var(--spacer-2);
+    white-space: nowrap;
   }
 
   .list-selection__actions {
     display: flex;
+    flex-shrink: 0;
     gap: var(--spacer-1);
   }
 

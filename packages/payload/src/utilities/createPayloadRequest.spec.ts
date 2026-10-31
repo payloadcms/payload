@@ -155,6 +155,21 @@ describe('createPayloadRequest - URL construction', () => {
     expect(secondBranchRequest.branch).toBe('second')
   })
 
+  it('should isolate branch false even when the parent already resolves main', async () => {
+    const parent = await createPayloadRequest({ branch: 'main', payload: mockPayload })
+    const bypassed = await createPayloadRequest({
+      branch: false,
+      payload: mockPayload,
+      req: parent,
+    })
+
+    expect(bypassed).not.toBe(parent)
+    expect(bypassed.payloadDataLoader).not.toBe(parent.payloadDataLoader)
+    expect(parent.branch).toBe('main')
+    expect(parent.context).not.toHaveProperty('_branchBypass')
+    expect(bypassed.context).toHaveProperty('_branchBypass', true)
+  })
+
   it('should not add a bypass marker for a named branch', async () => {
     const request = await createPayloadRequest({
       branch: 'preview',

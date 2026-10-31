@@ -3,7 +3,13 @@ import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations
 import type { ClientField, SanitizedFieldPermissions, SanitizedFieldsPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldIsHiddenOrDisabled,
+  fieldIsID,
+  tabHasName,
+  toWords,
+} from 'payload/shared'
 
 import type { ReducedField } from '../elements/WhereBuilder/types.js'
 
@@ -236,7 +242,7 @@ export const reduceFieldsToOptions = ({
           return acc
         }, [])
 
-        const localizedLabel = getTranslation(field.label || '', i18n)
+        const localizedLabel = field.label ? getTranslation(field.label, i18n) : toWords(field.name)
 
         const formattedLabel = labelPrefix
           ? combineFieldLabel({
