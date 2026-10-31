@@ -26,7 +26,7 @@ export const readLocalizedBranchWrite = async ({
   payload,
   req,
 }: Args): Promise<null | Record<string, unknown>> => {
-  const branchReq = isolateBranchState(req)
+  const branchReq = isolateBranchState({ req: req })
 
   branchReq.branch = branch
   branchReq.locale = locale
@@ -50,7 +50,7 @@ export const readLocalizedBranchWrite = async ({
       limit: 1,
       locale,
       pagination: false,
-      req: withoutBranch(branchReq),
+      req: withoutBranch({ req: branchReq }),
       sort: '-updatedAt',
       where: {
         and: [

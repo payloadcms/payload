@@ -1958,11 +1958,11 @@ export {
 export type { ValidationFieldError } from './errors/index.js'
 export { createCreatedByField, createUpdatedByField } from './fields/baseFields/authorship/index.js'
 
+export type { Authorship, SanitizedAuthorship } from './fields/baseFields/authorship/types.js'
+
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 
 export { baseIDField } from './fields/baseFields/baseIDField.js'
-
-export { getSlugFallbackValue } from './fields/baseFields/slug/getSlugFallbackValue.js'
 
 export interface FieldCustom extends Record<string, any> {}
 
@@ -1973,6 +1973,8 @@ export interface CollectionAdminCustom extends Record<string, any> {}
 export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
+
+export { getSlugFallbackValue } from './fields/baseFields/slug/getSlugFallbackValue.js'
 
 export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 
@@ -2102,8 +2104,8 @@ export type {
 } from './fields/config/types.js'
 
 export { getDefaultValue } from './fields/getDefaultValue.js'
-
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
+
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
@@ -2147,7 +2149,6 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
-
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -2155,6 +2156,7 @@ export {
   type ServerOnlyGlobalAdminProperties,
   type ServerOnlyGlobalProperties,
 } from './globals/config/client.js'
+
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
@@ -2168,8 +2170,8 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
-
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
+
 export { findOneOperation } from './globals/operations/findOne.js'
 
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
@@ -2191,8 +2193,8 @@ export {
   updateGlobalInputSchema,
   updateGlobalLocalInputSchema,
 } from './globals/operations/inputSchemas.js'
-
 export type { ValidateGlobalOptions } from './globals/operations/local/validate.js'
+
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
@@ -2211,8 +2213,8 @@ export { createFolderField } from './hierarchy/createFolderField.js'
 export type { CreateFolderFieldOptions } from './hierarchy/createFolderField.js'
 
 export { createTagField } from './hierarchy/createTagField.js'
-
 export type { CreateTagFieldOptions } from './hierarchy/createTagField.js'
+
 export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
 
 export type { GetInitialTreeDataArgs, InitialTreeData } from './hierarchy/getInitialTreeData.js'
@@ -2234,8 +2236,8 @@ export { getAncestors } from './hierarchy/utils/getAncestors.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'
 
 export * from './kv/adapters/InMemoryKVAdapter.js'
-
 export * from './kv/index.js'
+
 export type {
   AdminPreferences,
   CollapsedPreferences,
@@ -2321,8 +2323,8 @@ export {
   type BatchProcessingOptions,
   type BatchProcessorResult,
 } from './utilities/batchProcessing.js'
-
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'
+
 export { commitTransaction } from './utilities/commitTransaction.js'
 
 export {
@@ -2335,8 +2337,8 @@ export {
   type SchemaVariant,
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
-
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
+
 export {
   createPayloadRequest,
   type CreatePayloadRequestArgs,
@@ -2408,15 +2410,15 @@ export { getRequestLanguage } from './utilities/getRequestLanguage.js'
 export { getUniqueFieldValue } from './utilities/getUniqueFieldValue.js'
 
 export { hasDraftsEnabled, hasDraftValidationEnabled } from './utilities/getVersionsConfig.js'
-
 export {
   getCollectionVirtualFieldNames,
   getGlobalVirtualFieldNames,
   stripVirtualFields,
 } from './utilities/getVirtualFieldNames.js'
-export { handleEndpoints } from './utilities/handleEndpoints.js'
 
+export { handleEndpoints } from './utilities/handleEndpoints.js'
 export { headersWithCors } from './utilities/headersWithCors.js'
+
 export { initTransaction } from './utilities/initTransaction.js'
 
 export { isEntityHidden } from './utilities/isEntityHidden.js'
@@ -2424,8 +2426,8 @@ export { isEntityHidden } from './utilities/isEntityHidden.js'
 export { isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 
 export { isPlainObject } from './utilities/isPlainObject.js'
-
 export { isValidID } from './utilities/isValidID.js'
+
 export { killTransaction } from './utilities/killTransaction.js'
 
 export { logError } from './utilities/logError.js'
@@ -2457,8 +2459,8 @@ export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
 export { sanitizeSortParams } from './utilities/sanitizeSortParams.js'
 
 export { getConfigInfoInputSchema } from './utilities/sharedInputSchemas.js'
-
 export { stripUnselectedFields } from './utilities/stripUnselectedFields.js'
+
 export {
   beginDeferredCleanupScope,
   beginDeferredCleanupScopeIfNeeded,
@@ -2472,20 +2474,20 @@ export { transformPointDataToPayload } from './utilities/transformPointDataToPay
 export { traverseFields } from './utilities/traverseFields.js'
 
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
-
 export { strictObject } from './utilities/zod.js'
+
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
-
 export { versionDefaults } from './versions/defaults.js'
+
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
-
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
+
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
@@ -2493,8 +2495,8 @@ export { getLatestCollectionVersion } from './versions/getLatestCollectionVersio
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 
 export { saveVersion } from './versions/saveVersion.js'
-
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
+
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
 
 export { deepMergeSimple } from '@payloadcms/translations/utilities'
