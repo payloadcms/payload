@@ -271,6 +271,7 @@ export function PublishButton({
 
       const params = qs.stringify(
         {
+          branch,
           depth: 0,
           locale,
           uploadEdits: uploadEdits || undefined,
@@ -301,6 +302,7 @@ export function PublishButton({
     },
     [
       api,
+      branch,
       collectionSlug,
       globalSlug,
       id,
