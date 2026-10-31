@@ -460,10 +460,10 @@ export const promise = async ({
                     ? Object.fromEntries(
                         Object.entries(value).map(([localeKey, localeValue]) => [
                           localeKey,
-                          copyReferencedValue(localeValue),
+                          copyReferencedValue({ value: localeValue }),
                         ]),
                       )
-                    : copyReferencedValue(value)
+                    : copyReferencedValue({ value })
               }
 
               return populateRelationship()
@@ -1076,7 +1076,7 @@ export const promise = async ({
  * Copies the IDs or `{ relationTo, value }` objects of a relationship value, so that populating them
  * doesn't change the document they were read from.
  */
-const copyReferencedValue = (value: unknown): unknown => {
+const copyReferencedValue = ({ value }: { value: unknown }): unknown => {
   if (Array.isArray(value)) {
     return value.map((item) => (item && typeof item === 'object' ? { ...item } : item))
   }
