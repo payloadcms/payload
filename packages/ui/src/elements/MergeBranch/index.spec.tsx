@@ -7,6 +7,7 @@ import { MergeBranchModal } from './index.js'
 
 const closeMerge = vi.hoisted(() => vi.fn())
 const refresh = vi.hoisted(() => vi.fn())
+const modalState = vi.hoisted(() => ({ isOpen: true }))
 
 vi.mock('sonner', () => ({
   toast: { error: vi.fn(), info: vi.fn(), success: vi.fn() },
@@ -83,29 +84,51 @@ vi.mock('../DatePicker/index.js', () => ({ DatePickerField: () => null }))
 vi.mock('../Dialog/index.js', () => ({
   DialogBody: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   DialogFooter: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  DialogHeader: ({ title }: { title: ReactNode }) => <h2>{title}</h2>,
-  DialogModal: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DialogHeader: ({
+    title,
+    onClose,
+    showClose,
+  }: {
+    title: ReactNode
+    onClose?: () => void
+    showClose?: boolean
+  }) => (
+    <>
+      <h2>{title}</h2>
+      {showClose && (
+        <button onClick={onClose} type="button">
+          Header close
+        </button>
+      )}
+    </>
+  ),
+  DialogModal: ({ children, closeOnEsc }: { children: ReactNode; closeOnEsc?: boolean }) => (
+    <div data-testid="dialog" data-close-on-esc={String(closeOnEsc)}>
+      {children}
+    </div>
+  ),
 }))
 vi.mock('../Link/index.js', () => ({ Link: ({ children }: { children: ReactNode }) => children }))
 vi.mock('../Modal/index.js', () => ({
-  useModal: () => ({ isModalOpen: () => true }),
+  useModal: () => ({ isModalOpen: () => modalState.isOpen }),
 }))
+const mergeTarget = vi.hoisted(() => ({
+  branchID: 'campaign-id',
+  branchName: 'Campaign',
+  branchSlug: 'campaign',
+  changes: [],
+  totalChanges: 2,
+}))
+
 vi.mock('./context.js', () => ({
-  useMergeBranch: () => ({
-    closeMerge,
-    target: {
-      branchID: 'campaign-id',
-      branchName: 'Campaign',
-      branchSlug: 'campaign',
-      changes: [],
-      totalChanges: 2,
-    },
-  }),
+  useMergeBranch: () => ({ closeMerge, target: mergeTarget }),
 }))
 
 let mergeStreamController: ReadableStreamDefaultController<Uint8Array>
 
 beforeEach(() => {
+  modalState.isOpen = true
+  closeMerge.mockClear()
   vi.stubGlobal('process', { env: {} })
   vi.stubGlobal(
     'fetch',
@@ -239,4 +262,30 @@ test('should report a partial merge with the actual merged count and problems', 
   await expect
     .element(screen.getByRole('alert'))
     .toHaveTextContent('One change could not be applied')
+})
+
+test('should prevent Escape dismissal while a merge is running', async () => {
+  const screen = await render(<MergeBranchModal />)
+
+  await screen.getByRole('button', { name: 'Merge', exact: true }).click()
+
+  await expect.element(screen.getByTestId('dialog')).toHaveAttribute('data-close-on-esc', 'false')
+  await expect.element(screen.getByRole('button', { name: 'Header close' })).not.toBeInTheDocument()
+})
+
+test('should route header dismissal through closeMerge', async () => {
+  const screen = await render(<MergeBranchModal />)
+
+  await screen.getByRole('button', { name: 'Header close' }).click()
+
+  expect(closeMerge).toHaveBeenCalledOnce()
+})
+
+test('should clear the target after an external dismissal', async () => {
+  const screen = await render(<MergeBranchModal />)
+
+  modalState.isOpen = false
+  await screen.rerender(<MergeBranchModal />)
+
+  await expect.poll(() => closeMerge.mock.calls.length).toBeGreaterThan(0)
 })
