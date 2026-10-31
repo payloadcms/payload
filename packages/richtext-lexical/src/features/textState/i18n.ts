@@ -11,6 +11,7 @@ export const i18n: Partial<GenericLanguages> = {
   es: { defaultStyle: 'Estilo predeterminado' },
   et: { defaultStyle: 'Vaikimisi stiil' },
   fa: { defaultStyle: 'سبک پیش‌فرض' },
+  fi: { defaultStyle: 'Oletusulkoasu' },
   fr: { defaultStyle: 'Style par défaut' },
   he: { defaultStyle: 'סגנון ברירת מחדל' },
   hr: { defaultStyle: 'Zadani stil' },
