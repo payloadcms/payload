@@ -19,7 +19,7 @@ import { branchChangesCollectionSlug, branchField, MAIN_BRANCH } from './types.j
  * at a different main row, need it populated.
  */
 export const stampBranchOnCreate: CollectionBeforeChangeHook = ({ data, operation, req }) => {
-  const branch = resolveBranch(req)
+  const branch = resolveBranch({ req: req })
 
   if (branch === MAIN_BRANCH || operation !== 'create') {
     return data
@@ -44,7 +44,7 @@ export const recordBranchCreate: CollectionAfterChangeHook = async ({
   operation,
   req,
 }) => {
-  const branch = resolveBranch(req)
+  const branch = resolveBranch({ req: req })
 
   if (branch === MAIN_BRANCH || operation !== 'create') {
     return doc
@@ -72,7 +72,7 @@ export const recordBranchCreate: CollectionAfterChangeHook = async ({
     operation: 'create',
     req,
   })
-  refreshRequestDataLoader(req)
+  refreshRequestDataLoader({ req: req })
 
   return doc
 }
@@ -87,7 +87,7 @@ export const assertBranchWritableBeforeCollectionWrite: CollectionBeforeOperatio
     return args
   }
 
-  const branch = resolveBranch(req)
+  const branch = resolveBranch({ req: req })
 
   if (branch === MAIN_BRANCH) {
     return args
@@ -109,7 +109,7 @@ export const assertBranchWritableBeforeGlobalWrite: GlobalBeforeOperationHook = 
     return args
   }
 
-  const branch = resolveBranch(req)
+  const branch = resolveBranch({ req: req })
   const branching = req.payload.config.branching
 
   if (

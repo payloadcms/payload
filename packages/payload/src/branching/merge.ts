@@ -4,6 +4,7 @@ import type { BlockedChange } from './preflight.js'
 import type { MergeableChange, MergeProgress, MergeWarning } from './types.js'
 import type { BranchMergeValidationError } from './validation.js'
 
+import { scheduleAfterTransactionRollback } from '../utilities/transactionCallbacks.js'
 import { assertBranchUpdateAccess } from './assertBranchUpdateAccess.js'
 import { discardBranchChanges } from './discard.js'
 import { beginBranchMerge, restoreBranchAfterMerge } from './merge/branchMergeStatus.js'
@@ -24,14 +25,7 @@ export type MergeResult = {
   warnings: MergeWarning[]
 }
 
-/**
- * Emitted once per change, immediately before it is applied.
- *
- * A merge is a sequential loop over an arbitrary number of documents, so it is
- * the one Payload operation where "what is it doing right now" is a real
- * question. Reported by callback rather than persisted: the caller decides
- * whether that means a streamed HTTP response, a log line, or nothing.
- */
+/** Options for applying selected branch changes to main. */
 export type MergeOptions = {
   branch: string
   /** Change IDs to apply. Omit to apply every pending change. */
@@ -137,6 +131,13 @@ export const mergeBranch = async (
       result.merged.push(...cleanupRetry.retried)
 
       if (applicable.length === 0 && applicableGlobals.length === 0) {
+        if (await req.transactionID) {
+          await scheduleAfterTransactionRollback({
+            callback: () => restoreBranchAfterMerge({ branchDocID: branchDoc.id, payload, req }),
+            req,
+          })
+        }
+
         const remaining = await payload.count({
           collection: branchChangesCollectionSlug,
           overrideAccess: true,
@@ -157,7 +158,7 @@ export const mergeBranch = async (
         })
 
         if (incomingReq) {
-          refreshBranchState(incomingReq)
+          refreshBranchState({ req: incomingReq })
         }
 
         return result
@@ -226,14 +227,7 @@ export const mergeBranch = async (
   }
 }
 
-/**
- * A branch document's data, ready to be written onto main's row.
- *
- * Array and block rows carry primary keys belonging to the branch's copy, and writing them
- * onto main's row collides with the rows the branch's copy still owns. Passing an empty
- * `existingDoc` drops every nested key so the write mints its own — which is what
- * `copyDataWithFreshRowIDs` is for, and why the bulk update path already calls it.
- */
+/** Returns Local API methods for discarding and merging branch changes. */
 export const getBranchesLocalAPI = (payload: Payload) => ({
   discard: (options: DiscardOptions) => discardBranchChanges(payload, options),
   merge: (options: MergeOptions) => mergeBranch(payload, options),

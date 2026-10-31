@@ -43,6 +43,7 @@ export const countVersions: CountVersions = async function countVersions(
     adapter: this,
     fields,
     locale,
+    req,
     tableName,
     where: branchedWhere,
   })

@@ -3,6 +3,7 @@ import type { DeleteVersionsArgs } from '../database/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload, PayloadRequest, Where } from '../types/index.js'
 
+import { resolveBranchRowID } from '../branching/resolveBranchRowID.js'
 import { resolveBranchOwnVersions } from '../branching/versions.js'
 import {
   collectVersionFiles,
@@ -114,7 +115,12 @@ export const enforceMaxVersions = async ({
 
       const removedFiles =
         collection?.upload && id !== undefined && req
-          ? await collectVersionFiles({ collection, parentID: id, req, where: deleteQuery })
+          ? await collectVersionFiles({
+              collection,
+              parentID: await resolveBranchRowID({ id, collectionSlug: collection.slug, req }),
+              req,
+              where: deleteQuery,
+            })
           : []
 
       await payload.db.deleteVersions(deleteVersionsArgs)
