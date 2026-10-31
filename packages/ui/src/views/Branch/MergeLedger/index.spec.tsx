@@ -86,3 +86,9 @@ test('should preserve an unavailable history result without retrying it', async 
   await expect.element(screen.getByRole('status')).toHaveTextContent('general:notFound')
   expect(serverFunction).toHaveBeenCalledTimes(1)
 })
+
+test('should format merge times using the admin date format and time zone', async () => {
+  const screen = await render(<MergeLedger events={events} />)
+
+  await expect.element(screen.getByRole('heading', { name: '2029-12-31 20:00' })).toBeVisible()
+})
