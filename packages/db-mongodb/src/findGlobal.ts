@@ -38,13 +38,19 @@ export const findGlobal: FindGlobal = async function findGlobal<T extends Record
     where: combineQueries({ globalType: { equals: globalSlug } }, branchedWhere ?? {}),
   })
 
+  const projection = buildProjectionFromSelect({
+    adapter: this,
+    fields,
+    select: withBranchGlobalSelect({ branch, globalSlug, req, select }),
+  })
+
+  if (projection && branchGlobalNeedsBothRows({ branch, globalSlug, req })) {
+    projection._branch = true
+  }
+
   const options: QueryOptions = {
     lean: true,
-    select: buildProjectionFromSelect({
-      adapter: this,
-      fields,
-      select: withBranchGlobalSelect({ branch, globalSlug, req, select }),
-    }),
+    select: projection,
     session: await getSession(this, req),
   }
 
@@ -56,7 +62,7 @@ export const findGlobal: FindGlobal = async function findGlobal<T extends Record
   if (branchGlobalNeedsBothRows({ branch, globalSlug, req })) {
     const rows = await Model.find(query, {}, { ...options, limit: 2 }).lean<T[]>()
 
-    doc = pickBranchGlobal(rows, branch || resolveBranch(req as never))
+    doc = pickBranchGlobal(rows, branch || resolveBranch({ req: req as never }))
   } else {
     doc = (await Model.findOne(query, {}, options).lean<T>()) as T
   }

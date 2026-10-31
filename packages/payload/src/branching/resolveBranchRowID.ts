@@ -42,7 +42,7 @@ export const resolveBranchRowID = async ({
     return id
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch = branchOverride ?? resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return id

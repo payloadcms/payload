@@ -36,6 +36,16 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
     },
   ]
 
+  if (config.branching?.enabled && config.branching.branchableGlobals.has(global.slug)) {
+    fields.push({
+      name: '_branch',
+      type: 'text',
+      defaultValue: 'main',
+      index: true,
+      admin: { hidden: true },
+    })
+  }
+
   if (hasDraftsEnabled(global)) {
     if (config.localization) {
       fields.push({
