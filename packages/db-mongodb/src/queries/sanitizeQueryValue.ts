@@ -202,7 +202,7 @@ export const sanitizeQueryValue = ({
   }
 
   if (['relationship', 'upload'].includes(field.type)) {
-    if (val === 'null') {
+    if (val === 'null' || (Array.isArray(val) && val.length === 1 && val[0] === 'null')) {
       formattedValue = null
     }
 
