@@ -76,7 +76,9 @@ export const MergeLedger: React.FC<{ events: MergeEvent[] }> = ({ events }) => {
       key: string
       mergeID: string
     }) => {
-      if (loadedRef.current[key]) {
+      const previous = loadedRef.current[key]
+
+      if (previous && previous.status !== 'error') {
         return
       }
 
