@@ -15,6 +15,7 @@ import type { ScheduledMerge } from './ScheduledMerges/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
 import { BranchChanges, SetDocumentStepNav } from '../../exports/client/index.js'
 import { buildUpcomingMergeWhere } from '../../utilities/buildUpcomingMergeWhere.js'
+import { filterReadableBranchChanges } from './filterReadableBranchChanges.js'
 import './index.css'
 
 /** Small: each event lists every document it merged, so pages grow with the events. */
@@ -68,7 +69,7 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
       })
     : null
 
-  const documentChanges: BranchChange[] = (changes?.docs ?? []).reduce<BranchChange[]>(
+  const registryChanges: BranchChange[] = (changes?.docs ?? []).reduce<BranchChange[]>(
     (acc, change) => {
       const row = change as {
         collectionSlug?: string
@@ -106,6 +107,10 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
     },
     [],
   )
+
+  const documentChanges = slug
+    ? await filterReadableBranchChanges({ branch: slug, changes: registryChanges, req })
+    : []
 
   // Upcoming schedules, soonest first. A branch can carry several — schedule a merge,
   // keep working, schedule another — so this is a list rather than a flag.
