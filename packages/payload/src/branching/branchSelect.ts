@@ -33,7 +33,7 @@ export const isBranchProjectionActive = ({ branch, collectionSlug, req }: Active
     return false
   }
 
-  return (branch ?? resolveBranch(req as PayloadRequest)) !== MAIN_BRANCH
+  return (branch ?? resolveBranch({ req: req as PayloadRequest })) !== MAIN_BRANCH
 }
 
 type SelectArgs = {
