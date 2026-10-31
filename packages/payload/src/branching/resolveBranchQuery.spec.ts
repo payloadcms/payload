@@ -83,7 +83,7 @@ describe('resolveBranchReadState', () => {
 
     req.branch = 'halloween-updates'
 
-    expect(resolveBranch(req)).toBe('halloween-updates')
+    expect(resolveBranch({ req: req })).toBe('halloween-updates')
   })
 
   it('should identify a bypassed request as main without caching branch state', () => {
@@ -109,6 +109,6 @@ describe('resolveBranchReadState', () => {
     delete (req.context as Record<string, unknown>)._branchBypass
     req.branch = 'christmas-updates'
 
-    expect(resolveBranch(req)).toBe('christmas-updates')
+    expect(resolveBranch({ req: req })).toBe('christmas-updates')
   })
 })

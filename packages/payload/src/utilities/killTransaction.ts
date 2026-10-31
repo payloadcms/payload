@@ -47,6 +47,6 @@ export async function killTransaction(
       clearTransactionRollbackCallbacks({ req, transactionID })
     }
 
-    resetBranchState(req as PayloadRequest)
+    resetBranchState({ req: req as PayloadRequest })
   }
 }

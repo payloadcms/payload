@@ -89,7 +89,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
   incomingArgs: Arguments<TSlug, TSelect>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const hasCallerTransaction = Boolean(await incomingArgs.req.transactionID)
-  const branch = resolveBranch(incomingArgs.req)
+  const branch = resolveBranch({ req: incomingArgs.req })
   let didOwnAttemptTransaction = false
   let didReachFinalCommit = false
   let isRetrySafe = false
@@ -240,7 +240,7 @@ const deleteByIDOperationAttempt = async <
       Boolean(
         config.branching?.enabled &&
         config.branching.branchableCollections.has(collectionConfig.slug),
-      ) && resolveBranch(req) !== MAIN_BRANCH
+      ) && resolveBranch({ req: req }) !== MAIN_BRANCH
 
     // /////////////////////////////////////
     // Access
@@ -293,7 +293,7 @@ const deleteByIDOperationAttempt = async <
 
     const documentToDelete = docToDelete as Record<string, unknown>
 
-    const branch = resolveBranch(req)
+    const branch = resolveBranch({ req: req })
     const isBranchingDocument =
       branch !== MAIN_BRANCH &&
       req.payload.config.branching?.branchableCollections.has(collectionConfig.slug)
@@ -605,7 +605,7 @@ const deleteByIDOperationAttempt = async <
     }
 
     if (isDeletingFromBranch) {
-      refreshBranchState(req)
+      refreshBranchState({ req: req })
     }
 
     return result as TransformCollectionWithSelect<TSlug, TSelect>
@@ -617,7 +617,7 @@ const deleteByIDOperationAttempt = async <
     if (shouldCommit) {
       await killTransaction(args.req)
     }
-    resetBranchState(args.req)
+    resetBranchState({ req: args.req })
 
     if (hasFileOperationScope) {
       await abortFileOperationScope({ req: args.req })

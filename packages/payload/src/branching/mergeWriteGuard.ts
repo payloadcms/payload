@@ -44,7 +44,7 @@ export const runBranchMergeWriteGuard = async ({
   globalSlug,
   req,
 }: BranchMergeWrite): Promise<void> => {
-  if (resolveBranch(req) !== MAIN_BRANCH) {
+  if (resolveBranch({ req: req }) !== MAIN_BRANCH) {
     return
   }
 
