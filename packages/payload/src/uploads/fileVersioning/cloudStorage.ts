@@ -3,6 +3,8 @@ import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { FileToSave } from '../types.js'
 import type { StagedObject } from './fileOperationManager.js'
 
+import { resolveBranchRowID } from '../../branching/resolveBranchRowID.js'
+import { branchField, branchParentField } from '../../branching/types.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import {
   collectStoredFiles as collectSavedFiles,
@@ -15,6 +17,11 @@ import {
   getStoredFileIdentity,
   withLegacyCloudUploadFileData,
 } from './storedFiles.js'
+
+type BranchVersionMetadata = {
+  [branchField]?: null | string
+  [branchParentField]?: null | number | string
+}
 
 /** Preserve the caller's cloud flags; nested Local API calls can replace req.context. */
 export const captureCloudHookState = ({ req }: { req: PayloadRequest }): (() => void) => {
@@ -227,19 +234,27 @@ const persistLegacyCloudVersions = async ({
   id: number | string
   req: PayloadRequest
 }): Promise<void> => {
+  const versionParent = await resolveBranchRowID({
+    id,
+    collectionSlug: collection.slug,
+    req,
+  })
   let page = 1
   let hasVersions = false
 
   while (true) {
     const versions = await req.payload.db.findVersions<JsonObject>({
+      branch: false,
       collection: collection.slug,
       limit: 100,
       page,
       req,
-      where: { parent: { equals: id } },
+      where: { parent: { equals: versionParent } },
     })
 
     for (const row of versions.docs) {
+      const branchVersion = row as BranchVersionMetadata & typeof row
+
       hasVersions = true
       if (hasStoredOriginal({ doc: row.version })) {
         continue
@@ -259,6 +274,12 @@ const persistLegacyCloudVersions = async ({
         collection: collection.slug,
         req,
         versionData: {
+          ...(branchVersion[branchField] !== undefined
+            ? { [branchField]: branchVersion[branchField] }
+            : {}),
+          ...(branchVersion[branchParentField] !== undefined
+            ? { [branchParentField]: branchVersion[branchParentField] }
+            : {}),
           createdAt: row.createdAt,
           latest: row.latest,
           parent: row.parent,

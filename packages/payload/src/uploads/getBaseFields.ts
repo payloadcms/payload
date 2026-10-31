@@ -3,6 +3,7 @@ import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
 import type { SanitizedUploadConfig } from './types.js'
 
+import { appendBranchToFileURL } from './appendBranchToFileURL.js'
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
 import { validateUploadFilename } from './validateUploadFilename.js'
@@ -53,22 +54,29 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
             typeof collection.upload !== 'boolean' ? collection.upload?.adminThumbnail : undefined
 
           if (typeof adminThumbnail === 'function') {
-            return adminThumbnail({ doc: originalDoc })
+            const customThumbnailURL = adminThumbnail({ doc: originalDoc })
+
+            return typeof customThumbnailURL === 'string'
+              ? appendBranchToFileURL({ req, url: customThumbnailURL })
+              : customThumbnailURL
           }
 
-          return generateFilePathOrURL({
-            collectionSlug: collection.slug,
-            config,
-            filename:
-              typeof adminThumbnail === 'string'
-                ? (originalDoc.variants?.[adminThumbnail]?.filename as string)
-                : undefined,
-            relative: false,
-            serverURL: req.payload.config.serverURL,
-            urlOrPath:
-              typeof adminThumbnail === 'string'
-                ? (originalDoc.variants?.[adminThumbnail]?.url as string)
-                : undefined,
+          return appendBranchToFileURL({
+            req,
+            url: generateFilePathOrURL({
+              collectionSlug: collection.slug,
+              config,
+              filename:
+                typeof adminThumbnail === 'string'
+                  ? (originalDoc.variants?.[adminThumbnail]?.filename as string)
+                  : undefined,
+              relative: false,
+              serverURL: req.payload.config.serverURL,
+              urlOrPath:
+                typeof adminThumbnail === 'string'
+                  ? (originalDoc.variants?.[adminThumbnail]?.url as string)
+                  : undefined,
+            }),
           })
         },
       ],
@@ -143,13 +151,16 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       hooks: {
         afterRead: [
           ({ data, originalDoc, req, value }) =>
-            generateFilePathOrURL({
-              collectionSlug: collection.slug,
-              config,
-              filename: data?.filename || originalDoc?.filename,
-              relative: false,
-              serverURL: req.payload.config.serverURL,
-              urlOrPath: value,
+            appendBranchToFileURL({
+              req,
+              url: generateFilePathOrURL({
+                collectionSlug: collection.slug,
+                config,
+                filename: data?.filename || originalDoc?.filename,
+                relative: false,
+                serverURL: req.payload.config.serverURL,
+                urlOrPath: value,
+              }),
             }),
         ],
         beforeChange: [
@@ -185,13 +196,16 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           hooks: {
             afterRead: [
               ({ data, originalDoc, req, value }) => {
-                return generateFilePathOrURL({
-                  collectionSlug: collection.slug,
-                  config,
-                  filename: data?.original?.filename || originalDoc?.original?.filename,
-                  relative: false,
-                  serverURL: req.payload.config.serverURL,
-                  urlOrPath: value,
+                return appendBranchToFileURL({
+                  req,
+                  url: generateFilePathOrURL({
+                    collectionSlug: collection.slug,
+                    config,
+                    filename: data?.original?.filename || originalDoc?.original?.filename,
+                    relative: false,
+                    serverURL: req.payload.config.serverURL,
+                    urlOrPath: value,
+                  }),
                 })
               },
             ],
@@ -276,15 +290,18 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               hooks: {
                 afterRead: [
                   ({ collection, data, originalDoc, req, value }) =>
-                    generateFilePathOrURL({
-                      collectionSlug: collection?.slug as string,
-                      config,
-                      filename:
-                        data?.variants?.[size.name]?.filename ||
-                        originalDoc?.variants?.[size.name]?.filename,
-                      relative: false,
-                      serverURL: req.payload.config.serverURL,
-                      urlOrPath: value,
+                    appendBranchToFileURL({
+                      req,
+                      url: generateFilePathOrURL({
+                        collectionSlug: collection?.slug as string,
+                        config,
+                        filename:
+                          data?.variants?.[size.name]?.filename ||
+                          originalDoc?.variants?.[size.name]?.filename,
+                        relative: false,
+                        serverURL: req.payload.config.serverURL,
+                        urlOrPath: value,
+                      }),
                     }),
                 ],
                 beforeChange: [
