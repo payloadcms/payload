@@ -24,6 +24,7 @@ const config = await buildConfigWithDefaults({
       },
     ],
     localization: { defaultLocale: 'en', locales: ['en', 'es'] },
+    typescript: { autoGenerate: false },
   },
 })
 
