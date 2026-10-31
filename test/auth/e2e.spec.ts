@@ -19,7 +19,7 @@ import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.
 import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { BASE_PATH, slug } from './shared.js'
+import { BASE_PATH, passwordMinLengthSlug, slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -290,6 +290,19 @@ describe('Auth', () => {
         // should succeed with matching confirm password
         await page.locator('#field-confirm-password').fill('password')
         await saveDocAndAssert(page, '#action-save')
+      })
+
+      test('should use the password field minLength when creating a user', async () => {
+        const minLengthURL = new AdminUrlUtil(serverURL, passwordMinLengthSlug)
+
+        await page.goto(minLengthURL.create)
+        await page.locator('#field-email').fill('min-length@payloadcms.com')
+        await page.locator('#field-password').fill('ab')
+        await page.locator('#field-confirm-password').fill('ab')
+        await page.locator('#action-save').click({ delay: 100 })
+        await expect(page.locator('#field-error-password')).toHaveText(
+          'This value must be longer than the minimum length of 8 characters.',
+        )
       })
     })
 
