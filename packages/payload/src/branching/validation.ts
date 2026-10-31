@@ -54,7 +54,7 @@ export type BranchMergeValidate = (args: {
 }) => BranchMergeValidationResult | Promise<BranchMergeValidationResult>
 
 export const createMainBranchRequest = ({ req }: { req: PayloadRequest }): PayloadRequest => {
-  const targetReq = isolateBranchState(req)
+  const targetReq = isolateBranchState({ req: req })
 
   targetReq.branch = MAIN_BRANCH
   targetReq.query = { ...targetReq.query }

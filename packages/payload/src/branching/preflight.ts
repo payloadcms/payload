@@ -356,7 +356,7 @@ const getProposedWrites = async ({
 }
 
 const withLocale = ({ locale, req }: { locale: string; req: PayloadRequest }): PayloadRequest => {
-  const isolated = isolateBranchState(req)
+  const isolated = isolateBranchState({ req: req })
 
   isolated.locale = locale
 
