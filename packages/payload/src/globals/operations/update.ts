@@ -51,6 +51,7 @@ import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePubli
 import { getLocalizedDraftStatus } from '../../versions/drafts/getLocalizedDraftStatus.js'
 import { hasNonLocalizedDataChanged } from '../../versions/drafts/hasNonLocalizedDataChanged.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
+import { normalizeLocalizedStatus } from '../../versions/normalizeLocalizedStatus.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { validateGlobalLocalWithLocaleKeyedData } from './local/validate.js'
 type Args<TSlug extends GlobalSlug> = {
@@ -393,25 +394,13 @@ export const updateOperation = async <
       hasLocalizeStatusEnabled(globalConfig) &&
       typeof result._status === 'string'
     ) {
-      const statusStr = result._status
-
-      if (
-        typeof globalJSON._status === 'object' &&
-        globalJSON._status !== null &&
-        !Array.isArray(globalJSON._status)
-      ) {
-        result._status = { ...globalJSON._status }
-      } else {
-        result._status = {}
-      }
-
-      if (!hasAuthorizedPublicationStatus) {
-        const localesToUpdate = locale === 'all' ? config.localization.localeCodes : [locale!]
-
-        for (const localeCode of localesToUpdate) {
-          ;(result._status as Record<string, unknown>)[localeCode] = statusStr
-        }
-      }
+      result._status = normalizeLocalizedStatus({
+        existingStatus: globalJSON._status,
+        hasAuthorizedPublicationStatus,
+        locale: locale!,
+        localeCodes: config.localization.localeCodes,
+        status: result._status,
+      })
     }
 
     // /////////////////////////////////////

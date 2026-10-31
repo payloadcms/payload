@@ -54,6 +54,7 @@ import {
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
 import { getLocalizedDraftStatus } from '../../../versions/drafts/getLocalizedDraftStatus.js'
 import { hasNonLocalizedDataChanged } from '../../../versions/drafts/hasNonLocalizedDataChanged.js'
+import { normalizeLocalizedStatus } from '../../../versions/normalizeLocalizedStatus.js'
 import { validateLocalWithLocaleKeyedData } from '../local/validate.js'
 
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
@@ -348,25 +349,13 @@ export const updateDocument = async <
     hasLocalizeStatusEnabled(collectionConfig) &&
     typeof result._status === 'string'
   ) {
-    const statusStr = result._status
-
-    if (
-      typeof docWithLocales._status === 'object' &&
-      docWithLocales._status !== null &&
-      !Array.isArray(docWithLocales._status)
-    ) {
-      result._status = { ...docWithLocales._status }
-    } else {
-      result._status = {}
-    }
-
-    if (!hasAuthorizedPublicationStatus) {
-      const localesToUpdate = locale === 'all' ? config.localization.localeCodes : [locale]
-
-      for (const localeCode of localesToUpdate) {
-        ;(result._status as Record<string, unknown>)[localeCode] = statusStr
-      }
-    }
+    result._status = normalizeLocalizedStatus({
+      existingStatus: docWithLocales._status,
+      hasAuthorizedPublicationStatus,
+      locale,
+      localeCodes: config.localization.localeCodes,
+      status: result._status,
+    })
   }
 
   let localizedPublishData: JsonObject | null = null
