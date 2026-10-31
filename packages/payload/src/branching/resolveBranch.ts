@@ -2,8 +2,8 @@ import type { PayloadRequest } from '../types/index.js'
 import type { BranchOperation, SanitizedBranchingConfig } from './types.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
-import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { extractRelationshipID } from '../utilities/extractRelationshipID.js'
+import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { branchesCollectionSlug, MAIN_BRANCH } from './types.js'
 
 /**
@@ -271,11 +271,11 @@ export const loadBranchOperation = async ({
  * the dataloader's cache key does not include the branch and would otherwise
  * serve one branch's document to the other.
  */
-export const isolateBranchState = (req: PayloadRequest): PayloadRequest => {
+export const isolateBranchState = ({ req }: { req: PayloadRequest }): PayloadRequest => {
   const isolated = isolateObjectProperty(req, ['branch', 'context', 'payloadDataLoader'])
   isolated.context = { ...req.context }
 
-  resetBranchState(isolated)
+  resetBranchState({ req: isolated })
   isolated.payloadDataLoader = getDataLoader(isolated)
 
   return isolated
@@ -431,8 +431,8 @@ export const rememberBranchRowID = ({
  * Isolated rather than mutated, because the caller's request keeps its own branch — the
  * HTTP handler still has a response to render on it.
  */
-export const withoutBranch = (req: PayloadRequest): PayloadRequest => {
-  const isolated = isolateBranchState(req)
+export const withoutBranch = ({ req }: { req: PayloadRequest }): PayloadRequest => {
+  const isolated = isolateBranchState({ req })
 
   // The same sentinel `createPayloadRequest({ branch: false })` sets, rather than a `branch`
   // of our own: `req.branch` alone is not enough, because resolution falls back to the
@@ -449,14 +449,16 @@ export const withoutBranch = (req: PayloadRequest): PayloadRequest => {
  * Deliberately does not resolve: callers use this to find out whether they are about to
  * *change* the branch, and resolving here would create the state they are checking for.
  */
-export const peekResolvedBranch = (req?: Partial<PayloadRequest>): string | undefined => {
+export const peekResolvedBranch = ({ req }: { req?: Partial<PayloadRequest> } = {}):
+  | string
+  | undefined => {
   const context = req?.context as Record<string, unknown> | undefined
 
   return (context?.[stateKey] as BranchState | undefined)?.branch
 }
 
 /** Clears memoized branch state, for tests and for cross-branch reads. */
-export const resetBranchState = (req: PayloadRequest): void => {
+export const resetBranchState = ({ req }: { req: PayloadRequest }): void => {
   const context = req.context as Record<string, unknown> | undefined
 
   if (context) {
@@ -465,13 +467,13 @@ export const resetBranchState = (req: PayloadRequest): void => {
 }
 
 /** Clears memoized branch and document state after a write changes what this request can read. */
-export const refreshBranchState = (req: PayloadRequest): void => {
-  resetBranchState(req)
-  refreshRequestDataLoader(req)
+export const refreshBranchState = ({ req }: { req: PayloadRequest }): void => {
+  resetBranchState({ req })
+  refreshRequestDataLoader({ req })
 }
 
 /** Clears documents cached while populating relationships on this request. */
-export const refreshRequestDataLoader = (req: PayloadRequest): void => {
+export const refreshRequestDataLoader = ({ req }: { req: PayloadRequest }): void => {
   req.payloadDataLoader = getDataLoader(req)
 }
 
