@@ -47,7 +47,7 @@ export const resolveBranchReadState = ({
   const isBypassed = branchOverride === false || isRequestBypassed
 
   if (isRequestBypassed && req?.payload) {
-    resolveBranch(req as PayloadRequest)
+    resolveBranch({ req: req as PayloadRequest })
   }
 
   if (!branching?.enabled || !isBranchable || isBypassed) {
@@ -61,7 +61,7 @@ export const resolveBranchReadState = ({
     typeof branchOverride === 'string'
       ? branchOverride
       : req?.payload
-        ? resolveBranch(req as PayloadRequest)
+        ? resolveBranch({ req: req as PayloadRequest })
         : MAIN_BRANCH
 
   return {
@@ -114,7 +114,7 @@ export const resolveBranchQuery = async ({
     return where
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch = branchOverride ?? resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return appendBranchFilter({
@@ -180,7 +180,7 @@ export const getBranchPredicateSync = ({
     return null
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch = branchOverride ?? resolveBranch({ req: req as PayloadRequest })
 
   const shadowedIDs =
     branch === MAIN_BRANCH

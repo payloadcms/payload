@@ -153,7 +153,9 @@ export const resolveBranchVersionQuery = async ({
   }
 
   const branch =
-    typeof branchOverride === 'string' ? branchOverride : resolveBranch(req as PayloadRequest)
+    typeof branchOverride === 'string'
+      ? branchOverride
+      : resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return buildBranchVersionQuery({ branch, deletedIDs: [], shadowedIDs: [], where })
@@ -190,7 +192,9 @@ export const resolveBranchVersionQuerySync = ({
   }
 
   const branch =
-    typeof branchOverride === 'string' ? branchOverride : resolveBranch(req as PayloadRequest)
+    typeof branchOverride === 'string'
+      ? branchOverride
+      : resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return buildBranchVersionQuery({ branch, deletedIDs: [], shadowedIDs: [], where })
@@ -230,7 +234,7 @@ export const resolveBranchVersionHistoryQuery = async ({
     return where
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch = branchOverride ?? resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     const base = where && Object.keys(where).length ? [where] : []
@@ -390,13 +394,13 @@ export const resolveBranchVersionParent = async ({
     return { parent, versionData }
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch = branchOverride ?? resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return { parent, versionData }
   }
 
-  const rowID = await resolveBranchRowID({ id: parent, collectionSlug, req })
+  const rowID = await resolveBranchRowID({ id: parent, branch, collectionSlug, req })
 
   return {
     parent: rowID,
@@ -458,7 +462,7 @@ export const resolveBranchOwnVersions = async ({
     return unscoped
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch = branchOverride ?? resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return { and: [unscoped, { [branchField]: { equals: MAIN_BRANCH } }] }
@@ -468,7 +472,7 @@ export const resolveBranchOwnVersions = async ({
   // address that row rather than the canonical ID. When the branch has no copy
   // yet, `resolveBranchRowID` returns the canonical ID — and the `_branch`
   // constraint is what then keeps the cascade off main's rows.
-  const rowID = await resolveBranchRowID({ id, collectionSlug, req })
+  const rowID = await resolveBranchRowID({ id, branch, collectionSlug, req })
 
   return { and: [{ parent: { equals: rowID } }, { [branchField]: { equals: branch } }] }
 }
