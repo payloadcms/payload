@@ -24,9 +24,23 @@ type Resolver<TSlug extends GlobalSlug> = (
   },
 ) => Promise<DataFromGlobalSlug<TSlug>>
 
+/**
+ * Creates a GraphQL resolver for updating a global document.
+ *
+ * @param globalConfig - The sanitized global configuration.
+ * @returns A resolver function that updates the global document with the provided data.
+ */
 export function update<TSlug extends GlobalSlug>(
   globalConfig: SanitizedGlobalConfig,
 ): Resolver<TSlug> {
+  /**
+   * Resolves the update mutation for a global document.
+   *
+   * @param _ - Unused root value.
+   * @param args - The mutation arguments including optional data, draft, locale, and fallbackLocale.
+   * @param context - The GraphQL context containing the request.
+   * @returns The updated global document.
+   */
   return async function resolver(_, args, context: Context) {
     if (args.locale) {
       context.req.locale = args.locale
@@ -39,7 +53,7 @@ export function update<TSlug extends GlobalSlug>(
 
     const options = {
       slug,
-      data: args.data,
+      data: args.data ?? {},
       depth: 0,
       draft: args.draft,
       globalConfig,
