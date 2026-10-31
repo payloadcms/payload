@@ -37,7 +37,7 @@ export const forkDocument = async ({
   req,
   useAmbientTransaction = false,
 }: Args): Promise<number | string> => {
-  const branch = resolveBranch(req)
+  const branch = resolveBranch({ req: req })
 
   if (branch === MAIN_BRANCH) {
     return id

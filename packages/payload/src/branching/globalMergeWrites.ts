@@ -86,7 +86,7 @@ export const readBranchGlobalWrite = async ({
   payload,
   req,
 }: { draft: boolean; locale: string } & BaseArgs): Promise<null | Record<string, unknown>> => {
-  const branchReq = isolateBranchState(req)
+  const branchReq = isolateBranchState({ req: req })
 
   branchReq.branch = MAIN_BRANCH
   branchReq.locale = locale

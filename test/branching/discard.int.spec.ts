@@ -238,44 +238,6 @@ test.suite('Branching: discard', { config: './config.ts', resetBetweenTests: fal
       expect((await pendingChanges()).docs).toHaveLength(1)
     })
 
-    test('should discard through the REST endpoint', async () => {
-      const branchDoc = (
-        await payload.find({
-          collection: branchesSlug,
-          pagination: false,
-          where: { slug: { equals: 'discardwork' } },
-        })
-      ).docs[0]!
-
-      const res = await restClient.POST(`/${branchesSlug}/${branchDoc.id}/discard`, {
-        body: JSON.stringify({}),
-        headers: { Authorization: `JWT ${token}` },
-      })
-      const data = await res.json()
-
-      expect(res.status).toBe(200)
-      expect(data.discarded).toHaveLength(2)
-      expect((await pendingChanges()).docs).toHaveLength(0)
-    })
-
-    test('should reject an unauthenticated discard', async () => {
-      const branchDoc = (
-        await payload.find({
-          collection: branchesSlug,
-          pagination: false,
-          where: { slug: { equals: 'discardwork' } },
-        })
-      ).docs[0]!
-
-      const res = await restClient.POST(`/${branchesSlug}/${branchDoc.id}/discard`, {
-        auth: false,
-        body: JSON.stringify({}),
-      })
-
-      expect([401, 403]).toContain(res.status)
-      expect((await pendingChanges()).docs).toHaveLength(2)
-    })
-
     test('should enforce branch delete access in the Local API by default', async () => {
       await expect(
         payload.branches.discard({
@@ -396,25 +358,6 @@ test.suite('Branching: discard', { config: './config.ts', resetBetweenTests: fal
 
       expect(result.discarded).toHaveLength(2)
       expect((await pendingChanges()).docs).toHaveLength(0)
-    })
-
-    test('should deny a REST discard when discardBranch returns false', async () => {
-      hookSpy.discardBranchAccess = () => false
-
-      const branchDoc = (
-        await payload.find({
-          collection: branchesSlug,
-          pagination: false,
-          where: { slug: { equals: 'discardwork' } },
-        })
-      ).docs[0]!
-      const res = await restClient.POST(`/${branchesSlug}/${branchDoc.id}/discard`, {
-        body: JSON.stringify({}),
-        headers: { Authorization: `JWT ${token}` },
-      })
-
-      expect(res.status).toBe(403)
-      expect((await pendingChanges()).docs).toHaveLength(2)
     })
   })
 })

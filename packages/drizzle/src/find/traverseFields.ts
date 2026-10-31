@@ -470,9 +470,17 @@ export const traverseFields = ({
 
           let joinQueryWhere: Where
 
-          const currentIDRaw = sql.raw(
-            `"${getNameFromDrizzleTable(currentIDColumn.table)}"."${currentIDColumn.name}"`,
-          )
+          const parentUsesBranching = collectionSlug
+            ? resolveBranchReadState({ collectionSlug, req }).useBranching
+            : false
+          const canonicalIDColumn = parentUsesBranching
+            ? adapter.tables[currentTableName][versions ? '_branchParent' : '_branchDocID']
+            : undefined
+          const currentIDRaw = canonicalIDColumn
+            ? sql`COALESCE(${canonicalIDColumn}, ${currentIDColumn})`
+            : sql.raw(
+                `"${getNameFromDrizzleTable(currentIDColumn.table)}"."${currentIDColumn.name}"`,
+              )
 
           if (Array.isArray(field.targetField.relationTo)) {
             joinQueryWhere = {

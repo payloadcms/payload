@@ -492,7 +492,7 @@ export const generateFileData = async <T>({
     }
 
     let fsSafeName = getSanitizedUploadFilename(outputName, ext)
-    const branch = resolveBranch(req)
+    const branch = resolveBranch({ req: req })
     const isIsolatedProviderUpload = Boolean(
       file.uploadReference &&
       typeof file.uploadReference === 'object' &&
