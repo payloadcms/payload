@@ -1,6 +1,6 @@
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequest } from '../types'
 import type { UploadTransformer } from './transformers/types.js'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
