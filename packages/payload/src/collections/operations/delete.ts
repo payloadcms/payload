@@ -229,7 +229,7 @@ export const deleteOperation = async <
 
     const deletedDocumentIDs = new Map<string, number | string>()
     const hasWriteCapableBeforeDeleteHooks = Boolean(collectionConfig.hooks?.beforeDelete?.length)
-    const branch = resolveBranch(req)
+    const branch = resolveBranch({ req: req })
     const isDeletingFromBranch =
       Boolean(
         config.branching?.enabled &&
@@ -783,7 +783,7 @@ export const deleteOperation = async <
         if (docShouldCommit) {
           await killTransaction(req)
           deletedDocumentIDs.delete(String(doc.id))
-          resetBranchState(req)
+          resetBranchState({ req: req })
         }
 
         if (hasIndividualFileScope) {
@@ -1012,7 +1012,7 @@ export const deleteOperation = async <
 
         if (shouldCommit) {
           await killTransaction(req)
-          resetBranchState(req)
+          resetBranchState({ req: req })
 
           for (const id of deletedInBatch) {
             deletedDocumentIDs.delete(String(id))
@@ -1062,7 +1062,7 @@ export const deleteOperation = async <
 
             didBatchDeleteFail = true
             await killTransaction(req)
-            resetBranchState(req)
+            resetBranchState({ req: req })
             results.fill(null)
 
             for (const id of deletedInBatch) {
@@ -1179,7 +1179,7 @@ export const deleteOperation = async <
     }
 
     if (isDeletingFromBranch) {
-      refreshBranchState(req)
+      refreshBranchState({ req: req })
     }
 
     return result
@@ -1191,7 +1191,7 @@ export const deleteOperation = async <
     if (shouldCommit) {
       await killTransaction(args.req)
     }
-    resetBranchState(args.req)
+    resetBranchState({ req: args.req })
 
     if (hasFileOperationScope) {
       await abortFileOperationScope({ req: args.req })

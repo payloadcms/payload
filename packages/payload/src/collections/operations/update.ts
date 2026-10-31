@@ -144,7 +144,7 @@ export const updateOperation = async <
   }
 
   try {
-    const branch = resolveBranch(args.req)
+    const branch = resolveBranch({ req: args.req })
     const isBranchUpdate =
       branch !== MAIN_BRANCH &&
       Boolean(
@@ -656,7 +656,7 @@ export const updateOperation = async <
               }
             }
             if (isBranchUpdate) {
-              resetBranchState(documentReq)
+              resetBranchState({ req: documentReq })
             }
             if (
               (hasCallerTransaction && hasEnteredUpdateDocument) ||
@@ -747,7 +747,7 @@ export const updateOperation = async <
     }
 
     if (isBranchUpdate) {
-      refreshRequestDataLoader(req)
+      refreshRequestDataLoader({ req: req })
     }
 
     if (hasFileOperationScope) {
@@ -760,7 +760,7 @@ export const updateOperation = async <
     const shouldRollbackArtifacts = shouldRollbackTransactionArtifacts({ error })
 
     if (shouldUsePerDocumentBranchTransactions) {
-      resetBranchState(args.req)
+      resetBranchState({ req: args.req })
     }
 
     if (cleanupScope) {

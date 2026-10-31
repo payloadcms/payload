@@ -198,7 +198,7 @@ export const defaultBranchMergeValidation: BranchMergeValidate = ({ candidates, 
       continue
     }
 
-    const candidateReq = isolateBranchState(req)
+    const candidateReq = isolateBranchState({ req: req })
 
     if (candidate.locale) {
       candidateReq.locale = candidate.locale
