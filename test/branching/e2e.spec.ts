@@ -1808,9 +1808,12 @@ test.describe('Branching', () => {
       locale: 'en',
     })
 
-    await page.goto(slugDraftsURL.list)
+    await page.goto(withCurrentBranch({ page, href: slugDraftsURL.list }))
     await switchBranch({ name: branchName, page })
-    await gotoAndWaitForForm(page, slugDraftsURL.edit(doc.id))
+    await gotoAndWaitForForm(
+      page,
+      withCurrentBranch({ page, href: `${slugDraftsURL.edit(doc.id)}?locale=en` }),
+    )
     await expect(page.locator('#field-title')).toHaveValue('Initial branch draft')
 
     const autosaved = page.waitForResponse((response) => {
@@ -1875,9 +1878,12 @@ test.describe('Branching', () => {
         data: { code: 'website-code', slug: 'website-page', title: 'Website page' },
       })
 
-      await page.goto(slugDraftsURL.list)
+      await page.goto(withCurrentBranch({ page, href: slugDraftsURL.list }))
       await switchBranch({ name: branch === 'main' ? 'main' : branchName, page })
-      await gotoAndWaitForForm(page, slugDraftsURL.edit(doc.id))
+      await gotoAndWaitForForm(
+        page,
+        withCurrentBranch({ page, href: `${slugDraftsURL.edit(doc.id)}?locale=en` }),
+      )
       await expect(page.locator('#field-title')).toHaveValue('Website page')
 
       const autosaved = page.waitForResponse((response) => {
@@ -1928,9 +1934,12 @@ test.describe('Branching', () => {
         locale: 'es',
       })
 
-      await page.goto(localizedURL.list)
+      await page.goto(withCurrentBranch({ page, href: localizedURL.list }))
       await switchBranch({ name: branchName, page })
-      await gotoAndWaitForForm(page, localizedURL.edit(doc.id))
+      await gotoAndWaitForForm(
+        page,
+        withCurrentBranch({ page, href: `${localizedURL.edit(doc.id)}?locale=en` }),
+      )
       await expect(page.locator('#field-title')).toHaveValue('Branch-only English draft')
 
       const validationRequests: { branch: null | string; locales: string[]; status: number }[] = []
