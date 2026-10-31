@@ -300,7 +300,7 @@ describe('buildPolymorphicJoinQuery', () => {
       },
     } as unknown as PayloadRequest
 
-    resolveBranch(req)
+    resolveBranch({ req: req })
 
     const query = renderQuery(buildQuery({ adapter: branchAdapter, req }))
 

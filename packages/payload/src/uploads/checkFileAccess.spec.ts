@@ -111,3 +111,21 @@ describe('checkFileAccess', () => {
     })
   })
 })
+
+it.each(['main', 'campaign'])(
+  'should verify the visible upload document even for public reads on %s',
+  async (branch) => {
+    vi.mocked(executeAccess).mockResolvedValueOnce(true)
+    const findOne = makeFindOne(null)
+    const req = makeReq(findOne)
+
+    req.branch = branch
+    req.payload.config = {
+      branching: { enabled: true, branchableCollections: new Set(['test-media']) },
+    } as never
+    await expect(
+      checkFileAccess({ collection: makeCollection(), filename: 'other-branch.png', req }),
+    ).rejects.toThrow()
+    expect(findOne).toHaveBeenCalledOnce()
+  },
+)

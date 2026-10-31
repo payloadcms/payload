@@ -817,7 +817,7 @@ export const commitOperationRetryRequestContext = ({ req }: { req: PayloadReques
       msg: 'Failed to apply request state changes after committing an operation retry.',
     })
   } finally {
-    refreshBranchState(originalReq)
+    refreshBranchState({ req: originalReq })
     retryRequestStateByRequest.delete(req)
   }
 }
@@ -869,7 +869,7 @@ export const createOperationRetryRequest = async ({
   delete (retryReq as Partial<PayloadRequest>).payloadDataLoader
   delete retryReq.payloadUploadSizes
   delete retryReq.transactionID
-  resetBranchState(retryReq)
+  resetBranchState({ req: retryReq })
 
   const fallbackLocale =
     req.fallbackLocale === false || typeof req.fallbackLocale === 'string'

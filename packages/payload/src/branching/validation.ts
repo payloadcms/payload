@@ -17,7 +17,8 @@ import {
 import { branchMergeValidationContextKey } from './mergeWriteGuard.js'
 import { readLocalizedBranchWrite } from './readLocalizedBranchWrite.js'
 import { isolateBranchState } from './resolveBranch.js'
-import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
+import { stripBranchMergeData, stripBranchMergeGlobalData } from './stripBranchMergeData.js'
+import { MAIN_BRANCH } from './types.js'
 
 export type BranchMergeValidationCandidate = {
   changeID: number | string
@@ -54,7 +55,7 @@ export type BranchMergeValidate = (args: {
 }) => BranchMergeValidationResult | Promise<BranchMergeValidationResult>
 
 export const createMainBranchRequest = ({ req }: { req: PayloadRequest }): PayloadRequest => {
-  const targetReq = isolateBranchState(req)
+  const targetReq = isolateBranchState({ req: req })
 
   targetReq.branch = MAIN_BRANCH
   targetReq.query = { ...targetReq.query }
@@ -171,7 +172,10 @@ export const prepareBranchMergeValidationCandidates = async ({
           candidates.push({
             changeID: change.id as number | string,
             data: stripNonWritableFields({
-              data: stripGlobalInternal(data),
+              data: stripBranchMergeGlobalData({
+                data,
+                fields: payload.globals.config.find(({ slug }) => slug === globalSlug)!.fields,
+              }),
               fields: payload.globals.config.find(({ slug }) => slug === globalSlug)!.fields,
               payload,
             }),
@@ -198,7 +202,7 @@ export const defaultBranchMergeValidation: BranchMergeValidate = ({ candidates, 
       continue
     }
 
-    const candidateReq = isolateBranchState(req)
+    const candidateReq = isolateBranchState({ req: req })
 
     if (candidate.locale) {
       candidateReq.locale = candidate.locale
@@ -241,25 +245,6 @@ export const defaultBranchMergeValidation: BranchMergeValidate = ({ candidates, 
   return { errors, valid: errors.length === 0 }
 }
 
-const stripInternal = (data: Record<string, unknown>): Record<string, unknown> => {
-  const {
-    id: _id,
-    [branchDocIDField]: _docID,
-    [branchField]: _branch,
-    createdAt: _createdAt,
-    updatedAt: _updatedAt,
-    ...rest
-  } = data
-
-  return rest
-}
-
-const stripGlobalInternal = (data: Record<string, unknown>): Record<string, unknown> => {
-  const { globalType: _globalType, ...globalData } = data
-
-  return stripInternal(globalData)
-}
-
 const prepareCollectionCandidate = ({
   collectionSlug,
   data,
@@ -270,7 +255,10 @@ const prepareCollectionCandidate = ({
   payload: Payload
 }): Record<string, unknown> =>
   stripNonWritableFields({
-    data: stripInternal(data),
+    data: stripBranchMergeData({
+      data,
+      fields: payload.collections[collectionSlug]!.config.fields,
+    }),
     fields: payload.collections[collectionSlug]!.config.fields,
     payload,
   })

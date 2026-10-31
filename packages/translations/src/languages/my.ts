@@ -305,7 +305,7 @@ export const myTranslations: DefaultTranslationsObject = {
     clearAll: 'အားလုံးကိုရှင်းလင်းပါ',
     clearSearch: 'ရှာဖွေမှုကို ရှင်းလင်းရန်',
     close: 'ပိတ်',
-    closed: 'Ditutup',
+    closed: 'ပိတ်ထားသည်',
     collapse: 'ခေါက်သိမ်းပါ။',
     collection: 'စုဆည်းမှု',
     collections: 'စုစည်းမှူများ',

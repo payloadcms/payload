@@ -14,6 +14,7 @@ import {
   beginDeferredCleanupScope,
   clearDeferredCleanupScope,
   flushDeferredCleanupScope,
+  scheduleAfterTransactionCommit,
 } from '../utilities/transactionCallbacks.js'
 import { assertBranchActionAccess } from './assertBranchActionAccess.js'
 import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
@@ -115,7 +116,7 @@ const discardBranchChangesInternal = async (
   // `branch: false` throughout, as with merge: the rows being dropped are addressed
   // by their real primary keys, so the read predicate must not be in the way.
   const req = incomingReq
-    ? withoutBranch(incomingReq)
+    ? withoutBranch({ req: incomingReq })
     : await createPayloadRequest({ branch: false, payload, user })
 
   if (user) {
@@ -369,7 +370,15 @@ const discardBranchChangesInternal = async (
         await scheduleUnreferencedFileCleanup({ candidates, collection: collectionConfig, req })
 
         if (!collectionConfig.upload.fileOperations) {
-          await collectionConfig.upload.deleteFiles?.({ req, retainedDoc, sourceDoc })
+          const deleteFiles = async () => {
+            await collectionConfig.upload.deleteFiles?.({ req, retainedDoc, sourceDoc })
+          }
+
+          if (await req.transactionID) {
+            await scheduleAfterTransactionCommit({ callback: deleteFiles, req })
+          } else {
+            await deleteFiles()
+          }
         }
       } else {
         await deleteUploadFilesExclusiveToDocument({
@@ -399,13 +408,13 @@ const discardBranchChangesInternal = async (
     throw error
   } finally {
     if (incomingReq) {
-      refreshBranchState(incomingReq)
+      refreshBranchState({ req: incomingReq })
     }
   }
 
   // The manifest this request memoized still lists the discarded documents as
   // shadowed, which would hide main's copies from any later read on this request.
-  resetBranchState(req)
+  resetBranchState({ req: req })
 
   return result
 }
