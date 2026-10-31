@@ -54,3 +54,32 @@ test('should read internal branch state only after the branch access check', asy
     find.mock.invocationCallOrder[scheduledJobReadIndex]!,
   )
 })
+
+test.each([
+  ['1.5', 1],
+  ['2.9', 2],
+  ['0.5', 1],
+  ['0', 1],
+  ['-3', 1],
+  ['Infinity', 1],
+  ['invalid', 1],
+])('should normalize history page %s to %i', async (historyPage, expectedPage) => {
+  const find = vi.fn(async () => ({ docs: [], totalPages: 3 }))
+
+  await BranchChangesView({
+    initPageResult: {
+      collectionConfig: { admin: {}, labels: { plural: 'Branches' } },
+      docID: 1,
+      req: {
+        i18n: { t: (key: string) => key },
+        payload: { find, findByID: vi.fn(async () => ({ name: 'Campaign', slug: 'campaign' })) },
+        user: { id: 1 },
+      },
+    },
+    searchParams: { historyPage },
+  } as never)
+
+  expect(find).toHaveBeenCalledWith(
+    expect.objectContaining({ collection: 'payload-branch-merges', page: expectedPage }),
+  )
+})

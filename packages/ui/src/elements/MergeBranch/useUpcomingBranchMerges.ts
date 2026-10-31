@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { UpcomingBranchMerge } from '../../utilities/scheduleMergeHandler.js'
 import type { MergeMode } from './types.js'
@@ -23,10 +23,14 @@ export const useUpcomingBranchMerges = ({
   const { serverFunction } = useServerFunctions()
   const [upcoming, setUpcoming] = useState<UpcomingBranchMerge[]>([])
 
+  const requestVersion = useRef(0)
+
   const loadUpcoming = useCallback((): Promise<void> => {
     if (branchID === undefined || branchID === null) {
       return Promise.resolve()
     }
+
+    const version = ++requestVersion.current
 
     return Promise.resolve(
       serverFunction({
@@ -35,20 +39,31 @@ export const useUpcomingBranchMerges = ({
       }),
     )
       .then((upcomingMerges) => {
-        setUpcoming(upcomingMerges as UpcomingBranchMerge[])
+        if (version === requestVersion.current) {
+          setUpcoming(upcomingMerges as UpcomingBranchMerge[])
+        }
       })
       .catch(() => {
         // A missing list costs context, not the scheduling action.
       })
   }, [branchID, serverFunction])
 
+  const clearUpcoming = useCallback(() => {
+    requestVersion.current += 1
+    setUpcoming([])
+  }, [])
+
   useEffect(() => {
+    clearUpcoming()
+
     if (isOpen && mode === 'schedule') {
       void loadUpcoming()
     }
-  }, [isOpen, loadUpcoming, mode])
 
-  const clearUpcoming = useCallback(() => setUpcoming([]), [])
+    return () => {
+      requestVersion.current += 1
+    }
+  }, [clearUpcoming, isOpen, loadUpcoming, mode])
 
   return { clearUpcoming, loadUpcoming, upcoming }
 }

@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from 'react'
+import type { HTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
 
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -17,11 +17,16 @@ vi.mock('../../../elements/ShimmerEffect/index.js', () => ({
     </span>
   ),
 }))
-vi.mock('../../../fields/Checkbox/Input.js', () => ({ CheckboxInput: () => null }))
+vi.mock('../../../fields/Checkbox/Input.js', () => ({
+  CheckboxInput: (props: InputHTMLAttributes<HTMLInputElement>) => (
+    <input aria-label={props['aria-label']} type="checkbox" />
+  ),
+}))
 vi.mock('../../../icons/Chevron/index.js', () => ({ ChevronIcon: () => null }))
 vi.mock('../../../providers/Config/index.js', () => ({
   useConfig: () => ({
-    getEntityConfig: () => ({ labels: { singular: 'Post' } }),
+    getEntityConfig: ({ globalSlug }: { globalSlug?: string }) =>
+      globalSlug ? { label: 'Site settings' } : { labels: { singular: 'Post' } },
   }),
 }))
 vi.mock('../../../providers/ServerFunctions/index.js', () => ({
@@ -30,17 +35,24 @@ vi.mock('../../../providers/ServerFunctions/index.js', () => ({
 vi.mock('../../../providers/Translation/index.js', () => ({
   useTranslation: () => ({
     i18n: { language: 'en' },
-    t: (key: string) =>
-      ({
-        'branching:changedDocuments': 'Changed documents',
-        'branching:operation_update': 'Updated',
-        'error:unknown': 'An unknown error has occurred.',
-        'general:loading': 'Loading',
-      })[key] ?? key,
+    t: (key: string, values?: { label?: string }) =>
+      key === 'general:selectLabel'
+        ? `Select ${values?.label}`
+        : ({
+            'branching:changedDocuments': 'Changed documents',
+            'branching:operation_update': 'Updated',
+            'error:unknown': 'An unknown error has occurred.',
+            'general:loading': 'Loading',
+          }[key] ?? key),
   }),
 }))
 
+let notifyIntersection: IntersectionObserverCallback
+
 class IdleIntersectionObserver {
+  constructor(callback: IntersectionObserverCallback) {
+    notifyIntersection = callback
+  }
   disconnect = vi.fn()
   observe = vi.fn()
   unobserve = vi.fn()
@@ -103,4 +115,62 @@ test('should announce a diff loading error', async () => {
   await expect
     .element(screen.getByRole('alert'))
     .toHaveTextContent('An unknown error has occurred.')
+})
+
+test('should share an in-flight diff between prefetch and a simultaneous expansion', async () => {
+  serverFunction.mockReturnValue(new Promise(() => undefined))
+  const screen = await render(
+    <ChangedDocuments
+      branch="campaign"
+      changes={[
+        { collectionSlug: 'posts', docID: 'document-id', id: 'change-id', operation: 'update' },
+      ]}
+    />,
+  )
+
+  notifyIntersection(
+    [{ isIntersecting: true }] as IntersectionObserverEntry[],
+    {} as IntersectionObserver,
+  )
+  screen.getByRole('button', { name: 'document-id' }).element().click()
+
+  expect(serverFunction).toHaveBeenCalledTimes(1)
+})
+
+test('should label a global row and its controls before its diff loads', async () => {
+  serverFunction.mockReturnValue(new Promise(() => undefined))
+  const screen = await render(
+    <ChangedDocuments
+      branch="campaign"
+      changes={[{ globalSlug: 'settings', id: 'global-change', operation: 'update' }]}
+    />,
+  )
+
+  await expect.element(screen.getByRole('button', { name: 'Site settings' })).toBeVisible()
+  await expect.element(screen.getByRole('checkbox', { name: 'Select Site settings' })).toBeVisible()
+  await expect.element(screen.getByText('undefined', { exact: true })).not.toBeInTheDocument()
+})
+
+test('should retry a rejected diff when its row is expanded again', async () => {
+  serverFunction.mockRejectedValueOnce(new Error('Temporary failure'))
+  serverFunction.mockResolvedValueOnce({ title: 'document-id', diff: 'Recovered diff' })
+  const screen = await render(
+    <ChangedDocuments
+      branch="campaign"
+      changes={[
+        { collectionSlug: 'posts', docID: 'document-id', id: 'change-id', operation: 'update' },
+      ]}
+    />,
+  )
+  const toggle = screen.getByRole('button', { name: 'document-id' })
+
+  await toggle.click()
+  await expect
+    .element(screen.getByRole('alert'))
+    .toHaveTextContent('An unknown error has occurred.')
+  await toggle.click()
+  await toggle.click()
+
+  await expect.element(screen.getByRole('region')).toHaveTextContent('Recovered diff')
+  expect(serverFunction).toHaveBeenCalledTimes(2)
 })

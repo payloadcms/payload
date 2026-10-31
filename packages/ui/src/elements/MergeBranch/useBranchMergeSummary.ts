@@ -26,6 +26,9 @@ export const useBranchMergeSummary = ({
   const [sampledChanges, setSampledChanges] = useState<null | SummarizableChange[]>(null)
 
   useEffect(() => {
+    setCountedChanges(null)
+    setSampledChanges(null)
+
     if (!isOpen || branchID === undefined || branchID === null || knownChanges) {
       return
     }

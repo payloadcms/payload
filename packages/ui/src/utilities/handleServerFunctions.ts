@@ -12,6 +12,7 @@ import { sharedServerFunctions } from './serverFunctionRegistry.js'
 type InitAdminContextFn = (args: {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
+  requestURL?: string
 }) => Promise<AdminContext>
 
 type CreateServerFunctionHandlerArgs = {
@@ -54,6 +55,7 @@ export const createServerFunctionHandler = ({
     const { cookies, locale, permissions, req, user } = await initAdminContext({
       configPromise,
       importMap,
+      requestURL: args.requestURL,
     })
 
     const augmentedArgs: DefaultServerFunctionArgs = {
