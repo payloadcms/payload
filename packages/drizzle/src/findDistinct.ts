@@ -1,10 +1,12 @@
 import type { SQL } from 'drizzle-orm'
+import type { PayloadRequest } from 'payload'
 
 import { and, asc, desc, max, sql } from 'drizzle-orm'
 import {
   type FindDistinct,
   getFieldByPath,
   getLocalizedPaths,
+  resetBranchState,
   resolveBranchQuery,
   resolveBranchReadState,
   rewriteBranchIDs,
@@ -80,11 +82,6 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
       })
 
   const relatedBranchConstraints: Where[] = []
-  const nativeRelatedBranchReads: {
-    branch: string
-    collectionSlug: string
-    relationshipPath: string
-  }[] = []
   const fieldPaths = getLocalizedPaths({
     collectionSlug: args.collection,
     fields: collectionConfig.flattenedFields,
@@ -119,19 +116,27 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
           where: args.relatedAccess?.[relationshipPath],
         })
 
-    if (relatedBranchReadState.useBranching) {
-      nativeRelatedBranchReads.push({
-        branch: relatedBranchReadState.branch,
-        collectionSlug: relatedCollectionSlug,
-        relationshipPath,
-      })
-    }
-
     if (relatedWhere && Object.keys(relatedWhere).length) {
       relatedBranchConstraints.push(
         prefixWherePaths({ prefix: relationshipPath, where: relatedWhere }),
       )
     }
+  }
+
+  const queryReq =
+    args.req && args.branch !== undefined
+      ? {
+          ...args.req,
+          branch: args.branch === false ? args.req.branch : args.branch,
+          context: {
+            ...args.req.context,
+            ...(args.branch === false ? { _branchBypass: true } : {}),
+          },
+        }
+      : args.req
+
+  if (queryReq && queryReq !== args.req) {
+    resetBranchState(queryReq as PayloadRequest)
   }
 
   const {
@@ -143,6 +148,7 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     adapter: this,
     fields: collectionConfig.flattenedFields,
     locale: args.locale,
+    req: queryReq,
     sort: args.sort ?? args.field,
     tableName,
     where: {
@@ -177,23 +183,7 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
         table,
       })
     : undefined
-  const relatedBranchVisibility = nativeRelatedBranchReads.flatMap((relatedBranchRead) => {
-    const relatedTable = joins.find(({ queryPath }) =>
-      queryPath?.endsWith(`${relatedBranchRead.relationshipPath}._target`),
-    )?.table
-
-    return relatedTable
-      ? [
-          buildBranchVisibility({
-            adapter: this,
-            branch: relatedBranchRead.branch,
-            collectionSlug: relatedBranchRead.collectionSlug,
-            table: relatedTable,
-          }),
-        ]
-      : []
-  })
-  const where = and(queryWhere, branchVisibilityWhere, ...relatedBranchVisibility)
+  const where = and(queryWhere, branchVisibilityWhere)
 
   const db = await getTransaction(this, args.req)
 
