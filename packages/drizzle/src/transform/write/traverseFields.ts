@@ -732,7 +732,9 @@ export const traverseFields = ({
       if (isLocalized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
-            if (Array.isArray(localeData)) {
+            if (localeData === null) {
+              selectsToDelete[selectTableName].push({ locale: localeKey, parent: selectParent })
+            } else if (Array.isArray(localeData)) {
               selectsToDelete[selectTableName].push({ locale: localeKey, parent: selectParent })
 
               const newRows = transformSelects({
@@ -745,6 +747,11 @@ export const traverseFields = ({
             }
           })
         }
+      } else if (data[field.name] === null) {
+        selectsToDelete[selectTableName].push({
+          locale: withinArrayOrBlockLocale,
+          parent: selectParent,
+        })
       } else if (Array.isArray(data[field.name])) {
         selectsToDelete[selectTableName].push({
           locale: withinArrayOrBlockLocale,

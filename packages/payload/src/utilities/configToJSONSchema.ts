@@ -466,6 +466,7 @@ export function fieldsToJSONSchema({
         }
 
         let fieldSchema: JSONSchema4
+        let shouldWrapRichTextSchema = false
 
         switch (field.type) {
           case 'array': {
@@ -829,11 +830,8 @@ export function fieldsToJSONSchema({
                   variant,
                 }),
               }
-              fieldSchema = isRequired
-                ? richTextSchema
-                : {
-                    anyOf: [richTextSchema, { type: 'null' }],
-                  }
+              fieldSchema = richTextSchema
+              shouldWrapRichTextSchema = !isRequired
             } else {
               // Maintain backwards compatibility with existing rich text editors
               fieldSchema = {
@@ -949,6 +947,10 @@ export function fieldsToJSONSchema({
           for (const schema of field.jsonSchema) {
             fieldSchema = schema({ jsonSchema: fieldSchema!, variant })
           }
+        }
+
+        if (shouldWrapRichTextSchema) {
+          fieldSchema = { anyOf: [fieldSchema!, { type: 'null' }] }
         }
 
         if (fieldSchema! && fieldAffectsData(field)) {

@@ -22,6 +22,8 @@ const legacyMainFilter = {
  *
  * Run this generated migration after enabling branching. Backfill errors stop the migration
  * before any indexes are removed, so uniqueness conflicts remain visible and recoverable.
+ * Index synchronization removes indexes not declared in the configured Mongoose schema;
+ * declare user-managed indexes in that schema before running this migration.
  */
 export const migrateBranching = async ({
   payload,
