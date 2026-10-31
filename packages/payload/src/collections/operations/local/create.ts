@@ -216,22 +216,34 @@ export async function createLocal<
     payload,
   })
 
-  req.file = file ?? (await getFileByPath(filePath!))
+  // `req.file` belongs to this operation only. A hook may pass an outer operation's `req`
+  // to a nested Local API call, so restore the outer file once this operation finishes.
+  // See https://github.com/payloadcms/payload/issues/15975
+  const outerFile = req.file
+  const operationFile = file ?? (await getFileByPath(filePath!))
+  req.file = operationFile
 
-  return createOperation<TSlug, TSelect>({
-    collection,
-    data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
-    depth,
-    disableTransaction,
-    disableVerificationEmail,
-    draft,
-    duplicateFromID,
-    overrideAccess,
-    overwriteExistingFiles,
-    populate,
-    publishAllLocales,
-    req,
-    select,
-    showHiddenFields,
-  })
+  try {
+    return await createOperation<TSlug, TSelect>({
+      collection,
+      data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
+      depth,
+      disableTransaction,
+      disableVerificationEmail,
+      draft,
+      duplicateFromID,
+      overrideAccess,
+      overwriteExistingFiles,
+      populate,
+      publishAllLocales,
+      req,
+      select,
+      showHiddenFields,
+    })
+  } finally {
+    // Parallel nested calls may share `req`; only restore if no other call replaced the file.
+    if (req.file === operationFile) {
+      req.file = outerFile
+    }
+  }
 }
