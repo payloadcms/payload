@@ -119,7 +119,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       })
 
       const findManyKeysLength = Object.keys(findManyArgs).length
-      const hasOnlyColumns = Object.keys(findManyArgs.columns || {}).length > 0
+      // `returning()` can only return plain columns of this table. Extras (e.g. `point`
+      // fields read through ST_AsGeoJSON) and `with` (e.g. `_locales`) need the findFirst path below.
+      const hasOnlyColumns =
+        findManyKeysLength === 1 && Object.keys(findManyArgs.columns || {}).length > 0
 
       if (!hasDataToUpdate) {
         // Nothing to update => just fetch current row and return
@@ -151,17 +154,6 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
             if (enabled) {
               selectedFields[column] = adapter.tables[tableName][column]
             }
-          }
-        }
-
-        // Fields such as `point` are resolved via raw SQL expressions (e.g. ST_AsGeoJSON)
-        // rather than plain columns, and are tracked in `findManyArgs.extras`. Without
-        // merging them in here, `.returning()` would either omit them or fall back to
-        // returning every column (including the raw, unconverted value) once selectedFields
-        // is non-empty but missing these keys.
-        if (findManyArgs.extras) {
-          for (const [name, extra] of Object.entries(findManyArgs.extras)) {
-            selectedFields[name] = extra
           }
         }
 
