@@ -1,6 +1,8 @@
 import type { PayloadRequest } from '../types/index.js'
 import type { BranchOperation, SanitizedBranchingConfig } from './types.js'
 
+import { extractRelationshipID } from '../utilities/extractRelationshipID.js'
+
 import { branchesCollectionSlug, MAIN_BRANCH } from './types.js'
 
 /**
@@ -16,6 +18,7 @@ type BranchState = {
   /** Canonical shadowed document IDs, keyed by collection slug. */
   manifest: Map<string, (number | string)[]>
   manifestLoaded: boolean
+  manifestPromise?: Promise<void>
   /** Change-record operation keyed by collection and canonical document ID. */
   operations: Map<string, BranchOperation>
   /** Canonical ID → shadow row primary key, for the writes that resolved it. */
@@ -122,6 +125,7 @@ export const loadBranchManifest = async (
   }
 
   if (state.manifestLoaded) {
+    await state.manifestPromise
     return state.manifest
   }
 
@@ -129,50 +133,61 @@ export const loadBranchManifest = async (
   // through the adapter — cannot recurse back into loading the manifest.
   state.manifestLoaded = true
 
-  const { docs } = await req.payload.db.find({
-    collection: 'payload-branch-changes',
-    limit: 0,
-    pagination: false,
-    req,
-    where: {
-      and: [{ branch: { equals: branch } }, { entityType: { equals: 'collection' } }],
-    },
-  })
+  state.manifestPromise = (async () => {
+    const { docs } = await req.payload.db.find({
+      collection: 'payload-branch-changes',
+      limit: 0,
+      pagination: false,
+      req,
+      where: {
+        and: [{ branch: { equals: branch } }, { entityType: { equals: 'collection' } }],
+      },
+    })
 
-  for (const change of docs as Record<string, unknown>[]) {
-    const slug = change.collectionSlug as string
-    const docID = extractRelationshipID({ relationship: change.doc })
+    for (const change of docs as Record<string, unknown>[]) {
+      const slug = change.collectionSlug as string
+      const docID = extractRelationshipID({ relationship: change.doc })
 
-    if (!slug || docID === undefined || docID === null) {
-      continue
-    }
+      if (!slug || docID === undefined || docID === null) {
+        continue
+      }
 
-    const existing = state.manifest.get(slug)
+      const existing = state.manifest.get(slug)
 
-    if (existing) {
-      existing.push(docID)
-    } else {
-      state.manifest.set(slug, [docID])
-    }
-
-    if (change.operation === 'delete') {
-      const deleted = state.deleted.get(slug)
-
-      if (deleted) {
-        deleted.push(docID)
+      if (existing) {
+        existing.push(docID)
       } else {
-        state.deleted.set(slug, [docID])
+        state.manifest.set(slug, [docID])
+      }
+
+      if (change.operation === 'delete') {
+        const deleted = state.deleted.get(slug)
+
+        if (deleted) {
+          deleted.push(docID)
+        } else {
+          state.deleted.set(slug, [docID])
+        }
+      }
+
+      if (
+        change.operation === 'create' ||
+        change.operation === 'delete' ||
+        change.operation === 'update'
+      ) {
+        state.operations.set(`${slug}:${String(docID)}`, change.operation)
       }
     }
+  })().catch((error) => {
+    state.manifestLoaded = false
+    state.manifestPromise = undefined
+    state.manifest.clear()
+    state.deleted.clear()
+    state.operations.clear()
+    throw error
+  })
 
-    if (
-      change.operation === 'create' ||
-      change.operation === 'delete' ||
-      change.operation === 'update'
-    ) {
-      state.operations.set(`${slug}:${String(docID)}`, change.operation)
-    }
-  }
+  await state.manifestPromise
 
   return state.manifest
 }
