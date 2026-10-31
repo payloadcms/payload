@@ -19,6 +19,10 @@ import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
+import {
+  assertBranchMergeValidationWriteAllowed,
+  runBranchMergeWriteGuard,
+} from '../../branching/mergeWriteGuard.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
 import { APIError, ValidationError } from '../../errors/index.js'
 import { fillEmptyLocalizedSlugs } from '../../fields/baseFields/slug/fillEmptyLocalizedSlugs.js'
@@ -60,6 +64,7 @@ import { resolvePublishAllLocales } from '../../utilities/resolvePublishAllLocal
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import {
   buildAllLocalesPublicationHookDoc,
   getAllLocalesPublicationStatus,
@@ -104,6 +109,7 @@ export const createOperation = async <
     beginFileOperationScope({ req: args.req })
   }
 
+  assertBranchMergeValidationWriteAllowed({ req: args.req })
   assertNoValidationWrite(args.req)
 
   try {
@@ -511,6 +517,12 @@ export const createOperation = async <
     })
 
     const writeDocument = async () => {
+      await runBranchMergeWriteGuard({
+        collectionSlug: collectionConfig.slug,
+        data: dataWithLocales,
+        req,
+      })
+
       if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
         if (collectionConfig.auth.verify) {
           dataWithLocales._verified = Boolean(dataWithLocales._verified) || false
@@ -570,6 +582,7 @@ export const createOperation = async <
       }
       doc = await writeDocument()
     }
+    markTransactionWrite({ req })
 
     const verificationToken = doc._verificationToken
     let resultWithLocales: Document = sanitizeInternalFields(doc)

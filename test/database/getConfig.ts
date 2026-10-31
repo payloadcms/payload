@@ -670,6 +670,32 @@ export const getConfig: () => Partial<Config> = () => ({
           relationTo: 'relation-a',
         },
         {
+          name: 'localizedRelationship',
+          type: 'relationship',
+          hasMany: true,
+          localized: true,
+          relationTo: 'relation-a',
+        },
+        {
+          name: 'localizedTexts',
+          type: 'text',
+          hasMany: true,
+          localized: true,
+        },
+        {
+          name: 'localizedNumbers',
+          type: 'number',
+          hasMany: true,
+          localized: true,
+        },
+        {
+          name: 'localizedSelect',
+          type: 'select',
+          hasMany: true,
+          localized: true,
+          options: ['a', 'b', 'c'],
+        },
+        {
           name: 'select',
           type: 'select',
           dbName: ({ tableName }) => `${tableName}_customSelect`,
