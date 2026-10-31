@@ -1689,6 +1689,75 @@ test.describe('Branching', () => {
     })
   })
 
+  test('should publish the current locale of an autosaved branch-only page', async () => {
+    const slugDraftsURL = new AdminUrlUtil(serverURL, slugDraftsSlug)
+    const doc = await payload.create({
+      branch: branchSlug,
+      collection: slugDraftsSlug,
+      data: { title: 'Initial branch draft' },
+      draft: true,
+      locale: 'en',
+    })
+
+    await page.goto(slugDraftsURL.list)
+    await switchBranch({ name: branchName, page })
+    await gotoAndWaitForForm(page, slugDraftsURL.edit(doc.id))
+    await expect(page.locator('#field-title')).toHaveValue('Initial branch draft')
+
+    const autosaved = page.waitForResponse((response) => {
+      const url = new URL(response.url())
+
+      return (
+        url.pathname === `/api/${slugDraftsSlug}/${doc.id}` &&
+        url.searchParams.get('autosave') === 'true' &&
+        response.request().method() === 'PATCH'
+      )
+    })
+
+    await page.locator('#field-title').fill('Ready to publish')
+    await expect.poll(async () => (await autosaved).status()).toBe(200)
+
+    const published = page.waitForResponse((response) => {
+      const url = new URL(response.url())
+
+      return (
+        url.pathname === `/api/${slugDraftsSlug}/${doc.id}` &&
+        !url.searchParams.has('autosave') &&
+        response.request().method() === 'PATCH'
+      )
+    })
+
+    await page.locator('#action-save').click()
+
+    const response = await published
+    const query = new URL(response.url()).searchParams
+
+    expect(query.get('branch')).toBe(branchSlug)
+    expect(query.get('locale')).toBe('en')
+    expect(response.status()).toBe(200)
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await page.reload()
+    await expect(page.locator('#field-title')).toHaveValue('Ready to publish')
+    await expect(page.locator('.status')).toContainText('Published')
+
+    const publishedDoc = await payload.find({
+      branch: branchSlug,
+      collection: slugDraftsSlug,
+      draft: false,
+      locale: 'all',
+      where: { id: { equals: doc.id } },
+    })
+    const main = await payload.find({
+      branch: 'main',
+      collection: slugDraftsSlug,
+      draft: true,
+      where: { id: { equals: doc.id } },
+    })
+
+    expect(publishedDoc.docs[0]).toMatchObject({ _status: { en: 'published', es: 'draft' } })
+    expect(main.docs).toHaveLength(0)
+  })
+
   for (const branch of ['main', branchSlug]) {
     test(`should autosave a title change with an unchanged native slug on ${branch}`, async () => {
       const slugDraftsURL = new AdminUrlUtil(serverURL, slugDraftsSlug)
