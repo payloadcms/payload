@@ -19,6 +19,7 @@ import type {
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
+import { validateListSearchableFields } from '../collections/config/listSearchableFields.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
@@ -709,6 +710,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   for (const sanitizeRichText of richTextSanitizers) {
     sanitizeRichText(config as SanitizedConfig)
+  }
+
+  // Runs last so fields injected after collection sanitization (e.g. the hierarchy
+  // type and join fields, orderable fields) count as existing fields.
+  for (const collection of config.collections!) {
+    validateListSearchableFields(collection)
   }
 
   return config as SanitizedConfig

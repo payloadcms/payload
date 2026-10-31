@@ -1,16 +1,24 @@
 import type { Config } from '../../config/types.js'
 import type { CollectionConfig } from '../../index.js'
 
+import { describe, expect, it } from 'vitest'
+
+import { sanitizeConfig } from '../../config/sanitize.js'
 import { InvalidConfiguration } from '../../errors/InvalidConfiguration.js'
-import { sanitizeCollection } from './sanitize.js'
-import { describe, it, expect } from 'vitest'
+
+const configDefaults: Config = {
+  db: {
+    defaultIDType: 'text',
+    // @ts-expect-error partial config
+    init: () => {},
+  },
+  secret: 'secret',
+}
+
+const sanitizeWithCollections = (collections: CollectionConfig[]) =>
+  sanitizeConfig({ ...configDefaults, collections })
 
 describe('sanitize - collections -', () => {
-  const config = {
-    collections: [],
-    globals: [],
-  } as Partial<Config>
-
   describe('validate listSearchableFields -', () => {
     const defaultCollection: CollectionConfig = {
       slug: 'collection-with-defaults',
@@ -27,76 +35,64 @@ describe('sanitize - collections -', () => {
     }
 
     it('should throw on non-existent field', () => {
-      const collectionConfig: CollectionConfig = {
-        ...defaultCollection,
-        admin: {
-          listSearchableFields: ['title', 'nonExistentField'],
-        },
-      }
-      expect(() => {
-        sanitizeCollection(
-          // @ts-expect-error
+      expect(() =>
+        sanitizeWithCollections([
           {
-            ...config,
-            collections: [collectionConfig],
+            ...defaultCollection,
+            admin: {
+              listSearchableFields: ['title', 'nonExistentField'],
+            },
           },
-          collectionConfig,
-        )
-      }).toThrow(InvalidConfiguration)
+        ]),
+      ).toThrow(InvalidConfiguration)
     })
 
     it('should not throw when all fields exist', () => {
-      const collectionConfig: CollectionConfig = {
-        ...defaultCollection,
-        admin: {
-          listSearchableFields: ['title', 'slug'],
-        },
-      }
-      expect(() => {
-        sanitizeCollection(
-          // @ts-expect-error
+      expect(() =>
+        sanitizeWithCollections([
           {
-            ...config,
-            collections: [collectionConfig],
+            ...defaultCollection,
+            admin: {
+              listSearchableFields: ['title', 'slug'],
+            },
           },
-          collectionConfig,
-        )
-      }).not.toThrow()
+        ]),
+      ).not.toThrow()
     })
 
     it('should not throw on default field: id', () => {
-      const collectionConfig: CollectionConfig = {
-        ...defaultCollection,
-        admin: {
-          listSearchableFields: ['id'],
-        },
-      }
-      expect(() => {
-        sanitizeCollection(
-          // @ts-expect-error
+      expect(() =>
+        sanitizeWithCollections([
           {
-            ...config,
-            collections: [collectionConfig],
+            ...defaultCollection,
+            admin: {
+              listSearchableFields: ['id'],
+            },
           },
-          collectionConfig,
-        )
-      }).not.toThrow()
+        ]),
+      ).not.toThrow()
     })
 
     it('should not throw when listSearchableFields is undefined', () => {
-      const collectionConfig: CollectionConfig = {
-        ...defaultCollection,
-      }
-      expect(() => {
-        sanitizeCollection(
-          // @ts-expect-error
+      expect(() => sanitizeWithCollections([defaultCollection])).not.toThrow()
+    })
+
+    it('should accept the hierarchy type field injected after collection sanitization', () => {
+      expect(() =>
+        sanitizeWithCollections([
           {
-            ...config,
-            collections: [collectionConfig],
+            slug: 'folders',
+            admin: {
+              listSearchableFields: ['name', 'hierarchyType'],
+              useAsTitle: 'name',
+            },
+            fields: [{ name: 'name', type: 'text' }],
+            hierarchy: {
+              collectionSpecific: true,
+            },
           },
-          collectionConfig,
-        )
-      }).not.toThrow()
+        ]),
+      ).not.toThrow()
     })
   })
 })
