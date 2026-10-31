@@ -6,7 +6,8 @@ import './index.css'
 
 const transitionDuration = 200
 const baseClass = 'progress-bar'
-const initialDelay = 150
+const initialDelay = 200
+const completionAnimationThreshold = 1000
 
 /**
  * Renders a progress bar that shows the progress of a route transition.
@@ -25,12 +26,18 @@ export const ProgressBar = () => {
   const { isTransitioning, transitionProgress } = useRouteTransition()
   const [progressToShow, setProgressToShow] = React.useState<null | number>(null)
   const shouldDelayProgress = useRef(true)
+  const transitionStartedAt = useRef<null | number>(null)
+  const completionTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  useEffect(() => () => clearTimeout(completionTimer.current), [])
 
   useEffect(() => {
-    let clearTimerID: NodeJS.Timeout
     let delayTimerID: NodeJS.Timeout
 
     if (isTransitioning) {
+      clearTimeout(completionTimer.current)
+      transitionStartedAt.current ??= Date.now()
+
       if (shouldDelayProgress.current) {
         delayTimerID = setTimeout(() => {
           setProgressToShow(transitionProgress)
@@ -39,22 +46,27 @@ export const ProgressBar = () => {
       } else {
         setProgressToShow(transitionProgress)
       }
-    } else {
+    } else if (transitionStartedAt.current !== null) {
       shouldDelayProgress.current = true
 
-      // Fast forward to 100% when the transition is complete
-      // Then fade out the progress bar directly after
-      setProgressToShow((currentProgress) => (currentProgress === null ? null : 1))
+      const shouldAnimateCompletion =
+        Date.now() - transitionStartedAt.current >= completionAnimationThreshold
 
-      // Wait for CSS transition to finish before hiding the progress bar
-      // This includes both the fast-forward to 100% and the subsequent fade-out
-      clearTimerID = setTimeout(() => {
+      transitionStartedAt.current = null
+
+      if (shouldAnimateCompletion) {
+        setProgressToShow((currentProgress) => (currentProgress === null ? null : 1))
+
+        // Allow both the width transition and the subsequent fade-out to finish.
+        completionTimer.current = setTimeout(() => {
+          setProgressToShow(null)
+        }, transitionDuration * 2)
+      } else {
         setProgressToShow(null)
-      }, transitionDuration * 2)
+      }
     }
 
     return () => {
-      clearTimeout(clearTimerID)
       clearTimeout(delayTimerID)
     }
   }, [isTransitioning, transitionProgress])
