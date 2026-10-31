@@ -19,6 +19,7 @@ type RelationshipRow = {
 import { buildFindManyArgs } from '../find/buildFindManyArgs.js'
 import { transform } from '../transform/read/index.js'
 import { transformForWrite } from '../transform/write/index.js'
+import { deleteStaleBlockVariantRows } from '../utilities/blockPlacements.js'
 import { markWrite } from '../utilities/readAfterWrite.js'
 import { deleteExistingArrayRows } from './deleteExistingArrayRows.js'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath.js'
@@ -649,6 +650,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           where: eq(blockTable._parentID, insertedRow.id),
         })
       }
+
+      await deleteStaleBlockVariantRows({
+        adapter,
+        blockPlacements: rowToInsert.blockPlacements,
+        blocksToDelete: rowToInsert.blocksToDelete,
+        db,
+        parentID: insertedRow.id,
+      })
     }
 
     // When versions are enabled, adapter is used to track mapping between blocks/arrays ObjectID to their numeric generated representation, then we use it for nested to arrays/blocks select hasMany in versions.

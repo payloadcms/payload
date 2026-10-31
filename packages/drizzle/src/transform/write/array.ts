@@ -5,6 +5,7 @@ import { fieldShouldBeLocalized } from 'payload/shared'
 import type { DrizzleAdapter } from '../../types.js'
 import type {
   ArrayRowToInsert,
+  BlockPlacement,
   BlockRowToInsert,
   NumberToDelete,
   RelationshipToDelete,
@@ -18,6 +19,7 @@ type Args = {
   adapter: DrizzleAdapter
   arrayTableName: string
   baseTableName: string
+  blockPlacements: BlockPlacement[]
   blocks: {
     [blockType: string]: BlockRowToInsert[]
   }
@@ -47,6 +49,7 @@ export const transformArray = ({
   adapter,
   arrayTableName,
   baseTableName,
+  blockPlacements,
   blocks,
   blocksToDelete,
   data,
@@ -107,6 +110,7 @@ export const transformArray = ({
         arrays: newRow.arrays,
         arraysToPush: newRow.arraysToPush,
         baseTableName,
+        blockPlacements,
         blocks,
         blocksToDelete,
         columnPrefix: '',
