@@ -34,6 +34,7 @@ const rewriteIdentity = ({
   }
 
   const result: Where = {}
+  const identityClauses: Where[] = []
 
   for (const [key, value] of Object.entries(where)) {
     if ((key === 'and' || key === 'or') && Array.isArray(value)) {
@@ -45,14 +46,18 @@ const rewriteIdentity = ({
 
     if (key === identityKey) {
       const constraint = value as WhereField
+      const hasNegativeConstraint = 'not_equals' in constraint || 'not_in' in constraint
 
-      result.or = [
-        ...((result.or as Where[]) ?? []),
-        { [canonicalField]: constraint },
-        matchRawIdentity
-          ? { [identityKey]: constraint }
-          : { and: [{ [canonicalField]: { exists: false } }, { [identityKey]: constraint }] },
-      ]
+      identityClauses.push({
+        or: [
+          hasNegativeConstraint
+            ? { and: [{ [canonicalField]: { exists: true } }, { [canonicalField]: constraint }] }
+            : { [canonicalField]: constraint },
+          matchRawIdentity && !hasNegativeConstraint
+            ? { [identityKey]: constraint }
+            : { and: [{ [canonicalField]: { exists: false } }, { [identityKey]: constraint }] },
+        ],
+      })
 
       continue
     }
@@ -60,7 +65,9 @@ const rewriteIdentity = ({
     result[key] = value as WhereField
   }
 
-  return result
+  return identityClauses.length
+    ? { and: [...(Object.keys(result).length ? [result] : []), ...identityClauses] }
+    : result
 }
 
 /**
@@ -96,9 +103,9 @@ export const rewriteBranchVersionParents = (where: undefined | Where): undefined
  * `_branchDocID` holds the canonical ID for forked rows and is null for
  * branch-created rows, whose own ID is already canonical.
  */
-export const projectBranchIDs = <T extends Record<string, unknown>>(docs: T[]): T[] => {
+export const projectBranchIDs = <T extends object>(docs: T[]): T[] => {
   for (const doc of docs) {
-    const canonical = doc?.[branchDocIDField]
+    const canonical = (doc as Record<string, unknown>)?.[branchDocIDField]
 
     if (canonical !== undefined && canonical !== null) {
       ;(doc as Record<string, unknown>).id = extractRelationshipID({ relationship: canonical })

@@ -50,12 +50,15 @@ export async function commitTransaction(
   }
 
   delete req.transactionID
-  await commitFileOperations({ req: req as PayloadRequest })
-  clearTransactionRollbackCallbacks({ req, transactionID: resolvedTransactionID })
-
   try {
-    await runTransactionCommitCallbacks({ req, transactionID: resolvedTransactionID })
-  } catch (err) {
-    payload.logger.error({ err, msg: 'A post-commit cleanup task failed.' })
+    await commitFileOperations({ req: req as PayloadRequest })
+  } finally {
+    clearTransactionRollbackCallbacks({ req, transactionID: resolvedTransactionID })
+
+    try {
+      await runTransactionCommitCallbacks({ req, transactionID: resolvedTransactionID })
+    } catch (err) {
+      payload.logger.error({ err, msg: 'A post-commit cleanup task failed.' })
+    }
   }
 }
