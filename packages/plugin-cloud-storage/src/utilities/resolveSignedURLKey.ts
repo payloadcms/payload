@@ -55,24 +55,32 @@ export async function resolveSignedURLKey({
   storageFilePath: string
   uploadReference: UploadReference
 }> {
-  // The document stores the -original name, so check collisions against that name.
-  let sanitizedFilename = getSanitizedUploadFilename(filename)
-  let originalFilename = getOriginalFilename({ filename: sanitizedFilename })
-
-  while (
-    (await getSafeFileName({ collectionSlug, desiredFilename: originalFilename, req })) !==
-    originalFilename
-  ) {
-    sanitizedFilename = incrementName(sanitizedFilename)
-    originalFilename = getOriginalFilename({ filename: sanitizedFilename })
-  }
-
   const rawBaseDocPrefix = useCompositePrefixes ? docPrefix : docPrefix || collectionPrefix
   const { sanitizedDocPrefix } = buildUploadPrefix({
     collectionPrefix,
     docPrefix: rawBaseDocPrefix,
     useCompositePrefixes,
   })
+
+  const uploadConfig = req.payload.collections[collectionSlug]?.config.upload
+  const isFilenameUniquePerPrefix =
+    typeof uploadConfig === 'object' && uploadConfig.filenameCompoundIndex?.includes('prefix')
+
+  // The document stores the -original name, so check collisions against that name.
+  let sanitizedFilename = getSanitizedUploadFilename(filename)
+  let originalFilename = getOriginalFilename({ filename: sanitizedFilename })
+
+  while (
+    (await getSafeFileName({
+      collectionSlug,
+      desiredFilename: originalFilename,
+      prefix: isFilenameUniquePerPrefix ? sanitizedDocPrefix : undefined,
+      req,
+    })) !== originalFilename
+  ) {
+    sanitizedFilename = incrementName(sanitizedFilename)
+    originalFilename = getOriginalFilename({ filename: sanitizedFilename })
+  }
 
   const _objectKey = randomUUID()
   // Per-upload segment lives in the key; it is persisted in `_objectKey`, keeping `prefix` semantic.

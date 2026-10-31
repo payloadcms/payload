@@ -13,6 +13,8 @@ vi.mock('payload/internal', () => ({
 }))
 
 describe('resolveSignedURLKey', () => {
+  const req = { payload: { collections: {} } } as never
+
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -24,20 +26,20 @@ describe('resolveSignedURLKey', () => {
       collectionPrefix: 'media',
       collectionSlug: 'uploads',
       filename: 'nested\\folder/photo.png',
-      req: {} as never,
+      req,
     })
 
     expect(getSafeFileName).toHaveBeenCalledWith({
       collectionSlug: 'uploads',
       desiredFilename: 'photo-original.png',
-      req: {},
+      req,
     })
     expect(createClientUploadReceipt).toHaveBeenCalledWith({
       _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
       collectionSlug: 'uploads',
       filePrefix: 'media',
       filename: 'photo-1.png',
-      req: {},
+      req,
       storageFilePath: expect.stringMatching(/^media\/[0-9a-f-]+\/photo-1-original\.png$/),
     })
     expect(result).toEqual({
@@ -60,7 +62,7 @@ describe('resolveSignedURLKey', () => {
       collectionSlug: 'media',
       docPrefix: 'media-archive',
       filename: 'photo.jpg',
-      req: {} as never,
+      req,
     })
 
     expect(createClientUploadReceipt).toHaveBeenCalledWith({
@@ -68,7 +70,7 @@ describe('resolveSignedURLKey', () => {
       collectionSlug: 'media',
       filePrefix: result.sanitizedDocPrefix,
       filename: 'photo-1.jpg',
-      req: {},
+      req,
       storageFilePath: result.storageFilePath,
     })
     expect(result).toEqual({
@@ -90,11 +92,36 @@ describe('resolveSignedURLKey', () => {
       adapterData: { providerUploadID: 'provider-1' },
       collectionSlug: 'media',
       filename: 'photo.jpg',
-      req: {} as never,
+      req,
     })
 
     expect(createClientUploadReceipt).toHaveBeenCalledWith(
       expect.objectContaining({ adapterData: { providerUploadID: 'provider-1' } }),
     )
+  })
+
+  it('should check collisions within the prefix when filename is unique per prefix', async () => {
+    const reqWithCompoundIndex = {
+      payload: {
+        collections: {
+          media: { config: { upload: { filenameCompoundIndex: ['filename', 'prefix'] } } },
+        },
+      },
+    } as never
+
+    await resolveSignedURLKey({
+      collectionPrefix: 'media',
+      collectionSlug: 'media',
+      docPrefix: 'site-b',
+      filename: 'logo.png',
+      req: reqWithCompoundIndex,
+    })
+
+    expect(getSafeFileName).toHaveBeenCalledWith({
+      collectionSlug: 'media',
+      desiredFilename: 'logo-original.png',
+      prefix: 'media/site-b',
+      req: reqWithCompoundIndex,
+    })
   })
 })
