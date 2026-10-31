@@ -1,12 +1,14 @@
 'use client'
 import type { LinkAdapterProps, RouterAdapterRouter } from 'payload'
 
-import React, { createContext, use } from 'react'
+import React, { createContext, use, useMemo } from 'react'
 
 export type RouterAdapterContextValue = {
   Link: React.ComponentType<LinkAdapterProps>
   params: Record<string, string | string[]>
   pathname: string
+  /** Resolves admin destinations against the active content branch. */
+  resolveHref?: (href: string) => string
   router: RouterAdapterRouter
   searchParams: URLSearchParams
 }
@@ -30,7 +32,28 @@ function useRouterAdapterContext(): RouterAdapterContextValue {
 }
 
 export function useRouter(): RouterAdapterRouter {
-  return useRouterAdapterContext().router
+  const { resolveHref, router } = useRouterAdapterContext()
+
+  return useMemo(() => {
+    if (!resolveHref) {
+      return router
+    }
+
+    return {
+      ...router,
+      push: (href, options) => router.push(resolveHref(href), options),
+      replace: (href, options) => router.replace(resolveHref(href), options),
+      ...(router.replaceState
+        ? { replaceState: (href: string) => router.replaceState(resolveHref(href)) }
+        : {}),
+    } satisfies RouterAdapterRouter
+  }, [resolveHref, router])
+}
+
+export function useNavigationURL({ href }: { href: string }): string {
+  const { resolveHref } = useRouterAdapterContext()
+
+  return resolveHref ? resolveHref(href) : href
 }
 
 export function usePathname(): string {
@@ -46,11 +69,12 @@ export function useParams(): Record<string, string | string[]> {
 }
 
 export const PayloadLink: React.FC<{ ref?: React.Ref<HTMLAnchorElement> } & LinkAdapterProps> = ({
+  href,
   ref,
   ...props
 }: { ref?: React.RefObject<HTMLAnchorElement | null> } & LinkAdapterProps) => {
-  const { Link: LinkComponent } = useRouterAdapterContext()
-  return <LinkComponent {...props} ref={ref} />
+  const { Link: LinkComponent, resolveHref } = useRouterAdapterContext()
+  return <LinkComponent {...props} href={resolveHref ? resolveHref(href) : href} ref={ref} />
 }
 
 export type { LinkAdapterProps, RouterAdapterRouter }
