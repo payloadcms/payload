@@ -23,7 +23,7 @@ import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 import { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'
 import { Form } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { useBranch } from '../../providers/Branch/index.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -124,7 +124,7 @@ export function DefaultEditView({
   const isInDrawer = Boolean(drawerSlug)
 
   const { refreshCookieAsync, user } = useAuth()
-  const { activeBranch: branch } = useBranch()
+  const branch = useBranchParam()
 
   const {
     config,
