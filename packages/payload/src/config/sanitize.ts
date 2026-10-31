@@ -33,6 +33,7 @@ import {
 } from '../branching/collections.js'
 import { injectBranchFields, injectGlobalBranchFields } from '../branching/injectBranchFields.js'
 import { sanitizeBranchingConfig } from '../branching/sanitizeBranchingConfig.js'
+import { getScheduleMergeTask } from '../branching/schedule/job.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
@@ -590,6 +591,18 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
           .map(({ slug }) => slug),
         collections: schedulePublishCollections,
         globals: schedulePublishGlobals,
+      }),
+    )
+  }
+
+  // Registered whenever branching is on, so a branch can always be scheduled. Like
+  // scheduled publish, it only ever fires if the jobs queue is actually running.
+  if (branching.enabled) {
+    ;((config.jobs ??= {} as SanitizedJobsConfig).tasks ??= []).push(
+      getScheduleMergeTask({
+        authCollectionSlugs: config
+          .collections!.filter(({ auth }) => Boolean(auth))
+          .map(({ slug }) => slug),
       }),
     )
   }
