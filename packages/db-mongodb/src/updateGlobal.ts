@@ -62,7 +62,10 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal<
   const filter = writeBranch
     ? { _branch: { $eq: writeBranch }, globalType: globalSlug }
     : isBranchableGlobal
-      ? { _branch: { $eq: 'main' }, globalType: globalSlug }
+      ? {
+          $or: [{ _branch: 'main' }, { _branch: { $exists: false } }, { _branch: null }],
+          globalType: globalSlug,
+        }
       : { globalType: globalSlug }
 
   if (writeBranch) {
