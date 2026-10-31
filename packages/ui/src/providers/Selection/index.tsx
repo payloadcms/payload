@@ -6,6 +6,7 @@ import React, { createContext, use, useCallback, useEffect, useMemo, useRef, use
 
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useAuth } from '../Auth/index.js'
+import { useBranchParam } from '../Branch/index.js'
 import { useListQuery } from '../ListQuery/index.js'
 import { useLocale } from '../Locale/index.js'
 import { useSearchParams } from '../RouterAdapter/index.js'
@@ -70,6 +71,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const contextRef = useRef({} as SelectionContext)
   const { user } = useAuth()
 
+  const branch = useBranchParam()
   const currentLocale = useLocale()
   const locale = currentLocale?.code
 
@@ -190,13 +192,14 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
 
       return qs.stringify(
         {
+          branch,
           locale,
           where,
         },
         { addQueryPrefix: true },
       )
     },
-    [selectAll, selected, locale, searchParams],
+    [branch, selectAll, selected, locale, searchParams],
   )
 
   const getSelectedIds = useCallback(() => reduceActiveSelections(selected), [selected])
