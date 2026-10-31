@@ -43,7 +43,7 @@ const getBranchingConfig = (req: PayloadRequest): SanitizedBranchingConfig | und
  *   2. `branch` query param
  *   3. `main`
  */
-export const resolveBranch = (req: PayloadRequest): string => {
+export const resolveBranch = ({ req }: { req: PayloadRequest }): string => {
   const branching = getBranchingConfig(req)
 
   if (!branching?.enabled) {
@@ -113,7 +113,7 @@ const resolveBranchFromRequest = (req: PayloadRequest): string | undefined => {
 export const loadBranchManifest = async (
   req: PayloadRequest,
 ): Promise<Map<string, (number | string)[]>> => {
-  const branch = resolveBranch(req)
+  const branch = resolveBranch({ req: req })
   const context = req.context as Record<string, unknown> | undefined
   const state = context?.[stateKey] as BranchState | undefined
 
@@ -207,7 +207,7 @@ export const loadBranchOperation = async ({
   docID: number | string
   req: PayloadRequest
 }): Promise<BranchOperation | undefined> => {
-  const branch = resolveBranch(req)
+  const branch = resolveBranch({ req: req })
   const state = (req.context as Record<string, unknown> | undefined)?.[stateKey] as
     | BranchState
     | undefined
