@@ -2034,6 +2034,67 @@ describe('Fields', () => {
       expect(doc.group).toMatchObject(group)
     })
 
+    it('should return point field on update by id', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+
+      const created = await payload.create({
+        collection: 'point-fields',
+        data: {
+          group,
+          localized,
+          point,
+        },
+      })
+
+      // Update an unrelated field and ensure the point field is still
+      // present in the response - https://github.com/payloadcms/payload/issues/17461
+      const updated = await payload.update({
+        id: created.id,
+        collection: 'point-fields',
+        data: {
+          group,
+        },
+      })
+
+      expect(updated.id).toEqual(created.id)
+      expect(updated.point).toEqual(point)
+      expect(updated.localized).toEqual(localized)
+      expect(updated.group).toMatchObject(group)
+    })
+
+    it('should return selected point fields on update by id', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+
+      const created = await payload.create({
+        collection: 'point-fields',
+        data: {
+          group,
+          localized,
+          point,
+        },
+      })
+
+      const updated = await payload.update({
+        id: created.id,
+        collection: 'point-fields',
+        data: {
+          group,
+        },
+        select: {
+          localized: true,
+          point: true,
+        },
+      })
+
+      expect(updated.id).toEqual(created.id)
+      expect(updated.point).toEqual(point)
+      expect(updated.localized).toEqual(localized)
+    })
+
     it('should not create duplicate point when unique', async () => {
       if (payload.db.name === 'sqlite') {
         return
