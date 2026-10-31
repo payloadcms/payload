@@ -1,5 +1,7 @@
 import type { PayloadRequest, Where } from '../types/index.js'
 
+import { scheduleAfterTransactionRollback } from '../utilities/transactionCallbacks.js'
+
 import { loadBranchRow, resolveBranch, setBranchRow } from './resolveBranch.js'
 import {
   branchChangesCollectionSlug,
@@ -114,7 +116,7 @@ export const recordBranchGlobalChange = async ({
   if (req!.payload!.db.upsertBranchGlobalChange) {
     await req!.payload!.db.upsertBranchGlobalChange({ branch, globalSlug, req })
     await reopenBranchForGlobalChange({ branch, req: req as PayloadRequest })
-    recorded.add(key)
+    await rememberGlobalChange({ key, recorded, req: req as PayloadRequest })
 
     return
   }
@@ -132,7 +134,7 @@ export const recordBranchGlobalChange = async ({
 
   if (existing.docs.length) {
     await reopenBranchForGlobalChange({ branch, req: req as PayloadRequest })
-    recorded.add(key)
+    await rememberGlobalChange({ key, recorded, req: req as PayloadRequest })
 
     return
   }
@@ -150,7 +152,7 @@ export const recordBranchGlobalChange = async ({
   })
 
   await reopenBranchForGlobalChange({ branch, req: req as PayloadRequest })
-  recorded.add(key)
+  await rememberGlobalChange({ key, recorded, req: req as PayloadRequest })
 }
 
 const reopenBranchForGlobalChange = async ({
@@ -201,4 +203,27 @@ export const resolveBranchGlobalVersionQuery = ({
   const base = where && Object.keys(where).length ? [where] : []
 
   return { and: [...base, { [branchField]: { equals: active } }] }
+}
+
+const rememberGlobalChange = async ({
+  key,
+  recorded,
+  req,
+}: {
+  key: string
+  recorded: Set<string>
+  req: PayloadRequest
+}): Promise<Set<string>> => {
+  recorded.add(key)
+
+  if (await req.transactionID) {
+    await scheduleAfterTransactionRollback({
+      callback: () => {
+        recorded.delete(key)
+      },
+      req,
+    })
+  }
+
+  return recorded
 }
