@@ -296,6 +296,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:moving',
   'general:movingCount',
   'general:name',
+  'general:nextPage',
+  'general:previousPage',
   'general:next',
   'general:newLabel',
   'general:noDateSelected',
