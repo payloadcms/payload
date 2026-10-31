@@ -31,6 +31,7 @@ type Args = {
    * caller already created (or is creating) its own.
    */
   onCreated: (req: PayloadRequest, shadow: Record<string, unknown>) => Promise<unknown>
+  operation?: BranchOperation
   req: PayloadRequest
   /** Copies an exact logical source document instead of creating from data alone. */
   source?: ShadowSource
@@ -224,6 +225,7 @@ export const createShadowRow = async ({
   data,
   docID,
   onCreated,
+  operation,
   req,
   source,
   useAmbientTransaction = false,
@@ -289,7 +291,7 @@ export const createShadowRow = async ({
       throw error
     }
 
-    const winner = await findCompetingShadow({ branch, collectionSlug, docID, req })
+    const winner = await findCompetingShadow({ branch, collectionSlug, docID, operation, req })
 
     if (!winner) {
       markConcurrentShadowOperationError(error)
@@ -311,7 +313,7 @@ export const createShadowRow = async ({
     await killTransaction(isolated)
 
     if (shouldCommit && isRecoverableConcurrentShadowError(error)) {
-      const winner = await findCompetingShadow({ branch, collectionSlug, docID, req })
+      const winner = await findCompetingShadow({ branch, collectionSlug, docID, operation, req })
 
       if (winner) {
         return winner

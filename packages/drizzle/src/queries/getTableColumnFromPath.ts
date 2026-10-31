@@ -781,7 +781,7 @@ export const getTableColumnFromPath = ({
       case 'upload': {
         const newCollectionPath = pathSegments.slice(1).join('.')
         const relationshipQueryPath = `${getTableName(tableContainingField)}.${fieldStoragePath}._rels`
-        const targetQueryPath = `${getTableName(tableContainingField)}.${fieldStoragePath}._target`
+        const targetQueryPath = `${getTableName(tableContainingField)}.${fieldStoragePath}._target${isFieldLocalized && locale ? `.${locale}` : ''}`
 
         if (Array.isArray(field.relationTo) || field.hasMany) {
           const relationshipPath = resolveRelationshipPath({

@@ -7,7 +7,14 @@ import {
   isUnknownTransactionCommitResult,
   shouldRollbackTransactionArtifacts,
 } from './commitTransaction.js'
-import { scheduleAfterTransactionCommit } from './transactionCallbacks.js'
+import {
+  runTransactionRollbackCallbacks,
+  scheduleAfterTransactionCommit,
+  scheduleAfterTransactionRollback,
+} from './transactionCallbacks.js'
+
+const commitFileOperations = vi.hoisted(() => vi.fn())
+vi.mock('../uploads/fileVersioning/fileOperationManager.js', () => ({ commitFileOperations }))
 
 test.each([
   {
@@ -73,4 +80,25 @@ test('should clear transaction callbacks without running them when the commit re
   await commitTransaction(laterReq)
 
   expect(callback).not.toHaveBeenCalled()
+})
+
+test('should flush commit callbacks and clear rollback callbacks when file commit fails', async () => {
+  const fileError = new Error('file commit failed')
+  const onCommit = vi.fn()
+  const onRollback = vi.fn()
+  const req = {
+    context: {},
+    transactionID: 'file-failure',
+    payload: { db: { commitTransaction: vi.fn() }, logger: { error: vi.fn() } },
+  } as unknown as PayloadRequest
+
+  commitFileOperations.mockRejectedValueOnce(fileError)
+  await scheduleAfterTransactionCommit({ callback: onCommit, req })
+  await scheduleAfterTransactionRollback({ callback: onRollback, req })
+  await expect(commitTransaction(req)).rejects.toBe(fileError)
+  await runTransactionRollbackCallbacks({ req, transactionID: 'file-failure' })
+
+  expect(onCommit).toHaveBeenCalledOnce()
+  expect(onRollback).not.toHaveBeenCalled()
+  expect(req.transactionID).toBeUndefined()
 })

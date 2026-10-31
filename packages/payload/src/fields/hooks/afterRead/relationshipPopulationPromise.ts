@@ -77,7 +77,7 @@ const populate = async ({
     if (shouldPopulate) {
       relationshipValue = await req.payloadDataLoader.load(
         createDataloaderCacheKey({
-          branch: resolveBranch(req),
+          branch: resolveBranch({ req: req }),
           collectionSlug: relatedCollection.config.slug,
           currentDepth: currentDepth + 1,
           depth,

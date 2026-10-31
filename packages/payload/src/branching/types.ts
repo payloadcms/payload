@@ -126,7 +126,11 @@ export type BranchingConfig = {
     deleteBranch?: Access
     /** Controls whether a caller can discard pending changes from a readable branch. */
     discardBranch?: Access
-    /** Controls whether a caller can merge pending changes from a readable branch. */
+    /**
+     * Controls whether a caller can merge pending changes from a readable branch.
+     * Defaults to `readBranch` when provided, otherwise to the authenticated-user
+     * default access rule. Set this explicitly when readers must not merge to main.
+     */
     mergeBranch?: Access
     readBranch?: Access
     updateBranch?: Access
