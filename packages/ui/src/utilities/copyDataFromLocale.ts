@@ -298,9 +298,16 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     throw new Error(`Error fetching data from locale "${toLocale}"`)
   }
 
-  const fields = globalSlug
-    ? globals[globalSlug].config.fields
-    : collections[collectionSlug].config.fields
+  // `payload.globals` is `{ config: SanitizedGlobalConfig[] }`, not a slug map like `collections`.
+  const globalConfig = globalSlug
+    ? globals.config.find((candidate) => candidate.slug === globalSlug)
+    : undefined
+
+  if (globalSlug && !globalConfig) {
+    throw new Error(`Global with slug "${globalSlug}" was not found`)
+  }
+
+  const fields = globalConfig ? globalConfig.fields : collections[collectionSlug].config.fields
 
   const fromLocaleDataWithoutID = fromLocaleData.value
   const toLocaleDataWithoutID = toLocaleData.value
