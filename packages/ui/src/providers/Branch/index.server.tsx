@@ -10,7 +10,7 @@ import type { BranchOption } from './index.js'
 import { BranchProvider } from '../../exports/client/index.js'
 
 /**
- * Loads the branches the user can read and their stored branch preference, then
+ * Loads the branches the user can read and the request's URL branch, then
  * hands both to the client provider.
  *
  * Renders nothing of its own when branching is disabled, so a config without
@@ -101,29 +101,24 @@ export const RenderBranchProvider = async ({
       }))
     }
   } catch (_err) {
-    // Read access to `payload-branches` can legitimately be denied — a user
-    // without it simply has no branches to switch between, which must not take
-    // the whole admin panel down with it.
-    branches = []
+    // Discovery and schedule metadata are optional. A failure must not change the
+    // branch that produced the rendered content or discard already loaded choices.
   }
 
-  // Already resolved from the user's preference during request initialization,
+  // Already resolved from the URL during request initialization,
   // so this is a read of what every query on this request actually used —
   // not a second source of truth that could disagree with the data on screen.
   const activeBranch = resolveBranch(req)
 
-  // A branch the user can no longer see — merged, closed, deleted, or never
-  // theirs — must not be presented as the active one. Otherwise the switcher
-  // claims a branch while reads quietly fall through to main, which reads as
-  // "my edits vanished" rather than "that branch is gone".
-  const isActiveBranchStale =
-    activeBranch !== MAIN_BRANCH && !branches.some(({ slug }) => slug === activeBranch)
-
   return (
     <BranchProvider
-      activeBranch={isActiveBranchStale ? MAIN_BRANCH : activeBranch}
+      activeBranch={activeBranch}
       branches={branches}
-      staleBranch={isActiveBranchStale ? activeBranch : null}
+      origin={
+        req.url
+          ? new URL(req.url, payload.config.serverURL || 'http://payload.local').origin
+          : undefined
+      }
     >
       {children}
     </BranchProvider>
