@@ -24,6 +24,7 @@ import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { MediaWithThrowingHook } from './collections/MediaWithThrowingHook.js'
 import { ReferencedCloudMedia } from './collections/ReferencedCloudMedia.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
+import { StaticFileMedia } from './collections/StaticFileMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { UnversionedCloudMedia } from './collections/UnversionedCloudMedia.js'
 import { Users } from './collections/Users.js'
@@ -46,6 +47,7 @@ import {
   prefix,
   referencedCloudMediaSlug,
   restrictedMediaSlug,
+  staticFileMediaSlug,
   testMetadataSlug,
   unversionedCloudMediaSlug,
   versionedCloudMediaSlug,
@@ -54,6 +56,7 @@ import {
   versionedPublicVariantCloudMediaSlug,
   versionedS3MediaSlug,
 } from './shared.js'
+import { staticFileMediaAdapter } from './staticFileMedia.js'
 import {
   publicVersionedCloudAdapter,
   referencedVersionedCloudAdapter,
@@ -187,6 +190,15 @@ export function buildPluginCloudStorageIntConfig({
     })
   }
 
+  const staticFileMediaPlugin = cloudStoragePlugin({
+    // This collection is created for the suite and is not part of the generated upload slugs.
+    collections: {
+      [staticFileMediaSlug]: {
+        adapter: staticFileMediaAdapter,
+      },
+    } as never,
+  })
+
   const disabledStoragePlugin = cloudStoragePlugin({
     collections: {
       [mediaWithDisabledPluginSlug]: {
@@ -280,6 +292,7 @@ export function buildPluginCloudStorageIntConfig({
         MediaWithThrowingHook,
         ReferencedCloudMedia,
         RestrictedMedia,
+        StaticFileMedia,
         TestMetadata,
         UnversionedCloudMedia,
         Users,
@@ -290,7 +303,12 @@ export function buildPluginCloudStorageIntConfig({
         VersionedS3Media,
       ],
       endpoints: r2UploadEndpoints,
-      plugins: [testMetadataPlugin, versionedCloudPlugin, disabledStoragePlugin],
+      plugins: [
+        staticFileMediaPlugin,
+        testMetadataPlugin,
+        versionedCloudPlugin,
+        disabledStoragePlugin,
+      ],
       storage: storagePlugin ? [storagePlugin] : [],
       typescript: {
         outputFile: path.resolve(dirname, 'payload-types.ts'),

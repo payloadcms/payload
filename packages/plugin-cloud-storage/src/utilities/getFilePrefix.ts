@@ -1,10 +1,14 @@
 import type {
+  Access,
   CollectionConfig,
   FileData,
   PayloadRequest,
   SanitizedUploadConfig,
   TypeWithID,
+  Where,
 } from 'payload'
+
+import { combineQueries, executeAccess, Forbidden } from 'payload'
 
 import { buildPrefixWithObjectKey } from './buildPrefixWithObjectKey.js'
 import { buildUploadStoragePathData } from './buildStoragePathData.js'
@@ -15,9 +19,10 @@ import { sanitizePrefix } from './sanitizePrefix.js'
  *
  * An already-authorized `doc` wins outright. Otherwise an `uploadReference` is used (its
  * `prefix` re-contained with {@link buildUploadStoragePathData}, since it hasn't been verified against
- * a signed receipt by every adapter). Otherwise the document is resolved with
- * `overrideAccess: false`, any query-param prefix only narrows that lookup, and `_objectKey`
- * is read from the resolved document via `showHiddenFields`.
+ * a signed receipt by every adapter). Otherwise read access is evaluated with
+ * `isReadingStaticFile: true`, the same contract as `checkFileAccess`. A returned Where
+ * query constrains the lookup. Any query-param prefix only narrows that lookup, and
+ * `_objectKey` is read from the resolved document via `showHiddenFields`.
  */
 export async function getFilePrefix({
   collection,
@@ -93,12 +98,25 @@ export async function getFilePrefix({
       ? { and: [filenameClause, { prefix: { equals: sanitizePrefix(prefixQueryParam) } }] }
       : filenameClause
 
+  // `find({ overrideAccess: false })` runs collection read access without
+  // `isReadingStaticFile`, so a rule that allows anonymous file bytes and denies
+  // document reads throws Forbidden. Evaluate that access the same way
+  // `checkFileAccess` does, then look the prefix up under the result.
+  const accessResult = await executeAccess(
+    { slug: collection.slug, data: { filename }, isReadingStaticFile: true, req },
+    getStaticFileReadAccess({ collection, req }),
+  )
+
+  if (!accessResult) {
+    throw new Forbidden(req.t)
+  }
+
   const files = await req.payload.find({
     collection: collection.slug,
     depth: 0,
     draft: true,
     limit: 1,
-    overrideAccess: false,
+    overrideAccess: true,
     pagination: false,
     req,
     select: {
@@ -109,14 +127,42 @@ export async function getFilePrefix({
       variants: true,
     },
     showHiddenFields: true,
-    where,
+    where: constrainWhere({ accessResult, where }),
   })
 
   const found = files?.docs?.[0] as
     | ({ _objectKey?: string; prefix?: string } & Partial<FileData>)
     | undefined
+
+  // A Where that matches nothing is a denial, same as `checkFileAccess`. A boolean
+  // grant with no document means the file is absent, so the caller can 404.
+  if (!found && typeof accessResult === 'object') {
+    throw new Forbidden(req.t)
+  }
+
   return found ? getRepresentationPrefix({ doc: found, filename }) : ''
 }
+
+/**
+ * Sanitized collection access includes `baseAccess`. Fall back to the incoming
+ * config when this runs without an initialized Payload instance.
+ */
+const getStaticFileReadAccess = ({
+  collection,
+  req,
+}: {
+  collection: CollectionConfig
+  req: PayloadRequest
+}): Access | undefined =>
+  req.payload.collections?.[collection.slug]?.config.access.read ?? collection.access?.read
+
+const constrainWhere = ({
+  accessResult,
+  where,
+}: {
+  accessResult: boolean | Where
+  where: Where
+}): Where => (typeof accessResult === 'object' ? combineQueries(where, accessResult) : where)
 
 const getRepresentationPrefix = ({
   doc,
