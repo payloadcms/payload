@@ -1,6 +1,11 @@
-import { createContext, use } from 'react'
+'use client'
+
+import React, { createContext, use, useCallback, useMemo, useState } from 'react'
 
 import type { SummarizableChange } from '../ChangeSummary/index.js'
+
+import { useModal } from '../Modal/index.js'
+import { mergeBranchModalSlug } from './slug.js'
 
 export type MergeTarget = {
   /** `payload-branches` document ID, for the merge endpoint's path. */
@@ -60,5 +65,38 @@ const Context = createContext<MergeBranchContext>({
   openMerge: () => {},
   target: null,
 })
+
+/**
+ * Holds what the merge modal is currently pointed at.
+ *
+ * One store, mounted above both the app header and the page, because the modal is
+ * mounted exactly once. Rendering it per entry point — the switcher *and* the
+ * changed-documents view — stacked two dialogs on the same slug, so opening the
+ * merge opened both and only the topmost one showed progress.
+ */
+export const MergeBranchStoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { closeModal, openModal } = useModal()
+  const [target, setTarget] = useState<MergeTarget | null>(null)
+
+  const openMerge = useCallback(
+    (next: MergeTarget) => {
+      setTarget(next)
+      openModal(mergeBranchModalSlug)
+    },
+    [openModal],
+  )
+
+  const closeMerge = useCallback(() => {
+    closeModal(mergeBranchModalSlug)
+    setTarget(null)
+  }, [closeModal])
+
+  const value = useMemo<MergeBranchContext>(
+    () => ({ closeMerge, openMerge, target }),
+    [closeMerge, openMerge, target],
+  )
+
+  return <Context value={value}>{children}</Context>
+}
 
 export const useMergeBranch = (): MergeBranchContext => use(Context)

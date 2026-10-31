@@ -1,0 +1,137 @@
+@layer payload-default {
+  .merge-ledger {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-5);
+  }
+
+  .merge-ledger__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacer-3);
+    margin-block-end: var(--spacer-2);
+  }
+
+  .merge-ledger__when {
+    margin: 0;
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+  }
+
+  .merge-ledger__meta {
+    color: var(--color-text-secondary);
+  }
+
+  .merge-ledger__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .merge-ledger__row {
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-medium);
+    overflow: hidden;
+  }
+
+  .merge-ledger__row-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--color-bg-secondary);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--color-bg-secondary-hover);
+    }
+  }
+
+  /* Covers the header so the whole row is the control. Transparent text rather
+     than hidden, so it still carries the row's accessible name. */
+  .merge-ledger__toggle {
+    position: absolute;
+    inset: 0;
+    text-align: start;
+    color: transparent;
+    background: none;
+    border: none;
+    border-radius: inherit;
+    cursor: pointer;
+    outline: none;
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: -1px;
+    }
+
+    span {
+      user-select: none;
+    }
+  }
+
+  .merge-ledger__row-content {
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: var(--spacer-1-5) var(--spacer-2);
+  }
+
+  .merge-ledger__operation,
+  .merge-ledger__entity {
+    flex-shrink: 0;
+  }
+
+  /* The header it sits on is `--color-bg-secondary`, which is also the light-gray
+     pill's background, so give it its own edge to read against. */
+  .merge-ledger__entity {
+    background: var(--color-bg);
+    box-shadow: inset 0 0 0 var(--stroke-width-small) var(--color-border);
+  }
+
+  .merge-ledger__title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The one part of the header that is not the toggle: the document itself is still
+     reachable, since main is where the merged content now lives.
+     Sized to its text and not allowed to grow — stretched across the row it would
+     sit on top of the toggle overlay and swallow every click meant to expand. */
+  .merge-ledger__title--link {
+    position: relative;
+    z-index: 1;
+    flex: 0 1 auto;
+    margin-inline-end: auto;
+    pointer-events: all;
+    color: var(--color-text);
+
+    &:hover {
+      color: var(--color-text-brand);
+    }
+  }
+
+  .merge-ledger__indicator {
+    flex-shrink: 0;
+    color: var(--color-icon);
+  }
+
+  .merge-ledger__diff {
+    padding: var(--spacer-3);
+    border-block-start: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .merge-ledger__error {
+    color: var(--color-text-secondary);
+  }
+}

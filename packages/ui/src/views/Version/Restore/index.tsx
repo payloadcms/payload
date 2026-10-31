@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { Button } from '../../../elements/Button/index.js'
 import { ConfirmationModal } from '../../../elements/ConfirmationModal/index.js'
 import { useModal } from '../../../elements/Modal/index.js'
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
@@ -49,6 +50,7 @@ export const Restore: React.FC<Props> = ({
   const { toggleModal } = useModal()
   const router = useRouter()
   const { i18n, t } = useTranslation()
+  const branch = useBranchParam()
   const { startRouteTransition } = useRouteTransition()
   const entityConfig = collectionConfig || globalConfig
   const shouldRestoreAsDraft = Boolean(entityConfig && hasDraftsEnabled(entityConfig))
@@ -73,7 +75,10 @@ export const Restore: React.FC<Props> = ({
   const handleRestore = useCallback(async () => {
     let fetchURL: string
     let redirectURL: string
-    const queryString = qs.stringify({ draft: shouldRestoreAsDraft }, { addQueryPrefix: true })
+    const queryString = qs.stringify(
+      { branch: branch || undefined, draft: shouldRestoreAsDraft },
+      { addQueryPrefix: true },
+    )
 
     if (collectionConfig) {
       fetchURL = formatAdminURL({
@@ -111,6 +116,7 @@ export const Restore: React.FC<Props> = ({
       toast.error(t('version:problemRestoringVersion'))
     }
   }, [
+    branch,
     apiRoute,
     collectionConfig,
     globalConfig,
