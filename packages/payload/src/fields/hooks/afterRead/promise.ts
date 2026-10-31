@@ -348,26 +348,28 @@ export const promise = async ({
       }
     }
 
+    let virtualPopulationPromise: Promise<void> | undefined
+
     if (
       'virtual' in field &&
       typeof field.virtual === 'string' &&
       (!field.hidden || showHiddenFields)
     ) {
-      populationPromises.push(
-        virtualFieldPopulationPromise({
-          name: field.name,
-          draft,
-          fallbackLocale: fallbackLocale!,
-          fields: (collection || global)!.flattenedFields,
-          locale: locale!,
-          overrideAccess,
-          ref: doc,
-          req,
-          segments: field.virtual.split('.'),
-          showHiddenFields,
-          siblingDoc,
-        }),
-      )
+      virtualPopulationPromise = virtualFieldPopulationPromise({
+        name: field.name,
+        draft,
+        fallbackLocale: fallbackLocale!,
+        fields: (collection || global)!.flattenedFields,
+        locale: locale!,
+        overrideAccess,
+        ref: doc,
+        req,
+        segments: field.virtual.split('.'),
+        showHiddenFields,
+        siblingDoc,
+      })
+
+      populationPromises.push(virtualPopulationPromise)
     }
 
     // Execute access control
@@ -421,7 +423,7 @@ export const promise = async ({
     }
 
     if (field.type === 'relationship' || field.type === 'upload' || field.type === 'join') {
-      populationPromises.push(
+      const populateRelationship = () =>
         relationshipPopulationPromise({
           currentDepth,
           depth,
@@ -435,7 +437,13 @@ export const promise = async ({
           req,
           showHiddenFields,
           siblingDoc,
-        }),
+        })
+
+      // A virtual field with a reference only has a value once it has been resolved
+      populationPromises.push(
+        virtualPopulationPromise
+          ? virtualPopulationPromise.then(populateRelationship)
+          : populateRelationship(),
       )
     }
   }

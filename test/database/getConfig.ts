@@ -791,6 +791,19 @@ export const getConfig: () => Partial<Config> = () => ({
           virtual: 'post.localized',
         },
         {
+          name: 'postCategory',
+          type: 'relationship',
+          relationTo: 'categories',
+          virtual: 'post.category',
+        },
+        {
+          name: 'postCategories',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: 'categories',
+          virtual: 'post.categories',
+        },
+        {
           name: 'post',
           type: 'relationship',
           relationTo: 'posts',

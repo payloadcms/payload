@@ -4257,6 +4257,52 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       expect(doc.postTitle).toBe('my-title-10')
     })
 
+    test('should populate a relationship virtual field with reference like a relationship field', async ({
+      payload,
+    }) => {
+      const simple = await payload.create({
+        collection: 'simple',
+        data: { text: 'simple' },
+        overrideAccess: true,
+      })
+      const category = await payload.create({
+        collection: 'categories',
+        data: { simple: simple.id, title: 'category' },
+        overrideAccess: true,
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { categories: [category.id], category: category.id, title: 'post' },
+        overrideAccess: true,
+      })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post.id },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      const findAtDepth = (depth: number) =>
+        payload.findByID({ id, collection: 'virtual-relations', depth, overrideAccess: true })
+
+      const atDepth0 = await findAtDepth(0)
+
+      expect(atDepth0.postCategory).toBe(category.id)
+      expect(atDepth0.postCategories).toStrictEqual([category.id])
+
+      const atDepth1 = await findAtDepth(1)
+
+      expect(atDepth1.postCategory).toMatchObject({ id: category.id, simple: simple.id })
+      expect(atDepth1.postCategories).toMatchObject([{ id: category.id, simple: simple.id }])
+
+      const atDepth2 = await findAtDepth(2)
+
+      expect(atDepth2.postCategory).toMatchObject({ id: category.id, simple: { id: simple.id } })
+      expect(atDepth2.postCategories).toMatchObject([
+        { id: category.id, simple: { id: simple.id } },
+      ])
+    })
+
     test('should respect hidden: true for virtual fields with reference', async ({ payload }) => {
       const post = await payload.create({
         collection: 'posts',
