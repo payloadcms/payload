@@ -3,6 +3,7 @@ import type { JoinQuery, PayloadRequest, SanitizedJoins, Where } from 'payload'
 import {
   appendVersionToQueryKey,
   applyBranchIDProjection,
+  branchDocIDField,
   buildVersionCollectionFields,
   combineQueries,
   getBranchPredicateSync,
@@ -154,7 +155,7 @@ export async function resolveJoins({
 
       // Extract all parent document IDs to use in the join query
       const parentIDs = docs.map((doc) =>
-        versions ? projectBranchVersionParent(doc) : (doc._id ?? doc.id),
+        versions ? projectBranchVersionParent(doc) : (doc[branchDocIDField] ?? doc._id ?? doc.id),
       )
 
       // Build the base query
@@ -488,7 +489,9 @@ export async function resolveJoins({
 
     // Attach the joined data to each parent document
     for (const doc of docs) {
-      const id = (versions ? projectBranchVersionParent(doc) : (doc._id ?? doc.id)) as string
+      const id = (
+        versions ? projectBranchVersionParent(doc) : (doc[branchDocIDField] ?? doc._id ?? doc.id)
+      ) as string
       const all = grouped[id]?.docs || []
 
       // Calculate the slice for pagination
