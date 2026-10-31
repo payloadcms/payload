@@ -2,7 +2,7 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { expect, test, vi } from 'vitest'
 
-import { loadBranchManifest } from './resolveBranch.js'
+import { isolateBranchState, loadBranchManifest } from './resolveBranch.js'
 
 test('should share the pending manifest read and wait for its populated result', async () => {
   let complete!: (value: { docs: object[] }) => void
@@ -43,4 +43,23 @@ test('should retry a manifest read after a rejected query', async () => {
   await expect(loadBranchManifest(req)).rejects.toThrow('Unavailable')
   expect((await loadBranchManifest(req)).get('posts')).toEqual(['id'])
   expect(find).toHaveBeenCalledTimes(2)
+})
+
+test('should preserve native Request properties when isolating a branch', async () => {
+  const req = Object.assign(
+    new Request('https://example.com/api/posts?branch=campaign', {
+      headers: { 'x-test': 'preserved' },
+      method: 'POST',
+      body: 'payload',
+    }),
+    { branch: 'campaign', context: {} },
+  ) as unknown as PayloadRequest
+  const isolated = isolateBranchState({ req: req })
+
+  expect(isolated.url).toBe(req.url)
+  expect(isolated.method).toBe('POST')
+  expect(isolated.headers.get('x-test')).toBe('preserved')
+  expect(await isolated.text()).toBe('payload')
+  isolated.branch = 'other'
+  expect(req.branch).toBe('campaign')
 })

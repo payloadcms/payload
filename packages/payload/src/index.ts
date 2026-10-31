@@ -1522,16 +1522,17 @@ export { resolveBranchGlobalWrite } from './branching/globals.js'
 export type { MergeResult } from './branching/merge.js'
 export type { BlockedChange } from './branching/preflight.js'
 export { resolveBranch } from './branching/resolveBranch.js'
+export { isolateBranchState } from './branching/resolveBranch.js'
 export { loadBranchDeletions } from './branching/resolveBranch.js'
 export { loadBranchManifest } from './branching/resolveBranch.js'
 export { resetBranchState } from './branching/resolveBranch.js'
 export { resolveBranchReadState } from './branching/resolveBranchQuery.js'
-export { resolveBranchQuery } from './branching/resolveBranchQuery.js'
 
+export { resolveBranchQuery } from './branching/resolveBranchQuery.js'
 export { getBranchPredicateSync } from './branching/resolveBranchQuery.js'
 export type { BranchReadState } from './branching/resolveBranchQuery.js'
-export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
 
+export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
 export { resolveBranchDelete } from './branching/tombstone.js'
 export { MAIN_BRANCH } from './branching/types.js'
 export { branchField } from './branching/types.js'
@@ -1556,18 +1557,17 @@ export { mergeRecoveryOutcomes } from './branching/types.js'
 export type { BranchMergeValidate } from './branching/validation.js'
 export type { BranchMergeValidationCandidate } from './branching/validation.js'
 export type { BranchMergeValidationError } from './branching/validation.js'
+
 export type { BranchMergeValidationResult } from './branching/validation.js'
-
 export { resolveBranchVersionHistoryQuery } from './branching/versions.js'
-export { resolveBranchVersionParent } from './branching/versions.js'
 
+export { resolveBranchVersionParent } from './branching/versions.js'
 export { projectBranchVersionParents } from './branching/versions.js'
 export { resolveBranchVersionQuery } from './branching/versions.js'
 export { projectBranchVersionParent } from './branching/versions.js'
 export { resolveBranchVersionQuerySync } from './branching/versions.js'
-export { generateImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 
-export type { ImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
+export { resolveBranchOwnVersions } from './branching/versions.js'
 
 export interface FieldCustom extends Record<string, any> {}
 
@@ -1579,9 +1579,23 @@ export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
 
+export { generateImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
+export type { ImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
+
 export { genImportMapIterateFields } from './cli/commands/generateImportMap/iterateFields.js'
 export { registerCLIExitCodeHandler } from './cli/runtime/exitCodeHandlers.js'
 export type { CLIExitCodeHandler } from './cli/runtime/exitCodeHandlers.js'
+
+export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
+
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1590,7 +1604,6 @@ export {
   type ServerOnlyCollectionProperties,
   type ServerOnlyUploadProperties,
 } from './collections/config/client.js'
-
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
@@ -1630,32 +1643,21 @@ export type {
   TypeWithTimestamps,
 } from './collections/config/types.js'
 
-export interface FieldCustom extends Record<string, any> {}
-
-export interface CollectionCustom extends Record<string, any> {}
-
-export interface CollectionAdminCustom extends Record<string, any> {}
-
-export interface GlobalCustom extends Record<string, any> {}
-
-export interface GlobalAdminCustom extends Record<string, any> {}
-
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
 
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
-
 export { createOperation } from './collections/operations/create.js'
 export { deleteOperation } from './collections/operations/delete.js'
-export { deleteByIDOperation } from './collections/operations/deleteByID.js'
-export { docAccessOperation } from './collections/operations/docAccess.js'
 
+export { deleteByIDOperation } from './collections/operations/deleteByID.js'
+
+export { docAccessOperation } from './collections/operations/docAccess.js'
 export { duplicateOperation } from './collections/operations/duplicate.js'
 
 export { findOperation } from './collections/operations/find.js'
 export { findByIDOperation } from './collections/operations/findByID.js'
-
 export { findVersionByIDOperation } from './collections/operations/findVersionByID.js'
 export { findVersionsOperation } from './collections/operations/findVersions.js'
 export {
@@ -1708,24 +1710,24 @@ export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
 export { flattenWhereToOperators } from './database/flattenWhereToOperators.js'
 export { getLocalizedPaths } from './database/getLocalizedPaths.js'
+
 export { createMigration } from './database/migrations/createMigration.js'
 export { findMigrationDir } from './database/migrations/findMigrationDir.js'
-
 export { getMigrations } from './database/migrations/getMigrations.js'
 export { getPredefinedMigration } from './database/migrations/getPredefinedMigration.js'
 export { migrate } from './database/migrations/migrate.js'
 export { migrateDown } from './database/migrations/migrateDown.js'
+
 export { migrateRefresh } from './database/migrations/migrateRefresh.js'
 export { migrateReset } from './database/migrations/migrateReset.js'
-
 export { migrateStatus } from './database/migrations/migrateStatus.js'
+
 export { migrationsCollection } from './database/migrations/migrationsCollection.js'
 export { migrationTemplate } from './database/migrations/migrationTemplate.js'
-
 export { readMigrationFiles } from './database/migrations/readMigrationFiles.js'
+
 export { writeMigrationIndex } from './database/migrations/writeMigrationIndex.js'
 export type * from './database/queryValidation/types.js'
-
 export type { EntityPolicies, PathToQuery } from './database/queryValidation/types.js'
 export { validateQueryPaths } from './database/queryValidation/validateQueryPaths.js'
 export { validateSearchParam } from './database/queryValidation/validateSearchParams.js'
@@ -2128,14 +2130,15 @@ export {
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export type { ValidationResult } from './types/validation.js'
+
 export { generatePayloadFileURL } from './uploads/generatePayloadFileURL.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
-
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 export type * from './uploads/transformers/types.js'
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
+
 export {
   batchProcessing,
   type BatchProcessingOptions,
@@ -2154,14 +2157,13 @@ export {
   type SchemaVariant,
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
-
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
+
 export {
   createPayloadRequest,
   type CreatePayloadRequestArgs,
 } from './utilities/createPayloadRequest.js'
 export { createPayloadRequestFromWebRequest } from './utilities/createPayloadRequestFromWebRequest.js'
-
 export {
   deepCopyObject,
   deepCopyObjectComplex,

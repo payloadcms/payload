@@ -6,6 +6,7 @@ import type { APIError } from '../errors/APIError.js'
 import type { GlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
+import { assertBranchReadable } from '../branching/assertBranchReadable.js'
 import { createPayloadRequestFromWebRequest } from './createPayloadRequestFromWebRequest.js'
 import { formatAdminURL, stripTrailingSlash } from './formatAdminURL.js'
 import { headersWithCors } from './headersWithCors.js'
@@ -141,6 +142,11 @@ export const handleEndpoints = async ({
       payloadInstanceCacheKey,
       request,
     })
+
+    // Here rather than inside `createPayloadRequest`: the check needs the resolved user,
+    // and it has to be able to fail as a formatted response, which means the request has
+    // to exist first. §12.5 — a caller may not read through a branch they cannot see.
+    await assertBranchReadable({ req })
 
     const { payload } = req
     const { config } = payload

@@ -61,6 +61,46 @@ type Result = {
   tombstoned: boolean
 }
 
+export const setConcurrentBranchDelete = ({
+  branch,
+  collectionSlug,
+  doc,
+  docID,
+  req,
+  retryError,
+  winnerID,
+}: { req: PayloadRequest } & ConcurrentBranchDelete): void => {
+  req.context ??= {}
+  ;(req.context as Record<PropertyKey, unknown>)[concurrentBranchDeleteContextKey] = {
+    branch,
+    collectionSlug,
+    doc,
+    docID,
+    retryError,
+    winnerID,
+  }
+}
+
+export const setBranchDeleteOperation = ({
+  branch,
+  collectionSlug,
+  docID,
+  isTombstoneExpected,
+  onResolved,
+  req,
+  useAmbientTransaction,
+}: { req: PayloadRequest } & BranchDeleteOperation): void => {
+  req.context ??= {}
+  ;(req.context as Record<PropertyKey, unknown>)[branchDeleteOperationContextKey] = {
+    branch,
+    collectionSlug,
+    docID,
+    isTombstoneExpected,
+    onResolved,
+    useAmbientTransaction,
+  }
+}
+
 const createBranchDeleteChangedError = (): APIError =>
   new APIError(
     'The branch document changed while it was being deleted. Retry the operation.',
@@ -242,14 +282,14 @@ export const resolveBranchDelete = async ({
 
       if (matchingBranchDeleteOperation) {
         if (!matchingBranchDeleteOperation.isTombstoneExpected) {
-          resetBranchState(req as PayloadRequest)
+          resetBranchState({ req: req as PayloadRequest })
           throw createBranchDeleteChangedError()
         }
 
         matchingBranchDeleteOperation.onResolved(outcome)
       }
 
-      resetBranchState(req as PayloadRequest)
+      resetBranchState({ req: req as PayloadRequest })
 
       return outcome
     }
@@ -269,7 +309,7 @@ export const resolveBranchDelete = async ({
   })) as null | Record<string, unknown>
 
   if (!target) {
-    resetBranchState(req as PayloadRequest)
+    resetBranchState({ req: req as PayloadRequest })
     throw createBranchDeleteChangedError()
   }
 
@@ -283,12 +323,12 @@ export const resolveBranchDelete = async ({
     matchingBranchDeleteOperation &&
     matchingBranchDeleteOperation.isTombstoneExpected !== isTombstoneExpectedForTarget
   ) {
-    resetBranchState(req as PayloadRequest)
+    resetBranchState({ req: req as PayloadRequest })
     throw createBranchDeleteChangedError()
   }
 
   if (req.transactionID && !useAmbientTransaction && !isOnThisBranch) {
-    resetBranchState(req as PayloadRequest)
+    resetBranchState({ req: req as PayloadRequest })
     throw new APIError(
       'Cannot delete an untouched branch document within an existing transaction.',
       httpStatus.CONFLICT,
@@ -338,7 +378,7 @@ export const resolveBranchDelete = async ({
 
     matchingBranchDeleteOperation?.onResolved({ doc: target, tombstoned: false })
 
-    resetBranchState(req as PayloadRequest)
+    resetBranchState({ req: req as PayloadRequest })
 
     return { deleteRowID: targetID, tombstoned: false }
   }
@@ -458,7 +498,7 @@ export const resolveBranchDelete = async ({
     tombstoned: isTombstoneExpectedForTarget,
   })
 
-  resetBranchState(req as PayloadRequest)
+  resetBranchState({ req: req as PayloadRequest })
   ;(req as PayloadRequest).branch = branch
 
   return { doc: { ...target, id: canonicalID }, tombstoned: true }
