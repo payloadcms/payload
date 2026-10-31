@@ -217,3 +217,24 @@ describe('transformForWrite', () => {
     ])
   })
 })
+
+it.each([false, true])('should clear a null has-many select (localized=%s)', (localized) => {
+  const adapter = {
+    payload: { config: { localization: { localeCodes: ['en'] } } },
+    tableNameMap: new Map([['documents_tags', 'documents_tags']]),
+  } as unknown as DrizzleAdapter
+  const fields = [
+    { name: 'tags', type: 'select', hasMany: true, localized, options: ['one'] },
+  ] as FlattenedField[]
+  const transformed = transformForWrite({
+    adapter,
+    data: { tags: localized ? { en: null } : null },
+    fields,
+    tableName: 'documents',
+  })
+
+  expect(transformed.selectsToDelete.documents_tags).toEqual([
+    { locale: localized ? 'en' : undefined, parent: undefined },
+  ])
+  expect(transformed.selects.documents_tags).toEqual([])
+})
