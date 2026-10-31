@@ -793,6 +793,18 @@ export interface VirtualRelation {
     relationTo: 'categories';
     value: string | Category;
   } | null;
+  postLocalizedPolymorphicRelations?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'simple';
+            value: string | Simple;
+          }
+      )[]
+    | null;
   postCategoryReadDenied?: (string | null) | Category;
   post?: (string | null) | Post;
   posts?: (string | Post)[] | null;
@@ -1645,6 +1657,7 @@ export interface VirtualRelationsSelect<T extends boolean = true> {
   postCategory?: T;
   postCategories?: T;
   postCategoryPoly?: T;
+  postLocalizedPolymorphicRelations?: T;
   postCategoryReadDenied?: T;
   post?: T;
   posts?: T;

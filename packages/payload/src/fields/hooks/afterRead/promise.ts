@@ -449,12 +449,21 @@ export const promise = async ({
               // populating it would change that document
               const value = siblingDoc[field.name]
 
-              if (Array.isArray(value)) {
-                siblingDoc[field.name] = value.map((item) =>
-                  item && typeof item === 'object' ? { ...item } : item,
-                )
-              } else if (value && typeof value === 'object') {
-                siblingDoc[field.name] = { ...value }
+              // Same check as relationshipPopulationPromise uses to populate each locale
+              const isLocaleMap =
+                locale === 'all' &&
+                (field.type !== 'join' && field.hasMany ? shouldLocalizeField : field.localized)
+
+              if (value && typeof value === 'object') {
+                siblingDoc[field.name] =
+                  isLocaleMap && !Array.isArray(value)
+                    ? Object.fromEntries(
+                        Object.entries(value).map(([localeKey, localeValue]) => [
+                          localeKey,
+                          copyReferencedValue(localeValue),
+                        ]),
+                      )
+                    : copyReferencedValue(value)
               }
 
               return populateRelationship()
@@ -1061,4 +1070,16 @@ export const promise = async ({
       break
     }
   }
+}
+
+/**
+ * Copies the IDs or `{ relationTo, value }` objects of a relationship value, so that populating them
+ * doesn't change the document they were read from.
+ */
+const copyReferencedValue = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map((item) => (item && typeof item === 'object' ? { ...item } : item))
+  }
+
+  return value && typeof value === 'object' ? { ...value } : value
 }

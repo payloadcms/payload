@@ -810,6 +810,14 @@ export const getConfig: () => Partial<Config> = () => ({
           virtual: 'post.categoryPoly',
         },
         {
+          name: 'postLocalizedPolymorphicRelations',
+          type: 'relationship',
+          hasMany: true,
+          localized: true,
+          relationTo: ['categories', 'simple'],
+          virtual: 'post.localizedPolymorphicRelations',
+        },
+        {
           name: 'postCategoryReadDenied',
           type: 'relationship',
           access: { read: () => false },

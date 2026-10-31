@@ -4403,6 +4403,65 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       }
     })
 
+    test('should not change the related document when populating a localized relationship virtual field with reference', async ({
+      payload,
+    }) => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: 'category' },
+        overrideAccess: true,
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          localizedPolymorphicRelations: [{ relationTo: 'categories', value: category.id }],
+          title: 'post',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      for (let i = 0; i < 2; i++) {
+        await payload.create({
+          collection: 'virtual-relations',
+          data: { post: post.id },
+          depth: 0,
+          overrideAccess: true,
+        })
+      }
+
+      // Both reads share the request, and with it the related documents loaded for the references
+      const req = await createPayloadRequest({ payload })
+
+      const find = (depth: number) =>
+        payload.find({
+          collection: 'virtual-relations',
+          depth,
+          locale: 'all',
+          overrideAccess: true,
+          req,
+          where: { post: { equals: post.id } },
+        })
+
+      const atDepth1 = await find(1)
+
+      expect(atDepth1.docs).toHaveLength(2)
+
+      for (const doc of atDepth1.docs) {
+        expect(doc.postLocalizedPolymorphicRelations).toMatchObject({
+          en: [{ relationTo: 'categories', value: { id: category.id } }],
+        })
+      }
+
+      const atDepth0 = await find(0)
+
+      for (const doc of atDepth0.docs) {
+        expect(doc.postLocalizedPolymorphicRelations).toMatchObject({
+          en: [{ relationTo: 'categories', value: category.id }],
+        })
+      }
+    })
+
     test('should respect hidden: true for virtual fields with reference', async ({ payload }) => {
       const post = await payload.create({
         collection: 'posts',
