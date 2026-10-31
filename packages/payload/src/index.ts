@@ -1647,16 +1647,6 @@ export { type OrderableEndpointBody } from './config/orderable/index.js'
 
 export { sanitizeConfig } from './config/sanitize.js'
 
-export interface FieldCustom extends Record<string, any> {}
-
-export interface CollectionCustom extends Record<string, any> {}
-
-export interface CollectionAdminCustom extends Record<string, any> {}
-
-export interface GlobalCustom extends Record<string, any> {}
-
-export interface GlobalAdminCustom extends Record<string, any> {}
-
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 
