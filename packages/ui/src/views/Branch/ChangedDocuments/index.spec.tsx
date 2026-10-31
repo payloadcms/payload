@@ -40,7 +40,12 @@ vi.mock('../../../providers/Translation/index.js', () => ({
   }),
 }))
 
+let notifyIntersection: IntersectionObserverCallback
+
 class IdleIntersectionObserver {
+  constructor(callback: IntersectionObserverCallback) {
+    notifyIntersection = callback
+  }
   disconnect = vi.fn()
   observe = vi.fn()
   unobserve = vi.fn()
@@ -103,4 +108,24 @@ test('should announce a diff loading error', async () => {
   await expect
     .element(screen.getByRole('alert'))
     .toHaveTextContent('An unknown error has occurred.')
+})
+
+test('should share an in-flight diff between prefetch and a simultaneous expansion', async () => {
+  serverFunction.mockReturnValue(new Promise(() => undefined))
+  const screen = await render(
+    <ChangedDocuments
+      branch="campaign"
+      changes={[
+        { collectionSlug: 'posts', docID: 'document-id', id: 'change-id', operation: 'update' },
+      ]}
+    />,
+  )
+
+  notifyIntersection(
+    [{ isIntersecting: true }] as IntersectionObserverEntry[],
+    {} as IntersectionObserver,
+  )
+  screen.getByRole('button', { name: 'document-id' }).element().click()
+
+  expect(serverFunction).toHaveBeenCalledTimes(1)
 })
