@@ -39,6 +39,7 @@ import {
   localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
+  localizedStatusSharedGlobalSlug,
   portugueseLocale,
   publicationAccessGlobalSlug,
   publicationAccessSlug,
@@ -592,6 +593,46 @@ export default buildConfigWithDefaults({
       },
     ],
     globals: [
+      {
+        slug: localizedStatusSharedGlobalSlug,
+        fields: [
+          {
+            name: 'localizedText',
+            type: 'text',
+            localized: true,
+          },
+          {
+            name: 'sharedText',
+            type: 'text',
+          },
+          {
+            name: 'sharedRows',
+            type: 'array',
+            fields: [
+              { name: 'localizedText', type: 'text', localized: true },
+              { name: 'sharedText', type: 'text' },
+            ],
+          },
+          {
+            name: 'sharedBlocks',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'sharedTextBlock',
+                fields: [
+                  { name: 'localizedText', type: 'text', localized: true },
+                  { name: 'sharedText', type: 'text' },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: {
+          drafts: {
+            localizeStatus: true,
+          },
+        },
+      },
       {
         slug: localeValidationGlobalSlug,
         fields: getLocaleValidationFields(),
