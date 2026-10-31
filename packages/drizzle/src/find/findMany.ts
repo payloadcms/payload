@@ -125,10 +125,15 @@ export const findMany = async function find({
 
     groupQuery = groupQuery.orderBy(() =>
       orderBy.map(({ column, order }) => {
-        if (oneToManyJoinedTableNames.has(getNameFromDrizzleTable(column.table))) {
-          return order === asc ? asc(min(column)) : desc(max(column))
+        // Postgres requires ORDER BY expressions in a grouped query to be
+        // grouped or aggregated. Main-table columns are functionally
+        // dependent on the grouped primary key, but a joined column is not,
+        // so aggregate every joined sort column: a has-one related column
+        // holds a single value per group, so min/max preserves its order.
+        if (getNameFromDrizzleTable(column.table) === getNameFromDrizzleTable(mainTable)) {
+          return order(column)
         }
-        return order(column)
+        return order === asc ? asc(min(column)) : desc(max(column))
       }),
     )
 

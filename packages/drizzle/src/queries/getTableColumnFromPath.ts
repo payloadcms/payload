@@ -545,6 +545,7 @@ export const getTableColumnFromPath = ({
                 newAliasTable[field.on.replaceAll('.', '_')],
                 aliasTable ? aliasTable.id : adapter.tables[tableName].id,
               ),
+              isOneToMany: true,
               queryPath: `${constraintPath}${field.name}`,
               table: newAliasTable,
             })
@@ -971,12 +972,14 @@ export const getTableColumnFromPath = ({
 
             addJoinTable({
               condition: and(...conditions),
+              isOneToMany: true,
               joins,
               table: adapter.tables[newTableName],
             })
           } else {
             addJoinTable({
               condition: eq(idColumn, adapter.tables[newTableName].parent),
+              isOneToMany: true,
               joins,
               table: adapter.tables[newTableName],
             })
