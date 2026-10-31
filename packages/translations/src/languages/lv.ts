@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const lvTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konts',
@@ -85,6 +87,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ja neesat pieprasījis paroles atiestatīšanu, lūdzu, ignorējiet šo e-pastu, un parole paliks nemainīta.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Darbības',
     createNew: 'Izveidot jaunu',
@@ -309,6 +312,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     clearAll: 'Notīrīt visu',
     clearSearch: 'Notīrīt meklēšanu',
     close: 'Aizvērt',
+    closed: 'Slēgts',
     collapse: 'Sakļaut',
     collection: 'Kolekcija',
     collections: 'Kolekcijas',

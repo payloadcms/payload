@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const taTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'கணக்கு',
@@ -84,6 +86,7 @@ export const taTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'இதை நீங்கள் கோரவில்லை என்றால், இந்த மின்னஞ்சலை புறக்கணிக்கவும். உங்கள் கடவுச்சொல் மாறாது இருக்கும்.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'செயல்கள்',
     createNew: 'புதியதை உருவாக்கவும்',
@@ -306,6 +309,7 @@ export const taTranslations: DefaultTranslationsObject = {
     clearAll: 'அனைத்தையும் அழிக்கவும்',
     clearSearch: 'தேடலை அழி',
     close: 'மூடவும்',
+    closed: 'மூடப்பட்டது',
     collapse: 'சுருக்கவும்',
     collection: 'தொகுப்பு',
     collections: 'தொகுப்புகள்',

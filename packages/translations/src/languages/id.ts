@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const idTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Akun',
@@ -86,6 +88,7 @@ export const idTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jika Anda tidak meminta ini, harap abaikan email ini dan kata sandi Anda akan tetap tidak berubah.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Tindakan',
     createNew: 'Buat Baru',
@@ -312,6 +315,7 @@ export const idTranslations: DefaultTranslationsObject = {
     clearAll: 'Hapus Semua',
     clearSearch: 'Hapus pencarian',
     close: 'Tutup',
+    closed: 'Ditutup',
     collapse: 'Ciutkan',
     collection: 'Koleksi',
     collections: 'Koleksi',

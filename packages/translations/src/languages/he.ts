@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const heTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'חשבון',
@@ -83,6 +85,7 @@ export const heTranslations: DefaultTranslationsObject = {
       'קיבלת הודעה זו מכיוון שאתה (או מישהו אחר) ביקשת לאפס את הסיסמה של החשבון שלך. אנא לחץ על הקישור הבא או הדבק אותו בשורת הכתובת בדפדפן שלך כדי להשלים את התהליך:',
     youDidNotRequestPassword: 'אם לא ביקשת זאת, אנא התעלם מההודעה והסיסמה שלך תישאר ללא שינוי.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'פעולות',
     createNew: 'צור חדש',
@@ -299,6 +302,7 @@ export const heTranslations: DefaultTranslationsObject = {
     clearAll: 'נקה הכל',
     clearSearch: 'ניקוי החיפוש',
     close: 'סגור',
+    closed: 'סגור',
     collapse: 'כווץ',
     collection: 'אוסף',
     collections: 'אוספים',

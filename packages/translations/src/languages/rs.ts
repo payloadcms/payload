@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const rsTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Налог',
@@ -86,6 +88,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ако нисте затражили промену лозинке игноришите ову поруку и лозинка ће остати непромењена.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Akcije',
     createNew: 'Kreiraj novo',
@@ -310,6 +313,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     clearAll: 'Obriši sve',
     clearSearch: 'Обриши претрагу',
     close: 'Затвори',
+    closed: 'Затворена',
     collapse: 'Скупи',
     collection: 'Kolekcija',
     collections: 'Колекције',

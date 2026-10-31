@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const bgTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Профил',
@@ -85,6 +87,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ако не си заявил това, игнорирай този имейл и паролата ти ще остане непроменена.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Действия',
     createNew: 'Създаване на нов',
@@ -310,6 +313,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     clearAll: 'Изчисти всичко',
     clearSearch: 'Изчистване на търсенето',
     close: 'Затвори',
+    closed: 'Затворен',
     collapse: 'Свий',
     collection: 'Колекция',
     collections: 'Колекции',

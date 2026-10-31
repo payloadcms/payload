@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const myTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'အကောင့်',
@@ -84,6 +86,7 @@ export const myTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'ယခု လုပ်ဆောင်ချက်ကို သင်မတောင်းဆိုထားပါက ဤအီးမေးလ်ကို လျစ်လျူရှုထားခြင်းဖြင့် သင့်စကားဝှက်သည် ပြောင်းလဲမည်မဟုတ်ပါ။',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'လုပ်ဆောင်ချက်များ',
     createNew: 'အသစ်တစ်ခု ဖန်တီးပါ',
@@ -302,6 +305,7 @@ export const myTranslations: DefaultTranslationsObject = {
     clearAll: 'အားလုံးကိုရှင်းလင်းပါ',
     clearSearch: 'ရှာဖွေမှုကို ရှင်းလင်းရန်',
     close: 'ပိတ်',
+    closed: 'ပိတ်ထားသည်',
     collapse: 'ခေါက်သိမ်းပါ။',
     collection: 'စုဆည်းမှု',
     collections: 'စုစည်းမှူများ',

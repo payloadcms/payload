@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const hyTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Հաշիվ',
@@ -86,6 +88,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Եթե Դուք չեք ուղարկել հարցումը, խնդրում ենք անտեսել այս էլ. նամակը, և Ձեր գաղտնաբառը կմնա անփոփոխ։',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Գործողություններ',
     createNew: 'Ստեղծել Նոր',
@@ -311,6 +314,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     clearAll: 'Մաքրել բոլորը',
     clearSearch: 'Մաքրել որոնումը',
     close: 'Փակել',
+    closed: 'Փակ',
     collapse: 'Փակել',
     collection: 'Հավաքածու',
     collections: 'Հավաքածուներ',

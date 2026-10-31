@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const deTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Benutzerkonto',
@@ -88,6 +90,7 @@ export const deTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Solltest du dies nicht angefordert haben, ignoriere diese E-Mail. Dein Passwort bleibt unverändert.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Aktionen',
     createNew: 'Neu erstellen',
@@ -321,6 +324,7 @@ export const deTranslations: DefaultTranslationsObject = {
     clearAll: 'Alles leeren',
     clearSearch: 'Suche löschen',
     close: 'Schließen',
+    closed: 'Geschlossen',
     collapse: 'Einklappen',
     collection: 'Sammlung',
     collections: 'Sammlungen',

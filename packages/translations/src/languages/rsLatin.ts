@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const rsLatinTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Nalog',
@@ -86,6 +88,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ako niste zatražili promenu lozinke ignorišite ovu poruku i lozinka će ostati nepromenjena.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Akcije',
     createNew: 'Kreiraj novo',
@@ -310,6 +313,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     clearAll: 'Očisti sve',
     clearSearch: 'Obriši pretragu',
     close: 'Zatvori',
+    closed: 'Zatvorena',
     collapse: 'Skupi',
     collection: 'Kolekcija',
     collections: 'Kolekcije',

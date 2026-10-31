@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const ltTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Paskyra',
@@ -86,6 +88,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jei to neprašėte, prašome ignoruoti šį el. laišką ir jūsų slaptažodis išliks nepakeistas.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'Veiksmai',
     createNew: 'Sukurti naują',
@@ -314,6 +317,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     clearAll: 'Išvalyti viską',
     clearSearch: 'Išvalyti paiešką',
     close: 'Uždaryti',
+    closed: 'Uždaryta',
     collapse: 'Susikolimas',
     collection: 'Kolekcija',
     collections: 'Kolekcijos',

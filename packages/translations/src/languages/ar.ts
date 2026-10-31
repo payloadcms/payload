@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const arTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'الحساب',
@@ -86,6 +88,7 @@ export const arTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'إن لم تطلب هذا ، يرجى تجاهل هذا البريد الإلكتروني وستبقى كلمة مرورك ذاتها بدون تغيير.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'الإجراءات',
     createNew: 'إنشاء جديد',
@@ -302,6 +305,7 @@ export const arTranslations: DefaultTranslationsObject = {
     clearAll: 'امسح الكل',
     clearSearch: 'مسح البحث',
     close: 'إغلاق',
+    closed: 'مغلق',
     collapse: 'طيّ',
     collection: 'مجموعة',
     collections: 'المجموعات',

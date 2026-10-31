@@ -563,7 +563,9 @@ describe('configToJSONSchema', () => {
         id: {
           type: 'string',
         },
-        jsonWithSchema: customSchema,
+        jsonWithSchema: {
+          anyOf: [customSchema, { type: 'null' }],
+        },
         withCustom: customSchema,
       },
       required: ['id'],
@@ -886,5 +888,41 @@ describe('configToJSONSchema', () => {
 
     // Doesn't pull in unrelated collections.
     expect(schema.$defs?.other).toBeUndefined()
+  })
+})
+
+it('should transform optional rich text before applying its nullable wrapper', () => {
+  const config = sanitizeConfig({
+    collections: [
+      {
+        slug: 'test',
+        versions: false,
+        authorship: false,
+        timestamps: false,
+        fields: [
+          {
+            name: 'content',
+            type: 'richText',
+            editor: {
+              jsonSchema: () => ({ type: 'object', properties: { root: { type: 'string' } } }),
+            },
+            jsonSchema: [
+              ({ jsonSchema }) => {
+                jsonSchema.properties!.root = { type: 'string', description: 'Transformed root' }
+                return jsonSchema
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  } as unknown as Config)
+  const { jsonSchema } = configToJSONSchema(config, 'text')
+
+  expect(jsonSchema.$defs!.test.properties!.content).toMatchObject({
+    anyOf: [
+      { type: 'object', properties: { root: { description: 'Transformed root' } } },
+      { type: 'null' },
+    ],
   })
 })

@@ -1,6 +1,7 @@
 /** HTTP status codes used by Payload. */
 export const httpStatus = {
   BAD_REQUEST: 400,
+  CONFLICT: 409,
   CREATED: 201,
   FORBIDDEN: 403,
   INTERNAL_SERVER_ERROR: 500,
@@ -12,4 +13,5 @@ export const httpStatus = {
   REQUEST_ENTITY_TOO_LARGE: 413,
   REQUESTED_RANGE_NOT_SATISFIABLE: 416,
   UNAUTHORIZED: 401,
+  UNPROCESSABLE_ENTITY: 422,
 } as const

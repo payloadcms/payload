@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const faTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'حساب کاربری',
@@ -84,6 +86,7 @@ export const faTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'اگر شما درخواست بازنشانی رمز عبور نداده‌اید، این ایمیل را نادیده بگیرید. رمز عبور شما تغییری نخواهد کرد.',
   },
+  branching: enTranslations.branching,
   commandPalette: {
     actions: 'اقدامات',
     createNew: 'ایجاد جدید',
@@ -304,6 +307,7 @@ export const faTranslations: DefaultTranslationsObject = {
     clearAll: 'پاک کردن همه',
     clearSearch: 'پاک کردن جستجو',
     close: 'بستن',
+    closed: 'بسته',
     collapse: 'بستن',
     collection: 'مجموعه',
     collections: 'مجموعه‌ها',
