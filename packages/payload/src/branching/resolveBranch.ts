@@ -43,7 +43,7 @@ const getBranchingConfig = (req: PayloadRequest): SanitizedBranchingConfig | und
  *   2. `branch` query param
  *   3. `main`
  */
-export const resolveBranch = (req: PayloadRequest): string => {
+export const resolveBranch = ({ req }: { req: PayloadRequest }): string => {
   const branching = getBranchingConfig(req)
 
   if (!branching?.enabled) {
