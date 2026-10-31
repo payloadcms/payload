@@ -19,6 +19,7 @@ import type {
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
+import { supportedPasswordHashIterations } from '../auth/strategies/local/generatePasswordSaltHash.js'
 import { validateListSearchableFields } from '../collections/config/listSearchableFields.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
@@ -307,6 +308,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   if (!(safetyBuffer! >= 0 && safetyBuffer! < duration!)) {
     throw new InvalidConfiguration(
       '`jobs.processingLease.safetyBuffer` must be non-negative and less than `jobs.processingLease.duration`.',
+    )
+  }
+
+  if (!supportedPasswordHashIterations.includes(configWithDefaults.auth!.passwordHashIterations!)) {
+    throw new InvalidConfiguration(
+      `\`auth.passwordHashIterations\` must be one of ${supportedPasswordHashIterations.join(', ')}.`,
     )
   }
 

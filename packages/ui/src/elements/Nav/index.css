@@ -149,6 +149,14 @@
     }
   }
 
+  html[data-enhanced-contrast] .nav__header + .nav__scroll .nav__wrap > .nav-group:first-child {
+    padding-block-start: 0;
+
+    > .nav-group__toggle {
+      border-block-start: 0;
+    }
+  }
+
   html[data-enhanced-contrast] .nav__link--selected::before {
     background: var(--color-bg-secondary);
     border: var(--stroke-width-small) solid var(--color-border-selected);
