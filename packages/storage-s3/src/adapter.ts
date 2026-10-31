@@ -14,6 +14,7 @@ import { generateURL } from './generateURL.js'
 interface CreateS3AdapterArgs {
   acl?: 'private' | 'public-read'
   bucket: string
+  cacheControl?: string
   clientUploads?: ClientUploadsConfig
   config: S3ClientConfig
   getStorageClient: () => S3
@@ -24,6 +25,7 @@ interface CreateS3AdapterArgs {
 export function createS3Adapter({
   acl,
   bucket,
+  cacheControl,
   clientUploads,
   config,
   getStorageClient,
@@ -61,6 +63,7 @@ export function createS3Adapter({
         access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
         acl,
         bucket,
+        cacheControl,
         collectionPrefix: prefix,
         getStorageClient,
         useCompositePrefixes,
@@ -79,6 +82,7 @@ export function createS3Adapter({
         acl,
         bucket,
         buffer: file.buffer,
+        cacheControl,
         client: getStorageClient(),
         mimeType: file.mimeType,
         storageFilePath,
