@@ -272,7 +272,18 @@ export const loadBranchOperation = async ({
  * serve one branch's document to the other.
  */
 export const isolateBranchState = ({ req }: { req: PayloadRequest }): PayloadRequest => {
-  const isolated = isolateObjectProperty(req, ['branch', 'context', 'payloadDataLoader'])
+  const isolated = isolateObjectProperty(req, [
+    'branch',
+    'context',
+    'payloadDataLoader',
+    'operation',
+    'query',
+    'locale',
+    'fallbackLocale',
+    'user',
+    'file',
+    'files',
+  ])
   isolated.context = { ...req.context }
 
   resetBranchState({ req: isolated })
