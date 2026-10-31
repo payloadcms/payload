@@ -234,6 +234,7 @@ export const getVersions = async ({
       } else {
         publishedDoc = await payload.findGlobal({
           slug: globalConfig.slug,
+          branch,
           depth: 0,
           locale,
           overrideAccess: true,
@@ -251,6 +252,7 @@ export const getVersions = async ({
       if (hasAutosaveEnabled(globalConfig)) {
         const mostRecentVersion = await payload.findGlobalVersions({
           slug: globalConfig.slug,
+          branch,
           limit: 1,
           locale,
           overrideAccess: true,
@@ -271,6 +273,7 @@ export const getVersions = async ({
 
       if (publishedDoc?.updatedAt) {
         ;({ totalDocs: unpublishedVersionCount } = await payload.countGlobalVersions({
+          branch,
           global: globalConfig.slug,
           locale,
           overrideAccess: true,
@@ -297,6 +300,7 @@ export const getVersions = async ({
     }
 
     ;({ totalDocs: versionCount } = await payload.countGlobalVersions({
+      branch,
       global: globalConfig.slug,
       locale,
       overrideAccess: true,

@@ -3,9 +3,11 @@ import type { SanitizedCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { formatAdminURL, validateMimeType } from 'payload/shared'
+import * as qs from 'qs-esm'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -51,6 +53,7 @@ export const useUploadFromUrl = ({
       routes: { api },
     },
   } = useConfig()
+  const branch = useBranchParam()
   const { closeModal } = useModal()
   const { id, setUploadStatus } = useDocumentInfo()
   const { t } = useTranslation()
@@ -97,7 +100,8 @@ export const useUploadFromUrl = ({
 
   const fetchFileFromServerProxy = useCallback(
     async (url: string): Promise<boolean> => {
-      const pasteURL: `/${string}` = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(url)}`
+      const query = qs.stringify({ branch, src: url }, { addQueryPrefix: true })
+      const pasteURL: `/${string}` = `/${collectionSlug}/paste-url${id ? `/${id}` : ''}${query}`
       const response = await fetch(formatAdminURL({ apiRoute: api, path: pasteURL }))
 
       if (!response.ok) {
@@ -107,7 +111,7 @@ export const useUploadFromUrl = ({
       const blob = await response.blob()
       return acceptFetchedBlob({ blob, url })
     },
-    [acceptFetchedBlob, api, collectionSlug, id],
+    [acceptFetchedBlob, api, branch, collectionSlug, id],
   )
 
   const handleUrlSubmit = useCallback(
