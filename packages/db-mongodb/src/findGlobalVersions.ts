@@ -1,7 +1,11 @@
 import type { PaginateOptions, QueryOptions } from 'mongoose'
 import type { FindGlobalVersions } from 'payload'
 
-import { APIError, buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
+import {
+  buildVersionGlobalFields,
+  flattenWhereToOperators,
+  resolveBranchGlobalVersionQuery,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -15,6 +19,7 @@ import { transform } from './utilities/transform.js'
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: MongooseAdapter,
   {
+    branch,
     global: globalSlug,
     limit = 0,
     locale,
@@ -27,6 +32,8 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   },
 ) {
   const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug, versions: true })
+
+  where = resolveBranchGlobalVersionQuery({ branch, globalSlug, req, where }) ?? {}
 
   const versionFields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
 
@@ -51,8 +58,10 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
 
   const query = await buildQuery({
     adapter: this,
+    branch,
     fields: versionFields,
     locale,
+    req,
     where,
   })
 

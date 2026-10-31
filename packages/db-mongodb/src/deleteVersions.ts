@@ -40,6 +40,7 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(
     adapter: this,
     fields,
     locale,
+    req,
     where,
   })
 

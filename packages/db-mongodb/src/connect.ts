@@ -97,6 +97,7 @@ export const connect: Connect = async function connect(
             this.collections[collection.slug],
             this.versions[collection.slug],
           ]),
+          this.globals,
           ...this.payload.config.globals.map((global) => this.versions[global.slug]),
         ].map(async (model) => {
           await model?.ensureIndexes()

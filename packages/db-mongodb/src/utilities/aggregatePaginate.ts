@@ -6,6 +6,7 @@ import type { MongooseAdapter } from '../index.js'
 
 export const aggregatePaginate = async ({
   adapter,
+  branchVisibility,
   collation,
   joinAggregation,
   limit,
@@ -20,6 +21,7 @@ export const aggregatePaginate = async ({
   useEstimatedCount,
 }: {
   adapter: MongooseAdapter
+  branchVisibility?: PipelineStage[]
   collation?: CollationOptions
   joinAggregation?: PipelineStage[]
   limit?: number
@@ -33,7 +35,7 @@ export const aggregatePaginate = async ({
   sortAggregation?: PipelineStage[]
   useEstimatedCount?: boolean
 }): Promise<PaginatedDocs<any>> => {
-  const aggregation: PipelineStage[] = [{ $match: query }]
+  const aggregation: PipelineStage[] = [{ $match: query }, ...(branchVisibility ?? [])]
 
   if (sortAggregation && sortAggregation.length > 0) {
     for (const stage of sortAggregation) {
@@ -72,7 +74,12 @@ export const aggregatePaginate = async ({
   let countPromise: Promise<null | number> = Promise.resolve(null)
 
   if (pagination !== false && limit) {
-    if (useEstimatedCount) {
+    if (branchVisibility?.length) {
+      countPromise = Model.aggregate(
+        [{ $match: query }, ...branchVisibility, { $count: 'count' }],
+        { collation, session },
+      ).then((result) => result[0]?.count ?? 0)
+    } else if (useEstimatedCount) {
       countPromise = Model.estimatedDocumentCount(query)
     } else {
       // Only hint the _id index for unfiltered counts. With a filter, MongoDB picks the matching index on its own,
@@ -97,7 +104,9 @@ export const aggregatePaginate = async ({
   const count = countResult === null ? docs.length : countResult
 
   const totalPages =
-    pagination !== false && typeof limit === 'number' && limit !== 0 ? Math.ceil(count / limit) : 1
+    pagination !== false && typeof limit === 'number' && limit !== 0
+      ? Math.max(1, Math.ceil(count / limit))
+      : 1
 
   const hasPrevPage = typeof page === 'number' && pagination !== false && page > 1
   const hasNextPage = typeof page === 'number' && pagination !== false && totalPages > page

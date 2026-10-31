@@ -1,9 +1,17 @@
 import type { AggregateOptions, QueryOptions } from 'mongoose'
 
-import { type FindOne } from 'payload'
+import {
+  applyBranchIDProjection,
+  type FindOne,
+  resolveBranchQuery,
+  resolveBranchReadState,
+  rewriteBranchIDs,
+  withBranchIDSelect,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildBranchVisibilityStages } from './queries/buildBranchVisibility.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
@@ -15,26 +23,41 @@ import { transform } from './utilities/transform.js'
 
 export const findOne: FindOne = async function findOne(
   this: MongooseAdapter,
-  { collection: collectionSlug, draftsEnabled, joins, locale, req, select, where = {} },
+  { branch, collection: collectionSlug, draftsEnabled, joins, locale, req, select, where = {} },
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug, req })
+
+  where = branchReadState.useBranching
+    ? (rewriteBranchIDs(where) ?? {})
+    : ((await resolveBranchQuery({ branch, collectionSlug, req, where })) ?? {})
+  const branchVisibility = branchReadState.useBranching
+    ? buildBranchVisibilityStages({
+        adapter: this,
+        branch: branchReadState.branch,
+        collectionSlug,
+      })
+    : []
 
   const query = await buildQuery({
     adapter: this,
+    branch,
     collectionSlug,
     fields: collectionConfig.flattenedFields,
     locale,
+    req,
     where,
   })
 
   const projection = buildProjectionFromSelect({
     adapter: this,
     fields: collectionConfig.flattenedFields,
-    select,
+    select: withBranchIDSelect({ branch, collectionSlug, req, select }),
   })
 
   const aggregate = await buildJoinAggregation({
     adapter: this,
+    branch,
     collection: collectionSlug,
     collectionConfig,
     draftsEnabled,
@@ -42,6 +65,7 @@ export const findOne: FindOne = async function findOne(
     locale,
     projection,
     query,
+    req,
   })
 
   const session = await getSession(this, req)
@@ -51,9 +75,10 @@ export const findOne: FindOne = async function findOne(
   }
 
   let doc
-  if (aggregate.length > 0) {
+  if (aggregate.length > 0 || branchVisibility.length > 0) {
     const { docs } = await aggregatePaginate({
       adapter: this,
+      branchVisibility,
       joinAggregation: aggregate,
       limit: 1,
       Model,
@@ -71,10 +96,12 @@ export const findOne: FindOne = async function findOne(
   if (doc && !this.useJoinAggregations) {
     await resolveJoins({
       adapter: this,
+      branch,
       collectionSlug,
       docs: [doc] as Record<string, unknown>[],
       joins,
       locale,
+      req,
     })
   }
 
@@ -83,6 +110,13 @@ export const findOne: FindOne = async function findOne(
   }
 
   transform({ adapter: this, data: doc, fields: collectionConfig.fields, operation: 'read' })
+
+  applyBranchIDProjection({
+    branch,
+    collectionSlug,
+    docs: [doc as Record<string, unknown>],
+    req,
+  })
 
   return doc
 }

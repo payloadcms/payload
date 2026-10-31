@@ -7,21 +7,30 @@ import {
   type CollectionSlug,
   combineQueries,
   type FlattenedField,
+  getBranchPredicateSync,
   getQueryDraftsSort,
   type JoinQuery,
+  type PayloadRequest,
+  resolveBranchReadState,
+  resolveBranchVersionQuery,
+  rewriteBranchIDs,
+  rewriteBranchVersionParents,
   type SanitizedCollectionConfig,
+  type Where,
 } from 'payload'
 import { fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 import type { CollectionModel } from '../types.js'
 
+import { buildBranchVisibilityStages } from '../queries/buildBranchVisibility.js'
 import { buildQuery } from '../queries/buildQuery.js'
 import { buildSortParam } from '../queries/buildSortParam.js'
 import { getCollection } from './getEntity.js'
 
 type BuildJoinAggregationArgs = {
   adapter: MongooseAdapter
+  branch?: false | string
   collection: CollectionSlug
   collectionConfig: SanitizedCollectionConfig
   draftsEnabled?: boolean
@@ -30,18 +39,21 @@ type BuildJoinAggregationArgs = {
   projection?: Record<string, true>
   // the where clause for the top collection
   query?: Record<string, unknown>
+  req?: Partial<PayloadRequest>
   /** whether the query is from drafts */
   versions?: boolean
 }
 
 export const buildJoinAggregation = async ({
   adapter,
+  branch,
   collection,
   collectionConfig,
   draftsEnabled,
   joins,
   locale,
   projection,
+  req,
   versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[]> => {
   if (!adapter.useJoinAggregations) {
@@ -62,6 +74,15 @@ export const buildJoinAggregation = async ({
   }
 
   const aggregate: PipelineStage[] = []
+  const outerBranchReadState = resolveBranchReadState({ branch, collectionSlug: collection, req })
+  const canonicalParentField = '__payloadJoinParentID'
+  let localField = versions ? 'parent' : '_id'
+
+  if (outerBranchReadState.useBranching) {
+    localField = canonicalParentField
+  }
+
+  const rootIDExpression = outerBranchReadState.useBranching ? `$${canonicalParentField}` : '$_id'
   const polymorphicJoinsConfig = adapter.payload.collections[collection]?.config?.polymorphicJoins
 
   if (!polymorphicJoinsConfig) {
@@ -107,8 +128,10 @@ export const buildJoinAggregation = async ({
 
     const $match = await buildQuery({
       adapter,
+      branch,
       fields: aggregatedFields,
       locale,
+      req,
       where: whereJoin,
     })
 
@@ -125,7 +148,34 @@ export const buildJoinAggregation = async ({
       const alias = `${as}.docs.${collectionSlug}`
       aliases.push(alias)
 
-      const basePipeline = [
+      const joinBranchPredicate = getBranchPredicateSync({
+        branch,
+        collectionSlug,
+        req,
+      })
+      const joinBranchReadState = resolveBranchReadState({
+        branch,
+        collectionSlug,
+        req,
+      })
+      const branchMatch = joinBranchPredicate
+        ? await buildQuery({
+            adapter,
+            branch,
+            fields: adapter.payload.collections[collectionSlug]!.config.flattenedFields,
+            locale,
+            req,
+            where: joinBranchPredicate,
+          })
+        : undefined
+      const branchVisibility = joinBranchReadState.useBranching
+        ? buildBranchVisibilityStages({
+            adapter,
+            branch: joinBranchReadState.branch,
+            collectionSlug,
+          })
+        : []
+      const basePipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
         {
           $addFields: {
             relationTo: {
@@ -142,9 +192,17 @@ export const buildJoinAggregation = async ({
                 },
               },
               $match,
+              ...(branchMatch ? [branchMatch] : []),
             ],
           },
         },
+        ...branchVisibility,
+        ...(joinBranchPredicate || branchVisibility.length
+          ? ([{ $set: { _id: { $ifNull: ['$_branchDocID', '$_id'] } } }] as Exclude<
+              PipelineStage,
+              PipelineStage.Merge | PipelineStage.Out
+            >[])
+          : []),
       ]
 
       const { Model: JoinModel } = getCollection({ adapter, collectionSlug })
@@ -154,7 +212,7 @@ export const buildJoinAggregation = async ({
           as: alias,
           from: JoinModel.collection.name,
           let: {
-            root_id_: '$_id',
+            root_id_: rootIDExpression,
           },
           pipeline: [
             ...basePipeline,
@@ -190,7 +248,7 @@ export const buildJoinAggregation = async ({
             as: `${as}.totalDocs.${alias}`,
             from: JoinModel.collection.name,
             let: {
-              root_id_: '$_id',
+              root_id_: rootIDExpression,
             },
             pipeline: [
               ...basePipeline,
@@ -328,20 +386,69 @@ export const buildJoinAggregation = async ({
       const sortProperty = Object.keys(sort)[0]!
       const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
 
+      // A join subquery must carry the same branch predicate as the top-level
+      // read, or a branch would see main's related documents.
+      const joinBranchPredicate = getBranchPredicateSync({
+        branch,
+        collectionSlug: collectionConfig.slug,
+        req,
+      })
+      const joinBranchReadState = resolveBranchReadState({
+        branch,
+        collectionSlug: collectionConfig.slug,
+        req,
+      })
+
+      const resolvedWhereJoin = useDrafts
+        ? joinBranchReadState.useBranching
+          ? (rewriteBranchVersionParents(appendVersionToQueryKey(whereJoin)) ?? {})
+          : ((await resolveBranchVersionQuery({
+              branch,
+              collectionSlug: collectionConfig.slug,
+              req,
+              where: appendVersionToQueryKey(whereJoin),
+            })) ?? {})
+        : joinBranchReadState.useBranching
+          ? (rewriteBranchIDs(whereJoin) ?? {})
+          : joinBranchPredicate
+            ? ({ and: [whereJoin, joinBranchPredicate] } as Where)
+            : whereJoin
+
       const $match = await JoinModel.buildQuery({
+        branch,
         locale,
         payload: adapter.payload,
+        req,
         where: useDrafts
-          ? combineQueries(appendVersionToQueryKey(whereJoin), {
+          ? combineQueries(resolvedWhereJoin, {
               latest: {
                 equals: true,
               },
             })
-          : whereJoin,
+          : resolvedWhereJoin,
       })
+      const branchVisibility = joinBranchReadState.useBranching
+        ? buildBranchVisibilityStages({
+            adapter,
+            branch: joinBranchReadState.branch,
+            collectionSlug: collectionConfig.slug,
+            mode: useDrafts ? 'drafts' : 'documents',
+          })
+        : []
 
       const pipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
         { $match },
+        ...branchVisibility,
+        // Surface the canonical document ID rather than the shadow row's own
+        // primary key, so join results address documents the same way every
+        // other read does.
+        ...(joinBranchPredicate || branchVisibility.length
+          ? ([
+              useDrafts
+                ? { $set: { parent: { $ifNull: ['$_branchParent', '$parent'] } } }
+                : { $set: { _id: { $ifNull: ['$_branchDocID', '$_id'] } } },
+            ] as Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[])
+          : []),
         {
           $sort: { [sortProperty]: sortDirection },
         },
@@ -371,11 +478,12 @@ export const buildJoinAggregation = async ({
               as: `${as}.totalDocs`,
               foreignField,
               from: JoinModel.collection.name,
-              localField: versions ? 'parent' : '_id',
+              localField,
               pipeline: [
                 {
                   $match,
                 },
+                ...branchVisibility,
                 {
                   $count: 'result',
                 },
@@ -405,7 +513,7 @@ export const buildJoinAggregation = async ({
                 as: `${as}.docs`,
                 foreignField: `${foreignFieldPrefix}${join.field.on}${code}${polymorphicSuffix}`,
                 from: JoinModel.collection.name,
-                localField: versions ? 'parent' : '_id',
+                localField,
                 pipeline,
               },
             },
@@ -469,7 +577,7 @@ export const buildJoinAggregation = async ({
               as: `${as}.docs`,
               foreignField: `${foreignFieldPrefix}${foreignField}`,
               from: JoinModel.collection.name,
-              localField: versions ? 'parent' : '_id',
+              localField,
               pipeline,
             },
           },
@@ -504,6 +612,17 @@ export const buildJoinAggregation = async ({
         }
       }
     }
+  }
+
+  if (aggregate.length && outerBranchReadState.useBranching) {
+    aggregate.unshift({
+      $set: {
+        [canonicalParentField]: versions
+          ? { $ifNull: ['$_branchParent', '$parent'] }
+          : { $ifNull: ['$_branchDocID', '$_id'] },
+      },
+    })
+    aggregate.push({ $unset: canonicalParentField })
   }
 
   return aggregate
