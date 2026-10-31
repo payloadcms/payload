@@ -25,7 +25,7 @@ const activeBranch = ({ branch, globalSlug, req }: BaseArgs): null | string => {
     return null
   }
 
-  return branch === false ? null : (branch ?? resolveBranch(req as PayloadRequest))
+  return branch === false ? null : (branch ?? resolveBranch({ req: req as PayloadRequest }))
 }
 
 /**

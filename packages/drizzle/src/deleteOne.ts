@@ -1,7 +1,7 @@
 import type { DeleteOne } from 'payload'
 
 import { eq } from 'drizzle-orm'
-import { resolveBranchDelete } from 'payload'
+import { resolveBranchDelete, resolveBranchQuery } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -37,12 +37,15 @@ export const deleteOne: DeleteOne = async function deleteOne(
     whereArg = { id: { equals: branchDelete.deleteRowID } }
   }
 
+  whereArg = await resolveBranchQuery({ branch, collectionSlug, req, where: whereArg })
+
   let docToDelete: Record<string, unknown>
 
   const { joins, selectFields, where } = buildQuery({
     adapter: this,
     fields: collection.flattenedFields,
     locale: req?.locale,
+    req,
     tableName,
     where: whereArg,
   })
