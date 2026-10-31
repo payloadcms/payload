@@ -3392,7 +3392,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
     }) => {
       const filePath = path.resolve(dirname, './image.png')
       const file = await getFileByPath(filePath)
-      file.name = 'preserve-req-file-test.png'
+      file!.name = 'preserve-req-file-test.png'
 
       // Simulate `req` as it would exist on an upload request, i.e. already
       // carrying a `file` reference before any nested Local API call is made.
@@ -3416,6 +3416,57 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       expect(req.file?.name).toBe('preserve-req-file-test.png')
 
       await payload.delete({ collection: relationSlug, id: relationDoc.id })
+    })
+
+    test('should not use the outer req.file for a nested upload update without a file', async ({
+      payload,
+    }) => {
+      const mediaDoc = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        filePath: path.resolve(dirname, './image.png'),
+        overrideAccess: true,
+      })
+
+      const outerFile = await getFileByPath(path.resolve(dirname, './small.png'))
+      outerFile!.name = 'outer-req-file-test.png'
+      const req = { file: outerFile } as PayloadRequest
+
+      const updated = await payload.update({
+        id: mediaDoc.id,
+        collection: mediaSlug,
+        data: {},
+        overrideAccess: true,
+        req,
+      })
+
+      expect(updated.filename).toBe(mediaDoc.filename)
+      expect(updated.filesize).toBe(mediaDoc.filesize)
+      expect(req.file?.name).toBe('outer-req-file-test.png')
+
+      await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
+    })
+
+    test('should not use the outer req.file for a nested upload create without a file', async ({
+      payload,
+    }) => {
+      const outerFile = await getFileByPath(path.resolve(dirname, './image.png'))
+      outerFile!.name = 'outer-req-file-create-test.png'
+      const req = { file: outerFile } as PayloadRequest
+
+      await expect(
+        payload.create({
+          collection: mediaSlug,
+          data: {},
+          overrideAccess: true,
+          req,
+        }),
+      ).rejects.toThrow(
+        expect.objectContaining({
+          name: 'MissingFile',
+        }),
+      )
+      expect(req.file?.name).toBe('outer-req-file-create-test.png')
     })
   })
 

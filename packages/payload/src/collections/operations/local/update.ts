@@ -250,13 +250,12 @@ async function updateLocal<
     payload,
   })
 
-  // Only assign `req.file` when a file or filePath was explicitly passed to this operation.
-  // Otherwise, this would overwrite (and drop) a file reference that was already set on `req`
-  // by an earlier upload operation, e.g. when a hook passes the original `req` through to a
-  // nested Local API call. See https://github.com/payloadcms/payload/issues/15975
-  if (file || filePath) {
-    req.file = file ?? (await getFileByPath(filePath!))
-  }
+  // `req.file` belongs to this operation only. A hook may pass an outer operation's `req`
+  // to a nested Local API call, so restore the outer file once this operation finishes.
+  // See https://github.com/payloadcms/payload/issues/15975
+  const outerFile = req.file
+  const operationFile = file ?? (await getFileByPath(filePath!))
+  req.file = operationFile
 
   const args = {
     id,
@@ -282,12 +281,19 @@ async function updateLocal<
     where,
   }
 
-  if (options.id) {
+  try {
+    if (options.id) {
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      return await updateByIDOperation<TSlug, TSelect>(args)
+    }
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    return updateByIDOperation<TSlug, TSelect>(args)
+    return await updateOperation<TSlug, TSelect>(args)
+  } finally {
+    // Parallel nested calls may share `req`; only restore if no other call replaced the file.
+    if (req.file === operationFile) {
+      req.file = outerFile
+    }
   }
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  return updateOperation<TSlug, TSelect>(args)
 }
 
 export { updateLocal }
