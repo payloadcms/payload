@@ -173,6 +173,7 @@ const buildTableState: ServerFunction<
           [parent.joinPath]: joinQuery,
         },
         overrideAccess: false,
+        req,
         select,
         user: req.user,
       })
@@ -193,6 +194,7 @@ const buildTableState: ServerFunction<
         locale: req.locale,
         overrideAccess: false,
         page: query?.page,
+        req,
         sort: query?.sort,
         user: req.user,
         where: query?.where,
