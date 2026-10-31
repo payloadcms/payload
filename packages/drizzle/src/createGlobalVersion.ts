@@ -33,7 +33,7 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
   const db = getPrimaryDb(this, await getTransaction(this, req))
 
   const isBranchable = Boolean(req?.payload?.config?.branching?.branchableGlobals?.has(globalSlug))
-  const versionBranch = isBranchable ? resolveBranch(req as never) : MAIN_BRANCH
+  const versionBranch = isBranchable ? resolveBranch({ req: req as never }) : MAIN_BRANCH
 
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,

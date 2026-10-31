@@ -153,7 +153,9 @@ export const resolveBranchVersionQuery = async ({
   }
 
   const branch =
-    typeof branchOverride === 'string' ? branchOverride : resolveBranch(req as PayloadRequest)
+    typeof branchOverride === 'string'
+      ? branchOverride
+      : resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return buildBranchVersionQuery({ branch, deletedIDs: [], shadowedIDs: [], where })
@@ -190,7 +192,9 @@ export const resolveBranchVersionQuerySync = ({
   }
 
   const branch =
-    typeof branchOverride === 'string' ? branchOverride : resolveBranch(req as PayloadRequest)
+    typeof branchOverride === 'string'
+      ? branchOverride
+      : resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return buildBranchVersionQuery({ branch, deletedIDs: [], shadowedIDs: [], where })
@@ -230,7 +234,7 @@ export const resolveBranchVersionHistoryQuery = async ({
     return where
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch = branchOverride ?? resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     const base = where && Object.keys(where).length ? [where] : []
@@ -390,7 +394,7 @@ export const resolveBranchVersionParent = async ({
     return { parent, versionData }
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch = branchOverride ?? resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return { parent, versionData }

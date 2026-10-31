@@ -64,7 +64,7 @@ export const assertBranchReadable = async ({
     return
   }
 
-  const branch = resolveBranch(req)
+  const branch = resolveBranch({ req })
 
   if (branch === MAIN_BRANCH) {
     return
