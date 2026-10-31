@@ -100,7 +100,7 @@ export const assertBranchCreatedDeleteUnreferenced = async ({
     return doc
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch = branchOverride ?? resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return doc
@@ -167,7 +167,7 @@ export const resolveBranchDelete = async ({
     return { tombstoned: false }
   }
 
-  const branch = branchOverride ?? resolveBranch(req as PayloadRequest)
+  const branch = branchOverride ?? resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return { tombstoned: false }
