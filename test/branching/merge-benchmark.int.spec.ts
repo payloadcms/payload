@@ -63,7 +63,7 @@ const runBenchmark = async ({ payload }: { payload: Payload }) => {
 
   try {
     const seedStartedAt = performance.now()
-    const { branchID, changeIDs, documentIDs } = await seedBenchmarkRows({
+    const { documentIDs } = await seedBenchmarkRows({
       branch,
       payload,
       titlePrefix,
@@ -79,86 +79,13 @@ const runBenchmark = async ({ payload }: { payload: Payload }) => {
 
     const memory = startMemoryMeasurement()
     const startedAt = performance.now()
-    const attemptedChanges = documentIDs.map((documentID, index) => ({
-      applicationOutcome: 'attempted',
-      changeID: changeIDs[index],
-      cleanupOutcome: 'pending',
-      collectionSlug: postsSlug,
-      docID: documentID,
-      docTitle: `${titlePrefix}-${index}`,
-      operation: 'create',
-      recoveryOutcome: 'notNeeded',
-      sourceID: documentID,
-      targetID: documentID,
-    }))
-
     const executionStartedAt = performance.now()
-    const startedAtDate = new Date().toISOString()
-    const mergeEventDocument = await payload.create({
-      collection: branchMergesSlug,
-      data: {
-        branch,
-        changes: attemptedChanges,
-        startedAt: startedAtDate,
-        status: 'inProgress',
-        targetBranch: 'main',
-      },
-      overrideAccess: true,
-    })
-    const promotionResults = await payload.db.batchProcessing({
-      batchSize: 1_000,
-      operations: documentIDs.map((documentID) => ({
-        args: {
-          id: documentID,
-          branch: false,
-          collection: postsSlug,
-          data: { _branch: 'main' },
-          returning: false,
-        },
-        operation: 'updateOne' as const,
-      })),
-    })
-    const successfulPromotions = promotionResults.filter(({ status }) => status === 'succeeded')
-
-    expect(successfulPromotions).toHaveLength(mergeDocumentCount)
-    const cleanupResults = await payload.db.batchProcessing({
-      batchSize: 1_000,
-      operations: changeIDs.map((changeID) => ({
-        args: {
-          branch: false,
-          collection: branchChangesSlug,
-          returning: false,
-          where: { id: { equals: changeID } },
-        },
-        operation: 'deleteOne' as const,
-      })),
-    })
-    const successfulCleanups = cleanupResults.filter(({ status }) => status === 'succeeded')
-    const completedAt = new Date().toISOString()
-
-    expect(successfulCleanups).toHaveLength(mergeDocumentCount)
-    await payload.update({
-      id: mergeEventDocument.id,
-      collection: branchMergesSlug,
-      data: {
-        changes: attemptedChanges.map((change) => ({
-          ...change,
-          applicationOutcome: 'committed',
-          cleanupOutcome: 'completed',
-        })),
-        completedAt,
-        mergedAt: completedAt,
-        status: 'succeeded',
-      },
-      overrideAccess: true,
-    })
-    await payload.update({
-      id: branchID,
-      collection: branchesSlug,
-      data: { mergedAt: completedAt, status: 'merged' },
-      overrideAccess: true,
-    })
+    const mergeResult = await payload.branches.merge({ branch, overrideAccess: true })
     const executionDurationMs = performance.now() - executionStartedAt
+
+    expect(mergeResult.blocked).toEqual([])
+    expect(mergeResult.validationErrors).toEqual([])
+    expect(mergeResult.merged).toHaveLength(mergeDocumentCount)
 
     memory.stop()
     const durationMs = performance.now() - startedAt
@@ -195,13 +122,13 @@ const runBenchmark = async ({ payload }: { payload: Payload }) => {
       adapter: payload.db.packageName,
       branch,
       correctness: {
-        batchPromotions: successfulPromotions.length,
+        batchPromotions: mergeResult.merged.length,
         historyEvents: historyEvents.totalDocs,
         pendingChanges: pendingAfterMerge.totalDocs,
         promotedDocuments: promotedDocuments.totalDocs,
-        registryCleanups: successfulCleanups.length,
+        registryCleanups: pendingBeforeMerge.totalDocs - pendingAfterMerge.totalDocs,
         sampleDocumentsVerified: sampleIndexes.length,
-        selectedDocuments: attemptedChanges.length,
+        selectedDocuments: documentIDs.length,
       },
       durationMs,
       executionDurationMs,
