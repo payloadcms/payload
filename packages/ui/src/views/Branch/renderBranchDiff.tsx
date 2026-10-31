@@ -73,7 +73,7 @@ export const renderBranchDiffHandler: ServerFunction<
           depth: 0,
           draft,
           overrideAccess: false,
-          req: isolateBranchState(req),
+          req: isolateBranchState({ req: req }),
           user: req.user,
         })
       }
@@ -86,7 +86,7 @@ export const renderBranchDiffHandler: ServerFunction<
         disableErrors: true,
         draft,
         overrideAccess: false,
-        req: isolateBranchState(req),
+        req: isolateBranchState({ req: req }),
         user: req.user,
       })
     } catch (_err) {

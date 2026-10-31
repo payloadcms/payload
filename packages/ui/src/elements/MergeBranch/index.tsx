@@ -3,7 +3,7 @@
 import type { MergeResult } from 'payload'
 
 import { MAIN_BRANCH } from 'payload/shared'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { MergeBranchModalPhase, MergeMode } from './types.js'
 
@@ -96,6 +96,12 @@ export const MergeBranchModal: React.FC = () => {
     reset()
   }, [closeMerge, reset])
 
+  useEffect(() => {
+    if (!isOpen && !isMerging && target) {
+      dismiss()
+    }
+  }, [dismiss, isMerging, isOpen, target])
+
   const scheduleActionArgs = useMemo(
     () => ({
       canCloseBranch,
@@ -164,8 +170,14 @@ export const MergeBranchModal: React.FC = () => {
   }
 
   return (
-    <DialogModal className={baseClass} closeOnBlur={!isMerging} slug={mergeBranchModalSlug}>
-      <DialogHeader showClose={!isMerging} title={title} />
+    <DialogModal
+      className={baseClass}
+      closeOnBlur={!isMerging}
+      closeOnEsc={!isMerging}
+      size="medium"
+      slug={mergeBranchModalSlug}
+    >
+      <DialogHeader onClose={dismiss} showClose={!isMerging} title={title} />
       <DialogBody>
         {!hasOutcome && (
           <MergeBranchForm

@@ -17,7 +17,7 @@ import { findMany } from './find/findMany.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: DrizzleAdapter,
-  { collection, joins, limit, locale, page = 1, pagination, req, select, sort, where },
+  { branch, collection, joins, limit, locale, page = 1, pagination, req, select, sort, where },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const tableName = this.tableNameMap.get(
@@ -25,10 +25,11 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   )
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
-  const branchReadState = resolveBranchReadState({ collectionSlug: collection, req })
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug: collection, req })
   const branchedWhere = branchReadState.useBranching
     ? rewriteBranchVersionParents(where)
     : await resolveBranchVersionQuery({
+        branch,
         collectionSlug: collection,
         req,
         where,
@@ -49,7 +50,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     page,
     pagination,
     req,
-    select: withBranchVersionSelect({ collectionSlug: collection, req, select }),
+    select: withBranchVersionSelect({ branch, collectionSlug: collection, req, select }),
     sort,
     tableName,
     versions: true,

@@ -134,7 +134,7 @@ export const virtualFieldPopulationPromise = async ({
         docIDs.map((docID) => {
           return req.payloadDataLoader.load(
             createDataloaderCacheKey({
-              branch: resolveBranch(req),
+              branch: resolveBranch({ req: req }),
               collectionSlug,
               currentDepth: 0,
               depth: 0,
@@ -194,7 +194,7 @@ export const virtualFieldPopulationPromise = async ({
 
     const populatedDoc = await req.payloadDataLoader.load(
       createDataloaderCacheKey({
-        branch: resolveBranch(req),
+        branch: resolveBranch({ req: req }),
         collectionSlug: currentField.relationTo,
         currentDepth: 0,
         depth: 0,

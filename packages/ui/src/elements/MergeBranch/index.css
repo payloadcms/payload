@@ -1,12 +1,24 @@
 @layer payload-default {
+  .merge-branch-modal .dialog__header {
+    padding: var(--spacer-3) var(--spacer-4);
+  }
+
+  .merge-branch-modal.dialog .dialog__body {
+    padding: var(--spacer-4);
+  }
+
+  .merge-branch-modal .dialog__footer {
+    padding: var(--spacer-3) var(--spacer-4);
+  }
+
   /* Wraps the summary and its optional link so the gap to the mode options is the
      wrapper's, and does not depend on which of the two is last. */
   .merge-branch-modal__intro {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--spacer-1);
-    margin-block-end: var(--spacer-3);
+    gap: var(--spacer-2);
+    margin-block-end: var(--spacer-4);
   }
 
   .merge-branch-modal__summary {
@@ -25,11 +37,15 @@
     gap: var(--spacer-2);
   }
 
+  .merge-branch-modal__modes .radio-input {
+    min-height: var(--spacer-4);
+  }
+
   /* Separated from the mode radios by a rule: this is a second, independent
      decision, not a third option in the first one. */
   .merge-branch-modal__close-branch {
-    margin-block-start: var(--spacer-3);
-    padding-block-start: var(--spacer-3);
+    margin-block-start: var(--spacer-4);
+    padding-block-start: var(--spacer-4);
     border-block-start: var(--stroke-width-small) solid var(--color-border);
   }
 
@@ -44,8 +60,8 @@
   .merge-branch-modal__schedule {
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-2);
-    margin-block-start: var(--spacer-2);
+    gap: var(--spacer-2-5);
+    margin-block-start: var(--spacer-3);
     padding-inline-start: var(--spacer-4);
   }
 
@@ -55,10 +71,8 @@
     gap: var(--spacer-1);
   }
 
-  /* The picker sizes itself to its container, which in a modal is the full width —
-     a date needs nothing like that much room. */
   .merge-branch-modal__schedule-field .date-time-picker {
-    max-width: calc(var(--spacer-6) * 6);
+    width: 100%;
   }
 
   .merge-branch-modal__schedule-help {

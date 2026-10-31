@@ -2,7 +2,8 @@
 
 import type { DocumentViewClientProps, User } from 'payload'
 
-import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
+import { branchesCollectionSlug, formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -22,7 +23,7 @@ import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 import { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'
 import { Form } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { useBranch } from '../../providers/Branch/index.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -123,7 +124,7 @@ export function DefaultEditView({
   const isInDrawer = Boolean(drawerSlug)
 
   const { refreshCookieAsync, user } = useAuth()
-  const { activeBranch: branch } = useBranch()
+  const branch = useBranchParam()
 
   const {
     config,
@@ -368,7 +369,15 @@ export function DefaultEditView({
         // Redirect to the same locale if it's been set
         const redirectRoute = formatAdminURL({
           adminRoute,
-          path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
+          path: `/collections/${collectionSlug}/${document?.id}${qs.stringify(
+            {
+              ...(locale ? { locale } : {}),
+              ...(collectionSlug === branchesCollectionSlug && document?.slug
+                ? { branch: document.slug }
+                : {}),
+            },
+            { addQueryPrefix: true },
+          )}`,
         })
 
         void startRouteTransition(() => router.push(redirectRoute))
@@ -732,7 +741,7 @@ export function DefaultEditView({
           initialState={!isInitializing && initialState}
           isDocumentForm={true}
           isInitializing={isInitializing}
-          key={`${isLocked}`}
+          key={`${isLocked}:${branch ?? ''}`}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSubmit={() => {

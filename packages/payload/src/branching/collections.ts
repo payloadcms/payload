@@ -474,54 +474,56 @@ const deleteBranchStateBeforeDelete: CollectionBeforeDeleteHook = async ({ id, r
     targets: branchCreatedTargets,
   })
 
-  const scheduledMergeConditions: Where[] = [
-    { taskSlug: { equals: 'scheduleMerge' } },
-    { 'input.branch': { equals: branch.slug } },
-  ]
-  const now = new Date().toISOString()
-  const activeScheduledMergeWhere: Where = {
-    and: [
-      ...scheduledMergeConditions,
-      { completedAt: { exists: false } },
-      { processingUntil: { greater_than: now } },
-    ],
-  }
-  const assertNoActiveScheduledMerges = async (): Promise<void> => {
-    const activeScheduledMerges = await req.payload.count({
+  if (req.payload.collections['payload-jobs']) {
+    const scheduledMergeConditions: Where[] = [
+      { taskSlug: { equals: 'scheduleMerge' } },
+      { 'input.branch': { equals: branch.slug } },
+    ]
+    const now = new Date().toISOString()
+    const activeScheduledMergeWhere: Where = {
+      and: [
+        ...scheduledMergeConditions,
+        { completedAt: { exists: false } },
+        { processingUntil: { greater_than: now } },
+      ],
+    }
+    const assertNoActiveScheduledMerges = async (): Promise<void> => {
+      const activeScheduledMerges = await req.payload.count({
+        collection: 'payload-jobs',
+        overrideAccess: true,
+        req,
+        where: activeScheduledMergeWhere,
+      })
+
+      if (activeScheduledMerges.totalDocs > 0) {
+        throw new APIError('This branch cannot be deleted while a scheduled merge is running.', 409)
+      }
+    }
+
+    // Check first so a rejected deletion leaves every queued job unchanged.
+    await assertNoActiveScheduledMerges()
+
+    await req.payload.delete({
       collection: 'payload-jobs',
       overrideAccess: true,
       req,
-      where: activeScheduledMergeWhere,
+      where: {
+        and: [
+          ...scheduledMergeConditions,
+          {
+            or: [
+              { completedAt: { exists: true } },
+              { processingUntil: { exists: false } },
+              { processingUntil: { less_than_equal: now } },
+            ],
+          },
+        ],
+      },
     })
 
-    if (activeScheduledMerges.totalDocs > 0) {
-      throw new APIError('This branch cannot be deleted while a scheduled merge is running.', 409)
-    }
+    // A worker can acquire or queue work while inactive jobs are being removed.
+    await assertNoActiveScheduledMerges()
   }
-
-  // Check first so a rejected deletion leaves every queued job unchanged.
-  await assertNoActiveScheduledMerges()
-
-  await req.payload.delete({
-    collection: 'payload-jobs',
-    overrideAccess: true,
-    req,
-    where: {
-      and: [
-        ...scheduledMergeConditions,
-        {
-          or: [
-            { completedAt: { exists: true } },
-            { processingUntil: { exists: false } },
-            { processingUntil: { less_than_equal: now } },
-          ],
-        },
-      ],
-    },
-  })
-
-  // A worker can acquire or queue work while inactive jobs are being removed.
-  await assertNoActiveScheduledMerges()
 
   await discardBranchChangesBeforeBranchDeletion(req.payload, { branch: branch.slug, req })
 

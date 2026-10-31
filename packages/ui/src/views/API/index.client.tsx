@@ -130,6 +130,9 @@ export const APIViewClient: React.FC = () => {
   })
 
   React.useEffect(() => {
+    let isCurrent = true
+    const controller = new AbortController()
+
     const fetchData = async () => {
       try {
         const res = await fetch(fetchURL, {
@@ -138,22 +141,36 @@ export const APIViewClient: React.FC = () => {
             'Accept-Language': i18n.language,
           },
           method: 'GET',
+          signal: controller.signal,
         })
 
         try {
           const json = await res.json()
-          setData(json)
+          if (isCurrent) {
+            setData(json)
+          }
         } catch (error) {
+          if (!isCurrent) {
+            return
+          }
           toast.error('Error parsing response')
           console.error(error) // eslint-disable-line no-console
         }
       } catch (error) {
+        if (!isCurrent) {
+          return
+        }
         toast.error('Error making request')
         console.error(error) // eslint-disable-line no-console
       }
     }
 
     void fetchData()
+
+    return () => {
+      isCurrent = false
+      controller.abort()
+    }
   }, [i18n.language, fetchURL, authenticated])
 
   return (

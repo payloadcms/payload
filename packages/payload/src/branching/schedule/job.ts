@@ -55,7 +55,12 @@ export const getScheduleMergeTask = ({
   authCollectionSlugs,
 }: Args): TaskConfig<{
   input: ScheduleMergeTaskInput
-  output: { merged: number; warnings: MergeResult['warnings'] }
+  output: {
+    blocked: MergeResult['blocked']
+    merged: number
+    validationErrors: MergeResult['validationErrors']
+    warnings: MergeResult['warnings']
+  }
 }> => ({
   slug: 'scheduleMerge',
   handler: async ({ input, req }) => {
@@ -144,7 +149,7 @@ export const getScheduleMergeTask = ({
 
       const problems = [...result.blocked, ...result.validationErrors]
 
-      if (problems.length) {
+      if (problems.length && result.merged.length === 0) {
         throw new Error(
           `Scheduled merge of branch "${input.branch}" was refused: ${problems
             .map(({ message }) => message)
@@ -167,7 +172,12 @@ export const getScheduleMergeTask = ({
     await writeProgress({ mergeProgress: null })
 
     return {
-      output: { merged: result.merged.length, warnings: result.warnings },
+      output: {
+        blocked: result.blocked,
+        merged: result.merged.length,
+        validationErrors: result.validationErrors,
+        warnings: result.warnings,
+      },
     }
   },
   inputSchema: [

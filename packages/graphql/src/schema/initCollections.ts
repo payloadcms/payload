@@ -422,7 +422,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
             where: {
               type: buildWhereInputType({
                 name: `versions${singularName}`,
-                fields: versionCollectionFields,
+                fields: versionCollectionFields.filter(
+                  (field) => !('name' in field) || field.name !== '_branchParent',
+                ),
                 parentName: `versions${singularName}`,
               }),
             },

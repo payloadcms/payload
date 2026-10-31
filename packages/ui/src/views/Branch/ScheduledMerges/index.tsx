@@ -72,7 +72,17 @@ export const ScheduledMerges: React.FC<{
       setIsWorking(true)
 
       try {
-        await serverFunction({ name: 'schedule-merge', args: { deleteID } })
+        const result = (await serverFunction({
+          name: 'schedule-merge',
+          args: { deleteID },
+        })) as { error?: string }
+
+        if (result?.error) {
+          toast.error(result.error)
+
+          return
+        }
+
         toast.success(t('branching:scheduleCancelled'))
         closeModal(modalSlug)
         await startRouteTransition(() => router.refresh())
