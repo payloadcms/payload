@@ -3,65 +3,89 @@ import { render } from 'vitest-browser-react'
 
 import { useHierarchySearch } from './useHierarchySearch.js'
 
-const branchState = vi.hoisted(() => ({ current: 'first-branch' }))
+const state = vi.hoisted(() => ({ branch: 'first' }))
 
 vi.mock('../../../providers/Branch/index.js', () => ({
-  useBranchParam: () => branchState.current,
+  useBranchParam: () => state.branch,
 }))
-
 vi.mock('../../../providers/Config/index.js', () => ({
-  useConfig: () => ({
-    config: {
-      routes: { api: '/api' },
-      serverURL: 'http://localhost:3000',
-    },
-  }),
+  useConfig: () => ({ config: { routes: { api: '/api' }, serverURL: '' } }),
 }))
-
-vi.mock('../../../providers/Locale/index.js', () => ({
-  useLocale: () => null,
-}))
+vi.mock('../../../providers/Locale/index.js', () => ({ useLocale: () => ({ code: 'en' }) }))
 
 beforeEach(() => {
-  branchState.current = 'first-branch'
   vi.stubGlobal('process', { env: {} })
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async () => ({
-      json: async () => ({ docs: [], hasNextPage: false, totalDocs: 0 }),
-      ok: true,
-    })),
-  )
+  state.branch = 'first'
 })
 
 afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-test('should search the active branch after the branch changes', async () => {
-  const screen = await render(<SearchFixture renderKey="first" />)
+test('should reset pagination and ignore an old branch response after switching', async () => {
+  let resolveOldPage: (response: Response) => void
+  const fetch = vi
+    .fn()
+    .mockResolvedValueOnce(
+      Response.json({ docs: [{ id: 'first' }], hasNextPage: true, totalDocs: 2 }),
+    )
+    .mockImplementationOnce(
+      () =>
+        new Promise<Response>((resolve) => {
+          resolveOldPage = resolve
+        }),
+    )
+    .mockResolvedValueOnce(
+      Response.json({ docs: [{ id: 'second' }], hasNextPage: false, totalDocs: 1 }),
+    )
+  vi.stubGlobal('fetch', fetch)
 
-  await screen.getByRole('button', { name: 'Search' }).click()
-  await expect.poll(() => vi.mocked(fetch).mock.calls.length).toBe(1)
-  expect(String(vi.mocked(fetch).mock.calls[0][0])).toContain('branch=first-branch')
+  const screen = await render(<Fixture />)
+  await screen.getByRole('button', { name: 'Search', exact: true }).click()
+  await expect.element(screen.getByRole('status')).toHaveTextContent('first:2:true:false')
+  await screen.getByRole('button', { name: 'Load more' }).click()
 
-  branchState.current = 'second-branch'
-  await screen.rerender(<SearchFixture renderKey="second" />)
-  await screen.getByRole('button', { name: 'Search' }).click()
+  state.branch = 'second'
+  await screen.rerender(<Fixture />)
+  await expect.element(screen.getByRole('status')).toHaveTextContent(':0:false:false')
+  await screen.getByRole('button', { name: 'Load more' }).click()
+  expect(fetch).toHaveBeenCalledTimes(2)
 
-  await expect.poll(() => vi.mocked(fetch).mock.calls.length).toBe(2)
-  expect(String(vi.mocked(fetch).mock.calls[1][0])).toContain('branch=second-branch')
+  await screen.getByRole('button', { name: 'Search', exact: true }).click()
+  await expect.element(screen.getByRole('status')).toHaveTextContent('second:1:false:false')
+  resolveOldPage(Response.json({ docs: [{ id: 'obsolete' }], hasNextPage: true, totalDocs: 2 }))
+  await vi.waitFor(() => expect(fetch).toHaveResolvedTimes(3))
+  await expect.element(screen.getByRole('status')).toHaveTextContent('second:1:false:false')
 })
 
-function SearchFixture({ renderKey }: { renderKey: string }) {
-  const { search } = useHierarchySearch({
+function Fixture() {
+  const { hasNextPage, isLoading, loadMore, results, search, totalDocs } = useHierarchySearch({
     collectionSlug: 'folders',
-    titleField: 'title',
+    titleField: 'name',
   })
 
   return (
-    <button data-render-key={renderKey} onClick={() => void search('needle')} type="button">
-      Search
-    </button>
+    <>
+      <div role="status">
+        {results.map(({ id }) => id).join(',')}:{totalDocs}:{String(hasNextPage)}:
+        {String(isLoading)}
+      </div>
+      <button
+        onClick={() => {
+          void search('folder')
+        }}
+        type="button"
+      >
+        Search
+      </button>
+      <button
+        onClick={() => {
+          void loadMore()
+        }}
+        type="button"
+      >
+        Load more
+      </button>
+    </>
   )
 }

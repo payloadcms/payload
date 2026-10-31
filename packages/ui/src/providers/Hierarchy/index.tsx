@@ -344,6 +344,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
             const uniqueNewDocs = newDocs.filter((doc) => !existingDocIds.has(doc.id))
 
             newCache.set(cacheKey, {
+              ...existingEntry,
               docs: [...existingEntry.docs, ...uniqueNewDocs],
               loadedParents: {
                 ...existingEntry.loadedParents,

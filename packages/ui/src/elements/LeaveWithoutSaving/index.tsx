@@ -35,6 +35,7 @@ export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({
   const prevent = !disablePreventLeave && Boolean((modified || !isValid) && user)
 
   const handlePrevent = useCallback(() => {
+    setHasAccepted(false)
     const activeHref = (document.activeElement as HTMLAnchorElement)?.href || null
     if (onPrevent) {
       onPrevent(activeHref)

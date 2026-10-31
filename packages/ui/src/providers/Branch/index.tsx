@@ -4,6 +4,7 @@ import { branchesCollectionSlug, MAIN_BRANCH, PREFERENCE_KEYS } from 'payload/sh
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { confirmNavigation } from '../../elements/LeaveWithoutSaving/confirmNavigation.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { getBranchURL } from '../../utilities/getBranchURL.js'
 import { useConfig } from '../Config/index.js'
@@ -126,29 +127,33 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
         return
       }
 
-      const generation = ++selectionGeneration.current
+      confirmNavigation({
+        navigate: () => {
+          const generation = ++selectionGeneration.current
 
-      setActiveBranchState(slug)
+          setActiveBranchState(slug)
 
-      // Merge the selection without replacing other navigation preferences.
-      void (async () => {
-        try {
-          await setPreference(PREFERENCE_KEYS.NAV, { branch: slug }, true)
+          // Merge the selection without replacing other navigation preferences.
+          void (async () => {
+            try {
+              await setPreference(PREFERENCE_KEYS.NAV, { branch: slug }, true)
 
-          if (generation !== selectionGeneration.current) {
-            return
-          }
+              if (generation !== selectionGeneration.current) {
+                return
+              }
 
-          if (refresh) {
-            await navigateToBranch({ branch: slug })
-          }
-        } catch (_error) {
-          if (generation === selectionGeneration.current) {
-            setActiveBranchState(activeBranchFromServer)
-            toast.error(t('error:unspecific'))
-          }
-        }
-      })()
+              if (refresh) {
+                await navigateToBranch({ branch: slug })
+              }
+            } catch (_error) {
+              if (generation === selectionGeneration.current) {
+                setActiveBranchState(activeBranchFromServer)
+                toast.error(t('error:unspecific'))
+              }
+            }
+          })()
+        },
+      })
     },
     [activeBranch, activeBranchFromServer, navigateToBranch, setPreference, t],
   )
