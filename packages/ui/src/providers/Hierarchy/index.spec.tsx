@@ -1,4 +1,4 @@
-import { expect, test, vi } from 'vitest'
+import { afterEach, expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 
 import { HydrateHierarchyProvider } from '../../elements/Hierarchy/HydrateProvider/index.js'
@@ -101,13 +101,53 @@ function BranchHierarchyFixture({
 
 function HierarchyConsumer() {
   const { activeBranch } = useBranch()
-  const { getTreeDataForCollection } = useHierarchy()
+  const { getTreeDataForCollection, loadMoreChildren } = useHierarchy()
   const treeData = getTreeDataForCollection('folders')
 
   return (
     <div>
       <output data-testid="active-branch">{activeBranch}</output>
       <output data-testid="tree-data">{String(treeData?.docs[0]?.title ?? 'empty')}</output>
+      <span data-testid="tree-branch">{treeData?.branch}</span>
+      <span data-testid="tree-size">{treeData?.docs.length}</span>
+      <button
+        onClick={() => {
+          void loadMoreChildren(null)
+        }}
+        type="button"
+      >
+        Load more
+      </button>
     </div>
   )
 }
+
+afterEach(() => vi.unstubAllGlobals())
+
+test('should retain branch metadata after appending more hierarchy children', async () => {
+  vi.stubGlobal('process', { env: {} })
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValue(
+      Response.json({
+        docs: [{ id: 'folder-2', title: 'Second folder' }],
+        hasNextPage: false,
+        totalDocs: 2,
+      }),
+    ),
+  )
+  const screen = await render(
+    <BranchHierarchyFixture
+      activeBranch="feature"
+      treeData={{
+        ...featureTreeData,
+        loadedParents: { root: { hasMore: true, totalDocs: 2 } },
+      }}
+    />,
+  )
+
+  await screen.getByRole('button', { name: 'Load more' }).click()
+
+  await expect.element(screen.getByTestId('tree-size')).toHaveTextContent('2')
+  await expect.element(screen.getByTestId('tree-branch')).toHaveTextContent('feature')
+})
