@@ -49,3 +49,43 @@ export const deletionSafetySpy = {
   uploadHookWriteTargetID: undefined as number | string | undefined,
   uploadUpdateRequestFiles: [] as Array<{ id: number | string; name: string | undefined }>,
 }
+
+export const resetDeletionSafetySpy = (): void => {
+  deletionSafetySpy.activeLeaseBranchOnCompletedJobDelete = undefined
+  deletionSafetySpy.afterTargetDelete = undefined
+  deletionSafetySpy.beforeRejectedUploadAfterChange = undefined
+  deletionSafetySpy.beforeTargetDelete = undefined
+  deletionSafetySpy.beforeUploadDelete = undefined
+  deletionSafetySpy.bulkDeleteHookIDs = []
+  deletionSafetySpy.createUploadOwnerOnBeforeDelete = false
+  deletionSafetySpy.createUploadOwnerOnSecondBeforeDelete = false
+  deletionSafetySpy.directDatabaseUploadHookWrite = false
+  deletionSafetySpy.directDatabaseWriteFailureID = undefined
+  deletionSafetySpy.directDatabaseWriteTargetID = undefined
+  deletionSafetySpy.disableUploadHookWriteTransaction = false
+  deletionSafetySpy.globalBeforeReadCount = 0
+  deletionSafetySpy.hasCreatedRaceJob = false
+  deletionSafetySpy.hasCreatedUploadOwner = false
+  deletionSafetySpy.mainContentVisibleDuringRejectedCreate = undefined
+  deletionSafetySpy.mainMergeCollectionDependencyTargetID = undefined
+  deletionSafetySpy.mainMergeGlobalDependencyTargetID = undefined
+  deletionSafetySpy.ownerBeforeReadCount = 0
+  deletionSafetySpy.queueJobBeforeTargetValidationFailureID = undefined
+  deletionSafetySpy.reassignGlobalLockDuringValidation = undefined
+  deletionSafetySpy.reassignUploadLockDuringValidation = undefined
+  deletionSafetySpy.rejectTargetAfterChangeID = undefined
+  deletionSafetySpy.rejectTargetAfterDeleteID = undefined
+  deletionSafetySpy.rejectUploadAfterChange = false
+  deletionSafetySpy.rejectUploadAfterChangeID = undefined
+  deletionSafetySpy.rejectUploadAfterHookWriteID = undefined
+  deletionSafetySpy.rejectUploadBeforeDelete = false
+  deletionSafetySpy.rejectUploadBeforeValidate = false
+  deletionSafetySpy.rejectUploadBeforeValidateID = undefined
+  deletionSafetySpy.rejectVersionedTargetCreate = false
+  deletionSafetySpy.rejectVersionedTargetAfterDeleteID = undefined
+  deletionSafetySpy.uploadAfterDeleteCount = 0
+  deletionSafetySpy.uploadBeforeDeleteCount = 0
+  deletionSafetySpy.uploadHookWriteID = undefined
+  deletionSafetySpy.uploadHookWriteTargetID = undefined
+  deletionSafetySpy.uploadUpdateRequestFiles = []
+}
