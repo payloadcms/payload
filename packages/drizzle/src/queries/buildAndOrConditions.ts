@@ -1,5 +1,5 @@
 import type { SQL, Table } from 'drizzle-orm'
-import type { FlattenedField, Where } from 'payload'
+import type { FlattenedField, PayloadRequest, Where } from 'payload'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
@@ -15,6 +15,7 @@ export function buildAndOrConditions({
   joins,
   locale,
   parentIsLocalized,
+  req,
   selectFields,
   selectLocale,
   tableName,
@@ -29,6 +30,7 @@ export function buildAndOrConditions({
   joins: BuildQueryJoinAliases
   locale?: string
   parentIsLocalized: boolean
+  req?: Partial<PayloadRequest>
   selectFields: Record<string, GenericColumn>
   selectLocale?: boolean
   tableName: string
@@ -49,6 +51,7 @@ export function buildAndOrConditions({
         joins,
         locale,
         parentIsLocalized,
+        req,
         selectFields,
         selectLocale,
         tableName,

@@ -94,6 +94,10 @@ export type Execute<T> = (args: {
 
 export type Insert = (args: {
   db: PostgresDB | TransactionPg
+  onConflictDoNothing?: {
+    target?: GenericColumn | GenericColumn[]
+    where?: SQL
+  }
   onConflictDoUpdate?: PgInsertOnConflictDoUpdateConfig<any>
   tableName: string
   values: Record<string, unknown> | Record<string, unknown>[]

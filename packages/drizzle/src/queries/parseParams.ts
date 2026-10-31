@@ -1,5 +1,12 @@
 import type { SQL, Table } from 'drizzle-orm'
-import type { FlattenedField, HasManyRelationshipOperator, Operator, Sort, Where } from 'payload'
+import type {
+  FlattenedField,
+  HasManyRelationshipOperator,
+  Operator,
+  PayloadRequest,
+  Sort,
+  Where,
+} from 'payload'
 
 import {
   aliasedTable,
@@ -49,6 +56,7 @@ type Args = {
   joins: BuildQueryJoinAliases
   locale?: string
   parentIsLocalized: boolean
+  req?: Partial<PayloadRequest>
   selectFields: Record<string, GenericColumn>
   selectLocale?: boolean
   tableName: string
@@ -63,6 +71,7 @@ export function parseParams({
   joins,
   locale,
   parentIsLocalized,
+  req,
   selectFields,
   selectLocale,
   tableName,
@@ -91,6 +100,7 @@ export function parseParams({
             joins,
             locale,
             parentIsLocalized,
+            req,
             selectFields,
             selectLocale,
             tableName,
@@ -162,6 +172,7 @@ export function parseParams({
                           joins,
                           locale,
                           parentIsLocalized,
+                          req,
                           selectFields,
                           selectLocale,
                           tableName,
@@ -194,6 +205,7 @@ export function parseParams({
                   locale,
                   parentIsLocalized,
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
+                  req,
                   selectFields,
                   selectLocale,
                   tableName,

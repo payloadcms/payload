@@ -1,9 +1,10 @@
 import type { FindArgs, FlattenedField, TypeWithID } from 'payload'
 
-import { asc, desc, inArray, max, min } from 'drizzle-orm'
+import { and, asc, desc, inArray, max, min, sql } from 'drizzle-orm'
 
 import type { DrizzleAdapter } from '../types.js'
 
+import { buildBranchVisibility } from '../queries/buildBranchVisibility.js'
 import { buildQuery } from '../queries/buildQuery.js'
 import { selectDistinct } from '../queries/selectDistinct.js'
 import { transform } from '../transform/read/index.js'
@@ -13,6 +14,11 @@ import { buildFindManyArgs } from './buildFindManyArgs.js'
 
 type Args = {
   adapter: DrizzleAdapter
+  branchVisibility?: {
+    branch: string
+    collectionSlug: string
+    mode?: 'documents' | 'history'
+  }
   collectionSlug?: string
   fields: FlattenedField[]
   tableName: string
@@ -21,6 +27,7 @@ type Args = {
 
 export const findMany = async function find({
   adapter,
+  branchVisibility,
   collectionSlug,
   draftsEnabled,
   fields,
@@ -49,14 +56,34 @@ export const findMany = async function find({
     limit = undefined
   }
 
-  const { joins, orderBy, selectFields, where } = buildQuery({
+  const {
+    joins,
+    orderBy,
+    selectFields,
+    where: queryWhere,
+  } = buildQuery({
     adapter,
     fields,
     locale,
+    req,
     sort,
     tableName,
     where: whereArg,
   })
+  const table = adapter.tables[tableName]
+  const branchVisibilityWhere = branchVisibility
+    ? buildBranchVisibility({
+        adapter,
+        branch: branchVisibility.branch,
+        canonicalIDExpression: versions
+          ? sql`COALESCE(${table._branchParent}, ${table.parent})`
+          : undefined,
+        collectionSlug: branchVisibility.collectionSlug,
+        mode: branchVisibility.mode,
+        table,
+      })
+    : undefined
+  const where = branchVisibilityWhere ? and(queryWhere, branchVisibilityWhere) : queryWhere
 
   const orderedIDMap: Record<number | string, number> = {}
   let orderedIDs: (number | string)[]
@@ -70,6 +97,7 @@ export const findMany = async function find({
     joinQuery,
     joins,
     locale,
+    req,
     select,
     tableName,
     versions,

@@ -3,12 +3,20 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
 import { and, asc, count, desc, eq, getTableName, sql } from 'drizzle-orm'
-import { type FlattenedJoinField, type Where } from 'payload'
+import {
+  combineQueries,
+  type FlattenedJoinField,
+  getBranchPredicateSync,
+  type PayloadRequest,
+  resolveBranchReadState,
+  type Where,
+} from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericTable } from '../types.js'
 import type { PolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan.js'
 
+import { buildBranchVisibility } from '../queries/buildBranchVisibility.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { buildPolymorphicJoinWhere } from './buildPolymorphicJoinWhere.js'
 import { createPolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan.js'
@@ -22,6 +30,7 @@ type BuildPolymorphicJoinQueryArgs = {
   page?: number
   pageSize?: number
   path: string
+  req?: Partial<PayloadRequest>
   shouldCount: boolean
   sort?: string | string[]
   where?: Where
@@ -57,6 +66,7 @@ export const buildPolymorphicJoinQuery = ({
   page,
   pageSize = limit,
   path,
+  req,
   shouldCount,
   sort,
   where,
@@ -102,30 +112,49 @@ export const buildPolymorphicJoinQuery = ({
   const sortField = getSortField({ adapter, collections, sort })
   const sortOrder = sortField.startsWith('-') ? desc : asc
   const sortPath = sortField.replace('-', '').split('.').join('_')
-  const wherePlan: PolymorphicJoinWherePlan = where
-    ? createPolymorphicJoinWherePlan({ adapter, collections, where })
-    : new Map()
   let unionQuery: null | SQLiteSelect = null
 
   for (const { collection, table } of collectionTables) {
+    const branchReadState = resolveBranchReadState({ collectionSlug: collection, req })
+    const branchPredicate = branchReadState.useBranching
+      ? null
+      : getBranchPredicateSync({ collectionSlug: collection, req })
+    const collectionWhere = branchPredicate ? combineQueries(where ?? {}, branchPredicate) : where
+    const wherePlan: PolymorphicJoinWherePlan = collectionWhere
+      ? createPolymorphicJoinWherePlan({ adapter, collections, where: collectionWhere })
+      : new Map()
     const sortColumn = table[sortPath]
     const selectFields = {
-      id: table['id'],
+      id:
+        (branchReadState.useBranching || branchPredicate) && table['_branchDocID']
+          ? sql`COALESCE(${table['_branchDocID']}, ${table['id']})`.as('id')
+          : table['id'],
       parent: sql`${table[onPath]}`.as(onPath),
       relationTo: sql`${collection}`.as('relationTo'),
       sortPath: sql`${sortColumn ?? null}`.as('sortPath'),
     }
-    const collectionWhere =
-      where && Object.keys(where).length > 0
+    const parsedCollectionWhere =
+      collectionWhere && Object.keys(collectionWhere).length > 0
         ? buildPolymorphicJoinWhere({
             adapter,
             collection,
             locale,
             table,
-            where,
+            where: collectionWhere,
             wherePlan,
           })
         : undefined
+    const collectionWhereSQL = branchReadState.useBranching
+      ? and(
+          parsedCollectionWhere,
+          buildBranchVisibility({
+            adapter,
+            branch: branchReadState.branch,
+            collectionSlug: collection,
+            table,
+          }),
+        )
+      : parsedCollectionWhere
     const hasLocalizedWhere = [...wherePlan.values()].some((pathPlan) => {
       const collectionField = pathPlan.fieldsByCollection.get(collection)
 
@@ -150,8 +179,8 @@ export const buildPolymorphicJoinQuery = ({
       )
     }
 
-    if (collectionWhere) {
-      collectionQuery = collectionQuery.where(collectionWhere)
+    if (collectionWhereSQL) {
+      collectionQuery = collectionQuery.where(collectionWhereSQL)
     }
 
     if (unionQuery === null) {

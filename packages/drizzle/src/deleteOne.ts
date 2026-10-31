@@ -1,6 +1,7 @@
 import type { DeleteOne } from 'payload'
 
 import { eq } from 'drizzle-orm'
+import { resolveBranchDelete, resolveBranchQuery } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -15,11 +16,28 @@ import { markWrite } from './utilities/readAfterWrite.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: DrizzleAdapter,
-  { collection: collectionSlug, req, returning, select, where: whereArg },
+  { branch, collection: collectionSlug, req, returning, select, where: whereArg },
 ) {
   const collection = this.payload.collections[collectionSlug].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
+
+  const branchDelete = await resolveBranchDelete({
+    branch,
+    collectionSlug,
+    req,
+    where: whereArg,
+  })
+
+  if (branchDelete.tombstoned) {
+    return returning === false ? null : (branchDelete.doc as Awaited<ReturnType<DeleteOne>>)
+  }
+
+  if (branchDelete.deleteRowID !== undefined) {
+    whereArg = { id: { equals: branchDelete.deleteRowID } }
+  }
+
+  whereArg = await resolveBranchQuery({ branch, collectionSlug, req, where: whereArg })
 
   let docToDelete: Record<string, unknown>
 
@@ -27,6 +45,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     adapter: this,
     fields: collection.flattenedFields,
     locale: req?.locale,
+    req,
     tableName,
     where: whereArg,
   })

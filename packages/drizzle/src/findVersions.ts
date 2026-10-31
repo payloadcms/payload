@@ -1,6 +1,13 @@
 import type { FindVersions, SanitizedCollectionConfig } from 'payload'
 
-import { buildVersionCollectionFields } from 'payload'
+import {
+  buildVersionCollectionFields,
+  projectBranchVersionParents,
+  resolveBranchReadState,
+  resolveBranchVersionHistoryQuery,
+  rewriteBranchVersionParents,
+  withBranchVersionSelect,
+} from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -9,7 +16,7 @@ import { findMany } from './find/findMany.js'
 
 export const findVersions: FindVersions = async function findVersions(
   this: DrizzleAdapter,
-  { collection, limit, locale, page, pagination, req, select, sort: sortArg, where },
+  { branch, collection, limit, locale, page, pagination, req, select, sort: sortArg, where },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const sort = sortArg !== undefined && sortArg !== null ? sortArg : collectionConfig.defaultSort
@@ -20,8 +27,21 @@ export const findVersions: FindVersions = async function findVersions(
 
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
 
-  return findMany({
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug: collection, req })
+  const branchedWhere = branchReadState.useBranching
+    ? rewriteBranchVersionParents(where)
+    : await resolveBranchVersionHistoryQuery({
+        branch,
+        collectionSlug: collection,
+        req,
+        where,
+      })
+
+  const result = await findMany({
     adapter: this,
+    branchVisibility: branchReadState.useBranching
+      ? { branch: branchReadState.branch, collectionSlug: collection, mode: 'history' }
+      : undefined,
     fields,
     joins: false,
     limit,
@@ -29,9 +49,17 @@ export const findVersions: FindVersions = async function findVersions(
     page,
     pagination,
     req,
-    select,
+    select: withBranchVersionSelect({ branch, collectionSlug: collection, req, select }),
     sort,
     tableName,
-    where,
+    where: branchedWhere,
   })
+
+  if (branchReadState.useBranching) {
+    // A branch version hangs off the shadow row, so its `parent` is that row rather
+    // than the document the history belongs to.
+    projectBranchVersionParents(result.docs as Record<string, unknown>[])
+  }
+
+  return result
 }

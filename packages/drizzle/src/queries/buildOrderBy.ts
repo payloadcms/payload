@@ -1,5 +1,5 @@
 import type { SQL, Table } from 'drizzle-orm'
-import type { FlattenedField, Sort } from 'payload'
+import type { FlattenedField, PayloadRequest, Sort } from 'payload'
 
 import { asc, desc } from 'drizzle-orm'
 
@@ -17,6 +17,7 @@ type Args = {
   locale?: string
   parentIsLocalized: boolean
   rawSort?: SQL
+  req?: Partial<PayloadRequest>
   selectFields: Record<string, GenericColumn>
   sort?: Sort
   tableName: string
@@ -33,6 +34,7 @@ export const buildOrderBy = ({
   locale,
   parentIsLocalized,
   rawSort,
+  req,
   selectFields,
   sort,
   tableName,
@@ -84,6 +86,7 @@ export const buildOrderBy = ({
         locale,
         parentIsLocalized,
         pathSegments: sortProperty.replace(/__/g, '.').split('.'),
+        req,
         selectFields,
         tableName,
         value: sortProperty,

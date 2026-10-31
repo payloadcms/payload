@@ -58,6 +58,100 @@ const createAdapter = (
   }) as unknown as DrizzleAdapter
 
 describe('buildRawSchema', () => {
+  it('should build branch-scoped localized unique indexes in the locales table', () => {
+    const config = sanitizeConfig({
+      branching: true,
+      collections: [
+        {
+          slug: 'articles',
+          fields: [
+            {
+              name: 'slug',
+              type: 'text',
+              localized: true,
+              unique: true,
+            },
+          ],
+          versions: { drafts: true },
+        },
+      ],
+      localization: {
+        defaultLocale: 'en',
+        locales: ['en', 'de'],
+      },
+    } as Config)
+    const adapter = createAdapter(config)
+
+    expect(() => buildRawSchema({ adapter, setColumnID })).not.toThrow()
+
+    const localesTable = adapter.rawTables.articles_locales
+
+    expect(localesTable.columns._branch).toMatchObject({
+      default: 'main',
+      name: '_branch',
+      notNull: true,
+      type: 'varchar',
+    })
+    expect(Object.values(localesTable.indexes ?? {})).toContainEqual(
+      expect.objectContaining({
+        on: ['slug', '_branch', '_locale'],
+        unique: true,
+      }),
+    )
+
+    const slugIndex = Object.values(localesTable.indexes ?? {}).find(
+      (index) => index.on.includes('slug') && index.unique,
+    )!
+
+    expect(adapter.fieldConstraints.articles_locales[slugIndex.name]).toBe('slug')
+
+    const versionLocalesTable = adapter.rawTables._articles_versions_locales
+
+    expect(versionLocalesTable.columns._branch).toMatchObject({
+      default: 'main',
+      name: '_branch',
+      notNull: true,
+      type: 'varchar',
+    })
+    expect(Object.values(versionLocalesTable.indexes ?? {})).toContainEqual(
+      expect.objectContaining({
+        on: ['version_slug', '_branch', '_locale'],
+        unique: false,
+      }),
+    )
+  })
+
+  it('should map branch-scoped unique constraints to their configured field paths', () => {
+    const config = sanitizeConfig({
+      branching: true,
+      collections: [
+        {
+          slug: 'articles',
+          fields: [
+            { name: 'code', type: 'text', unique: true },
+            {
+              name: 'details',
+              type: 'group',
+              fields: [{ name: 'reference', type: 'text', unique: true }],
+            },
+          ],
+        },
+      ],
+    } as Config)
+    const adapter = createAdapter(config)
+
+    buildRawSchema({ adapter, setColumnID })
+
+    const indexes = Object.values(adapter.rawTables.articles.indexes ?? {})
+    const codeIndex = indexes.find((index) => index.on.includes('code') && index.unique)!
+    const referenceIndex = indexes.find(
+      (index) => index.on.includes('details_reference') && index.unique,
+    )!
+
+    expect(adapter.fieldConstraints.articles[codeIndex.name]).toBe('code')
+    expect(adapter.fieldConstraints.articles[referenceIndex.name]).toBe('details.reference')
+  })
+
   it('should create suffixed block tables for different schemas with the same slug', async () => {
     const config = sanitizeConfig({
       collections: [
