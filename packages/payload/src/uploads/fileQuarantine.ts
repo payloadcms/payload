@@ -38,10 +38,32 @@ export const quarantineFile = async ({
     throw error
   }
 
-  const fileIdentity = await getFileIdentity({ filePath: quarantinedFilePath })
+  let fileIdentity: FileIdentity
 
-  if (!fileIdentity) {
-    throw new Error('The quarantined file was not present after it was moved.')
+  try {
+    const identity = await getFileIdentity({ filePath: quarantinedFilePath })
+
+    if (!identity) {
+      throw new Error('The quarantined file was not present after it was moved.')
+    }
+
+    fileIdentity = identity
+  } catch (error) {
+    try {
+      await linkFileWithoutOverwrite({
+        sourceFilePath: quarantinedFilePath,
+        targetFilePath: filePath,
+      })
+      await fs.rm(directoryPath, { force: true, recursive: true })
+    } catch (restoreError) {
+      throw new AggregateError(
+        [error, restoreError],
+        'Identity capture failed and the quarantined file could not be restored safely.',
+        { cause: error },
+      )
+    }
+
+    throw error
   }
 
   return {

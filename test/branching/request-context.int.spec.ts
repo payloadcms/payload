@@ -240,13 +240,13 @@ test.suite(
             id: docID,
             branch: 'main',
             collection: postsSlug,
-            req: isolateBranchState(req),
+            req: isolateBranchState({ req: req }),
           }),
           payload.findByID({
             id: docID,
             branch: 'two-branch-read',
             collection: postsSlug,
-            req: isolateBranchState(req),
+            req: isolateBranchState({ req: req }),
           }),
         ])
 
@@ -265,7 +265,7 @@ test.suite(
           id: docID,
           branch: 'main',
           collection: postsSlug,
-          req: isolateBranchState(req),
+          req: isolateBranchState({ req: req }),
         })
 
         const stillOnBranch = await payload.findByID({ id: docID, collection: postsSlug, req })
@@ -315,7 +315,7 @@ test.suite(
 
         await assertBranchReadable({ req })
 
-        const isolatedReq = isolateBranchState(req)
+        const isolatedReq = isolateBranchState({ req: req })
         isolatedReq.branch = 'unreadable-branch'
         isolatedReq.user = null
 
