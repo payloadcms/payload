@@ -156,8 +156,10 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
 
   // The merge history, newest first and paginated: a long-lived branch accumulates
   // one event per merge indefinitely, so this read is paginated independently.
-  const historyPage = Number(
-    (props.searchParams as Record<string, string | undefined> | undefined)?.historyPage ?? 1,
+  const historyPage = Math.floor(
+    Number(
+      (props.searchParams as Record<string, string | undefined> | undefined)?.historyPage ?? 1,
+    ),
   )
   const historyPageNumber = Number.isFinite(historyPage) && historyPage > 0 ? historyPage : 1
 
