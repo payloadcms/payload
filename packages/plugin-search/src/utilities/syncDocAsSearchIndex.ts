@@ -199,7 +199,7 @@ export const syncDocAsSearchIndex = async ({
                   collection: searchSlug,
                   data: {
                     ...dataToSave,
-                    priority: foundDoc.priority || defaultPriority,
+                    priority: foundDoc.priority ?? defaultPriority,
                   },
                   depth: 0,
                   locale: syncLocale,
