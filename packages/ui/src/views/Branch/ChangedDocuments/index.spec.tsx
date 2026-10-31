@@ -150,3 +150,27 @@ test('should label a global row and its controls before its diff loads', async (
   await expect.element(screen.getByRole('checkbox', { name: 'Select Site settings' })).toBeVisible()
   await expect.element(screen.getByText('undefined', { exact: true })).not.toBeInTheDocument()
 })
+
+test('should retry a rejected diff when its row is expanded again', async () => {
+  serverFunction.mockRejectedValueOnce(new Error('Temporary failure'))
+  serverFunction.mockResolvedValueOnce({ title: 'document-id', diff: 'Recovered diff' })
+  const screen = await render(
+    <ChangedDocuments
+      branch="campaign"
+      changes={[
+        { collectionSlug: 'posts', docID: 'document-id', id: 'change-id', operation: 'update' },
+      ]}
+    />,
+  )
+  const toggle = screen.getByRole('button', { name: 'document-id' })
+
+  await toggle.click()
+  await expect
+    .element(screen.getByRole('alert'))
+    .toHaveTextContent('An unknown error has occurred.')
+  await toggle.click()
+  await toggle.click()
+
+  await expect.element(screen.getByRole('region')).toHaveTextContent('Recovered diff')
+  expect(serverFunction).toHaveBeenCalledTimes(2)
+})

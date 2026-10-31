@@ -86,7 +86,9 @@ export const ChangedDocuments: React.FC<{
 
   const load = useCallback(
     async (change: BranchChange) => {
-      if (inFlight.current.has(change.id) || loadedRef.current[change.id]) {
+      const previous = loadedRef.current[change.id]
+
+      if (inFlight.current.has(change.id) || (previous && previous.status !== 'error')) {
         return
       }
 
