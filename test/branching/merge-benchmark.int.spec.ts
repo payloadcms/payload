@@ -168,7 +168,7 @@ const runBenchmark = async ({ payload }: { payload: Payload }) => {
       where: { branch: { equals: branch } },
     })
     const promotedDocuments = await payload.count({
-      branch: false,
+      branch: 'main',
       collection: postsSlug,
       overrideAccess: true,
       where: { title: { contains: titlePrefix } },
@@ -183,7 +183,7 @@ const runBenchmark = async ({ payload }: { payload: Payload }) => {
     for (const index of sampleIndexes) {
       const document = await payload.findByID({
         id: documentIDs[index]!,
-        branch: false,
+        branch: 'main',
         collection: postsSlug,
         overrideAccess: true,
       })
