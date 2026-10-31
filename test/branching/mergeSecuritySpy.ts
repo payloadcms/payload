@@ -9,3 +9,15 @@ export const mergeSecuritySpy = {
   uploadCleanupSourceFilename: undefined as string | undefined,
   uploadUpdateAccessChecks: 0,
 }
+
+export const resetMergeSecuritySpy = (): void => {
+  mergeSecuritySpy.allowPageCreate = true
+  mergeSecuritySpy.cloudUploadContents.length = 0
+  mergeSecuritySpy.isUpdatingNestedUpload = false
+  mergeSecuritySpy.nestedUploadID = undefined
+  mergeSecuritySpy.nestedUploadTriggerAlt = undefined
+  mergeSecuritySpy.rejectedPostTitle = undefined
+  mergeSecuritySpy.uploadCleanupRetainedFilename = undefined
+  mergeSecuritySpy.uploadCleanupSourceFilename = undefined
+  mergeSecuritySpy.uploadUpdateAccessChecks = 0
+}
