@@ -1,6 +1,6 @@
 import type { CountGlobalVersions, SanitizedGlobalConfig } from 'payload'
 
-import { buildVersionGlobalFields } from 'payload'
+import { buildVersionGlobalFields, resolveBranchGlobalVersionQuery } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -10,7 +10,7 @@ import { getTransaction } from './utilities/getTransaction.js'
 
 export const countGlobalVersions: CountGlobalVersions = async function countGlobalVersions(
   this: DrizzleAdapter,
-  { global, locale, req, where: whereArg },
+  { branch, global, locale, req, where: whereArg },
 ) {
   const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
     ({ slug }) => slug === global,
@@ -27,7 +27,7 @@ export const countGlobalVersions: CountGlobalVersions = async function countGlob
     fields,
     locale,
     tableName,
-    where: whereArg,
+    where: resolveBranchGlobalVersionQuery({ branch, globalSlug: global, req, where: whereArg }),
   })
 
   const db = await getTransaction(this, req)
