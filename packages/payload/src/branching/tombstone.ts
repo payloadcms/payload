@@ -255,7 +255,7 @@ export const willBranchAbsorbDelete = async ({
     return false
   }
 
-  const branch = resolveBranch(req as PayloadRequest)
+  const branch = resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return false
