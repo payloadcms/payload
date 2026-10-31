@@ -2495,3 +2495,5 @@ export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'
 
 export { z } from 'zod/mini'
+
+export type { Authorship, SanitizedAuthorship } from './fields/baseFields/authorship/types.js'
