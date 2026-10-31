@@ -32,6 +32,7 @@ import type { OperatorMapKey } from './operatorMap.js'
 import { getCollection } from '../utilities/getEntity.js'
 import { isObjectID } from '../utilities/isObjectID.js'
 import { buildBranchVisibilityStages } from './buildBranchVisibility.js'
+import { buildRelatedQueryPipeline } from './buildRelatedQueryPipeline.js'
 import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
@@ -751,7 +752,10 @@ const findRelatedDocuments = async ({
   query: Record<string, unknown>
 }) => {
   if (branchVisibility.length) {
-    return Model.aggregate([{ $match: query }, ...branchVisibility, { $project: projection }])
+    return Model.aggregate([
+      ...buildRelatedQueryPipeline({ branchVisibility, query }),
+      { $project: projection },
+    ])
   }
 
   return Model.find(query).lean().select(projection)
@@ -773,8 +777,7 @@ const findRelatedDistinctValues = async ({
   }
 
   return Model.aggregate([
-    { $match: query },
-    ...branchVisibility,
+    ...buildRelatedQueryPipeline({ branchVisibility, query }),
     { $project: { value: `$${path}` } },
     { $unwind: '$value' },
     { $group: { _id: '$value' } },
