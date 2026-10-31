@@ -69,6 +69,7 @@ export interface Config {
     'localized-category-block': LocalizedCategoryBlock;
   };
   collections: {
+    'slug-drafts': SlugDraft;
     posts: Post;
     pages: Page;
     categories: Category;
@@ -102,6 +103,7 @@ export interface Config {
     };
   };
   collectionsSelect: {
+    'slug-drafts': SlugDraftsSelect<false> | SlugDraftsSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
@@ -815,6 +817,10 @@ export interface PayloadBranchChange {
   globalSlug?: string | null;
   doc?:
     | ({
+        relationTo: 'slug-drafts';
+        value: string | SlugDraft;
+      } | null)
+    | ({
         relationTo: 'posts';
         value: string | Post;
       } | null)
@@ -973,6 +979,10 @@ export interface PayloadBranchMerge {
 export interface PayloadLockedDocument {
   id: string;
   document?:
+    | ({
+        relationTo: 'slug-drafts';
+        value: string | SlugDraft;
+      } | null)
     | ({
         relationTo: 'posts';
         value: string | Post;
@@ -1762,6 +1772,7 @@ export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
     relatedCollection:
+      | 'slug-drafts'
       | 'posts'
       | 'pages'
       | 'categories'
@@ -1801,6 +1812,7 @@ export interface ActivityWidget {
   data?: {
     excludedCollections?:
       | (
+          | 'slug-drafts'
           | 'posts'
           | 'pages'
           | 'categories'
@@ -1856,6 +1868,47 @@ export interface Auth {
   [k: string]: unknown;
 }
 
+
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-drafts".
+ */
+export interface SlugDraft {
+  id: string;
+  title: string;
+  slug: string;
+  code?: string | null;
+  _branch: string;
+  _branchDocID?: (string | null) | SlugDraft;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-drafts_select".
+ */
+export interface SlugDraftsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  code?: T;
+  _branch?: T;
+  _branchDocID?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
 
 declare module 'payload' {
   // @ts-ignore

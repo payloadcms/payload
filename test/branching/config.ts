@@ -7,6 +7,7 @@ import { defaultBranchMergeValidation } from 'payload'
 import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { SlugDrafts } from './collections/SlugDrafts.js'
 import { hookSpy } from './hookSpy.js'
 import {
   autosaveSlug,
@@ -111,6 +112,7 @@ export default buildConfigWithDefaults({
           : defaultBranchMergeValidation(args),
     },
     collections: [
+      SlugDrafts,
       {
         slug: postsSlug,
         access: {

@@ -189,16 +189,7 @@ export function DefaultListView(props: ListViewClientProps) {
     }, 500)
 
     return () => clearTimeout(timeout)
-  }, [
-    data,
-    i18n,
-    isSearchSettled,
-    labels.plural,
-    labels.singular,
-    resolvedGroupBy,
-    resolvedSearch,
-    searchInput,
-  ])
+  }, [data, i18n, isSearchSettled, labels.plural, labels.singular, resolvedGroupBy, resolvedSearch])
 
   const collectionLabel = getTranslation(labels?.plural, i18n)
   const hierarchyParentFieldName =

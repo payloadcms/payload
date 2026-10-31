@@ -19,6 +19,9 @@ const shouldWriteEvalReport = process.env.VITEST_EVAL_REPORT === 'true'
 // https://github.com/vitest-dev/vitest/issues/4605
 const _require = createRequire(path.resolve(ROOT_DIR, 'packages/graphql/package.json'))
 const graphqlDir = path.dirname(_require.resolve('graphql/package.json'))
+const dateFnsTransposePath = createRequire(
+  path.resolve(ROOT_DIR, 'packages/ui/package.json'),
+).resolve('date-fns/transpose')
 
 console.log('[Dev Setup] Checking for local Figma plugin at:', figmaPath)
 if (hasFigma) {
@@ -82,9 +85,10 @@ export default defineConfig({
       },
       {
         optimizeDeps: {
-          include: ['monaco-editor'],
+          include: ['date-fns/transpose', 'monaco-editor'],
         },
         resolve: {
+          alias: { 'date-fns/transpose': dateFnsTransposePath },
           dedupe: ['react', 'react-dom'],
         },
         test: {

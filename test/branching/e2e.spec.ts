@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Page, Response } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -18,10 +18,12 @@ import {
   branchMergesSlug,
   headerGlobalSlug,
   homepageGlobalSlug,
+  localizedSlug,
   mediaSlug,
   nestedSlug,
   pagesSlug,
   postsSlug,
+  slugDraftsSlug,
   versionedMediaSlug,
 } from './shared.js'
 
@@ -129,6 +131,8 @@ test.describe('Branching', () => {
     // Shadow rows are addressed by their real primary key, so these deletes
     // bypass branch resolution rather than writing tombstones.
     for (const collection of [
+      localizedSlug,
+      slugDraftsSlug,
       mediaSlug,
       nestedSlug,
       pagesSlug,
@@ -1793,6 +1797,215 @@ test.describe('Branching', () => {
       )
     })
   })
+
+  test('should publish the current locale of an autosaved branch-only page', async () => {
+    const slugDraftsURL = new AdminUrlUtil(serverURL, slugDraftsSlug)
+    const doc = await payload.create({
+      branch: branchSlug,
+      collection: slugDraftsSlug,
+      data: { title: 'Initial branch draft' },
+      draft: true,
+      locale: 'en',
+    })
+
+    await page.goto(withCurrentBranch({ page, href: slugDraftsURL.list }))
+    await switchBranch({ name: branchName, page })
+    await gotoAndWaitForForm(
+      page,
+      withCurrentBranch({ page, href: `${slugDraftsURL.edit(doc.id)}?locale=en` }),
+    )
+    await expect(page.locator('#field-title')).toHaveValue('Initial branch draft')
+
+    const autosaved = page.waitForResponse((response) => {
+      const url = new URL(response.url())
+
+      return (
+        url.pathname === `/api/${slugDraftsSlug}/${doc.id}` &&
+        url.searchParams.get('autosave') === 'true' &&
+        response.request().method() === 'PATCH'
+      )
+    })
+
+    await page.locator('#field-title').fill('Ready to publish')
+    await expect.poll(async () => (await autosaved).status()).toBe(200)
+
+    const published = page.waitForResponse((response) => {
+      const url = new URL(response.url())
+
+      return (
+        url.pathname === `/api/${slugDraftsSlug}/${doc.id}` &&
+        !url.searchParams.has('autosave') &&
+        response.request().method() === 'PATCH'
+      )
+    })
+
+    await page.locator('#action-save').click()
+
+    const response = await published
+    const query = new URL(response.url()).searchParams
+
+    expect(query.get('branch')).toBe(branchSlug)
+    expect(query.get('locale')).toBe('en')
+    expect(response.status()).toBe(200)
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await page.reload()
+    await expect(page.locator('#field-title')).toHaveValue('Ready to publish')
+    await expect(page.locator('.status')).toContainText('Published')
+
+    const publishedDoc = await payload.find({
+      branch: branchSlug,
+      collection: slugDraftsSlug,
+      draft: false,
+      locale: 'all',
+      where: { id: { equals: doc.id } },
+    })
+    const main = await payload.find({
+      branch: 'main',
+      collection: slugDraftsSlug,
+      draft: true,
+      where: { id: { equals: doc.id } },
+    })
+
+    expect(publishedDoc.docs[0]).toMatchObject({ _status: { en: 'published', es: 'draft' } })
+    expect(main.docs).toHaveLength(0)
+  })
+
+  for (const branch of ['main', branchSlug]) {
+    test(`should autosave a title change with an unchanged native slug on ${branch}`, async () => {
+      const slugDraftsURL = new AdminUrlUtil(serverURL, slugDraftsSlug)
+      const doc = await payload.create({
+        collection: slugDraftsSlug,
+        data: { code: 'website-code', slug: 'website-page', title: 'Website page' },
+      })
+
+      await page.goto(withCurrentBranch({ page, href: slugDraftsURL.list }))
+      await switchBranch({ name: branch === 'main' ? 'main' : branchName, page })
+      await gotoAndWaitForForm(
+        page,
+        withCurrentBranch({ page, href: `${slugDraftsURL.edit(doc.id)}?locale=en` }),
+      )
+      await expect(page.locator('#field-title')).toHaveValue('Website page')
+
+      const autosaved = page.waitForResponse((response) => {
+        const url = new URL(response.url())
+
+        return (
+          url.pathname === `/api/${slugDraftsSlug}/${doc.id}` &&
+          url.searchParams.get('autosave') === 'true' &&
+          response.request().method() === 'PATCH'
+        )
+      })
+
+      await page.locator('#field-title').fill('Updated website page')
+
+      const response = await autosaved
+
+      expect(response.ok()).toBe(true)
+      expect(await response.json()).toMatchObject({
+        doc: {
+          id: doc.id,
+          code: 'website-code',
+          slug: 'website-page',
+          title: 'Updated website page',
+        },
+      })
+      await page.reload()
+      await expect(page.locator('#field-title')).toHaveValue('Updated website page')
+    })
+  }
+
+  for (const collectionSlug of [localizedSlug, slugDraftsSlug] as const) {
+    test(`should publish all locales on a branch-only ${collectionSlug} document`, async () => {
+      const localizedURL = new AdminUrlUtil(serverURL, collectionSlug)
+      const doc = await payload.create({
+        branch: branchSlug,
+        collection: collectionSlug,
+        data: { title: 'Branch-only English draft' },
+        draft: true,
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: doc.id,
+        branch: branchSlug,
+        collection: collectionSlug,
+        data: { title: 'Borrador solo en la rama' },
+        draft: true,
+        locale: 'es',
+      })
+
+      await page.goto(withCurrentBranch({ page, href: localizedURL.list }))
+      await switchBranch({ name: branchName, page })
+      await gotoAndWaitForForm(
+        page,
+        withCurrentBranch({ page, href: `${localizedURL.edit(doc.id)}?locale=en` }),
+      )
+      await expect(page.locator('#field-title')).toHaveValue('Branch-only English draft')
+
+      const validationRequests: { branch: null | string; locales: string[]; status: number }[] = []
+      const recordValidation = (response: Response) => {
+        const url = new URL(response.url())
+
+        if (
+          url.pathname === `/api/${collectionSlug}/${doc.id}/validate` &&
+          response.request().method() === 'POST'
+        ) {
+          validationRequests.push({
+            branch: url.searchParams.get('branch'),
+            locales: url.searchParams.getAll('locale'),
+            status: response.status(),
+          })
+        }
+      }
+
+      page.on('response', recordValidation)
+
+      try {
+        await page.getByRole('button', { name: 'More options: Publish', exact: true }).click()
+        await page.getByRole('menuitem', { name: 'Publish all locales', exact: true }).click()
+
+        await expect
+          .poll(() => validationRequests)
+          .toEqual([
+            { branch: branchSlug, locales: ['en'], status: 200 },
+            { branch: branchSlug, locales: ['es'], status: 200 },
+          ])
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+        await expect
+          .poll(async () => {
+            const published = await payload.find({
+              branch: branchSlug,
+              collection: collectionSlug,
+              draft: false,
+              fallbackLocale: false,
+              locale: 'all',
+              where: { id: { equals: doc.id } },
+            })
+
+            return published.docs[0]
+          })
+          .toMatchObject({
+            _status: { en: 'published', es: 'published' },
+            title: { en: 'Branch-only English draft', es: 'Borrador solo en la rama' },
+          })
+
+        await expect
+          .poll(async () => {
+            const onMain = await payload.find({
+              branch: 'main',
+              collection: collectionSlug,
+              draft: true,
+              where: { id: { equals: doc.id } },
+            })
+
+            return onMain.docs
+          })
+          .toHaveLength(0)
+      } finally {
+        page.off('response', recordValidation)
+      }
+    })
+  }
 
   test.describe('Drafts saved from the admin panel', () => {
     test.afterEach(async () => {
