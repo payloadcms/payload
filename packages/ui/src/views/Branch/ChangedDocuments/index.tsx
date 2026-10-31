@@ -4,7 +4,7 @@ import type { BranchOperation } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 
 import type { RenderBranchDiffResult } from '../renderBranchDiff.js'
 
@@ -215,7 +215,7 @@ const ChangedDocumentRow: React.FC<{
 }) => {
   const { t } = useTranslation()
   const rowRef = useRef<HTMLLIElement>(null)
-  const rowID = `${baseClass}-${encodeURIComponent(change.id)}`
+  const rowID = `${baseClass}-${useId()}`
   const diffPanelID = `${rowID}-diff`
   const toggleID = `${rowID}-toggle`
 

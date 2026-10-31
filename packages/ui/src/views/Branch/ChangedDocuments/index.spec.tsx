@@ -67,29 +67,34 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-test('should connect the toggle to the diff panel and expose loading status', async () => {
+test('should connect the toggle to its own diff panel and expose loading status', async () => {
   serverFunction.mockReturnValue(new Promise(() => undefined))
+  const changes = [
+    {
+      collectionSlug: 'posts',
+      docID: 'document-id',
+      id: 'change-id',
+      operation: 'update' as const,
+    },
+  ]
+
   const screen = await render(
-    <ChangedDocuments
-      branch="campaign"
-      changes={[
-        {
-          collectionSlug: 'posts',
-          docID: 'document-id',
-          id: 'change-id',
-          operation: 'update',
-        },
-      ]}
-    />,
+    <>
+      <ChangedDocuments branch="campaign" changes={changes} />
+      <ChangedDocuments branch="campaign" changes={changes} selectable={false} />
+    </>,
   )
-  const toggle = screen.getByRole('button', { name: 'document-id' })
+  const toggles = screen.getByRole('button', { name: 'document-id' })
+  const toggle = toggles.nth(1)
 
   await toggle.click()
 
   const panel = screen.getByRole('region', { name: 'document-id' })
 
-  await expect.element(toggle).toHaveAttribute('aria-controls', 'changed-docs-change-id-diff')
-  await expect.element(panel).toHaveAttribute('id', 'changed-docs-change-id-diff')
+  expect(toggle.element().id).not.toBe(toggles.nth(0).element().id)
+  await expect.element(toggle).toHaveAttribute('aria-controls', panel.element().id)
+  await expect.element(panel).toHaveAttribute('aria-labelledby', toggle.element().id)
+  expect(document.getElementById(toggle.element().id)).toBe(toggle.element())
   await expect.element(screen.getByRole('status')).toHaveTextContent('Loading')
   await expect.element(screen.getByTestId('shimmer')).toHaveAttribute('aria-hidden', 'true')
 })
