@@ -1635,6 +1635,39 @@ test.describe('Branching', () => {
     })
   })
 
+  test('should copy a branch-only document to another locale', async () => {
+    const localizedURL = new AdminUrlUtil(serverURL, localizedSlug)
+    const doc = await payload.create({
+      branch: branchSlug,
+      collection: localizedSlug,
+      data: { title: 'Branch English copy' },
+      draft: true,
+      locale: 'en',
+    })
+
+    await page.goto(localizedURL.list)
+    await switchBranch({ name: branchName, page })
+    await gotoAndWaitForForm(page, `${localizedURL.edit(doc.id)}?locale=en`)
+    await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+    await page.locator('#copy-locale-data__button').click()
+    await expect(page.locator('.copy-locale-data__content')).toBeVisible()
+    await page.locator('#field-toLocale').click()
+    await page.locator('.rs__option', { hasText: 'es' }).click()
+    await page.locator('.copy-locale-data__sub-header button').click()
+    await expect(page).toHaveURL(/locale=es/)
+    await expect(page.locator('#field-title')).toHaveValue('Branch English copy')
+
+    const copied = await payload.find({
+      branch: branchSlug,
+      collection: localizedSlug,
+      draft: true,
+      locale: 'es',
+      where: { id: { equals: doc.id } },
+    })
+
+    expect(copied.docs[0]?.title).toBe('Branch English copy')
+  })
+
   test.describe('API view', () => {
     test.afterEach(async () => {
       const pages = await payload.find({ branch: false, collection: pagesSlug, pagination: false })
