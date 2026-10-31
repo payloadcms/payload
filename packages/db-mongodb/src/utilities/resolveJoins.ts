@@ -348,6 +348,7 @@ export async function resolveJoins({
         }
       } else {
         applyBranchIDProjection({
+          branch,
           collectionSlug: joinCollectionSlug,
           docs: results,
           req,
