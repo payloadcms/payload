@@ -73,10 +73,8 @@ export const branchGlobalNeedsBothRows = (args: BaseArgs): boolean => {
 }
 
 /** Picks the branch's copy of a global when it has one, else main's. */
-export const pickBranchGlobal = <T extends Record<string, unknown>>(
-  docs: T[],
-  branch: string,
-): T | undefined => docs.find((doc) => doc?.[branchField] === branch) ?? docs[0]
+export const pickBranchGlobal = <T extends object>(docs: T[], branch: string): T | undefined =>
+  docs.find((doc) => (doc as Record<string, unknown>)?.[branchField] === branch) ?? docs[0]
 
 /**
  * The branch a global write should be scoped to, or `null` on main.
