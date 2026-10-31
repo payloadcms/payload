@@ -241,7 +241,7 @@ const ChangedDocumentRow: React.FC<{
     return () => observer.disconnect()
   }, [change, load, state])
 
-  const title = state?.result?.title ?? String(change.docID)
+  const title = state?.result?.title ?? (change.globalSlug ? collectionLabel : String(change.docID))
 
   return (
     <li className={`${baseClass}__row`} ref={rowRef}>
