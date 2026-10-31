@@ -30,6 +30,10 @@
     white-space: nowrap;
   }
 
+  .branch-selector__popup .combobox__entries {
+    padding-inline: var(--spacer-2-5);
+  }
+
   .branch-selector__popup .combobox__entry {
     flex-direction: column;
   }
@@ -91,22 +95,17 @@
     color: var(--color-text);
   }
 
-  /* On a branch the name is the way into its manage view. The icon is the standing
-     affordance, so the underline is held back for hover — a permanently underlined
-     name reads as decoration on what is otherwise the row's heading. */
   .branch-selector__current-link {
     display: inline-flex;
     align-items: center;
     gap: var(--spacer-1);
     min-width: 0;
+    border-radius: var(--popup-item-radius);
     text-decoration: none;
 
     &:hover {
-      color: var(--color-text-brand);
-    }
-
-    &:hover .branch-selector__current-text {
-      text-decoration: underline;
+      background: var(--color-bg-secondary);
+      color: var(--color-text);
     }
   }
 
@@ -119,10 +118,6 @@
   .branch-selector__current-icon {
     flex-shrink: 0;
     color: var(--color-icon);
-  }
-
-  .branch-selector__current-link:hover .branch-selector__current-icon {
-    color: var(--color-text-brand);
   }
 
   /* Reads as a state to notice rather than a footnote, so it takes the same green
