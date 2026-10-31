@@ -36,7 +36,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
   })
 
   const doc = needsBoth
-    ? pickBranchGlobal(docs, (branch as string) || resolveBranch(req as never))
+    ? pickBranchGlobal(docs, (branch as string) || resolveBranch({ req: req as never }))
     : docs[0]
 
   if (doc) {

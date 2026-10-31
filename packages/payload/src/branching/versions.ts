@@ -192,7 +192,9 @@ export const resolveBranchVersionQuerySync = ({
   }
 
   const branch =
-    typeof branchOverride === 'string' ? branchOverride : resolveBranch(req as PayloadRequest)
+    typeof branchOverride === 'string'
+      ? branchOverride
+      : resolveBranch({ req: req as PayloadRequest })
 
   if (branch === MAIN_BRANCH) {
     return buildBranchVersionQuery({ branch, deletedIDs: [], shadowedIDs: [], where })
