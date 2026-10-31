@@ -111,6 +111,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false)
   const [menuIsOpen, setMenuIsOpen] = useState(false)
   const hasLoadedFirstPageRef = useRef(false)
+  const requestGeneration = useRef(0)
   const { queueTask } = useQueue()
 
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
@@ -202,7 +203,12 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       if (!permissions) {
         return
       }
+      const generation = requestGeneration.current
+
       queueTask(async () => {
+        if (generation !== requestGeneration.current) {
+          return
+        }
         const lastFullyLoadedRelationToUse =
           typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1
 
@@ -238,6 +244,10 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               lastLoadedPageToUse = (lastLoadedPageArg[relation] || 0) + 1
             }
             await priorRelation
+
+            if (generation !== requestGeneration.current) {
+              return
+            }
 
             if (relationFilterOption === false) {
               setLastFullyLoadedRelation(relations.indexOf(relation))
@@ -311,8 +321,16 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 },
               )
 
+              if (generation !== requestGeneration.current) {
+                return
+              }
+
               if (response.ok) {
                 const data: PaginatedDocs<unknown> = await response.json()
+
+                if (generation !== requestGeneration.current) {
+                  return
+                }
                 setLastLoadedPage((prevState) => {
                   return {
                     ...prevState,
@@ -353,7 +371,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             }
           }, Promise.resolve())
 
-          if (typeof onSuccess === 'function') {
+          if (generation === requestGeneration.current && typeof onSuccess === 'function') {
             onSuccess()
           }
         }
@@ -702,13 +720,18 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     [config.routes.admin, serverURL],
   )
 
-  // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
-  // Note - effect should not run on first run
+  // Reset options and pagination when their request inputs change.
   useEffect(() => {
+    requestGeneration.current += 1
+    const shouldReload = menuIsOpen
+
+    hasLoadedFirstPageRef.current = false
+    setIsLoading(false)
+
     // If the menu is open while filterOptions changes
     // due to latency of form state and fast clicking into this field,
     // re-fetch options
-    if (hasLoadedFirstPageRef.current && menuIsOpen) {
+    if (shouldReload) {
       setIsLoading(true)
       void updateResultsEffectEvent({
         filterOptions,
@@ -738,7 +761,10 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
     setLastFullyLoadedRelation(-1)
     setLastLoadedPage({})
-  }, [relationTo, filterOptions, locale, path, menuIsOpen, hasMany])
+    return () => {
+      requestGeneration.current += 1
+    }
+  }, [branch, relationTo, filterOptions, locale, path, menuIsOpen, hasMany])
 
   const prevValue = useRef(value)
   const isFirstRenderRef = useRef(true)

@@ -115,8 +115,8 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
     Icon,
   })
 
-  // Fetch item name when currentId changes
   useEffect(() => {
+    let isCurrent = true
     const fetchItemName = async () => {
       if (
         currentId !== null &&
@@ -139,14 +139,20 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
             const itemData = await response.json()
             const title = itemData?.[useAsTitle] || itemData?.name || itemData?.id
 
-            setDisplayName(String(title))
-          } else {
+            if (isCurrent) {
+              setDisplayName(String(title))
+            }
+          } else if (isCurrent) {
             setDisplayName(t('general:none'))
           }
         } catch {
-          setDisplayName(t('general:none'))
+          if (isCurrent) {
+            setDisplayName(t('general:none'))
+          }
         } finally {
-          setIsLoading(false)
+          if (isCurrent) {
+            setIsLoading(false)
+          }
         }
       } else {
         setDisplayName(t('general:none'))
@@ -155,6 +161,10 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
     }
 
     void fetchItemName()
+
+    return () => {
+      isCurrent = false
+    }
   }, [
     branch,
     config.routes.api,
