@@ -1,5 +1,7 @@
 import type { DeleteBranchGlobal } from 'payload'
 
+import { MAIN_BRANCH } from 'payload'
+
 import type { MongooseAdapter } from './index.js'
 
 import { getGlobal } from './utilities/getEntity.js'
@@ -16,6 +18,10 @@ export const deleteBranchGlobal: DeleteBranchGlobal = async function deleteBranc
   this: MongooseAdapter,
   { branch, globalSlug, req },
 ) {
+  if (branch === MAIN_BRANCH) {
+    throw new Error('Cannot delete a main global as a branch copy.')
+  }
+
   const { Model } = getGlobal({ adapter: this, globalSlug })
 
   await Model.deleteOne(
