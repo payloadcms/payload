@@ -246,7 +246,7 @@ export const finalizeMergeAfterCommit = async ({
   await payload.config.branching?.hooks?.afterMerge?.({ branch, req, results: result.merged })
 
   if (incomingReq) {
-    refreshBranchState(incomingReq)
+    refreshBranchState({ req: incomingReq })
   }
 }
 
@@ -277,6 +277,6 @@ export const recordMergeRollback = async ({
   await restoreBranchAfterMerge({ branchDocID: branchDoc.id, payload, req })
 
   if (incomingReq) {
-    refreshBranchState(incomingReq)
+    refreshBranchState({ req: incomingReq })
   }
 }
