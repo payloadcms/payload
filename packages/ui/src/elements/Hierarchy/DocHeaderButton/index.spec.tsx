@@ -3,6 +3,7 @@ import { render } from 'vitest-browser-react'
 
 import { HierarchyButtonClient } from './index.js'
 
+const state = vi.hoisted(() => ({ branch: 'feature-branch' }))
 const dispatchField = vi.hoisted(() => vi.fn())
 const openModal = vi.hoisted(() => vi.fn())
 const translate = vi.hoisted(() => (key: string) => key)
@@ -14,7 +15,7 @@ vi.mock('../../../forms/Form/context.js', () => ({
 }))
 
 vi.mock('../../../providers/Branch/index.js', () => ({
-  useBranchParam: () => 'feature-branch',
+  useBranchParam: () => state.branch,
 }))
 
 vi.mock('../../../providers/Config/index.js', () => ({
@@ -51,6 +52,7 @@ vi.mock('../Modal/useHierarchyModal.js', () => ({
 }))
 
 beforeEach(() => {
+  state.branch = 'feature-branch'
   vi.stubGlobal('process', { env: {} })
   vi.stubGlobal(
     'fetch',
@@ -69,4 +71,29 @@ test('should fetch the selected hierarchy item from the active branch', async ()
 
   const requestURL = new URL(String(vi.mocked(fetch).mock.calls[0][0]))
   expect(requestURL.searchParams.get('branch')).toBe('feature-branch')
+})
+
+test('should ignore a slower name response after the branch changes', async () => {
+  let finishOldRequest: (response: Response) => void
+  vi.mocked(fetch)
+    .mockImplementationOnce(
+      () =>
+        new Promise<Response>((resolve) => {
+          finishOldRequest = resolve
+        }),
+    )
+    .mockResolvedValueOnce(Response.json({ id: 'folder-1', title: 'Current folder' }))
+  const screen = await render(
+    <HierarchyButtonClient fieldName="parent" hierarchyCollectionSlug="folders" />,
+  )
+
+  state.branch = 'new-branch'
+  await screen.rerender(
+    <HierarchyButtonClient fieldName="parent" hierarchyCollectionSlug="folders" />,
+  )
+  await expect.element(screen.getByRole('button')).toHaveTextContent('Current folder')
+
+  finishOldRequest(Response.json({ id: 'folder-1', title: 'Obsolete folder' }))
+  await vi.waitFor(() => expect(fetch).toHaveResolvedTimes(2))
+  await expect.element(screen.getByRole('button')).toHaveTextContent('Current folder')
 })

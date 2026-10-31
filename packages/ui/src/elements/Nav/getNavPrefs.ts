@@ -1,9 +1,9 @@
 import type { NavPreferences, PayloadRequest } from 'payload'
 
+import { getAdminPreferences } from 'payload'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import { cache } from 'react'
 
-import { getAdminPreferences } from '../../utilities/getAdminPreferences.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
 
 /**
