@@ -133,6 +133,7 @@ export const recordBranchGlobalChange = async ({
   })
 
   if (existing.docs.length) {
+    await reopenBranchForGlobalChange({ branch, req: req as PayloadRequest })
     recorded.add(key)
 
     return
@@ -150,6 +151,7 @@ export const recordBranchGlobalChange = async ({
     req: req as PayloadRequest,
   })
 
+  await reopenBranchForGlobalChange({ branch, req: req as PayloadRequest })
   recorded.add(key)
 }
 
