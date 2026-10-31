@@ -400,7 +400,7 @@ export const resolveBranchVersionParent = async ({
     return { parent, versionData }
   }
 
-  const rowID = await resolveBranchRowID({ id: parent, collectionSlug, req })
+  const rowID = await resolveBranchRowID({ id: parent, branch, collectionSlug, req })
 
   return {
     parent: rowID,
@@ -472,7 +472,7 @@ export const resolveBranchOwnVersions = async ({
   // address that row rather than the canonical ID. When the branch has no copy
   // yet, `resolveBranchRowID` returns the canonical ID — and the `_branch`
   // constraint is what then keeps the cascade off main's rows.
-  const rowID = await resolveBranchRowID({ id, collectionSlug, req })
+  const rowID = await resolveBranchRowID({ id, branch, collectionSlug, req })
 
   return { and: [{ parent: { equals: rowID } }, { [branchField]: { equals: branch } }] }
 }
