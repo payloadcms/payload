@@ -116,7 +116,7 @@ const streamMerge = ({
         controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`))
 
       try {
-        const mergeReq = isolateBranchState(req)
+        const mergeReq = isolateBranchState({ req: req })
 
         delete mergeReq.transactionID
 

@@ -68,7 +68,7 @@ export const getGraphQLRequest = async ({
     req.branch = branch
   }
 
-  resetBranchState(req)
+  resetBranchState({ req: req })
   req.payloadDataLoader = getDataLoader(req)
 
   registerGraphQLRequest({ context, info, req })
