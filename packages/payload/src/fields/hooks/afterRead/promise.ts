@@ -348,32 +348,11 @@ export const promise = async ({
       }
     }
 
-    if (
-      'virtual' in field &&
-      typeof field.virtual === 'string' &&
-      (!field.hidden || showHiddenFields)
-    ) {
-      populationPromises.push(
-        virtualFieldPopulationPromise({
-          name: field.name,
-          draft,
-          fallbackLocale: fallbackLocale!,
-          fields: (collection || global)!.flattenedFields,
-          locale: locale!,
-          overrideAccess,
-          ref: doc,
-          req,
-          segments: field.virtual.split('.'),
-          showHiddenFields,
-          siblingDoc,
-        }),
-      )
-    }
-
     // Execute access control
     let allowDefaultValue = true
+    let canReadField = true
     if (triggerAccessControl && field.access && field.access.read) {
-      const canReadField = overrideAccess
+      canReadField = overrideAccess
         ? true
         : await field.access.read(
             collection
@@ -403,6 +382,31 @@ export const promise = async ({
       }
     }
 
+    let virtualPopulationPromise: Promise<void> | undefined
+
+    if (
+      'virtual' in field &&
+      typeof field.virtual === 'string' &&
+      canReadField &&
+      (!field.hidden || showHiddenFields)
+    ) {
+      virtualPopulationPromise = virtualFieldPopulationPromise({
+        name: field.name,
+        draft,
+        fallbackLocale: fallbackLocale!,
+        fields: (collection || global)!.flattenedFields,
+        locale: locale!,
+        overrideAccess,
+        ref: doc,
+        req,
+        segments: field.virtual.split('.'),
+        showHiddenFields,
+        siblingDoc,
+      })
+
+      populationPromises.push(virtualPopulationPromise)
+    }
+
     // Set defaultValue on the field for globals being returned without being first created
     // or collection documents created prior to having a default.
     if (
@@ -421,7 +425,7 @@ export const promise = async ({
     }
 
     if (field.type === 'relationship' || field.type === 'upload' || field.type === 'join') {
-      populationPromises.push(
+      const populateRelationship = () =>
         relationshipPopulationPromise({
           currentDepth,
           depth,
@@ -435,7 +439,36 @@ export const promise = async ({
           req,
           showHiddenFields,
           siblingDoc,
-        }),
+        })
+
+      // A virtual field with a reference only has a value once it has been resolved
+      populationPromises.push(
+        virtualPopulationPromise
+          ? virtualPopulationPromise.then(() => {
+              // The value belongs to the related document, which is shared by the request, and
+              // populating it would change that document
+              const value = siblingDoc[field.name]
+
+              // Same check as relationshipPopulationPromise uses to populate each locale
+              const isLocaleMap =
+                locale === 'all' &&
+                (field.type !== 'join' && field.hasMany ? shouldLocalizeField : field.localized)
+
+              if (value && typeof value === 'object') {
+                siblingDoc[field.name] =
+                  isLocaleMap && !Array.isArray(value)
+                    ? Object.fromEntries(
+                        Object.entries(value).map(([localeKey, localeValue]) => [
+                          localeKey,
+                          copyReferencedValue({ value: localeValue }),
+                        ]),
+                      )
+                    : copyReferencedValue({ value })
+              }
+
+              return populateRelationship()
+            })
+          : populateRelationship(),
       )
     }
   }
@@ -1037,4 +1070,25 @@ export const promise = async ({
       break
     }
   }
+}
+
+/**
+ * Copies the IDs or `{ relationTo, value }` objects of a relationship value, so that populating them
+ * doesn't change the document they were read from.
+ */
+const copyReferencedValue = ({ value }: { value: unknown }): unknown => {
+  if (Array.isArray(value)) {
+    return value.map((item) => (item && typeof item === 'object' ? { ...item } : item))
+  }
+
+  if (!value || typeof value !== 'object') {
+    return value
+  }
+
+  // A join value holds its documents in `docs`
+  const { docs } = value as { docs?: unknown }
+
+  return Array.isArray(docs)
+    ? { ...value, docs: copyReferencedValue({ value: docs }) }
+    : { ...value }
 }

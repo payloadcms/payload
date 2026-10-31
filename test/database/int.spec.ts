@@ -22,6 +22,7 @@ import mongoose, { Types } from 'mongoose'
 import path from 'path'
 import {
   commitTransaction,
+  createPayloadRequest,
   initTransaction,
   isolateObjectProperty,
   killTransaction,
@@ -4255,6 +4256,210 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
         select: { postTitle: true },
       })
       expect(doc.postTitle).toBe('my-title-10')
+    })
+
+    test('should populate a relationship virtual field with reference like a relationship field', async ({
+      payload,
+    }) => {
+      const simple = await payload.create({
+        collection: 'simple',
+        data: { text: 'simple' },
+        overrideAccess: true,
+      })
+      const category = await payload.create({
+        collection: 'categories',
+        data: { simple: simple.id, title: 'category' },
+        overrideAccess: true,
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { categories: [category.id], category: category.id, title: 'post' },
+        overrideAccess: true,
+      })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post.id },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      const findAtDepth = (depth: number) =>
+        payload.findByID({ id, collection: 'virtual-relations', depth, overrideAccess: true })
+
+      const atDepth0 = await findAtDepth(0)
+
+      expect(atDepth0.postCategory).toBe(category.id)
+      expect(atDepth0.postCategories).toStrictEqual([category.id])
+
+      const atDepth1 = await findAtDepth(1)
+
+      expect(atDepth1.postCategory).toMatchObject({ id: category.id, simple: simple.id })
+      expect(atDepth1.postCategories).toMatchObject([{ id: category.id, simple: simple.id }])
+
+      const atDepth2 = await findAtDepth(2)
+
+      expect(atDepth2.postCategory).toMatchObject({ id: category.id, simple: { id: simple.id } })
+      expect(atDepth2.postCategories).toMatchObject([
+        { id: category.id, simple: { id: simple.id } },
+      ])
+    })
+
+    test('should not return a virtual field with reference when read access is denied', async ({
+      payload,
+    }) => {
+      const user = await payload.create({
+        collection: 'users',
+        data: { email: 'virtual-read-denied@payloadcms.com', password: 'test' },
+        overrideAccess: true,
+      })
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: 'category' },
+        overrideAccess: true,
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { category: category.id, title: 'post' },
+        overrideAccess: true,
+      })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post.id },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      for (const depth of [0, 1]) {
+        const doc = await payload.findByID({
+          id,
+          collection: 'virtual-relations',
+          depth,
+          overrideAccess: false,
+          user,
+        })
+
+        expect(doc.postCategory).toBeDefined()
+        expect(doc).not.toHaveProperty('postCategoryReadDenied')
+      }
+    })
+
+    test('should not change the related document when populating a relationship virtual field with reference', async ({
+      payload,
+    }) => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: 'category' },
+        overrideAccess: true,
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          categories: [category.id],
+          categoryPoly: { relationTo: 'categories', value: category.id },
+          title: 'post',
+        },
+        overrideAccess: true,
+      })
+
+      for (let i = 0; i < 2; i++) {
+        await payload.create({
+          collection: 'virtual-relations',
+          data: { post: post.id },
+          depth: 0,
+          overrideAccess: true,
+        })
+      }
+
+      // Both reads share the request, and with it the related documents loaded for the references
+      const req = await createPayloadRequest({ payload })
+
+      const find = (depth: number) =>
+        payload.find({
+          collection: 'virtual-relations',
+          depth,
+          overrideAccess: true,
+          req,
+          where: { post: { equals: post.id } },
+        })
+
+      const atDepth1 = await find(1)
+
+      expect(atDepth1.docs).toHaveLength(2)
+
+      for (const doc of atDepth1.docs) {
+        expect(doc.postCategories).toMatchObject([{ id: category.id }])
+        expect(doc.postCategoryPoly).toMatchObject({
+          relationTo: 'categories',
+          value: { id: category.id },
+        })
+        expect(doc.post).toMatchObject({ categories: [category.id] })
+      }
+
+      const atDepth0 = await find(0)
+
+      for (const doc of atDepth0.docs) {
+        expect(doc.postCategories).toStrictEqual([category.id])
+        expect(doc.postCategoryPoly).toStrictEqual({ relationTo: 'categories', value: category.id })
+      }
+    })
+
+    test('should not change the related document when populating a localized relationship virtual field with reference', async ({
+      payload,
+    }) => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: 'category' },
+        overrideAccess: true,
+      })
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          localizedPolymorphicRelations: [{ relationTo: 'categories', value: category.id }],
+          title: 'post',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      for (let i = 0; i < 2; i++) {
+        await payload.create({
+          collection: 'virtual-relations',
+          data: { post: post.id },
+          depth: 0,
+          overrideAccess: true,
+        })
+      }
+
+      // Both reads share the request, and with it the related documents loaded for the references
+      const req = await createPayloadRequest({ payload })
+
+      const find = (depth: number) =>
+        payload.find({
+          collection: 'virtual-relations',
+          depth,
+          locale: 'all',
+          overrideAccess: true,
+          req,
+          where: { post: { equals: post.id } },
+        })
+
+      const atDepth1 = await find(1)
+
+      expect(atDepth1.docs).toHaveLength(2)
+
+      for (const doc of atDepth1.docs) {
+        expect(doc.postLocalizedPolymorphicRelations).toMatchObject({
+          en: [{ relationTo: 'categories', value: { id: category.id } }],
+        })
+      }
+
+      const atDepth0 = await find(0)
+
+      for (const doc of atDepth0.docs) {
+        expect(doc.postLocalizedPolymorphicRelations).toMatchObject({
+          en: [{ relationTo: 'categories', value: category.id }],
+        })
+      }
     })
 
     test('should respect hidden: true for virtual fields with reference', async ({ payload }) => {
