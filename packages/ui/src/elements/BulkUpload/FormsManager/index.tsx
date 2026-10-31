@@ -20,6 +20,7 @@ import type { State } from './reducer.js'
 
 import { fieldReducer } from '../../../forms/Form/fieldReducer.js'
 import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
@@ -110,6 +111,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   } = config
   const locale = useLocale()
   const code = locale?.code
+  const branch = useBranchParam()
   const { i18n, t } = useTranslation()
 
   const { getDocumentSlots, getFormState } = useServerFunctions()
@@ -156,7 +158,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const hasInitializedWithFiles = React.useRef(false)
   const initialStateRef = React.useRef<FormState>(null)
   const initializedStateCollectionSlugRef = React.useRef<string | undefined>(undefined)
-  const initializedPermissionsCollectionSlugRef = React.useRef<string | undefined>(undefined)
+  const permissionsKey = JSON.stringify([collectionSlug, branch ?? null])
+  const initializedPermissionsKeyRef = React.useRef<string | undefined>(undefined)
+  const currentPermissionsKeyRef = React.useRef(permissionsKey)
+  currentPermissionsKeyRef.current = permissionsKey
   const currentCollectionSlugRef = React.useRef(collectionSlug)
   currentCollectionSlugRef.current = collectionSlug
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
@@ -219,6 +224,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const initializeSharedDocPermissions = React.useCallback(async () => {
     const params = {
+      branch,
       locale: code || undefined,
     }
 
@@ -248,7 +254,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       },
     ).then((res) => res.json())
 
-    if (currentCollectionSlugRef.current !== collectionSlug) {
+    if (currentPermissionsKeyRef.current !== permissionsKey) {
       return
     }
 
@@ -263,9 +269,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     )
 
     setHasPublishPermission(publishedAccessJSON?.update)
-    initializedPermissionsCollectionSlugRef.current = collectionSlug
+    initializedPermissionsKeyRef.current = permissionsKey
     setHasInitializedDocPermissions(true)
-  }, [api, code, collectionSlug, i18n.language])
+  }, [api, branch, code, collectionSlug, i18n.language, permissionsKey])
 
   const initializeSharedFormState = React.useCallback(
     async (abortController?: AbortController) => {
@@ -280,9 +286,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         const { state: formStateWithoutFiles } = await getFormState({
           collectionSlug,
           docPermissions:
-            initializedPermissionsCollectionSlugRef.current === collectionSlug
-              ? docPermissions
-              : undefined,
+            initializedPermissionsKeyRef.current === permissionsKey ? docPermissions : undefined,
           docPreferences: { fields: {} },
           locale: code,
           operation: 'create',
@@ -315,7 +319,15 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         return null
       }
     },
-    [getDocumentSlots, collectionSlug, getFormState, docPermissions, code, folderFieldName],
+    [
+      getDocumentSlots,
+      collectionSlug,
+      getFormState,
+      docPermissions,
+      code,
+      folderFieldName,
+      permissionsKey,
+    ],
   )
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(
@@ -485,6 +497,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           const actionURLWithParams = `${actionURL}${qs.stringify(
             {
+              branch,
               locale: code,
               uploadEdits: form?.uploadEdits || undefined,
             },
@@ -659,6 +672,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
     },
     [
+      branch,
       forms,
       activeIndex,
       t,
@@ -758,14 +772,17 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       void initializeSharedFormState()
     }
 
-    if (initializedPermissionsCollectionSlugRef.current !== collectionSlug) {
+    if (initializedPermissionsKeyRef.current !== permissionsKey) {
+      setHasInitializedDocPermissions(false)
+      setHasSavePermission(false)
+      setHasPublishPermission(false)
       void initializeSharedDocPermissions()
     }
 
     if (initialFiles || initialForms) {
       if (
         initializedStateCollectionSlugRef.current !== collectionSlug ||
-        initializedPermissionsCollectionSlugRef.current !== collectionSlug
+        initializedPermissionsKeyRef.current !== permissionsKey
       ) {
         setIsInitializing(true)
       } else {
@@ -777,7 +794,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       hasInitializedState &&
       hasInitializedDocPermissions &&
       initializedStateCollectionSlugRef.current === collectionSlug &&
-      initializedPermissionsCollectionSlugRef.current === collectionSlug &&
+      initializedPermissionsKeyRef.current === permissionsKey &&
       pendingCollectionChangeRef.current?.slug === collectionSlug
     ) {
       const previousForms = pendingCollectionChangeRef.current.forms
@@ -813,7 +830,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       hasInitializedState &&
       hasInitializedDocPermissions &&
       initializedStateCollectionSlugRef.current === collectionSlug &&
-      initializedPermissionsCollectionSlugRef.current === collectionSlug &&
+      initializedPermissionsKeyRef.current === permissionsKey &&
       (initialForms?.length || initialFiles?.length) &&
       !hasInitializedWithFiles.current
     ) {
@@ -827,6 +844,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     }
     return
   }, [
+    permissionsKey,
     initialFiles,
     initializeSharedFormState,
     initializeSharedDocPermissions,
@@ -835,6 +853,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     hasInitializedDocPermissions,
     initialForms,
     applyFolderToState,
+    folderFieldName,
+    parentID,
   ])
 
   return (

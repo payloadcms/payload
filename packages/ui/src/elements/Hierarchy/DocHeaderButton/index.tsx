@@ -1,11 +1,13 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { SelectionWithPath } from '../Modal/types.js'
 
 import { useForm, useFormFields } from '../../../forms/Form/context.js'
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -42,6 +44,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   const { config, getEntityConfig } = useConfig()
   const { id: documentId, collectionSlug: documentCollectionSlug } = useDocumentInfo()
   const { disabled: formDisabled, setModified } = useForm()
+  const branch = useBranchParam()
   const readOnly = readOnlyFromProps || formDisabled
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
 
@@ -112,8 +115,8 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
     Icon,
   })
 
-  // Fetch item name when currentId changes
   useEffect(() => {
+    let isCurrent = true
     const fetchItemName = async () => {
       if (
         currentId !== null &&
@@ -122,10 +125,11 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
       ) {
         setIsLoading(true)
         try {
+          const queryString = qs.stringify({ branch }, { addQueryPrefix: true })
           const response = await fetch(
             formatAdminURL({
               apiRoute: config.routes.api,
-              path: `/${hierarchyCollectionSlug}/${currentId}`,
+              path: `/${hierarchyCollectionSlug}/${currentId}${queryString}`,
               serverURL: config.serverURL,
             }),
             { credentials: 'include' },
@@ -135,14 +139,20 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
             const itemData = await response.json()
             const title = itemData?.[useAsTitle] || itemData?.name || itemData?.id
 
-            setDisplayName(String(title))
-          } else {
+            if (isCurrent) {
+              setDisplayName(String(title))
+            }
+          } else if (isCurrent) {
             setDisplayName(t('general:none'))
           }
         } catch {
-          setDisplayName(t('general:none'))
+          if (isCurrent) {
+            setDisplayName(t('general:none'))
+          }
         } finally {
-          setIsLoading(false)
+          if (isCurrent) {
+            setIsLoading(false)
+          }
         }
       } else {
         setDisplayName(t('general:none'))
@@ -151,7 +161,19 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
     }
 
     void fetchItemName()
-  }, [currentId, hierarchyCollectionSlug, config.routes.api, config.serverURL, useAsTitle, t])
+
+    return () => {
+      isCurrent = false
+    }
+  }, [
+    branch,
+    config.routes.api,
+    config.serverURL,
+    currentId,
+    hierarchyCollectionSlug,
+    t,
+    useAsTitle,
+  ])
 
   const handleModalSave = useCallback(
     ({

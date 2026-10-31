@@ -1,6 +1,7 @@
 import type { TypeWithID } from '../collections/config/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
+import { MAIN_BRANCH } from '../branching/types.js'
 import { DEFAULT_HIERARCHY_TREE_LIMIT } from '../hierarchy/constants.js'
 
 export type GetInitialTreeDataArgs = {
@@ -12,6 +13,7 @@ export type GetInitialTreeDataArgs = {
   filterByCollections?: string[]
   limit?: number
   payload: PayloadRequest['payload']
+  req?: PayloadRequest
   /** The currently selected node ID. When provided, ensures siblings are loaded to include this node. */
   selectedNodeId?: null | number | string
   /** The parent ID of the selected node. Required when selectedNodeId is provided. */
@@ -20,6 +22,7 @@ export type GetInitialTreeDataArgs = {
 }
 
 export type InitialTreeData = {
+  branch: null | string
   docs: TypeWithID[]
   // Metadata about what was loaded - keyed by parent ID ('null' for root)
   loadedParents: Record<string, { hasMore: boolean; loadedCount?: number; totalDocs: number }>
@@ -32,6 +35,7 @@ export const getInitialTreeData = async ({
   filterByCollections,
   limit,
   payload,
+  req,
   selectedNodeId,
   selectedNodeParentId,
   user,
@@ -125,6 +129,7 @@ export const getInitialTreeData = async ({
         limit: effectiveLimit,
         overrideAccess: false,
         page: currentPage,
+        req,
         sort: useAsTitle,
         user,
         where: whereClause,
@@ -170,6 +175,7 @@ export const getInitialTreeData = async ({
   }
 
   return {
+    branch: req?.branch && req.branch !== MAIN_BRANCH ? req.branch : null,
     docs: allDocs,
     loadedParents,
   }

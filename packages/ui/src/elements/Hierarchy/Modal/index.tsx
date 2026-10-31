@@ -14,6 +14,7 @@ import type { PathSegment } from '../ColumnBrowser/types.js'
 import type { HierarchyModalInternalProps, SelectionWithPath } from './types.js'
 
 import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -69,6 +70,8 @@ export const HierarchyModalContent = function HierarchyModalContent({
     getEntityConfig,
   } = useConfig()
 
+  const branch = useBranchParam()
+
   const collectionConfig = getEntityConfig({ collectionSlug: hierarchyCollectionSlug })
   const collectionLabel = collectionConfig
     ? getTranslation(collectionConfig.labels?.plural || hierarchyCollectionSlug, i18n)
@@ -98,6 +101,7 @@ export const HierarchyModalContent = function HierarchyModalContent({
     try {
       const { ancestorIds, path } = await fetchAncestorPath({
         api,
+        branch,
         collectionSlug: hierarchyCollectionSlug,
         itemId,
         parentFieldName: parentFieldName_internal,

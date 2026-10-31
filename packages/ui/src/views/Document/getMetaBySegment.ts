@@ -8,6 +8,8 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
+import { branchesCollectionSlug } from 'payload/shared'
+
 import type { GenerateEditViewMetadata } from '../API/generateAPIViewMetadata.js'
 
 import { generateAPIViewMetadata } from '../API/generateAPIViewMetadata.js'
@@ -63,6 +65,14 @@ export const getMetaBySegment = async ({
       switch (segments[3]) {
         case 'api':
           fn = generateAPIViewMetadata
+          break
+        case 'manage':
+          // A branch's own fields, which is the edit view under another name.
+          // Without this the segment resolves to no generator and the page title
+          // reads "Not Found" over a perfectly good form.
+          if (collectionConfig?.slug === branchesCollectionSlug) {
+            fn = generateEditViewMetadata
+          }
           break
         case 'versions':
           fn = generateVersionsViewMetadata

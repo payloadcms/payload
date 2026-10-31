@@ -11,14 +11,15 @@ import { tanstackServerAdapter } from '../adapters/server.js'
 
 type TanStackInitAdminContextArgs = {
   serverAdapter?: ServerAdapter
-} & Omit<InitAdminContextArgs, 'cache' | 'requestURL' | 'serverAdapter'>
+} & Omit<InitAdminContextArgs, 'cache' | 'serverAdapter'>
 
 export const initAdminContext = ({
+  requestURL = getRequest().url,
   serverAdapter = tanstackServerAdapter,
   ...args
 }: TanStackInitAdminContextArgs) =>
   initPayloadAdminContext({
     ...args,
-    requestURL: getRequest().url,
+    requestURL,
     serverAdapter,
   })

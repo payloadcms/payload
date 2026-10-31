@@ -7,12 +7,14 @@ export type HierarchyDocument = {
 
 export type HierarchyInitialData = {
   baseFilter?: null | Where
+  branch?: null | string
   docs: HierarchyDocument[]
   loadedParents: Record<string, { hasMore: boolean; loadedCount?: number; totalDocs: number }>
 }
 
 export type HierarchyTreeCacheEntry = {
   baseFilter?: null | Where
+  branch?: null | string
   docs: HierarchyDocument[]
   loadedParents: Record<string, { hasMore: boolean; loadedCount?: number; totalDocs: number }>
 }

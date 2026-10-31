@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -47,6 +48,7 @@ export function PublishButton({
   const editDepth = useEditDepth()
   const locale = useLocale()
   const localeCode = locale?.code
+  const branch = useBranchParam()
   const {
     blocksMap,
     localization,
@@ -104,6 +106,7 @@ export function PublishButton({
 
     const params = qs.stringify(
       {
+        branch,
         depth: 0,
         draft: true,
         'fallback-locale': 'null',
@@ -141,7 +144,7 @@ export function PublishButton({
       },
       skipValidation: true,
     })
-  }, [disabled, localeCode, collectionSlug, globalSlug, submit, api, id, uploadEdits])
+  }, [branch, disabled, localeCode, collectionSlug, globalSlug, submit, api, id, uploadEdits])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
@@ -208,6 +211,7 @@ export function PublishButton({
 
     const params = qs.stringify(
       {
+        branch,
         depth: 0,
         locale: localeCode,
         uploadEdits: uploadEdits || undefined,
@@ -236,12 +240,13 @@ export function PublishButton({
       setHasPublishedDoc(true)
     }
   }, [
+    branch,
     localeCode,
     localizeStatusEnabled,
     api,
     blocksMap,
     collectionSlug,
-    entityConfig?.fields,
+    entityConfig,
     getData,
     globalSlug,
     hasLocalizedFields,
@@ -265,6 +270,7 @@ export function PublishButton({
 
       const params = qs.stringify(
         {
+          branch,
           depth: 0,
           locale,
           uploadEdits: uploadEdits || undefined,
@@ -295,6 +301,7 @@ export function PublishButton({
     },
     [
       api,
+      branch,
       collectionSlug,
       globalSlug,
       id,

@@ -36,6 +36,8 @@ export type ServerFunctionArgs = {
 export type ServerFunctionClientArgs = {
   args: Record<string, unknown>
   name: string
+  /** Admin page URL whose branch and locale scope this action. */
+  requestURL?: string
 }
 
 export type ServerFunctionClient = (args: ServerFunctionClientArgs) => Promise<unknown> | unknown

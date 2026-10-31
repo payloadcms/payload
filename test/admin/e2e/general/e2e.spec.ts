@@ -1,7 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
-import { formatAdminURL, wait } from 'payload/shared'
+import { formatAdminURL, PREFERENCE_KEYS, wait } from 'payload/shared'
 
 import type { Config, Geo, Post } from '../../payload-types.js'
 
@@ -860,8 +860,9 @@ describe('General', () => {
       await Promise.all([
         page.waitForResponse(
           (response) =>
-            new URL(response.url()).pathname.endsWith('/payload-preferences/nav') &&
-            response.request().method() === 'POST',
+            new URL(response.url()).pathname.endsWith(
+              `/payload-preferences/${PREFERENCE_KEYS.NAV}`,
+            ) && response.request().method() === 'POST',
         ),
         page.locator('#nav-group-One .nav-group__toggle').click(),
       ])
@@ -883,8 +884,9 @@ describe('General', () => {
       const waitForNavPreferenceUpdate = () =>
         page.waitForResponse(
           (response) =>
-            new URL(response.url()).pathname.endsWith('/payload-preferences/nav') &&
-            response.request().method() === 'POST',
+            new URL(response.url()).pathname.endsWith(
+              `/payload-preferences/${PREFERENCE_KEYS.NAV}`,
+            ) && response.request().method() === 'POST',
         )
 
       await expect.poll(navColumnWidth).toBeGreaterThan(0)

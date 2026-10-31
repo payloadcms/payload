@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 
 import type { SelectionWithPath } from '../Modal/types.js'
 
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
@@ -63,6 +64,7 @@ export function MoveMany({
   const { i18n, t } = useTranslation()
   const currentLocale = useLocale()
   const locale = currentLocale?.code
+  const branch = useBranchParam()
   const {
     config: {
       collections,
@@ -180,6 +182,7 @@ export function MoveMany({
 
           const queryString = qs.stringify(
             {
+              branch,
               locale,
               where: { id: { in: ids } },
             },
@@ -254,7 +257,7 @@ export function MoveMany({
         setIsMoving(false)
       }
     },
-    [closeModal, selections, parentFieldName, locale, api, i18n, t, label, onSuccess],
+    [branch, closeModal, selections, parentFieldName, locale, api, i18n, t, label, onSuccess],
   )
 
   const handleModalSave = useCallback(

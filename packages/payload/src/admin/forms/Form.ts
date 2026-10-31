@@ -101,6 +101,8 @@ export type FormStateWithoutComponents = {
 }
 
 export type BuildFormStateArgs = {
+  /** The branch that the admin form is editing. */
+  branch?: string
   /**
    * If true, will check if the document has been modified since it was loaded.
    * This helps detect stale data when multiple users are editing the same document.
