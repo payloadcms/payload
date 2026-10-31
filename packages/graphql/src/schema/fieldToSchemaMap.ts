@@ -710,7 +710,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
               const result = await req.payloadDataLoader.load(
                 createDataloaderCacheKey({
-                  branch: resolveBranch(req),
+                  branch: resolveBranch({ req: req }),
                   collectionSlug: collectionSlug as string,
                   currentDepth: 0,
                   depth: 0,
@@ -761,7 +761,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           if (graphQLCollections.some((collection) => collection.slug === relatedCollectionSlug)) {
             const relatedDocument = await req.payloadDataLoader.load(
               createDataloaderCacheKey({
-                branch: resolveBranch(req),
+                branch: resolveBranch({ req: req }),
                 collectionSlug: relatedCollectionSlug as string,
                 currentDepth: 0,
                 depth: 0,
@@ -1133,7 +1133,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
               const result = await req.payloadDataLoader.load(
                 createDataloaderCacheKey({
-                  branch: resolveBranch(req),
+                  branch: resolveBranch({ req: req }),
                   collectionSlug: collectionSlug as string,
                   currentDepth: 0,
                   depth: 0,
@@ -1184,7 +1184,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           if (graphQLCollections.some((collection) => collection.slug === relatedCollectionSlug)) {
             const relatedDocument = await req.payloadDataLoader.load(
               createDataloaderCacheKey({
-                branch: resolveBranch(req),
+                branch: resolveBranch({ req: req }),
                 collectionSlug: relatedCollectionSlug as string,
                 currentDepth: 0,
                 depth: 0,
