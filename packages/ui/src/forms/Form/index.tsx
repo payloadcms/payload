@@ -42,6 +42,10 @@ import { useUploadHandlers } from '../../providers/UploadHandlers/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
 import {
+  formatBulkErrorDescription,
+  readBulkErrorToast,
+} from '../../utilities/bulkErrorMessages.js'
+import {
   BackgroundProcessingContext,
   DocumentFormContext,
   FormContext,
@@ -309,12 +313,22 @@ export const Form: React.FC<FormProps> = (props) => {
         // Do not show submitting toast, as the promise toast may never disappear under these conditions.
         // Instead, make successToast() or errorToast() throw toast.success / toast.error
         successToast = (data) => toast.success(data)
-        errorToast = (data) => toast.error(data)
+        errorToast = (data) => {
+          const bulkError = readBulkErrorToast(data)
+
+          if (bulkError) {
+            toast.error(bulkError.message, {
+              description: bulkError.description,
+            })
+            return
+          }
+
+          toast.error(data)
+        }
       } else {
         toast.promise(promise, {
-          error: (data) => {
-            return data as string
-          },
+          description: (data) => readBulkErrorToast(data)?.description,
+          error: (data) => readBulkErrorToast(data)?.message ?? (data as string),
           loading: t('general:submitting'),
           success: (data) => {
             return data as string
@@ -507,7 +521,16 @@ export const Form: React.FC<FormProps> = (props) => {
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
 
           if (json.message) {
-            errorToast(json.message)
+            const description = formatBulkErrorDescription({ errors: json.errors })
+
+            errorToast(
+              description
+                ? {
+                    description,
+                    message: json.message,
+                  }
+                : json.message,
+            )
             return
           }
 
