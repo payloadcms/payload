@@ -34,6 +34,7 @@ const rewriteIdentity = ({
   }
 
   const result: Where = {}
+  const identityClauses: Where[] = []
 
   for (const [key, value] of Object.entries(where)) {
     if ((key === 'and' || key === 'or') && Array.isArray(value)) {
@@ -46,13 +47,14 @@ const rewriteIdentity = ({
     if (key === identityKey) {
       const constraint = value as WhereField
 
-      result.or = [
-        ...((result.or as Where[]) ?? []),
-        { [canonicalField]: constraint },
-        matchRawIdentity
-          ? { [identityKey]: constraint }
-          : { and: [{ [canonicalField]: { exists: false } }, { [identityKey]: constraint }] },
-      ]
+      identityClauses.push({
+        or: [
+          { [canonicalField]: constraint },
+          matchRawIdentity
+            ? { [identityKey]: constraint }
+            : { and: [{ [canonicalField]: { exists: false } }, { [identityKey]: constraint }] },
+        ],
+      })
 
       continue
     }
@@ -60,7 +62,9 @@ const rewriteIdentity = ({
     result[key] = value as WhereField
   }
 
-  return result
+  return identityClauses.length
+    ? { and: [...(Object.keys(result).length ? [result] : []), ...identityClauses] }
+    : result
 }
 
 /**
