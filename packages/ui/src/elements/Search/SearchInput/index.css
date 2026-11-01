@@ -61,14 +61,43 @@
 
   .search-input__clear {
     position: absolute;
-    inset-inline-end: var(--spacer-1);
+    inset-inline-end: var(--spacer-0);
     top: 50%;
     transform: translateY(-50%);
     color: var(--color-icon-secondary);
+    isolation: isolate;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset-block: 0;
+      inset-inline: 0;
+      margin: auto;
+      width: var(--spacer-3);
+      height: var(--spacer-3);
+      border-radius: inherit;
+      z-index: -1;
+    }
 
     &.btn {
-      height: unset;
-      width: unset;
+      height: var(--spacer-4);
+      width: var(--spacer-4);
+    }
+
+    &:hover:not(.btn--disabled) {
+      background: transparent;
+
+      &::before {
+        background: var(--color-bg-transparent-hover);
+      }
+    }
+
+    &:active:not(.btn--disabled) {
+      background: transparent;
+
+      &::before {
+        background: var(--color-bg-transparent-pressed);
+      }
     }
 
     &:hover:not(.btn--disabled),

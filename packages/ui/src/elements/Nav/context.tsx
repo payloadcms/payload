@@ -10,6 +10,7 @@ type NavContextType = {
   hydrated: boolean
   navOpen: boolean
   navRef: React.RefObject<HTMLDivElement | null>
+  navToggleRef?: React.RefObject<HTMLAnchorElement | HTMLButtonElement | null>
   setNavOpen: (value: boolean, persist?: boolean) => void
 }
 
@@ -50,6 +51,7 @@ export const NavProvider: React.FC<{
 
   const { getPreference, setPreference } = usePreferences()
   const navRef = useRef(null)
+  const navToggleRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null)
   const previousBreakpoints = useRef({
     large: largeBreak,
     mid: midBreak,
@@ -139,5 +141,9 @@ export const NavProvider: React.FC<{
     }
   }, [])
 
-  return <NavContext value={{ hydrated, navOpen, navRef, setNavOpen }}>{children}</NavContext>
+  return (
+    <NavContext value={{ hydrated, navOpen, navRef, navToggleRef, setNavOpen }}>
+      {children}
+    </NavContext>
+  )
 }

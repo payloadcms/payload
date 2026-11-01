@@ -1,4 +1,14 @@
-import { gte, major, maxSatisfying, minVersion, prerelease, satisfies, sort, valid } from 'semver'
+import {
+  gte,
+  major,
+  maxSatisfying,
+  minVersion,
+  prerelease,
+  satisfies,
+  sort,
+  valid,
+  validRange,
+} from 'semver'
 
 type DependencyGroup = {
   dependency: string
@@ -91,6 +101,24 @@ const buildBump = async ({
   patchedRange: string
 }): Promise<Bump> => {
   const { dependency, spec, workspacePackages } = group
+  if (!validRange(patchedRange)) {
+    return {
+      currentSpec: spec,
+      dependency,
+      fix: { reason: 'no-patched-range', status: 'unknown' },
+      workspacePackages,
+    }
+  }
+  // Aliases, dist-tags, and file/git specs carry no semver floor to bump from.
+  if (spec && !validRange(spec)) {
+    return {
+      currentSpec: spec,
+      dependency,
+      fix: { reason: 'unsupported-spec', status: 'unknown' },
+      workspacePackages,
+    }
+  }
+
   const min = spec ? minVersion(spec) : null
   const fix = await findMinimalFix({
     chainPackages,
@@ -181,6 +209,10 @@ type TraceOutcome = 'clear' | 'unknown' | 'vulnerable'
  * that appeared on the introducing chains, resolving each hop to its highest
  * satisfying version. Returns whether every reachable version of the vulnerable
  * module lands in the patched range.
+ *
+ * The chain restriction bounds registry requests per candidate. A path that a newer
+ * version adds through a package off the original chain is not traced, so `clear` is a
+ * suggestion: the plan's verify step re-runs the audit and catches any remaining copy.
  */
 const traceModule = async ({
   chainPackages,
@@ -197,6 +229,11 @@ const traceModule = async ({
   rootName: string
   rootVersion: string
 }): Promise<TraceOutcome> => {
+  // A patched root can still pull a vulnerable copy back in, so the trace continues below it.
+  if (rootName === module && !satisfies(rootVersion, patchedRange)) {
+    return 'vulnerable'
+  }
+
   const moduleVersions: string[] = []
   const visited = new Set<string>([`${rootName}@${rootVersion}`])
   const queue: Array<{ name: string; version: string }> = [{ name: rootName, version: rootVersion }]

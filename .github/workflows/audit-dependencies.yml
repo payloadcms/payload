@@ -1,11 +1,20 @@
 name: audit-dependencies
 
 on:
-  # Monday at 2am EST
+  # Daily at 2am EST
   schedule:
-    - cron: '0 7 * * 1'
+    - cron: '0 7 * * *'
   workflow_dispatch:
     inputs:
+      ref:
+        description: Which branch to audit
+        type: choice
+        required: true
+        options:
+          - both
+          - main
+          - 3.x
+        default: both
       scope:
         description: Which surface to audit (consumer-facing or monorepo)
         required: false
@@ -25,10 +34,18 @@ env:
 
 jobs:
   audit:
+    name: audit (${{ matrix.ref }})
     runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # inputs.ref is empty on `schedule`; audit both main and 3.x.
+        ref: ${{ fromJSON(inputs.ref && inputs.ref != 'both' && format('["{0}"]', inputs.ref) || '["main","3.x"]') }}
     steps:
-      - name: Checkout
+      - name: Checkout ${{ matrix.ref }}
         uses: actions/checkout@v5
+        with:
+          ref: ${{ matrix.ref }}
       - name: Setup
         uses: ./.github/actions/setup
         with:

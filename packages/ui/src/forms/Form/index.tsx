@@ -874,7 +874,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  const executeOnChange = useEffectEvent((submitted: boolean) => {
+  const executeOnChange = useEffectEvent(() => {
     queueTask(async () => {
       if (Array.isArray(onChange)) {
         let serverState: FormState
@@ -889,10 +889,12 @@ export const Form: React.FC<FormProps> = (props) => {
           })
         }
 
-        dispatchFields({
-          type: 'MERGE_SERVER_STATE',
-          prevStateRef: prevFormState,
-          serverState,
+        React.startTransition(() => {
+          dispatchFields({
+            type: 'MERGE_SERVER_STATE',
+            prevStateRef: prevFormState,
+            serverState,
+          })
         })
       }
     })
@@ -901,7 +903,7 @@ export const Form: React.FC<FormProps> = (props) => {
   useDebouncedEffect(
     () => {
       if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
-        executeOnChange(submitted)
+        executeOnChange()
       }
 
       prevFormState.current = formState

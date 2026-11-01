@@ -1,6 +1,12 @@
 import { execSync } from 'child_process'
 import path from 'path'
-import { Project, QuoteKind, type SourceFile, SyntaxKind } from 'ts-morph'
+import {
+  type ObjectLiteralExpression,
+  Project,
+  QuoteKind,
+  type SourceFile,
+  SyntaxKind,
+} from 'ts-morph'
 
 import type {
   ConfigureOptions,
@@ -14,7 +20,12 @@ import type {
 } from './types.js'
 
 import { debug } from '../../utils/log.js'
-import { DB_ADAPTER_CONFIG, STORAGE_ADAPTER_CONFIG } from './adapter-config.js'
+import {
+  DB_ADAPTER_CONFIG,
+  SHARP_TRANSFORMER_NAME,
+  SHARP_TRANSFORMER_PACKAGE,
+  STORAGE_ADAPTER_CONFIG,
+} from './adapter-config.js'
 import {
   addImportDeclaration,
   cleanupOrphanedImports,
@@ -341,9 +352,9 @@ export function addStorageAdapter({
 
   const config = STORAGE_ADAPTER_CONFIG[adapter]
 
-  // Local disk doesn't need any imports or plugins
+  // Local disk doesn't need any imports or storage adapters
   if (adapter === 'localDisk') {
-    debug('[AST] localDisk storage adapter - no imports or plugins needed')
+    debug('[AST] localDisk storage adapter - no imports or storage adapters needed')
     return {
       modifications: [],
       modified: false,
@@ -383,16 +394,16 @@ export function addStorageAdapter({
 
   const objLiteral = configObject.asKindOrThrow(SyntaxKind.ObjectLiteralExpression)
 
-  // Find or create plugins array
-  const pluginsPropertyRaw = objLiteral.getProperty('plugins')
-  let pluginsProperty = pluginsPropertyRaw?.asKind(SyntaxKind.PropertyAssignment)
+  // Find or create storage array
+  const storagePropertyRaw = objLiteral.getProperty('storage')
+  let storageProperty = storagePropertyRaw?.asKind(SyntaxKind.PropertyAssignment)
 
-  // Check if it's a shorthand property (e.g., `plugins` referencing an imported variable)
-  const shorthandProperty = pluginsPropertyRaw?.asKind(SyntaxKind.ShorthandPropertyAssignment)
+  // Check if it's a shorthand property (e.g., `storage` referencing an imported variable)
+  const shorthandProperty = storagePropertyRaw?.asKind(SyntaxKind.ShorthandPropertyAssignment)
 
   if (shorthandProperty) {
-    debug('[AST] Found shorthand plugins property, converting to long form with spread')
-    // Get the identifier name (usually 'plugins')
+    debug('[AST] Found shorthand storage property, converting to long form with spread')
+    // Get the identifier name (usually 'storage')
     const identifierName = shorthandProperty.getName()
 
     // Find insert position before removing
@@ -402,40 +413,43 @@ export function addStorageAdapter({
     // Remove the shorthand property
     shorthandProperty.remove()
 
-    // Create new property with spread operator: plugins: [...plugins, newAdapter]
+    // Create new property with spread operator: storage: [...storage, newAdapter]
     objLiteral.insertPropertyAssignment(insertIndex, {
-      name: 'plugins',
+      name: 'storage',
       initializer: `[...${identifierName}]`,
     })
 
-    pluginsProperty = objLiteral.getProperty('plugins')?.asKind(SyntaxKind.PropertyAssignment)
+    storageProperty = objLiteral.getProperty('storage')?.asKind(SyntaxKind.PropertyAssignment)
     modifications.push({
       type: 'property-added',
-      description: `Converted shorthand plugins property to array with spread syntax`,
+      description: `Converted shorthand storage property to array with spread syntax`,
     })
-  } else if (!pluginsProperty) {
-    debug('[AST] Creating new plugins array')
-    // Create plugins array
-    objLiteral.addPropertyAssignment({
-      name: 'plugins',
+  } else if (!storageProperty) {
+    debug('[AST] Creating new storage array')
+    // Insert after the last property, not after trailing comments, which would produce `},,`
+    const propertiesWithComments = objLiteral.getPropertiesWithComments()
+    const lastProperty = objLiteral.getProperties().at(-1)
+    const insertIndex = lastProperty ? propertiesWithComments.indexOf(lastProperty) + 1 : 0
+    objLiteral.insertPropertyAssignment(insertIndex, {
+      name: 'storage',
       initializer: '[]',
     })
-    pluginsProperty = objLiteral.getProperty('plugins')?.asKind(SyntaxKind.PropertyAssignment)
+    storageProperty = objLiteral.getProperty('storage')?.asKind(SyntaxKind.PropertyAssignment)
     modifications.push({
       type: 'property-added',
-      description: `Created plugins array`,
+      description: `Created storage array`,
     })
   } else {
-    debug('[AST] Reusing existing plugins array')
+    debug('[AST] Reusing existing storage array')
   }
 
-  if (!pluginsProperty) {
+  if (!storageProperty) {
     return {
       error: formatError({
-        actual: 'Failed to create or find plugins property',
+        actual: 'Failed to create or find storage property',
         context: 'storage adapter configuration',
-        expected: 'plugins array property',
-        technicalDetails: 'Could not create or access plugins property',
+        expected: 'storage array property',
+        technicalDetails: 'Could not create or access storage property',
       }),
       modifications: [],
       modified: false,
@@ -443,14 +457,14 @@ export function addStorageAdapter({
     }
   }
 
-  const initializer = pluginsProperty.getInitializer()
+  const initializer = storageProperty.getInitializer()
   if (!initializer || initializer.getKind() !== SyntaxKind.ArrayLiteralExpression) {
     return {
       error: formatError({
-        actual: 'plugins property is not an array',
+        actual: 'storage property is not an array',
         context: 'storage adapter configuration',
-        expected: 'plugins: [...]',
-        technicalDetails: 'plugins property must be an array literal expression',
+        expected: 'storage: [...]',
+        technicalDetails: 'storage property must be an array literal expression',
       }),
       modifications: [],
       modified: false,
@@ -458,15 +472,15 @@ export function addStorageAdapter({
     }
   }
 
-  const pluginsArray = initializer.asKindOrThrow(SyntaxKind.ArrayLiteralExpression)
+  const storageArray = initializer.asKindOrThrow(SyntaxKind.ArrayLiteralExpression)
 
   // Add storage adapter call
   const configText = config.configTemplate()
   if (configText) {
-    pluginsArray.addElement(configText)
+    storageArray.addElement(configText)
     modifications.push({
       type: 'property-added',
-      description: `Added ${adapter} to plugins array`,
+      description: `Added ${adapter} to storage array`,
     })
   }
 
@@ -484,13 +498,15 @@ export function removeSharp(sourceFile: SourceFile): TransformationResult {
 
   const modifications: Modification[] = []
 
-  // Remove import
-  const { removedIndex } = removeImportDeclaration({ moduleSpecifier: 'sharp', sourceFile })
-  if (removedIndex !== undefined) {
-    modifications.push({
-      type: 'import-removed',
-      description: `Removed import from 'sharp'`,
-    })
+  // Remove imports
+  for (const moduleSpecifier of ['sharp', SHARP_TRANSFORMER_PACKAGE]) {
+    const { removedIndex } = removeImportDeclaration({ moduleSpecifier, sourceFile })
+    if (removedIndex !== undefined) {
+      modifications.push({
+        type: 'import-removed',
+        description: `Removed import from '${moduleSpecifier}'`,
+      })
+    }
   }
 
   // Find and remove sharp property from buildConfig
@@ -538,6 +554,14 @@ export function removeSharp(sourceFile: SourceFile): TransformationResult {
     debug('[AST] ✓ Sharp property removed from config')
   } else {
     debug('[AST] Sharp property not found (already absent)')
+  }
+
+  if (removeSharpTransformer({ objLiteral })) {
+    modifications.push({
+      type: 'property-removed',
+      description: `Removed ${SHARP_TRANSFORMER_NAME} from upload transformers`,
+    })
+    debug(`[AST] ✓ ${SHARP_TRANSFORMER_NAME} removed from upload transformers`)
   }
 
   return {
@@ -806,4 +830,51 @@ export async function configurePayloadConfig(
       success: false,
     }
   }
+}
+
+/**
+ * Removes `sharpTransformer()` from `upload.transformers`, then removes `transformers`
+ * and `upload` if they become empty. Returns true if anything was removed.
+ */
+function removeSharpTransformer({ objLiteral }: { objLiteral: ObjectLiteralExpression }): boolean {
+  const uploadProperty = objLiteral.getProperty('upload')?.asKind(SyntaxKind.PropertyAssignment)
+  const uploadObject = uploadProperty?.getInitializerIfKind(SyntaxKind.ObjectLiteralExpression)
+  const transformersProperty = uploadObject
+    ?.getProperty('transformers')
+    ?.asKind(SyntaxKind.PropertyAssignment)
+  const transformersArray = transformersProperty?.getInitializerIfKind(
+    SyntaxKind.ArrayLiteralExpression,
+  )
+
+  if (!uploadProperty || !uploadObject || !transformersProperty || !transformersArray) {
+    return false
+  }
+
+  const sharpTransformerIndexes = transformersArray
+    .getElements()
+    .flatMap((element, index) =>
+      element.asKind(SyntaxKind.CallExpression)?.getExpression().getText() ===
+      SHARP_TRANSFORMER_NAME
+        ? [index]
+        : [],
+    )
+
+  if (sharpTransformerIndexes.length === 0) {
+    return false
+  }
+
+  // Remove from the end so earlier indexes stay valid
+  for (const index of sharpTransformerIndexes.reverse()) {
+    transformersArray.removeElement(index)
+  }
+
+  if (transformersArray.getElements().length === 0) {
+    transformersProperty.remove()
+  }
+
+  if (uploadObject.getProperties().length === 0) {
+    uploadProperty.remove()
+  }
+
+  return true
 }

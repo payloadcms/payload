@@ -52,7 +52,7 @@ for suite in $SUITES; do
   # this loop just failed with, before the manifest step ever reads them.
   PLAYWRIGHT_JSON_OUTPUT_NAME="results_visual_${suite}.json" \
     PLAYWRIGHT_OUTPUT_DIR="test-results/${suite}" \
-    pnpm test:e2e:prod:server:run:noturbo "$suite" "${GREP_ARGS[@]}" "$@" || status=1
+    pnpm test:e2e:prod:server:run "$suite" "${GREP_ARGS[@]}" "$@" || status=1
 done
 
 exit "$status"

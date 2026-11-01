@@ -728,6 +728,10 @@ export const roTranslations: DefaultTranslationsObject = {
       'Sunteți pe cale să publicați toate {{label}} din selecție. Sunteți sigur?',
     aboutToRestore:
       'Sunteți pe cale să readuceți acest document {{label}} în starea în care se afla la data de {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Restaurați conținutul din {{versionDate}} ca ciornă. Conținutul publicat va rămâne neschimbat până când îl publicați din editor.',
+    aboutToRestoreAsDraftAllLocales:
+      'Restaurați conținutul din {{versionDate}} ca ciornă în toate limbile. Conținutul publicat va rămâne neschimbat până când îl publicați din editor.',
     aboutToRestoreGlobal:
       'Sunteți pe cale să readuceți {{label}} global în starea în care se afla la data de {{versionDate}}.',
     aboutToRevertToPublished:

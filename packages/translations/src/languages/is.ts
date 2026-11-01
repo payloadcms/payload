@@ -715,6 +715,10 @@ export const isTranslations: DefaultTranslationsObject = {
     type: 'Tegund',
     aboutToPublishSelection: 'Þú ert að fara að gefa út allar valdar {{label}}. Ertu viss?',
     aboutToRestore: 'Þú munt endurheimta {{label}} í þá stöðu sem það var þann {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Endurheimtu efnið frá {{versionDate}} sem drög. Birt efni helst óbreytt þar til þú birtir það úr ritlinum.',
+    aboutToRestoreAsDraftAllLocales:
+      'Endurheimtu efnið frá {{versionDate}} sem drög á öllum tungumálum. Birt efni helst óbreytt þar til þú birtir það úr ritlinum.',
     aboutToRestoreGlobal:
       'Þú munt endurheimta {{label}} í þá stöðu sem það var í þann {{versionDate}}.',
     aboutToRevertToPublished:

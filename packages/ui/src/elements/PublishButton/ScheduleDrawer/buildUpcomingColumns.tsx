@@ -121,6 +121,7 @@ export const buildUpcomingColumns = ({
     Heading: <span>{t('general:delete')}</span>,
     renderedCells: docs.map((doc) => (
       <Button
+        aria-label={t('general:delete')}
         buttonStyle="ghost"
         className="schedule-publish__delete"
         icon="x"

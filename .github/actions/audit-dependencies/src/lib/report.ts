@@ -1,5 +1,13 @@
 import type { AllowlistEntry } from './allowlist'
-import type { AdvisoryHit, Bump, Finding, ReportedFinding, Scope, Severity } from '../types'
+import type {
+  AdvisoryHit,
+  Bump,
+  Finding,
+  FixResult,
+  ReportedFinding,
+  Scope,
+  Severity,
+} from '../types'
 
 import { isFixable, meetsThreshold, severityRank } from './severity'
 
@@ -139,6 +147,13 @@ export const printAllowlistReview = (findings: ReportedFinding[]): void => {
   }
 }
 
+const UNKNOWN_FIX_CAUSES: Record<Extract<FixResult, { status: 'unknown' }>['reason'], string> = {
+  'no-current-version': 'current version unknown, declared outside packages/',
+  'no-patched-range': 'advisory has no patched range',
+  registry: 'registry unreachable',
+  'unsupported-spec': 'declared spec is not a semver range',
+}
+
 /** Prints the remediation for one direct dependency: the minimal bump, relock, or why none applies. */
 const printBump = ({
   bump: { currentSpec, dependency, fix, workspacePackages },
@@ -150,11 +165,9 @@ const printBump = ({
   const where = workspacePackages.length > 0 ? ` (in ${workspacePackages.join(', ')})` : ''
 
   if (fix.status === 'unknown') {
-    const cause =
-      fix.reason === 'registry'
-        ? 'registry unreachable'
-        : 'current version unknown, declared outside packages/'
-    console.log(`  ${dependency}: fix availability unknown — ${cause}${where}`)
+    console.log(
+      `  ${dependency}: fix availability unknown — ${UNKNOWN_FIX_CAUSES[fix.reason]}${where}`,
+    )
     return
   }
   if (fix.status === 'none') {

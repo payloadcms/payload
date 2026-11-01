@@ -1,7 +1,7 @@
 /** Minimal `fetch` surface we depend on, so tests can inject a fake without DOM types. */
 export type FetchLike = (
   url: string,
-  init?: { headers?: Record<string, string> },
+  init?: { headers?: Record<string, string>; signal?: AbortSignal },
 ) => Promise<{ json: () => Promise<unknown>; ok: boolean }>
 
 /** The slice of an npm packument we use: each version's declared dependencies plus dist-tags. */
@@ -18,6 +18,8 @@ export type RegistryClient = {
 const DEFAULT_REGISTRY = 'https://registry.npmjs.org'
 // Abbreviated packument: smaller payload that still carries per-version dependencies.
 const ABBREVIATED = 'application/vnd.npm.install-v1+json'
+// A stalled request rejects after this, so the trace reports "unknown" instead of hanging the job.
+const REQUEST_TIMEOUT_MS = 30_000
 
 /**
  * Builds a packument fetcher that caches per package name (as an in-flight promise,
@@ -57,7 +59,10 @@ const load = async ({
 }): Promise<null | Packument> => {
   // Scoped names must keep their `@` but encode the slash for the registry path.
   const path = name.replace('/', '%2F')
-  const response = await fetchImpl(`${registryUrl}/${path}`, { headers: { accept: ABBREVIATED } })
+  const response = await fetchImpl(`${registryUrl}/${path}`, {
+    headers: { accept: ABBREVIATED },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  })
   if (!response.ok) {
     return null
   }
