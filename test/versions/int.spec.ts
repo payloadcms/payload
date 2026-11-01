@@ -2472,21 +2472,23 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           overrideAccess: true,
         })
 
-        vi.useFakeTimers()
-        const now = Date.now()
-        vi.setSystemTime(now - 10000)
+        try {
+          vi.useFakeTimers()
+          const now = Date.now()
+          vi.setSystemTime(now - 10000)
 
-        await payload.update({
-          id: doc.id,
-          collection: draftCollectionSlug,
-          data: {
-            title: 'V2 - Drifted',
-          },
-          draft: true,
-          overrideAccess: true,
-        })
-
-        vi.useRealTimers()
+          await payload.update({
+            id: doc.id,
+            collection: draftCollectionSlug,
+            data: {
+              title: 'V2 - Drifted',
+            },
+            draft: true,
+            overrideAccess: true,
+          })
+        } finally {
+          vi.useRealTimers()
+        }
 
         const { docs: latestDocs } = await payload.findVersions({
           collection: draftCollectionSlug,
