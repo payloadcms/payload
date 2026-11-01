@@ -603,7 +603,7 @@ illustration on the website.
 **Hiding a product.** Tick **Hide on the website** in a product's sidebar and publish the change: the
 product leaves the website (its page, the catalog, search, Vigor AI, the sitemap) in every language, but
 stays published, translated and editable here. Untick it and publish to show it again. For several
-products, select them in the list, then **Edit** → **Hide on the website**. The **Hide on the website**
+products, select them in the list, then **Edit** → choose **Hide on the website** → tick it → **Publish changes**. The **Hide on the website**
 column and filter show which are hidden. Unlike **Unpublish**, nothing has to be published again in each
 language afterwards.
 
