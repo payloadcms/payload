@@ -170,6 +170,8 @@ const METAL_CODES: Record<string, string> = { AG: 'silver', AU: 'gold', CU: 'cop
 const SILVER_CODE = /^(?:JS|PJS|EJS|NJS|GJS|SJ)\d/
 
 const HINTS = ['likely', 'check', 'old', 'doubtful']
+/** Fields toProduct leaves out when the old records have nothing for them */
+const CLEARED_ON_REBUILD = ['body', 'category', 'legacyLastSeen', 'metal', 'weight']
 const FLAGS = ['--dry-run', '--no-images', '--only-legit']
 const VALUE_OPTIONS = ['--hint=', '--catalog=']
 const DEFAULT_CATALOG = 'export/legacy-catalog.json'
@@ -372,7 +374,12 @@ async function updateExisting({ data, existing }: { data: Data; existing: VigorP
     existing._status === 'draft' && Math.abs(Date.parse(existing.updatedAt) - importedAt) < 5000
   const isEmpty = (value: unknown) => !Array.isArray(value) || value.length === 0
   const changes: Data = isUntouched
-    ? { ...data, legacyImportedAt: new Date().toISOString() }
+    ? {
+        // Fields the catalog has nothing for are emptied, not left as an older import wrote them
+        ...Object.fromEntries(CLEARED_ON_REBUILD.map((field) => [field, null])),
+        ...data,
+        legacyImportedAt: new Date().toISOString(),
+      }
     : {
         ...(isEmpty(existing.stones) && !isEmpty(data.stones) ? { stones: data.stones } : {}),
         ...(isEmpty(existing.sizes) && !isEmpty(data.sizes) ? { sizes: data.sizes } : {}),
@@ -489,7 +496,7 @@ function toProduct({ index, product }: { index: number; product: LegacyProduct }
   const bySizeOfStone =
     sizesByStone.size > 1 && !isSameForAll
       ? `Sizes by gemstone: ${[...sizesByStone]
-          .map(([stoneName, set]) => `${stoneName} ${[...set].join(', ')}`)
+          .map(([stoneName, set]) => `${stoneName} (${[...set].join(', ')})`)
           .join('; ')}`
       : ''
   const body = [bySizeOfStone, [...new Set(types)].map((type) => `Type: ${type.toLowerCase()}`).join(', ')]
