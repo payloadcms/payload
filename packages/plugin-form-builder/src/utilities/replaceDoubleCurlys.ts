@@ -11,8 +11,9 @@ type EmailVariables = EmailVariable[]
 
 export const replaceDoubleCurlys = (str: string, variables?: EmailVariables): string => {
   const regex = /\{\{(.+?)\}\}/g
-  if (str && variables) {
-    return str.replace(regex, (_, variable: string) => {
+  if (str != null && variables) {
+    const stringVal = typeof str === 'string' ? str : String(str)
+    return stringVal.replace(regex, (_, variable: string) => {
       if (variable.includes('*')) {
         if (variable === '*') {
           return variables
