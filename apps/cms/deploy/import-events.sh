@@ -30,7 +30,7 @@ trap 'docker image rm "$image" >/dev/null 2>&1 || true' EXIT
 echo "==> Preparing the import tool (takes ~5-10 minutes if the code changed since the last deploy)"
 docker build --quiet --file Dockerfile --target builder --tag "$image" ../.. >/dev/null
 
-docker run --rm --network host \
+docker run --rm --network host --add-host host.docker.internal:host-gateway \
   --env DATABASE_URL="$(env_value DATABASE_URL)" \
   --env PAYLOAD_SECRET="$(env_value PAYLOAD_SECRET)" \
   --env SERVER_URL="$(env_value SERVER_URL)" \

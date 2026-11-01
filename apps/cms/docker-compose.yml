@@ -17,6 +17,10 @@ services:
     env_file: .env
     expose:
       - '3006'
+    # Lets the CMS reach services on this machine, e.g. a MongoDB installed on a laptop:
+    # DATABASE_URL=mongodb://host.docker.internal:27017/payload (Docker Desktop has this name built in)
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     volumes:
       # Uploaded media lives on the host (in a Docker volume) and survives rebuilds/redeploys
       - media:/app/media

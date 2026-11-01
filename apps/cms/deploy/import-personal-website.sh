@@ -70,7 +70,7 @@ done
 echo "==> Preparing the import tool (takes ~5-10 minutes if the code changed since the last deploy)"
 docker build --quiet --file Dockerfile --target builder --tag "$image" ../.. >/dev/null
 
-docker run --rm --network host \
+docker run --rm --network host --add-host host.docker.internal:host-gateway \
   "${env_args[@]}" \
   --env MEDIA_DIR=/app/media \
   --volume "$media_volume:/app/media" \
