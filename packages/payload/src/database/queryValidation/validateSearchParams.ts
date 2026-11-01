@@ -178,7 +178,10 @@ export async function validateSearchParam({
         (field.type === 'select' || field.type === 'radio') &&
         'options' in field &&
         Array.isArray(field.options) &&
-        operator !== 'exists'
+        operator !== 'exists' &&
+        operator !== 'like' &&
+        operator !== 'not_like' &&
+        !(operator === 'contains' && !('hasMany' in field && field.hasMany))
       ) {
         const validValues = new Set<string>()
         for (const opt of field.options) {
@@ -195,7 +198,7 @@ export async function validateSearchParam({
         }
 
         const isValueValid = (v: unknown): boolean => {
-          if (v === null || v === 'null') {
+          if (v === null) {
             return true
           }
           if (typeof v === 'string' || typeof v === 'number') {
@@ -205,11 +208,14 @@ export async function validateSearchParam({
         }
 
         let isInvalid = false
-        if (['in', 'not_in', 'all'].includes(operator)) {
+        if (
+          ['in', 'not_in', 'all'].includes(operator) ||
+          (operator === 'contains' && Array.isArray(val))
+        ) {
           const list = Array.isArray(val)
             ? val
             : typeof val === 'string'
-              ? val.split(',').map((s) => s.trim())
+              ? val.split(',')
               : [val]
           if (list.some((item) => !isValueValid(item))) {
             isInvalid = true
