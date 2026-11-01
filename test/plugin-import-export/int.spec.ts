@@ -6092,6 +6092,54 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       })
 
+      it('should commit the import transaction when imported documents populate a relationship', async () => {
+        const authorID = user.user.id
+        const csvContent = `title,author\n"Sync Import Relationship Test",${authorID}`
+        const csvBuffer = Buffer.from(csvContent)
+
+        const importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'posts-imports-only',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'sync-import-relationship-test.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        const storedImportDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(storedImportDoc.status).toBe('completed')
+        expect(storedImportDoc.summary?.imported).toBe(1)
+        expect(Object.keys(payload.db.sessions ?? {})).toHaveLength(0)
+
+        const importedDocs = await payload.find({
+          collection: 'posts-imports-only',
+          depth: 0,
+          where: {
+            title: { equals: 'Sync Import Relationship Test' },
+          },
+        })
+
+        expect(importedDocs.totalDocs).toBe(1)
+        expect(importedDocs.docs[0]?.author).toBe(authorID)
+
+        await payload.delete({
+          collection: 'posts-imports-only',
+          where: {
+            title: { equals: 'Sync Import Relationship Test' },
+          },
+        })
+      })
+
       it('should not allow restricted user to import to posts-imports-only (access control)', async () => {
         const csvContent = 'title\n"Restricted Import Test 1"\n"Restricted Import Test 2"'
         const csvBuffer = Buffer.from(csvContent)
