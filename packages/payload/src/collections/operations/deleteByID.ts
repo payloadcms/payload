@@ -12,7 +12,7 @@ import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
+import { deleteUserPreferences, findUserPreferenceIDs } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import {
   collectStoredFiles,
@@ -213,11 +213,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       })
     }
 
-    // /////////////////////////////////////
-    // Delete Preferences
-    // /////////////////////////////////////
-
-    await deleteUserPreferences({
+    const preferenceIDs = await findUserPreferenceIDs({
       collectionConfig,
       ids: [id],
       payload,
@@ -260,6 +256,18 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     if (collectionConfig.auth) {
       result = { ...result, collection: collectionConfig.slug }
     }
+
+    // /////////////////////////////////////
+    // Delete Preferences
+    // /////////////////////////////////////
+
+    await deleteUserPreferences({
+      collectionConfig,
+      ids: [id],
+      payload,
+      preferenceIDs,
+      req,
+    })
 
     // /////////////////////////////////////
     // afterRead - Fields
