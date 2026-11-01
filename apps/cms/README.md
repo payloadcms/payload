@@ -45,6 +45,8 @@ uses to test templates.
 | `src/app/(frontend)/ios-app/`, `scripts/import-legal-pages.ts` | Privacy Policy and Terms of Use of the app and the Vigor website (see "Privacy policy and terms of use") |
 | `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
 | `scripts/import-vigor.ts`                  | Copies the Vigor website's current content into the CMS (see "Vigor website")          |
+| `scripts/import-legacy-catalog.ts`         | Old website's products in as drafts (see "Products from the old website")              |
+| `scripts/publish-legacy-products.ts`       | Publishes them in every language (see "Products from the old website")                 |
 | `scripts/import-app-page.ts`, `scripts/app-page/` | The first version of the Vigor website's VgemsAI app page (see "VgemsAI app page") |
 | `src/timezones.ts`, `src/zonedTime.ts`     | Time zones offered for event dates, and days at midnight in a time zone                |
 | `src/proxy.ts`, `src/twoFactor/`           | Two-factor authentication for every login (see "Two-factor authentication")            |
@@ -60,6 +62,8 @@ uses to test templates.
 | `deploy/locate-events.sh`                  | Looks up the coordinates of events on the server                                       |
 | `deploy/import-personal-website.sh`        | Runs the personal website import on the server                                         |
 | `deploy/import-vigor.sh`                   | Runs the Vigor website import on the server                                            |
+| `deploy/import-legacy-catalog.sh`          | Runs the import of the old website's products on the server                            |
+| `deploy/publish-legacy-products.sh`        | Publishes the imported products on the server                                          |
 | `deploy/import-app-page.sh`                | Adds the VgemsAI app page's first version on the server                                |
 | `deploy/import-legal-pages.sh`             | Adds the Privacy Policy and Terms of Use on the server                                 |
 | `deploy/mongodb/create-payload-user.js`    | Creates the MongoDB user for Payload (run on the DB EC2)                               |
@@ -729,6 +733,20 @@ ones to keep. Drafts aren't on the website, so nothing changes there until you p
    These fields are only for logged-in users: the website and its visitors never get them.
 4. **Publish the ones to keep**: correct what the notes say was guessed, then use the arrow next to
    **Publish in English** → **Publish all locales**. Delete the ones you don't want.
+
+   **Many at once**, e.g. every imported product that has a photo, in every language:
+
+   ```bash
+   ./deploy/publish-legacy-products.sh --with-photo --dry-run   # preview, nothing is published
+   ./deploy/publish-legacy-products.sh --with-photo
+   ```
+
+   `--hint=likely,check` narrows it to those hints. A product with a required field still empty
+   (gemstones, metal, category…) stays a draft and is listed with the field to fill in; run it again
+   after filling them in. It also completes products published in English only. Don't use **Publish**
+   in the list for this: it publishes only the language you're viewing, so the products are missing
+   from the Spanish, French and Chinese pages, and it skips incomplete products with only a brief error.
+   Locally without Docker: `pnpm payload run scripts/publish-legacy-products.ts --with-photo --dry-run`.
 
 The stones' names aren't translated yet: on the Spanish, French and Chinese pages they show in English
 until they're added to the `glossary` in the website's `shared/i18n/*.json`.
