@@ -21,7 +21,11 @@ export const LinkHTMLConverter: HTMLConverter<any> = {
     let href: string =
       node.fields.linkType === 'custom'
         ? (node.fields.url ?? '')
-        : (node.fields.doc?.value?.id ?? '')
+        : (node.fields.doc?.value?.id != null
+            ? String(node.fields.doc.value.id)
+            : node.fields.doc?.value != null && typeof node.fields.doc.value !== 'object'
+              ? String(node.fields.doc.value)
+              : '')
 
     if (submissionData) {
       href = replaceDoubleCurlys(href, submissionData)
