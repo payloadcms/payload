@@ -705,6 +705,16 @@ ones to keep. Drafts aren't on the website, so nothing changes there until you p
    only those marked `true`, `--hint=likely,check` only those hints, `--no-images` skips the photos.
    Locally without Docker: `pnpm payload run scripts/import-legacy-catalog.ts ~/old_vgems --dry-run`.
 
+   The photos are stored like uploads in the admin panel: in S3 when `S3_BUCKET` is set in `.env` (see
+   "Uploads in S3"; the EC2's IAM role is enough, no keys needed), with their smaller copies, otherwise in
+   the `media` volume. Turn on S3 before importing: photos imported before stay in the volume. On a
+   server, only the catalog and the photos of old_vgems are needed (about 400 MB instead of 1.8 GB):
+
+   ```bash
+   git clone --filter=blob:none --sparse --branch <branch> https://github.com/atorpos/old_vgems.git ~/old_vgems
+   cd ~/old_vgems && git sparse-checkout set export images/products shop/wp-content/uploads media
+   ```
+
    Running it again is safe and keeps your edits. A product that is still a draft nobody has saved since
    the import is rebuilt from the catalog (e.g. after an update of this script). Any other product from the
    old website only gets its empty **Gemstones** and **Sizes** filled in, as a draft: publish it to show
