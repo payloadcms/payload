@@ -296,6 +296,7 @@ export const azTranslations: DefaultTranslationsObject = {
     and: 'Və',
     anotherUser: 'Başqa bir istifadəçi',
     anotherUserTakenOver: 'Başqa bir istifadəçi bu sənədin redaktəsini ələ keçirdi.',
+    apiResponse: 'API cavabı',
     applyChanges: 'Dəyişiklikləri Tətbiq Edin',
     ascending: 'Artan',
     auto: 'Avtomatik',
@@ -369,6 +370,13 @@ export const azTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Bu sənəd yeni başqa bir istifadəçi tərəfindən yenilənib. Sizin baxışınız köhnədir.',
     documents: 'Sənədlər',
+    dragCancelled: '{{label}} sürüklənməsi ləğv edildi.',
+    dragDropped: '{{label}} buraxıldı. Mövqe {{position}} / {{count}}.',
+    dragInstructions:
+      'Sətri götürmək üçün Space və ya Enter düyməsini basın. Daşımaq üçün ox düymələrindən istifadə edin. VoiceOver ilə Quick Nav rejimini söndürün və Command + ox düymələrindən istifadə edin. Buraxmaq üçün Space və ya Enter, ləğv etmək üçün Escape düyməsini basın.',
+    dragMoved: '{{label}}: {{direction}}. Mövqe {{position}} / {{count}}.',
+    dragPickedUp: '{{label}} götürüldü. Mövqe {{position}} / {{count}}.',
+    dragToMove: 'Daşımaq üçün sürükləyin',
     dragToReorder: 'Sıralamaq üçün sürükləyin',
     duplicate: 'Dublikat',
     duplicateWithoutSaving: 'Dəyişiklikləri saxlamadan dublikatla',
@@ -483,6 +491,7 @@ export const azTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Bütün {{collections}} yenidən indekslənir.',
     reloadDocument: 'Sənədə yenidən yükləyin',
     remove: 'Sil',
+    removeFilter: 'Filtri sil',
     rename: 'Yenidən adlandırın',
     replaceRow: 'Sətiri əvəz et',
     requiredFields: '* ilə işarələnmiş sahələr məcburidir.',
@@ -577,6 +586,7 @@ export const azTranslations: DefaultTranslationsObject = {
     yes: 'Bəli',
   },
   hierarchy: {
+    folderLocation: 'Qovluğun yeri',
     goTo: '"{{name}}" -a keçin',
     itemsMovedTo: '{{title}} {{destination}}-ə köçürüldü',
     itemsMovedToRoot: '{{title}} kökə köçürüldü',

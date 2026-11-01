@@ -2359,10 +2359,7 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
   })
 })
 
-async function createPost(
-  { restClient }: { restClient: RESTClient },
-  overrides?: Partial<Post>,
-) {
+async function createPost({ restClient }: { restClient: RESTClient }, overrides?: Partial<Post>) {
   const { doc } = await restClient
     .POST(`/${postsSlug}`, {
       body: JSON.stringify({ title: 'title', ...overrides }),

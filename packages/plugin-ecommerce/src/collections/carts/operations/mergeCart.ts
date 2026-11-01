@@ -164,7 +164,7 @@ export const mergeCart = async (args: MergeCartArgs): Promise<CartOperationResul
       // In SQL, array items are stored in separate tables with their own IDs,
       // and using IDs from another cart's array would cause conflicts.
       const { id: _omit, ...sourceItemWithoutId } = sourceItem
-      mergedItems.push(sourceItemWithoutId as CartItemData)
+      mergedItems.push(sourceItemWithoutId)
     }
   }
 

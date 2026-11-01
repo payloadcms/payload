@@ -75,7 +75,7 @@ export const Localizer: React.FC<{
                         { addQueryPrefix: true },
                       )
 
-                      startRouteTransition(() => {
+                      void startRouteTransition(() => {
                         router.push(url)
                       })
                     }}

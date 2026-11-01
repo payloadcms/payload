@@ -2,6 +2,7 @@ import type { SelectField, ValidateOptions } from './config/types.js'
 
 import {
   blocks,
+  email,
   json,
   number,
   password,
@@ -38,6 +39,102 @@ let options: ValidateOptions<any, any, any, any> = {
 }
 
 describe('Field Validations', () => {
+  describe('email', () => {
+    it.each(['', null, undefined])('should require an empty email value of %s', (value) => {
+      expect(email(value, { ...options, required: true })).toBe('validation:required')
+    })
+
+    it.each(['', null, undefined])('should allow an optional empty email value of %s', (value) => {
+      expect(email(value, { ...options, required: false })).toBe(true)
+    })
+
+    it.each([false, true])('should reject a malformed email when required is %s', (required) => {
+      expect(email('invalid-address', { ...options, required })).toBe('validation:emailAddress')
+    })
+
+    it('should allow a valid email', () => {
+      expect(email('user@example.com', { ...options, required: true })).toBe(true)
+    })
+
+    describe.each(['server', 'client'])('username authentication on the %s', (environment) => {
+      it.each([
+        {
+          scenario: 'neither identifier',
+          requireEmail: false,
+          requireUsername: false,
+          value: '',
+          username: undefined,
+          expected: 'validation:required',
+        },
+        {
+          scenario: 'username without email',
+          requireEmail: false,
+          requireUsername: false,
+          value: '',
+          username: 'example',
+          expected: true,
+        },
+        {
+          scenario: 'email without username',
+          requireEmail: false,
+          requireUsername: false,
+          value: 'user@example.com',
+          username: undefined,
+          expected: true,
+        },
+        {
+          scenario: 'malformed email with username',
+          requireEmail: false,
+          requireUsername: false,
+          value: 'invalid-address',
+          username: 'example',
+          expected: 'validation:emailAddress',
+        },
+        {
+          scenario: 'required email with username',
+          requireEmail: true,
+          requireUsername: false,
+          value: '',
+          username: 'example',
+          expected: 'validation:required',
+        },
+        {
+          scenario: 'optional email with required username',
+          requireEmail: false,
+          requireUsername: true,
+          value: '',
+          username: 'example',
+          expected: true,
+        },
+      ])(
+        'should preserve the rules for $scenario',
+        ({ expected, requireEmail, requireUsername, username, value }) => {
+          const collection = {
+            slug: 'users',
+            auth: { loginWithUsername: { allowEmailLogin: true, requireEmail, requireUsername } },
+          }
+          const validationOptions = {
+            ...options,
+            collectionSlug: collection.slug,
+            req: {
+              ...options.req,
+              payload: {
+                ...options.req.payload,
+                collections:
+                  environment === 'server' ? { users: { config: collection } } : undefined,
+                config: { ...options.req.payload.config, collections: [collection] },
+              },
+            },
+            required: requireEmail,
+            siblingData: { username },
+          }
+
+          expect(email(value, validationOptions)).toBe(expected)
+        },
+      )
+    })
+  })
+
   describe('text', () => {
     it('should validate', () => {
       const val = 'test'

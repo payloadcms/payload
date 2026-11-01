@@ -52,13 +52,13 @@
     "graphql": "^16.8.2",
     "jsonwebtoken": "9.0.1",
     "lucide-react": "0.563.0",
-    "next": "16.4.0",
+    "next": "16.4.2",
     "next-themes": "0.4.6",
     "payload": "workspace:*",
     "prism-react-renderer": "^2.3.1",
     "qs-esm": "8.0.1",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "react-hook-form": "7.71.1",
     "sharp": "0.35.4",
     "sonner": "^1.7.2",
@@ -79,15 +79,14 @@
     "@vercel/git-hooks": "^1.0.0",
     "@vitejs/plugin-react": "4.5.2",
     "eslint": "^9.16.0",
-    "eslint-config-next": "16.4.0",
+    "eslint-config-next": "16.4.2",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "jsdom": "28.0.0",
     "lint-staged": "^15.2.2",
+    "oxfmt": "^0.73.0",
     "postcss": "^8.4.38",
-    "prettier": "^3.4.2",
-    "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^4.1.18",
     "tsx": "4.23.15",
     "tw-animate-css": "^1.4.0",
@@ -96,7 +95,7 @@
     "vitest": "5.0.1"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

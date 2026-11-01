@@ -6,12 +6,12 @@
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
+  "main": "src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts"
     }
   },
-  "main": "src/index.ts",
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
     "build-template-with-local-pkgs": "pnpm runts src/build-template-with-local-pkgs.ts",
@@ -23,8 +23,6 @@
     "generateTranslations:plugin-import-export": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-import-export.ts",
     "generateTranslations:plugin-multi-tenant": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-multi-tenant.ts",
     "license-check": "pnpm runts src/license-check.ts",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "pack-all-to-dest": "pnpm runts src/pack-all-to-dest.ts",
     "runts": "cross-env NODE_OPTIONS=--no-deprecation node --no-deprecation --import @swc-node/register/esm-register",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -47,6 +45,7 @@
     "@payloadcms/plugin-import-export": "workspace:*",
     "@payloadcms/plugin-multi-tenant": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
-    "@payloadcms/translations": "workspace:*"
+    "@payloadcms/translations": "workspace:*",
+    "oxfmt": "0.73.0"
   }
 }

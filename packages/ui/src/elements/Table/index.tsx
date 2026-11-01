@@ -94,7 +94,7 @@ export const Table: React.FC<Props> = ({
                       hasRowSelection && !isLockedByAnotherUser
                         ? Boolean(
                             (typeof row.id === 'string' || typeof row.id === 'number') &&
-                              selected.get(row.id),
+                            selected.get(row.id),
                           )
                         : undefined
                     }

@@ -32,7 +32,7 @@ const packuments: Record<string, RegistryPackument> = {
   payload: {
     'dist-tags': { canary: '4.0.0-canary.20' },
     versions: {
-      '4.0.0-canary.20': { engines: { node: '>=24.15.0' } },
+      '4.0.0-canary.20': { engines: { node: '>=24.22.1' } },
     },
   },
 }
@@ -50,7 +50,7 @@ describe('resolveVersions', () => {
     const resolved = await resolveVersions({ fetchRegistry, tag: 'canary' })
 
     expect(resolved).toEqual({
-      enginesNode: '>=24.15.0',
+      enginesNode: '>=24.22.1',
       nextTarget: '16.9.3', // newest within >=16.2.6 <17, excludes 17.0.0
       payloadVersion: '4.0.0-canary.20',
       typesNode: '24.12.3', // newest within major 24, excludes 25.0.0

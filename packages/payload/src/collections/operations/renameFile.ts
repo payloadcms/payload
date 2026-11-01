@@ -233,7 +233,7 @@ export const renameFileOperation = async (
           autosave: false,
           collectionConfig: collection.config,
           config: req.payload.config,
-          data: data as never,
+          data,
           depth: args.depth ?? 0,
           docWithLocales: stored as never,
           draftArg: draft,
@@ -254,7 +254,7 @@ export const renameFileOperation = async (
           collection: collection.config,
           req,
         })
-        return updated as JsonObject
+        return updated
       },
     })
 

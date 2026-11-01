@@ -293,6 +293,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     and: 'Un',
     anotherUser: 'Cits lietotājs',
     anotherUserTakenOver: 'Cits lietotājs ir pārņēmis šī dokumenta rediģēšanu.',
+    apiResponse: 'API atbilde',
     applyChanges: 'Pielietot izmaiņas',
     ascending: 'Augošā secībā',
     auto: 'Automātiska',
@@ -365,6 +366,13 @@ export const lvTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Šis dokuments nesen tika atjaunināts ar citu lietotāju. Jūsu skatījums ir novecojis.',
     documents: 'Dokumenti',
+    dragCancelled: '{{label}} vilkšana atcelta.',
+    dragDropped: '{{label}} nolikts. Pozīcija {{position}} no {{count}}.',
+    dragInstructions:
+      'Nospiediet Space vai Enter, lai paņemtu rindu. Pārvietojiet to ar bulttaustiņiem. Izmantojot VoiceOver, izslēdziet Quick Nav un izmantojiet Command + bulttaustiņus. Nospiediet Space vai Enter, lai noliktu, vai Escape, lai atceltu.',
+    dragMoved: '{{label}}: {{direction}}. Pozīcija {{position}} no {{count}}.',
+    dragPickedUp: '{{label}} paņemts. Pozīcija {{position}} no {{count}}.',
+    dragToMove: 'Velciet, lai pārvietotu',
     dragToReorder: 'Velciet, lai pārkārtotu',
     duplicate: 'Dublēt',
     duplicateWithoutSaving: 'Dublēt bez izmaiņu saglabāšanas',
@@ -480,6 +488,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Pārindeksē visus {{collections}}.',
     reloadDocument: 'Pārlādēt dokumentu',
     remove: 'Noņemt',
+    removeFilter: 'Noņemt filtru',
     rename: 'Pārdēvēt',
     replaceRow: 'Aizstāt rindu',
     requiredFields: 'Lauki, kas atzīmēti ar *, ir obligāti.',
@@ -570,6 +579,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     yes: 'Jā',
   },
   hierarchy: {
+    folderLocation: 'Mapes atrašanās vieta',
     goTo: 'Dodieties uz "{{name}}"',
     itemsMovedTo: '{{title}} tika pārvietots uz {{destination}}',
     itemsMovedToRoot: '{{title}} pārvietots uz sakni',

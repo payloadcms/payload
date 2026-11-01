@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { MetaDescriptionField, MetaTitleField } from '@payloadcms/plugin-seo/fields'
 import {
   BlocksFeature,
   FixedToolbarFeature,
@@ -89,9 +90,62 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'relatedPosts',
+      type: 'relationship',
+      hasMany: true,
+      relationTo: postsSlug,
+    },
+    {
       name: 'relatedPost',
       type: 'relationship',
       relationTo: postsSlug,
+    },
+    {
+      name: 'contrastRelationships',
+      type: 'relationship',
+      relationTo: postsSlug,
+      hasMany: true,
+    },
+    {
+      name: 'contrastDisabledSelect',
+      type: 'select',
+      admin: { readOnly: true },
+      defaultValue: ['one', 'two'],
+      hasMany: true,
+      options: [
+        { label: 'Value One', value: 'one' },
+        { label: 'Value Two', value: 'two' },
+      ],
+    },
+    {
+      name: 'contrastDate',
+      type: 'date',
+      timezone: true,
+    },
+    {
+      name: 'contrastGroup',
+      type: 'group',
+      admin: { description: 'Group description for contrast measurement.' },
+      fields: [{ name: 'text', type: 'text' }],
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        { fields: [{ name: 'contrastFirst', type: 'text' }], label: 'Contrast first tab' },
+        { fields: [{ name: 'contrastSecond', type: 'text' }], label: 'Contrast second tab' },
+      ],
+    },
+    {
+      name: 'contrastUpload',
+      type: 'upload',
+      admin: { description: 'Choose a media file for this post.' },
+      relationTo: mediaSlug,
+    },
+    {
+      name: 'contrastSEO',
+      type: 'group',
+      fields: [MetaTitleField({}), MetaDescriptionField({})],
+      label: 'Contrast SEO',
     },
     {
       name: 'status',
@@ -142,6 +196,24 @@ export const PostsCollection: CollectionConfig = {
           BlocksFeature({
             blocks: [
               { slug: 'callout', fields: [{ name: 'text', type: 'text' }] },
+              {
+                slug: 'nestedRichText',
+                fields: [
+                  {
+                    name: 'body',
+                    type: 'richText',
+                    editor: lexicalEditor({
+                      features: ({ defaultFeatures }) => [
+                        ...defaultFeatures,
+                        FixedToolbarFeature(),
+                        BlocksFeature({
+                          blocks: [{ slug: 'callout', fields: [{ name: 'text', type: 'text' }] }],
+                        }),
+                      ],
+                    }),
+                  },
+                ],
+              },
               {
                 slug: 'noHandle',
                 admin: {
@@ -227,6 +299,16 @@ export const PostsCollection: CollectionConfig = {
       label: 'Publishing details',
     },
     {
+      name: 'customLabelRows',
+      type: 'array',
+      admin: {
+        components: {
+          RowLabel: '/components/AccessibleRowLabel/index.js#AccessibleRowLabel',
+        },
+      },
+      fields: [{ name: 'label', type: 'text' }],
+    },
+    {
       type: 'collapsible',
       admin: {
         components: { Label: '/components/CustomCollapsibleLabel/index.js#CustomCollapsibleLabel' },
@@ -267,6 +349,18 @@ export const PostsCollection: CollectionConfig = {
       type: 'code',
     },
     {
+      name: 'readOnlySettings',
+      type: 'json',
+      admin: { readOnly: true },
+      defaultValue: { enabled: true },
+    },
+    {
+      name: 'readOnlySource',
+      type: 'code',
+      admin: { readOnly: true },
+      defaultValue: 'const enabled = true;',
+    },
+    {
       name: 'unlabelledSettings',
       type: 'json',
       admin: {
@@ -281,6 +375,20 @@ export const PostsCollection: CollectionConfig = {
         disabled: { bulkEdit: true, column: true, filter: true, groupBy: true },
       },
       label: false,
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'tabDetails',
+          fields: [{ name: 'note', type: 'text' }],
+          label: { en: 'Post details' },
+        },
+        {
+          fields: [{ name: 'tabSummary', type: 'text' }],
+          label: 'Post summary',
+        },
+      ],
     },
   ],
   llmInstructions: 'Use descriptive post titles.',

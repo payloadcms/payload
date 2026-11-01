@@ -18,7 +18,7 @@ export function parseValidationLocaleSelector(locale: unknown): ValidationLocale
       return 'all'
     }
 
-    return locale as TypedLocale
+    return locale
   }
 
   if (

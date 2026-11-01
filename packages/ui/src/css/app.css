@@ -49,8 +49,8 @@
     letter-spacing: var(--text-letter-spacing);
     color: var(--color-text);
     margin: 0;
-    /* this is for the nav to be able to push the document over */
-    overflow-x: hidden;
+    /* Clip the shifted navigation without making body a vertical scroll container. */
+    overflow-x: clip;
   }
 
   /* Lock background scroll while a drawer is open. Backs up faceless-ui's JS

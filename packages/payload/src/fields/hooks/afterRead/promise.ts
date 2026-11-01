@@ -159,12 +159,12 @@ export const promise = async ({
 
   const shouldHoistLocalizedValue: boolean = Boolean(
     flattenLocales &&
-      fieldAffectsDataResult &&
-      typeof siblingDoc[field.name!] === 'object' &&
-      siblingDoc[field.name!] !== null &&
-      shouldLocalizeField &&
-      locale !== 'all' &&
-      req.payload.config.localization,
+    fieldAffectsDataResult &&
+    typeof siblingDoc[field.name!] === 'object' &&
+    siblingDoc[field.name!] !== null &&
+    shouldLocalizeField &&
+    locale !== 'all' &&
+    req.payload.config.localization,
   )
 
   if (fieldAffectsDataResult && shouldHoistLocalizedValue) {

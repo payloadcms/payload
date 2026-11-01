@@ -143,21 +143,19 @@ export const TimezonePicker: React.FC<Props> = (props) => {
         }}
         options={options}
         placeholder={t('general:none')}
-        styles={
-          {
-            control: (base) => ({
-              ...base,
-              flexWrap: 'nowrap',
-            }),
-            option: (base) => ({
-              ...base,
-              alignItems: 'center',
-              display: 'flex',
-              gap: 'var(--spacer-1)',
-              minWidth: 0,
-            }),
-          } as StylesConfig<OptionType>
-        }
+        styles={{
+          control: (base) => ({
+            ...base,
+            flexWrap: 'nowrap',
+          }),
+          option: (base) => ({
+            ...base,
+            alignItems: 'center',
+            display: 'flex',
+            gap: 'var(--spacer-1)',
+            minWidth: 0,
+          }),
+        }}
         value={selectedTimezone}
       />
     </div>

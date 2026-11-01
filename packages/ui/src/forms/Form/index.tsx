@@ -168,6 +168,25 @@ export const Form: React.FC<FormProps> = (props) => {
   }, [])
 
   const formRef = useRef<HTMLFormElement>(null)
+  const submitFocusRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    if (processing) {
+      return
+    }
+
+    const previousFocus = submitFocusRef.current
+
+    submitFocusRef.current = null
+    if (
+      previousFocus?.isConnected &&
+      document.activeElement === document.body &&
+      !previousFocus.closest('[inert]') &&
+      !previousFocus.matches(':disabled')
+    ) {
+      previousFocus.focus({ preventScroll: true })
+    }
+  }, [processing])
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
   const isFirstRenderRef = useRef(true)
@@ -262,7 +281,7 @@ export const Form: React.FC<FormProps> = (props) => {
         method: methodToUse = method,
         overrides: overridesFromArgs = {},
         skipValidation,
-      } = options || ({} as SubmitOptions)
+      } = options || {}
 
       const disableToast = disableSuccessStatusFromArgs ?? disableSuccessStatus
 
@@ -272,6 +291,8 @@ export const Form: React.FC<FormProps> = (props) => {
         }
         return
       }
+
+      modifiedWhileProcessingRef.current = false
 
       // create new toast promise which will resolve manually later
       let errorToast, successToast
@@ -307,6 +328,13 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       if (disableFormWhileProcessing) {
+        const activeElement = document.activeElement
+
+        // Disabling the active field drops browser focus to the body.
+        submitFocusRef.current =
+          activeElement instanceof HTMLElement && formRef.current?.contains(activeElement)
+            ? activeElement
+            : null
         setProcessing(true)
         setDisabled(true)
       }
@@ -411,16 +439,16 @@ export const Form: React.FC<FormProps> = (props) => {
           res = await action(formData)
         }
 
-        if (!modifiedWhileProcessingRef.current) {
+        if (res.status < 400 && !modifiedWhileProcessingRef.current) {
           setModified(false)
-        } else {
-          modifiedWhileProcessingRef.current = false
         }
+        modifiedWhileProcessingRef.current = false
 
         setDisabled(false)
 
         if (typeof handleResponse === 'function') {
-          handleResponse(res, successToast, errorToast)
+          await handleResponse(res, successToast, errorToast)
+          setProcessing(false)
           return
         }
 
@@ -457,7 +485,7 @@ export const Form: React.FC<FormProps> = (props) => {
           setProcessing(false)
 
           if (redirect) {
-            startRouteTransition(() => router.push(redirect))
+            void startRouteTransition(() => router.push(redirect))
           } else if (!disableToast) {
             successToast(json.message || t('general:submissionSuccessful'))
           }
@@ -513,14 +541,22 @@ export const Form: React.FC<FormProps> = (props) => {
 
             setIsValid(false)
 
-            dispatchFields({
-              type: 'ADD_SERVER_ERRORS',
+            const serverErrorAction = {
+              type: 'ADD_SERVER_ERRORS' as const,
               errors: fieldErrors,
-            })
+            }
+
+            prevFormState.current = fieldReducer(prevFormState.current, serverErrorAction)
+            dispatchFields(serverErrorAction)
 
             nonFieldErrors.forEach((err) => {
               // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
-              if (onNonFieldError?.(err, () => void submit({ overrides: overridesFromArgs }))) {
+              if (
+                onNonFieldError?.(
+                  err,
+                  () => void contextRef.current.submit({ overrides: overridesFromArgs }),
+                )
+              ) {
                 return
               }
               errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
@@ -660,7 +696,7 @@ export const Form: React.FC<FormProps> = (props) => {
         skipValidation: true,
       })
 
-      contextRef.current = { ...initContextState } as FormContextType
+      contextRef.current = { ...initContextState }
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
 
@@ -682,7 +718,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const replaceState = useCallback(
     (state: FormState) => {
-      contextRef.current = { ...initContextState } as FormContextType
+      contextRef.current = { ...initContextState }
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
@@ -810,7 +846,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useEffect(() => {
     if (initialState) {
-      contextRef.current = { ...initContextState } as FormContextType
+      contextRef.current = { ...initContextState }
       dispatchFields({
         type: 'REPLACE_STATE',
         optimize: false,

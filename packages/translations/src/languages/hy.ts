@@ -294,6 +294,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     and: 'Եվ',
     anotherUser: 'Այլ օգտատեր',
     anotherUserTakenOver: 'Այլ օգտատեր ստանձել է այս փաստաթղթի խմբագրումը։',
+    apiResponse: 'API պատասխան',
     applyChanges: 'Կիրառել փոփոխությունները',
     ascending: 'Աճող',
     auto: 'Ավտո',
@@ -367,6 +368,13 @@ export const hyTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Այս փաստաթուղթը վերջերս թարմացրել է մեկ այլ օգտագործող։ Ձեր տեսքը անթարմացած է։',
     documents: 'Փաստաթղթեր',
+    dragCancelled: '{{label}} քաշելը չեղարկված է։',
+    dragDropped: '{{label}} տեղադրված է։ Դիրք՝ {{position}}՝ {{count}}-ից։',
+    dragInstructions:
+      'Տողը վերցնելու համար սեղմեք Space կամ Enter։ Տեղափոխելու համար օգտագործեք սլաքների ստեղները։ VoiceOver-ի դեպքում անջատեք Quick Nav-ը և օգտագործեք Command + սլաքների ստեղները։ Տեղադրելու համար սեղմեք Space կամ Enter, իսկ չեղարկելու համար՝ Escape։',
+    dragMoved: '{{label}}: {{direction}}. Դիրք՝ {{position}}՝ {{count}}-ից։',
+    dragPickedUp: '{{label}} վերցված է։ Դիրք՝ {{position}}՝ {{count}}-ից։',
+    dragToMove: 'Քաշեք՝ տեղափոխելու համար',
     dragToReorder: 'Քաշել և վերադասավորել',
     duplicate: 'Կրկնօրինակել',
     duplicateWithoutSaving: 'Կրկնօրինակել առանց փոփոխությունները պահպանելու',
@@ -481,6 +489,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Վերաինդեքսավորվում են բոլոր {{collections}}-ները։',
     reloadDocument: 'Թարմացնել փաստաթուղթը',
     remove: 'Հեռացնել',
+    removeFilter: 'Հեռացնել զտիչը',
     rename: 'Վերանվանել',
     replaceRow: 'Տողը փոխարինել',
     requiredFields: '* նշանով դաշտերը պարտադիր են։',
@@ -576,6 +585,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     yes: 'Այո',
   },
   hierarchy: {
+    folderLocation: 'Պանակի տեղադրություն',
     goTo: 'Անցեք "{{name}}"',
     itemsMovedTo: '{{title}} տեղափոխվեց {{destination}}։',
     itemsMovedToRoot: '"{{title}}" տեղափոխվել է արմատը',

@@ -17,7 +17,7 @@ const shortNameFromTaskId = (taskId: string, byPackage: Map<string, string>): st
   byPackage.get(taskId.replace(/#.*$/, ''))
 
 /** Public packages released on their own version line, outside the monorepo release. */
-const independentlyReleasedPackages = new Set(['eslint-config', 'eslint-plugin'])
+const independentlyReleasedPackages = new Set(['oxlint-config', 'oxlint-plugin'])
 
 describe('packagePublishList completeness', () => {
   it('should list every public package in packages/', () => {

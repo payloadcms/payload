@@ -266,7 +266,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       for (const id of createdIDs) {
         await payload.delete({
           id,
-          collection: fileAccessMediaSlug as CollectionSlug,
+          collection: fileAccessMediaSlug,
           overrideAccess: true,
         })
       }
@@ -321,7 +321,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       const updatedDoc = await payload.findByID({
         id: readableDoc.id,
-        collection: fileAccessMediaSlug as CollectionSlug,
+        collection: fileAccessMediaSlug,
         overrideAccess: true,
       })
 
@@ -381,7 +381,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       const updatedDoc = await payload.findByID({
         id: doc.id,
-        collection: fileAccessMediaSlug as CollectionSlug,
+        collection: fileAccessMediaSlug,
         overrideAccess: true,
       })
 
@@ -427,7 +427,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       for (const doc of docs) {
         const updatedDoc = await payload.findByID({
           id: doc.id,
-          collection: fileAccessMediaSlug as CollectionSlug,
+          collection: fileAccessMediaSlug,
           overrideAccess: true,
         })
 
@@ -490,7 +490,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           docs.map(({ id }) =>
             payload.findByID({
               id,
-              collection: fileAccessMediaSlug as CollectionSlug,
+              collection: fileAccessMediaSlug,
               overrideAccess: true,
             }),
           ),
@@ -544,7 +544,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       const updatedDoc = await payload.findByID({
         id: doc.id,
-        collection: fileAccessMediaSlug as CollectionSlug,
+        collection: fileAccessMediaSlug,
         overrideAccess: true,
       })
 
@@ -581,7 +581,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       const updatedDoc = await payload.findByID({
         id: doc.id,
-        collection: fileAccessMediaSlug as CollectionSlug,
+        collection: fileAccessMediaSlug,
         overrideAccess: true,
       })
 
@@ -613,7 +613,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       })
       currentDoc = await payload.findByID({
         id: currentDoc.id,
-        collection: fileAccessMediaSlug as CollectionSlug,
+        collection: fileAccessMediaSlug,
         overrideAccess: true,
       })
 
@@ -628,7 +628,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       createdIDs.push(otherDoc.id)
 
       const { docs: versions } = await payload.findVersions({
-        collection: fileAccessMediaSlug as CollectionSlug,
+        collection: fileAccessMediaSlug,
         overrideAccess: true,
         where: { parent: { equals: currentDoc.id } },
       })
@@ -660,7 +660,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       const restoredDoc = await payload.findByID({
         id: currentDoc.id,
-        collection: fileAccessMediaSlug as CollectionSlug,
+        collection: fileAccessMediaSlug,
         overrideAccess: true,
       })
       expect(restoredDoc.filename).toBe(currentDoc.filename)
@@ -976,7 +976,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
             createdIDs.map((id) =>
               payload.delete({
                 id,
-                collection: skipSafeFetchMediaSlug as CollectionSlug,
+                collection: skipSafeFetchMediaSlug,
                 overrideAccess: true,
               }),
             ),
@@ -992,12 +992,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const file = await getFileByPath(filePath)
         file!.name = 'my test image.png'
 
-        const mediaDoc = (await payload.create({
+        const mediaDoc = await payload.create({
           collection: mediaSlug,
           data: {},
           file,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         expect(mediaDoc.url).toBeDefined()
         expect(mediaDoc.url).toContain('%20')
@@ -1269,12 +1269,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         payload,
         restClient,
       }) => {
-        const mediaDoc = (await payload.create({
+        const mediaDoc = await payload.create({
           collection: mediaSlug,
           data: {},
           file: await getFileByPath(path.resolve(dirname, './image.png')),
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         const response = await restClient.PATCH(`/${mediaSlug}/${mediaDoc.id}`, {
           body: JSON.stringify({
@@ -1289,11 +1289,11 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         expect(response.status).toBe(400)
 
-        const unchangedDoc = (await payload.findByID({
+        const unchangedDoc = await payload.findByID({
           id: mediaDoc.id,
           collection: mediaSlug,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         expect(unchangedDoc.filename).toBe(mediaDoc.filename)
         expect(unchangedDoc.variants.icon.filename).toBe(mediaDoc.variants.icon.filename)
@@ -1309,12 +1309,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const file = await getFileByPath(filePath)
         file.name = 'renamed.png'
 
-        const mediaDoc = (await payload.create({
+        const mediaDoc = await payload.create({
           collection: mediaSlug,
           data: {},
           file,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         const formData = new FormData()
         const filePath2 = path.resolve(dirname, './small.png')
@@ -1346,12 +1346,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const file = await getFileByPath(filePath)
         file.name = 'renamed.png'
 
-        const mediaDoc = (await payload.create({
+        const mediaDoc = await payload.create({
           collection: mediaSlug,
           data: {},
           file,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         const formData = new FormData()
         const filePath2 = path.resolve(dirname, './small.png')
@@ -1386,12 +1386,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       test('should preserve files outside the upload directory during document deletion', async ({
         payload,
       }) => {
-        const mediaDoc = (await payload.create({
+        const mediaDoc = await payload.create({
           collection: mediaSlug,
           data: {},
           file: await getFileByPath(path.resolve(dirname, './image.png')),
           overrideAccess: true,
-        })) as unknown as Media
+        })
         const outsideFilename = `retained-${randomUUID()}.txt`
         const outsidePath = path.join(dirname, outsideFilename)
 
@@ -1474,12 +1474,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const file = await getFileByPath(path.resolve(dirname, './image.png'))
         file.name = `size-mime-${randomUUID()}.png`
 
-        const mediaDoc = (await payload.create({
+        const mediaDoc = await payload.create({
           collection: mediaSlug,
           data: {},
           file,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         try {
           const size = mediaDoc.variants!.differentFormatFromMainImage!
@@ -1568,12 +1568,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const file = await getFileByPath(filePath)
         file.name = 'renamed.png'
 
-        const mediaDoc = (await payload.create({
+        const mediaDoc = await payload.create({
           collection: mediaSlug,
           data: {},
           file,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         const response = await restClient.GET(`/${mediaSlug}/file/${mediaDoc.filename}`)
 
@@ -1623,7 +1623,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         await payload.delete({
           id: doc.id,
-          collection: anyImagesSlug as CollectionSlug,
+          collection: anyImagesSlug,
           overrideAccess: true,
         })
       })
@@ -1656,7 +1656,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         await payload.delete({
           id: doc.id,
-          collection: anyImagesSlug as CollectionSlug,
+          collection: anyImagesSlug,
           overrideAccess: true,
         })
       })
@@ -1699,7 +1699,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         // Clean up
         await payload.delete({
           id: doc.id,
-          collection: adminThumbnailSizeSlug as CollectionSlug,
+          collection: adminThumbnailSizeSlug,
           overrideAccess: true,
         })
       })
@@ -1945,12 +1945,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const file = await getFileByPath(filePath)
         file.name = 'temp.png'
 
-        const mediaDoc = (await payload.create({
+        const mediaDoc = await payload.create({
           collection: mediaSlug,
           data: {},
           file,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         const expectedPath = path.join(dirname, './media')
 
@@ -1962,13 +1962,13 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const newFile = await getFileByPath(newFilePath)
         newFile.name = 'temp-renamed.png'
 
-        const updatedMediaDoc = (await payload.update({
+        const updatedMediaDoc = await payload.update({
           id: mediaDoc.id,
           collection: mediaSlug,
           data: {},
           file: newFile,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         expect(await fileExists(path.join(expectedPath, updatedMediaDoc.filename))).toBe(true)
         expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
@@ -1986,12 +1986,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const file = await getFileByPath(filePath)
         file.name = 'temp.png'
 
-        const mediaDoc = (await payload.create({
+        const mediaDoc = await payload.create({
           collection: mediaSlug,
           data: {},
           file,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         const expectedPath = path.join(dirname, './media')
 
@@ -2040,13 +2040,13 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           overrideAccess: true,
         })
 
-        const doc = (await payload.update({
+        const doc = await payload.update({
           id,
           collection: mediaSlug,
           data: {},
           file: small,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         expect(doc.variants.icon).toBeDefined()
         expect(doc.variants.tablet.width).toBeNull()
@@ -3087,7 +3087,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       expect(result).toBeTruthy()
 
-      const { variants } = result as unknown as Enlarge
+      const { variants } = result
       const expectedPath = path.join(dirname, './media/enlarge')
       const sourceName = path.parse(result.filename!).name
 
@@ -3128,12 +3128,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
     }) => {
       const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
-      const result = (await payload.create({
+      const result = await payload.create({
         collection: enlargeSlug,
         data: {},
         file: small,
         overrideAccess: true,
-      })) as unknown as Enlarge
+      })
 
       expect(result).toBeTruthy()
 
@@ -3169,7 +3169,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       expect(result).toBeTruthy()
 
-      const { variants } = result as unknown as Enlarge
+      const { variants } = result
       const expectedPath = path.join(dirname, './media/reduce')
       const sourceName = path.parse(result.filename!).name
 
@@ -3214,7 +3214,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
       expect(result).toBeTruthy()
 
-      const { variants } = result as unknown as Enlarge
+      const { variants } = result
 
       expect(variants.undefinedHeightWithoutEnlargement).toMatchObject({
         filename: null,
@@ -3401,12 +3401,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         file!.name = 'serverurl-test.png'
 
         // Create an upload
-        const mediaDoc = (await payload.create({
+        const mediaDoc = await payload.create({
           collection: mediaSlug,
           data: {},
           file,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         expect(mediaDoc).toBeDefined()
         expect(mediaDoc.url).toBeDefined()
@@ -3461,21 +3461,21 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         file!.name = 'duplicate-serverurl-test.png'
 
         // Create an upload
-        const mediaDoc = (await payload.create({
+        const mediaDoc = await payload.create({
           collection: mediaSlug,
           data: {},
           file,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         expect(mediaDoc).toBeDefined()
 
         // Duplicate the upload (this will pass full URLs from afterRead hooks)
-        const duplicatedDoc = (await payload.duplicate({
+        const duplicatedDoc = await payload.duplicate({
           id: mediaDoc.id,
           collection: mediaSlug,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         expect(duplicatedDoc).toBeDefined()
         expect(duplicatedDoc.id).not.toEqual(mediaDoc.id)
@@ -3527,17 +3527,17 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         file!.name = 'update-serverurl-test.png'
 
         // Create an upload
-        const mediaDoc = (await payload.create({
+        const mediaDoc = await payload.create({
           collection: mediaSlug,
           data: {},
           file,
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         expect(mediaDoc).toBeDefined()
 
         // Update the upload (changing focal point triggers a re-upload)
-        const updatedDoc = (await payload.update({
+        const updatedDoc = await payload.update({
           id: mediaDoc.id,
           collection: mediaSlug,
           data: {
@@ -3545,7 +3545,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
             focalY: 25,
           },
           overrideAccess: true,
-        })) as unknown as Media
+        })
 
         expect(updatedDoc).toBeDefined()
         expect(updatedDoc.focalX).toEqual(75)
@@ -3589,12 +3589,12 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       const filePath = path.join(dirname, './audio.mp3')
       const file = await getFileByPath(filePath)
 
-      uploadedDoc = (await payload.create({
+      uploadedDoc = await payload.create({
         collection: mediaSlug,
         data: {},
         file,
         overrideAccess: true,
-      })) as unknown as Media
+      })
 
       uploadedFilename = uploadedDoc.filename
       const stats = await stat(filePath)
@@ -3699,7 +3699,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         try {
           await payloadInstance.delete({
             id,
-            collection: noRestrictFileTypesSlug as CollectionSlug,
+            collection: noRestrictFileTypesSlug,
             overrideAccess: true,
           })
         } catch {

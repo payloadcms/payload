@@ -46,7 +46,7 @@ export const LexicalNestedBlocks: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           BlocksFeature({
-            blocks: ['blockWithBlockRef' as BlockSlug],
+            blocks: ['blockWithBlockRef'],
           }),
         ],
       }),

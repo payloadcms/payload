@@ -24,16 +24,14 @@ export function createTestRequestHandler({
   if (process.env.PAYLOAD_FRAMEWORK === 'tanstack-start') {
     return async ({ isGraphQL, request }) => {
       if (isGraphQL) {
-        const { handleGraphQL } = await import(
-          '../../../packages/tanstack-start/src/routes/graphql/handler.server.js'
-        )
+        const { handleGraphQL } =
+          await import('../../../packages/tanstack-start/src/routes/graphql/handler.server.js')
 
         return handleGraphQL({ config, request })
       }
 
-      const { handleAPIRoute } = await import(
-        '../../../packages/tanstack-start/src/routes/rest/handler.server.js'
-      )
+      const { handleAPIRoute } =
+        await import('../../../packages/tanstack-start/src/routes/rest/handler.server.js')
 
       return handleAPIRoute({ config, request })
     }

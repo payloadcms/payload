@@ -2337,7 +2337,7 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
     },
     disableTransaction: true,
     overrideAccess: true,
-  }) as unknown as Promise<Post>
+  })
 }
 
 async function deleteAllPosts() {
@@ -2357,7 +2357,7 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
     },
     disableTransaction: true,
     overrideAccess: true,
-  }) as unknown as Promise<Geo>
+  })
 }
 
 async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
@@ -2392,5 +2392,5 @@ async function createVirtualDoc(overrides?: Partial<Virtual>): Promise<Virtual> 
     },
     disableTransaction: true,
     overrideAccess: true,
-  }) as unknown as Promise<Virtual>
+  })
 }

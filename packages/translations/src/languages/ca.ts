@@ -298,6 +298,7 @@ export const caTranslations: DefaultTranslationsObject = {
     and: 'i',
     anotherUser: 'Altre usuari',
     anotherUserTakenOver: "Un altre usuari ha pres la edició d'aquest document.",
+    apiResponse: 'Resposta de l’API',
     applyChanges: 'Apica els canvis',
     ascending: 'Ascendent',
     auto: 'Automàtic',
@@ -369,6 +370,13 @@ export const caTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Aquest document ha estat actualitzat recentment per un altre usuari. La seva vista està desactualitzada.',
     documents: 'Documents',
+    dragCancelled: 'S’ha cancel·lat l’arrossegament de {{label}}.',
+    dragDropped: 'S’ha deixat anar {{label}}. Posició {{position}} de {{count}}.',
+    dragInstructions:
+      'Premeu Space o Enter per agafar una fila. Utilitzeu les fletxes per moure-la. Amb VoiceOver, desactiveu Quick Nav i utilitzeu Command + les fletxes. Premeu Space o Enter per deixar-la anar, o Escape per cancel·lar.',
+    dragMoved: '{{label}}: {{direction}}. Posició {{position}} de {{count}}.',
+    dragPickedUp: 'S’ha agafat {{label}}. Posició {{position}} de {{count}}.',
+    dragToMove: 'Arrossegueu per moure',
     dragToReorder: 'Arrossegueu per reordenar',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplica sense desar',
@@ -484,6 +492,7 @@ export const caTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindexa tots el {{collections}}.',
     reloadDocument: 'Recarrega el document',
     remove: 'Elimina',
+    removeFilter: 'Elimina el filtre',
     rename: 'Canvia el nom',
     replaceRow: 'Reemplaça fila',
     requiredFields: 'Els camps marcats amb * són obligatoris.',
@@ -576,6 +585,7 @@ export const caTranslations: DefaultTranslationsObject = {
     yes: 'Sí',
   },
   hierarchy: {
+    folderLocation: 'Ubicació de la carpeta',
     goTo: 'Vés a "{{name}}"',
     itemsMovedTo: "{{title}} s'ha traslladat a {{destination}}",
     itemsMovedToRoot: "{{title}} s'ha traslladat a l'arrel",

@@ -349,13 +349,13 @@ export async function checkFocusIndicators(
         const hasVisibleOutline = (style: string, width: string, color: string) =>
           Boolean(
             style &&
-              style !== 'none' &&
-              width &&
-              width !== '0px' &&
-              color &&
-              color !== 'transparent' &&
-              color !== 'rgba(0, 0, 0, 0)' &&
-              !color.includes('rgba(0, 0, 0, 0)'),
+            style !== 'none' &&
+            width &&
+            width !== '0px' &&
+            color &&
+            color !== 'transparent' &&
+            color !== 'rgba(0, 0, 0, 0)' &&
+            !color.includes('rgba(0, 0, 0, 0)'),
           )
 
         // Helper to check if a style has a visible box-shadow
@@ -390,13 +390,13 @@ export async function checkFocusIndicators(
         const hasVisibleBorderCheck = (bdr: string, width: string, color: string) =>
           Boolean(
             bdr &&
-              bdr !== 'none' &&
-              width &&
-              width !== '0px' &&
-              color &&
-              color !== 'transparent' &&
-              color !== 'rgba(0, 0, 0, 0)' &&
-              !color.includes('rgba(0, 0, 0, 0)'),
+            bdr !== 'none' &&
+            width &&
+            width !== '0px' &&
+            color &&
+            color !== 'transparent' &&
+            color !== 'rgba(0, 0, 0, 0)' &&
+            !color.includes('rgba(0, 0, 0, 0)'),
           )
 
         // Check if element has a visible focus indicator on the element itself

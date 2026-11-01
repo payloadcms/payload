@@ -136,6 +136,99 @@ describe('Live Preview', () => {
     })
   })
 
+  test('should hide collection fields while live preview is expanded', async () => {
+    await navigateToDoc(page, pagesURLUtil)
+    await toggleLivePreview(page, { targetState: 'on' })
+
+    const titleField = page.locator('#field-title')
+    const expandButton = page.getByRole('button', { name: 'Expand' })
+
+    await expect(titleField).toBeVisible()
+    await expandButton.focus()
+    await page.keyboard.press('Enter')
+
+    const collapseButton = page.getByRole('button', { name: 'Collapse' })
+
+    await expect(collapseButton).toBeFocused()
+    await expect(titleField).toBeHidden()
+    await collapseButton.click()
+    await expect(titleField).toBeVisible()
+  })
+
+  test('should keep collection live preview controls in the viewport while expanded', async () => {
+    await navigateToDoc(page, pagesURLUtil)
+    await toggleLivePreview(page, { targetState: 'on' })
+
+    await page.getByRole('button', { name: 'Expand' }).click()
+
+    const collapseButton = page.getByRole('button', { name: 'Collapse' })
+    const openInNewWindowButton = page.getByRole('button', {
+      name: 'Open in new window',
+    })
+
+    await expect(collapseButton).toBeVisible()
+    await expect(openInNewWindowButton).toBeVisible()
+
+    for (const button of [collapseButton, openInNewWindowButton]) {
+      const box = await button.boundingBox()
+      const viewport = page.viewportSize()
+
+      expect(box).not.toBeNull()
+      expect(viewport).not.toBeNull()
+      expect(box!.x).toBeGreaterThanOrEqual(0)
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport!.width)
+    }
+  })
+
+  test('should hide collection fields while live previewing at narrow viewport widths', async () => {
+    const originalViewport = page.viewportSize()
+
+    try {
+      await page.setViewportSize({ height: 900, width: 940 })
+      await navigateToDoc(page, pagesURLUtil)
+      await toggleLivePreview(page, { targetState: 'on' })
+
+      const titleField = page.locator('#field-title')
+
+      await expect(titleField).toBeHidden()
+      await toggleLivePreview(page, { targetState: 'off' })
+      await expect(titleField).toBeVisible()
+    } finally {
+      if (originalViewport) {
+        await page.setViewportSize(originalViewport)
+      }
+    }
+  })
+
+  test('should keep initial collection live preview controls in a narrow viewport', async () => {
+    const originalViewport = page.viewportSize()
+
+    try {
+      await page.setViewportSize({ height: 900, width: 940 })
+      await navigateToDoc(page, pagesURLUtil)
+      await toggleLivePreview(page, { targetState: 'on' })
+
+      const expandButton = page.getByRole('button', { name: 'Expand' })
+      const openInNewWindowButton = page.getByRole('button', {
+        name: 'Open in new window',
+      })
+
+      for (const button of [expandButton, openInNewWindowButton]) {
+        const box = await button.boundingBox()
+        const viewport = page.viewportSize()
+
+        expect(box).not.toBeNull()
+        expect(viewport).not.toBeNull()
+        expect(box!.x).toBeGreaterThanOrEqual(0)
+        expect(box!.x + box!.width).toBeLessThanOrEqual(viewport!.width)
+      }
+    } finally {
+      if (originalViewport) {
+        await page.setViewportSize(originalViewport)
+      }
+    }
+  })
+
   test('collection — does not render live preview when creating a new doc', async () => {
     await page.goto(pagesURLUtil.create)
     await expect(page.locator('button#live-preview-toggler')).toBeHidden()
@@ -942,23 +1035,20 @@ describe('Live Preview', () => {
   })
 
   describe.skip('A11y', () => {
-    test.fixme(
-      'Live preview and edit view should have no accessibility violations',
-      async ({}, testInfo) => {
-        await goToCollectionLivePreview(page, pagesURLUtil)
-        const { iframe } = await getLivePreviewIframe(page)
-        await expect(iframe).toBeVisible()
-        await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
+    test.fixme('Live preview and edit view should have no accessibility violations', async ({}, testInfo) => {
+      await goToCollectionLivePreview(page, pagesURLUtil)
+      const { iframe } = await getLivePreviewIframe(page)
+      await expect(iframe).toBeVisible()
+      await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
 
-        const scanResults = await runAxeScan({
-          exclude: ['.document-fields__main'], // we don't need to test fields here
-          include: ['.collection-edit'],
-          page,
-          testInfo,
-        })
+      const scanResults = await runAxeScan({
+        exclude: ['.document-fields__main'], // we don't need to test fields here
+        include: ['.collection-edit'],
+        page,
+        testInfo,
+      })
 
-        expect(scanResults.violations.length).toBe(0)
-      },
-    )
+      expect(scanResults.violations.length).toBe(0)
+    })
   })
 })

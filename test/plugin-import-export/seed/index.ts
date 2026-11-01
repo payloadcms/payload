@@ -204,7 +204,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
             },
             {
               blockType: 'content',
-              // @ts-ignore
+              // @ts-expect-error
               richText: richTextData,
             },
           ],

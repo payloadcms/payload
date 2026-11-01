@@ -1074,7 +1074,7 @@ test.describe('Group By', () => {
         deletedAt: new Date().toISOString(), // Set the post as trashed
       },
       overrideAccess: true,
-    }) as unknown as Promise<Post>
+    })
   }
 
   test.describe('Query Presets with Virtual Fields', () => {

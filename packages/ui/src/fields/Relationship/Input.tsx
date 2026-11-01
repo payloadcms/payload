@@ -374,6 +374,10 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     ],
   )
 
+  const updateResultsEffectEvent: UpdateResults = useEffectEvent((args) => {
+    return updateResults(args)
+  })
+
   const updateSearch = useDebouncedCallback<{ search: string } & HasManyValueUnion>(
     ({ hasMany: hasManyArg, search: searchArg, value }) => {
       updateResultsEffectEvent({
@@ -692,10 +696,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     },
     [config.routes.admin, serverURL],
   )
-
-  const updateResultsEffectEvent: UpdateResults = useEffectEvent((args) => {
-    return updateResults(args)
-  })
 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run

@@ -35,5 +35,8 @@ export const cannotCreateDefaultLocale = 'cannot-create-default-locale'
 export const allFieldsLocalizedSlug = 'all-fields-localized'
 export const arrayWithFallbackCollectionSlug = 'array-with-fallback-fields'
 export const localeRestrictedSlug = 'locale-restricted'
+export const localeValidationSlug = 'locale-validation'
+export const localeValidationGlobalSlug = 'locale-validation-global'
+export const localeValidationBlockSlug = 'locale-validation-block'
 
 export const globalWithDraftsSlug = 'global-drafts'

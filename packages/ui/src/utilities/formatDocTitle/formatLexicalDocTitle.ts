@@ -21,7 +21,7 @@ export function formatLexicalDocTitle(
       }
     }
     if ('children' in node && node.children) {
-      textContent += formatLexicalDocTitle(node.children as Array<{ type: string }>, textContent)
+      textContent += formatLexicalDocTitle(node.children, textContent)
     }
   }
   return textContent

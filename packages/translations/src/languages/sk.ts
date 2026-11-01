@@ -295,6 +295,7 @@ export const skTranslations: DefaultTranslationsObject = {
     and: 'a',
     anotherUser: 'Iný používateľ',
     anotherUserTakenOver: 'Iný používateľ prevzal úpravy tohto dokumentu.',
+    apiResponse: 'Odpoveď API',
     applyChanges: 'Použiť zmeny',
     ascending: 'Vzostupne',
     auto: 'Automaticky',
@@ -365,6 +366,13 @@ export const skTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Tento dokument bol nedávno aktualizovaný iným používateľom. Váš pohľad je zastaraný.',
     documents: 'Dokumenty',
+    dragCancelled: 'Presúvanie {{label}} bolo zrušené.',
+    dragDropped: '{{label}} bol pustený. Pozícia {{position}} z {{count}}.',
+    dragInstructions:
+      'Stlačením Space alebo Enter uchopíte riadok. Pomocou šípok ho presuniete. S VoiceOver vypnite Quick Nav a použite Command + šípky. Stlačením Space alebo Enter ho pustíte, Escape akciu zruší.',
+    dragMoved: '{{label}}: {{direction}}. Pozícia {{position}} z {{count}}.',
+    dragPickedUp: '{{label}} bol uchopený. Pozícia {{position}} z {{count}}.',
+    dragToMove: 'Presunutím premiestniť',
     dragToReorder: 'Potiahnite pre zmenu poradia',
     duplicate: 'Duplikovať',
     duplicateWithoutSaving: 'Duplikovať bez uloženia zmien',
@@ -477,6 +485,7 @@ export const skTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Znova sa indexujú všetky {{collections}}.',
     reloadDocument: 'Obnoviť dokument',
     remove: 'Odstrániť',
+    removeFilter: 'Odstrániť filter',
     rename: 'Premenovať',
     replaceRow: 'Nahradiť riadok',
     requiredFields: 'Polia označené * sú povinné.',
@@ -568,6 +577,7 @@ export const skTranslations: DefaultTranslationsObject = {
     yes: 'Áno',
   },
   hierarchy: {
+    folderLocation: 'Umiestnenie priečinka',
     goTo: 'Prejdite na "{{name}}"',
     itemsMovedTo: '{{title}} presunuté do {{destination}}',
     itemsMovedToRoot: '{{title}} presunutý do koreňa',

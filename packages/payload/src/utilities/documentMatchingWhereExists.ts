@@ -40,7 +40,7 @@ export const documentMatchingWhereExists = async ({
     disableErrors: true,
     draft: Boolean(draftsEnabled),
     limit: 2,
-    locale: locale as Parameters<typeof req.payload.find>[0]['locale'],
+    locale,
     overrideAccess,
     pagination: false,
     req: queryReq,

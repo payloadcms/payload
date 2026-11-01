@@ -83,9 +83,7 @@ export const createDocumentsTool = defineCollectionTool({
           select: returning ? select : { id: true },
         })
 
-        docs.push(
-          returning ? { doc: result as Record<string, unknown>, index } : { id: result.id, index },
-        )
+        docs.push(returning ? { doc: result, index } : { id: result.id, index })
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error'
         const formattedError = formatEntityError({

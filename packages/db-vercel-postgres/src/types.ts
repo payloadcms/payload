@@ -113,7 +113,8 @@ export type VercelPostgresAdapter = {
 
 declare module 'payload' {
   export interface DatabaseAdapter
-    extends Omit<Args, 'extensions' | 'idType' | 'logger' | 'migrationDir' | 'pool'>,
+    extends
+      Omit<Args, 'extensions' | 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
     afterSchemaInit: PostgresSchemaHook[]
     beforeSchemaInit: PostgresSchemaHook[]

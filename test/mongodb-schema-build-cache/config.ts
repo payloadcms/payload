@@ -32,7 +32,7 @@ export const leftBlock: Block = {
     {
       name: 'leaves',
       type: 'blocks',
-      blocks: [leafBlockSlug as BlockSlug],
+      blocks: [leafBlockSlug],
     },
   ],
 }
@@ -43,7 +43,7 @@ export const rightBlock: Block = {
     {
       name: 'leaves',
       type: 'blocks',
-      blocks: [leafBlockSlug as BlockSlug],
+      blocks: [leafBlockSlug],
     },
   ],
 }
@@ -54,7 +54,7 @@ export const rootBlock: Block = {
     {
       name: 'branches',
       type: 'blocks',
-      blocks: [leftBlockSlug as BlockSlug, rightBlockSlug as BlockSlug],
+      blocks: [leftBlockSlug, rightBlockSlug],
     },
   ],
 }
@@ -84,12 +84,12 @@ export default buildConfigWithDefaults({
           {
             name: 'layout',
             type: 'blocks',
-            blocks: [rootBlockSlug as BlockSlug],
+            blocks: [rootBlockSlug],
           },
           {
             name: 'localizedLayout',
             type: 'blocks',
-            blocks: [rootBlockSlug as BlockSlug],
+            blocks: [rootBlockSlug],
             localized: true,
           },
         ],

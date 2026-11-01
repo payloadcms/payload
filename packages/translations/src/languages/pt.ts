@@ -296,6 +296,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     and: 'E',
     anotherUser: 'Outro usuário',
     anotherUserTakenOver: 'Outro usuário assumiu a edição deste documento.',
+    apiResponse: 'Resposta da API',
     applyChanges: 'Aplicar alterações',
     ascending: 'Ascendente',
     auto: 'Automático',
@@ -368,6 +369,13 @@ export const ptTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Este documento foi recentemente atualizado por outro usuário. Sua visualização está desatualizada.',
     documents: 'Documentos',
+    dragCancelled: 'Arrasto de {{label}} cancelado.',
+    dragDropped: '{{label}} largado. Posição {{position}} de {{count}}.',
+    dragInstructions:
+      'Prima Space ou Enter para selecionar uma linha para mover. Utilize as setas para a mover. Com VoiceOver, desative Quick Nav e utilize Command + as setas. Prima Space ou Enter para largar, ou Escape para cancelar.',
+    dragMoved: '{{label}}: {{direction}}. Posição {{position}} de {{count}}.',
+    dragPickedUp: '{{label}} selecionado para mover. Posição {{position}} de {{count}}.',
+    dragToMove: 'Arrastar para mover',
     dragToReorder: 'Arraste para reordenar',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplicar sem salvar alterações',
@@ -483,6 +491,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindexando todas as {{collections}}.',
     reloadDocument: 'Recarregar documento',
     remove: 'Remover',
+    removeFilter: 'Remover filtro',
     rename: 'Renomear',
     replaceRow: 'Substituir Linha',
     requiredFields: 'Os campos marcados com * são obrigatórios.',
@@ -576,6 +585,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     yes: 'Sim',
   },
   hierarchy: {
+    folderLocation: 'Localização da pasta',
     goTo: 'Ir para "{{name}}"',
     itemsMovedTo: '{{title}} foi movido para {{destination}}',
     itemsMovedToRoot: '{{title}} movido para a raiz',

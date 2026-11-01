@@ -113,7 +113,7 @@ function mapPayloadEmailToResendEmail(
     headers: mapHeaders(message.headers),
     html: message.html?.toString() || '',
     text: message.text?.toString() || '',
-  } as ResendSendEmailOptions
+  }
 }
 
 function mapFromAddress(

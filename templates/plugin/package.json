@@ -63,16 +63,16 @@
     "copyfiles": "2.4.1",
     "cross-env": "10.1.0",
     "eslint": "^9.23.0",
-    "eslint-config-next": "16.4.0",
+    "eslint-config-next": "16.4.2",
     "graphql": "^16.8.1",
     "mongodb-memory-server": "10.1.4",
-    "next": "16.4.0",
+    "next": "16.4.2",
     "open": "^10.1.0",
+    "oxfmt": "^0.73.0",
     "payload": "3.82.1",
-    "prettier": "^3.4.2",
     "qs-esm": "8.0.1",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "rimraf": "3.0.2",
     "sort-package-json": "^2.10.0",
     "typescript": "6.0.3",
@@ -83,7 +83,7 @@
     "payload": "^3.82.1"
   },
   "engines": {
-    "node": ">=24.15.0",
+    "node": ">=24.22.1",
     "pnpm": "^9 || ^10 || ^11"
   },
   "publishConfig": {

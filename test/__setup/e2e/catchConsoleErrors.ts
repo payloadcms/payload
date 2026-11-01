@@ -51,6 +51,12 @@ export function catchConsoleErrors(page: Page, options?: { ignoreCORS?: boolean 
       !msg.text().includes('Error getting document data') &&
       !msg.text().includes('Failed trying to load default language strings') &&
       !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted
+      // TanStack Start logs this when a navigation aborts a server function response that is
+      // still streaming, e.g. the previous route's loader. Analogous to aborted server actions above.
+      !(
+        msg.text().includes('Stream processing error') &&
+        msg.text().includes('AbortError: BodyStreamBuffer was aborted')
+      ) &&
       !msg.text().includes('TypeError: network error') && // Transient network errors during chunk loading
       !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') && // This is a weird error that happens in the console
       // Expected lexical-converter warning for blocks/inline-blocks intentionally

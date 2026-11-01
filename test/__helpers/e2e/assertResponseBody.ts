@@ -54,10 +54,10 @@ export const assertResponseBody = async <T>(
     page.waitForResponse((response) =>
       Boolean(
         response.url().includes(options.url || '') &&
-          response.status() === 200 &&
-          response
-            .headers()
-            ['content-type']?.includes(options.responseContentType || 'application/json'),
+        response.status() === 200 &&
+        response
+          .headers()
+          ['content-type']?.includes(options.responseContentType || 'application/json'),
       ),
     ),
     await options.action,

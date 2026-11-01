@@ -300,6 +300,7 @@ export const itTranslations: DefaultTranslationsObject = {
     anotherUser: 'Un altro utente',
     anotherUserTakenOver:
       'Un altro utente ha preso il controllo della modifica di questo documento.',
+    apiResponse: 'Risposta API',
     applyChanges: 'Applica modifiche',
     ascending: 'Ascendente',
     auto: 'Automatico',
@@ -370,6 +371,13 @@ export const itTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Questo documento è stato recentemente aggiornato da un altro utente. La tua visualizzazione non è aggiornata.',
     documents: 'Documenti',
+    dragCancelled: 'Trascinamento di {{label}} annullato.',
+    dragDropped: '{{label}} rilasciato. Posizione {{position}} di {{count}}.',
+    dragInstructions:
+      'Premi Space o Enter per prendere una riga. Usa le frecce per spostarla. Con VoiceOver, disattiva Quick Nav e usa Command + le frecce. Premi Space o Enter per rilasciare, oppure Escape per annullare.',
+    dragMoved: '{{label}}: {{direction}}. Posizione {{position}} di {{count}}.',
+    dragPickedUp: '{{label}} selezionato per lo spostamento. Posizione {{position}} di {{count}}.',
+    dragToMove: 'Trascina per spostare',
     dragToReorder: 'Trascina per riordinare',
     duplicate: 'Duplica',
     duplicateWithoutSaving: 'Duplica senza salvare le modifiche',
@@ -485,6 +493,7 @@ export const itTranslations: DefaultTranslationsObject = {
     reindexingAll: "Rifacendo l'indice di tutte le {{collections}}.",
     reloadDocument: 'Ricarica documento',
     remove: 'Rimuovi',
+    removeFilter: 'Rimuovi filtro',
     rename: 'Rinomina',
     replaceRow: 'Sostituisci riga',
     requiredFields: 'I campi contrassegnati con * sono obbligatori.',
@@ -579,6 +588,7 @@ export const itTranslations: DefaultTranslationsObject = {
     yes: 'Sì',
   },
   hierarchy: {
+    folderLocation: 'Posizione della cartella',
     goTo: 'Vai a "{{name}}"',
     itemsMovedTo: '{{title}} è stato spostato a {{destination}}',
     itemsMovedToRoot: '{{title}} spostato alla radice',

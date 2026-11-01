@@ -291,8 +291,8 @@ const persistLegacyCloudVersions = async ({
 const hasStoredOriginal = ({ doc }: { doc: JsonObject }): boolean =>
   Boolean(
     doc.original &&
-      typeof doc.original === 'object' &&
-      typeof (doc.original as Record<string, unknown>).filename === 'string',
+    typeof doc.original === 'object' &&
+    typeof (doc.original as Record<string, unknown>).filename === 'string',
   )
 
 const withCloudHookGuard = async <T>({

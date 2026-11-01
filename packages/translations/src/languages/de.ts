@@ -305,6 +305,7 @@ export const deTranslations: DefaultTranslationsObject = {
     and: 'Und',
     anotherUser: 'Ein anderer Benutzer',
     anotherUserTakenOver: 'Ein anderer Benutzer hat die Bearbeitung dieses Dokuments übernommen.',
+    apiResponse: 'API-Antwort',
     applyChanges: 'Änderungen anwenden',
     ascending: 'Aufsteigend',
     auto: 'Automatisch',
@@ -377,6 +378,13 @@ export const deTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Dieses Dokument wurde kürzlich von einem anderen Benutzer aktualisiert. Deine Ansicht ist veraltet.',
     documents: 'Dokumente',
+    dragCancelled: 'Ziehen von {{label}} abgebrochen.',
+    dragDropped: '{{label}} abgelegt. Position {{position}} von {{count}}.',
+    dragInstructions:
+      'Drücken Sie Space oder Enter, um eine Zeile aufzunehmen. Verschieben Sie sie mit den Pfeiltasten. Deaktivieren Sie mit VoiceOver Quick Nav und verwenden Sie Command + Pfeiltasten. Drücken Sie Space oder Enter zum Ablegen oder Escape zum Abbrechen.',
+    dragMoved: '{{label}}: {{direction}}. Position {{position}} von {{count}}.',
+    dragPickedUp: '{{label}} aufgenommen. Position {{position}} von {{count}}.',
+    dragToMove: 'Zum Verschieben ziehen',
     dragToReorder: 'Ziehen, um die Reihenfolge zu ändern',
     duplicate: 'Duplizieren',
     duplicateWithoutSaving: 'Duplizieren ohne Änderungen zu speichern',
@@ -492,6 +500,7 @@ export const deTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Alle {{collections}} werden neu indiziert.',
     reloadDocument: 'Dokument neu laden',
     remove: 'Entfernen',
+    removeFilter: 'Filter entfernen',
     rename: 'Umbenennen',
     replaceRow: 'Zeile ersetzen',
     requiredFields: 'Mit * gekennzeichnete Felder sind Pflichtfelder.',
@@ -587,6 +596,7 @@ export const deTranslations: DefaultTranslationsObject = {
     yes: 'Ja',
   },
   hierarchy: {
+    folderLocation: 'Ordnerpfad',
     goTo: 'Gehen Sie zu "{{name}}"',
     itemsMovedTo: '{{title}} wurde nach {{destination}} verschoben.',
     itemsMovedToRoot: '{{title}} wurde zur Wurzel verschoben',

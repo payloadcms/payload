@@ -296,6 +296,7 @@ export const viTranslations: DefaultTranslationsObject = {
     and: 'Và',
     anotherUser: 'Người dùng khác',
     anotherUserTakenOver: 'Người dùng khác đã tiếp quản việc chỉnh sửa tài liệu này.',
+    apiResponse: 'Phản hồi API',
     applyChanges: 'Áp dụng thay đổi',
     ascending: 'Tăng dần',
     auto: 'Tự động',
@@ -367,6 +368,13 @@ export const viTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Tài liệu này đã được cập nhật gần đây bởi một người dùng khác. Chế độ xem của bạn đã lỗi thời.',
     documents: 'Tài liệu',
+    dragCancelled: 'Đã hủy kéo {{label}}.',
+    dragDropped: 'Đã thả {{label}}. Vị trí {{position}} trong {{count}}.',
+    dragInstructions:
+      'Nhấn Space hoặc Enter để nhấc một hàng. Dùng các phím mũi tên để di chuyển. Với VoiceOver, tắt Quick Nav và dùng Command + các phím mũi tên. Nhấn Space hoặc Enter để thả, hoặc Escape để hủy.',
+    dragMoved: '{{label}}: {{direction}}. Vị trí {{position}} trong {{count}}.',
+    dragPickedUp: 'Đã nhấc {{label}}. Vị trí {{position}} trong {{count}}.',
+    dragToMove: 'Kéo để di chuyển',
     dragToReorder: 'Kéo để sắp xếp lại',
     duplicate: 'Tạo bản sao',
     duplicateWithoutSaving: 'Không lưu dữ liệu và tạo bản sao',
@@ -481,6 +489,7 @@ export const viTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Đang tái lập chỉ mục tất cả {{collections}}.',
     reloadDocument: 'Tải lại tài liệu',
     remove: 'Xóa',
+    removeFilter: 'Xóa bộ lọc',
     rename: 'Đổi tên',
     replaceRow: 'Thay thế hàng',
     requiredFields: 'Các trường được đánh dấu * là bắt buộc.',
@@ -572,6 +581,7 @@ export const viTranslations: DefaultTranslationsObject = {
     yes: 'Có',
   },
   hierarchy: {
+    folderLocation: 'Vị trí thư mục',
     goTo: 'Đi đến "{{name}}"',
     itemsMovedTo: '{{title}} đã di chuyển đến {{destination}}',
     itemsMovedToRoot: '{{title}} đã được chuyển đến gốc',

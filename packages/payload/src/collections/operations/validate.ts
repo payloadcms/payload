@@ -184,7 +184,7 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
         ensureUsernameOrEmail<TSlug>({
           authOptions: collectionConfig.auth,
           collectionSlug: collectionConfig.slug,
-          data: data as RequiredDataFromCollectionSlug<TSlug>,
+          data,
           operation: 'create',
           req,
         })
@@ -192,9 +192,9 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
         ensureUsernameOrEmail<TSlug>({
           authOptions: collectionConfig.auth,
           collectionSlug: collectionConfig.slug,
-          data: data as RequiredDataFromCollectionSlug<TSlug>,
+          data,
           operation: 'update',
-          originalDoc: originalDoc as RequiredDataFromCollectionSlug<TSlug>,
+          originalDoc,
           req,
         })
       }
@@ -202,7 +202,7 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
     collection: collectionConfig,
     docWithLocales,
     global: null,
-    incomingData: incomingData as JsonObject | undefined,
+    incomingData,
     onValidationData,
     originalDoc,
     overrideAccess,

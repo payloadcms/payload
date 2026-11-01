@@ -18,7 +18,6 @@ const toolbarGroups = ({ disabledNodes }: IndentFeatureProps): ToolbarGroup[] =>
   toolbarIndentGroupWithItems([
     {
       ChildComponent: IndentDecreaseIcon,
-      isActive: () => false,
       isEnabled: ({ selection }) => {
         const nodes = selection?.getNodes() ?? []
 
@@ -41,7 +40,6 @@ const toolbarGroups = ({ disabledNodes }: IndentFeatureProps): ToolbarGroup[] =>
     },
     {
       ChildComponent: IndentIncreaseIcon,
-      isActive: () => false,
       isEnabled: ({ selection }) => {
         const nodes = selection?.getNodes() ?? []
 

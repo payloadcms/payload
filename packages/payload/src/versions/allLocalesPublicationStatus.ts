@@ -24,7 +24,7 @@ export const buildAllLocalesPublicationHookDoc = <TDoc extends JsonObject>({
     return {
       ...doc,
       _status: { ...(docWithLocales._status as JsonObject) },
-    } as TDoc
+    }
   }
 
   return doc

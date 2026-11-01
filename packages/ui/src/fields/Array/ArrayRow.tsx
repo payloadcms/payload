@@ -81,6 +81,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   rowIndex,
   schemaPath,
   scrollIdPrefix,
+  setActivatorNodeRef,
   setCollapse,
   setNodeRef,
   transform,
@@ -147,6 +148,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
                 id: row.id,
                 attributes,
                 listeners,
+                setActivatorNodeRef,
               }
             : undefined
         }

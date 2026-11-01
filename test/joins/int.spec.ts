@@ -2042,6 +2042,50 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
 
       expect(parent.children?.totalDocs).toBe(1)
     })
+
+    test('should return all docs across multiple collections with limit 0', async ({ payload }) => {
+      let parent = await payload.create({
+        collection: 'multiple-collections-parents',
+        data: {},
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: 'multiple-collections-1',
+        data: {
+          parent,
+          title: 'doc-1',
+        },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: 'multiple-collections-2',
+        data: {
+          parent,
+          title: 'doc-2',
+        },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      parent = await payload.findByID({
+        id: parent.id,
+        collection: 'multiple-collections-parents',
+        depth: 0,
+        joins: {
+          children: {
+            limit: 0,
+          },
+        },
+        overrideAccess: true,
+      })
+
+      expect(parent.children.docs).toHaveLength(2)
+      expect(parent.children?.hasNextPage).toBe(false)
+    })
   })
 
   test.options.describe('Constrained joins', { db: 'drizzle' }, () => {

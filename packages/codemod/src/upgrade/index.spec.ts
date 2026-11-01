@@ -16,7 +16,7 @@ const packuments: Record<string, RegistryPackument> = {
   next: { versions: { '16.9.3': {} } },
   payload: {
     'dist-tags': { canary: '4.0.0-canary.20' },
-    versions: { '4.0.0-canary.20': { engines: { node: '>=24.15.0' } } },
+    versions: { '4.0.0-canary.20': { engines: { node: '>=24.22.1' } } },
   },
 }
 

@@ -4,7 +4,7 @@ import type { NotFoundRouteProps } from '@tanstack/react-router'
 
 import { NotFoundClient, useRouteTransition } from '@payloadcms/ui'
 import { useLoaderData } from '@tanstack/react-router'
-import { Fragment, type ReactNode, useDeferredValue, useEffect } from 'react'
+import { Fragment, useDeferredValue, useLayoutEffect } from 'react'
 
 export function AdminPage() {
   // Note: React key intentionally omitted here so the persistent template (nav, header) doesn't remount and flash on navigation.
@@ -18,7 +18,8 @@ export function AdminPage() {
   const { holdRouteTransition } = useRouteTransition()
   const isRscPayloadDeferred = rscPayload !== data?.rscPayload
 
-  useEffect(() => {
+  // Register before the router acknowledges this commit so navigation can await the deferred view.
+  useLayoutEffect(() => {
     if (!isRscPayloadDeferred) {
       return
     }
@@ -28,10 +29,10 @@ export function AdminPage() {
     return () => releaseRouteTransition()
   }, [holdRouteTransition, isRscPayloadDeferred])
 
-  return <Fragment>{rscPayload}</Fragment>
+  return <Fragment>{rscPayload?.page}</Fragment>
 }
 
-type AdminNotFoundData = { routeKey?: string; rscPayload?: ReactNode }
+type AdminNotFoundData = { routeKey?: string; rscPayload?: { page: React.ReactNode } }
 
 export function AdminNotFound({ data }: NotFoundRouteProps) {
   // TanStack exposes not-found data as unknown; this route only receives the shape thrown below.
@@ -39,5 +40,5 @@ export function AdminNotFound({ data }: NotFoundRouteProps) {
   if (!rscPayload) {
     return <NotFoundClient />
   }
-  return <Fragment key={routeKey}>{rscPayload}</Fragment>
+  return <Fragment key={routeKey}>{rscPayload.page}</Fragment>
 }

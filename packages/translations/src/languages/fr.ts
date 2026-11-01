@@ -305,6 +305,7 @@ export const frTranslations: DefaultTranslationsObject = {
     and: 'Et',
     anotherUser: 'Un autre utilisateur',
     anotherUserTakenOver: 'Un autre utilisateur a pris en charge la modification de ce document.',
+    apiResponse: 'Réponse de l’API',
     applyChanges: 'Appliquer les modifications',
     ascending: 'Ascendant',
     auto: 'Automatique',
@@ -377,6 +378,13 @@ export const frTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Ce document a récemment été mis à jour par un autre utilisateur. Votre vue est obsolète.',
     documents: 'Documents',
+    dragCancelled: 'Déplacement de {{label}} annulé.',
+    dragDropped: '{{label}} déposé. Position {{position}} sur {{count}}.',
+    dragInstructions:
+      'Appuyez sur Space ou Enter pour saisir une ligne. Utilisez les flèches pour la déplacer. Avec VoiceOver, désactivez Quick Nav et utilisez Command + les flèches. Appuyez sur Space ou Enter pour déposer, ou sur Escape pour annuler.',
+    dragMoved: '{{label}}: {{direction}}. Position {{position}} sur {{count}}.',
+    dragPickedUp: '{{label}} saisi. Position {{position}} sur {{count}}.',
+    dragToMove: 'Faire glisser pour déplacer',
     dragToReorder: 'Faites glisser pour réorganiser',
     duplicate: 'Dupliquer',
     duplicateWithoutSaving: 'Dupliquer sans enregistrer les modifications',
@@ -492,6 +500,7 @@ export const frTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Réindexation de toutes les {{collections}}.',
     reloadDocument: 'Recharger le document',
     remove: 'Retirer',
+    removeFilter: 'Supprimer le filtre',
     rename: 'Renommer',
     replaceRow: 'Remplacer la ligne',
     requiredFields: 'Les champs marqués d’un * sont obligatoires.',
@@ -586,6 +595,7 @@ export const frTranslations: DefaultTranslationsObject = {
     yes: 'Oui',
   },
   hierarchy: {
+    folderLocation: 'Emplacement du dossier',
     goTo: 'Aller à « {{name}} »',
     itemsMovedTo: '{{title}} déplacé vers {{destination}}',
     itemsMovedToRoot: '{{title}} déplacé à la racine',

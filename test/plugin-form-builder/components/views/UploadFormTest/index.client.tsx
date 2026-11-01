@@ -97,13 +97,11 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
         for (const item of items) {
           // Each item is polymorphic: { relationTo, value: rawId | populatedDoc }
           const unwrapped =
-            typeof item === 'object' && item !== null && 'value' in item
-              ? (item as { value: unknown }).value
-              : item
+            typeof item === 'object' && item !== null && 'value' in item ? item.value : item
           // Unwrapped may be a populated Payload document — extract its id
           const id =
             typeof unwrapped === 'object' && unwrapped !== null && 'id' in unwrapped
-              ? String((unwrapped as { id: unknown }).id)
+              ? String(unwrapped.id)
               : String(unwrapped)
           const collection =
             typeof item === 'object' && item !== null && 'relationTo' in item

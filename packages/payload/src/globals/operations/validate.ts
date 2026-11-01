@@ -108,7 +108,7 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
     collection: null,
     docWithLocales,
     global: globalConfig,
-    incomingData: incomingData as JsonObject | undefined,
+    incomingData,
     onValidationData,
     originalDoc,
     overrideAccess,

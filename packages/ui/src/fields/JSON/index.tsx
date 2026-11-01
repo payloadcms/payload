@@ -60,7 +60,8 @@ const JSONFieldComponent: React.FC<JSONFieldClientProps> = (props) => {
     )
 
   const inputChangeFromRef = React.useRef<'formState' | 'internalEditor'>('formState')
-  const [recalculatedHeightAt, setRecalculatedHeightAt] = useState<number | undefined>(Date.now())
+  // A counter that tells CodeEditor to recalculate its height
+  const [recalculatedHeightAt, setRecalculatedHeightAt] = useState(0)
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -139,7 +140,7 @@ const JSONFieldComponent: React.FC<JSONFieldClientProps> = (props) => {
       const newStringValue = formatJSON(value ?? initialValue)
       if (newStringValue !== stringValueRef.current) {
         stringValueRef.current = newStringValue
-        setRecalculatedHeightAt(Date.now())
+        setRecalculatedHeightAt((count) => count + 1)
       }
     }
 

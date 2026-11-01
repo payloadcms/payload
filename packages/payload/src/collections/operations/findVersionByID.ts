@@ -253,10 +253,10 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   if (collectionConfig.upload) {
     result.version = markHistoricalFileURLs({
       collectionSlug: collectionConfig.slug,
-      doc: result.version as Record<string, unknown>,
+      doc: result.version,
       req,
       versionID: result.id,
-    }) as TData
+    })
   }
 
   // /////////////////////////////////////

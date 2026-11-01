@@ -40,9 +40,9 @@ export default buildConfig({
 
 ## Client-side Environments
 
-For security and safety reasons, the [Admin Panel](../admin/overview) does **not** include Environment Variables in its _client-side_ bundle by default. But, Next.js provides a mechanism to expose Environment Variables to the client-side bundle when needed.
+For security and safety reasons, the [Admin Panel](../admin/overview) does **not** include Environment Variables in its _client-side_ bundle by default. But, both Next.js and TanStack Start provide a mechanism to expose Environment Variables to the client-side bundle when needed.
 
-If you are building a [Custom Component](../custom-components/overview) and need to access Environment Variables from the client-side, you can do so by prefixing them with `NEXT_PUBLIC_`.
+If you are building a [Custom Component](../custom-components/overview) and need to access Environment Variables from the client-side, you can do so by prefixing them with `NEXT_PUBLIC_` on Next.js, or with `VITE_` on TanStack Start.
 
 <Banner type="warning">
   **Important:** Be careful about what variables you provide to your client-side
@@ -73,6 +73,27 @@ const MyClientComponent = () => {
 ```
 
 For more information, check out the [Next.js documentation](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables).
+
+On TanStack Start, the same rule applies but the mechanism is Vite's. Prefix any variable you want exposed to the client-side bundle with `VITE_`, then read it from `import.meta.env`:
+
+```bash
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_XXXXXXXXXXXXXXXXXX
+```
+
+```tsx
+'use client'
+import React from 'react'
+
+const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY // highlight-line
+
+const MyClientComponent = () => {
+  // do something with the key
+
+  return <div>My Client Component</div>
+}
+```
+
+For more information, check out the [Vite documentation](https://vite.dev/guide/env-and-mode).
 
 ## Outside of Next.js
 

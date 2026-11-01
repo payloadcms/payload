@@ -51,7 +51,7 @@ const getTenantAccessResult = ({
 
   const user = args.req.user
 
-  if (!user || user.collection !== adminUsersSlug || userHasAccessToAllTenants(user as User)) {
+  if (!user || user.collection !== adminUsersSlug || userHasAccessToAllTenants(user)) {
     return finish(accessResult)
   }
 

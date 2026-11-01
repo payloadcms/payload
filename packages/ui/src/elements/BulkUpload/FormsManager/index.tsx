@@ -556,33 +556,18 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           if (missingFile || exceedsLimit || missingFilename) {
             currentForms[i].formState.file.valid = false
 
-            // File/Blob objects cannot be serialized via the RSC flight protocol,
-            // so replace with a plain object before calling the server function.
-            const originalFileValue = currentForms[i].formState.file?.value
-            const formStateForServer = { ...currentForms[i].formState }
-            if (originalFileValue instanceof File) {
-              formStateForServer.file = {
-                ...formStateForServer.file,
-                value: { name: originalFileValue.name },
-              }
-            }
-
             // Need to get the field state to extract count since field errors
             // are not returned when file is missing or exceeds limit
             const { state: newState } = await getFormState({
               collectionSlug,
               docPermissions,
               docPreferences: null,
-              formState: formStateForServer,
+              formState: currentForms[i].formState,
               operation: 'update',
               schemaPath: collectionSlug,
             })
 
             if (newState) {
-              if (originalFileValue instanceof File && newState.file) {
-                newState.file = { ...newState.file, value: originalFileValue }
-              }
-
               currentForms[i] = {
                 errorCount: Object.values(newState).reduce(
                   (acc, value) => (value?.valid === false ? acc + 1 : acc),
@@ -714,14 +699,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         }
 
         if (hasSubmitted) {
-          // File/Blob objects cannot be serialized across the server-function
-          // boundary (RSC flight / TanStack seroval), so the `file` value is
-          // dropped during the `getFormState` round-trip. Capture it first and
-          // re-attach it afterwards so the file survives — mirroring the
-          // save-retry path below; without this the next save omits the file
-          // entirely and the server responds "No files were uploaded".
-          const originalFileValue = forms[i].formState.file?.value
-
           const { state } = await getFormState({
             collectionSlug,
             docPermissions,
@@ -730,10 +707,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             operation: 'create',
             schemaPath: collectionSlug,
           })
-
-          if (originalFileValue instanceof File && state.file) {
-            state.file = { ...state.file, value: originalFileValue }
-          }
 
           const newFormErrorCount = Object.values(state).reduce(
             (acc, value) => (value?.valid === false ? acc + 1 : acc),

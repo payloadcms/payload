@@ -16,7 +16,7 @@ database_url="$(env_value DATABASE_URL)"
 
 echo "==> Connecting to MongoDB (credentials hidden): $(sed -E 's#://[^@]+@#://***@#' <<<"$database_url")"
 
-docker run --rm mongo:8 mongosh "$database_url" --quiet --eval '
+docker run --rm --add-host host.docker.internal:host-gateway mongo:8 mongosh "$database_url" --quiet --eval '
   const ping = db.runCommand({ ping: 1 })
   const info = db.runCommand({ connectionStatus: 1 }).authInfo.authenticatedUsers
   print(`ping ok: ${ping.ok === 1}`)

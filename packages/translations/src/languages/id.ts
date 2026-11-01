@@ -296,6 +296,7 @@ export const idTranslations: DefaultTranslationsObject = {
     and: 'Dan',
     anotherUser: 'Pengguna lain',
     anotherUserTakenOver: 'Pengguna lain telah mengambil alih pengeditan dokumen ini.',
+    apiResponse: 'Respons API',
     applyChanges: 'Terapkan Perubahan',
     ascending: 'Naik',
     auto: 'Otomatis',
@@ -368,6 +369,13 @@ export const idTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Dokumen ini baru-baru ini diperbarui oleh pengguna lain. Tampilan Anda sudah usang.',
     documents: 'Dokumen',
+    dragCancelled: 'Penyeretan {{label}} dibatalkan.',
+    dragDropped: '{{label}} diletakkan. Posisi {{position}} dari {{count}}.',
+    dragInstructions:
+      'Tekan Space atau Enter untuk mengangkat baris. Gunakan tombol panah untuk memindahkannya. Dengan VoiceOver, nonaktifkan Quick Nav dan gunakan Command + tombol panah. Tekan Space atau Enter untuk meletakkan, atau Escape untuk membatalkan.',
+    dragMoved: '{{label}}: {{direction}}. Posisi {{position}} dari {{count}}.',
+    dragPickedUp: '{{label}} diangkat. Posisi {{position}} dari {{count}}.',
+    dragToMove: 'Seret untuk memindahkan',
     dragToReorder: 'Seret untuk mengurutkan ulang',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Duplikat tanpa menyimpan perubahan',
@@ -482,6 +490,7 @@ export const idTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Mengindeks ulang semua {{collections}}.',
     reloadDocument: 'Muat ulang dokumen',
     remove: 'Hapus',
+    removeFilter: 'Hapus filter',
     rename: 'Ganti Nama',
     replaceRow: 'Ganti Baris',
     requiredFields: 'Kolom yang ditandai dengan * wajib diisi.',
@@ -576,6 +585,7 @@ export const idTranslations: DefaultTranslationsObject = {
     yes: 'Ya',
   },
   hierarchy: {
+    folderLocation: 'Lokasi folder',
     goTo: 'Buka "{{name}}"',
     itemsMovedTo: '{{title}} dipindahkan ke {{destination}}',
     itemsMovedToRoot: '{{title}} dipindahkan ke akar',

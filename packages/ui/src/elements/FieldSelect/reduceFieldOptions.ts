@@ -43,10 +43,10 @@ const getPlainTextFieldLabel = (field: ClientField, i18n?: I18nClient): string =
 export const ignoreFromBulkEdit = (field: ClientField): boolean =>
   Boolean(
     (fieldAffectsData(field) || field.type === 'ui') &&
-      (isFieldDisabled(field, 'bulkEdit') ||
-        field.unique ||
-        fieldIsHiddenOrDisabled(field) ||
-        ('readOnly' in field && field.readOnly)),
+    (isFieldDisabled(field, 'bulkEdit') ||
+      field.unique ||
+      fieldIsHiddenOrDisabled(field) ||
+      ('readOnly' in field && field.readOnly)),
   )
 
 export const reduceFieldOptions = ({

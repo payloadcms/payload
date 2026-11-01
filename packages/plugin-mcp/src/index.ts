@@ -29,7 +29,7 @@ export const mcpPlugin = definePlugin<MCPPluginConfig>({
     const registered = plugins['@payloadcms/plugin-mcp']
     if (registered) {
       // @ts-expect-error
-      registered.sanitizedOptions = pluginConfig as unknown as typeof registered.options
+      registered.sanitizedOptions = pluginConfig
     }
 
     if (pluginConfig.disabled) {

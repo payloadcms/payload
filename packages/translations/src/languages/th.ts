@@ -27,8 +27,7 @@ export const thTranslations: DefaultTranslationsObject = {
     failedToUnlock: 'ไม่สามารถปลดล็อกได้',
     forceUnlock: 'ปลดล็อกบัญชี',
     forgotPassword: 'ลืมรหัสผ่าน',
-    forgotPasswordEmailInstructions:
-      'กรุณาใส่อีเมลของคุณ ระบบจะส่งวิธีการเปลี่ยนรหัสผ่านไปให้คุณทางอีเมล',
+    forgotPasswordEmailInstructions: 'กรุณาใส่อีเมลของคุณ ระบบจะส่งวิธีการเปลี่ยนรหัสผ่านไปให้คุณทางอีเมล',
     forgotPasswordQuestion: 'ลืมรหัสผ่าน?',
     forgotPasswordUsernameInstructions:
       'กรุณากรอกชื่อผู้ใช้ของคุณที่ด้านล่าง คำแนะนำเกี่ยวกับวิธีการรีเซ็ตรหัสผ่านของคุณจะถูกส่งไปยังที่อยู่อีเมลที่เชื่อมโยงกับชื่อผู้ใช้ของคุณ',
@@ -70,8 +69,7 @@ export const thTranslations: DefaultTranslationsObject = {
     unableToVerify: 'ไม่สามารถยืนยันบัญชีได้',
     username: 'ชื่อผู้ใช้',
     usernameNotValid: 'ชื่อผู้ใช้ที่ให้มาไม่ถูกต้อง',
-    verificationFailedRequestNew:
-      'เราไม่สามารถยืนยันบัญชีของคุณได้ กรุณาขออีเมลยืนยันใหม่และลองอีกครั้ง',
+    verificationFailedRequestNew: 'เราไม่สามารถยืนยันบัญชีของคุณได้ กรุณาขออีเมลยืนยันใหม่และลองอีกครั้ง',
     verified: 'ยืนยันบััญชีแล้ว',
     verifiedSuccessfully: 'ยืนยันบัญชีสำเร็จ',
     verify: 'ยืนยันบัญชี',
@@ -120,8 +118,7 @@ export const thTranslations: DefaultTranslationsObject = {
     widgetDropFilesToUpload: 'ลากและวางไฟล์',
     widgetInvalidCollection: 'Collection "{{collection}}" ไม่มีอยู่ในระบบ',
     widgetInvalidFilterField: 'ฟิลด์ตัวกรอง "{{field}}" ไม่มีอยู่ใน Collection "{{collection}}"',
-    widgetInvalidSortField:
-      'เขตข้อมูลเรียงลำดับ "{{field}}" ไม่มีอยู่ใน Collection "{{collection}}"',
+    widgetInvalidSortField: 'เขตข้อมูลเรียงลำดับ "{{field}}" ไม่มีอยู่ใน Collection "{{collection}}"',
     widgetLimitLabel: 'จำกัด',
     widgetNonSortableSortField:
       'ไม่สามารถจัดเรียง field "{{field}}" ใน Collection "{{collection}}" ได้',
@@ -153,8 +150,7 @@ export const thTranslations: DefaultTranslationsObject = {
     correctInvalidFields: 'โปรดแก้ไขช่องที่ไม่ถูกต้อง',
     deletingFile: 'เกิดปัญหาระหว่างการลบไฟล์',
     deletingTitle: 'เกิดปัญหาระหว่างการลบ {{title}} โปรดตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้ง',
-    documentNotFound:
-      'ไม่พบเอกสารที่มี ID {{id}} อาจจะถูกลบหรือไม่เคยมีอยู่ หรือคุณอาจไม่มีสิทธิ์เข้าถึง',
+    documentNotFound: 'ไม่พบเอกสารที่มี ID {{id}} อาจจะถูกลบหรือไม่เคยมีอยู่ หรือคุณอาจไม่มีสิทธิ์เข้าถึง',
     emailOrPasswordIncorrect: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
     failedToResetLayout: 'ไม่สามารถรีเซ็ตเค้าโครงได้',
     failedToSaveLayout: 'ไม่สามารถบันทึกเค้าโครงได้',
@@ -162,8 +158,7 @@ export const thTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'ช่องต่อไปนี้ไม่ถูกต้อง:',
     followingFieldsInvalid_other: 'ช่องต่อไปนี้ไม่ถูกต้อง:',
     incorrectCollection: 'Collection ไม่ถูกต้อง',
-    insufficientClipboardPermissions:
-      'การเข้าถึงคลิปบอร์ดถูกปฏิเสธ กรุณาตรวจสอบสิทธิ์การเข้าถึงคลิปบอร์ดของคุณ',
+    insufficientClipboardPermissions: 'การเข้าถึงคลิปบอร์ดถูกปฏิเสธ กรุณาตรวจสอบสิทธิ์การเข้าถึงคลิปบอร์ดของคุณ',
     invalidClipboardData: 'ข้อมูลคลิปบอร์ดไม่ถูกต้อง',
     invalidFileType: 'ประเภทของไฟล์ไม่ถูกต้อง',
     invalidFileTypeValue: 'ประเภทของไฟล์ไม่ถูกต้อง: {{value}}',
@@ -185,8 +180,7 @@ export const thTranslations: DefaultTranslationsObject = {
     noUser: 'ไม่พบผู้ใช้',
     previewing: 'เกิดปัญหาระหว่างการแสดงตัวอย่างเอกสาร',
     problemUploadingFile: 'เกิดปัญหาระหว่างการอัปโหลดไฟล์',
-    restoringTitle:
-      'เกิดข้อผิดพลาดขณะกำลังคืนค่า {{title}} กรุณาตรวจสอบการเชื่อมต่อของคุณและลองอีกครั้ง',
+    restoringTitle: 'เกิดข้อผิดพลาดขณะกำลังคืนค่า {{title}} กรุณาตรวจสอบการเชื่อมต่อของคุณและลองอีกครั้ง',
     revertingDocument: 'เกิดปัญหาขณะกลับไปยังเอกสารนี้',
     tokenInvalidOrExpired: 'Token ไม่ถูกต้องหรือหมดอายุ',
     tokenNotProvided: 'ไม่ได้รับโทเค็น',
@@ -286,6 +280,7 @@ export const thTranslations: DefaultTranslationsObject = {
     and: 'และ',
     anotherUser: 'ผู้ใช้อื่น',
     anotherUserTakenOver: 'ผู้ใช้อื่นเข้าครอบครองการแก้ไขเอกสารนี้แล้ว',
+    apiResponse: 'การตอบกลับ API',
     applyChanges: 'ใช้การเปลี่ยนแปลง',
     ascending: 'น้อยไปมาก',
     auto: 'อัตโนมัติ',
@@ -315,16 +310,14 @@ export const thTranslations: DefaultTranslationsObject = {
     confirmReindexAll: 'ทำการจัดทำดัชนีใหม่ทั้งหมดในทุกคอลเลกชัน?',
     confirmReindexDescription:
       'การดำเนินการนี้จะลบดัชนีที่มีอยู่และทำการจัดทำดัชนีใหม่ในเอกสารของคอลเลกชัน {{collections}}.',
-    confirmReindexDescriptionAll:
-      'การดำเนินการนี้จะลบดัชนีที่มีอยู่และทำการจัดทำดัชนีใหม่ในเอกสารของทุกคอลเลกชัน.',
+    confirmReindexDescriptionAll: 'การดำเนินการนี้จะลบดัชนีที่มีอยู่และทำการจัดทำดัชนีใหม่ในเอกสารของทุกคอลเลกชัน.',
     confirmRestoration: 'ยืนยันการคืนค่าให้ครบถ้วน',
     copied: 'คัดลอกแล้ว',
     copy: 'คัดลอก',
     copyField: 'คัดลอกฟิลด์',
     copying: 'การคัดลอก',
     copyRow: 'คัดลอกแถว',
-    copyWarning:
-      'คุณกำลังจะเขียนทับ {{to}} ด้วย {{from}} สำหรับ {{label}} {{title}}. คุณแน่ใจหรือไม่?',
+    copyWarning: 'คุณกำลังจะเขียนทับ {{to}} ด้วย {{from}} สำหรับ {{label}} {{title}}. คุณแน่ใจหรือไม่?',
     create: 'สร้าง',
     created: 'ถูกสร้างเมื่อ',
     createdAt: 'สร้างเมื่อ',
@@ -355,9 +348,15 @@ export const thTranslations: DefaultTranslationsObject = {
     documentIsTrashed: 'ป้ายนี้ {{label}} ถูกทำให้เป็นขยะและอ่านอย่างเดียว',
     documentLocked: 'เอกสารถูกล็อค',
     documentModified: 'เอกสารถูกแก้ไข',
-    documentOutOfDate:
-      'เอกสารนี้ได้รับการปรับปรุงเมื่อเร็ว ๆ นี้โดยผู้ใช้คนอื่น มุมมองของคุณล้าสมัยแล้ว',
+    documentOutOfDate: 'เอกสารนี้ได้รับการปรับปรุงเมื่อเร็ว ๆ นี้โดยผู้ใช้คนอื่น มุมมองของคุณล้าสมัยแล้ว',
     documents: 'เอกสาร',
+    dragCancelled: 'ยกเลิกการลาก {{label}} แล้ว',
+    dragDropped: 'วาง {{label}} แล้ว ตำแหน่ง {{position}} จาก {{count}}',
+    dragInstructions:
+      'กด Space หรือ Enter เพื่อหยิบแถว ใช้ปุ่มลูกศรเพื่อย้าย เมื่อใช้ VoiceOver ให้ปิด Quick Nav และใช้ Command + ปุ่มลูกศร กด Space หรือ Enter เพื่อวาง หรือ Escape เพื่อยกเลิก',
+    dragMoved: '{{label}}: {{direction}}. ตำแหน่ง {{position}} จาก {{count}}',
+    dragPickedUp: 'หยิบ {{label}} แล้ว ตำแหน่ง {{position}} จาก {{count}}',
+    dragToMove: 'ลากเพื่อย้าย',
     dragToReorder: 'ลากเพื่อจัดลำดับใหม่',
     duplicate: 'สำเนา',
     duplicateWithoutSaving: 'สำเนาโดยไม่บันทึกการแก้ไข',
@@ -433,8 +432,7 @@ export const thTranslations: DefaultTranslationsObject = {
     noMatchesFound: 'ไม่พบผลลัพธ์สำหรับการค้นหานี้',
     none: 'ไม่มี',
     noOptions: 'ไม่มีตัวเลือก',
-    noResults:
-      'ไม่พบ {{label}} เนื่องจากยังไม่มี {{label}} หรือไม่มี {{label}} ใดตรงกับการกรองด้านบน',
+    noResults: 'ไม่พบ {{label}} เนื่องจากยังไม่มี {{label}} หรือไม่มี {{label}} ใดตรงกับการกรองด้านบน',
     noResultsDescription: 'อาจไม่มีอยู่หรือไม่ตรงกับตัวกรองที่คุณระบุไว้ด้านบน',
     noResultsFound: 'ไม่มีผลลัพธ์.',
     notFound: 'ไม่พบ',
@@ -470,6 +468,7 @@ export const thTranslations: DefaultTranslationsObject = {
     reindexingAll: 'กำลังทำการจัดทำดัชนีใหม่ทั้งหมดใน {{collections}}.',
     reloadDocument: 'โหลดเอกสารใหม่',
     remove: 'ลบ',
+    removeFilter: 'นำตัวกรองออก',
     rename: 'เปลี่ยนชื่อ',
     replaceRow: 'แทนที่แถว',
     requiredFields: 'จำเป็นต้องกรอกช่องที่มีเครื่องหมาย *',
@@ -561,6 +560,7 @@ export const thTranslations: DefaultTranslationsObject = {
     yes: 'ใช่',
   },
   hierarchy: {
+    folderLocation: 'ตำแหน่งโฟลเดอร์',
     goTo: 'ไปที่ "{{name}}"',
     itemsMovedTo: '{{title}} ย้ายไปที่ {{destination}}',
     itemsMovedToRoot: '{{title}} ถูกย้ายไปยังราก',
@@ -576,14 +576,12 @@ export const thTranslations: DefaultTranslationsObject = {
     additionalInstructions: 'คำแนะนำเพิ่มเติม',
     collectionDescription:
       'เพิ่มคำแนะนำที่กำหนดเองสำหรับคอลเลกชัน {{label}} เพื่อช่วยให้ LLM ปรับคำตอบให้เหมาะกับพรอมต์ได้ดียิ่งขึ้น',
-    collectionSystemDescription:
-      'คำแนะนำระบบเหล่านี้มาจากไฟล์การกำหนดค่าของคอลเลกชันและจะรวมไว้เสมอ',
+    collectionSystemDescription: 'คำแนะนำระบบเหล่านี้มาจากไฟล์การกำหนดค่าของคอลเลกชันและจะรวมไว้เสมอ',
     editInstructions: 'แก้ไขคำแนะนำ LLM',
     global: 'เอกสารส่วนกลาง',
     globalDescription:
       'เพิ่มคำแนะนำที่กำหนดเองสำหรับเอกสารส่วนกลาง {{label}} เพื่อช่วยให้ LLM ปรับคำตอบให้เหมาะกับพรอมต์ได้ดียิ่งขึ้น',
-    globalSystemDescription:
-      'คำแนะนำระบบเหล่านี้มาจากไฟล์การกำหนดค่าของเอกสารส่วนกลางและจะรวมไว้เสมอ',
+    globalSystemDescription: 'คำแนะนำระบบเหล่านี้มาจากไฟล์การกำหนดค่าของเอกสารส่วนกลางและจะรวมไว้เสมอ',
     instructions: 'คำแนะนำ LLM',
     systemInstructions: 'คำแนะนำระบบ (อ่านอย่างเดียว)',
     targetCannotBeChanged: 'ไม่สามารถเปลี่ยนเป้าหมายของคำแนะนำได้',
@@ -691,10 +689,8 @@ export const thTranslations: DefaultTranslationsObject = {
   version: {
     type: 'ประเภท',
     aboutToPublishSelection: 'คุณกำลังจะเผยแพร่ {{label}} ทั้งหมดในส่วนที่เลือก คุณแน่ใจไหม?',
-    aboutToRestore:
-      'คุณกำลังจะคืนค่าเอกสาร {{label}} นี้กลับไปอยู่ในเวอร์ชันเมื่อวันที่ {{versionDate}}',
-    aboutToRestoreGlobal:
-      'คุณกำลังจะคืนค่า global {{label}} กลับไปอยู่ในเวอร์ชันเมื่อวันที่ {{versionDate}}.',
+    aboutToRestore: 'คุณกำลังจะคืนค่าเอกสาร {{label}} นี้กลับไปอยู่ในเวอร์ชันเมื่อวันที่ {{versionDate}}',
+    aboutToRestoreGlobal: 'คุณกำลังจะคืนค่า global {{label}} กลับไปอยู่ในเวอร์ชันเมื่อวันที่ {{versionDate}}.',
     aboutToRevertToPublished:
       'คุณกำลังจะย้อนการเปลี่ยนแปลงของเอกสารนี้ไปยังเวอร์ชันที่เผยแพร่อยู่ คุณต้องการดำเนินการต่อหรือไม่?',
     aboutToUnpublish: 'คุณกำลังจะยกเลิกเผยแพร่เอกสารนี้ คุณต้องการดำเนินการต่อหรือไม่?',

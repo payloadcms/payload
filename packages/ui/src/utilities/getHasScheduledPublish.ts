@@ -27,8 +27,8 @@ export const getHasScheduledPublish = async ({
 
   const canSchedulePublish = Boolean(
     hasScheduledPublishEnabled(entityConfig) &&
-      hasPublishPermission &&
-      (globalSlug || (collectionSlug && id)),
+    hasPublishPermission &&
+    (globalSlug || (collectionSlug && id)),
   )
 
   if (!canSchedulePublish) {

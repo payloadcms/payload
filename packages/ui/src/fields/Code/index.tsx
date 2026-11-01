@@ -49,7 +49,8 @@ const CodeFieldComponent: React.FC<CodeFieldClientProps> = (props) => {
     )
 
   const inputChangeFromRef = React.useRef<'formState' | 'internalEditor'>('formState')
-  const [recalculatedHeightAt, setRecalculatedHeightAt] = useState<number | undefined>(Date.now())
+  // A counter that tells CodeEditor to recalculate its height
+  const [recalculatedHeightAt, setRecalculatedHeightAt] = useState(0)
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -99,7 +100,7 @@ const CodeFieldComponent: React.FC<CodeFieldClientProps> = (props) => {
     if (inputChangeFromRef.current === 'formState') {
       stringValueRef.current =
         (value || initialValue) !== undefined ? (value ?? initialValue) : undefined
-      setRecalculatedHeightAt(Date.now())
+      setRecalculatedHeightAt((count) => count + 1)
     }
 
     inputChangeFromRef.current = 'formState'

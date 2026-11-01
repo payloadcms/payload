@@ -177,12 +177,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   if (id) {
     return (
       <Fragment>
-        <PopupList.Button
-          id={buttonId}
-          onClick={() => {
-            openModal(modalSlug)
-          }}
-        >
+        <PopupList.Button id={buttonId} onClick={() => openModal(modalSlug)}>
           {t('general:delete')}
         </PopupList.Button>
         <ConfirmationModal

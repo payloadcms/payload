@@ -50,7 +50,7 @@ test.suite('SQL migrations', { db: (adapter) => adapter === 'postgres' }, () => 
     await payload.db.migrate()
     await payload.db.migrateDown()
 
-    await payload.db.dropDatabase({ adapter: payload.db as any })
+    await payload.db.dropDatabase({ adapter: payload.db })
     await payload.destroy()
   })
 })

@@ -401,7 +401,7 @@ test.suite('@payloadcms/sdk', { config: './config.ts', resetBetweenTests: false 
 
     await payload.updateGlobal({ slug: 'global', data: { text: 'new' }, overrideAccess: true })
 
-    const { version: result } = await sdk.restoreGlobalVersion({
+    const result = await sdk.restoreGlobalVersion({
       id: currentVersion.id,
       slug: 'global',
     })

@@ -364,7 +364,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
           {data?.filename && !removedFile ? (
             <FilePreview
               collectionSlug={collectionSlug}
-              data={data as Record<string, unknown>}
+              data={data}
               imageCacheTag={imageCacheTag}
               selectedSize={selectedSize}
               selectedSizeData={selectedSizeData}

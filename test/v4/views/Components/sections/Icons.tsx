@@ -1,6 +1,47 @@
 'use client'
 
-import { AlignJustifiedIcon, ArrowIcon, CalendarIcon, CheckIcon, ChevronIcon, CircledXIcon, CirclePlusIcon, ClipboardIcon, CloseMenuIcon, CodeBlockIcon, CopyIcon, DocumentIcon, DuplicateIcon, EditIcon, EyeIcon, FilterIcon, FolderIcon, GearIcon, GridViewIcon, LineIcon, LinkIcon, LockIcon, LockOpenIcon, LogOutIcon, MinimizeMaximizeIcon, MoreIcon, MoveFolderIcon, NewTabIcon, PeopleIcon, PlusIcon, RefreshIcon, SearchIcon, SortDownIcon, SpinnerIcon, SwapIcon, TagIcon, ThreeDotsIcon, TrashIcon, WriteIcon, XIcon } from '@payloadcms/ui'
+import {
+  AlignJustifiedIcon,
+  ArrowIcon,
+  CalendarIcon,
+  CheckIcon,
+  ChevronIcon,
+  CircledXIcon,
+  CirclePlusIcon,
+  ClipboardIcon,
+  CloseMenuIcon,
+  CodeBlockIcon,
+  CopyIcon,
+  DocumentIcon,
+  DuplicateIcon,
+  EditIcon,
+  EyeIcon,
+  FilterIcon,
+  FolderIcon,
+  GearIcon,
+  GridViewIcon,
+  LineIcon,
+  LinkIcon,
+  LockIcon,
+  LockOpenIcon,
+  LogOutIcon,
+  MinimizeMaximizeIcon,
+  MoreIcon,
+  MoveFolderIcon,
+  NewTabIcon,
+  PeopleIcon,
+  PlusIcon,
+  RefreshIcon,
+  SearchIcon,
+  SortDownIcon,
+  SpinnerIcon,
+  SwapIcon,
+  TagIcon,
+  ThreeDotsIcon,
+  TrashIcon,
+  WriteIcon,
+  XIcon,
+} from '@payloadcms/ui'
 import React from 'react'
 
 import { Section } from '../shared.js'

@@ -37,7 +37,11 @@ export const validateGlobalData = ({
   req: PayloadRequest
   slug: GlobalSlug
 }): void => {
-  const schema = getGlobalInputSchema({ globalSlug: slug, req, shouldKeepDeprecatedProperties: true })
+  const schema = getGlobalInputSchema({
+    globalSlug: slug,
+    req,
+    shouldKeepDeprecatedProperties: true,
+  })
 
   validateEntityData({ slug, data, entity: 'global', partial: true, req, schema })
 }

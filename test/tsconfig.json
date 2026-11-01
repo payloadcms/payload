@@ -36,7 +36,6 @@
     "dist",
     "build",
     "node_modules",
-    "eslint.config.js",
     "dist/**/*.js",
     "**/dist/**/*.js"
   ],

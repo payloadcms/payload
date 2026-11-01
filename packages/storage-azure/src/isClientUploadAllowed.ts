@@ -3,6 +3,6 @@ export const isClientUploadAllowed = (collection?: {
 }): boolean =>
   Boolean(
     collection &&
-      typeof collection.upload === 'object' &&
-      collection.upload.allowRestrictedFileTypes,
+    typeof collection.upload === 'object' &&
+    collection.upload.allowRestrictedFileTypes,
   )

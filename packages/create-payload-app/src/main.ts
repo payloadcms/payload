@@ -58,7 +58,7 @@ export class Main {
         '--help': Boolean,
         '--local-template': String,
         '--name': String,
-        '--payload-version': String, // Install a specific Payload version or npm dist-tag (e.g. 3.40.0 or canary; default: canary)
+        '--payload-version': String, // Install a specific Payload version or npm dist-tag (e.g. 3.40.0 or beta; default: this CLI's own dist-tag)
         '--secret': String,
         '--template': String,
 

@@ -8,7 +8,7 @@ import { findOne } from '../../packages/payload/src/preferences/operations/findO
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the existing preference endpoint operations.
 import { update } from '../../packages/payload/src/preferences/operations/update.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the real document handler.
-import { getDashboardDocuments } from '../../packages/ui/src/widgets/RecentlyViewed/getDocuments.js'
+import { getActivityWidgetDocs } from '../../packages/ui/src/widgets/Activity/utils/getActivityWidgetDocs.js'
 import { test } from '../__helpers/int/vitest.js'
 
 test.suite('Pinned document preferences', { config: './config.ts' }, () => {
@@ -89,7 +89,7 @@ test.suite('Pinned document preferences', { config: './config.ts' }, () => {
       user: req.user,
       value: { items: [{ id: ticket.id, collectionSlug: 'tickets' }] },
     })
-    const result = await getDashboardDocuments({ limit: 4, page: 1, req, tab: 'pinned' })
+    const result = await getActivityWidgetDocs({ type: 'pinned', limit: 4, page: 1, req })
 
     expect(result.items).toEqual([])
     expect(result.totalDocs).toBe(0)
@@ -128,7 +128,7 @@ test.suite('Pinned document preferences', { config: './config.ts' }, () => {
         ],
       },
     })
-    const result = await getDashboardDocuments({ limit: 4, page: 1, req, tab: 'pinned' })
+    const result = await getActivityWidgetDocs({ type: 'pinned', limit: 4, page: 1, req })
 
     expect(result.totalDocs).toBe(1)
     expect(result.items.map(({ id }) => id)).toEqual([ticket.id])

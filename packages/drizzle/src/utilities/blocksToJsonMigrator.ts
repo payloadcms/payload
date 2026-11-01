@@ -25,6 +25,7 @@ import type {
   DrizzleAdapter,
 } from '../types.js'
 
+import { formatGeneratedFile } from './formatGeneratedFile.js'
 import { getTransaction } from './getTransaction.js'
 
 const DEFAULT_BATCH_SIZE = 100
@@ -705,22 +706,9 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
     }
 
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-    let output = printer.printFile(result.transformed[0])
+    writeFileSync(configPath, printer.printFile(result.transformed[0]), 'utf-8')
+    await formatGeneratedFile({ filePath: configPath, logger: this.adapter.payload.logger })
 
-    try {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-      const prettier = await dynamicImport<typeof import('prettier')>('prettier')
-      const configPath = await prettier.resolveConfigFile()
-      const config = configPath ? await prettier.resolveConfig(configPath) : {}
-      output = await prettier.format(output, { ...config, parser: 'typescript' })
-    } catch (err) {
-      this.adapter.payload.logger.error({
-        err,
-        msg: 'Could not format payload config with Prettier',
-      })
-    }
-
-    writeFileSync(configPath, output, 'utf-8')
     this.adapter.payload.logger.info(`Updated ${configPath} with blocksAsJSON: true`)
   }
 }

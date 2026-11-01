@@ -13,7 +13,4 @@ export {
   payloadAdminIndexRoute,
   payloadAdminSplatRoute,
 } from '../adapters/views/index.js'
-export {
-  createServerFunctionClient,
-  stripUnserializable,
-} from '../utilities/serverFunctionClient.js'
+export { createServerFunctionClient } from '../utilities/serverFunctionClient.js'

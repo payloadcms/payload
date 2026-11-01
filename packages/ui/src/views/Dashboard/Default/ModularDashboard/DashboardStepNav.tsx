@@ -10,6 +10,7 @@ import { Popup } from '../../../../elements/Popup/index.js'
 import * as PopupList from '../../../../elements/Popup/PopupButtonList/index.js'
 import { useStepNav } from '../../../../elements/StepNav/index.js'
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
+import { useEmbed } from '../../../../providers/Embed/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 
 export function DashboardStepNav({
@@ -31,13 +32,16 @@ export function DashboardStepNav({
 }) {
   const { t } = useTranslation()
   const { setStepNav } = useStepNav()
+  const { isEmbedded } = useEmbed()
   const uuid = useId()
   const drawerSlug = `widgets-drawer-${uuid}`
 
   useEffect(() => {
     setStepNav([
       {
-        label: (
+        label: isEmbedded ? (
+          <span>{t('general:dashboard')}</span>
+        ) : (
           <DashboardBreadcrumbDropdown
             isEditing={isEditing}
             onCancel={cancel}
@@ -49,11 +53,21 @@ export function DashboardStepNav({
         ),
       },
     ])
-  }, [isEditing, drawerSlug, cancel, resetLayout, saveLayout, setIsEditing, setStepNav])
+  }, [
+    isEditing,
+    isEmbedded,
+    drawerSlug,
+    cancel,
+    resetLayout,
+    saveLayout,
+    setIsEditing,
+    setStepNav,
+    t,
+  ])
 
   return (
     <>
-      {isEditing && (
+      {!isEmbedded && isEditing && (
         <ItemsDrawer
           drawerSlug={drawerSlug}
           items={widgets}

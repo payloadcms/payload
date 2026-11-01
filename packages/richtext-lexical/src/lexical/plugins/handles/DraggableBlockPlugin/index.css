@@ -1,4 +1,20 @@
 @layer payload-default {
+  .draggable-block-menu__button {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+    }
+  }
+
   .draggable-block-menu {
     border: none;
     border-radius: var(--radius-medium);

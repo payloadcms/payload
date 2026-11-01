@@ -1133,6 +1133,56 @@ shows whether an email was delivered.
 | A page can't use a slug that another site's page uses ("invalid: slug")  | The database still has the index from before the Sites field. Remove it as described in "Pages for several websites and apps".                                              |
 | A new Vigor product shows in English but not in the other languages      | It is published in English only. Open it and use the arrow next to **Publish in English** → **Publish all locales**.                                                        |
 
+## Running the Docker stack on a laptop
+
+To try the CMS the same way it runs on EC2 (the same scripts, the same containers), with MongoDB
+installed on the laptop:
+
+1. Install Docker Desktop (Mac, Windows) or Docker Engine (Linux). In Docker Desktop, give it at least
+   **8 GB of memory** (Settings → Resources): building the admin panel needs about 6 GB. On Windows, run
+   the scripts in WSL.
+2. In `apps/cms/.env` (no need to copy `.env.example`):
+
+   ```bash
+   DATABASE_URL=mongodb://host.docker.internal:27017/payload
+   PAYLOAD_SECRET=<openssl rand -hex 32>
+   SERVER_URL=http://localhost
+   SITE_ADDRESS=:80
+   ```
+
+   `host.docker.internal` is how containers reach the laptop: inside a container, `127.0.0.1` is the
+   container itself. If your MongoDB has a user, use
+   `mongodb://<user>:<password>@host.docker.internal:27017/payload?authSource=admin`.
+
+   **Linux only:** MongoDB must also listen on Docker's bridge address. In `/etc/mongod.conf`, set
+   `bindIp: 127.0.0.1,172.17.0.1` and restart it (`sudo systemctl restart mongod`). Docker Desktop needs
+   nothing.
+3. Check the connection, then build and start (the first build takes 10–20 minutes on a laptop):
+
+   ```bash
+   ./deploy/check-db.sh
+   ./deploy/deploy.sh
+   ```
+
+4. Open http://localhost/admin, create the first user and set up two-factor (see "Two-factor
+   authentication").
+
+Caddy takes ports 80 and 443; if another program uses them, `deploy.sh` stops with "port is already
+allocated". `docker compose down` stops the CMS; the content stays in MongoDB and uploads in the
+`payload-cms_media` volume. `deploy/setup-app-server.sh` is only for a fresh EC2: don't run it on a laptop.
+
+**The Vigor website on the same laptop.** Run it in Docker too, on another port, and point the two at
+each other through `host.docker.internal`:
+
+- In the website's folder: a `.env` with `HOST_PORT=8080`, and in its `server/.env`
+  `PAYLOAD_URL=http://host.docker.internal` (for its server) and `PAYLOAD_PUBLIC_URL=http://localhost`
+  (for images in the browser). Then `docker compose up -d --build` and open http://localhost:8080.
+- Copy its content into the CMS from here: `./deploy/import-vigor.sh http://host.docker.internal:8080`.
+  Do it while the website still shows its own content, i.e. before setting `PAYLOAD_URL`, or with
+  `PAYLOAD_URL` left empty for a moment.
+- Optional, to refresh the website on every change: `VIGOR_WEBSITE_URL=http://host.docker.internal:8080`
+  and the shared `VIGOR_WEBSITE_REVALIDATE_SECRET` in this `.env`, then `./deploy/deploy.sh`.
+
 ## Local development
 
 ```bash

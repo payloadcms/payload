@@ -158,7 +158,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const onQueryChange: ListDrawerContextProps['onQueryChange'] = useCallback(
     (query) => {
-      void refresh({ slug: selectedOption?.value, query })
+      return refresh({ slug: selectedOption?.value, query })
     },
     [refresh, selectedOption.value],
   )

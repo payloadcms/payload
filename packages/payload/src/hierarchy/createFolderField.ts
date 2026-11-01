@@ -65,5 +65,5 @@ export function createFolderField(options: CreateFolderFieldOptions): Relationsh
     label: label ?? 'Folder',
     relationTo,
     ...restOptions,
-  } as RelationshipField
+  }
 }

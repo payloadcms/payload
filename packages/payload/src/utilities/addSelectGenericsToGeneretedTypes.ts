@@ -25,7 +25,6 @@ export const addSelectGenericsToGeneratedTypes = ({
       }
     }
 
-    // eslint-disable-next-line regexp/no-unused-capturing-group
     if (line.match(/via the `definition` "([\w-]+_select)"/g)) {
       isSelectTypeToken = true
     }

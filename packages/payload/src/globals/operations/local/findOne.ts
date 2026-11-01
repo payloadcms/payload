@@ -118,7 +118,7 @@ export async function findOneGlobalLocal<
   }
 
   return findOneOperation({
-    slug: globalSlug as string,
+    slug: globalSlug,
     data,
     depth,
     disableErrors,

@@ -526,7 +526,7 @@ export const generateFileData = async <T>({
 
     const hasGeneratedProviderRepresentations = Boolean(
       providerOriginal &&
-        (fileWasTransformed || sizeResults.some((result) => Boolean(result.file))),
+      (fileWasTransformed || sizeResults.some((result) => Boolean(result.file))),
     )
     const newObjectKey =
       hasManagedCloudStorage && (shouldStageCloudFiles || hasGeneratedProviderRepresentations)
@@ -558,21 +558,19 @@ export const generateFileData = async <T>({
               staticPath: staticPath!,
             })
           : fsSafeName)
-      const original =
-        retainedOriginal ??
-        ({
-          _objectKey: providerOriginal ? providerOriginal._objectKey : newObjectKey,
-          filename: originalFilename,
-          filesize: file.size,
-          mimeType: file.mimetype,
-          prefix: providerOriginal?.prefix ?? currentFileData?.prefix,
-          url: formatAdminURL({
-            apiRoute: req.payload.config.routes.api,
-            path: `/${collectionConfig.slug}/file/${encodeURIComponent(originalFilename)}`,
-            relative: true,
-            serverURL: req.payload.config.serverURL,
-          }),
-        } as NonNullable<FileData['original']>)
+      const original = retainedOriginal ?? {
+        _objectKey: providerOriginal ? providerOriginal._objectKey : newObjectKey,
+        filename: originalFilename,
+        filesize: file.size,
+        mimeType: file.mimetype,
+        prefix: providerOriginal?.prefix ?? currentFileData?.prefix,
+        url: formatAdminURL({
+          apiRoute: req.payload.config.routes.api,
+          path: `/${collectionConfig.slug}/file/${encodeURIComponent(originalFilename)}`,
+          relative: true,
+          serverURL: req.payload.config.serverURL,
+        }),
+      }
 
       if (!retainedOriginal && isProcessableImage(file.mimetype)) {
         try {

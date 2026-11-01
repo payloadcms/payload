@@ -15,7 +15,7 @@ export const withTenancy: Plugin = (incomingConfig) => {
       ...col,
       // TODO: add the tenant relationship field to auth-enabled collections
     })),
-  } as Config
+  }
 }
 
 export default buildConfig({

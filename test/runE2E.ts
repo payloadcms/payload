@@ -1,5 +1,6 @@
 import type { ChildProcess } from 'child_process'
 
+import fs from 'fs'
 import globby from 'globby'
 import minimist from 'minimist'
 import { createServer } from 'net'
@@ -59,6 +60,12 @@ if (!suiteName) {
   const testFilePattern = screenReader ? '*screen-reader.spec.ts' : '*e2e.spec.ts'
   let files = await globby(`${path.resolve(dirname).replace(/\\/g, '/')}/**/${testFilePattern}`)
 
+  if (grep) {
+    // Booting a server per suite is slow, so skip spec files that can't match. This only works
+    // for greps that appear literally in the spec file, e.g. `@also-without-cache-components`.
+    files = files.filter((file) => fs.readFileSync(file, 'utf8').includes(grep))
+  }
+
   const totalFiles = files.length
 
   if (part) {
@@ -95,6 +102,7 @@ if (!suiteName) {
     await executePlaywright({
       bail,
       baseTestFolder,
+      grepArg: grep,
       grepInvertArg: effectiveGrepInvert,
       headedArg: headed,
       screenReaderArg: screenReader,

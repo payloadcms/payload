@@ -56,7 +56,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
     const collection: Collection = graphqlResult.collections[slug]
     const {
       config: collectionConfig,
-      config: { fields, graphQL = {} as SanitizedCollectionConfig['graphQL'], versions },
+      config: { fields, graphQL = {}, versions },
     } = collection
 
     if (!graphQL) {

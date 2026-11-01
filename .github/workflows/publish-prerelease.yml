@@ -23,7 +23,7 @@ jobs:
     name: publish-prerelease-${{ github.ref_name }}-${{ github.sha }}
     permissions:
       id-token: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@v5

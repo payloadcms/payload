@@ -14,7 +14,6 @@
     "tests",
     "test",
     "node_modules",
-    "eslint.config.js",
     "**/*.spec.*"
   ],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],

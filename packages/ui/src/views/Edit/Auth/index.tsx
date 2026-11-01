@@ -1,8 +1,6 @@
 'use client'
 
-import type { SanitizedFieldPermissions } from 'payload'
-
-import { formatAdminURL, getFieldPermissions } from 'payload/shared'
+import { flattenTopLevelFields, formatAdminURL, getFieldPermissions } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -48,35 +46,32 @@ export const Auth: React.FC<Props> = (props) => {
     config: {
       routes: { api },
     },
+    getEntityConfig,
   } = useConfig()
 
-  let showPasswordFields: SanitizedFieldPermissions = true
+  const hasPasswordField = useMemo(
+    () =>
+      flattenTopLevelFields(getEntityConfig({ collectionSlug }).fields).some(
+        (field) => field.name === 'password',
+      ),
+    [collectionSlug, getEntityConfig],
+  )
+
+  let showPasswordFields = Boolean(docPermissions[operation])
   let showUnlock = true
-  const hasPasswordFieldOverride =
-    typeof docPermissions.fields === 'object' && 'password' in docPermissions.fields
   const hasLoginFieldOverride =
     typeof docPermissions.fields === 'object' &&
     ('username' in docPermissions.fields || 'email' in docPermissions.fields)
 
-  if (hasPasswordFieldOverride) {
-    const { permissions: passwordPermissions } = getFieldPermissions({
+  if (hasPasswordField) {
+    const { operation: passwordPermission } = getFieldPermissions({
       field: { name: 'password', type: 'text' },
       operation,
       parentName: '',
       permissions: docPermissions?.fields,
     })
 
-    if (operation === 'create') {
-      showPasswordFields =
-        passwordPermissions === true ||
-        ((typeof passwordPermissions === 'object' &&
-          passwordPermissions.create) as SanitizedFieldPermissions)
-    } else {
-      showPasswordFields =
-        passwordPermissions === true ||
-        ((typeof passwordPermissions === 'object' &&
-          passwordPermissions.update) as SanitizedFieldPermissions)
-    }
+    showPasswordFields = passwordPermission
   }
 
   if (hasLoginFieldOverride) {

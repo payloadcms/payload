@@ -235,6 +235,7 @@ export const Condition: React.FC<Props> = (props) => {
         </div>
         <div className={`${baseClass}__actions`}>
           <Button
+            aria-label={t('general:removeFilter')}
             buttonStyle="ghost"
             className={`${baseClass}__actions-remove`}
             disabled={disableRemoveButton}

@@ -31,3 +31,9 @@ fb7d1be2f3325d076b7c967b1730afcef37922c2
 
 # Bump all eslint deps, lint and format
 03291472d6e427ff94e61fca0616cca7796a3a95
+
+# Switch from prettier to oxfmt, then format
+734d711bbfa100ebab0b640cf3ca44493de9fd99
+
+# Switch from eslint to oxlint, then lint everything
+f564d020910f00b53147bf6572b00ded1d045c8c

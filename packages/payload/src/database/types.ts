@@ -847,6 +847,10 @@ export type MigrationTemplateArgs = {
 export type GenerateSchemaArgs = {
   log?: boolean
   outputFile?: string
+  /**
+   * Format the generated schema with the project's oxfmt, falling back to Prettier.
+   * @default true
+   */
   prettify?: boolean
 }
 

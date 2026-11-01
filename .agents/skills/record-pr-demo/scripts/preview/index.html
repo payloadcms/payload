@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recording chrome preview</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        color: #252422;
+        background: #fff;
+      }
+      body {
+        max-width: 1120px;
+        margin: 32px auto;
+        padding: 0 24px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        border: 0;
+        border-radius: 100px;
+        padding: 10px 18px;
+        background: #f3f2ef;
+        color: inherit;
+        min-height: 40px;
+      }
+      button:focus-visible,
+      input:focus-visible {
+        outline: 2px solid #252422;
+        outline-offset: 3px;
+      }
+      button[aria-pressed='true'] {
+        background: #e2e0db;
+      }
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      .presets {
+        display: flex;
+        gap: 4px;
+      }
+      label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 40px;
+        color: #66635e;
+      }
+      input {
+        accent-color: #252422;
+      }
+      .timeline {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 16px;
+        margin-top: 20px;
+      }
+      .timeline input {
+        width: 100%;
+      }
+      output {
+        font:
+          12px/1.5 ui-monospace,
+          monospace;
+        font-variant-numeric: tabular-nums;
+      }
+      .status {
+        color: #66635e;
+        font-size: 12px;
+        margin-top: 12px;
+      }
+      #chrome {
+        overflow: hidden;
+        border-radius: 12px;
+      }
+      @media (pointer: coarse) {
+        button,
+        label {
+          min-height: 44px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="controls" aria-label="Preview controls">
+      <div class="presets" role="group" aria-label="Window size">
+        <button type="button" data-width="1280" aria-pressed="true">Desktop</button>
+        <button type="button" data-width="768" aria-pressed="false">Tablet</button>
+        <button type="button" data-width="390" aria-pressed="false">Mobile</button>
+      </div>
+      <button type="button" id="refresh">Refresh frame</button>
+      <label><input type="checkbox" id="dimensions" checked />Dimensions</label>
+      <label><input type="checkbox" id="annotation" checked />Annotation</label>
+    </div>
+    <div id="chrome"></div>
+    <div class="timeline">
+      <button type="button" id="play">Play resize</button>
+      <input
+        id="timeline"
+        type="range"
+        min="0"
+        max="5200"
+        step="1"
+        value="0"
+        aria-label="Resize timeline in milliseconds"
+      />
+      <output id="time" for="timeline">0.00 / 5.20 s</output>
+    </div>
+    <div class="status" id="status" aria-live="polite">
+      Window: 1280 × 720. Canvas: 1600 × 1000.
+    </div>
+    <script type="module" src="/preview/index.mjs"></script>
+  </body>
+</html>

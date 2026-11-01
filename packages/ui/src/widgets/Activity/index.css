@@ -1,0 +1,320 @@
+@layer payload-default {
+  .activity-widget,
+  .activity-widget__pin-picker {
+    --activity-text-secondary: color-mix(
+      in srgb,
+      var(--color-text-secondary) 75%,
+      var(--color-text)
+    );
+  }
+
+  .card.widget-card.activity-widget {
+    container-type: inline-size;
+    gap: var(--spacer-3);
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: var(--color-bg);
+  }
+
+  .activity-widget .widget-card__header {
+    position: absolute;
+    width: calc(var(--spacer-1) / 4);
+    height: calc(var(--spacer-1) / 4);
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .activity-widget__toolbar,
+  .activity-widget__tabs {
+    display: flex;
+    align-items: center;
+  }
+
+  .activity-widget__toolbar {
+    justify-content: space-between;
+    gap: var(--spacer-2);
+    flex-wrap: wrap;
+    align-content: flex-start;
+    /* Reserve the second toolbar row when pagination wraps on narrow widgets. */
+    min-block-size: calc(var(--spacer-4) * 2 + var(--spacer-2));
+  }
+
+  .activity-widget__tabs {
+    gap: var(--spacer-1);
+    flex-wrap: wrap;
+  }
+
+  .activity-widget__tab {
+    min-height: var(--spacer-4);
+    padding-inline: var(--spacer-2);
+    border: 0;
+    border-radius: var(--radius-medium);
+    background: transparent;
+    color: var(--activity-text-secondary);
+    cursor: pointer;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+    white-space: nowrap;
+  }
+
+  .activity-widget__tab[aria-pressed='true'] {
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    font-weight: var(--text-body-medium-strong-font-weight);
+  }
+
+  .activity-widget__viewport {
+    /* Read by the client for pagination. Must equal columns * rows in every tier, except for single-row tabs below. */
+    --activity-page-size: 4;
+    --activity-columns: 2;
+    --activity-rows: 2;
+    /* Match the thumbnail, two text lines, padding, metadata gap, borders, and divider. */
+    --activity-row-height: max(
+      calc(var(--spacer-6) * 5),
+      calc(
+        var(--activity-thumbnail-height) +
+          (var(--text-body-medium-line-height) + var(--spacer-2-5)) * 2 + var(--spacer-1) +
+          var(--stroke-width-small) * 3
+      )
+    );
+    --activity-thumbnail-height: calc(var(--spacer-6) * 3.5 - var(--stroke-width-small) * 2);
+    --activity-content-height: calc(
+      var(--activity-row-height) * var(--activity-rows) + var(--spacer-3) *
+        (var(--activity-rows) - 1)
+    );
+    display: grid;
+    grid-template-columns: repeat(var(--activity-columns), minmax(0, 1fr));
+    gap: var(--spacer-3);
+    min-block-size: var(--activity-content-height);
+    position: relative;
+  }
+
+  /*
+   * A tab whose items all fit in one row only reserves one row. `data-item-count` is the tab total,
+   * not the current page, so paging never changes the height. The page size stays columns * 2,
+   * which still fits every item on one page.
+   */
+  .activity-widget__viewport:is(
+    [data-item-count='0'],
+    [data-item-count='1'],
+    [data-item-count='2']
+  ) {
+    --activity-rows: 1;
+  }
+
+  /*
+   * The server renders a full batch before the page size is known, so each tier hides the cards
+   * past its page size. Items 1-4 are visible in every tier.
+   */
+  .activity-widget__item:nth-child(n + 5) {
+    display: none;
+  }
+
+  .activity-widget__pagination[data-page-size] {
+    display: none;
+  }
+
+  .activity-widget__pagination[data-page-size='4'] {
+    display: flex;
+  }
+
+  .activity-widget__error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacer-3);
+    padding: var(--spacer-3);
+    text-align: center;
+  }
+
+  .activity-widget__save-error {
+    position: absolute;
+    inset-block-start: var(--spacer-3);
+    inset-inline: var(--spacer-3);
+    padding: var(--spacer-2);
+    border-radius: var(--radius-medium);
+    background: var(--color-bg);
+  }
+
+  .activity-widget__loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .activity-widget__loading > span {
+    padding: var(--spacer-2);
+    background: var(--color-bg);
+  }
+
+  .activity-widget__loading:empty {
+    display: none;
+  }
+
+  .activity-widget__tab:focus-visible {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
+  }
+
+  @container (min-width: 400px) {
+    .activity-widget__toolbar {
+      min-block-size: var(--spacer-4);
+    }
+  }
+
+  @container (min-width: 600px) {
+    .activity-widget__viewport {
+      --activity-page-size: 6;
+      --activity-columns: 3;
+    }
+
+    .activity-widget__viewport[data-item-count='3'] {
+      --activity-rows: 1;
+    }
+
+    .activity-widget__item:nth-child(n + 5) {
+      display: block;
+    }
+
+    .activity-widget__item:nth-child(n + 7) {
+      display: none;
+    }
+
+    .activity-widget__pagination[data-page-size] {
+      display: none;
+    }
+
+    .activity-widget__pagination[data-page-size='6'] {
+      display: flex;
+    }
+  }
+
+  /*
+   * From 800px the grid is a single row of columns at least 180px wide with 16px gaps, so N columns
+   * fit from a container width of 196N - 16px. Explicit tiers keep the column count known to CSS.
+   */
+  @container (min-width: 800px) {
+    .activity-widget__viewport {
+      --activity-page-size: 4;
+      --activity-columns: 4;
+      --activity-rows: 1;
+      --activity-row-height: calc(var(--spacer-6) * 5 + var(--spacer-4));
+    }
+
+    .activity-widget__item:nth-child(n + 5) {
+      display: none;
+    }
+
+    .activity-widget__pagination[data-page-size] {
+      display: none;
+    }
+
+    .activity-widget__pagination[data-page-size='4'] {
+      display: flex;
+    }
+  }
+
+  @container (min-width: 964px) {
+    .activity-widget__viewport {
+      --activity-page-size: 5;
+      --activity-columns: 5;
+    }
+
+    .activity-widget__item:nth-child(n + 5) {
+      display: block;
+    }
+
+    .activity-widget__item:nth-child(n + 6) {
+      display: none;
+    }
+
+    .activity-widget__pagination[data-page-size] {
+      display: none;
+    }
+
+    .activity-widget__pagination[data-page-size='5'] {
+      display: flex;
+    }
+  }
+
+  @container (min-width: 1160px) {
+    .activity-widget__viewport {
+      --activity-page-size: 6;
+      --activity-columns: 6;
+    }
+
+    .activity-widget__item:nth-child(n + 5) {
+      display: block;
+    }
+
+    .activity-widget__item:nth-child(n + 7) {
+      display: none;
+    }
+
+    .activity-widget__pagination[data-page-size] {
+      display: none;
+    }
+
+    .activity-widget__pagination[data-page-size='6'] {
+      display: flex;
+    }
+  }
+
+  @container (min-width: 1356px) {
+    .activity-widget__viewport {
+      --activity-page-size: 7;
+      --activity-columns: 7;
+    }
+
+    .activity-widget__item:nth-child(n + 5) {
+      display: block;
+    }
+
+    .activity-widget__item:nth-child(n + 8) {
+      display: none;
+    }
+
+    .activity-widget__pagination[data-page-size] {
+      display: none;
+    }
+
+    .activity-widget__pagination[data-page-size='7'] {
+      display: flex;
+    }
+  }
+
+  @container (min-width: 1552px) {
+    .activity-widget__viewport {
+      --activity-page-size: 8;
+      --activity-columns: 8;
+    }
+
+    .activity-widget__item:nth-child(n + 5) {
+      display: block;
+    }
+
+    .activity-widget__item:nth-child(n + 9) {
+      display: none;
+    }
+
+    .activity-widget__pagination[data-page-size] {
+      display: none;
+    }
+
+    .activity-widget__pagination[data-page-size='8'] {
+      display: flex;
+    }
+  }
+}

@@ -1,22 +1,27 @@
 import type { RootLayoutData as UIRootLayoutData } from '@payloadcms/ui/layouts/Root/getRootLayoutData'
+import type { RenderableServerComponent } from '@tanstack/react-start/rsc'
 import type { ImportMap, SanitizedConfig, ServerProps } from 'payload'
-import type { ReactNode } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 
 import { NestProviders } from '@payloadcms/ui/layouts/NestProviders'
 import { getRootLayoutData } from '@payloadcms/ui/layouts/Root/getRootLayoutData'
-import { Outlet } from '@tanstack/react-router'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 import { createElement } from 'react'
 
-import type { SerializableRecord } from '../../utilities/toSerializable.js'
-
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Register the client boundary in the Flight model.
+import { PayloadRootProviders } from '../../exports/client/layout.js'
 import { initAdminContext } from '../../utilities/initAdminContext.server.js'
-import { toSerializable } from '../../utilities/toSerializable.js'
+import { PayloadOutlet } from './outlet.js'
 
-export type LoadLayoutDataResult = SerializableRecord
+export type LoadLayoutDataResult = {
+  layout: RenderableServerComponent<ReactElement>
+} & Pick<
+  RootLayoutData,
+  'dir' | 'highContrastMode' | 'languageCode' | 'suppressHydrationWarning' | 'theme' | 'themeSource'
+>
 
 export type RootLayoutData = {
-  /** Custom admin providers wrapping the Outlet, rendered to an RSC payload before serialization. */
+  /** Custom admin providers wrapping the Outlet. */
   providers?: ReactNode
 } & UIRootLayoutData
 
@@ -58,7 +63,7 @@ export async function getLayoutData({
     }
 
     providers = createElement(NestProviders, {
-      children: createElement(Outlet),
+      children: createElement(PayloadOutlet),
       importMap,
       providers: providerPaths,
       serverProps,
@@ -68,15 +73,7 @@ export async function getLayoutData({
   return { ...data, providers }
 }
 
-/**
- * Resolves the admin layout data for TanStack Start and returns a serializable
- * payload for the `/_payload` route loader. The framework adapter wraps this in
- * a `createServerFn` that supplies the app's `config` and generated `importMap`.
- *
- * `toSerializable` strips React elements, so the custom-providers element tree
- * (`config.admin.components.providers`) is rendered to an RSC payload separately
- * and re-attached.
- */
+/** Keeps document attributes ordinary and sends the complete layout model through Flight. */
 export async function loadLayoutData({
   config,
   importMap,
@@ -84,9 +81,16 @@ export async function loadLayoutData({
   config: SanitizedConfig
   importMap: ImportMap
 }): Promise<LoadLayoutDataResult> {
-  const { providers, ...data } = await getLayoutData({ configPromise: config, importMap })
+  const data = await getLayoutData({ configPromise: config, importMap })
+  const { dir, highContrastMode, languageCode, suppressHydrationWarning, theme, themeSource } = data
 
-  return toSerializable(data, {
-    providers: providers ? await renderServerComponent(providers as any) : undefined,
-  })
+  return {
+    dir,
+    highContrastMode,
+    languageCode,
+    layout: await renderServerComponent(createElement(PayloadRootProviders, { data })),
+    suppressHydrationWarning,
+    theme,
+    themeSource,
+  }
 }

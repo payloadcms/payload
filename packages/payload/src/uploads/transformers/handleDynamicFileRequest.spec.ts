@@ -1,3 +1,4 @@
+import { setImmediate } from 'node:timers/promises'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('./resolveUploadDocument.js', async (importOriginal) => ({
@@ -71,6 +72,8 @@ describe('handleDynamicFileRequest', () => {
         handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
           const sourceResponse: Response = await getSourceFile()
           await sourceResponse.body!.getReader().read()
+          // Drain queued stream work so the abandoned reader leaves a write blocked by backpressure.
+          await setImmediate()
           throw new Error('transform failed')
         }),
         mimeTypes: ['image/*'],
@@ -159,6 +162,7 @@ describe('handleDynamicFileRequest', () => {
         handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
           const sourceResponse: Response = await getSourceFile()
           await sourceResponse.body!.getReader().read()
+          await setImmediate()
 
           return { response: new Response('replacement'), status: 'complete' }
         }),
@@ -218,6 +222,7 @@ describe('handleDynamicFileRequest', () => {
           handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => {
             const sourceResponse: Response = await getSourceFile()
             await sourceResponse.body!.getReader().read()
+            await setImmediate()
 
             return { response: sourceResponse, status: 'continue' }
           }),
