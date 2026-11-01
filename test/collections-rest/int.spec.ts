@@ -873,6 +873,35 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
         await createPost({ restClient }) // Extra post to allow asserting totalDoc count
       })
 
+      test.describe('select field', () => {
+        test('should return 400 QueryError when querying with unknown select option', async ({
+          restClient,
+        }) => {
+          const response = await restClient.GET(`/${postsSlug}`, {
+            query: {
+              where: { mode: { not_equals: 'nope' } },
+            },
+          })
+          const result = await response.json()
+
+          expect(response.status).toEqual(400)
+          expect(result.errors).toHaveLength(1)
+          expect(result.errors[0].message).toEqual('The following path cannot be queried: mode')
+        })
+
+        test('should succeed when querying with valid select option', async ({ restClient }) => {
+          const response = await restClient.GET(`/${postsSlug}`, {
+            query: {
+              where: { mode: { equals: 'inPerson' } },
+            },
+          })
+          const result = await response.json()
+
+          expect(response.status).toEqual(200)
+          expect(Array.isArray(result.docs)).toBe(true)
+        })
+      })
+
       test.describe('regular relationship', () => {
         test('query by property value', async ({ restClient }) => {
           const response = await restClient.GET(`/${postsSlug}`, {
