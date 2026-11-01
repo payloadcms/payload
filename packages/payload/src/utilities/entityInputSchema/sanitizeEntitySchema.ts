@@ -10,6 +10,7 @@ import type { EntityInputSchema as JsonSchemaType } from './types.js'
 export const sanitizeEntitySchema = ({
   schema,
   shouldKeepDeprecatedProperties = false,
+  shouldKeepNullableContainers = false,
 }: {
   schema: JsonSchemaType
   /**
@@ -17,12 +18,16 @@ export const sanitizeEntitySchema = ({
    * that existing data that still contains them stays valid input.
    */
   shouldKeepDeprecatedProperties?: boolean
+  /** Preserve valid null array/object values when validating existing content. */
+  shouldKeepNullableContainers?: boolean
 }): JsonSchemaType => {
   // Work on a copy — the caller reuses the original schema elsewhere (e.g. when listing tools).
   let result = structuredClone(schema)
 
   // LLM ergonomics — drop the redundant `'null'` from optional arrays/objects (`['array','null']` → `'array'`).
-  result = collapseOptionalContainerTypes(result)
+  if (!shouldKeepNullableContainers) {
+    result = collapseOptionalContainerTypes(result)
+  }
 
   // LLM ergonomics — rewrite point fields from a `[number, number]` tuple into a `{ longitude, latitude }` object.
   result = pointFieldsToObjects(result)

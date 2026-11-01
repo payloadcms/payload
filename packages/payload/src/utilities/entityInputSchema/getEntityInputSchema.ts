@@ -19,6 +19,7 @@ export const getCollectionInputSchema = ({
   permissions,
   req,
   shouldKeepDeprecatedProperties,
+  shouldKeepNullableContainers,
 }: {
   collectionSlug: CollectionSlug
   permissions?: SanitizedCollectionPermission
@@ -28,6 +29,8 @@ export const getCollectionInputSchema = ({
    * `true` when validating input, so existing data that still contains them stays valid.
    */
   shouldKeepDeprecatedProperties?: boolean
+  /** Preserve null array/object values for data validation. */
+  shouldKeepNullableContainers?: boolean
 }): EntityInputSchema | null => {
   const collection = req.payload.collections[collectionSlug]?.config
 
@@ -36,7 +39,12 @@ export const getCollectionInputSchema = ({
   }
 
   if (!permissions) {
-    return buildEntityInputSchema({ entity: collection, req, shouldKeepDeprecatedProperties })
+    return buildEntityInputSchema({
+      entity: collection,
+      req,
+      shouldKeepDeprecatedProperties,
+      shouldKeepNullableContainers,
+    })
   }
 
   const fieldsAllowedByAccess = filterFieldsByAccess({
@@ -51,6 +59,7 @@ export const getCollectionInputSchema = ({
     fields: fieldsAllowedByAccess,
     req,
     shouldKeepDeprecatedProperties,
+    shouldKeepNullableContainers,
   })
 }
 
@@ -59,6 +68,7 @@ export const getGlobalInputSchema = ({
   permissions,
   req,
   shouldKeepDeprecatedProperties,
+  shouldKeepNullableContainers,
 }: {
   globalSlug: GlobalSlug
   permissions?: SanitizedGlobalPermission
@@ -68,6 +78,8 @@ export const getGlobalInputSchema = ({
    * `true` when validating input, so existing data that still contains them stays valid.
    */
   shouldKeepDeprecatedProperties?: boolean
+  /** Preserve null array/object values for data validation. */
+  shouldKeepNullableContainers?: boolean
 }): EntityInputSchema | null => {
   const global = req.payload.config.globals.find((globalConfig) => globalConfig.slug === globalSlug)
 
@@ -76,7 +88,12 @@ export const getGlobalInputSchema = ({
   }
 
   if (!permissions) {
-    return buildEntityInputSchema({ entity: global, req, shouldKeepDeprecatedProperties })
+    return buildEntityInputSchema({
+      entity: global,
+      req,
+      shouldKeepDeprecatedProperties,
+      shouldKeepNullableContainers,
+    })
   }
 
   const fieldsAllowedByAccess = filterFieldsByAccess({
@@ -91,6 +108,7 @@ export const getGlobalInputSchema = ({
     fields: fieldsAllowedByAccess,
     req,
     shouldKeepDeprecatedProperties,
+    shouldKeepNullableContainers,
   })
 }
 
@@ -99,11 +117,14 @@ const buildEntityInputSchema = ({
   fields = entity.flattenedFields,
   req,
   shouldKeepDeprecatedProperties,
+  shouldKeepNullableContainers,
 }: {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   fields?: FlattenedField[]
   req: PayloadRequest
   shouldKeepDeprecatedProperties?: boolean
+  /** Preserve null array/object values for data validation. */
+  shouldKeepNullableContainers?: boolean
 }): EntityInputSchema => {
   // The core schema generator reads flattenedFields from the entity and has no fields argument.
   const entityForSchema = { ...entity, flattenedFields: fields }
@@ -115,5 +136,9 @@ const buildEntityInputSchema = ({
     variant: 'input',
   }) as unknown as EntityInputSchema
 
-  return sanitizeEntitySchema({ schema, shouldKeepDeprecatedProperties })
+  return sanitizeEntitySchema({
+    schema,
+    shouldKeepDeprecatedProperties,
+    shouldKeepNullableContainers,
+  })
 }

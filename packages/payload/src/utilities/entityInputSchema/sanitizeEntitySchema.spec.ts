@@ -1,3 +1,4 @@
+import { fromJSONSchema } from 'zod'
 import { describe, expect, it } from 'vitest'
 
 import type { EntityInputSchema as JsonSchemaType } from './types.js'
@@ -5,6 +6,30 @@ import type { EntityInputSchema as JsonSchemaType } from './types.js'
 import { sanitizeEntitySchema } from './sanitizeEntitySchema.js'
 
 describe('sanitizeEntitySchema', () => {
+  it('should preserve nullable containers for validation without accepting malformed values', () => {
+    const schema: JsonSchemaType = {
+      type: 'object',
+      properties: {
+        breadcrumbs: {
+          type: ['array', 'null'],
+          items: { type: 'object', properties: { label: { type: 'string' } } },
+        },
+        metadata: { type: ['object', 'null'], properties: { title: { type: 'string' } } },
+      },
+    }
+    const validationSchema = sanitizeEntitySchema({ schema, shouldKeepNullableContainers: true })
+    const validator = fromJSONSchema(validationSchema as Parameters<typeof fromJSONSchema>[0])
+
+    expect(validator.safeParse({ breadcrumbs: null, metadata: null }).success).toBe(true)
+    expect(validator.safeParse({ breadcrumbs: [{ label: 'Category' }] }).success).toBe(true)
+    expect(validator.safeParse({ breadcrumbs: 'invalid' }).success).toBe(false)
+    expect(validator.safeParse({ breadcrumbs: [{ label: 42 }] }).success).toBe(false)
+    expect(sanitizeEntitySchema({ schema }).properties?.breadcrumbs).toMatchObject({
+      type: 'array',
+    })
+    expect(schema.properties?.breadcrumbs).toMatchObject({ type: ['array', 'null'] })
+  })
+
   it('renames the Lexical node-union definition to a short name and keeps it a strict oneOf', () => {
     // Shaped like the agent-friendly schema for a collection with a Lexical richText field
     // (Payload's `input` variant): a `$defs` node union (a `oneOf` of node shapes). The input variant
