@@ -600,6 +600,13 @@ tagline and portal name are per language; the others are the same in every langu
 **Images** go to Media like any upload (to S3 when it's on). A product without a photo gets a drawn
 illustration on the website.
 
+**Hiding a product.** Tick **Hide on the website** in a product's sidebar and publish the change: the
+product leaves the website (its page, the catalog, search, Vigor AI, the sitemap) in every language, but
+stays published, translated and editable here. Untick it and publish to show it again. For several
+products, select them in the list, then **Edit** → **Hide on the website**. The **Hide on the website**
+column and filter show which are hidden. Unlike **Unpublish**, nothing has to be published again in each
+language afterwards.
+
 **Gemstones and sizes.** A product lists every gemstone its style comes in (**Gemstones**) and every size
 (**Sizes**, one at a time, e.g. `8 mm`, `12 × 28 mm`, `US 6`); the website shows them as two lists, read as
 "any of these stones in any of these sizes". When a gemstone comes in fewer sizes, say so in the body.

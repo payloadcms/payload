@@ -1,11 +1,19 @@
-import type { CollectionConfig, Condition, FieldAccess } from 'payload'
+import type { Access, CollectionConfig, Condition, FieldAccess, Where } from 'payload'
 
 import { text, textarea } from 'payload/shared'
 
-import { publishedOrLoggedIn } from '../../access/publishedOrLoggedIn'
 import { bodyField, imageField, requiredInEnglish, slugField, sortOrderField } from '../fields'
 import { badges, gemstones, metals, productCategories, units } from '../options'
 import { revalidateVigorAfterChange, revalidateVigorAfterDelete } from '../revalidate'
+
+/**
+ * Logged-in users see every product; everyone else, including the website, only published products
+ * that aren't hidden ("Hide on the website"). A hidden product is never sent outside the admin panel.
+ */
+const publishedAndShown: Access = ({ req }) => {
+  const shown: Where = { and: [{ _status: { equals: 'published' } }, { hidden: { not_equals: true } }] }
+  return req.user ? true : shown
+}
 
 /** The old-website fields are for editors only: the website and other visitors never get them */
 const loggedInOnly: FieldAccess = ({ req }) => Boolean(req.user)
@@ -17,10 +25,10 @@ const isLegacy: Condition = (data) => Boolean(data?.legacyCode)
 export const VigorProducts: CollectionConfig = {
   slug: 'vigor-products',
   access: {
-    read: publishedOrLoggedIn,
+    read: publishedAndShown,
   },
   admin: {
-    defaultColumns: ['name', 'sku', 'category', 'badge', 'legacyHint', 'sortOrder', '_status'],
+    defaultColumns: ['name', 'sku', 'category', 'badge', 'legacyHint', 'hidden', '_status'],
     group: 'Vigor website',
     listSearchableFields: ['name', 'sku', 'slug'],
     useAsTitle: 'name',
@@ -126,6 +134,17 @@ export const VigorProducts: CollectionConfig = {
       description:
         'Optional product photo. Without one, the website draws the piece from its gemstone and metal.',
     }),
+    {
+      name: 'hidden',
+      type: 'checkbox',
+      admin: {
+        description:
+          'Takes the product off the website (its page, the catalog, search and Vigor AI) without unpublishing or deleting it. Publish the change to apply it; untick and publish to show it again.',
+        position: 'sidebar',
+      },
+      defaultValue: false,
+      label: 'Hide on the website',
+    },
     slugField({ from: 'name' }),
     {
       name: 'sku',
