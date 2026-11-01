@@ -92,3 +92,15 @@ test('should format merge times using the admin date format and time zone', asyn
 
   await expect.element(screen.getByRole('heading', { name: '2029-12-31 20:00' })).toBeVisible()
 })
+
+test.each(['', 'invalid'])(
+  'should keep history usable with an invalid merge date %s',
+  async (mergedAt) => {
+    serverFunction.mockResolvedValue({ status: 'ready', diff: 'History diff' })
+    const screen = await render(<MergeLedger events={[{ ...events[0], mergedAt }]} />)
+
+    await screen.getByRole('button', { name: 'Post title' }).click()
+
+    await expect.element(screen.getByText('History diff')).toBeVisible()
+  },
+)
