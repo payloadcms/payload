@@ -35,6 +35,7 @@ uses to test templates.
 | `scripts/import-events.ts`                 | Imports events from a JSON file (see "Importing events")                               |
 | `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
 | `scripts/import-vigor.ts`                  | Copies the Vigor website's current content into the CMS (see "Vigor website")          |
+| `scripts/import-legacy-catalog.ts`         | Copies the old website's products in as drafts (see "Products from the old website")   |
 | `src/timezones.ts`                         | Time zones offered for event dates                                                     |
 | `src/proxy.ts`, `src/twoFactor/`           | Two-factor authentication for every login (see "Two-factor authentication")            |
 | `src/email/sendgrid.ts`                    | Sends emails such as "forgot password" through SendGrid (see "Email (SendGrid)")       |
@@ -48,6 +49,7 @@ uses to test templates.
 | `deploy/import-events.sh`                  | Runs the events import on the server                                                   |
 | `deploy/import-personal-website.sh`        | Runs the personal website import on the server                                         |
 | `deploy/import-vigor.sh`                   | Runs the Vigor website import on the server                                            |
+| `deploy/import-legacy-catalog.sh`          | Runs the import of the old website's products on the server                            |
 | `deploy/mongodb/create-payload-user.js`    | Creates the MongoDB user for Payload (run on the DB EC2)                               |
 | `scripts/pack-local-packages.mjs`          | Packs `packages/*` into tarballs for the app (used by the Dockerfile)                  |
 
@@ -540,6 +542,40 @@ its own server, so it doesn't need to be in `CORS_ORIGINS`. If the CMS can't be 
 showing the last content it loaded.
 
 Locally, run `pnpm payload run scripts/import-vigor.ts <website-url> [--dry-run]` in this folder instead.
+
+### Products from the old website
+
+The old Vigor website's catalog ([atorpos/old_vgems](https://github.com/atorpos/old_vgems), its
+`export/legacy-catalog.json`) can be copied in as **draft** products, to check them here and publish the
+ones to keep. Drafts aren't on the website, so nothing changes there until you publish.
+
+1. Deploy this version first (`./deploy/deploy.sh`): it has the old catalog's categories (beads,
+   cabochons, pendants, carvings, globes, accessories), its semi-precious stones and "No metal".
+2. With a checkout of old_vgems (the `export/` folder and the photos), preview, then import:
+
+   ```bash
+   ./deploy/import-legacy-catalog.sh ~/old_vgems --dry-run
+   ./deploy/import-legacy-catalog.sh ~/old_vgems
+   ```
+
+   Each old style code (BL404, CB001…) becomes one product with its best photo. Products marked
+   `"legit": false` in the catalog file are left out; `--only-legit` takes only those marked `true`,
+   `--hint=likely,check` only those hints, `--no-images` skips the photos. A product whose old code is
+   already here is skipped, so running it again is safe and keeps your edits. Locally without Docker:
+   `pnpm payload run scripts/import-legacy-catalog.ts ~/old_vgems --dry-run`.
+
+3. **Check them** under **Vigor website → Products**. **Filters → Old website: code → exists** lists
+   only the imported ones, and the **Old website: hint** column says what the old records suggest
+   (likely, check, old, doubtful). On each product, **Old website: notes** has everything the old
+   records say: its stones with sizes and 2012–2013 prices, where it was seen, the text of the old
+   printed catalogs, and what the import had to guess (the metal, the minimum order, the summary).
+   These fields are only for logged-in users: the website and its visitors never get them.
+4. **Publish the ones to keep**: correct what the notes say was guessed, then use the arrow next to
+   **Publish in English** → **Publish all locales**. Delete the ones you don't want. A product that is
+   offered in several stones has the gemstone **Various stones** and lists them in its text.
+
+The stones' names aren't translated yet: on the Spanish, French and Chinese pages they show in English
+until they're added to the `glossary` in the website's `shared/i18n/*.json`.
 
 ## Clients and events
 

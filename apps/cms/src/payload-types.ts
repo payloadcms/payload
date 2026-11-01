@@ -727,12 +727,116 @@ export interface Event {
 export interface VigorProduct {
   id: string;
   name: string;
-  category: 'Rings' | 'Necklaces' | 'Earrings' | 'Bracelets' | 'Loose gemstones' | 'Pearls';
+  category:
+    | 'Rings'
+    | 'Necklaces'
+    | 'Earrings'
+    | 'Bracelets'
+    | 'Loose gemstones'
+    | 'Pearls'
+    | 'Beads'
+    | 'Cabochons'
+    | 'Pendants'
+    | 'Carvings'
+    | 'Globes'
+    | 'Accessories';
   /**
    * Products with a badge are featured on the home page.
    */
   badge?: ('New' | 'Best seller') | null;
-  stone: 'Emerald' | 'Diamond' | 'Lab-grown diamond' | 'Sapphire' | 'Ruby' | 'Pearl' | 'Tanzanite';
+  stone:
+    | 'Emerald'
+    | 'Diamond'
+    | 'Lab-grown diamond'
+    | 'Sapphire'
+    | 'Ruby'
+    | 'Pearl'
+    | 'Tanzanite'
+    | 'Various stones'
+    | 'Amazonite'
+    | 'Amethyst'
+    | 'Artistic jasper'
+    | 'Bamboo coral (dyed)'
+    | 'Black agate'
+    | 'Black and white onyx'
+    | 'Black line jasper'
+    | 'Black obsidian'
+    | 'Black onyx'
+    | 'Black stone'
+    | 'Blue agate'
+    | 'Blue goldstone'
+    | 'Blue lace agate'
+    | 'Botswana agate'
+    | 'Brecciated jasper'
+    | 'Butter jasper'
+    | 'Carnelian'
+    | "Cat's eye (synthetic)"
+    | 'Citrine'
+    | 'Crackle quartz'
+    | 'Crystal quartz'
+    | 'Dalmatian jasper'
+    | 'Dumortierite'
+    | 'Dyed howlite'
+    | 'Fancy agate'
+    | 'Flower jasper'
+    | 'Fluorite'
+    | 'Garnet'
+    | 'Goldstone'
+    | 'Green agate'
+    | 'Green aventurine'
+    | 'Green lace stone'
+    | 'Hematite'
+    | 'Hydrothermal citrine'
+    | 'Imitation tourmaline'
+    | 'Jadeite (B+C treated)'
+    | 'Korea jade'
+    | 'Labradorite'
+    | 'Lapis lazuli'
+    | 'Lavender agate'
+    | 'Lavender amethyst'
+    | 'Lemon new jade'
+    | 'Lemon quartz'
+    | 'Leopard skin jasper'
+    | 'Lepidolite'
+    | 'Malachite'
+    | 'Mixed stones'
+    | 'Moss agate'
+    | 'Mookaite jasper'
+    | 'Mother of pearl'
+    | 'New jade'
+    | 'Ocean jasper'
+    | 'Olive quartz'
+    | 'Peach aventurine'
+    | 'Peach stone'
+    | 'Picasso jasper'
+    | 'Picture jasper'
+    | 'Pink agate'
+    | 'Purple agate (dyed)'
+    | 'Qinghai jade'
+    | 'Rainbow fluorite'
+    | 'Red agate'
+    | 'Red aventurine'
+    | 'Red jasper'
+    | 'Red picture jasper'
+    | 'Rhodonite'
+    | 'Rose quartz'
+    | 'Rutilated quartz'
+    | 'Smoky quartz'
+    | 'Snowflake obsidian'
+    | 'Sodalite'
+    | 'South China jade'
+    | 'Three-color tiger eye'
+    | 'Tiger eye'
+    | 'Tourmaline'
+    | 'Turquoise'
+    | 'Unakite'
+    | 'White and dyed howlite'
+    | 'White howlite'
+    | 'White onyx'
+    | 'White quartz'
+    | 'Yellow calcite'
+    | 'Yellow turquoise jasper'
+    | 'Zebra jasper';
   metal:
     | '18K yellow gold'
     | '18K white gold'
@@ -743,7 +847,8 @@ export interface VigorProduct {
     | 'Sterling silver'
     | '18K yellow gold clasp'
     | 'Sterling silver clasp'
-    | 'Loose (unset)';
+    | 'Loose (unset)'
+    | 'No metal';
   /**
    * e.g. 1.20 ct emerald, 0.45 ct diamonds, size 6.5
    */
@@ -768,6 +873,22 @@ export interface VigorProduct {
    * Lower numbers are shown first.
    */
   sortOrder?: number | null;
+  /**
+   * Style code on the old website
+   */
+  legacyCode?: string | null;
+  /**
+   * What the old records suggest. Likely: photo and several records, seen 2012 or later. Old: no photo, only seen before 2010. Doubtful: inactive in the 2016 stock list.
+   */
+  legacyHint?: ('likely' | 'check' | 'old' | 'doubtful') | null;
+  /**
+   * Latest year an old record shows it
+   */
+  legacyLastSeen?: number | null;
+  /**
+   * Everything the old website knew about this style: its stones and sizes, where it was seen, the text of the old catalogs, and what the import had to guess. Not shown on the website.
+   */
+  legacyNotes?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -1285,6 +1406,10 @@ export interface VigorProductsSelect<T extends boolean = true> {
   slug?: T;
   sku?: T;
   sortOrder?: T;
+  legacyCode?: T;
+  legacyHint?: T;
+  legacyLastSeen?: T;
+  legacyNotes?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Condition, FieldAccess } from 'payload'
 
 import { text, textarea } from 'payload/shared'
 
@@ -7,6 +7,12 @@ import { bodyField, imageField, requiredInEnglish, slugField, sortOrderField } f
 import { badges, gemstones, metals, productCategories, units } from '../options'
 import { revalidateVigorAfterChange, revalidateVigorAfterDelete } from '../revalidate'
 
+/** The old-website fields are for editors only: the website and other visitors never get them */
+const loggedInOnly: FieldAccess = ({ req }) => Boolean(req.user)
+
+/** Shown only on products imported from the old website */
+const isLegacy: Condition = (data) => Boolean(data?.legacyCode)
+
 /** The Vigor website's catalog: /products and a page per product at /products/<slug> */
 export const VigorProducts: CollectionConfig = {
   slug: 'vigor-products',
@@ -14,7 +20,7 @@ export const VigorProducts: CollectionConfig = {
     read: publishedOrLoggedIn,
   },
   admin: {
-    defaultColumns: ['name', 'sku', 'category', 'badge', 'sortOrder', '_status'],
+    defaultColumns: ['name', 'sku', 'category', 'badge', 'legacyHint', 'sortOrder', '_status'],
     group: 'Vigor website',
     listSearchableFields: ['name', 'sku', 'slug'],
     useAsTitle: 'name',
@@ -123,6 +129,64 @@ export const VigorProducts: CollectionConfig = {
       unique: true,
     },
     sortOrderField,
+    // Filled in by scripts/import-legacy-catalog.ts, to check an imported product before publishing it
+    {
+      name: 'legacyCode',
+      type: 'text',
+      access: { read: loggedInOnly },
+      admin: {
+        condition: isLegacy,
+        description: 'Style code on the old website',
+        position: 'sidebar',
+        readOnly: true,
+      },
+      index: true,
+      label: 'Old website: code',
+    },
+    {
+      name: 'legacyHint',
+      type: 'select',
+      access: { read: loggedInOnly },
+      admin: {
+        condition: isLegacy,
+        description:
+          'What the old records suggest. Likely: photo and several records, seen 2012 or later. Old: no photo, only seen before 2010. Doubtful: inactive in the 2016 stock list.',
+        position: 'sidebar',
+        readOnly: true,
+      },
+      label: 'Old website: hint',
+      options: [
+        { label: 'Likely', value: 'likely' },
+        { label: 'Check', value: 'check' },
+        { label: 'Old', value: 'old' },
+        { label: 'Doubtful', value: 'doubtful' },
+      ],
+    },
+    {
+      name: 'legacyLastSeen',
+      type: 'number',
+      access: { read: loggedInOnly },
+      admin: {
+        condition: isLegacy,
+        description: 'Latest year an old record shows it',
+        position: 'sidebar',
+        readOnly: true,
+      },
+      label: 'Old website: last seen',
+    },
+    {
+      name: 'legacyNotes',
+      type: 'textarea',
+      access: { read: loggedInOnly },
+      admin: {
+        condition: isLegacy,
+        description:
+          'Everything the old website knew about this style: its stones and sizes, where it was seen, the text of the old catalogs, and what the import had to guess. Not shown on the website.',
+        readOnly: true,
+        rows: 14,
+      },
+      label: 'Old website: notes',
+    },
   ],
   hooks: {
     afterChange: [revalidateVigorAfterChange],
