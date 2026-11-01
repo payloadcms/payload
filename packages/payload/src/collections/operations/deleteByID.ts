@@ -213,6 +213,17 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       })
     }
 
+    // /////////////////////////////////////
+    // Delete Preferences
+    // /////////////////////////////////////
+
+    await deleteUserPreferences({
+      collectionConfig,
+      ids: [id],
+      payload,
+      req,
+    })
+
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
       select: resolveSelect({
@@ -249,17 +260,6 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     if (collectionConfig.auth) {
       result = { ...result, collection: collectionConfig.slug }
     }
-
-    // /////////////////////////////////////
-    // Delete Preferences
-    // /////////////////////////////////////
-
-    await deleteUserPreferences({
-      collectionConfig,
-      ids: [id],
-      payload,
-      req,
-    })
 
     // /////////////////////////////////////
     // afterRead - Fields
