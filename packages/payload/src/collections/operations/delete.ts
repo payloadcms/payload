@@ -331,6 +331,13 @@ export const deleteOperation = async <
           })
         }
 
+        await deleteUserPreferences({
+          collectionConfig,
+          ids: [doc.id],
+          payload,
+          req,
+        })
+
         await payload.db.deleteOne({
           collection: collectionConfig.slug,
           req,
@@ -457,6 +464,17 @@ export const deleteOperation = async <
       }
 
       // /////////////////////////////////////
+      // Delete Preferences
+      // /////////////////////////////////////
+
+      await deleteUserPreferences({
+        collectionConfig,
+        ids,
+        payload,
+        req,
+      })
+
+      // /////////////////////////////////////
       // Delete documents
       // /////////////////////////////////////
 
@@ -523,19 +541,6 @@ export const deleteOperation = async <
       }
     } else {
       awaitedDocs = await deleteDocumentsInBulk()
-    }
-
-    // /////////////////////////////////////
-    // Delete Preferences
-    // /////////////////////////////////////
-
-    if (!didBatchDeleteFail) {
-      await deleteUserPreferences({
-        collectionConfig,
-        ids: docs.map(({ id }) => id),
-        payload,
-        req,
-      })
     }
 
     let result = {
