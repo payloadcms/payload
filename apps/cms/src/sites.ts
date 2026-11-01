@@ -9,6 +9,7 @@ export const sites = [
   { label: 'Personal website', value: 'personal' },
   { label: 'Business website', value: 'business' },
   { label: 'iOS app', value: 'ios-app' },
+  { label: 'Vigor website', value: 'vigor' },
 ] as const
 
 export type Site = (typeof sites)[number]['value']

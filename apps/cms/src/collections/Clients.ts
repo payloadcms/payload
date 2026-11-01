@@ -5,6 +5,7 @@ import { loggedIn } from '../access/loggedIn'
 /**
  * Client records: contact details, type of business and how important the client is.
  * Internal only: every operation, including reading, requires a logged-in user.
+ * People who sign up in the VgemsAI app are added as leads by POST /api/app/clients (src/endpoints/appClients.ts).
  */
 export const Clients: CollectionConfig = {
   slug: 'clients',
@@ -88,6 +89,21 @@ export const Clients: CollectionConfig = {
               type: 'text',
             },
             {
+              name: 'state',
+              type: 'text',
+              label: 'State / Province',
+            },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'postalCode',
+              type: 'text',
+              label: 'ZIP / Postal Code',
+            },
+            {
               name: 'country',
               type: 'text',
             },
@@ -135,6 +151,18 @@ export const Clients: CollectionConfig = {
       on: 'clients',
     },
     {
+      name: 'chatSessions',
+      type: 'join',
+      admin: {
+        defaultColumns: ['title', 'summary', 'messageCount', 'lastMessageAt'],
+        description: 'Their conversations in the VgemsAI app, newest first (kept 90 days).',
+      },
+      collection: 'chat-sessions',
+      defaultSort: '-lastMessageAt',
+      label: 'VgemsAI App Chats',
+      on: 'client',
+    },
+    {
       name: 'importance',
       type: 'select',
       admin: {
@@ -170,6 +198,17 @@ export const Clients: CollectionConfig = {
         description: 'How you found them, e.g. a referral or an event',
         position: 'sidebar',
       },
+    },
+    {
+      name: 'appUserId',
+      type: 'number',
+      admin: {
+        description: 'Signed up in the VgemsAI app: the ID of their account there. Set by the app.',
+        position: 'sidebar',
+        readOnly: true,
+      },
+      index: true,
+      label: 'VgemsAI App Account',
     },
   ],
 }

@@ -208,19 +208,13 @@ export const seoField: Field = {
   label: 'SEO',
 }
 
-/** Stores tags in the form the website uses for its tag pages: "Next.js" -> "next-js" */
+/** A tag in the form the website uses for its tag pages: "Next.js" -> "next-js" */
+export const toTag = (tag: unknown) =>
+  String(tag)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-|-$/g, '')
+
+/** Stores tags in the form the website uses for its tag pages, without duplicates */
 export const normalizeTags: FieldHook = ({ value }) =>
-  Array.isArray(value)
-    ? [
-        ...new Set(
-          value
-            .map((tag) =>
-              String(tag)
-                .toLowerCase()
-                .replace(/[^\p{L}\p{N}]+/gu, '-')
-                .replace(/^-|-$/g, ''),
-            )
-            .filter(Boolean),
-        ),
-      ]
-    : value
+  Array.isArray(value) ? [...new Set(value.map(toTag).filter(Boolean))] : value

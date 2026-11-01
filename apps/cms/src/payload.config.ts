@@ -5,17 +5,48 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { ChatMessages } from './collections/ChatMessages'
+import { ensureChatRetentionIndexes } from './collections/chatRetention'
+import { ChatSessions } from './collections/ChatSessions'
 import { Clients } from './collections/Clients'
 import { Events } from './collections/Events'
-import { Media } from './collections/Media'
+import { MarketMaterials } from './collections/MarketMaterials'
+import { MarketPrices } from './collections/MarketPrices'
+import { PushNotifications } from './collections/PushNotifications'
+import { seedMarketMaterials } from './collections/marketSeed'
+import { Media, mediaVariants } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Profiles } from './collections/Profiles'
 import { Users } from './collections/Users'
 import { sendgridAdapter } from './email/sendgrid'
+import {
+  appAccountDeleteEndpoint,
+  appChatMessagesEndpoint,
+  appChatSessionSummaryEndpoint,
+  appChatSessionsToSummarizeEndpoint,
+} from './endpoints/appChat'
+import {
+  appClientByAccountEndpoint,
+  appClientsEndpoint,
+  appClientUpdateEndpoint,
+} from './endpoints/appClients'
+import {
+  appEventDiscoveryEndpoint,
+  appEventDiscoverySaveEndpoint,
+} from './endpoints/appEventDiscovery'
+import { appEventsEndpoint } from './endpoints/appEvents'
+import { appMarketEndpoint, appMarketPricesEndpoint } from './endpoints/appMarket'
+import {
+  appPushNotificationResultEndpoint,
+  appPushNotificationsDueEndpoint,
+  appPushNotificationStartEndpoint,
+} from './endpoints/appPushNotifications'
 import { healthEndpoint } from './endpoints/health'
 import { locales } from './locales'
 import { personalCollections, personalGlobals } from './personal'
+import { photoVariants } from './personal/collections/PersonalPhotos'
+import { requestSizeLimit } from './requestSizeLimit'
 import { s3StorageAdapter } from './storage/s3'
 import { timezones } from './timezones'
 import { vigorCollections, vigorGlobals } from './vigor'
@@ -70,6 +101,11 @@ export default buildConfig({
     Profiles,
     Clients,
     Events,
+    ChatSessions,
+    ChatMessages,
+    MarketMaterials,
+    MarketPrices,
+    PushNotifications,
     ...vigorCollections,
   ],
   cors: allowedOrigins,
@@ -84,9 +120,31 @@ export default buildConfig({
   editor: lexicalEditor(),
   // Sends emails such as "forgot password" through SendGrid when SENDGRID_API_KEY is set
   email: sendgridAdapter(),
-  endpoints: [healthEndpoint],
+  endpoints: [
+    appAccountDeleteEndpoint,
+    appChatMessagesEndpoint,
+    appChatSessionSummaryEndpoint,
+    appChatSessionsToSummarizeEndpoint,
+    appClientByAccountEndpoint,
+    appClientsEndpoint,
+    appClientUpdateEndpoint,
+    appEventsEndpoint,
+    appEventDiscoveryEndpoint,
+    appEventDiscoverySaveEndpoint,
+    appMarketEndpoint,
+    appMarketPricesEndpoint,
+    appPushNotificationsDueEndpoint,
+    appPushNotificationStartEndpoint,
+    appPushNotificationResultEndpoint,
+    healthEndpoint,
+  ],
   globals: [...personalGlobals, ...vigorGlobals],
   // Only fields marked `localized: true` have a version per language; see src/locales.ts
+  // Lets MongoDB delete VgemsAI app chats after 90 days, and adds the Research tab's materials the first time
+  onInit: async (payload) => {
+    await ensureChatRetentionIndexes(payload)
+    await seedMarketMaterials(payload)
+  },
   localization: {
     defaultLocale: 'en',
     fallback: true,
@@ -100,8 +158,16 @@ export default buildConfig({
   },
   upload: {
     limits: { fileSize: 50 * 1024 * 1024 },
-    requestSizeLimit: 60 * 1024 * 1024,
+    requestSizeLimit,
     // Image processing on upload, such as cropping (the top-level `sharp` option before Payload 4)
-    transformers: [sharpTransformer()],
+    // and the smaller copies of each Media image and photo (`imageSizes` before Payload 4)
+    transformers: [
+      sharpTransformer({
+        collections: {
+          media: { variants: mediaVariants },
+          'personal-photos': { variants: photoVariants },
+        },
+      }),
+    ],
   },
 })

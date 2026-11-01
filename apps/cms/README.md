@@ -25,6 +25,7 @@ uses to test templates.
 | `src/payload.config.ts`                    | Payload config: MongoDB via `DATABASE_URL`, `SERVER_URL`, CORS/CSRF                    |
 | `src/endpoints/health.ts`                  | `GET /api/health`: pings MongoDB (used by the Docker healthcheck)                      |
 | `src/storage/s3.ts`                        | Optional S3 storage for uploads, turned on by `S3_BUCKET`                              |
+| `src/collections/Media.ts`                 | Uploads, and the smaller copies made of each image (see "Image sizes")                 |
 | `src/personal/`                            | Pages, settings and projects of the personal website (see "Personal website")          |
 | `src/collections/Posts.ts`                 | Blog posts for the personal website (see "Personal website")                           |
 | `scripts/import-personal-website.ts`       | Copies the personal website's current content into the CMS (see "Personal website")    |
@@ -33,10 +34,19 @@ uses to test templates.
 | `src/collections/Clients.ts`               | Private client records: contacts, business type, importance (see "Clients and events") |
 | `src/collections/Events.ts`                | Private records of sales events and exhibitions worldwide                              |
 | `scripts/import-events.ts`                 | Imports events from a JSON file (see "Importing events")                               |
+| `src/maps/`, `src/hooks/locateEvent.ts`    | Finds each event's coordinates in Apple Maps (see "Event locations")                   |
+| `scripts/locate-events.ts`                 | Looks up the coordinates of events saved earlier (see "Event locations")               |
+| `src/endpoints/appEvents.ts`               | Upcoming events for the VgemsAI app (see "The VgemsAI app")                            |
+| `src/endpoints/appEventDiscovery.ts`       | Trade shows Claude finds every week (see "Events found by Claude")                     |
+| `src/collections/PushNotifications.ts`, `src/endpoints/appPushNotifications.ts` | Push notifications to the VgemsAI app (see "Push notifications") |
+| `src/endpoints/appClients.ts`              | VgemsAI app signups as clients, and their Account screen (see "The VgemsAI app")       |
+| `src/endpoints/appChat.ts`                 | Saves VgemsAI app chats, deletes app accounts' data (see "The VgemsAI app")            |
+| `src/collections/ChatSessions.ts`, `…/ChatMessages.ts` | VgemsAI app conversations, deleted after 90 days (see "Chats")             |
+| `src/app/(frontend)/ios-app/`, `scripts/import-legal-pages.ts` | Privacy Policy and Terms of Use of the app and the Vigor website (see "Privacy policy and terms of use") |
 | `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
 | `scripts/import-vigor.ts`                  | Copies the Vigor website's current content into the CMS (see "Vigor website")          |
-| `scripts/import-legacy-catalog.ts`         | Copies the old website's products in as drafts (see "Products from the old website")   |
-| `src/timezones.ts`                         | Time zones offered for event dates                                                     |
+| `scripts/import-app-page.ts`, `scripts/app-page/` | The first version of the Vigor website's VgemsAI app page (see "VgemsAI app page") |
+| `src/timezones.ts`, `src/zonedTime.ts`     | Time zones offered for event dates, and days at midnight in a time zone                |
 | `src/proxy.ts`, `src/twoFactor/`           | Two-factor authentication for every login (see "Two-factor authentication")            |
 | `src/email/sendgrid.ts`                    | Sends emails such as "forgot password" through SendGrid (see "Email (SendGrid)")       |
 | `src/hooks/revalidateWebsite.ts`           | Tells the personal website to refresh its pages when its content changes               |
@@ -47,9 +57,11 @@ uses to test templates.
 | `deploy/check-db.sh`                       | Checks that the app EC2 can reach and write to MongoDB                                 |
 | `deploy/deploy.sh`                         | Build + (re)start + wait until healthy                                                 |
 | `deploy/import-events.sh`                  | Runs the events import on the server                                                   |
+| `deploy/locate-events.sh`                  | Looks up the coordinates of events on the server                                       |
 | `deploy/import-personal-website.sh`        | Runs the personal website import on the server                                         |
 | `deploy/import-vigor.sh`                   | Runs the Vigor website import on the server                                            |
-| `deploy/import-legacy-catalog.sh`          | Runs the import of the old website's products on the server                            |
+| `deploy/import-app-page.sh`                | Adds the VgemsAI app page's first version on the server                                |
+| `deploy/import-legal-pages.sh`             | Adds the Privacy Policy and Terms of Use on the server                                 |
 | `deploy/mongodb/create-payload-user.js`    | Creates the MongoDB user for Payload (run on the DB EC2)                               |
 | `scripts/pack-local-packages.mjs`          | Packs `packages/*` into tarballs for the app (used by the Dockerfile)                  |
 
@@ -140,6 +152,8 @@ nano .env
 | `CORS_ORIGINS`                                              | optional, comma-separated frontend origins that call the API with cookies                                      |
 | `WEBSITE_URL`, `WEBSITE_REVALIDATE_SECRET`                  | optional, refresh the personal website as soon as its content changes (see "Personal website")                 |
 | `VIGOR_WEBSITE_URL`, `VIGOR_WEBSITE_REVALIDATE_SECRET`      | optional, refresh the Vigor website as soon as its content changes (see "Vigor website")                       |
+| `OPENAI_API_KEY`, `OPENAI_MODEL`                            | optional, write the title, alt text, description and tags of photos with AI (see "Photos")                     |
+| `APPLE_MAPS_*`                                              | optional, team ID, key ID and private key to put events on the map with Apple Maps (see "Event locations")     |
 | `SENDGRID_API_KEY`, `EMAIL_FROM_ADDRESS`, `EMAIL_FROM_NAME` | optional, send "forgot password" emails (see "Email (SendGrid)")                                               |
 
 URL-encode special characters in the MongoDB password: `@` → `%40`, `:` → `%3A`, `/` → `%2F`,
@@ -190,6 +204,40 @@ curl -s localhost/api/health       # {"database":"up","status":"ok"}
 - Uploaded media, on the app EC2 (only while uploads are stored locally, not in S3):
   `docker run --rm -v payload-cms_media:/media -v "$PWD":/backup busybox tar czf /backup/media-$(date +%F).tgz -C /media .`
 - Or snapshot both EBS volumes with AWS Backup. With S3 storage, turn on bucket versioning instead.
+
+## Image sizes
+
+Every image uploaded to Media (JPEG, PNG, WebP, AVIF, GIF, TIFF) is stored as is, plus three smaller
+copies whose longer side (width or height) is at most:
+
+| Name      | Longer side | Example: 4000×3000 photo | Example: 3000×4000 photo |
+| --------- | ----------- | ------------------------ | ------------------------ |
+| `max1440` | 1440 px     | 1440×1080                | 1080×1440                |
+| `max720`  | 720 px      | 720×540                  | 540×720                  |
+| `max640`  | 640 px      | 640×480                  | 480×640                  |
+
+The proportions never change, phone photos are turned upright first, and an image that is already
+smaller keeps its own size rather than being enlarged. The copies drop the photo's metadata (such as
+GPS location); the original keeps it. Other files (PDF, SVG, …) are stored without copies.
+
+The copies are saved next to the original (in S3 when it's on) and deleted or replaced with it.
+Each read returns them under `variants`, with the full-size file in `url`, `width` and `height`:
+
+```json
+{
+  "url": "https://cdn.example.com/media/…",
+  "width": 4000,
+  "height": 3000,
+  "variants": {
+    "max1440": { "url": "https://cdn.example.com/media/…", "width": 1440, "height": 1080 },
+    "max720": { "url": "https://cdn.example.com/media/…", "width": 720, "height": 540 },
+    "max640": { "url": "https://cdn.example.com/media/…", "width": 640, "height": 480 }
+  }
+}
+```
+
+Images uploaded before this was added have no copies; replace the file in the admin panel to make
+them. To change the sizes, edit `mediaVariants` in `src/collections/Media.ts`.
 
 ## Uploads in S3
 
@@ -285,7 +333,8 @@ S3_PUBLIC_URL=            # empty = https://your-bucket.s3.ap-southeast-1.amazon
 ```
 
 Upload an image in the admin panel. `GET /api/media` should now return `"url": "https://…"`
-pointing at S3, and the file should be in the bucket under `media/`.
+pointing at S3, and the file should be in the bucket under `media/`. Photos of the personal website go to
+`media/photos/` (`S3_PHOTOS_PREFIX` to change it).
 
 ### d) Files uploaded before switching
 
@@ -314,11 +363,14 @@ content without logging in; drafts are only visible to logged-in users.
 | ------------------ | ----------------------------------------------------------------------------------------------------------- |
 | Posts              | The blog: `/blog/<slug>`, the post lists, tag pages, featured posts on the home page, the RSS feed          |
 | Projects           | The cards on `/projects` and a page per project at `/projects/<slug>`                                       |
+| Photos             | The photo portfolio: a page per photo at `/photos/<album>/<slug>`, tag pages at `/photos/tags/<tag>`        |
+| Photo albums       | The albums ("catalogs") on `/photos`, each at `/photos/<slug>`                                              |
 | Site settings      | Site name, browser tab titles, default description, X handle, main menu and social links                    |
 | Home page          | `/`: name, job titles, introduction, button (e.g. your resume), key figures, featured posts, logos          |
 | About page         | `/about`: photo, numbered sections, call to action, skill sets with levels and icons, employment, education |
 | Services page      | `/services`: introduction, button and a tile per service                                                    |
 | Projects page      | The texts of `/projects` and the GitHub repositories shown there                                            |
+| Photos page        | The texts of `/photos`                                                                                      |
 | Blog page          | The texts of `/blog`                                                                                        |
 | Contact page       | The texts of `/contact` and the contact details next to the form                                            |
 | Pages              | Pages whose **Sites** include **Personal website**, at `/<slug>`, e.g. `/privacy-policy`                    |
@@ -328,7 +380,8 @@ name, so all but one of them fail to build): **Save** puts the change live, and 
 earlier save. Until a page or Site settings is saved for the first time, the website keeps showing its own Markdown
 file or `theme.config.js`, so pages can move to the CMS one at a time.
 
-**Posts and projects** have drafts: **Save Draft** keeps changes private, **Publish** makes them public.
+**Posts, projects, photos and photo albums** have drafts: **Save Draft** keeps changes private, **Publish** makes them
+public.
 
 - **Icons** (skills, services, "Expert In" logos, project logos) must be SVG files; only those can be chosen. The
   website puts them inline so they take the theme's colors.
@@ -371,10 +424,51 @@ Locally, run `pnpm payload run scripts/import-personal-website.ts <website-folde
 | Tags         | Tag chips. A tag links to `/tags/<tag>` when the website has `content/tags/<tag>.md`                |
 | SEO          | Optional title and description for search engines and link previews                                 |
 
+### Photos
+
+1. Create an album in **Photo albums** (e.g. "Street", "Japan 2025") and publish it.
+2. In **Photos**, click **Bulk Upload** and drop in your photos (JPEG, PNG or WebP, up to 50 MB each). To set the
+   album of all of them at once, click **Edit all**, choose **Album**, pick the album and click **Apply Changes**.
+3. With `OPENAI_API_KEY` set, uploading fills in each photo's empty title, alt text, description and tags (a few
+   seconds per photo). Review them, then **Publish** (or **Save draft** to publish later).
+
+Each photo is one upload, stored like Media (in S3 when it's on, under `<S3_PREFIX>/photos/`, so the bucket policy and
+IAM role for Media cover it). On upload the CMS:
+
+- reads the capture date, camera, lens and settings from the file's EXIF data into **Taken on** and **Camera**
+- stores the photo turned upright, at most 4096 px on its longer side, and **without its metadata**: the GPS location
+  that most phones record would otherwise be public with the file
+- makes copies whose longer side is at most 480, 960, 1600 and 2560 px (`photoVariants` in
+  `src/personal/collections/PersonalPhotos.ts`); the website picks the size that fits the screen
+
+| Field       | On the website                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------- |
+| Title       | The photo's heading, browser tab title and name in search results                                 |
+| Alt text    | What the photo shows, for screen readers and image search; not shown on the page                  |
+| Description | The text below the photo, its search result snippet and link preview text                         |
+| Location    | Shown with the photo, e.g. "Kyoto, Japan". AI uses it too; the CMS never reads the GPS location   |
+| Camera      | Camera, lens and settings below the photo                                                         |
+| Album       | The album it's in (required); its page is `/photos/<album>/<slug>`                                |
+| Tags        | Links to `/photos/tags/<tag>`, the photos of every album with that tag; also filters on the album |
+| Slug        | Generated from the title once and kept when the title changes                                     |
+| Taken on    | The date below the photo                                                                          |
+| Featured    | Shown on `/photos`. Without any featured photos, `/photos` shows the 12 latest                    |
+
+**Order:** drag photos (in **Photos**) and albums (in **Photo albums**) into the order the website shows them in.
+Moving a photo to another album changes its address; its old address redirects to the new one.
+
+**AI texts** come from the OpenAI API (`src/personal/photos/describePhoto.ts`): the CMS sends a 1024 px copy of the
+photo with the album, the location and the tags already in use, so new photos get the same tags. It only fills empty
+fields, and an upload never fails because of it: when OpenAI is unreachable or answers with an error, the photo is saved
+with the file name as its title, and `docker compose logs cms` says `Could not write the texts of <file> with AI`.
+**Generate with AI** in a photo's sidebar writes new texts for a saved photo into the form, unsaved, so you can review
+them first. `OPENAI_MODEL` picks another model that understands images (default `gpt-5-mini`, a small and inexpensive
+one). After setting or changing these, run `./deploy/deploy.sh`.
+
 ### Refreshing the website
 
 The website refreshes its pages from the CMS about once a minute. To update it the moment you save a page or Site
-settings, or publish, edit, unpublish or delete a post, project or page, give both sides the same secret
+settings, or publish, edit, unpublish or delete a post, project, photo, album or page, give both sides the same secret
 (`openssl rand -hex 32`):
 
 1. Website: set `REVALIDATE_SECRET=<secret>` and redeploy it.
@@ -405,7 +499,7 @@ The personal website shows its pages (see "Personal website"); no website reads 
 ### Pages for several websites and apps
 
 Every page has a **Sites** field (in the sidebar) that says which websites and apps show it. A page can
-belong to several, e.g. one privacy policy for the business website and the iOS app. The sites are listed
+belong to several, e.g. one privacy policy for the Vigor website and the iOS app. The sites are listed
 in `src/sites.ts`:
 
 | Site             | Value it sends |
@@ -413,6 +507,7 @@ in `src/sites.ts`:
 | Personal website | `personal`     |
 | Business website | `business`     |
 | iOS app          | `ios-app`      |
+| Vigor website    | `vigor`        |
 
 Each website or app asks only for its own pages by adding its value to the request:
 
@@ -468,9 +563,11 @@ Traditional Chinese. The code is in `src/vigor/`, the languages in `src/locales.
 | Service pages      | `/topics/<slug>`, shown as tiles on the home page                                       |
 | News               | `/news` and a page per article                                                          |
 | Events             | Upcoming events on the home page (separate from the private events under Business)      |
-| Site settings      | Company name, contact details, opening hours, social links, main menu, key figures      |
+| Site settings      | Company name, contact details (see below), social links, main menu, key figures         |
 | Home page          | The hero slides at the top of the home page                                             |
 | About page         | `/about`                                                                                |
+| VgemsAI app page   | `/vgemsai`: what the app does and how to join its beta (see "VgemsAI app page")         |
+| Pages              | Pages whose **Sites** include Vigor website, at `/<slug>`, e.g. the privacy policy      |
 
 **Languages.** Switch language with the menu at the top right; each text field shows its language, e.g.
 "Name — English". Categories, gemstones, metals, badges, units, slugs, SKUs, links and images are the same in
@@ -490,12 +587,49 @@ Site settings, Home page and About page have no drafts: **Save** puts the change
 editing. (With MongoDB, Payload gives every global with drafts an index with the same name, so all but one
 of them fail to build.)
 
+**Contact details** (Site settings → Company: email, phone, WhatsApp, WeChat ID, showroom address, opening hours)
+appear in the website's top bar, footer and Contact page, where the showroom address also gets a map, and the
+website's AI assistant knows them. Each field says where it's shown. WhatsApp becomes a link that opens a chat.
+Optional fields left empty, such as WeChat or a social link, are left out on the website. Address, opening hours,
+tagline and portal name are per language; the others are the same in every language.
+
 **Images** go to Media like any upload (to S3 when it's on). A product without a photo gets a drawn
 illustration on the website.
 
 **Catalog choices** (categories, gemstones, metals, units, badges, news categories) are in
 `src/vigor/options.ts`. The website translates them with the `glossary` in its `shared/i18n/*.json`: when
 you add one, add its translations there too, or it shows in English on the other languages' pages.
+
+### VgemsAI app page
+
+**Vigor website → VgemsAI app page** is the website's page about the app, at `/vgemsai` (and `/es/vgemsai`, …), in the
+four languages like the rest of the Vigor website. It's public, so it can be the Marketing or Support URL in App Store
+Connect, and App Review can open it. Saving it puts it live; it stays hidden ("page not found") while it has no title.
+It has four tabs:
+
+- **Banner:** title, summary, a status badge (e.g. "In development · Public beta on TestFlight"), the banner artwork,
+  the highlights under the banner, and two links that decide the main button:
+  - **App Store link** set: "Download on the App Store";
+  - otherwise **TestFlight link** set (App Store Connect → TestFlight → External Testing → Public Link): "Join the beta
+    on TestFlight";
+  - neither: "Ask for beta access", which opens the contact page.
+- **Features**, **Beta** (the steps to join it) and **FAQ**.
+
+The icons of the highlights and features are a dropdown (`appIcons` in `src/vigor/options.ts`); the website draws
+each one, so a new icon needs a drawing there too (`client/src/pages/AppPage.tsx` in the website repo). Buttons and
+small labels, like the main button's text, are the website's interface texts (`app` in its `shared/i18n/*.json`).
+
+**Adding the first version (once).** It's in `scripts/app-page/`: `content.json` in English, Spanish, French and
+Traditional Chinese, and `banner.jpg`. On the app server:
+
+```bash
+cd ~/payloadcms/apps/cms
+./deploy/import-app-page.sh --dry-run   # only show what would happen
+./deploy/import-app-page.sh
+```
+
+A page that already has a title is skipped, so running it again keeps your edits; `--update` replaces its text with
+the one in `scripts/app-page/` (the banner stays). Then add the TestFlight link and check each language.
 
 ### Connecting the website (once)
 
@@ -582,13 +716,16 @@ until they're added to the `glossary` in the website's `shared/i18n/*.json`.
 Both appear under **Business** in the admin panel and are private: every request, including reading,
 needs a logged-in user, so `GET /api/clients` and `GET /api/events` return `403` to everyone else.
 
-- **Clients**: company, contact person, job title, email, phone, website, address, business type,
+- **Clients**: company, contact person, job title, email, phone, website, address (street, city, state or
+  province, ZIP or postal code, country), business type,
   industry, notes, **importance** (1–5 stars), status (lead, active, inactive) and source. Each client also
-  lists the events it is linked to.
+  lists the events it is linked to. People who sign up in the VgemsAI app are added as leads (see
+  "The VgemsAI app").
 - **Events**: name, type (exhibition, trade show, sales event, conference, meeting, other), description, start and end
-  date and time with the **time zone** of the event, venue, booth, address, city, country, organizer,
-  website, linked clients, notes, status (planned, confirmed, completed, cancelled) and attachments. The
-  list is sorted with the latest event first, and an end date before the start date is rejected.
+  date and time with the **time zone** of the event, venue, booth, address, city, country, **coordinates**
+  (see "Event locations"), organizer, website, linked clients, notes, status (planned, confirmed, completed,
+  cancelled) and attachments. The list is sorted with the latest event first, and an end date before the start
+  date is rejected.
 
 Attachments are stored in Media, whose files are publicly readable by URL. Don't attach confidential
 documents to events.
@@ -657,6 +794,292 @@ How the file becomes events:
   city is `TBC`.
 
 Locally, run `pnpm payload run scripts/import-events.ts <file.json> [--dry-run]` in this folder instead.
+
+With Apple Maps set up (next section), every imported event gets its coordinates, which adds a second or two
+per event.
+
+### Events found by Claude
+
+Every Monday, awoz-api asks Claude to search the web for gem, jewellery and raw material trade shows and fairs
+around the world in the next 12 months, and adds the ones the CMS doesn't have yet (awoz-api README: "Weekly event
+search"):
+
+1. awoz-api reads the events the CMS knows from `GET /api/app/event-discovery`: those that started in the last
+   13 months, so Claude looks for their next edition, and those coming up, cancelled ones included.
+2. Claude searches the web, preferably the organizers' own sites, for the others.
+3. awoz-api sends what Claude found to `POST /api/app/event-discovery`
+   (`src/endpoints/appEventDiscovery.ts`), which adds each event it doesn't know yet as **planned**, with its
+   coordinates from Apple Maps (next section).
+
+Added events are marked **Found by: Claude (weekly web search)** in the sidebar, and their notes say when they
+were found and list the pages Claude found the dates on. Filter the Events list by *Found by* to check them. They
+show in the app right away, like any planned event. To hide one, set it to **Cancelled** rather than deleting it:
+the search skips cancelled events, but a deleted one can be found and added again.
+
+An event counts as known when one starts within 60 days of it under the same name (years, edition numbers and
+"Jewellery" or "Jewelry" don't count), under a name with the same words and more in the same country (e.g.
+"HKTDC Hong Kong International Jewellery Show" for "Hong Kong International Jewellery Show"), or under a similar
+name in the same city within 3 days. A found event is rejected, and awoz-api logs why, when it's over, starts more
+than 400 days ahead, lasts more than 31 days, has no city or country, or its time zone has no counterpart with the
+same UTC offset in `src/timezones.ts`.
+
+### Event locations
+
+Each event's **Coordinates** (longitude and latitude, under Location) are filled in from the
+[Apple Maps Server API](https://developer.apple.com/documentation/applemapsserverapi) when the event is saved,
+so the VgemsAI app can pin it on its map. Apple Maps is looked up, most precise first, for:
+
+1. the **venue** in its city, e.g. `Palexpo, Geneva, Switzerland`
+2. the **street address** in its city
+3. only the **city**, or only the **country** while the city is `TBC`
+
+A venue or address that Apple Maps finds more than 100 km from the city is taken for a namesake elsewhere and
+skipped. **Coordinates of** next to them says which one was found, so you can tell a rough pin (only the city or
+country) from a precise one.
+
+- **Looked up again** when the venue, address, city or country changes, or when you clear the coordinates.
+- **Wrong pin?** Type the right longitude and latitude (e.g. from Apple Maps or Google Maps) and save. They're
+  marked **Set by hand** and kept, until the venue, address, city or country changes; to move the event and
+  keep your own pin, change both in the same save.
+- **Not found**, or Apple Maps can't be reached: the event is saved anyway, without coordinates, and the app
+  then looks the place up on the phone. **Why there are no coordinates** under them says what went wrong, e.g.
+  that Apple Maps isn't set up, or the error Apple Maps answered with. Saving it again tries again.
+
+**Set up (once):**
+
+1. In your [Apple Developer account](https://developer.apple.com/account), under _Certificates, Identifiers &
+   Profiles_ → _Identifiers_, add a **Maps ID**, e.g. `maps.co.vgems.cms`.
+2. Under _Keys_, add a key with **MapKit JS** checked, press _Configure_ and choose that Maps ID, then register
+   it and **download the .p8 file** (Apple offers it only once). Note the **Key ID**.
+3. Find your **Team ID** under _Membership_.
+4. Add them to `.env`. The key must be **one line**: the lines between `BEGIN PRIVATE KEY` and `END PRIVATE KEY`
+   joined together. On your Mac, this copies it that way:
+
+   ```bash
+   grep -v PRIVATE ~/Downloads/AuthKey_ABC123DEFG.p8 | tr -d '\r\n' | pbcopy
+   ```
+
+   ```bash
+   APPLE_MAPS_TEAM_ID=DEF123GHIJ
+   APPLE_MAPS_KEY_ID=ABC123DEFG
+   APPLE_MAPS_PRIVATE_KEY=MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg...
+   ```
+
+   Check it on the server: `grep '^APPLE_MAPS_PRIVATE_KEY=' .env | cut -d= -f2- | wc -c` prints about `200`.
+
+5. `./deploy/deploy.sh`, then look up the events saved before, previewing first:
+
+   ```bash
+   ./deploy/locate-events.sh --dry-run   # lists what Apple Maps finds for each event; nothing is saved
+   ./deploy/locate-events.sh             # saves it for every event without coordinates
+   ```
+
+   `--all` looks up every event again, except coordinates set by hand.
+
+**Still no coordinates?** On the server, `docker compose exec cms printenv | grep -c '^APPLE_MAPS_'` must print
+`3`; otherwise the CMS doesn't see the settings (`docker compose restart` doesn't reload `.env`; run
+`./deploy/deploy.sh`). `./deploy/locate-events.sh --dry-run` prints the exact error, and
+`docker compose logs cms | grep -i 'apple maps'` shows past ones.
+
+Apple allows 25,000 lookups a day per developer team (shared with MapKit JS); each saved event takes two or
+three. Use a separate key for each server (e.g. UAT and production), so one can be revoked without the other.
+Locally, run `pnpm payload run scripts/locate-events.ts [--dry-run] [--all]` in this folder.
+
+### The VgemsAI app
+
+The VgemsAI app talks to the CMS through its own backend, awoz-api, which reads upcoming events from
+`GET /api/app/events`, adds the trade shows Claude finds every week (see "Events found by Claude"), sends the push
+notifications written here (see "Push notifications"), saves every signup as a client with `POST /api/app/clients`, keeps the app's chats
+(see "Chats" below) and the Research tab's market prices (see "Market prices"). A server can't pass two-factor,
+so instead of logging in it sends a shared key:
+
+```bash
+curl -H "X-API-Key: $APP_API_KEY" https://cms.example.com/api/app/events
+```
+
+1. Generate a key with `openssl rand -hex 32`.
+2. Set it as `APP_API_KEY` in this server's `.env` and as `PAYLOAD_API_KEY` on awoz-api, then redeploy both.
+
+A wrong or missing key gets `401`; while `APP_API_KEY` is empty every `/api/app/...` endpoint returns `404`.
+
+#### Events
+
+`GET /api/app/events` returns events that aren't over yet and start within the next 12 months, soonest first, without
+cancelled ones. An end date without a time (00:00, as the import saves them) counts as the whole of that day, so an
+event stays listed, and shows as happening now in the app, until its last day is over. Each event has its name, type, description, start and end date with time zone, location
+(venue, booth, address, city, country and coordinates), organizer, website and status. **Clients, notes and
+attachments are never included.** The coordinates are `{ "latitude": 22.2829, "longitude": 114.1736,
+"precision": "venue" }`, where `precision` is `exact` (set by hand), `venue`, `address`, `city` or `country`,
+or `null` while the event has none (see "Event locations").
+
+#### Signups
+
+When someone signs up in the app, awoz-api keeps the account (email, password, login) in its own MySQL
+database and sends their name, email and company details here within 30 seconds. Each signup becomes a
+client under **Business → Clients** with status **Lead**, source "VgemsAI app", and their app account's ID in
+**VgemsAI App Account** (sidebar, read-only). From there it is an ordinary client: set the importance, add
+notes, link events. The password never reaches the CMS.
+
+While the CMS is down or `APP_API_KEY` is missing, signups in the app keep working; awoz-api sends them once
+the CMS answers again. Sending the same signup twice doesn't make a second client: for an account that
+already has one, the endpoint returns the existing client.
+
+```bash
+curl -X POST -H "X-API-Key: $APP_API_KEY" -H 'Content-Type: application/json' \
+  -d '{"appUserId": 1, "company": "Oskar Gems", "contactName": "Oskar", "email": "oskar@example.com",
+       "address": {"city": "Hong Kong", "country": "Hong Kong"}, "businessType": "retailer"}' \
+  https://cms.example.com/api/app/clients
+# 201 {"id": "…"}, or 200 with the same id when that account already has a client
+```
+
+Only `company`, `contactName`, `jobTitle`, `email`, `phone`, `website`, `address` (`street`, `city`, `state`,
+`postalCode`, `country`), `businessType` and `industry` are copied.
+
+People can see and change these details later in the app's Account screen, except the email. awoz-api reads them
+with `GET /api/app/clients/by-account/:appUserId` and saves changes with `PATCH` to the same path, which sets all
+of those fields at once (an empty one is cleared). Importance, notes, status, source and linked events are never
+sent to the app and never changed by it. The app picks the country from a list, so
+`country` is always its English name ("United States"); in the US and Canada `state` (the full name, e.g. "New
+York") and `postalCode` are always set, and the phone number starts with the country's calling code. Invalid values, such as an unknown business type, get
+`400` with `{"errors": [{"message": "…", "path": "businessType"}]}`.
+
+#### Chats
+
+Every question asked in the app's chat, and every answer, is kept under **VgemsAI App**:
+
+- **Chat Sessions**: one per conversation, titled with its first question, with the client who asked, the number of
+  messages, the time of the last one and the AI model. Once a conversation has been quiet for 30 minutes,
+  awoz-api has the AI write a **summary and topics** for the sales team. Each client's page lists their sessions
+  under **VgemsAI App Chats**, newest first: together they show what the person asks about over time.
+- **Chat Messages**: every question and answer, with the model, tokens and answer time, and whether the AI declined.
+
+Both are read-only in the admin panel (the app writes them), and can be deleted. **MongoDB deletes each message 90
+days after it was sent, and each session 90 days after its last message** (a TTL index on `expiresAt`, created when
+the CMS starts; MongoDB checks about once a minute). To keep chats longer or shorter, change
+`CHAT_RETENTION_DAYS` in `src/collections/chatRetention.ts`; it applies to messages saved from then on. The app's
+Privacy Policy says 90 days too, so change it there as well (see "Privacy policy and terms of use").
+
+awoz-api uses these endpoints (`src/endpoints/appChat.ts`); it decides who is asking from the app login, and a
+session only ever answers to the account that started it:
+
+| Endpoint | What it does |
+| --- | --- |
+| `POST /api/app/chat-messages` | Saves a question (starting a session when there's none) or an answer; a question returns the session's last 50 messages |
+| `GET /api/app/chat-sessions/to-summarize` | Sessions quiet for 30 minutes whose summary is missing or older than their last message |
+| `POST /api/app/chat-sessions/:id/summary` | Saves the AI's summary and topics |
+| `POST /api/app/accounts/delete` | When someone deletes their app account: deletes their chats, and their client while it's still an untouched app lead (status Lead, source "VgemsAI app"); otherwise the client stays, unlinked, with a note |
+
+#### Market prices (Research tab)
+
+The app's **Research** tab shows raw material prices, and lets people predict whether each one goes up or down next
+month. The prices are kept under **VgemsAI App**:
+
+- **Market Materials**: what the tab shows, in order: name, key (the app's name for it, e.g. `gold`), unit, an SF
+  Symbols icon, whether it's a **highlight** (a chart under Highlight Trends and in the widget), and its **API Ninjas
+  commodity** (`gold`, `silver`, `brent_crude_oil`, `platinum`, `palladium`, `copper`, … as in API Ninjas' Commodity
+  Price API). Those six are added the first time the CMS starts; materials still named by their Yahoo Finance
+  symbol (`GC=F` …, from the first version) get their API Ninjas name when the CMS starts. Untick **Active** to hide
+  one and keep its prices; deleting one deletes its prices too. Don't change a key once people have voted: their
+  predictions are kept under it.
+- **Market Prices**: one price per material and day, the day's last. awoz-api saves them every 4 hours from API
+  Ninjas, and the first time also fills in the last year (see its README, "Market prices and predictions"). The ten
+  years before come from World Bank and U.S. EIA data (below). A price you add or correct here is marked **Entered
+  by hand** and never overwritten. A material without an API Ninjas commodity only has the prices you enter.
+
+**Adding the ten years before (once).** API Ninjas' history needs a premium plan, and awoz-api only asks it for a
+year, so `scripts/market-history/` holds ten years of prices from open sources: World Bank monthly averages for gold,
+silver, platinum and copper (Oct 2016 – Sep 2026), and the U.S. EIA's daily Brent price (Oct 2016 – Oct 2026).
+`SOURCES.md` there says exactly what each is and its licence. Palladium has none: no openly licensed source was
+found, so its chart starts with API Ninjas. Import them after deploying this version:
+
+```bash
+cd ~/payloadcms/apps/cms
+./deploy/import-market-history.sh --dry-run   # only show what would happen
+./deploy/import-market-history.sh             # about a minute for ~3,000 prices
+```
+
+Days that already have a price keep it, so running it again is safe. The World Bank's prices are licensed CC BY
+4.0: the app credits them at the bottom of the Research tab. To add history for another material, put a
+`<key>.csv` with the columns `date,price,source` in that folder and import again.
+
+awoz-api uses these endpoints (`src/endpoints/appMarket.ts`); people's predictions are kept by awoz-api itself,
+with their accounts:
+
+| Endpoint | What it does |
+| --- | --- |
+| `GET /api/app/market` | The active materials with their latest two prices, their price at the end of each month for 10 years, and at the end of each week for the last year |
+| `POST /api/app/market-prices` | Saves up to 1000 prices, one per material and day, e.g. `{"source": "api-ninjas", "prices": [{"material": "gold", "date": "2026-10-28", "price": 2680.5}]}`; answers how many were created, updated, unchanged and kept |
+
+#### Push notifications
+
+**VgemsAI App → Push Notifications** sends notifications to the phones of app users. Write a title and a message,
+choose the tab the app opens when it's tapped (**Opens**) and who gets it (**To**: everyone with the app, or chosen
+clients; only clients with a **VgemsAI App Account** can be chosen). Under **Send**, choose **Now** or **At a set
+time** (with its time zone) and save; **Not yet (draft)** keeps it for later.
+
+awoz-api checks every minute for the ones whose time has come and sends them through Firebase to the phones that
+are signed in with notifications on (awoz-api README: "Push notifications", which also has the Firebase setup). The
+sidebar then shows its **Status** and how many phones it was sent to, how many Firebase accepted, and how many no
+longer have the app (those are never sent to again).
+
+- A notification goes out once: when it's sending or sent it can't be changed. **Duplicate** it to send it again;
+  the copy starts as a draft.
+- Deleting one that hasn't gone out yet cancels it.
+- **Failed** comes with the reason, e.g. Firebase isn't set up on awoz-api. Fix it, then save the notification again
+  with **Send: Now**.
+
+awoz-api uses three endpoints (`src/endpoints/appPushNotifications.ts`): `GET /api/app/push-notifications/due` lists
+the notifications due, with the app accounts of the chosen clients; `POST /api/app/push-notifications/:id/start`
+marks one as sending (`409` if it no longer waits); `POST /api/app/push-notifications/:id/result` saves how it went.
+
+#### Privacy policy and terms of use
+
+One **Privacy Policy** and one **Terms of Use** cover both the app and the Vigor website. They are ordinary pages
+under **Pages**, for the iOS app and the Vigor website, with the slugs `privacy-policy` and `terms-of-use`, so
+publishing an edit updates both at once:
+
+- **The app:** the CMS shows every published page of the iOS app as a web page
+  (`src/app/(frontend)/ios-app/[slug]/page.tsx`). That is the address to give App Store Connect (App Privacy →
+  Privacy Policy URL; App Information → License Agreement or the description for the terms) and the address the
+  app opens from Settings and the signup screen:
+
+  ```
+  SERVER_URL/ios-app/privacy-policy
+  SERVER_URL/ios-app/terms-of-use
+  ```
+
+- **The Vigor website** shows every published page of the Vigor website at `/<slug>` in each of its languages, e.g.
+  `/privacy-policy` and `/fr/privacy-policy`, and links to both from its footer (see "Vigor website"). The text is
+  the same in every language, since pages aren't translated.
+
+Drafts aren't shown anywhere, and a published edit shows up right away (on the website, once `VIGOR_WEBSITE_URL` is
+set; otherwise within a minute). Links to another page (**Link → Internal link**) point to that page on each site.
+The page's version history (**Versions** tab) keeps every earlier text.
+
+**Adding them (once).** The first version of both texts is in `scripts/legal/`. Add them as drafts, then open each
+one under **Pages**, replace every `[ADD CONTACT EMAIL]` and `[ADD STATE]` (the US state whose laws govern the
+terms), and press **Publish**:
+
+```bash
+cd ~/payloadcms/apps/cms
+./deploy/import-legal-pages.sh --dry-run   # only show what would happen
+./deploy/import-legal-pages.sh
+```
+
+A page that already exists with the same slug is skipped, so running it again keeps your edits. If you added the
+app-only first version earlier, `--update` saves the current text, which also covers the website, as a new draft of
+each page (the published version stays live until you publish it, and the earlier text stays under **Versions**).
+Fill in the `[ADD …]` spots again, then publish:
+
+```bash
+./deploy/import-legal-pages.sh --update
+```
+
+**Updating them.** Edit the page under **Pages** and change the "Last updated" date at the top, then publish. When the
+app or the website starts collecting something new or uses a new service (another AI provider, analytics tool,
+payments), update the Privacy Policy, and for the app the answers in App Store Connect → App Privacy, before releasing
+that version. Tell users in the app, on the website or by email before significant changes take effect, as both
+texts promise.
 
 ## Two-factor authentication
 
@@ -733,9 +1156,13 @@ shows whether an email was delivered.
 | Build killed / `exit code: 137`                                          | Out of memory. Use an 8 GB instance or check that swap is on (`swapon --show`).                                                                                             |
 | Caddy can't get a certificate                                            | DNS doesn't point at the instance yet, or port 80/443 is closed. Check `docker compose logs caddy`.                                                                         |
 | Upload fails: `Could not load credentials` / `AccessDenied`              | S3 access. Check that the IAM role is attached with the policy above and that the metadata hop limit is 2, or set the key pair in `.env`.                                   |
+| Upload of a file over 10 MB fails: `Something went wrong` (500)          | `docker compose logs cms` says `Request body exceeded 10MB`. Fixed in `next.config.ts`: redeploy. Files may be up to 50 MB (`src/requestSizeLimit.ts`, `fileSize`).         |
 | Upload works but images are broken (403)                                 | The files aren't public. Add the bucket policy (and untick the bucket-policy public-access blocks), or check the CloudFront origin access settings.                         |
 | Personal website only shows a change after a minute                      | `docker compose logs cms` shows `Could not revalidate`: `401` means the two secrets differ; `ECONNREFUSED` or a timeout means `WEBSITE_URL` is wrong.                       |
 | Personal website still shows its Markdown version of a page              | The page (or Site settings) was never saved in the CMS. Open it in the admin panel and save it, or run the import.                                                          |
+| Uploaded photos get no AI title, description or tags                     | `docker compose logs cms` says `Could not write the texts of … with AI` and why, e.g. a wrong `OPENAI_API_KEY` (401), no credit (429) or a model without image input (400). |
+| **Generate with AI** says to set `OPENAI_API_KEY`                        | The key isn't in the running container. Add it to `.env` and run `./deploy/deploy.sh` (`docker compose restart` doesn't read `.env` again).                                 |
+| A photo or album isn't on the website                                    | It (or the photo's album) is a draft: publish both.                                                                                                                         |
 | Vigor website only shows a change after a minute                         | The same, for `VIGOR_WEBSITE_URL` and `VIGOR_WEBSITE_REVALIDATE_SECRET` (the website's `REVALIDATE_SECRET`).                                                                |
 | A page can't use a slug that another site's page uses ("invalid: slug")  | The database still has the index from before the Sites field. Remove it as described in "Pages for several websites and apps".                                              |
 | A new Vigor product shows in English but not in the other languages      | It is published in English only. Open it and use the arrow next to **Publish in English** → **Publish all locales**.                                                        |

@@ -74,60 +74,69 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_52BE8802".
+ * via the `definition` "LexicalNodes_AD5CE431".
  */
-export type LexicalNodes_52BE8802 =
+export type LexicalNodes_AD5CE431 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_52BE8802>
+  | SerializedParagraphNode<LexicalNodes_AD5CE431>
   | SerializedBlockNode<Code | YouTubeBlock>
-  | SerializedAutoLinkNode<LexicalNodes_52BE8802, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_52BE8802, LexicalLinkFields>
-  | SerializedHeadingNode<LexicalNodes_52BE8802, 'h2' | 'h3' | 'h4' | 'h5' | 'h6'>
+  | SerializedAutoLinkNode<LexicalNodes_AD5CE431, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_AD5CE431, LexicalLinkFields>
+  | SerializedHeadingNode<LexicalNodes_AD5CE431, 'h2' | 'h3' | 'h4' | 'h5' | 'h6'>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_52BE8802>
-  | SerializedListNode<LexicalNodes_52BE8802>
-  | SerializedListItemNode<LexicalNodes_52BE8802>;
+  | SerializedUploadNode<'personal-photos'>
+  | SerializedQuoteNode<LexicalNodes_AD5CE431>
+  | SerializedListNode<LexicalNodes_AD5CE431>
+  | SerializedListItemNode<LexicalNodes_AD5CE431>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_6B304EA0".
+ * via the `definition` "LexicalNodes_8909F562".
  */
-export type LexicalNodes_6B304EA0 =
+export type LexicalNodes_8909F562 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_6B304EA0>
+  | SerializedParagraphNode<LexicalNodes_8909F562>
   | SerializedBlockNode<Code | YouTubeBlock>
-  | SerializedAutoLinkNode<LexicalNodes_6B304EA0, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_6B304EA0, LexicalLinkFields>
-  | SerializedHeadingNode<LexicalNodes_6B304EA0, 'h2' | 'h3' | 'h4'>
+  | SerializedAutoLinkNode<LexicalNodes_8909F562, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_8909F562, LexicalLinkFields>
+  | SerializedHeadingNode<LexicalNodes_8909F562, 'h2' | 'h3' | 'h4'>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_6B304EA0>
-  | SerializedListNode<LexicalNodes_6B304EA0>
-  | SerializedListItemNode<LexicalNodes_6B304EA0>;
+  | SerializedUploadNode<'personal-photos'>
+  | SerializedQuoteNode<LexicalNodes_8909F562>
+  | SerializedListNode<LexicalNodes_8909F562>
+  | SerializedListItemNode<LexicalNodes_8909F562>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_0D9794BB".
+ * via the `definition` "LexicalNodes_ECEDE4E2".
  */
-export type LexicalNodes_0D9794BB =
+export type LexicalNodes_ECEDE4E2 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_0D9794BB>
+  | SerializedParagraphNode<LexicalNodes_ECEDE4E2>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_0D9794BB>
+  | SerializedUploadNode<'personal-photos'>
+  | SerializedQuoteNode<LexicalNodes_ECEDE4E2>
   | SerializedRelationshipNode<
       | 'users'
       | 'posts'
       | 'personal-projects'
+      | 'personal-photo-albums'
       | 'pages'
       | 'profiles'
       | 'clients'
       | 'events'
+      | 'chat-sessions'
+      | 'chat-messages'
+      | 'market-materials'
+      | 'market-prices'
+      | 'push-notifications'
       | 'vigor-products'
       | 'vigor-services'
       | 'vigor-news'
@@ -137,11 +146,11 @@ export type LexicalNodes_0D9794BB =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_0D9794BB, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_0D9794BB, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_0D9794BB>
-  | SerializedListItemNode<LexicalNodes_0D9794BB>
-  | SerializedHeadingNode<LexicalNodes_0D9794BB>;
+  | SerializedAutoLinkNode<LexicalNodes_ECEDE4E2, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_ECEDE4E2, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_ECEDE4E2>
+  | SerializedListItemNode<LexicalNodes_ECEDE4E2>
+  | SerializedHeadingNode<LexicalNodes_ECEDE4E2>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -165,10 +174,17 @@ export interface Config {
     media: Media;
     posts: Post;
     'personal-projects': PersonalProject;
+    'personal-photos': PersonalPhoto;
+    'personal-photo-albums': PersonalPhotoAlbum;
     pages: Page;
     profiles: Profile;
     clients: Client;
     events: Event;
+    'chat-sessions': ChatSession;
+    'chat-messages': ChatMessage;
+    'market-materials': MarketMaterial;
+    'market-prices': MarketPrice;
+    'push-notifications': PushNotification;
     'vigor-products': VigorProduct;
     'vigor-services': VigorService;
     'vigor-news': VigorNewsArticle;
@@ -180,8 +196,18 @@ export interface Config {
     'payload-llm-instructions': PayloadLlmInstruction;
   };
   collectionsJoins: {
+    'personal-photo-albums': {
+      photos: 'personal-photos';
+    };
     clients: {
       events: 'events';
+      chatSessions: 'chat-sessions';
+    };
+    'chat-sessions': {
+      messages: 'chat-messages';
+    };
+    'market-materials': {
+      prices: 'market-prices';
     };
   };
   collectionsSelect: {
@@ -189,10 +215,17 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'personal-projects': PersonalProjectsSelect<false> | PersonalProjectsSelect<true>;
+    'personal-photos': PersonalPhotosSelect<false> | PersonalPhotosSelect<true>;
+    'personal-photo-albums': PersonalPhotoAlbumsSelect<false> | PersonalPhotoAlbumsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     profiles: ProfilesSelect<false> | ProfilesSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
+    'chat-sessions': ChatSessionsSelect<false> | ChatSessionsSelect<true>;
+    'chat-messages': ChatMessagesSelect<false> | ChatMessagesSelect<true>;
+    'market-materials': MarketMaterialsSelect<false> | MarketMaterialsSelect<true>;
+    'market-prices': MarketPricesSelect<false> | MarketPricesSelect<true>;
+    'push-notifications': PushNotificationsSelect<false> | PushNotificationsSelect<true>;
     'vigor-products': VigorProductsSelect<false> | VigorProductsSelect<true>;
     'vigor-services': VigorServicesSelect<false> | VigorServicesSelect<true>;
     'vigor-news': VigorNewsSelect<false> | VigorNewsSelect<true>;
@@ -214,11 +247,13 @@ export interface Config {
     'personal-about': PersonalAbout;
     'personal-services': PersonalServices;
     'personal-projects-page': PersonalProjectsPage;
+    'personal-photos-page': PersonalPhotosPage;
     'personal-blog-page': PersonalBlogPage;
     'personal-contact': PersonalContact;
     'vigor-settings': VigorSettings;
     'vigor-home': VigorHome;
     'vigor-about': VigorAbout;
+    'vigor-app': VigorApp;
   };
   globalsSelect: {
     'personal-settings': PersonalSettingsSelect<false> | PersonalSettingsSelect<true>;
@@ -226,11 +261,13 @@ export interface Config {
     'personal-about': PersonalAboutSelect<false> | PersonalAboutSelect<true>;
     'personal-services': PersonalServicesSelect<false> | PersonalServicesSelect<true>;
     'personal-projects-page': PersonalProjectsPageSelect<false> | PersonalProjectsPageSelect<true>;
+    'personal-photos-page': PersonalPhotosPageSelect<false> | PersonalPhotosPageSelect<true>;
     'personal-blog-page': PersonalBlogPageSelect<false> | PersonalBlogPageSelect<true>;
     'personal-contact': PersonalContactSelect<false> | PersonalContactSelect<true>;
     'vigor-settings': VigorSettingsSelect<false> | VigorSettingsSelect<true>;
     'vigor-home': VigorHomeSelect<false> | VigorHomeSelect<true>;
     'vigor-about': VigorAboutSelect<false> | VigorAboutSelect<true>;
+    'vigor-app': VigorAppSelect<false> | VigorAppSelect<true>;
   };
   locale: 'en' | 'es' | 'fr' | 'zh-Hant';
   widgets: {
@@ -354,6 +391,38 @@ export interface Media {
   };
   focalX?: number | null;
   focalY?: number | null;
+  variants?: {
+    max1440?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+    max720?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+    max640?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -370,7 +439,7 @@ export interface Post {
    * The first image is the cover on post cards. All images appear in the gallery at the top of the post.
    */
   images?: (string | Media)[] | null;
-  content: LexicalRichText<LexicalNodes_6B304EA0>;
+  content: LexicalRichText<LexicalNodes_8909F562>;
   /**
    * The post is published at /blog/<slug>.
    */
@@ -445,7 +514,7 @@ export interface PersonalProject {
         id?: string | null;
       }[]
     | null;
-  content: LexicalRichText<LexicalNodes_52BE8802>;
+  content: LexicalRichText<LexicalNodes_AD5CE431>;
   /**
    * The project is published at /projects/<slug>.
    */
@@ -485,6 +554,196 @@ export interface PersonalProject {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Drop in many photos at once with Bulk upload. With OPENAI_API_KEY set, empty titles, alt texts, descriptions and tags are written by AI on upload; review them before you publish.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-photos".
+ */
+export interface PersonalPhoto {
+  id: string;
+  _order?: string | null;
+  /**
+   * Shown on the photo's page and in search results.
+   */
+  title?: string | null;
+  /**
+   * What the photo shows, in one sentence, for screen readers and image search. Not shown on the page.
+   */
+  alt?: string | null;
+  /**
+   * Shown below the photo on its page, and in search results and link previews.
+   */
+  description?: string | null;
+  /**
+   * Optional, e.g. Kyoto, Japan. Shown on the photo's page; AI uses it too.
+   */
+  location?: string | null;
+  /**
+   * Read from the file on upload when the camera recorded them. Shown on the photo's page.
+   */
+  camera?: {
+    model?: string | null;
+    lens?: string | null;
+    focalLength?: string | null;
+    aperture?: string | null;
+    shutterSpeed?: string | null;
+    iso?: string | null;
+  };
+  /**
+   * Bulk upload: set it for all photos at once with "Edit all", then choose Album.
+   */
+  album: string | PersonalPhotoAlbum;
+  /**
+   * Shown as links to every photo with the same tag.
+   */
+  tags?: string[] | null;
+  /**
+   * The photo is at /photos/<album>/<slug>.
+   */
+  slug: string;
+  /**
+   * Read from the file when the camera recorded it.
+   */
+  takenAt?: string | null;
+  /**
+   * Show it on the Photos page (/photos).
+   */
+  featured?: boolean | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+  variants?: {
+    max480?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+    max960?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+    max1600?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+    max2560?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+      prefix?: string | null;
+      _objectKey?: string | null;
+    };
+  };
+}
+/**
+ * The Photos page shows the albums in the order of this list; drag them to change it.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-photo-albums".
+ */
+export interface PersonalPhotoAlbum {
+  id: string;
+  _order?: string | null;
+  /**
+   * e.g. Street, Landscapes, Japan 2025
+   */
+  title: string;
+  /**
+   * Shown below the title on the album page, and in search results.
+   */
+  description?: string | null;
+  /**
+   * Shown for the album on the Photos page. Empty: the album's first photo.
+   */
+  cover?: (string | null) | PersonalPhoto;
+  /**
+   * The album is at /photos/<slug>.
+   */
+  slug: string;
+  /**
+   * The photos of this album. Set the album of a photo in Photos.
+   */
+  photos?: {
+    docs?: (string | PersonalPhoto)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Title and description for search engines and link previews. Empty fields use the defaults from Site settings.
+   */
+  seo?: {
+    /**
+     * The browser tab shows it in the Site settings title template, e.g. "Oskar Wong | <title>".
+     */
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Shown in link previews, e.g. on LinkedIn or X.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -496,11 +755,11 @@ export interface Page {
    */
   description?: string | null;
   heroImage?: (string | null) | Media;
-  content: LexicalRichText<LexicalNodes_6B304EA0>;
+  content: LexicalRichText<LexicalNodes_8909F562>;
   /**
    * The websites and apps that show this page.
    */
-  sites: ('personal' | 'business' | 'ios-app')[];
+  sites: ('personal' | 'business' | 'ios-app' | 'vigor')[];
   /**
    * Identifies the page within each site, e.g. "about" for /about. Filled in from the title when left empty.
    */
@@ -536,7 +795,7 @@ export interface Profile {
    */
   headline?: string | null;
   photo?: (string | null) | Media;
-  bio?: LexicalRichText<LexicalNodes_0D9794BB> | null;
+  bio?: LexicalRichText<LexicalNodes_ECEDE4E2> | null;
   links?:
     | {
         platform: 'github' | 'linkedin' | 'youtube' | 'x' | 'website' | 'other';
@@ -625,6 +884,8 @@ export interface Client {
   address?: {
     street?: string | null;
     city?: string | null;
+    state?: string | null;
+    postalCode?: string | null;
     country?: string | null;
   };
   businessType?:
@@ -643,6 +904,14 @@ export interface Client {
     totalDocs?: number;
   };
   /**
+   * Their conversations in the VgemsAI app, newest first (kept 90 days).
+   */
+  chatSessions?: {
+    docs?: (string | ChatSession)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
    * How important this client is to the business
    */
   importance?: ('5' | '4' | '3' | '2' | '1') | null;
@@ -651,6 +920,10 @@ export interface Client {
    * How you found them, e.g. a referral or an event
    */
   source?: string | null;
+  /**
+   * Signed up in the VgemsAI app: the ID of their account there. Set by the app.
+   */
+  appUserId?: number | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -693,6 +966,18 @@ export interface Event {
     address?: string | null;
     city: string;
     country: string;
+    /**
+     * Filled in from Apple Maps when the venue, address, city or country changes. Correct them if the pin is in the wrong place; clear them to look the place up again.
+     *
+     * @minItems 2
+     * @maxItems 2
+     */
+    coordinates?: [number, number] | null;
+    /**
+     * How precise the coordinates are
+     */
+    coordinatesSource?: ('venue' | 'address' | 'city' | 'country' | 'manual') | null;
+    coordinatesProblem?: string | null;
   };
   organizer?: string | null;
   website?: string | null;
@@ -706,9 +991,243 @@ export interface Event {
   notes?: string | null;
   status: 'planned' | 'confirmed' | 'completed' | 'cancelled';
   /**
+   * Added by awoz-api's weekly web search; its sources are in the notes. Check the dates and the place.
+   */
+  foundBy?: 'claude' | null;
+  /**
    * Brochures, floor plans, photos
    */
   attachments?: (string | Media)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Conversations in the VgemsAI app. Each is deleted 90 days after its last message.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-sessions".
+ */
+export interface ChatSession {
+  id: string;
+  /**
+   * The first question
+   */
+  title: string;
+  /**
+   * Written by the AI once the conversation has been quiet for 30 minutes
+   */
+  summary?: string | null;
+  topics?: string[] | null;
+  messages?: {
+    docs?: (string | ChatMessage)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Who asked: the client made from their app signup
+   */
+  client?: (string | null) | Client;
+  /**
+   * Their account ID in the app
+   */
+  appUserId: number;
+  messageCount?: number | null;
+  lastMessageAt?: string | null;
+  /**
+   * The AI model of the last answer
+   */
+  model?: string | null;
+  expiresAt?: string | null;
+  needsSummary?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Every question and answer in the VgemsAI app, kept 90 days.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-messages".
+ */
+export interface ChatMessage {
+  id: string;
+  session: string | ChatSession;
+  role: 'user' | 'assistant';
+  text: string;
+  /**
+   * The AI declined to answer
+   */
+  refused?: boolean | null;
+  appUserId: number;
+  /**
+   * claude or openai
+   */
+  provider?: string | null;
+  model?: string | null;
+  inputTokens?: number | null;
+  outputTokens?: number | null;
+  durationMs?: number | null;
+  expiresAt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * The prices the VgemsAI app shows under Research, where people predict whether each goes up or down next month.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "market-materials".
+ */
+export interface MarketMaterial {
+  id: string;
+  /**
+   * As the app shows it, e.g. Crude Oil (Brent)
+   */
+  name: string;
+  /**
+   * The app's name for it, e.g. gold. People's predictions are kept under it: don't change it once they have voted.
+   */
+  key: string;
+  /**
+   * e.g. USD/oz, USD/lb, USD/bbl
+   */
+  unit: string;
+  /**
+   * Its name in API Ninjas' Commodity Price API, e.g. gold, silver, platinum, palladium, copper or brent_crude_oil: awoz-api saves its price every 4 hours. Leave it empty to enter the prices by hand under Market Prices.
+   */
+  symbol?: string | null;
+  /**
+   * An SF Symbols name, e.g. circle.hexagongrid.fill
+   */
+  icon: string;
+  prices?: {
+    docs?: (string | MarketPrice)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Shown in the app, with its price saved every 4 hours. Untick it to hide it and keep its prices.
+   */
+  active?: boolean | null;
+  /**
+   * Also shown as a chart under Highlight Trends, and in the price widget
+   */
+  highlight?: boolean | null;
+  /**
+   * Lower numbers come first
+   */
+  sortOrder?: number | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Each day's last price, saved by awoz-api every 4 hours. A price added or changed here is kept as it is.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "market-prices".
+ */
+export interface MarketPrice {
+  id: string;
+  material: string | MarketMaterial;
+  /**
+   * The trading day
+   */
+  date: string;
+  /**
+   * In the material's unit
+   */
+  price: number;
+  /**
+   * Where the price comes from. Saving it here makes it "Entered by hand".
+   */
+  source: 'api-ninjas' | 'world-bank' | 'eia' | 'yahoo' | 'manual';
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Notifications on the phones of VgemsAI app users. Choose "Now" or a time under Send, and save: it goes out within a minute of that time.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "push-notifications".
+ */
+export interface PushNotification {
+  id: string;
+  /**
+   * In bold on the notification, e.g. "New trade show added"
+   */
+  title: string;
+  body: string;
+  /**
+   * The tab the app opens when the notification is tapped
+   */
+  screen: 'home' | 'events' | 'products' | 'research' | 'settings';
+  audience: 'everyone' | 'clients';
+  /**
+   * Only clients who signed up in the app (with a VgemsAI App Account) can get it, on the phones they are signed in on with notifications on.
+   */
+  clients?: (string | Client)[] | null;
+  delivery: 'draft' | 'now' | 'scheduled';
+  sendAt?: string | null;
+  sendAt_tz?: SupportedTimezones;
+  status: 'draft' | 'queued' | 'sending' | 'sent' | 'failed';
+  sentAt?: string | null;
+  results?: {
+    /**
+     * Phones it was sent to
+     */
+    devices?: number | null;
+    /**
+     * Accepted by Firebase
+     */
+    delivered?: number | null;
+    /**
+     * Not accepted, e.g. Firebase was busy
+     */
+    failed?: number | null;
+    /**
+     * Phones that no longer have the app or notifications: never sent to again
+     */
+    removed?: number | null;
+  };
+  problem?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -1030,6 +1549,14 @@ export interface PayloadLockedDocument {
         value: string | PersonalProject;
       } | null)
     | ({
+        relationTo: 'personal-photos';
+        value: string | PersonalPhoto;
+      } | null)
+    | ({
+        relationTo: 'personal-photo-albums';
+        value: string | PersonalPhotoAlbum;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: string | Page;
       } | null)
@@ -1044,6 +1571,26 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'events';
         value: string | Event;
+      } | null)
+    | ({
+        relationTo: 'chat-sessions';
+        value: string | ChatSession;
+      } | null)
+    | ({
+        relationTo: 'chat-messages';
+        value: string | ChatMessage;
+      } | null)
+    | ({
+        relationTo: 'market-materials';
+        value: string | MarketMaterial;
+      } | null)
+    | ({
+        relationTo: 'market-prices';
+        value: string | MarketPrice;
+      } | null)
+    | ({
+        relationTo: 'push-notifications';
+        value: string | PushNotification;
       } | null)
     | ({
         relationTo: 'vigor-products';
@@ -1190,6 +1737,46 @@ export interface MediaSelect<T extends boolean = true> {
       };
   focalX?: T;
   focalY?: T;
+  variants?:
+    | T
+    | {
+        max1440?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+        max720?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+        max640?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1237,6 +1824,136 @@ export interface PersonalProjectsSelect<T extends boolean = true> {
   slug?: T;
   date?: T;
   tags?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-photos_select".
+ */
+export interface PersonalPhotosSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  alt?: T;
+  description?: T;
+  location?: T;
+  camera?:
+    | T
+    | {
+        model?: T;
+        lens?: T;
+        focalLength?: T;
+        aperture?: T;
+        shutterSpeed?: T;
+        iso?: T;
+      };
+  album?: T;
+  tags?: T;
+  slug?: T;
+  takenAt?: T;
+  featured?: T;
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+  variants?:
+    | T
+    | {
+        max480?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+        max960?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+        max1600?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+        max2560?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+              prefix?: T;
+              _objectKey?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-photo-albums_select".
+ */
+export interface PersonalPhotoAlbumsSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  description?: T;
+  cover?: T;
+  slug?: T;
+  photos?: T;
   seo?:
     | T
     | {
@@ -1341,15 +2058,19 @@ export interface ClientsSelect<T extends boolean = true> {
     | {
         street?: T;
         city?: T;
+        state?: T;
+        postalCode?: T;
         country?: T;
       };
   businessType?: T;
   industry?: T;
   notes?: T;
   events?: T;
+  chatSessions?: T;
   importance?: T;
   status?: T;
   source?: T;
+  appUserId?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -1375,13 +2096,121 @@ export interface EventsSelect<T extends boolean = true> {
         address?: T;
         city?: T;
         country?: T;
+        coordinates?: T;
+        coordinatesSource?: T;
+        coordinatesProblem?: T;
       };
   organizer?: T;
   website?: T;
   clients?: T;
   notes?: T;
   status?: T;
+  foundBy?: T;
   attachments?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-sessions_select".
+ */
+export interface ChatSessionsSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  topics?: T;
+  messages?: T;
+  client?: T;
+  appUserId?: T;
+  messageCount?: T;
+  lastMessageAt?: T;
+  model?: T;
+  expiresAt?: T;
+  needsSummary?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-messages_select".
+ */
+export interface ChatMessagesSelect<T extends boolean = true> {
+  session?: T;
+  role?: T;
+  text?: T;
+  refused?: T;
+  appUserId?: T;
+  provider?: T;
+  model?: T;
+  inputTokens?: T;
+  outputTokens?: T;
+  durationMs?: T;
+  expiresAt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "market-materials_select".
+ */
+export interface MarketMaterialsSelect<T extends boolean = true> {
+  name?: T;
+  key?: T;
+  unit?: T;
+  symbol?: T;
+  icon?: T;
+  prices?: T;
+  active?: T;
+  highlight?: T;
+  sortOrder?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "market-prices_select".
+ */
+export interface MarketPricesSelect<T extends boolean = true> {
+  material?: T;
+  date?: T;
+  price?: T;
+  source?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "push-notifications_select".
+ */
+export interface PushNotificationsSelect<T extends boolean = true> {
+  title?: T;
+  body?: T;
+  screen?: T;
+  audience?: T;
+  clients?: T;
+  delivery?: T;
+  sendAt?: T;
+  sendAt_tz?: T;
+  status?: T;
+  sentAt?: T;
+  results?:
+    | T
+    | {
+        devices?: T;
+        delivered?: T;
+        failed?: T;
+        removed?: T;
+      };
+  problem?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -1642,7 +2471,7 @@ export interface PersonalHome {
    * Typed out under the name, one after another, e.g. Software Engineer. Press Enter after each.
    */
   roles?: string[] | null;
-  intro?: LexicalRichText<LexicalNodes_52BE8802> | null;
+  intro?: LexicalRichText<LexicalNodes_AD5CE431> | null;
   /**
    * Optional. Shown above the name.
    */
@@ -1764,7 +2593,7 @@ export interface PersonalAbout {
          * e.g. Interests and Hobbies
          */
         title: string;
-        text: LexicalRichText<LexicalNodes_52BE8802>;
+        text: LexicalRichText<LexicalNodes_AD5CE431>;
         id?: string | null;
       }[]
     | null;
@@ -1893,7 +2722,7 @@ export interface PersonalServices {
    * Shown below the title in color, e.g. My Expertise
    */
   subtitle?: string | null;
-  intro?: LexicalRichText<LexicalNodes_52BE8802> | null;
+  intro?: LexicalRichText<LexicalNodes_AD5CE431> | null;
   button?: {
     /**
      * The button text. Leave empty to hide the button.
@@ -1918,7 +2747,7 @@ export interface PersonalServices {
          * An SVG file. The website colors it to match the theme.
          */
         icon?: (string | null) | Media;
-        text?: LexicalRichText<LexicalNodes_52BE8802> | null;
+        text?: LexicalRichText<LexicalNodes_AD5CE431> | null;
         id?: string | null;
       }[]
     | null;
@@ -1973,6 +2802,56 @@ export interface PersonalProjectsPage {
     title?: string | null;
     text?: string | null;
   };
+  /**
+   * Title and description for search engines and link previews. Empty fields use the defaults from Site settings.
+   */
+  seo?: {
+    /**
+     * The browser tab shows it in the Site settings title template, e.g. "Oskar Wong | <title>".
+     */
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Shown in link previews, e.g. on LinkedIn or X.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The photos themselves are under Photos, their catalogs under Photo albums.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-photos-page".
+ */
+export interface PersonalPhotosPage {
+  id: string;
+  /**
+   * e.g. Photography
+   */
+  title: string;
+  /**
+   * Shown below the title in color, e.g. Moments I captured
+   */
+  subtitle?: string | null;
+  intro?: LexicalRichText<LexicalNodes_AD5CE431> | null;
+  /**
+   * Above the photos marked Featured, e.g. Featured. Empty: Latest photos.
+   */
+  featuredTitle?: string | null;
+  /**
+   * Above the albums, e.g. Albums
+   */
+  albumsTitle?: string | null;
   /**
    * Title and description for search engines and link previews. Empty fields use the defaults from Site settings.
    */
@@ -2060,7 +2939,7 @@ export interface PersonalContact {
    * Shown below the title in color, e.g. Let's talk about your project
    */
   subtitle?: string | null;
-  intro?: LexicalRichText<LexicalNodes_52BE8802> | null;
+  intro?: LexicalRichText<LexicalNodes_AD5CE431> | null;
   /**
    * Shown below the introduction, each with its icon.
    */
@@ -2143,14 +3022,38 @@ export interface VigorSettings {
      * Shown in the top bar and the footer.
      */
     tagline?: string | null;
+    /**
+     * Shown in the footer and on the Contact page. The contact form's messages go here too, unless the website's CONTACT_EMAIL_TO says otherwise.
+     */
     email: string;
+    /**
+     * With the country code, e.g. +852 2123 4567. Shown in the top bar, the footer and on the Contact page.
+     */
     phone: string;
+    /**
+     * The WhatsApp number with the country code, e.g. +852 9123 4567. Buyers get a "WhatsApp" link that opens a chat with it.
+     */
+    whatsapp?: string | null;
+    /**
+     * The WeChat ID buyers search for to add you. Shown in the footer and on the Contact page.
+     */
+    wechat?: string | null;
+    /**
+     * The showroom. Shown in the footer and on the Contact page, with a map.
+     */
     address?: string | null;
+    /**
+     * e.g. Monday to Friday, 9:00 am to 6:00 pm
+     */
     hours?: string | null;
+    /**
+     * Links in the footer. Leave a field empty to leave its link out.
+     */
     social?: {
       linkedin?: string | null;
       instagram?: string | null;
       facebook?: string | null;
+      youtube?: string | null;
     };
   };
   /**
@@ -2264,6 +3167,93 @@ export interface VigorAbout {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-app".
+ */
+export interface VigorApp {
+  id: string;
+  title: string;
+  summary?: string | null;
+  /**
+   * Badge in the banner, e.g. "In development · Public beta on TestFlight". Leave it empty for none.
+   */
+  status?: string | null;
+  /**
+   * Banner artwork, at least 1600 × 600 pixels.
+   */
+  image?: (string | null) | Media;
+  /**
+   * Once the app is on the App Store: its link. The main button then says "Download on the App Store".
+   */
+  appStoreUrl?: string | null;
+  /**
+   * The public link of the beta (App Store Connect → TestFlight → External Testing → Public Link). Without it, the beta button opens the contact form.
+   */
+  testFlightUrl?: string | null;
+  /**
+   * The short points under the banner, three or four of them.
+   */
+  highlights?:
+    | {
+        icon:
+          'assistant' | 'events' | 'map' | 'products' | 'research' | 'widgets' | 'security' | 'account' | 'languages';
+        title: string;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  features?: {
+    title?: string | null;
+    intro?: string | null;
+    items?:
+      | {
+          icon:
+            'assistant' | 'events' | 'map' | 'products' | 'research' | 'widgets' | 'security' | 'account' | 'languages';
+          title: string;
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  beta?: {
+    title?: string | null;
+    /**
+     * Where the app is at, and how to join the beta. Separate paragraphs with a blank line.
+     */
+    text?: string | null;
+    steps?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Small print under the steps, e.g. the iOS version the app needs.
+     */
+    note?: string | null;
+  };
+  faq?: {
+    title?: string | null;
+    items?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -2507,6 +3497,29 @@ export interface PersonalProjectsPageSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personal-photos-page_select".
+ */
+export interface PersonalPhotosPageSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  intro?: T;
+  featuredTitle?: T;
+  albumsTitle?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "personal-blog-page_select".
  */
 export interface PersonalBlogPageSelect<T extends boolean = true> {
@@ -2575,6 +3588,8 @@ export interface VigorSettingsSelect<T extends boolean = true> {
         tagline?: T;
         email?: T;
         phone?: T;
+        whatsapp?: T;
+        wechat?: T;
         address?: T;
         hours?: T;
         social?:
@@ -2583,6 +3598,7 @@ export interface VigorSettingsSelect<T extends boolean = true> {
               linkedin?: T;
               instagram?: T;
               facebook?: T;
+              youtube?: T;
             };
       };
   nav?:
@@ -2665,6 +3681,70 @@ export interface VigorAboutSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vigor-app_select".
+ */
+export interface VigorAppSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  status?: T;
+  image?: T;
+  appStoreUrl?: T;
+  testFlightUrl?: T;
+  highlights?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  features?:
+    | T
+    | {
+        title?: T;
+        intro?: T;
+        items?:
+          | T
+          | {
+              icon?: T;
+              title?: T;
+              text?: T;
+              id?: T;
+            };
+      };
+  beta?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        steps?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        note?: T;
+      };
+  faq?:
+    | T
+    | {
+        title?: T;
+        items?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "welcome_widget".
  */
 export interface WelcomeWidget {
@@ -2695,10 +3775,17 @@ export interface CollectionQueryWidget {
       | 'media'
       | 'posts'
       | 'personal-projects'
+      | 'personal-photos'
+      | 'personal-photo-albums'
       | 'pages'
       | 'profiles'
       | 'clients'
       | 'events'
+      | 'chat-sessions'
+      | 'chat-messages'
+      | 'market-materials'
+      | 'market-prices'
+      | 'push-notifications'
       | 'vigor-products'
       | 'vigor-services'
       | 'vigor-news'
@@ -2730,10 +3817,17 @@ export interface ActivityWidget {
           | 'media'
           | 'posts'
           | 'personal-projects'
+          | 'personal-photos'
+          | 'personal-photo-albums'
           | 'pages'
           | 'profiles'
           | 'clients'
           | 'events'
+          | 'chat-sessions'
+          | 'chat-messages'
+          | 'market-materials'
+          | 'market-prices'
+          | 'push-notifications'
           | 'vigor-products'
           | 'vigor-services'
           | 'vigor-news'
@@ -2749,7 +3843,7 @@ export interface ActivityWidget {
  */
 export interface UploadDropzoneWidget {
   data?: {
-    excludedCollections?: 'media'[] | null;
+    excludedCollections?: ('media' | 'personal-photos')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

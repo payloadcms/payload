@@ -25,6 +25,7 @@ import { getPayload } from 'payload'
 import type { Event } from '../src/payload-types'
 
 import config from '../src/payload.config'
+import { type Day, dayNumber, zonedMidnight } from '../src/zonedTime'
 
 type Timezone = NonNullable<Event['startDate_tz']>
 
@@ -35,8 +36,6 @@ type SourceEvent = {
   exact_date?: null | string
   location?: null | string
 }
-
-type Day = { day: number; month: number; year: number }
 
 type ParsedEvent = {
   address?: string
@@ -298,10 +297,6 @@ function day(year: string, month: string, dayOfMonth: string): Day {
   return result
 }
 
-function dayNumber({ day, month, year }: Day) {
-  return Date.UTC(year, month - 1, day)
-}
-
 /**
  * "Venue, 198 Street, City, ST, USA" → venue, address (parts starting with a number), city, country.
  * A trailing "(…)" remark goes to the notes; brackets inside the venue stay.
@@ -398,41 +393,6 @@ function eventType(description = ''): ParsedEvent['type'] {
     return 'tradeShow'
   }
   return 'exhibition'
-}
-
-/** Midnight of `date` in `timeZone`, as a UTC ISO string */
-function zonedMidnight(date: Day, timeZone: string) {
-  const guess = dayNumber(date)
-  const first = guess - offsetAt(guess, timeZone)
-  // Correct once in case the offset differs at midnight local time (daylight saving)
-  return new Date(guess - offsetAt(first, timeZone)).toISOString()
-}
-
-/** How far `timeZone` is ahead of UTC at `time`, in milliseconds */
-function offsetAt(time: number, timeZone: string) {
-  const parts = Object.fromEntries(
-    new Intl.DateTimeFormat('en-US', {
-      day: 'numeric',
-      hour: 'numeric',
-      hourCycle: 'h23',
-      minute: 'numeric',
-      month: 'numeric',
-      second: 'numeric',
-      timeZone,
-      year: 'numeric',
-    })
-      .formatToParts(time)
-      .map(({ type, value }) => [type, Number(value)]),
-  )
-  const local = Date.UTC(
-    parts.year,
-    parts.month - 1,
-    parts.day,
-    parts.hour,
-    parts.minute,
-    parts.second,
-  )
-  return local - Math.floor(time / 1000) * 1000
 }
 
 async function findExisting(event: ParsedEvent, startDate: string) {

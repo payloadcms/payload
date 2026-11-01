@@ -1,10 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
 import { loggedIn } from '../access/loggedIn'
+import { locateEvent } from '../hooks/locateEvent'
 
 /**
  * Sales events, exhibitions and trade shows around the world: when, where, and which clients were
  * involved. Internal only: every operation, including reading, requires a logged-in user.
+ *
+ * The coordinates of each event's place come from Apple Maps when it's saved (../hooks/locateEvent.ts).
+ * awoz-api adds the gem, jewellery and raw material trade shows Claude finds on the web every week
+ * (../endpoints/appEventDiscovery.ts).
  */
 export const Events: CollectionConfig = {
   slug: 'events',
@@ -22,6 +27,9 @@ export const Events: CollectionConfig = {
   },
   // Most recent first
   defaultSort: '-startDate',
+  hooks: {
+    beforeChange: [locateEvent],
+  },
   fields: [
     {
       type: 'row',
@@ -131,6 +139,45 @@ export const Events: CollectionConfig = {
             },
           ],
         },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'coordinates',
+              type: 'point',
+              admin: {
+                description:
+                  'Filled in from Apple Maps when the venue, address, city or country changes. Correct them if the pin is in the wrong place; clear them to look the place up again.',
+              },
+            },
+            {
+              name: 'coordinatesSource',
+              type: 'select',
+              admin: {
+                description: 'How precise the coordinates are',
+                readOnly: true,
+              },
+              label: 'Coordinates of',
+              options: [
+                { label: 'The venue (Apple Maps)', value: 'venue' },
+                { label: 'The street address (Apple Maps)', value: 'address' },
+                { label: 'Only the city (Apple Maps)', value: 'city' },
+                { label: 'Only the country (Apple Maps)', value: 'country' },
+                { label: 'Set by hand', value: 'manual' },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'coordinatesProblem',
+          type: 'text',
+          admin: {
+            // Only while there is one
+            condition: (_data, siblingData) => Boolean(siblingData?.coordinatesProblem),
+            readOnly: true,
+          },
+          label: 'Why there are no coordinates',
+        },
       ],
     },
     {
@@ -178,6 +225,20 @@ export const Events: CollectionConfig = {
         { label: 'Cancelled', value: 'cancelled' },
       ],
       required: true,
+    },
+    {
+      name: 'foundBy',
+      type: 'select',
+      admin: {
+        // Only on events awoz-api's weekly search added
+        condition: (data) => Boolean(data?.foundBy),
+        description:
+          "Added by awoz-api's weekly web search; its sources are in the notes. Check the dates and the place.",
+        position: 'sidebar',
+        readOnly: true,
+      },
+      label: 'Found by',
+      options: [{ label: 'Claude (weekly web search)', value: 'claude' }],
     },
     {
       name: 'attachments',

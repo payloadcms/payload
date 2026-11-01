@@ -10,32 +10,43 @@ import type {
 /**
  * Asks the personal website to rebuild the pages that show a document right after it is published,
  * edited, unpublished or deleted, instead of waiting for the website's periodic refresh: posts,
- * projects, its pages in Pages, and the pages and settings under "Personal website".
+ * projects, photos and albums, its pages in Pages, and the pages and settings under "Personal
+ * website".
  *
  * Calls `POST <WEBSITE_URL>/api/revalidate` (pages/api/revalidate.js in the website repo) with
  * `Authorization: Bearer <WEBSITE_REVALIDATE_SECRET>` and what changed: `{ collection, slugs,
- * tags }` for documents, `{ global }` for a page or the site settings. Does nothing unless both are
- * set, or when an operation runs with `context: { disableRevalidate: true }` (e.g. an import
- * script).
+ * tags }` for documents (photos also have `albums`), `{ global }` for a page or the site settings.
+ * Does nothing unless both are set, or when an operation runs with
+ * `context: { disableRevalidate: true }` (e.g. an import script).
  */
 const websiteURL = process.env.WEBSITE_URL?.replace(/\/+$/, '') || ''
 const secret = process.env.WEBSITE_REVALIDATE_SECRET || ''
 
 type WebsiteDoc = {
   _status?: 'draft' | 'published' | null
+  album?: unknown
   id: number | string
   sites?: null | string[]
   slug?: null | string
   tags?: null | string[]
 }
 
+type ExtraBody = (args: {
+  docs: WebsiteDoc[]
+  req: PayloadRequest
+}) => Promise<Record<string, unknown>>
+
 /**
  * Hooks for a collection with drafts whose published documents appear on the website.
  * `isOnWebsite` tells whether a document is shown there at all, e.g. a page of another site isn't.
+ * `extraBody` adds what else the website needs to find the pages of the documents, e.g. the albums
+ * of photos; it runs once the change is saved.
  */
 export const revalidateWebsiteCollection = ({
+  extraBody,
   isOnWebsite = () => true,
 }: {
+  extraBody?: ExtraBody
   isOnWebsite?: (doc: WebsiteDoc) => boolean
 } = {}) => {
   /**
@@ -77,6 +88,7 @@ export const revalidateWebsiteCollection = ({
     notifyAboutDocs({
       collection: collection.slug,
       docs: [isPublished ? (doc as WebsiteDoc) : null, liveDoc],
+      extraBody,
       isOnWebsite,
       req,
     })
@@ -86,7 +98,13 @@ export const revalidateWebsiteCollection = ({
 
   const afterDelete: CollectionAfterDeleteHook = ({ collection, doc, req }) => {
     if (doc?._status === 'published') {
-      notifyAboutDocs({ collection: collection.slug, docs: [doc as WebsiteDoc], isOnWebsite, req })
+      notifyAboutDocs({
+        collection: collection.slug,
+        docs: [doc as WebsiteDoc],
+        extraBody,
+        isOnWebsite,
+        req,
+      })
     }
 
     return doc
@@ -110,11 +128,13 @@ const liveDocKey = ({ collection, id }: { collection: string; id: number | strin
 const notifyAboutDocs = ({
   collection,
   docs,
+  extraBody,
   isOnWebsite,
   req,
 }: {
   collection: string
   docs: (null | undefined | WebsiteDoc)[]
+  extraBody?: ExtraBody
   isOnWebsite: (doc: WebsiteDoc) => boolean
   req: PayloadRequest
 }) => {
@@ -125,16 +145,23 @@ const notifyAboutDocs = ({
   }
 
   notifyWebsite({
-    body: {
+    body: async () => ({
       collection,
       slugs: [...new Set(shownDocs.map((doc) => doc.slug).filter(Boolean))],
       tags: [...new Set(shownDocs.flatMap((doc) => doc.tags ?? []))],
-    },
+      ...(extraBody && (await extraBody({ docs: shownDocs, req }))),
+    }),
     req,
   })
 }
 
-const notifyWebsite = ({ body, req }: { body: Record<string, unknown>; req: PayloadRequest }) => {
+const notifyWebsite = ({
+  body,
+  req,
+}: {
+  body: (() => Promise<Record<string, unknown>>) | Record<string, unknown>
+  req: PayloadRequest
+}) => {
   if (!isEnabled({ req })) {
     return
   }
@@ -143,7 +170,7 @@ const notifyWebsite = ({ body, req }: { body: Record<string, unknown>; req: Payl
   void waitForCommit({ req })
     .then(async () => {
       const res = await fetch(`${websiteURL}/api/revalidate`, {
-        body: JSON.stringify(body),
+        body: JSON.stringify(typeof body === 'function' ? await body() : body),
         headers: {
           Authorization: `Bearer ${secret}`,
           'Content-Type': 'application/json',

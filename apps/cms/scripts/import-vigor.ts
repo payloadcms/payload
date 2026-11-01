@@ -45,8 +45,10 @@ type Site = {
     phone: string
     portalName: string
     shortName: string
-    social: { facebook: string; instagram: string; linkedin: string }
+    social: { facebook: string; instagram: string; linkedin: string; youtube?: string }
     tagline: string
+    wechat?: string
+    whatsapp?: string
   }
   events: { date: string; location: string; title: string }[]
   hero: {
