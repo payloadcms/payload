@@ -614,10 +614,14 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
   test.describe('Lexical LinkHTMLConverter', () => {
     // Dynamic import to avoid circular dependency with serializeLexical
     let FormBuilderLinkConverter: any
+    let FormBuilderTextConverter: any
     test.beforeAll(async () => {
       FormBuilderLinkConverter = (
         await import('../../packages/plugin-form-builder/src/utilities/lexical/converters/link.js')
       ).LinkHTMLConverter
+      FormBuilderTextConverter = (
+        await import('../../packages/plugin-form-builder/src/utilities/lexical/converters/text.js')
+      ).TextHTMLConverter
     })
 
     test('blocks javascript: in link href', async () => {
@@ -654,7 +658,7 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
 
     test('handles internal document link with numeric ID without throwing', async () => {
       const result = await FormBuilderLinkConverter.converter({
-        converters: [],
+        converters: [FormBuilderTextConverter],
         node: {
           children: [{ format: 0, text: 'Page Link', type: 'text' }],
           fields: {
