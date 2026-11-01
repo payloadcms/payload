@@ -1263,7 +1263,10 @@ export interface VigorProduct {
    * Products with a badge are featured on the home page.
    */
   badge?: ('New' | 'Best seller') | null;
-  stone:
+  /**
+   * Every gemstone this style comes in.
+   */
+  stones: (
     | 'Emerald'
     | 'Diamond'
     | 'Lab-grown diamond'
@@ -1271,7 +1274,6 @@ export interface VigorProduct {
     | 'Ruby'
     | 'Pearl'
     | 'Tanzanite'
-    | 'Various stones'
     | 'Amazonite'
     | 'Amethyst'
     | 'Artistic jasper'
@@ -1355,7 +1357,12 @@ export interface VigorProduct {
     | 'White quartz'
     | 'Yellow calcite'
     | 'Yellow turquoise jasper'
-    | 'Zebra jasper';
+    | 'Zebra jasper'
+  )[];
+  /**
+   * Every size this style comes in, one at a time, e.g. 8 mm, 12 × 28 mm, US 6. If a gemstone comes in fewer sizes, say so in the body.
+   */
+  sizes?: string[] | null;
   metal:
     | '18K yellow gold'
     | '18K white gold'
@@ -1369,9 +1376,9 @@ export interface VigorProduct {
     | 'Loose (unset)'
     | 'No metal';
   /**
-   * e.g. 1.20 ct emerald, 0.45 ct diamonds, size 6.5
+   * Optional, e.g. 1.20 ct emerald, 0.45 ct diamonds; inner length 19 cm
    */
-  weight: string;
+  weight?: string | null;
   moq: number;
   unit: 'piece' | 'pair' | 'parcel' | 'strand';
   summary: string;
@@ -1408,6 +1415,7 @@ export interface VigorProduct {
    * Everything the old website knew about this style: its stones and sizes, where it was seen, the text of the old catalogs, and what the import had to guess. Not shown on the website.
    */
   legacyNotes?: string | null;
+  legacyImportedAt?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -2224,7 +2232,8 @@ export interface VigorProductsSelect<T extends boolean = true> {
   name?: T;
   category?: T;
   badge?: T;
-  stone?: T;
+  stones?: T;
+  sizes?: T;
   metal?: T;
   weight?: T;
   moq?: T;
@@ -2239,6 +2248,7 @@ export interface VigorProductsSelect<T extends boolean = true> {
   legacyHint?: T;
   legacyLastSeen?: T;
   legacyNotes?: T;
+  legacyImportedAt?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

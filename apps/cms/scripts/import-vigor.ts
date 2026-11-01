@@ -77,8 +77,11 @@ type Site = {
     moq: number
     name: string
     sku: string
+    sizes?: string[]
     slug: string
-    stone: string
+    /** Before the website listed several gemstones and sizes per product */
+    stone?: string
+    stones?: string[]
     summary: string
     unit: string
     weight: string
@@ -231,7 +234,7 @@ await importDocs({
   label: 'Product',
   title: ({ name }) => name,
   toData: (
-    { badge, body, category, metal, moq, name, sku, slug, stone, summary, unit, weight },
+    { badge, body, category, metal, moq, name, sizes, sku, slug, stone, stones, summary, unit, weight },
     index,
   ) => ({
     badge: badge || undefined,
@@ -240,13 +243,14 @@ await importDocs({
     metal,
     moq,
     name,
+    sizes: sizes ?? [],
     sku,
     slug,
     sortOrder: (index + 1) * 10,
-    stone,
+    stones: stones ?? (stone ? [stone] : []),
     summary,
     unit,
-    weight,
+    weight: weight || undefined,
   }),
   translated: (site, { slug }) => site.products.find((product) => product.slug === slug),
 })

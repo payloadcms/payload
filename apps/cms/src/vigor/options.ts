@@ -120,8 +120,6 @@ export const gemstones = options([
   'Ruby',
   'Pearl',
   'Tanzanite',
-  // A style offered in several stones; the product's text lists them
-  'Various stones',
   ...semiPreciousStones,
 ])
 

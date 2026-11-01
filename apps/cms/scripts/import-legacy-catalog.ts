@@ -17,10 +17,14 @@
  * runs this inside Docker.
  *
  * Each old style code (BL404, CB001…) becomes one product, saved as a draft: the website doesn't
- * show it until it's published. What the old records say about it, and what the import had to
- * guess, is in its "Old website" fields. Products marked "legit": false are never imported, and a
- * product whose old code is already in the CMS is skipped, so running it again is safe and keeps
- * your edits.
+ * show it until it's published. It lists every gemstone and every size the old records give for
+ * the style; when a gemstone comes in fewer sizes, the body says so. What the old records say about
+ * it, and what the import had to guess, is in its "Old website" fields. Products marked
+ * "legit": false are never imported.
+ *
+ * Running it again is safe and keeps your edits: a product that is still a draft nobody has saved
+ * since the import is rebuilt from the catalog; any other product from the old website only gets
+ * its empty gemstones and sizes filled in, as a draft.
  */
 /* eslint-disable no-console -- a command-line script */
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
@@ -31,8 +35,12 @@ import path from 'path'
 import { getPayload } from 'payload'
 import { slugify } from 'payload/shared'
 
+import type { VigorProduct } from '../src/payload-types'
+
 import config from '../src/payload.config'
 import { gemstones, metals, productCategories, units } from '../src/vigor/options'
+
+type Data = Record<string, unknown>
 
 type Photo = { date?: string; from: string; match?: string; path: string; px?: string }
 
@@ -221,7 +229,6 @@ const metalChoices = choices(metals)
 const unitChoices = choices(units)
 const missingChoices = [
   ...Object.values(STONES).filter((stone) => !stoneChoices.has(stone)),
-  ...['Various stones'].filter((stone) => !stoneChoices.has(stone)),
   ...['Sterling silver', 'Sterling silver clasp', 'Loose (unset)', 'No metal'].filter(
     (metal) => !metalChoices.has(metal),
   ),
@@ -245,7 +252,16 @@ const defaultLocale = (payload.config.localization || undefined)?.defaultLocale 
   | undefined
 // Drafts don't change the website, so it isn't told about them
 const context = { disableRevalidate: true }
-const counts = { added: 0, exists: 0, filtered: 0, notLegit: 0, photos: 0, unmarked: 0 }
+const counts = {
+  added: 0,
+  exists: 0,
+  filled: 0,
+  filtered: 0,
+  notLegit: 0,
+  photos: 0,
+  refreshed: 0,
+  unmarked: 0,
+}
 
 if (dryRun) {
   console.log('Dry run: nothing is saved.\n')
@@ -276,14 +292,14 @@ for (const [index, product] of catalog.products.entries()) {
     pagination: false,
     where: { or: [{ sku: { equals: code } }, { legacyCode: { equals: code } }] },
   })
+  const { data, photoPath } = toProduct({ index, product })
+  const existing = docs[0]
 
-  if (docs[0]) {
-    counts.exists++
-    console.log(`  skip  ${code}  ${product.name ?? ''}  [already in the CMS]`)
+  if (existing) {
+    await updateExisting({ data, existing })
     continue
   }
 
-  const { data, photoPath } = toProduct(product, index)
   const photo = withImages && photoPath && fs.existsSync(photoPath) ? photoPath : undefined
 
   counts.added++
@@ -306,7 +322,12 @@ for (const [index, product] of catalog.products.entries()) {
   await payload.create({
     collection: 'vigor-products',
     context,
-    data: { ...data, ...(imageID ? { image: imageID } : {}), _status: 'draft' } as never,
+    data: {
+      ...data,
+      ...(imageID ? { image: imageID } : {}),
+      _status: 'draft',
+      legacyImportedAt: new Date().toISOString(),
+    } as never,
     draft: true,
     locale: defaultLocale,
     overrideAccess: true,
@@ -314,6 +335,10 @@ for (const [index, product] of catalog.products.entries()) {
 }
 
 const left = [
+  counts.refreshed &&
+    `${dryRun ? 'would update' : 'updated'} ${counts.refreshed} drafts nobody has saved since the import`,
+  counts.filled &&
+    `${dryRun ? 'would fill in' : 'filled in'} the empty gemstones or sizes of ${counts.filled} edited or published products (as a draft: publish them to show it)`,
   counts.exists && `skipped ${counts.exists} already in the CMS`,
   counts.notLegit && `left out ${counts.notLegit} marked "legit": false`,
   counts.unmarked && `${counts.unmarked} not marked "legit": true`,
@@ -328,8 +353,63 @@ if (!dryRun && counts.added) {
 }
 process.exit(0)
 
+/**
+ * A product that is already in the CMS. A draft nobody has saved since the import is rebuilt from the
+ * catalog (keeping its photo); otherwise only its empty gemstones and sizes are filled in, as a draft,
+ * so edits and the published version stay as they are.
+ */
+async function updateExisting({ data, existing }: { data: Data; existing: VigorProduct }) {
+  const code = String(data.sku)
+
+  if (existing.legacyCode !== code) {
+    counts.exists++
+    console.log(`  skip  ${code}  ${existing.name}  [a product with this SKU is not from the old website]`)
+    return
+  }
+
+  const importedAt = Date.parse(existing.legacyImportedAt ?? existing.createdAt)
+  const isUntouched =
+    existing._status === 'draft' && Math.abs(Date.parse(existing.updatedAt) - importedAt) < 5000
+  const isEmpty = (value: unknown) => !Array.isArray(value) || value.length === 0
+  const changes: Data = isUntouched
+    ? { ...data, legacyImportedAt: new Date().toISOString() }
+    : {
+        ...(isEmpty(existing.stones) && !isEmpty(data.stones) ? { stones: data.stones } : {}),
+        ...(isEmpty(existing.sizes) && !isEmpty(data.sizes) ? { sizes: data.sizes } : {}),
+      }
+
+  if (!isUntouched && Object.keys(changes).length === 0) {
+    counts.exists++
+    console.log(`  skip  ${code}  ${existing.name}  [already in the CMS]`)
+    return
+  }
+
+  if (isUntouched) {
+    counts.refreshed++
+  } else {
+    counts.filled++
+  }
+  console.log(
+    `  ${isUntouched ? 'update' : 'fill  '}  ${code}  ${existing.name}  [${isUntouched ? 'unchanged draft: rebuilt from the catalog' : `fills in ${Object.keys(changes).join(' and ')}`}]`,
+  )
+
+  if (dryRun) {
+    return
+  }
+
+  await payload.update({
+    id: existing.id,
+    collection: 'vigor-products',
+    context,
+    data: { ...changes, _status: 'draft' } as never,
+    draft: true,
+    locale: defaultLocale,
+    overrideAccess: true,
+  })
+}
+
 /** The CMS product for an old style code, and the path of its best photo */
-function toProduct(product: LegacyProduct, index: number) {
+function toProduct({ index, product }: { index: number; product: LegacyProduct }) {
   const guessed: string[] = []
   const name = cleanName(product.name) ?? `${product.category ?? 'Style'} ${product.code}`
   const category =
@@ -344,7 +424,9 @@ function toProduct(product: LegacyProduct, index: number) {
     }
   }
   const stones = [...new Set([...codes].map((stoneCode) => STONES[stoneCode]).filter(isString))]
-  const stone = stones.length === 1 ? stones[0] : stones.length > 1 ? 'Various stones' : undefined
+  if (!stones.length) {
+    guessed.push('gemstones (left empty: none in the old records, choose them)')
+  }
 
   const types = product.variants.map((variant) => variant.specs?.type).filter(isString)
   const text = [name, ...(product.otherNames ?? []), ...types].join(' ').toLowerCase()
@@ -364,18 +446,14 @@ function toProduct(product: LegacyProduct, index: number) {
   }
   guessed.push(metal ? `metal (${metal})` : 'metal (left empty: choose one)')
 
-  const sizes = [...new Set(product.variants.flatMap((variant) => variant.sizes ?? []))].sort(bySize)
-  const lengths = [...new Set(product.variants.map((variant) => variant.specs?.length).filter(isString))]
-  const weight =
-    [
-      sizes.length && `${sizes.slice(0, 8).map(prettySize).join(', ')}${sizes.length > 8 ? '…' : ''}`,
-      lengths.length && `length ${lengths.join(', ')}`,
-    ]
-      .filter(Boolean)
-      .join('; ') || undefined
-  if (!weight) {
-    guessed.push('size (left empty: no size in the old records)')
+  const sizes = [...new Set(product.variants.flatMap((variant) => variant.sizes ?? []))]
+    .sort(bySize)
+    .map(prettySize)
+  if (!sizes.length) {
+    guessed.push('sizes (left empty: none in the old records)')
   }
+  const lengths = [...new Set(product.variants.map((variant) => variant.specs?.length).filter(isString))]
+  const weight = lengths.length ? `Length ${lengths.join(', ')}` : undefined
 
   const beads = category === 'Beads'
   const unit = beads ? 'strand' : 'piece'
@@ -386,34 +464,45 @@ function toProduct(product: LegacyProduct, index: number) {
       : 'minimum order (1: not in the old records)',
   )
 
-  const available = stones.length > 1 ? `Available in ${listOf(stones)}.` : ''
   const summary = product.description
     ? sentence(product.description)
-    : `${name}${stones.length === 1 ? ` in ${stones[0]}` : ''}.${available ? ` ${available}` : ''}`
+    : stones.length === 1
+      ? `${name} in ${stones[0]}.`
+      : stones.length > 1
+        ? `${name}, available in ${stones.length} gemstones${sizes.length > 1 ? ` and ${sizes.length} sizes` : ''}.`
+        : `${name}.`
   if (!product.description) {
-    guessed.push('summary (written from the name and stones)')
+    guessed.push('summary (written from the name, gemstones and sizes)')
   }
 
-  const perStone = product.variants
-    .filter((variant) => variant.stone && STONES[variant.stone])
-    .map((variant) => {
-      const variantSizes = (variant.sizes ?? []).map(prettySize)
-      return `${STONES[variant.stone!]}${variantSizes.length ? ` (${variantSizes.join(', ')})` : ''}`
-    })
-  const specs = [...new Set(types)].map((type) => `Type: ${type.toLowerCase()}`)
-  const body = [
-    perStone.length > 1 && `Available in: ${[...new Set(perStone)].join('; ')}.`,
-    [...specs, ...lengths.map((length) => `length ${length}`)].join(', '),
-  ]
+  // The sizes of each gemstone, when they aren't all the same: the exceptions to "any stone in any size"
+  const sizesByStone = new Map<string, Set<string>>()
+  for (const variant of product.variants) {
+    const stoneName = variant.stone && STONES[variant.stone]
+    if (stoneName && variant.sizes?.length) {
+      const set = sizesByStone.get(stoneName) ?? new Set<string>()
+      variant.sizes.forEach((size) => set.add(prettySize(size)))
+      sizesByStone.set(stoneName, set)
+    }
+  }
+  const isSameForAll = [...sizesByStone.values()].every((set) => set.size === sizes.length)
+  const bySizeOfStone =
+    sizesByStone.size > 1 && !isSameForAll
+      ? `Sizes by gemstone: ${[...sizesByStone]
+          .map(([stoneName, set]) => `${stoneName} ${[...set].join(', ')}`)
+          .join('; ')}`
+      : ''
+  const body = [bySizeOfStone, [...new Set(types)].map((type) => `Type: ${type.toLowerCase()}`).join(', ')]
     .filter(Boolean)
-    .map((paragraph) => sentence(String(paragraph)))
+    .map((paragraph) => sentence(paragraph))
     .join('\n\n')
 
   return {
     data: {
       name,
       ...(category ? { category } : {}),
-      ...(stone ? { stone } : {}),
+      stones,
+      sizes,
       ...(metal ? { metal } : {}),
       ...(weight ? { weight } : {}),
       moq,
@@ -426,14 +515,14 @@ function toProduct(product: LegacyProduct, index: number) {
       legacyCode: product.code,
       legacyHint: product.hint,
       ...(product.lastSeen ? { legacyLastSeen: product.lastSeen } : {}),
-      legacyNotes: notesOf(product, guessed),
-    },
+      legacyNotes: notesOf({ guessed, product }),
+    } as Data,
     photoPath: product.photo ? path.resolve(folder!, product.photo) : undefined,
   }
 }
 
 /** Everything the old records say, for the "Old website: notes" field */
-function notesOf(product: LegacyProduct, guessed: string[]) {
+function notesOf({ guessed, product }: { guessed: string[]; product: LegacyProduct }) {
   const decision =
     product.legit === true ? 'keep' : product.legit === false ? 'drop' : 'not decided yet'
   const lines = [
@@ -540,10 +629,6 @@ function prettySize(size: string) {
 function bySize(a: string, b: string) {
   const first = (size: string) => Number.parseFloat(size) || Number.MAX_VALUE
   return first(a) - first(b) || a.localeCompare(b)
-}
-
-function listOf(items: string[]) {
-  return items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`
 }
 
 function sentence(text: string) {
