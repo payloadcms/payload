@@ -524,6 +524,12 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
       expect(result).toBe('{{name}}')
     })
 
+    test('safely handles non-string input such as numeric IDs', () => {
+      // @ts-expect-error testing numeric input resilience
+      const result = replaceDoubleCurlys(12345, testVariables)
+      expect(result).toBe('12345')
+    })
+
     test('properly encodes quotes and special characters', () => {
       const variables = [{ field: 'name', value: '"><img src=x onerror=alert(1)>' }]
       const result = replaceDoubleCurlys('Value: {{name}}', variables)
@@ -644,6 +650,27 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
       } as any)
       expect(result).not.toContain('data:')
       expect(result).toContain('href="#"')
+    })
+
+    test('handles internal document link with numeric ID without throwing', async () => {
+      const result = await FormBuilderLinkConverter.converter({
+        converters: [],
+        node: {
+          children: [{ format: 0, text: 'Page Link', type: 'text' }],
+          fields: {
+            doc: {
+              relationTo: 'pages',
+              value: { id: 2 },
+            },
+            linkType: 'internal',
+            newTab: false,
+          },
+        },
+        parent: {},
+        submissionData: [{ field: 'name', value: 'John' }],
+      } as any)
+      expect(result).toContain('href="2"')
+      expect(result).toContain('Page Link')
     })
 
     test('properly encodes special characters in href', async () => {
