@@ -596,6 +596,13 @@ tagline and portal name are per language; the others are the same in every langu
 **Images** go to Media like any upload (to S3 when it's on). A product without a photo gets a drawn
 illustration on the website.
 
+**Gemstones and sizes.** A product lists every gemstone its style comes in (**Gemstones**) and every size
+(**Sizes**, one at a time, e.g. `8 mm`, `12 × 28 mm`, `US 6`); the website shows them as two lists, read as
+"any of these stones in any of these sizes". When a gemstone comes in fewer sizes, say so in the body.
+**Weight and details** is optional, for carat weights and the like. Products saved before there were two
+lists had one gemstone: the first `./deploy/deploy.sh` of this version moves it into the list by itself
+(a migration in `src/migrations`; locally, run `pnpm payload migrate`).
+
 **Catalog choices** (categories, gemstones, metals, units, badges, news categories) are in
 `src/vigor/options.ts`. The website translates them with the `glossary` in its `shared/i18n/*.json`: when
 you add one, add its translations there too, or it shows in English on the other languages' pages.
@@ -692,21 +699,26 @@ ones to keep. Drafts aren't on the website, so nothing changes there until you p
    ./deploy/import-legacy-catalog.sh ~/old_vgems
    ```
 
-   Each old style code (BL404, CB001…) becomes one product with its best photo. Products marked
-   `"legit": false` in the catalog file are left out; `--only-legit` takes only those marked `true`,
-   `--hint=likely,check` only those hints, `--no-images` skips the photos. A product whose old code is
-   already here is skipped, so running it again is safe and keeps your edits. Locally without Docker:
-   `pnpm payload run scripts/import-legacy-catalog.ts ~/old_vgems --dry-run`.
+   Each old style code (BL404, CB001…) becomes one product with its best photo, every gemstone and every
+   size the old records give for it. When a gemstone comes in fewer sizes, its body says which ("Sizes by
+   gemstone: …"). Products marked `"legit": false` in the catalog file are left out; `--only-legit` takes
+   only those marked `true`, `--hint=likely,check` only those hints, `--no-images` skips the photos.
+   Locally without Docker: `pnpm payload run scripts/import-legacy-catalog.ts ~/old_vgems --dry-run`.
+
+   Running it again is safe and keeps your edits. A product that is still a draft nobody has saved since
+   the import is rebuilt from the catalog (e.g. after an update of this script). Any other product from the
+   old website only gets its empty **Gemstones** and **Sizes** filled in, as a draft: publish it to show
+   them on the website.
 
 3. **Check them** under **Vigor website → Products**. **Filters → Old website: code → exists** lists
    only the imported ones, and the **Old website: hint** column says what the old records suggest
    (likely, check, old, doubtful). On each product, **Old website: notes** has everything the old
    records say: its stones with sizes and 2012–2013 prices, where it was seen, the text of the old
-   printed catalogs, and what the import had to guess (the metal, the minimum order, the summary).
+   printed catalogs, and what the import had to guess (the metal, the minimum order, the summary, and
+   gemstones or sizes the old records don't give).
    These fields are only for logged-in users: the website and its visitors never get them.
 4. **Publish the ones to keep**: correct what the notes say was guessed, then use the arrow next to
-   **Publish in English** → **Publish all locales**. Delete the ones you don't want. A product that is
-   offered in several stones has the gemstone **Various stones** and lists them in its text.
+   **Publish in English** → **Publish all locales**. Delete the ones you don't want.
 
 The stones' names aren't translated yet: on the Spanish, French and Chinese pages they show in English
 until they're added to the `glossary` in the website's `shared/i18n/*.json`.

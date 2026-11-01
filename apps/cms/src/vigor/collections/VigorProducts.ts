@@ -54,33 +54,45 @@ export const VigorProducts: CollectionConfig = {
       ],
     },
     {
+      name: 'stones',
+      type: 'select',
+      admin: {
+        description: 'Every gemstone this style comes in.',
+      },
+      hasMany: true,
+      label: 'Gemstones',
+      options: gemstones,
+      required: true,
+    },
+    {
+      name: 'sizes',
+      type: 'text',
+      admin: {
+        description:
+          'Every size this style comes in, one at a time, e.g. 8 mm, 12 × 28 mm, US 6. If a gemstone comes in fewer sizes, say so in the body.',
+      },
+      hasMany: true,
+      label: 'Sizes',
+    },
+    {
       type: 'row',
       fields: [
-        {
-          name: 'stone',
-          type: 'select',
-          label: 'Gemstone',
-          options: gemstones,
-          required: true,
-        },
         {
           name: 'metal',
           type: 'select',
           options: metals,
           required: true,
         },
+        {
+          name: 'weight',
+          type: 'text',
+          admin: {
+            description: 'Optional, e.g. 1.20 ct emerald, 0.45 ct diamonds; inner length 19 cm',
+          },
+          label: 'Weight and details',
+          localized: true,
+        },
       ],
-    },
-    {
-      name: 'weight',
-      type: 'text',
-      admin: {
-        description: 'e.g. 1.20 ct emerald, 0.45 ct diamonds, size 6.5',
-      },
-      label: 'Weight and size',
-      localized: true,
-      required: true,
-      validate: requiredInEnglish(text),
     },
     {
       type: 'row',
@@ -186,6 +198,14 @@ export const VigorProducts: CollectionConfig = {
         rows: 14,
       },
       label: 'Old website: notes',
+    },
+    {
+      // When the import last wrote this product: if it's still a draft that nobody has saved since,
+      // running the import again may rebuild it from the old catalog
+      name: 'legacyImportedAt',
+      type: 'date',
+      access: { read: loggedInOnly },
+      admin: { hidden: true },
     },
   ],
   hooks: {

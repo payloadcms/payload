@@ -44,6 +44,7 @@ import {
 } from './endpoints/appPushNotifications'
 import { healthEndpoint } from './endpoints/health'
 import { locales } from './locales'
+import { migrations } from './migrations'
 import { personalCollections, personalGlobals } from './personal'
 import { photoVariants } from './personal/collections/PersonalPhotos'
 import { requestSizeLimit } from './requestSizeLimit'
@@ -115,6 +116,9 @@ export default buildConfig({
       maxPoolSize: Number(process.env.DATABASE_MAX_POOL_SIZE || 10),
       serverSelectionTimeoutMS: 10_000,
     },
+    // Data changes (src/migrations) run once by themselves when the server starts in production;
+    // locally, run `pnpm payload migrate`
+    prodMigrations: migrations,
     url: process.env.DATABASE_URL || '',
   }),
   editor: lexicalEditor(),
