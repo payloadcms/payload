@@ -38,6 +38,46 @@ describe('commitTransaction', () => {
     },
   )
 
+  it.each([
+    { configuredTimeout: undefined, expectedTimeout: 120_000 },
+    { configuredTimeout: 0, expectedTimeout: 120_000 },
+    { configuredTimeout: -1, expectedTimeout: 120_000 },
+    { configuredTimeout: 5_000, expectedTimeout: 5_000 },
+    { configuredTimeout: 240_000, expectedTimeout: 120_000 },
+  ])(
+    'should bound all retries with configured timeout $configuredTimeout to $expectedTimeout ms',
+    async ({ configuredTimeout, expectedTimeout }) => {
+      vi.useFakeTimers()
+      vi.setSystemTime(0)
+      vi.spyOn(Math, 'random').mockReturnValue(0)
+
+      const commitError = { errorLabels: ['UnknownTransactionCommitResult'] }
+      const session = {
+        commitTransaction: vi.fn().mockImplementation(() => {
+          vi.setSystemTime(Date.now() + 1_000)
+
+          return Promise.reject(commitError)
+        }),
+        endSession: vi.fn().mockResolvedValue(undefined),
+        inTransaction: vi.fn().mockReturnValue(true),
+        timeoutMS: configuredTimeout,
+      }
+      const adapter = {
+        sessions: { transaction: session },
+      } as unknown as MongooseAdapter
+      const commit = commitTransaction.call(adapter, 'transaction')
+      const rejection = expect(commit).rejects.toBe(commitError)
+
+      await vi.runAllTimersAsync()
+      await rejection
+
+      expect(session.commitTransaction).toHaveBeenCalledTimes(expectedTimeout / 1_000)
+      expect(session.commitTransaction).toHaveBeenLastCalledWith({ timeoutMS: 1_000 })
+      expect(session.endSession).toHaveBeenCalledOnce()
+      expect(adapter.sessions.transaction).toBeUndefined()
+    },
+  )
+
   it('should time out a stalled retry within the remaining commit budget', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(0)
