@@ -4,10 +4,13 @@ import type { BranchOperation } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 
 import type { RenderBranchDiffResult } from '../renderBranchDiff.js'
 
+import { Link } from '../../../elements/Link/index.js'
 import { Pill } from '../../../elements/Pill/index.js'
 import { ShimmerEffect } from '../../../elements/ShimmerEffect/index.js'
 import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
@@ -167,6 +170,7 @@ export const ChangedDocuments: React.FC<{
       <ul className={`${baseClass}__list`}>
         {changes.map((change) => (
           <ChangedDocumentRow
+            branch={branch}
             change={change}
             collectionLabel={getTranslation(
               change.globalSlug
@@ -193,6 +197,7 @@ export const ChangedDocuments: React.FC<{
 const emptySelection: Set<string> = new Set()
 
 const ChangedDocumentRow: React.FC<{
+  branch: string
   change: BranchChange
   collectionLabel: string
   isExpanded: boolean
@@ -203,6 +208,7 @@ const ChangedDocumentRow: React.FC<{
   toggleExpanded: (change: BranchChange) => void
   toggleSelected?: (id: string) => void
 }> = ({
+  branch,
   change,
   collectionLabel,
   isExpanded,
@@ -213,6 +219,7 @@ const ChangedDocumentRow: React.FC<{
   toggleExpanded,
   toggleSelected,
 }) => {
+  const { config } = useConfig()
   const { t } = useTranslation()
   const rowRef = useRef<HTMLLIElement>(null)
   const rowID = `${baseClass}-${useId()}`
@@ -249,7 +256,7 @@ const ChangedDocumentRow: React.FC<{
     <li className={`${baseClass}__row`} ref={rowRef}>
       {/* The row opens from anywhere in its header. Following `Collapsible`: an
           overlay button takes the clicks, the header content sits above it with
-          pointer events off, and the checkbox turns them back on for itself. */}
+          pointer events off, and the checkbox and link turn them back on. */}
       <div className={`${baseClass}__header`}>
         <button
           aria-controls={diffPanelID}
@@ -287,7 +294,23 @@ const ChangedDocumentRow: React.FC<{
           <Pill className={`${baseClass}__entity`} pillStyle="light-gray" size="small">
             {collectionLabel}
           </Pill>
-          <span className={`${baseClass}__title`}>{title}</span>
+          {change.operation === 'delete' ? (
+            <span className={`${baseClass}__title`}>{title}</span>
+          ) : (
+            <Link
+              className={`${baseClass}__title ${baseClass}__title--link`}
+              href={formatAdminURL({
+                adminRoute: config.routes.admin,
+                path: `${
+                  change.globalSlug
+                    ? `/globals/${change.globalSlug}`
+                    : `/collections/${change.collectionSlug}/${encodeURIComponent(String(change.docID))}`
+                }${qs.stringify({ branch }, { addQueryPrefix: true })}`,
+              })}
+            >
+              {title}
+            </Link>
+          )}
           <ChevronIcon
             className={`${baseClass}__indicator`}
             direction={isExpanded ? 'up' : 'down'}
