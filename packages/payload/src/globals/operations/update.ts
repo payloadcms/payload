@@ -39,16 +39,15 @@ import { mergeLocalizedData } from '../../utilities/mergeLocalizedData.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import {
   buildAllLocalesPublicationHookDoc,
+  canApplyAllLocalesStatusChange,
   getAllLocalesPublicationStatus,
-  hasAuthorizedAllLocalesPublicationStatus,
   normalizeAllLocalesPublicationStatus,
   reconcileAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../versions/allLocalesPublicationStatus.js'
-import { getLocalizedDraftStatus } from '../../versions/drafts/getLocalizedDraftStatus.js'
 import { hasNonLocalizedDataChanged } from '../../versions/drafts/hasNonLocalizedDataChanged.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
-import { normalizeLocalizedStatus } from '../../versions/normalizeLocalizedStatus.js'
+import { mergeLocalizedStatus } from '../../versions/mergeLocalizedStatus.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
@@ -357,83 +356,88 @@ export const updateOperation = async <
       },
     })
 
-    const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
-      data: publicationData,
-      fieldAccessDenied: !statusFieldAccess,
-      fieldValue: statusFieldValue,
-      status: allLocalesPublicationStatus,
+    const shouldApplyAllLocalesStatusChange = canApplyAllLocalesStatusChange({
+      canUpdateStatus: statusFieldAccess,
+      requestedStatus: allLocalesPublicationStatus,
+      statusAfterDocumentHooks: publicationData._status,
+      statusAfterFieldHooks: statusFieldValue,
     })
+    const shouldUnpublishAllLocales =
+      unpublishAllLocales &&
+      (!hasLocalizeStatusEnabled(globalConfig) || shouldApplyAllLocalesStatusChange)
 
-    const localization = config?.localization
-    let accessibleLocaleCodes = localization ? localization.localeCodes : undefined
-
-    if (
-      localization &&
-      hasLocalizeStatusEnabled(globalConfig) &&
-      (hasAuthorizedPublicationStatus ||
-        (locale === 'all' &&
-          (typeof result._status === 'string' || (isSavingDraft && statusFieldAccess)))) &&
-      localization.filterAvailableLocales
-    ) {
-      const filteredLocales = await localization.filterAvailableLocales({
-        locales: localization.locales,
-        req,
-      })
-      accessibleLocaleCodes = filteredLocales.map((locale) =>
-        typeof locale === 'string' ? locale : locale.code,
-      )
-    }
     if (
       allLocalesPublicationStatus &&
-      !hasAuthorizedPublicationStatus &&
+      !shouldApplyAllLocalesStatusChange &&
       typeof statusFieldValue === 'undefined' &&
       typeof globalJSON._status === 'object' &&
       globalJSON._status !== null
     ) {
+      // Keep the current locale statuses when the all-locale change cannot be applied.
       result._status = { ...globalJSON._status }
     }
 
     let snapshotToSave: JsonObject | undefined
 
-    if (
-      config?.localization &&
-      hasLocalizeStatusEnabled(globalConfig) &&
-      typeof result._status === 'string'
-    ) {
-      result._status = normalizeLocalizedStatus({
-        existingStatus: globalJSON._status,
-        hasAuthorizedPublicationStatus,
-        locale: locale!,
-        localeCodes: accessibleLocaleCodes ?? config.localization.localeCodes,
-        status: result._status,
-      })
-    }
+    const localization =
+      config?.localization && hasLocalizeStatusEnabled(globalConfig)
+        ? config.localization
+        : undefined
 
-    const shouldDraftAllLocales =
-      isSavingDraft &&
-      statusFieldAccess &&
-      localization &&
-      hasLocalizeStatusEnabled(globalConfig) &&
-      hasNonLocalizedDataChanged({
-        after: result,
-        before: globalJSON,
-        configBlockReferences: config.blocks,
-        fields: globalConfig.fields,
-      })
+    if (localization && config) {
+      const hasStringStatus = typeof result._status === 'string'
+      const canUpdateDraftStatus = isSavingDraft && statusFieldAccess
+      const isAllLocaleStatusUpdate = locale === 'all' && (hasStringStatus || canUpdateDraftStatus)
+      const shouldFilterStatusLocales = shouldApplyAllLocalesStatusChange || isAllLocaleStatusUpdate
+      let statusLocaleCodes = localization.localeCodes
 
-    if (
-      isSavingDraft &&
-      statusFieldAccess &&
-      localization &&
-      hasLocalizeStatusEnabled(globalConfig)
-    ) {
-      result._status = getLocalizedDraftStatus({
-        existingStatus: shouldDraftAllLocales ? result._status : globalJSON._status,
-        locale: shouldDraftAllLocales ? 'all' : locale!,
-        localeCodes: shouldDraftAllLocales
-          ? localization.localeCodes
-          : (accessibleLocaleCodes ?? localization.localeCodes),
-      })
+      if (shouldFilterStatusLocales && localization.filterAvailableLocales) {
+        const filteredLocales = await localization.filterAvailableLocales({
+          locales: localization.locales,
+          req,
+        })
+        statusLocaleCodes = filteredLocales.map((locale) =>
+          typeof locale === 'string' ? locale : locale.code,
+        )
+      }
+
+      const requestedStatusLocaleCodes = locale === 'all' ? statusLocaleCodes : [locale!]
+
+      if (!shouldApplyAllLocalesStatusChange && hasStringStatus) {
+        // Update the status for the requested locales while preserving the others.
+        result._status = mergeLocalizedStatus({
+          existingStatus: globalJSON._status,
+          localeCodes: requestedStatusLocaleCodes,
+          status: result._status,
+        })
+      }
+
+      const shouldDraftAllLocales =
+        canUpdateDraftStatus &&
+        hasNonLocalizedDataChanged({
+          after: result,
+          before: globalJSON,
+          configBlockReferences: config.blocks,
+          fields: globalConfig.fields,
+        })
+
+      if (shouldApplyAllLocalesStatusChange) {
+        // Update the status for the locales the user can publish.
+        result._status = mergeLocalizedStatus({
+          existingStatus: hasStringStatus ? globalJSON._status : result._status,
+          localeCodes: statusLocaleCodes,
+          status: unpublishAllLocales ? 'draft' : 'published',
+        })
+      } else if (canUpdateDraftStatus) {
+        // Update every locale for shared changes, or only the requested locales for localized changes.
+        result._status = mergeLocalizedStatus({
+          existingStatus: shouldDraftAllLocales ? result._status : globalJSON._status,
+          localeCodes: shouldDraftAllLocales
+            ? localization.localeCodes
+            : requestedStatusLocaleCodes,
+          status: 'draft',
+        })
+      }
     }
 
     // /////////////////////////////////////
@@ -445,17 +449,11 @@ export const updateOperation = async <
       let snapshotData: JsonObject | undefined
 
       if (hasLocalizeStatusEnabled(globalConfig)) {
-        if (hasAuthorizedPublicationStatus) {
-          if (typeof result._status !== 'object' || result._status === null) {
-            result._status = {}
-          }
-
-          for (const localeCode of accessibleLocaleCodes ?? config.localization.localeCodes) {
-            result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
-          }
-        } else if (!isSavingDraft && locale !== 'all') {
+        if (!shouldApplyAllLocalesStatusChange && !isSavingDraft && locale !== 'all') {
+          // Fetch the current global so publishing one locale does not overwrite the others.
           currentGlobal = await payload.db.findGlobal({
             slug: globalConfig.slug,
+            locale: 'all',
             req,
             where: query,
           })
@@ -543,7 +541,7 @@ export const updateOperation = async <
         req,
         select,
         snapshot: snapshotToSave,
-        unpublish: unpublishAllLocales,
+        unpublish: shouldUnpublishAllLocales,
       })
 
       result = {
