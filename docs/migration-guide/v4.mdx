@@ -1244,7 +1244,7 @@ The deprecated `isHTMLElement` utility has been removed from `@payloadcms/richte
 
 ### Lexical now uses the upstream Markdown package
 
-`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.52.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
+`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.53.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
 
 Most projects use markdown through the editor or through `convertMarkdownToLexical` / `convertLexicalToMarkdown` and need no changes. You are only affected if you import from `@payloadcms/richtext-lexical/lexical/markdown` directly.
 
@@ -1268,7 +1268,9 @@ If you keep calling `$convertFromMarkdownString` directly, pass `editorConfig.fe
 
 **Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
 
-If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.52.0`. None of them require action for typical Payload usage.
+**Markdown export escapes literal brackets and HTML-like text.** `convertLexicalToMarkdown` now writes text such as `[note]` as `&#91;note&#93;` and `<b>` as `&#60;b>`, so literal text no longer turns into links or HTML when the Markdown is parsed again. Ordinary text such as `AT&T` and `a < b` is unchanged, and `convertMarkdownToLexical` restores the original text. No action is required unless you compare exported Markdown against fixed strings or pass it to a parser that does not decode numeric character references.
+
+If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.53.0`. None of them require action for typical Payload usage.
 
 If your app imports Lexical types or adds custom features, check these changes from `0.50.0`. They also apply to imports through `@payloadcms/richtext-lexical/lexical` and its subpaths:
 
@@ -1278,6 +1280,8 @@ If your app imports Lexical types or adds custom features, check these changes f
 - `SerializedEditorState<T>`, `SerializedElementNode<T>`, and `SerializedRootNode<T>` no longer accept a type argument. Remove `<T>` if you only need the base node type. For a document with your own node types, use Payload's `TypedEditorState<T>` instead. Without a type argument, Lexical's `children` are still typed as `SerializedLexicalNode[]`.
 - `ReturnType<Node['exportJSON']>` can now infer partial JSON, making fields such as `version` and `url` optional. If your code expects the full format, use the node's explicit serialized type, such as `SerializedLinkNode`. A normal `node.exportJSON()` call still returns the full format.
 - `LexicalNode.getCommonAncestor` was removed. Use `$getCommonAncestor(a, b)?.commonAncestor ?? null`; pass the parents of non-element nodes if you need the old method's behavior.
+- Node traversal and key lookup methods no longer accept a type argument: `getParent<T>()`, `getParentOrThrow<T>()`, `getChildren<T>()`, `getFirstChild<T>()`, `getNextSibling<T>()`, `$getNodeByKey<T>()` and the rest of that family. Remove `<T>` and narrow the result with a node guard, for example `node.getChildren().filter($isTableCellNode)`. Runtime behavior is unchanged.
+- The deprecated `LinkImportExtension`, `ListImportExtension` and `RichTextImportExtension` were removed. Use `LinkExtension`, `ListExtension` and `RichTextExtension` instead. `HorizontalRuleImportExtension` was also removed; use `HorizontalRuleExtension` from `@lexical/extension` together with an extension that includes `CoreImportExtension`. The `*ImportRules` arrays remain.
 
 ### Lexical table support is no longer experimental
 

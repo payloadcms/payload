@@ -31,7 +31,8 @@ jobs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       needs_tests: ${{ steps.filter.outputs.needs_tests }}
       needs_visual: ${{ steps.filter.outputs.needs_visual }}
-      needs_a11y: ${{ steps.filter.outputs.needs_a11y }}
+      needs_a11y: ${{ steps.a11y_filter.outputs.needs_a11y }}
+      a11y_files: ${{ steps.a11y_report_files.outputs.files }}
       templates: ${{ steps.filter.outputs.templates }}
       build_approvals: ${{ steps.filter.outputs.build_approvals }}
       needs_sbom: ${{ steps.filter.outputs.needs_sbom }}
@@ -46,6 +47,8 @@ jobs:
         with:
           filters: |
             needs_build:
+              - '.github/filters/a11y.yml'
+              - '.github/scripts/a11y/**'
               - '.github/workflows/main.yml'
               - '.github/actions/start-services/**'
               - '.github/actions/setup/**'
@@ -58,6 +61,8 @@ jobs:
               - 'templates/**'
               - 'vitest.config.ts'
             needs_tests:
+              - '.github/filters/a11y.yml'
+              - '.github/scripts/a11y/**'
               - '.github/workflows/main.yml'
               - '.github/actions/start-services/**'
               - 'packages/**'
@@ -99,31 +104,6 @@ jobs:
               - 'test/admin/seed.ts'
               - 'test/admin/collections/**'
               - 'test/admin/globals/**'
-            needs_a11y:
-              # Production UI and frontend logic, including plain TypeScript.
-              - 'packages/**/*.{css,scss,tsx,jsx,svg,png,jpg,jpeg,gif,webp,avif,ico,woff,woff2,ttf,otf}'
-              - 'packages/{ui,richtext-*,admin-bar,live-preview*,translations,plugin-seo}/src/**/*.{ts,js,mjs,cjs,json}'
-              - 'packages/*/src/{admin,client,components,elements,providers,views}/**/*.{ts,js,mjs,cjs,json}'
-              - 'packages/**/*.{client,browser}.{ts,js}'
-              - 'packages/{next,tanstack-start}/src/{adapters,auth,exports,rsc,utilities,withPayload}/**/*.{ts,js,mjs,cjs,json}'
-              - 'packages/payload/src/{admin,config,collections/config,globals/config,fields}/**/*.{ts,js,json}'
-              - 'packages/payload/src/{exports/{shared,internal},auth/getLoginOptions,utilities/formatAdminURL}.{ts,js}'
-              - 'packages/payload/src/cli/commands/generateImportMap/**/*.{ts,js}'
-              # A11y fixtures and the browser/server setup they use.
-              - 'test/a11y/**/*.{ts,tsx,js,jsx,json,css,scss,svg,png,jpg,jpeg,gif,webp,avif,woff,woff2}'
-              - 'test/{__helpers/e2e,__helpers/shared,__setup,app,app-tanstack}/**/*.{ts,tsx,js,jsx,mjs,json,css,scss}'
-              - 'test/admin/components/{CustomProvider,CustomProviderServer}/**/*.{ts,tsx,js,jsx,css,scss}'
-              - 'test/{buildConfigWithDefaults,runE2E,setupProd,dev,initDevAndTest,runInit,runInitSeparateProcess,credentials,testHooks,dbAdapters}.ts'
-              - 'test/{playwright*,next.config,vite.tanstack*,tsconfig*}.{ts,mjs,json}'
-              - 'test/uploads/image.png'
-              # Dependencies and build inputs; the root lockfile is intentionally conservative.
-              - '{package.json,pnpm-lock.yaml,pnpm-workspace.yaml,.npmrc,.tool-versions,turbo.json,tsconfig*.json}'
-              - 'packages/{ui,richtext-*,admin-bar,live-preview*,translations,next,tanstack-start,payload,plugin-seo}/{package.json,tsconfig*.json,tsup.config.*,esbuild*}'
-              - 'test/{package.json,pnpm-lock.yaml}'
-              - 'tools/scripts/src/{pack-all-to-dest,local-package-tarballs}.ts'
-              - 'scripts/{pack_to_dest.sh,replacePayloadConfigPath.js}'
-              - '.github/workflows/main.yml'
-              - '.github/actions/{setup,setup-playwright,start-services}/**'
             build_approvals:
               - '.github/workflows/main.yml'
               # Any dependency-graph change (packages/* or the blank workspace member) lands in
@@ -145,12 +125,28 @@ jobs:
               - 'package.json'
               - '.github/actions/setup/**'
               - '.github/workflows/main.yml'
+      - name: Filter accessibility changes
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        id: a11y_filter
+        with:
+          list-files: json
+          filters: .github/filters/a11y.yml
+
+      - name: Bound accessibility report file list
+        id: a11y_report_files
+        continue-on-error: true
+        # The full JSON list travels through stdin, never an argument or environment variable.
+        run: |
+          node .github/scripts/a11y/matched-files.mjs <<'A11Y_MATCHED_FILES_JSON'
+          ${{ steps.a11y_filter.outputs.needs_a11y_files }}
+          A11Y_MATCHED_FILES_JSON
+
       - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "needs_visual: ${{ steps.filter.outputs.needs_visual }}"
-          echo "needs_a11y: ${{ steps.filter.outputs.needs_a11y }}"
+          echo "needs_a11y: ${{ steps.a11y_filter.outputs.needs_a11y }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
           echo "build_approvals: ${{ steps.filter.outputs.build_approvals }}"
           echo "needs_sbom: ${{ steps.filter.outputs.needs_sbom }}"
@@ -545,7 +541,7 @@ jobs:
         # `visual-regression` job (gated on `needs_visual`), never by this unconditional matrix —
         # otherwise a `@visual` test would also run here on every PR that touches test/packages
         # code, including under the tanstack-start framework it was never baselined against.
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json pnpm test:e2e:prod:server:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel --grep-invert="@visual"${{ matrix.parallel == false && ' --workers=1' || '' }}${{ matrix.grep && format(' --grep="{0}"', matrix.grep) || '' }}
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json pnpm test:e2e:prod:server:run ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel --grep-invert="@visual"${{ matrix.parallel == false && ' --workers=1' || '' }}${{ matrix.grep && format(' --grep="{0}"', matrix.grep) || '' }}
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
@@ -611,19 +607,40 @@ jobs:
         timeout-minutes: 10
 
       - name: Accessibility tests
-        run: pnpm test:e2e:prod:server:run:noturbo a11y --workers=1 --grep-invert="@visual"
+        id: a11y_tests
+        run: pnpm test:e2e:prod:server:run a11y --workers=1 --grep-invert="@visual"
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_a11y_${{ matrix.framework }}_1.json
+          A11Y_REPORT_PATH: ${{ github.workspace }}/test/test-results/a11y-summary.md
+          A11Y_MATCHED_FILES: ${{ needs.changes.outputs.a11y_files }}
           NEXT_TELEMETRY_DISABLED: 1
           PAYLOAD_DATABASE: mongodb
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - id: a11y_evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: test-results-a11y_${{ matrix.framework }}_1
+          name: test-results-a11y_${{ matrix.framework }}_${{ github.run_attempt }}
           path: test/test-results/
           if-no-files-found: ignore
-          retention-days: 1
+          retention-days: 7
+
+      - name: Publish accessibility workflow summary
+        if: always()
+        continue-on-error: true
+        env:
+          A11Y_TEST_OUTCOME: ${{ steps.a11y_tests.outcome }}
+          A11Y_EVIDENCE_URL: ${{ steps.a11y_evidence.outputs.artifact-url }}
+        run: node .github/scripts/a11y/report.mjs test/test-results/a11y-summary.md
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        continue-on-error: true
+        with:
+          name: a11y-summary-${{ matrix.framework }}-${{ github.run_attempt }}
+          path: test/test-results/a11y-summary.md
+          if-no-files-found: warn
+          retention-days: 7
 
   # Runs `@visual`-tagged e2e tests (screenshot comparisons against baselines).
   # If this fails, reproduce locally with `pnpm test:visual`; update an intentional baseline with
