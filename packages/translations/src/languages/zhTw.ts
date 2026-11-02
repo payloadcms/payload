@@ -446,6 +446,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     overwriteExistingData: '覆寫現有欄位資料',
     pageNotFound: '找不到此頁面',
     pageNumberRange: '請輸入 1 到 {{totalPages}} 之間的頁碼。',
+    parentDocument: '父文件',
     password: '密碼',
     pasteBelow: '貼至下方',
     pasteField: '貼上欄位',

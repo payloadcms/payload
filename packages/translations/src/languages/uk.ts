@@ -468,6 +468,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Перезаписати існуючі дані поля',
     pageNotFound: 'Сторінка не знайдена',
     pageNumberRange: 'Введіть номер сторінки від 1 до {{totalPages}}.',
+    parentDocument: 'Батьківський документ',
     password: 'Пароль',
     pasteBelow: 'Вставити нижче',
     pasteField: 'Вставити поле',

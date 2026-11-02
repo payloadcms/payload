@@ -468,6 +468,7 @@ export const csTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Přepsat existující data pole',
     pageNotFound: 'Stránka nenalezena',
     pageNumberRange: 'Zadejte číslo stránky od 1 do {{totalPages}}.',
+    parentDocument: 'Nadřazený dokument',
     password: 'Heslo',
     pasteBelow: 'Vložit níže',
     pasteField: 'Vložit pole',

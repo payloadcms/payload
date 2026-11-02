@@ -469,6 +469,7 @@ export const skTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepísať existujúce pole dát',
     pageNotFound: 'Stránka nenájdená',
     pageNumberRange: 'Zadajte číslo stránky od 1 do {{totalPages}}.',
+    parentDocument: 'Nadradený dokument',
     password: 'Heslo',
     pasteBelow: 'Vložte nižšie',
     pasteField: 'Prilepiť pole',

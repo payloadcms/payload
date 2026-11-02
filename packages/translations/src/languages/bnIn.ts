@@ -472,6 +472,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'বিদ্যমান ফিল্ড ডেটা ওভাররাইট করুন',
     pageNotFound: 'পৃষ্ঠা পাওয়া যায়নি',
     pageNumberRange: '1 থেকে {{totalPages}} পর্যন্ত একটি পৃষ্ঠা নম্বর লিখুন।',
+    parentDocument: 'মূল নথি',
     password: 'পাসওয়ার্ড',
     pasteBelow: 'নিচে পেস্ট করুন',
     pasteField: 'ফিল্ড পেস্ট করুন',

@@ -464,6 +464,7 @@ export const faTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'بازنویسی اطلاعات موجود در فیلدها',
     pageNotFound: 'صفحه پیدا نشد',
     pageNumberRange: 'شمارهٔ صفحه‌ای از 1 تا {{totalPages}} وارد کنید.',
+    parentDocument: 'سند والد',
     password: 'رمز عبور',
     pasteBelow: 'در زیر قرار دهید',
     pasteField: 'جای‌گذاری در فیلد',

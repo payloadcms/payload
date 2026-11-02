@@ -460,6 +460,7 @@ export const arTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'استبدل بيانات الحقل الموجودة',
     pageNotFound: 'الصّفحة غير موجودة',
     pageNumberRange: 'أدخل رقم صفحة من 1 إلى {{totalPages}}.',
+    parentDocument: 'المستند الأب',
     password: 'كلمة المرور',
     pasteBelow: 'الصق أدناه',
     pasteField: 'لصق الحقل',

@@ -472,6 +472,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Презапишете съществуващите данни в полето',
     pageNotFound: 'Страницата не беше открита',
     pageNumberRange: 'Въведете номер на страница от 1 до {{totalPages}}.',
+    parentDocument: 'Родителски документ',
     password: 'Парола',
     pasteBelow: 'Поставете по-долу',
     pasteField: 'Постави поле',

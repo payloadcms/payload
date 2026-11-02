@@ -472,6 +472,7 @@ export const enTranslations = {
     overwriteExistingData: 'Overwrite existing field data',
     pageNotFound: 'Page not found',
     pageNumberRange: 'Enter a page number from 1 to {{totalPages}}.',
+    parentDocument: 'Parent document',
     password: 'Password',
     pasteBelow: 'Paste Below',
     pasteField: 'Paste Field',

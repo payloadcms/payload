@@ -108,7 +108,11 @@ async function validateNoCircularReference({
 
     // If we've reached the current document, this means we're trying to move into a child
     if (ancestorId === currentDocId) {
-      throw new Error('Cannot move folder into its own subfolder')
+      throw new Error(
+        collection.nestedDocs
+          ? 'Document cannot be nested beneath one of its descendants'
+          : 'Cannot move folder into its own subfolder',
+      )
     }
 
     // Add this node to visited set

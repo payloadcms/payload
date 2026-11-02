@@ -465,6 +465,7 @@ export const taTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'ஏற்கனவே உள்ள புலத் தரவை மேலெழுது',
     pageNotFound: 'பக்கம் கிடைக்கவில்லை',
     pageNumberRange: '1 முதல் {{totalPages}} வரையிலான பக்க எண்ணை உள்ளிடவும்.',
+    parentDocument: 'பெற்றோர் ஆவணம்',
     password: 'கடவுச்சொல்',
     pasteBelow: 'கீழே ஒட்டு',
     pasteField: 'புலத்தை ஒட்டு',
