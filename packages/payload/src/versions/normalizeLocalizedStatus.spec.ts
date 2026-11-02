@@ -23,12 +23,13 @@ describe('normalizeLocalizedStatus', () => {
     })
   })
 
-  it('should update all configured locales during ordinary all-locale normalization', () => {
+  it('should update only the provided locales during ordinary all-locale normalization', () => {
     expect(
       normalizeLocalizedStatus({
         existingStatus: {
           en: 'published',
           es: 'published',
+          xx: 'published',
         },
         hasAuthorizedPublicationStatus: false,
         locale: 'all',
@@ -38,6 +39,7 @@ describe('normalizeLocalizedStatus', () => {
     ).toStrictEqual({
       en: 'draft',
       es: 'draft',
+      xx: 'published',
     })
   })
 

@@ -72,4 +72,70 @@ test.suite('Localized publication access', { config: './config.ts' }, () => {
     expect(unpublished._status[spanishLocale]).toBe('draft')
     expect(unpublished._status.xx).toBe('published')
   })
+
+  test('should preserve inaccessible collection locales during an all-locale draft save', async ({
+    payload,
+  }) => {
+    const doc = await payload.create({
+      collection: publicationAccessSlug as any,
+      data: { _status: 'published', title: 'filtered published' },
+      locale: 'xx',
+      overrideAccess: true,
+      publishAllLocales: false,
+    })
+
+    await payload.update({
+      id: doc.id,
+      collection: publicationAccessSlug as any,
+      data: {},
+      locale: 'all',
+      overrideAccess: true,
+      publishAllLocales: true,
+    })
+
+    const updated = await payload.update({
+      id: doc.id,
+      collection: publicationAccessSlug as any,
+      data: { _status: 'draft' },
+      draft: true,
+      locale: 'all',
+      overrideAccess: true,
+    })
+
+    expect(updated._status[defaultLocale]).toBe('draft')
+    expect(updated._status[spanishLocale]).toBe('draft')
+    expect(updated._status.xx).toBe('published')
+  })
+
+  test('should preserve inaccessible global locales during an all-locale draft save', async ({
+    payload,
+  }) => {
+    await payload.updateGlobal({
+      slug: globalWithDraftsSlug,
+      data: { _status: 'published', text: 'filtered published' },
+      locale: 'xx',
+      overrideAccess: true,
+      publishAllLocales: false,
+    })
+
+    await payload.updateGlobal({
+      slug: globalWithDraftsSlug,
+      data: {},
+      locale: 'all',
+      overrideAccess: true,
+      publishAllLocales: true,
+    })
+
+    const updated = await payload.updateGlobal({
+      slug: globalWithDraftsSlug,
+      data: { _status: 'draft' },
+      draft: true,
+      locale: 'all',
+      overrideAccess: true,
+    })
+
+    expect(updated._status[defaultLocale]).toBe('draft')
+    expect(updated._status[spanishLocale]).toBe('draft')
+    expect(updated._status.xx).toBe('published')
+  })
 })
