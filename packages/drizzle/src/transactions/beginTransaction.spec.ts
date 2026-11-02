@@ -9,13 +9,26 @@ import { rollbackTransaction } from './rollbackTransaction.js'
 describe('Drizzle transactions', () => {
   it('should reject when the database fails to commit the transaction', async () => {
     const commitError = new Error('database commit failed')
+    const execute = vi.fn(async ({ statement }: { statement: string }) => {
+      if (statement === 'COMMIT') {
+        throw commitError
+      }
+    })
     const adapter = {
       drizzle: {
         transaction: vi.fn(async (callback: (transaction: unknown) => Promise<void>) => {
           await Promise.resolve()
-          await callback({})
+          await execute({ statement: 'BEGIN' })
 
-          throw commitError
+          // Model Drizzle's transaction wrapper: a failed COMMIT triggers ROLLBACK.
+          try {
+            await callback({})
+            await execute({ statement: 'COMMIT' })
+          } catch (error) {
+            await execute({ statement: 'ROLLBACK' })
+
+            throw error
+          }
         }),
       },
       initializing: Promise.resolve(),
@@ -26,6 +39,11 @@ describe('Drizzle transactions', () => {
     const transactionID = await beginTransaction.call(adapter, undefined)
 
     await expect(commitTransaction.call(adapter, transactionID)).rejects.toBe(commitError)
+    expect(execute.mock.calls.map(([{ statement }]) => statement)).toEqual([
+      'BEGIN',
+      'COMMIT',
+      'ROLLBACK',
+    ])
     expect(adapter.sessions[transactionID]).toBeUndefined()
   })
 

@@ -28,7 +28,11 @@ export const commitTransaction: CommitTransaction = async function commitTransac
   }
 
   const session = this.sessions[transactionID]
-  const retryDeadline = Date.now() + unknownCommitRetryTimeoutMilliseconds
+  const retryTimeoutMilliseconds =
+    session.timeoutMS && session.timeoutMS > 0
+      ? Math.min(session.timeoutMS, unknownCommitRetryTimeoutMilliseconds)
+      : unknownCommitRetryTimeoutMilliseconds
+  const retryDeadline = Date.now() + retryTimeoutMilliseconds
   let retryIndex = 0
 
   while (true) {
