@@ -28,3 +28,29 @@ export default buildConfig({
   }),
 })
 ```
+
+## Idempotency keys
+
+A send can time out after Resend already took it, so a retry can send the same email twice. To stop that, pass `getIdempotencyKey`. It gets the email and returns the key to send in the `Idempotency-Key` header. Resend won't send a second email for a key it saw in the last 24 hours.
+
+The key has to stay the same across retries, so build it from something stable like a job or record id. `messageId` is one way to carry it. The adapter doesn't send that field to Resend.
+
+```ts
+// payload.config.js
+export default buildConfig({
+  email: resendAdapter({
+    defaultFromAddress: 'dev@payloadcms.com',
+    defaultFromName: 'Payload CMS',
+    apiKey: process.env.RESEND_API_KEY || '',
+    getIdempotencyKey: (message) => message.messageId,
+  }),
+})
+
+// When you send
+await payload.sendEmail({
+  messageId: `booking-confirmation-${booking.id}`,
+  to: booking.email,
+  subject: 'Your booking',
+  text: 'See you soon',
+})
+```
