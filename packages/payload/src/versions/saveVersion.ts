@@ -3,6 +3,8 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../index.js'
 import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
 
+import { isBranchProjectionActive } from '../branching/branchSelect.js'
+import { projectBranchVersionParent } from '../branching/versions.js'
 import { deepCopyObjectSimple } from '../index.js'
 import { assertNoValidationWrite } from '../utilities/assertNoValidationWrite.js'
 import { getVersionsMax, hasLocalizeStatusEnabled } from '../utilities/getVersionsConfig.js'
@@ -195,7 +197,10 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
   let createdVersion = (result as any).version
 
   createdVersion = sanitizeInternalFields(createdVersion)
-  createdVersion.id = (result as any).parent
+  createdVersion.id =
+    collection && isBranchProjectionActive({ collectionSlug: collection.slug, req })
+      ? projectBranchVersionParent(result as JsonObject)
+      : (result as any).parent
 
   return createdVersion
 }

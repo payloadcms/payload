@@ -6,7 +6,7 @@ import { assertBranchReadable } from '../branching/assertBranchReadable.js'
 import { Forbidden } from '../errors/Forbidden.js'
 import { getRequestBranch } from './getRequestBranch.js'
 
-function createRequest() {
+function createRequest({ url }: { url?: string } = {}) {
   return {
     context: {},
     payload: {
@@ -14,6 +14,12 @@ function createRequest() {
       find: vi.fn().mockResolvedValue({ docs: [] }),
     },
     query: {},
+    server: {
+      redirect: vi.fn(() => {
+        throw new Error('redirect')
+      }),
+    },
+    url,
     user: { id: 'editor', collection: 'users' },
   } as unknown as PayloadRequest
 }
@@ -37,13 +43,60 @@ describe('getRequestBranch', () => {
     },
   )
 
-  it('should preserve forbidden behavior for an unavailable explicit query branch', async () => {
-    const req = createRequest()
+  it('should preserve the access check if branch access changes after resolution', async () => {
+    const req = createRequest({ url: 'http://localhost/admin?branch=campaign' })
 
     req.query.branch = 'campaign'
+    vi.mocked(req.payload.find)
+      .mockResolvedValueOnce({ docs: [{ id: 'campaign-id' }] } as never)
+      .mockResolvedValueOnce({ docs: [] } as never)
     req.branch = await getRequestBranch({ req })
 
     await expect(assertBranchReadable({ req })).rejects.toBeInstanceOf(Forbidden)
+  })
+
+  it('should redirect a missing branch to main while preserving the rest of the URL', async () => {
+    const req = createRequest({
+      url: 'http://localhost/admin/collections/posts?branch=deleted&locale=fr&page=2',
+    })
+    const redirect = vi.fn(() => {
+      throw new Error('redirect')
+    })
+
+    req.query.branch = 'deleted'
+    req.server = { redirect } as unknown as PayloadRequest['server']
+
+    await expect(getRequestBranch({ req })).rejects.toThrow('redirect')
+    expect(redirect).toHaveBeenCalledWith('/admin/collections/posts?locale=fr&page=2')
+    expect(req.payload.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collection: 'payload-branches',
+        overrideAccess: false,
+        where: { slug: { equals: 'deleted' } },
+      }),
+    )
+  })
+
+  it('should keep anonymous branch requests subject to the access check', async () => {
+    const req = createRequest({ url: 'http://localhost/admin?branch=deleted' })
+
+    req.query.branch = 'deleted'
+    req.user = null
+
+    req.branch = await getRequestBranch({ req })
+
+    expect(req.payload.find).not.toHaveBeenCalled()
+    await expect(assertBranchReadable({ req })).rejects.toBeInstanceOf(Forbidden)
+  })
+
+  it('should preserve the requested branch when no server adapter can redirect', async () => {
+    const req = createRequest({ url: 'http://localhost/admin?branch=campaign' })
+
+    req.query.branch = 'campaign'
+    req.server = undefined
+
+    expect(await getRequestBranch({ req })).toBe('campaign')
+    expect(req.payload.find).not.toHaveBeenCalled()
   })
 
   it('should ignore the query branch when branching is disabled', async () => {

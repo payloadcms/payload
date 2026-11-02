@@ -18,7 +18,7 @@
      means for a document — so it takes the same brand treatment. */
   .branch-status-cell--merged {
     background: var(--color-bg-selected);
-    color: var(--color-text-brand);
+    color: var(--color-text-selected);
   }
 
   /* In flight. Warning rather than brand: it is a state to notice, not a result. */

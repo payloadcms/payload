@@ -23,6 +23,7 @@ export const validateCollectionData = ({
     collectionSlug: slug,
     req,
     shouldKeepDeprecatedProperties: true,
+    shouldKeepNullableContainers: true,
   })
 
   validateEntityData({ slug, data, entity: 'collection', partial, req, schema })
@@ -41,6 +42,7 @@ export const validateGlobalData = ({
     globalSlug: slug,
     req,
     shouldKeepDeprecatedProperties: true,
+    shouldKeepNullableContainers: true,
   })
 
   validateEntityData({ slug, data, entity: 'global', partial: true, req, schema })

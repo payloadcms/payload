@@ -113,13 +113,19 @@ const rewriteUniqueFields = ({
   parentPath?: string
 }): void => {
   for (const field of fields) {
-    if (fieldAffectsData(field) && 'unique' in field && field.unique) {
+    // Native slug defaults are applied later, during field sanitization.
+    if (
+      fieldAffectsData(field) &&
+      (('unique' in field && field.unique) || (field.type === 'slug' && field.unique === undefined))
+    ) {
       const fieldPath = joinFieldPath({ name: field.name, parentPath })
 
       field.unique = false
       indexes.push({
         fields: [fieldPath, branchField],
-        ...(field.required === true ? {} : { requireExists: [fieldPath] }),
+        ...(field.required === true || (field.type === 'slug' && field.required !== false)
+          ? {}
+          : { requireExists: [fieldPath] }),
         unique: true,
       })
     }

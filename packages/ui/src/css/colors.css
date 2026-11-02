@@ -526,6 +526,7 @@
     --color-text-secondary: var(--ramp-black-600);
     --color-text-selected: var(--ramp-blue-800);
     --color-text-tertiary: var(--ramp-grey-600);
+    --color-text-warning: var(--color-text);
   }
 
   html[data-enhanced-contrast][data-theme='dark'],
@@ -551,5 +552,6 @@
     --color-text-secondary: var(--ramp-white-500);
     --color-text-selected: var(--ramp-blue-200);
     --color-text-tertiary: var(--ramp-white-500);
+    --color-text-warning: var(--ramp-yellow-400);
   }
 }

@@ -1,4 +1,4 @@
-import type { HTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
+import type { AnchorHTMLAttributes, HTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
 
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -7,6 +7,9 @@ import { ChangedDocuments } from './index.js'
 
 const serverFunction = vi.hoisted(() => vi.fn())
 
+vi.mock('../../../elements/Link/index.js', () => ({
+  Link: (props: AnchorHTMLAttributes<HTMLAnchorElement>) => <a {...props} />,
+}))
 vi.mock('../../../elements/Pill/index.js', () => ({
   Pill: ({ children }: { children: ReactNode }) => <span>{children}</span>,
 }))
@@ -25,6 +28,7 @@ vi.mock('../../../fields/Checkbox/Input.js', () => ({
 vi.mock('../../../icons/Chevron/index.js', () => ({ ChevronIcon: () => null }))
 vi.mock('../../../providers/Config/index.js', () => ({
   useConfig: () => ({
+    config: { routes: { admin: '/custom-admin' } },
     getEntityConfig: ({ globalSlug }: { globalSlug?: string }) =>
       globalSlug ? { label: 'Site settings' } : { labels: { singular: 'Post' } },
   }),
@@ -59,6 +63,7 @@ class IdleIntersectionObserver {
 }
 
 beforeEach(() => {
+  vi.stubGlobal('process', { env: {} })
   vi.stubGlobal('IntersectionObserver', IdleIntersectionObserver)
 })
 
@@ -67,29 +72,62 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-test('should connect the toggle to the diff panel and expose loading status', async () => {
-  serverFunction.mockReturnValue(new Promise(() => undefined))
+test('should link created and updated documents and globals on the reviewed branch', async () => {
   const screen = await render(
     <ChangedDocuments
-      branch="campaign"
+      branch="campaign & launch"
       changes={[
-        {
-          collectionSlug: 'posts',
-          docID: 'document-id',
-          id: 'change-id',
-          operation: 'update',
-        },
+        { collectionSlug: 'posts', docID: 'created/id', id: 'created', operation: 'create' },
+        { collectionSlug: 'posts', docID: 123, id: 'updated', operation: 'update' },
+        { collectionSlug: 'posts', docID: 'deleted', id: 'deleted', operation: 'delete' },
+        { globalSlug: 'settings', id: 'global', operation: 'update' },
       ]}
     />,
   )
-  const toggle = screen.getByRole('button', { name: 'document-id' })
+
+  await expect
+    .element(screen.getByRole('link', { name: 'created/id' }))
+    .toHaveAttribute(
+      'href',
+      '/custom-admin/collections/posts/created%2Fid?branch=campaign%20%26%20launch',
+    )
+  await expect
+    .element(screen.getByRole('link', { name: '123' }))
+    .toHaveAttribute('href', '/custom-admin/collections/posts/123?branch=campaign%20%26%20launch')
+  await expect
+    .element(screen.getByRole('link', { name: 'Site settings' }))
+    .toHaveAttribute('href', '/custom-admin/globals/settings?branch=campaign%20%26%20launch')
+  await expect.element(screen.getByRole('link', { name: 'deleted' })).not.toBeInTheDocument()
+})
+
+test('should connect the toggle to its own diff panel and expose loading status', async () => {
+  serverFunction.mockReturnValue(new Promise(() => undefined))
+  const changes = [
+    {
+      collectionSlug: 'posts',
+      docID: 'document-id',
+      id: 'change-id',
+      operation: 'update' as const,
+    },
+  ]
+
+  const screen = await render(
+    <>
+      <ChangedDocuments branch="campaign" changes={changes} />
+      <ChangedDocuments branch="campaign" changes={changes} selectable={false} />
+    </>,
+  )
+  const toggles = screen.getByRole('button', { name: 'document-id' })
+  const toggle = toggles.nth(1)
 
   await toggle.click()
 
   const panel = screen.getByRole('region', { name: 'document-id' })
 
-  await expect.element(toggle).toHaveAttribute('aria-controls', 'changed-docs-change-id-diff')
-  await expect.element(panel).toHaveAttribute('id', 'changed-docs-change-id-diff')
+  expect(toggle.element().id).not.toBe(toggles.nth(0).element().id)
+  await expect.element(toggle).toHaveAttribute('aria-controls', panel.element().id)
+  await expect.element(panel).toHaveAttribute('aria-labelledby', toggle.element().id)
+  expect(document.getElementById(toggle.element().id)).toBe(toggle.element())
   await expect.element(screen.getByRole('status')).toHaveTextContent('Loading')
   await expect.element(screen.getByTestId('shimmer')).toHaveAttribute('aria-hidden', 'true')
 })

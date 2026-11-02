@@ -111,9 +111,6 @@ export const useChildren = ({
     childrenRef.current = stateCacheKey === cacheKey ? children : null
   }, [cacheKey, children, stateCacheKey])
   const isLoadingRef = useRef(isLoading)
-  useEffect(() => {
-    isLoadingRef.current = isLoading
-  }, [isLoading])
   const {
     config: {
       routes: { api },
@@ -126,6 +123,7 @@ export const useChildren = ({
       currentChildren: null | TreeDocument[],
     ): Promise<TreeDocument[]> => {
       if (activeCacheKeyRef.current === cacheKey) {
+        isLoadingRef.current = true
         setIsLoading(true)
       }
 
@@ -237,6 +235,7 @@ export const useChildren = ({
         return []
       } finally {
         if (activeCacheKeyRef.current === cacheKey) {
+          isLoadingRef.current = false
           setIsLoading(false)
         }
       }
@@ -319,6 +318,12 @@ export const useChildren = ({
 
     return fetchPage(1, null)
   }, [cache, cacheKey, fetchPage])
+
+  useEffect(() => {
+    if (enabled && stateCacheKey === cacheKey) {
+      void load()
+    }
+  }, [cacheKey, enabled, load, stateCacheKey])
 
   const loadMore = useCallback(async (): Promise<TreeDocument[]> => {
     if (isLoading || !hasMore) {

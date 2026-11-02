@@ -1,0 +1,1 @@
+export { getAdminPreferences } from 'payload'

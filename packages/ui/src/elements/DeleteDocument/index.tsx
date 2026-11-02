@@ -3,7 +3,7 @@ import type { SanitizedCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
+import { branchesCollectionSlug, formatAdminURL, MAIN_BRANCH } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'sonner'
@@ -131,8 +131,20 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           // Navigating away tears this surface down, so just notify other surfaces.
           reportUpdate(deleteEvent)
 
+          const hasDeletedActiveBranch =
+            collectionSlug === branchesCollectionSlug && branch && json.doc?.slug === branch
+
           return startRouteTransition(() =>
-            router.push(formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` })),
+            router.push(
+              formatAdminURL({
+                adminRoute,
+                // An explicit branch prevents navigation from preserving the deleted workspace.
+                path: `/collections/${collectionSlug}${qs.stringify(
+                  { branch: hasDeletedActiveBranch ? MAIN_BRANCH : undefined },
+                  { addQueryPrefix: true },
+                )}`,
+              }),
+            ),
           )
         }
 

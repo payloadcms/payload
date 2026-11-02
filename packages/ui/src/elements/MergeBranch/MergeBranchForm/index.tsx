@@ -52,6 +52,7 @@ export const MergeBranchForm: React.FC<{
   upcoming,
 }) => {
   const { t } = useTranslation()
+  const scheduledForID = React.useId()
   const [minDate] = React.useState(() => new Date())
   const modeOptions = [
     { label: t('branching:mergeNow'), value: 'now' as const },
@@ -88,11 +89,11 @@ export const MergeBranchForm: React.FC<{
       {mode === 'schedule' && (
         <div className={`${baseClass}__schedule`}>
           <div className={`${baseClass}__schedule-field`}>
-            <FieldLabel label={t('general:time')} path="merge-scheduled-for" required />
+            <FieldLabel htmlFor={scheduledForID} label={t('general:time')} required />
             <DatePickerField
-              id="merge-scheduled-for"
               minDate={minDate}
               onChange={(value) => onScheduledForChange(value ?? undefined)}
+              overrides={{ id: scheduledForID, required: true }}
               pickerAppearance="dayAndTime"
               readOnly={isScheduling}
               value={scheduledFor}
