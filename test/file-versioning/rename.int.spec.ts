@@ -186,6 +186,46 @@ test.suite('File rename', { config: './config.ts' }, () => {
     expect(await readFile(path.join(transformedMediaDir, 'cover-1.png'))).toEqual(bytes)
   })
 
+  test('should reject with 400 when the main file is renamed to the name of its own original', async ({
+    payload,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: transformedMediaSlug,
+      data: { alt: 'cropped later' },
+      file: { name: 'photo.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+    const cropped = await payload.update({
+      id: created.id,
+      collection: transformedMediaSlug,
+      data: {},
+      req: {
+        query: {
+          uploadEdits: {
+            crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+            heightInPixels: 800,
+            widthInPixels: 800,
+          },
+        },
+      },
+    })
+
+    expect(cropped.original?.filename).toBe('photo.png')
+
+    await expect(
+      renameFileOperation({
+        id: created.id,
+        collection: payload.collections[transformedMediaSlug],
+        filename: 'photo.png',
+        overrideAccess: true,
+        req: await createPayloadRequest({ payload }),
+      }),
+    ).rejects.toMatchObject({
+      message: 'This upload already uses the filename photo.png.',
+      status: 400,
+    })
+  })
+
   test('should rename an upload whose own name contains -original', async ({ payload }) => {
     const bytes = await readFile(imageFixture)
     const created = await payload.create({

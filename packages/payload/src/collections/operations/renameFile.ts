@@ -156,6 +156,14 @@ export const renameFileOperation = async (
       const key = normalizeStorageKey({ key: nextKey })
       replacements.set(getStoredFileIdentity(file), key)
     }
+    // Files are copied before the old ones are removed, so one file cannot take another file's current name.
+    const currentKeys = new Set(storedFiles.map((file) => getStoredFileIdentity(file)))
+    for (const [from, to] of replacements) {
+      const toIdentity = getStoredFileIdentity({ key: to })
+      if (toIdentity !== from && currentKeys.has(toIdentity)) {
+        throw new APIError(`This upload already uses the filename ${path.posix.basename(to)}.`, 400)
+      }
+    }
 
     const renamed = replaceStoredFileReferences({
       files: storedFiles,
