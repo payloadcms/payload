@@ -30,7 +30,14 @@ const withLocationFields = ({ select }: { select: SelectType }): SelectType => {
   const result = addLocationFields({ representation: { ...select } })
 
   if (isSelectRecord(result.original)) {
-    result.original = addLocationFields({ representation: { ...result.original } })
+    const original = addLocationFields({ representation: { ...result.original } })
+    result.original = original
+
+    // The original URL compares the original's location with the main file's location.
+    if (original.url === true) {
+      result.filename = true
+      result._objectKey = true
+    }
   }
 
   if (isSelectRecord(result.variants)) {

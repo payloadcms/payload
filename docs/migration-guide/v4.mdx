@@ -2159,7 +2159,7 @@ The `alwaysInsertFields` option (on `cloudStoragePlugin` and every `storage-*` a
 
 ### Upload collections retain originals and file history
 
-Upload collections now store `original` metadata and a `prefix` and `_objectKey` for each stored file (the main file, `original`, and each variant), so saved versions can find their files. New uploads keep their source under an `-original` filename. Update any code or infrastructure that relies on the old filename, URL, or object key.
+Upload collections now store `original` metadata and a `prefix` and `_objectKey` for each stored file (the main file, `original`, and each variant), so saved versions can find their files. New uploads keep their uploaded filename. With a storage adapter, each new file is stored under its own `_objectKey` folder, so update any code or infrastructure that relies on the old object key. When a processed main file and its original share a filename, request the original with `?original=true`; `original.url` already includes it. With local storage, the original gets a counter name instead (for example `photo-1.png`). Files saved by earlier v4 beta releases with an `-original` filename keep that name and are still served. Custom storage adapters should handle the new `params.isOriginal` in `staticHandler`; see [Custom Storage Adapters](../upload/storage-adapters#custom-storage-adapters).
 
 **Postgres and SQLite:** after updating, run `payload migrate:create`, check that it adds these columns to each upload collection table and its versions table, then run `payload migrate`. Existing rows keep `null` values until their next write.
 

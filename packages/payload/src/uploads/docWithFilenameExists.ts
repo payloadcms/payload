@@ -4,6 +4,7 @@ import { buildFilenameWhere } from './transformers/resolveUploadDocument.js'
 
 type Args = {
   collectionSlug: string
+  excludeDocumentID?: number | string
   filename: string
   matchAnyPrefix?: boolean
   path: string
@@ -13,6 +14,7 @@ type Args = {
 
 export const docWithFilenameExists = async ({
   collectionSlug,
+  excludeDocumentID,
   filename,
   matchAnyPrefix = false,
   prefix,
@@ -28,10 +30,17 @@ export const docWithFilenameExists = async ({
     variants: upload && typeof upload === 'object' ? upload.variants : undefined,
   })
 
-  const where: Where =
-    !matchAnyPrefix && typeof prefix === 'string' && hasPrefixField
-      ? { and: [filenameCondition, { prefix: { equals: prefix } }] }
-      : filenameCondition
+  const constraints: Where[] = [filenameCondition]
+
+  if (!matchAnyPrefix && typeof prefix === 'string' && hasPrefixField) {
+    constraints.push({ prefix: { equals: prefix } })
+  }
+
+  if (excludeDocumentID !== undefined) {
+    constraints.push({ id: { not_equals: excludeDocumentID } })
+  }
+
+  const where: Where = constraints.length > 1 ? { and: constraints } : filenameCondition
 
   const doc = await req.payload.db.findOne({
     collection: collectionSlug,
