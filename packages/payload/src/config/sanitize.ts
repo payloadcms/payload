@@ -239,6 +239,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       const sanitizedBlock = block
 
       if (sanitizedBlock._sanitized === true) {
+        config.blocks.push(flattenBlock({ block }))
         continue
       }
       sanitizedBlock._sanitized = true
