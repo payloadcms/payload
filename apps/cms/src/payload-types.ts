@@ -1391,6 +1391,10 @@ export interface VigorProduct {
    */
   image?: (string | null) | Media;
   /**
+   * Takes the product off the website (its page, the catalog, search and Vigor AI) without unpublishing or deleting it. Publish the change to apply it; untick and publish to show it again.
+   */
+  hidden?: boolean | null;
+  /**
    * Used in the address on the website, the same in every language. Filled in from the name when left empty; don't change it once the page is live.
    */
   slug: string;
@@ -2241,6 +2245,7 @@ export interface VigorProductsSelect<T extends boolean = true> {
   summary?: T;
   body?: T;
   image?: T;
+  hidden?: T;
   slug?: T;
   sku?: T;
   sortOrder?: T;

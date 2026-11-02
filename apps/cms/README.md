@@ -45,6 +45,8 @@ uses to test templates.
 | `src/app/(frontend)/ios-app/`, `scripts/import-legal-pages.ts` | Privacy Policy and Terms of Use of the app and the Vigor website (see "Privacy policy and terms of use") |
 | `src/vigor/`, `src/locales.ts`             | Content of the Vigor website in four languages (see "Vigor website")                   |
 | `scripts/import-vigor.ts`                  | Copies the Vigor website's current content into the CMS (see "Vigor website")          |
+| `scripts/import-legacy-catalog.ts`         | Old website's products in as drafts (see "Products from the old website")              |
+| `scripts/publish-legacy-products.ts`       | Publishes them in every language (see "Products from the old website")                 |
 | `scripts/import-app-page.ts`, `scripts/app-page/` | The first version of the Vigor website's VgemsAI app page (see "VgemsAI app page") |
 | `src/timezones.ts`, `src/zonedTime.ts`     | Time zones offered for event dates, and days at midnight in a time zone                |
 | `src/proxy.ts`, `src/twoFactor/`           | Two-factor authentication for every login (see "Two-factor authentication")            |
@@ -60,6 +62,8 @@ uses to test templates.
 | `deploy/locate-events.sh`                  | Looks up the coordinates of events on the server                                       |
 | `deploy/import-personal-website.sh`        | Runs the personal website import on the server                                         |
 | `deploy/import-vigor.sh`                   | Runs the Vigor website import on the server                                            |
+| `deploy/import-legacy-catalog.sh`          | Runs the import of the old website's products on the server                            |
+| `deploy/publish-legacy-products.sh`        | Publishes the imported products on the server                                          |
 | `deploy/import-app-page.sh`                | Adds the VgemsAI app page's first version on the server                                |
 | `deploy/import-legal-pages.sh`             | Adds the Privacy Policy and Terms of Use on the server                                 |
 | `deploy/mongodb/create-payload-user.js`    | Creates the MongoDB user for Payload (run on the DB EC2)                               |
@@ -596,6 +600,13 @@ tagline and portal name are per language; the others are the same in every langu
 **Images** go to Media like any upload (to S3 when it's on). A product without a photo gets a drawn
 illustration on the website.
 
+**Hiding a product.** Tick **Hide on the website** in a product's sidebar and publish the change: the
+product leaves the website (its page, the catalog, search, Vigor AI, the sitemap) in every language, but
+stays published, translated and editable here. Untick it and publish to show it again. For several
+products, select them in the list, then **Edit** → choose **Hide on the website** → tick it → **Publish changes**. The **Hide on the website**
+column and filter show which are hidden. Unlike **Unpublish**, nothing has to be published again in each
+language afterwards.
+
 **Gemstones and sizes.** A product lists every gemstone its style comes in (**Gemstones**) and every size
 (**Sizes**, one at a time, e.g. `8 mm`, `12 × 28 mm`, `US 6`); the website shows them as two lists, read as
 "any of these stones in any of these sizes". When a gemstone comes in fewer sizes, say so in the body.
@@ -705,6 +716,16 @@ ones to keep. Drafts aren't on the website, so nothing changes there until you p
    only those marked `true`, `--hint=likely,check` only those hints, `--no-images` skips the photos.
    Locally without Docker: `pnpm payload run scripts/import-legacy-catalog.ts ~/old_vgems --dry-run`.
 
+   The photos are stored like uploads in the admin panel: in S3 when `S3_BUCKET` is set in `.env` (see
+   "Uploads in S3"; the EC2's IAM role is enough, no keys needed), with their smaller copies, otherwise in
+   the `media` volume. Turn on S3 before importing: photos imported before stay in the volume. On a
+   server, only the catalog and the photos of old_vgems are needed (about 400 MB instead of 1.8 GB):
+
+   ```bash
+   git clone --filter=blob:none --sparse --branch <branch> https://github.com/atorpos/old_vgems.git ~/old_vgems
+   cd ~/old_vgems && git sparse-checkout set export images/products shop/wp-content/uploads media
+   ```
+
    Running it again is safe and keeps your edits. A product that is still a draft nobody has saved since
    the import is rebuilt from the catalog (e.g. after an update of this script). Any other product from the
    old website only gets its empty **Gemstones** and **Sizes** filled in, as a draft: publish it to show
@@ -719,6 +740,20 @@ ones to keep. Drafts aren't on the website, so nothing changes there until you p
    These fields are only for logged-in users: the website and its visitors never get them.
 4. **Publish the ones to keep**: correct what the notes say was guessed, then use the arrow next to
    **Publish in English** → **Publish all locales**. Delete the ones you don't want.
+
+   **Many at once**, e.g. every imported product that has a photo, in every language:
+
+   ```bash
+   ./deploy/publish-legacy-products.sh --with-photo --dry-run   # preview, nothing is published
+   ./deploy/publish-legacy-products.sh --with-photo
+   ```
+
+   `--hint=likely,check` narrows it to those hints. A product with a required field still empty
+   (gemstones, metal, category…) stays a draft and is listed with the field to fill in; run it again
+   after filling them in. It also completes products published in English only. Don't use **Publish**
+   in the list for this: it publishes only the language you're viewing, so the products are missing
+   from the Spanish, French and Chinese pages, and it skips incomplete products with only a brief error.
+   Locally without Docker: `pnpm payload run scripts/publish-legacy-products.ts --with-photo --dry-run`.
 
 The stones' names aren't translated yet: on the Spanish, French and Chinese pages they show in English
 until they're added to the `glossary` in the website's `shared/i18n/*.json`.
