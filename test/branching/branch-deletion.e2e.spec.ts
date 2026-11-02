@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
@@ -138,6 +139,67 @@ test.describe('Deleting the selected branch', () => {
       })
     }
   })
+
+  for (const returnToBranchURL of [false, true]) {
+    test(`should return to main after another session deletes the saved branch (${returnToBranchURL ? 'previous branch URL' : 'plain admin URL'})`, async ({
+      page,
+    }, testInfo) => {
+      await page.goto(`${serverURL}/admin`)
+      await page.locator('.branch-selector__trigger').click()
+
+      const preferenceUpdate = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === `/api/payload-preferences/${PREFERENCE_KEYS.NAV}` &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
+
+      await page
+        .locator('.branch-selector__popup .combobox__entry', { hasText: branch.name })
+        .click()
+      await preferenceUpdate
+      await expect(page).toHaveURL((url) => url.searchParams.get('branch') === branch.slug)
+      await expect(page.locator('.branch-selector__trigger-name')).toHaveText(branch.name)
+
+      const previousURL = page.url()
+      const preferenceURL = `${serverURL}/api/payload-preferences/${PREFERENCE_KEYS.NAV}`
+
+      await expect
+        .poll(async () => (await (await page.request.get(preferenceURL)).json()).value?.branch)
+        .toBe(branch.slug)
+
+      // Leave the admin while another session removes the selected workspace.
+      await page.goto('about:blank')
+      await payload.delete({ collection: branchesSlug, id: branch.id, overrideAccess: true })
+      await expect
+        .poll(
+          async () =>
+            (await payload.find({ collection: branchesSlug, where: { id: { equals: branch.id } } }))
+              .totalDocs,
+        )
+        .toBe(0)
+      await expect
+        .poll(async () => (await (await page.request.get(preferenceURL)).json()).value?.branch)
+        .toBe(branch.slug)
+
+      const response = await page.goto(returnToBranchURL ? previousURL : `${serverURL}/admin`)
+
+      await testInfo.attach('return-response', {
+        body: JSON.stringify({ status: response?.status(), url: page.url() }),
+        contentType: 'application/json',
+      })
+
+      // Regression expectation: an obsolete workspace should not lock the user out of the admin.
+      await expect(page).toHaveURL((url) => !url.searchParams.has('branch'))
+      await expect(page.locator('.branch-selector__trigger-name')).toHaveText('main')
+      await expect(
+        page.getByRole('button', { name: 'Select branch: main', exact: true }),
+      ).toBeVisible()
+      await expect(
+        page.getByRole('heading', { name: `Welcome, ${devUser.email}`, exact: true }),
+      ).toBeVisible()
+    })
+  }
 
   test('should toast a denied deletion and keep the selected branch page usable', async ({
     page,
