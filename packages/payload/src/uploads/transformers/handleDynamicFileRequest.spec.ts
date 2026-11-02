@@ -86,7 +86,8 @@ describe('handleDynamicFileRequest', () => {
       ...uploadDocument,
       _stored: false,
       _transforms: { crop: { height: 1, width: 1, x: 0, y: 0 } },
-      original: { filename: 'logo-original.png', mimeType: 'image/png' },
+      // In cloud storage the original can share the main file's name.
+      original: { filename: 'logo.png', mimeType: 'image/png' },
     }
 
     const stage = (handleRequest: UploadTransformer['handleRequest']): UploadTransformer => ({
@@ -128,9 +129,14 @@ describe('handleDynamicFileRequest', () => {
 
       await handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() })
 
-      expect(vi.mocked(getSourceFileResponse).mock.calls.map(([args]) => args.filename)).toEqual([
-        'logo-original.png',
-        'logo-original.png',
+      expect(
+        vi.mocked(getSourceFileResponse).mock.calls.map(([{ filename, isOriginal }]) => ({
+          filename,
+          isOriginal,
+        })),
+      ).toEqual([
+        { filename: 'logo.png', isOriginal: true },
+        { filename: 'logo.png', isOriginal: true },
       ])
       await vi.waitFor(() =>
         originals.forEach(({ onCancel }) => expect(onCancel).toHaveBeenCalled()),
