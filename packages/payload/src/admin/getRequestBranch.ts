@@ -11,7 +11,7 @@ export async function getRequestBranch({ req }: { req: PayloadRequest }): Promis
   const branchFromQuery = req.query?.branch
 
   if (typeof branchFromQuery === 'string' && branchFromQuery) {
-    if (branchFromQuery !== MAIN_BRANCH && req.user && req.url) {
+    if (branchFromQuery !== MAIN_BRANCH && req.user && req.url && req.server) {
       const { docs } = await req.payload.find({
         collection: branchesCollectionSlug,
         depth: 0,
