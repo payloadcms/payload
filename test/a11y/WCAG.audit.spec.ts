@@ -150,7 +150,6 @@ test.describe('WCAG 2.2 Level AA', () => {
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
     test('should expose a translated deletion cue beside removed version text', async () => {
-      test.fixme(true, 'PYLD-3722: requires the stacked package remediation PR.')
       // PYLD-3722: deletion meaning must be available without seeing strikethrough styling.
       await openVersionComparison({ page, postsURL, serverURL, versionIndex: 0 })
       const removed = page.locator('.text-diff [data-match-type="delete"]').first()
@@ -6037,7 +6036,6 @@ test.describe('WCAG 2.2 Level AA', () => {
 
   test.describe('2.4.3 Focus Order (A)', () => {
     test('should expose a named deletion alert with its warning and safe initial focus', async () => {
-      test.fixme(true, 'PYLD-3769: requires the stacked package remediation PR.')
       // PYLD-3769: focus a real safe action; exact dialog speech is checked manually.
       await gotoFirstPost({ page, postsURL, serverURL })
       const moreOptions = page.locator('.doc-controls__popup .popup__trigger-wrap button')
