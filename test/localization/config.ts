@@ -642,6 +642,11 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
+          name: 'hiddenSharedText',
+          type: 'text',
+          hidden: true,
+        },
+        {
           name: 'sharedArray',
           type: 'array',
           fields: [

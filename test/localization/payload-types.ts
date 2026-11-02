@@ -2083,6 +2083,7 @@ export interface LocalizedStatusSharedGlobal {
   id: string;
   localizedText?: string | null;
   sharedText?: string | null;
+  hiddenSharedText?: string | null;
   sharedArray?:
     | {
         sharedText?: string | null;
@@ -2229,6 +2230,7 @@ export interface GlobalTextSelect<T extends boolean = true> {
 export interface LocalizedStatusSharedGlobalSelect<T extends boolean = true> {
   localizedText?: T;
   sharedText?: T;
+  hiddenSharedText?: T;
   sharedArray?:
     | T
     | {
