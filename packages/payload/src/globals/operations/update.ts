@@ -48,9 +48,8 @@ import {
   validateAllLocalesPublicationFlags,
 } from '../../versions/allLocalesPublicationStatus.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
-import { hasNonLocalizedDataChanged } from '../../versions/drafts/hasNonLocalizedDataChanged.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
-import { mergeLocalizedStatus } from '../../versions/mergeLocalizedStatus.js'
+import { resolveLocalizedStatus } from '../../versions/resolveLocalizedStatus.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { validateGlobalLocalWithLocaleKeyedData } from './local/validate.js'
 type Args<TSlug extends GlobalSlug> = {
@@ -398,59 +397,19 @@ export const updateOperation = async <
         : undefined
 
     if (localization && config) {
-      const hasStringStatus = typeof result._status === 'string'
-      const canUpdateDraftStatus = isSavingDraft && statusFieldAccess
-      const isAllLocaleStatusUpdate = locale === 'all' && (hasStringStatus || canUpdateDraftStatus)
-      const shouldFilterStatusLocales = shouldApplyAllLocalesStatusChange || isAllLocaleStatusUpdate
-      let statusLocaleCodes = localization.localeCodes
-
-      if (shouldFilterStatusLocales && localization.filterAvailableLocales) {
-        const filteredLocales = await localization.filterAvailableLocales({
-          locales: localization.locales,
-          req,
-        })
-        statusLocaleCodes = filteredLocales.map((locale) =>
-          typeof locale === 'string' ? locale : locale.code,
-        )
-      }
-
-      const requestedStatusLocaleCodes = locale === 'all' ? statusLocaleCodes : [locale!]
-
-      if (!shouldApplyAllLocalesStatusChange && hasStringStatus) {
-        // Update the status for the requested locales while preserving the others.
-        result._status = mergeLocalizedStatus({
-          existingStatus: globalJSON._status,
-          localeCodes: requestedStatusLocaleCodes,
-          status: result._status,
-        })
-      }
-
-      const shouldDraftAllLocales =
-        canUpdateDraftStatus &&
-        hasNonLocalizedDataChanged({
-          after: result,
-          before: globalJSON,
-          configBlockReferences: config.blocks,
-          fields: globalConfig.fields,
-        })
-
-      if (shouldApplyAllLocalesStatusChange) {
-        // Update the status for the locales the user can publish.
-        result._status = mergeLocalizedStatus({
-          existingStatus: hasStringStatus ? globalJSON._status : result._status,
-          localeCodes: statusLocaleCodes,
-          status: unpublishAllLocales ? 'draft' : 'published',
-        })
-      } else if (canUpdateDraftStatus) {
-        // Update every locale for shared changes, or only the requested locales for localized changes.
-        result._status = mergeLocalizedStatus({
-          existingStatus: shouldDraftAllLocales ? result._status : globalJSON._status,
-          localeCodes: shouldDraftAllLocales
-            ? localization.localeCodes
-            : requestedStatusLocaleCodes,
-          status: 'draft',
-        })
-      }
+      result._status = await resolveLocalizedStatus({
+        configBlockReferences: config.blocks,
+        existingDoc: globalJSON,
+        fields: globalConfig.fields,
+        isSavingDraft,
+        locale: locale!,
+        localization,
+        req,
+        result,
+        shouldApplyAllLocalesStatusChange,
+        statusFieldAccess,
+        unpublishAllLocales,
+      })
     }
 
     // /////////////////////////////////////

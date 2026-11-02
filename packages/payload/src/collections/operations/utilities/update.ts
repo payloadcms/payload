@@ -43,7 +43,6 @@ import {
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
-import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
 import { resolvePublishAllLocales } from '../../../utilities/resolvePublishAllLocales.js'
 import {
   buildAllLocalesPublicationHookDoc,
@@ -52,8 +51,7 @@ import {
   validateAllLocalesPublicationFlags,
 } from '../../../versions/allLocalesPublicationStatus.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
-import { hasNonLocalizedDataChanged } from '../../../versions/drafts/hasNonLocalizedDataChanged.js'
-import { mergeLocalizedStatus } from '../../../versions/mergeLocalizedStatus.js'
+import { resolveLocalizedStatus } from '../../../versions/resolveLocalizedStatus.js'
 import { validateLocalWithLocaleKeyedData } from '../local/validate.js'
 
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
@@ -353,63 +351,19 @@ export const updateDocument = async <
       : undefined
 
   if (localization) {
-    const hasStringStatus = typeof result._status === 'string'
-    const canUpdateDraftStatus = isSavingDraft && statusFieldAccess
-    const isAllLocaleStatusUpdate = locale === 'all' && (hasStringStatus || canUpdateDraftStatus)
-    const shouldFilterStatusLocales = shouldApplyAllLocalesStatusChange || isAllLocaleStatusUpdate
-    let statusLocaleCodes = localization.localeCodes
-
-    if (shouldFilterStatusLocales && localization.filterAvailableLocales) {
-      const filteredLocales = await localization.filterAvailableLocales({
-        locales: localization.locales,
-        req,
-      })
-      statusLocaleCodes = filteredLocales.map((locale) =>
-        typeof locale === 'string' ? locale : locale.code,
-      )
-    }
-
-    const requestedStatusLocaleCodes = locale === 'all' ? statusLocaleCodes : [locale]
-
-    if (!shouldApplyAllLocalesStatusChange && hasStringStatus) {
-      // Update the status for the requested locales while preserving the others.
-      result._status = mergeLocalizedStatus({
-        existingStatus: docWithLocales._status,
-        localeCodes: requestedStatusLocaleCodes,
-        status: result._status,
-      })
-    }
-
-    const shouldDraftAllLocales =
-      canUpdateDraftStatus &&
-      hasNonLocalizedDataChanged({
-        after: mergeLocalizedData({
-          configBlockReferences: config.blocks,
-          dataWithLocales: result,
-          docWithLocales,
-          fields: collectionConfig.fields,
-          localesToUpdate: localization.localeCodes,
-        }),
-        before: docWithLocales,
-        configBlockReferences: config.blocks,
-        fields: collectionConfig.fields,
-      })
-
-    if (shouldApplyAllLocalesStatusChange) {
-      // Update the status for the locales the user can publish.
-      result._status = mergeLocalizedStatus({
-        existingStatus: hasStringStatus ? docWithLocales._status : result._status,
-        localeCodes: statusLocaleCodes,
-        status: unpublishAllLocales ? 'draft' : 'published',
-      })
-    } else if (canUpdateDraftStatus) {
-      // Update every locale for shared changes, or only the requested locales for localized changes.
-      result._status = mergeLocalizedStatus({
-        existingStatus: shouldDraftAllLocales ? result._status : docWithLocales._status,
-        localeCodes: shouldDraftAllLocales ? localization.localeCodes : requestedStatusLocaleCodes,
-        status: 'draft',
-      })
-    }
+    result._status = await resolveLocalizedStatus({
+      configBlockReferences: config.blocks,
+      existingDoc: docWithLocales,
+      fields: collectionConfig.fields,
+      isSavingDraft,
+      locale,
+      localization,
+      req,
+      result,
+      shouldApplyAllLocalesStatusChange,
+      statusFieldAccess,
+      unpublishAllLocales,
+    })
   }
 
   let localizedPublishData: JsonObject | null = null

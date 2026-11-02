@@ -2382,6 +2382,7 @@ export interface LocalizedStatusSharedGlobal {
   id: string;
   localizedText?: string | null;
   sharedText?: string | null;
+  hiddenSharedText?: string | null;
   sharedRows?:
     | {
         localizedText?: string | null;
@@ -2625,6 +2626,7 @@ export interface PublicationHookGlobal {
 export interface LocalizedStatusSharedGlobalSelect<T extends boolean = true> {
   localizedText?: T;
   sharedText?: T;
+  hiddenSharedText?: T;
   sharedRows?:
     | T
     | {

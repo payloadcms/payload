@@ -607,6 +607,11 @@ export default buildConfigWithDefaults({
             type: 'text',
           },
           {
+            name: 'hiddenSharedText',
+            type: 'text',
+            hidden: true,
+          },
+          {
             name: 'sharedRows',
             type: 'array',
             fields: [

@@ -83,6 +83,20 @@ describe('mergeLocalizedData', () => {
 
       expect(missingData.title).toBe('Old Title')
 
+      const undefinedData = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales: {
+          title: undefined,
+        },
+        docWithLocales: {
+          title: 'Old Title',
+        },
+        fields,
+        localesToUpdate,
+      })
+
+      expect(undefinedData.title).toBe('Old Title')
+
       const updatedData = mergeLocalizedData({
         configBlockReferences: [],
         dataWithLocales: {
