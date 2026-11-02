@@ -110,12 +110,12 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
   }
 
   // Set only by core, and only to `false`, for a file entry with no stored object. A missing value
-  // means stored. `hidden` keeps it out of API output; `sanitizeUploadData` drops client input.
+  // means stored. `sanitizeUploadData` drops client input. Like `_objectKey`, it is not
+  // field-level `hidden`, because that would remove it before the URL hooks can read it.
   const storedField: Field = {
     name: '_stored',
     type: 'checkbox',
-    admin: { disabled: true },
-    hidden: true,
+    admin: { disabled: true, hidden: true, readOnly: true },
   }
 
   const filename: Field = {

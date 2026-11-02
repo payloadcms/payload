@@ -53,9 +53,15 @@ export async function resolveUploadEdits({
   })
 
   // A duplicate is made from the source's cropped main file, which becomes the copy's original.
-  // The crop is already part of those files, so the copy keeps every other key but not `crop`.
+  // The crop is already part of those files, so the copy keeps every other key but not `crop`. A
+  // source with no stored main file is copied from its original, so its copy keeps every key.
   if (isDuplicating) {
+    const isCopiedFromOriginal = (originalDoc as Document)?._stored === false
     const applyTransformState = <T>(fileData: T): T => {
+      if (isCopiedFromOriginal) {
+        return fileData
+      }
+
       const { crop: _crop, ...rest } = ((fileData as Document)._transforms ?? {}) as Document
 
       return { ...fileData, _transforms: Object.keys(rest).length ? rest : null }

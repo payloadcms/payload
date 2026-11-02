@@ -170,7 +170,7 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       { isStored: false, purposes: ['persisted-default', 'request-override'] },
       { isStored: true, purposes: ['request-override'] },
     ])(
-      'should run the $purposes phases in config order, each with its own options, when isStored is $isStored, keeping _transforms and hiding _stored',
+      'should run the $purposes phases in config order, each with its own options, when isStored is $isStored, keeping _transforms',
       async ({ isStored, purposes }, { payload, restClient }) => {
         const created = await createNote({ _transforms: { contractSuffix: '!' }, payload })
 
@@ -195,7 +195,6 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
           ]),
         )
         expect(stored._transforms).toEqual({ contractSuffix: '!' })
-        expect(stored).not.toHaveProperty('_stored')
       },
     )
   })

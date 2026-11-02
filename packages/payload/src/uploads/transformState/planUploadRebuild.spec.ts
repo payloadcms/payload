@@ -32,6 +32,7 @@ const plan = ({
   transformers?: UploadTransformer[]
 } & Partial<Parameters<typeof planUploadRebuild>[0]>) =>
   planUploadRebuild({
+    canApplyAtRequest: false,
     collectionSlug: 'media',
     hasCropOrResizeEdit: false,
     isDuplicating: false,
@@ -61,7 +62,7 @@ describe('planUploadRebuild', () => {
       transformers: [stage],
     })
 
-    expect(result).toEqual({ shouldRebuild: true })
+    expect(result).toEqual({ isAppliedAtRequest: false, shouldRebuild: true })
     expect(stage.canTransform).not.toHaveBeenCalled()
   })
 
@@ -70,7 +71,7 @@ describe('planUploadRebuild', () => {
 
     const result = await plan({ next: rotate, previous: rotate, transformers: [stage] })
 
-    expect(result).toEqual({ shouldRebuild: false })
+    expect(result).toEqual({ isAppliedAtRequest: false, shouldRebuild: false })
     expect(stage.canTransform).not.toHaveBeenCalled()
   })
 
@@ -97,7 +98,7 @@ describe('planUploadRebuild', () => {
   it('should rebuild without a plan when the stored MIME type is unknown', async () => {
     const result = await plan({ next: rotate, previous: null, storedMimeType: undefined })
 
-    expect(result).toEqual({ shouldRebuild: true })
+    expect(result).toEqual({ isAppliedAtRequest: false, shouldRebuild: true })
   })
 
   it.for<{ args: Parameters<typeof plan>[0]; name: string; shouldRebuild: boolean }>([

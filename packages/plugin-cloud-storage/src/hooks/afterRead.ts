@@ -49,7 +49,8 @@ export const getAfterReadHook =
     })
     let url = value
 
-    if (filename) {
+    // An entry with no stored object is built when it is requested, so it keeps the Payload route.
+    if (filename && representation?._stored !== false) {
       if (generateFileURL) {
         url = await generateFileURL({
           collection,
