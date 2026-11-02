@@ -72,7 +72,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@libsql/client": "0.14.0",
+    "@libsql/client": "0.18.0",
     "@payloadcms/drizzle": "workspace:*",
     "console-table-printer": "2.12.1",
     "drizzle-kit": "0.31.7",
