@@ -75,7 +75,7 @@ export const useFormSubmission = ({
 
   const [isModified, _setIsModified] = useState(false)
 
-  const [isDisabled, setIsDisabled] = useState(isDisabledFromProps || false)
+  const [isDisabled, _setIsDisabled] = useState(isDisabledFromProps || false)
 
   const [isSubmitted, setIsSubmitted] = useState(false)
 
@@ -112,6 +112,15 @@ export const useFormSubmission = ({
 
   const method = 'method' in props ? props?.method : undefined
   const validateDrafts = hasDraftValidationEnabled(docConfig)
+
+  const setIsDisabled = useCallback(
+    (isDisabled: boolean) => {
+      // Recovery callbacks can submit again before React renders the updated disabled state.
+      contextRef.current.disabled = isDisabled
+      _setIsDisabled(isDisabled)
+    },
+    [contextRef],
+  )
 
   /**
    * Intercept the `setIsModified` method to track whether the event happened during background processing.
@@ -166,7 +175,7 @@ export const useFormSubmission = ({
     setIsProcessing(false)
     setIsDisabled(isDisabledFromPropsRef.current || false)
     setIsBackgroundProcessing(false)
-  }, [setIsBackgroundProcessing])
+  }, [setIsBackgroundProcessing, setIsDisabled])
 
   const executeSubmit = useCallback(
     async ({
@@ -574,6 +583,7 @@ export const useFormSubmission = ({
       i18n,
       validateDrafts,
       waitForAutocomplete,
+      setIsDisabled,
       setIsModified,
       setIsSubmitted,
       onNonFieldError,
@@ -599,7 +609,7 @@ export const useFormSubmission = ({
 
       const resultPromise = scheduleRequest({
         priority: requestPriority[options?.submissionType ?? 'submit'],
-        run: (requestContext) =>
+        task: (requestContext) =>
           executeSubmit({
             onResponse: ({ res }) => {
               didSucceed = res.ok
@@ -646,7 +656,7 @@ export const useFormSubmission = ({
     if (typeof isDisabledFromProps === 'boolean') {
       setIsDisabled(isDisabledFromProps)
     }
-  }, [isDisabledFromProps])
+  }, [isDisabledFromProps, setIsDisabled])
 
   useEffect(() => {
     if (typeof isSubmittedFromProps === 'boolean') {

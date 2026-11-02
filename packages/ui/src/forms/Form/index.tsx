@@ -492,7 +492,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const executeOnChange = useEffectEvent(() => {
     void scheduleRequest({
       priority: requestPriority.formState,
-      run: async (requestContext) => {
+      task: async (requestContext) => {
         if (Array.isArray(onChange)) {
           let serverState: FormState
           const requestFormState = deepCopyObjectSimpleWithoutReactComponents(

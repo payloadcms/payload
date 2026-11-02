@@ -31,19 +31,19 @@ describe('useQueue', () => {
     const calls: string[] = []
     const queue = renderQueue()
     const first = queue.scheduleTask({
-      run: async () => {
+      task: async () => {
         calls.push('first')
         await active.promise
         return 'first result'
       },
     })
     const dropped = queue.scheduleTask({
-      run: async () => {
+      task: async () => {
         calls.push('dropped')
       },
     })
     const latest = queue.scheduleTask({
-      run: async () => {
+      task: async () => {
         calls.push('latest')
         return 'latest result'
       },
@@ -63,22 +63,22 @@ describe('useQueue', () => {
     const queue = renderQueue()
 
     void queue.scheduleTask({
-      run: async () => {
+      task: async () => {
         calls.push('active')
         await active.promise
       },
     })
     const low = queue.scheduleTask({
       priority: 2,
-      run: async () => calls.push('low'),
+      task: async () => calls.push('low'),
     })
     const medium = queue.scheduleTask({
       priority: 1,
-      run: async () => calls.push('medium'),
+      task: async () => calls.push('medium'),
     })
     const high = queue.scheduleTask({
       priority: 0,
-      run: async () => calls.push('high'),
+      task: async () => calls.push('high'),
     })
 
     active.resolve()
@@ -94,18 +94,18 @@ describe('useQueue', () => {
     const queue = renderQueue()
 
     void queue.scheduleTask({
-      run: async () => {
+      task: async () => {
         calls.push('active')
         await active.promise
       },
     })
     const high = queue.scheduleTask({
       priority: 0,
-      run: async () => calls.push('high'),
+      task: async () => calls.push('high'),
     })
     const low = queue.scheduleTask({
       priority: 1,
-      run: async () => calls.push('low'),
+      task: async () => calls.push('low'),
     })
 
     active.resolve()
@@ -119,12 +119,12 @@ describe('useQueue', () => {
     const calls: string[] = []
     const queue = renderQueue()
 
-    void queue.scheduleTask({ run: async () => active.promise })
+    void queue.scheduleTask({ task: async () => active.promise })
     const high = queue.scheduleTask({
       priority: 0,
-      run: async () => calls.push('high'),
+      task: async () => calls.push('high'),
     })
-    const low = queue.scheduleTask({ run: async () => calls.push('low') })
+    const low = queue.scheduleTask({ task: async () => calls.push('low') })
 
     active.resolve()
     await expect(low).resolves.toEqual({ status: 'superseded' })
@@ -137,13 +137,13 @@ describe('useQueue', () => {
     const calls: string[] = []
     const queue = renderQueue()
     const rejected = queue.scheduleTask({
-      run: async () => {
+      task: async () => {
         calls.push('active')
         await active.promise
       },
     })
     const pending = queue.scheduleTask({
-      run: async () => calls.push('pending'),
+      task: async () => calls.push('pending'),
     })
 
     active.reject(new Error('active task failed'))
@@ -158,13 +158,13 @@ describe('useQueue', () => {
     let isQueueReset: (() => boolean) | undefined
     const queue = renderQueue()
     const running = queue.scheduleTask({
-      run: async (context) => {
+      task: async (context) => {
         isCurrent = context.isCurrent
         isQueueReset = context.isQueueReset
         await active.promise
       },
     })
-    const pending = queue.scheduleTask({ run: async () => undefined })
+    const pending = queue.scheduleTask({ task: async () => undefined })
 
     queue.resetQueue()
 
@@ -185,7 +185,7 @@ describe('useQueue', () => {
       await active.promise
     })
     const scheduled = queue.scheduleTask({
-      run: async () => calls.push('scheduled'),
+      task: async () => calls.push('scheduled'),
     })
 
     expect(calls).toEqual(['legacy'])

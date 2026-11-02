@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 import { afterEach, expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 
-import type { Context, FormProps } from './types.js'
+import type { Context, FormProps, Submit } from './types.js'
 
 import { useQueue } from '../../hooks/useQueue.js'
 import { requests } from '../../utilities/api.js'
@@ -89,7 +89,44 @@ test('should dismiss the submitting toast when onSuccess resets and unmounts the
   expect(toast.dismiss).toHaveBeenCalledWith(1)
 })
 
-async function mountSubmission(props: Pick<FormProps, 'handleResponse' | 'onSuccess'> = {}) {
+test('should retry a superseded autosave after an explicit submission fails', async () => {
+  const form = await mountSubmission({ disableValidationOnSubmit: true })
+  const activeRequest = Promise.withResolvers<void>()
+  const running = form.queue.scheduleTask({ task: () => activeRequest.promise })
+  const savedResponse = Response.json({ message: 'Autosaved' })
+  let retry: ReturnType<Submit> | undefined
+
+  vi.mocked(requests.post)
+    .mockImplementationOnce(() => form.response.promise)
+    .mockResolvedValueOnce(savedResponse)
+
+  const autosave = form.submit({
+    disableFormWhileProcessing: false,
+    onStaleRequest: () => {
+      retry = form.submit({ disableFormWhileProcessing: false, submissionType: 'autosave' })
+    },
+    submissionType: 'autosave',
+  })
+  const explicitSubmit = form.submit()
+
+  activeRequest.resolve()
+  await running
+  await expect.poll(() => form.contextRef.current.disabled).toBe(true)
+  form.response.resolve(Response.json({ message: 'Validation failed' }, { status: 400 }))
+  await explicitSubmit
+  await autosave
+
+  await expect(retry).resolves.toEqual({
+    formState: { title: { value: 'Initial value' } },
+    res: savedResponse,
+  })
+  expect(requests.post).toHaveBeenCalledTimes(2)
+  await expect.poll(() => form.contextRef.current.disabled).toBe(false)
+})
+
+async function mountSubmission(
+  props: Pick<FormProps, 'disableValidationOnSubmit' | 'handleResponse' | 'onSuccess'> = {},
+) {
   const response = Promise.withResolvers<Response>()
   const requestScopeRef = { current: {} }
   const contextRef = {
@@ -121,6 +158,7 @@ async function mountSubmission(props: Pick<FormProps, 'handleResponse' | 'onSucc
   function Probe() {
     queue = useQueue()
     submission = useFormSubmission(args)
+    contextRef.current.disabled = submission.disabled
     useEffect(() => () => reset(), [])
 
     return null
@@ -128,5 +166,7 @@ async function mountSubmission(props: Pick<FormProps, 'handleResponse' | 'onSucc
 
   const screen = await render(<Probe />)
 
-  return { reset, response, screen, submit: () => submission.submit() }
+  const submit: Submit = (...args) => submission.submit(...args)
+
+  return { contextRef, queue, reset, response, screen, submit }
 }
