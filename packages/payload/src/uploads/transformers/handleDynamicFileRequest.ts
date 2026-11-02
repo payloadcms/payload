@@ -151,6 +151,8 @@ export async function handleDynamicFileRequest({
             collection,
             document,
             filename: document.original?.filename ?? document.filename,
+            // The original can share the main file's name, so ask for it by role, not by name.
+            isOriginal: Boolean(document.original?.filename),
             prefix,
             req,
           }),
@@ -204,7 +206,7 @@ export async function handleDynamicFileRequest({
     return finalizeFileResponse({ collection, req, response: currentResponse })
   }
 
-  // No transformer produced a response — serve the original file through the
+  // No transformer produced a response — serve the requested stored file through the
   // normal path (Range/ETag/redirect support, existing `modifyResponseHeaders` order).
   return retrieveFileResponse({ collection, doc: document, filename, prefix, req })
 }
