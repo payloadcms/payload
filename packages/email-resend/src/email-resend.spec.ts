@@ -343,6 +343,21 @@ describe('email-resend', () => {
       expect(fetchMock.mock.calls[0][1].headers).not.toHaveProperty('Idempotency-Key')
     })
 
+    it('should throw without sending when the function returns an empty key', async () => {
+      const fetchMock = mockFetch({ id: 'test-id' })
+
+      await expect(() =>
+        resendAdapter({
+          apiKey,
+          defaultFromAddress,
+          defaultFromName,
+          getIdempotencyKey: () => '',
+        })({ payload: mockPayload }).sendEmail({ from, subject, text, to }),
+      ).rejects.toThrow(/empty key/)
+
+      expect(fetchMock).not.toHaveBeenCalled()
+    })
+
     it('should not send the header without the option', async () => {
       const fetchMock = mockFetch({ id: 'test-id' })
 

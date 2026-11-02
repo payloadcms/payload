@@ -8,8 +8,9 @@ export type ResendAdapterArgs = {
   defaultFromName: string
   /**
    * Returns the `Idempotency-Key` to send with this email. If a retry uses the
-   * same key, Resend doesn't send the email again. Resend keeps keys for 24 hours.
-   * Return `undefined` to send without a key.
+   * same key and the same email, Resend doesn't send it again. If the email changed,
+   * Resend returns a 409. Resend keeps keys for 24 hours. Return `undefined` to send
+   * without a key. An empty key throws, so a broken key can't send without protection.
    *
    * @see https://resend.com/docs/dashboard/emails/idempotency-keys
    */
@@ -55,6 +56,10 @@ export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
       )
 
       const idempotencyKey = args.getIdempotencyKey?.(message)
+
+      if (idempotencyKey === '') {
+        throw new APIError('Error sending email: getIdempotencyKey returned an empty key', 400)
+      }
 
       const res = await fetch('https://api.resend.com/emails', {
         body: JSON.stringify(sendEmailOptions),
