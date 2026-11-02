@@ -1257,6 +1257,7 @@ export interface PublicationAccess {
 export interface PublicationFieldAccess {
   id: string;
   title?: string | null;
+  sharedText?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -2290,6 +2291,7 @@ export interface PublicationAccessSelect<T extends boolean = true> {
  */
 export interface PublicationFieldAccessSelect<T extends boolean = true> {
   title?: T;
+  sharedText?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -2584,6 +2586,7 @@ export interface PublicationSanitizeGlobal {
 export interface PublicationFieldAccessGlobal {
   id: string;
   title?: string | null;
+  sharedText?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -2764,6 +2767,7 @@ export interface PublicationSanitizeGlobalSelect<T extends boolean = true> {
  */
 export interface PublicationFieldAccessGlobalSelect<T extends boolean = true> {
   title?: T;
+  sharedText?: T;
   createdBy?: T;
   updatedBy?: T;
   _status?: T;

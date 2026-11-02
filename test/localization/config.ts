@@ -486,6 +486,7 @@ export default buildConfigWithDefaults({
         access: openAccess,
         fields: [
           ...localizedPublicationFields,
+          { name: 'sharedText', type: 'text' },
           {
             name: '_status',
             access: {
@@ -746,6 +747,7 @@ export default buildConfigWithDefaults({
         },
         fields: [
           ...localizedPublicationFields,
+          { name: 'sharedText', type: 'text' },
           {
             name: '_status',
             access: {

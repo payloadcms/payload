@@ -78,67 +78,83 @@ test.suite('Localized draft preservation', { config: './config.ts' }, () => {
     expect(stored._status.es).toBe('published')
   })
 
-  test('should preserve collection status when field access denies draft status changes', async ({
-    payload,
-  }) => {
-    const doc = await payload.create({
-      collection: publicationFieldAccessSlug,
-      data: { _status: 'published', title: 'Published' },
-      overrideAccess: true,
-    })
+  test.for(['localized', 'shared'] as const)(
+    'should preserve collection status when field access denies draft status changes during a %s edit',
+    async (editType, { payload }) => {
+      const doc = await payload.create({
+        collection: publicationFieldAccessSlug,
+        data: { _status: 'published', sharedText: 'Published shared value', title: 'Published' },
+        overrideAccess: true,
+      })
 
-    await payload.update({
-      id: doc.id,
-      collection: publicationFieldAccessSlug,
-      data: { _status: 'draft', title: 'Localized draft' },
-      draft: true,
-      locale: defaultLocale,
-      overrideAccess: false,
-    })
+      await payload.update({
+        id: doc.id,
+        collection: publicationFieldAccessSlug,
+        data: {
+          _status: 'draft',
+          title: 'Localized draft',
+          ...(editType === 'shared' ? { sharedText: 'Shared draft' } : {}),
+        },
+        draft: true,
+        locale: defaultLocale,
+        overrideAccess: false,
+      })
 
-    const draft = await payload.findByID({
-      id: doc.id,
-      collection: publicationFieldAccessSlug,
-      draft: true,
-      locale: defaultLocale,
-      overrideAccess: true,
-    })
+      const draft = await payload.findByID({
+        id: doc.id,
+        collection: publicationFieldAccessSlug,
+        draft: true,
+        locale: defaultLocale,
+        overrideAccess: true,
+      })
 
-    expect(draft.title).toBe('Localized draft')
-    expect(draft._status).toBe('published')
-  })
+      expect(draft.title).toBe('Localized draft')
+      expect(draft._status).toBe('published')
+      expect(draft.sharedText).toBe(
+        editType === 'shared' ? 'Shared draft' : 'Published shared value',
+      )
+    },
+  )
 
-  test('should preserve global status when field access denies draft status changes', async ({
-    payload,
-  }) => {
-    await payload.updateGlobal({
-      slug: publicationFieldAccessGlobalSlug,
-      data: { _status: 'published', title: 'Published' },
-      overrideAccess: true,
-    })
+  test.for(['localized', 'shared'] as const)(
+    'should preserve global status when field access denies draft status changes during a %s edit',
+    async (editType, { payload }) => {
+      await payload.updateGlobal({
+        slug: publicationFieldAccessGlobalSlug,
+        data: { _status: 'published', sharedText: 'Published shared value', title: 'Published' },
+        overrideAccess: true,
+      })
 
-    await payload.updateGlobal({
-      slug: publicationFieldAccessGlobalSlug,
-      data: { _status: 'draft', title: 'Localized draft' },
-      draft: true,
-      locale: defaultLocale,
-      overrideAccess: false,
-    })
+      await payload.updateGlobal({
+        slug: publicationFieldAccessGlobalSlug,
+        data: {
+          _status: 'draft',
+          title: 'Localized draft',
+          ...(editType === 'shared' ? { sharedText: 'Shared draft' } : {}),
+        },
+        draft: true,
+        locale: defaultLocale,
+        overrideAccess: false,
+      })
 
-    const versions = await payload.findGlobalVersions({
-      slug: publicationFieldAccessGlobalSlug,
-      limit: 1,
-      locale: defaultLocale,
-      overrideAccess: true,
-      sort: '-updatedAt',
-      where: { latest: { equals: true } },
-    })
+      const versions = await payload.findGlobalVersions({
+        slug: publicationFieldAccessGlobalSlug,
+        limit: 1,
+        locale: defaultLocale,
+        overrideAccess: true,
+        sort: '-updatedAt',
+        where: { latest: { equals: true } },
+      })
 
-    const draft = versions.docs[0]!.version
+      const draft = versions.docs[0]!.version
 
-    expect(draft.title).toBe('Localized draft')
-    expect(draft._status).toBe('published')
-  })
+      expect(draft.title).toBe('Localized draft')
+      expect(draft._status).toBe('published')
+      expect(draft.sharedText).toBe(
+        editType === 'shared' ? 'Shared draft' : 'Published shared value',
+      )
+    },
+  )
 
   test('should draft all locales when a shared array is cleared with null', async ({ payload }) => {
     expect(payload.collections[allFieldsLocalizedSlug].config.versions).toMatchObject({
