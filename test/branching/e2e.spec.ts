@@ -206,6 +206,51 @@ test.describe('Branching', () => {
     }
   })
 
+  test('should update the version count when switching branches without refreshing', async () => {
+    const document = await payload.create({
+      collection: pagesSlug,
+      data: { title: 'Main version', _status: 'published' },
+    })
+
+    for (const title of ['First branch version', 'Second branch version']) {
+      await payload.update({
+        id: document.id,
+        branch: branchSlug,
+        collection: pagesSlug,
+        data: { title },
+      })
+    }
+
+    const [mainVersions, branchVersions] = await Promise.all([
+      payload.findVersions({
+        branch: 'main',
+        collection: pagesSlug,
+        where: { parent: { equals: document.id } },
+      }),
+      payload.findVersions({
+        branch: branchSlug,
+        collection: pagesSlug,
+        where: { parent: { equals: document.id } },
+      }),
+    ])
+
+    await expect.poll(() => mainVersions.totalDocs).toBeGreaterThan(0)
+    await expect.poll(() => branchVersions.totalDocs).not.toBe(mainVersions.totalDocs)
+
+    await switchBranch({ name: 'main', page })
+    await gotoAndWaitForForm(page, pagesURL.edit(document.id))
+
+    const versionCount = page.locator('.doc-tabs__tabs .pill-version-count')
+
+    await expect(versionCount).toHaveText(String(mainVersions.totalDocs))
+    await switchBranch({ name: branchName, page })
+    await expect(page.locator('#field-title')).toHaveValue('Second branch version')
+    await expect(versionCount).toHaveText(String(branchVersions.totalDocs))
+    await switchBranch({ name: 'main', page })
+    await expect(page.locator('#field-title')).toHaveValue('Main version')
+    await expect(versionCount).toHaveText(String(mainVersions.totalDocs))
+  })
+
   test.describe('Media files', () => {
     test.afterEach(async () => {
       const branch = await payload.find({

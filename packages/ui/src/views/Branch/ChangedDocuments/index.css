@@ -102,6 +102,23 @@
     white-space: nowrap;
   }
 
+  /* Keep the link sized to its text so the rest of the header still expands the diff. */
+  .changed-docs__title--link {
+    position: relative;
+    z-index: 1;
+    flex: 0 1 auto;
+    margin-inline-end: auto;
+    margin-block: calc(-1 * var(--spacer-1));
+    padding-block: var(--spacer-1);
+    min-inline-size: var(--spacer-4);
+    pointer-events: all;
+    color: var(--color-text);
+
+    &:hover {
+      color: var(--color-text-brand);
+    }
+  }
+
   .changed-docs__indicator {
     flex-shrink: 0;
     color: var(--color-icon);
