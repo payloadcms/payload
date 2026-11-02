@@ -363,6 +363,26 @@ export const updateOperation = async <
       fieldValue: statusFieldValue,
       status: allLocalesPublicationStatus,
     })
+
+    const localization = config?.localization
+    let accessibleLocaleCodes = localization ? localization.localeCodes : undefined
+
+    if (
+      localization &&
+      hasLocalizeStatusEnabled(globalConfig) &&
+      (hasAuthorizedPublicationStatus ||
+        (locale === 'all' &&
+          (typeof result._status === 'string' || (isSavingDraft && statusFieldAccess)))) &&
+      localization.filterAvailableLocales
+    ) {
+      const filteredLocales = await localization.filterAvailableLocales({
+        locales: localization.locales,
+        req,
+      })
+      accessibleLocaleCodes = filteredLocales.map((locale) =>
+        typeof locale === 'string' ? locale : locale.code,
+      )
+    }
     if (
       allLocalesPublicationStatus &&
       !hasAuthorizedPublicationStatus &&
@@ -384,12 +404,11 @@ export const updateOperation = async <
         existingStatus: globalJSON._status,
         hasAuthorizedPublicationStatus,
         locale: locale!,
-        localeCodes: config.localization.localeCodes,
+        localeCodes: accessibleLocaleCodes ?? config.localization.localeCodes,
         status: result._status,
       })
     }
 
-    const localization = config?.localization
     const shouldDraftAllLocales =
       isSavingDraft &&
       statusFieldAccess &&
@@ -411,7 +430,9 @@ export const updateOperation = async <
       result._status = getLocalizedDraftStatus({
         existingStatus: shouldDraftAllLocales ? result._status : globalJSON._status,
         locale: shouldDraftAllLocales ? 'all' : locale!,
-        localeCodes: localization.localeCodes,
+        localeCodes: shouldDraftAllLocales
+          ? localization.localeCodes
+          : (accessibleLocaleCodes ?? localization.localeCodes),
       })
     }
 
@@ -425,23 +446,11 @@ export const updateOperation = async <
 
       if (hasLocalizeStatusEnabled(globalConfig)) {
         if (hasAuthorizedPublicationStatus) {
-          let accessibleLocaleCodes = config.localization.localeCodes
-
-          if (config.localization.filterAvailableLocales) {
-            const filteredLocales = await config.localization.filterAvailableLocales({
-              locales: config.localization.locales,
-              req,
-            })
-            accessibleLocaleCodes = filteredLocales.map((locale) =>
-              typeof locale === 'string' ? locale : locale.code,
-            )
-          }
-
           if (typeof result._status !== 'object' || result._status === null) {
             result._status = {}
           }
 
-          for (const localeCode of accessibleLocaleCodes) {
+          for (const localeCode of accessibleLocaleCodes ?? config.localization.localeCodes) {
             result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
           }
         } else if (!isSavingDraft && locale !== 'all') {
