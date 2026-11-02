@@ -76,7 +76,7 @@ type MergeLocalizedDataArgs = {
  * Merges data from dataWithLocales onto docWithLocales for specified locales.
  * For localized fields, merges only the specified locales while preserving others
  * (or only `localesToPreserve` if supplied).
- * For non-localized fields, keeps existing values from docWithLocales unchanged.
+ * For non-localized fields, uses incoming values while preserving existing values when omitted.
  * Returns a new object without mutating the original.
  */
 export function mergeLocalizedData({
@@ -126,6 +126,8 @@ export function mergeLocalizedData({
                 // Preserve existing value if new value is not a valid object
                 result[field.name] = existingValue
               }
+            } else if (newValue === null) {
+              result[field.name] = null
             } else if (Array.isArray(newValue)) {
               // Non-localized array - still process children for any localized fields
               result[field.name] = newValue.map((newItem: JsonObject, index: number) => {
@@ -167,6 +169,8 @@ export function mergeLocalizedData({
                 // Preserve existing value if new value is not a valid object
                 result[field.name] = existingValue
               }
+            } else if (newValue === null) {
+              result[field.name] = null
             } else if (Array.isArray(newValue)) {
               // Non-localized blocks - still process children for any localized fields
               result[field.name] = newValue.map((newBlockData: JsonObject, index: number) => {
@@ -280,7 +284,7 @@ export function mergeLocalizedData({
             result[field.name] = dataWithLocales[field.name]
           } else {
             result[field.name] =
-              field.name in dataWithLocales
+              typeof dataWithLocales[field.name] !== 'undefined'
                 ? dataWithLocales[field.name]
                 : docWithLocales[field.name]
           }
