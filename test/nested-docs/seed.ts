@@ -40,4 +40,45 @@ export async function seed(payload: Payload) {
       },
     })
   }
+
+  const academy = await payload.create({
+    collection: pagesSlug,
+    data: { title: 'Academy', _status: 'published' },
+  })
+  const courses = await payload.create({
+    collection: pagesSlug,
+    data: { title: 'Courses', parent: academy.id, _status: 'published' },
+  })
+  await payload.create({
+    collection: pagesSlug,
+    data: { title: 'Getting started', parent: courses.id, _status: 'published' },
+  })
+  await payload.create({
+    collection: pagesSlug,
+    data: { title: 'Advanced training', parent: courses.id, _status: 'published' },
+  })
+  await payload.create({
+    collection: pagesSlug,
+    data: { title: 'Training events', parent: academy.id, _status: 'published' },
+  })
+  const account = await payload.create({
+    collection: pagesSlug,
+    data: { title: 'Account services', _status: 'published' },
+  })
+  const membership = await payload.create({
+    collection: pagesSlug,
+    data: { title: 'Membership', parent: account.id, _status: 'published' },
+  })
+  await payload.create({
+    collection: pagesSlug,
+    data: { title: 'Renew membership', parent: membership.id, _status: 'published' },
+  })
+  await payload.create({
+    collection: pagesSlug,
+    data: { title: 'Update your address', parent: membership.id, _status: 'published' },
+  })
+  await payload.create({
+    collection: pagesSlug,
+    data: { title: 'Billing and payments', parent: account.id, _status: 'published' },
+  })
 }

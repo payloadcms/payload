@@ -215,6 +215,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         collectionSlug,
         data,
         defaultLimit: data?.limit,
+        defaultSort: queryFromProps?.sort,
         handlePageChange,
         handlePerPageChange,
         handleSearchChange,

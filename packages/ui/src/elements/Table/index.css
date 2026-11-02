@@ -147,6 +147,11 @@
 
       &:focus-within {
         outline: none;
+      }
+
+      /* Pointer actions can restore focus to a tree cell after replacing its button. */
+      &:focus-within:not(:where(.table--nested-docs tr)),
+      &:has(:focus-visible) {
         background: var(--color-bg-secondary);
       }
 
@@ -160,6 +165,13 @@
       outline-offset: var(--accessibility-outline-offset);
       border-radius: var(--radius-small);
     }
+  }
+
+  .table--nested-docs :is(th, td)[data-column='_select'] {
+    padding-inline-start: var(--gutter-h);
+    padding-inline-end: var(--spacer-4);
+    min-width: 0;
+    width: var(--spacer-3);
   }
 
   [dir='rtl'] .table thead th {

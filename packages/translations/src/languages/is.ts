@@ -174,6 +174,7 @@ export const isTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Ógild skráartegund: {{value}}',
     invalidRequestArgs: 'Ógild viðföng send í beiðni: {{args}}',
     loadingDocument: 'Vandamál kom upp við að sækja færslu með ID: {{id}}.',
+    loadingItems: 'Ekki tókst að hlaða atriðum.',
     localesNotSaved_one: 'Ekki tókst að vista eftirfarandi staðfærslu:',
     localesNotSaved_other: 'Ekki tókst að vista eftirfarandi staðfærslur:',
     logoutFailed: 'Útskráning mistókst.',
@@ -549,6 +550,9 @@ export const isTranslations: DefaultTranslationsObject = {
     toggle: 'Breyta',
     trash: 'Rusl',
     trashedCountSuccessfully: '{{count}} {{label}} færð í rusl.',
+    treeLayout: 'Tré',
+    treeSearchResults:
+      'Samsvarandi skjöl eru sýnd sem flatur listi. Hreinsaðu leit, síur og flokkun til að fara aftur í tréð.',
     true: 'Satt',
     unauthorized: 'Óheimilt',
     unchecked: 'Óhakið',

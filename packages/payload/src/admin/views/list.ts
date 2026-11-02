@@ -116,6 +116,8 @@ export type ListViewClientProps = {
    * @deprecated
    */
   listPreferences?: CollectionPreferences
+  nestedDocExpanded?: string[]
+  nestedDocRows?: Record<string, import('../../hierarchy/getNestedDocsData.js').NestedDocRow>
   newDocumentURL: string
   /**
    * @deprecated

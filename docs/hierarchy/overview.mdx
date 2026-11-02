@@ -1061,3 +1061,7 @@ export const Pages: CollectionConfig = {
 The parent relationship defaults to `_h_parent`. Use `nestedDocs: { parentFieldName: 'parentPage' }` to choose another field name. The parent relationship cannot be localized or have multiple values. Existing single-value parent fields may omit `hasMany`. Only one of `nestedDocs`, `hierarchy`, `folders`, and `tags` can be configured on a collection.
 
 Deletion and trash operations use the shared hierarchy behavior described above: reparent by default, with an explicit cascade choice per operation.
+
+### Tree layout
+
+The collection list offers a Tree layout beside Table and Grid. Expand rows to load children, and scroll to load additional roots or children. A **Load more** button is available for keyboard use. Loaded branches are cached until the list query changes or the page reloads. Search, filters and grouping show flat results so matching descendants remain findable; clearing them restores the expanded tree.

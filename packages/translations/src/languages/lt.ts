@@ -176,6 +176,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Neteisingas failo tipas: {{value}}',
     invalidRequestArgs: 'Netinkami argumentai perduoti užklausoje: {{args}}',
     loadingDocument: 'Įvyko klaida įkeliant dokumentą, kurio ID yra {{id}}.',
+    loadingItems: 'Nepavyko įkelti elementų.',
     localesNotSaved_one: 'Negalima išsaugoti šios lokalės:',
     localesNotSaved_other: 'Šios lokalės negalėjo būti išsaugotos:',
     logoutFailed: 'Atsijungimas nepavyko.',
@@ -557,6 +558,9 @@ export const ltTranslations: DefaultTranslationsObject = {
     toggle: 'Perjungti',
     trash: 'Šiukšlės',
     trashedCountSuccessfully: '{{count}} {{label}} perkeltas į šiukšlinę.',
+    treeLayout: 'Medis',
+    treeSearchResults:
+      'Atitinkantys dokumentai rodomi plokščiame sąraše. Norėdami grįžti prie medžio, išvalykite paiešką, filtrus ir grupavimą.',
     true: 'Tiesa',
     unauthorized: 'Neleistinas',
     unchecked: 'Nežymėta',

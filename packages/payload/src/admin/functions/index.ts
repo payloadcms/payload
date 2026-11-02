@@ -102,6 +102,7 @@ export type ListQuery = {
   */
   search?: string
   sort?: Sort
+  treeExpanded?: string[]
   where?: Where
 } & Record<string, unknown>
 

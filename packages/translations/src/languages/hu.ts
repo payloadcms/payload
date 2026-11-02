@@ -178,6 +178,7 @@ export const huTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Érvénytelen fájltípus: {{value}}',
     invalidRequestArgs: 'Érvénytelen argumentumok a kérésben: {{args}}',
     loadingDocument: 'Hiba történt a {{id}} azonosítójú dokumentum betöltésekor.',
+    loadingItems: 'Nem sikerült betölteni az elemeket.',
     localesNotSaved_one: 'Az alábbi helyi beállítást nem sikerült menteni:',
     localesNotSaved_other: 'Az alábbi helyi beállításokat nem sikerült menteni:',
     logoutFailed: 'Kijelentkezés sikertelen.',
@@ -561,6 +562,9 @@ export const huTranslations: DefaultTranslationsObject = {
     toggle: 'Váltás',
     trash: 'Szemét',
     trashedCountSuccessfully: '{{count}} {{label}} átkerült a szemeteskukába.',
+    treeLayout: 'Fa',
+    treeSearchResults:
+      'Az egyező dokumentumok lapos listában jelennek meg. A fához való visszatéréshez törölje a keresést, a szűrőket és a csoportosítást.',
     true: 'Igaz',
     unauthorized: 'Jogosulatlan',
     unchecked: 'Nincs bejelölve',

@@ -5,6 +5,8 @@ function createClientTranslationKeys<T extends DefaultTranslationKeys[]>(keys: T
 }
 
 export const clientTranslationKeys = createClientTranslationKeys([
+  'general:treeLayout',
+  'general:treeSearchResults',
   'general:parentDocument',
   'authentication:account',
   'authentication:accountOfCurrentUser',
@@ -127,6 +129,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:emailOrPasswordIncorrect',
   'error:usernameOrPasswordIncorrect',
   'error:loadingDocument',
+  'error:loadingItems',
   'error:insufficientClipboardPermissions',
   'error:invalidClipboardData',
   'error:invalidRequestArgs',
