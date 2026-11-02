@@ -37,6 +37,7 @@ uses to test templates.
 | `src/maps/`, `src/hooks/locateEvent.ts`    | Finds each event's coordinates in Apple Maps (see "Event locations")                   |
 | `scripts/locate-events.ts`                 | Looks up the coordinates of events saved earlier (see "Event locations")               |
 | `src/endpoints/appEvents.ts`               | Upcoming events for the VgemsAI app (see "The VgemsAI app")                            |
+| `src/endpoints/appProducts.ts`             | The catalog with prices, for the VgemsAI app (see "Products" under "The VgemsAI app")  |
 | `src/endpoints/appEventDiscovery.ts`       | Trade shows Claude finds every week (see "Events found by Claude")                     |
 | `src/collections/PushNotifications.ts`, `src/endpoints/appPushNotifications.ts` | Push notifications to the VgemsAI app (see "Push notifications") |
 | `src/endpoints/appClients.ts`              | VgemsAI app signups as clients, and their Account screen (see "The VgemsAI app")       |
@@ -1056,6 +1057,19 @@ with their accounts:
 | --- | --- |
 | `GET /api/app/market` | The active materials with their latest two prices, their price at the end of each month for 10 years, and at the end of each week for the last year |
 | `POST /api/app/market-prices` | Saves up to 1000 prices, one per material and day, e.g. `{"source": "api-ninjas", "prices": [{"material": "gold", "date": "2026-10-28", "price": 2680.5}]}`; answers how many were created, updated, unchanged and kept |
+
+#### Products
+
+The app's **Products** tab shows the Vigor website's catalog (**Vigor website → Products**), through awoz-api,
+which searches, filters and sorts it for the app. `GET /api/app/products?locale=en`
+(`src/endpoints/appProducts.ts`) gives awoz-api every product the website shows (published and not hidden), in
+their sort order, with their photo's URLs. In another language (`es`, `fr`, `zh-Hant`) it gives the products
+published in that language, as the website does.
+
+**Prices:** each product has an optional **Price (USD)**, per unit (piece, pair, parcel or strand). Only
+people signed in to the app see it; awoz-api leaves it out for everyone else, and the website and the public API
+(`/api/vigor-products`) never get it, since only logged-in editors can read the field. Without a price the app
+says "price on request". As with any change to a product, publish it to apply it.
 
 #### Push notifications
 

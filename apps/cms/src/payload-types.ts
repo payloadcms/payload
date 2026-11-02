@@ -1381,6 +1381,10 @@ export interface VigorProduct {
   weight?: string | null;
   moq: number;
   unit: 'piece' | 'pair' | 'parcel' | 'strand';
+  /**
+   * Optional, in US dollars per unit (above). Only people signed in to the VgemsAI app see it; the website and its visitors never get it. Empty: "price on request". Publish the change to apply it.
+   */
+  price?: number | null;
   summary: string;
   /**
    * Separate paragraphs with a blank line.
@@ -2242,6 +2246,7 @@ export interface VigorProductsSelect<T extends boolean = true> {
   weight?: T;
   moq?: T;
   unit?: T;
+  price?: T;
   summary?: T;
   body?: T;
   image?: T;

@@ -37,6 +37,7 @@ import {
 } from './endpoints/appEventDiscovery'
 import { appEventsEndpoint } from './endpoints/appEvents'
 import { appMarketEndpoint, appMarketPricesEndpoint } from './endpoints/appMarket'
+import { appProductsEndpoint } from './endpoints/appProducts'
 import {
   appPushNotificationResultEndpoint,
   appPushNotificationsDueEndpoint,
@@ -137,6 +138,7 @@ export default buildConfig({
     appEventDiscoverySaveEndpoint,
     appMarketEndpoint,
     appMarketPricesEndpoint,
+    appProductsEndpoint,
     appPushNotificationsDueEndpoint,
     appPushNotificationStartEndpoint,
     appPushNotificationResultEndpoint,

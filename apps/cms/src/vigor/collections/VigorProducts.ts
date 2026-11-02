@@ -15,7 +15,10 @@ const publishedAndShown: Access = ({ req }) => {
   return req.user ? true : shown
 }
 
-/** The old-website fields are for editors only: the website and other visitors never get them */
+/**
+ * The price and the old-website fields are for editors only: the website and other visitors never
+ * get them
+ */
 const loggedInOnly: FieldAccess = ({ req }) => Boolean(req.user)
 
 /** Shown only on products imported from the old website */
@@ -28,7 +31,16 @@ export const VigorProducts: CollectionConfig = {
     read: publishedAndShown,
   },
   admin: {
-    defaultColumns: ['name', 'sku', 'category', 'badge', 'legacyHint', 'hidden', '_status'],
+    defaultColumns: [
+      'name',
+      'sku',
+      'category',
+      'price',
+      'badge',
+      'legacyHint',
+      'hidden',
+      '_status',
+    ],
     group: 'Vigor website',
     listSearchableFields: ['name', 'sku', 'slug'],
     useAsTitle: 'name',
@@ -121,6 +133,20 @@ export const VigorProducts: CollectionConfig = {
           required: true,
         },
       ],
+    },
+    {
+      // Never on the website: the VgemsAI app shows it to signed-in users only
+      // (src/endpoints/appProducts.ts)
+      name: 'price',
+      type: 'number',
+      access: { read: loggedInOnly },
+      admin: {
+        description:
+          'Optional, in US dollars per unit (above). Only people signed in to the VgemsAI app see it; the website and its visitors never get it. Empty: "price on request". Publish the change to apply it.',
+        step: 0.01,
+      },
+      label: 'Price (USD)',
+      min: 0,
     },
     {
       name: 'summary',
