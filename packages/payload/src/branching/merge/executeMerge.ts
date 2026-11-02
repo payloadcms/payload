@@ -243,6 +243,7 @@ export const executeMerge = async ({
   reqContext[branchMergeWriteGuardContextKey] = (async ({
     collectionSlug,
     data,
+    docID,
     globalSlug,
     req: writeReq,
   }) => {
@@ -251,6 +252,7 @@ export const executeMerge = async ({
         availableChangeIDs: appliedChangeIDs,
         collectionSlug,
         data,
+        docID,
         globalSlug,
         payload,
         req: writeReq,
