@@ -152,10 +152,10 @@ describe('generateFileData', () => {
       height: 5,
       mimeType: 'image/png',
       original: {
-        filename: 'photo-original.png',
+        filename: 'photo.png',
         height: 10,
         mimeType: 'image/png',
-        url: '/api/media/file/photo-original.png',
+        url: '/api/media/file/photo.png?original=true',
         width: 10,
       },
       url: '/api/media/file/photo.png',
