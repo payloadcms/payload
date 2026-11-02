@@ -117,6 +117,8 @@ export type BuildTableStateArgs = {
    */
   docs?: PaginatedDocs['docs']
   enableRowSelections?: boolean
+  /** Load one nested-document branch without rebuilding the collection view. */
+  nestedDocs?: { parentID: null | number | string }
   orderableFieldName: string
   parent?: {
     collectionSlug: CollectionSlug
