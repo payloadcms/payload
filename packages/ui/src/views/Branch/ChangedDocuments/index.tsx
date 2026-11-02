@@ -301,10 +301,10 @@ const ChangedDocumentRow: React.FC<{
               className={`${baseClass}__title ${baseClass}__title--link`}
               href={formatAdminURL({
                 adminRoute: config.routes.admin,
-                path: `${
+                path: `/${
                   change.globalSlug
-                    ? `/globals/${change.globalSlug}`
-                    : `/collections/${change.collectionSlug}/${encodeURIComponent(String(change.docID))}`
+                    ? `globals/${change.globalSlug}`
+                    : `collections/${change.collectionSlug}/${encodeURIComponent(String(change.docID))}`
                 }${qs.stringify({ branch }, { addQueryPrefix: true })}`,
               })}
             >
