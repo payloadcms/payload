@@ -74,6 +74,7 @@ describe('planUploadRebuild', () => {
     },
   ])('should $name', async ({ args, expected, next = null, transformers = [] }) => {
     const result = await planUploadRebuild({
+      canApplyAtRequest: false,
       collectionSlug: 'media',
       hasCropOrResizeEdit: false,
       isDuplicating: false,

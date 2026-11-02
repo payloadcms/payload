@@ -64,7 +64,8 @@ export const collectStoredFiles = ({
       return
     }
     const representation = value as Record<string, unknown>
-    if (typeof representation.filename !== 'string') {
+    // A `_stored: false` entry is built when it is requested, so it has no object to copy or delete.
+    if (typeof representation.filename !== 'string' || representation._stored === false) {
       return
     }
     const filename = representation.filename

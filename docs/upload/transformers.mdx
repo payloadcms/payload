@@ -284,7 +284,19 @@ GET /api/<collection>/file/<filename>?width=500
 
 Inside each phase, transformers run in the order of `upload.transformers`. A `complete` result in phase 1 also ends phase 2.
 
-Phase 1 runs only for a document that has no stored default file. Payload marks such a document internally. For all other documents, such as a collection where Sharp stores the cropped file at upload time, Payload serves the stored file and runs only phase 2, as before.
+Phase 1 runs only for a document that has no stored default file. For all other documents, such as a collection where Sharp stores the cropped file at upload time, Payload serves the stored file and runs only phase 2, as before.
+
+#### Documents with no stored default file
+
+When Payload saves a file and no upload stage claims a saved key, it plans phase 1 with `purpose: 'persisted-default'` to check whether request-time stages claim every saved key. If they do, Payload stores only the original, and no upload stage runs, not even a stage that only changes `_transforms`. The document then has no stored default file, and each request builds it in phase 1. This lets a transformer for a CDN apply a saved crop when the file is served. When an upload stage and a request-time stage both claim a key, the upload stage applies it and Payload stores the file.
+
+For such a document:
+
+- The main entry has the original's `filename`, and `_stored: false`. The plain URL runs phase 1. `?original=true` serves the original, and the original's `url` includes it.
+- `width` and `height` are the saved crop's size, or the original's size when there is no crop. `mimeType` is the original's. `filesize` is `null`, because the file exists only when it is requested. These values describe the plain URL. A request with its own parameters, such as `?width=500`, is not recorded.
+- The main `url` is always the Payload file route, also with `disablePayloadAccessControl`, because there is no stored object to serve directly.
+- A plain request is an ordinary read for access control. Only the request's own parameters set `req.fileTransform`.
+- A duplicate keeps the saved keys and copies the original. When the saved keys no longer need a request-time stage, for example after the crop is removed, Payload stores the default file again.
 
 In phase 1, the [rules for saved keys](#applying-saved-_transforms-keys) apply to the stages that return `handledTransformKeys`. If a built-in key has no stage, or a key has two, the request fails with a `500`, and Payload logs an error that names the key. This happens before Payload reads a file or runs a stage.
 

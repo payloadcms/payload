@@ -65,13 +65,13 @@ export async function handleDynamicFileRequest({
     filename,
     isOriginal: isOriginalParam,
   })
-  // Without transform params, a stored file is served as it is, with no transformer.
+  // Without transform params, a stored file is served as it is, with no transformer. A default
+  // file built at request time shares the original's name, but is not the original.
   const hasNoTransformParams = req.searchParams?.size === 0
+  const isStoredOriginalName =
+    resolvedDocument.original?.filename === filename && resolvedDocument._stored !== false
 
-  if (
-    isOriginalRequest ||
-    (resolvedDocument.original?.filename === filename && hasNoTransformParams)
-  ) {
+  if (isOriginalRequest || (isStoredOriginalName && hasNoTransformParams)) {
     const permittedDocument = await withFileTransformAccessContext({
       callback: () => checkFileAccess({ collection, filename, prefix, req }),
       isTransform: false,
@@ -97,9 +97,15 @@ export async function handleDynamicFileRequest({
   })
 
   const requestedFile = getRequestedFile({ document, filename })
+  // A default file built at request time has no object, so its stages start from the original.
+  const isBuiltAtRequest =
+    document._stored === false && requestedFile.filename === document.filename
+  const storedFile = isBuiltAtRequest
+    ? { filename: document.original?.filename ?? filename, isOriginal: true }
+    : { filename, isOriginal: false }
 
   const source = createLazySourceGetter({
-    retrieve: () => getSourceFileResponse({ collection, document, filename, prefix, req }),
+    retrieve: () => getSourceFileResponse({ ...storedFile, collection, document, prefix, req }),
   })
 
   let currentResponse: Response | undefined
@@ -204,9 +210,9 @@ export async function handleDynamicFileRequest({
     return finalizeFileResponse({ collection, req, response: currentResponse })
   }
 
-  // No transformer produced a response — serve the requested stored file through the
-  // normal path (Range/ETag/redirect support, existing `modifyResponseHeaders` order).
-  return retrieveFileResponse({ collection, doc: document, filename, prefix, req })
+  // No transformer produced a response — serve the stored file through the normal path
+  // (Range/ETag/redirect support, existing `modifyResponseHeaders` order).
+  return retrieveFileResponse({ ...storedFile, collection, doc: document, prefix, req })
 }
 
 /**
@@ -256,7 +262,11 @@ async function cancelUnusedBody(response: Response | undefined): Promise<void> {
 }
 
 /** One planned `handleRequest` call. A transformer planned in both phases is two stages. */
-type RequestStage = { options: unknown; transformer: UploadTransformer }
+type RequestStage = {
+  options: unknown
+  purpose: 'persisted-default' | 'request-override'
+  transformer: UploadTransformer
+}
 
 /**
  * Plans the saved-state phase, when no default file is stored, then the request phase. Fails
@@ -314,6 +324,7 @@ async function planRequestPipeline({
     pipeline.push(
       ...plan.pipeline.map((transformer) => ({
         options: plan.options.get(transformer),
+        purpose,
         transformer,
       })),
     )
@@ -421,7 +432,9 @@ async function authorizeDocument({
     filename,
     req,
   })
-  const isTransform = pipeline.length > 0
+  // Only the request's own parameters make it a transform. Applying the saved state is an ordinary
+  // read of the saved file.
+  const isTransform = pipeline.some(({ purpose }) => purpose === 'request-override')
 
   if (isTransform !== isTransformAccess) {
     const requiredAccess = await checkAccess({ isTransform })
