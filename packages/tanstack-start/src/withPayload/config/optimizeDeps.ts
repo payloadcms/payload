@@ -103,7 +103,6 @@ export const optimizeDepsIncludeDefaults: string[] = [
   '@payloadcms/ui > dequal',
   '@payloadcms/ui > object-to-formdata',
   '@payloadcms/ui > md5',
-  'payload > deepmerge',
   'payload > pluralize',
   // `scheduler` is a transitive dep of `react-dom`, not a direct dependency of
   // the app, so a bare `'scheduler'` specifier fails to resolve from an isolated
