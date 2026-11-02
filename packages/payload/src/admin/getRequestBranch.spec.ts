@@ -14,6 +14,11 @@ function createRequest({ url }: { url?: string } = {}) {
       find: vi.fn().mockResolvedValue({ docs: [] }),
     },
     query: {},
+    server: {
+      redirect: vi.fn(() => {
+        throw new Error('redirect')
+      }),
+    },
     url,
     user: { id: 'editor', collection: 'users' },
   } as unknown as PayloadRequest
@@ -82,6 +87,16 @@ describe('getRequestBranch', () => {
 
     expect(req.payload.find).not.toHaveBeenCalled()
     await expect(assertBranchReadable({ req })).rejects.toBeInstanceOf(Forbidden)
+  })
+
+  it('should preserve the requested branch when no server adapter can redirect', async () => {
+    const req = createRequest({ url: 'http://localhost/admin?branch=campaign' })
+
+    req.query.branch = 'campaign'
+    req.server = undefined
+
+    expect(await getRequestBranch({ req })).toBe('campaign')
+    expect(req.payload.find).not.toHaveBeenCalled()
   })
 
   it('should ignore the query branch when branching is disabled', async () => {
