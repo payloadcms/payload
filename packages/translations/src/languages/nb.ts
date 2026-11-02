@@ -720,6 +720,10 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Du er i ferd med å publisere alle {{label}} i utvalget. Er du sikker?',
     aboutToRestore:
       'Du er i ferd med å gjenopprette {{label}} dokumentet til tilstanden det var i på {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Gjenopprett innholdet fra {{versionDate}} som et utkast. Publisert innhold forblir uendret til du publiserer fra redigeringsverktøyet.',
+    aboutToRestoreAsDraftAllLocales:
+      'Gjenopprett innholdet fra {{versionDate}} som et utkast for alle språk. Publisert innhold forblir uendret til du publiserer fra redigeringsverktøyet.',
     aboutToRestoreGlobal:
       'Du er i ferd med å gjenopprette det globale innholdet {{label}} til tilstanden det var i på {{versionDate}}.',
     aboutToRevertToPublished:

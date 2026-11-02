@@ -710,6 +710,10 @@ export const koTranslations: DefaultTranslationsObject = {
     type: '유형',
     aboutToPublishSelection: '선택한 {{label}}을(를) 게시하려고 합니다. 계속하시겠습니까?',
     aboutToRestore: '이 {{label}} 문서를 {{versionDate}}기준 버전으로 복원하려고 합니다.',
+    aboutToRestoreAsDraft:
+      '{{versionDate}}의 콘텐츠를 초안으로 복원합니다. 편집기에서 게시할 때까지 게시된 콘텐츠는 변경되지 않습니다.',
+    aboutToRestoreAsDraftAllLocales:
+      '{{versionDate}}의 콘텐츠를 모든 로케일에서 초안으로 복원합니다. 편집기에서 게시할 때까지 게시된 콘텐츠는 변경되지 않습니다.',
     aboutToRestoreGlobal: '글로벌 {{label}}을(를) {{versionDate}}기준 버전으로 복원하려고 합니다.',
     aboutToRevertToPublished:
       '이 문서의 변경 사항을 게시된 상태로 되돌리려고 합니다. 계속하시겠습니까?',

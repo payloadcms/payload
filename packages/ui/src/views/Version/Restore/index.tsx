@@ -3,14 +3,14 @@
 import type { ClientCollectionConfig, ClientGlobalConfig, SanitizedCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
-import React, { Fragment, useCallback, useState } from 'react'
+import { formatAdminURL, hasDraftsEnabled, hasLocalizeStatusEnabled } from 'payload/shared'
+import * as qs from 'qs-esm'
+import React, { Fragment, useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '../../../elements/Button/index.js'
 import { ConfirmationModal } from '../../../elements/ConfirmationModal/index.js'
 import { useModal } from '../../../elements/Modal/index.js'
-import * as PopupList from '../../../elements/Popup/PopupButtonList/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
@@ -27,7 +27,6 @@ type Props = {
   globalConfig?: ClientGlobalConfig
   label: SanitizedCollectionConfig['labels']['singular']
   originalDocID: number | string
-  status?: string
   versionDateFormatted: string
   versionID: string
 }
@@ -38,7 +37,6 @@ export const Restore: React.FC<Props> = ({
   globalConfig,
   label,
   originalDocID,
-  status,
   versionDateFormatted,
   versionID,
 }) => {
@@ -51,44 +49,52 @@ export const Restore: React.FC<Props> = ({
   const { toggleModal } = useModal()
   const router = useRouter()
   const { i18n, t } = useTranslation()
-  const [draft, setDraft] = useState(false)
   const { startRouteTransition } = useRouteTransition()
+  const entityConfig = collectionConfig || globalConfig
+  const shouldRestoreAsDraft = Boolean(entityConfig && hasDraftsEnabled(entityConfig))
+  const restoreLabel = t(
+    shouldRestoreAsDraft ? 'version:restoreAsDraft' : 'version:restoreThisVersion',
+  )
 
   const restoreMessage = t(
-    globalConfig ? 'version:aboutToRestoreGlobal' : 'version:aboutToRestore',
+    shouldRestoreAsDraft
+      ? entityConfig && hasLocalizeStatusEnabled(entityConfig)
+        ? 'version:aboutToRestoreAsDraftAllLocales'
+        : 'version:aboutToRestoreAsDraft'
+      : globalConfig
+        ? 'version:aboutToRestoreGlobal'
+        : 'version:aboutToRestore',
     {
       label: getTranslation(label, i18n),
       versionDate: versionDateFormatted,
     },
   )
 
-  const restoresAsDraftOnly = status === 'draft' && Boolean(collectionConfig?.versions?.drafts)
-  const canRestoreAsDraft = status !== 'draft' && Boolean(collectionConfig?.versions?.drafts)
-
   const handleRestore = useCallback(async () => {
     let fetchURL: string
     let redirectURL: string
+    const queryString = qs.stringify({ draft: shouldRestoreAsDraft }, { addQueryPrefix: true })
 
     if (collectionConfig) {
       fetchURL = formatAdminURL({
         apiRoute,
-        path: `/${collectionConfig.slug}/versions/${versionID}?draft=${draft}`,
+        path: `/${collectionConfig.slug}/versions/${versionID}${queryString}`,
       })
       redirectURL = formatAdminURL({
         adminRoute,
         path: `/collections/${collectionConfig.slug}/${originalDocID}`,
       })
-    }
-
-    if (globalConfig) {
+    } else if (globalConfig) {
       fetchURL = formatAdminURL({
         apiRoute,
-        path: `/globals/${globalConfig.slug}/versions/${versionID}?draft=${draft}`,
+        path: `/globals/${globalConfig.slug}/versions/${versionID}${queryString}`,
       })
       redirectURL = formatAdminURL({
         adminRoute,
         path: `/globals/${globalConfig.slug}`,
       })
+    } else {
+      return
     }
 
     const res = await requests.post(fetchURL, {
@@ -110,7 +116,7 @@ export const Restore: React.FC<Props> = ({
     globalConfig,
     i18n.language,
     versionID,
-    draft,
+    shouldRestoreAsDraft,
     adminRoute,
     originalDocID,
     startRouteTransition,
@@ -121,42 +127,15 @@ export const Restore: React.FC<Props> = ({
   return (
     <Fragment>
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
-        <Button
-          buttonStyle="primary"
-          className={[canRestoreAsDraft && `${baseClass}__restore-as-draft-button`]
-            .filter(Boolean)
-            .join(' ')}
-          onClick={() => {
-            setDraft(restoresAsDraftOnly)
-            toggleModal(modalSlug)
-          }}
-          size="medium"
-          SubMenuPopupContent={
-            canRestoreAsDraft
-              ? () => (
-                  <PopupList.ButtonGroup>
-                    <PopupList.Button
-                      onClick={() => {
-                        setDraft(true)
-                        toggleModal(modalSlug)
-                      }}
-                    >
-                      {t('version:restoreAsDraft')}
-                    </PopupList.Button>
-                  </PopupList.ButtonGroup>
-                )
-              : null
-          }
-        >
-          {restoresAsDraftOnly ? t('version:restoreAsDraft') : t('version:restoreThisVersion')}
+        <Button buttonStyle="primary" onClick={() => toggleModal(modalSlug)} size="medium">
+          {restoreLabel}
         </Button>
       </div>
       <ConfirmationModal
         body={restoreMessage}
         confirmingLabel={t('version:restoring')}
-        heading={t('version:confirmVersionRestoration')}
+        heading={shouldRestoreAsDraft ? restoreLabel : t('version:confirmVersionRestoration')}
         modalSlug={modalSlug}
-        onCancel={() => setDraft(restoresAsDraftOnly)}
         onConfirm={handleRestore}
       />
     </Fragment>

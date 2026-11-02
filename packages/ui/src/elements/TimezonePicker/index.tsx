@@ -2,13 +2,7 @@
 
 import type { OptionObject } from 'payload'
 import type React from 'react'
-import type { JSX } from 'react'
-import type {
-  ClearIndicatorProps,
-  DropdownIndicatorProps,
-  OptionProps,
-  StylesConfig,
-} from 'react-select'
+import type { ClearIndicatorProps, DropdownIndicatorProps, OptionProps } from 'react-select'
 
 import { useMemo } from 'react'
 import { components as rsComponents } from 'react-select'
@@ -24,59 +18,48 @@ import { ReactSelect } from '../ReactSelect/index.js'
 import { formatOptions } from '../WhereBuilder/Condition/Select/formatOptions.js'
 import './index.css'
 
-const SmallDropdownIndicator: React.FC<
-  {
-    innerProps: JSX.IntrinsicElements['button']
-  } & DropdownIndicatorProps<OptionType, true>
-> = (props) => {
-  const {
-    innerProps: { ref, ...restInnerProps },
-    isDisabled,
-  } = props
+const SmallDropdownIndicator: React.FC<DropdownIndicatorProps<OptionType, true>> = (props) => {
+  const { innerProps, isDisabled } = props
 
   if (isDisabled) {
     return null
   }
 
   return (
-    <button
-      className="timezone-picker__dropdown-indicator"
-      ref={ref}
-      {...restInnerProps}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          e.key = ' '
-        }
-      }}
-      type="button"
-    >
+    <div className="timezone-picker__dropdown-indicator" {...innerProps}>
       <ChevronIcon size={16} />
-    </button>
+    </div>
   )
 }
 
 const SmallClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (props) => {
-  const {
-    clearValue,
-    innerProps: { ref, ...restInnerProps },
-  } = props
+  const { clearValue } = props
+  const { t } = useTranslation()
 
   return (
-    <div
+    <button
+      aria-label={`${t('general:clear')} ${t('general:timezone')}`}
       className="timezone-picker__clear-indicator"
-      ref={typeof ref === 'string' ? null : ref}
-      {...restInnerProps}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          clearValue()
-          e.stopPropagation()
+      onClick={(event) => {
+        event.stopPropagation()
+        const input = event.currentTarget
+          .closest('.timezone-picker')
+          ?.querySelector<HTMLInputElement>('[role="combobox"]')
+
+        clearValue()
+        input?.focus()
+      }}
+      onKeyDown={(event) => {
+        if (event.key === ' ' || event.key === 'Enter') {
+          event.stopPropagation()
         }
       }}
-      role="button"
-      tabIndex={0}
+      onMouseDown={(event) => event.stopPropagation()}
+      onTouchEnd={(event) => event.stopPropagation()}
+      type="button"
     >
       <CircledXIcon size={24} />
-    </div>
+    </button>
   )
 }
 
@@ -116,10 +99,10 @@ export const TimezonePicker: React.FC<Props> = (props) => {
 
   return (
     <div className="timezone-picker-wrapper">
-      <span className="timezone-picker__label">
+      <label className="timezone-picker__label" htmlFor={id}>
         {t('general:timezone')}
         {required && <span className="timezone-picker__required">*</span>}
-      </span>
+      </label>
       <ReactSelect
         className="timezone-picker"
         classNames={{

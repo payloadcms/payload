@@ -716,6 +716,10 @@ export const viTranslations: DefaultTranslationsObject = {
     type: 'Loại',
     aboutToPublishSelection: 'Bạn có muốn xuất bản tất cả {{label}} không?',
     aboutToRestore: 'Bạn chuẩn bị khôi phục lại {{label}} về phiên bản {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Khôi phục nội dung từ {{versionDate}} dưới dạng bản nháp. Nội dung đã xuất bản sẽ không thay đổi cho đến khi bạn xuất bản từ trình chỉnh sửa.',
+    aboutToRestoreAsDraftAllLocales:
+      'Khôi phục nội dung từ {{versionDate}} dưới dạng bản nháp cho tất cả ngôn ngữ. Nội dung đã xuất bản sẽ không thay đổi cho đến khi bạn xuất bản từ trình chỉnh sửa.',
     aboutToRestoreGlobal:
       'Bạn chuẩn bị khôi phục cấu hình chung của {{label}} về phiên bản {{versionDate}}.',
     aboutToRevertToPublished: 'Bạn có muốn tái xuất bản bản nháp này không?',

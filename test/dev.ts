@@ -18,6 +18,8 @@ import { createTestHooks } from './testHooks.js'
 // --prod-server boots a real production server (next build + dev: false) against the
 // packed dist packages. Without it, the dev server runs against source.
 const prodServer = process.argv.includes('--prod-server')
+// --no-turbo switches the Next dev server to webpack. The prod server's `next build` always uses Turbopack.
+const enableTurbo = prodServer || !process.argv.includes('--no-turbo')
 
 if (prodServer) {
   process.argv = process.argv.filter((arg) => arg !== '--prod-server')
@@ -54,18 +56,6 @@ if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
   process.exit(0)
 }
 
-// Enable turbopack by default, unless --no-turbo is passed
-let enableTurbo = args.turbo !== false
-
-if (['admin-root'].includes(testSuiteArg)) {
-  console.log(
-    chalk.yellow(
-      `The "${testSuiteArg}" test directory is not compatible with turbopack, using webpack instead.`,
-    ),
-  )
-  enableTurbo = false
-}
-
 // Framework is selected with a --framework-<name> flag (e.g. --framework-tanstack-start),
 // falling back to the PAYLOAD_FRAMEWORK env var, then 'next'. The flag suffix is the
 // framework name. Resolved value is written back to the env var so downstream helpers
@@ -78,12 +68,8 @@ const framework = frameworkFromFlag || process.env.PAYLOAD_FRAMEWORK || 'next'
 process.env.PAYLOAD_FRAMEWORK = framework
 
 console.log(
-  `Selected test suite: ${testSuiteArg} [${framework}]${framework === 'next' && enableTurbo ? ' [Turbopack]' : framework === 'next' ? ' [Webpack]' : ''}`,
+  `Selected test suite: ${testSuiteArg} [${framework}]${framework === 'next' ? (enableTurbo ? ' [Turbopack]' : ' [Webpack]') : ''}`,
 )
-
-if (enableTurbo && framework === 'next' && !prodServer) {
-  process.env.TURBOPACK = '1'
-}
 
 await assertDbReachable(getCurrentDatabaseAdapter())
 

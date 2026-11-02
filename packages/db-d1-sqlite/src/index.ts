@@ -19,6 +19,7 @@ import {
   deleteVersions,
   destroy,
   find,
+  findDistinct,
   findGlobal,
   findGlobalVersions,
   findOne,
@@ -44,12 +45,12 @@ import {
   convertPathToJSONTraversal,
   countDistinct,
   createJSONQuery,
+  createRequireDrizzleKit,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
   init,
   insert,
-  requireDrizzleKit,
 } from '@payloadcms/drizzle/sqlite'
 import { like, notLike } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
@@ -61,6 +62,10 @@ import { connect } from './connect.js'
 import { execute } from './execute.js'
 
 const filename = fileURLToPath(import.meta.url)
+
+const requireDrizzleKit = createRequireDrizzleKit({
+  from: import.meta.url,
+})
 
 export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter> {
   const sqliteIDType = args.idType || 'number'
@@ -177,6 +182,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       destroy,
       dropDatabase,
       find,
+      findDistinct,
       findGlobal,
       findGlobalVersions,
       findOne,

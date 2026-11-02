@@ -1016,6 +1016,17 @@ describe('Field Validations', () => {
       const result = number(val, { ...numberOptions, hasMany: true, max: 1 })
       expect(result).toBe('validation:greaterThanMax')
     })
+    it('should interpolate the offending number instead of the whole array', () => {
+      const val = [1.25, 2.5]
+
+      number(val, { ...numberOptions, hasMany: true, max: 2 })
+
+      expect(t).toHaveBeenLastCalledWith('validation:greaterThanMax', {
+        label: 'general:value',
+        max: 2,
+        value: 2.5,
+      })
+    })
     it('should validate an array of numbers using minRows', async () => {
       const val = [1.25, 2.5]
       const result = number(val, { ...numberOptions, hasMany: true, minRows: 4 })

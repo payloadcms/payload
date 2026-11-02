@@ -702,6 +702,10 @@ export const arTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'أنت على وشك نشر كلّ {{label}} في التّحديد. هل أنت متأكّد؟',
     aboutToRestore:
       'أنت على وشك استرجاع هذا المستند {{label}} إلى الحالة التّي كان عليها في {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'استعد المحتوى من {{versionDate}} كمسودة. سيبقى المحتوى المنشور دون تغيير حتى تنشر من المحرر.',
+    aboutToRestoreAsDraftAllLocales:
+      'استعد المحتوى من {{versionDate}} كمسودة بجميع اللغات. سيبقى المحتوى المنشور دون تغيير حتى تنشر من المحرر.',
     aboutToRestoreGlobal:
       'أنت على وشك استرجاع الاعداد العامّ {{label}} إلى الحالة التي كان عليها في {{versionDate}}.',
     aboutToRevertToPublished: 'أنت على وشك إعادة هذا المستند إلى حالته المنشورة. هل أنت متأكّد؟',

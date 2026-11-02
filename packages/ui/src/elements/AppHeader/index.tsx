@@ -25,7 +25,7 @@ export function AppHeader() {
   const localeLabel = locale && getTranslation(locale.label, i18n)
   const { Actions } = useActions()
 
-  const { navOpen, setNavOpen } = useNav()
+  const { navOpen, navToggleRef, setNavOpen } = useNav()
   const { isEmbedded } = useEmbed()
 
   const {
@@ -79,6 +79,7 @@ export function AppHeader() {
                 className={`${baseClass}__sidebar-toggle`}
                 icon={<SidebarIcon />}
                 onClick={() => setNavOpen(!navOpen, true)}
+                ref={navToggleRef}
                 type="button"
               />
               <div className={`${baseClass}__step-nav-wrapper`}>

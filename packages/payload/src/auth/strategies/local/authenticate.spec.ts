@@ -1,7 +1,8 @@
 import crypto from 'crypto'
 
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { InvalidConfiguration } from '../../../errors/InvalidConfiguration.js'
 import { authenticateLocalStrategy } from './authenticate.js'
 
 const generateExistingHashAndSalt = (password: string): { hash: string; salt: string } => {
@@ -18,12 +19,20 @@ const generateCurrentHashAndSalt = (password: string): { hash: string; salt: str
 }
 
 describe('authenticateLocalStrategy', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('should return doc for an existing password hash', async () => {
     const password = 'test-password'
     const { hash, salt } = generateExistingHashAndSalt(password)
     const doc = { id: 1, hash, salt }
 
-    const result = await authenticateLocalStrategy({ doc, password })
+    const result = await authenticateLocalStrategy({
+      doc,
+      password,
+      passwordHashIterations: 600000,
+    })
 
     expect(result).toEqual({ doc, shouldUpdatePasswordHash: true })
   })
@@ -33,16 +42,98 @@ describe('authenticateLocalStrategy', () => {
     const { hash, salt } = generateCurrentHashAndSalt(password)
     const doc = { id: 1, hash, salt }
 
-    const result = await authenticateLocalStrategy({ doc, password })
+    const result = await authenticateLocalStrategy({
+      doc,
+      password,
+      passwordHashIterations: 600000,
+    })
 
     expect(result).toEqual({ doc, shouldUpdatePasswordHash: false })
+  })
+
+  it('should flag a 600k password hash for rehash when configured for 100000 iterations', async () => {
+    const password = 'test-password'
+    const { hash, salt } = generateCurrentHashAndSalt(password)
+    const doc = { id: 1, hash, salt }
+
+    const result = await authenticateLocalStrategy({
+      doc,
+      password,
+      passwordHashIterations: 100000,
+    })
+
+    expect(result).toEqual({ doc, shouldUpdatePasswordHash: true })
+  })
+
+  it('should flag a legacy password hash for rehash when configured for 100000 iterations', async () => {
+    const password = 'test-password'
+    const { hash, salt } = generateExistingHashAndSalt(password)
+    const doc = { id: 1, hash, salt }
+
+    const result = await authenticateLocalStrategy({
+      doc,
+      password,
+      passwordHashIterations: 100000,
+    })
+
+    expect(result).toEqual({ doc, shouldUpdatePasswordHash: true })
+  })
+
+  it('should return null when hashing fails', async () => {
+    // Calls back on a later tick like the real crypto.pbkdf2, so an error thrown
+    // inside the callback is not caught by authenticateLocalStrategy
+    vi.spyOn(crypto, 'pbkdf2').mockImplementation(((...args: unknown[]) => {
+      const callback = args.at(-1) as (err: Error, derivedKey?: Buffer) => void
+
+      process.nextTick(() => callback(new Error('Unsupported iteration count')))
+    }) as typeof crypto.pbkdf2)
+    const { hash, salt } = generateCurrentHashAndSalt('test-password')
+    const doc = { id: 1, hash, salt }
+
+    const result = await authenticateLocalStrategy({
+      doc,
+      password: 'test-password',
+      passwordHashIterations: 600000,
+    })
+
+    expect(result).toBeNull()
+  })
+
+  it('should throw an InvalidConfiguration error when the environment does not support the stored hash iterations', async () => {
+    // Matches the error Cloudflare Workers throws for more than 100,000 iterations
+    vi.spyOn(crypto, 'pbkdf2').mockImplementation(((...args: unknown[]) => {
+      const callback = args.at(-1) as (err: Error) => void
+
+      process.nextTick(() =>
+        callback(
+          new DOMException(
+            'Pbkdf2 failed: iteration counts above 100000 are not supported (requested 600000).',
+            'NotSupportedError',
+          ),
+        ),
+      )
+    }) as typeof crypto.pbkdf2)
+    const { hash, salt } = generateCurrentHashAndSalt('test-password')
+    const doc = { id: 1, hash, salt }
+
+    await expect(
+      authenticateLocalStrategy({
+        doc,
+        password: 'test-password',
+        passwordHashIterations: 100000,
+      }),
+    ).rejects.toThrow(InvalidConfiguration)
   })
 
   it('should return null when password is invalid', async () => {
     const { hash, salt } = generateExistingHashAndSalt('correct-password')
     const doc = { id: 1, hash, salt }
 
-    const result = await authenticateLocalStrategy({ doc, password: 'wrong-password' })
+    const result = await authenticateLocalStrategy({
+      doc,
+      password: 'wrong-password',
+      passwordHashIterations: 600000,
+    })
 
     expect(result).toBeNull()
   })
@@ -51,7 +142,11 @@ describe('authenticateLocalStrategy', () => {
     const { hash } = generateExistingHashAndSalt('test-password')
     const doc = { id: 1, hash }
 
-    const result = await authenticateLocalStrategy({ doc, password: 'test-password' })
+    const result = await authenticateLocalStrategy({
+      doc,
+      password: 'test-password',
+      passwordHashIterations: 600000,
+    })
 
     expect(result).toBeNull()
   })
@@ -60,7 +155,11 @@ describe('authenticateLocalStrategy', () => {
     const { salt } = generateExistingHashAndSalt('test-password')
     const doc = { id: 1, salt }
 
-    const result = await authenticateLocalStrategy({ doc, password: 'test-password' })
+    const result = await authenticateLocalStrategy({
+      doc,
+      password: 'test-password',
+      passwordHashIterations: 600000,
+    })
 
     expect(result).toBeNull()
   })
@@ -72,7 +171,11 @@ describe('authenticateLocalStrategy', () => {
     const shortHash = 'abcd1234'
     const doc = { id: 1, hash: shortHash, salt }
 
-    const result = await authenticateLocalStrategy({ doc, password })
+    const result = await authenticateLocalStrategy({
+      doc,
+      password,
+      passwordHashIterations: 600000,
+    })
 
     expect(result).toBeNull()
   })

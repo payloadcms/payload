@@ -1,6 +1,9 @@
 'use client'
-import { type ListQuery, type Where } from 'payload'
+import type { ListQuery, Where } from 'payload'
+
+import { dequal } from 'dequal/lite'
 import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { IListQueryContext, ListQueryProps } from './types.js'
@@ -140,7 +143,17 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
    * triggering a re-render.
    */
   const syncPropsToURL = useEffectEvent(() => {
-    const newQuery = sanitizeQuery({ ...(query || {}), ...(queryFromProps || {}) })
+    // URL serialization omits empty draft conditions and compacts their array indexes.
+    // Preserve those rows on an equivalent server echo so the focused input stays mounted.
+    const shouldKeepDraftFilters = dequal(
+      qs.parse(qs.stringify({ where: query?.where }), { depth: 10 }),
+      qs.parse(qs.stringify({ where: queryFromProps?.where }), { depth: 10 }),
+    )
+    const newQuery = sanitizeQuery({
+      ...(query || {}),
+      ...(queryFromProps || {}),
+      ...(shouldKeepDraftFilters ? { where: query?.where } : {}),
+    })
 
     const search = getSearchWithListQuery({
       currentSearch: window.location.search,

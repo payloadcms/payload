@@ -715,6 +715,10 @@ export const jaTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: '選択中のすべての{{label}}を公開しようとしています。よろしいですか？',
     aboutToRestore:
       'この {{label}} データを {{versionDate}} 時点のバージョンに復元しようとしています。',
+    aboutToRestoreAsDraft:
+      '{{versionDate}} のコンテンツを下書きとして復元します。エディターから公開するまで、公開済みのコンテンツは変更されません。',
+    aboutToRestoreAsDraftAllLocales:
+      '{{versionDate}} のコンテンツをすべてのロケールで下書きとして復元します。エディターから公開するまで、公開済みのコンテンツは変更されません。',
     aboutToRestoreGlobal:
       'グローバルな {{label}} データを {{versionDate}} 時点のバージョンに復元しようとしています。',
     aboutToRevertToPublished:

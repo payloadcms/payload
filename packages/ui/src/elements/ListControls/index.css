@@ -60,6 +60,7 @@
 
     .list-controls__actions {
       width: 100%;
+      flex-wrap: wrap;
 
       .pill {
         padding: var(--spacer-1) var(--spacer-1) var(--spacer-1) var(--spacer-2);

@@ -203,13 +203,15 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       selectedOption={selectedOption}
       setSelectedOption={setMySelectedOption}
     >
-      {!isLoading && (
-        <>
-          <div className="drawer__fade-in">{ListView}</div>
-          <DocumentDrawer onSave={onCreateNew} />
-        </>
-      )}
-      <LoadingOverlay animationDuration="200ms" overlayType="drawer" show={isLoading} />
+      <React.Suspense fallback={<LoadingOverlay animationDuration="200ms" overlayType="drawer" />}>
+        {!isLoading && (
+          <>
+            <div className="drawer__fade-in">{ListView}</div>
+            <DocumentDrawer onSave={onCreateNew} />
+          </>
+        )}
+        <LoadingOverlay animationDuration="200ms" overlayType="drawer" show={isLoading} />
+      </React.Suspense>
     </ListDrawerContextProvider>
   )
 }
