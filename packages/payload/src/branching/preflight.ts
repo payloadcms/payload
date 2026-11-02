@@ -537,6 +537,7 @@ export const hasUnavailableBranchCreatedDependency = async ({
   availableChangeIDs,
   collectionSlug,
   data,
+  docID,
   globalSlug,
   payload,
   req,
@@ -544,6 +545,7 @@ export const hasUnavailableBranchCreatedDependency = async ({
   availableChangeIDs?: Set<string>
   collectionSlug?: string
   data: Record<string, unknown>
+  docID?: number | string
   globalSlug?: string
   payload: Payload
   req: PayloadRequest
@@ -576,6 +578,12 @@ export const hasUnavailableBranchCreatedDependency = async ({
   return branchCreates.some(
     (target) =>
       !availableChangeIDs?.has(String(target.changeID)) &&
+      // A document's own relationships become available with the document being written.
+      !(
+        docID !== undefined &&
+        target.collectionSlug === collectionSlug &&
+        String(target.docID) === String(docID)
+      ) &&
       hasBranchCreatedDocumentReference({
         data,
         dataShape: 'withLocales',

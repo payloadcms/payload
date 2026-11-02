@@ -7,6 +7,7 @@ import { MAIN_BRANCH } from './types.js'
 export type BranchMergeWrite = {
   collectionSlug?: string
   data: Record<string, unknown>
+  docID?: number | string
   globalSlug?: string
   req: PayloadRequest
 }
@@ -40,6 +41,7 @@ export const isBranchMergeValidationRequest = ({
 export const runBranchMergeWriteGuard = async ({
   collectionSlug,
   data,
+  docID,
   globalSlug,
   req,
 }: BranchMergeWrite): Promise<void> => {
@@ -51,5 +53,5 @@ export const runBranchMergeWriteGuard = async ({
     branchMergeWriteGuardContextKey
   ] as BranchMergeWriteGuard | undefined
 
-  await guard?.({ collectionSlug, data, globalSlug, req })
+  await guard?.({ collectionSlug, data, docID, globalSlug, req })
 }

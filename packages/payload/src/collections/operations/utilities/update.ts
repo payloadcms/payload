@@ -565,6 +565,7 @@ export const updateDocument = async <
     await runBranchMergeWriteGuard({
       collectionSlug: collectionConfig.slug,
       data: dataToUpdate,
+      docID: id,
       req,
     })
 
@@ -572,6 +573,7 @@ export const updateDocument = async <
       await runBranchMergeWriteGuard({
         collectionSlug: collectionConfig.slug,
         data: result,
+        docID: id,
         req,
       })
     }
