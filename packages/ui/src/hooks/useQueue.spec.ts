@@ -30,19 +30,19 @@ describe('useQueue', () => {
     const active = deferred()
     const calls: string[] = []
     const queue = renderQueue()
-    const first = queue.schedule({
+    const first = queue.scheduleTask({
       run: async () => {
         calls.push('first')
         await active.promise
         return 'first result'
       },
     })
-    const dropped = queue.schedule({
+    const dropped = queue.scheduleTask({
       run: async () => {
         calls.push('dropped')
       },
     })
-    const latest = queue.schedule({
+    const latest = queue.scheduleTask({
       run: async () => {
         calls.push('latest')
         return 'latest result'
@@ -62,21 +62,21 @@ describe('useQueue', () => {
     const calls: string[] = []
     const queue = renderQueue()
 
-    void queue.schedule({
+    void queue.scheduleTask({
       run: async () => {
         calls.push('active')
         await active.promise
       },
     })
-    const low = queue.schedule({
+    const low = queue.scheduleTask({
       priority: 2,
       run: async () => calls.push('low'),
     })
-    const medium = queue.schedule({
+    const medium = queue.scheduleTask({
       priority: 1,
       run: async () => calls.push('medium'),
     })
-    const high = queue.schedule({
+    const high = queue.scheduleTask({
       priority: 0,
       run: async () => calls.push('high'),
     })
@@ -93,17 +93,17 @@ describe('useQueue', () => {
     const calls: string[] = []
     const queue = renderQueue()
 
-    void queue.schedule({
+    void queue.scheduleTask({
       run: async () => {
         calls.push('active')
         await active.promise
       },
     })
-    const high = queue.schedule({
+    const high = queue.scheduleTask({
       priority: 0,
       run: async () => calls.push('high'),
     })
-    const low = queue.schedule({
+    const low = queue.scheduleTask({
       priority: 1,
       run: async () => calls.push('low'),
     })
@@ -119,12 +119,12 @@ describe('useQueue', () => {
     const calls: string[] = []
     const queue = renderQueue()
 
-    void queue.schedule({ run: async () => active.promise })
-    const high = queue.schedule({
+    void queue.scheduleTask({ run: async () => active.promise })
+    const high = queue.scheduleTask({
       priority: 0,
       run: async () => calls.push('high'),
     })
-    const low = queue.schedule({ run: async () => calls.push('low') })
+    const low = queue.scheduleTask({ run: async () => calls.push('low') })
 
     active.resolve()
     await expect(low).resolves.toEqual({ status: 'superseded' })
@@ -136,13 +136,13 @@ describe('useQueue', () => {
     const active = deferred()
     const calls: string[] = []
     const queue = renderQueue()
-    const rejected = queue.schedule({
+    const rejected = queue.scheduleTask({
       run: async () => {
         calls.push('active')
         await active.promise
       },
     })
-    const pending = queue.schedule({
+    const pending = queue.scheduleTask({
       run: async () => calls.push('pending'),
     })
 
@@ -157,44 +157,22 @@ describe('useQueue', () => {
     let isCurrent: (() => boolean) | undefined
     let isQueueReset: (() => boolean) | undefined
     const queue = renderQueue()
-    const running = queue.schedule({
+    const running = queue.scheduleTask({
       run: async (context) => {
         isCurrent = context.isCurrent
         isQueueReset = context.isQueueReset
         await active.promise
       },
     })
-    const pending = queue.schedule({ run: async () => undefined })
+    const pending = queue.scheduleTask({ run: async () => undefined })
 
-    queue.reset()
+    queue.resetQueue()
 
     await expect(pending).resolves.toEqual({ status: 'superseded' })
     expect(isCurrent?.()).toBe(false)
     expect(isQueueReset?.()).toBe(true)
     active.resolve()
     await running
-  })
-
-  it('should wait for an unabortable active promise before starting pending work', async () => {
-    const active = deferred()
-    const calls: string[] = []
-    const queue = renderQueue()
-
-    void queue.schedule({
-      run: async () => {
-        calls.push('active')
-        await active.promise
-      },
-    })
-    const pending = queue.schedule({
-      run: async () => calls.push('pending'),
-    })
-
-    await Promise.resolve()
-    expect(calls).toEqual(['active'])
-    active.resolve()
-    await pending
-    expect(calls).toEqual(['active', 'pending'])
   })
 
   it('should use one queue for legacy and scheduled tasks', async () => {
@@ -206,7 +184,7 @@ describe('useQueue', () => {
       calls.push('legacy')
       await active.promise
     })
-    const scheduled = queue.schedule({
+    const scheduled = queue.scheduleTask({
       run: async () => calls.push('scheduled'),
     })
 

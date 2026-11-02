@@ -24,25 +24,25 @@ export type QueueResult<T> = { status: 'completed'; value: T } | { status: 'supe
 
 type Queue = {
   /** Invalidates active task contexts and supersedes pending work. */
-  reset: () => void
+  resetQueue: () => void
   /** Adds work to the queue and reports whether it completed or was superseded. */
-  schedule: <T>(task: QueueTask<T>) => Promise<QueueResult<T>>
+  scheduleTask: <T>(task: QueueTask<T>) => Promise<QueueResult<T>>
 }
 
-type PendingEntry = {
+type QueueEntry = {
   priority: number
   reject: (reason: unknown) => void
   resolve: (result: QueueResult<unknown>) => void
   run: (context: QueueContext) => Promise<unknown>
 }
 
-const initializeQueue = (): Queue => {
+const createQueue = (): Queue => {
   let resetCount = 0
-  let isActive = false
-  let pending: PendingEntry | undefined
+  let isTaskRunning = false
+  let pendingTask: QueueEntry | undefined
 
-  const start = ({ entry }: { entry: PendingEntry }): void => {
-    isActive = true
+  const startTask = ({ entry }: { entry: QueueEntry }): void => {
+    isTaskRunning = true
 
     const resetCountAtStart = resetCount
 
@@ -61,27 +61,27 @@ const initializeQueue = (): Queue => {
         (error) => entry.reject(error),
       )
       .finally(() => {
-        isActive = false
+        isTaskRunning = false
 
-        const next = pending
-        pending = undefined
+        const next = pendingTask
+        pendingTask = undefined
 
         if (next) {
-          start({ entry: next })
+          startTask({ entry: next })
         }
       })
   }
 
-  const reset = (): void => {
+  const resetQueue = (): void => {
     resetCount += 1
 
-    if (pending) {
-      pending.resolve({ status: 'superseded' })
-      pending = undefined
+    if (pendingTask) {
+      pendingTask.resolve({ status: 'superseded' })
+      pendingTask = undefined
     }
   }
 
-  const schedule = <T>(task: QueueTask<T>): Promise<QueueResult<T>> => {
+  const scheduleTask = <T>(task: QueueTask<T>): Promise<QueueResult<T>> => {
     let resolve!: (result: QueueResult<T>) => void
     let reject!: (reason: unknown) => void
 
@@ -90,21 +90,21 @@ const initializeQueue = (): Queue => {
       reject = rejectPromise
     })
 
-    const entry: PendingEntry = {
+    const entry: QueueEntry = {
       priority: task.priority ?? Infinity,
       reject,
       resolve: resolve as (result: QueueResult<unknown>) => void,
       run: task.run as (context: QueueContext) => Promise<unknown>,
     }
 
-    if (!isActive) {
-      start({ entry })
+    if (!isTaskRunning) {
+      startTask({ entry })
       return result
     }
 
-    if (!pending || entry.priority <= pending.priority) {
-      pending?.resolve({ status: 'superseded' })
-      pending = entry
+    if (!pendingTask || entry.priority <= pendingTask.priority) {
+      pendingTask?.resolve({ status: 'superseded' })
+      pendingTask = entry
     } else {
       resolve({ status: 'superseded' })
     }
@@ -112,7 +112,7 @@ const initializeQueue = (): Queue => {
     return result
   }
 
-  return { reset, schedule }
+  return { resetQueue, scheduleTask }
 }
 
 type QueuedFunction = () => Promise<void>
@@ -130,14 +130,14 @@ export type UseQueueResult = {
 
 /**
  * Queues asynchronous work sequentially while retaining only the highest-priority pending task.
- * `queueTask` preserves the original fire-and-forget API; `schedule` returns the task result.
+ * `queueTask` preserves the original fire-and-forget API; `scheduleTask` returns the task result.
  */
 export function useQueue(): UseQueueResult {
   const queueRef = useRef<Queue>(undefined)
-  queueRef.current ??= initializeQueue()
+  queueRef.current ??= createQueue()
 
   const queueTask = useCallback<UseQueueResult['queueTask']>((fn, taskOptions) => {
-    void queueRef.current.schedule({
+    void queueRef.current.scheduleTask({
       run: async () => {
         if (taskOptions?.beforeProcess?.() === false) {
           return
@@ -156,7 +156,7 @@ export function useQueue(): UseQueueResult {
 
   return {
     queueTask,
-    reset: queueRef.current.reset,
-    schedule: queueRef.current.schedule,
+    resetQueue: queueRef.current.resetQueue,
+    scheduleTask: queueRef.current.scheduleTask,
   }
 }
