@@ -57,7 +57,7 @@ export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
 
       const idempotencyKey = args.getIdempotencyKey?.(message)
 
-      if (idempotencyKey === '') {
+      if (idempotencyKey?.trim() === '') {
         throw new APIError('Error sending email: getIdempotencyKey returned an empty key', 400)
       }
 
