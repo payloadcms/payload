@@ -1060,4 +1060,4 @@ export const Pages: CollectionConfig = {
 
 The parent relationship defaults to `_h_parent`. Use `nestedDocs: { parentFieldName: 'parentPage' }` to choose another field name. The parent relationship cannot be localized or have multiple values. Existing single-value parent fields may omit `hasMany`. Only one of `nestedDocs`, `hierarchy`, `folders`, and `tags` can be configured on a collection.
 
-Deleting or trashing a nested document promotes its direct children to its parent, or to the root when it has no parent. Reparenting is an internal structural update; deleting the parent still requires delete access. Published content and pending drafts are retained. Restoring a trashed parent does not reverse the promotion. A transactional database adapter is required to roll back all promotions if a hook fails.
+Deletion and trash operations use the shared hierarchy behavior described above: reparent by default, with an explicit cascade choice per operation.
