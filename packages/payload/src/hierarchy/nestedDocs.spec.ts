@@ -20,12 +20,33 @@ describe('nested documents', () => {
 
     expect(collection.hierarchy).toMatchObject({
       admin: { injectSidebarTab: false, useHeaderButton: false },
-      parentFieldName: 'parent',
+      parentFieldName: '_h_parent',
     })
     expect(
-      collection.fields.find((field) => 'name' in field && field.name === 'parent'),
+      collection.fields.find((field) => 'name' in field && field.name === '_h_parent'),
     ).toMatchObject({ type: 'relationship', admin: { position: 'sidebar' }, relationTo: 'pages' })
     expect(collection.admin?.group).toBeUndefined()
+  })
+
+  it('should leave an unrelated parent field untouched when creating the default parent relationship', () => {
+    const collection: CollectionConfig = {
+      slug: 'pages',
+      fields: [
+        { name: 'title', type: 'text' },
+        { name: 'parent', type: 'text' },
+      ],
+      hierarchy: buildNestedDocsHierarchy({ config: true }),
+      nestedDocs: true,
+    }
+
+    sanitizeHierarchyCollection(collection, {} as Config)
+
+    expect(
+      collection.fields.find((field) => 'name' in field && field.name === 'parent'),
+    ).toMatchObject({ type: 'text' })
+    expect(
+      collection.fields.find((field) => 'name' in field && field.name === '_h_parent'),
+    ).toMatchObject({ type: 'relationship', relationTo: 'pages' })
   })
 
   it('should allow custom parent and slug fields', () => {

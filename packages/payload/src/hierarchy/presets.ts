@@ -14,7 +14,7 @@ export function buildNestedDocsHierarchy({
     ...options,
     admin: { injectSidebarTab: false, useHeaderButton: false },
     allowHasMany: false,
-    parentFieldName: options.parentFieldName ?? 'parent',
+    parentFieldName: options.parentFieldName ?? '_h_parent',
   }
 }
 

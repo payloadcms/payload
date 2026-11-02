@@ -91,7 +91,7 @@ export default buildConfigWithDefaults({
             },
           ],
         },
-        nestedDocs: true,
+        nestedDocs: { parentFieldName: 'parent' },
         versions: { drafts: true },
       },
     ],

@@ -399,7 +399,7 @@ export type TagsConfig = {
 
 /** Configure a content collection's own document tree, independently of folder membership. */
 export type NestedDocsConfig = {
-  /** @default 'parent' */
+  /** @default '_h_parent' */
   parentFieldName?: string
 } & Pick<HierarchyConfig, 'slugField' | 'slugify' | 'slugPathFieldName' | 'titlePathFieldName'>
 
