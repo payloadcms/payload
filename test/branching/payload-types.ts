@@ -69,6 +69,9 @@ export interface Config {
     'localized-category-block': LocalizedCategoryBlock;
   };
   collections: {
+    folders: Folder;
+    tags: Tag;
+    'organized-docs': OrganizedDoc;
     'slug-drafts': SlugDraft;
     posts: Post;
     pages: Page;
@@ -103,6 +106,9 @@ export interface Config {
     };
   };
   collectionsSelect: {
+    folders: FoldersSelect<false> | FoldersSelect<true>;
+    tags: TagsSelect<false> | TagsSelect<true>;
+    'organized-docs': OrganizedDocsSelect<false> | OrganizedDocsSelect<true>;
     'slug-drafts': SlugDraftsSelect<false> | SlugDraftsSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -309,6 +315,74 @@ export interface Post {
   sharedLayout?: LocalizedCategoryBlock[] | null;
   _branch: string;
   _branchDocID?: (string | null) | Post;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders".
+ */
+export interface Folder {
+  id: string;
+  folder?: (string | null) | Folder;
+  name: string;
+  _branch: string;
+  _branchDocID?: (string | null) | Folder;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags".
+ */
+export interface Tag {
+  id: string;
+  _h_tags?: (string | null) | Tag;
+  name: string;
+  _branch: string;
+  _branchDocID?: (string | null) | Tag;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "organized-docs".
+ */
+export interface OrganizedDoc {
+  id: string;
+  title?: string | null;
+  folder?: (string | null) | Folder;
+  _h_tags?: (string | Tag)[] | null;
+  _branch: string;
+  _branchDocID?: (string | null) | OrganizedDoc;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -817,6 +891,18 @@ export interface PayloadBranchChange {
   globalSlug?: string | null;
   doc?:
     | ({
+        relationTo: 'folders';
+        value: string | Folder;
+      } | null)
+    | ({
+        relationTo: 'tags';
+        value: string | Tag;
+      } | null)
+    | ({
+        relationTo: 'organized-docs';
+        value: string | OrganizedDoc;
+      } | null)
+    | ({
         relationTo: 'slug-drafts';
         value: string | SlugDraft;
       } | null)
@@ -974,11 +1060,70 @@ export interface PayloadBranchMerge {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders_select".
+ */
+export interface FoldersSelect<T extends boolean = true> {
+  folder?: T;
+  name?: T;
+  _branch?: T;
+  _branchDocID?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags_select".
+ */
+export interface TagsSelect<T extends boolean = true> {
+  _h_tags?: T;
+  name?: T;
+  _branch?: T;
+  _branchDocID?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "organized-docs_select".
+ */
+export interface OrganizedDocsSelect<T extends boolean = true> {
+  title?: T;
+  folder?: T;
+  _h_tags?: T;
+  _branch?: T;
+  _branchDocID?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
   id: string;
   document?:
+    | ({
+        relationTo: 'folders';
+        value: string | Folder;
+      } | null)
+    | ({
+        relationTo: 'tags';
+        value: string | Tag;
+      } | null)
+    | ({
+        relationTo: 'organized-docs';
+        value: string | OrganizedDoc;
+      } | null)
     | ({
         relationTo: 'slug-drafts';
         value: string | SlugDraft;
@@ -1772,6 +1917,9 @@ export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
     relatedCollection:
+      | 'folders'
+      | 'tags'
+      | 'organized-docs'
       | 'slug-drafts'
       | 'posts'
       | 'pages'
@@ -1812,6 +1960,9 @@ export interface ActivityWidget {
   data?: {
     excludedCollections?:
       | (
+          | 'folders'
+          | 'tags'
+          | 'organized-docs'
           | 'slug-drafts'
           | 'posts'
           | 'pages'
