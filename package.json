@@ -158,7 +158,7 @@
     "@clack/prompts": "1.2.0",
     "@guidepup/guidepup": "0.34.0",
     "@guidepup/playwright": "0.19.1",
-    "@libsql/client": "0.14.0",
+    "@libsql/client": "0.18.0",
     "@next/bundle-analyzer": "16.4.2",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",

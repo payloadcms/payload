@@ -34,6 +34,30 @@ describe('handleUpsertError', () => {
     expect(fieldError.tableName).toBe('ultrasonic_avail_country')
   })
 
+  it('recognizes SQLite unique violations reported through extendedCode', () => {
+    // @libsql/client 0.17+ shape: base code in `code`, specific code in `extendedCode`
+    const libsqlError = {
+      code: 'SQLITE_CONSTRAINT',
+      extendedCode: 'SQLITE_CONSTRAINT_UNIQUE',
+      message: 'SQLITE_CONSTRAINT: UNIQUE constraint failed: posts.slug',
+    }
+
+    let thrown: unknown
+    try {
+      handleUpsertError({
+        adapter,
+        collectionSlug: 'posts',
+        error: { cause: libsqlError },
+        tableName: 'posts',
+      })
+    } catch (error) {
+      thrown = error
+    }
+
+    expect(thrown).toBeInstanceOf(ValidationError)
+    expect((thrown as ValidationError).data.errors[0]!.path).toBe('slug')
+  })
+
   it('re-throws non unique-constraint errors unchanged', () => {
     const otherError = new Error('some other db error')
 
