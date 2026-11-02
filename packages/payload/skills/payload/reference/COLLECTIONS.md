@@ -246,6 +246,7 @@ export const Pages: CollectionConfig = {
 // Create draft
 await payload.create({
   collection: 'posts',
+  overrideAccess: true,
   data: { title: 'Draft Post' },
   draft: true, // Saves as draft, skips required field validation
 })
@@ -253,6 +254,7 @@ await payload.create({
 // Update as draft
 await payload.update({
   collection: 'posts',
+  overrideAccess: true,
   id: '123',
   data: { title: 'Updated Draft' },
   draft: true,
@@ -261,6 +263,7 @@ await payload.update({
 // Read with drafts (returns newest draft if available)
 const post = await payload.findByID({
   collection: 'posts',
+  overrideAccess: true,
   id: '123',
   draft: true, // Returns draft version if exists
 })

@@ -6,11 +6,10 @@
     .toast-title {
       padding-inline: var(--spacer-1);
       color: var(--color-text);
-      font-family: var(--text-body-medium-strong-font-family);
-      font-size: var(--text-body-medium-strong-font-size);
-      font-weight: var(--text-body-medium-strong-font-weight);
-      letter-spacing: var(--text-body-medium-strong-letter-spacing);
-      line-height: var(--text-body-medium-strong-line-height);
+      font-size: var(--text-body-medium-bold-font-size);
+      font-weight: var(--text-body-medium-bold-font-weight);
+      letter-spacing: var(--text-body-medium-bold-letter-spacing);
+      line-height: var(--text-body-medium-bold-line-height);
     }
 
     .payload-toast-item {
@@ -89,8 +88,8 @@
    are unlayered too, winning on class specificity. */
 
 .payload-toast-container .toast-title {
-  font-weight: var(--text-body-medium-strong-font-weight);
-  line-height: var(--text-body-medium-strong-line-height);
+  font-weight: var(--text-body-medium-bold-font-weight);
+  line-height: var(--text-body-medium-bold-line-height);
 }
 
 /* Sonner forces [data-icon] to 16px; use a --spacer-4 (24px) box so our icons fit. */

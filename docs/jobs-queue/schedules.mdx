@@ -87,6 +87,7 @@ schedule: [{ cron: '0 15 * * *', queue: 'default' }] // Runs every day at 3pm
 await payload.jobs.queue({
   task: 'publishPost',
   input: { postId: '123' },
+  overrideAccess: true,
   waitUntil: new Date('2024-12-25T15:00:00Z'), // Runs once at this specific time
 })
 
@@ -100,7 +101,7 @@ Something needs to actually trigger the scheduling of jobs (execute the scheduli
 
 ### Bin Scripts (Recommended for Dedicated Servers)
 
-For dedicated servers, the recommended approach is to use Payload's bin scripts. This runs the scheduling logic in a separate process from your Next.js server.
+For dedicated servers, the recommended approach is to use Payload's bin scripts. This runs the scheduling logic in a separate process from your app server.
 
 **Combined scheduling and running (recommended):**
 
@@ -120,10 +121,10 @@ pnpm payload jobs:handle-schedules --cron "*/5 * * * *" --all-queues
 
 **Benefits of bin scripts:**
 
-- Separate process from Next.js server
+- Separate process from your app server
 - Easy to deploy as independent workers
 - Simple to scale by running multiple instances
-- No impact on Next.js server performance
+- No impact on your app server's performance
 
 ### autoRun (Alternative for Dedicated Servers)
 
@@ -364,6 +365,7 @@ export const DailyDigestTask: TaskConfig<'DailyDigest'> = {
   handler: async ({ req }) => {
     const users = await req.payload.find({
       collection: 'users',
+      overrideAccess: true,
       where: { digestEnabled: { equals: true } },
     })
 
@@ -391,6 +393,7 @@ export const WeeklyReportTask: TaskConfig<'WeeklyReport'> = {
     const report = await generateWeeklyReport()
     await req.payload.create({
       collection: 'reports',
+      overrideAccess: true,
       data: report,
     })
 
@@ -414,6 +417,7 @@ export const SyncDataTask: TaskConfig<'SyncData'> = {
     const data = await fetchFromExternalAPI()
     await req.payload.create({
       collection: 'synced-data',
+      overrideAccess: true,
       data,
     })
 
@@ -461,6 +465,7 @@ Test your cron expressions at [crontab.guru](https://crontab.guru) (for 5-field 
 ```ts
 const stats = await payload.findGlobal({
   slug: 'payload-jobs-stats',
+  overrideAccess: true,
 })
 
 console.log(stats.lastScheduled) // Check when each task was last scheduled

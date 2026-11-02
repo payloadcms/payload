@@ -36,7 +36,7 @@ export const assertRequestBody = async <T>(
     page.waitForRequest((request) =>
       Boolean(
         request.url().startsWith(options.url) &&
-          (request.method() === options.requestMethod || 'POST'),
+        (request.method() === options.requestMethod || 'POST'),
       ),
     ),
     await options.action(),

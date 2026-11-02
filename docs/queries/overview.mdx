@@ -180,6 +180,7 @@ query. All conditions inside one operator are evaluated against the same related
 ```ts
 const burgers = await payload.find({
   collection: 'burgers',
+  overrideAccess: true,
   where: {
     ingredients: {
       contains: {
@@ -218,6 +219,7 @@ import type { Payload } from 'payload'
 const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
+    overrideAccess: true,
     where: {
       color: {
         equals: 'mint',
@@ -328,6 +330,7 @@ Relationships will only populate down to the specified depth, and any relationsh
 ```ts
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   where: { ... },
   // highlight-start
   depth: 0, // Only return the IDs of related documents
@@ -344,6 +347,7 @@ Set the [Limit](./pagination#limit) if you can reliably predict the number of ma
 ```ts
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   where: {
     slug: {
       equals: 'unique-post-slug',
@@ -371,12 +375,14 @@ This will reduce the amount of data returned from the request, and also skip pro
 ```ts
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   where: { ... },
   // highlight-start
   select: {
     title: true,
   },
   // highlight-end
+})
 ```
 
 This is a basic example, but there are many ways to use the Select API, including selecting specific fields, excluding fields, etc.
@@ -390,6 +396,7 @@ To learn more, see the [Select documentation](./select).
 ```ts
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   where: {
     slug: {
       equals: 'unique-post-slug',

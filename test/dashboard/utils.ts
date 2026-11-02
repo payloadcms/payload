@@ -23,6 +23,12 @@ export class DashboardHelper {
     return this.page.locator('.step-nav__last')
   }
 
+  get stepNavButtons() {
+    return this.stepNavLast.locator(
+      '.dashboard-breadcrumb-dropdown__actions button, .dashboard-breadcrumb-dropdown > .popup__trigger-wrap > button',
+    )
+  }
+
   widgetByPos = (pos: number) => this.page.locator(`.modular-dashboard > :nth-child(${pos})`)
 
   getDeleteWidgetButton = (widget: Locator) => widget.locator('.widget-wrapper__delete-btn')
@@ -172,32 +178,32 @@ export class DashboardHelper {
   }
 
   setEditing = async () => {
-    await this.stepNavLast.locator('button').click()
-    await this.page.getByRole('button', { name: 'Edit Dashboard' }).click()
+    await this.stepNavButtons.click()
+    await this.page.getByRole('menuitem', { name: 'Edit Dashboard' }).click()
     await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
   }
 
   resetLayout = async () => {
-    await this.stepNavLast.locator('button').click()
-    await this.page.getByRole('button', { name: 'Reset Layout' }).click()
+    await this.stepNavButtons.click()
+    await this.page.getByRole('menuitem', { name: 'Reset Layout' }).click()
   }
 
   assertIsEditing = async (shouldBe: boolean) => {
     if (shouldBe) {
       await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
-      await expect(this.stepNavLast.locator('button')).toHaveCount(3)
-      await expect(this.stepNavLast.locator('button').nth(0)).toHaveText('Add +')
-      await expect(this.stepNavLast.locator('button').nth(1)).toHaveText('Save changes')
-      await expect(this.stepNavLast.locator('button').nth(2)).toHaveText('Cancel')
+      await expect(this.stepNavButtons).toHaveCount(3)
+      await expect(this.stepNavButtons.nth(0)).toHaveText('Add +')
+      await expect(this.stepNavButtons.nth(1)).toHaveText('Save changes')
+      await expect(this.stepNavButtons.nth(2)).toHaveText('Cancel')
     } else {
-      await expect(this.stepNavLast.locator('button')).toHaveCount(1)
+      await expect(this.stepNavButtons).toHaveCount(1)
       await expect(this.stepNavLast.getByLabel('Dashboard')).toBeVisible()
     }
   }
 
   addWidget = async (slug: string) => {
     const widgetsCount = await this.widgets.count()
-    await this.stepNavLast.locator('button').nth(0).click()
+    await this.stepNavButtons.nth(0).click()
     await this.page.locator('.drawer__content').getByText(slug).click()
     await expect(this.widgets).toHaveCount(widgetsCount + 1)
     // Wait for highlight animation to complete (1.5s animation + buffer)
@@ -205,7 +211,7 @@ export class DashboardHelper {
   }
 
   openAddWidgetDrawer = async () => {
-    await this.stepNavLast.locator('button').nth(0).click()
+    await this.stepNavButtons.nth(0).click()
     await expect(this.page.locator('.drawer__content')).toBeVisible()
   }
 
@@ -247,7 +253,7 @@ export class DashboardHelper {
   }
 
   cancelEditing = async () => {
-    await this.stepNavLast.locator('button').nth(2).click()
+    await this.stepNavButtons.nth(2).click()
     const confirmButton = this.page.locator(
       '#cancel-dashboard-changes [data-dialog-action="confirm"]',
     )
@@ -260,7 +266,7 @@ export class DashboardHelper {
   saveChangesAndValidate = async () => {
     const snapshot = await this.getSnapshot()
     await this.assertIsEditing(true)
-    await this.stepNavLast.locator('button').nth(1).click()
+    await this.stepNavButtons.nth(1).click()
     await this.assertIsEditing(false)
     // The widget set must be fully (re)rendered before `validateLayout` measures
     // bounding boxes — both after the edit→view re-render and after the reload,
@@ -276,7 +282,8 @@ export class DashboardHelper {
 
   moveWidget = async (from: number, to: number, place: 'after' | 'before' = 'before') => {
     const srcWidget = this.widgetByPos(from)
-    const srcWidgetBox = (await srcWidget.boundingBox())!
+    await srcWidget.hover()
+    const srcWidgetBox = (await srcWidget.locator('.widget-wrapper__drag-btn').boundingBox())!
     const targetWidget = this.widgetByPos(to)
     const snapshot = await this.getSnapshot()
 
@@ -313,6 +320,80 @@ export class DashboardHelper {
     const expectedSnapshot = moveArrayItem(snapshot, from, to, place)
     expect(snapshotAfter).toEqual(expectedSnapshot)
   }
+}
+
+/** The grid the Recents and Pinned widget container queries produce for a container width. */
+export function getExpectedRecentsGrid({ containerWidth }: { containerWidth: number }): {
+  columns: number
+  pageSize: number
+} {
+  if (containerWidth < 600) {
+    return { columns: 2, pageSize: 4 }
+  }
+  if (containerWidth < 800) {
+    return { columns: 3, pageSize: 6 }
+  }
+  const columns = 4 + [964, 1160, 1356, 1552].filter((width) => containerWidth >= width).length
+
+  return { columns, pageSize: columns }
+}
+
+/**
+ * Server-rendered widgets ignore input until React hydrates them. The nav marks itself hydrated
+ * after an async preference read, which runs once hydration is done.
+ */
+export async function waitForDashboardHydration({ page }: { page: Page }): Promise<void> {
+  await expect(page.locator('.template-default--nav-hydrated')).toBeVisible()
+}
+
+/** The content-box width of the Recents and Pinned widget, which its container queries measure. */
+export function getRecentsContainerWidth({ widget }: { widget: Locator }): Promise<number> {
+  return widget.evaluate((element) => {
+    const style = getComputedStyle(element)
+
+    return [
+      'border-inline-start-width',
+      'border-inline-end-width',
+      'padding-inline-start',
+      'padding-inline-end',
+    ].reduce(
+      (contentWidth, property) => contentWidth - parseFloat(style.getPropertyValue(property)),
+      element.getBoundingClientRect().width,
+    )
+  })
+}
+
+/**
+ * Sums the layout-shift scores recorded since navigation whose sources include the Recents and
+ * Pinned widget or the collections below it. This is not CLS: there are no session windows, shifts
+ * after recent input still count, and shifts after the call are missed.
+ */
+export function getRecentsLayoutShiftSum({ page }: { page: Page }): Promise<number> {
+  return page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        let total = 0
+
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries() as unknown as Array<{
+            sources: Array<{ node: Node | null }>
+            value: number
+          }>) {
+            const isDashboardShift = entry.sources.some(({ node }) =>
+              (node instanceof Element ? node : node?.parentElement)?.closest(
+                '.activity-widget, .collections__wrap',
+              ),
+            )
+
+            if (isDashboardShift) {
+              total += entry.value
+            }
+          }
+        }).observe({ type: 'layout-shift', buffered: true })
+        // Buffered entries are delivered in the next observer callback, if there are any.
+        setTimeout(() => resolve(total), 100)
+      }),
+  )
 }
 
 // utility function to move an item in an array

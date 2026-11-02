@@ -1,6 +1,6 @@
 'use client'
 
-import type { GroupFieldClientComponent } from 'payload'
+import type { GroupFieldClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { groupHasName } from 'payload/shared'
@@ -25,7 +25,7 @@ import { GroupProvider, useGroup } from './provider.js'
 
 const baseClass = 'group-field'
 
-export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
+export const GroupFieldComponent: React.FC<GroupFieldClientProps> = (props) => {
   const {
     field,
     field: { admin: { className, description, hideGutter } = {}, fields, label },

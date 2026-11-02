@@ -49,6 +49,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
     ...admin,
     avatar: admin?.avatar ?? 'gravatar',
     components: admin?.components ?? {},
+    constrainWidth: admin?.constrainWidth ?? false,
     custom: admin?.custom ?? {},
     dateFormat: admin?.dateFormat ?? 'MMMM do yyyy, h:mm a',
     dependencies: admin?.dependencies ?? {},
@@ -144,11 +145,12 @@ export const addDefaultsToConfig = (config: Config): Config => {
       typescript?.outputFile ??
       `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
   }
-  config.upload = config.upload ?? {}
+  config.upload = config.upload ?? { transformers: [] }
 
   config.auth = {
     ...(config.auth || {}),
     jwtOrder: config.auth?.jwtOrder ?? ['JWT', 'Bearer', 'cookie'],
+    passwordHashIterations: config.auth?.passwordHashIterations ?? 600000,
   }
 
   config.kv = config.kv ?? databaseKVAdapter()

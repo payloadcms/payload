@@ -30,6 +30,8 @@ export const ColumnSelectionButton: React.FC<ColumnSelectionButtonProps> = ({
     <Popup
       className={baseClass}
       horizontalAlign="right"
+      popupAriaLabel={t('general:columns')}
+      popupType="dialog"
       render={({ close }) => (
         <ColumnSelectionPopup
           collectionSlug={collectionSlug}

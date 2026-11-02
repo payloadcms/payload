@@ -1,8 +1,11 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] -- Tests use the shared fixture wrapper. */
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import { copyS3File } from '../../packages/storage-s3/src/copyFile.js'
 import { test } from '../__helpers/int/vitest.js'
+import { runTransformReadsRealSourceTest } from '../__helpers/shared/transformSourceTests.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -15,6 +18,7 @@ import {
 import {
   clearTestBucket,
   createTestBucket,
+  getAWSClient,
   getTestBucketName,
   verifyUploads,
 } from './test-utils.js'
@@ -22,7 +26,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
+test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
   test.beforeEach(async () => {
     await createTestBucket()
     await clearTestBucket()
@@ -31,19 +35,47 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
     await clearTestBucket()
   })
 
+  test('should copy an S3 object without removing its source or overwriting a destination', async () => {
+    const client = getAWSClient()
+    const bucket = getTestBucketName()
+    await client.putObject({
+      Body: 'copy source',
+      Bucket: bucket,
+      ContentType: 'text/plain',
+      Key: 'copy-source.txt',
+      Metadata: { owner: 'payload' },
+    })
+
+    await copyS3File({ bucket, client, from: 'copy-source.txt', to: 'copy-destination.txt' })
+
+    expect(
+      (await client.headObject({ Bucket: bucket, Key: 'copy-source.txt' })).ContentLength,
+    ).toBe(11)
+    expect(
+      (await client.headObject({ Bucket: bucket, Key: 'copy-destination.txt' })).ContentType,
+    ).toBe('text/plain')
+    expect(
+      (await client.headObject({ Bucket: bucket, Key: 'copy-destination.txt' })).Metadata,
+    ).toEqual({ owner: 'payload' })
+    await expect(
+      copyS3File({ bucket, client, from: 'copy-source.txt', to: 'copy-destination.txt' }),
+    ).rejects.toThrow()
+  })
+
   test('can upload', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
 
     await verifyUploads({
       collectionSlug: mediaSlug,
-      uploadId: upload.id,
       payload,
+      uploadId: upload.id,
     })
 
     expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
@@ -54,68 +86,82 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
 
     await verifyUploads({
       collectionSlug: mediaWithPrefixSlug,
-      uploadId: upload.id,
-      prefix,
       payload,
+      prefix,
+      uploadId: upload.id,
     })
     expect(upload.url).toEqual(
       `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
     )
   })
 
-  test('has prefix field with alwaysInsertFields even when plugin is disabled', async ({
-    payload,
-  }) => {
-    // This collection uses a s3Storage plugin with enabled: false but alwaysInsertFields: true
-    // The upload will use local storage, but the prefix field should still exist
+  test('has prefix field by default even when plugin is disabled', async ({ payload }) => {
+    // This collection uses a s3Storage plugin with enabled: false.
+    // The upload uses local storage, but the prefix field still exists.
     const upload = await payload.create({
       collection: mediaWithAlwaysInsertFieldsSlug,
       data: {
         prefix: 'test',
       },
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
-    // With alwaysInsertFields: true and enabled: false, the prefix field should still exist
     expect(upload.prefix).toBe('test')
   })
 
   test('can download with signed downloads', async ({ payload, restClient }) => {
-    await payload.create({
+    const upload = await payload.create({
       collection: mediaWithSignedDownloadsSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
-    const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/image.png`)
+    const response = await restClient.GET(
+      `/${mediaWithSignedDownloadsSlug}/file/${upload.filename}`,
+    )
     expect(response.status).toBe(302)
     const url = response.headers.get('Location')
     expect(url).toBeDefined()
-    expect(url).toContain(`/${getTestBucketName()}/image.png`)
+    expect(url).toContain(`/${getTestBucketName()}/`)
+    expect(url).toContain(`/${upload.filename}`)
     expect(new URLSearchParams(url).get('x-id')).toBe('GetObject')
     const file = await fetch(url)
     expect(file.headers.get('Content-Type')).toBe('image/png')
   })
 
   test('should skip signed download', async ({ payload, restClient }) => {
-    await payload.create({
+    const upload = await payload.create({
       collection: mediaWithSignedDownloadsSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/small.png'),
+      overrideAccess: true,
     })
 
-    const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/small.png`, {
-      headers: { 'X-Disable-Signed-URL': 'true' },
-    })
+    const response = await restClient.GET(
+      `/${mediaWithSignedDownloadsSlug}/file/${upload.filename}`,
+      {
+        headers: { 'X-Disable-Signed-URL': 'true' },
+      },
+    )
     expect(response.status).toBe(200)
     expect(response.headers.get('Content-Type')).toBe('image/png')
+  })
+
+  test.describe('transform source on a signed-downloads collection', () => {
+    runTransformReadsRealSourceTest({
+      collection: mediaWithSignedDownloadsSlug,
+      etagRequestHeaders: { 'X-Disable-Signed-URL': 'true' },
+    })
   })
 
   test('should return 404 when the file is not found', async ({ restClient }) => {
@@ -127,15 +173,19 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
     payload,
     restClient,
   }) => {
-    await payload.create({
+    const upload = await payload.create({
       collection: mediaWithSignedDownloadsSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/temp.png'),
+      overrideAccess: true,
     })
 
-    const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/temp.png`, {
-      headers: { 'X-Disable-Signed-URL': 'true', 'If-None-Match': 'invalid-etag-1234' },
-    })
+    const response = await restClient.GET(
+      `/${mediaWithSignedDownloadsSlug}/file/${upload.filename}`,
+      {
+        headers: { 'If-None-Match': 'invalid-etag-1234', 'X-Disable-Signed-URL': 'true' },
+      },
+    )
     expect(response.status).toBe(200)
     expect(response.headers.get('Content-Type')).toBe('image/png')
 
@@ -143,11 +193,11 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
     expect(etag).toBeDefined()
 
     const responseNotModified = await restClient.GET(
-      `/${mediaWithSignedDownloadsSlug}/file/temp.png`,
+      `/${mediaWithSignedDownloadsSlug}/file/${upload.filename}`,
       {
         headers: {
-          'X-Disable-Signed-URL': 'true',
           'If-None-Match': etag!,
+          'X-Disable-Signed-URL': 'true',
         },
       },
     )
@@ -164,16 +214,17 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image with spaces.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
-      expect(upload.filename).toBe('image with spaces.png')
+      expect(upload.filename).toBe('image with spaces-original.png')
 
       // When disablePayloadAccessControl is true, URL should point directly to S3
       // and the filename should be URL-encoded
       expect(upload.url).toContain(process.env.S3_ENDPOINT)
       expect(upload.url).toContain(getTestBucketName())
-      expect(upload.url).toContain('image%20with%20spaces.png')
+      expect(upload.url).toContain('image%20with%20spaces-original.png')
 
       // Verify the file can be fetched using the URL
       const response = await fetch(upload.url)
@@ -206,13 +257,14 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
 
       // Verify image sizes URLs are returned correctly
-      expect(upload.sizes?.thumbnail?.url).toContain(process.env.S3_ENDPOINT)
-      expect(upload.sizes?.thumbnail?.url).toContain(getTestBucketName())
+      expect(upload.variants?.thumbnail?.url).toContain(process.env.S3_ENDPOINT)
+      expect(upload.variants?.thumbnail?.url).toContain(getTestBucketName())
 
       // CRITICAL: Verify that image size URLs are also stored as full S3 URLs in the database
       const dbDoc = await payload.db.findOne({
@@ -225,11 +277,15 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
       })
 
       expect(dbDoc).toBeDefined()
-      expect(dbDoc.sizes.thumbnail.url).toContain(process.env.S3_ENDPOINT)
-      expect(dbDoc.sizes.thumbnail.url).toContain(getTestBucketName())
-      expect(dbDoc.sizes.thumbnail.url).not.toMatch(/^\/api\//)
+      expect(dbDoc.variants.thumbnail.url).toContain(process.env.S3_ENDPOINT)
+      expect(dbDoc.variants.thumbnail.url).toContain(getTestBucketName())
+      expect(dbDoc.variants.thumbnail.url).not.toMatch(/^\/api\//)
 
-      await payload.delete({ collection: mediaWithDirectAccessSlug, id: upload.id })
+      await payload.delete({
+        id: upload.id,
+        collection: mediaWithDirectAccessSlug,
+        overrideAccess: true,
+      })
     })
 
     test('should return direct S3 URL without encoding issues for normal filenames', async ({
@@ -239,6 +295,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
@@ -246,11 +303,15 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
       // URL should point directly to S3
       expect(upload.url).toContain(process.env.S3_ENDPOINT)
       expect(upload.url).toContain(getTestBucketName())
-      expect(upload.url).toContain('image.png')
+      expect(upload.url).toContain('image-original.png')
 
-      // Verify the file can be fetched
-      const response = await fetch(upload.url)
+      const [response, originalResponse] = await Promise.all([
+        fetch(upload.url),
+        fetch(upload.original!.url),
+      ])
+
       expect(response.status).toBe(200)
+      expect(originalResponse.status).toBe(200)
     })
   })
 
@@ -274,7 +335,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
   })
 
   test.describe('R2', () => {
-    test.todo('can upload')
+    test.todo('can upload via R2 multipart')
   })
 
   test.describe('prefix collision detection', () => {
@@ -284,14 +345,17 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
       // Clear database records before each test
       await payload.delete({
         collection: mediaWithPrefixSlug,
+        overrideAccess: true,
         where: {},
       })
       await payload.delete({
         collection: mediaSlug,
+        overrideAccess: true,
         where: {},
       })
       await payload.delete({
         collection: mediaWithAlwaysInsertFieldsSlug,
+        overrideAccess: true,
         where: {},
       })
     })
@@ -304,16 +368,18 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
-      expect(upload1.filename).toBe('image.png')
-      expect(upload2.filename).toBe('image-1.png')
+      expect(upload1.filename).toBe('image-original.png')
+      expect(upload2.filename).toBe('image-original-1.png')
       expect(upload1.prefix).toBe(prefix)
       expect(upload2.prefix).toBe(prefix)
     })
@@ -326,20 +392,22 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
       expect(upload2.filename).toBe('image-1.png')
-      // @ts-expect-error prefix should never be set
-      expect(upload1.prefix).toBeUndefined()
-      // @ts-expect-error prefix should never be set
-      expect(upload2.prefix).toBeUndefined()
+      // The prefix field is always inserted by default, defaulting to an empty string
+      // for collections that don't configure a prefix.
+      expect(upload1.prefix).toBe('')
+      expect(upload2.prefix).toBe('')
     })
 
     test('allows same filename under different prefixes', async ({ payload }) => {
@@ -350,6 +418,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       // Upload with different prefix
@@ -359,12 +428,20 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
           prefix: 'different-prefix',
         },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
-      expect(upload1.filename).toBe('image.png')
-      expect(upload2.filename).toBe('image.png') // Should NOT increment
+      expect(upload1.filename).toBe('image-original.png')
+      expect(upload2.filename).toBe('image-original.png') // Should NOT increment
       expect(upload1.prefix).toBe(prefix) // 'test-prefix'
-      expect(upload2.prefix).toBe('different-prefix')
+      // New uploads store the document prefix beneath the collection prefix.
+      expect(upload2.prefix).toBe(`${prefix}/different-prefix`)
+      await verifyUploads({
+        collectionSlug: mediaWithPrefixSlug,
+        payload,
+        prefix: `${prefix}/different-prefix`,
+        uploadId: upload2.id,
+      })
     })
 
     test('supports multi-tenant scenario with dynamic prefix from hook', async ({ payload }) => {
@@ -375,6 +452,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'a' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       // Tenant B uploads logo.png
@@ -382,11 +460,12 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'b' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       // Both should keep original filename
-      expect(tenantAUpload.filename).toBe('image.png')
-      expect(tenantBUpload.filename).toBe('image.png')
+      expect(tenantAUpload.filename).toBe('image-original.png')
+      expect(tenantBUpload.filename).toBe('image-original.png')
       expect(tenantAUpload.prefix).toBe('tenant-a')
       expect(tenantBUpload.prefix).toBe('tenant-b')
     })

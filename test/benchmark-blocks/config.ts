@@ -2,10 +2,11 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { mediaSharpTransformer } from '../__helpers/shared/mediaSharpTransformer.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { generateBlockFields, generateBlocks } from './blocks/blocks.js'
-import { MediaCollection } from './collections/Media/index.js'
+import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -14,7 +15,6 @@ const dirname = path.dirname(filename)
 const USE_BLOCK_REFERENCES = true
 
 export default buildConfigWithDefaults({
-  suite: 'benchmark-blocks',
   config: {
     admin: {
       importMap: {
@@ -35,7 +35,10 @@ export default buildConfigWithDefaults({
       MediaCollection,
     ],
     editor: lexicalEditor({}),
-    // @ts-expect-error
+    upload: {
+      transformers: [mediaSharpTransformer({ mediaSlug })],
+    },
+    // @ts-expect-error -- The benchmark intentionally produces more block types than generated types include.
     blocks: USE_BLOCK_REFERENCES ? generateBlocks(30 * 20, false) : undefined,
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -48,6 +51,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -55,6 +59,8 @@ export default buildConfigWithDefaults({
       data: {
         title: 'example post',
       },
+      overrideAccess: true,
     })
   },
+  suite: 'benchmark-blocks',
 })

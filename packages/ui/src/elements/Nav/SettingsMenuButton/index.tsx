@@ -25,6 +25,7 @@ export const SettingsMenuButton: React.FC<SettingsMenuButtonProps> = ({ settings
       className={baseClass}
       horizontalAlign="left"
       id="settings-menu"
+      popupType="menu"
       size="small"
       verticalAlign="bottom"
     >

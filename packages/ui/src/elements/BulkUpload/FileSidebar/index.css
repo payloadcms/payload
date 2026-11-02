@@ -131,7 +131,6 @@
   }
 
   .file-selections__fileSize {
-    font-family: var(--text-body-small-font-family);
     font-size: var(--text-body-small-font-size);
     font-weight: var(--text-body-small-font-weight);
     line-height: var(--text-body-small-line-height);
@@ -179,6 +178,7 @@
     overflow: auto;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .file-selections {
       --file-gutter-h: var(--gutter-h);

@@ -3,11 +3,15 @@
 import React from 'react'
 import { toast } from 'sonner'
 
+import { SelectInput } from '../../../fields/Select/Input.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { getFilesFromClipboard } from '../../../utilities/getFilesFromClipboard.js'
 import { DialogHeader, DialogModal } from '../../Dialog/index.js'
 import { Dropzone } from '../../Dropzone/index.js'
 import { UploadDropzoneContent } from '../../UploadDropzoneContent/index.js'
+import { useFormsManager } from '../FormsManager/index.js'
+import { useBulkUpload } from '../index.js'
+import { useUploadCollectionOptions } from '../useUploadCollectionOptions.js'
 import './index.css'
 
 const baseClass = 'bulk-upload--add-files'
@@ -19,6 +23,9 @@ type Props = {
 }
 export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: Props) {
   const { t } = useTranslation()
+  const { collectionSlug, setCollectionSlug } = useBulkUpload()
+  const { changeCollectionSlug, forms, isInitializing } = useFormsManager()
+  const collectionOptions = useUploadCollectionOptions()
 
   const handlePasteFromClipboard = React.useCallback(async () => {
     try {
@@ -36,6 +43,30 @@ export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: 
   return (
     <DialogModal className={baseClass} size="large" slug={modalSlug}>
       <DialogHeader showClose title={t('upload:addFiles')} />
+      {collectionOptions.length > 1 && (
+        <SelectInput
+          className={`${baseClass}__collectionSelect`}
+          isClearable={false}
+          label={t('general:collection')}
+          name="collection"
+          onChange={(option) => {
+            if (option && typeof option === 'object' && 'value' in option) {
+              if (typeof option.value === 'string') {
+                if (forms.length) {
+                  changeCollectionSlug(option.value)
+                } else {
+                  setCollectionSlug(option.value)
+                }
+              }
+            }
+          }}
+          options={collectionOptions}
+          path="uploadCollection"
+          readOnly={isInitializing}
+          required
+          value={collectionSlug}
+        />
+      )}
       <div className={`${baseClass}__body`}>
         <div className={`${baseClass}__dropArea`}>
           <Dropzone multipleFiles onChange={onDrop}>

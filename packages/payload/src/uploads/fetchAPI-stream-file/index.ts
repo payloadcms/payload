@@ -1,7 +1,16 @@
 import fs from 'fs'
 
-export function iteratorToStream(iterator: AsyncIterator<Uint8Array>) {
+export function iteratorToStream({
+  iterator,
+  onCancel,
+}: {
+  iterator: AsyncIterator<Uint8Array>
+  onCancel?: () => void
+}) {
   return new ReadableStream({
+    cancel() {
+      onCancel?.()
+    },
     async pull(controller) {
       const { done, value } = await iterator.next()
       if (done) {
@@ -27,6 +36,10 @@ export function streamFile({
   options?: { end?: number; start?: number }
 }): ReadableStream {
   const nodeStream = fs.createReadStream(filePath, options)
-  const data: ReadableStream = iteratorToStream(nodeStreamToIterator(nodeStream))
+  // Destroying the read stream on cancel releases the file handle, even if nothing was read yet.
+  const data: ReadableStream = iteratorToStream({
+    iterator: nodeStreamToIterator(nodeStream),
+    onCancel: () => nodeStream.destroy(),
+  })
   return data
 }

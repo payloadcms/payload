@@ -1,0 +1,33 @@
+@layer payload-default {
+  .hierarchy-modal-footer__info,
+  .hierarchy-modal-footer__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  .hierarchy-modal-footer__info {
+    min-inline-size: 0;
+    margin-inline-end: auto;
+    overflow: hidden;
+  }
+
+  .hierarchy-modal-footer__actions,
+  .hierarchy-modal-footer__arrow {
+    flex-shrink: 0;
+  }
+
+  .hierarchy-modal-footer__secondary,
+  .hierarchy-modal-footer__arrow {
+    color: var(--color-text-secondary);
+  }
+
+  .hierarchy-modal-footer__path {
+    min-inline-size: 0;
+    max-inline-size: calc(var(--spacer-6) * 7);
+  }
+
+  .hierarchy-modal-footer__path .chip__label {
+    min-inline-size: 0;
+  }
+}

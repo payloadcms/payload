@@ -1,10 +1,13 @@
+import type { AriaAttributes } from 'react'
+
 import { Button, ChevronIcon, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 type ReindexButtonLabelProps = {
   readonly active?: boolean
-  readonly 'aria-expanded'?: boolean
-  readonly 'aria-haspopup'?: true
+  readonly 'aria-controls'?: AriaAttributes['aria-controls']
+  readonly 'aria-expanded'?: AriaAttributes['aria-expanded']
+  readonly 'aria-haspopup'?: AriaAttributes['aria-haspopup']
   readonly onClick?: React.MouseEventHandler
   readonly onKeyDown?: React.KeyboardEventHandler
 }

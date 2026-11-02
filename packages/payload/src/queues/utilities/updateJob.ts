@@ -2,6 +2,7 @@ import type { UpdateJobsArgs } from '../../database/types.js'
 import type { Job } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { jobAfterRead } from '../config/collection.js'
 import { getCurrentDate } from './getCurrentDate.js'
 
@@ -52,15 +53,14 @@ export async function updateJobs({
   sort,
   where: whereArg,
 }: RunJobsArgs): Promise<Job[] | null> {
+  assertNoValidationWrite(req)
+
   const limit = id ? 1 : limitArg
   const where = id ? { id: { equals: id } } : whereArg
 
-  const jobReq = {
-    transactionID:
-      req.payload.db.name !== 'mongoose'
-        ? ((await req.payload.db.beginTransaction()) as string)
-        : undefined,
-  }
+  const transactionID =
+    req.payload.db.name !== 'mongoose' ? await req.payload.db.beginTransaction() : undefined
+  const jobReq = { transactionID: transactionID ?? undefined }
 
   if (data.processingUntil === null) {
     data.processingToken = null
@@ -87,10 +87,24 @@ export async function updateJobs({
         where: where as Where,
       }
 
-  const updatedJobs: Job[] | null = await req.payload.db.updateJobs(args)
+  let updatedJobs: Job[] | null
 
-  if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
-    await req.payload.db.commitTransaction(jobReq.transactionID)
+  try {
+    updatedJobs = await req.payload.db.updateJobs(args)
+
+    if (transactionID !== null && typeof transactionID !== 'undefined') {
+      await req.payload.db.commitTransaction(transactionID)
+    }
+  } catch (error) {
+    if (transactionID !== null && typeof transactionID !== 'undefined') {
+      try {
+        await req.payload.db.rollbackTransaction(transactionID)
+      } catch {
+        // Preserve the update or commit error that caused the rollback.
+      }
+    }
+
+    throw error
   }
 
   if (returning === false || !updatedJobs?.length) {

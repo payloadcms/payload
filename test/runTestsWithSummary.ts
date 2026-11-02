@@ -85,6 +85,7 @@ const contentAPISuiteTimeout = 120000
 // no JSON report, so the suite is recorded as 0/<collected>.
 const vitestExecMaxBuffer = 64 * 1024 * 1024
 const vitestBinary = './node_modules/.bin/vitest'
+const vitestJSONReportPath = path.join(dirname, '..', '.vitest', 'json', 'summary.json')
 const diagnosticMaxLines = 40
 const diagnosticMaxChars = 4000
 
@@ -398,9 +399,11 @@ function runTestSuite(suiteName: string): SuiteResult {
     total: 0,
   }
 
+  fs.rmSync(vitestJSONReportPath, { force: true })
+
   try {
     const testPath = path.join(dirname, suiteName, 'int.spec.ts')
-    const command = `${vitestBinary} run --project int ${testPath} --reporter=json`
+    const command = `${vitestBinary} run --project int ${testPath} --reporter=json --outputFile.json=${JSON.stringify(vitestJSONReportPath)}`
 
     const output = execSync(command, {
       cwd: path.join(dirname, '..'),
@@ -411,8 +414,7 @@ function runTestSuite(suiteName: string): SuiteResult {
       ...(isContentAPIMode ? { timeout: contentAPISuiteTimeout } : {}),
     })
 
-    // Parse Jest output to extract test counts
-    const parsed = parseTestResults(output)
+    const parsed = parseTestResults(fs.readFileSync(vitestJSONReportPath, 'utf8'))
     result.passed = parsed.passed
     result.total = parsed.total
 
@@ -448,7 +450,10 @@ function runTestSuite(suiteName: string): SuiteResult {
       }
     }
 
-    const parsed = parseTestResults(errorOutput)
+    const report = fs.existsSync(vitestJSONReportPath)
+      ? fs.readFileSync(vitestJSONReportPath, 'utf8')
+      : ''
+    const parsed = parseTestResults(report)
     result.passed = parsed.passed
     result.total = parsed.total
 
@@ -463,6 +468,8 @@ function runTestSuite(suiteName: string): SuiteResult {
       result.diagnostic = extractDiagnostic(errorOutput)
     }
   }
+
+  fs.rmSync(vitestJSONReportPath, { force: true })
 
   result.total = Math.max(0, result.total - getExplicitSkippedTestCount(suiteName))
   result.failed = result.passed < result.total

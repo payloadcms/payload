@@ -1,9 +1,9 @@
-import type { SelectFieldLabelServerComponent } from 'payload'
+import type { SelectFieldLabelServerProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomSelectFieldLabelServer: SelectFieldLabelServerComponent = ({
+export const CustomSelectFieldLabelServer: React.FC<SelectFieldLabelServerProps> = ({
   clientField,
   path,
 }) => {

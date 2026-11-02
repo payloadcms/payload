@@ -23,6 +23,7 @@ export const workflowRetries2TasksRetries0Workflow: WorkflowConfig<'workflowRetr
           },
         },
         id: job.id,
+        overrideAccess: true,
       })
       job.input = updatedJob.input as any
 

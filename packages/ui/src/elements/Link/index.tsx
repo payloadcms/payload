@@ -58,6 +58,10 @@ export const Link: React.FC<Props> = ({
           onClick(e)
         }
 
+        if (e.defaultPrevented) {
+          return
+        }
+
         if (preventDefault) {
           e.preventDefault()
         }
@@ -77,7 +81,7 @@ export const Link: React.FC<Props> = ({
           }
         }
 
-        startRouteTransition(navigate)
+        void startRouteTransition(navigate)
       }}
       ref={ref}
       {...rest}

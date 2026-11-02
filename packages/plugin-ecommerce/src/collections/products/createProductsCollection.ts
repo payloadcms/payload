@@ -66,6 +66,7 @@ export const createProductsCollection: (props: Props) => CollectionConfig = (pro
       ],
       group: 'Ecommerce',
     },
+    authorship: false,
     fields,
     labels: {
       plural: ({ t }) =>

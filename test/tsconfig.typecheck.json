@@ -16,6 +16,9 @@
       "path": "../packages/admin-bar"
     },
     {
+      "path": "../packages/codemod"
+    },
+    {
       "path": "../packages/create-payload-app"
     },
     {
@@ -68,6 +71,9 @@
     },
     {
       "path": "../packages/richtext-lexical"
+    },
+    {
+      "path": "../packages/transformer-sharp"
     },
     {
       "path": "../packages/translations"

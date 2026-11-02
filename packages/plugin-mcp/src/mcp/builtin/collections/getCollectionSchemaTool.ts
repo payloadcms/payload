@@ -1,4 +1,5 @@
 import { getAccessResults, getCollectionInputSchema, getCollectionSchemaInputSchema } from 'payload'
+import { getLLMInstructions } from 'payload/internal'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
@@ -16,7 +17,8 @@ export const getCollectionSchemaTool = defineCollectionTool({
     readOnlyHint: true,
     title: 'Get Collection Schema',
   },
-  description: 'Get the input schema for creating or updating documents in a collection.',
+  description:
+    'Get the input schema and LLM instructions before creating or updating documents in a collection.',
   input: getCollectionSchemaInputSchema,
 }).handler(async ({ slug, authorizedMCP, req }) => {
   const permissions = authorizedMCP.overrideAccess
@@ -64,17 +66,26 @@ export const getCollectionSchemaTool = defineCollectionTool({
       }
     : { enabled: false }
 
+  const instructions = await getLLMInstructions({
+    slug,
+    type: 'collection',
+    overrideAccess: authorizedMCP.overrideAccess,
+    req,
+  })
+
   return {
     content: [
       {
         type: 'text',
         text: `Schema for collection "${slug}":\n\`\`\`json\n${JSON.stringify(inputSchema)}\n\`\`\`\nUpload configuration:\n\`\`\`json\n${JSON.stringify(upload)}\n\`\`\``,
       },
+      ...(instructions ? [{ type: 'text' as const, text: instructions }] : []),
     ],
     structuredContent: {
       slug,
       schema: inputSchema,
       upload,
+      ...(instructions ? { instructions } : {}),
     },
   }
 })

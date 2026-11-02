@@ -16,7 +16,6 @@
     border-radius: var(--radius-small, 3px);
     background: var(--color-bg-danger-tertiary);
     color: var(--color-text-danger);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
@@ -30,11 +29,10 @@
     border-radius: var(--radius-small, 3px);
     background: var(--color-bg-danger);
     color: var(--color-text-ondanger);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
-    letter-spacing: var(--text-body-medium-strong-letter-spacing);
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
+    letter-spacing: var(--text-body-medium-bold-letter-spacing);
   }
 
   .collection-query-widget__error-list {

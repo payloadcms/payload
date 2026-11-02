@@ -1,5 +1,3 @@
-import type { ObjectLiteralExpression } from 'ts-morph'
-
 import { Node } from 'ts-morph'
 
 import type { Transform } from '../../types.js'

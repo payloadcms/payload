@@ -6,6 +6,7 @@ import terminalLink from 'terminal-link'
 import type { PackageManager, ProjectTemplate } from '../types.js'
 
 import { getValidTemplates } from '../lib/templates.js'
+import { DEFAULT_PAYLOAD_VERSION_TAG } from './resolvePackageVersion.js'
 
 const header = (message: string): string => chalk.bold(message)
 
@@ -38,13 +39,13 @@ export function helpMessage(): void {
 
         {dim Available templates: ${formatTemplates(validTemplates)}}
 
-      --no-agent                    Skip writing AGENTS.md and CLAUDE.md
+      --no-agent                    Skip writing AGENTS.md
       --use-npm                     Use npm to install dependencies
       --use-yarn                    Use yarn to install dependencies
       --use-pnpm                    Use pnpm to install dependencies
       --use-bun                     Use bun to install dependencies (experimental)
       --no-deps                     Do not install any dependencies
-      --payload-version {underline value}       Install a specific Payload version or npm dist-tag (default: canary)
+      --payload-version {underline value}       Install a specific Payload version or npm dist-tag (default: ${DEFAULT_PAYLOAD_VERSION_TAG})
       -h                            Show help
 `)
 }

@@ -16,6 +16,7 @@ import {
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
 import { randomUUID } from 'crypto'
+import { sql } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
@@ -57,7 +58,7 @@ const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('database', () => {
+test.suite('database', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
     payload.db.migrationDir = path.join(dirname, './migrations')
 
@@ -72,23 +73,25 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     user = loginResult.user
     token = loginResult.token
   })
 
-  test
-    .options({
+  test.options.describe(
+    'connection pool',
+    {
       db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase',
-    })
-    .describe('connection pool', () => {
+    },
+    () => {
       test('should not leave a client checked out after connecting', async ({ payload }) => {
         const { pool } = payload.db as unknown as PostgresAdapter
 
         // Awaiting a query guarantees the pool has been used and that nothing is
         // in flight while the counts below are read.
-        await payload.count({ collection: 'simple' })
+        await payload.count({ collection: 'simple', overrideAccess: true })
 
         expect(pool.totalCount).toBeGreaterThan(0)
 
@@ -97,7 +100,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         // the process, so `pool.end()` never drains after `payload.destroy()`.
         expect(pool.totalCount - pool.idleCount).toBe(0)
       })
-    })
+    },
+  )
 
   test.describe('id type', () => {
     test('should sanitize incoming IDs if ID type is number', async ({ restClient }) => {
@@ -130,6 +134,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const doc = await payload.create({
         collection: 'custom-ids',
         data: {},
+        overrideAccess: true,
       })
 
       expect(doc.id).toBeDefined()
@@ -141,23 +146,26 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           title: 'hey',
         },
+        overrideAccess: true,
       })
 
       await payload.update({
         id: doc.id,
         collection: 'custom-ids',
         data: {},
+        overrideAccess: true,
       })
 
       await payload.update({
         id: doc.id,
         collection: 'custom-ids',
         data: {},
+        overrideAccess: true,
       })
 
       const versionsQuery = await payload.db.findVersions({
         collection: 'custom-ids',
-        req: {} as PayloadRequest,
+        req: {},
         where: {
           latest: {
             equals: true,
@@ -195,6 +203,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           ],
           title: 'test',
         },
+        overrideAccess: true,
       })
 
       expect(doc.arrayWithIDs[0].id).toStrictEqual(arrayRowID)
@@ -221,11 +230,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           ],
           title: 'test',
         },
+        overrideAccess: true,
       })
 
       const duplicate = await payload.duplicate({
         id: doc.id,
         collection: postsSlug,
+        overrideAccess: true,
       })
 
       expect(duplicate.arrayWithIDs[0].id).not.toStrictEqual(arrayRowID)
@@ -235,36 +246,48 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     test('should properly give the result with hasMany relationships with custom numeric IDs', async ({
       payload,
     }) => {
-      await payload.create({ collection: 'categories-custom-id', data: { id: 9999 } })
+      await payload.create({
+        collection: 'categories-custom-id',
+        data: { id: 9999 },
+        overrideAccess: true,
+      })
       const res = await payload.create({
         collection: 'posts',
         data: { categoriesCustomID: [9999], title: 'post' },
         depth: 0,
+        overrideAccess: true,
       })
       expect(res.categoriesCustomID[0]).toBe(9999)
-      const resFind = await payload.findByID({ id: res.id, collection: 'posts', depth: 0 })
+      const resFind = await payload.findByID({
+        id: res.id,
+        collection: 'posts',
+        depth: 0,
+        overrideAccess: true,
+      })
       expect(resFind.categoriesCustomID[0]).toBe(9999)
     })
 
-    test
-      .options({ db: (adapter) => adapter === 'postgres-uuidv7' || adapter === 'sqlite-uuidv7' })
-      .describe('uuidv7', () => {
+    test.options.describe(
+      'uuidv7',
+      { db: (adapter) => adapter === 'postgres-uuidv7' || adapter === 'sqlite-uuidv7' },
+      () => {
         const createdRows: { collection: string; id: number | string }[] = []
 
         const track = (collection: string, id: number | string) => {
-          createdRows.push({ collection, id })
+          createdRows.push({ id, collection })
         }
 
         test.afterEach(async ({ payload }) => {
-          for (const { collection, id } of [...createdRows].reverse()) {
+          for (const { id, collection } of [...createdRows].reverse()) {
             try {
               await payload.delete({
+                id,
                 collection: collection as
                   | typeof customIDsSlug
                   | typeof postsSlug
                   | typeof relationASlug
                   | typeof relationBSlug,
-                id,
+                overrideAccess: true,
               })
             } catch {
               // ignore: concurrent cleanup or FK already removed
@@ -278,6 +301,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           const doc = await payload.create({
             collection: postsSlug,
             data: { title: 'uuidv7 test' },
+            overrideAccess: true,
           })
 
           track(postsSlug, doc.id)
@@ -293,10 +317,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           const doc1 = await payload.create({
             collection: postsSlug,
             data: { title: 'uuidv7 first' },
+            overrideAccess: true,
           })
           const doc2 = await payload.create({
             collection: postsSlug,
             data: { title: 'uuidv7 second' },
+            overrideAccess: true,
           })
 
           track(postsSlug, doc1.id)
@@ -309,13 +335,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           const created = await payload.create({
             collection: postsSlug,
             data: { title: 'uuidv7 findable' },
+            overrideAccess: true,
           })
 
           track(postsSlug, created.id)
 
           const found = await payload.findByID({
-            collection: postsSlug,
             id: created.id,
+            collection: postsSlug,
+            overrideAccess: true,
           })
 
           expect(found.id).toBe(created.id)
@@ -326,12 +354,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           const created = await payload.create({
             collection: postsSlug,
             data: { title: 'uuidv7 queryable' },
+            overrideAccess: true,
           })
 
           track(postsSlug, created.id)
 
           const result = await payload.find({
             collection: postsSlug,
+            overrideAccess: true,
             where: { id: { equals: created.id } },
           })
 
@@ -343,22 +373,25 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           const relA = await payload.create({
             collection: relationASlug,
             data: { title: 'uuidv7 rel A' },
+            overrideAccess: true,
           })
           const relB = await payload.create({
             collection: relationBSlug,
             data: {
-              title: 'uuidv7 rel B',
               relationship: relA.id,
+              title: 'uuidv7 rel B',
             },
+            overrideAccess: true,
           })
 
           track(relationBSlug, relB.id)
           track(relationASlug, relA.id)
 
           const found = await payload.findByID({
-            collection: relationBSlug,
             id: relB.id,
+            collection: relationBSlug,
             depth: 1,
+            overrideAccess: true,
           })
 
           expect(found.relationship).toBeDefined()
@@ -368,18 +401,21 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           const doc = await payload.create({
             collection: customIDsSlug,
             data: { title: 'v7 versioned' },
+            overrideAccess: true,
           })
 
           track(customIDsSlug, doc.id)
 
           await payload.update({
-            collection: customIDsSlug,
             id: doc.id,
+            collection: customIDsSlug,
             data: { title: 'v7 versioned updated' },
+            overrideAccess: true,
           })
 
           const versions = await payload.findVersions({
             collection: customIDsSlug,
+            overrideAccess: true,
             where: { parent: { equals: doc.id } },
           })
 
@@ -389,7 +425,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         test('defaultIDType should be text for uuidv7', ({ payload }) => {
           expect(payload.db.defaultIDType).toBe('text')
         })
-      })
+      },
+    )
   })
 
   test.describe('timestamps', () => {
@@ -401,6 +438,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       const createdAtDate = new Date(result.createdAt)
@@ -421,11 +459,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           createdAt,
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       const doc = await payload.findByID({
         id: result.id,
         collection: postsSlug,
+        overrideAccess: true,
       })
 
       expect(result.createdAt).toStrictEqual(createdAt)
@@ -445,6 +485,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           title: 'hello',
           updatedAt,
         },
+        overrideAccess: true,
       })
 
       expect(result.updatedAt).toStrictEqual(updatedAt)
@@ -460,6 +501,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
       const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
 
@@ -474,6 +516,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const doc = await payload.findByID({
         id: result.id,
         collection: postsSlug,
+        overrideAccess: true,
       })
 
       expect(doc.createdAt).toStrictEqual(createdAt)
@@ -490,6 +533,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
       const updatedAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
 
@@ -504,6 +548,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const doc = await payload.findByID({
         id: result.id,
         collection: postsSlug,
+        overrideAccess: true,
       })
 
       expect(doc.updatedAt).toStrictEqual(updatedAt)
@@ -520,6 +565,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       const result: any = await payload.db.updateOne({
@@ -546,6 +592,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       const result: any = await payload.db.updateOne({
@@ -565,12 +612,43 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       })
     })
 
+    test.options.describe('conditional updateOne', { db: 'drizzle' }, () => {
+      test('should allow exactly one concurrent compare-and-set winner', async ({ payload }) => {
+        const post = await payload.create({
+          collection: postsSlug,
+          data: { title: 'pending' },
+          overrideAccess: true,
+        })
+
+        const results = await Promise.all(
+          Array.from({ length: 20 }, () =>
+            payload.db.updateOne({
+              collection: postsSlug,
+              data: { title: 'processing' },
+              options: { atomic: true },
+              where: {
+                and: [{ id: { equals: post.id } }, { title: { equals: 'pending' } }],
+              },
+            }),
+          ),
+        )
+
+        expect(results.filter(Boolean)).toHaveLength(1)
+
+        await payload.db.deleteMany({
+          collection: postsSlug,
+          where: { id: { equals: post.id } },
+        })
+      })
+    })
+
     test('should allow createdAt to be set in updateVersion', async ({ payload }) => {
       const category = await payload.create({
         collection: 'categories',
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
       await payload.update({
         id: category.id,
@@ -578,10 +656,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           title: 'hello2',
         },
+        overrideAccess: true,
       })
       const versions = await payload.findVersions({
         collection: 'categories',
         depth: 0,
+        overrideAccess: true,
         sort: '-createdAt',
       })
       const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
@@ -600,6 +680,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const updatedVersions = await payload.findVersions({
         collection: 'categories',
         depth: 0,
+        overrideAccess: true,
         sort: '-createdAt',
       })
       expect(updatedVersions.docs).toHaveLength(2)
@@ -623,6 +704,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
       await payload.update({
         id: category.id,
@@ -630,10 +712,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           title: 'hello2',
         },
+        overrideAccess: true,
       })
       const versions = await payload.findVersions({
         collection: 'categories',
         depth: 0,
+        overrideAccess: true,
         sort: '-createdAt',
       })
       const updatedAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
@@ -652,6 +736,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const updatedVersions = await payload.findVersions({
         collection: 'categories',
         depth: 0,
+        overrideAccess: true,
         sort: '-updatedAt',
       })
       expect(updatedVersions.docs).toHaveLength(2)
@@ -675,6 +760,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
       expect(createdDoc.createdAt).toBeUndefined()
       expect(createdDoc.updatedAt).toBeUndefined()
@@ -685,6 +771,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           title: 'updated',
         },
+        overrideAccess: true,
       })
       expect(updated.createdAt).toBeUndefined()
       expect(updated.updatedAt).toBeUndefined()
@@ -697,6 +784,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           title: 'hello',
           updatedAt: date,
         },
+        overrideAccess: true,
       })
       expect(createdDocWithTimestamps.createdAt).toBeUndefined()
       expect(createdDocWithTimestamps.updatedAt).toBeUndefined()
@@ -709,6 +797,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           title: 'updated',
           updatedAt: date,
         },
+        overrideAccess: true,
       })
       expect(updatedDocWithTimestamps.createdAt).toBeUndefined()
       expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
@@ -771,8 +860,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       await noTimestampsTestDB(payload)
     })
 
-    test.options({ db: 'mongo' })(
+    test.options(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
+      { db: 'mongo' },
       async ({ payload }) => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
@@ -781,8 +871,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       },
     )
 
-    test.options({ db: 'mongo' })(
+    test.options(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
+      { db: 'mongo' },
       async ({ payload }) => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
@@ -805,6 +896,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           'confirm-password': 'some-password',
           email: 'user1@payloadcms.com',
         },
+        overrideAccess: true,
       })
 
       let keys = Object.keys(createdUser)
@@ -812,7 +904,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       expect(keys).not.toContain('password')
       expect(keys).not.toContain('confirm-password')
 
-      const foundUser = await payload.findByID({ id: createdUser.id, collection: 'users' })
+      const foundUser = await payload.findByID({
+        id: createdUser.id,
+        collection: 'users',
+        overrideAccess: true,
+      })
 
       keys = Object.keys(foundUser)
 
@@ -854,10 +950,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       data: {
         roles: ['admin'],
       },
+      overrideAccess: true,
     })
 
     const result = await payload.find({
       collection: 'select-has-many',
+      overrideAccess: true,
       where: {
         roles: {
           contains: 'admin',
@@ -868,7 +966,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     expect(result.docs.some((doc) => doc.id === id)).toBe(true)
 
-    await payload.delete({ collection: 'select-has-many', id })
+    await payload.delete({ id, collection: 'select-has-many', overrideAccess: true })
   })
 
   test('ensure querying hasMany select field with contains operator does not do partial matching', async ({
@@ -879,10 +977,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       data: {
         food: ['bananabread'],
       },
+      overrideAccess: true,
     })
 
     const result = await payload.find({
       collection: 'select-has-many',
+      overrideAccess: true,
       where: {
         food: {
           contains: 'banana',
@@ -891,7 +991,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
     expect(result.docs).toHaveLength(0)
 
-    await payload.delete({ collection: 'select-has-many', id })
+    await payload.delete({ id, collection: 'select-has-many', overrideAccess: true })
   })
 
   test.describe('allow ID on create', () => {
@@ -915,7 +1015,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         id = 9999
       }
 
-      const post = await payload.create({ collection: 'posts', data: { id, title: 'created' } })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { id, title: 'created' },
+        overrideAccess: true,
+      })
 
       expect(post.id).toBe(id)
     })
@@ -970,7 +1074,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   })
 
   test('should find distinct field values of the collection', async ({ payload }) => {
-    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
     const titles = [
       'title-1',
       'title-2',
@@ -986,13 +1090,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     for (const { title } of titles) {
       const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
       for (let i = 0; i < docsCount; i++) {
-        await payload.create({ collection: 'posts', data: { title } })
+        await payload.create({ collection: 'posts', data: { title }, overrideAccess: true })
       }
     }
 
     const res = await payload.findDistinct({
       collection: 'posts',
       field: 'title',
+      overrideAccess: true,
     })
 
     expect(res.values).toStrictEqual(titles)
@@ -1001,6 +1106,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       collection: 'posts',
       field: 'title',
       limit: 3,
+      overrideAccess: true,
     })
 
     expect(resLimit.values).toStrictEqual(
@@ -1012,6 +1118,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const resDesc = await payload.findDistinct({
       collection: 'posts',
       field: 'title',
+      overrideAccess: true,
       sort: '-title',
     })
 
@@ -1020,13 +1127,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const resAscDefault = await payload.findDistinct({
       collection: 'posts',
       field: 'title',
+      overrideAccess: true,
     })
 
     expect(resAscDefault.values).toStrictEqual(titles)
   })
 
   test('should sort find on a different field with findDistinct', async ({ payload }) => {
-    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
     const titles: {
       title: string
     }[] = [
@@ -1056,6 +1164,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             number: numbers[titles.indexOf(entry)]! + Math.random(),
             title: entry.title,
           },
+          overrideAccess: true,
         })
       }
     }
@@ -1063,12 +1172,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const resDesc = await payload.findDistinct({
       collection: 'posts',
       field: 'title',
+      overrideAccess: true,
       sort: '-number',
     })
 
     const resAsc = await payload.findDistinct({
       collection: 'posts',
       field: 'title',
+      overrideAccess: true,
       sort: 'number',
     })
 
@@ -1079,7 +1190,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   })
 
   test('should populate distinct relationships when depth>0', async ({ payload }) => {
-    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
 
     const categories = ['category-1', 'category-2', 'category-3', 'category-4'].map((title) => ({
       title,
@@ -1088,20 +1199,29 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const categoriesIDS: { category: string }[] = []
 
     for (const { title } of categories) {
-      const doc = await payload.create({ collection: 'categories', data: { title } })
+      const doc = await payload.create({
+        collection: 'categories',
+        data: { title },
+        overrideAccess: true,
+      })
       categoriesIDS.push({ category: doc.id })
     }
 
     for (const { category } of categoriesIDS) {
       const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
       for (let i = 0; i < docsCount; i++) {
-        await payload.create({ collection: 'posts', data: { category, title: randomUUID() } })
+        await payload.create({
+          collection: 'posts',
+          data: { category, title: randomUUID() },
+          overrideAccess: true,
+        })
       }
     }
 
     const resultDepth0 = await payload.findDistinct({
       collection: 'posts',
       field: 'category',
+      overrideAccess: true,
       sort: 'category.title',
     })
     expect(resultDepth0.values).toStrictEqual(categoriesIDS)
@@ -1109,6 +1229,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       collection: 'posts',
       depth: 1,
       field: 'category',
+      overrideAccess: true,
       sort: 'category.title',
     })
 
@@ -1124,8 +1245,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   test('should populate distinct relationships of hasMany: true when depth>0', async ({
     payload,
   }) => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
+    await payload.delete({ collection: 'categories', overrideAccess: true, where: {} })
 
     const categories = ['category-1', 'category-2', 'category-3', 'category-4'].map((title) => ({
       title,
@@ -1134,7 +1255,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const categoriesIDS: { categories: string }[] = []
 
     for (const { title } of categories) {
-      const doc = await payload.create({ collection: 'categories', data: { title } })
+      const doc = await payload.create({
+        collection: 'categories',
+        data: { title },
+        overrideAccess: true,
+      })
       categoriesIDS.push({ categories: doc.id })
     }
 
@@ -1144,6 +1269,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         categories: [categoriesIDS[0]?.categories, categoriesIDS[1]?.categories],
         title: '1',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -1156,6 +1282,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         ],
         title: '2',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -1168,11 +1295,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         ],
         title: '3',
       },
+      overrideAccess: true,
     })
 
     const resultDepth0 = await payload.findDistinct({
       collection: 'posts',
       field: 'categories',
+      overrideAccess: true,
       sort: 'categories.title',
     })
     expect(resultDepth0.values).toStrictEqual(categoriesIDS)
@@ -1180,6 +1309,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       collection: 'posts',
       depth: 1,
       field: 'categories',
+      overrideAccess: true,
       sort: 'categories.title',
     })
 
@@ -1200,6 +1330,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       collection: 'posts',
       depth: 1,
       field: 'categories',
+      overrideAccess: true,
     })
 
     for (let i = 0; i < resultDepth1NoSort.values.length; i++) {
@@ -1214,47 +1345,56 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   test('should populate distinct relationships of polymorphic when depth>0', async ({
     payload,
   }) => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
+    await payload.delete({ collection: 'categories', overrideAccess: true, where: {} })
 
     const category_1 = await payload.create({
       collection: 'categories',
       data: { title: 'category_1' },
+      overrideAccess: true,
     })
     const category_2 = await payload.create({
       collection: 'categories',
       data: { title: 'category_2' },
+      overrideAccess: true,
     })
     const category_3 = await payload.create({
       collection: 'categories',
       data: { title: 'category_3' },
+      overrideAccess: true,
     })
 
     const post_1 = await payload.create({
       collection: 'posts',
       data: { categoryPoly: { relationTo: 'categories', value: category_1.id }, title: 'post_1' },
+      overrideAccess: true,
     })
     const post_2 = await payload.create({
       collection: 'posts',
       data: { categoryPoly: { relationTo: 'categories', value: category_1.id }, title: 'post_2' },
+      overrideAccess: true,
     })
     const post_3 = await payload.create({
       collection: 'posts',
       data: { categoryPoly: { relationTo: 'categories', value: category_2.id }, title: 'post_3' },
+      overrideAccess: true,
     })
     const post_4 = await payload.create({
       collection: 'posts',
       data: { categoryPoly: { relationTo: 'categories', value: category_3.id }, title: 'post_4' },
+      overrideAccess: true,
     })
     const post_5 = await payload.create({
       collection: 'posts',
       data: { categoryPoly: { relationTo: 'categories', value: category_3.id }, title: 'post_5' },
+      overrideAccess: true,
     })
 
     const result = await payload.findDistinct({
       collection: 'posts',
       depth: 0,
       field: 'categoryPoly',
+      overrideAccess: true,
     })
 
     expect(result.values).toHaveLength(3)
@@ -1281,20 +1421,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   test('should populate distinct relationships of hasMany polymorphic when depth>0', async ({
     payload,
   }) => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
+    await payload.delete({ collection: 'categories', overrideAccess: true, where: {} })
 
     const category_1 = await payload.create({
       collection: 'categories',
       data: { title: 'category_1' },
+      overrideAccess: true,
     })
     const category_2 = await payload.create({
       collection: 'categories',
       data: { title: 'category_2' },
+      overrideAccess: true,
     })
     const category_3 = await payload.create({
       collection: 'categories',
       data: { title: 'category_3' },
+      overrideAccess: true,
     })
 
     const post_1 = await payload.create({
@@ -1303,6 +1446,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         categoryPolyMany: [{ relationTo: 'categories', value: category_1.id }],
         title: 'post_1',
       },
+      overrideAccess: true,
     })
     const post_2 = await payload.create({
       collection: 'posts',
@@ -1310,6 +1454,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         categoryPolyMany: [{ relationTo: 'categories', value: category_1.id }],
         title: 'post_2',
       },
+      overrideAccess: true,
     })
     const post_3 = await payload.create({
       collection: 'posts',
@@ -1317,6 +1462,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         categoryPolyMany: [{ relationTo: 'categories', value: category_2.id }],
         title: 'post_3',
       },
+      overrideAccess: true,
     })
     const post_4 = await payload.create({
       collection: 'posts',
@@ -1324,6 +1470,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         categoryPolyMany: [{ relationTo: 'categories', value: category_3.id }],
         title: 'post_4',
       },
+      overrideAccess: true,
     })
     const post_5 = await payload.create({
       collection: 'posts',
@@ -1331,6 +1478,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         categoryPolyMany: [{ relationTo: 'categories', value: category_3.id }],
         title: 'post_5',
       },
+      overrideAccess: true,
     })
 
     const post_6 = await payload.create({
@@ -1339,12 +1487,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         categoryPolyMany: null,
         title: 'post_6',
       },
+      overrideAccess: true,
     })
 
     const result = await payload.findDistinct({
       collection: 'posts',
       depth: 0,
       field: 'categoryPolyMany',
+      overrideAccess: true,
     })
 
     expect(result.values).toHaveLength(4)
@@ -1373,34 +1523,70 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   })
 
   test('should find distinct values with field nested to a relationship', async ({ payload }) => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
+    await payload.delete({ collection: 'categories', overrideAccess: true, where: {} })
 
     const category_1 = await payload.create({
       collection: 'categories',
       data: { title: 'category_1' },
+      overrideAccess: true,
     })
     const category_2 = await payload.create({
       collection: 'categories',
       data: { title: 'category_2' },
+      overrideAccess: true,
     })
     const category_3 = await payload.create({
       collection: 'categories',
       data: { title: 'category_3' },
+      overrideAccess: true,
     })
 
-    await payload.create({ collection: 'posts', data: { category: category_1, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_1, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
 
     const res = await payload.findDistinct({
       collection: 'posts',
       field: 'category.title',
+      overrideAccess: true,
     })
 
     expect(res.values).toEqual([
@@ -1419,34 +1605,70 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   test('should find distinct values with virtual field linked to a relationship', async ({
     payload,
   }) => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
+    await payload.delete({ collection: 'categories', overrideAccess: true, where: {} })
 
     const category_1 = await payload.create({
       collection: 'categories',
       data: { title: 'category_1' },
+      overrideAccess: true,
     })
     const category_2 = await payload.create({
       collection: 'categories',
       data: { title: 'category_2' },
+      overrideAccess: true,
     })
     const category_3 = await payload.create({
       collection: 'categories',
       data: { title: 'category_3' },
+      overrideAccess: true,
     })
 
-    await payload.create({ collection: 'posts', data: { category: category_1, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_1, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
 
     const res = await payload.findDistinct({
       collection: 'posts',
       field: 'categoryTitle',
+      overrideAccess: true,
     })
 
     expect(res.values).toEqual([
@@ -1465,44 +1687,97 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   test('should find distinct values with field nested to a 2x relationship', async ({
     payload,
   }) => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
-    await payload.delete({ collection: 'simple', where: {} })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
+    await payload.delete({ collection: 'categories', overrideAccess: true, where: {} })
+    await payload.delete({ collection: 'simple', overrideAccess: true, where: {} })
 
-    const simple_1 = await payload.create({ collection: 'simple', data: { text: 'simple_1' } })
-    const simple_2 = await payload.create({ collection: 'simple', data: { text: 'simple_2' } })
-    const simple_3 = await payload.create({ collection: 'simple', data: { text: 'simple_3' } })
+    const simple_1 = await payload.create({
+      collection: 'simple',
+      data: { text: 'simple_1' },
+      overrideAccess: true,
+    })
+    const simple_2 = await payload.create({
+      collection: 'simple',
+      data: { text: 'simple_2' },
+      overrideAccess: true,
+    })
+    const simple_3 = await payload.create({
+      collection: 'simple',
+      data: { text: 'simple_3' },
+      overrideAccess: true,
+    })
 
     const category_1 = await payload.create({
       collection: 'categories',
       data: { simple: simple_1, title: 'category_1' },
+      overrideAccess: true,
     })
     const category_2 = await payload.create({
       collection: 'categories',
       data: { simple: simple_2, title: 'category_2' },
+      overrideAccess: true,
     })
     const category_3 = await payload.create({
       collection: 'categories',
       data: { simple: simple_3, title: 'category_3' },
+      overrideAccess: true,
     })
     const category_4 = await payload.create({
       collection: 'categories',
       data: { simple: simple_3, title: 'category_4' },
+      overrideAccess: true,
     })
 
-    await payload.create({ collection: 'posts', data: { category: category_1, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_4, title: 'post' } })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_1, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_4, title: 'post' },
+      overrideAccess: true,
+    })
 
     const res = await payload.findDistinct({
       collection: 'posts',
       field: 'category.simple.text',
+      overrideAccess: true,
     })
 
     expect(res.values).toEqual([
@@ -1521,44 +1796,97 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   test('should find distinct values with virtual field linked to a 2x relationship', async ({
     payload,
   }) => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
-    await payload.delete({ collection: 'simple', where: {} })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
+    await payload.delete({ collection: 'categories', overrideAccess: true, where: {} })
+    await payload.delete({ collection: 'simple', overrideAccess: true, where: {} })
 
-    const simple_1 = await payload.create({ collection: 'simple', data: { text: 'simple_1' } })
-    const simple_2 = await payload.create({ collection: 'simple', data: { text: 'simple_2' } })
-    const simple_3 = await payload.create({ collection: 'simple', data: { text: 'simple_3' } })
+    const simple_1 = await payload.create({
+      collection: 'simple',
+      data: { text: 'simple_1' },
+      overrideAccess: true,
+    })
+    const simple_2 = await payload.create({
+      collection: 'simple',
+      data: { text: 'simple_2' },
+      overrideAccess: true,
+    })
+    const simple_3 = await payload.create({
+      collection: 'simple',
+      data: { text: 'simple_3' },
+      overrideAccess: true,
+    })
 
     const category_1 = await payload.create({
       collection: 'categories',
       data: { simple: simple_1, title: 'category_1' },
+      overrideAccess: true,
     })
     const category_2 = await payload.create({
       collection: 'categories',
       data: { simple: simple_2, title: 'category_2' },
+      overrideAccess: true,
     })
     const category_3 = await payload.create({
       collection: 'categories',
       data: { simple: simple_3, title: 'category_3' },
+      overrideAccess: true,
     })
     const category_4 = await payload.create({
       collection: 'categories',
       data: { simple: simple_3, title: 'category_4' },
+      overrideAccess: true,
     })
 
-    await payload.create({ collection: 'posts', data: { category: category_1, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_2, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_3, title: 'post' } })
-    await payload.create({ collection: 'posts', data: { category: category_4, title: 'post' } })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_1, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_2, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_3, title: 'post' },
+      overrideAccess: true,
+    })
+    await payload.create({
+      collection: 'posts',
+      data: { category: category_4, title: 'post' },
+      overrideAccess: true,
+    })
 
     const res = await payload.findDistinct({
       collection: 'posts',
       field: 'categorySimpleText',
+      overrideAccess: true,
     })
 
     expect(res.values).toEqual([
@@ -1577,26 +1905,44 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   test('should find distinct values when the virtual field is linked to ID', async ({
     payload,
   }) => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
+    await payload.delete({ collection: 'categories', overrideAccess: true, where: {} })
     const category = await payload.create({
       collection: 'categories',
       data: { title: 'category' },
+      overrideAccess: true,
     })
-    await payload.create({ collection: 'posts', data: { category, title: 'post' } })
-    const distinct = await payload.findDistinct({ collection: 'posts', field: 'categoryID' })
+    await payload.create({
+      collection: 'posts',
+      data: { category, title: 'post' },
+      overrideAccess: true,
+    })
+    const distinct = await payload.findDistinct({
+      collection: 'posts',
+      field: 'categoryID',
+      overrideAccess: true,
+    })
     expect(distinct.values).toStrictEqual([{ categoryID: category.id }])
   })
 
   test('should find distinct values by the explicit ID field path', async ({ payload }) => {
-    await payload.delete({ collection: 'posts', where: {} })
-    await payload.delete({ collection: 'categories', where: {} })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
+    await payload.delete({ collection: 'categories', overrideAccess: true, where: {} })
     const category = await payload.create({
       collection: 'categories',
       data: { title: 'category' },
+      overrideAccess: true,
     })
-    await payload.create({ collection: 'posts', data: { category, title: 'post' } })
-    const distinct = await payload.findDistinct({ collection: 'posts', field: 'category.id' })
+    await payload.create({
+      collection: 'posts',
+      data: { category, title: 'post' },
+      overrideAccess: true,
+    })
+    const distinct = await payload.findDistinct({
+      collection: 'posts',
+      field: 'category.id',
+      overrideAccess: true,
+    })
     expect(distinct.values).toStrictEqual([{ 'category.id': category.id }])
   })
 
@@ -1610,6 +1956,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         const cat = await payload.create({
           collection: 'categories',
           data: { title: `DistinctTest-Cat-${i + 1}-${Date.now()}` },
+          overrideAccess: true,
         })
         return cat.id
       })
@@ -1623,6 +1970,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             category: categoryId,
             title: `DistinctTest-Post-${i + 1}-${Date.now()}`,
           },
+          overrideAccess: true,
         })
         return post.id
       })
@@ -1633,12 +1981,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       // Clean up in order: posts first, then categories
       await Promise.all(
         createdPostIds.map((id) =>
-          payloadInstance.delete({ id, collection: 'posts' }).catch(() => {}),
+          payloadInstance.delete({ id, collection: 'posts', overrideAccess: true }).catch(() => {}),
         ),
       )
       await Promise.all(
         createdCategoryIds.map((id) =>
-          payloadInstance.delete({ id, collection: 'categories' }).catch(() => {}),
+          payloadInstance
+            .delete({ id, collection: 'categories', overrideAccess: true })
+            .catch(() => {}),
         ),
       )
     })
@@ -1649,6 +1999,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         collection: 'posts',
         field: 'category.title',
         limit: 10,
+        overrideAccess: true,
         page: 1,
         where: {
           title: {
@@ -1669,6 +2020,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         collection: 'posts',
         field: 'category.title',
         limit: 10,
+        overrideAccess: true,
         page: 2,
         where: {
           title: {
@@ -1713,6 +2065,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           })),
           title: `${testPrefix}-${i}`,
         },
+        overrideAccess: true,
       })
 
       createdIds.push(String(doc.id))
@@ -1721,6 +2074,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const page1 = await payload.find({
       collection: postsSlug,
       limit: LIMIT,
+      overrideAccess: true,
       page: 1,
       sort: 'arrayWithIDs.text',
       where: { title: { contains: testPrefix } },
@@ -1729,6 +2083,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const page2 = await payload.find({
       collection: postsSlug,
       limit: LIMIT,
+      overrideAccess: true,
       page: 2,
       sort: 'arrayWithIDs.text',
       where: { title: { contains: testPrefix } },
@@ -1764,30 +2119,34 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     await payload.delete({
       collection: postsSlug,
+      overrideAccess: true,
       where: { id: { in: createdIds } },
     })
   })
 
   test.describe('Compound Indexes', () => {
     test.beforeEach(async ({ payload }) => {
-      await payload.delete({ collection: 'compound-indexes', where: {} })
+      await payload.delete({ collection: 'compound-indexes', overrideAccess: true, where: {} })
     })
 
     test('top level: should throw a unique error', async ({ payload }) => {
       await payload.create({
         collection: 'compound-indexes',
         data: { one: '1', three: randomUUID(), two: '2' },
+        overrideAccess: true,
       })
 
       // does not fail
       await payload.create({
         collection: 'compound-indexes',
         data: { one: '1', three: randomUUID(), two: '3' },
+        overrideAccess: true,
       })
       // does not fail
       await payload.create({
         collection: 'compound-indexes',
         data: { one: '-1', three: randomUUID(), two: '2' },
+        overrideAccess: true,
       })
 
       // fails
@@ -1795,6 +2154,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         payload.create({
           collection: 'compound-indexes',
           data: { one: '1', three: randomUUID(), two: '2' },
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
     })
@@ -1807,17 +2167,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           one: randomUUID(),
           three: '3',
         },
+        overrideAccess: true,
       })
 
       // does not fail
       await payload.create({
         collection: 'compound-indexes',
         data: { group: { four: '5' }, one: randomUUID(), three: '3' },
+        overrideAccess: true,
       })
       // does not fail
       await payload.create({
         collection: 'compound-indexes',
         data: { group: { four: '4' }, one: randomUUID(), three: '4' },
+        overrideAccess: true,
       })
 
       // fails
@@ -1825,6 +2188,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         payload.create({
           collection: 'compound-indexes',
           data: { group: { four: '4' }, one: randomUUID(), three: '3' },
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
     })
@@ -1869,6 +2233,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       await payload.db.migrate()
       const { docs } = await payload.find({
         collection: 'payload-migrations',
+        overrideAccess: true,
       })
       const migration = docs[0]
       expect(migration?.name).toContain('_test')
@@ -1889,6 +2254,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       await payload.db.migrateFresh({ forceAcceptWarning: true })
       const { docs } = await payload.find({
         collection: 'payload-migrations',
+        overrideAccess: true,
       })
       const migration = docs[0]
       expect(migration.name).toContain('_test')
@@ -1897,7 +2263,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    test.options({ db: 'mongo' })('should run migrate:down', async ({ payload }) => {
+    test.options('should run migrate:down', { db: 'mongo' }, async ({ payload }) => {
       // migrate existing if there any
       await payload.db.migrate()
 
@@ -1910,7 +2276,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       // migrate current to test
       await payload.db.migrate()
 
-      const { docs } = await payload.find({ collection: 'payload-migrations' })
+      const { docs } = await payload.find({
+        collection: 'payload-migrations',
+        overrideAccess: true,
+      })
       expect(docs.some((doc) => doc.name.includes('migration_to_down'))).toBeTruthy()
 
       let error
@@ -1922,16 +2291,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
       const migrations = await payload.find({
         collection: 'payload-migrations',
+        overrideAccess: true,
       })
 
       expect(error).toBeUndefined()
       expect(migrations.docs.some((doc) => doc.name.includes('migration_to_down'))).toBeFalsy()
 
-      await payload.delete({ collection: 'payload-migrations', where: {} })
+      await payload.delete({ collection: 'payload-migrations', overrideAccess: true, where: {} })
     })
 
     // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    test.options({ db: 'mongo' })('should run migrate:refresh', async ({ payload }) => {
+    test.options('should run migrate:refresh', { db: 'mongo' }, async ({ payload }) => {
       let error
       try {
         await payload.db.migrateRefresh()
@@ -1941,6 +2311,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
       const migrations = await payload.find({
         collection: 'payload-migrations',
+        overrideAccess: true,
       })
 
       expect(error).toBeUndefined()
@@ -1949,7 +2320,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   })
 
   // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-  test.options({ db: 'mongo' })('should run migrate:reset', async ({ payload }) => {
+  test.options('should run migrate:reset', { db: 'mongo' }, async ({ payload }) => {
     let error
     try {
       await payload.db.migrateReset()
@@ -1959,6 +2330,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     const migrations = await payload.find({
       collection: 'payload-migrations',
+      overrideAccess: true,
     })
 
     expect(error).toBeUndefined()
@@ -2130,6 +2502,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           title: 'hello',
         },
+        overrideAccess: true,
       })
 
       const { id } = await payload.create({
@@ -2154,11 +2527,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           select: ['a', 'b'],
           text: 'test',
         },
+        overrideAccess: true,
       })
 
       const doc = await payload.findByID({
         id,
         collection: 'custom-schema',
+        overrideAccess: true,
       })
 
       expect(doc.relationship[0].title).toStrictEqual(relationA.title)
@@ -2181,27 +2556,30 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           array: [{ text: 'array row' }],
           select: ['a', 'b'],
         },
+        overrideAccess: true,
       })
 
       await payload.db.updateOne({
-        collection: customSchemaSlug,
         id: doc.id,
+        collection: customSchemaSlug,
         data: {
           array: [],
         },
       })
 
       const updated = await payload.findByID({
-        collection: customSchemaSlug,
         id: doc.id,
+        collection: customSchemaSlug,
+        overrideAccess: true,
       })
 
       expect(updated.array).toHaveLength(0)
       expect(updated.select).toStrictEqual(['a', 'b'])
 
       await payload.delete({
-        collection: customSchemaSlug,
         id: doc.id,
+        collection: customSchemaSlug,
+        overrideAccess: true,
       })
     })
 
@@ -2213,26 +2591,29 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           select: ['a', 'b'],
         },
+        overrideAccess: true,
       })
 
       await payload.db.updateOne({
-        collection: customSchemaSlug,
         id: doc.id,
+        collection: customSchemaSlug,
         data: {
           select: [],
         },
       })
 
       const updated = await payload.findByID({
-        collection: customSchemaSlug,
         id: doc.id,
+        collection: customSchemaSlug,
+        overrideAccess: true,
       })
 
       expect(updated.select).toHaveLength(0)
 
       await payload.delete({
-        collection: customSchemaSlug,
         id: doc.id,
+        collection: customSchemaSlug,
+        overrideAccess: true,
       })
     })
 
@@ -2246,8 +2627,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             },
           ],
         },
+        overrideAccess: true,
       })
-      const res = await payload.findByID({ id, collection: 'aliases' })
+      const res = await payload.findByID({ id, collection: 'aliases', overrideAccess: true })
       expect(
         res.thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName,
       ).toHaveLength(1)
@@ -2260,7 +2642,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   })
 
   test.describe('transactions', () => {
-    test.options({ db: 'mongo' }).describe('pagination', () => {
+    test.options.describe('pagination', { db: 'mongo' }, () => {
       const createdDocs: { collection: CollectionSlug; id: number | string }[] = []
 
       const trackCreatedDoc = (collection: CollectionSlug, id: number | string) => {
@@ -2269,7 +2651,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
       test.afterEach(async ({ payload }) => {
         for (const { collection, id } of [...createdDocs].reverse()) {
-          await payload.delete({ collection, id })
+          await payload.delete({ collection, id, overrideAccess: true })
         }
 
         createdDocs.length = 0
@@ -2282,24 +2664,28 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         const simpleOne = await payload.create({
           collection: 'simple',
           data: { text: `${uniqueTitle} simple one` },
+          overrideAccess: true,
         })
         trackCreatedDoc('simple', simpleOne.id)
 
         const simpleTwo = await payload.create({
           collection: 'simple',
           data: { text: `${uniqueTitle} simple two` },
+          overrideAccess: true,
         })
         trackCreatedDoc('simple', simpleTwo.id)
 
         const categoryOne = await payload.create({
           collection: 'categories',
           data: { title: `${uniqueTitle} category one` },
+          overrideAccess: true,
         })
         trackCreatedDoc('categories', categoryOne.id)
 
         const categoryTwo = await payload.create({
           collection: 'categories',
           data: { title: `${uniqueTitle} category two` },
+          overrideAccess: true,
         })
         trackCreatedDoc('categories', categoryTwo.id)
 
@@ -2309,6 +2695,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             category: categoryOne.id,
             title: `${uniqueTitle} post one`,
           },
+          overrideAccess: true,
         })
         trackCreatedDoc(postsSlug, postOne.id)
 
@@ -2318,6 +2705,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             category: categoryTwo.id,
             title: `${uniqueTitle} post two`,
           },
+          overrideAccess: true,
         })
         trackCreatedDoc(postsSlug, postTwo.id)
 
@@ -2393,6 +2781,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             data: {
               title,
             },
+            overrideAccess: true,
             req,
           })
 
@@ -2400,6 +2789,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             payload.findByID({
               id: first.id,
               collection,
+              overrideAccess: true,
               // omitting req for isolation
             }),
           ).rejects.toThrow('Not Found')
@@ -2409,6 +2799,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             data: {
               title,
             },
+            overrideAccess: true,
             req,
           })
 
@@ -2418,11 +2809,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           const firstResult = await payload.findByID({
             id: first.id,
             collection,
+            overrideAccess: true,
             req,
           })
           const secondResult = await payload.findByID({
             id: second.id,
             collection,
+            overrideAccess: true,
             req,
           })
 
@@ -2445,6 +2838,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
               data: {
                 title,
               },
+              overrideAccess: true,
               req: isolateObjectProperty(req, 'transactionID'),
             })
             .then((res) => {
@@ -2457,6 +2851,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
               data: {
                 title,
               },
+              overrideAccess: true,
               req: isolateObjectProperty(req, 'transactionID'),
             })
             .then((res) => {
@@ -2470,10 +2865,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           const firstResult = await payload.findByID({
             id: first.id,
             collection,
+            overrideAccess: true,
           })
           const secondResult = await payload.findByID({
             id: second.id,
             collection,
+            overrideAccess: true,
           })
 
           expect(firstResult.id).toStrictEqual(first.id)
@@ -2493,6 +2890,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             data: {
               title,
             },
+            overrideAccess: true,
             req,
           })
 
@@ -2503,6 +2901,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
                 throwAfterChange: true,
                 title,
               },
+              overrideAccess: true,
               req,
             })
           } catch (error: unknown) {
@@ -2518,6 +2917,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             payload.findByID({
               id: first.id,
               collection,
+              overrideAccess: true,
               req,
             }),
           ).rejects.toThrow('Not Found')
@@ -2531,11 +2931,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             data: {
               title,
             },
+            overrideAccess: true,
           })
 
           await payload.delete({
             id: missing.id,
             collection,
+            overrideAccess: true,
           })
 
           const req = {
@@ -2550,6 +2952,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             data: {
               title,
             },
+            overrideAccess: true,
             req,
           })
 
@@ -2560,6 +2963,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             payload.findByID({
               id: missing.id,
               collection,
+              overrideAccess: true,
               req,
             }),
           ).rejects.toThrow('Not Found')
@@ -2571,6 +2975,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           const result = await payload.findByID({
             id: created.id,
             collection,
+            overrideAccess: true,
           })
 
           expect(result.id).toStrictEqual(created.id)
@@ -2578,14 +2983,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           await payload.delete({
             id: created.id,
             collection,
+            overrideAccess: true,
           })
         })
       }
 
-      test.options({
-        db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase',
-      })(
+      test.options(
         'should throw error when beginTransaction fails to connect (drizzle)',
+        {
+          db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase',
+        },
         async ({ payload }) => {
           const db = payload.db as unknown as Record<string, unknown>
           const originalDrizzle = db.drizzle
@@ -2601,11 +3008,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         },
       )
 
-      test.options({
-        db: (adapter) =>
-          adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
-      })(
+      test.options(
         'should throw error when beginTransaction fails to connect (mongo)',
+        {
+          db: (adapter) =>
+            adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+        },
         async ({ payload }) => {
           const db = payload.db as unknown as Record<string, unknown>
           const originalConnection = db.connection
@@ -2635,6 +3043,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             },
             depth: 0,
             disableTransaction: true,
+            overrideAccess: true,
           })
         })
         test('should not use transaction calling create() with disableTransaction', () => {
@@ -2650,6 +3059,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
               title,
             },
             disableTransaction: true,
+            overrideAccess: true,
           })
 
           expect(result.hasTransaction).toBeFalsy()
@@ -2664,6 +3074,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
               title,
             },
             disableTransaction: true,
+            overrideAccess: true,
           })
 
           expect(result.hasTransaction).toBeFalsy()
@@ -2680,6 +3091,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           data: {
             title: 'hello',
           },
+          overrideAccess: true,
         })
       }
 
@@ -2689,6 +3101,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           title: 'world',
         },
         limit: 5,
+        overrideAccess: true,
         where: {
           title: { equals: 'hello' },
         },
@@ -2696,6 +3109,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
       const findResult = await payload.find({
         collection,
+        overrideAccess: true,
         where: {
           title: { exists: true },
         },
@@ -2716,14 +3130,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
       try {
         const posts = await Promise.all([
-          payload.create({ collection, data: { title: 'test1' } }),
-          payload.create({ collection, data: { title: 'test2' } }),
-          payload.create({ collection, data: { title: 'test3' } }),
+          payload.create({ collection, data: { title: 'test1' }, overrideAccess: true }),
+          payload.create({ collection, data: { title: 'test2' }, overrideAccess: true }),
+          payload.create({ collection, data: { title: 'test3' }, overrideAccess: true }),
         ])
 
         const result = await payload.update({
           collection,
           data: { title: 'updated' },
+          overrideAccess: true,
           where: { id: { in: posts.map((p) => p.id) } },
         })
 
@@ -2740,12 +3155,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
       try {
         const posts = await Promise.all([
-          payload.create({ collection, data: { title: 'toDelete1' } }),
-          payload.create({ collection, data: { title: 'toDelete2' } }),
+          payload.create({ collection, data: { title: 'toDelete1' }, overrideAccess: true }),
+          payload.create({ collection, data: { title: 'toDelete2' }, overrideAccess: true }),
         ])
 
         const result = await payload.delete({
           collection,
+          overrideAccess: true,
           where: { id: { in: posts.map((p) => p.id) } },
         })
 
@@ -2762,6 +3178,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           point: [5, 10],
         },
+        overrideAccess: true,
       })
 
       expect(result.point).toEqual([5, 10])
@@ -2782,6 +3199,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           title: 'notupdated',
         },
+        overrideAccess: true,
       })
 
       // Create 5 posts
@@ -2791,6 +3209,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           data: {
             title: `v1 ${i}`,
           },
+          overrideAccess: true,
         })
       }
 
@@ -2814,6 +3233,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const { docs } = await payload.find({
         collection: postsSlug,
         depth: 0,
+        overrideAccess: true,
         pagination: false,
         where: {
           title: {
@@ -2829,6 +3249,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const { docs: notUpdatedDocs } = await payload.find({
         collection: postsSlug,
         depth: 0,
+        overrideAccess: true,
         pagination: false,
         where: {
           title: {
@@ -2858,6 +3279,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           data: {
             title: 'not updated',
           },
+          overrideAccess: true,
         })
       }
 
@@ -2882,6 +3304,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const { docs } = await payload.find({
         collection: postsSlug,
         depth: 0,
+        overrideAccess: true,
         pagination: false,
         where: {
           title: {
@@ -2897,6 +3320,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const { docs: notUpdatedDocs } = await payload.find({
         collection: postsSlug,
         depth: 0,
+        overrideAccess: true,
         pagination: false,
         where: {
           title: {
@@ -2933,6 +3357,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             number: i,
             title: 'not updated',
           },
+          overrideAccess: true,
         })
       }
 
@@ -2961,6 +3386,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const { docs } = await payload.find({
         collection: postsSlug,
         depth: 0,
+        overrideAccess: true,
         pagination: false,
         sort: 'number',
         where: {
@@ -3000,6 +3426,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             number: i,
             title: 'not updated',
           },
+          overrideAccess: true,
         })
       }
 
@@ -3009,6 +3436,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           title: 'updated',
         },
         limit: 5,
+        overrideAccess: true,
         sort: 'number',
         where: {
           id: {
@@ -3028,6 +3456,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const { docs } = await payload.find({
         collection: postsSlug,
         depth: 0,
+        overrideAccess: true,
         pagination: false,
         sort: 'number',
         where: {
@@ -3067,6 +3496,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             number: i,
             title: 'not updated',
           },
+          overrideAccess: true,
         })
       }
 
@@ -3095,6 +3525,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const { docs } = await payload.find({
         collection: postsSlug,
         depth: 0,
+        overrideAccess: true,
         pagination: false,
         sort: '-number',
         where: {
@@ -3136,6 +3567,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             number: i,
             title: 'not updated',
           },
+          overrideAccess: true,
         })
       }
 
@@ -3145,6 +3577,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           title: 'updated',
         },
         limit: 5,
+        overrideAccess: true,
         sort: '-number',
         where: {
           id: {
@@ -3164,6 +3597,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const { docs } = await payload.find({
         collection: postsSlug,
         depth: 0,
+        overrideAccess: true,
         pagination: false,
         sort: '-number',
         where: {
@@ -3197,6 +3631,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           data: {
             title: 'not updated',
           },
+          overrideAccess: true,
         })
       }
 
@@ -3221,6 +3656,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const { docs } = await payload.find({
         collection: postsSlug,
         depth: 0,
+        overrideAccess: true,
         pagination: false,
         where: {
           title: {
@@ -3251,6 +3687,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           data: {
             title: 'not updated',
           },
+          overrideAccess: true,
         })
       }
 
@@ -3275,6 +3712,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const { docs } = await payload.find({
         collection: postsSlug,
         depth: 0,
+        overrideAccess: true,
         pagination: false,
         where: {
           title: {
@@ -3364,6 +3802,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             // @ts-expect-error
             title: undefined,
           },
+          overrideAccess: true,
         })
       } catch (e: any) {
         errorMessage = e.message
@@ -3387,6 +3826,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             },
             title: 'Title',
           },
+          overrideAccess: true,
         })
       } catch (e: any) {
         expect(e.message).toMatch(
@@ -3411,6 +3851,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
               text: undefined,
             },
           },
+          overrideAccess: true,
         })
       } catch (e: any) {
         expect(e.data?.errors?.[0]?.path).toBe('groupWithinUnnamedTab.text')
@@ -3440,7 +3881,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
   })
 
-  test.options({ db: 'drizzle' }).describe('Schema generation', () => {
+  test.options.describe('Schema generation', { db: 'drizzle' }, () => {
     test('should generate Drizzle Postgres schema', async ({ payload }) => {
       const generatedAdapterName = process.env.PAYLOAD_DATABASE
       if (!generatedAdapterName?.includes('postgres') && generatedAdapterName !== 'supabase') {
@@ -3496,6 +3937,90 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       }
     })
   })
+
+  test.options.describe(
+    'locale table indexes (Postgres)',
+    { db: (adapter) => adapter.startsWith('postgres') || adapter.startsWith('vercel-postgres') },
+    () => {
+      const getUniqueLocaleIndexColumns = async ({
+        payload,
+        tableName,
+      }: {
+        payload: Payload
+        tableName: string
+      }): Promise<string> => {
+        const schemaName = (payload.db as any).schemaName || 'public'
+        const result = await (payload.db as any).drizzle.execute(sql`
+          SELECT indexdef FROM pg_indexes
+          WHERE schemaname = ${schemaName}
+            AND tablename = ${tableName}
+            AND indexdef ILIKE '%unique%'
+            AND indexdef ILIKE '%_parent_id%'
+            AND indexdef ILIKE '%_locale%'
+        `)
+
+        const indexdef = result.rows[0]?.indexdef as string | undefined
+
+        if (!indexdef) {
+          throw new Error(`Expected a unique locale index on ${tableName}`)
+        }
+
+        // Return only the parenthesized column list, e.g. "_parent_id, _locale".
+        return indexdef.slice(indexdef.lastIndexOf('(') + 1, indexdef.lastIndexOf(')'))
+      }
+
+      for (const tableName of ['customs_locales', '_customs_v_locales']) {
+        test(`should lead the ${tableName} unique index with _parent_id`, async ({ payload }) => {
+          const columns = await getUniqueLocaleIndexColumns({ payload, tableName })
+
+          expect(columns).toContain('_parent_id')
+          expect(columns.indexOf('_parent_id')).toBeLessThan(columns.indexOf('_locale'))
+        })
+      }
+    },
+  )
+
+  test.options.describe(
+    'locale table indexes (SQLite)',
+    { db: (adapter) => adapter.startsWith('sqlite') },
+    () => {
+      const getUniqueLocaleIndexColumns = async ({
+        payload,
+        tableName,
+      }: {
+        payload: Payload
+        tableName: string
+      }): Promise<string> => {
+        const rows = (await payload.db.drizzle.all(
+          sql.raw(
+            `SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name='${tableName}'`,
+          ),
+        )) as { name: string; sql: null | string }[]
+
+        const indexdef = rows.find(
+          (row) =>
+            typeof row.sql === 'string' &&
+            row.sql.includes('_parent_id') &&
+            row.sql.includes('_locale'),
+        )?.sql
+
+        if (!indexdef) {
+          throw new Error(`Expected a unique locale index on ${tableName}`)
+        }
+
+        return indexdef.slice(indexdef.lastIndexOf('(') + 1, indexdef.lastIndexOf(')'))
+      }
+
+      for (const tableName of ['customs_locales', '_customs_v_locales']) {
+        test(`should lead the ${tableName} unique index with _parent_id`, async ({ payload }) => {
+          const columns = await getUniqueLocaleIndexColumns({ payload, tableName })
+
+          expect(columns).toContain('_parent_id')
+          expect(columns.indexOf('_parent_id')).toBeLessThan(columns.indexOf('_locale'))
+        })
+      }
+    },
+  )
 
   test.describe('drizzle: schema hooks', () => {
     test.beforeAll(() => {
@@ -3629,6 +4154,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           city: 'Berlin',
           country: 'Germany',
         },
+        overrideAccess: true,
       })
 
       const tableName = payload.db.schemaName ? `"${payload.db.schemaName}"."places"` : 'places'
@@ -3690,6 +4216,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           city: 'A',
           country: 'B',
         },
+        overrideAccess: true,
       })
 
       await expect(
@@ -3699,6 +4226,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             city: 'C',
             country: 'B',
           },
+          overrideAccess: true,
         }),
       ).resolves.toBeTruthy()
 
@@ -3709,6 +4237,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             city: 'A',
             country: 'D',
           },
+          overrideAccess: true,
         }),
       ).resolves.toBeTruthy()
 
@@ -3719,6 +4248,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             city: 'A',
             country: 'B',
           },
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
     })
@@ -3729,16 +4259,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const createRes = await payload.create({
         collection: 'fields-persistance',
         data: { array: [], text: 'asd', textHooked: 'asd' },
+        overrideAccess: true,
       })
 
       const resLocal = await payload.findByID({
         id: createRes.id,
         collection: 'fields-persistance',
+        overrideAccess: true,
       })
 
       const resDb = (await payload.db.findOne({
         collection: 'fields-persistance',
-        req: {} as PayloadRequest,
+        req: {},
         where: { id: { equals: createRes.id } },
       })) as Record<string, unknown>
 
@@ -3759,6 +4291,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           textWithinRow: '2',
           textWithinTabs: '3',
         },
+        overrideAccess: true,
       })
 
       expect(res.textWithinCollapsible).toBeUndefined()
@@ -3778,11 +4311,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const resDb = (await payload.db.findOne({
         collection: fieldsPersistanceSlug,
-        req: {} as PayloadRequest,
+        req: {},
         where: { id: { equals: created.id } },
       })) as Record<string, unknown>
 
@@ -3793,88 +4327,140 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     test('should allow virtual field with reference', async ({ payload }) => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'my-title' },
+        overrideAccess: true,
+      })
       const { id } = await payload.create({
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
-      })
-
-      const doc = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
-      expect(doc.postTitle).toBe('my-title')
-      const draft = await payload.find({
-        collection: 'virtual-relations',
-        depth: 0,
-        where: { id: { equals: id } },
-      })
-      expect(draft.docs[0]?.postTitle).toBe('my-title')
-    })
-
-    test('should not break when using select', async ({ payload }) => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-10' } })
-      const { id } = await payload.create({
-        collection: 'virtual-relations',
-        data: { post: post.id },
-        depth: 0,
+        overrideAccess: true,
       })
 
       const doc = await payload.findByID({
         id,
         collection: 'virtual-relations',
         depth: 0,
+        overrideAccess: true,
+      })
+      expect(doc.postTitle).toBe('my-title')
+      const draft = await payload.find({
+        collection: 'virtual-relations',
+        depth: 0,
+        overrideAccess: true,
+        where: { id: { equals: id } },
+      })
+      expect(draft.docs[0]?.postTitle).toBe('my-title')
+    })
+
+    test('should not break when using select', async ({ payload }) => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'my-title-10' },
+        overrideAccess: true,
+      })
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post.id },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      const doc = await payload.findByID({
+        id,
+        collection: 'virtual-relations',
+        depth: 0,
+        overrideAccess: true,
         select: { postTitle: true },
       })
       expect(doc.postTitle).toBe('my-title-10')
     })
 
     test('should respect hidden: true for virtual fields with reference', async ({ payload }) => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-3' } })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'my-title-3' },
+        overrideAccess: true,
+      })
       const { id } = await payload.create({
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
+        overrideAccess: true,
       })
 
-      const doc = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
+      const doc = await payload.findByID({
+        id,
+        collection: 'virtual-relations',
+        depth: 0,
+        overrideAccess: true,
+      })
       expect(doc.postTitleHidden).toBeUndefined()
 
       const doc_show = await payload.findByID({
         id,
         collection: 'virtual-relations',
         depth: 0,
+        overrideAccess: true,
         showHiddenFields: true,
       })
       expect(doc_show.postTitleHidden).toBe('my-title-3')
     })
 
     test('should allow virtual field as reference to ID', async ({ payload }) => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'my-title' },
+        overrideAccess: true,
+      })
       const { id } = await payload.create({
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
+        overrideAccess: true,
       })
 
-      const docDepth2 = await payload.findByID({ id, collection: 'virtual-relations' })
+      const docDepth2 = await payload.findByID({
+        id,
+        collection: 'virtual-relations',
+        overrideAccess: true,
+      })
       expect(docDepth2.postID).toBe(post.id)
-      const docDepth0 = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
+      const docDepth0 = await payload.findByID({
+        id,
+        collection: 'virtual-relations',
+        depth: 0,
+        overrideAccess: true,
+      })
       expect(docDepth0.postID).toBe(post.id)
     })
 
     test('should allow virtual field as reference to custom ID', async ({ payload }) => {
-      const customID = await payload.create({ collection: 'custom-ids', data: {} })
+      const customID = await payload.create({
+        collection: 'custom-ids',
+        data: {},
+        overrideAccess: true,
+      })
       const { id } = await payload.create({
         collection: 'virtual-relations',
         data: { customID: customID.id },
         depth: 0,
+        overrideAccess: true,
       })
 
-      const docDepth2 = await payload.findByID({ id, collection: 'virtual-relations' })
+      const docDepth2 = await payload.findByID({
+        id,
+        collection: 'virtual-relations',
+        overrideAccess: true,
+      })
       expect(docDepth2.customIDValue).toBe(customID.id)
       const docDepth0 = await payload.findByID({
         id,
         collection: 'virtual-relations',
         depth: 0,
+        overrideAccess: true,
       })
       expect(docDepth0.customIDValue).toBe(customID.id)
     })
@@ -3883,20 +4469,32 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const category = await payload.create({
         collection: 'categories',
         data: { title: 'category-3' },
+        overrideAccess: true,
       })
       const post = await payload.create({
         collection: 'posts',
         data: { category: category.id, title: 'my-title-3' },
+        overrideAccess: true,
       })
       const { id } = await payload.create({
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
+        overrideAccess: true,
       })
 
-      const docDepth2 = await payload.findByID({ id, collection: 'virtual-relations' })
+      const docDepth2 = await payload.findByID({
+        id,
+        collection: 'virtual-relations',
+        overrideAccess: true,
+      })
       expect(docDepth2.postCategoryID).toBe(category.id)
-      const docDepth0 = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
+      const docDepth0 = await payload.findByID({
+        id,
+        collection: 'virtual-relations',
+        depth: 0,
+        overrideAccess: true,
+      })
       expect(docDepth0.postCategoryID).toBe(category.id)
     })
 
@@ -3904,6 +4502,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const post = await payload.create({
         collection: 'posts',
         data: { localized: 'localized en', title: 'my-title' },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -3911,41 +4510,65 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         collection: 'posts',
         data: { localized: 'localized es' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       const { id } = await payload.create({
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
+        overrideAccess: true,
       })
 
-      let doc = await payload.findByID({ id, collection: 'virtual-relations', depth: 0 })
+      let doc = await payload.findByID({
+        id,
+        collection: 'virtual-relations',
+        depth: 0,
+        overrideAccess: true,
+      })
       expect(doc.postLocalized).toBe('localized en')
 
-      doc = await payload.findByID({ id, collection: 'virtual-relations', depth: 0, locale: 'es' })
+      doc = await payload.findByID({
+        id,
+        collection: 'virtual-relations',
+        depth: 0,
+        locale: 'es',
+        overrideAccess: true,
+      })
       expect(doc.postLocalized).toBe('localized es')
     })
 
     test('should allow to query by a virtual field with reference', async ({ payload }) => {
-      await payload.delete({ collection: 'posts', where: {} })
-      await payload.delete({ collection: 'virtual-relations', where: {} })
-      const post_1 = await payload.create({ collection: 'posts', data: { title: 'Dan' } })
-      const post_2 = await payload.create({ collection: 'posts', data: { title: 'Mr.Dan' } })
+      await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
+      await payload.delete({ collection: 'virtual-relations', overrideAccess: true, where: {} })
+      const post_1 = await payload.create({
+        collection: 'posts',
+        data: { title: 'Dan' },
+        overrideAccess: true,
+      })
+      const post_2 = await payload.create({
+        collection: 'posts',
+        data: { title: 'Mr.Dan' },
+        overrideAccess: true,
+      })
 
       const doc_1 = await payload.create({
         collection: 'virtual-relations',
         data: { post: post_1.id },
         depth: 0,
+        overrideAccess: true,
       })
       const doc_2 = await payload.create({
         collection: 'virtual-relations',
         data: { post: post_2.id },
         depth: 0,
+        overrideAccess: true,
       })
 
       const { docs: ascDocs } = await payload.find({
         collection: 'virtual-relations',
         depth: 0,
+        overrideAccess: true,
         sort: 'postTitle',
       })
 
@@ -3956,6 +4579,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const { docs: descDocs } = await payload.find({
         collection: 'virtual-relations',
         depth: 0,
+        overrideAccess: true,
         sort: '-postTitle',
       })
 
@@ -3968,12 +4592,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const category = await payload.create({
         collection: 'categories',
         data: { title: '1-category' },
+        overrideAccess: true,
       })
       const post = await payload.create({
         collection: 'posts',
         data: { category: category.id, title: '1-post' },
+        overrideAccess: true,
       })
-      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const doc = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post.id },
+        overrideAccess: true,
+      })
       expect(doc.postCategoryTitle).toBe('1-category')
     })
 
@@ -3981,17 +4611,24 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const category = await payload.create({
         collection: 'categories',
         data: { title: '3-category' },
+        overrideAccess: true,
       })
       const post = await payload.create({
         collection: 'posts',
         data: { category: category.id, title: '3-post' },
+        overrideAccess: true,
       })
-      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const doc = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post.id },
+        overrideAccess: true,
+      })
 
       const docWithSelect = await payload.findByID({
         id: doc.id,
         collection: 'virtual-relations',
         depth: 0,
+        overrideAccess: true,
         select: { postCategoryTitle: true },
       })
       expect(docWithSelect.postCategoryTitle).toBe('3-category')
@@ -4001,14 +4638,21 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const category = await payload.create({
         collection: 'categories',
         data: { title: '2-category' },
+        overrideAccess: true,
       })
       const post = await payload.create({
         collection: 'posts',
         data: { category: category.id, title: '2-post' },
+        overrideAccess: true,
       })
-      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const doc = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post.id },
+        overrideAccess: true,
+      })
       const found = await payload.find({
         collection: 'virtual-relations',
+        overrideAccess: true,
         where: { postCategoryTitle: { equals: '2-category' } },
       })
       expect(found.docs).toHaveLength(1)
@@ -4016,19 +4660,26 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     test('should allow to query by virtual field 2x deep with draft:true', async ({ payload }) => {
-      await payload.delete({ collection: 'virtual-relations', where: {} })
+      await payload.delete({ collection: 'virtual-relations', overrideAccess: true, where: {} })
       const category = await payload.create({
         collection: 'categories',
         data: { title: '3-category' },
+        overrideAccess: true,
       })
       const post = await payload.create({
         collection: 'posts',
         data: { category: category.id, title: '3-post' },
+        overrideAccess: true,
       })
-      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const doc = await payload.create({
+        collection: 'virtual-relations',
+        data: { post: post.id },
+        overrideAccess: true,
+      })
       const found = await payload.find({
         collection: 'virtual-relations',
         draft: true,
+        overrideAccess: true,
         where: { postCategoryTitle: { equals: '3-category' } },
       })
       expect(found.docs).toHaveLength(1)
@@ -4036,11 +4687,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     test('should allow referenced virtual field in globals', async ({ payload }) => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'post' } })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'post' },
+        overrideAccess: true,
+      })
       const globalData = await payload.updateGlobal({
         slug: 'virtual-relation-global',
         data: { post: post.id },
         depth: 0,
+        overrideAccess: true,
       })
       expect(globalData.postTitle).toBe('post')
     })
@@ -4048,18 +4704,24 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     test('should allow referenced virtual field in collection update response', async ({
       payload,
     }) => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'post-updated' } })
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'post-updated' },
+        overrideAccess: true,
+      })
       const doc = await payload.create({
         collection: 'virtual-relations',
         data: {},
         depth: 0,
+        overrideAccess: true,
       })
 
       const updated = await payload.update({
-        collection: 'virtual-relations',
         id: doc.id,
+        collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(updated.postTitle).toBe('post-updated')
@@ -4068,35 +4730,42 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     test('should allow to sort by a virtual field with a reference to an ID', async ({
       payload,
     }) => {
-      await payload.delete({ collection: 'virtual-relations', where: {} })
+      await payload.delete({ collection: 'virtual-relations', overrideAccess: true, where: {} })
       const category_1 = await payload.create({
         collection: 'categories-custom-id',
         data: { id: 1 },
+        overrideAccess: true,
       })
       const category_2 = await payload.create({
         collection: 'categories-custom-id',
         data: { id: 2 },
+        overrideAccess: true,
       })
       const post_1 = await payload.create({
         collection: 'posts',
         data: { categoryCustomID: category_1.id, title: 'p-1' },
+        overrideAccess: true,
       })
       const post_2 = await payload.create({
         collection: 'posts',
         data: { categoryCustomID: category_2.id, title: 'p-2' },
+        overrideAccess: true,
       })
       const virtual_1 = await payload.create({
         collection: 'virtual-relations',
         data: { post: post_1.id },
+        overrideAccess: true,
       })
       const virtual_2 = await payload.create({
         collection: 'virtual-relations',
         data: { post: post_2.id },
+        overrideAccess: true,
       })
 
       const res = (
         await payload.find({
           collection: 'virtual-relations',
+          overrideAccess: true,
           sort: 'postCategoryCustomID',
         })
       ).docs
@@ -4106,6 +4775,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const res2 = (
         await payload.find({
           collection: 'virtual-relations',
+          overrideAccess: true,
           sort: '-postCategoryCustomID',
         })
       ).docs
@@ -4123,22 +4793,33 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const { docs: existingUsers } = await payload.find({
         collection: 'users',
         limit: 1,
+        overrideAccess: true,
         where: { email: { equals: devUser.email } },
       })
       if (existingUsers.length === 0) {
-        await payload.create({ collection: 'users', data: devUser })
+        await payload.create({ collection: 'users', data: devUser, overrideAccess: true })
       }
       await restClient.login({ slug: 'users', credentials: devUser })
 
-      const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
-      const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
+      const post_1 = await payload.create({
+        collection: 'posts',
+        data: { title: 'A' },
+        overrideAccess: true,
+      })
+      const post_2 = await payload.create({
+        collection: 'posts',
+        data: { title: 'B' },
+        overrideAccess: true,
+      })
       const doc_1 = await payload.create({
         collection: 'virtual-relations',
         data: { post: post_1 },
+        overrideAccess: true,
       })
       const doc_2 = await payload.create({
         collection: 'virtual-relations',
         data: { post: post_2 },
+        overrideAccess: true,
       })
 
       const queryDesc = `query {
@@ -4161,6 +4842,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
       const { docs: localDesc } = await payload.find({
         collection: 'virtual-relations',
+        overrideAccess: true,
         sort: '-postTitle',
         where: { id: { in: [doc_1.id, doc_2.id] } },
       })
@@ -4190,6 +4872,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
       const { docs: localAsc } = await payload.find({
         collection: 'virtual-relations',
+        overrideAccess: true,
         sort: 'postTitle',
         where: { id: { in: [doc_1.id, doc_2.id] } },
       })
@@ -4201,13 +4884,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     test('should allow to sort by a virtual field without error', async ({ payload }) => {
-      await payload.delete({ collection: fieldsPersistanceSlug, where: {} })
+      await payload.delete({ collection: fieldsPersistanceSlug, overrideAccess: true, where: {} })
       await payload.create({
         collection: fieldsPersistanceSlug,
         data: {},
+        overrideAccess: true,
       })
       const { docs } = await payload.find({
         collection: fieldsPersistanceSlug,
+        overrideAccess: true,
         sort: '-textHooked',
       })
       expect(docs).toHaveLength(1)
@@ -4224,17 +4909,26 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     test('should the value populate with hasMany: true relationship field', async ({ payload }) => {
-      await payload.delete({ collection: 'categories', where: {} })
-      await payload.delete({ collection: 'posts', where: {} })
-      await payload.delete({ collection: 'virtual-relations', where: {} })
+      await payload.delete({ collection: 'categories', overrideAccess: true, where: {} })
+      await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
+      await payload.delete({ collection: 'virtual-relations', overrideAccess: true, where: {} })
 
-      const post1 = await payload.create({ collection: 'posts', data: { title: 'post 1' } })
-      const post2 = await payload.create({ collection: 'posts', data: { title: 'post 2' } })
+      const post1 = await payload.create({
+        collection: 'posts',
+        data: { title: 'post 1' },
+        overrideAccess: true,
+      })
+      const post2 = await payload.create({
+        collection: 'posts',
+        data: { title: 'post 2' },
+        overrideAccess: true,
+      })
 
       const res = await payload.create({
         collection: 'virtual-relations',
         data: { posts: [post1.id, post2.id] },
         depth: 0,
+        overrideAccess: true,
       })
       expect(res.postsTitles).toEqual(['post 1', 'post 2'])
     })
@@ -4242,27 +4936,31 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     test('should the value populate with nested hasMany: true relationship field', async ({
       payload,
     }) => {
-      await payload.delete({ collection: 'categories', where: {} })
-      await payload.delete({ collection: 'posts', where: {} })
-      await payload.delete({ collection: 'virtual-relations', where: {} })
+      await payload.delete({ collection: 'categories', overrideAccess: true, where: {} })
+      await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
+      await payload.delete({ collection: 'virtual-relations', overrideAccess: true, where: {} })
 
       const category_1 = await payload.create({
         collection: 'categories',
         data: { title: 'category 1' },
+        overrideAccess: true,
       })
       const category_2 = await payload.create({
         collection: 'categories',
         data: { title: 'category 2' },
+        overrideAccess: true,
       })
       const post1 = await payload.create({
         collection: 'posts',
         data: { categories: [category_1.id, category_2.id], title: 'post 1' },
+        overrideAccess: true,
       })
 
       const res = await payload.create({
         collection: 'virtual-relations',
         data: { post: post1.id },
         depth: 0,
+        overrideAccess: true,
       })
       expect(res.postCategoriesTitles).toEqual(['category 1', 'category 2'])
     })
@@ -4273,16 +4971,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const tenant = await payload.create({
         collection: 'virtual-linked-tenants',
         data: { slug: 'my-tenant' },
+        overrideAccess: true,
       })
 
       const project = await payload.create({
         collection: 'virtual-linked-projects',
         data: {},
+        overrideAccess: true,
       })
 
       await payload.create({
         collection: 'virtual-linked-roles',
         data: { project: project.id, tenant: tenant.id },
+        overrideAccess: true,
       })
 
       const result = await payload.find({
@@ -4303,6 +5004,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         // @ts-expect-error hardcoding a number and expecting that it will convert to string
         text: 1,
       },
+      overrideAccess: true,
     })
 
     expect(result.text).toStrictEqual('1')
@@ -4316,6 +5018,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         // @ts-expect-error passing strings when numbers are expected
         numbersHasMany: ['10', '20', '30'],
       },
+      overrideAccess: true,
     })
 
     expect(result.numbersHasMany).toEqual([10, 20, 30])
@@ -4327,9 +5030,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const result = await payload.create({
       collection: postsSlug,
       data: {
-        title: 'testing-date-field',
         publishDate: testDate,
+        title: 'testing-date-field',
       },
+      overrideAccess: true,
     })
 
     // Dates should be stored as ISO strings
@@ -4338,8 +5042,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     // Reading back should also return ISO string
     const retrieved = await payload.findByID({
-      collection: postsSlug,
       id: result.id,
+      collection: postsSlug,
+      overrideAccess: true,
     })
 
     expect(typeof retrieved.publishDate).toBe('string')
@@ -4354,10 +5059,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const result = await payload.db.create({
       collection: postsSlug,
       data: {
-        title: 'testing-date-coercion',
         publishDate: unixTimestamp,
+        title: 'testing-date-coercion',
       },
-      req: {} as any,
+      req: {},
     })
 
     // Should be converted to ISO string
@@ -4369,6 +5074,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     await expect(
       payload.find({
         collection: 'fields-persistance',
+        overrideAccess: true,
         where: { text: { equals: 'asd' } },
       }),
     ).rejects.toThrow(QueryError)
@@ -4386,6 +5092,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       invalidDoc = await payload.create({
         collection: 'relation-b',
         data: { relationship: invalidId, title: 'invalid' },
+        overrideAccess: true,
       })
     } catch (error) {
       // instanceof checks don't work with libsql
@@ -4396,6 +5103,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     const relationBDocs = await payload.find({
       collection: 'relation-b',
+      overrideAccess: true,
     })
 
     expect(relationBDocs.docs).toHaveLength(0)
@@ -4463,9 +5171,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const updated = await payload.db.upsert({
       collection: defaultValuesSlug,
       data: {
-        title: 'upsert-test',
         defaultValue: 'custom value', // Explicitly set a different value
         select: 'option0', // Change from default
+        title: 'upsert-test',
       },
       req: {},
       where: {
@@ -4508,9 +5216,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   })
 
   test('should enforce unique ids on db level even after delete', async ({ payload }) => {
-    const { id } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
-    await payload.delete({ id, collection: postsSlug })
-    const { id: id_2 } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
+    const { id } = await payload.create({
+      collection: postsSlug,
+      data: { title: 'ASD' },
+      overrideAccess: true,
+    })
+    await payload.delete({ id, collection: postsSlug, overrideAccess: true })
+    const { id: id_2 } = await payload.create({
+      collection: postsSlug,
+      data: { title: 'ASD' },
+      overrideAccess: true,
+    })
     expect(id_2).not.toBe(id)
   })
 
@@ -4550,6 +5266,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     let result = (await payload.updateGlobal({
       slug: 'global-3',
       data: { text: 'this is global-3' },
+      overrideAccess: true,
     })) as { globalType: string } & Global2
 
     expect(result.text).toBe('this is global-3')
@@ -4564,6 +5281,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     result = (await payload.updateGlobal({
       slug: 'global-3',
       data: { text: 'this is global-3 but updated' },
+      overrideAccess: true,
     })) as { globalType: string } & Global2
 
     expect(result.text).toBe('this is global-3 but updated')
@@ -4579,6 +5297,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       data: {
         title: 'post 1',
       },
+      overrideAccess: true,
     })
 
     const doc2 = await payload.create({
@@ -4586,10 +5305,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       data: {
         title: 'post 2',
       },
+      overrideAccess: true,
     })
 
     const query1 = await payload.find({
       collection: postsSlug,
+      overrideAccess: true,
       where: {
         id: {
           // where order, `in` last
@@ -4601,6 +5322,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     const query2 = await payload.find({
       collection: postsSlug,
+      overrideAccess: true,
       where: {
         id: {
           // where order, `in` first
@@ -4612,6 +5334,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     const query3 = await payload.find({
       collection: postsSlug,
+      overrideAccess: true,
       where: {
         and: [
           {
@@ -4661,6 +5384,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     let payloadRes: any = await payload.findByID({
       id: res!.insertedId.toHexString(),
       collection: postsSlug,
+      overrideAccess: true,
     })
 
     expect(payloadRes.id).toBe(res!.insertedId.toHexString())
@@ -4676,6 +5400,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     payloadRes = await payload.findByID({
       id: res!.insertedId.toHexString(),
       collection: postsSlug,
+      overrideAccess: true,
     })
 
     expect(payloadRes.id).toBe(res!.insertedId.toHexString())
@@ -4686,7 +5411,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   })
 
   test('should not crash when the version field is not selected', async ({ payload }) => {
-    const customID = await payload.create({ collection: 'custom-ids', data: {} })
+    const customID = await payload.create({
+      collection: 'custom-ids',
+      data: {},
+      overrideAccess: true,
+    })
     const res = await payload.db.queryDrafts({
       collection: 'custom-ids',
       select: { parent: true },
@@ -4700,9 +5429,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     await payload.updateGlobal({
       slug: 'header',
       data: { itemsLvl1: [{ itemsLvl2: [{ itemsLvl3: [{ itemsLvl4: [{ label: 'label' }] }] }] }] },
+      overrideAccess: true,
     })
 
-    const header = await payload.findGlobal({ slug: 'header' })
+    const header = await payload.findGlobal({ slug: 'header', overrideAccess: true })
 
     expect(header.itemsLvl1[0]?.itemsLvl2[0]?.itemsLvl3[0]?.itemsLvl4[0]?.label).toBe('label')
   })
@@ -4711,14 +5441,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const category = await payload.create({
       collection: 'categories',
       data: { title: 'new-category' },
+      overrideAccess: true,
     })
     const post = await payload.create({
       collection: 'posts',
       data: { category: category.id, title: 'new-post' },
+      overrideAccess: true,
     })
 
     const result_1 = await payload.count({
       collection: 'posts',
+      overrideAccess: true,
       where: {
         'category.title': {
           equals: 'new-category',
@@ -4730,6 +5463,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     const result_2 = await payload.count({
       collection: 'posts',
+      overrideAccess: true,
       where: {
         'category.title': {
           equals: 'non-existing-category',
@@ -4747,6 +5481,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         testBlocks: [{ blockType: 'cta', text: 'text' }],
         testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],
       },
+      overrideAccess: true,
     })
 
     expect(res.testBlocks[0]?.text).toBe('text')
@@ -4754,26 +5489,31 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   })
 
   test('should support in with null', async ({ payload }) => {
-    await payload.delete({ collection: 'posts', where: {} })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
     const post_1 = await payload.create({
       collection: 'posts',
       data: { text: 'text-1', title: 'a' },
+      overrideAccess: true,
     })
     const post_2 = await payload.create({
       collection: 'posts',
       data: { text: 'text-2', title: 'a' },
+      overrideAccess: true,
     })
     const post_3 = await payload.create({
       collection: 'posts',
       data: { text: 'text-3', title: 'a' },
+      overrideAccess: true,
     })
     const post_null = await payload.create({
       collection: 'posts',
       data: { text: null, title: 'a' },
+      overrideAccess: true,
     })
 
     const { docs } = await payload.find({
       collection: 'posts',
+      overrideAccess: true,
       where: { text: { in: ['text-1', 'text-3', null] } },
     })
     expect(docs).toHaveLength(3)
@@ -4788,6 +5528,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       data: {
         slugField: 'unique-text',
       },
+      overrideAccess: true,
     })
 
     try {
@@ -4796,6 +5537,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         data: {
           slugField: 'unique-text',
         },
+        overrideAccess: true,
       })
     } catch (e) {
       const error = e as ValidationError
@@ -4810,6 +5552,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       data: {
         slugField: 'optimized-unique-1',
       },
+      overrideAccess: true,
     })
 
     const doc2 = await payload.create({
@@ -4817,17 +5560,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       data: {
         slugField: 'optimized-unique-2',
       },
+      overrideAccess: true,
     })
 
     // This update goes through the optimized path (shouldUseOptimizedUpsertRow) in db-drizzle
     // because it's a simple field update with an existing ID
     try {
       await payload.update({
-        collection: 'unique-fields',
         id: doc2.id,
+        collection: 'unique-fields',
         data: {
           slugField: 'optimized-unique-1', // Try to set to doc1's unique value
         },
+        overrideAccess: true,
       })
     } catch (e) {
       const error = e as ValidationError
@@ -4846,6 +5591,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         text: 'other text (should not be nuked)',
         title: 'hello',
       },
+      overrideAccess: true,
     })
     const res = (await payload.db.updateOne({
       collection: 'posts',
@@ -4875,6 +5621,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         text: 'other text (should not be nuked)',
         title: 'hello',
       },
+      overrideAccess: true,
     })
     const post2 = await payload.create({
       collection: 'posts',
@@ -4885,6 +5632,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         text: 'other text 2 (should not be nuked)',
         title: 'hello',
       },
+      overrideAccess: true,
     })
 
     const res = (await payload.db.updateMany({
@@ -4942,10 +5690,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const category = await payload.create({
       collection: 'categories',
       data: { title: 'category123' },
+      overrideAccess: true,
     })
     const res = await payload.find({
       collection: 'categories',
       draft: true,
+      overrideAccess: true,
       where: { id: { like: typeof category.id === 'number' ? `${category.id}` : category.id } },
     })
     expect(res.docs).toHaveLength(1)
@@ -4953,7 +5703,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   })
 
   test('should allow incremental number update', async ({ payload }) => {
-    const post = await payload.create({ collection: 'posts', data: { number: 1, title: 'post' } })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { number: 1, title: 'post' },
+      overrideAccess: true,
+    })
 
     const res = (await payload.db.updateOne({
       collection: 'posts',
@@ -4993,6 +5747,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           number: 10,
           title: 'post',
         },
+        overrideAccess: true,
       })
 
       const res = (await payload.db.updateOne({
@@ -5030,6 +5785,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           ],
           title: 'post',
         },
+        overrideAccess: true,
       })
 
       const res = (await payload.db.updateOne({
@@ -5063,6 +5819,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           ],
           title: 'post',
         },
+        overrideAccess: true,
       })
 
       const res = (await payload.db.updateOne({
@@ -5109,6 +5866,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           ],
           title: 'post',
         },
+        overrideAccess: true,
       })
 
       const res = (await payload.db.updateOne({
@@ -5155,6 +5913,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           ],
           title: 'post',
         },
+        overrideAccess: true,
       })
 
       const res = (await payload.db.updateOne({
@@ -5196,6 +5955,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           ],
           title: 'post',
         },
+        overrideAccess: true,
       })
 
       const res = (await payload.db.updateOne({
@@ -5258,6 +6018,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           ],
           title: 'post',
         },
+        overrideAccess: true,
       })
 
       const res = (await payload.db.updateOne({
@@ -5307,10 +6068,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const cat1 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 1' },
+        overrideAccess: true,
       })
       const cat2 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 2' },
+        overrideAccess: true,
       })
 
       // Create a post with initial relationship
@@ -5321,6 +6084,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           title: 'Test Post',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(post.categories).toHaveLength(1)
@@ -5349,14 +6113,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const cat1 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 1' },
+        overrideAccess: true,
       })
       const cat2 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 2' },
+        overrideAccess: true,
       })
       const cat3 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 3' },
+        overrideAccess: true,
       })
 
       // Create post with initial relationship
@@ -5366,6 +6133,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           categories: [cat1.id],
           title: 'Test Post',
         },
+        overrideAccess: true,
       })
 
       // Append multiple relationships using $push
@@ -5392,10 +6160,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const cat1 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 1' },
+        overrideAccess: true,
       })
       const cat2 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 2' },
+        overrideAccess: true,
       })
 
       // Create post with initial relationships
@@ -5405,6 +6175,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           categories: [cat1.id, cat2.id],
           title: 'Test Post',
         },
+        overrideAccess: true,
       })
 
       // Try to append existing relationship - should not create duplicates
@@ -5430,10 +6201,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const cat1 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 1' },
+        overrideAccess: true,
       })
       const cat2 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 2' },
+        overrideAccess: true,
       })
 
       // Create multiple posts with initial relationships
@@ -5443,6 +6216,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           categories: [cat1.id],
           title: 'Post 1',
         },
+        overrideAccess: true,
       })
       const post2 = await payload.create({
         collection: 'posts',
@@ -5450,6 +6224,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           categories: [cat1.id],
           title: 'Post 2',
         },
+        overrideAccess: true,
       })
 
       // Append cat2 to all posts using updateMany
@@ -5479,10 +6254,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const category = await payload.create({
         collection: 'categories',
         data: { title: 'Test Category' },
+        overrideAccess: true,
       })
       const simple = await payload.create({
         collection: 'simple',
         data: { text: 'Test Simple' },
+        overrideAccess: true,
       })
 
       // Create post with initial polymorphic relationship
@@ -5497,7 +6274,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           ],
           title: 'Test Post',
         },
-        depth: 0, // Don't populate relationships
+        depth: 0,
+        overrideAccess: true, // Don't populate relationships
       })
 
       expect(post.polymorphicRelations).toHaveLength(1)
@@ -5540,6 +6318,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const category = await payload.create({
         collection: 'categories',
         data: { title: 'Test Category' },
+        overrideAccess: true,
       })
 
       // Create post with polymorphic relationship
@@ -5555,6 +6334,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           title: 'Test Post',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       // Try to append the same relationship - should not create duplicates
@@ -5585,10 +6365,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const category1 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 1' },
+        overrideAccess: true,
       })
       const category2 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 2' },
+        overrideAccess: true,
       })
 
       // Create post with localized polymorphic relationships
@@ -5605,6 +6387,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         },
         depth: 0,
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Append relationship using $push with correct localized structure
@@ -5643,11 +6426,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const category1 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 1' },
+        overrideAccess: true,
       })
 
       const category2 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 2' },
+        overrideAccess: true,
       })
 
       // Create a post with nested localized polymorphic relationship
@@ -5665,6 +6450,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           title: 'Test Nested $push',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Use low-level API to push new items
@@ -5691,6 +6477,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         collection: 'posts',
         depth: 0,
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation).toHaveLength(2)
@@ -5713,10 +6500,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const cat1 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 1' },
+        overrideAccess: true,
       })
       const cat2 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 2' },
+        overrideAccess: true,
       })
 
       // Create post with relationships
@@ -5726,6 +6515,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           categories: [cat1.id, cat2.id],
           title: 'Test Post',
         },
+        overrideAccess: true,
       })
 
       expect(post.categories).toHaveLength(2)
@@ -5750,14 +6540,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const cat1 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 1' },
+        overrideAccess: true,
       })
       const cat2 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 2' },
+        overrideAccess: true,
       })
       const cat3 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 3' },
+        overrideAccess: true,
       })
 
       // Create post with relationships
@@ -5767,6 +6560,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           categories: [cat1.id, cat2.id, cat3.id],
           title: 'Test Post',
         },
+        overrideAccess: true,
       })
 
       expect(post.categories).toHaveLength(3)
@@ -5791,14 +6585,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const cat1 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 1' },
+        overrideAccess: true,
       })
       const cat2 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 2' },
+        overrideAccess: true,
       })
       const cat3 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 3' },
+        overrideAccess: true,
       })
 
       // Create multiple posts with relationships
@@ -5808,6 +6605,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           categories: [cat1.id, cat2.id, cat3.id],
           title: 'Post 1',
         },
+        overrideAccess: true,
       })
       const post2 = await payload.create({
         collection: 'posts',
@@ -5815,6 +6613,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           categories: [cat1.id, cat2.id, cat3.id],
           title: 'Post 2',
         },
+        overrideAccess: true,
       })
 
       // Remove cat1 and cat3 from all posts using updateMany
@@ -5845,10 +6644,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const category1 = await payload.create({
         collection: 'categories',
         data: { title: 'Test Category 1' },
+        overrideAccess: true,
       })
       const category2 = await payload.create({
         collection: 'categories',
         data: { title: 'Test Category 2' },
+        overrideAccess: true,
       })
 
       // Create post with multiple polymorphic relationships
@@ -5868,6 +6669,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           title: 'Test Post',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(post.polymorphicRelations).toHaveLength(2)
@@ -5900,14 +6702,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const category1 = await payload.create({
         collection: 'categories',
         data: { title: 'Test Category 1' },
+        overrideAccess: true,
       })
       const category2 = await payload.create({
         collection: 'categories',
         data: { title: 'Test Category 2' },
+        overrideAccess: true,
       })
       const simple = await payload.create({
         collection: 'simple',
         data: { text: 'Test Simple' },
+        overrideAccess: true,
       })
 
       // Create post with multiple polymorphic relationships
@@ -5922,6 +6727,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           title: 'Test Post',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(post.polymorphicRelations).toHaveLength(3)
@@ -5952,14 +6758,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const category1 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 1' },
+        overrideAccess: true,
       })
       const category2 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 2' },
+        overrideAccess: true,
       })
       const category3 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 3' },
+        overrideAccess: true,
       })
 
       // Create post with multiple localized polymorphic relationships
@@ -5975,6 +6784,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         },
         depth: 0,
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Remove relationships using $remove with correct localized structure
@@ -6015,16 +6825,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const category1 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 1' },
+        overrideAccess: true,
       })
 
       const category2 = await payload.create({
         collection: 'categories',
         data: { title: 'Category 2' },
+        overrideAccess: true,
       })
 
       const simple1 = await payload.create({
         collection: 'simple',
         data: { text: 'Simple 1' },
+        overrideAccess: true,
       })
 
       // Create a post with multiple items in nested localized polymorphic relationship
@@ -6050,6 +6863,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           title: 'Test Nested $remove',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Use low-level API to remove items
@@ -6074,6 +6888,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         collection: 'posts',
         depth: 0,
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(result.testNestedGroup?.nestedLocalizedPolymorphicRelation).toHaveLength(1)
@@ -6101,6 +6916,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         ],
         title: 'title',
       },
+      overrideAccess: true,
     })
 
     expect(res.blocks).toHaveLength(1)
@@ -6147,6 +6963,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       id: res?.insertedId?.toHexString() as string,
       collection: 'blocks-docs',
       locale: 'en',
+      overrideAccess: true,
     })
     expect(doc.testBlocks).toHaveLength(1)
     expect(doc.testBlocks[0].id).toBe('1')
@@ -6172,6 +6989,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         testBlocks: [{ blockType: 'cta', text: 'text' }],
         testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],
       },
+      overrideAccess: true,
     })
     expect(res.testBlocks[0]?.text).toBe('text')
     expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
@@ -6183,6 +7001,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized-es' }],
       },
       locale: 'es',
+      overrideAccess: true,
     })
     expect(res_es.testBlocks[0]?.text).toBe('text_updated')
     expect(res_es.testBlocksLocalized[0]?.text).toBe('text-localized-es')
@@ -6190,6 +7009,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       id: res.id,
       collection: 'blocks-docs',
       locale: 'all',
+      overrideAccess: true,
     })
     expect(res_all.testBlocks[0]?.text).toBe('text_updated')
     expect(res_all.testBlocksLocalized.es[0]?.text).toBe('text-localized-es')
@@ -6201,8 +7021,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     await payload.db.connect()
   })
 
-  test.options({ db: 'mongo' })(
+  test.options(
     'ensure mongodb query sanitization does not duplicate IDs',
+    { db: 'mongo' },
     ({ payload }) => {
       const res: any = sanitizeQueryValue({
         field: {
@@ -6223,34 +7044,39 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     },
   )
 
-  test.options({ db: 'mongo' })(
+  test.options(
     'ensure mongodb respects collation when using collection in the config',
+    { db: 'mongo' },
     async ({ payload }) => {
       // Clear any existing documents
-      await payload.delete({ collection: 'simple', where: {} })
+      await payload.delete({ collection: 'simple', overrideAccess: true, where: {} })
 
       const expectedUnsortedItems = ['Євген', 'Віктор', 'Роман']
       const expectedSortedItems = ['Віктор', 'Євген', 'Роман']
 
       const simple_1 = await payload.create({
         collection: 'simple',
-        locale: 'uk',
         data: { text: 'Роман' },
+        locale: 'uk',
+        overrideAccess: true,
       })
       const simple_2 = await payload.create({
         collection: 'simple',
-        locale: 'uk',
         data: { text: 'Віктор' },
+        locale: 'uk',
+        overrideAccess: true,
       })
       const simple_3 = await payload.create({
         collection: 'simple',
-        locale: 'uk',
         data: { text: 'Євген' },
+        locale: 'uk',
+        overrideAccess: true,
       })
 
       const results = await payload.find({
         collection: 'simple',
         locale: 'uk',
+        overrideAccess: true,
         sort: 'text',
       })
 
@@ -6263,6 +7089,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const resultsWithCollation = await payload.find({
         collection: 'simple',
         locale: 'uk',
+        overrideAccess: true,
         sort: 'text',
       })
 
@@ -6274,11 +7101,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     },
   )
 
-  test.options({ db: 'mongo' })(
+  test.options(
     'ensure mongodb collation works with draft pagination without sort',
+    { db: 'mongo' },
     async ({ payload }) => {
       // Clear any existing documents
-      await payload.delete({ collection: 'categories', where: {} })
+      await payload.delete({ collection: 'categories', overrideAccess: true, where: {} })
 
       // Create 15 draft documents
       const createdIds: (number | string)[] = []
@@ -6287,6 +7115,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
           collection: 'categories',
           data: { name: `Category ${i}` },
           draft: true,
+          overrideAccess: true,
         })
         createdIds.push(doc.id)
       }
@@ -6297,16 +7126,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       // Query drafts WITHOUT sort - this is the scenario that breaks
       const resultsNoSort = await payload.find({
         collection: 'categories',
-        limit: 10,
         draft: true,
+        limit: 10,
+        overrideAccess: true,
         // No sort parameter
       })
 
       console.log({
-        totalDocs: resultsNoSort.totalDocs,
-        totalPages: resultsNoSort.totalPages,
         docsLength: resultsNoSort.docs.length,
         hasNextPage: resultsNoSort.hasNextPage,
+        totalDocs: resultsNoSort.totalDocs,
+        totalPages: resultsNoSort.totalPages,
       })
 
       // The bug: totalDocs returns 10 (same as limit) instead of 15
@@ -6317,7 +7147,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
       // Clean up
       for (const id of createdIds) {
-        await payload.delete({ collection: 'categories', id })
+        await payload.delete({ id, collection: 'categories', overrideAccess: true })
       }
 
       // Reset collation

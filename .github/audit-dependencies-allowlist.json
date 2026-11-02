@@ -1,0 +1,4 @@
+{
+  "$comment": "Advisories intentionally ignored by .github/actions/audit-dependencies. Entry shape: { advisory: 'GHSA-xxxx-xxxx-xxxx', appliesTo: 'monorepo' | 'consumer' | 'both', rationale: string, expires: 'YYYY-MM-DD' }. An expired entry fails the audit so exceptions get re-reviewed; the audit also re-reviews live entries and flags any whose vulnerability a bump or relock can now clear.",
+  "entries": []
+}

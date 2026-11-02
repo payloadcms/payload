@@ -81,13 +81,15 @@ export const GroupByButton: React.FC<GroupByButtonProps> = ({
   }
 
   const triggerLabel = isActive
-    ? t('general:groupByLabel', { label: groupByField?.label || '' })
+    ? t('general:groupByLabel', { label: groupByField?.plainTextLabel || '' })
     : t('general:groupByLabel', { label: '' })
 
   return (
     <Popup
       className={baseClass}
       horizontalAlign="right"
+      popupAriaLabel={triggerLabel}
+      popupType="dialog"
       portalClassName={`${baseClass}__popup`}
       render={({ close }) => (
         <GroupByPopup

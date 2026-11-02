@@ -132,6 +132,7 @@ export default withPayload(
     // Payload's monorepo packages and Next.js test fixtures both use `.client.*` modules.
     // The server-only specifier protection remains enabled for other source files.
     clientDenialExcludeFiles: ['**/packages/*/src/**', '**/*.client.*'],
+    devBundleServerPackages: true,
     payloadConfigPath:
       process.env.PAYLOAD_CONFIG_PATH ?? path.resolve(__dirname, testSuite, 'config.ts'),
     routesDirectory: 'app',

@@ -49,7 +49,9 @@ export function PreviewButton() {
       style={{ position: 'relative' }}
     >
       <Button
+        aria-label={label}
         buttonStyle="ghost"
+        extraButtonProps={{ title: undefined }}
         icon={<LinkIcon size={24} />}
         id="preview-button"
         onClick={handleClick}

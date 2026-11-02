@@ -88,10 +88,9 @@
     border-radius: 50%;
   }
 
-  .ReactCrop__crop-selection:focus {
-    outline: none;
-    border-color: var(--color-border-selected);
-    border-style: solid;
+  .ReactCrop__crop-selection:focus-visible {
+    outline: var(--stroke-width-medium) solid var(--color-border-selected);
+    outline-offset: calc(var(--stroke-width-medium) * -1);
   }
 
   .ReactCrop--invisible-crop .ReactCrop__crop-selection {
@@ -148,15 +147,9 @@
     outline: 1px solid transparent;
   }
 
-  .ReactCrop__drag-handle:focus:after {
-    border-color: var(--color-border-selected-strong);
-  }
-
-  .ReactCrop .ord-n:focus:after,
-  .ReactCrop .ord-e:focus:after,
-  .ReactCrop .ord-s:focus:after,
-  .ReactCrop .ord-w:focus:after {
-    background-color: var(--color-border-selected-strong);
+  .ReactCrop .ReactCrop__drag-handle:focus-visible:after {
+    outline: var(--stroke-width-medium) solid var(--color-border-selected-strong);
+    outline-offset: var(--stroke-width-small);
   }
 
   .ReactCrop .ord-nw {

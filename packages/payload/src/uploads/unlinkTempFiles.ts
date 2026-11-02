@@ -7,32 +7,30 @@ import type { PayloadRequest } from '../types/index.js'
 import { mapAsync } from '../utilities/mapAsync.js'
 
 type Args = {
-  collectionConfig: SanitizedCollectionConfig
+  collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
   req: PayloadRequest
 }
 /**
  * Cleanup temp files after operation lifecycle
  */
-export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
-  collectionConfig,
-  config,
-  req,
-}) => {
-  const { file } = req
+export const unlinkTempFiles: (args: Args) => Promise<void> = async ({ config, req }) => {
+  const requestFiles = Object.values(req.files ?? {}).flatMap((file) =>
+    Array.isArray(file) ? file : [file],
+  )
+  const files = [req.file, ...requestFiles]
+  const tempFilePaths = new Set<string>()
+  const isClientUploadTempFile = Boolean(
+    req.file?.uploadReference || req.context?._payloadClientUploadTempFile,
+  )
 
-  // A file fetched from a client-upload reference always gets its own temp file for
-  // post-processing (see getFileFromUploadInstructions.ts), regardless of the global
-  // useTempFiles setting, so it must always be cleaned up here too.
-  const isClientUploadTempFile = Boolean(file?.uploadReference)
-
-  if (collectionConfig.upload && (config.upload?.useTempFiles || isClientUploadTempFile)) {
-    const fileArray = [{ file }]
-    await mapAsync(fileArray, async ({ file }) => {
-      // Still need this check because this will not be populated if using local API
-      if (file?.tempFilePath) {
-        await fs.unlink(file.tempFilePath)
-      }
-    })
+  for (const file of files) {
+    if (file?.tempFilePath && (config.upload?.useTempFiles || isClientUploadTempFile)) {
+      tempFilePaths.add(file.tempFilePath)
+    }
   }
+
+  await mapAsync([...tempFilePaths], async (tempFilePath) => {
+    await fs.unlink(tempFilePath)
+  })
 }

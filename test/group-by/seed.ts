@@ -1,8 +1,8 @@
 import type { Payload } from 'payload'
 
-import { devUser } from '../credentials.js'
-import { executePromises } from '../__helpers/shared/executePromises.js'
 import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
+import { executePromises } from '../__helpers/shared/executePromises.js'
+import { devUser } from '../credentials.js'
 import { categoriesSlug } from './collections/Categories/index.js'
 import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
@@ -28,12 +28,14 @@ export const seed = async (_payload: Payload) => {
             data: {
               title: 'Category 1',
             },
+            overrideAccess: true,
           }),
           _payload.create({
             collection: categoriesSlug,
             data: {
               title: 'Category 2',
             },
+            overrideAccess: true,
           }),
         ])
 
@@ -45,6 +47,7 @@ export const seed = async (_payload: Payload) => {
               data: {
                 title: `Page ${index + 1}`,
               },
+              overrideAccess: true,
             }),
           ),
         )
@@ -58,6 +61,7 @@ export const seed = async (_payload: Payload) => {
                 page: pages[index]!.id,
                 title: `Post ${index + 1}`,
               },
+              overrideAccess: true,
             }),
           ),
         )
@@ -68,6 +72,7 @@ export const seed = async (_payload: Payload) => {
             category: category1.id,
             title: 'Find me',
           },
+          overrideAccess: true,
         })
 
         await _payload.create({
@@ -76,12 +81,14 @@ export const seed = async (_payload: Payload) => {
             category: category2.id,
             title: 'Find me',
           },
+          overrideAccess: true,
         })
 
         // Get the first post for polymorphic relationships
         const firstPost = await _payload.find({
           collection: postsSlug,
           limit: 1,
+          overrideAccess: true,
         })
 
         // Create relationship test documents
@@ -96,6 +103,7 @@ export const seed = async (_payload: Payload) => {
               },
               title: 'Poly HasOne (Category)',
             },
+            overrideAccess: true,
           }),
 
           // Document with PolyHasOneRelationship to post
@@ -108,6 +116,7 @@ export const seed = async (_payload: Payload) => {
               },
               title: 'Poly HasOne (Post)',
             },
+            overrideAccess: true,
           }),
 
           // Document with PolyHasManyRelationship to both categories and posts
@@ -130,6 +139,7 @@ export const seed = async (_payload: Payload) => {
               ],
               title: 'Poly HasMany (Mixed)',
             },
+            overrideAccess: true,
           }),
 
           // Document with MonoHasOneRelationship
@@ -139,6 +149,7 @@ export const seed = async (_payload: Payload) => {
               MonoHasOneRelationship: category1.id,
               title: 'Mono HasOne',
             },
+            overrideAccess: true,
           }),
 
           // Document with MonoHasManyRelationship
@@ -148,6 +159,7 @@ export const seed = async (_payload: Payload) => {
               MonoHasManyRelationship: [category1.id, category2.id],
               title: 'Mono HasMany',
             },
+            overrideAccess: true,
           }),
 
           // Documents with no relationships (for "No Value" testing)
@@ -156,6 +168,7 @@ export const seed = async (_payload: Payload) => {
             data: {
               title: 'No Relationships 1',
             },
+            overrideAccess: true,
           }),
 
           _payload.create({
@@ -163,6 +176,7 @@ export const seed = async (_payload: Payload) => {
             data: {
               title: 'No Relationships 2',
             },
+            overrideAccess: true,
           }),
         ])
       },

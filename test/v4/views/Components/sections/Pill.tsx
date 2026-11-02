@@ -1,7 +1,6 @@
 'use client'
 
-import { Pill } from '@payloadcms/ui'
-import { PlusIcon } from '@payloadcms/ui/icons/Plus'
+import { Pill, PlusIcon } from '@payloadcms/ui'
 import React from 'react'
 
 import { Section, Variant } from '../shared.js'

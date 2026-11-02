@@ -9,25 +9,41 @@ import type {
   SanitizedJoins,
 } from './types.js'
 
-import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
+import { omitAPIKey } from '../../auth/baseFields/apiKey.js'
+import { apiKeyRevealEndpoint, authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { withBaseAccess, withBaseAdminAccess } from '../../auth/withBaseAccess.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
+import {
+  createCreatedByField,
+  createUpdatedByField,
+  sanitizeAuthorship,
+} from '../../fields/baseFields/authorship/index.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { buildFoldersHierarchy, buildTagsHierarchy } from '../../hierarchy/presets.js'
 import { sanitizeHierarchyCollection } from '../../hierarchy/sanitizeHierarchyCollection.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
+import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
-import { defaultCollectionEndpoints } from '../endpoints/index.js'
-import { addDefaultsToAuthConfig, addDefaultsToCollectionConfig } from './defaults.js'
+import {
+  isInheritedReadVersionsAccess,
+  markInheritedReadVersionsAccess,
+} from '../../versions/isInheritedReadVersionsAccess.js'
+import { defaultCollectionEndpoints, duplicateEndpoint } from '../endpoints/index.js'
+import {
+  addDefaultsToAuthConfig,
+  addDefaultsToCollectionConfig,
+  createInheritedReadVersionsAccess,
+} from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
+import { validateUseAsThumbnail } from './useAsThumbnail.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
 /**
@@ -137,6 +153,53 @@ export const sanitizeCollection = (
 
   const polymorphicJoins: SanitizedJoin[] = []
 
+  // Inject createdBy / updatedBy (unless already defined) before sanitizing fields.
+  const authorship = sanitizeAuthorship(sanitized.authorship)
+  sanitized.authorship = authorship
+
+  if (authorship.createdBy || authorship.updatedBy) {
+    const authCollections = config
+      .collections!.filter((collectionConfig) => collectionConfig.auth)
+      .map((collectionConfig) => collectionConfig.slug)
+
+    let hasCreatedBy = false
+    let hasUpdatedBy = false
+
+    sanitized.fields.some((field) => {
+      if (fieldAffectsData(field)) {
+        if (field.name === 'createdBy') {
+          hasCreatedBy = true
+        }
+
+        if (field.name === 'updatedBy') {
+          hasUpdatedBy = true
+        }
+
+        // A user may spread `getAuthorshipFields` into their `fields` to customize these
+        // without knowing the auth collections; backfill the polymorphic relationTo here.
+        if (
+          (field.name === 'createdBy' || field.name === 'updatedBy') &&
+          field.type === 'relationship' &&
+          (!field.relationTo || (Array.isArray(field.relationTo) && field.relationTo.length === 0))
+        ) {
+          field.relationTo = authCollections
+        }
+      }
+
+      return hasCreatedBy && hasUpdatedBy
+    })
+
+    if (authCollections.length > 0) {
+      if (authorship.createdBy && !hasCreatedBy) {
+        sanitized.fields.push(createCreatedByField({ authCollections }))
+      }
+
+      if (authorship.updatedBy && !hasUpdatedBy) {
+        sanitized.fields.push(createUpdatedByField({ authCollections }))
+      }
+    }
+  }
+
   sanitized.fields = sanitizeFields({
     collectionConfig: sanitized,
     config,
@@ -150,6 +213,11 @@ export const sanitizeCollection = (
     validRelationships,
   })
 
+  if (sanitized.auth) {
+    // disable duplicate for auth enabled collections by default
+    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
+  }
+
   if (sanitized.endpoints !== false) {
     if (!sanitized.endpoints) {
       sanitized.endpoints = []
@@ -158,6 +226,14 @@ export const sanitizeCollection = (
     if (sanitized.auth) {
       for (const endpoint of authCollectionEndpoints) {
         sanitized.endpoints.push(endpoint)
+      }
+
+      if (
+        typeof sanitized.auth === 'object' &&
+        typeof sanitized.auth.useAPIKey === 'object' &&
+        sanitized.auth.useAPIKey.reveal === true
+      ) {
+        sanitized.endpoints.push(apiKeyRevealEndpoint)
       }
     }
 
@@ -168,7 +244,9 @@ export const sanitizeCollection = (
     }
 
     for (const endpoint of defaultCollectionEndpoints) {
-      sanitized.endpoints.push(endpoint)
+      if (endpoint !== duplicateEndpoint || sanitized.disableDuplicate !== true) {
+        sanitized.endpoints.push(endpoint)
+      }
     }
   }
 
@@ -317,6 +395,13 @@ export const sanitizeCollection = (
     })
 
     sanitized.fields = mergeBaseFields(sanitized.fields, uploadFields)
+    sanitized.hooks = {
+      ...sanitized.hooks,
+      beforeRead: [
+        ({ doc, req }) => withLegacyCloudUploadFileData({ collection: sanitized, doc, req }),
+        ...(sanitized.hooks?.beforeRead || []),
+      ],
+    }
   }
 
   if (sanitized.auth) {
@@ -324,21 +409,25 @@ export const sanitizeCollection = (
       typeof sanitized.auth === 'boolean' ? {} : sanitized.auth,
     )
 
-    // disable duplicate for auth enabled collections by default
-    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
-
     if (!collection?.admin?.useAsTitle) {
       sanitized.admin!.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
     }
 
-    sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
+    if (sanitized.auth.useAPIKey) {
+      sanitized.hooks!.beforeRead!.unshift(omitAPIKey)
+    }
+
+    sanitized.fields = mergeBaseFields(
+      sanitized.fields,
+      getBaseAuthFields(sanitized.auth, sanitized.fields),
+    )
   }
 
   if (collection?.admin?.pagination?.limits?.length) {
     sanitized.admin!.pagination!.limits = collection.admin.pagination.limits
   }
 
-  for (const operation of ['create', 'delete', 'read', 'unlock', 'update'] as const) {
+  for (const operation of ['create', 'delete', 'read', 'unlock', 'update', 'validate'] as const) {
     sanitized.access![operation] = withBaseAccess({
       slug: sanitized.slug,
       access: sanitized.access?.[operation],
@@ -353,15 +442,21 @@ export const sanitizeCollection = (
   })
 
   if (sanitized.versions) {
-    sanitized.access!.readVersions = withBaseAccess({
+    const inheritsReadAccess = isInheritedReadVersionsAccess(sanitized.access!.readVersions)
+    const readVersions = inheritsReadAccess
+      ? createInheritedReadVersionsAccess(sanitized.access!.read!)
+      : sanitized.access!.readVersions
+    const readVersionsWithBaseAccess = withBaseAccess({
       slug: sanitized.slug,
-      access: sanitized.access?.readVersions,
+      access: readVersions,
       entityType: 'collection',
       operation: 'readVersions',
     })
-  }
 
-  validateUseAsTitle(sanitized)
+    sanitized.access!.readVersions = inheritsReadAccess
+      ? markInheritedReadVersionsAccess(readVersionsWithBaseAccess)
+      : readVersionsWithBaseAccess
+  }
 
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
@@ -369,6 +464,19 @@ export const sanitizeCollection = (
   sanitizedConfig.polymorphicJoins = polymorphicJoins
 
   sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
+
+  validateUseAsTitle(sanitized)
+  validateUseAsThumbnail({ config: sanitizedConfig })
+
+  if (!sanitizedConfig.admin.useAsThumbnail) {
+    const uploadField = sanitizedConfig.flattenedFields.find(
+      (field) => fieldAffectsData(field) && field.type === 'upload',
+    )
+
+    if (uploadField && fieldAffectsData(uploadField)) {
+      sanitizedConfig.admin.useAsThumbnail = uploadField.name
+    }
+  }
 
   sanitizedConfig.sanitizedIndexes = sanitizeCompoundIndexes({
     fields: sanitizedConfig.flattenedFields,

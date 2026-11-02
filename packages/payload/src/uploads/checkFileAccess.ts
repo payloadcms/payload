@@ -3,14 +3,17 @@ import type { PayloadRequest, Where } from '../types/index.js'
 
 import { executeAccess } from '../auth/executeAccess.js'
 import { Forbidden } from '../errors/Forbidden.js'
+import { resolveUploadDocument } from './transformers/resolveUploadDocument.js'
 
 export const checkFileAccess = async ({
   collection,
+  documentID,
   filename,
   prefix,
   req,
 }: {
   collection: Collection
+  documentID?: number | string
   filename: string
   prefix?: string
   req: PayloadRequest
@@ -21,7 +24,7 @@ export const checkFileAccess = async ({
   const { config } = collection
 
   const accessResult = await executeAccess(
-    { slug: config.slug, data: { filename }, isReadingStaticFile: true, req },
+    { id: documentID, slug: config.slug, data: { filename }, isReadingStaticFile: true, req },
     config.access.read,
   )
 
@@ -35,24 +38,21 @@ export const checkFileAccess = async ({
     constraints.push({ prefix: { equals: prefix } })
   }
 
-  if (constraints.length > 0) {
-    const filenameCondition: Where = {
-      or: [{ filename: { equals: filename } }],
-    }
-
-    if (config.upload.imageSizes) {
-      config.upload.imageSizes.forEach(({ name }) => {
-        filenameCondition.or!.push({
-          [`sizes.${name}.filename`]: { equals: filename },
-        })
-      })
-    }
-
-    const doc = await req.payload.db.findOne({
-      collection: config.slug,
-      req,
-      where: { and: [filenameCondition, ...constraints] },
-    })
+  if (constraints.length > 0 || documentID !== undefined) {
+    const doc =
+      documentID === undefined
+        ? await resolveUploadDocument({
+            collection,
+            filename,
+            prefix,
+            req,
+            where: typeof accessResult === 'object' ? accessResult : undefined,
+          })
+        : await req.payload.db.findOne({
+            collection: config.slug,
+            req,
+            where: { and: [{ id: { equals: documentID } }, ...constraints] },
+          })
 
     if (!doc) {
       throw new Forbidden(req.t)

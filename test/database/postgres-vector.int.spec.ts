@@ -19,8 +19,9 @@ const primaryDb = (payload: BasePayload): PostgresDB => {
   return adapter.primaryDrizzle ?? adapter.drizzle
 }
 
-test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
+test.suite(
   'postgres vector custom column',
+  { db: (adapter) => adapter.startsWith('postgres') },
   () => {
     const vectorColumnQueryTest = async (vectorType: string) => {
       const {
@@ -91,6 +92,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           embedding: [-5.2, 3.1, 0.2, 8.1, 3.5],
           title: 'apple',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -99,6 +101,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           embedding: catEmbedding,
           title: 'cat',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -107,6 +110,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           embedding: [-5.1, 2.9, 0.8, 7.9, 3.1],
           title: 'fruit',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -115,6 +119,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           embedding: [1.7, -0.3, 6.9, 19.1, 21.1],
           title: 'dog',
         },
+        overrideAccess: true,
       })
 
       const similarity = sql<number>`1 - (${cosineDistance(payload.db.tables.posts.embedding, catEmbedding)})`
@@ -213,6 +218,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           embedding: '{2:1,4:2}/5',
           title: 'apple',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -221,6 +227,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           embedding: catEmbedding,
           title: 'cat',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -229,6 +236,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           embedding: '{2:4,4:6}/5',
           title: 'fruit',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -237,6 +245,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           embedding: '{1:1,3:2,5:2}/5',
           title: 'dog',
         },
+        overrideAccess: true,
       })
 
       const distance = sql<number>`(${l2Distance(payload.db.tables.posts.embedding, catEmbedding)})`
@@ -325,6 +334,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           embedding: '01010',
           title: 'apple',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -333,6 +343,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           embedding: '10101',
           title: 'cat',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -341,6 +352,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           embedding: '11111',
           title: 'fruit',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -349,6 +361,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
           embedding: '10100',
           title: 'dog',
         },
+        overrideAccess: true,
       })
 
       const similarity = sql<number>`1 - (${jaccardDistance(payload.db.tables.posts.embedding, catEmbedding)})`

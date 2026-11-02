@@ -1,8 +1,6 @@
 'use client'
 
-import type { SanitizedFieldPermissions } from 'payload'
-
-import { formatAdminURL, getFieldPermissions } from 'payload/shared'
+import { flattenTopLevelFields, formatAdminURL, getFieldPermissions } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -39,7 +37,6 @@ export const Auth: React.FC<Props> = (props) => {
   } = props
 
   const [changingPassword, setChangingPassword] = useState(requirePassword)
-  const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
@@ -49,35 +46,32 @@ export const Auth: React.FC<Props> = (props) => {
     config: {
       routes: { api },
     },
+    getEntityConfig,
   } = useConfig()
 
-  let showPasswordFields: SanitizedFieldPermissions = true
+  const hasPasswordField = useMemo(
+    () =>
+      flattenTopLevelFields(getEntityConfig({ collectionSlug }).fields).some(
+        (field) => field.name === 'password',
+      ),
+    [collectionSlug, getEntityConfig],
+  )
+
+  let showPasswordFields = Boolean(docPermissions[operation])
   let showUnlock = true
-  const hasPasswordFieldOverride =
-    typeof docPermissions.fields === 'object' && 'password' in docPermissions.fields
   const hasLoginFieldOverride =
     typeof docPermissions.fields === 'object' &&
     ('username' in docPermissions.fields || 'email' in docPermissions.fields)
 
-  if (hasPasswordFieldOverride) {
-    const { permissions: passwordPermissions } = getFieldPermissions({
+  if (hasPasswordField) {
+    const { operation: passwordPermission } = getFieldPermissions({
       field: { name: 'password', type: 'text' },
       operation,
       parentName: '',
       permissions: docPermissions?.fields,
     })
 
-    if (operation === 'create') {
-      showPasswordFields =
-        passwordPermissions === true ||
-        ((typeof passwordPermissions === 'object' &&
-          passwordPermissions.create) as SanitizedFieldPermissions)
-    } else {
-      showPasswordFields =
-        passwordPermissions === true ||
-        ((typeof passwordPermissions === 'object' &&
-          passwordPermissions.update) as SanitizedFieldPermissions)
-    }
+    showPasswordFields = passwordPermission
   }
 
   if (hasLoginFieldOverride) {
@@ -114,20 +108,10 @@ export const Auth: React.FC<Props> = (props) => {
 
   const disabled = readOnly || isInitializing || isTrashed
 
-  const apiKeyPermissions =
-    docPermissions?.fields === true ? true : docPermissions?.fields?.enableAPIKey
-
-  const apiKeyReadOnly =
-    readOnly ||
-    (apiKeyPermissions !== true &&
-      apiKeyPermissions &&
-      typeof apiKeyPermissions === 'object' &&
-      !apiKeyPermissions?.update)
-
-  const enableAPIKeyReadOnly =
-    readOnly || (apiKeyPermissions !== true && !apiKeyPermissions?.update)
-
-  const canReadApiKey = apiKeyPermissions === true || apiKeyPermissions?.read
+  const apiKeyPermissions = docPermissions?.fields === true ? true : docPermissions?.fields?.apiKey
+  const canManageAPIKey =
+    apiKeyPermissions === true ||
+    (typeof apiKeyPermissions === 'object' && Boolean(apiKeyPermissions?.[operation]))
 
   const hasPermissionToUnlock: boolean = useMemo(() => {
     if (docPermissions) {
@@ -196,7 +180,7 @@ export const Auth: React.FC<Props> = (props) => {
   }, [modified])
 
   const showAuthBlock = enableFields
-  const showAPIKeyBlock = useAPIKey && canReadApiKey
+  const showAPIKeyBlock = useAPIKey && canManageAPIKey
   const showVerifyBlock = verify && isEditing
 
   if (!(showAuthBlock || showAPIKeyBlock || showVerifyBlock)) {
@@ -293,16 +277,10 @@ export const Auth: React.FC<Props> = (props) => {
           )}
           {showAPIKeyBlock && (
             <div className={`${baseClass}__api-key`}>
-              <CheckboxField
-                field={{
-                  name: 'enableAPIKey',
-                  admin: { disabled, readOnly: enableAPIKeyReadOnly },
-                  label: t('authentication:enableAPIKey'),
-                }}
-                path="enableAPIKey"
-                schemaPath={`${collectionSlug}.enableAPIKey`}
+              <APIKey
+                readOnly={disabled}
+                reveal={typeof useAPIKey === 'object' && useAPIKey.reveal === true}
               />
-              <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />
             </div>
           )}
           {showVerifyBlock && (

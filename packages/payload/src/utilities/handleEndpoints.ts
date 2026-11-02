@@ -1,4 +1,3 @@
-import { status as httpStatus } from 'http-status'
 import { match } from 'path-to-regexp'
 
 import type { Collection } from '../collections/config/types.js'
@@ -7,9 +6,10 @@ import type { APIError } from '../errors/APIError.js'
 import type { GlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
-import { createPayloadRequest } from './createPayloadRequest.js'
-import { formatAdminURL } from './formatAdminURL.js'
+import { createPayloadRequestFromWebRequest } from './createPayloadRequestFromWebRequest.js'
+import { formatAdminURL, stripTrailingSlash } from './formatAdminURL.js'
 import { headersWithCors } from './headersWithCors.js'
+import { httpStatus } from './httpStatus.js'
 import { mergeHeaders } from './mergeHeaders.js'
 import { routeError } from './routeError.js'
 
@@ -103,8 +103,7 @@ export const handleEndpoints = async ({
       // May not be supported by every endpoint
       data = await request.json()
 
-      // locale and fallbackLocale is read by createPayloadRequest to populate req.locale and req.fallbackLocale
-      // => add to searchParams
+      // createPayloadRequestFromWebRequest reads locale and fallbackLocale from searchParams.
       if (data?.locale) {
         url += `?locale=${data.locale}`
       }
@@ -136,7 +135,7 @@ export const handleEndpoints = async ({
   }
 
   try {
-    req = await createPayloadRequest({
+    req = await createPayloadRequestFromWebRequest({
       canSetHeaders: true,
       config: incomingConfig,
       payloadInstanceCacheKey,
@@ -146,11 +145,13 @@ export const handleEndpoints = async ({
     const { payload } = req
     const { config } = payload
 
-    const pathname = path ?? new URL(req.url!).pathname
-    const baseAPIPath = formatAdminURL({
+    const rawPathname = path ?? new URL(req.url!).pathname
+    const pathname = stripTrailingSlash(rawPathname)
+    const rawBaseAPIPath = formatAdminURL({
       apiRoute: config.routes.api,
       path: '',
     })
+    const baseAPIPath = stripTrailingSlash(rawBaseAPIPath)
 
     if (!pathname.startsWith(baseAPIPath)) {
       return notFoundResponse(req, pathname)

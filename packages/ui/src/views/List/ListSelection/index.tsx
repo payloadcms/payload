@@ -137,7 +137,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             afterDelete={() => {
               toggleAll()
 
-              router.replace(
+              void router.replace(
                 qs.stringify(
                   {
                     ...parseSearchParams(searchParams),

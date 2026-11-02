@@ -31,6 +31,7 @@ export const subscriptionDeleted = async (args) => {
       where: {
         stripeID: customerStripeID,
       },
+      overrideAccess: true,
     })
 
     const foundCustomer = customerReq.docs[0]
@@ -55,6 +56,7 @@ export const subscriptionDeleted = async (args) => {
             skipSync: true,
             subscriptions,
           },
+          overrideAccess: true,
         })
 
         payload.logger.info(`✅ Successfully deleted subscription.`)

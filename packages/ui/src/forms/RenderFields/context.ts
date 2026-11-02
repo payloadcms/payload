@@ -10,9 +10,9 @@ import React from 'react'
  * 'use client'
  * import React from 'react'
  * import { TextField, FieldPathContext } from '@payloadcms/ui'
- * import type { TextFieldClientComponent } from 'payload'
+ * import type { TextFieldClientProps } from 'payload'
  *
- * export const MyCustomField: TextFieldClientComponent = (props) => {
+ * export const MyCustomField: React.FC<TextFieldClientProps> = (props) => {
  *   return (
  *     <FieldPathContext value="path.to.some.other.field">
  *       <TextField {...props} />
@@ -32,7 +32,7 @@ export const FieldPathContext = React.createContext<string>(undefined)
  * @experimental This is an experimental API and may change at any time. Use at your own risk.
  */
 export const useFieldPath = () => {
-  const context = React.useContext(FieldPathContext)
+  const context = React.use(FieldPathContext)
 
   if (!context) {
     // swallow the error, not all fields are wrapped in a FieldPathContext

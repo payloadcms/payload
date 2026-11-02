@@ -14,6 +14,8 @@ export const SubMenuHeader: React.FC<{
         aria-label={title}
         className="user-menu__submenu-header-row"
         onClick={onBack}
+        role="menuitem"
+        tabIndex={-1}
         type="button"
       >
         <span className="user-menu__submenu-back">

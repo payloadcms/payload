@@ -79,6 +79,7 @@ export const createAddressesCollection: (props: Props) => CollectionConfig = (pr
       hidden: true,
       useAsTitle: 'createdAt',
     },
+    authorship: false,
     fields,
     hooks: {
       beforeChange: [

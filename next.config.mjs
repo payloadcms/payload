@@ -14,7 +14,8 @@ const withBundleAnalyzer = bundleAnalyzer({
 const config = withBundleAnalyzer(
   withPayload(
     {
-      cacheComponents: process.env.PAYLOAD_CACHE_COMPONENTS === 'true',
+      cacheComponents: process.env.PAYLOAD_DISABLE_CACHE_COMPONENTS !== 'true',
+      partialPrefetching: process.env.PAYLOAD_DISABLE_CACHE_COMPONENTS !== 'true',
       basePath: process.env?.NEXT_BASE_PATH || undefined,
       typescript: {
         ignoreBuildErrors: true,
@@ -31,8 +32,6 @@ const config = withBundleAnalyzer(
       env: {
         PAYLOAD_CORE_DEV: 'true',
         ROOT_DIR: path.resolve(dirname),
-        // @todo remove in 4.0 - will behave like this by default in 4.0
-        PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY: 'true',
       },
       async redirects() {
         return [

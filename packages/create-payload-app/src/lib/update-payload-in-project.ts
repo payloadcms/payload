@@ -100,9 +100,9 @@ export async function updatePayloadInTanStackProject({
 
   for (const { destination, relativePath, sourcePath } of TANSTACK_TEMPLATE_FILES) {
     const isPayloadRoute = destination === 'routes' && relativePath.startsWith('_payload')
-    const isPayloadStyles = destination === 'src' && relativePath === 'payload.css'
+    const isCustomStyles = destination === 'routes' && relativePath === '_payload/custom.css'
 
-    if (!isPayloadRoute && !isPayloadStyles) {
+    if (!isPayloadRoute) {
       continue
     }
 
@@ -110,7 +110,7 @@ export async function updatePayloadInTanStackProject({
       destination === 'routes' ? appDetails.routesDir : appDetails.sourceDir,
       relativePath,
     )
-    if (isPayloadStyles && fse.existsSync(destinationPath)) {
+    if (isCustomStyles && fse.existsSync(destinationPath)) {
       continue
     }
 

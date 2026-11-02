@@ -88,6 +88,7 @@ export const afterTenantDelete =
       cleanupPromises.push(
         req.payload.delete({
           collection: slug,
+          overrideAccess: true,
           req,
           where: {
             [tenantFieldName]: {
@@ -103,6 +104,7 @@ export const afterTenantDelete =
         collection: usersSlug,
         depth: 0,
         limit: 0,
+        overrideAccess: true,
         req,
         where: {
           [`${usersTenantsArrayFieldName}.${usersTenantsArrayTenantFieldName}`]: {
@@ -128,6 +130,7 @@ export const afterTenantDelete =
                 }
               }),
             },
+            overrideAccess: true,
             req,
           }),
         )

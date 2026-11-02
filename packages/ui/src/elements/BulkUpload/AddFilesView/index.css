@@ -1,4 +1,9 @@
 @layer payload-default {
+  .bulk-upload--add-files__collectionSelect {
+    margin-inline: var(--spacer-2-5);
+    margin-block-start: var(--spacer-2-5);
+  }
+
   .bulk-upload--add-files__body {
     display: flex;
     flex: 1 1 auto;

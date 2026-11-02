@@ -118,6 +118,7 @@ describe('Document View', () => {
         const noAPIViewDoc = await payload.create({
           collection: noApiViewCollectionSlug,
           data: {},
+          overrideAccess: true,
         })
 
         const urlUtil = new AdminUrlUtil(serverURL, noApiViewCollectionSlug)
@@ -381,7 +382,7 @@ describe('Document View', () => {
       const drawerEditView = drawer.locator('.drawer__content .collection-edit')
       await expect(drawerEditView).toBeVisible()
 
-      const drawerTitleField = drawerEditView.locator('#field-title')
+      const drawerTitleField = drawerEditView.locator('input[name="title"]')
       const testTitle = 'Test Title for Persistence'
       await drawerTitleField.fill(testTitle)
       await expect(drawerTitleField).toHaveValue(testTitle)
@@ -470,7 +471,7 @@ describe('Document View', () => {
       await expect(drawer1Content).toBeVisible()
 
       // modify the title to trigger the leave page modal
-      await page.locator('.drawer__content #field-title').fill('New Title')
+      await page.locator('.drawer__content input[name="title"]').fill('New Title')
       await wait(200)
 
       // The drawer header renders the document title as a link to the full document.
@@ -748,19 +749,59 @@ describe('Document View', () => {
   })
 
   describe('publish button', () => {
-    test('should show publish active locale button with defaultLocalePublishOption set to active', async () => {
+    test('should show publish active locale button by default when localized fields exist', async () => {
       await navigateToDoc(page, localizedURL)
       const publishButton = page.locator('#action-save')
       await expect(publishButton).toBeVisible()
       await expect(publishButton).toContainText('Publish in English')
     })
 
-    test('should not show publish active locale button with defaultLocalePublishOption set to active but no localized fields', async () => {
+    test('should not show publish active locale button when no localized fields exist', async () => {
       await navigateToDoc(page, postsUrl)
       const publishButton = page.locator('#action-save')
       await expect(publishButton).toBeVisible()
       await expect(publishButton).toContainText('Publish changes')
       await expect(publishButton).not.toContainText('Publish in')
+    })
+
+    test('should publish all locales from the secondary option', async () => {
+      const localizedDocument = await payload.create({
+        collection: localizedCollectionSlug,
+        data: {
+          title: 'English draft',
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: localizedDocument.id,
+        collection: localizedCollectionSlug,
+        data: {
+          title: 'Spanish draft',
+        },
+        draft: true,
+        locale: 'es',
+      })
+
+      await page.goto(localizedURL.edit(localizedDocument.id))
+      await saveDocAndAssert(page, '#publish-all-locales')
+
+      const publishedDocuments = await payload.find({
+        collection: localizedCollectionSlug,
+        draft: true,
+        locale: 'all',
+        where: {
+          id: {
+            equals: localizedDocument.id,
+          },
+        },
+      })
+
+      expect(publishedDocuments.docs[0]?._status).toEqual({
+        en: 'published',
+        es: 'published',
+      })
     })
 
     test('should show published status after publishing specific locale', async () => {
@@ -930,7 +971,7 @@ describe('Document View', () => {
         selector: '#field-relationship button.relationship--single-value__drawer-toggler',
       })
       const editModal = page.locator('.drawer--is-open .collection-edit')
-      await editModal.locator('#field-title').fill('new sean')
+      await editModal.locator('input[name="title"]').fill('new sean')
 
       // Attempt to close the drawer
       const closeButton = editModal.locator('button.doc-drawer__header-close')
@@ -955,5 +996,6 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       title,
       ...overrides,
     },
-  }) as unknown as Promise<Post>
+    overrideAccess: true,
+  })
 }

@@ -12,6 +12,10 @@ export const cloudStorageDeletedFilenames: string[] = []
 
 export const mockCloudStorageAdapter = () => ({
   name: 'mock-cloud-storage-adapter',
+  deleteFile: ({ storageFilePath }: { storageFilePath: string }) => {
+    cloudStorageDeletedFilenames.push(path.posix.basename(storageFilePath))
+    return Promise.resolve()
+  },
   handleDelete: ({ filename }: { filename: string }) => {
     cloudStorageDeletedFilenames.push(filename)
     return Promise.resolve()

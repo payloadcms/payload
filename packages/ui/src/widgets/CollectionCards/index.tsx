@@ -14,6 +14,9 @@ import './index.css'
 
 const baseClass = 'collections'
 
+/**
+ * @internal - may change or be removed without a major version bump
+ */
 export async function CollectionCards(props: WidgetServerProps) {
   const { i18n, payload, user } = props.req
   const { admin: adminRoute } = payload.config.routes
@@ -94,6 +97,8 @@ export async function CollectionCards(props: WidgetServerProps) {
                       }
                     }
 
+                    const createButtonLabel = t('general:createNewLabel', { label: title })
+
                     return (
                       <li key={entityIndex}>
                         <Card
@@ -102,21 +107,20 @@ export async function CollectionCards(props: WidgetServerProps) {
                               <Locked className={`${baseClass}__locked`} user={userEditing} />
                             ) : hasCreatePermission && type === EntityType.collection ? (
                               <Button
-                                aria-label={t('general:createNewLabel', {
-                                  label,
-                                })}
+                                aria-label={createButtonLabel}
                                 buttonStyle="ghost"
                                 el="link"
                                 icon="plus"
                                 round
                                 to={createHREF}
+                                tooltip={createButtonLabel}
                               />
                             ) : undefined
                           }
                           buttonAriaLabel={buttonAriaLabel}
                           href={href}
                           id={`card-${slug}`}
-                          title={getTranslation(label, i18n)}
+                          title={title}
                           titleAs="h3"
                         />
                       </li>

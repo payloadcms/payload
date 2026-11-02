@@ -4,6 +4,7 @@ import type { AccessResult } from '../../config/types.js'
 import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
+import type { TypeWithVersion } from '../types.js'
 
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -23,14 +24,41 @@ type Arguments<T> = {
   select?: SelectType
 }
 
+type FindDraftVersionArguments<T> = {
+  draftVersionID?: number | string
+} & Arguments<T>
+
 export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   accessResult,
   doc,
   entity,
   entityType,
+  overrideAccess,
   req,
   select,
 }: Arguments<T>): Promise<T> => {
+  const draftVersion = await findDraftVersion({
+    accessResult,
+    doc,
+    entity,
+    entityType,
+    overrideAccess,
+    req,
+    select,
+  })
+
+  return draftVersion ? getDocumentFromDraftVersion({ doc, draftVersion, entityType }) : doc
+}
+
+export const findDraftVersion = async <T extends TypeWithID>({
+  accessResult,
+  doc,
+  draftVersionID,
+  entity,
+  entityType,
+  req,
+  select,
+}: FindDraftVersionArguments<T>): Promise<TypeWithVersion<T> | undefined> => {
   const { locale, payload } = req
 
   let queryToBuild: Where = {
@@ -80,6 +108,14 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     })
   }
 
+  if (draftVersionID !== undefined) {
+    queryToBuild.and!.push({
+      id: {
+        equals: draftVersionID,
+      },
+    })
+  }
+
   if (docHasTimestamps(doc)) {
     queryToBuild.and!.push({
       or: [
@@ -122,13 +158,19 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     versionDocs = (await req.payload.db.findVersions<T>(findVersionsArgs)).docs
   }
 
-  let draft = versionDocs[0]
+  return versionDocs[0]
+}
 
-  if (!draft) {
-    return doc
-  }
-
-  draft = sanitizeInternalFields(draft)
+export const getDocumentFromDraftVersion = <T extends TypeWithID>({
+  doc,
+  draftVersion,
+  entityType,
+}: {
+  doc: T
+  draftVersion: TypeWithVersion<T>
+  entityType: 'collection' | 'global'
+}): T => {
+  const draft = sanitizeInternalFields(draftVersion)
 
   // Patch globalType onto version doc
   if (entityType === 'global' && 'globalType' in doc) {

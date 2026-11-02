@@ -47,6 +47,8 @@ export const ThemeMenu: React.FC<{
         className="popup-button-list__button popup-button-list__button--submenu-trigger"
         data-popup-prevent-close
         onClick={onMobileOpen}
+        role="menuitem"
+        tabIndex={-1}
         type="button"
       >
         <span className="popup-button-list__submenu-icon">
@@ -62,28 +64,16 @@ export const ThemeMenu: React.FC<{
 
   return (
     <Popup
-      renderButton={({ active, onClick, onKeyDown, ...aria }) => (
-        <button
-          {...aria}
-          className={[
-            'popup-button-list__button',
-            'popup-button-list__button--submenu-trigger',
-            active && 'popup-button-list__button--selected',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          onClick={onClick}
-          onKeyDown={onKeyDown}
-          type="button"
+      hoverSubmenu
+      popupType="menu"
+      renderButton={(buttonProps) => (
+        <PopupList.SubmenuTrigger
+          buttonProps={buttonProps}
+          icon={<VariableColorIcon size={24} />}
+          trailingIcon={<ChevronIcon direction="right" size={16} />}
         >
-          <span className="popup-button-list__submenu-icon">
-            <VariableColorIcon size={24} />
-          </span>
-          <span className="popup-button-list__label">{t('general:theme')}</span>
-          <span className="popup-button-list__chevron">
-            <ChevronIcon direction="right" size={16} />
-          </span>
-        </button>
+          {t('general:theme')}
+        </PopupList.SubmenuTrigger>
       )}
       side="left"
       size="large"

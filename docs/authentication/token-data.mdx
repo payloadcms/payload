@@ -73,6 +73,24 @@ If you wish to use a different key other than the field `name`, you can define `
 
 </Banner>
 
+Decoding a token produces the same flat token data shape used by earlier Payload versions:
+
+```ts
+{
+  id: 'user-id',
+  collection: 'users',
+  email: 'user@example.com',
+  sid: 'session-id', // when sessions are enabled
+  role: 'super-admin', // fields configured with saveToJWT
+  iat: 1750000000,
+  exp: 1750007200,
+}
+```
+
+Payload reserves `id`, `collection`, `email`, `sid`, `iat`, and `exp`; fields configured with `saveToJWT` cannot replace these values. All other fields selected by `saveToJWT`, including fields that use a custom string key, are stored at the top level with the trusted authentication values.
+
+Payload also signs `authVersion: 1` into the token's protected JWT header. This marker identifies tokens issued by the fixed authentication format and is checked during authentication. It is not a decoded payload field, because an existing `saveToJWT` alias could use that name.
+
 ### Using Token Data
 
 This is especially helpful when writing [Hooks](../hooks/overview) and [Access Control](../access-control/overview) that depend on user defined fields.

@@ -1,9 +1,9 @@
-import type { NumberFieldLabelServerComponent } from 'payload'
+import type { NumberFieldLabelServerProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomNumberFieldLabelServer: NumberFieldLabelServerComponent = ({
+export const CustomNumberFieldLabelServer: React.FC<NumberFieldLabelServerProps> = ({
   clientField,
   path,
 }) => {

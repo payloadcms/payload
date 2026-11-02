@@ -17,7 +17,13 @@ import {
   type SanitizedFieldsPermissions,
   type VersionField,
 } from 'payload'
-import { fieldIsID, fieldShouldBeLocalized, getFieldPaths, tabHasName } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldIsID,
+  fieldShouldBeLocalized,
+  getFieldPaths,
+  tabHasName,
+} from 'payload/shared'
 
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import { diffComponents } from './fields/index.js'
@@ -77,6 +83,13 @@ export const buildVersionFields = ({
     fieldIndex++
 
     if (fieldIsID(field)) {
+      continue
+    }
+
+    // Hidden data fields are stripped from API responses, so they have no values to diff.
+    // Unnamed layout fields still need to be traversed because their children remain readable.
+    // Fields with only `admin.hidden` also retain their values and remain diffable.
+    if (fieldAffectsData(field) && field.hidden) {
       continue
     }
 
@@ -519,24 +532,14 @@ const buildVersionField = ({
       ...baseVersionField,
       CustomComponent: undefined,
     },
-    /**
-     * TODO: Change to valueFrom in 4.0
-     */
-    comparisonValue: valueFrom,
-    /**
-     * @deprecated remove in 4.0. Each field should handle its own diffing logic
-     */
-    diffMethod: 'diffWordsWithSpace',
     field: clientField,
     fieldPermissions:
       typeof fieldPermissions === 'undefined' ? parentFieldsPermissions : fieldPermissions,
     parentIsLocalized,
 
     nestingLevel: nestingLevel ? nestingLevel : undefined,
-    /**
-     * TODO: Change to valueTo in 4.0
-     */
-    versionValue: valueTo,
+    valueFrom,
+    valueTo,
   }
   if (locale) {
     clientDiffProps.locale = locale

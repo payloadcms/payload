@@ -1,9 +1,9 @@
 'use client'
-import type { CodeFieldClientComponent } from 'payload'
+import type { CodeFieldClientProps } from 'payload'
 
 import { CodeField } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomCodeFieldClient: CodeFieldClientComponent = (props) => {
+export const CustomCodeFieldClient: React.FC<CodeFieldClientProps> = (props) => {
   return <CodeField {...props} />
 }

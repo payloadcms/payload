@@ -1,30 +1,25 @@
 'use server'
 
-import type { createLocalReq, ImportMap, InitReqResult, SanitizedConfig } from 'payload'
+import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
+import type { InitAdminContextFn } from '../Root/index.js'
+
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
 import { NotFoundClient, PageConfigProvider } from '../../exports/client/index.js'
+
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 
-type InitReqFn = (args: {
-  canSetHeaders?: boolean
-  configPromise: Promise<SanitizedConfig> | SanitizedConfig
-  importMap: ImportMap
-  key: string
-  overrides?: Parameters<typeof createLocalReq>[0]
-}) => Promise<InitReqResult>
-
 export type RenderNotFoundPageArgs = {
   config: Promise<SanitizedConfig>
   importMap: ImportMap
-  initReq: InitReqFn
+  initAdminContext: InitAdminContextFn
   params: Promise<{ segments: string[] }>
   searchParams: Promise<{ [key: string]: string | string[] }>
 }
@@ -32,7 +27,7 @@ export type RenderNotFoundPageArgs = {
 export const renderNotFoundPage = async ({
   config: configPromise,
   importMap,
-  initReq,
+  initAdminContext,
   params: paramsPromise,
   searchParams: searchParamsPromise,
 }: RenderNotFoundPageArgs) => {
@@ -47,7 +42,8 @@ export const renderNotFoundPage = async ({
     permissions,
     req,
     req: { payload },
-  } = await initReq({
+    user,
+  } = await initAdminContext({
     configPromise: config,
     importMap,
     key: 'RootLayout',
@@ -75,7 +71,7 @@ export const renderNotFoundPage = async ({
     config,
     i18n: req.i18n,
     importMap,
-    user: req.user,
+    user,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -90,7 +86,7 @@ export const renderNotFoundPage = async ({
         permissions={permissions}
         req={req}
         searchParams={searchParams}
-        user={req.user}
+        user={user}
         visibleEntities={visibleEntities}
       >
         <NotFoundClient />

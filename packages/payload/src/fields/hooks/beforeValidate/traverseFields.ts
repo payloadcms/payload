@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
-import type { JsonObject, PayloadRequest } from '../../../types/index.js'
+import type { BeforeValidateOperation, JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { unflattenData } from '../../../utilities/unflattenData.js'
@@ -19,10 +19,12 @@ type Args<T> = {
    * The original data (not modified by any hooks)
    */
   doc: T
+  docForHooks?: T
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
-  operation: 'create' | 'update'
+  onFieldAccess?: (args: { accessResult: boolean; path: string }) => void
+  operation: BeforeValidateOperation
   overrideAccess: boolean
   parentIndexPath: string
   /**
@@ -46,8 +48,10 @@ export const traverseFields = async <T>({
   context,
   data,
   doc,
+  docForHooks,
   fields,
   global,
+  onFieldAccess,
   operation,
   overrideAccess,
   parentIndexPath,
@@ -71,9 +75,11 @@ export const traverseFields = async <T>({
         context,
         data,
         doc,
+        docForHooks,
         field,
         fieldIndex,
         global,
+        onFieldAccess,
         operation,
         overrideAccess,
         parentIndexPath,

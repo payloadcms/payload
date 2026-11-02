@@ -14,6 +14,7 @@ export const getPreferences = cache(
         collection: 'payload-preferences',
         depth: 0,
         limit: 1,
+        overrideAccess: true,
         pagination: false,
         where: {
           and: [

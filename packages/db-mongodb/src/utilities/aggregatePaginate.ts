@@ -75,7 +75,12 @@ export const aggregatePaginate = async ({
     if (useEstimatedCount) {
       countPromise = Model.estimatedDocumentCount(query)
     } else {
-      const hint = adapter.disableIndexHints !== true ? { _id: 1 } : undefined
+      // Only hint the _id index for unfiltered counts. With a filter, MongoDB picks the matching index on its own,
+      // while forcing _id would make it scan the whole collection.
+      const hint =
+        adapter.disableIndexHints !== true && Object.keys(query).length === 0
+          ? { _id: 1 }
+          : undefined
       countPromise = Model.countDocuments(query, {
         collation,
         session,

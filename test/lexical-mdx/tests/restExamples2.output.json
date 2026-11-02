@@ -5,7 +5,7 @@
         {
           "format": "",
           "type": "block",
-          "version": 2,
+          "version": 1,
           "fields": {
             "blockType": "restExamples",
             "data": [

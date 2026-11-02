@@ -200,7 +200,7 @@ export const createClientField = ({
           break
         }
 
-        clientField.admin = {} as AdminClient
+        clientField.admin = {}
 
         for (const adminKey in incomingField.admin) {
           if (serverOnlyFieldAdminProperties.includes(adminKey as any)) {
@@ -434,7 +434,7 @@ export const createClientField = ({
                 t: i18n.t,
               })
             } else if (key === 'admin') {
-              clientTab.admin = {} as AdminClient
+              clientTab.admin = {}
 
               for (const adminKey in tab.admin) {
                 if (serverOnlyFieldAdminProperties.includes(adminKey as any)) {

@@ -1,0 +1,7 @@
+#custom-css {
+  font-family: monospace;
+}
+
+#custom-css::after {
+  content: 'custom-css';
+}

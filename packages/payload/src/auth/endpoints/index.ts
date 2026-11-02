@@ -10,6 +10,7 @@ import { meHandler } from './me.js'
 import { refreshHandler } from './refresh.js'
 import { registerFirstUserHandler } from './registerFirstUser.js'
 import { resetPasswordHandler } from './resetPassword.js'
+import { revealAPIKeyHandler } from './revealAPIKey.js'
 import { unlockHandler } from './unlock.js'
 import { verifyEmailHandler } from './verifyEmail.js'
 
@@ -20,6 +21,14 @@ export const authRootEndpoints: Endpoint[] = wrapInternalEndpoints([
     path: '/access',
   },
 ])
+
+export const apiKeyRevealEndpoint: Endpoint = wrapInternalEndpoints([
+  {
+    handler: revealAPIKeyHandler,
+    method: 'post',
+    path: '/:id/api-key/reveal',
+  },
+])[0]!
 
 export const authCollectionEndpoints: Endpoint[] = wrapInternalEndpoints([
   {

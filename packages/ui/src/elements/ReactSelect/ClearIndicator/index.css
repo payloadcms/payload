@@ -5,7 +5,12 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    background: transparent;
+    border: 0;
     color: var(--color-icon-secondary);
+    min-height: var(--spacer-4);
+    min-width: var(--spacer-4);
+    padding: 0;
 
     &:hover {
       color: var(--color-icon);

@@ -8,12 +8,18 @@ export const formatErrors = (incoming: { [key: string]: unknown } | APIError): E
     // Payload 'ValidationError' and 'APIError'
     // Use duck-typing fallback alongside instanceof to handle bundlers (e.g. Vite)
     // that may load duplicate module instances, causing instanceof to fail.
-    if (
-      (incoming instanceof ValidationError ||
-        incoming instanceof APIError ||
-        ('isOperational' in incoming && incoming.isOperational === true)) &&
-      incoming.data
-    ) {
+    const isPayloadError =
+      incoming instanceof ValidationError ||
+      incoming instanceof APIError ||
+      ('isOperational' in incoming && incoming.isOperational === true)
+
+    if (isPayloadError) {
+      if (!incoming.data) {
+        return {
+          errors: [{ message: incoming.message as string | undefined }],
+        }
+      }
+
       return {
         errors: [
           {

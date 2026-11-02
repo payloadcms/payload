@@ -7,7 +7,7 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('KV Adapters', () => {
+test.suite('KV Adapters', { config: './config.ts' }, () => {
   const testKVAdapter = async (payload: Payload, adapter?: KVAdapterResult) => {
     if (adapter) {
       payload.kv = adapter.init({ payload })
@@ -51,6 +51,14 @@ test.suite({ config: './config.ts' })('KV Adapters', () => {
 
     return true
   }
+
+  test('should not inject authorship fields into the internal KV collection', ({ payload }) => {
+    const fields = payload.collections['payload-kv'].config.fields
+    const names = fields.filter((f) => 'name' in f).map((f) => (f as { name: string }).name)
+
+    expect(names).not.toContain('createdBy')
+    expect(names).not.toContain('updatedBy')
+  })
 
   test('databaseKVAdapter', async ({ payload }) => {
     // default

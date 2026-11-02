@@ -1,4 +1,4 @@
-import { createLocalReq, strictObject, z } from 'payload'
+import { createPayloadRequest, strictObject, z } from 'payload'
 
 import type { MCPToolResponse } from '../../../types.js'
 
@@ -53,7 +53,10 @@ export const authCollectionTool = defineCollectionTool({
     if (input.headers) {
       authHeaders = new Headers(input.headers)
     }
-    const authReq = await createLocalReq({ req: { headers: authHeaders } }, req.payload)
+    const authReq = await createPayloadRequest({
+      payload: req.payload,
+      req: { headers: authHeaders },
+    })
     const result = await req.payload.auth({ headers: authHeaders, req: authReq })
 
     if (result.user) {
@@ -232,7 +235,7 @@ export const unlockCollectionTool = defineCollectionTool({
           text: `# Account Unlocked\n\n**Collection:** ${slug}\n**Email:** ${input.email}\n**Result:** ${result ? 'Success' : 'Failed'}`,
         },
       ],
-      doc: { result } as Record<string, unknown>,
+      doc: { result },
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -267,7 +270,7 @@ export const verifyCollectionTool = defineCollectionTool({
           text: `# Email Verification Successful\n\n**Collection:** ${slug}\n**Result:** ${result ? 'Success' : 'Failed'}`,
         },
       ],
-      doc: { result } as Record<string, unknown>,
+      doc: { result },
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'

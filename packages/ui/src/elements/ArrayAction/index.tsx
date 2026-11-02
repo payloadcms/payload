@@ -24,6 +24,7 @@ export type Props = {
   hasMaxRows: boolean
   index: number
   isSortable?: boolean
+  label: string
   moveRow: (from: number, to: number) => void
   pasteData: ClipboardPasteEligibilityArgs
   pasteRow: (index: number) => void
@@ -39,6 +40,7 @@ export const ArrayAction: React.FC<Props> = ({
   hasMaxRows,
   index,
   isSortable,
+  label,
   moveRow,
   pasteData,
   pasteRow,
@@ -53,7 +55,7 @@ export const ArrayAction: React.FC<Props> = ({
   return (
     <Popup
       button={<MoreIcon />}
-      buttonAriaLabel={t('general:moreOptions')}
+      buttonAriaLabel={`${t('general:moreOptions')}: ${label}`}
       buttonClassName={`${baseClass}__button`}
       caret={false}
       className={baseClass}
@@ -63,6 +65,7 @@ export const ArrayAction: React.FC<Props> = ({
           refresh()
         }
       }}
+      popupType="menu"
       render={({ close }) => {
         return (
           <PopupList.MenuItem>

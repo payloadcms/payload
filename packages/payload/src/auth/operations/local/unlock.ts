@@ -5,24 +5,24 @@ import type {
   RequestContext,
 } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { unlockOperation } from '../unlock.js'
 
 export type Options<TSlug extends AuthCollectionSlug> = {
   collection: TSlug
   context?: RequestContext
   data: AuthOperationsFromCollectionSlug<TSlug>['unlock']
-  overrideAccess: boolean
   req?: Partial<PayloadRequest>
-}
+} & Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export async function unlockLocal<TSlug extends AuthCollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<boolean> {
-  const { collection: collectionSlug, data, overrideAccess = true } = options
+  const { collection: collectionSlug, data, overrideAccess = false } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -36,6 +36,6 @@ export async function unlockLocal<TSlug extends AuthCollectionSlug>(
     collection,
     data,
     overrideAccess,
-    req: await createLocalReq(options, payload),
+    req: await createPayloadRequest({ ...options, payload }),
   })
 }

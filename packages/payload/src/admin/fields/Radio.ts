@@ -2,21 +2,15 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { RadioField, RadioFieldClient } from '../../fields/config/types.js'
 import type { RadioFieldValidation } from '../../fields/validations.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
-import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type RadioFieldClientWithoutType = MarkOptional<RadioFieldClient, 'type'>
@@ -39,42 +33,30 @@ export type RadioFieldClientProps = ClientFieldBase<RadioFieldClientWithoutType>
 
 export type RadioFieldServerProps = RadioFieldBaseServerProps &
   ServerFieldBase<RadioField, RadioFieldClientWithoutType>
-
-export type RadioFieldServerComponent = FieldServerComponent<
-  RadioField,
-  RadioFieldClientWithoutType,
-  RadioFieldBaseServerProps
->
-
-export type RadioFieldClientComponent = FieldClientComponent<
-  RadioFieldClientWithoutType,
-  RadioFieldBaseClientProps
->
-
 type OnChange<T = string> = (value: T) => void
 
-export type RadioFieldLabelServerComponent = FieldLabelServerComponent<
+export type RadioFieldLabelServerProps = FieldLabelServerProps<
   RadioField,
   RadioFieldClientWithoutType
 >
 
-export type RadioFieldLabelClientComponent = FieldLabelClientComponent<RadioFieldClientWithoutType>
+export type RadioFieldLabelClientProps = FieldLabelClientProps<RadioFieldClientWithoutType>
 
-export type RadioFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+export type RadioFieldDescriptionServerProps = FieldDescriptionServerProps<
   RadioField,
   RadioFieldClientWithoutType
 >
 
-export type RadioFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<RadioFieldClientWithoutType>
+export type RadioFieldDescriptionClientProps =
+  FieldDescriptionClientProps<RadioFieldClientWithoutType>
 
-export type RadioFieldErrorServerComponent = FieldErrorServerComponent<
+export type RadioFieldErrorServerProps = FieldErrorServerProps<
   RadioField,
   RadioFieldClientWithoutType
 >
 
-export type RadioFieldErrorClientComponent = FieldErrorClientComponent<RadioFieldClientWithoutType>
+export type RadioFieldErrorClientProps = FieldErrorClientProps<RadioFieldClientWithoutType>
 
-export type RadioFieldDiffServerComponent = FieldDiffServerComponent<RadioField, RadioFieldClient>
+export type RadioFieldDiffServerProps = FieldDiffServerProps<RadioField, RadioFieldClient>
 
-export type RadioFieldDiffClientComponent = FieldDiffClientComponent<RadioFieldClient>
+export type RadioFieldDiffClientProps = FieldDiffClientProps<RadioFieldClient>

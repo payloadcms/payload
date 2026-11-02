@@ -1,6 +1,7 @@
 import type {
   Adapter,
   ClientUploadsConfig,
+  DeleteFile,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
@@ -9,13 +10,14 @@ import type { R2Bucket } from './types.js'
 
 import { deleteFile } from './deleteFile.js'
 import { getFile } from './getFile.js'
-import { defaultR2ClientUploadsAccess, getHandleMultiPartUpload } from './handleMultiPartUpload.js'
+import { getHandleMultiPartUpload } from './handleMultiPartUpload.js'
 import { uploadFile } from './uploadFile.js'
 
 interface CreateR2AdapterArgs {
   bucket: R2Bucket
   clientUploads?: ClientUploadsConfig
   collections: R2StorageOptions['collections']
+  copyCredentials?: R2StorageOptions['copyCredentials']
   useCompositePrefixes?: boolean
 }
 
@@ -23,12 +25,10 @@ export function createR2Adapter({
   bucket,
   clientUploads,
   collections,
+  copyCredentials,
   useCompositePrefixes = false,
 }: CreateR2AdapterArgs): Adapter {
-  const access =
-    typeof clientUploads === 'object' && clientUploads.access
-      ? clientUploads.access
-      : defaultR2ClientUploadsAccess
+  const access = typeof clientUploads === 'object' ? clientUploads.access : undefined
   const uploadInstructions: GeneratedAdapter['uploadInstructions'] = {
     adminHandler: {
       path: '@payloadcms/storage-r2/client#R2ClientUploadHandler',
@@ -53,44 +53,62 @@ export function createR2Adapter({
         uploadReference: {},
       },
     }),
+    requiresUploadReceipt: true,
     useInAdmin: true,
   }
+
+  const deleteStoredFile: DeleteFile = ({ storageFilePath }) =>
+    deleteFile({ bucket, storageFilePath })
 
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'r2',
     uploadInstructions,
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
-      deleteFile({
-        bucket,
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
-        useCompositePrefixes,
-      }),
+    copyFile: async ({ from, req, to }) => {
+      if (!copyCredentials) {
+        throw new Error('R2 file copy requires S3 API credentials')
+      }
 
-    handleUpload: ({ data, file }) =>
+      const [{ S3 }, { copyS3File }] = await Promise.all([
+        import('@aws-sdk/client-s3'),
+        import('@payloadcms/storage-s3/copy-file'),
+      ])
+      const client = new S3({
+        credentials: {
+          accessKeyId: copyCredentials.accessKeyId,
+          secretAccessKey: copyCredentials.secretAccessKey,
+        },
+        endpoint: `https://${copyCredentials.accountId}.r2.cloudflarestorage.com`,
+        region: 'auto',
+      })
+
+      try {
+        await copyS3File({ bucket: copyCredentials.bucket, client, from, req, to })
+      } finally {
+        client.destroy()
+      }
+    },
+
+    deleteFile: deleteStoredFile,
+    handleDelete: deleteStoredFile,
+
+    handleUpload: ({ file, storageFilePath }) =>
       uploadFile({
         bucket,
         buffer: file.buffer,
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename: file.filename,
         mimeType: file.mimeType,
-        useCompositePrefixes,
+        storageFilePath,
       }),
 
-    staticHandler: (
-      req,
-      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { filename, operation, uploadReference } }) =>
       getFile({
         bucket,
         collection,
+        doc,
         filename,
         incomingHeaders: headers,
+        operation,
         prefix,
-        prefixQueryParam,
         req,
         uploadReference,
         useCompositePrefixes,

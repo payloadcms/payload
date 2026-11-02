@@ -1,13 +1,8 @@
 {
   "name": "@payloadcms/email-resend",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-beta.6",
   "description": "Payload Resend Email Adapter",
   "homepage": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/email-resend"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -17,8 +12,18 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/email-resend"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -26,19 +31,24 @@
       "default": "./src/index.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "dist"
-  ],
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "devDependencies": {
@@ -48,18 +58,6 @@
     "payload": "workspace:*"
   },
   "engines": {
-    "node": ">=24.15.0"
-  },
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    },
-    "main": "./dist/index.js",
-    "registry": "https://registry.npmjs.org/",
-    "types": "./dist/index.d.ts"
+    "node": ">=24.22.1"
   }
 }

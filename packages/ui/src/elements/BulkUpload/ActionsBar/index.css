@@ -45,6 +45,7 @@
     white-space: nowrap;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .bulk-upload--actions-bar__navigation {
       justify-content: space-between;

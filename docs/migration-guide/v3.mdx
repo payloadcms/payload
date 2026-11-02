@@ -1,12 +1,10 @@
 ---
 title: 2.0 to 3.0 Migration Guide
-label: 2.0 to 3.0 Migration Guide
-order: 10
+label: 2.0 to 3.0
+order: 15
 desc: Upgrade guide for Payload 2.x projects migrating to 3.0.
 keywords: local api, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react
 ---
-
-# Payload 2.0 to 3.0 Migration Guide
 
 Payload 3.0 completely replatforms the Admin Panel from a React Router single-page application onto the Next.js App Router with full support for React Server Components. This change completely separates Payload "core" from its rendering and HTTP layers, making it truly Node-safe and portable.
 
@@ -61,7 +59,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
    - @payloadcms/plugin-sentry
    - @payloadcms/plugin-seo
    - @payloadcms/plugin-stripe
-   - @payloadcms/plugin-cloud-storage - Read [More](#@payloadcms/plugin-cloud-storage).
+   - @payloadcms/plugin-cloud-storage - Read [More](#payloadcms-plugin-cloud-storage).
 
 1. Uninstall deprecated packages:
 
@@ -653,7 +651,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
    }
    ```
 
-1. The `href` and `isActive` functions on View Tabs no longer includes the `match` or `location` arguments. This is is a property specific to React Router, not Next.js. If you need to do URL matching similar to this, use a custom tab that fires of some hooks, i.e. `usePathname()` and run it through your own utility functions:
+1. The `href` and `isActive` functions on View Tabs no longer includes the `match` or `location` arguments. This is a property specific to React Router, not Next.js. If you need to do URL matching similar to this, use a custom tab that fires off some hooks, i.e. `usePathname()` and run it through your own utility functions:
 
    ```diff
    // collections/Posts.ts
@@ -864,7 +862,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
    }
    ```
 
-   For more details, see the [Documentation](https://payloadcms.com/docs/admin/custom-components/overview#accessing-the-payload-config).
+   For more details, see the [Documentation](https://payloadcms.com/docs/custom-components/overview#accessing-the-payload-config).
 
 1. The `useCollapsible` hook has had slight changes to its property names. `collapsed` is now `isCollapsed` and `withinCollapsible` is now `isWithinCollapsible`.
 
@@ -1112,7 +1110,7 @@ plugins: [
 
 ## `@payloadcms/richtext-lexical`
 
-If you have custom features for `@payloadcms/richtext-lexical` you will need to migrate your code to the new API. Read more about the new API in the [documentation](https://payloadcms.com/docs/rich-text/building-custom-features).
+If you have custom features for `@payloadcms/richtext-lexical` you will need to migrate your code to the new API. Read more about the new API in the [documentation](https://payloadcms.com/docs/rich-text/custom-features).
 
 ## Reserved Field names
 

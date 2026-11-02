@@ -1,9 +1,8 @@
 import { createServerFunctionHandler } from '@payloadcms/ui/utilities/handleServerFunctions'
-import { initReq } from '@payloadcms/ui/utilities/initReq'
 
-import { nextServerAdapter } from './server.js'
+import { initAdminContext } from '../utilities/initAdminContext.js'
 
 export const handleServerFunctions = createServerFunctionHandler({
-  initReq: ({ configPromise, importMap }) =>
-    initReq({ configPromise, importMap, key: 'RootLayout', serverAdapter: nextServerAdapter }),
+  initAdminContext: ({ configPromise, importMap }) =>
+    initAdminContext({ configPromise, importMap, key: 'RootLayout' }),
 })

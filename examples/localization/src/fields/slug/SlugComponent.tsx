@@ -70,7 +70,7 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
   return (
     <div className="field-type slug-field-component">
       <div className="label-wrapper">
-        <FieldLabel htmlFor={`field-${path}`} label={label} />
+        <FieldLabel label={label} path={path || field.name} />
 
         <Button className="lock-button" buttonStyle="ghost" onClick={handleLock}>
           {checkboxValue ? 'Unlock' : 'Lock'}

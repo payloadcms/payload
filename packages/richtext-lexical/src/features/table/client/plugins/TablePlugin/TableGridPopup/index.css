@@ -67,7 +67,6 @@
     min-width: 0;
     border: none;
     background: transparent;
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
@@ -92,7 +91,6 @@
   }
 
   .table-grid-popup__separator {
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     color: var(--color-text-secondary);
@@ -133,7 +131,6 @@
     position: absolute;
     background: var(--color-bg-menu);
     color: var(--ramp-white-800);
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);

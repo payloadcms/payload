@@ -32,7 +32,7 @@ export function createResolver<TSlug extends CollectionSlug>(
 
     const result = await createOperation({
       collection,
-      data: args.data,
+      data: args.data ?? {},
       depth: 0,
       draft: args.draft,
       req: isolateObjectProperty(context.req, 'transactionID'),

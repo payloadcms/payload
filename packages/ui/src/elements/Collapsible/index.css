@@ -34,9 +34,18 @@
   }
 
   .collapsible__drag {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+    }
+
     display: flex;
-    width: var(--spacer-3);
-    height: var(--spacer-3);
+    width: var(--spacer-4);
+    height: var(--spacer-4);
     align-items: center;
     justify-content: center;
     position: relative;
@@ -68,7 +77,7 @@
 
     &:focus-visible {
       outline: var(--accessibility-outline);
-      outline-offset: -1px;
+      outline-offset: var(--accessibility-outline-inset);
     }
 
     span {
@@ -78,7 +87,10 @@
 
   .collapsible .row-label {
     color: var(--color-text);
-    letter-spacing: var(--text-letter-spacing);
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
+    letter-spacing: var(--text-body-medium-bold-letter-spacing);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -190,11 +202,13 @@
   }
 
   .collapsible__content {
+    --collapsible-content-padding: var(--spacer-3);
+
     background-color: var(--color-bg);
     border: var(--stroke-width-small) solid var(--color-border);
     border-top: none;
     border-radius: 0 0 var(--button-radius) var(--button-radius);
-    padding: var(--spacer-3);
+    padding: var(--collapsible-content-padding);
     z-index: 1;
   }
 
@@ -206,9 +220,10 @@
     border-color: var(--color-border);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .collapsible__content {
-      padding: var(--spacer-2-5);
+      --collapsible-content-padding: var(--spacer-2-5);
     }
   }
 }

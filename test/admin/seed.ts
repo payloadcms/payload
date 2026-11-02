@@ -265,6 +265,7 @@ export const seed = async (_payload: Payload) => {
   await _payload.delete({
     collection: with300DocumentsSlug,
     where: {},
+    overrideAccess: true,
   })
 
   // Create 300 documents of with300Documents
@@ -276,6 +277,7 @@ export const seed = async (_payload: Payload) => {
         id: index,
         text: `document ${index}`,
       },
+      overrideAccess: true,
     })
   })
 

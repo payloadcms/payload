@@ -3,21 +3,15 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { TextField, TextFieldClient } from '../../fields/config/types.js'
 import type { TextFieldValidation } from '../../fields/validations.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
-import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type TextFieldClientWithoutType = MarkOptional<TextFieldClient, 'type'>
@@ -36,40 +30,22 @@ export type TextFieldClientProps = ClientFieldBase<TextFieldClientWithoutType> &
 
 export type TextFieldServerProps = ServerFieldBase<TextField, TextFieldClientWithoutType> &
   TextFieldBaseServerProps
+export type TextFieldLabelServerProps = FieldLabelServerProps<TextField, TextFieldClientWithoutType>
 
-export type TextFieldServerComponent = FieldServerComponent<
-  TextField,
-  TextFieldClientWithoutType,
-  TextFieldBaseServerProps
->
+export type TextFieldLabelClientProps = FieldLabelClientProps<TextFieldClientWithoutType>
 
-export type TextFieldClientComponent = FieldClientComponent<
-  TextFieldClientWithoutType,
-  TextFieldBaseClientProps
->
-
-export type TextFieldLabelServerComponent = FieldLabelServerComponent<
+export type TextFieldDescriptionServerProps = FieldDescriptionServerProps<
   TextField,
   TextFieldClientWithoutType
 >
 
-export type TextFieldLabelClientComponent = FieldLabelClientComponent<TextFieldClientWithoutType>
+export type TextFieldDescriptionClientProps =
+  FieldDescriptionClientProps<TextFieldClientWithoutType>
 
-export type TextFieldDescriptionServerComponent = FieldDescriptionServerComponent<
-  TextField,
-  TextFieldClientWithoutType
->
+export type TextFieldErrorServerProps = FieldErrorServerProps<TextField, TextFieldClientWithoutType>
 
-export type TextFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<TextFieldClientWithoutType>
+export type TextFieldErrorClientProps = FieldErrorClientProps<TextFieldClientWithoutType>
 
-export type TextFieldErrorServerComponent = FieldErrorServerComponent<
-  TextField,
-  TextFieldClientWithoutType
->
+export type TextFieldDiffServerProps = FieldDiffServerProps<TextField, TextFieldClient>
 
-export type TextFieldErrorClientComponent = FieldErrorClientComponent<TextFieldClientWithoutType>
-
-export type TextFieldDiffServerComponent = FieldDiffServerComponent<TextField, TextFieldClient>
-
-export type TextFieldDiffClientComponent = FieldDiffClientComponent<TextFieldClient>
+export type TextFieldDiffClientProps = FieldDiffClientProps<TextFieldClient>

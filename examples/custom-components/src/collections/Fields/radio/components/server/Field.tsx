@@ -1,9 +1,9 @@
-import type { RadioFieldServerComponent } from 'payload'
+import type { RadioFieldServerProps } from 'payload'
 import type React from 'react'
 
 import { RadioGroupField } from '@payloadcms/ui'
 
-export const CustomRadioFieldServer: RadioFieldServerComponent = ({
+export const CustomRadioFieldServer: React.FC<RadioFieldServerProps> = ({
   clientField,
   path,
   schemaPath,

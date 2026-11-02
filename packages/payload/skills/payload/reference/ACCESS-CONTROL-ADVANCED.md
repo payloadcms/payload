@@ -189,6 +189,7 @@ export const activeSubscriptionAccess: Access = async ({ req: { user } }) => {
   try {
     const subscription = await req.payload.findByID({
       collection: 'subscriptions',
+      overrideAccess: true,
       id: user.subscriptionId,
     })
 
@@ -223,6 +224,7 @@ export const tierBasedAccess = (requiredTier: string): Access => {
     try {
       const subscription = await req.payload.findByID({
         collection: 'subscriptions',
+        overrideAccess: true,
         id: user.subscriptionId,
       })
 
@@ -575,9 +577,21 @@ console.log('Public access result:', testAccess.docs.length)
 ```ts
 // ❌ Slow: Multiple sequential async calls
 export const slowAccess: Access = async ({ req: { user } }) => {
-  const org = await req.payload.findByID({ collection: 'orgs', id: user.orgId })
-  const team = await req.payload.findByID({ collection: 'teams', id: user.teamId })
-  const subscription = await req.payload.findByID({ collection: 'subs', id: user.subId })
+  const org = await req.payload.findByID({
+    collection: 'orgs',
+    id: user.orgId,
+    overrideAccess: true,
+  })
+  const team = await req.payload.findByID({
+    collection: 'teams',
+    id: user.teamId,
+    overrideAccess: true,
+  })
+  const subscription = await req.payload.findByID({
+    collection: 'subs',
+    id: user.subId,
+    overrideAccess: true,
+  })
 
   return org.active && team.active && subscription.active
 }
@@ -658,7 +672,7 @@ const optimizedArrayField: ArrayField = {
 // ❌ N+1 Problem: Query per access check
 export const n1Access: Access = async ({ req, id }) => {
   // Runs for EACH document in list
-  const doc = await req.payload.findByID({ collection: 'docs', id })
+  const doc = await req.payload.findByID({ collection: 'docs', id, overrideAccess: true })
   return doc.isPublic
 }
 
@@ -696,7 +710,7 @@ Comprehensive security and implementation guidelines:
 12. **Rate Limit External Calls**: Protect against DoS on external validation services
 13. **Handle Errors Gracefully**: Access functions should return `false` on error, not throw
 14. **Use Environment Vars**: Store configuration (IPs, API keys) in env vars
-15. **Test Local API**: Remember to set `overrideAccess: false` when testing
+15. **Test Local API**: Set `overrideAccess: false` when testing access control
 16. **Consider Performance**: Measure impact of async operations on login time
 17. **Version Control**: Track access control changes in git history
 18. **Principle of Least Privilege**: Grant minimum access required for functionality

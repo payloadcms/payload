@@ -1,6 +1,6 @@
 import type { Client, ProtocolEra } from '@modelcontextprotocol/client'
 
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
+import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
 import type { McpHTTPResponse } from './realMcpClient.js'
 
 import { connectMcpClient } from './realMcpClient.js'
@@ -21,7 +21,7 @@ export function createMcpClient({
   restClient,
 }: {
   protocolEra: ProtocolEra
-  restClient: NextRESTClient
+  restClient: RESTClient
 }): McpClient {
   // One connected client per API key and access mode — the handshake runs once, then reused.
   const clients = new Map<string, Promise<Client>>()

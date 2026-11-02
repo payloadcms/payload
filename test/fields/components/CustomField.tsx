@@ -1,9 +1,9 @@
 'use client'
 
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
 import React from 'react'
 
-export const CustomField: TextFieldClientComponent = ({ schemaPath }) => {
+export const CustomField: React.FC<TextFieldClientProps> = ({ schemaPath }) => {
   return <div id="custom-field-schema-path">{schemaPath}</div>
 }

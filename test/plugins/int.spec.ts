@@ -6,13 +6,14 @@ import type { ReaderPluginOptions } from './config.js'
 import { test } from '../__helpers/int/vitest.js'
 import { pagesSlug } from './config.js'
 
-test.suite({ config: './config.ts' })('Collections - Plugins', () => {
+test.suite('Collections - Plugins', { config: './config.ts' }, () => {
   test('created pages collection', async ({ payload }) => {
     const { id } = await payload.create({
       collection: pagesSlug,
       data: {
         title: 'Test Page',
       },
+      overrideAccess: true,
     })
 
     expect(id).toBeDefined()
@@ -40,6 +41,12 @@ test.suite({ config: './config.ts' })('Collections - Plugins', () => {
 
       expect(items).toContain('user-provided')
       expect(items).toContain('injected-by-writer')
+    })
+
+    test('should let a plugin replace the options of a plugin registered without options', ({
+      payload,
+    }) => {
+      expect(payload.config.custom?.optionalSettingsItems).toEqual(['set-by-writer'])
     })
 
     test('should expose typed options on plugins found by slug', ({ payload }) => {

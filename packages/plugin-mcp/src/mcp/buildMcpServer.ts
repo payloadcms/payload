@@ -25,7 +25,7 @@ import { toStandardSchema } from '../utils/toStandardSchema.js'
  *
  * `req` is the request context handlers see. For HTTP it's the live
  * `PayloadRequest` derived from the incoming HTTP request; for stdio it's a
- * synthesized one built via `createLocalReq`.
+ * synthesized one built via `createPayloadRequest`.
  */
 export const buildMcpServer = ({
   authorizedMCP,
@@ -250,7 +250,7 @@ const withSlugInput = ({ input }: { input?: ToolInputSchema }): ToolInputSchema 
   const slugSchema = z.string().check(z.describe(description))
 
   if (!input) {
-    return strictObject({ slug: slugSchema }) as unknown as ToolInputSchema
+    return strictObject({ slug: slugSchema })
   }
 
   if (typeof input === 'object' && input !== null && '~standard' in input) {
@@ -261,7 +261,7 @@ const withSlugInput = ({ input }: { input?: ToolInputSchema }): ToolInputSchema 
       return input
     }
 
-    return addSlugToJSONSchema({ description, schema: schema as JsonSchemaType })
+    return addSlugToJSONSchema({ description, schema })
   }
 
   return addSlugToJSONSchema({ description, schema: input })

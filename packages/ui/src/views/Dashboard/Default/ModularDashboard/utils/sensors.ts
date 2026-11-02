@@ -1,13 +1,6 @@
-import type { KeyboardCoordinateGetter, KeyboardSensorOptions } from '@dnd-kit/core'
+import type { KeyboardCoordinateGetter } from '@dnd-kit/core'
 
-import {
-  KeyboardCode,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core'
+import { KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 
 type DroppablePosition = {
   centerX: number
@@ -272,46 +265,6 @@ const droppableJumpKeyboardCoordinateGetter: KeyboardCoordinateGetter = (
   return currentCoordinates
 }
 
-/**
- * Custom KeyboardSensor that only activates when focus is directly on the
- * draggable element, not on any of its descendants. This allows interactive
- * elements inside draggables (like buttons) to work normally with the keyboard.
- */
-class DirectFocusKeyboardSensor extends KeyboardSensor {
-  static override activators = [
-    {
-      eventName: 'onKeyDown' as const,
-      handler: (
-        event: React.KeyboardEvent,
-        {
-          keyboardCodes = {
-            cancel: [KeyboardCode.Esc],
-            end: [KeyboardCode.Space, KeyboardCode.Enter],
-            start: [KeyboardCode.Space, KeyboardCode.Enter],
-          },
-          onActivation,
-        }: KeyboardSensorOptions,
-        { active }: { active: { node: React.MutableRefObject<HTMLElement | null> } },
-      ) => {
-        const { code } = event.nativeEvent
-
-        // Only activate if focus is directly on the draggable node, not descendants
-        if (event.target !== active.node.current) {
-          return false
-        }
-
-        if (keyboardCodes.start.includes(code)) {
-          event.preventDefault()
-          onActivation?.({ event: event.nativeEvent })
-          return true
-        }
-
-        return false
-      },
-    },
-  ]
-}
-
 export function useDashboardSensors() {
   return useSensors(
     useSensor(MouseSensor, {
@@ -325,7 +278,7 @@ export function useDashboardSensors() {
         tolerance: 5,
       },
     }),
-    useSensor(DirectFocusKeyboardSensor, {
+    useSensor(KeyboardSensor, {
       coordinateGetter: droppableJumpKeyboardCoordinateGetter,
     }),
   )

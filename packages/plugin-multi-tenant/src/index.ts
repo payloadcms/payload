@@ -2,7 +2,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { CollectionConfig } from 'payload'
 
 import { definePlugin } from 'payload'
-import { hasAutosaveEnabled } from 'payload/shared'
+import { hasAutosaveEnabled, parsePayloadComponent } from 'payload/shared'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { MultiTenantPluginConfig } from './types.js'
@@ -13,6 +13,7 @@ import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
 import { filterDocumentsByTenants } from './filters/filterDocumentsByTenants.js'
 import { addTenantCleanup } from './hooks/afterTenantDelete.js'
+import { enforceTenantMembership } from './hooks/enforceTenantMembership.js'
 import { translations } from './translations/index.js'
 import { addCollectionAccess, type TenantAccessConfig } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
@@ -271,9 +272,26 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
           collection.admin.components ??= {}
           collection.admin.components.edit ??= {}
           collection.admin.components.edit.editMenuItems ??= []
-          collection.admin.components.edit.editMenuItems.push({
-            path: '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger',
-          })
+          const assignTenantTriggerPath =
+            '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger'
+          const hasAssignTenantTrigger = collection.admin.components.edit.editMenuItems.some(
+            (component) => {
+              if (!component) {
+                return false
+              }
+
+              const { exportName, path } = parsePayloadComponent(component)
+
+              return (
+                path === '@payloadcms/plugin-multi-tenant/client' &&
+                exportName === 'AssignTenantFieldTrigger'
+              )
+            },
+          )
+
+          if (!hasAssignTenantTrigger) {
+            collection.admin.components.edit.editMenuItems.push({ path: assignTenantTriggerPath })
+          }
         }
 
         /**
@@ -299,6 +317,7 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
           collection.fields.unshift(
             tenantField({
               name: tenantFieldName,
+              adminUsersSlug: adminUsersCollection.slug,
               debug: pluginConfig.debug,
               isAutosaveEnabled: hasAutosaveEnabled(collection),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
@@ -308,9 +327,22 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
               tenantsArrayTenantFieldName,
               tenantsCollectionSlug,
               unique: isGlobal,
+              userHasAccessToAllTenants,
             }),
           )
         }
+
+        collection.hooks ??= {}
+        collection.hooks.beforeValidate ??= []
+        collection.hooks.beforeValidate.push(
+          enforceTenantMembership({
+            collectionSlug: collection.slug,
+            tenantFieldName,
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
+            userHasAccessToAllTenants,
+          }),
+        )
 
         const { useBaseFilter, useBaseListFilter } = pluginConfig.collections[collection.slug] || {}
         if (useBaseFilter ?? useBaseListFilter ?? true) {

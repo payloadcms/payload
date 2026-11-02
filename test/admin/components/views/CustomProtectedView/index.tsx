@@ -21,6 +21,7 @@ export async function CustomProtectedView({ initPageResult }: AdminViewServerPro
 
   const settings = await req.payload.findGlobal({
     slug: settingsGlobalSlug,
+    overrideAccess: true,
   })
 
   if (!settings?.canAccessProtected) {

@@ -22,7 +22,12 @@ import { getIsLocked } from '../../utilities/getIsLocked.js'
 import { getVersions } from '../../utilities/getVersions.js'
 import { Settings } from './Settings/index.js'
 
-export async function AccountView({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export async function AccountView({
+  initPageResult,
+  params,
+  searchParams,
+  user: userWithReadAccess,
+}: AdminViewServerProps) {
   const {
     languageOptions,
     locale,
@@ -93,6 +98,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
       req,
       schemaPath: collectionConfig.slug,
       skipValidation: true,
+      user: userWithReadAccess,
     })
 
     // Fetch document lock state
@@ -123,7 +129,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
             languageOptions={languageOptions}
             payload={payload}
             theme={theme}
-            user={user}
+            user={userWithReadAccess}
           />
         }
         apiURL={formatAdminURL({
@@ -154,6 +160,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
             hideTabs
             permissions={permissions}
             req={req}
+            user={userWithReadAccess}
           />
           <HydrateAuthProvider permissions={permissions} />
           {RenderServerComponent({
@@ -172,7 +179,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
               routeSegments: [],
               searchParams,
               server: req.server,
-              user,
+              user: userWithReadAccess,
             } satisfies DocumentViewServerPropsOnly,
           })}
           <AccountClient />

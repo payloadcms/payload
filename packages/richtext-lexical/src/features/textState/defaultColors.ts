@@ -294,7 +294,7 @@ const tailwindColors = {
   },
 }
 
-// prettier-ignore
+// oxfmt-ignore
 /* eslint-disable perfectionist/sort-objects */
 export const defaultColors = {
     text: {

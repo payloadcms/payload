@@ -1,6 +1,11 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientConfig, ViewTypes } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientConfig,
+  CollectionPreferences,
+  ViewTypes,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
@@ -44,15 +49,21 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
 
     // Save preference for list vs hierarchy (not trash)
     if (newViewType === 'list' || newViewType === 'hierarchy') {
-      await setPreference(`collection-${collectionConfig.slug}`, {
-        listViewType: newViewType,
-      })
+      const listViewType = newViewType as 'hierarchy' | 'list'
+
+      await setPreference<CollectionPreferences>(
+        `collection-${collectionConfig.slug}`,
+        (preferences) => ({
+          ...(preferences ?? {}),
+          listViewType,
+        }),
+      )
     }
 
-    let path: `/${string}` = `/collections/${collectionConfig.slug}`
+    let path: `/${string}` = `/collections/${collectionConfig.slug}?view=all`
     switch (newViewType) {
       case 'hierarchy':
-        path = `/collections/${collectionConfig.slug}/hierarchy`
+        path = `/collections/${collectionConfig.slug}?view=hierarchy`
         break
       case 'trash':
         path = `/collections/${collectionConfig.slug}/trash`

@@ -21,7 +21,7 @@
   }
 
   .collection-list .table table td.cell--linked > :is(a, button) {
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-bold-font-weight);
     text-decoration-line: underline;
     text-decoration-style: solid;
     text-decoration-skip-ink: none;
@@ -35,7 +35,6 @@
     }
   }
 
-  /* The ID cell renders its own pill with a hover background instead of an underline */
   .collection-list .table table td.cell--linked > :is(a, button):has(.id-label) {
     text-decoration-line: none;
   }
@@ -88,6 +87,7 @@
     margin-top: var(--spacer-2);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .collection-list {
       margin-top: var(--spacer-2);
@@ -122,6 +122,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .collection-list {
       margin-bottom: var(--spacing-view-bottom);

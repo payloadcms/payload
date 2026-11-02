@@ -39,6 +39,7 @@
     flex-shrink: 0;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .list-controls__search-row {
       flex-wrap: wrap;
@@ -59,6 +60,7 @@
 
     .list-controls__actions {
       width: 100%;
+      flex-wrap: wrap;
 
       .pill {
         padding: var(--spacer-1) var(--spacer-1) var(--spacer-1) var(--spacer-2);

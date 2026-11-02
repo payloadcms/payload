@@ -1,6 +1,6 @@
 import type { Storage } from '@google-cloud/storage'
 
-import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { buildStoragePathData } from '@payloadcms/plugin-cloud-storage/utilities'
 
 interface GenerateURLArgs {
   bucket: string
@@ -19,12 +19,12 @@ export function generateURL({
   prefix,
   useCompositePrefixes = false,
 }: GenerateURLArgs): string {
-  const { fileKey } = getFileKey({
+  const { storageFilePath } = buildStoragePathData({
     collectionPrefix,
     docPrefix: prefix,
     filename,
     useCompositePrefixes,
   })
 
-  return client.bucket(bucket).file(fileKey).publicUrl()
+  return client.bucket(bucket).file(storageFilePath).publicUrl()
 }

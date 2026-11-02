@@ -31,6 +31,7 @@ export const CreateSimpleTask: TaskConfig<'CreateSimple'> = {
       data: {
         title: input.message,
       },
+      overrideAccess: true,
     })
     return {
       output: {

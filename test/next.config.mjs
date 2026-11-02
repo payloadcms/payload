@@ -14,7 +14,8 @@ const withBundleAnalyzer = bundleAnalyzer({
 export default withBundleAnalyzer(
   withPayload(
     {
-      cacheComponents: process.env.PAYLOAD_CACHE_COMPONENTS === 'true',
+      cacheComponents: process.env.PAYLOAD_DISABLE_CACHE_COMPONENTS !== 'true',
+      partialPrefetching: process.env.PAYLOAD_DISABLE_CACHE_COMPONENTS !== 'true',
       devIndicators: {
         position: 'bottom-right',
       },
@@ -49,7 +50,7 @@ export default withBundleAnalyzer(
             hostname: 'localhost',
           },
         ],
-        qualities: [5, 50, 75, 100]
+        qualities: [5, 50, 75, 100],
       },
       webpack: (webpackConfig) => {
         webpackConfig.resolve.extensionAlias = {

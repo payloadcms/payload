@@ -1,11 +1,11 @@
 'use client'
 
-import type { SelectFieldClientComponent } from 'payload'
+import type { SelectFieldClientProps } from 'payload'
 
 import { SelectField, useDocumentInfo, useField, useLocale } from '@payloadcms/ui'
 import React, { useEffect, useRef } from 'react'
 
-export const LocaleField: SelectFieldClientComponent = (props) => {
+export const LocaleField: React.FC<SelectFieldClientProps> = (props) => {
   const { id } = useDocumentInfo()
   const { setValue, value } = useField<string>()
   const locale = useLocale()

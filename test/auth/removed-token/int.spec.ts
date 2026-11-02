@@ -7,7 +7,7 @@ import { test } from '../../__helpers/int/vitest.js'
 import { devUser } from '../../credentials.js'
 import { collectionSlug, providerCookie } from './shared.js'
 
-test.suite({ config: './config.ts' })('Remove token from auth responses', () => {
+test.suite('Remove token from auth responses', { config: './config.ts' }, () => {
   test.beforeEach(async ({ restClient }) => {
     await restClient.POST(`/${collectionSlug}/first-register`, {
       body: JSON.stringify({ ...devUser, 'confirm-password': devUser.password }),
@@ -98,6 +98,7 @@ test.suite({ config: './config.ts' })('Remove token from auth responses', () => 
       collection: collectionSlug,
       data: { email: devUser.email },
       disableEmail: true,
+      overrideAccess: true,
     })
 
     const response = await restClient.POST(`/${collectionSlug}/reset-password`, {

@@ -76,11 +76,12 @@ export const useHierarchyModal: UseHierarchyModal = ({
     collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
       ? collectionConfig.hierarchy
       : undefined
+
   const parentFieldName = hierarchyConfig?.parentFieldName
 
   // Use explicit prop if provided, otherwise fall back to allowedCollections from context
   // - allowedCollections is null/undefined: no filtering (undefined)
-  // - allowedCollections is []: folder accepts everything, show only unrestricted destinations ([])
+  // - allowedCollections is []: no collection requirements ([])
   // - allowedCollections has values: show folders accepting those types
   // Memoize to prevent new array references on every render
   const filterByCollection = useMemo(() => {

@@ -1,5 +1,5 @@
 'use client'
-import type { DateFieldDiffClientComponent } from 'payload'
+import type { DateFieldDiffClientProps } from 'payload'
 
 import React from 'react'
 
@@ -16,12 +16,12 @@ import './index.css'
 
 const baseClass = 'date-diff'
 
-export const DateDiffComponent: DateFieldDiffClientComponent = ({
-  comparisonValue: valueFrom,
+export const DateDiffComponent: React.FC<DateFieldDiffClientProps> = ({
   field,
   locale,
   nestingLevel,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const { i18n } = useTranslation()
   const {

@@ -15,10 +15,12 @@ import './index.css'
 export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
   const {
     as: ElementFromProps = 'label',
+    hasRequiredAccessibleState = false,
     hideLocale = false,
     htmlFor: htmlForFromProps,
     label,
     localized = false,
+    onClick,
     path,
     required = false,
     unstyled = false,
@@ -39,9 +41,19 @@ export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
 
   if (label) {
     return (
-      <Element className={`field-label${unstyled ? ' unstyled' : ''}`} htmlFor={htmlFor}>
+      <Element
+        className={['field-label', unstyled && 'unstyled', onClick && 'field-label--with-control']
+          .filter(Boolean)
+          .join(' ')}
+        htmlFor={Element === 'label' ? htmlFor : undefined}
+        onClick={onClick}
+      >
         {getTranslation(label, i18n)}
-        {required && !unstyled && <span className="required">*</span>}
+        {required && !unstyled && (
+          <span aria-hidden={hasRequiredAccessibleState || undefined} className="required">
+            *
+          </span>
+        )}
         {localized && !hideLocale && locale && (
           <span className="localized">
             &mdash; {typeof localLabel === 'string' ? localLabel : code}

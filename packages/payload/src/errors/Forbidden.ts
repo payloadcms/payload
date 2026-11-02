@@ -1,8 +1,8 @@
 import type { TFunction } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
-import { status as httpStatus } from 'http-status'
 
+import { httpStatus } from '../utilities/httpStatus.js'
 import { APIError } from './APIError.js'
 
 export class Forbidden extends APIError {
@@ -11,5 +11,6 @@ export class Forbidden extends APIError {
       t ? t('error:notAllowedToPerformAction') : en.translations.error.notAllowedToPerformAction,
       httpStatus.FORBIDDEN,
     )
+    this.name = 'Forbidden'
   }
 }

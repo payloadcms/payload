@@ -1,5 +1,5 @@
 'use client'
-import type { RadioFieldClientComponent, RadioFieldClientProps } from 'payload'
+import type { RadioFieldClientProps } from 'payload'
 
 import { optionIsObject } from 'payload/shared'
 import React, { useCallback, useMemo } from 'react'
@@ -18,16 +18,12 @@ import { Radio } from './Radio/index.js'
 
 const baseClass = 'radio-group'
 
-const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
+const RadioGroupFieldComponent: React.FC<RadioFieldClientProps> = (props) => {
   const {
     disableModifyingForm: disableModifyingFormFromProps,
     field,
     field: {
-      admin: {
-        className,
-        description,
-        layout = 'horizontal',
-      } = {} as RadioFieldClientProps['field']['admin'],
+      admin: { className, description, layout = 'horizontal' } = {},
       label,
       localized,
       options = [],

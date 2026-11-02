@@ -27,7 +27,7 @@ export type RenderWidgetServerFnReturnType = {
 export const renderWidgetHandler: ServerFunction<
   RenderWidgetServerFnArgs,
   RenderWidgetServerFnReturnType
-> = ({ cookies, locale, permissions, req, widgetData, widgetSlug }) => {
+> = ({ cookies, locale, permissions, req, user, widgetData, widgetSlug }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -67,6 +67,7 @@ export const renderWidgetHandler: ServerFunction<
       locale,
       permissions,
       req,
+      user,
       widgetData: localeFilteredData,
       widgetSlug,
     }

@@ -27,7 +27,8 @@ export const getClientSchemaMap = cache(
       cachedClientSchemaMap = new Map()
     }
 
-    const cacheKey = collectionSlug || globalSlug || `widget:${widgetSlug}`
+    // Labels are translated while building the map, so it has to be cached per language
+    const cacheKey = `${i18n.language}:${collectionSlug || globalSlug || `widget:${widgetSlug}`}`
     let cachedEntityClientFieldMap = cachedClientSchemaMap.get(cacheKey)
 
     if (cachedEntityClientFieldMap) {

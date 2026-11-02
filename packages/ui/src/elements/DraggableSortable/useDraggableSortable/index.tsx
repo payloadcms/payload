@@ -14,6 +14,7 @@ export const useDraggableSortable = (props: UseDraggableArguments): UseDraggable
     isOver,
     isSorting,
     listeners,
+    setActivatorNodeRef,
     setNodeRef,
     transform,
     transition,
@@ -37,6 +38,7 @@ export const useDraggableSortable = (props: UseDraggableArguments): UseDraggable
     isOver,
     isSorting,
     listeners,
+    setActivatorNodeRef,
     setNodeRef,
     transform: transform && `translate3d(${transform.x}px, ${transform.y}px, 0)`, // translate3d is faster than translate in most browsers
     transition,

@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
-import { devUser } from '../credentials.js'
 import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
+import { devUser } from '../credentials.js'
 
 export const seed = async (_payload: Payload) => {
   await _payload.create({
@@ -10,6 +10,7 @@ export const seed = async (_payload: Payload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 }
 

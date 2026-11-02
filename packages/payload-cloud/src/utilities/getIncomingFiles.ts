@@ -24,8 +24,8 @@ export function getIncomingFiles({
 
     files = [mainFile]
 
-    if (data?.sizes) {
-      Object.entries(data.sizes).forEach(([key, resizedFileData]) => {
+    if (data?.variants) {
+      Object.entries(data.variants).forEach(([key, resizedFileData]) => {
         if (req.payloadUploadSizes?.[key] && resizedFileData.mimeType) {
           files = files.concat([
             {

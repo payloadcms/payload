@@ -119,6 +119,7 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
             paymentIntentID: paymentIntent.id,
           },
         },
+        overrideAccess: true,
         req,
       })
 

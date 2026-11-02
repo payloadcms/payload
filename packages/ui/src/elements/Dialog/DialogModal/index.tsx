@@ -1,10 +1,10 @@
 'use client'
 import type { ComponentProps } from 'react'
 
-import { Modal } from '@faceless-ui/modal'
 import React, { createContext, use, useEffect, useState } from 'react'
 
 import { drawerZBase, useDrawerDepth } from '../../Drawer/index.js'
+import { Modal, useModal } from '../../Modal/index.js'
 import { DialogContext } from '../context.js'
 import '../index.css'
 
@@ -34,11 +34,16 @@ export const DialogModal: React.FC<DialogModalProps> = ({
   size = 'small',
 }) => {
   const [isConfirming, setConfirming] = useState(false)
+  const { modalState } = useModal()
   const drawerDepth = useDrawerDepth()
   const dialogDepth = useDialogDepth()
 
   useEffect(() => {
-    if (closeOnEsc) {
+    const latestOpenModal = Object.values(modalState)
+      .filter((modal) => modal.isOpen)
+      .sort((a, b) => (b.openedOn ?? 0) - (a.openedOn ?? 0))[0]
+
+    if (closeOnEsc || latestOpenModal?.slug !== slug) {
       return
     }
 
@@ -52,7 +57,7 @@ export const DialogModal: React.FC<DialogModalProps> = ({
     // Capture phase fires before ModalProvider's bubble-phase listener
     document.addEventListener('keydown', handler, true)
     return () => document.removeEventListener('keydown', handler, true)
-  }, [closeOnEsc])
+  }, [closeOnEsc, modalState, slug])
 
   return (
     <DialogDepthProvider>

@@ -9,6 +9,7 @@ import type { AdminRoutes } from '../helpers.js'
 import { devUser } from '../../../credentials.js'
 import { POLL_TOPASS_TIMEOUT } from '../../../playwright.config.js'
 import { getRoutes } from '../helpers.js'
+import { openNav } from '../toggleNav.js'
 
 type LoginArgs = {
   customAdminRoutes?: AdminRoutes
@@ -93,6 +94,7 @@ export async function loginClientSide(args: LoginArgs): Promise<void> {
 
   if ((await page.locator('.app-header__sidebar-toggle').count()) > 0) {
     // a user is already logged in - open UserMenu and click logout
+    await openNav(page)
     await page.locator('.user-menu__trigger').click()
     const logoutAnchor = page.locator('a[href$="/logout"]')
     await expect(logoutAnchor).toBeVisible()

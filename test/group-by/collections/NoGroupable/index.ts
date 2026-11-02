@@ -4,9 +4,10 @@ export const noGroupableSlug = 'no-groupable'
 
 export const NoGroupableCollection: CollectionConfig = {
   slug: noGroupableSlug,
-  // Both must be false: auto timestamps add createdAt/updatedAt date fields,
-  // and versions adds dated fields — all groupable, which would defeat this
-  // fixture's purpose of having zero groupable fields.
+  // These must all be false to keep this fixture free of groupable fields:
+  // auto timestamps add createdAt/updatedAt date fields, versions adds dated
+  // fields, and authorship adds createdBy/updatedBy relationship fields.
+  authorship: false,
   timestamps: false,
   versions: false,
   fields: [

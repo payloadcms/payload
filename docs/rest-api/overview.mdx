@@ -14,6 +14,9 @@ keywords: rest, api, documentation, Content Management System, cms, headless, ja
 The REST API is a fully functional HTTP client that allows you to interact with your Documents in a RESTful manner. It supports all CRUD operations and is equipped with automatic pagination, depth, and sorting.
 All Payload API routes are mounted and prefixed to your config's `routes.api` URL segment (default: `/api`).
 
+To check collection or global candidates without saving them, use the
+[on-demand validation endpoints](../validation/overview#rest-api).
+
 For example, if you have a Collection called `pages`, you can fetch its documents directly from the browser or any HTTP client:
 
 ```ts
@@ -31,8 +34,8 @@ To enhance DX, you can use [Payload SDK](#payload-rest-api-sdk) to query your RE
 - [fallback-locale](/docs/configuration/localization#retrieving-localized-docs) - specifies a fallback locale if no locale value exists
 - [select](../queries/select) - specifies which fields to include in the result
 - [populate](../queries/select#populate) - specifies which fields to include in the result from populated documents
-- [limit](../queries/pagination#pagination-controls) - limits the number of documents returned
-- [page](../queries/pagination#pagination-controls) - specifies which page to get documents from when used with a limit
+- [limit](../queries/pagination#options) - limits the number of documents returned
+- [page](../queries/pagination#options) - specifies which page to get documents from when used with a limit
 - [sort](../queries/sort#rest-api) - specifies the field(s) to use to sort the returned documents by
 - [where](../queries/overview) - specifies advanced filters to use to query documents
 - [joins](/docs/fields/join#rest-api) - specifies the custom request for each join field by name of the field
@@ -73,8 +76,8 @@ The \`find\` endpoint supports the following additional query parameters:
 
 - [sort](/docs/queries/overview#sort) - sort by field
 - [where](/docs/queries/overview) - pass a where query to constrain returned documents
-- [limit](/docs/queries/pagination#pagination-controls) - limit the returned documents to a certain number
-- [page](/docs/queries/pagination#pagination-controls) - get a specific page of documents
+- [limit](/docs/queries/pagination#options) - limit the returned documents to a certain number
+- [page](/docs/queries/pagination#options) - get a specific page of documents
   `
   },
   },
@@ -601,9 +604,7 @@ import type { CollectionConfig } from 'payload'
 // a collection of 'orders' with an additional route for tracking details, reachable at /api/orders/:id/tracking
 export const Orders: CollectionConfig = {
   slug: 'orders',
-  fields: [
-    /* ... */
-  ],
+  fields: [/* ... */],
   // highlight-start
   endpoints: [
     {
@@ -631,6 +632,8 @@ export const Orders: CollectionConfig = {
         const data = await req.json()
         await req.payload.update({
           collection: 'tracking',
+          overrideAccess: false,
+          req,
           data: {
             // data to update the document with
           },
@@ -687,6 +690,8 @@ import { addDataAndFileToRequest } from 'payload'
     await addDataAndFileToRequest(req)
     await req.payload.update({
       collection: 'tracking',
+      overrideAccess: false,
+      req,
       data: {
         // data to update the document with
       }

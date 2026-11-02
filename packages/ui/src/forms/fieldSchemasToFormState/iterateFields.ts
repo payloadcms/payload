@@ -4,6 +4,7 @@ import type {
   Data,
   DocumentPreferences,
   Field,
+  FieldOperation,
   FieldSchemaMap,
   FormState,
   FormStateWithoutComponents,
@@ -57,7 +58,7 @@ type Args = {
   /**
    * operation is only needed for validation
    */
-  operation: 'create' | 'update'
+  operation: FieldOperation
   parentIndexPath: string
   parentPassesCondition?: boolean
   parentPath: string

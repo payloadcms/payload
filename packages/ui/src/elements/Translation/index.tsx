@@ -17,7 +17,7 @@ const RecursiveTranslation: React.FC<{
           const Element = elements[elementKey]
 
           if (Element) {
-            const regex = new RegExp(`<${elementKey}>(.*?)<\/${elementKey}>`, 'g')
+            const regex = new RegExp(`<${elementKey}>(.*?)</${elementKey}>`, 'g')
             const children = section.replace(regex, (_, group) => group)
 
             return (

@@ -261,7 +261,7 @@ const ArrayFields: CollectionConfig = {
       ],
     },
   ],
-  slug: arrayFieldsSlug
+  slug: arrayFieldsSlug,
 }
 
 export default ArrayFields

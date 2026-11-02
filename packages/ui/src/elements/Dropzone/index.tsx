@@ -16,6 +16,7 @@ export type Props = {
   readonly disabled?: boolean
   readonly dropzoneStyle?: 'default' | 'none'
   readonly hasError?: boolean
+  readonly isFocusable?: boolean
   readonly multipleFiles?: boolean
   readonly onChange: (e: FileList) => void
 }
@@ -26,6 +27,7 @@ export function Dropzone({
   disabled = false,
   dropzoneStyle = 'default',
   hasError = false,
+  isFocusable = true,
   multipleFiles,
   onChange,
 }: Props) {
@@ -122,10 +124,15 @@ export function Dropzone({
     .filter(Boolean)
     .join(' ')
 
+  /* eslint-disable jsx-a11y/no-noninteractive-tabindex -- interactive via drag/drop/paste event listeners */
   return (
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- interactive via drag/drop/paste event listeners
-    <div className={classes} ref={dropRef} tabIndex={dropzoneStyle === 'none' ? undefined : 0}>
+    <div
+      className={classes}
+      ref={dropRef}
+      tabIndex={isFocusable && dropzoneStyle !== 'none' ? 0 : undefined}
+    >
       {children}
     </div>
   )
+  /* eslint-enable jsx-a11y/no-noninteractive-tabindex */
 }

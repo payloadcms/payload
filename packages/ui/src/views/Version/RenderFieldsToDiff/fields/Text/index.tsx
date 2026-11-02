@@ -1,5 +1,5 @@
 'use client'
-import type { TextFieldDiffClientComponent } from 'payload'
+import type { TextFieldDiffClientProps } from 'payload'
 
 import React from 'react'
 
@@ -47,12 +47,12 @@ function formatValue(value: unknown): {
   }
 }
 
-export const Text: TextFieldDiffClientComponent = ({
-  comparisonValue: valueFrom,
+export const Text: React.FC<TextFieldDiffClientProps> = ({
   field,
   locale,
   nestingLevel,
-  versionValue: valueTo,
+  valueFrom,
+  valueTo,
 }) => {
   const { i18n } = useTranslation()
 
@@ -77,9 +77,11 @@ export const Text: TextFieldDiffClientComponent = ({
 
   const { From, To } = getHTMLDiffComponents({
     fromHTML: '<p>' + renderedValueFrom + '</p>',
+    fromLabel: i18n.t('version:comparingAgainst'),
     postProcess: unescapeDiffHTML,
     toHTML: '<p>' + renderedValueTo + '</p>',
     tokenizeByCharacter,
+    toLabel: i18n.t('version:version'),
   })
 
   return (

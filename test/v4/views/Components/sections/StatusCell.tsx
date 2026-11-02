@@ -2,7 +2,7 @@
 
 import type { CollectionSlug } from 'payload'
 
-import { StatusCell } from '@payloadcms/ui/elements/Table/DefaultCell/fields/Status'
+import { StatusCell } from '@payloadcms/ui'
 import React from 'react'
 
 import { Section, Variant } from '../shared.js'

@@ -18,10 +18,12 @@ export function WidgetEditControl({
   onSave,
   widgetData,
   widgetID,
+  widgetLabel,
 }: {
   onSave: (data: Data) => void
   widgetData?: Record<string, unknown>
   widgetID: string
+  widgetLabel: string
 }) {
   const { t } = useTranslation()
   const { openModal } = useModal()
@@ -41,9 +43,10 @@ export function WidgetEditControl({
   return (
     <>
       <Button
-        aria-label={`${t('general:edit')} ${widgetID}`}
+        aria-label={t('general:editLabel', { label: widgetLabel })}
         buttonStyle="secondary"
         className="widget-wrapper__edit-btn"
+        extraButtonProps={{ tabIndex: 0 }}
         icon={<EditIcon />}
         margin={false}
         onClick={() => {

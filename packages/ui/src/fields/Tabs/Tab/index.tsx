@@ -16,15 +16,19 @@ const baseClass = 'tabs-field__tab-button'
 
 type TabProps = {
   readonly hidden?: boolean
+  readonly id?: string
   readonly isActive?: boolean
+  readonly panelID?: string
   readonly parentPath: string
   readonly setIsActive: () => void
   readonly tab: ClientTab
 }
 
 export const TabComponent: React.FC<TabProps> = ({
+  id,
   hidden,
   isActive,
+  panelID,
   parentPath,
   setIsActive,
   tab,
@@ -49,9 +53,11 @@ export const TabComponent: React.FC<TabProps> = ({
         disabled={isInitializing}
         hasError={fieldHasErrors}
         hidden={hidden}
+        id={id}
         isActive={isActive}
         modifierClassName={baseClass}
         onClick={setIsActive}
+        panelID={panelID}
       >
         {tab.label ? getTranslation(tab.label, i18n) : tabHasName(tab) ? tab.name : ''}
         {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} />}

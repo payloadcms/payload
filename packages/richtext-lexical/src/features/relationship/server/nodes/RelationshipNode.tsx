@@ -76,10 +76,6 @@ export class RelationshipServerNode extends DecoratorBlockNode {
   }
 
   static override importJSON(serializedNode: SerializedRelationshipNode): RelationshipServerNode {
-    if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
-      serializedNode.value = (serializedNode.value as unknown as { id: string }).id
-    }
-
     const importedData: RelationshipData = {
       relationTo: serializedNode.relationTo,
       value: serializedNode.value,
@@ -121,7 +117,6 @@ export class RelationshipServerNode extends DecoratorBlockNode {
       ...super.exportJSON(),
       ...this.getData(),
       type: 'relationship',
-      version: 2,
     }
   }
 

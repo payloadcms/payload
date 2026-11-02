@@ -3,13 +3,15 @@ import { v4 as uuidv4 } from 'uuid'
 import type { SerializedListItemNode, SerializedListNode } from '../../../../../types/nodeTypes.js'
 import type { JSXConverters } from '../types.js'
 
+import { ALLOWED_LIST_TAGS } from '../../../../lists/shared/constants.js'
+
 export const ListJSXConverter: JSXConverters<SerializedListItemNode | SerializedListNode> = {
   list: ({ node, nodesToJSX }) => {
     const children = nodesToJSX({
       nodes: node.children,
     })
 
-    const NodeTag = node.tag
+    const NodeTag = ALLOWED_LIST_TAGS.has(node.tag) ? node.tag : 'ul'
 
     return <NodeTag className={`list-${node?.listType}`}>{children}</NodeTag>
   },

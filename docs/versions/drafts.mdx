@@ -60,6 +60,7 @@ POST /api/your-collection?draft=true
 // Local API
 await payload.create({
   collection: 'your-collection',
+  overrideAccess: true,
   data: {
     // your data here
   },

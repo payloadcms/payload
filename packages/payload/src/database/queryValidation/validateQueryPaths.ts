@@ -15,6 +15,7 @@ type Args = {
   policies?: EntityPolicies
   polymorphicJoin?: boolean
   req: PayloadRequest
+  showHiddenFields?: boolean
   versionFields?: FlattenedField[]
   where: Where
 } & (
@@ -39,6 +40,7 @@ export async function validateQueryPaths({
   },
   polymorphicJoin,
   req,
+  showHiddenFields,
   versionFields,
   where,
 }: Args): Promise<void> {
@@ -61,6 +63,7 @@ export async function validateQueryPaths({
                 policies,
                 polymorphicJoin,
                 req,
+                showHiddenFields,
                 versionFields,
                 where: item,
               }),
@@ -74,6 +77,7 @@ export async function validateQueryPaths({
                 policies,
                 polymorphicJoin,
                 req,
+                showHiddenFields,
                 versionFields,
                 where: item,
               }),
@@ -99,6 +103,7 @@ export async function validateQueryPaths({
                 policies,
                 polymorphicJoin,
                 req,
+                showHiddenFields,
                 val,
                 versionFields,
               }),

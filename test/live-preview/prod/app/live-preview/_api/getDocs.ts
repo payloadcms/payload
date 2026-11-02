@@ -9,6 +9,7 @@ export const getDocs = async <T>(collection: CollectionSlug): Promise<T[]> => {
       collection,
       depth: 0,
       limit: 100,
+      overrideAccess: true,
     })
 
     if (docs) {

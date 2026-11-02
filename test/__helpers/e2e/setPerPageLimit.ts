@@ -26,12 +26,12 @@ export const setPerPageLimit = async ({
   waitForURL?: boolean
 }): Promise<void> => {
   const scopeToUse = scope ?? page
-  const perPageButton = scopeToUse.locator('.per-page button')
+  const perPageButton = scopeToUse.locator('.per-page .popup__trigger-wrap > button')
 
   await perPageButton.waitFor({ state: 'visible' })
   await perPageButton.click()
 
-  // Target the option within the popup - use page since popup is portaled to body
+  // Target the active popup option from the page so this also works for drawer-scoped triggers.
   const popupOption = page.locator('.popup__content .popup-button-list__button', {
     hasText: new RegExp(`^${limit}$`),
   })
@@ -62,12 +62,12 @@ export const expectPerPageLimits = async ({
   scope?: Locator | Page
 }): Promise<void> => {
   const scopeToUse = scope ?? page
-  const perPageButton = scopeToUse.locator('.per-page button')
+  const perPageButton = scopeToUse.locator('.per-page .popup__trigger-wrap > button')
 
   await perPageButton.waitFor({ state: 'visible' })
   await perPageButton.click({ force: true })
 
-  // Use page since popup is portaled to body
+  // Use page because the trigger may be scoped to a drawer while the active popup is top-layer UI.
   const popupOptions = page.locator('.popup__content .popup-button-list__button')
 
   await expect

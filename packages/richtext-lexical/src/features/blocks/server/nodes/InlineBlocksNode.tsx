@@ -83,9 +83,9 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
 
   override exportJSON(): SerializedInlineBlockNode {
     return {
+      ...super.exportJSON(),
       type: 'inlineBlock',
       fields: this.getFields(),
-      version: 1,
     }
   }
 

@@ -54,10 +54,7 @@ export const mergeQuery = (
     preset: 'preset' in newQuery ? newQuery.preset : currentQuery?.preset,
     queryByGroup: mergedQueryByGroup,
     search: 'search' in newQuery ? newQuery.search : currentQuery?.search,
-    sort:
-      'sort' in newQuery
-        ? newQuery.sort
-        : ((currentQuery?.sort as string) ?? options?.defaults?.sort),
+    sort: 'sort' in newQuery ? newQuery.sort : (currentQuery?.sort ?? options?.defaults?.sort),
     where: 'where' in newQuery ? newQuery.where : currentQuery?.where,
   }
 

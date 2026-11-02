@@ -48,6 +48,7 @@ export const Posts: CollectionConfig = {
         create: ({ req: { user } }) => { ... },
         read: ({ req: { user } }) => { ... },
         update: ({ req: { user } }) => { ... },
+        validate: ({ req: { user } }) => { ... },
       },
       // highlight-end
     };
@@ -57,11 +58,12 @@ export const Posts: CollectionConfig = {
 
 The following options are available:
 
-| Function     | Purpose                                                                                                    |
-| ------------ | ---------------------------------------------------------------------------------------------------------- |
-| **`create`** | Allows or denies the ability to set a field's value when creating a new document. [More details](#create). |
-| **`read`**   | Allows or denies the ability to read a field's value. [More details](#read).                               |
-| **`update`** | Allows or denies the ability to update a field's value [More details](#update).                            |
+| Function       | Purpose                                                                                                                                       |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`create`**   | Allows or denies the ability to set a field's value when creating a new document. [More details](#create).                                    |
+| **`read`**     | Allows or denies the ability to read a field's value. [More details](#read).                                                                  |
+| **`update`**   | Allows or denies the ability to update a field's value. [More details](#update).                                                              |
+| **`validate`** | Optionally overrides `update` access for candidate field data during [on-demand validation](../validation/overview#access-control-and-hooks). |
 
 ### Create
 

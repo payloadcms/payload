@@ -19,7 +19,6 @@ import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { isSuperset } from '../../../utilities/isSuperset.js'
 import { Spinner } from '../../Spinner/index.js'
 import { Column } from './Column/index.js'
 import './index.css'
@@ -86,49 +85,8 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
           ? { [parentFieldName]: { exists: false } }
           : { [parentFieldName]: { equals: parentId } }
 
-      // Build the final where clause, adding collectionSpecific filtering if configured
-      let where: Record<string, unknown> = parentWhere
-
-      // Filter by collection type if collectionSpecific is configured and filterByCollection is defined
-      // - undefined: no filtering, show all folders
-      // - [] empty: show all folders (no constraints)
-      // - ['posts', ...]: show folders that allow ANY of these OR unrestricted
-      // Note: Ideally we'd enforce ALL (superset) but hasMany enum fields in PG
-      // do not support "contains all" queries easily
-      if (hierarchyConfig?.collectionSpecific && filterByCollection !== undefined) {
-        const typeFieldName = hierarchyConfig.collectionSpecific.fieldName
-
-        if (filterByCollection.length > 0) {
-          // Get all possible type field values from relatedCollections
-          // This is used to detect "unrestricted" folders (empty allowedTypes array)
-          const allPossibleTypes = Object.keys(hierarchyConfig.relatedCollections || {})
-
-          where = {
-            and: [
-              parentWhere,
-              {
-                or: [
-                  // items that allow ANY of the selected collections
-                  { [typeFieldName]: { in: filterByCollection } },
-                  // OR items that are unrestricted (no type field exists)
-                  { [typeFieldName]: { exists: false } },
-                  // OR items with empty allowedTypes array (unrestricted)
-                  // Using not_in with all possible values matches empty arrays in both MongoDB and Postgres
-                  ...(allPossibleTypes.length > 0
-                    ? [{ [typeFieldName]: { not_in: allPossibleTypes } }]
-                    : []),
-                ],
-              },
-            ],
-          }
-        } else {
-          // Empty array: show all items of this parent
-          where = parentWhere
-        }
-      }
-
       // Combine with baseFilter if provided
-      const whereWithBaseFilter = combineWhereConstraints([where, baseFilter])
+      const whereWithBaseFilter = combineWhereConstraints([parentWhere, baseFilter])
 
       const queryString = qs.stringify(
         { limit: treeLimit, page, sort: useAsTitle, where: whereWithBaseFilter },
@@ -155,7 +113,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         ? hierarchyConfig.collectionSpecific.fieldName
         : undefined
 
-      const allItems: ColumnItemData[] = (data.docs || []).map(
+      const items: ColumnItemData[] = (data.docs || []).map(
         (doc: { id: number | string } & Record<string, unknown>) => ({
           id: doc.id,
           allowedCollections: typeFieldName
@@ -166,13 +124,6 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         }),
       )
 
-      // Client-side filter: only show items that are a superset of required collections
-      // Server query uses ANY (due to PG limitations), but we want ALL (superset)
-      const items =
-        filterByCollection && filterByCollection.length > 0
-          ? allItems.filter((item) => isSuperset(item.allowedCollections, filterByCollection))
-          : allItems
-
       return {
         hasNextPage: data.hasNextPage || false,
         items,
@@ -182,7 +133,6 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
     [
       api,
       baseFilter,
-      filterByCollection,
       hierarchyConfig,
       parentFieldName,
       serverURL,
@@ -199,9 +149,11 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         return
       }
 
+      const loadingColumn = { ...columns[columnIndex], isLoading: true }
+
       setColumns((prev) => {
         const updated = [...prev]
-        updated[columnIndex] = { ...updated[columnIndex], isLoading: true }
+        updated[columnIndex] = loadingColumn
         return updated
       })
 
@@ -210,7 +162,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
 
         setColumns((prev) => {
           const updated = [...prev]
-          if (updated[columnIndex]) {
+          if (updated[columnIndex] === loadingColumn) {
             updated[columnIndex] = {
               ...updated[columnIndex],
               hasNextPage,
@@ -225,7 +177,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
       } catch {
         setColumns((prev) => {
           const updated = [...prev]
-          if (updated[columnIndex]) {
+          if (updated[columnIndex] === loadingColumn) {
             updated[columnIndex] = { ...updated[columnIndex], isLoading: false }
           }
           return updated
@@ -337,13 +289,19 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         return
       }
 
+      if (columns[columnIndex + 1]?.parentId === itemId) {
+        setExpandedPath(expandedPath.slice(0, columnIndex))
+        setColumns(columns.slice(0, columnIndex + 1))
+        return
+      }
+
       // Update expanded path - keep path up to this column, add new item
       const newExpandedPath = [...expandedPath.slice(0, columnIndex), itemId]
       setExpandedPath(newExpandedPath)
 
       // Remove columns to the right and add new loading column
       const newColumns = columns.slice(0, columnIndex + 1)
-      newColumns.push({
+      const loadingColumn: ColumnState = {
         hasNextPage: false,
         isLoading: true,
         items: [],
@@ -351,7 +309,8 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         parentId: itemId,
         parentTitle: item.title,
         totalDocs: 0,
-      })
+      }
+      newColumns.push(loadingColumn)
 
       setColumns(newColumns)
 
@@ -363,14 +322,12 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
           const updated = [...prev]
           const targetIndex = columnIndex + 1
 
-          if (updated[targetIndex]?.parentId === itemId) {
+          if (updated[targetIndex] === loadingColumn) {
             updated[targetIndex] = {
+              ...loadingColumn,
               hasNextPage,
               isLoading: false,
               items,
-              page: 1,
-              parentId: itemId,
-              parentTitle: item.title,
               totalDocs,
             }
           }
@@ -382,16 +339,8 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
           const updated = [...prev]
           const targetIndex = columnIndex + 1
 
-          if (updated[targetIndex]?.parentId === itemId) {
-            updated[targetIndex] = {
-              hasNextPage: false,
-              isLoading: false,
-              items: [],
-              page: 1,
-              parentId: itemId,
-              parentTitle: item.title,
-              totalDocs: 0,
-            }
+          if (updated[targetIndex] === loadingColumn) {
+            updated[targetIndex] = { ...loadingColumn, isLoading: false }
           }
 
           return updated
@@ -411,9 +360,11 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
       const nextPage = column.page + 1
 
       // Set loading state
+      const loadingColumn = { ...column, isLoading: true }
+
       setColumns((prev) => {
         const updated = [...prev]
-        updated[columnIndex] = { ...updated[columnIndex], isLoading: true }
+        updated[columnIndex] = loadingColumn
         return updated
       })
 
@@ -426,7 +377,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         setColumns((prev) => {
           const updated = [...prev]
 
-          if (updated[columnIndex]) {
+          if (updated[columnIndex] === loadingColumn) {
             updated[columnIndex] = {
               ...updated[columnIndex],
               hasNextPage,
@@ -442,7 +393,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         setColumns((prev) => {
           const updated = [...prev]
 
-          if (updated[columnIndex]) {
+          if (updated[columnIndex] === loadingColumn) {
             updated[columnIndex] = { ...updated[columnIndex], isLoading: false }
           }
 

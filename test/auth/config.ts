@@ -12,6 +12,8 @@ import {
   BASE_PATH,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
+  passwordCustomValidateSlug,
+  passwordMinLengthSlug,
   publicUsersSlug,
   rotateSecretLoginSlug,
   rotateSecretOldSecret,
@@ -24,7 +26,6 @@ import {
 process.env.NEXT_BASE_PATH = BASE_PATH
 
 export default buildConfigWithDefaults({
-  suite: 'auth',
   config: {
     admin: {
       autoLogin: {
@@ -69,6 +70,7 @@ export default buildConfigWithDefaults({
           depth: 0,
           forgotPassword: {
             expiration: 300000, // 5 minutes
+            minRequestInterval: 1,
           },
           lockTime: 600 * 1000, // lock time in ms
           maxLoginAttempts: 2,
@@ -85,6 +87,11 @@ export default buildConfigWithDefaults({
                 return user?.roles?.includes('admin')
               },
             },
+          },
+          {
+            name: 'restrictedField',
+            type: 'text',
+            access: { read: () => false },
           },
           {
             name: 'roles',
@@ -226,8 +233,8 @@ export default buildConfigWithDefaults({
           },
           {
             // This is a uniquely identifiable field that we use to ensure it doesn't appear in the page source when unauthenticated
-            // E.g. if the user is authenticated, it will appear in the both the client config
-            name: 'shouldNotShowInClientConfigUnlessAuthenticated',
+            // E.g. if the user is authenticated, it will appear in both full config as well as the client config
+            name: 'onlyShowInClientConfigWhenAuthenticated',
             type: 'text',
             access: {
               // Setting this forces the field to show up in the permissions object
@@ -298,8 +305,36 @@ export default buildConfigWithDefaults({
         versions: false,
       },
       {
+        slug: passwordMinLengthSlug,
+        auth: true,
+        fields: [
+          {
+            name: 'password',
+            type: 'text',
+            hidden: true,
+            minLength: 8,
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: passwordCustomValidateSlug,
+        auth: true,
+        fields: [
+          {
+            name: 'password',
+            type: 'text',
+            hidden: true,
+            validate: (value: null | string | undefined) =>
+              !value || /\d/.test(value) || 'Password must contain a number',
+          },
+        ],
+        versions: false,
+      },
+      {
         slug: publicUsersSlug,
         auth: {
+          useSessions: false,
           verify: true,
         },
         fields: [],
@@ -367,17 +402,12 @@ export default buildConfigWithDefaults({
         },
         fields: [
           {
-            name: 'enableAPIKey',
-            type: 'checkbox',
-            access: {
-              read: () => false,
-            },
-          },
-          {
             name: 'apiKey',
             type: 'text',
             access: {
+              create: () => false,
               read: () => false,
+              update: () => false,
             },
           },
         ],
@@ -394,4 +424,5 @@ export default buildConfigWithDefaults({
     },
   },
   seed,
+  suite: 'auth',
 })

@@ -1,9 +1,4 @@
-import type {
-  SerializedEditorState,
-  SerializedLexicalNode,
-  SerializedParagraphNode,
-  SerializedTextNode,
-} from 'lexical'
+import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
 
 /**
  * This function checks if the editor state is empty (has any text). If the editor state has no nodes,
@@ -11,8 +6,8 @@ import type {
  * Otherwise, it returns true.
  */
 export function hasText(
-  value: null | SerializedEditorState<SerializedLexicalNode> | undefined,
-): value is SerializedEditorState<SerializedLexicalNode> {
+  value: null | SerializedEditorState | undefined,
+): value is SerializedEditorState {
   const hasChildren = !!value?.root?.children?.length
   if (!hasChildren) {
     return false

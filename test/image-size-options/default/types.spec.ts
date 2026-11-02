@@ -1,24 +1,32 @@
-import type { CollectionConfig, ImageSize } from 'payload'
+import type { CollectionConfig, ImageSize, SanitizedUploadConfig } from 'payload'
 
 import { describe, expect, test } from 'tstyche'
 
 type CollectionUploadConfig = Exclude<NonNullable<CollectionConfig['upload']>, boolean>
-type CollectionImageSize = NonNullable<CollectionUploadConfig['imageSizes']>[number]
+type SanitizedImageSize = NonNullable<SanitizedUploadConfig['variants']>[number]
 
 describe('default image size options', () => {
-  test('should use Sharp options when no provider is registered', () => {
-    expect<'kernel' extends keyof ImageSize ? true : false>().type.toBe<true>()
-    expect<'withoutEnlargement' extends keyof ImageSize ? true : false>().type.toBe<true>()
+  test('should carry no processor-specific options when no provider is registered', () => {
+    expect<'kernel' extends keyof ImageSize ? true : false>().type.toBe<false>()
+    expect<'withoutEnlargement' extends keyof ImageSize ? true : false>().type.toBe<false>()
     expect<{
+      admin?: never
+      generateImageName?: never
       height: number
-      kernel: 'lanczos3'
       name: string
       width: number
-      withoutEnlargement: true
     }>().type.toBeAssignableTo<ImageSize>()
   })
 
-  test('should apply Sharp options to collection upload configuration', () => {
-    expect<CollectionImageSize>().type.toBe<ImageSize>()
+  test('should apply the same (empty) options to the sanitized upload configuration', () => {
+    expect<SanitizedImageSize>().type.toBe<ImageSize>()
+  })
+
+  test('should not allow imageSizes to be authored on a collection upload configuration', () => {
+    expect<'imageSizes' extends keyof CollectionUploadConfig ? true : false>().type.toBe<false>()
+  })
+
+  test('should not allow variants to be authored on a collection upload configuration', () => {
+    expect<'variants' extends keyof CollectionUploadConfig ? true : false>().type.toBe<false>()
   })
 })

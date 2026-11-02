@@ -7,6 +7,7 @@ import {
   fieldShouldBeLocalized,
   tabHasName,
 } from '../fields/config/types.js'
+import { expandOwnDottedKey } from './fieldPath.js'
 
 const traverseArrayOrBlocksField = ({
   callback,
@@ -475,23 +476,7 @@ export const traverseFields = ({
   // Fallback: Handle dot-notation paths when no fields matched
   if (!fieldsMatched && ref && typeof ref === 'object') {
     Object.keys(ref).forEach((key) => {
-      if (key.includes('.')) {
-        // Split on first dot only
-        const firstDotIndex = key.indexOf('.')
-        const fieldName = key.substring(0, firstDotIndex)
-        const remainingPath = key.substring(firstDotIndex + 1)
-
-        // Create nested structure for this field
-        if (!ref[fieldName as keyof typeof ref]) {
-          ;(ref as Record<string, unknown>)[fieldName] = {}
-        }
-
-        const nestedRef = ref[fieldName as keyof typeof ref] as Record<string, unknown>
-
-        // Move the value to the nested structure
-        nestedRef[remainingPath] = (ref as Record<string, unknown>)[key]
-        delete (ref as Record<string, unknown>)[key]
-
+      if (expandOwnDottedKey({ key, target: ref as Record<string, unknown> })) {
         // Recursively process the newly created nested structure
         // The field traversal will naturally handle it if the field exists in the schema
         traverseFields({

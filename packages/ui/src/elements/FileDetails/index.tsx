@@ -10,7 +10,7 @@ type SharedFileDetailsProps = {
   collectionSlug: string
   customUploadActions?: React.ReactNode[]
   doc: {
-    sizes?: FileSizes
+    variants?: FileSizes
   } & Data
   enableAdjustments?: boolean
   hasImageSizes?: boolean

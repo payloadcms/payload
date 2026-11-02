@@ -28,7 +28,7 @@ export const linkValidation = (
       fields: sanitizedFieldsWithoutText, // Sanitized in feature.server.ts
       fieldSchemaMap: undefined,
       initialBlockData: node.fields,
-      operation: operation === 'create' || operation === 'update' ? operation : 'update',
+      operation,
       permissions: {},
       preferences,
       renderAllFields: false,

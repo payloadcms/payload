@@ -65,7 +65,7 @@ export async function setAuthCookie({
     cookiePrefix,
     returnCookieAsObject: true,
     token,
-  }) as GeneratedCookie
+  })
 
   await applyAuthCookie({ cookie, serverAdapter })
 }
@@ -84,7 +84,7 @@ export async function clearAuthCookie({
     collectionAuthConfig: authConfig,
     cookiePrefix,
     returnCookieAsObject: true,
-  }) as GeneratedCookie
+  })
 
   await serverAdapter.setCookie(cookie.name, '', toCookieOptions(cookie))
 }

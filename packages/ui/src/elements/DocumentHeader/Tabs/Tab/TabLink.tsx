@@ -65,12 +65,13 @@ export const DocumentTabLink: React.FC<{
       aria-label={ariaLabel}
       buttonStyle={isActive ? 'pill' : 'ghost'}
       className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}
-      disabled={isActive}
-      el={!isActive || href !== pathname ? 'link' : 'div'}
+      el="link"
+      extraButtonProps={{ 'aria-current': isActive ? 'page' : false }}
       margin={false}
       newTab={newTab}
+      onClick={href === pathname && !newTab ? (event) => event.preventDefault() : undefined}
       size="medium"
-      to={!isActive || href !== pathname ? hrefWithLocale : undefined}
+      to={hrefWithLocale}
     >
       {children}
     </Button>

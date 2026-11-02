@@ -4,7 +4,7 @@ import { test } from '../../__helpers/int/vitest.js'
 import { devUser } from '../../credentials.js'
 import { collectionSlug } from './shared.js'
 
-test.suite({ config: './config.ts' })('Forgot password operation with localized fields', () => {
+test.suite('Forgot password operation with localized fields', { config: './config.ts' }, () => {
   test.beforeEach(async ({ payload, restClient }) => {
     // Register a user with additional localized field
     const res = await restClient?.POST(`/${collectionSlug}/first-register?locale=en`, {
@@ -29,6 +29,7 @@ test.suite({ config: './config.ts' })('Forgot password operation with localized 
       data: {
         localizedField: 'Polish content',
       },
+      overrideAccess: true,
     })
   })
 
@@ -40,6 +41,7 @@ test.suite({ config: './config.ts' })('Forgot password operation with localized 
       collection: collectionSlug,
       data: { email: devUser.email },
       disableEmail: true,
+      overrideAccess: true,
     })
 
     // Verify token was generated successfully
@@ -55,6 +57,7 @@ test.suite({ config: './config.ts' })('Forgot password operation with localized 
         collection: collectionSlug,
         data: { email: devUser.email },
         disableEmail: true,
+        overrideAccess: true,
       }),
     ).resolves.not.toThrow()
   })

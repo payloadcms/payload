@@ -33,6 +33,7 @@ export const longRunningWorkflow: WorkflowConfig<'longRunning'> = {
           title: job.input.postTitle,
         },
         req,
+        overrideAccess: true,
       })
     }
   },

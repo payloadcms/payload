@@ -129,6 +129,7 @@ describe('Lexical Views', () => {
           }),
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       try {
@@ -166,6 +167,7 @@ describe('Lexical Views', () => {
         await _payload.delete({
           id: doc.id,
           collection: lexicalViewsFrontendSlug,
+          overrideAccess: true,
         })
       }
     })
@@ -197,6 +199,7 @@ describe('Lexical Views', () => {
           }),
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       try {
@@ -217,7 +220,7 @@ describe('Lexical Views', () => {
         await expect(blockDecorator).toBeVisible()
 
         // Verify the custom Block component renders (no default collapsible toggle)
-        const toggleBlockButton = blockDecorator.getByRole('button', { name: 'Toggle block' })
+        const toggleBlockButton = blockDecorator.locator('.collapsible__toggle')
         await expect(toggleBlockButton).toHaveCount(0)
 
         // Open the block's drawer via edit button
@@ -234,15 +237,14 @@ describe('Lexical Views', () => {
 
         // The custom Block component should still be rendered after drawer save.
         await expect(blockDecorator).toBeVisible()
-        const toggleBlockButtonAfterSave = blockDecorator.getByRole('button', {
-          name: 'Toggle block',
-        })
+        const toggleBlockButtonAfterSave = blockDecorator.locator('.collapsible__toggle')
         await expect(toggleBlockButtonAfterSave).toHaveCount(0)
         await expect(blockDecorator.locator('.custom-banner-block-component')).toBeVisible()
       } finally {
         await _payload.delete({
           id: doc.id,
           collection: lexicalViewsFrontendSlug,
+          overrideAccess: true,
         })
       }
     })
@@ -272,6 +274,7 @@ describe('Lexical Views', () => {
           }),
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       try {
@@ -317,6 +320,7 @@ describe('Lexical Views', () => {
         await _payload.delete({
           id: doc.id,
           collection: lexicalViewsFrontendSlug,
+          overrideAccess: true,
         })
       }
     })

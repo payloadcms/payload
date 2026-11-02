@@ -256,6 +256,8 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   collectionsInput: {
     posts: PostInput;
@@ -347,6 +349,24 @@ export interface Post {
   };
   radioField: MyRadioOptions;
   externalType?: CustomType;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -356,12 +376,122 @@ export interface CustomType {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fallback-users".
+ */
+export interface FallbackUser {
+  id: number;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  apiKey?: string | null;
+  apiKeyLast4?: string | null;
+  apiKeyIndex?: string | null;
+  email?: string | null;
+  username?: string | null;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'fallback-users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
   id: string;
   title?: string | null;
   category?: (string | null) | PagesCategory;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -377,6 +507,24 @@ export interface PagesCategory {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -388,6 +536,24 @@ export interface DraftPost {
   id: string;
   title: string;
   description: string;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -399,6 +565,24 @@ export interface DraftPost {
 export interface Media {
   id: string;
   alt?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -418,6 +602,24 @@ export interface Media {
 export interface Gallery {
   id: string;
   title?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -429,35 +631,6 @@ export interface Gallery {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "fallback-users".
- */
-export interface FallbackUser {
-  id: number;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  email?: string | null;
-  username?: string | null;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  _verified?: boolean | null;
-  _verificationToken?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'fallback-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -481,33 +654,26 @@ export interface InputType {
   image?: (string | null) | Media;
   richText?: LexicalRichText<LexicalNodes_040C7D3E> | null;
   computedTitle?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -638,6 +804,8 @@ export interface PostsSelect<T extends boolean = true> {
       };
   radioField?: T;
   externalType?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -648,6 +816,8 @@ export interface PostsSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -658,6 +828,8 @@ export interface PagesSelect<T extends boolean = true> {
 export interface PagesCategoriesSelect<T extends boolean = true> {
   title?: T;
   relatedPages?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -668,6 +840,8 @@ export interface PagesCategoriesSelect<T extends boolean = true> {
 export interface DraftPostsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -678,6 +852,8 @@ export interface DraftPostsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -696,6 +872,8 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface GallerySelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -714,8 +892,10 @@ export interface GallerySelect<T extends boolean = true> {
  */
 export interface FallbackUsersSelect<T extends boolean = true> {
   id?: T;
-  enableAPIKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
   apiKey?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
   email?: T;
   username?: T;
@@ -723,6 +903,7 @@ export interface FallbackUsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   _verified?: T;
   _verificationToken?: T;
   loginAttempts?: T;
@@ -748,6 +929,8 @@ export interface InputTypesSelect<T extends boolean = true> {
   image?: T;
   richText?: T;
   computedTitle?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -756,6 +939,8 @@ export interface InputTypesSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -763,6 +948,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -821,6 +1007,24 @@ export interface Menu {
   id: string;
   text?: string | null;
   richText?: LexicalRichText<LexicalNodes_D5E7E2D8> | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -831,6 +1035,24 @@ export interface Menu {
 export interface Setting {
   id: string;
   siteName?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number | FallbackUser;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -842,6 +1064,8 @@ export interface Setting {
 export interface MenuSelect<T extends boolean = true> {
   text?: T;
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -852,6 +1076,8 @@ export interface MenuSelect<T extends boolean = true> {
  */
 export interface SettingsSelect<T extends boolean = true> {
   siteName?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -869,6 +1095,60 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'posts'
+      | 'pages'
+      | 'pages-categories'
+      | 'draft-posts'
+      | 'media'
+      | 'gallery'
+      | 'fallback-users'
+      | 'input-types'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'posts'
+          | 'pages'
+          | 'pages-categories'
+          | 'draft-posts'
+          | 'media'
+          | 'gallery'
+          | 'fallback-users'
+          | 'input-types'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_input".
  */
 export interface PostInput {
@@ -883,6 +1163,24 @@ export interface PostInput {
   };
   radioField: MyRadioOptions;
   externalType?: CustomType;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -892,6 +1190,24 @@ export interface PageInput {
   id?: string;
   title?: string | null;
   category?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -900,6 +1216,24 @@ export interface PageInput {
 export interface PagesCategoryInput {
   id?: string;
   title?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -909,6 +1243,24 @@ export interface DraftPostInput {
   id?: string;
   title: string;
   description: string;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -918,6 +1270,24 @@ export interface DraftPostInput {
 export interface MediaInput {
   id?: string;
   alt?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -935,6 +1305,24 @@ export interface MediaInput {
 export interface GalleryInput {
   id?: string;
   title?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -951,8 +1339,26 @@ export interface GalleryInput {
  */
 export interface FallbackUserInput {
   id?: number;
-  enableAPIKey?: boolean | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
   apiKey?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   email?: string | null;
   username?: string | null;
@@ -960,6 +1366,7 @@ export interface FallbackUserInput {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   _verified?: boolean | null;
   _verificationToken?: string | null;
   loginAttempts?: number | null;
@@ -994,6 +1401,24 @@ export interface InputTypeInput {
       } | null);
   image?: string | null;
   richText?: LexicalRichText<LexicalNodes_BE82CF4C_Input> | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1001,11 +1426,30 @@ export interface InputTypeInput {
  */
 export interface UserInput {
   id?: string;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -1131,6 +1575,24 @@ export interface MenuInput {
   id?: string;
   text?: string | null;
   richText?: LexicalRichText<LexicalNodes_FB3BECC7_Input> | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1139,6 +1601,24 @@ export interface MenuInput {
 export interface SettingInput {
   id?: string;
   siteName?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'fallback-users';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
   _status?: ('draft' | 'published') | null;
 }
 /**

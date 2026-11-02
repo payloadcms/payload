@@ -2,7 +2,7 @@ import type { MigrationResult, Payload } from 'payload'
 
 import {
   commitTransaction,
-  createLocalReq,
+  createPayloadRequest,
   initTransaction,
   killTransaction,
   readMigrationFiles,
@@ -41,6 +41,7 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
     ;({ docs: migrationsInDB } = await payload.find({
       collection: 'payload-migrations',
       limit: 0,
+      overrideAccess: true,
       sort: '-name',
     }))
 
@@ -97,7 +98,7 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
   const start = Date.now()
-  const req = await createLocalReq({}, payload)
+  const req = await createPayloadRequest({ payload })
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
 
@@ -112,6 +113,7 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
         name: migration.name,
         batch,
       },
+      overrideAccess: true,
       req,
     })
     await commitTransaction(req)

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import { setNestedValue } from './setNestedValue.js'
 
-const unsupportedSegments = ['__proto__', 'constructor', 'prototype']
+const unsupportedSegments = ['__proto__']
 const unsupportedPaths = unsupportedSegments.flatMap((segment) => [
   `${segment}.value`,
   `group.${segment}.value`,
@@ -33,6 +33,63 @@ describe('setNestedValue', () => {
 
     expect(target).toEqual({ stable: { value: true } })
     expect(Object.getPrototypeOf(target)).toBe(targetPrototypeBefore)
+    expect(Object.getOwnPropertyDescriptors(Object.prototype)).toEqual(objectPrototypeBefore)
+  })
+
+  it('should build nested values from owned data', () => {
+    const inheritedContainer = 'constrainedNestedContainer'
+    const target: Record<string, unknown> = {}
+    const source: Record<string, unknown> = {}
+    const objectPrototypeBefore = Object.getOwnPropertyDescriptors(Object.prototype)
+    const originalContainerDescriptor = Object.getOwnPropertyDescriptor(
+      Object.prototype,
+      inheritedContainer,
+    )
+    let inheritedGetterCalls = 0
+    let inheritedSetterCalls = 0
+
+    try {
+      Object.defineProperty(Object.prototype, inheritedContainer, {
+        configurable: true,
+        get: () => {
+          inheritedGetterCalls += 1
+          return { value: 'inherited' }
+        },
+        set: () => {
+          inheritedSetterCalls += 1
+        },
+      })
+
+      setNestedValue(target, 'constructor.prototype.value', 'example')
+      setNestedValue(target, 'prototype.value', 'example')
+      setNestedValue(target, `${inheritedContainer}.value`, 'local', source)
+    } finally {
+      if (originalContainerDescriptor) {
+        Object.defineProperty(Object.prototype, inheritedContainer, originalContainerDescriptor)
+      } else {
+        delete (Object.prototype as Record<string, unknown>)[inheritedContainer]
+      }
+    }
+
+    expect(inheritedGetterCalls).toBe(0)
+    expect(inheritedSetterCalls).toBe(0)
+    expect(Object.hasOwn(target, 'constructor')).toBe(true)
+    expect(Object.hasOwn(target, 'prototype')).toBe(true)
+    expect(target).toEqual({
+      [inheritedContainer]: {
+        value: 'local',
+      },
+      constructor: {
+        prototype: {
+          value: 'example',
+        },
+      },
+      prototype: {
+        value: 'example',
+      },
+    })
+    expect(Object.getPrototypeOf(target.constructor)).toBeNull()
+    expect(Object.getPrototypeOf(target.prototype)).toBeNull()
     expect(Object.getOwnPropertyDescriptors(Object.prototype)).toEqual(objectPrototypeBefore)
   })
 

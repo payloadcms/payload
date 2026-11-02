@@ -1,0 +1,80 @@
+@layer payload-default {
+  .card.upload-dropzone-widget {
+    min-height: calc(var(--spacer-6) * 5);
+    padding: var(--spacer-2);
+    border-radius: var(--radius-large);
+    background: var(--color-bg);
+  }
+
+  .card.upload-dropzone-widget .upload-dropzone-widget__dropzone {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    padding: var(--spacer-4) var(--spacer-3);
+    border: var(--stroke-width-small) dashed var(--color-border);
+    border-radius: var(--radius-medium);
+    background: var(--color-bg);
+    text-align: center;
+
+    &:hover {
+      background: var(--color-bg);
+    }
+
+    &.dragging {
+      border-color: var(--color-border-selected);
+      background: var(--color-bg-selected);
+    }
+  }
+
+  .upload-dropzone-widget__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacer-3);
+  }
+
+  .upload-dropzone-widget__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-6);
+    height: var(--spacer-6);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-selected);
+    color: var(--color-icon-brand);
+  }
+
+  .upload-dropzone-widget__description,
+  .upload-dropzone-widget__drag-message,
+  .upload-dropzone-widget__message {
+    margin: 0;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .upload-dropzone-widget__description,
+  .upload-dropzone-widget__drag-message {
+    color: color-mix(in srgb, var(--color-text-secondary) 91%, var(--color-text) 9%);
+  }
+
+  .upload-dropzone-widget__message {
+    color: var(--color-text);
+  }
+
+  .upload-dropzone-widget__drag-message {
+    display: none;
+  }
+
+  .upload-dropzone-widget__dropzone.dragging {
+    .upload-dropzone-widget__content {
+      display: none;
+    }
+
+    .upload-dropzone-widget__drag-message {
+      display: block;
+    }
+  }
+}

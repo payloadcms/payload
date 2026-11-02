@@ -8,6 +8,7 @@ import type {
   LoggedOutRoute,
 } from './shared.js'
 
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import {
   AUTH_SESSION_TEST_ADMIN_ROUTES,
@@ -239,6 +240,7 @@ export async function createSessionScenario({
       return page
     },
     async logout(page) {
+      await openNav(page)
       await page.locator('.user-menu__trigger').click()
       await page.locator('a[href$="/logout"]').click()
     },

@@ -5,7 +5,7 @@
  * prerelease line) must be rejected rather than defaulted — extend this list to
  * onboard a new publishable line.
  */
-export const PREIDS = ['beta', 'canary'] as const
+export const PREIDS = ['beta'] as const
 
 export type Preid = (typeof PREIDS)[number]
 

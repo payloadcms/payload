@@ -17,6 +17,7 @@ import { CustomTabID } from './collections/CustomID/CustomTabID.js'
 import { CustomID } from './collections/CustomID/index.js'
 import { CustomIDNested } from './collections/CustomIDNested/index.js'
 import DateFields from './collections/Date/index.js'
+import DuplicateFields from './collections/Duplicate/index.js'
 import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
 import IndexedFields from './collections/Indexed/index.js'
@@ -72,6 +73,7 @@ export const collections: CollectionConfig[] = [
   CustomTabID,
   CustomRowID,
   DateFields,
+  DuplicateFields,
   EmailFields,
   RadioFields,
   GroupFields,
@@ -128,6 +130,37 @@ export const baseConfig: Partial<Config> = {
         {
           name: 'deduplicatedText',
           type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'conditionalReference',
+      fields: [
+        {
+          name: 'testBlocks',
+          type: 'blocks',
+          admin: {
+            condition: (data) => Boolean(data.showConditionalFields),
+          },
+          blocks: [
+            {
+              slug: 'testBlock',
+              fields: [
+                {
+                  name: 'testField',
+                  type: 'text',
+                },
+              ],
+              labels: {
+                plural: 'Test Blocks',
+                singular: 'Test Block',
+              },
+            },
+          ],
+          defaultValue: [{ blockType: 'testBlock' }],
+          maxRows: 1,
+          minRows: 1,
+          required: true,
         },
       ],
     },

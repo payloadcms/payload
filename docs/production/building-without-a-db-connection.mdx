@@ -10,6 +10,13 @@ One of the most common problems when building a site for production, especially 
 
 The important note is that Payload by itself does not have this requirement, But [Next.js' SSG ](https://nextjs.org/docs/pages/building-your-application/rendering/static-site-generation) does if any of your route segments have SSG enabled (which is default, unless you opted out or used a [Dynamic API](https://nextjs.org/docs/app/deep-dive/caching#dynamic-apis)) and use the Payload Local API.
 
+<Banner type="info">
+  The solutions below are Next.js-specific (they use `next build` flags and the
+  `dynamic` route-segment export). On TanStack Start the Vite build does not
+  statically pre-render routes that hit the Local API, so this DB-at-build-time
+  requirement generally does not apply.
+</Banner>
+
 Solutions:
 
 ## Using the experimental-build-mode Next.js build flag

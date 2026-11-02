@@ -1,7 +1,7 @@
 'use client'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
-import React, { Fragment, useEffect, useRef, useState } from 'react'
+import React, { Fragment, useEffect, useId, useRef, useState } from 'react'
 
 import type { ListControlsProps } from './types.js'
 
@@ -13,6 +13,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { ListColumnSelectionButton } from '../ListColumnSelectionButton/index.js'
 import { ListGroupByButton } from '../ListGroupByButton/index.js'
+import { ListEmptyTrashButton } from '../ListHeader/TitleActions/index.js'
 import { ListWhereBuilder } from '../ListWhereBuilder/index.js'
 import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
 import { ListSearchFilter } from '../Search/ListSearchFilter/index.js'
@@ -35,7 +36,9 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     enableFilters = true,
     enableSort = false,
     hasCreatePermission,
+    hasDeletePermission,
     isWhereOpen: isWhereOpenFromProps,
+    layoutToggle,
     listMenuItems,
     newDocumentURL,
     onWhereToggle,
@@ -43,11 +46,16 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     queryPresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
+    viewType,
+    wherePanelID: wherePanelIDFromProps,
   } = props
+
+  const instanceID = useId()
+  const wherePanelID = wherePanelIDFromProps ?? `${baseClass}-where-${instanceID}`
 
   const isControlled = typeof onWhereToggle === 'function'
 
-  const { handleSearchChange, hasActiveFilters, query } = useListQuery()
+  const { handleSearchChange, hasActiveFilters, query, setSearchInput } = useListQuery()
 
   const { t } = useTranslation()
 
@@ -85,6 +93,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             key={collectionSlug}
             label={searchLabelTranslated}
             onSearchChange={handleSearchChange}
+            onSearchInputChange={setSearchInput}
             searchQueryParam={query?.search}
           />
           {collectionConfig?.enableQueryPresets && !disableQueryPresets && (
@@ -103,7 +112,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               buttonStyle="secondary"
               className={`${baseClass}__toggle-where`}
               extraButtonProps={{
-                'aria-controls': `${baseClass}-where`,
+                'aria-controls': wherePanelID,
                 'aria-expanded': isWhereOpen,
               }}
               icon={<ChevronIcon direction={isWhereOpen ? 'up' : 'down'} size={16} />}
@@ -136,6 +145,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               {t('general:sort')}
             </Button>
           )}
+          {layoutToggle}
           {hasCreatePermission && newDocumentURL && (
             <Button
               buttonStyle="primary"
@@ -148,12 +158,19 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               {t('general:createNew')}
             </Button>
           )}
+          {hasDeletePermission && collectionConfig.trash && viewType === 'trash' && (
+            <ListEmptyTrashButton
+              collectionConfig={collectionConfig}
+              hasDeletePermission={hasDeletePermission}
+            />
+          )}
           {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
             <Popup
               button={<Dots ariaLabel={t('general:moreOptions')} />}
               className={`${baseClass}__popup`}
               horizontalAlign="right"
               id="list-menu"
+              popupType="menu"
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>
@@ -166,7 +183,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         </div>
       </div>
       {!isControlled && isWhereOpen && (
-        <div className={`${baseClass}__where`} id={`${baseClass}-where`}>
+        <div className={`${baseClass}__where`} id={wherePanelID}>
           <ListWhereBuilder
             collectionPluralLabel={collectionConfig?.labels?.plural}
             collectionSlug={collectionConfig.slug}

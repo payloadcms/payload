@@ -1,4 +1,4 @@
-import { decodeJwt } from 'jose'
+import { decodeJwt } from 'jose/jwt/decode'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { AuthenticatedUser } from '../../index.js'

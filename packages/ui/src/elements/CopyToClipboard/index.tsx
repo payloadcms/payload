@@ -24,10 +24,12 @@ export const CopyToClipboard: React.FC<Props> = ({
   const [copied, setCopied] = useState(false)
   const [hovered, setHovered] = useState(false)
   const { t } = useTranslation()
+  const copyLabel = defaultMessage ?? t('general:copy')
 
   if (value) {
     return (
       <button
+        aria-label={copyLabel}
         className={baseClass}
         onClick={async () => {
           await navigator.clipboard.writeText(value)
@@ -46,7 +48,7 @@ export const CopyToClipboard: React.FC<Props> = ({
         {icon ?? <CopyIcon />}
         <Tooltip delay={copied ? 0 : undefined} show={hovered || copied}>
           {copied && (successMessage ?? t('general:copied'))}
-          {!copied && (defaultMessage ?? t('general:copy'))}
+          {!copied && copyLabel}
         </Tooltip>
       </button>
     )

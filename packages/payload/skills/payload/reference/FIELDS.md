@@ -319,6 +319,7 @@ const locationField: PointField = {
 // Query by distance (sorted by nearest first)
 const nearbyLocations = await payload.find({
   collection: 'stores',
+  overrideAccess: true,
   where: {
     location: {
       near: [10, 20], // [longitude, latitude]
@@ -339,6 +340,7 @@ const polygon: Point[] = [
 
 const withinArea = await payload.find({
   collection: 'stores',
+  overrideAccess: true,
   where: {
     location: {
       within: {
@@ -352,6 +354,7 @@ const withinArea = await payload.find({
 // Query intersecting area
 const intersecting = await payload.find({
   collection: 'stores',
+  overrideAccess: true,
   where: {
     location: {
       intersects: {

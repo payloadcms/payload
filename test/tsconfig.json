@@ -36,7 +36,6 @@
     "dist",
     "build",
     "node_modules",
-    "eslint.config.js",
     "dist/**/*.js",
     "**/dist/**/*.js"
   ],
@@ -51,6 +50,7 @@
     "./__helpers/**/*.tsx",
     "./__setup/**/*.ts",
     "./__setup/**/*.tsx",
+    "./__setup/**/*.mjs",
     "./app/**/*.ts",
     "./app/**/*.tsx",
     "./evals/**/*.ts",

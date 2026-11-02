@@ -19,6 +19,13 @@ export const AutosavePostsCollection: CollectionConfig = {
         beforeChange: [({ data }) => data?.title],
       },
     },
+    {
+      name: 'restrictedValue',
+      type: 'text',
+      access: {
+        create: () => false,
+      },
+    },
   ],
   versions: {
     drafts: {

@@ -167,6 +167,7 @@ export default buildConfigWithDefaults({
             await req.payload.create({
               collection: 'pages',
               data: { title: 'CLI job ran' },
+              overrideAccess: true,
             } as never)
 
             return { output: {} }

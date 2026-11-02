@@ -8,7 +8,7 @@ let token: string
 
 const { email, password } = devUser
 
-test.suite({ config: './config.ts' })('_Community Tests', () => {
+test.suite('_Community Tests', { config: './config.ts' }, () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
@@ -37,6 +37,7 @@ test.suite({ config: './config.ts' })('_Community Tests', () => {
         title: 'LOCAL API EXAMPLE',
       },
       context: {},
+      overrideAccess: true,
     })
 
     expect(newPost.title).toEqual('LOCAL API EXAMPLE')

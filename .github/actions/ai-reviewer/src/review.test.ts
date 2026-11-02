@@ -64,7 +64,7 @@ describe('buildSystemPrompt', () => {
     vi.resetAllMocks()
   })
 
-  it('should return just the prompt when no CLAUDE.md exists and not a fork', () => {
+  it('should return just the prompt when no AGENTS.md exists and not a fork', () => {
     mockFs.existsSync.mockImplementation((p) => p === '/workspace/.github/ai-reviewer-prompt.md')
     mockFs.readFileSync.mockReturnValue('You are a reviewer.')
 
@@ -84,10 +84,10 @@ describe('buildSystemPrompt', () => {
     expect(result.indexOf('You are a reviewer.')).toBeLessThan(result.indexOf('Security Notice'))
   })
 
-  it('should prepend CLAUDE.md content when it exists', () => {
+  it('should prepend AGENTS.md content when it exists', () => {
     mockFs.existsSync.mockReturnValue(true)
     mockFs.readFileSync.mockImplementation((p) => {
-      if (String(p).endsWith('CLAUDE.md')) return '# Project guidelines'
+      if (String(p).endsWith('AGENTS.md')) return '# Project guidelines'
       return 'You are a reviewer.'
     })
 

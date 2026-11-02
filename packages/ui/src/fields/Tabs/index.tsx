@@ -5,12 +5,12 @@ import type {
   DocumentPreferences,
   SanitizedFieldPermissions,
   StaticDescription,
-  TabsFieldClientComponent,
+  TabsFieldClientProps,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { getFieldPaths, toKebabCase } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useId, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -32,7 +32,7 @@ const baseClass = 'tabs-field'
 
 export { TabsProvider }
 
-const TabsFieldComponent: TabsFieldClientComponent = (props) => {
+const TabsFieldComponent: React.FC<TabsFieldClientProps> = (props) => {
   const {
     field: { admin: { className } = {}, tabs = [] },
     forceRender = false,
@@ -49,6 +49,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
+  const tabsID = useId()
 
   const tabStates = useFormFields(([fields]) => {
     return tabs.map((tab, index) => {
@@ -167,8 +168,10 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
           {tabStates.map(({ index, passesCondition, tab }) => (
             <TabComponent
               hidden={!passesCondition}
+              id={`${tabsID}-tab-${index}`}
               isActive={activeTabIndex === index}
               key={index}
+              panelID={`${tabsID}-panel-${index}`}
               parentPath={path}
               setIsActive={() => {
                 void handleTabChange(index)
@@ -178,29 +181,40 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
           ))}
         </TabsList>
         <div className={`${baseClass}__content-wrap`}>
-          {activeTabConfig && (
-            <TabContent
-              description={activeTabStaticDescription}
-              field={activeTabConfig}
-              forceRender={forceRender}
-              hidden={false}
-              parentIndexPath={indexPath}
-              parentPath={path}
-              parentSchemaPath={schemaPath}
-              path={path}
-              permissions={
-                permissions && typeof permissions === 'object' && 'name' in activeTabConfig
-                  ? permissions[activeTabConfig.name] &&
-                    typeof permissions[activeTabConfig.name] === 'object' &&
-                    'fields' in permissions[activeTabConfig.name]
-                    ? permissions[activeTabConfig.name].fields
-                    : permissions[activeTabConfig.name]
-                  : permissions
-              }
-              readOnly={readOnly}
-              tabIndex={activeTabIndex}
-            />
-          )}
+          {tabStates.map(({ index }) => (
+            <div
+              aria-labelledby={`${tabsID}-tab-${index}`}
+              hidden={index !== activeTabIndex}
+              id={`${tabsID}-panel-${index}`}
+              key={index}
+              role="tabpanel"
+              tabIndex={0}
+            >
+              {index === activeTabIndex && activeTabConfig && (
+                <TabContent
+                  description={activeTabStaticDescription}
+                  field={activeTabConfig}
+                  forceRender={forceRender}
+                  hidden={false}
+                  parentIndexPath={indexPath}
+                  parentPath={path}
+                  parentSchemaPath={schemaPath}
+                  path={path}
+                  permissions={
+                    permissions && typeof permissions === 'object' && 'name' in activeTabConfig
+                      ? permissions[activeTabConfig.name] &&
+                        typeof permissions[activeTabConfig.name] === 'object' &&
+                        'fields' in permissions[activeTabConfig.name]
+                        ? permissions[activeTabConfig.name].fields
+                        : permissions[activeTabConfig.name]
+                      : permissions
+                  }
+                  readOnly={readOnly}
+                  tabIndex={activeTabIndex}
+                />
+              )}
+            </div>
+          ))}
         </div>
       </TabsProvider>
     </div>

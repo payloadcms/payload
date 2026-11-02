@@ -6,6 +6,7 @@ import React from 'react'
 
 import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { ToolbarControls } from './Controls/index.js'
 import './index.css'
 
@@ -13,6 +14,7 @@ const baseClass = 'live-preview-toolbar'
 
 const DraggableToolbar: React.FC<EditViewProps> = (props) => {
   const { toolbarPosition } = useLivePreviewContext()
+  const { t } = useTranslation()
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: 'live-preview-toolbar',
@@ -36,6 +38,7 @@ const DraggableToolbar: React.FC<EditViewProps> = (props) => {
       <button
         {...listeners}
         {...attributes}
+        aria-label={t('general:dragToMove')}
         className={`${baseClass}__drag-handle`}
         ref={setNodeRef}
         type="button"

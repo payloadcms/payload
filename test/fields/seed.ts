@@ -120,8 +120,8 @@ export const seed = async (_payload: Payload) => {
   const createdPNGDoc = await _payload.create({
     collection: uploadsSlug,
     data: {},
-    file: pngFile,
     depth: 0,
+    file: pngFile,
     overrideAccess: true,
   })
 
@@ -131,24 +131,24 @@ export const seed = async (_payload: Payload) => {
       ...uploadsDoc,
       media: createdPNGDoc.id,
     },
+    depth: 0,
     file: jpgFile,
-    depth: 0,
     overrideAccess: true,
   })
 
   await _payload.create({
     collection: uploadsSlug,
     data: {},
+    depth: 0,
     file: jpg480x320File,
-    depth: 0,
     overrideAccess: true,
   })
 
   await _payload.create({
     collection: uploadsSlug,
     data: {},
-    file: png20x20File,
     depth: 0,
+    file: png20x20File,
     overrideAccess: true,
   })
 
@@ -168,6 +168,7 @@ export const seed = async (_payload: Payload) => {
     data: {
       media: [createdPNGDoc.id],
     },
+    overrideAccess: true,
   })
 
   // Create hasMany poly upload
@@ -185,8 +186,9 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: uploadsPoly,
     data: {
-      media: { value: createdJPGDoc.id, relationTo: uploadsSlug },
+      media: { relationTo: uploadsSlug, value: createdJPGDoc.id },
     },
+    overrideAccess: true,
   })
   // Create poly upload
   // await _payload.create({
@@ -220,11 +222,11 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: usersSlug,
-    depth: 0,
     data: {
       email: devUser.email,
       password: devUser.password,
     },
+    depth: 0,
     overrideAccess: true,
   })
 
@@ -326,11 +328,11 @@ export const seed = async (_payload: Payload) => {
   const relationshipField1 = await _payload.create({
     collection: relationshipFieldsSlug,
     data: {
-      text: 'Relationship 1',
       relationship: {
         relationTo: textFieldsSlug,
         value: createdTextDoc.id,
       },
+      text: 'Relationship 1',
     },
     depth: 0,
     overrideAccess: true,
@@ -340,12 +342,12 @@ export const seed = async (_payload: Payload) => {
     await _payload.create({
       collection: relationshipFieldsSlug,
       data: {
-        text: 'Relationship 2',
-        relationToSelf: relationshipField1.id,
         relationship: {
           relationTo: textFieldsSlug,
           value: createdAnotherTextDoc.id,
         },
+        relationToSelf: relationshipField1.id,
+        text: 'Relationship 2',
       },
       depth: 0,
       overrideAccess: true,
@@ -381,6 +383,7 @@ export const seed = async (_payload: Payload) => {
       text: 'text',
     },
     depth: 0,
+    overrideAccess: true,
   })
 
   await Promise.all([
@@ -390,6 +393,7 @@ export const seed = async (_payload: Payload) => {
         id: nonStandardID,
       },
       depth: 0,
+      overrideAccess: true,
     }),
     _payload.create({
       collection: customTabIDSlug,
@@ -397,6 +401,7 @@ export const seed = async (_payload: Payload) => {
         id: customTabID,
       },
       depth: 0,
+      overrideAccess: true,
     }),
     _payload.create({
       collection: customRowIDSlug,
@@ -404,6 +409,7 @@ export const seed = async (_payload: Payload) => {
         id: customRowID,
       },
       depth: 0,
+      overrideAccess: true,
     }),
   ])
 }

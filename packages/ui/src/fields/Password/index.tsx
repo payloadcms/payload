@@ -21,12 +21,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     autoComplete,
     field,
     field: {
-      admin: {
-        className,
-        description,
-        placeholder,
-        rtl,
-      } = {} as PasswordFieldProps['field']['admin'],
+      admin: { className, description, placeholder, rtl } = {},
       label,
       localized,
       required,

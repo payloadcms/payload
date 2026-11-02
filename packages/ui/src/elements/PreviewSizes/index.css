@@ -107,6 +107,7 @@
     text-overflow: ellipsis;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .preview-sizes {
       margin-top: var(--spacer-3);
@@ -114,6 +115,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .preview-sizes {
       margin-top: 0;

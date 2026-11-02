@@ -10,7 +10,6 @@
 
   .form-header h1 {
     margin: 0;
-    font-family: var(--text-heading-large-font-family);
     font-size: var(--text-heading-large-font-size);
     font-weight: var(--text-heading-large-font-weight);
     line-height: var(--text-heading-large-line-height);
@@ -20,7 +19,6 @@
 
   .form-header p {
     margin: 0;
-    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);

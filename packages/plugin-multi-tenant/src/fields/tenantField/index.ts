@@ -1,17 +1,28 @@
 import type { RelationshipFieldValidation, SingleRelationshipField } from 'payload'
 
-import type { RootTenantFieldConfigOverrides } from '../../types.js'
+import type { MultiTenantPluginConfig, RootTenantFieldConfigOverrides } from '../../types.js'
 
 import { defaults } from '../../defaults.js'
 import { getCollectionIDType } from '../../utilities/getCollectionIDType.js'
 import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
 import { getUserTenantIDs } from '../../utilities/getUserTenantIDs.js'
+import { isValidTenantAssignment } from '../../utilities/isValidTenantAssignment.js'
 
 const fieldValidation =
-  (validateFunction?: RelationshipFieldValidation): RelationshipFieldValidation =>
-  (value, options) => {
+  ({
+    tenantsArrayFieldName,
+    tenantsArrayTenantFieldName,
+    userHasAccessToAllTenants,
+    validateFunction,
+  }: {
+    tenantsArrayFieldName: string
+    tenantsArrayTenantFieldName: string
+    userHasAccessToAllTenants?: MultiTenantPluginConfig['userHasAccessToAllTenants']
+    validateFunction?: RelationshipFieldValidation
+  }): RelationshipFieldValidation =>
+  async (value, options) => {
     if (validateFunction) {
-      const result = validateFunction(value, options)
+      const result = await validateFunction(value, options)
       if (result !== true) {
         return result
       }
@@ -27,10 +38,24 @@ const fieldValidation =
       }
     }
 
-    return true
+    if (
+      isValidTenantAssignment({
+        previousValue: options.previousValue,
+        req: options.req,
+        tenantsArrayFieldName,
+        tenantsArrayTenantFieldName,
+        userHasAccessToAllTenants,
+        value,
+      })
+    ) {
+      return true
+    }
+
+    return options.req.t('validation:invalidSelection')
   }
 
 type Args = {
+  adminUsersSlug?: string
   debug?: boolean
   isAutosaveEnabled?: boolean
   name: string
@@ -39,9 +64,11 @@ type Args = {
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
   unique: boolean
+  userHasAccessToAllTenants?: MultiTenantPluginConfig['userHasAccessToAllTenants']
 }
 export const tenantField = ({
   name = defaults.tenantFieldName,
+  adminUsersSlug,
   debug,
   isAutosaveEnabled,
   overrides: _overrides = {},
@@ -49,13 +76,22 @@ export const tenantField = ({
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug = defaults.tenantCollectionSlug,
   unique,
+  userHasAccessToAllTenants,
 }: Args): SingleRelationshipField => {
   const { hasMany = false, validate, ...overrides } = _overrides || {}
   return {
     ...(overrides || {}),
     name,
     type: 'relationship',
-    access: overrides.access || {},
+    access: {
+      ...(adminUsersSlug
+        ? {
+            create: ({ req }) => Boolean(req.user && req.user.collection === adminUsersSlug),
+            update: ({ req }) => Boolean(req.user && req.user.collection === adminUsersSlug),
+          }
+        : {}),
+      ...(overrides.access || {}),
+    },
     admin: {
       allowCreate: false,
       allowEdit: false,
@@ -88,7 +124,7 @@ export const tenantField = ({
         })
         const tenantFromCookie = getTenantFromCookie(req.headers, idType)
         if (tenantFromCookie) {
-          const isValidTenant = await req.payload.count({
+          const { totalDocs } = await req.payload.count({
             collection: tenantsCollectionSlug,
             overrideAccess: false,
             req,
@@ -99,7 +135,7 @@ export const tenantField = ({
               },
             },
           })
-          return isValidTenant ? tenantFromCookie : null
+          return totalDocs > 0 ? tenantFromCookie : null
         }
         if (req.user && isAutosaveEnabled) {
           const userTenants = getUserTenantIDs(req.user, {
@@ -136,12 +172,22 @@ export const tenantField = ({
       ? {
           hasMany: true,
           // TODO: V4 - replace validation with required: true
-          validate: fieldValidation(validate as RelationshipFieldValidation),
+          validate: fieldValidation({
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
+            userHasAccessToAllTenants,
+            validateFunction: validate as RelationshipFieldValidation,
+          }),
         }
       : {
           hasMany: false,
           // TODO: V4 - replace validation with required: true
-          validate: fieldValidation(validate as RelationshipFieldValidation),
+          validate: fieldValidation({
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
+            userHasAccessToAllTenants,
+            validateFunction: validate as RelationshipFieldValidation,
+          }),
         }),
     // @ts-expect-error translations are not typed for this plugin
     label: overrides.label || (({ t }) => t('plugin-multi-tenant:field-assignedTenant-label')),

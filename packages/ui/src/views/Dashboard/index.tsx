@@ -27,7 +27,6 @@ export async function DashboardView(props: AdminViewServerProps) {
       i18n,
       payload: { config },
       payload,
-      user,
     },
     req,
     visibleEntities,
@@ -56,7 +55,7 @@ export async function DashboardView(props: AdminViewServerProps) {
           payload,
           permissions,
           server: req.server,
-          user,
+          user: props.user,
           visibleEntities,
         } satisfies DashboardViewServerPropsOnly,
       })}

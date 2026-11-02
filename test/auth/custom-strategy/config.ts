@@ -22,10 +22,13 @@ const customAuthenticationStrategy: AuthStrategyFunction = async ({ headers, pay
         equals: headers.get('secret'),
       },
     },
+    overrideAccess: true,
   })
 
   const user = usersQuery.docs[0] || null
-  if (!user) return { user: null }
+  if (!user) {
+    return { user: null }
+  }
 
   return {
     responseHeaders: new Headers({

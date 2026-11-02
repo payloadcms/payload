@@ -8,6 +8,7 @@ import {
 } from '../fields/config/types.js'
 import { APIError, type Payload, type SanitizedCollectionConfig } from '../index.js'
 import { SAFE_FIELD_PATH_REGEX } from '../types/constants.js'
+import { getFieldByPath } from '../utilities/getFieldByPath.js'
 
 export function getLocalizedPaths({
   collectionSlug,
@@ -18,6 +19,7 @@ export function getLocalizedPaths({
   overrideAccess = false,
   parentIsLocalized,
   payload,
+  showHiddenFields = false,
 }: {
   collectionSlug?: string
   fields: FlattenedField[]
@@ -30,6 +32,7 @@ export function getLocalizedPaths({
    */
   parentIsLocalized?: boolean
   payload: Payload
+  showHiddenFields?: boolean
 }): PathToQuery[] {
   const pathSegments = incomingPath.split('.')
   const localizationConfig = payload.config.localization
@@ -131,7 +134,12 @@ export function getLocalizedPaths({
       }
 
       if (matchedField) {
-        if ('hidden' in matchedField && matchedField.hidden && !overrideAccess) {
+        if (
+          'hidden' in matchedField &&
+          matchedField.hidden &&
+          !overrideAccess &&
+          !showHiddenFields
+        ) {
           lastIncompletePath.invalid = true
         }
 
@@ -183,6 +191,19 @@ export function getLocalizedPaths({
                   }
 
                   relatedCollection = payload.collections[matchedField.collection]!.config
+
+                  const joinOnField = getFieldByPath({
+                    fields: relatedCollection.flattenedFields,
+                    path: matchedField.on,
+                  })?.field
+
+                  if (
+                    joinOnField &&
+                    (joinOnField.type === 'relationship' || joinOnField.type === 'upload') &&
+                    Array.isArray(joinOnField.relationTo)
+                  ) {
+                    throw new APIError('Not supported')
+                  }
                 } else {
                   relatedCollection = payload.collections[matchedField.relationTo as string]!.config
                 }
@@ -195,6 +216,7 @@ export function getLocalizedPaths({
                   locale,
                   parentIsLocalized: false,
                   payload,
+                  showHiddenFields,
                 })
 
                 paths = [...paths, ...remainingPaths]

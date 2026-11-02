@@ -1,0 +1,28 @@
+@layer payload-default {
+  .activity-widget__select-documents {
+    height: auto;
+    min-block-size: var(--spacer-4);
+    max-inline-size: 100%;
+  }
+
+  .activity-widget__select-documents .btn__label {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .activity-widget__select-documents[aria-disabled='true'] {
+    cursor: progress;
+  }
+
+  .activity-widget__pin-picker .sort-column__label,
+  .activity-widget__pin-picker .page-controls__page-info,
+  .activity-widget__pin-picker .per-page__label {
+    color: var(--activity-text-secondary);
+  }
+
+  .activity-widget__pin-picker .sort-column__button {
+    min-width: var(--spacer-4);
+    min-height: var(--spacer-4);
+    color: var(--color-icon-secondary);
+  }
+}

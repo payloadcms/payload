@@ -9,7 +9,7 @@ const headers = {
   'Content-Type': 'application/json',
 }
 
-test.suite({ config: './config.ts' })('AuthStrategies', () => {
+test.suite('AuthStrategies', { config: './config.ts' }, () => {
   test.describe('create user', () => {
     test.beforeEach(async ({ restClient }) => {
       await restClient.POST(`/${usersSlug}`, {

@@ -21,6 +21,7 @@ export const noRetriesSetWorkflow: WorkflowConfig<'workflowNoRetriesSet'> = {
         },
       },
       id: job.id,
+      overrideAccess: true,
     })
 
     job.input = updatedJob.input as any

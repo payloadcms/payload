@@ -1,7 +1,6 @@
 'use client'
 
-import { Button, PayloadLink, ReactSelect, useTheme } from '@payloadcms/ui'
-import { ChevronIcon } from '@payloadcms/ui/icons/Chevron'
+import { Button, ChevronIcon, PayloadLink, ReactSelect, useTheme } from '@payloadcms/ui'
 import React, { useMemo, useState } from 'react'
 
 import './index.css'

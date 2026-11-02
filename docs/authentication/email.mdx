@@ -115,6 +115,7 @@ The following options are available:
 | **`expiration`**           | Configure how long password reset tokens remain valid, specified in milliseconds.                                                               |
 | **`generateEmailHTML`**    | Allows for overriding the HTML within emails that are sent to users attempting to reset their password. [More details](#generateEmailHTML).     |
 | **`generateEmailSubject`** | Allows for overriding the subject of the email that is sent to users attempting to reset their password. [More details](#generateEmailSubject). |
+| **`minRequestInterval`**   | Minimum time between reset emails for the same user, in milliseconds. Defaults to `15000` (15 seconds). Set to `0` to disable.                  |
 
 <Banner type="success">
   **Tip:** Payload provides a built-in password reset page. If you don't need a

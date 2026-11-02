@@ -54,6 +54,7 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
           return [
             ...docSubOptions,
             {
+              doc,
               label: docTitle,
               relationTo: relation,
               value: doc.id,
@@ -158,6 +159,7 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
       const foundOption = foundOptionGroup?.options?.find((option) => option.value === doc.id)
 
       if (foundOption) {
+        foundOption.doc = doc
         foundOption.label = docTitle
         foundOption.relationTo = relation
       }

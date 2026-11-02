@@ -14,9 +14,14 @@ export const directionSchema: JSONSchema4 = {
   tsType: 'LexicalElementDirection',
 }
 
-/** `version` property shared by every Lexical node. */
+/**
+ * `version` property shared by every Lexical node. Lexical deprecated it and ignores it when it
+ * loads a document. It stays optional so existing documents remain valid input, and `deprecated`
+ * hides it from the schema shown to agents (see `sanitizeEntitySchema` in `payload`).
+ */
 export const versionSchema: JSONSchema4 = {
   type: 'integer',
+  deprecated: true,
   description: "Lexical's internal serialization version for this node type.",
 }
 
@@ -51,7 +56,7 @@ export const elementNodeSchema = ({
     version: versionSchema,
     ...properties,
   },
-  required: ['children', 'direction', 'format', 'indent', 'type', 'version', ...required],
+  required: ['children', 'direction', 'format', 'indent', 'type', ...required],
   ...(tsType ? { tsType } : {}),
 })
 

@@ -14,6 +14,7 @@ export const Page = async ({ params: paramsPromise }: { params: Promise<{ id: st
     collection: 'orders',
     id: orderID,
     depth: 2,
+    overrideAccess: true,
   })
 
   return (

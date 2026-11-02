@@ -13,7 +13,7 @@ import type {
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({})('Dashboard Widget Types', () => {
+test.suite('Dashboard Widget Types', {}, () => {
   test('should add all widgets to Config', () => {
     expectTypeOf<Config['widgets']>().toEqualTypeOf<{
       collections: CollectionsWidget

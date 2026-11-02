@@ -2,10 +2,11 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
-import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
+import type { FieldOperation, JsonObject, PayloadRequest } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
+import { recordNewDoc } from '../../baseFields/authorship/index.js'
 import { traverseFields } from './traverseFields.js'
 
 export type Args<T extends JsonObject> = {
@@ -14,11 +15,19 @@ export type Args<T extends JsonObject> = {
   data: T
   doc: T
   docWithLocales: JsonObject
+  /**
+   * Names of the top-level fields submitted by the caller. When present, validation skips other
+   * top-level fields and validates all nested fields below each submitted field.
+   */
+  fieldsToValidate?: ReadonlySet<string>
   global: null | SanitizedGlobalConfig
   id?: number | string
-  operation: Operation
+  isValidationOperation?: boolean
+  onDataProcessed?: (data: T) => void
+  operation: FieldOperation
   overrideAccess?: boolean
   req: PayloadRequest
+  skipHooks?: boolean
   skipValidation?: boolean
 }
 
@@ -38,15 +47,23 @@ export const beforeChange = async <T extends JsonObject>({
   data: incomingData,
   doc,
   docWithLocales,
+  fieldsToValidate: submittedTopLevelFieldNames,
   global,
+  isValidationOperation,
+  onDataProcessed,
   operation,
   overrideAccess,
   req,
+  skipHooks,
   skipValidation,
 }: Args<T>): Promise<T> => {
   const data = deepCopyObjectSimple(incomingData)
   const mergeLocaleActions: (() => Promise<void> | void)[] = []
   const errors: ValidationFieldError[] = []
+
+  // Record the first-write flag before traversal mutates `docWithLocales`, so `createdBy` is
+  // stamped reliably.
+  recordNewDoc(context, !docWithLocales || Object.keys(docWithLocales).length === 0)
 
   await traverseFields({
     id,
@@ -59,6 +76,7 @@ export const beforeChange = async <T extends JsonObject>({
     fieldLabelPath: '',
     fields: (collection?.fields || global?.fields)!,
     global,
+    isValidationOperation,
     mergeLocaleActions,
     operation,
     overrideAccess: overrideAccess!,
@@ -70,7 +88,9 @@ export const beforeChange = async <T extends JsonObject>({
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,
+    skipHooks,
     skipValidation,
+    submittedTopLevelFieldNames,
   })
 
   if (errors.length > 0) {
@@ -85,6 +105,8 @@ export const beforeChange = async <T extends JsonObject>({
       req.t,
     )
   }
+
+  onDataProcessed?.(data)
 
   for (const action of mergeLocaleActions) {
     await action()

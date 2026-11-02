@@ -23,7 +23,7 @@ const packJXLBits = (fields: Array<{ length: number; value: number }>): Buffer =
   const bytes = Buffer.alloc(Math.ceil(bits.length / 8))
   bits.forEach((bit, i) => {
     if (bit) {
-      bytes[Math.floor(i / 8)]! |= 1 << i % 8
+      bytes[Math.floor(i / 8)]! |= 1 << (i % 8)
     }
   })
 

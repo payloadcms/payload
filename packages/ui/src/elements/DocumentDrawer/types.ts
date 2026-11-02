@@ -1,4 +1,4 @@
-import type { Data, DefaultDocumentIDType, FormState, Operation } from 'payload'
+import type { Data, DefaultDocumentIDType, Operation } from 'payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
@@ -20,10 +20,6 @@ export type DocumentDrawerProps = {
    */
   readonly id?: DefaultDocumentIDType | null
   readonly initialData?: Data
-  /**
-   * @deprecated
-   */
-  readonly initialState?: FormState
   readonly overrideEntityVisibility?: boolean
   readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
@@ -33,7 +29,14 @@ export type DocumentDrawerProps = {
   Pick<DrawerProps, 'Header'>
 
 export type DocumentTogglerProps = {
-  readonly buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'pill' | 'primary' | 'secondary'
+  readonly buttonStyle?:
+    | 'dashed'
+    | 'destructive'
+    | 'ghost'
+    | 'link'
+    | 'pill'
+    | 'primary'
+    | 'secondary'
   readonly children?: React.ReactNode
   readonly className?: string
   readonly collectionSlug: string

@@ -13,7 +13,14 @@ import { toWords } from 'payload'
 import { GraphQLJSONObject } from '../packages/graphql-type-json/index.js'
 import { formatName } from '../utilities/formatName.js'
 
-type OperationType = 'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update'
+type OperationType =
+  | 'create'
+  | 'delete'
+  | 'read'
+  | 'readVersions'
+  | 'unlock'
+  | 'update'
+  | 'validate'
 
 type AccessScopes = 'docAccess' | undefined
 
@@ -28,32 +35,37 @@ const buildFields = (label, fieldsToBuild) =>
       if (field.name) {
         const fieldName = formatName(field.name)
 
-        const objectTypeFields: ObjectTypeFields = ['create', 'read', 'update', 'delete'].reduce(
-          (operations, operation) => {
-            const capitalizedOperation = operation.charAt(0).toUpperCase() + operation.slice(1)
+        const objectTypeFields: ObjectTypeFields = [
+          'create',
+          'read',
+          'update',
+          'delete',
+          'validate',
+        ].reduce((operations, operation) => {
+          const capitalizedOperation = operation.charAt(0).toUpperCase() + operation.slice(1)
 
-            return {
-              ...operations,
-              [operation]: {
-                type: new GraphQLObjectType({
-                  name: `${label}_${fieldName}_${capitalizedOperation}`,
-                  fields: {
-                    permission: {
-                      type: new GraphQLNonNull(GraphQLBoolean),
-                    },
+          return {
+            ...operations,
+            [operation]: {
+              type: new GraphQLObjectType({
+                name: `${label}_${fieldName}_${capitalizedOperation}`,
+                fields: {
+                  permission: {
+                    type: new GraphQLNonNull(GraphQLBoolean),
                   },
-                }),
-              },
-            }
-          },
-          {},
-        )
+                },
+              }),
+            },
+          }
+        }, {})
 
-        if (field.fields) {
+        const subFields = field.fields && buildFields(`${label}_${fieldName}`, field.fields)
+
+        if (subFields && Object.keys(subFields).length > 0) {
           objectTypeFields.fields = {
             type: new GraphQLObjectType({
               name: `${label}_${fieldName}_Fields`,
-              fields: buildFields(`${label}_${fieldName}`, field.fields),
+              fields: subFields,
             }),
           }
         }
@@ -82,12 +94,14 @@ const buildFields = (label, fieldsToBuild) =>
         return field.tabs.reduce(
           (fieldsWithTabFields, tab) => {
             if ('name' in tab) {
-              if (tab.fields.length) {
-                const tabName = formatName(tab.name)
+              const tabName = formatName(tab.name)
+              const subFields = buildFields(`${label}_${tabName}`, tab.fields)
+
+              if (Object.keys(subFields).length > 0) {
                 fieldsWithTabFields[tabName] = {
                   type: new GraphQLObjectType({
                     name: `${label}_${tabName}`,
-                    fields: buildFields(`${label}_${tabName}`, tab.fields),
+                    fields: subFields,
                   }),
                 }
               }
@@ -115,13 +129,16 @@ export const buildEntityPolicy = (args: BuildEntityPolicy) => {
   const { name, entityFields, operations, scope } = args
 
   const fieldsTypeName = toWords(`${name}-${scope || ''}-Fields`, true)
-  const fields = {
-    fields: {
+  const policyFields = buildFields(fieldsTypeName, entityFields)
+  const fields: ObjectTypeFields = {}
+
+  if (Object.keys(policyFields).length > 0) {
+    fields.fields = {
       type: new GraphQLObjectType({
         name: fieldsTypeName,
-        fields: buildFields(fieldsTypeName, entityFields),
+        fields: policyFields,
       }),
-    },
+    }
   }
 
   operations.forEach((operation) => {
@@ -165,7 +182,7 @@ export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
   }
 
   if (type === 'collection') {
-    operations = ['create', 'read', 'update', 'delete']
+    operations = ['create', 'read', 'update', 'delete', 'validate']
 
     if (
       entity.auth &&
@@ -194,7 +211,7 @@ export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
   }
 
   // else create global type
-  operations = ['read', 'update']
+  operations = ['read', 'update', 'validate']
 
   if (entity.versions) {
     operations.push('readVersions')

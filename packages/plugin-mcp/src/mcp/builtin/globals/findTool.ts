@@ -54,7 +54,7 @@ export const findGlobalTool = defineGlobalTool({
           text: `Global "${slug}":\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
         },
       ],
-      doc: result as Record<string, unknown>,
+      doc: result,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'

@@ -3,7 +3,7 @@ import type { SanitizedConfig } from '../../config/types.js'
 import type { MaybePromise } from '../../types/index.js'
 
 import { getPayload } from '../../index.js'
-import { createLocalReq } from '../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { logoutOperation } from '../operations/logout.js'
 import { clearAuthCookie } from './cookies.js'
 
@@ -31,7 +31,7 @@ export async function logout({
   }
 
   const { user } = authResult
-  const req = await createLocalReq({ user }, payload)
+  const req = await createPayloadRequest({ payload, user })
   const collection = payload.collections[user.collection]
 
   if (!collection) {

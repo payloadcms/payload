@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   debug-context:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: View context attributes
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -27,7 +27,7 @@ jobs:
 
   label-created-by:
     name: label-on-open
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Tag with 'created-by'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -89,7 +89,7 @@ jobs:
   triage:
     name: initial-triage
     if: github.event_name == 'issues'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v5
         with:

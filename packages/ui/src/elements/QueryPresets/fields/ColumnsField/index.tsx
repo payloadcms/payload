@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField, Column, ColumnPreference, JSONFieldClientComponent } from 'payload'
+import type { ClientField, Column, ColumnPreference, JSONFieldClientProps } from 'payload'
 
 import { fieldIsHiddenOrDisabled, fieldIsID, flattenTopLevelFields } from 'payload/shared'
 import React, { useMemo } from 'react'
@@ -16,7 +16,7 @@ import { getColumns } from '../../../../utilities/getColumns.js'
 import { ColumnSelectionButton } from '../../../ColumnSelection/index.js'
 import '../fields.css'
 
-export const QueryPresetsColumnField: JSONFieldClientComponent = ({
+export const QueryPresetsColumnField: React.FC<JSONFieldClientProps> = ({
   field: { label, required },
 }) => {
   const { path, setValue, value } = useField<ColumnPreference[]>()

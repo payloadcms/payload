@@ -1,0 +1,17 @@
+@layer payload-default {
+  .table-wrap--group-by-grid .table-section__heading {
+    color: var(--color-text-primary, var(--color-text));
+  }
+
+  .table-section.table-wrap--group-by.table-wrap--group-by-grid > .table-section__divider {
+    display: none;
+  }
+
+  .table-wrap--group-by-grid .table-section__header-inner {
+    border-block-end-color: transparent;
+  }
+
+  .table-wrap--group-by-grid .card-grid {
+    padding-block: 0;
+  }
+}

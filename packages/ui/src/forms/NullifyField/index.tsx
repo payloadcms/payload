@@ -19,6 +19,21 @@ type NullifyLocaleFieldProps = {
   readonly readOnly?: boolean
 }
 
+export const buildNullifyLocaleFieldUpdate = ({
+  fieldValue,
+  path,
+  useFallback,
+}: {
+  fieldValue: NullifyLocaleFieldProps['fieldValue']
+  path: string
+  useFallback: boolean
+}) => ({
+  type: 'UPDATE' as const,
+  disableFormData: useFallback ? undefined : false,
+  path,
+  value: useFallback ? null : fieldValue || 0,
+})
+
 export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   fieldValue,
   localized,
@@ -47,11 +62,7 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   const onChange = () => {
     const useFallback = !checked
 
-    dispatchFields({
-      type: 'UPDATE',
-      path,
-      value: useFallback ? null : fieldValue || 0,
-    })
+    dispatchFields(buildNullifyLocaleFieldUpdate({ fieldValue, path, useFallback }))
     setModified(true)
     setChecked(useFallback)
   }

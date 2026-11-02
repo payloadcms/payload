@@ -52,7 +52,7 @@ export async function CreateFirstUserView({ initPageResult }: AdminViewServerPro
   const baseFields: SanitizedFieldsPermissions = Object.fromEntries(
     collectionConfig.fields
       .filter((f): f is { name: string } & typeof f => 'name' in f && typeof f.name === 'string')
-      .map((f) => [f.name, { create: true, read: true, update: true }]),
+      .map((f) => [f.name, { create: true, read: true, update: true, validate: true }]),
   )
 
   // In create-first-user we should always allow all fields
@@ -63,6 +63,7 @@ export async function CreateFirstUserView({ initPageResult }: AdminViewServerPro
     read: true,
     readVersions: true,
     update: true,
+    validate: true,
   }
 
   // Build initial form state from data

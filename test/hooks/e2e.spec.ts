@@ -82,6 +82,7 @@ describe('Hooks', () => {
         data: {
           title: 'some title',
         },
+        overrideAccess: true,
       })
 
       await page.goto(beforeDeleteURL.list)
@@ -108,6 +109,7 @@ describe('Hooks', () => {
               where: {
                 id: { equals: doc.id },
               },
+              overrideAccess: true,
             })
             return docs.totalDocs
           },
@@ -118,6 +120,7 @@ describe('Hooks', () => {
       await payload.delete({
         id: doc.id,
         collection: 'before-delete-hooks',
+        overrideAccess: true,
       })
     })
 
@@ -127,6 +130,7 @@ describe('Hooks', () => {
         data: {
           title: 'some title',
         },
+        overrideAccess: true,
       })
 
       await page.goto(beforeDeleteURL.edit(doc.id))
@@ -149,6 +153,7 @@ describe('Hooks', () => {
               where: {
                 id: { equals: doc.id },
               },
+              overrideAccess: true,
             })
             return docs.totalDocs
           },
@@ -159,6 +164,7 @@ describe('Hooks', () => {
       await payload.delete({
         id: doc.id,
         collection: 'before-delete-hooks',
+        overrideAccess: true,
       })
     })
 
@@ -168,6 +174,7 @@ describe('Hooks', () => {
         data: {
           title: 'some title',
         },
+        overrideAccess: true,
       })
 
       await page.goto(beforeDelete2URL.list)
@@ -189,6 +196,7 @@ describe('Hooks', () => {
       await payload.delete({
         id: doc.id,
         collection: 'before-delete-2-hooks',
+        overrideAccess: true,
       })
     })
 
@@ -198,6 +206,7 @@ describe('Hooks', () => {
         data: {
           title: 'some title',
         },
+        overrideAccess: true,
       })
 
       await page.goto(beforeDelete2URL.edit(doc.id))
@@ -215,6 +224,7 @@ describe('Hooks', () => {
       await payload.delete({
         id: doc.id,
         collection: 'before-delete-2-hooks',
+        overrideAccess: true,
       })
     })
   })
@@ -230,5 +240,6 @@ async function clearCollectionDocs(collectionSlug: CollectionSlug): Promise<void
     where: {
       id: { exists: true },
     },
+    overrideAccess: true,
   })
 }

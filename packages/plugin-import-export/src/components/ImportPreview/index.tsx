@@ -11,6 +11,7 @@ import {
   useDebouncedEffect,
   useDocumentInfo,
   useField,
+  useForm,
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
@@ -25,9 +26,17 @@ import type {
 import type { ImportPreviewResponse } from '../../types.js'
 
 import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
+import {
+  getFormStateSignature,
+  getSubmittedFormValues,
+} from '../../utilities/getSubmittedFormValues.js'
+import { RelationshipCell } from '../RelationshipCell/index.js'
 import './index.css'
 
 const baseClass = 'import-preview'
+
+// The file contents are sent separately as `fileData`.
+const nonSerializableFormKeys = ['file']
 
 /**
  * Browser-native ArrayBuffer → base64. Avoids Node's `Buffer`, which is not
@@ -68,6 +77,11 @@ export const ImportPreview: React.FC = () => {
 
   // Access the file field directly from form fields
   const fileField = useFormFields(([fields]) => fields?.file || null)
+
+  const { getData } = useForm()
+  const formStateSignature = useFormFields(([fields]) =>
+    getFormStateSignature({ fields, omit: nonSerializableFormKeys }),
+  )
 
   const [dataToRender, setDataToRender] = useState<Record<string, unknown>[]>([])
   const [columns, setColumns] = useState<Column[]>([])
@@ -157,6 +171,10 @@ export const ImportPreview: React.FC = () => {
               collectionSlug: targetCollectionSlug,
               fileData,
               format,
+              formData: getSubmittedFormValues({
+                formData: getData(),
+                omit: nonSerializableFormKeys,
+              }),
               previewLimit,
               previewPage,
             }),
@@ -239,7 +257,7 @@ export const ImportPreview: React.FC = () => {
                 active: true,
                 field,
                 Heading: label,
-                renderedCells: docs.map((doc) => {
+                renderedCells: docs.map((doc, rowIndex) => {
                   const value = getObjectDotNotation(doc, fieldPath)
 
                   if (value === undefined || value === null) {
@@ -247,10 +265,22 @@ export const ImportPreview: React.FC = () => {
                   }
 
                   // Format based on field type
-                  if (field.type === 'relationship' || field.type === 'upload') {
-                    // Handle relationships
+                  const shouldRenderGroupedRelationship =
+                    format === 'json' &&
+                    field.type === 'relationship' &&
+                    Array.isArray(field.relationTo)
+
+                  if (shouldRenderGroupedRelationship) {
+                    return (
+                      <RelationshipCell
+                        fieldPath={fieldPath}
+                        key={`${fieldPath}-${rowIndex}`}
+                        relationTo={field.relationTo}
+                        value={value}
+                      />
+                    )
+                  } else if (field.type === 'relationship' || field.type === 'upload') {
                     if (typeof value === 'object' && !Array.isArray(value)) {
-                      // Single relationship
                       const relationTo = Array.isArray(field.relationTo)
                         ? (value as any).relationTo
                         : field.relationTo
@@ -268,11 +298,9 @@ export const ImportPreview: React.FC = () => {
                         }
                       }
 
-                      // Fallback to ID
                       const id = (value as any).id || value
                       return `${getTranslation(relatedConfig?.labels?.singular || relationTo, i18n)}: ${id}`
                     } else if (Array.isArray(value)) {
-                      // Multiple relationships
                       return value
                         .map((item) => {
                           if (typeof item === 'object') {
@@ -302,7 +330,6 @@ export const ImportPreview: React.FC = () => {
                         .join(', ')
                     }
 
-                    // Just an ID
                     return String(value)
                   } else if (field.type === 'date') {
                     // Display date as string to avoid wrong locale/timezone conversion
@@ -486,6 +513,8 @@ export const ImportPreview: React.FC = () => {
       filename,
       mimeType,
       fileField?.value,
+      formStateSignature,
+      getData,
       collectionConfig,
       config,
       i18n,

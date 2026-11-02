@@ -22,15 +22,15 @@ export const MediaWithThrowingHook: CollectionConfig = {
       type: 'checkbox',
       admin: {
         description:
-          'When enabled, the afterChange hook throws during the cloud-storage plugin internal update. Used to reproduce the swallowed-error bug in the admin panel and integration tests.',
+          'When enabled, the afterChange hook throws during updates. Used to test upload cleanup after a hook failure.',
       },
       defaultValue: false,
     },
   ],
   hooks: {
     afterChange: [
-      ({ doc, operation, req }) => {
-        if (operation === 'update' && req.context?.skipCloudStorage && doc.shouldThrow) {
+      ({ doc, operation }) => {
+        if (operation === 'update' && doc.shouldThrow) {
           throw new APIError(throwingHookError, 500, null, true)
         }
 

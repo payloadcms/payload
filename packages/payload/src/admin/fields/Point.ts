@@ -2,21 +2,15 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { PointField, PointFieldClient } from '../../fields/config/types.js'
 import type { PointFieldValidation } from '../../fields/validations.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
-import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type PointFieldClientWithoutType = MarkOptional<PointFieldClient, 'type'>
@@ -33,40 +27,28 @@ export type PointFieldClientProps = ClientFieldBase<PointFieldClientWithoutType>
 
 export type PointFieldServerProps = PointFieldBaseServerProps &
   ServerFieldBase<PointField, PointFieldClientWithoutType>
-
-export type PointFieldServerComponent = FieldServerComponent<
-  PointField,
-  PointFieldClientWithoutType,
-  PointFieldBaseServerProps
->
-
-export type PointFieldClientComponent = FieldClientComponent<
-  PointFieldClientWithoutType,
-  PointFieldBaseClientProps
->
-
-export type PointFieldLabelServerComponent = FieldLabelServerComponent<
+export type PointFieldLabelServerProps = FieldLabelServerProps<
   PointField,
   PointFieldClientWithoutType
 >
 
-export type PointFieldLabelClientComponent = FieldLabelClientComponent<PointFieldClientWithoutType>
+export type PointFieldLabelClientProps = FieldLabelClientProps<PointFieldClientWithoutType>
 
-export type PointFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+export type PointFieldDescriptionServerProps = FieldDescriptionServerProps<
   PointField,
   PointFieldClientWithoutType
 >
 
-export type PointFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<PointFieldClientWithoutType>
+export type PointFieldDescriptionClientProps =
+  FieldDescriptionClientProps<PointFieldClientWithoutType>
 
-export type PointFieldErrorServerComponent = FieldErrorServerComponent<
+export type PointFieldErrorServerProps = FieldErrorServerProps<
   PointField,
   PointFieldClientWithoutType
 >
 
-export type PointFieldErrorClientComponent = FieldErrorClientComponent<PointFieldClientWithoutType>
+export type PointFieldErrorClientProps = FieldErrorClientProps<PointFieldClientWithoutType>
 
-export type PointFieldDiffServerComponent = FieldDiffServerComponent<PointField, PointFieldClient>
+export type PointFieldDiffServerProps = FieldDiffServerProps<PointField, PointFieldClient>
 
-export type PointFieldDiffClientComponent = FieldDiffClientComponent<PointFieldClient>
+export type PointFieldDiffClientProps = FieldDiffClientProps<PointFieldClient>

@@ -15,7 +15,7 @@ type EmailReturnType = {
   to: string
 }
 
-test.suite({ config: './config.ts' })('@payloadcms/email-nodemailer', () => {
+test.suite('@payloadcms/email-nodemailer', { config: './config.ts' }, () => {
   test.beforeEach(() => {
     mockedSendEmail = vi.fn()
   })

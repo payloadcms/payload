@@ -163,3 +163,4 @@ runs:
         pnpm run build:all
       env:
         DO_NOT_TRACK: 1
+        NODE_OPTIONS: --max-old-space-size=4096

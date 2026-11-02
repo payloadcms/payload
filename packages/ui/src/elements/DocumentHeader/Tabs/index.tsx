@@ -23,7 +23,8 @@ export const DocumentTabs: React.FC<{
   globalConfig: SanitizedGlobalConfig
   permissions: SanitizedPermissions
   req: PayloadRequest
-}> = ({ collectionConfig, globalConfig, permissions, req }) => {
+  user?: PayloadRequest['user']
+}> = ({ collectionConfig, globalConfig, permissions, req, user }) => {
   const { config } = req.payload
 
   const tabs = getTabs({
@@ -63,21 +64,23 @@ export const DocumentTabs: React.FC<{
                     permissions,
                     req,
                     server: req.server,
-                    user: req.user,
+                    user,
                   } satisfies DocumentTabServerPropsOnly,
                 })
               }
 
               return (
-                <DefaultDocumentTab
-                  collectionConfig={collectionConfig}
-                  globalConfig={globalConfig}
-                  key={`tab-${index}`}
-                  path={viewPath}
-                  permissions={permissions}
-                  req={req}
-                  tabConfig={tabConfig}
-                />
+                <li key={`tab-${index}`}>
+                  <DefaultDocumentTab
+                    collectionConfig={collectionConfig}
+                    globalConfig={globalConfig}
+                    path={viewPath}
+                    permissions={permissions}
+                    req={req}
+                    tabConfig={tabConfig}
+                    user={user}
+                  />
+                </li>
               )
             })}
           </ul>
