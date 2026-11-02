@@ -120,6 +120,12 @@ A token is also rejected if its `collection` is not auth-enabled or has `disable
 
 See [Token Data](../authentication/token-data) for the full token data shape.
 
+### Sessions track their refreshes
+
+Auth collections with `useSessions` (the default) now store two more fields on each session, `refreshCount` and `refreshedAt`. [Refresh tokens](../authentication/overview#refresh-tokens) use them to tell the latest refresh token apart from older ones.
+
+On SQL adapters this adds two columns to each `<collection>_sessions` table, so existing projects need a database migration. In development the schema is pushed automatically; in production, generate a migration with `payload migrate:create` and run `payload migrate`. Existing sessions keep working, since an empty `refreshCount` counts as `0`. MongoDB needs no migration.
+
 ### Local API access is now enforced by default #overrideaccess-now-defaults-to-false-on-local-api-operations
 
 `overrideAccess` now defaults to `false` on Local API operations, so omitting it respects Access Control instead. Operations that do not expose `overrideAccess`, and operations such as `resetPassword` where it was already required or did not default to `true`, are unaffected by this change.
