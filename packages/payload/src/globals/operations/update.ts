@@ -39,13 +39,14 @@ import { mergeLocalizedData } from '../../utilities/mergeLocalizedData.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import {
   buildAllLocalesPublicationHookDoc,
+  canApplyAllLocalesStatusChange,
   getAllLocalesPublicationStatus,
-  hasAuthorizedAllLocalesPublicationStatus,
   normalizeAllLocalesPublicationStatus,
   reconcileAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../versions/allLocalesPublicationStatus.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
+import { resolveLocalizedStatus } from '../../versions/resolveLocalizedStatus.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
@@ -354,23 +355,49 @@ export const updateOperation = async <
       },
     })
 
-    const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
-      data: publicationData,
-      fieldAccessDenied: !statusFieldAccess,
-      fieldValue: statusFieldValue,
-      status: allLocalesPublicationStatus,
+    const shouldApplyAllLocalesStatusChange = canApplyAllLocalesStatusChange({
+      canUpdateStatus: statusFieldAccess,
+      requestedStatus: allLocalesPublicationStatus,
+      statusAfterDocumentHooks: publicationData._status,
+      statusAfterFieldHooks: statusFieldValue,
     })
+    const shouldUnpublishAllLocales =
+      unpublishAllLocales &&
+      (!hasLocalizeStatusEnabled(globalConfig) || shouldApplyAllLocalesStatusChange)
+
     if (
       allLocalesPublicationStatus &&
-      !hasAuthorizedPublicationStatus &&
+      !shouldApplyAllLocalesStatusChange &&
       typeof statusFieldValue === 'undefined' &&
       typeof globalJSON._status === 'object' &&
       globalJSON._status !== null
     ) {
+      // Keep the current locale statuses when the all-locale change cannot be applied.
       result._status = { ...globalJSON._status }
     }
 
     let snapshotToSave: JsonObject | undefined
+
+    const localization =
+      config?.localization && hasLocalizeStatusEnabled(globalConfig)
+        ? config.localization
+        : undefined
+
+    if (localization && config) {
+      result._status = await resolveLocalizedStatus({
+        configBlockReferences: config.blocks,
+        existingDoc: globalJSON,
+        fields: globalConfig.fields,
+        isSavingDraft,
+        locale: locale!,
+        localization,
+        req,
+        result,
+        shouldApplyAllLocalesStatusChange,
+        statusFieldAccess,
+        unpublishAllLocales,
+      })
+    }
 
     // /////////////////////////////////////
     // Handle Localized Data Merging
@@ -381,30 +408,11 @@ export const updateOperation = async <
       let snapshotData: JsonObject | undefined
 
       if (hasLocalizeStatusEnabled(globalConfig)) {
-        if (hasAuthorizedPublicationStatus) {
-          let accessibleLocaleCodes = config.localization.localeCodes
-
-          if (config.localization.filterAvailableLocales) {
-            const filteredLocales = await config.localization.filterAvailableLocales({
-              locales: config.localization.locales,
-              req,
-            })
-            accessibleLocaleCodes = filteredLocales.map((locale) =>
-              typeof locale === 'string' ? locale : locale.code,
-            )
-          }
-
-          if (typeof result._status !== 'object' || result._status === null) {
-            result._status = {}
-          }
-
-          for (const localeCode of accessibleLocaleCodes) {
-            result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
-          }
-        } else if (!isSavingDraft) {
-          // publishing a single locale
+        if (!shouldApplyAllLocalesStatusChange && !isSavingDraft && locale !== 'all') {
+          // Fetch the current global so publishing one locale does not overwrite the others.
           currentGlobal = await payload.db.findGlobal({
             slug: globalConfig.slug,
+            locale: 'all',
             req,
             where: query,
           })
@@ -436,7 +444,7 @@ export const updateOperation = async <
           dataWithLocales: result || {},
           docWithLocales: currentGlobal || {},
           fields: globalConfig.fields,
-          selectedLocales: [locale!],
+          localesToUpdate: [locale!],
         })
       }
     }
@@ -492,7 +500,7 @@ export const updateOperation = async <
         req,
         select,
         snapshot: snapshotToSave,
-        unpublish: unpublishAllLocales,
+        unpublish: shouldUnpublishAllLocales,
       })
 
       result = {
