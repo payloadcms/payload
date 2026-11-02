@@ -716,6 +716,10 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Jūs grasāties publicēt visus {{label}} izvēlētajā sarakstā. Vai esat pārliecināts?',
     aboutToRestore:
       'Jūs grasāties atjaunot šo {{label}} dokumentu uz stāvokli, kādā tas bija {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Atjaunojiet {{versionDate}} saturu kā melnrakstu. Publicētais saturs paliks nemainīts, līdz to publicēsiet no redaktora.',
+    aboutToRestoreAsDraftAllLocales:
+      'Atjaunojiet {{versionDate}} saturu kā melnrakstu visās valodās. Publicētais saturs paliks nemainīts, līdz to publicēsiet no redaktora.',
     aboutToRestoreGlobal:
       'Jūs grasāties atjaunot globālo {{label}} uz stāvokli, kādā tas bija {{versionDate}}.',
     aboutToRevertToPublished:

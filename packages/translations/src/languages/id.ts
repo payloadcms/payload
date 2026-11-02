@@ -721,6 +721,10 @@ export const idTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection:
       'Anda akan mempublikasikan semua {{label}} dalam pilihan. Apakah Anda yakin?',
     aboutToRestore: 'Anda akan memulihkan dokumen {{label}} ini ke keadaan pada {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Pulihkan konten dari {{versionDate}} sebagai draf. Konten yang dipublikasikan akan tetap tidak berubah sampai Anda memublikasikannya dari editor.',
+    aboutToRestoreAsDraftAllLocales:
+      'Pulihkan konten dari {{versionDate}} sebagai draf di semua lokal. Konten yang dipublikasikan akan tetap tidak berubah sampai Anda memublikasikannya dari editor.',
     aboutToRestoreGlobal: 'Anda akan memulihkan global {{label}} ke keadaan pada {{versionDate}}.',
     aboutToRevertToPublished:
       'Anda akan mengembalikan perubahan dokumen ini ke keadaan yang dipublikasikan. Apakah Anda yakin?',

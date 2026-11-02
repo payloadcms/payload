@@ -106,6 +106,31 @@ describe('buildPlan', () => {
     ])
   })
 
+  it('names the cause for unsupported specs and unknown patched ranges', () => {
+    const plan = buildPlan({
+      findings: [
+        finding({
+          bumps: [
+            bump({
+              dependency: 'aliased',
+              fix: { reason: 'unsupported-spec', status: 'unknown' },
+            }),
+            bump({
+              dependency: 'unpatched',
+              fix: { reason: 'no-patched-range', status: 'unknown' },
+            }),
+          ],
+        }),
+      ],
+      scope: 'monorepo',
+    })
+
+    expect(plan.actions.map((action) => action.type === 'manual' && action.reason)).toEqual([
+      'declared spec is not a semver range (alias, tag, file, or git); determine the current version manually',
+      'advisory has no patched range; check the advisory before deciding',
+    ])
+  })
+
   it('orders actions relock, then bump, then manual', () => {
     const plan = buildPlan({
       findings: [

@@ -187,7 +187,9 @@ export const AddNewRelation: React.FC<Props> = ({
               <Button
                 className={`${baseClass}__add-button`}
                 {...buttonProps}
+                aria-label={t('fields:addNew')}
                 buttonStyle="secondary"
+                extraButtonProps={{ title: undefined }}
                 selected={active}
                 tooltip={popupOpen ? '' : t('fields:addNew')}
               >

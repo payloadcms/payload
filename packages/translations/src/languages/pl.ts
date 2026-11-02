@@ -717,6 +717,10 @@ export const plTranslations: DefaultTranslationsObject = {
       'Za chwilę opublikujesz wszystkie {{label}} w zaznaczeniu. Jesteś pewny?',
     aboutToRestore:
       'Zamierzasz przywrócić dokument {{label}} do stanu, w jakim znajdował się w dniu {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Przywróć treść z {{versionDate}} jako szkic. Opublikowana treść pozostanie bez zmian do momentu opublikowania jej z edytora.',
+    aboutToRestoreAsDraftAllLocales:
+      'Przywróć treść z {{versionDate}} jako szkic we wszystkich wersjach językowych. Opublikowana treść pozostanie bez zmian do momentu opublikowania jej z edytora.',
     aboutToRestoreGlobal:
       'Zamierzasz przywrócić globalny rekord {{label}} do stanu, w którym znajdował się w dniu {{versionDate}}.',
     aboutToRevertToPublished:

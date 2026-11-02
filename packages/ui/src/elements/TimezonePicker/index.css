@@ -122,7 +122,7 @@
 
         &:focus-visible {
           outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
-          outline-offset: calc(-1 * var(--stroke-width-small));
+          outline-offset: var(--accessibility-outline-inset);
         }
       }
 
@@ -130,15 +130,16 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding-inline: calc(-1 * var(--stroke-width-small));
+        padding: 0;
         cursor: pointer;
-        margin-left: calc(var(--spacer-1) / 2);
-        height: var(--spacer-3);
+        margin-inline-start: calc(var(--spacer-1) / 2);
+        min-width: var(--spacer-4);
+        height: var(--spacer-4);
         overflow: visible;
         border-radius: var(--button-radius);
 
         &:focus-visible {
-          outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
+          outline-offset: var(--accessibility-outline-inset);
         }
       }
     }

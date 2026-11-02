@@ -722,6 +722,10 @@ export const ruTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Вы собираетесь опубликовать все {{label}} в выборе. Вы уверены?',
     aboutToRestore:
       'Вы собираетесь восстановить этот документ {{label}} в состояние, в котором он находился {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Восстановите содержимое от {{versionDate}} как черновик. Опубликованное содержимое останется неизменным, пока вы не опубликуете его из редактора.',
+    aboutToRestoreAsDraftAllLocales:
+      'Восстановите содержимое от {{versionDate}} как черновик для всех языковых версий. Опубликованное содержимое останется неизменным, пока вы не опубликуете его из редактора.',
     aboutToRestoreGlobal:
       'Вы собираетесь восстановить глобальную запись {{label}} в состояние, в котором она находилась {{versionDate}}.',
     aboutToRevertToPublished:

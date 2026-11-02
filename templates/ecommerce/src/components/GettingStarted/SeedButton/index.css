@@ -3,6 +3,8 @@
   background: none;
   border: none;
   padding: 0;
+  color: inherit;
+  font: inherit;
   text-decoration: underline;
 
   &:hover {

@@ -14,6 +14,8 @@ import type { UploadReference } from '../types.js'
 import { buildUploadPrefix, buildUploadStoragePathData } from './buildStoragePathData.js'
 
 type Args = {
+  /** Signed into the receipt and returned to the upload handler as `uploadReference.adapterData`. */
+  adapterData?: Record<string, unknown>
   collectionPrefix?: string
   collectionSlug: string
   docPrefix?: string
@@ -40,6 +42,7 @@ type Args = {
  * beneath the configured collection prefix.
  */
 export async function resolveSignedURLKey({
+  adapterData,
   collectionPrefix = '',
   collectionSlug,
   docPrefix,
@@ -87,6 +90,7 @@ export async function resolveSignedURLKey({
     prefix: sanitizedDocPrefix,
     signedReceipt: createClientUploadReceipt({
       _objectKey,
+      ...(adapterData !== undefined && { adapterData }),
       collectionSlug,
       filename: sanitizedFilename,
       filePrefix: sanitizedDocPrefix,

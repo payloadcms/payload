@@ -84,4 +84,17 @@ describe('resolveSignedURLKey', () => {
       },
     })
   })
+
+  it('should sign adapterData into the receipt', async () => {
+    await resolveSignedURLKey({
+      adapterData: { providerUploadID: 'provider-1' },
+      collectionSlug: 'media',
+      filename: 'photo.jpg',
+      req: {} as never,
+    })
+
+    expect(createClientUploadReceipt).toHaveBeenCalledWith(
+      expect.objectContaining({ adapterData: { providerUploadID: 'provider-1' } }),
+    )
+  })
 })

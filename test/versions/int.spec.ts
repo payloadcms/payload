@@ -11,6 +11,7 @@ import {
   Forbidden,
   getFileByPath,
   NotFound,
+  restoreVersionOperationGlobal,
   saveVersion,
   ValidationError,
 } from 'payload'
@@ -44,6 +45,7 @@ import {
   restoreAccessLocalizedCollectionSlug,
   restoreAccessNoVersionsGlobalSlug,
   secondaryAdminUserCollectionSlug,
+  simpleDraftGlobalSlug,
   versionCollectionSlug,
   versionsDisabledCollectionSlug,
   versionsDisabledGlobalSlug,
@@ -4186,6 +4188,10 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
 
     test.describe('Restore', () => {
+      test.afterEach(async ({ payload }) => {
+        await payload.db.deleteVersions({ globalSlug: simpleDraftGlobalSlug, where: {} })
+      })
+
       test('should allow a version to be restored', async ({ payload }) => {
         const title2 = 'Another updated title in EN'
 
@@ -4235,6 +4241,56 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         })
 
         expect(restoredGlobal.title).toBe(restore.title)
+      })
+      test('should restore a never-published global as a draft without creating a live global', async ({
+        payload,
+        restClient,
+      }) => {
+        await payload.updateGlobal({
+          slug: simpleDraftGlobalSlug,
+          data: { title: 'Historical' },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        const { docs } = await payload.findGlobalVersions({
+          slug: simpleDraftGlobalSlug,
+          limit: 1,
+          overrideAccess: true,
+          sort: '-updatedAt',
+        })
+
+        await payload.updateGlobal({
+          slug: simpleDraftGlobalSlug,
+          data: { title: 'Current' },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        const liveGlobalBeforeRestore = await payload.db.findGlobal({ slug: simpleDraftGlobalSlug })
+
+        expect(Object.keys(liveGlobalBeforeRestore ?? {})).toHaveLength(0)
+
+        await restClient.login({ slug: 'users', credentials: devUser })
+
+        const response = await restClient.POST(
+          `/globals/${simpleDraftGlobalSlug}/versions/${docs[0]!.id}?draft=true`,
+        )
+
+        expect(response.status).toBe(200)
+
+        const restoredDraft = await payload.findGlobal({
+          slug: simpleDraftGlobalSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+
+        expect(restoredDraft.title).toBe('Historical')
+        expect(restoredDraft._status).toBe('draft')
+
+        const liveGlobalAfterRestore = await payload.db.findGlobal({ slug: simpleDraftGlobalSlug })
+
+        expect(Object.keys(liveGlobalAfterRestore ?? {})).toHaveLength(0)
       })
     })
 
@@ -4652,6 +4708,111 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
             user,
           }),
         ).rejects.toThrow(Forbidden)
+      })
+
+      test('should authorize the draft intent when restoring a published global as a draft', async ({
+        payload,
+        restClient,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'Historical' },
+          overrideAccess: true,
+        })
+
+        const { docs } = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          limit: 1,
+          overrideAccess: true,
+          sort: '-updatedAt',
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'Current' },
+          overrideAccess: true,
+        })
+
+        const publishedBefore = await payload.db.findGlobal({ slug: restoreAccessGlobalSlug })
+        const { user } = await restClient.login({ slug: 'users', credentials: devUser })
+        const req = await createPayloadRequest({
+          context: { restoreAccessMode: 'publishGate' },
+          payload,
+          user: { ...user, collection: 'users' },
+        })
+
+        await restoreVersionOperationGlobal({
+          id: docs[0]!.id,
+          draft: true,
+          globalConfig: payload.globals.config.find(
+            ({ slug }) => slug === restoreAccessGlobalSlug,
+          )!,
+          overrideAccess: false,
+          req,
+        })
+
+        const restoredDraft = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+
+        expect(restoredDraft.title).toBe('Historical')
+        expect(restoredDraft._status).toBe('draft')
+        expect(await payload.db.findGlobal({ slug: restoreAccessGlobalSlug })).toEqual(
+          publishedBefore,
+        )
+
+        req.context.restoreAccessMode = 'unpublishGate'
+
+        await expect(
+          restoreVersionOperationGlobal({
+            id: docs[0]!.id,
+            draft: true,
+            globalConfig: payload.globals.config.find(
+              ({ slug }) => slug === restoreAccessGlobalSlug,
+            )!,
+            overrideAccess: false,
+            req,
+          }),
+        ).rejects.toThrow(Forbidden)
+      })
+
+      test('should reject a global draft restore outside the update access constraint', async ({
+        payload,
+        restClient,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'Historical' },
+          overrideAccess: true,
+        })
+
+        const { docs } = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          limit: 1,
+          overrideAccess: true,
+          sort: '-updatedAt',
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'Current' },
+          overrideAccess: true,
+        })
+
+        const publishedBefore = await payload.db.findGlobal({ slug: restoreAccessGlobalSlug })
+
+        await restClient.login({ slug: 'users', credentials: devUser })
+
+        const response = await restClient.POST(
+          `/globals/${restoreAccessGlobalSlug}/versions/${docs[0]!.id}?draft=true`,
+        )
+
+        expect(response.status).toBe(403)
+        expect(await payload.db.findGlobal({ slug: restoreAccessGlobalSlug })).toEqual(
+          publishedBefore,
+        )
       })
 
       test('should deny restoring a published global version when update access denies publishing', async ({
