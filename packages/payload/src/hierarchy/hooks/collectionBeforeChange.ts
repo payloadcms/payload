@@ -7,6 +7,7 @@ import type {
 
 import { NotFound } from '../../errors/NotFound.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
+import { deleteHierarchyChildren } from '../deleteHierarchyChildren.js'
 
 type Args = {
   /**
@@ -18,6 +19,16 @@ type Args = {
 export const hierarchyCollectionBeforeChange =
   ({ parentFieldName }: Args): CollectionBeforeChangeHook =>
   async ({ collection, data, operation, originalDoc, req }) => {
+    if (collection.trash && operation === 'update' && data.deletedAt && !originalDoc?.deletedAt) {
+      await deleteHierarchyChildren({
+        id: originalDoc.id,
+        collection,
+        deletedAt: data.deletedAt,
+        parentFieldName,
+        req,
+      })
+    }
+
     // Determine the new parent ID
     const newParentID =
       data[parentFieldName] !== undefined ? data[parentFieldName] : originalDoc?.[parentFieldName]
