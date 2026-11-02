@@ -443,6 +443,28 @@ test.suite('versioned cloud storage', { config: './config.ts' }, () => {
     expect(Buffer.from(await originalResponse.arrayBuffer())).toEqual(sourceBytes)
   })
 
+  test('should request the original when only the original url is selected', async ({
+    payload,
+  }) => {
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      data: {},
+      filePath: firstFile,
+      req: { query: { uploadEdits: halfCrop } },
+    })
+    const {
+      docs: [selected],
+    } = await payload.find({
+      collection: versionedCloudMediaSlug,
+      select: { original: { url: true } },
+      where: { id: { equals: created.id } },
+    })
+
+    expect(new URL(selected!.original!.url!, 'http://localhost').searchParams.get('original')).toBe(
+      'true',
+    )
+  })
+
   test('should apply read access to original=true requests', async ({ payload, restClient }) => {
     const created = await payload.create({
       collection: versionedCloudMediaSlug,

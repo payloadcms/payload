@@ -19,7 +19,10 @@ export const isOriginalFileRequest = ({
 }): boolean =>
   doc.original?.filename === filename && (Boolean(isOriginal) || doc.filename !== filename)
 
-/** The original's URL asks for the original when it is a separate object with the main file's name. */
+/**
+ * The original's URL asks for the original when it is a separate object with the main file's name.
+ * `getStorageLocationSelect` in plugin-cloud-storage selects the fields this reads.
+ */
 export const shouldRequestOriginal = ({ doc }: { doc?: SharedFilenameDoc }): boolean => {
   const original = doc?.original
 
