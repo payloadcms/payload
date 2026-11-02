@@ -644,6 +644,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     addFile: 'Legg til fil',
     addFiles: 'Legg til filer',
     bulkUpload: 'Bulk opplasting',
+    cancelUpload: 'Avbryt opplasting',
     copyLinkToFile: 'Kopier lenke til fil',
     copyURL: 'Kopier URL',
     crop: 'Beskjær',
@@ -665,6 +666,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     fileSize: 'Filstørrelse',
     filesToUpload: 'Filer til opplasting',
     fileToUpload: 'Fil til opplasting',
+    finishSaving: 'Fullfør lagring',
     focalPoint: 'Fokuspunkt',
     focalPointDescription:
       'Dra fokuspunktet direkte på forhåndsvisningen eller juster verdiene nedenfor.',
@@ -679,12 +681,27 @@ export const nbTranslations: DefaultTranslationsObject = {
     previewSizes: 'Forhåndsvisningsstørrelser',
     renameFile: 'Gi nytt navn til fil',
     replaceFile: 'Erstatt fil',
+    resumingFile: 'Gjenopptar {{filename}}',
+    savingInBackground: 'Opplastingen fullføres i bakgrunnen, og dokumentet lagres da.',
     selectCollectionToBrowse: 'Velg en samling å bla i',
     selectFile: 'Velg en fil',
     setCropArea: 'Angi beskjæringsområde',
     setFocalPoint: 'Angi fokuspunkt',
     sizes: 'Størrelser',
     sizesFor: 'Størrelser for {{label}}',
+    uploadFileMismatch: 'Den valgte filen samsvarer ikke med den avbrutte opplastingen.',
+    uploadingFile: 'Laster opp {{filename}}',
+    uploadingFileProgress: 'Laster opp {{filename}}: {{percent}} %',
+    uploadInProgressLeaveWarning:
+      'En opplasting pågår fortsatt. Hvis du forlater siden nå, avbrytes den.',
+    uploadInterrupted: 'Opplastingen av {{filename}} ble avbrutt.',
+    uploadInterruptedWillSave:
+      'Opplastingen av {{filename}} ble avbrutt. Dokumentet lagres når den er ferdig.',
+    uploadReadyToFinishSaving:
+      '{{filename}} er lastet opp. Åpne skjemaet for å fullføre lagringen.',
+    uploadSavedInBackground: 'Opplastingen er ferdig, og dokumentet ble lagret.',
+    uploadStorageRejectedSegments:
+      'Lagringen godtok ingen deler av opplastingen. Sjekk bucketens CORS-policy.',
     width: 'Bredde',
   },
   validation: {

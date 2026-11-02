@@ -50,9 +50,11 @@ const mockedGenerateStagedUploadInstructions = vi.mocked(generateStagedUploadIns
 
 const createRequest = ({
   allowRestrictedFileTypes = false,
+  disableLocalStorage = false,
   withAdapterInstructions = true,
 }: {
   allowRestrictedFileTypes?: boolean
+  disableLocalStorage?: boolean
   withAdapterInstructions?: boolean
 } = {}) =>
   ({
@@ -64,6 +66,7 @@ const createRequest = ({
             access: { create: () => true },
             upload: {
               allowRestrictedFileTypes,
+              disableLocalStorage,
               ...(withAdapterInstructions && {
                 uploadInstructions: { generate: generateAdapterInstructions },
               }),
@@ -132,5 +135,33 @@ describe('getUploadInstructions', () => {
     ).rejects.toMatchObject({ status: 403 })
 
     expect(mockedGenerateStagedUploadInstructions).not.toHaveBeenCalled()
+  })
+
+  it('should reject staged uploads when the collection has no local storage', async () => {
+    await expect(
+      getUploadInstructions({
+        collectionSlug: 'media',
+        filename: 'reference.png',
+        filesize: 1,
+        mimeType: 'image/png',
+        overrideAccess: true,
+        req: createRequest({ disableLocalStorage: true, withAdapterInstructions: false }),
+      }),
+    ).rejects.toMatchObject({ status: 400 })
+
+    expect(mockedGenerateStagedUploadInstructions).not.toHaveBeenCalled()
+  })
+
+  it('should keep staged uploads for collections with local storage', async () => {
+    await expect(
+      getUploadInstructions({
+        collectionSlug: 'media',
+        filename: 'reference.png',
+        filesize: 1,
+        mimeType: 'image/png',
+        overrideAccess: true,
+        req: createRequest({ withAdapterInstructions: false }),
+      }),
+    ).resolves.toBe(stagedInstructions)
   })
 })

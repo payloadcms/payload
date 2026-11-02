@@ -77,6 +77,15 @@ export const getUploadInstructions = async ({
     throw new APIError('SVG and XML files must be uploaded with the document through Payload.', 400)
   }
 
+  // Staged files live next to locally stored files. Without local storage they would land on
+  // whichever server received them, so a document request on another server could not find them.
+  if (!uploadInstructions && uploadConfig.disableLocalStorage) {
+    throw new APIError(
+      'This collection does not accept upload instructions. Send the file with the document request instead.',
+      400,
+    )
+  }
+
   return uploadInstructions
     ? uploadInstructions.generate({ ...upload, overrideAccess, req })
     : generateStagedUploadInstructions({ ...upload, req })

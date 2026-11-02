@@ -4,6 +4,7 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { docWithFilenameExists } from './docWithFilenameExists.js'
 import { fileExists } from './fileExists.js'
+import { isFilenameReservedByUploadSession } from './sessions/isFilenameReserved.js'
 
 /**
  * Increments a filename by appending or incrementing a numeric suffix.
@@ -43,8 +44,9 @@ type Args = {
 }
 
 /**
- * Generates a safe, unique filename by checking for conflicts in the database
- * and (when a `staticPath` is provided) the local filesystem. If a conflict
+ * Generates a safe, unique filename by checking for conflicts in the database,
+ * names reserved by unfinished upload sessions, and (when a `staticPath` is
+ * provided) the local filesystem. If a conflict
  * exists, it increments a numeric suffix until a unique name is found.
  *
  * @param args.collectionSlug - The slug of the upload collection
@@ -80,7 +82,8 @@ export async function getSafeFileName({
       prefix,
       req,
     })) ||
-    (staticPath ? await fileExists(`${staticPath}/${modifiedFilename}`) : false)
+    (staticPath ? await fileExists(`${staticPath}/${modifiedFilename}`) : false) ||
+    (await isFilenameReservedByUploadSession({ collectionSlug, filename: modifiedFilename, req }))
   ) {
     modifiedFilename = incrementName(modifiedFilename)
   }
