@@ -94,6 +94,8 @@ export type ListQuery = {
    */
   groupBy?: string
   limit?: number
+  /** The independent list-query preference scope for nested-document collections. */
+  listLayout?: 'table' | 'tree'
   page?: number
   preset?: number | string
   queryByGroup?: Record<string, ListQuery>

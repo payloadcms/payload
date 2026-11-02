@@ -145,12 +145,15 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const syncPropsToURL = useEffectEvent(() => {
     // URL serialization omits empty draft conditions and compacts their array indexes.
     // Preserve those rows on an equivalent server echo so the focused input stays mounted.
-    const shouldKeepDraftFilters = dequal(
-      qs.parse(qs.stringify({ where: query?.where }), { depth: 10 }),
-      qs.parse(qs.stringify({ where: queryFromProps?.where }), { depth: 10 }),
-    )
+    const hasLayoutChanged = query?.listLayout !== queryFromProps?.listLayout
+    const shouldKeepDraftFilters =
+      !hasLayoutChanged &&
+      dequal(
+        qs.parse(qs.stringify({ where: query?.where }), { depth: 10 }),
+        qs.parse(qs.stringify({ where: queryFromProps?.where }), { depth: 10 }),
+      )
     const newQuery = sanitizeQuery({
-      ...(query || {}),
+      ...(queryFromProps?.listLayout ? {} : query || {}),
       ...(queryFromProps || {}),
       ...(shouldKeepDraftFilters ? { where: query?.where } : {}),
     })
@@ -159,6 +162,16 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       currentSearch: window.location.search,
       query: newQuery,
     })
+
+    if (queryFromProps?.listLayout && !dequal(query, newQuery)) {
+      setQuery(newQuery)
+      if (hasLayoutChanged) {
+        setModified(false)
+      }
+      if (hasLayoutChanged || query?.search !== newQuery.search) {
+        setSearchInput(newQuery.search || '')
+      }
+    }
 
     if (window.location.search !== search) {
       setQuery(newQuery)

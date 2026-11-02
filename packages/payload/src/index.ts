@@ -2015,6 +2015,7 @@ export * from './kv/adapters/InMemoryKVAdapter.js'
 export * from './kv/index.js'
 export type {
   CollapsedPreferences,
+  CollectionListQueryPreferences,
   CollectionPreferences,
   /**
    * @deprecated Use `CollectionPreferences` instead.
