@@ -238,20 +238,15 @@ export const useFormSubmission = ({
         }
       }
 
-      try {
+      // Only put back what this submission took: an autosave must not release a queued save's disable.
+      const releaseForm = () => {
         if (disableFormWhileProcessing) {
-          const activeElement = document.activeElement
-
-          // Disabling the active field drops browser focus to the body.
-          submitFocus.current =
-            activeElement instanceof HTMLElement && formRef.current?.contains(activeElement)
-              ? activeElement
-              : null
-
-          setIsProcessing(true)
-          setIsDisabled(true)
+          setIsProcessing(false)
+          setIsDisabled(false)
         }
+      }
 
+      try {
         if (options?.submissionType === 'autosave') {
           setIsBackgroundProcessing(true)
         }
@@ -298,9 +293,8 @@ export const useFormSubmission = ({
           setIsValid(isValid)
 
           if (!isValid) {
-            setIsProcessing(false)
+            releaseForm()
             setIsSubmitted(true)
-            setIsDisabled(false)
             return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
           }
         }
@@ -319,9 +313,8 @@ export const useFormSubmission = ({
         // If not valid, prevent submission
         if (!isValid) {
           errorToast(t('error:correctInvalidFields'))
-          setIsProcessing(false)
+          releaseForm()
           setIsSubmitted(true)
-          setIsDisabled(false)
           return
         }
 
@@ -345,9 +338,8 @@ export const useFormSubmission = ({
         if (!hasFormSubmitAction) {
           // No action provided, so we should return. An example where this happens are lexical link drawers. Upon submitting the drawer, we
           // want to close it without submitting the form. Stuff like validation would be handled by lexical before this, through beforeSubmit
-          setIsProcessing(false)
+          releaseForm()
           setIsSubmitted(true)
-          setIsDisabled(false)
           return
         }
 
@@ -386,14 +378,12 @@ export const useFormSubmission = ({
 
           isModifiedWhileProcessing.current = false
 
-          setIsDisabled(false)
-
           if (typeof handleResponse === 'function') {
             preservePromiseToast = true
 
             await handleResponse(res, successToast, errorToast)
 
-            if (requestContext.isCurrent()) {
+            if (requestContext.isCurrent() && disableFormWhileProcessing) {
               setIsProcessing(false)
             }
 
@@ -449,7 +439,10 @@ export const useFormSubmission = ({
             }
 
             setIsSubmitted(false)
-            setIsProcessing(false)
+
+            if (disableFormWhileProcessing) {
+              setIsProcessing(false)
+            }
 
             if (redirect) {
               void startRouteTransition(() => router.push(redirect))
@@ -457,7 +450,10 @@ export const useFormSubmission = ({
               successToast(json.message || t('general:submissionSuccessful'))
             }
           } else {
-            setIsProcessing(false)
+            if (disableFormWhileProcessing) {
+              setIsProcessing(false)
+            }
+
             setIsSubmitted(true)
 
             // When there was an error submitting a draft,
@@ -549,16 +545,22 @@ export const useFormSubmission = ({
           console.error('Error submitting form', err) // eslint-disable-line no-console
 
           if (isCurrentRequest) {
-            setIsProcessing(false)
+            releaseForm()
             setIsSubmitted(true)
-            setIsDisabled(false)
           }
 
           errorToast(err.message)
         }
       } finally {
         if (requestContext.isCurrent()) {
-          restoreRequestState()
+          if (disableFormWhileProcessing) {
+            setIsProcessing(false)
+            setIsDisabled(isDisabledFromPropsRef.current || false)
+          }
+
+          if (options?.submissionType === 'autosave') {
+            setIsBackgroundProcessing(false)
+          }
         } else if (!preservePromiseToast && promiseToastID !== undefined) {
           toast.dismiss(promiseToastID)
         }
@@ -566,7 +568,6 @@ export const useFormSubmission = ({
     },
     [
       beforeSubmit,
-      restoreRequestState,
       setIsBackgroundProcessing,
       startRouteTransition,
       action,
@@ -588,7 +589,6 @@ export const useFormSubmission = ({
       setIsSubmitted,
       onNonFieldError,
       contextRef,
-      formRef,
       prevFormState,
       requestScopeRef,
       setIsValid,
@@ -606,6 +606,20 @@ export const useFormSubmission = ({
 
       const requestScope = requestScopeRef.current
       let didSucceed = false
+
+      // Disable before queueing, like a direct submit, so the guard above rejects any submission made while this one waits.
+      if (options?.disableFormWhileProcessing ?? true) {
+        const activeElement = document.activeElement
+
+        // Disabling the active field drops browser focus to the body.
+        submitFocus.current =
+          activeElement instanceof HTMLElement && formRef.current?.contains(activeElement)
+            ? activeElement
+            : null
+
+        setIsProcessing(true)
+        setIsDisabled(true)
+      }
 
       const resultPromise = scheduleRequest({
         priority: requestPriority[options?.submissionType ?? 'submit'],
@@ -649,7 +663,7 @@ export const useFormSubmission = ({
 
       return result.status === 'completed' ? result.value : undefined
     },
-    [contextRef, executeSubmit, requestScopeRef, scheduleRequest],
+    [contextRef, executeSubmit, formRef, requestScopeRef, scheduleRequest, setIsDisabled],
   )
 
   useEffect(() => {

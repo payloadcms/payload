@@ -70,6 +70,7 @@ export interface Config {
     posts: Post;
     'autosave-posts': AutosavePost;
     conditions: Condition;
+    'draft-posts': DraftPost;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -81,6 +82,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
     conditions: ConditionsSelect<false> | ConditionsSelect<true>;
+    'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -271,6 +273,25 @@ export interface Condition {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-posts".
+ */
+export interface DraftPost {
+  id: string;
+  title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -304,6 +325,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conditions';
         value: string | Condition;
+      } | null)
+    | ({
+        relationTo: 'draft-posts';
+        value: string | DraftPost;
       } | null)
     | ({
         relationTo: 'users';
@@ -437,6 +462,18 @@ export interface ConditionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-posts_select".
+ */
+export interface DraftPostsSelect<T extends boolean = true> {
+  title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -517,7 +554,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'posts' | 'autosave-posts' | 'conditions' | 'users';
+    relatedCollection: 'posts' | 'autosave-posts' | 'conditions' | 'draft-posts' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -539,7 +576,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('posts' | 'autosave-posts' | 'conditions' | 'users')[] | null;
+    excludedCollections?: ('posts' | 'autosave-posts' | 'conditions' | 'draft-posts' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

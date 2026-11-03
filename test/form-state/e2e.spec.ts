@@ -27,6 +27,7 @@ import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConf
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
+import { draftPostsSlug } from './collections/DraftPosts/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 const { afterEach, beforeEach, describe } = test
@@ -827,7 +828,10 @@ test.describe('Form State', () => {
 test.describe('Shared form request queue', () => {
   let payload: PayloadTestSDK<Config>
   let serverURL: string
-  const createdDocs: { collection: 'autosave-posts' | 'posts'; id: Post['id'] }[] = []
+  const createdDocs: {
+    collection: 'autosave-posts' | 'draft-posts' | 'posts'
+    id: Post['id']
+  }[] = []
   const releases = new Set<() => void>()
 
   test.beforeAll(async () => {
@@ -934,6 +938,8 @@ test.describe('Shared form request queue', () => {
     await page.locator('#action-save').click()
     await page.clock.runFor(500)
     expect(saveCount).toBe(0)
+    await expect(page.locator('#action-save')).toBeDisabled()
+    await expect(page.locator('#field-title')).toBeDisabled()
     released.resolve()
     await expect(saved.promise).resolves.toMatchObject({ title: 'Edited value' })
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
@@ -1032,6 +1038,222 @@ test.describe('Shared form request queue', () => {
     await expect(page.locator('.collection-edit__form')).toHaveAttribute('data-form-ready', 'true')
     await page.clock.runFor(2000)
     await expect(page.locator('.autosave')).toBeHidden()
+  })
+
+  test('should retry a superseded autosave after an explicit save fails', async ({ page }) => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: { title: 'Initial value' },
+      draft: true,
+      overrideAccess: true,
+    })
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+    const retried = Promise.withResolvers<Record<string, unknown>>()
+    const requests: string[] = []
+
+    createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+    releases.add(released.resolve)
+    await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+      const isAutosave = new URL(route.request().url()).searchParams.get('autosave') === 'true'
+
+      requests.push(isAutosave ? 'autosave' : 'save')
+
+      if (!isAutosave) {
+        return route.fulfill({ json: { message: 'Save failed' }, status: 400 })
+      }
+      if (requests.length === 1) {
+        // Failing the first autosave keeps server values from merging and scheduling a fresh autosave.
+        captured.resolve()
+        await released.promise
+        return route.fulfill({ json: { message: 'Autosave failed' }, status: 400 })
+      }
+      retried.resolve(readSubmittedData({ body: route.request().postData() ?? '' }))
+      await route.fulfill({ response: await route.fetch() })
+    })
+    await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
+    await waitForFormReady(page)
+    await page.locator('#field-title').fill('First autosave')
+    await page.clock.runFor(200)
+    await captured.promise
+    await page.locator('#field-title').fill('Pending autosave')
+    await page.clock.runFor(1000)
+    await page.waitForTimeout(100)
+    // The explicit save evicts the pending autosave, then fails.
+    await page
+      .locator('form.collection-edit__form')
+      .evaluate((form: HTMLFormElement) => form.requestSubmit())
+    released.resolve()
+    await expect(page.locator('.payload-toast-container')).toContainText('Save failed')
+    await expect(retried.promise).resolves.toMatchObject({ title: 'Pending autosave' })
+    expect(requests).toEqual(['autosave', 'save', 'autosave'])
+  })
+
+  test('should not allow saving a draft while a publish is queued', async ({ page }) => {
+    const doc = await payload.create({
+      collection: draftPostsSlug,
+      data: { title: 'Initial value' },
+      draft: true,
+      overrideAccess: true,
+    })
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+    const editURL = new AdminUrlUtil(serverURL, draftPostsSlug).edit(doc.id)
+    const statuses: unknown[] = []
+
+    createdDocs.push({ collection: draftPostsSlug, id: doc.id })
+    releases.add(released.resolve)
+    await page.goto(editURL)
+    await waitForFormReady(page)
+    await page.route(
+      (url) => url.href === editURL || url.pathname.startsWith('/_serverFn/'),
+      async (route) => {
+        if (
+          route.request().method() !== 'POST' ||
+          !route.request().postData()?.includes('form-state')
+        ) {
+          return route.continue()
+        }
+        const response = await route.fetch()
+
+        captured.resolve()
+        await released.promise
+        await route.fulfill({ response })
+      },
+    )
+    await page.route(`**/api/${draftPostsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+      statuses.push(readSubmittedData({ body: route.request().postData() ?? '' })._status)
+      await route.fulfill({ response: await route.fetch() })
+    })
+    await page.locator('#field-title').fill('Published value')
+    await page.clock.runFor(500)
+    await captured.promise
+    await page.locator('#action-save').click()
+    await expect(page.locator('#action-save-draft')).toBeDisabled()
+    released.resolve()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    expect(statuses).toEqual(['published'])
+  })
+
+  test('should keep the form disabled when an autosave settles while a save is queued', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: { title: 'Initial value' },
+      draft: true,
+      overrideAccess: true,
+    })
+    const autosaveCaptured = Promise.withResolvers<void>()
+    const autosaveReleased = Promise.withResolvers<void>()
+    const saveCaptured = Promise.withResolvers<void>()
+    const saveReleased = Promise.withResolvers<void>()
+
+    createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+    releases.add(autosaveReleased.resolve)
+    releases.add(saveReleased.resolve)
+    await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+      const isAutosave = new URL(route.request().url()).searchParams.get('autosave') === 'true'
+      const response = await route.fetch()
+
+      if (isAutosave) {
+        autosaveCaptured.resolve()
+        await autosaveReleased.promise
+      } else {
+        saveCaptured.resolve()
+        await saveReleased.promise
+      }
+      await route.fulfill({ response })
+    })
+    await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
+    await waitForFormReady(page)
+    const title = page.locator('#field-title')
+
+    await title.fill('Autosaved value')
+    await page.clock.runFor(200)
+    await autosaveCaptured.promise
+    // The save button is inert during autosave, so submit the form directly.
+    await page
+      .locator('form.collection-edit__form')
+      .evaluate((form: HTMLFormElement) => form.requestSubmit())
+    await expect(title).toBeDisabled()
+    autosaveReleased.resolve()
+    await saveCaptured.promise
+    await expect(title).toBeDisabled()
+    saveReleased.resolve()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect(title).toBeEnabled()
+  })
+
+  test('should reject submissions until the saved document state is applied', async ({ page }) => {
+    const doc = await payload.create({
+      collection: postsSlug,
+      data: { title: 'Initial value' },
+      overrideAccess: true,
+    })
+    const saved = Promise.withResolvers<void>()
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+    const editURL = new AdminUrlUtil(serverURL, postsSlug).edit(doc.id)
+    let didSave = false
+    let saveCount = 0
+
+    createdDocs.push({ collection: postsSlug, id: doc.id })
+    releases.add(released.resolve)
+    await page.goto(editURL)
+    await waitForFormReady(page)
+    await page.route(`**/api/${postsSlug}/${doc.id}**`, async (route) => {
+      if (route.request().method() !== 'PATCH') {
+        return route.continue()
+      }
+      saveCount += 1
+      await route.fulfill({ response: await route.fetch() })
+      didSave = true
+      saved.resolve()
+    })
+    await page.route(
+      (url) => url.href === editURL || url.pathname.startsWith('/_serverFn/'),
+      async (route) => {
+        if (
+          !didSave ||
+          route.request().method() !== 'POST' ||
+          !route.request().postData()?.includes('form-state')
+        ) {
+          return route.continue()
+        }
+        const response = await route.fetch()
+
+        captured.resolve()
+        await released.promise
+        await route.fulfill({ response })
+      },
+    )
+    const title = page.locator('#field-title')
+
+    await title.fill('Saved value')
+    await page.clock.runFor(500)
+    await page.locator('#action-save').click()
+    await saved.promise
+    await captured.promise
+    // Fields stay disabled while processing, so only a direct submit can reach the guard here.
+    await page
+      .locator('form.collection-edit__form')
+      .evaluate((form: HTMLFormElement) => form.requestSubmit())
+    released.resolve()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect(title).toBeEnabled()
+    await page.clock.runFor(500)
+    await expect(page.locator('.collection-edit__form')).toHaveAttribute('data-form-ready', 'true')
+    expect(saveCount).toBe(1)
   })
 })
 
