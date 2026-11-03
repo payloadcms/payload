@@ -218,11 +218,11 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
   )
 
   test.for([
-    ['a saved crop', { crop: savedCrop }, savedCrop, 800],
-    ['no saved transforms', null, null, 1600],
+    ['a saved crop', { crop: savedCrop }, savedCrop, 300],
+    ['no saved transforms', null, null, 400],
   ] as const)(
     'should build a size from the original, with the size name, for an upload with %s',
-    async ([, _transforms, crop, width], { payload, restClient }) => {
+    async ([, _transforms, crop, height], { payload, restClient }) => {
       const created = await createImage({ _transforms, payload })
 
       const response = await restClient.GET(
@@ -230,7 +230,8 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
       )
 
       expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject({
-        width,
+        height,
+        width: 400,
       })
       expect(requestCropCalls).toEqual([
         { crop, purpose: 'persisted-default', variantName: 'card' },
