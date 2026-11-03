@@ -8,6 +8,8 @@ const CUT_NOTE = "Some sections were cut to fit GitHub's size limit."
 export const MAX_COMMITS = 10
 const MS_PER_DAY = 86400000
 const SAFE_URL_PATTERN = /^https:\/\/[^\s)<>|]+$/
+const GITHUB_ORIGIN_PATTERN = /^https:\/\/(?:www\.)?github\.com\//i
+const PARENT_SEGMENT_PATTERN = /(?:^|\/)\.\.(?:\/|$)/
 const SEVERITY_ORDER = ['low', 'moderate', 'medium', 'high', 'critical']
 const MAJOR_BANNER =
   'Major version: no automated review. Read the release notes and check breaking changes before you merge.'
@@ -26,7 +28,7 @@ export function isDraftPr({ pr }) {
 
 /**
  * Builds the full PR body from the plan and the fetched details. Text from outside the repo
- * enters the body only through `sanitizeOutsideText`.
+ * enters the body only through `sanitizeOutsideText`, and outside URLs only through `safeUrl`.
  * @returns {string}
  */
 export function renderPrBody({
@@ -143,8 +145,8 @@ function renderTable({ prBumps, details, fixed, partly, ref, repoUrl, now }) {
 
 function renderPackageCell({ bump, detail }) {
   const name = escapeTableCell({ text: bump.dependency })
-  const npmUrl = `https://www.npmjs.com/package/${bump.dependency}`
-  const link = safeUrl({ url: npmUrl }) ? `[${name}](${npmUrl})` : name
+  const npmUrl = safeUrl({ url: `https://www.npmjs.com/package/${bump.dependency}` })
+  const link = npmUrl ? `[${name}](${npmUrl})` : name
   const source = sourceUrl({ repo: detail.packageMeta?.repo })
   return source ? `${link} ([source](${source}))` : link
 }
@@ -311,8 +313,9 @@ function renderNotes({ detail }) {
     ['releases', links.releases],
     ['compare', links.compare],
   ]
-    .map(([label, url]) => (safeUrl({ url }) ? `[${label}](${url})` : null))
-    .filter(Boolean)
+    .map(([label, url]) => ({ label, url: safeUrl({ url }) }))
+    .filter(({ url }) => url)
+    .map(({ label, url }) => `[${label}](${url})`)
   if (linkParts.length > 0) {
     lines.push(`All versions: ${linkParts.join(' · ')}`)
   }
@@ -326,7 +329,8 @@ function renderCommits({ detail }) {
 
   if (commits?.repoMoved) {
     const links = (commits.releaseLinks ?? [])
-      .filter((url) => safeUrl({ url }))
+      .map((url) => safeUrl({ url }))
+      .filter(Boolean)
       .map((url) => `- ${url}`)
     lines.push('The repository moved; no commit list. Release pages:', '', ...links)
     return collapsible({ summary: 'Commits', content: lines.join('\n') })
@@ -340,7 +344,8 @@ function renderCommits({ detail }) {
   }
   for (const commit of shown) {
     const sha = commit.sha.slice(0, 7)
-    const label = safeUrl({ url: commit.url }) ? `[${sha}](${commit.url})` : sha
+    const commitUrl = safeUrl({ url: commit.url })
+    const label = commitUrl ? `[${sha}](${commitUrl})` : sha
     const message = oneLine({ text: String(commit.message ?? '').split('\n')[0], maxLength: 200 })
     lines.push(`- ${label} ${message}`)
   }
@@ -394,12 +399,23 @@ function sourceUrl({ repo }) {
     return null
   }
   const base = `https://github.com/${repo.owner}/${repo.name}`
-  const hasSafeDirectory = repo.directory && /^[\w./@-]+$/.test(repo.directory)
-  return hasSafeDirectory ? `${base}/tree/HEAD/${repo.directory}` : base
+  // A `..` segment could point the link at another repo's issue.
+  const hasSafeDirectory =
+    repo.directory &&
+    /^[\w./@-]+$/.test(repo.directory) &&
+    !PARENT_SEGMENT_PATTERN.test(repo.directory)
+  return safeUrl({ url: hasSafeDirectory ? `${base}/tree/HEAD/${repo.directory}` : base })
 }
 
+/**
+ * Returns an outside URL that is safe as a Markdown link target, or null. A github.com link to an
+ * issue or PR adds a reference event to it, so github.com links go through redirect.github.com.
+ */
 function safeUrl({ url }) {
-  return typeof url === 'string' && SAFE_URL_PATTERN.test(url) ? url : null
+  if (typeof url !== 'string' || !SAFE_URL_PATTERN.test(url)) {
+    return null
+  }
+  return url.replace(GITHUB_ORIGIN_PATTERN, 'https://redirect.github.com/')
 }
 
 function parseVersion({ version }) {

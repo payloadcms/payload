@@ -210,6 +210,29 @@ describe('outside text', () => {
     expect(body).toContain('see https://redirect.github.com/a/b/issues/1')
   })
 
+  it('should send outside GitHub links through redirect.github.com', () => {
+    const body = renderCsv({
+      details: {
+        ...csvDetails,
+        notes: {
+          ...csvDetails.notes,
+          entries: [{ ...csvDetails.notes.entries[0], url: 'https://github.com/a/b/issues/1' }],
+        },
+        packageMeta: {
+          ...csvDetails.packageMeta,
+          repo: { owner: 'adaltas', name: 'node-csv', directory: '../../a/b/issues/2' },
+        },
+      },
+    })
+
+    expect(body).not.toContain('https://github.com/adaltas/')
+    expect(body).not.toContain('https://github.com/a/b/')
+    expect(body).not.toContain('../')
+    expect(body).toContain('(https://redirect.github.com/a/b/issues/1)')
+    expect(body).toContain('(https://redirect.github.com/adaltas/node-csv/compare/')
+    expect(body).toContain('([source](https://redirect.github.com/adaltas/node-csv))')
+  })
+
   it('should close fences left open in release notes and in a cut description', () => {
     const body = renderCsv({
       details: {
