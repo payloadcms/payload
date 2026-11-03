@@ -11622,20 +11622,38 @@ const findMinimalFix = async ({ chainPackages, client, currentMajor, currentSpec
     return { status: 'none' };
 };
 /**
- * Walks the dependency graph of `rootName@rootVersion`, restricted to the packages
- * that appeared on the introducing chains, resolving each hop to its highest
- * satisfying version. Returns whether every reachable version of the vulnerable
- * module lands in the patched range.
+ * Walks the dependency graph of `rootName@rootVersion`, resolving each hop to its highest
+ * satisfying version, and returns whether every reachable version of the vulnerable module
+ * lands in the patched range.
  *
- * The chain restriction bounds registry requests per candidate. A path that a newer
- * version adds through a package off the original chain is not traced, so `clear` is a
- * suggestion: the plan's verify step re-runs the audit and catches any remaining copy.
+ * The walk first follows only the packages on the introducing chains, which bounds registry
+ * requests per candidate. When that walk finds no copy, the module may have moved under a
+ * package off the chain (a rename), so the whole graph is walked before `clear` is returned.
+ * A `clear` with a copy on the chain can still miss a new copy off the chain; the plan's
+ * verify step re-runs the audit and catches it.
  */
 const traceModule = async ({ chainPackages, client, module, patchedRange, rootName, rootVersion, }) => {
     // A patched root can still pull a vulnerable copy back in, so the trace continues below it.
     if (rootName === module && !(0,semver.satisfies)(rootVersion, patchedRange)) {
         return 'vulnerable';
     }
+    const root = { client, module, rootName, rootVersion };
+    const onChain = await collectModuleVersions({
+        ...root,
+        shouldFollow: (name) => chainPackages.has(name),
+    });
+    const moduleVersions = Array.isArray(onChain) && onChain.length === 0
+        ? await collectModuleVersions({ ...root, shouldFollow: () => true })
+        : onChain;
+    if (moduleVersions === 'unknown') {
+        return 'unknown';
+    }
+    return moduleVersions.every((version) => (0,semver.satisfies)(version, patchedRange))
+        ? 'clear'
+        : 'vulnerable';
+};
+/** Resolved versions of `module` reachable from the root through packages `shouldFollow` accepts. */
+const collectModuleVersions = async ({ client, module, rootName, rootVersion, shouldFollow, }) => {
     const moduleVersions = [];
     const visited = new Set([`${rootName}@${rootVersion}`]);
     const queue = [{ name: rootName, version: rootVersion }];
@@ -11654,7 +11672,7 @@ const traceModule = async ({ chainPackages, client, module, patchedRange, rootNa
         }
         for (const [depName, range] of Object.entries(dependencies)) {
             const isModule = depName === module;
-            if (!isModule && !chainPackages.has(depName)) {
+            if (!isModule && !shouldFollow(depName)) {
                 continue;
             }
             const depPackument = await client.fetchPackument(depName);
@@ -11676,13 +11694,7 @@ const traceModule = async ({ chainPackages, client, module, patchedRange, rootNa
             }
         }
     }
-    if (moduleVersions.length === 0) {
-        // The bumped dependency no longer pulls the module through the known chain.
-        return 'clear';
-    }
-    return moduleVersions.every((version) => (0,semver.satisfies)(version, patchedRange))
-        ? 'clear'
-        : 'vulnerable';
+    return moduleVersions;
 };
 
 // EXTERNAL MODULE: ./node_modules/.pnpm/yaml@2.9.1/node_modules/yaml/dist/index.js

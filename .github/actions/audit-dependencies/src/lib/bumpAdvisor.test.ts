@@ -245,6 +245,58 @@ describe('annotateFindings', () => {
     expect(reported.bumps[0].fix).toMatchObject({ status: 'fix', version: '4.7.0' })
   })
 
+  it('should not clear a version that moves the module under a package off the known chain', async () => {
+    const sentryIndex: DeclaredIndex = new Map([
+      ['plugin-sentry', new Map([['@sentry/nextjs', '^9.5.0']])],
+    ])
+    const client = fakeClient({
+      '@sentry/bundler-plugin-core': packument({ '3.0.0': { glob: '^13.0.6' } }),
+      '@sentry/bundler-plugins': packument({
+        '10.76.2': { glob: '^13.0.6' },
+        '11.11.0': { glob: '^14.0.2' },
+      }),
+      '@sentry/nextjs': packument({
+        '9.5.0': { '@sentry/bundler-plugin-core': '3.0.0' },
+        '10.76.2': { '@sentry/bundler-plugins': '10.76.2' },
+        '11.11.0': { '@sentry/bundler-plugins': '11.11.0' },
+      }),
+      glob: packument({ '13.0.6': {}, '14.0.3': {} }),
+    })
+    const renamedFinding = finding({
+      chainPackages: ['@sentry/nextjs', '@sentry/bundler-plugin-core', 'glob'],
+      directDeps: [{ dependency: '@sentry/nextjs', workspacePackage: 'plugin-sentry' }],
+      fixed_in: '>=14.0.2',
+      package: 'glob',
+      paths: ['plugin-sentry > @sentry/nextjs > @sentry/bundler-plugin-core > glob'],
+      vulnerable: '>=9.0.0 <=14.0.1',
+    })
+
+    const [reported] = await annotateFindings({
+      client,
+      findings: [renamedFinding],
+      index: sentryIndex,
+    })
+
+    // 10.76.2 renames bundler-plugin-core to bundler-plugins, which still pulls glob 13.
+    expect(reported.bumps[0].fix).toMatchObject({ status: 'fix', version: '11.11.0' })
+  })
+
+  it('should clear a version whose whole graph no longer pulls the module', async () => {
+    const client = fakeClient({
+      '@typescript-eslint/parser': packument({
+        '8.20.0': { minimatch: '3.0.0' },
+        '8.42.0': { helper: '1.0.0' },
+      }),
+      'brace-expansion': packument({ '1.0.0': {} }),
+      helper: packument({ '1.0.0': {} }),
+      minimatch: packument({ '3.0.0': { 'brace-expansion': '1.0.0' } }),
+    })
+
+    const [reported] = await annotateFindings({ client, findings: [finding()], index })
+
+    expect(reported.bumps[0].fix).toEqual({ status: 'relock', version: '8.42.0' })
+  })
+
   it('checks the version itself when the direct dependency is the vulnerable module', async () => {
     const directIndex: DeclaredIndex = new Map([['plugin-mcp', new Map([['zod', '^3.25.50']])]])
     const client = fakeClient({
