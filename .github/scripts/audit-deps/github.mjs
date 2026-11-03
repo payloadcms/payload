@@ -12,6 +12,8 @@ const BRANCH_PREFIX = 'ci/audit-deps-fix-'
 const MISSING_REF_STATUSES = new Set([404, 422])
 const CLOSED_PRS_PER_BRANCH = 20
 const MAX_CLOSER_LOOKUPS = 5
+const MERGEABILITY_ATTEMPTS = 3
+const MERGEABILITY_RETRY_MS = 3000
 const COMMENT_TAG = '<!-- audit-deps-comment -->'
 const STALE_COMMENT = 'The audit no longer needs this update.'
 const STALE_KEPT_BRANCH_COMMENT =
@@ -230,12 +232,16 @@ async function findRejectedPr({ github, owner, pr: plannedPr, ref, repo }) {
   return null
 }
 
-// GitHub computes mergeability in the background and can report `unknown` for a while, so only
-// `dirty` counts as a conflict.
+// GitHub computes mergeability in the background and reports `unknown` until it is done, so an
+// `unknown` answer is asked again. Only `dirty` counts as a conflict.
 async function isConflicted({ github, owner, prNumber, repo }) {
-  const { data: pr } = await github.rest.pulls.get({ owner, pull_number: prNumber, repo })
-
-  return pr?.mergeable_state === 'dirty'
+  for (let attempt = 1; ; attempt++) {
+    const { data: pr } = await github.rest.pulls.get({ owner, pull_number: prNumber, repo })
+    if (pr?.mergeable_state !== 'unknown' || attempt === MERGEABILITY_ATTEMPTS) {
+      return pr?.mergeable_state === 'dirty'
+    }
+    await new Promise((resolve) => setTimeout(resolve, MERGEABILITY_RETRY_MS))
+  }
 }
 
 function listCommits({ github, owner, prNumber, repo }) {

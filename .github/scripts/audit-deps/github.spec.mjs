@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { formatFingerprint } from './decide.mjs'
 import { closeStalePrs, decidePrSteps } from './github.mjs'
@@ -248,7 +248,7 @@ describe('decidePrSteps', () => {
 
   it.each([
     ['dirty', 'update'],
-    ['unknown', 'skip'],
+    ['clean', 'skip'],
   ])(
     'should treat an equal fingerprint with mergeable_state %s as %s',
     async (mergeableState, step) => {
@@ -263,6 +263,40 @@ describe('decidePrSteps', () => {
       expect(result.prSteps['non-major'].step).toBe(step)
     },
   )
+
+  describe('while GitHub computes mergeability', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    async function planWithStates({ states }) {
+      vi.useFakeTimers()
+      const github = makeGithub({ commits: { 1: [botCommit] }, openPrs: [openPr({})] })
+      for (const state of states) {
+        github.rest.pulls.get.mockResolvedValueOnce({ data: { mergeable_state: state } })
+      }
+      const pending = planPrs({ github })
+      await vi.runAllTimersAsync()
+
+      return { github, result: await pending }
+    }
+
+    it('should ask again when mergeable_state is unknown', async () => {
+      const { github, result } = await planWithStates({ states: ['unknown', 'dirty'] })
+
+      expect(github.rest.pulls.get).toHaveBeenCalledTimes(2)
+      expect(result.prSteps['non-major'].step).toBe('update')
+    })
+
+    it('should skip after three unknown answers', async () => {
+      const { github, result } = await planWithStates({
+        states: ['unknown', 'unknown', 'unknown', 'dirty'],
+      })
+
+      expect(github.rest.pulls.get).toHaveBeenCalledTimes(3)
+      expect(result.prSteps['non-major'].step).toBe('skip')
+    })
+  })
 
   it('should skip-reject when a person closed an unmerged PR with an equal fingerprint', async () => {
     const github = makeGithub({ closedBy: { 5: { type: 'User' } }, closedPrs: [closedPr({})] })
