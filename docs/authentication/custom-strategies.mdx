@@ -105,3 +105,17 @@ export const Users: CollectionConfig = {
   ],
 }
 ```
+
+### Issuing tokens for other clients
+
+Some clients can't use your strategy's login themselves, like an MCP client the user connects from their browser. A strategy can issue tokens for them with three optional methods:
+
+| Method                  | Description                                                                                                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`issueToken`**        | Issues tokens for `req.user`, a user your strategy logged in. Returns `{ accessToken, expiresIn, refreshToken }`, where `expiresIn` is in seconds and both are optional. |
+| **`refreshToken`**      | Trades a refresh token from `issueToken` or an earlier refresh for new tokens. Returns `null` when the refresh token doesn't work anymore.                               |
+| **`authenticateToken`** | Returns the user of an access token from `issueToken` or `refreshToken`, or `null`.                                                                                      |
+
+Payload's built-in strategy implements them with its login tokens and [refresh tokens](./overview#refresh-tokens), so they work for any collection that uses the local strategy.
+
+Plugins find the strategy that logged a user in through `req.user._strategy`. Payload sets it to the strategy's `name` unless your strategy sets it itself, so leave it unset, or set it to the `name`, when your strategy implements these methods.

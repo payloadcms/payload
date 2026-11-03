@@ -153,6 +153,11 @@ import { buildEncryptionKeyring, decrypt, encrypt, reencrypt } from './auth/cryp
 import { authLocal } from './auth/operations/local/auth.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
+import {
+  authenticateJWTToken,
+  issueJWTToken,
+  refreshJWTToken,
+} from './auth/strategies/jwtTokens.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import {
   generateImportMap,
@@ -1121,6 +1126,9 @@ export class BasePayload {
       this.authStrategies.push({
         name: 'local-jwt',
         authenticate: JWTAuthentication,
+        authenticateToken: authenticateJWTToken,
+        issueToken: issueJWTToken,
+        refreshToken: refreshJWTToken,
       })
     }
 
@@ -1479,9 +1487,11 @@ export { JWTAuthentication } from './auth/strategies/jwt.js'
 export { incrementLoginAttempts } from './auth/strategies/local/incrementLoginAttempts.js'
 export { resetLoginAttempts } from './auth/strategies/local/resetLoginAttempts.js'
 export type {
+  AuthStrategy,
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
   AuthStrategyResult,
+  AuthStrategyTokens,
   CollectionPermission,
   DocumentPermissions,
   FieldPermissions,

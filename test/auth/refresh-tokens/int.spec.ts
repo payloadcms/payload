@@ -1,3 +1,4 @@
+import { createPayloadRequest } from 'payload'
 import { wait } from 'payload/shared'
 import { expect, onTestFinished, vi } from 'vitest'
 
@@ -145,5 +146,32 @@ test.suite('Refresh tokens', { config: './config.ts' }, () => {
 
     expect(refreshed.data.refreshTokenUser.refreshedToken).toEqual(expect.any(String))
     expect(refreshed.data.refreshTokenUser.refreshToken).not.toBe(data.loginUser.refreshToken)
+  })
+
+  test('should issue tokens with the JWT strategy that it can authenticate and refresh', async ({
+    payload,
+  }) => {
+    const {
+      docs: [user],
+    } = await payload.find({
+      collection: collectionSlug,
+      overrideAccess: true,
+      where: { email: { equals: devUser.email } },
+    })
+    const req = await createPayloadRequest({
+      payload,
+      user: { ...user!, collection: collectionSlug },
+    })
+    const strategy = payload.authStrategies.find(({ name }) => name === 'local-jwt')!
+
+    const tokens = await strategy.issueToken!({ req })
+    const refreshed = await strategy.refreshToken!({ refreshToken: tokens.refreshToken!, req })
+
+    expect(await strategy.authenticateToken!({ req, token: tokens.accessToken })).toMatchObject({
+      email: devUser.email,
+    })
+    expect(await strategy.authenticateToken!({ req, token: refreshed!.accessToken })).toMatchObject(
+      { email: devUser.email },
+    )
   })
 })
