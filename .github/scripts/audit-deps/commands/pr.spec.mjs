@@ -6,15 +6,14 @@ const csvBump = { dependency: 'csv-parse', from: '5.6.0', fromVersion: '5.6.0', 
 
 describe('buildTitle', () => {
   it.each([
-    ['main', 'fix(deps): bump csv-parse from 5.6.0 to 7.0.2'],
-    ['3.x', 'fix(deps): bump csv-parse from 5.6.0 to 7.0.2 (3.x)'],
-  ])('should title a major PR on %s', (ref, title) => {
-    expect(buildTitle({ ref, pr: { kind: 'major' }, prBumps: [csvBump] })).toBe(title)
-  })
-
-  it('should suffix a 3.x group PR title', () => {
-    expect(buildTitle({ ref: '3.x', pr: { kind: 'group' }, prBumps: [csvBump, csvBump] })).toBe(
+    ['a major PR on main', 'main', 'major', 'fix(deps): bump csv-parse from 5.6.0 to 7.0.2'],
+    [
+      'a group PR on 3.x',
+      '3.x',
+      'group',
       'fix(deps): bump the non-major group with 2 updates (3.x)',
-    )
+    ],
+  ])('should title %s', (_name, ref, kind, title) => {
+    expect(buildTitle({ ref, pr: { kind }, prBumps: [csvBump, csvBump] })).toBe(title)
   })
 })

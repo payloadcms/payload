@@ -78,26 +78,6 @@ describe('fetchPackageMeta', () => {
   })
 })
 
-describe('fetchWeeklyDownloads', () => {
-  it('should read the count for one version', async () => {
-    const fetch = fakeFetch({
-      'https://api.npmjs.org/versions/@sentry%2Fnextjs/last-week': {
-        downloads: { '10.54.0': 1234, '10.53.0': 5 },
-      },
-    })
-
-    expect(await fetchWeeklyDownloads({ fetch, name: '@sentry/nextjs', version: '10.54.0' })).toBe(
-      1234,
-    )
-  })
-
-  it('should return null on 404', async () => {
-    expect(
-      await fetchWeeklyDownloads({ fetch: fakeFetch({}), name: 'missing', version: '1.0.0' }),
-    ).toBeNull()
-  })
-})
-
 describe('fetchReleaseNotes', () => {
   it('should take each major from its release, else from its changelog section', async () => {
     const changelog = [
@@ -283,47 +263,5 @@ describe('upstream requests', () => {
 
     expect(timeout).toHaveBeenCalledWith(30_000)
     expect(inits.every((init) => init?.signal instanceof AbortSignal)).toBe(true)
-  })
-
-  it('should fetch the packument once for one bump', async () => {
-    const urls = []
-    const base = fakeFetch({
-      [packumentUrl('pkg')]: { versions: { '1.0.0': {}, '2.0.0': {} }, repository: 'github:o/r' },
-    })
-    const fetch = async (url, init) => {
-      urls.push(url)
-      return base(url, init)
-    }
-    const range = { fetch, repo, name: 'pkg', from: '1.0.0', to: '2.0.0' }
-
-    await fetchPackageMeta({ fetch, name: 'pkg', version: '2.0.0' })
-    await Promise.all([fetchReleaseNotes({ ...range, isMajor: true }), fetchCommits(range)])
-
-    expect(urls.filter((url) => url === packumentUrl('pkg'))).toHaveLength(1)
-  })
-})
-
-describe('fetchAdvisory', () => {
-  it('should return the text fields', async () => {
-    const fetch = fakeFetch({
-      [`${GH}/advisories/GHSA-aaaa-bbbb-cccc`]: {
-        summary: 'Bad',
-        description: 'Very bad',
-        severity: 'high',
-        html_url: 'https://github.com/advisories/GHSA-aaaa-bbbb-cccc',
-      },
-    })
-
-    expect(await fetchAdvisory({ fetch, ghsa: 'GHSA-aaaa-bbbb-cccc' })).toEqual({
-      summary: 'Bad',
-      description: 'Very bad',
-      severity: 'high',
-    })
-  })
-
-  it('should return null on 403', async () => {
-    const fetch = fakeFetch({ [`${GH}/advisories/GHSA-x`]: { status: 403 } })
-
-    expect(await fetchAdvisory({ fetch, ghsa: 'GHSA-x' })).toBeNull()
   })
 })

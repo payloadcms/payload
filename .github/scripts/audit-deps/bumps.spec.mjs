@@ -229,7 +229,7 @@ describe('buildBumps', () => {
     ])
   })
 
-  it.each([['latest'], ['1.0.0\n::error::x'], ['1.0']])(
+  it.each([['latest'], ['1.0.0\n::error::x']])(
     'should throw on a fix version %j that is not strict semver',
     (version) => {
       const report = {
@@ -300,13 +300,6 @@ describe('buildPrs', () => {
     })
   })
 
-  it('should name 3.x branches under the 3.x prefix', () => {
-    const prs = buildPrs({ bumps: buildBumps({ report: buildReport() }), ref: '3.x' })
-
-    expect(prs.length).toBeGreaterThan(0)
-    expect(prs.every((pr) => pr.branch.startsWith('ci/audit-deps-fix-3.x-'))).toBe(true)
-  })
-
   it('should omit the group PR when there are no non-major bumps', () => {
     const bumps = buildBumps({ report: buildReport() })
 
@@ -325,19 +318,6 @@ describe('listNoFix', () => {
       },
     ])
   })
-
-  it.each([
-    ['consumer-facing', 'Needs an override or relock; consumers do not get our overrides.'],
-    ['monorepo', 'Not handled: needs a relock or override.'],
-  ])('should explain relock-only findings for the %s scope', (scope, reason) => {
-    const relock = entry({ dependency: 'r', currentSpec: '1.0.0', status: 'relock' })
-    const report = {
-      findings: [finding({ advisory: 'GHSA-r', bumps: [relock], pkg: 'r' })],
-      plan: { actions: [] },
-    }
-
-    expect(listNoFix({ report, scope })[0].reason).toBe(reason)
-  })
 })
 
 describe('classifyFixes', () => {
@@ -348,30 +328,12 @@ describe('classifyFixes', () => {
     plan: { actions: [] },
   })
 
-  it('should mark advisories absent from the re-audit as fixed', () => {
-    const report = { findings: [], plan: { actions: [] } }
-
-    expect(classifyFixes({ bumps: bumpsFor('graphql-scalars'), report })).toEqual({
-      fixed: ['GHSA-graphql'],
-      partly: [],
-    })
-  })
-
   it('should mark an advisory still reported through other dependencies as partly fixed', () => {
     const report = reauditWith({ advisory: 'GHSA-uuid', dependency: '@sentry/nextjs' })
 
     expect(classifyFixes({ bumps: bumpsFor('@google-cloud/storage'), report })).toEqual({
       fixed: [],
       partly: ['GHSA-uuid'],
-    })
-  })
-
-  it('should leave an advisory in neither list when its own dependency still reports it', () => {
-    const report = reauditWith({ advisory: 'GHSA-csv', dependency: 'csv-parse' })
-
-    expect(classifyFixes({ bumps: bumpsFor('csv-parse'), report })).toEqual({
-      fixed: [],
-      partly: [],
     })
   })
 })

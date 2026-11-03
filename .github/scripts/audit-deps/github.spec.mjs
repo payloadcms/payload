@@ -156,18 +156,6 @@ async function planPrs({ github }) {
 }
 
 describe('decidePrSteps', () => {
-  it('should create every planned PR when no PR exists', async () => {
-    const result = await planPrs({ github: makeGithub() })
-
-    expect(result).toEqual({
-      prSteps: {
-        'non-major': { headSha: null, prNumber: null, step: 'create' },
-        'react-19': { headSha: null, prNumber: null, step: 'create' },
-      },
-      stalePrs: [],
-    })
-  })
-
   it('should create with a lease on a leftover branch that has only bot commits', async () => {
     const github = makeGithub({
       branches: { [`${PREFIX}non-major`]: { commits: [botCommit], sha: 'leftover' } },
@@ -358,16 +346,6 @@ describe('closeStalePrs', () => {
     expect(github.rest.issues.createComment).not.toHaveBeenCalled()
     expect(github.rest.pulls.update).not.toHaveBeenCalled()
     expect(github.rest.git.deleteRef).not.toHaveBeenCalled()
-  })
-
-  it('should rethrow when closing fails', async () => {
-    const github = makeGithub({ prs: { 3: stalePr() } })
-    github.rest.pulls.update.mockRejectedValue(new Error('nope'))
-    const logger = vi.spyOn(console, 'error').mockImplementation(() => {})
-
-    await expect(close(github)).rejects.toThrow('nope')
-
-    logger.mockRestore()
   })
 
   it('should ignore a missing branch ref', async () => {

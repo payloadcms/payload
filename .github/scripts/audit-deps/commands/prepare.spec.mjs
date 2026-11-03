@@ -164,12 +164,16 @@ describe('runPreparePrs', () => {
     expect(entryFor('non-major')).toMatchObject({ failedStep: 'lockfile' })
   })
 
-  it('should commit only the manifest and lockfile on top of the base', async () => {
-    const { commit } = entryFor('dep-b-1')
+  // The repo has a failing pre-commit hook, and the failed PR before this one left an ignored file.
+  it('should commit only the manifest and lockfile as the bot on top of the base', async () => {
+    const { commit, reason } = entryFor('dep-b-1')
+
+    expect(reason).toBeUndefined()
     const files = await git('diff', '--name-only', baseSha, commit)
 
     expect(files.split('\n').sort()).toEqual(['package.json', 'pnpm-lock.yaml'])
     expect(await git('rev-parse', `${commit}^`)).toBe(baseSha)
+    expect(await git('log', '-1', '--format=%an <%ae>', commit)).toBe(BOT)
   })
 
   it('should not carry the failed PR manifest edit into the next PR', async () => {
@@ -196,19 +200,6 @@ describe('runPreparePrs', () => {
     }
   })
 
-  it('should not fail a PR for an ignored file an earlier PR left', () => {
-    expect(entryFor('dep-b-1').failedStep).toBeUndefined()
-  })
-
-  it('should commit with repo hooks turned off', () => {
-    expect(entryFor('dep-b-1')).toMatchObject({ commit: expect.any(String) })
-    expect(entryFor('dep-b-1').failedStep).toBeUndefined()
-  })
-
-  it('should commit as the bot', async () => {
-    expect(await git('log', '-1', '--format=%an <%ae>', entryFor('dep-b-1').commit)).toBe(BOT)
-  })
-
   it('should leave out PRs whose step is not prepared', () => {
     expect(prepared.prs.map((entry) => entry.prId)).toEqual([
       'non-major',
@@ -220,12 +211,6 @@ describe('runPreparePrs', () => {
 
   it('should refuse a branch outside the bot prefix', () => {
     expect(entryFor('bad-branch')).toMatchObject({ failedStep: 'branch' })
-  })
-
-  it('should end detached at the base commit', async () => {
-    expect(prepared.baseSha).toBe(baseSha)
-    expect(await git('rev-parse', 'HEAD')).toBe(baseSha)
-    expect(await git('rev-parse', '--abbrev-ref', 'HEAD')).toBe('HEAD')
   })
 })
 

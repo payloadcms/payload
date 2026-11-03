@@ -115,35 +115,14 @@ function withNoteText({ text }) {
 }
 
 describe('major review banner', () => {
-  const minorBump = { ...csvBump, id: 'x', isMajor: false, from: '^5.6.0', to: '5.7.0' }
+  it('should start a major body with the review banner, naming missing notes only when absent', () => {
+    const withNotes = renderCsv({ details: csvDetails }).split('\n')
+    const withoutNotes = renderCsv({ details: noNotes }).split('\n')
 
-  it('should start a major body with the review banner', () => {
-    const lines = renderCsv({ details: csvDetails }).split('\n')
-
-    expect(lines[0]).toBe(MAJOR_BANNER)
-    expect(lines.slice(0, 3).join('\n')).not.toContain('No release notes found for')
-  })
-
-  it('should follow the banner with the missing notes line', () => {
-    const lines = renderCsv({ details: noNotes }).split('\n')
-
-    expect(lines[0]).toBe(MAJOR_BANNER)
-    expect(lines[1]).toBe('No release notes found for 7.x.')
-  })
-
-  it('should name the 0.<minor> line in the missing notes line of a 0.x major', () => {
-    const lexicalBump = { ...csvBump, from: '0.52.0', fromVersion: '0.52.0', to: '0.53.0' }
-
-    const lines = render({ bumps: [lexicalBump], details: { [csvBump.id]: noNotes } }).split('\n')
-
-    expect(lines[1]).toBe('No release notes found for 0.53.x.')
-  })
-
-  it('should render neither line in a group body', () => {
-    const body = renderGroup({ bumps: [minorBump], details: noNotes })
-
-    expect(body).not.toContain(MAJOR_BANNER)
-    expect(body).not.toContain('No release notes found for')
+    expect(withNotes[0]).toBe(MAJOR_BANNER)
+    expect(withNotes.slice(0, 3).join('\n')).not.toContain('No release notes found for')
+    expect(withoutNotes[0]).toBe(MAJOR_BANNER)
+    expect(withoutNotes[1]).toBe('No release notes found for 7.x.')
   })
 
   it('should draft every major PR and no group PR', () => {

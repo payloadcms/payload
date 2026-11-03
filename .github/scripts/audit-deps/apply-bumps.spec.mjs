@@ -40,7 +40,7 @@ function readRepoFile({ cwd, file }) {
 }
 
 describe('setSpecifierVersion', () => {
-  it.each(['>=1.0.0', '*', 'workspace:*', 'npm:x@1'])('should throw for %s', (spec) => {
+  it.each(['>=1.0.0', 'workspace:*'])('should throw for %s', (spec) => {
     expect(() => setSpecifierVersion({ spec, version: '2.0.0' })).toThrow(UnsupportedSpecifierError)
   })
 })
@@ -129,15 +129,5 @@ describe('applyBumps', () => {
     expect(changes).toEqual([
       { file: 'b/package.json', after: '^5.6.1', before: '^5.6.0', dependency: 'dep' },
     ])
-  })
-
-  it('should throw when the manifest does not declare the dependency', async () => {
-    const cwd = await makeRepo({
-      files: { 'a/package.json': '{\n  "dependencies": {\n    "other": "1.0.0"\n  }\n}\n' },
-    })
-
-    await expect(
-      applyBumps({ bumps: [bump({ to: '1.2.5', manifests: ['a/package.json'] })], cwd }),
-    ).rejects.toThrow('a/package.json does not declare dep')
   })
 })

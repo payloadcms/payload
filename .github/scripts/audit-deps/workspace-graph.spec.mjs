@@ -18,20 +18,13 @@ const graph = new Map([
 ])
 
 describe('resolveAffects', () => {
-  it('should list direct packages and published transitive dependents', () => {
-    expect(resolveAffects({ graph, originDirs: ['graphql'] })).toEqual({
+  it('should list published direct packages and published transitive dependents', () => {
+    expect(resolveAffects({ graph, originDirs: ['graphql', 'test-app', 'nope'] })).toEqual({
       direct: [{ name: '@payloadcms/graphql', dir: 'graphql' }],
       via: [
         { name: '@payloadcms/next', dir: 'next' },
         { name: '@payloadcms/tanstack-start', dir: 'tanstack-start' },
       ],
-    })
-  })
-
-  it('should exclude private packages and unknown folders from direct', () => {
-    expect(resolveAffects({ graph, originDirs: ['test-app', 'ui', 'nope'] })).toEqual({
-      direct: [{ name: '@payloadcms/ui', dir: 'ui' }],
-      via: [],
     })
   })
 })

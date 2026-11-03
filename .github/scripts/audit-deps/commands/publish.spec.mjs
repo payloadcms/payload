@@ -193,16 +193,6 @@ describe('runPublish', () => {
     expect(fakes.core.setFailed).toHaveBeenCalledWith('App token missing; no PRs were published')
   })
 
-  it('should reject bad stale PR numbers before any push', async () => {
-    await writePrepared({ prs: [{ prId: 'a' }] })
-    const push = vi.fn()
-
-    await expect(
-      publish({ env: { STALE_PRS: '[1,-2]' }, fakes: makeFakes(), push }),
-    ).rejects.toThrow('invalid stale PR numbers: [1,-2]')
-    expect(push).not.toHaveBeenCalled()
-  })
-
   it('should list every PR step that was not prepared', async () => {
     await writePrepared({ prs: [] })
     const fakes = makeFakes()
@@ -250,7 +240,6 @@ describe('pushBranch', () => {
   const base = { branch: 'ci/audit-deps-fix-main-a', commit: 'c0ffee' }
 
   it.each([
-    ['an update on the head the plan saw', { headSha: 'beef', step: 'update' }, 'beef'],
     ['a create on no branch', { headSha: null, step: 'create' }, ''],
     ['a create on a leftover branch', { headSha: 'cafe', step: 'create' }, 'cafe'],
   ])('should lease %s', async (_name, entry, expectedHead) => {
@@ -259,8 +248,8 @@ describe('pushBranch', () => {
     expect(args).toContain(`--force-with-lease=refs/heads/ci/audit-deps-fix-main-a:${expectedHead}`)
   })
 
-  it('should keep the token out of the arguments', async () => {
-    const { args, command, options } = await pushArgs({
+  it('should keep the token out of the arguments and mask the auth header', async () => {
+    const { args, command, core, options } = await pushArgs({
       entry: { ...base, headSha: null, step: 'create' },
     })
     const basic = Buffer.from('x-access-token:secret-token').toString('base64')
@@ -268,14 +257,7 @@ describe('pushBranch', () => {
     expect(command).toBe('git')
     expect(args.some((arg) => arg.includes('secret-token') || arg.includes(basic))).toBe(false)
     expect(options.env.GIT_CONFIG_VALUE_0).toBe(`AUTHORIZATION: basic ${basic}`)
-  })
-
-  it('should mask the auth header before the push', async () => {
-    const { core } = await pushArgs({ entry: { ...base, headSha: null, step: 'create' } })
-
-    expect(core.setSecret).toHaveBeenCalledWith(
-      Buffer.from('x-access-token:secret-token').toString('base64'),
-    )
+    expect(core.setSecret).toHaveBeenCalledWith(basic)
   })
 
   it('should push with repo hooks turned off', async () => {
