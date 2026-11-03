@@ -3,7 +3,11 @@ import fs from 'fs/promises'
 import { randomUUID } from 'node:crypto'
 import { openAsBlob } from 'node:fs'
 
-import type { Collection, TypeWithID } from '../collections/config/types.js'
+import type {
+  Collection,
+  SanitizedCollectionConfig,
+  TypeWithID,
+} from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
 import type { ExternalUploadSource } from './sanitizeUploadData.js'
@@ -329,19 +333,7 @@ const processUpload = async <T>({
     }
   }
 
-  const detectedFileType = await checkFileRestrictions({
-    collection: collectionConfig,
-    file,
-    req,
-  })
-
-  const shouldUseDetectedFileType =
-    detectedFileType &&
-    (isProcessableImage(file.mimetype) || isProcessableImage(detectedFileType.mime))
-
-  if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
-    file = { ...file, mimetype: detectedFileType.mime }
-  }
+  file = await checkFileAndUseDetectedType({ collection: collectionConfig, file, req })
 
   if (!disableLocalStorage) {
     await fs.mkdir(staticPath!, { recursive: true })
@@ -367,6 +359,9 @@ const processUpload = async <T>({
     ? { ...uploadEdits, crop: undefined, heightInPixels: undefined, widthInPixels: undefined }
     : uploadEdits
 
+  // Errors from the deferred client-upload download and its checks keep their own message and status.
+  let isFetchingClientUpload = false
+
   try {
     const pipeline = await planTransformerPipeline({
       args: {
@@ -390,9 +385,13 @@ const processUpload = async <T>({
       file.uploadReference &&
       pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
     ) {
+      isFetchingClientUpload = true
       file = await fetchFullClientUpload({ collectionSlug: collectionConfig.slug, file, req })
       // On req.file, the temp file is removed after the operation.
       req.file = file
+      // The first check saw only a probe, so check the whole file before a transformer reads it.
+      file = await checkFileAndUseDetectedType({ collection: collectionConfig, file, req })
+      isFetchingClientUpload = false
     }
 
     // A large client upload can arrive as a bounded probe alongside a temp file. Transformers
@@ -848,7 +847,7 @@ const processUpload = async <T>({
     req.payload.logger.error(err)
 
     // A broken transformer contract is a bug in the transformer, so it keeps its own message.
-    if (err instanceof TransformerContractError) {
+    if (err instanceof TransformerContractError || isFetchingClientUpload) {
       throw err
     }
 
@@ -884,4 +883,27 @@ async function getUnplannedSafeFileName({
     }
     filename = incrementName(filename)
   }
+}
+
+/** Checks the file, and uses the detected MIME type when the file is a processable image. */
+const checkFileAndUseDetectedType = async ({
+  collection,
+  file,
+  req,
+}: {
+  collection: SanitizedCollectionConfig
+  file: NonNullable<PayloadRequest['file']>
+  req: PayloadRequest
+}): Promise<NonNullable<PayloadRequest['file']>> => {
+  const detectedFileType = await checkFileRestrictions({ collection, file, req })
+
+  const shouldUseDetectedFileType =
+    detectedFileType &&
+    (isProcessableImage(file.mimetype) || isProcessableImage(detectedFileType.mime))
+
+  if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
+    return { ...file, mimetype: detectedFileType.mime }
+  }
+
+  return file
 }
