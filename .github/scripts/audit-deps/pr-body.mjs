@@ -4,7 +4,7 @@ import { closeOpenFence, escapeTableCell, GHSA_PATTERN, sanitizeOutsideText } fr
 const MAX_BODY_LENGTH = 60000
 const MAX_NOTES_LENGTH = 8000
 const CUT_NOTE = "Some sections were cut to fit GitHub's size limit."
-/** Commits shown per package; upstream keeps no more than this. */
+/** The most commits shown for one package. upstream.mjs also returns no more than this. */
 export const MAX_COMMITS = 10
 const MS_PER_DAY = 86400000
 const SAFE_URL_PATTERN = /^https:\/\/[^\s)<>|]+$/
@@ -12,11 +12,12 @@ const SEVERITY_ORDER = ['low', 'moderate', 'medium', 'high', 'critical']
 const MAJOR_BANNER =
   'Major version: no automated review. Read the release notes and check breaking changes before you merge.'
 
-// Sections are dropped in this order, each from the last package backwards.
+// When the body is too long, each section type in this order is removed from the last package
+// back to the first, until the body fits.
 const DROP_ORDER = ['commits', 'notes', 'info']
 
 /**
- * Nothing reviews a major bump before a person does, so every major PR is a draft.
+ * A major bump gets no automated review, so every major PR opens as a draft for a person to check.
  * @returns {boolean}
  */
 export function isDraftPr({ pr }) {
@@ -24,8 +25,8 @@ export function isDraftPr({ pr }) {
 }
 
 /**
- * Builds the whole PR body from trusted data. Outside text only enters through
- * `sanitizeOutsideText`.
+ * Builds the full PR body from the plan and the fetched details. Text from outside the repo
+ * enters the body only through `sanitizeOutsideText`.
  * @returns {string}
  */
 export function renderPrBody({
@@ -102,7 +103,7 @@ function renderMajorBanner({ prBumps, details }) {
   return `${MAJOR_BANNER}\nNo release notes found for ${releaseLineOf({ version: bump.to })}.x.`
 }
 
-// Under semver, `^0.x` breaks on each minor, so a 0.x release line is `0.<minor>`.
+// Semver treats each minor change in 0.x as breaking, so a 0.x release line is `0.<minor>`.
 function releaseLineOf({ version }) {
   const [major, minor] = version.split('.')
   return major === '0' ? `0.${minor}` : major

@@ -866,7 +866,8 @@ jobs:
     name: Content API Tests
     runs-on: ubuntu-26.04
     needs: [changes, build]
-    # Skip fork and bot PRs: this job assumes an AWS role, and bot PRs run dependency versions no person has reviewed.
+    # Skip fork PRs, bot PRs and audit fix branches. This job assumes an AWS role, and a bot PR
+    # runs dependency versions that no person has reviewed.
     if: >-
       needs.changes.outputs.needs_tests == 'true'
       && github.event.pull_request.head.repo.fork == false

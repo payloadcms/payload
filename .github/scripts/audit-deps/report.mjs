@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises'
 
 /**
- * Reads the audit report written by the audit-dependencies action.
- * Throws a single error for missing files, bad JSON, and wrong shape so callers fail closed.
+ * Reads the audit report that the audit-dependencies action writes. A missing file, invalid
+ * JSON and an unexpected shape all throw the same error, so no caller continues with a bad report.
  */
 export async function readReport({ path }) {
   const invalidError = new Error(`audit report missing or invalid: ${path}`)

@@ -15,10 +15,12 @@ const UNPREPARED_REASONS = {
 }
 
 /**
- * github-script step after `prepare-prs`. Reads `APP_TOKEN`, `IS_DEFAULT_INPUTS`, `PR_STEPS`,
- * `REF`, `STALE_PRS`, `RUNNER_TEMP`, `GITHUB_WORKSPACE`. Real runs push each prepared commit
- * and create or update its PR, then close stale PRs; dry runs only report. The summary lists
- * every planned PR. Any failed PR fails the step after every other PR is handled.
+ * Runs the `Publish PRs` workflow step from actions/github-script, after `prepare-prs`. Reads
+ * `APP_TOKEN`, `IS_DEFAULT_INPUTS`, `PR_STEPS`, `REF`, `STALE_PRS`, `RUNNER_TEMP` and
+ * `GITHUB_WORKSPACE` from `env`. A real run (from main, with default inputs) pushes each prepared
+ * commit, creates or updates its PR, then closes stale PRs. A dry run only writes the summary.
+ * The summary lists every planned PR. When a PR fails, the other PRs continue and the step
+ * fails at the end.
  */
 export async function runPublish({ context, core, env, github, push = pushBranch }) {
   const { owner, repo } = context.repo
@@ -95,7 +97,8 @@ export async function runPublish({ context, core, env, github, push = pushBranch
   }
 }
 
-// The lease names the head the plan saw (none for a new branch), so a person's push is not overwritten.
+// The lease expects the branch head that `Decide PR steps` saw, or no branch for a new PR. If a
+// person pushes in between, the push fails and their commits stay on the branch.
 export async function pushBranch({
   core,
   cwd,
@@ -107,7 +110,7 @@ export async function pushBranch({
 }) {
   const lease = `refs/heads/${entry.branch}:${entry.headSha ?? ''}`
   const basic = Buffer.from(`x-access-token:${token}`).toString('base64')
-  // The runner masks the token but not its base64 form, which git trace output can print.
+  // The runner masks the raw token but not its base64 form, and git trace output can print it.
   core.setSecret(basic)
 
   await execFile(
@@ -123,7 +126,7 @@ export async function pushBranch({
     ],
     {
       cwd,
-      // Config through env keeps the token out of the process arguments.
+      // Git reads this config from env, which keeps the token out of the visible process arguments.
       env: {
         ...process.env,
         GIT_CONFIG_COUNT: '1',

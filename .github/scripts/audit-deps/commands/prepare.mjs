@@ -22,11 +22,12 @@ import {
 const execFileAsync = promisify(execFile)
 
 const PREPARED_STEPS = new Set(['create', 'update', 'dry-run'])
-// The action ships with these scripts, so the re-audit runs the same code as the first audit.
+// The audit bundle comes from the same checkout as these scripts, so the re-audit runs the same
+// code as the first audit.
 const AUDIT_ACTION_ENTRY = fileURLToPath(
   new URL('../../../actions/audit-dependencies/dist/index.js', import.meta.url),
 )
-// The audit exits 1 when findings remain, which is expected for unfixable advisories.
+// The audit exits with 1 when findings remain, which is expected when some advisories have no fix.
 const MAX_AUDIT_EXIT_CODE = 1
 const BOT_IDENTITY = {
   GIT_AUTHOR_EMAIL: '41898282+github-actions[bot]@users.noreply.github.com',
@@ -36,11 +37,12 @@ const BOT_IDENTITY = {
 }
 
 /**
- * `prepare-prs --plan --pr-steps-json --ref --scope --severity --run-url --cwd --out-dir`:
- * for each PR to create, update or preview, applies its bumps on the base commit, regenerates
- * the lockfile without scripts, checks paths, re-audits, renders the body and commits on the
- * PR branch. Writes `<out-dir>/prepared.json`; a failed PR is listed with its step, not thrown.
- * `run` spawns pnpm and the audit; `renderPr` builds the title and body.
+ * Usage: `prepare-prs --plan --pr-steps-json --ref --scope --severity --run-url --cwd --out-dir`.
+ * For each PR whose step is create, update or dry-run, it applies the bumps on the base commit,
+ * regenerates the lockfile without install scripts, checks the changed paths, runs the audit
+ * again, renders the PR body and commits on the PR branch. Writes `<out-dir>/prepared.json`.
+ * When one PR fails, the file records the step that failed and the other PRs continue.
+ * `run` spawns pnpm and the audit, and `renderPr` builds the title and body.
  */
 export async function runPreparePrs({ options, run = spawnForExitCode, renderPr = buildPr }) {
   const plan = await readPlan({ options })
@@ -58,7 +60,7 @@ export async function runPreparePrs({ options, run = spawnForExitCode, renderPr 
     scope: requireOption({ name: 'scope', options }),
     severity: requireOption({ name: 'severity', options }),
   }
-  // Each PR starts with a forced checkout and clean, which would destroy uncommitted work.
+  // Each PR starts with a forced checkout and `git clean`, which delete uncommitted work.
   if ((await git({ args: ['status', '--porcelain'], cwd })) !== '') {
     throw new Error(`prepare-prs needs a clean working tree in ${cwd}`)
   }
@@ -96,7 +98,8 @@ async function preparePr({ baseSha, context, pr, prStep }) {
   try {
     await git({ args: ['checkout', '-q', '--force', '-B', pr.branch, baseSha], cwd })
     await git({ args: ['clean', '-fdq'], cwd })
-    // Ignored files survive `clean -fd`, so the guard checks only what this PR changes.
+    // `git clean -fd` leaves ignored files, and the change list includes them. Recording them
+    // here lets the path guard check only the changes that this PR makes.
     const baseline = await listWorkingTreeChanges({ cwd })
 
     currentStep = 'apply'
@@ -183,7 +186,8 @@ function listNewChanges({ baseline, changes }) {
   return changes.filter((change) => !before.has(keyOf(change)))
 }
 
-// A PR that leaves an advisory reported through its own bumps claims a fix it does not make.
+// Returns the advisories that the re-audit reports through a dependency this PR bumps. A PR with
+// such an advisory would claim a fix that it does not make.
 function findUnclearedAdvisories({ bumps, report }) {
   const { fixed, partly } = classifyFixes({ bumps, report })
   const cleared = new Set([...fixed, ...partly])
@@ -229,7 +233,7 @@ async function runOrThrow({ args, command, cwd, run }) {
   }
 }
 
-// pnpm and the re-audit read registry data, so they get no GitHub token.
+// pnpm and the re-audit need only registry data, so they run without `GITHUB_TOKEN`.
 export function spawnForExitCode({ args, command, cwd, env = {} }) {
   const { GITHUB_TOKEN: _token, ...inherited } = process.env
 

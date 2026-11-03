@@ -20,8 +20,8 @@ const STALE_KEPT_BRANCH_COMMENT =
  */
 
 /**
- * Decides every planned PR's step and sets the job outputs `pr_steps` and `stale_prs`
- * (single-line JSON). Non-default inputs never call the API.
+ * Decides the step for each planned PR and sets the step outputs `pr_steps` and `stale_prs` as
+ * single-line JSON. A dry run (non-default inputs) makes no GitHub API calls.
  */
 export async function decidePrSteps({ core, github, isDefaultInputs, owner, plan, ref, repo }) {
   if (!isDefaultInputs) {
@@ -58,8 +58,8 @@ export async function decidePrSteps({ core, github, isDefaultInputs, owner, plan
 }
 
 /**
- * Closes PRs no planned PR owns anymore. A branch with a person's commits is kept so their
- * work survives.
+ * Closes stale audit PRs with a comment and deletes their branches. A branch with commits from a
+ * person is not deleted, so their work is not lost.
  */
 export async function closeStalePrs({ github, owner, prNumbers, ref, repo }) {
   for (const prNumber of prNumbers) {
@@ -149,8 +149,9 @@ async function decideStepForPr({ github, openPr, owner, plan, pr, ref, repo }) {
 }
 
 /**
- * A branch can outlive its PR (closed or merged without delete, or a failed create). The push
- * leases on its head, and a person's commits on it block the bot from overwriting them.
+ * A branch can exist without an open PR, for example after a close or merge that did not delete
+ * it, or after a failed PR create. Returns its head for the push lease, and blocks the step when
+ * the branch has commits from a person, so the bot does not overwrite them.
  */
 async function decideLeftoverBranch({ branch, github, owner, ref, repo, step }) {
   const headSha = await findBranchSha({ branch, github, owner, repo })
@@ -203,9 +204,9 @@ async function listOpenBotPrs({ github, owner, ref, repo }) {
 }
 
 /**
- * Only a person closing an unmerged PR counts as a rejection, and only if its body carries
- * a fingerprint. Bot closes and unknown closers do not, because a missed security PR costs more
- * than a duplicate.
+ * Finds the latest bot PR on this branch that a person closed without a merge and whose body has
+ * a fingerprint. A PR closed by a bot or by an unknown user is not a rejection, because a missed
+ * security fix costs more than a duplicate PR.
  */
 async function findRejectedPr({ github, owner, pr: plannedPr, ref, repo }) {
   const { data } = await github.rest.pulls.list({
@@ -238,7 +239,8 @@ async function findRejectedPr({ github, owner, pr: plannedPr, ref, repo }) {
   return null
 }
 
-// GitHub computes mergeability lazily, so only a settled `dirty` counts as a conflict.
+// GitHub computes mergeability in the background and can report `unknown` for a while, so only
+// `dirty` counts as a conflict.
 async function isConflicted({ github, owner, prNumber, repo }) {
   const { data: pr } = await github.rest.pulls.get({ owner, pull_number: prNumber, repo })
 

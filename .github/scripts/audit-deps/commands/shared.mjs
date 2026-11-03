@@ -12,7 +12,8 @@ const CATALOG_ENTRY_PATTERN = /^\s+(['"]?)(.+?)\1\s*:\s*(['"]?)([^'"#\s]+)\3\s*(
  * @property {import('../bumps.mjs').Bump[]} bumps
  * @property {import('../bumps.mjs').PlannedPr[]} prs
  * @property {import('../bumps.mjs').NoFix[]} noFix
- * @property {Record<string, string[]>} originDirs bump id to `packages/` folder names it reaches
+ * @property {Record<string, string[]>} originDirs bump ID to the `packages/` folder names whose
+ *   dependencies bring in its advisories
  */
 
 export function requireOption({ name, options }) {
@@ -37,7 +38,7 @@ export async function writeJson({ file, value }) {
   await writeFile(file, `${JSON.stringify(value, null, 2)}\n`)
 }
 
-/** Returns '' for a missing file, so a repo without the file reads as empty. */
+/** Returns '' when the file does not exist. Other read errors are thrown. */
 export async function readOptionalText({ file }) {
   try {
     return await readFile(file, 'utf8')
@@ -78,7 +79,8 @@ export function findPr({ plan, prId }) {
 }
 
 /**
- * Top-level `catalog:` block of pnpm-workspace.yaml as name to `{ spec }`.
+ * Reads the top-level `catalog:` block of pnpm-workspace.yaml into a map from dependency name
+ * to `{ spec }`. Named catalogs under `catalogs:` are not read.
  * @returns {Map<string, { spec: string }>}
  */
 export function parseCatalog({ text }) {
@@ -102,14 +104,14 @@ export function parseCatalog({ text }) {
   return catalog
 }
 
-/** Outside text for a single summary or comment line. */
+/** Sanitizes text from outside the repo and puts it on one line for a summary or comment. */
 export function toSummaryText({ text, maxLength = 500 }) {
   return sanitizeOutsideText({ text, maxLength })
     .replace(/\s*\r?\n\s*/g, ' ')
     .trim()
 }
 
-/** Markdown lines for the no-fix list; empty when there is none. */
+/** Renders the findings with no fix as Markdown lines. Returns [] when there are none. */
 export function renderNoFixList({ noFix }) {
   if (noFix.length === 0) {
     return []
@@ -147,7 +149,8 @@ export async function writeSummary({ markdown }) {
   await appendFile(process.env.GITHUB_STEP_SUMMARY, `${markdown}\n`)
 }
 
-// Workflow command data escaping; messages quote attacker-controlled paths and keys.
+// Escapes a message for a workflow command such as `::error::`. Messages can quote paths and keys
+// that an attacker controls, and a raw newline in them would start a new workflow command.
 export function escapeCommandMessage({ message }) {
   return message.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A')
 }

@@ -11,8 +11,9 @@ const UNSAFE_SEGMENTS = new Set(['', '.', '..', '.git'])
 const WRITE_STATUS_CODES = new Set(['M', 'A', '?'])
 
 /**
- * Returns a reason for every change that falls outside the dependency-manifest allowlist.
- * Fails closed: any status other than a modification or addition of a regular file is a reason.
+ * Returns one reason for each problem in `changes`. Only package.json files, and pnpm-lock.yaml
+ * and pnpm-workspace.yaml at the root, may change. Any status other than a modification or
+ * addition of a regular file is also a reason, so an unknown status is rejected.
  */
 export function findDisallowedChanges({ changes }) {
   const reasons = []
@@ -36,8 +37,9 @@ export function findDisallowedChanges({ changes }) {
 }
 
 /**
- * Lists tracked, untracked, and ignored working tree changes. A rename yields the destination
- * (added) plus the source (deleted); a copy yields the destination plus its unchanged source.
+ * Lists tracked, untracked and ignored changes in the working tree. A rename gives the
+ * destination as added and the source as deleted. A copy gives the destination as added and
+ * the source as modified, so the guard checks both paths.
  */
 export async function listWorkingTreeChanges({ cwd }) {
   const { stdout } = await execFileAsync(
@@ -93,8 +95,8 @@ function describeStatusProblem({ status }) {
 }
 
 /**
- * Record layout of `--porcelain=v1 -z`: `XY <path>\0`, and for renames/copies
- * `XY <destination>\0<source>\0`. Paths are raw, never quoted.
+ * Parses `git status --porcelain=v1 -z` output. Each record is `XY <path>\0`, and a rename or
+ * copy record is `XY <destination>\0<source>\0`. With `-z`, git does not quote paths.
  */
 function parseStatusOutput({ stdout }) {
   const tokens = stdout.split('\0')

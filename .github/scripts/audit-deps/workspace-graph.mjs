@@ -11,7 +11,8 @@ import path from 'node:path'
  */
 
 /**
- * Reads `packages/*\/package.json` under `cwd`, keyed by folder name.
+ * Reads each `packages/*\/package.json` under `cwd` into a map keyed by folder name. Private
+ * packages are included, with `isPrivate` set.
  * @returns {Promise<Map<string, WorkspacePackage>>}
  */
 export async function listPublishedPackages({ cwd }) {
@@ -38,8 +39,10 @@ export async function listPublishedPackages({ cwd }) {
 }
 
 /**
- * `direct` are the published origin packages. `via` are other published packages that reach
- * a direct one through `dependencies`, transitively. Private packages never appear.
+ * Finds the published packages that a bump affects. `direct` holds the published packages in
+ * `originDirs`. `via` holds the other published packages that depend on a `direct` package
+ * through `dependencies`, at any depth. Private packages are not listed, and the search does not
+ * pass through them.
  * @returns {{ direct: PackageRef[], via: PackageRef[] }}
  */
 export function resolveAffects({ graph, originDirs }) {

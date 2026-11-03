@@ -18,7 +18,7 @@ const OPTION_NAMES = [
   'severity',
 ]
 
-// One entry per workflow step; each command documents its options on its run function.
+// Each command is one workflow step. The JSDoc of each run function lists its options.
 const COMMANDS = {
   plan: runPlan,
   'prepare-prs': runPreparePrs,

@@ -34,7 +34,7 @@ export class NonRaisingBumpError extends Error {
   }
 }
 
-/** Keeps the range prefix of `spec` and swaps in `version`. */
+/** Returns `spec` with its version set to `version`. The `^` or `~` prefix does not change. */
 export function setSpecifierVersion({ spec, version }) {
   const match = SPECIFIER_PATTERN.exec(spec)
   if (!match) {
@@ -44,10 +44,11 @@ export function setSpecifierVersion({ spec, version }) {
 }
 
 /**
- * Edits manifests, or the pnpm catalog entry for `catalog:` specifiers, with targeted
- * text replacement so formatting survives. Does not run pnpm. A spec already at or above
- * `bump.to` is left alone, since editing it would be a no-op or a downgrade; a bump that
- * raises no spec throws `NonRaisingBumpError`.
+ * Writes each bump into its package.json files. A `catalog:` specifier is changed in the
+ * pnpm-workspace.yaml catalog. Only the version text is replaced, so the file formatting
+ * does not change. This function does not run pnpm.
+ * A specifier that is already at or above `bump.to` is not changed, because the edit would
+ * do nothing or downgrade it. A bump that raises no specifier throws `NonRaisingBumpError`.
  * @param {{ bumps: Array<import('./bumps.mjs').Bump>, cwd: string }} params
  * @returns {Promise<{ changes: AppliedChange[] }>}
  */
@@ -101,7 +102,7 @@ export async function applyBumps({ bumps, cwd }) {
   return { changes }
 }
 
-/** The raised spec, or null when `spec` already reaches `version`. */
+/** Returns `spec` raised to `version`, or null when `spec` is already at or above `version`. */
 function raiseSpecifier({ spec, version }) {
   const after = setSpecifierVersion({ spec, version })
   const [, , current] = SPECIFIER_PATTERN.exec(spec)

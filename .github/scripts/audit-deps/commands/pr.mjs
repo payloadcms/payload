@@ -13,8 +13,8 @@ import { findBump, findPr, readToken, repoUrlFromEnv } from './shared.mjs'
 const BACKPORT_REF = '3.x'
 
 /**
- * Renders one PR's title, body and draft state. `reaudit` is the audit after the bumps,
- * for fixed and partly.
+ * Builds the title, body and draft state of one planned PR. `reaudit` is the audit report taken
+ * after the bumps; it decides which advisories the body lists as fixed or partly fixed.
  * @returns {Promise<{ body: string, isDraft: boolean, title: string }>}
  */
 export async function buildPr({ cwd, plan, prId, reaudit, ref, runUrl, scope, severity }) {

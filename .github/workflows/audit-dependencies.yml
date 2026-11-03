@@ -28,8 +28,9 @@ on:
         required: false
         default: false
 
-# Real runs come only from main and share one queue, so they never race on PR branches. Dry
-# runs from other branches queue apart, so they cannot replace a pending real run.
+# Only runs from main can change PRs, and they share one queue, so two of them never push to the
+# PR branches at the same time. Runs from other branches use their own queue, so they cannot
+# replace a pending run from main.
 concurrency:
   group: audit-dependencies-${{ github.ref }}
   cancel-in-progress: false
@@ -42,17 +43,19 @@ jobs:
       matrix:
         # inputs.ref is empty on `schedule`; audit both main and 3.x.
         ref: ${{ fromJSON(inputs.ref && inputs.ref != 'both' && format('["{0}"]', inputs.ref) || '["main","3.x"]') }}
-    # A reusable workflow cannot raise permissions; the PR-step lookup reads PRs with pull-requests: read.
+    # A called workflow gets only the permissions that its caller grants. Its Decide PR steps step
+    # reads PRs, so it needs pull-requests: read.
     permissions:
       contents: read
       pull-requests: read
     uses: ./.github/workflows/audit-dependencies-branch.yml
     with:
       ref: ${{ matrix.ref }}
-      # inputs.* are empty on `schedule`; fall back to the defaults.
+      # inputs.* are empty on `schedule`, so the defaults apply.
       scope: ${{ inputs.scope || 'consumer-facing' }}
       severity: ${{ inputs.audit-level || 'moderate' }}
-      # Only runs from main may change PRs; runs from other branches are dry runs.
+      # Only a run from main with the default scope and severity may change PRs. All other runs
+      # are dry runs.
       is-default-inputs: ${{ github.ref == 'refs/heads/main' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'moderate') == 'moderate' }}
     secrets:
       AUDIT_DEPS_APP_CLIENT_ID: ${{ secrets.AUDIT_DEPS_APP_CLIENT_ID }}

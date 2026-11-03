@@ -27,17 +27,22 @@ on:
 
 permissions: {}
 
-# One job. Only Publish PRs holds a write token (the App token, in real runs); every other step
-# has the read-only github.token at most.
-# No step runs package code: bumps use `pnpm install --lockfile-only --ignore-scripts`, and each
-# PR's own CI builds and tests it. The App token is minted after prepare PRs, so it does not exist
-# while pnpm and the re-audit read registry data. Memory is the bot's PR state: an unchanged PR is
-# skipped, a person's commits block updates, and a closed PR is not proposed again.
+# All steps run in one job. A real run is one with `is-default-inputs`; any other run is a dry run.
+# Only the Publish PRs step gets a write token (the App token, in real runs). Every other step gets
+# at most the read-only github.token.
+# No step runs code from the dependencies. Bumps use
+# `pnpm install --lockfile-only --ignore-scripts`, and the CI of each PR builds and tests the
+# result. The App token is created after Prepare PRs, so it does not exist while pnpm and the
+# re-audit read registry data.
+# The workflow stores no state of its own and reads the state of its open and closed PRs. An
+# unchanged PR is skipped, commits from a person block updates, and a change that a person closed
+# is not opened again.
 jobs:
   audit:
     runs-on: ubuntu-26.04
     timeout-minutes: 30
-    # Dry runs may be on any branch, which the environment's branch policy would reject.
+    # Dry runs use no environment. They can come from any branch, which the branch policy of the
+    # `audit-deps` environment would reject.
     environment: ${{ inputs.is-default-inputs && 'audit-deps' || '' }}
     permissions:
       contents: read
@@ -49,8 +54,9 @@ jobs:
           ref: ${{ inputs.ref }}
           persist-credentials: false
 
-      # Tooling (the scripts and the audit action) comes from the triggering commit, kept out of the
-      # workspace. Every ref is audited with the same code; the audited ref gives its tree and allowlist.
+      # The scripts and the audit action come from the commit that started the run, in a folder
+      # outside the workspace. This audits every ref with the same code. The audited ref gives only
+      # its dependency tree and its allowlist.
       - name: Checkout tooling
         env:
           TOOLING_SHA: ${{ github.sha }}
@@ -62,16 +68,19 @@ jobs:
           git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
           git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
 
-      # The job later holds the App token, so it restores no cache another workflow could have written.
+      # The job holds the App token later, so it restores no cache: another workflow could have
+      # written it.
       - name: Setup
         uses: ./.github/actions/setup
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false
 
-      # Runs the audit action's bundle as its action.yml does; the action reads the workspace.
+      # Runs the audit bundle from the tooling folder the same way its action.yml does, with inputs
+      # in `INPUT_*` variables. The audit reads the checked-out ref in the workspace.
       - name: Run dependency audit
-        # Findings exit non-zero; the plan step validates the report instead.
+        # The audit exits non-zero when it has findings. The plan step fails when the report is
+        # missing or invalid.
         continue-on-error: true
         env:
           INPUT_JSON: ${{ runner.temp }}/audit_output.json
@@ -105,7 +114,8 @@ jobs:
             )
             await runDecidePrSteps({ context, core, env: process.env, github })
 
-      # Each PR is one bot commit on the audited commit; a failed PR is recorded and the rest go on.
+      # Each PR is one bot commit on top of the audited commit. A failed PR is recorded, and the
+      # other PRs continue.
       - name: Prepare PRs
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -134,7 +144,8 @@ jobs:
           permission-contents: write
           permission-pull-requests: write
 
-      # Real runs push with a lease on the planned head, so a person's push is kept; dry runs only report.
+      # Real runs push with a lease on the branch head that Decide PR steps saw, so a push from a
+      # person is not overwritten. Dry runs only write the summary.
       - name: Publish PRs
         if: ${{ !cancelled() }}
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0

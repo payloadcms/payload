@@ -17,8 +17,9 @@ const CATALOG_SPEC = 'catalog:'
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(-[\w.]+)?$/
 
 /**
- * `plan --report --scope --ref --out [--cwd]`: writes plan.json.
- * `--cwd` (default: process cwd) holds pnpm-workspace.yaml for `catalog:` specs.
+ * Usage: `plan --report --scope --ref --out [--cwd]`. Writes the bump and PR plan as JSON to
+ * `--out`. `--cwd` is the folder with pnpm-workspace.yaml, which gives the current version of a
+ * `catalog:` dependency. It defaults to the process working directory.
  */
 export async function runPlan({ options }) {
   const cwd = options.cwd ?? process.cwd()

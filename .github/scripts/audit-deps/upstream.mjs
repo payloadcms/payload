@@ -9,7 +9,8 @@ const VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/
 const STRICT_VERSION_PATTERN = /^\d+\.\d+\.\d+$/
 const HEADING_PATTERN = /^(#{1,3})\s+(.*)$/
 const REQUEST_TIMEOUT_MS = 30_000
-// Keyed by fetch, so each run (and each spec's fake fetch) has its own packument cache.
+// A packument is the full npm registry document for a package. Each `fetch` function gets its
+// own packument cache, so a fake `fetch` in a test never reads data cached by another `fetch`.
 const packumentCaches = new WeakMap()
 
 /**
@@ -28,7 +29,8 @@ const packumentCaches = new WeakMap()
  */
 
 /**
- * Reads repository and publish time from the npm registry. Never throws.
+ * Reads the source repository and the publish time of `version` from the npm registry. On any
+ * failure, it returns nulls and does not throw.
  * @returns {Promise<{ repo: Repo | null, publishedAt: string | null }>}
  */
 export async function fetchPackageMeta({ fetch, name, version }) {
@@ -56,9 +58,9 @@ export async function fetchWeeklyDownloads({ fetch, name, version }) {
 }
 
 /**
- * Release notes for one bump. Majors list X.0.0 and 0.Y.0 versions in (from, to], taken from
- * the npm packument. Non-majors list only the `to` release. Each version uses its GitHub
- * release, else its CHANGELOG.md section.
+ * Fetches the release notes for one bump. A major bump lists every X.0.0 and 0.Y.0 version
+ * above `from` and up to `to`, read from the packument. A non-major bump lists only `to`. Each
+ * version uses its GitHub release text, or its CHANGELOG.md section when it has no release.
  * @returns {Promise<{
  *   entries: NoteEntry[],
  *   links: { releases: string | null, changelog: string | null, compare: string | null },
@@ -117,8 +119,9 @@ export async function fetchReleaseNotes({ fetch, repo, name, from, to, isMajor, 
 }
 
 /**
- * Non-bot commits between two version tags. A repo move
- * (the `from` version published from another repo) yields no commits and both release links.
+ * Lists the commits by people between the `from` and `to` version tags. When the `from` version
+ * was published from a different repository, the result has no commits and links to the
+ * releases pages of both repositories.
  * @returns {Promise<{
  *   commits: Array<{ sha: string, message: string, url: string }>,
  *   total: number,
@@ -224,7 +227,10 @@ function tagPrefixes({ repo, name }) {
   )
 }
 
-/** Returns a memoized `(version) => tag | null` that probes each candidate via the git ref API. */
+/**
+ * Returns a cached `(version) => tag | null` lookup. It tries each tag prefix in turn and asks
+ * the git ref API whether that tag exists.
+ */
 function createTagResolver({ fetch, repo, name, token }) {
   const cache = new Map()
 
@@ -264,7 +270,7 @@ async function fetchTagRelease({ fetch, repo, tag, version, token }) {
   return { version, url: release.html_url ?? '', text, isMajor: isMajorRelease({ version }) }
 }
 
-// Packuments can be many MB, and each bump reads one up to three times.
+// A packument can be many megabytes, and one bump reads the same packument up to three times.
 function fetchPackument({ fetch, name }) {
   const url = `https://registry.npmjs.org/${encodeName({ name })}`
   let cache = packumentCaches.get(fetch)
@@ -405,13 +411,16 @@ function sortEntries({ entries }) {
   ]
 }
 
-// Under semver, `^0.x` treats a minor change as breaking, so 0.Y.0 counts as a major release.
+// Semver treats a minor change in 0.x as breaking, so 0.Y.0 counts as a major release.
 function isMajorRelease({ version }) {
   const [major, minor, patch] = parseVersion({ version })
   return patch === 0 && (minor === 0 || major === 0)
 }
 
-/** Splits a changelog at the shallowest heading level that carries a semver. */
+/**
+ * Splits a changelog into one section per version. Sections start at the version headings of the
+ * top-most heading level that has a version, so deeper headings stay inside their section.
+ */
 function cutChangelog({ text, url }) {
   const lines = text.split('\n')
   const versionLevels = lines
@@ -449,7 +458,7 @@ function buildHeaders({ token, accept = 'application/vnd.github+json' }) {
 async function request({ fetch, url, token, accept }) {
   try {
     const isGithub = url.startsWith(GITHUB_API)
-    // One hung response must not hold the step until the job timeout.
+    // The timeout stops one hung request from blocking the step until the job times out.
     const signal = AbortSignal.timeout(REQUEST_TIMEOUT_MS)
     const response = await fetch(
       url,

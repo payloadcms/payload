@@ -205,15 +205,15 @@ const findMinimalFix = async ({
 type TraceOutcome = 'clear' | 'unknown' | 'vulnerable'
 
 /**
- * Walks the dependency graph of `rootName@rootVersion`, resolving each hop to its highest
- * satisfying version, and returns whether every reachable version of the vulnerable module
- * lands in the patched range.
+ * Walks the dependency graph of `rootName@rootVersion`, resolving each dependency to its highest
+ * satisfying version, and returns whether every reachable copy of the vulnerable module is in
+ * the patched range.
  *
- * The walk first follows only the packages on the introducing chains, which bounds registry
- * requests per candidate. When that walk finds no copy, the module may have moved under a
- * package off the chain (a rename), so the whole graph is walked before `clear` is returned.
- * A `clear` with a copy on the chain can still miss a new copy off the chain; the plan's
- * verify step re-runs the audit and catches it.
+ * The first walk follows only the packages on the introducing chains (the dependency paths that
+ * the audit found to the module), which limits registry requests for each candidate. If that
+ * walk finds no copy, a chain package may have been renamed or replaced, so the whole graph is
+ * walked before the result is `clear`. A `clear` from the first walk can miss a new copy off the
+ * chain. The audit that runs again after the bump finds such a copy.
  */
 const traceModule = async ({
   chainPackages,
@@ -253,7 +253,7 @@ const traceModule = async ({
     : 'vulnerable'
 }
 
-/** Resolved versions of `module` reachable from the root through packages `shouldFollow` accepts. */
+/** Lists the versions of `module` reachable through packages that `shouldFollow` accepts. */
 const collectModuleVersions = async ({
   client,
   module,

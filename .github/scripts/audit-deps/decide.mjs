@@ -5,13 +5,14 @@ const GROUP_PR_ID = 'non-major'
 /**
  * @typedef {object} Fingerprint
  * @property {string} prId
- * @property {Array<[string, string]>} bumps [dependency, to] pairs
+ * @property {Array<[string, string]>} bumps [dependency, target version] pairs
  * @property {string[]} advisories
  *
  * @typedef {object} PrState
  * @property {Fingerprint | null} fingerprint
  * @property {boolean} hasForeignCommits
- * @property {boolean} [isConflicted] GitHub reports `mergeable_state: 'dirty'`
+ * @property {boolean} [isConflicted] true when GitHub reports `mergeable_state: 'dirty'`, which
+ *   means the PR has merge conflicts
  *
  * @typedef {'dry-run' | 'create' | 'update' | 'skip' | 'skip-rejected' | 'blocked'} PrStep
  */
@@ -26,7 +27,10 @@ export function formatFingerprint({ fingerprint }) {
   return `<!-- audit-deps: ${JSON.stringify(sorted)} -->`
 }
 
-/** Returns the last fingerprint in the body, so an earlier forged fingerprint cannot win. */
+/**
+ * Returns the last fingerprint in the body. The bot writes its fingerprint at the end, so a
+ * fingerprint that someone adds higher in the body cannot replace it.
+ */
 export function parseFingerprint({ body }) {
   const matches = [...(body ?? '').matchAll(FINGERPRINT_PATTERN)]
   const last = matches.at(-1)
@@ -56,9 +60,10 @@ export function fingerprintForPr({ pr, bumps }) {
 }
 
 /**
- * Decides what to do for one planned PR. A closed-unmerged PR (`rejectedPr`) only blocks
- * recreation while its fingerprint still describes the same change. A conflicted open PR is
- * rebuilt on the current base even when its fingerprint is unchanged.
+ * Decides the step for one planned PR. `rejectedPr` is a PR that a person closed without a
+ * merge. It stops a new PR only when its fingerprint matches the planned change; for a major PR,
+ * that means the same dependency, target major and advisories. An open PR with merge conflicts
+ * is rebuilt on the current base, even when its fingerprint matches.
  * @returns {PrStep}
  */
 export function decidePrStep({ fingerprint, openPr, rejectedPr }) {
@@ -80,7 +85,7 @@ export function decidePrStep({ fingerprint, openPr, rejectedPr }) {
   return openPr.hasForeignCommits ? 'blocked' : 'update'
 }
 
-/** Open bot PRs whose branch under this ref's prefix matches no planned PR. */
+/** Returns the numbers of open PRs on this ref's audit branches that no planned PR uses. */
 export function findStalePrs({ openPrs, prs, ref }) {
   const prefix = `ci/audit-deps-fix-${ref}-`
   const branches = new Set(prs.map((pr) => pr.branch))

@@ -2,13 +2,15 @@ const ZERO_WIDTH_SPACE = '​'
 const MENTION_PATTERN = /(?<!\w)@(?=\w)/g
 const FENCE_PATTERN = /^ {0,3}(`{3,}|~{3,})(.*)$/
 const STRUCTURAL_TAG_PATTERN = /<(\/?)(details|summary)/gi
-// GitHub autolinks bare `www.` hosts and resolves protocol-relative links, so both count.
+// GitHub turns bare `www.github.com/` text into links and follows protocol-relative `//github.com/`
+// links, so the pattern matches both forms.
 const GITHUB_URL_PATTERN = /(?:https?:)?\/\/(?:www\.)?github\.com\/|(?<![\w.-])www\.github\.com\//gi
 
 /**
- * Cleans text from outside the repo (advisories, release notes, commits) before it
- * enters a PR body: removes HTML comments, breaks `@name` mentions, neutralizes structural
- * tags, and cuts at `maxLength`.
+ * Cleans text from outside the repo, such as advisories, release notes and commit messages,
+ * before it goes into a PR body. It removes HTML comments, breaks `@name` mentions and issue
+ * references, escapes `<details>` and `<summary>` tags so the text cannot break the collapsed
+ * sections of the body, and cuts the text to `maxLength`.
  */
 export function sanitizeOutsideText({ text, maxLength }) {
   const cleaned = neutralizeIssueRefs({
@@ -26,8 +28,8 @@ export function sanitizeOutsideText({ text, maxLength }) {
 export const GHSA_PATTERN = /^GHSA(-[23456789cfghjmpqrvwx]{4}){3}$/
 
 /**
- * Stops GitHub from creating cross-reference events on other repos: breaks `#123` and
- * `owner/repo#123`, and routes github.com links through the redirect host.
+ * Stops GitHub from adding cross-reference events to other issues and PRs. It breaks `#123` and
+ * `owner/repo#123` references and sends github.com links through redirect.github.com.
  */
 export function neutralizeIssueRefs({ text }) {
   return text
@@ -35,7 +37,10 @@ export function neutralizeIssueRefs({ text }) {
     .replace(GITHUB_URL_PATTERN, 'https://redirect.github.com/')
 }
 
-/** Appends the closing fence for a fenced code block left open, per CommonMark fence rules. */
+/**
+ * Closes a fenced code block that `text` leaves open, so the rest of the PR body does not render
+ * as code. Fences match by CommonMark rules.
+ */
 export function closeOpenFence({ text }) {
   let openFence = null
 
@@ -61,7 +66,7 @@ export function closeOpenFence({ text }) {
   return openFence ? `${text}\n${openFence}` : text
 }
 
-/** Makes text safe inside one markdown table cell. */
+/** Replaces newlines and escapes `|`, so the text stays inside one Markdown table cell. */
 export function escapeTableCell({ text }) {
   return String(text ?? '')
     .replace(/\r?\n|\r/g, ' ')
@@ -69,8 +74,9 @@ export function escapeTableCell({ text }) {
 }
 
 /**
- * Removes every HTML comment, not only audit-deps fingerprints, because hidden text can steer
- * later AI reviewers. Repeats until stable to defeat nesting like `<!-<!-- -->-`.
+ * Removes all HTML comments. A comment could forge an audit-deps fingerprint, and hidden text
+ * can mislead AI reviewers that read the body later. Repeats until the text stops changing, so
+ * nested input such as `<!-<!-- -->-` cannot leave a comment behind.
  */
 function stripHtmlComments({ text }) {
   let current = text
