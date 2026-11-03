@@ -9,6 +9,8 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { APIError } from '../errors/APIError.js'
+
 const fetchFullClientUploadMock = vi.fn()
 
 vi.mock('./getFileFromUploadInstructions.js', () => ({
@@ -41,7 +43,7 @@ const createReq = (transformers: UploadTransformer[]): PayloadRequest =>
       collections: { media: { config: { fields: [], upload: {} } } },
       config: { routes: { api: '/api' }, upload: { transformers } },
       db: { findOne: vi.fn(async () => null) },
-      logger: { error: vi.fn() },
+      logger: { error: vi.fn(), warn: vi.fn() },
     },
   }) as unknown as PayloadRequest
 
@@ -128,5 +130,50 @@ describe('generateFileData - client uploads without full contents', () => {
       }),
     )
     expect(fetchFullClientUploadMock).not.toHaveBeenCalled()
+  })
+
+  it('should run the content checks on the downloaded file before transformers get it', async () => {
+    const malformedMedia = Buffer.concat([
+      Buffer.alloc(4),
+      Buffer.from('ftypavif'),
+      Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>'),
+    ])
+    await fs.writeFile(tempFilePath, malformedMedia)
+    const transformFile = vi.fn(async () => ({ status: 'continue' as const }))
+    const req = createReq([{ slug: 'accepting', mimeTypes: ['video/*'], transformFile }])
+    req.file!.size = malformedMedia.length
+
+    await expect(
+      generateFileData({
+        collection,
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        req,
+      }),
+    ).rejects.toMatchObject({
+      data: { errors: [{ message: 'Invalid or corrupted ISO base media file.' }] },
+    })
+    expect(transformFile).not.toHaveBeenCalled()
+  })
+
+  it('should keep the message and status of an error from the download', async () => {
+    fetchFullClientUploadMock.mockRejectedValue(
+      new APIError('Uploaded source size does not match the declared size.', 400),
+    )
+    const req = createReq([{ slug: 'accepting', mimeTypes: ['video/*'], transformFile: vi.fn() }])
+
+    await expect(
+      generateFileData({
+        collection,
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        req,
+      }),
+    ).rejects.toMatchObject({
+      message: 'Uploaded source size does not match the declared size.',
+      status: 400,
+    })
   })
 })

@@ -274,7 +274,7 @@ export const fetchFullClientUpload = async ({
     | { filename?: string }
     | undefined
 
-  const { tempFilePath } = await downloadToTempFile({
+  const { contentType, tempFilePath } = await downloadToTempFile({
     collectionSlug,
     file: {
       filename: verifiedOriginal?.filename ?? file.name,
@@ -285,7 +285,7 @@ export const fetchFullClientUpload = async ({
     req,
   })
 
-  return { ...file, data: Buffer.alloc(0), tempFilePath }
+  return { ...file, data: Buffer.alloc(0), mimetype: contentType || file.mimetype, tempFilePath }
 }
 
 const downloadToTempFile = async ({

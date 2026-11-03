@@ -8,7 +8,10 @@ import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
-import { getFileFromUploadInstructions } from './getFileFromUploadInstructions.js'
+import {
+  fetchFullClientUpload,
+  getFileFromUploadInstructions,
+} from './getFileFromUploadInstructions.js'
 
 vi.mock('./clientUploadReceipt.js', () => ({
   verifyClientUploadReceipt: vi.fn(({ signedReceipt }: { signedReceipt: unknown }) => {
@@ -189,6 +192,33 @@ describe('getFileFromUploadInstructions', () => {
     expect(canTransform).not.toHaveBeenCalled()
     expect(file.tempFilePath).toBeUndefined()
     expect(file.data.length).toBe(0)
+  })
+
+  it('should use the MIME type of the full download when it fetches a deferred client upload', async () => {
+    const handler = vi.fn(
+      async () =>
+        new Response('some file contents', {
+          headers: { 'Content-Type': 'video/quicktime' },
+          status: 200,
+        }),
+    )
+    const req = createReq([handler])
+    const uploadReferenceFile = createUploadReferenceFile()
+
+    const file = await fetchFullClientUpload({
+      collectionSlug: 'media',
+      file: {
+        name: uploadReferenceFile.filename,
+        data: Buffer.alloc(0),
+        mimetype: 'video/mp4',
+        size: uploadReferenceFile.size,
+        uploadReference: uploadReferenceFile.uploadReference,
+      },
+      req,
+    })
+    tempFilesToClean.push(file.tempFilePath!)
+
+    expect(file.mimetype).toBe('video/quicktime')
   })
 
   it('throws when no handler returns a response with a body', async () => {
