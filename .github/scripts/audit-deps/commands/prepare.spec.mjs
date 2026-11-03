@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
+import { readPrepared } from '../step-handoff.mjs'
 import { runPreparePrs, spawnForExitCode } from './prepare.mjs'
 
 const execFileAsync = promisify(execFile)
@@ -147,7 +148,7 @@ describe('runPreparePrs', () => {
       renderPr: async () => ({ body: 'b', isDraft: false, title: 't' }),
       run,
     })
-    prepared = JSON.parse(await readFile(path.join(outDir, 'prepared.json'), 'utf8'))
+    prepared = await readPrepared({ file: path.join(outDir, 'prepared.json') })
   })
 
   afterAll(async () => {
@@ -157,7 +158,7 @@ describe('runPreparePrs', () => {
   })
 
   function entryFor(prId) {
-    return prepared.prs.find((entry) => entry.prId === prId)
+    return prepared.find((entry) => entry.prId === prId)
   }
 
   it('should record the failed step and keep going', () => {
@@ -200,13 +201,21 @@ describe('runPreparePrs', () => {
     }
   })
 
-  it('should leave out PRs whose step is not prepared', () => {
-    expect(prepared.prs.map((entry) => entry.prId)).toEqual([
+  it('should record a PR whose step is not prepared without building it', () => {
+    expect(prepared.map((entry) => entry.prId)).toEqual([
       'non-major',
       'dep-b-1',
       'dep-c-1',
+      'skipped',
       'bad-branch',
     ])
+    expect(entryFor('skipped')).toEqual({
+      branch: 'ci/audit-deps-fix-main-skipped',
+      headSha: 'abc',
+      prId: 'skipped',
+      prNumber: 95,
+      step: 'skip',
+    })
   })
 
   it('should refuse a branch outside the bot prefix', () => {

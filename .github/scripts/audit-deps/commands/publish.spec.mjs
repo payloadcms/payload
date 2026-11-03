@@ -1,45 +1,49 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { isPreparedStep, writePrepared as writePreparedFile } from '../step-handoff.mjs'
 import { pushBranch, runPublish } from './publish.mjs'
 
 const FAIL_TEXT = 'Some audit PRs for main were not opened or updated; see the run summary'
 
 describe('runPublish', () => {
-  let runnerTemp
+  let preparedDir
 
   beforeEach(async () => {
-    runnerTemp = await mkdtemp(path.join(tmpdir(), 'publish-'))
-    await mkdir(path.join(runnerTemp, 'prepared'))
+    preparedDir = await mkdtemp(path.join(tmpdir(), 'publish-'))
   })
 
   afterEach(async () => {
-    await rm(runnerTemp, { force: true, recursive: true })
+    await rm(preparedDir, { force: true, recursive: true })
   })
 
   async function writePrepared({ prs }) {
     const entries = []
     for (const pr of prs) {
-      const bodyFile = path.join(runnerTemp, 'prepared', `${pr.prId}.md`)
-      await writeFile(bodyFile, `body ${pr.prId}`)
-      entries.push({
+      const entry = {
         branch: `ci/audit-deps-fix-main-${pr.prId}`,
-        commit: 'c0ffee',
         headSha: null,
-        isDraft: false,
         prNumber: null,
         step: 'create',
-        title: `title ${pr.prId}`,
         ...pr,
+      }
+      if (!isPreparedStep({ step: entry.step })) {
+        entries.push(entry)
+        continue
+      }
+      const bodyFile = path.join(preparedDir, `${pr.prId}.md`)
+      await writeFile(bodyFile, `body ${pr.prId}`)
+      entries.push({
         bodyFile,
+        commit: 'c0ffee',
+        isDraft: false,
+        title: `title ${pr.prId}`,
+        ...entry,
       })
     }
-    await writeFile(
-      path.join(runnerTemp, 'prepared', 'prepared.json'),
-      JSON.stringify({ baseSha: 'base', prs: entries }),
-    )
+    await writePreparedFile({ file: path.join(preparedDir, 'prepared.json'), prs: entries })
   }
 
   function makeFakes() {
@@ -60,7 +64,6 @@ describe('runPublish', () => {
         issues: { addLabels: vi.fn(async () => ({})) },
         pulls: {
           create: vi.fn(async () => ({ data: { number: 101 } })),
-          list: vi.fn(async () => ({ data: [] })),
           update: vi.fn(async () => ({})),
         },
       },
@@ -76,9 +79,8 @@ describe('runPublish', () => {
         APP_TOKEN: 'app-token',
         GITHUB_WORKSPACE: '/w',
         IS_DEFAULT_INPUTS: 'true',
-        PR_STEPS: '{}',
+        PREPARED_FILE: path.join(preparedDir, 'prepared.json'),
         REF: 'main',
-        RUNNER_TEMP: runnerTemp,
         STALE_PRS: '[]',
         ...env,
       },
@@ -194,21 +196,20 @@ describe('runPublish', () => {
   })
 
   it('should list every PR step that was not prepared', async () => {
-    await writePrepared({ prs: [] })
-    const fakes = makeFakes()
-
-    await publish({
-      env: {
-        PR_STEPS: JSON.stringify({
-          held: { headSha: 'h', prNumber: 90, step: 'blocked' },
-          rejected: { headSha: null, prNumber: null, step: 'skip-rejected' },
-          same: { headSha: 'h', prNumber: 95, step: 'skip' },
-        }),
-      },
-      fakes,
+    await writePrepared({
+      prs: [
+        { headSha: 'h', prId: 'held', prNumber: 90, step: 'blocked' },
+        { prId: 'rejected', step: 'skip-rejected' },
+        { headSha: 'h', prId: 'same', prNumber: 95, step: 'skip' },
+      ],
     })
+    const fakes = makeFakes()
+    const push = vi.fn()
+
+    await publish({ fakes, push })
 
     const lines = fakes.summary().split('\n')
+    expect(push).not.toHaveBeenCalled()
     expect(lines).toContain(
       '- held: blocked #90: a person pushed to this branch; the bot no longer updates it',
     )
@@ -217,6 +218,20 @@ describe('runPublish', () => {
       '- rejected: skip-rejected: a person closed this change; it is not re-created',
     )
     expect(fakes.core.setFailed).not.toHaveBeenCalled()
+  })
+
+  it('should stop before it publishes when prepared.json is invalid', async () => {
+    await writeFile(
+      path.join(preparedDir, 'prepared.json'),
+      JSON.stringify({
+        prs: [{ branch: 'b', headSha: 'h', prId: 'a', prNumber: null, step: 'update' }],
+      }),
+    )
+    const fakes = makeFakes()
+    const push = vi.fn()
+
+    await expect(publish({ fakes, push })).rejects.toThrow('an update needs a PR number')
+    expect(push).not.toHaveBeenCalled()
   })
 })
 

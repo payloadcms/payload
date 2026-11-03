@@ -6,6 +6,7 @@ import {
   parseFingerprint,
 } from './decide.mjs'
 import { bumpsOfPr } from './plan.mjs'
+import { formatStepOutputs } from './step-handoff.mjs'
 
 const BRANCH_PREFIX = 'ci/audit-deps-fix-'
 const MISSING_REF_STATUSES = new Set([404, 422])
@@ -24,6 +25,7 @@ export async function decidePrSteps({ core, github, isDefaultInputs, owner, plan
   if (!isDefaultInputs) {
     return setOutputs({
       core,
+      plan,
       prSteps: Object.fromEntries(
         plan.prs.map((pr) => [pr.id, { headSha: null, prNumber: null, step: 'dry-run' }]),
       ),
@@ -49,6 +51,7 @@ export async function decidePrSteps({ core, github, isDefaultInputs, owner, plan
 
   return setOutputs({
     core,
+    plan,
     prSteps: Object.fromEntries(plan.prs.map((pr) => [pr.id, stepsById.get(pr.id)])),
     staleNumbers: findStalePrs({ openPrs, prs: plan.prs, ref }),
   })
@@ -106,9 +109,12 @@ function withCommentTag({ text }) {
   return `${text}\n\n${COMMENT_TAG}`
 }
 
-function setOutputs({ core, prSteps, staleNumbers }) {
-  core.setOutput('pr_steps', JSON.stringify(prSteps))
-  core.setOutput('stale_prs', JSON.stringify(staleNumbers))
+function setOutputs({ core, plan, prSteps, staleNumbers }) {
+  for (const [name, value] of Object.entries(
+    formatStepOutputs({ plan, prSteps, stalePrs: staleNumbers }),
+  )) {
+    core.setOutput(name, value)
+  }
 }
 
 async function decideStepForPr({ github, openPr, owner, plan, pr, ref, repo }) {

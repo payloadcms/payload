@@ -9,12 +9,12 @@ import { classifyFixes } from '../bumps.mjs'
 import { findDisallowedChanges, listWorkingTreeChanges } from '../path-guard.mjs'
 import { bumpsOfPr, readPlan } from '../plan.mjs'
 import { readReport } from '../report.mjs'
+import { isPreparedStep, parsePrSteps, writePrepared } from '../step-handoff.mjs'
 import { buildPr } from './pr.mjs'
-import { errorMessage, requireOption, toSummaryText, writeJson, writeSummary } from './shared.mjs'
+import { errorMessage, requireOption, toSummaryText, writeSummary } from './shared.mjs'
 
 const execFileAsync = promisify(execFile)
 
-const PREPARED_STEPS = new Set(['create', 'update', 'dry-run'])
 // The audit bundle comes from the same checkout as these scripts, so the re-audit runs the same
 // code as the first audit.
 const AUDIT_ACTION_ENTRY = fileURLToPath(
@@ -33,13 +33,14 @@ const BOT_IDENTITY = {
  * Usage: `prepare-prs --plan --pr-steps-json --ref --scope --severity --run-url --cwd --out-dir`.
  * For each PR whose step is create, update or dry-run, it applies the bumps on the base commit,
  * regenerates the lockfile without install scripts, checks the changed paths, runs the audit
- * again, renders the PR body and commits on the PR branch. Writes `<out-dir>/prepared.json`.
- * When one PR fails, the file records the step that failed and the other PRs continue.
- * `run` spawns pnpm and the audit, and `renderPr` builds the title and body.
+ * again, renders the PR body and commits on the PR branch. Writes `<out-dir>/prepared.json` with
+ * one record for each planned PR. When one PR fails, its record names the step that failed and
+ * the other PRs continue. `run` spawns pnpm and the audit, and `renderPr` builds the title and
+ * body.
  */
 export async function runPreparePrs({ options, run = spawnForExitCode, renderPr = buildPr }) {
   const plan = await readPlan({ path: requireOption({ name: 'plan', options }) })
-  const prSteps = JSON.parse(requireOption({ name: 'pr-steps-json', options }))
+  const prSteps = parsePrSteps({ plan, text: requireOption({ name: 'pr-steps-json', options }) })
   const cwd = requireOption({ name: 'cwd', options })
   const outDir = requireOption({ name: 'out-dir', options })
   const context = {
@@ -62,26 +63,27 @@ export async function runPreparePrs({ options, run = spawnForExitCode, renderPr 
 
   const prepared = []
   for (const pr of plan.prs) {
-    const prStep = prSteps[pr.id] ?? {}
-    if (!PREPARED_STEPS.has(prStep.step)) {
-      continue
+    const prStep = prSteps[pr.id]
+    const entry = {
+      branch: pr.branch,
+      headSha: prStep.headSha,
+      prId: pr.id,
+      prNumber: prStep.prNumber,
+      step: prStep.step,
     }
-    prepared.push(await preparePr({ baseSha, context, pr, prStep }))
+    prepared.push(
+      isPreparedStep({ step: prStep.step })
+        ? await preparePr({ baseSha, context, entry, pr })
+        : entry,
+    )
   }
   await git({ args: ['checkout', '-q', '--force', '--detach', baseSha], cwd })
 
-  await writeJson({ file: path.join(outDir, 'prepared.json'), value: { baseSha, prs: prepared } })
+  await writePrepared({ file: path.join(outDir, 'prepared.json'), prs: prepared })
   await writeSummary({ markdown: renderPreparedSummary({ prepared, ref: context.ref }) })
 }
 
-async function preparePr({ baseSha, context, pr, prStep }) {
-  const entry = {
-    branch: pr.branch,
-    headSha: prStep.headSha,
-    prId: pr.id,
-    prNumber: prStep.prNumber,
-    step: prStep.step,
-  }
+async function preparePr({ baseSha, context, entry, pr }) {
   if (!isValidPrBranch({ branch: pr.branch, ref: context.ref })) {
     return { ...entry, failedStep: 'branch', reason: 'not a ci/audit-deps-fix branch' }
   }
@@ -191,11 +193,12 @@ function findUnclearedAdvisories({ bumps, report }) {
 }
 
 function renderPreparedSummary({ prepared, ref }) {
+  const built = prepared.filter((entry) => isPreparedStep({ step: entry.step }))
   const lines = [`## Prepared PRs (${ref})`, '']
-  if (prepared.length === 0) {
+  if (built.length === 0) {
     lines.push('No PR to create or update.')
   }
-  for (const entry of prepared) {
+  for (const entry of built) {
     const name = toSummaryText({ text: entry.prId, maxLength: 200 })
     lines.push(
       entry.failedStep

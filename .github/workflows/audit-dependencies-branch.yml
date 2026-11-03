@@ -104,6 +104,7 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           IS_DEFAULT_INPUTS: ${{ inputs.is-default-inputs }}
+          PLAN_FILE: ${{ runner.temp }}/audit-plan/plan.json
           REF: ${{ inputs.ref }}
         with:
           github-token: ${{ github.token }}
@@ -154,7 +155,7 @@ jobs:
         env:
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
           IS_DEFAULT_INPUTS: ${{ inputs.is-default-inputs }}
-          PR_STEPS: ${{ steps.decide.outputs.pr_steps }}
+          PREPARED_FILE: ${{ runner.temp }}/prepared/prepared.json
           REF: ${{ inputs.ref }}
           STALE_PRS: ${{ steps.decide.outputs.stale_prs }}
         with:

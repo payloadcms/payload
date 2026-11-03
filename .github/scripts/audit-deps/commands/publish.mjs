@@ -1,9 +1,9 @@
 import { execFile } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
-import path from 'node:path'
 import { promisify } from 'node:util'
 
 import { closeStalePrs } from '../github.mjs'
+import { isPreparedStep, parseStalePrs, readPrepared } from '../step-handoff.mjs'
 import { errorMessage, toSummaryText } from './shared.mjs'
 
 const execFileAsync = promisify(execFile)
@@ -16,29 +16,35 @@ const UNPREPARED_REASONS = {
 
 /**
  * Runs the `Publish PRs` workflow step from actions/github-script, after `prepare-prs`. Reads
- * `APP_TOKEN`, `IS_DEFAULT_INPUTS`, `PR_STEPS`, `REF`, `STALE_PRS`, `RUNNER_TEMP` and
- * `GITHUB_WORKSPACE` from `env`. A real run (from main, with default inputs) pushes each prepared
- * commit, creates or updates its PR, then closes stale PRs. A dry run only writes the summary.
- * The summary lists every planned PR. When a PR fails, the other PRs continue and the step
- * fails at the end.
+ * `APP_TOKEN`, `IS_DEFAULT_INPUTS`, `PREPARED_FILE`, `REF`, `STALE_PRS` and `GITHUB_WORKSPACE`
+ * from `env`. A real run (from main, with default inputs) pushes each prepared commit, creates or
+ * updates its PR, then closes stale PRs. A dry run only writes the summary. The summary lists
+ * every planned PR. When a PR fails, the other PRs continue and the step fails at the end.
  */
 export async function runPublish({ context, core, env, github, push = pushBranch }) {
   const { owner, repo } = context.repo
   const ref = env.REF
   const isRealRun = env.IS_DEFAULT_INPUTS === 'true'
   const staleNumbers = parseStalePrs({ text: env.STALE_PRS })
-  const prepared = JSON.parse(
-    await readFile(path.join(env.RUNNER_TEMP, 'prepared', 'prepared.json'), 'utf8'),
-  )
+  const prepared = await readPrepared({ file: env.PREPARED_FILE })
 
   const isTokenMissing = isRealRun && !env.APP_TOKEN
   const results = []
-  for (const entry of prepared.prs) {
+  for (const entry of prepared) {
     if (entry.failedStep) {
       results.push({
         entry,
         status: 'failed',
         reason: `failed at ${entry.failedStep}: ${entry.reason}`,
+      })
+      continue
+    }
+    if (!isPreparedStep({ step: entry.step })) {
+      results.push({
+        entry,
+        number: entry.prNumber,
+        reason: UNPREPARED_REASONS[entry.step],
+        status: entry.step,
       })
       continue
     }
@@ -57,18 +63,6 @@ export async function runPublish({ context, core, env, github, push = pushBranch
       results.push({ entry, number, status: entry.step === 'update' ? 'updated' : 'created' })
     } catch (error) {
       results.push({ entry, status: 'failed', reason: errorMessage({ error }) })
-    }
-  }
-
-  const preparedIds = new Set(prepared.prs.map((entry) => entry.prId))
-  for (const [prId, prStep] of Object.entries(JSON.parse(env.PR_STEPS || '{}'))) {
-    if (!preparedIds.has(prId)) {
-      results.push({
-        entry: { prId },
-        number: prStep.prNumber,
-        reason: UNPREPARED_REASONS[prStep.step],
-        status: prStep.step,
-      })
     }
   }
 
@@ -141,9 +135,14 @@ async function upsertPr({ entry, github, owner, ref, repo }) {
   const body = await readFile(entry.bodyFile, 'utf8')
 
   if (entry.step === 'update') {
-    const number = Number(entry.prNumber ?? (await findPrNumber({ entry, github, owner, repo })))
-    await github.rest.pulls.update({ body, owner, pull_number: number, repo, title: entry.title })
-    return number
+    await github.rest.pulls.update({
+      body,
+      owner,
+      pull_number: entry.prNumber,
+      repo,
+      title: entry.title,
+    })
+    return entry.prNumber
   }
 
   const { data } = await github.rest.pulls.create({
@@ -162,27 +161,6 @@ async function upsertPr({ entry, github, owner, ref, repo }) {
     repo,
   })
   return data.number
-}
-
-async function findPrNumber({ entry, github, owner, repo }) {
-  const { data } = await github.rest.pulls.list({
-    head: `${owner}:${entry.branch}`,
-    owner,
-    repo,
-    state: 'open',
-  })
-  if (!data[0]) {
-    throw new Error(`no open PR for ${entry.branch}`)
-  }
-  return data[0].number
-}
-
-function parseStalePrs({ text }) {
-  const prNumbers = JSON.parse(text || '[]')
-  if (!Array.isArray(prNumbers) || !prNumbers.every((n) => Number.isInteger(n) && n > 0)) {
-    throw new Error(`invalid stale PR numbers: ${text}`)
-  }
-  return prNumbers
 }
 
 function renderResults({ ref, results }) {

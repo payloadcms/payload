@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -6,17 +6,17 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { runDecidePrSteps } from './github.mjs'
 
 describe('runDecidePrSteps', () => {
-  let runnerTemp
+  let planDir
 
   afterEach(async () => {
-    await rm(runnerTemp, { force: true, recursive: true })
+    await rm(planDir, { force: true, recursive: true })
   })
 
   it('should dry-run every planned PR without calling the API for non-default inputs', async () => {
-    runnerTemp = await mkdtemp(path.join(tmpdir(), 'audit-deps-github-'))
-    await mkdir(path.join(runnerTemp, 'audit-plan'))
+    planDir = await mkdtemp(path.join(tmpdir(), 'audit-deps-github-'))
+    const planFile = path.join(planDir, 'plan.json')
     await writeFile(
-      path.join(runnerTemp, 'audit-plan', 'plan.json'),
+      planFile,
       JSON.stringify({
         bumps: [{ id: 'lodash-4' }, { id: 'react-19' }],
         noFix: [],
@@ -33,7 +33,7 @@ describe('runDecidePrSteps', () => {
     await runDecidePrSteps({
       context: { repo: { owner: 'payloadcms', repo: 'payload' } },
       core,
-      env: { IS_DEFAULT_INPUTS: 'false', REF: 'main', RUNNER_TEMP: runnerTemp },
+      env: { IS_DEFAULT_INPUTS: 'false', PLAN_FILE: planFile, REF: 'main' },
       github,
     })
 
