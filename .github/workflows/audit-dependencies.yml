@@ -23,10 +23,6 @@ on:
         description: The level of audit to run (low, moderate, high, critical)
         required: false
         default: moderate
-      debug:
-        description: Enable debug logging
-        required: false
-        default: false
 
 # Real runs share one queue, so two of them never push to the PR branches at the same time. A
 # group keeps only its newest pending run, so each dry run gets its own group and cannot replace a
