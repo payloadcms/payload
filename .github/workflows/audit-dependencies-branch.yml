@@ -49,7 +49,8 @@ jobs:
           ref: ${{ inputs.ref }}
           persist-credentials: false
 
-      # Tooling comes from the triggering commit (the audited ref may lack it), kept out of the workspace.
+      # Tooling (the scripts and the audit action) comes from the triggering commit, kept out of the
+      # workspace. Every ref is audited with the same code; the audited ref gives its tree and allowlist.
       - name: Checkout tooling
         env:
           TOOLING_SHA: ${{ github.sha }}
@@ -57,7 +58,7 @@ jobs:
           set -euo pipefail
           tooling="$RUNNER_TEMP/audit-deps-tooling"
           git clone -q --filter=blob:none --no-checkout --depth=1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$tooling"
-          git -C "$tooling" sparse-checkout set --no-cone /.github/scripts/audit-deps/
+          git -C "$tooling" sparse-checkout set --no-cone /.github/scripts/audit-deps/ /.github/actions/audit-dependencies/dist/
           git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
           git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
 
@@ -68,14 +69,15 @@ jobs:
           pnpm-run-install: false
           pnpm-restore-cache: false
 
-      - name: Run audit dependencies action
-        uses: ./.github/actions/audit-dependencies
+      # Runs the audit action's bundle as its action.yml does; the action reads the workspace.
+      - name: Run dependency audit
         # Findings exit non-zero; the plan step validates the report instead.
         continue-on-error: true
-        with:
-          scope: ${{ inputs.scope }}
-          severity: ${{ inputs.severity }}
-          json: ${{ runner.temp }}/audit_output.json
+        env:
+          INPUT_JSON: ${{ runner.temp }}/audit_output.json
+          INPUT_SCOPE: ${{ inputs.scope }}
+          INPUT_SEVERITY: ${{ inputs.severity }}
+        run: node "$RUNNER_TEMP/audit-deps-tooling/.github/actions/audit-dependencies/dist/index.js"
 
       - name: Plan bumps and PRs
         env:

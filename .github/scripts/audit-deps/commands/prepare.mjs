@@ -1,6 +1,7 @@
 import { execFile, spawn } from 'node:child_process'
 import { mkdir, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 
 import { applyBumps } from '../apply-bumps.mjs'
@@ -21,7 +22,10 @@ import {
 const execFileAsync = promisify(execFile)
 
 const PREPARED_STEPS = new Set(['create', 'update', 'dry-run'])
-const AUDIT_ACTION_ENTRY = '.github/actions/audit-dependencies/dist/index.js'
+// The action ships with these scripts, so the re-audit runs the same code as the first audit.
+const AUDIT_ACTION_ENTRY = fileURLToPath(
+  new URL('../../../actions/audit-dependencies/dist/index.js', import.meta.url),
+)
 // The audit exits 1 when findings remain, which is expected for unfixable advisories.
 const MAX_AUDIT_EXIT_CODE = 1
 const BOT_IDENTITY = {
@@ -156,7 +160,7 @@ async function reauditPr({ context, pr }) {
   await rm(file, { force: true })
 
   const code = await context.run({
-    args: [path.join(context.cwd, AUDIT_ACTION_ENTRY)],
+    args: [AUDIT_ACTION_ENTRY],
     command: 'node',
     cwd: context.cwd,
     env: { INPUT_JSON: file, INPUT_SCOPE: context.scope, INPUT_SEVERITY: context.severity },

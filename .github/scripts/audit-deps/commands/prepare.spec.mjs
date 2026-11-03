@@ -2,6 +2,7 @@ import { execFile } from 'node:child_process'
 import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
@@ -75,6 +76,7 @@ describe('runPreparePrs', () => {
   let outDir
   let baseSha
   let prepared
+  const auditCalls = []
 
   async function git(...args) {
     const { stdout } = await execFileAsync('git', args, { cwd: repoDir })
@@ -108,7 +110,7 @@ describe('runPreparePrs', () => {
     await writeFile(planFile, JSON.stringify(plan))
 
     let lockfileCalls = 0
-    const run = async ({ command, cwd, env }) => {
+    const run = async ({ args, command, cwd, env }) => {
       if (command === 'pnpm') {
         lockfileCalls++
         if (lockfileCalls === 1) {
@@ -123,6 +125,7 @@ describe('runPreparePrs', () => {
         )
         return 0
       }
+      auditCalls.push({ args, command, cwd })
       const findings = env.INPUT_JSON.endsWith('reaudit-dep-c-1.json')
         ? [{ advisory: UNCLEARED_ADVISORY, bumps: [{ dependency: 'dep-c' }] }]
         : []
@@ -180,6 +183,17 @@ describe('runPreparePrs', () => {
       failedStep: 're-audit',
       reason: expect.stringContaining(UNCLEARED_ADVISORY),
     })
+  })
+
+  it('should re-audit the audited tree with the action from the tooling checkout', () => {
+    const toolingAction = fileURLToPath(
+      new URL('../../../actions/audit-dependencies/dist/index.js', import.meta.url),
+    )
+
+    expect(auditCalls.length).toBeGreaterThan(0)
+    for (const call of auditCalls) {
+      expect(call).toEqual({ args: [toolingAction], command: 'node', cwd: repoDir })
+    }
   })
 
   it('should not fail a PR for an ignored file an earlier PR left', () => {
