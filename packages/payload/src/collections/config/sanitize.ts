@@ -409,6 +409,12 @@ export const sanitizeCollection = (
       typeof sanitized.auth === 'boolean' ? {} : sanitized.auth,
     )
 
+    if (sanitized.auth.refreshTokens && !sanitized.auth.useSessions) {
+      throw new Error(
+        `Collection "${sanitized.slug}": auth.refreshTokens requires auth.useSessions`,
+      )
+    }
+
     if (!collection?.admin?.useAsTitle) {
       sanitized.admin!.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
     }

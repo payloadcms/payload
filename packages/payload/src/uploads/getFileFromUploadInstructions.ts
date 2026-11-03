@@ -16,7 +16,7 @@ import { sanitizeFilename } from '../utilities/sanitizeFilename.js'
 import { sanitizeUploadPrefix } from '../utilities/sanitizeUploadPrefix.js'
 import { verifyClientUploadReceipt } from './clientUploadReceipt.js'
 import { docWithFilenameExists } from './docWithFilenameExists.js'
-import { getOriginalFilename, normalizeStorageKey } from './fileVersioning/naming.js'
+import { normalizeStorageKey } from './fileVersioning/naming.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
@@ -83,24 +83,23 @@ export const getFileFromUploadInstructions = async ({
       signedReceipt,
     })
     allowOverwrite = receipt.allowOverwrite === true
-    let originalFilename: string
     let storageFilePath: string
 
     try {
-      originalFilename = getOriginalFilename({ filename: file.filename })
       storageFilePath = normalizeStorageKey({ key: receipt.storageFilePath })
     } catch {
       throw new APIError('Invalid upload reference.', 400)
     }
 
-    const expectedKeySuffix = [receipt.filePrefix, receipt._objectKey, originalFilename]
+    const isReceiptForUploadedFilename = path.posix.basename(storageFilePath) === file.filename
+    const expectedKeySuffix = [receipt.filePrefix, receipt._objectKey, file.filename]
       .filter(Boolean)
       .join('/')
 
     if (
       (!allowOverwrite &&
         (!receipt._objectKey ||
-          path.posix.basename(storageFilePath) !== originalFilename ||
+          !isReceiptForUploadedFilename ||
           !`/${storageFilePath}`.endsWith(`/${expectedKeySuffix}`))) ||
       ('prefix' in file.uploadReference && file.uploadReference.prefix !== receipt.filePrefix) ||
       ('_objectKey' in file.uploadReference &&
@@ -109,11 +108,11 @@ export const getFileFromUploadInstructions = async ({
       throw new APIError('Invalid upload reference.', 400)
     }
 
-    providerFilename = allowOverwrite ? file.filename : originalFilename
+    providerFilename = file.filename
     if (!allowOverwrite) {
       verifiedOriginal = {
         _objectKey: receipt._objectKey,
-        filename: originalFilename,
+        filename: file.filename,
         key: storageFilePath,
         prefix: receipt.filePrefix,
         signedReceipt: signedReceipt as string,

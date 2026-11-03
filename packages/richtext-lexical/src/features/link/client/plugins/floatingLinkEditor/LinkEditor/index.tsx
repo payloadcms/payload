@@ -181,7 +181,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         }
 
         const loadingLabel = t('fields:linkedTo', {
-          label: `${getTranslation(relatedField.labels.singular, i18n)} - ${t('lexical:link:loadingWithEllipsis', i18n)}`,
+          label: `${getTranslation(relatedField.labels.singular, i18n)} - ${t('lexical:link:loadingWithEllipsis')}`,
         }).replace(/<[^>]*>?/g, '')
         setLinkLabel(loadingLabel)
 
@@ -216,7 +216,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
           })
           .catch(() => {
             const label = t('fields:linkedTo', {
-              label: `${getTranslation(relatedField.labels.singular, i18n)} - ${t('general:untitled', i18n)} - ID: ${id}`,
+              label: `${getTranslation(relatedField.labels.singular, i18n)} - ${t('general:untitled')} - ID: ${id}`,
             }).replace(/<[^>]*>?/g, '')
             setLinkLabel(label)
           })

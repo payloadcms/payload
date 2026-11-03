@@ -115,7 +115,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
         overrideAccess: true,
         where: {
           filename: {
-            equals: 'payload-original.jpg',
+            equals: 'payload.jpg',
           },
         },
       })
@@ -561,7 +561,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
       const uploadNode: SerializedUploadNode = docs[0].lexicalCustomFields.root.children.find(
         (node) => node.type === 'upload',
       ) as SerializedUploadNode
-      expect((uploadNode.value.media as any).filename).toStrictEqual('payload-original.png')
+      expect((uploadNode.value.media as any).filename).toStrictEqual('payload.png')
     })
   })
 
@@ -717,7 +717,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
       /**
        * Depth 1 population:
        */
-      expect(relationshipBlockNode.fields.rel.filename).toStrictEqual('payload-original.jpg')
+      expect(relationshipBlockNode.fields.rel.filename).toStrictEqual('payload.jpg')
     })
 
     test('should correctly populate polymorphic hasMany relationships in blocks with depth=0', async ({
@@ -790,9 +790,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
       expect(relationshipBlockNode.fields.rel[1].relationTo).toStrictEqual('uploads')
       expect(relationshipBlockNode.fields.rel[1].value.id).toStrictEqual(createdJPGDocID)
       expect(relationshipBlockNode.fields.rel[1].value.text).toStrictEqual(uploadsDoc.text)
-      expect(relationshipBlockNode.fields.rel[1].value.filename).toStrictEqual(
-        'payload-original.jpg',
-      )
+      expect(relationshipBlockNode.fields.rel[1].value.filename).toStrictEqual('payload.jpg')
     })
 
     test('should not populate relationship nodes inside of a sub-editor from a blocks node with 0 depth', async ({

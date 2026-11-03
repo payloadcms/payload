@@ -78,7 +78,7 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
         })
         expect(instructions.file.filename).toBe('image.png')
         expect(instructions.data.pathname).toBe(
-          `${(instructions.file.uploadReference as { _objectKey: string })._objectKey}/image-original.png`,
+          `${(instructions.file.uploadReference as { _objectKey: string })._objectKey}/image.png`,
         )
 
         const result = await put(
@@ -92,7 +92,7 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
         )
 
         expect(result.url).toBeDefined()
-        expect(result.url).toContain('image-original.png')
+        expect(result.url).toContain('image.png')
 
         const { blobs } = await list()
         const uploaded = blobs.find((b) => b.pathname === instructions.data.pathname)
@@ -132,7 +132,9 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
           const { blobs: remaining } = await list()
 
           if (shouldFail) {
-            expect(createdResponse.status).toBe(500)
+            // The first document already uses the receipt's filename, so the second claim on the
+            // same object is rejected before the document write.
+            expect(createdResponse.status).toBe(outcome === 'retain shared source' ? 400 : 500)
             expect(remaining.map(({ pathname }) => pathname)).toEqual(
               outcome === 'retain shared source' ? [instructions.data.pathname] : [],
             )
@@ -143,8 +145,8 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
             expect(createdResponse.status).toBe(201)
             const { doc } = await createdResponse.json()
 
-            expect(doc.filename).toBe('image-original.png')
-            expect(doc.original.filename).toBe('image-original.png')
+            expect(doc.filename).toBe('image.png')
+            expect(doc.original.filename).toBe('image.png')
             expect(remaining.map(({ pathname }) => pathname)).toEqual([instructions.data.pathname])
             const storedResponse = await restClient.GET(`/media/file/${doc.filename}`)
 
@@ -198,7 +200,7 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
 
     expect(result.url).toBeDefined()
     expect(result.url).toContain(prefix)
-    expect(result.url).toContain('image-original.png')
+    expect(result.url).toContain('image.png')
 
     const { blobs } = await list()
     const uploaded = blobs.find((b) => b.pathname === instructions.data.pathname)

@@ -83,6 +83,20 @@ describe('mergeLocalizedData', () => {
 
       expect(missingData.title).toBe('Old Title')
 
+      const undefinedData = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales: {
+          title: undefined,
+        },
+        docWithLocales: {
+          title: 'Old Title',
+        },
+        fields,
+        localesToUpdate,
+      })
+
+      expect(undefinedData.title).toBe('Old Title')
+
       const updatedData = mergeLocalizedData({
         configBlockReferences: [],
         dataWithLocales: {
@@ -1079,4 +1093,32 @@ describe('mergeLocalizedData', () => {
       expect(result.layout[0].body).toEqual({ en: 'New English', es: 'Old Spanish' })
     })
   })
+})
+
+describe('clearing non-localized rows', () => {
+  it.each(['array', 'blocks'] as const)(
+    'should preserve an explicit null for a non-localized %s field',
+    (type) => {
+      const fields: Field[] =
+        type === 'array'
+          ? [{ name: 'rows', type: 'array', fields: [{ name: 'text', type: 'text' }] }]
+          : [
+              {
+                name: 'rows',
+                type: 'blocks',
+                blocks: [{ slug: 'text', fields: [{ name: 'text', type: 'text' }] }],
+              },
+            ]
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales: { rows: null },
+        docWithLocales: { rows: [{ id: 'row-1', blockType: 'text', text: 'Published' }] },
+        fields,
+        localesToUpdate: ['en'],
+      })
+
+      expect(result.rows).toBeNull()
+    },
+  )
 })
