@@ -267,7 +267,7 @@ export function withSavedCrop({
   transforms,
 }: {
   edits: UploadEdits
-  original: Partial<Dimensions>
+  original: { height?: null | number; width?: null | number }
   transforms: TransformState | undefined
 }): UploadEdits {
   const savedCrop = transforms?.crop
