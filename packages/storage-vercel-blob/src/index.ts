@@ -12,6 +12,7 @@ import type { VercelBlobClientUploadHandlerExtra } from './client/VercelBlobClie
 
 import { createVercelBlobAdapter } from './adapter.js'
 import { getClientUploadRoute } from './getClientUploadRoute.js'
+import { resolveBlobConfig } from './resolveBlobConfig.js'
 
 export type VercelBlobStorageOptions = {
   /**
@@ -64,13 +65,35 @@ export type VercelBlobStorageOptions = {
    */
   enabled?: boolean
   /**
-   * Vercel Blob storage read/write token
+   * Vercel Blob store ID (the `store_<id>` identifier, with or without the
+   * `store_` prefix).
    *
-   * Usually process.env.BLOB_READ_WRITE_TOKEN set by Vercel
+   * Only needed for OIDC authentication (see `token`). When the adapter runs on
+   * Vercel with a connected Blob store, Vercel sets `BLOB_STORE_ID` in the
+   * environment and this is picked up automatically, so you usually don't need
+   * to set it. Provide it explicitly when `BLOB_STORE_ID` is not available
+   * (e.g. a team-level store, or code running outside Vercel with a manual OIDC
+   * token).
    *
-   * If unset, the plugin will be disabled and will fallback to local storage
+   * Ignored when a read/write `token` is provided, because the store ID is
+   * derived from the token in that case.
    */
-  token: string | undefined
+  storeId?: string
+
+  /**
+   * Vercel Blob storage read/write token.
+   *
+   * Usually process.env.BLOB_READ_WRITE_TOKEN set by Vercel.
+   *
+   * Leave this unset to use OIDC authentication instead (now the default for
+   * newly connected Vercel Blob stores). In OIDC mode, Vercel issues
+   * short-lived tokens that `@vercel/blob` resolves automatically from the
+   * environment (`VERCEL_OIDC_TOKEN`), and the store is identified by
+   * `storeId` / the `BLOB_STORE_ID` environment variable instead of by the
+   * token. The plugin is only disabled (falling back to local storage) when
+   * neither a token nor a resolvable store ID is available.
+   */
+  token?: string | undefined
 
   /**
    * When true, the collection-level prefix and document-level prefix are combined
@@ -101,29 +124,27 @@ type VercelBlobStoragePlugin = (vercelBlobStorageOpts: VercelBlobStorageOptions)
 export const vercelBlobStorage: VercelBlobStoragePlugin =
   (options: VercelBlobStorageOptions) =>
   (incomingConfig: Config): Config => {
-    // Parse storeId from token
-    const storeId = options.token
-      ?.match(/^vercel_blob_rw_([a-z\d]+)_[a-z\d]+$/i)?.[1]
-      ?.toLowerCase()
-
-    const isPluginDisabled = options.enabled === false || !options.token
-
-    // Don't throw if the plugin is disabled
-    if (!storeId && !isPluginDisabled) {
-      throw new Error(
-        'Invalid token format for Vercel Blob adapter. Should be vercel_blob_rw_<store_id>_<random_string>.',
-      )
-    }
-
     const optionsWithDefaults = {
       ...defaultUploadOptions,
       ...options,
     }
 
-    // support overriding the base URL for emulator https://github.com/payloadcms/vercel-blob-emulator
-    const baseUrl =
-      process.env.STORAGE_VERCEL_BLOB_BASE_URL ||
-      `https://${storeId}.${optionsWithDefaults.access}.blob.vercel-storage.com`
+    // Whether a read/write token was supplied. When it is absent the adapter
+    // runs in OIDC mode and lets @vercel/blob resolve credentials from the
+    // environment (VERCEL_OIDC_TOKEN), so `undefined` is threaded through.
+    const token = options.token
+
+    // Resolve the store ID (needed to build public blob URLs), the base URL,
+    // and whether the plugin should be disabled. See resolveBlobConfig for the
+    // precedence rules and OIDC behavior.
+    const { baseUrl, isPluginDisabled, storeId } = resolveBlobConfig({
+      access: optionsWithDefaults.access ?? 'public',
+      enabled: options.enabled,
+      envBaseUrl: process.env.STORAGE_VERCEL_BLOB_BASE_URL,
+      envStoreId: process.env.BLOB_STORE_ID,
+      storeId: options.storeId,
+      token: options.token,
+    })
 
     initClientUploads<
       VercelBlobClientUploadHandlerExtra,
@@ -132,7 +153,10 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       clientHandler: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
       collections: options.collections,
       config: incomingConfig,
-      enabled: !isPluginDisabled && Boolean(options.clientUploads),
+      // Client uploads mint short-lived client tokens server-side, which
+      // requires a read/write token. OIDC is not supported for that exchange,
+      // so client uploads are only enabled when a token is present.
+      enabled: !isPluginDisabled && Boolean(options.clientUploads) && Boolean(token),
       extraClientHandlerProps: () => ({
         addRandomSuffix: !!optionsWithDefaults.addRandomSuffix,
         useCompositePrefixes: !!options.useCompositePrefixes,
@@ -143,13 +167,15 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
         addRandomSuffix: optionsWithDefaults.addRandomSuffix,
         cacheControlMaxAge: options.cacheControlMaxAge,
         collections: options.collections,
-        token: options.token ?? '',
+        storeId,
+        token,
         useCompositePrefixes: optionsWithDefaults.useCompositePrefixes,
       }),
       serverHandlerPath: '/vercel-blob-client-upload-route',
     })
 
-    // If the plugin is disabled or no token is provided, do not enable the plugin
+    // If the plugin is disabled (explicitly, or because neither a token nor a
+    // resolvable store ID is available), do not enable the plugin
     if (isPluginDisabled) {
       if (options.alwaysInsertFields) {
         const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -177,7 +203,8 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       baseUrl,
       cacheControlMaxAge: optionsWithDefaults.cacheControlMaxAge ?? 60 * 60 * 24 * 365,
       clientUploads: optionsWithDefaults.clientUploads,
-      token: options.token!,
+      storeId,
+      token,
       useCompositePrefixes: options.useCompositePrefixes,
     })
 

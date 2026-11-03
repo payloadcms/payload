@@ -5,13 +5,23 @@ import { buildBlobUrl } from './generateURL.js'
 interface DeleteFileArgs {
   baseUrl: string
   storageFilePath: string
-  token: string
+  /**
+   * Store ID for OIDC authentication. When no `token` is provided, @vercel/blob
+   * resolves OIDC credentials from the environment and uses this store ID.
+   */
+  storeId?: string
+  /**
+   * Read/write token. When undefined, @vercel/blob resolves OIDC credentials
+   * from the environment instead.
+   */
+  token?: string
 }
 
 export async function deleteFile({
   baseUrl,
   storageFilePath,
+  storeId,
   token,
 }: DeleteFileArgs): Promise<void> {
-  await del(buildBlobUrl(baseUrl, storageFilePath), { token })
+  await del(buildBlobUrl(baseUrl, storageFilePath), { storeId, token })
 }

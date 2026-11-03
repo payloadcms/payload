@@ -25,7 +25,19 @@ type Args = {
   addRandomSuffix?: boolean
   cacheControlMaxAge?: number
   collections: VercelBlobCollectionOptions
-  token: string
+  /**
+   * Store ID for OIDC authentication. Unused by the client-upload token
+   * exchange (which requires a read/write token), but accepted for a
+   * consistent signature with the rest of the adapter.
+   */
+  storeId?: string
+  /**
+   * Read/write token. Client uploads require a read/write token to mint
+   * short-lived client tokens server-side; OIDC is not supported for the
+   * client-upload token exchange, so `clientUploads` cannot be used in
+   * OIDC-only mode.
+   */
+  token?: string
   useCompositePrefixes?: boolean
 }
 
