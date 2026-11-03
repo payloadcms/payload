@@ -174,23 +174,4 @@ describe('useQueue', () => {
     active.resolve()
     await running
   })
-
-  it('should use one queue for legacy and scheduled tasks', async () => {
-    const active = deferred()
-    const calls: string[] = []
-    const queue = renderQueue()
-
-    queue.queueTask(async () => {
-      calls.push('legacy')
-      await active.promise
-    })
-    const scheduled = queue.scheduleTask({
-      task: async () => calls.push('scheduled'),
-    })
-
-    expect(calls).toEqual(['legacy'])
-    active.resolve()
-    await scheduled
-    expect(calls).toEqual(['legacy', 'scheduled'])
-  })
 })

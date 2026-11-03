@@ -12,7 +12,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { QueueContext, UseQueueResult } from '../../hooks/useQueue.js'
+import type { TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
 import type {
   FieldAction,
   Context as FormContextType,
@@ -185,7 +185,7 @@ export const useFormSubmission = ({
     }: {
       onResponse: (args: { res: Response }) => void
       options?: SubmitOptions
-      requestContext: QueueContext
+      requestContext: TaskContext
     }) => {
       const {
         acceptValues = true,
