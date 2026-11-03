@@ -360,6 +360,54 @@ describe('Localization', () => {
       await expect(page.locator('.row-1 .cell-title')).toContainText(spanishTitle)
     })
 
+    test('should save to the rendered locale after navigating back to a URL without a locale param', async () => {
+      const { id } = await payload.create({
+        collection: localizedPostsSlug,
+        data: { title: englishTitle },
+        locale: defaultLocale,
+      })
+
+      await payload.update({
+        id,
+        collection: localizedPostsSlug,
+        data: { title: spanishTitle },
+        locale: spanishLocale,
+      })
+
+      await page.goto(url.edit(id))
+      await expect(page.locator('#field-title')).toHaveValue(englishTitle)
+
+      // Updates the locale preference to Spanish
+      await changeLocale(page, spanishLocale)
+      await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
+
+      // Restores the English render of the URL without a locale param from the router cache
+      await page.goBack()
+      await expect(page).not.toHaveURL(/locale=/)
+      await expect(page.locator('#field-title')).toHaveValue(englishTitle)
+      await expect(
+        page.locator('.localizer.app-header__localizer .localizer__button-content'),
+      ).toHaveText('English')
+
+      const editedEnglishTitle = `${englishTitle} edited`
+
+      await page.locator('#field-title').fill(editedEnglishTitle)
+      await saveDocAndAssert(page)
+
+      const {
+        docs: [savedPost],
+      } = await payload.find({
+        collection: localizedPostsSlug,
+        locale: 'all',
+        where: { id: { equals: id } },
+      })
+
+      expect(savedPost?.title).toEqual({
+        [defaultLocale]: editedEnglishTitle,
+        [spanishLocale]: spanishTitle,
+      })
+    })
+
     test('should not render default locale in locale selector when prefs are not default', async () => {
       await upsertPreferences<Config, GeneratedTypes<any>>({
         key: 'locale',

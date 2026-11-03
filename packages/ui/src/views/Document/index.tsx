@@ -19,6 +19,7 @@ import { RenderServerComponent } from '../../elements/RenderServerComponent/inde
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
 import {
   DocumentInfoProvider,
+  DocumentLocaleProvider,
   EditDepthProvider,
   HydrateAuthProvider,
   LivePreviewProvider,
@@ -428,69 +429,73 @@ export const renderDocument = async ({
   return {
     data: doc,
     Document: (
-      <DocumentInfoProvider
-        apiURL={apiURL}
-        collectionSlug={collectionConfig?.slug}
-        currentEditor={currentEditor}
-        disableActions={disableActions ?? false}
-        docPermissions={docPermissions}
-        globalSlug={globalConfig?.slug}
-        hasDeletePermission={hasDeletePermission}
-        hasPublishedDoc={hasPublishedDoc}
-        hasPublishPermission={hasPublishPermission}
-        hasSavePermission={hasSavePermission}
-        hasScheduledPublish={hasScheduledPublish}
-        hasTrashPermission={hasTrashPermission}
-        id={id}
-        initialData={doc}
-        initialState={formState}
-        isEditing={isEditing}
-        isLocked={isLocked}
-        isTrashed={isTrashedDoc}
-        key={locale?.code}
-        lastUpdateTime={lastUpdateTime}
-        mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
-        redirectAfterCreate={redirectAfterCreate}
-        redirectAfterDelete={redirectAfterDelete}
-        redirectAfterDuplicate={redirectAfterDuplicate}
-        redirectAfterRestore={redirectAfterRestore}
-        unpublishedVersionCount={unpublishedVersionCount}
-        versionCount={versionCount}
-      >
-        <LivePreviewProvider
-          breakpoints={livePreviewConfig?.breakpoints}
-          isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
-          isLivePreviewing={Boolean(
-            (entityPreferences?.value?.editViewType === undefined
-              ? livePreviewConfig?.openByDefault
-              : entityPreferences.value.editViewType === 'live-preview') && livePreviewURL,
-          )}
-          isPreviewEnabled={Boolean(isPreviewEnabled)}
-          previewURL={previewURL}
-          typeofLivePreviewURL={typeof livePreviewConfig?.url as 'function' | 'string' | undefined}
-          url={livePreviewURL}
+      <DocumentLocaleProvider locale={locale?.code}>
+        <DocumentInfoProvider
+          apiURL={apiURL}
+          collectionSlug={collectionConfig?.slug}
+          currentEditor={currentEditor}
+          disableActions={disableActions ?? false}
+          docPermissions={docPermissions}
+          globalSlug={globalConfig?.slug}
+          hasDeletePermission={hasDeletePermission}
+          hasPublishedDoc={hasPublishedDoc}
+          hasPublishPermission={hasPublishPermission}
+          hasSavePermission={hasSavePermission}
+          hasScheduledPublish={hasScheduledPublish}
+          hasTrashPermission={hasTrashPermission}
+          id={id}
+          initialData={doc}
+          initialState={formState}
+          isEditing={isEditing}
+          isLocked={isLocked}
+          isTrashed={isTrashedDoc}
+          key={locale?.code}
+          lastUpdateTime={lastUpdateTime}
+          mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
+          redirectAfterCreate={redirectAfterCreate}
+          redirectAfterDelete={redirectAfterDelete}
+          redirectAfterDuplicate={redirectAfterDuplicate}
+          redirectAfterRestore={redirectAfterRestore}
+          unpublishedVersionCount={unpublishedVersionCount}
+          versionCount={versionCount}
         >
-          {showHeader && !drawerSlug && (
-            <DocumentHeader
-              AfterHeader={Description}
-              collectionConfig={collectionConfig}
-              globalConfig={globalConfig}
-              permissions={permissions}
-              req={req}
-              user={userWithReadAccess}
-            />
-          )}
-          <HydrateAuthProvider permissions={permissions} />
-          <EditDepthProvider>
-            {RenderServerComponent({
-              clientProps,
-              Component: View,
-              importMap,
-              serverProps: documentViewServerProps,
-            })}
-          </EditDepthProvider>
-        </LivePreviewProvider>
-      </DocumentInfoProvider>
+          <LivePreviewProvider
+            breakpoints={livePreviewConfig?.breakpoints}
+            isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
+            isLivePreviewing={Boolean(
+              (entityPreferences?.value?.editViewType === undefined
+                ? livePreviewConfig?.openByDefault
+                : entityPreferences.value.editViewType === 'live-preview') && livePreviewURL,
+            )}
+            isPreviewEnabled={Boolean(isPreviewEnabled)}
+            previewURL={previewURL}
+            typeofLivePreviewURL={
+              typeof livePreviewConfig?.url as 'function' | 'string' | undefined
+            }
+            url={livePreviewURL}
+          >
+            {showHeader && !drawerSlug && (
+              <DocumentHeader
+                AfterHeader={Description}
+                collectionConfig={collectionConfig}
+                globalConfig={globalConfig}
+                permissions={permissions}
+                req={req}
+                user={userWithReadAccess}
+              />
+            )}
+            <HydrateAuthProvider permissions={permissions} />
+            <EditDepthProvider>
+              {RenderServerComponent({
+                clientProps,
+                Component: View,
+                importMap,
+                serverProps: documentViewServerProps,
+              })}
+            </EditDepthProvider>
+          </LivePreviewProvider>
+        </DocumentInfoProvider>
+      </DocumentLocaleProvider>
     ),
   }
 }

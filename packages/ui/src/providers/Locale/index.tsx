@@ -3,7 +3,7 @@
 import type { Locale } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
-import React, { createContext, use, useEffect, useRef, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 import { useAuth } from '../Auth/index.js'
@@ -11,7 +11,23 @@ import { useConfig } from '../Config/index.js'
 import { useSearchParams } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 
-const LocaleContext = createContext<Locale | null>(null)
+export const LocaleContext = createContext<Locale | null>(null)
+
+type DocumentLocaleClaim = {
+  code: Locale['code']
+}
+
+type DocumentLocaleClaimContextValue = {
+  /**
+   * Called by a rendered document to make the global locale match the locale its data was rendered in.
+   * Returns a function that releases the claim.
+   */
+  claimDocumentLocale: (args: { code: Locale['code'] }) => () => void
+}
+
+export const DocumentLocaleClaimContext = createContext<DocumentLocaleClaimContextValue>({
+  claimDocumentLocale: () => () => undefined,
+})
 
 export const LocaleLoadingContext = createContext({
   localeIsLoading: false,
@@ -76,6 +92,44 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
 
   const prevLocale = useRef<Locale | null>(locale)
 
+  /**
+   * Locales claimed by currently mounted documents, most recent last.
+   * When the URL has no `locale` param, a mounted document's locale takes precedence over preferences,
+   * because the document's data was rendered in that locale (e.g. restored from the router cache on back navigation).
+   */
+  const documentLocaleClaims = useRef<DocumentLocaleClaim[]>([])
+
+  /**
+   * Incremented whenever the locale is set, so that a slower preferences request cannot overwrite a newer locale.
+   */
+  const latestLocaleRequest = useRef(0)
+
+  const claimDocumentLocale = useCallback<DocumentLocaleClaimContextValue['claimDocumentLocale']>(
+    ({ code }) => {
+      const claim: DocumentLocaleClaim = { code }
+      documentLocaleClaims.current = [...documentLocaleClaims.current, claim]
+
+      const claimedLocale = localization ? findLocaleFromCode(localization, code) : null
+
+      if (claimedLocale) {
+        latestLocaleRequest.current += 1
+        setLocale(claimedLocale)
+      }
+
+      return () => {
+        documentLocaleClaims.current = documentLocaleClaims.current.filter(
+          (existingClaim) => existingClaim !== claim,
+        )
+      }
+    },
+    [localization],
+  )
+
+  const documentLocaleClaimContextValue = useMemo(
+    () => ({ claimDocumentLocale }),
+    [claimDocumentLocale],
+  )
+
   useEffect(() => {
     // Keep fields disabled until the new locale's document state finishes loading.
     if (locale?.code !== prevLocale.current?.code && !isTransitioning) {
@@ -92,9 +146,17 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
      */
     async function resetLocale() {
       if (localization && user?.id) {
+        latestLocaleRequest.current += 1
+        const request = latestLocaleRequest.current
+
         const localeToUse =
           localeFromParams ||
+          documentLocaleClaims.current.at(-1)?.code ||
           (await fetchPreferences<Locale['code']>('locale', apiRoute)?.then((res) => res.value))
+
+        if (request !== latestLocaleRequest.current) {
+          return
+        }
 
         const newLocale =
           findLocaleFromCode(localization, localeToUse) ||
@@ -113,7 +175,9 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
   return (
     <LocaleContext value={locale}>
       <LocaleLoadingContext value={{ localeIsLoading: isLoading, setLocaleIsLoading }}>
-        {children}
+        <DocumentLocaleClaimContext value={documentLocaleClaimContextValue}>
+          {children}
+        </DocumentLocaleClaimContext>
       </LocaleLoadingContext>
     </LocaleContext>
   )

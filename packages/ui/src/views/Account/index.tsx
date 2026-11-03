@@ -10,6 +10,7 @@ import {
   AccountClient,
   DefaultEditView,
   DocumentInfoProvider,
+  DocumentLocaleProvider,
   EditDepthProvider,
   HydrateAuthProvider,
 } from '../../exports/client/index.js'
@@ -122,69 +123,71 @@ export async function AccountView({
       })
 
     return (
-      <DocumentInfoProvider
-        AfterFields={
-          <Settings
-            i18n={i18n}
-            languageOptions={languageOptions}
-            payload={payload}
-            theme={theme}
-            user={userWithReadAccess}
-          />
-        }
-        apiURL={formatAdminURL({
-          apiRoute: api,
-          path: `/${userSlug}${user?.id ? `/${user.id}` : ''}`,
-        })}
-        collectionSlug={userSlug}
-        currentEditor={currentEditor}
-        docPermissions={docPermissions}
-        hasDeletePermission={hasDeletePermission}
-        hasPublishedDoc={hasPublishedDoc}
-        hasPublishPermission={hasPublishPermission}
-        hasSavePermission={hasSavePermission}
-        hasTrashPermission={hasTrashPermission}
-        id={user?.id}
-        initialData={data}
-        initialState={formState}
-        isEditing
-        isLocked={isLocked}
-        lastUpdateTime={lastUpdateTime}
-        mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
-        unpublishedVersionCount={unpublishedVersionCount}
-        versionCount={versionCount}
-      >
-        <EditDepthProvider>
-          <DocumentHeader
-            collectionConfig={collectionConfig}
-            hideTabs
-            permissions={permissions}
-            req={req}
-            user={userWithReadAccess}
-          />
-          <HydrateAuthProvider permissions={permissions} />
-          {RenderServerComponent({
-            Component: config.admin?.components?.views?.account?.Component,
-            Fallback: DefaultEditView,
-            importMap: payload.importMap,
-            serverProps: {
-              doc: data,
-              hasPublishedDoc,
-              i18n,
-              initPageResult,
-              locale,
-              params,
-              payload,
-              permissions,
-              routeSegments: [],
-              searchParams,
-              server: req.server,
-              user: userWithReadAccess,
-            } satisfies DocumentViewServerPropsOnly,
+      <DocumentLocaleProvider locale={locale?.code}>
+        <DocumentInfoProvider
+          AfterFields={
+            <Settings
+              i18n={i18n}
+              languageOptions={languageOptions}
+              payload={payload}
+              theme={theme}
+              user={userWithReadAccess}
+            />
+          }
+          apiURL={formatAdminURL({
+            apiRoute: api,
+            path: `/${userSlug}${user?.id ? `/${user.id}` : ''}`,
           })}
-          <AccountClient />
-        </EditDepthProvider>
-      </DocumentInfoProvider>
+          collectionSlug={userSlug}
+          currentEditor={currentEditor}
+          docPermissions={docPermissions}
+          hasDeletePermission={hasDeletePermission}
+          hasPublishedDoc={hasPublishedDoc}
+          hasPublishPermission={hasPublishPermission}
+          hasSavePermission={hasSavePermission}
+          hasTrashPermission={hasTrashPermission}
+          id={user?.id}
+          initialData={data}
+          initialState={formState}
+          isEditing
+          isLocked={isLocked}
+          lastUpdateTime={lastUpdateTime}
+          mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
+          unpublishedVersionCount={unpublishedVersionCount}
+          versionCount={versionCount}
+        >
+          <EditDepthProvider>
+            <DocumentHeader
+              collectionConfig={collectionConfig}
+              hideTabs
+              permissions={permissions}
+              req={req}
+              user={userWithReadAccess}
+            />
+            <HydrateAuthProvider permissions={permissions} />
+            {RenderServerComponent({
+              Component: config.admin?.components?.views?.account?.Component,
+              Fallback: DefaultEditView,
+              importMap: payload.importMap,
+              serverProps: {
+                doc: data,
+                hasPublishedDoc,
+                i18n,
+                initPageResult,
+                locale,
+                params,
+                payload,
+                permissions,
+                routeSegments: [],
+                searchParams,
+                server: req.server,
+                user: userWithReadAccess,
+              } satisfies DocumentViewServerPropsOnly,
+            })}
+            <AccountClient />
+          </EditDepthProvider>
+        </DocumentInfoProvider>
+      </DocumentLocaleProvider>
     )
   }
 
