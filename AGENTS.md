@@ -281,23 +281,6 @@ test('should show fresh data', { tag: '@also-without-cache-components' }, async 
 - `pnpm run format` - Format the repo with [oxfmt](https://oxc.rs/docs/guide/usage/formatter) (config: `oxfmt.config.ts`)
 - `pnpm run format:check` - Check formatting (runs in CI)
 
-### GitHub Actions
-
-Pin every non-local action (in `.github/workflows/` and `.github/actions/`) to a full 40-character commit SHA, with its exact version tag as a comment:
-
-```yaml
-# BAD - a tag can be moved to point at different code
-- uses: actions/checkout@v5
-
-# GOOD
-- uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
-```
-
-- Get the SHA from the real tag, never from memory: `gh api repos/<owner>/<repo>/commits/<tag> --jq .sha`. Use the most specific tag (`v5.1.0`, not `v5`) in the comment.
-- Local actions (`uses: ./.github/actions/...`) need no pin.
-- Dependabot updates the SHA and the comment together, so keep the `# vX.Y.Z` comment format.
-- CI checks this with [zizmor](https://docs.zizmor.sh) in the `lint` job (config: `.github/zizmor.yml`). It fails on a tag pin, a SHA that is not in the action's repo, or a comment that does not match the SHA. To run it locally, use the `version` from the `lint` job: `GH_TOKEN=$(gh auth token) uvx zizmor@1.32.0 .github`
-
 ## Internationalization
 
 - Translation files are in `packages/translations/src/languages/`
