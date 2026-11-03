@@ -1,4 +1,19 @@
 {
   "$comment": "Advisories intentionally ignored by .github/actions/audit-dependencies. Entry shape: { advisory: 'GHSA-xxxx-xxxx-xxxx', appliesTo: 'monorepo' | 'consumer' | 'both', rationale: string, expires: 'YYYY-MM-DD' }. An expired entry fails the audit so exceptions get re-reviewed; the audit also re-reviews live entries and flags any whose vulnerability a bump or relock can now clear.",
-  "entries": []
+  "entries": [
+    {
+      "advisory": "GHSA-3g3m-2fjr-6pw4",
+      "appliesTo": "consumer",
+      "expires": "2027-02-03",
+      "package": "glob",
+      "rationale": "Reached through @sentry/nextjs > @sentry/bundler-plugins, which needs glob ^13.0.6 in every release up to 11.10.0. Sentry merged glob 14 in getsentry/sentry-javascript#26014 (issue #25969); remove this entry once a release ships it."
+    },
+    {
+      "advisory": "GHSA-g3hv-75wg-m249",
+      "appliesTo": "consumer",
+      "expires": "2027-02-03",
+      "package": "minimatch",
+      "rationale": "Reached through glob 13 under @sentry/bundler-plugins, and through ts-morph and the eslint plugins in oxlint-config, none of which has a release on minimatch 11. The Sentry fix (getsentry/sentry-javascript#26014) moves glob to 14, which needs minimatch ^11.0.2."
+    }
+  ]
 }
