@@ -454,11 +454,12 @@ const processUpload = async <T>({
     // `canTransform` decides here with the real document. The content requirement covers what
     // Sharp's bridge needs for its configuration, but not saved keys that it claims. A focal point
     // only guides sizes, which the content requirement already covers, so it needs no download.
-    const isBridgeApplyingSavedKey =
-      plannedBridgeTransformer !== undefined &&
-      Object.keys(pipelineDoc._transforms ?? {}).some(
-        (key) => isClaimRequired(key) && plan.claims.get(plannedBridgeTransformer)?.includes(key),
-      )
+    const plannedBridgeClaims = plannedBridgeTransformer
+      ? plan.claims.get(plannedBridgeTransformer)
+      : undefined
+    const isBridgeApplyingSavedKey = Object.keys(pipelineDoc._transforms ?? {}).some(
+      (key) => isClaimRequired(key) && Boolean(plannedBridgeClaims?.includes(key)),
+    )
 
     if (
       !hasFullFileContents(file) &&
