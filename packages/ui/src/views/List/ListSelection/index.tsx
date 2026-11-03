@@ -1,6 +1,7 @@
 'use client'
 import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
 
+import { combineWhereConstraints } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { Fragment, useCallback } from 'react'
 
@@ -11,6 +12,7 @@ import { PublishMany } from '../../../elements/PublishMany/index.js'
 import { RestoreMany } from '../../../elements/RestoreMany/index.js'
 import { UnpublishMany } from '../../../elements/UnpublishMany/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
+import { useListQuery } from '../../../providers/ListQuery/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../../providers/RouterAdapter/index.js'
 import { SelectAllStatus, useSelection } from '../../../providers/Selection/index.js'
@@ -45,6 +47,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   const { count, selectAll, selectedIDs, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
   const { permissions } = useAuth()
+  const { baseFilter } = useListQuery()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { clearRouteCache } = useRouteCache()
@@ -70,15 +73,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   const selectingAll = selectAll === SelectAllStatus.AllAvailable
   const deleteIDs = selectingAll ? [] : selectedIDs
   const baseWhere = parseSearchParams(searchParams)?.where as Where
-  const deleteWhere =
-    viewType === 'trash'
-      ? {
-          and: [
-            ...(Array.isArray(baseWhere?.and) ? baseWhere.and : baseWhere ? [baseWhere] : []),
-            { deletedAt: { exists: true } },
-          ],
-        }
-      : baseWhere
+  const deleteWhere = combineWhereConstraints([baseFilter, baseWhere, where])
 
   return (
     <ListSelection_v4
@@ -163,7 +158,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             }}
             trash={collectionConfig?.trash}
             viewType={viewType}
-            where={deleteWhere}
+            where={Object.keys(deleteWhere).length > 0 ? deleteWhere : undefined}
           />
         ),
       ].filter(Boolean)}

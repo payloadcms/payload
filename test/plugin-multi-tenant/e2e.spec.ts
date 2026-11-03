@@ -77,6 +77,67 @@ test.describe('Multi Tenant', () => {
     await page.goto(usersURL.admin)
   })
 
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+  ]) {
+    test(`should preserve other tenants when deleting all selected-tenant documents at ${viewport.width}px`, async () => {
+      const previousViewport = page.viewportSize()!
+
+      await page.setViewportSize(viewport)
+
+      try {
+        await loginClientSide({ data: credentials.admin, page, serverURL })
+        await setTenantFilter({ page, tenant: 'Blue Dog', urlUtil: menuItemsURL })
+
+        const { docs: tenants } = await payload.find({
+          collection: tenantsSlug,
+          overrideAccess: true,
+          where: { name: { equals: 'Blue Dog' } },
+        })
+        const { docs: selectedTenantDocs } = await payload.find({
+          collection: menuItemsSlug,
+          limit: 0,
+          overrideAccess: true,
+          where: { tenant: { equals: tenants[0].id } },
+        })
+        const { docs: otherTenantDocs } = await payload.find({
+          collection: menuItemsSlug,
+          limit: 0,
+          overrideAccess: true,
+          where: { tenant: { not_equals: tenants[0].id } },
+        })
+
+        await page.goto(`${menuItemsURL.list}?limit=2`)
+        await expect(page.locator('.table tbody tr')).toHaveCount(2)
+        await page.locator('.table tbody tr input[type="checkbox"]').first().check()
+        await page.locator('button#select-all-across-pages').click()
+        await page.getByRole('button', { name: 'Delete', exact: true }).click()
+        await expect(page.locator('#confirm-delete-many-docs')).toContainText(
+          String(selectedTenantDocs.length),
+        )
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
+        await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+          `Deleted ${selectedTenantDocs.length}`,
+        )
+
+        await expect
+          .poll(async () => {
+            const { docs: remainingDocs } = await payload.find({
+              collection: menuItemsSlug,
+              limit: 0,
+              overrideAccess: true,
+            })
+
+            return remainingDocs.map(({ id }) => id).sort()
+          })
+          .toEqual(otherTenantDocs.map(({ id }) => id).sort())
+      } finally {
+        await page.setViewportSize(previousViewport)
+      }
+    })
+  }
+
   test.describe('Filters', () => {
     test.describe('Tenants', () => {
       test('should show all tenants when tenant selector is empty', async () => {

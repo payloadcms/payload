@@ -25,6 +25,8 @@ export type OnListQueryChange =
   | ((query: ListQuery) => void)
 
 export type ListQueryProps = {
+  /** Server-resolved constraints applied to the collection list, such as the selected tenant. */
+  readonly baseFilter?: Where
   readonly children: React.ReactNode
   readonly collectionSlug?: ClientCollectionConfig['slug']
   readonly data: PaginatedDocs | undefined
@@ -35,6 +37,8 @@ export type ListQueryProps = {
 }
 
 export type IListQueryContext = {
+  /** Server-resolved constraints applied in addition to the user's query. */
+  baseFilter?: Where
   collectionSlug: ClientCollectionConfig['slug']
   data: ListQueryProps['data']
   defaultLimit?: number
