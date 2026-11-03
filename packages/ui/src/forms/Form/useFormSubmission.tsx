@@ -39,7 +39,7 @@ type Args = {
   prevFormState: RefObject<FormState>
   props: FormProps
   requestScopeRef: RefObject<unknown>
-  scheduleRequest: UseQueueResult['scheduleTask']
+  scheduleRequest: UseQueueResult['queueTask']
   setIsValid: FormContextType['setIsValid']
 }
 

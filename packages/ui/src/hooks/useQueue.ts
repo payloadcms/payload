@@ -15,14 +15,14 @@ export type Task<T> = (context: TaskContext) => Promise<T>
 export type QueueResult<T> = { status: 'completed'; value: T } | { status: 'superseded' }
 
 export type UseQueueResult = {
-  /** Invalidates active task contexts and supersedes pending work. */
-  resetQueue: () => void
   /** Adds work to the queue and reports whether it completed or was superseded. */
-  scheduleTask: <T>(options: {
+  queueTask: <T>(options: {
     /** Determines which pending task is retained. Lower values take precedence; defaults to `Infinity` (lowest priority). */
     priority?: number
     task: Task<T>
   }) => Promise<QueueResult<T>>
+  /** Invalidates active task contexts and supersedes pending work. */
+  resetQueue: () => void
 }
 
 type QueueEntry = {
@@ -74,10 +74,7 @@ const createQueue = (): UseQueueResult => {
     }
   }
 
-  const scheduleTask = <T>(options: {
-    priority?: number
-    task: Task<T>
-  }): Promise<QueueResult<T>> => {
+  const queueTask = <T>(options: { priority?: number; task: Task<T> }): Promise<QueueResult<T>> => {
     let resolve!: (result: QueueResult<T>) => void
     let reject!: (reason: unknown) => void
 
@@ -108,7 +105,7 @@ const createQueue = (): UseQueueResult => {
     return result
   }
 
-  return { resetQueue, scheduleTask }
+  return { queueTask, resetQueue }
 }
 
 /**
@@ -116,16 +113,16 @@ const createQueue = (): UseQueueResult => {
  * Pending work keeps the highest priority (lowest number), with newer tasks winning ties.
  * Scheduling new work never interrupts the active task.
  *
- * Use `scheduleTask` to await a completed result or a superseded status.
+ * Use `queueTask` to await a completed result or a superseded status.
  * Task errors reject the returned promise.
  * `resetQueue` discards pending work and invalidates the active task's context without aborting its work.
  * Tasks can check `isCurrent()` before applying results that arrive after a reset.
  *
  * @example
- * const { scheduleTask } = useQueue()
+ * const { queueTask } = useQueue()
  *
  * const loadPosts = async () => {
- *   const result = await scheduleTask({
+ *   const result = await queueTask({
  *     priority: 0,
  *     task: async () => {
  *       const response = await fetch('/api/posts')

@@ -109,7 +109,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false)
   const [menuIsOpen, setMenuIsOpen] = useState(false)
   const hasLoadedFirstPageRef = useRef(false)
-  const { scheduleTask } = useQueue()
+  const { queueTask } = useQueue()
 
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
 
@@ -356,13 +356,13 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         }
       }
 
-      void scheduleTask({ task }).catch((error) => {
+      void queueTask({ task }).catch((error) => {
         console.error('Error in queued function:', error) // eslint-disable-line no-console
       })
     },
     [
       permissions,
-      scheduleTask,
+      queueTask,
       relationTo,
       errorLoading,
       search,

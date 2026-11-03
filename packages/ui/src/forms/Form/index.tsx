@@ -79,7 +79,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { t } = useTranslation()
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
-  const { resetQueue, scheduleTask: scheduleRequest } = useQueue()
+  const { queueTask: scheduleRequest, resetQueue } = useQueue()
   const requestScopeRef = useRef({})
   const resetRequestQueue = useCallback(() => {
     requestScopeRef.current = {}
