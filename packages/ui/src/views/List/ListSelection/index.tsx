@@ -3,7 +3,7 @@ import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
 
 import { combineWhereConstraints } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { Fragment, useCallback } from 'react'
+import React, { Fragment, useCallback, useMemo } from 'react'
 
 import { DeleteMany } from '../../../elements/DeleteMany/index.js'
 import { EditMany } from '../../../elements/EditMany/index.js'
@@ -47,12 +47,17 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   const { count, selectAll, selectedIDs, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
   const { permissions } = useAuth()
-  const { baseFilter } = useListQuery()
+  const { baseFilter, query } = useListQuery()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { clearRouteCache } = useRouteCache()
 
   const onActionSuccess = useCallback(() => toggleAll(), [toggleAll])
+  const bulkActionWhere = useMemo(() => {
+    const combinedWhere = combineWhereConstraints([baseFilter, query?.where, where])
+
+    return Object.keys(combinedWhere).length > 0 ? combinedWhere : undefined
+  }, [baseFilter, query?.where, where])
 
   if (count === 0) {
     return null
@@ -72,8 +77,6 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
 
   const selectingAll = selectAll === SelectAllStatus.AllAvailable
   const deleteIDs = selectingAll ? [] : selectedIDs
-  const baseWhere = parseSearchParams(searchParams)?.where as Where
-  const deleteWhere = combineWhereConstraints([baseFilter, baseWhere, where])
 
   return (
     <ListSelection_v4
@@ -102,7 +105,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
-              where={where}
+              where={bulkActionWhere}
             />
             <PublishMany
               collection={collectionConfig}
@@ -111,7 +114,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
-              where={where}
+              where={bulkActionWhere}
             />
             <UnpublishMany
               collection={collectionConfig}
@@ -120,12 +123,18 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               modalPrefix={modalPrefix}
               onSuccess={onActionSuccess}
               selectAll={selectAll === SelectAllStatus.AllAvailable}
-              where={where}
+              where={bulkActionWhere}
             />
           </Fragment>
         ),
         isTrashView && (
-          <RestoreMany collection={collectionConfig} key="bulk-restore" viewType={viewType} />
+          <RestoreMany
+            collection={collectionConfig}
+            key="bulk-restore"
+            modalPrefix={modalPrefix}
+            viewType={viewType}
+            where={bulkActionWhere}
+          />
         ),
         !disableBulkDelete && canShowDeleteButton && collectionConfig && (
           <DeleteMany
@@ -158,7 +167,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
             }}
             trash={collectionConfig?.trash}
             viewType={viewType}
-            where={Object.keys(deleteWhere).length > 0 ? deleteWhere : undefined}
+            where={bulkActionWhere}
           />
         ),
       ].filter(Boolean)}
