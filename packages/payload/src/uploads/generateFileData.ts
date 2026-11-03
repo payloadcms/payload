@@ -283,7 +283,9 @@ export const generateFileData = async <T>({
 
   const shouldUseDetectedFileType =
     detectedFileType &&
-    (isProcessableImage(file.mimetype) || isProcessableImage(detectedFileType.mime))
+    (isProcessableImage(file.mimetype) ||
+      isProcessableImage(detectedFileType.mime) ||
+      (file.mimetype.startsWith('video/') && detectedFileType.mime.startsWith('video/')))
 
   if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
     file = { ...file, mimetype: detectedFileType.mime }
