@@ -78,7 +78,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const outstandingSubmitCountRef = useRef(0)
   const autosaveSequenceRef = useRef(0)
-  const retryAutosaveRef = useRef<(() => Promise<void>) | null>(null)
   const savingStartTimestampRef = useRef(0)
   const wasSkippedWhileInvalidRef = useRef(false)
 
@@ -148,7 +147,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     }
 
     savingStartTimestampRef.current = Date.now()
-    const autosaveSequence = ++autosaveSequenceRef.current
+    autosaveSequenceRef.current += 1
     outstandingSubmitCountRef.current += 1
     setSaving(true)
 
@@ -163,11 +162,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
         disableFormWhileProcessing: false,
         disableSuccessStatus: true,
         method,
-        onStaleRequest: () => {
-          if (autosaveSequence === autosaveSequenceRef.current) {
-            void retryAutosaveRef.current?.()
-          }
-        },
         overrides: { _status: 'draft' },
         skipValidation: !validateOnDraft,
         submissionType: 'autosave',
@@ -203,14 +197,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       }
     }
   })
-
-  useEffect(() => {
-    retryAutosaveRef.current = handleAutosave
-
-    return () => {
-      retryAutosaveRef.current = null
-    }
-  }, [handleAutosave])
 
   const didMount = useRef(false)
   const previousDebouncedData = useRef(reduceFieldsToValues(debouncedFormState))

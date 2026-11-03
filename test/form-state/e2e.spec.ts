@@ -1040,58 +1040,6 @@ test.describe('Shared form request queue', () => {
     await expect(page.locator('.autosave')).toBeHidden()
   })
 
-  test('should retry a superseded autosave after an explicit save fails', async ({ page }) => {
-    const doc = await payload.create({
-      collection: autosavePostsSlug,
-      data: { title: 'Initial value' },
-      draft: true,
-      overrideAccess: true,
-    })
-    const captured = Promise.withResolvers<void>()
-    const released = Promise.withResolvers<void>()
-    const retried = Promise.withResolvers<Record<string, unknown>>()
-    const requests: string[] = []
-
-    createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
-    releases.add(released.resolve)
-    await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
-      if (route.request().method() !== 'PATCH') {
-        return route.continue()
-      }
-      const isAutosave = new URL(route.request().url()).searchParams.get('autosave') === 'true'
-
-      requests.push(isAutosave ? 'autosave' : 'save')
-
-      if (!isAutosave) {
-        return route.fulfill({ json: { message: 'Save failed' }, status: 400 })
-      }
-      if (requests.length === 1) {
-        // Failing the first autosave keeps server values from merging and scheduling a fresh autosave.
-        captured.resolve()
-        await released.promise
-        return route.fulfill({ json: { message: 'Autosave failed' }, status: 400 })
-      }
-      retried.resolve(readSubmittedData({ body: route.request().postData() ?? '' }))
-      await route.fulfill({ response: await route.fetch() })
-    })
-    await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
-    await waitForFormReady(page)
-    await page.locator('#field-title').fill('First autosave')
-    await page.clock.runFor(200)
-    await captured.promise
-    await page.locator('#field-title').fill('Pending autosave')
-    await page.clock.runFor(1000)
-    await page.waitForTimeout(100)
-    // The explicit save evicts the pending autosave, then fails.
-    await page
-      .locator('form.collection-edit__form')
-      .evaluate((form: HTMLFormElement) => form.requestSubmit())
-    released.resolve()
-    await expect(page.locator('.payload-toast-container')).toContainText('Save failed')
-    await expect(retried.promise).resolves.toMatchObject({ title: 'Pending autosave' })
-    expect(requests).toEqual(['autosave', 'save', 'autosave'])
-  })
-
   test('should not allow saving a draft while a publish is queued', async ({ page }) => {
     const doc = await payload.create({
       collection: draftPostsSlug,

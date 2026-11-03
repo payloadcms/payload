@@ -103,7 +103,6 @@ export const useFormSubmission = ({
    */
   const isModifiedWhileProcessing = useRef(false)
 
-  const latestExplicitSubmit = useRef<Promise<boolean> | undefined>(undefined)
   const requestAtUnmount = useRef<unknown>(undefined)
   const submitFocus = useRef<HTMLElement | null>(null)
   const isDisabledFromPropsRef = useRef(isDisabledFromProps)
@@ -179,11 +178,9 @@ export const useFormSubmission = ({
 
   const executeSubmit = useCallback(
     async ({
-      onResponse,
       options,
       requestContext,
     }: {
-      onResponse: (args: { res: Response }) => void
       options?: SubmitOptions
       requestContext: TaskContext
     }) => {
@@ -354,8 +351,6 @@ export const useFormSubmission = ({
           } else if (typeof action === 'function') {
             res = await action(formData)
           }
-
-          onResponse({ res })
 
           if (!requestContext.isCurrent()) {
             return
@@ -581,9 +576,6 @@ export const useFormSubmission = ({
         return
       }
 
-      const requestScope = requestScopeRef.current
-      let didSucceed = false
-
       // Disable before queueing, like a direct submit, so the guard above rejects any submission made while this one waits.
       if (options?.disableFormWhileProcessing ?? true) {
         const activeElement = document.activeElement
@@ -598,49 +590,14 @@ export const useFormSubmission = ({
         setIsDisabled(true)
       }
 
-      const resultPromise = scheduleRequest({
+      const result = await scheduleRequest({
         priority: requestPriority[options?.submissionType ?? 'submit'],
-        task: (requestContext) =>
-          executeSubmit({
-            onResponse: ({ res }) => {
-              didSucceed = res.ok
-            },
-            options,
-            requestContext,
-          }),
+        task: (requestContext) => executeSubmit({ options, requestContext }),
       })
-
-      if (options?.submissionType !== 'autosave') {
-        latestExplicitSubmit.current = resultPromise.then(
-          () => didSucceed,
-          () => didSucceed,
-        )
-      }
-
-      const result = await resultPromise
-
-      if (result.status === 'superseded' && options?.submissionType === 'autosave') {
-        let explicitSubmit = latestExplicitSubmit.current
-        let didExplicitSubmitSucceed = true
-
-        while (explicitSubmit !== undefined) {
-          didExplicitSubmitSucceed = await explicitSubmit
-
-          if (explicitSubmit === latestExplicitSubmit.current) {
-            break
-          }
-
-          explicitSubmit = latestExplicitSubmit.current
-        }
-
-        if (!didExplicitSubmitSucceed && requestScope === requestScopeRef.current) {
-          options.onStaleRequest?.()
-        }
-      }
 
       return result.status === 'completed' ? result.value : undefined
     },
-    [contextRef, executeSubmit, formRef, requestScopeRef, scheduleRequest, setIsDisabled],
+    [contextRef, executeSubmit, formRef, scheduleRequest, setIsDisabled],
   )
 
   useEffect(() => {
