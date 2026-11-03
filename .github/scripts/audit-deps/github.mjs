@@ -1,0 +1,265 @@
+import {
+  decidePrStep,
+  findStalePrs,
+  fingerprintForPr,
+  hasForeignCommits,
+  parseFingerprint,
+} from './decide.mjs'
+
+const BRANCH_PREFIX = 'ci/audit-deps-fix-'
+const MISSING_REF_STATUSES = new Set([404, 422])
+const CLOSED_PRS_PER_BRANCH = 20
+const MAX_CLOSER_LOOKUPS = 5
+const COMMENT_TAG = '<!-- audit-deps-comment -->'
+const STALE_COMMENT = 'The audit no longer needs this update.'
+const STALE_KEPT_BRANCH_COMMENT =
+  'The audit no longer needs this update. The branch has commits from a person, so it was not deleted.'
+
+/**
+ * @typedef {import('./bumps.mjs').Bump} Bump
+ */
+
+/**
+ * Decides every planned PR's step and sets the job outputs `pr_steps` and `stale_prs`
+ * (single-line JSON). Non-default inputs never call the API.
+ */
+export async function decidePrSteps({ core, github, isDefaultInputs, owner, plan, ref, repo }) {
+  if (!isDefaultInputs) {
+    return setOutputs({
+      core,
+      prSteps: Object.fromEntries(
+        plan.prs.map((pr) => [pr.id, { headSha: null, prNumber: null, step: 'dry-run' }]),
+      ),
+      staleNumbers: [],
+    })
+  }
+
+  const openPrs = await listOpenBotPrs({ github, owner, ref, repo })
+  const stepsById = new Map()
+
+  for (const pr of plan.prs) {
+    const prStep = await decideStepForPr({
+      github,
+      openPr: openPrs.find((openPr) => openPr.branch === pr.branch) ?? null,
+      owner,
+      plan,
+      pr,
+      ref,
+      repo,
+    })
+    stepsById.set(pr.id, prStep)
+  }
+
+  return setOutputs({
+    core,
+    prSteps: Object.fromEntries(plan.prs.map((pr) => [pr.id, stepsById.get(pr.id)])),
+    staleNumbers: findStalePrs({ openPrs, prs: plan.prs, ref }),
+  })
+}
+
+/**
+ * Closes PRs no planned PR owns anymore. A branch with a person's commits is kept so their
+ * work survives.
+ */
+export async function closeStalePrs({ github, owner, prNumbers, ref, repo }) {
+  for (const prNumber of prNumbers) {
+    try {
+      await closeStalePr({ github, owner, prNumber, ref, repo })
+    } catch (error) {
+      console.error(`Failed to close stale audit PR #${prNumber}: ${error?.message ?? error}`)
+      throw error
+    }
+  }
+}
+
+async function closeStalePr({ github, owner, prNumber, ref, repo }) {
+  const { data: pr } = await github.rest.pulls.get({ owner, pull_number: prNumber, repo })
+  const branch = pr.head.ref
+  const isOurs = isBotPr({ owner, pr, ref, repo })
+  if (!isOurs || pr.state !== 'open') {
+    return
+  }
+
+  const hasPersonCommits = hasForeignCommits({
+    commits: await listCommits({ github, owner, prNumber, repo }),
+  })
+
+  await github.rest.issues.createComment({
+    body: withCommentTag({ text: hasPersonCommits ? STALE_KEPT_BRANCH_COMMENT : STALE_COMMENT }),
+    issue_number: prNumber,
+    owner,
+    repo,
+  })
+  await github.rest.pulls.update({ owner, pull_number: prNumber, repo, state: 'closed' })
+
+  if (!hasPersonCommits) {
+    await deleteBranch({ branch, github, owner, repo })
+  }
+}
+
+function isBotPr({ owner, pr, ref, repo }) {
+  return (
+    pr.head.ref.startsWith(`${BRANCH_PREFIX}${ref}-`) &&
+    pr.head.repo?.full_name === `${owner}/${repo}` &&
+    pr.user?.type === 'Bot'
+  )
+}
+
+function withCommentTag({ text }) {
+  return `${text}\n\n${COMMENT_TAG}`
+}
+
+function setOutputs({ core, prSteps, staleNumbers }) {
+  core.setOutput('pr_steps', JSON.stringify(prSteps))
+  core.setOutput('stale_prs', JSON.stringify(staleNumbers))
+}
+
+async function decideStepForPr({ github, openPr, owner, plan, pr, ref, repo }) {
+  const prNumber = openPr?.number ?? null
+  const headSha = openPr?.headSha ?? null
+  const expectedBumps = expectedBumpsFor({ plan, pr })
+  if (expectedBumps.length === 0) {
+    return { headSha, prNumber, step: 'skip' }
+  }
+
+  const fingerprint = fingerprintForPr({ bumps: expectedBumps, pr })
+  if (!openPr) {
+    const rejectedPr = await findRejectedPr({ github, owner, pr, ref, repo })
+    const step = decidePrStep({ fingerprint, openPr: null, rejectedPr })
+
+    return decideLeftoverBranch({ branch: pr.branch, github, owner, ref, repo, step })
+  }
+
+  let openState = { fingerprint: parseFingerprint({ body: openPr.body }), hasForeignCommits: false }
+  let step = decidePrStep({ fingerprint, openPr: openState, rejectedPr: null })
+  if (step === 'skip' && (await isConflicted({ github, owner, prNumber, repo }))) {
+    openState = { ...openState, isConflicted: true }
+    step = decidePrStep({ fingerprint, openPr: openState, rejectedPr: null })
+  }
+  if (step === 'update') {
+    const commits = await listCommits({ github, owner, prNumber, repo })
+    step = decidePrStep({
+      fingerprint,
+      openPr: { ...openState, hasForeignCommits: hasForeignCommits({ commits }) },
+      rejectedPr: null,
+    })
+  }
+
+  return { headSha, prNumber, step }
+}
+
+/**
+ * A branch can outlive its PR (closed or merged without delete, or a failed create). The push
+ * leases on its head, and a person's commits on it block the bot from overwriting them.
+ */
+async function decideLeftoverBranch({ branch, github, owner, ref, repo, step }) {
+  const headSha = await findBranchSha({ branch, github, owner, repo })
+  if (!headSha) {
+    return { headSha: null, prNumber: null, step }
+  }
+
+  const { data } = await github.rest.repos.compareCommits({ base: ref, head: branch, owner, repo })
+  const isBlocked = hasForeignCommits({ commits: data.commits })
+
+  return { headSha, prNumber: null, step: isBlocked ? 'blocked' : step }
+}
+
+async function findBranchSha({ branch, github, owner, repo }) {
+  try {
+    const { data } = await github.rest.git.getRef({ owner, ref: `heads/${branch}`, repo })
+    return data.object.sha
+  } catch (error) {
+    if (error?.status === 404) {
+      return null
+    }
+    throw error
+  }
+}
+
+/** @returns {Bump[]} */
+function expectedBumpsFor({ plan, pr }) {
+  const bumpsById = new Map(plan.bumps.map((bump) => [bump.id, bump]))
+
+  return pr.bumpIds.map((id) => bumpsById.get(id)).filter(Boolean)
+}
+
+async function listOpenBotPrs({ github, owner, ref, repo }) {
+  const prs = await github.paginate(github.rest.pulls.list, {
+    base: ref,
+    owner,
+    per_page: 100,
+    repo,
+    state: 'open',
+  })
+
+  return prs
+    .filter((pr) => isBotPr({ owner, pr, ref, repo }))
+    .map((pr) => ({
+      body: pr.body,
+      branch: pr.head.ref,
+      headSha: pr.head.sha ?? null,
+      number: pr.number,
+    }))
+}
+
+/**
+ * Only a person closing an unmerged PR counts as a rejection, and only if its body carries
+ * a fingerprint. Bot closes and unknown closers do not, because a missed security PR costs more
+ * than a duplicate.
+ */
+async function findRejectedPr({ github, owner, pr: plannedPr, ref, repo }) {
+  const { data } = await github.rest.pulls.list({
+    direction: 'desc',
+    head: `${owner}:${plannedPr.branch}`,
+    owner,
+    per_page: CLOSED_PRS_PER_BRANCH,
+    repo,
+    sort: 'updated',
+    state: 'closed',
+  })
+  const candidates = data
+    .filter((pr) => pr.merged_at === null && pr.closed_at && isBotPr({ owner, pr, ref, repo }))
+    .sort((a, b) => Date.parse(b.closed_at) - Date.parse(a.closed_at))
+    .map((pr) => ({ fingerprint: parseFingerprint({ body: pr.body }), number: pr.number }))
+    .filter((pr) => pr.fingerprint !== null)
+    .slice(0, MAX_CLOSER_LOOKUPS)
+
+  for (const candidate of candidates) {
+    const { data: issue } = await github.rest.issues.get({
+      issue_number: candidate.number,
+      owner,
+      repo,
+    })
+    if (issue.closed_by && issue.closed_by.type !== 'Bot') {
+      return { fingerprint: candidate.fingerprint }
+    }
+  }
+
+  return null
+}
+
+// GitHub computes mergeability lazily, so only a settled `dirty` counts as a conflict.
+async function isConflicted({ github, owner, prNumber, repo }) {
+  const { data: pr } = await github.rest.pulls.get({ owner, pull_number: prNumber, repo })
+
+  return pr?.mergeable_state === 'dirty'
+}
+
+function listCommits({ github, owner, prNumber, repo }) {
+  return github.paginate(github.rest.pulls.listCommits, {
+    owner,
+    per_page: 100,
+    pull_number: prNumber,
+    repo,
+  })
+}
+
+async function deleteBranch({ branch, github, owner, repo }) {
+  try {
+    await github.rest.git.deleteRef({ owner, ref: `heads/${branch}`, repo })
+  } catch (error) {
+    if (!MISSING_REF_STATUSES.has(error?.status)) {
+      throw error
+    }
+  }
+}

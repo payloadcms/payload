@@ -1,0 +1,151 @@
+name: audit-dependencies-branch
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Branch to audit and fix
+        type: string
+        required: true
+      scope:
+        description: Which surface to audit (consumer-facing or monorepo)
+        type: string
+        required: true
+      severity:
+        description: Minimum severity to report (low, moderate, high, critical)
+        type: string
+        required: true
+      is-default-inputs:
+        description: Only runs from main with default inputs may create, update, or close PRs
+        type: boolean
+        required: true
+    secrets:
+      AUDIT_DEPS_APP_CLIENT_ID:
+        required: false
+      AUDIT_DEPS_APP_PRIVATE_KEY:
+        required: false
+
+permissions: {}
+
+# One job. Only Publish PRs holds a write token (the App token, in real runs); every other step
+# has the read-only github.token at most.
+# No step runs package code: bumps use `pnpm install --lockfile-only --ignore-scripts`, and each
+# PR's own CI builds and tests it. The App token is minted after prepare PRs, so it does not exist
+# while pnpm and the re-audit read registry data. Memory is the bot's PR state: an unchanged PR is
+# skipped, a person's commits block updates, and a closed PR is not proposed again.
+jobs:
+  audit:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    # Dry runs may be on any branch, which the environment's branch policy would reject.
+    environment: ${{ inputs.is-default-inputs && 'audit-deps' || '' }}
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout ${{ inputs.ref }}
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      # Tooling comes from the triggering commit (the audited ref may lack it), kept out of the workspace.
+      - name: Checkout tooling
+        env:
+          TOOLING_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tooling="$RUNNER_TEMP/audit-deps-tooling"
+          git clone -q --filter=blob:none --no-checkout --depth=1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$tooling"
+          git -C "$tooling" sparse-checkout set --no-cone /.github/scripts/audit-deps/
+          git -C "$tooling" fetch -q --depth=1 origin "$TOOLING_SHA"
+          git -C "$tooling" checkout -q --detach "$TOOLING_SHA"
+
+      # The job later holds the App token, so it restores no cache another workflow could have written.
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          pnpm-restore-cache: false
+
+      - name: Run audit dependencies action
+        uses: ./.github/actions/audit-dependencies
+        # Findings exit non-zero; the plan step validates the report instead.
+        continue-on-error: true
+        with:
+          scope: ${{ inputs.scope }}
+          severity: ${{ inputs.severity }}
+          json: ${{ runner.temp }}/audit_output.json
+
+      - name: Plan bumps and PRs
+        env:
+          REF: ${{ inputs.ref }}
+          SCOPE: ${{ inputs.scope }}
+        run: >-
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" plan
+          --report="$RUNNER_TEMP/audit_output.json"
+          --scope="$SCOPE"
+          --ref="$REF"
+          --cwd="$GITHUB_WORKSPACE"
+          --out="$RUNNER_TEMP/audit-plan/plan.json"
+
+      - name: Decide PR steps
+        id: decide
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          IS_DEFAULT_INPUTS: ${{ inputs.is-default-inputs }}
+          REF: ${{ inputs.ref }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { runDecidePrSteps } = await import(
+              `${process.env.RUNNER_TEMP}/audit-deps-tooling/.github/scripts/audit-deps/commands/github.mjs`
+            )
+            await runDecidePrSteps({ context, core, env: process.env, github })
+
+      # Each PR is one bot commit on the audited commit; a failed PR is recorded and the rest go on.
+      - name: Prepare PRs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_STEPS: ${{ steps.decide.outputs.pr_steps }}
+          REF: ${{ inputs.ref }}
+          SCOPE: ${{ inputs.scope }}
+          SEVERITY: ${{ inputs.severity }}
+        run: >-
+          node "$RUNNER_TEMP/audit-deps-tooling/.github/scripts/audit-deps/cli.mjs" prepare-prs
+          --plan="$RUNNER_TEMP/audit-plan/plan.json"
+          --pr-steps-json="$PR_STEPS"
+          --ref="$REF"
+          --scope="$SCOPE"
+          --severity="$SEVERITY"
+          --run-url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          --cwd="$GITHUB_WORKSPACE"
+          --out-dir="$RUNNER_TEMP/prepared"
+
+      - name: Mint App token
+        id: app-token
+        if: inputs.is-default-inputs
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ secrets.AUDIT_DEPS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.AUDIT_DEPS_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      # Real runs push with a lease on the planned head, so a person's push is kept; dry runs only report.
+      - name: Publish PRs
+        if: ${{ !cancelled() }}
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          IS_DEFAULT_INPUTS: ${{ inputs.is-default-inputs }}
+          PR_STEPS: ${{ steps.decide.outputs.pr_steps }}
+          REF: ${{ inputs.ref }}
+          STALE_PRS: ${{ steps.decide.outputs.stale_prs }}
+        with:
+          github-token: ${{ steps.app-token.outputs.token || github.token }}
+          script: |
+            const { runPublish } = await import(
+              `${process.env.RUNNER_TEMP}/audit-deps-tooling/.github/scripts/audit-deps/commands/publish.mjs`
+            )
+            await runPublish({ context, core, env: process.env, github })

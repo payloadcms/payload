@@ -1,0 +1,87 @@
+import { classifyFixes } from '../bumps.mjs'
+import { isDraftPr, renderPrBody } from '../pr-body.mjs'
+import {
+  fetchAdvisory,
+  fetchCommits,
+  fetchPackageMeta,
+  fetchReleaseNotes,
+  fetchWeeklyDownloads,
+} from '../upstream.mjs'
+import { listPublishedPackages, resolveAffects } from '../workspace-graph.mjs'
+import { findBump, findPr, readToken, repoUrlFromEnv } from './shared.mjs'
+
+const BACKPORT_REF = '3.x'
+
+/**
+ * Renders one PR's title, body and draft state. `reaudit` is the audit after the bumps,
+ * for fixed and partly.
+ * @returns {Promise<{ body: string, isDraft: boolean, title: string }>}
+ */
+export async function buildPr({ cwd, plan, prId, reaudit, ref, runUrl, scope, severity }) {
+  const pr = findPr({ plan, prId })
+  const prBumps = pr.bumpIds.map((bumpId) => findBump({ plan, bumpId }))
+  const graph = await listPublishedPackages({ cwd })
+  const token = readToken()
+
+  const details = Object.fromEntries(
+    await Promise.all(
+      prBumps.map(async (bump) => [
+        bump.id,
+        await fetchBumpDetails({ bump, fetch, graph, plan, token }),
+      ]),
+    ),
+  )
+  const { fixed, partly } = classifyFixes({ bumps: prBumps, report: reaudit })
+
+  const body = renderPrBody({
+    pr,
+    bumps: plan.bumps,
+    details,
+    fixed,
+    partly,
+    scope,
+    severity,
+    ref,
+    repoUrl: repoUrlFromEnv(),
+    runUrl,
+  })
+
+  return { body, isDraft: isDraftPr({ pr }), title: buildTitle({ ref, pr, prBumps }) }
+}
+
+export function buildTitle({ ref, pr, prBumps }) {
+  const [first] = prBumps
+  const title =
+    pr.kind === 'group'
+      ? `fix(deps): bump the non-major group with ${prBumps.length} updates`
+      : `fix(deps): bump ${first.dependency} from ${first.fromVersion || first.from} to ${first.to}`
+
+  return ref === BACKPORT_REF ? `${title} (${BACKPORT_REF})` : title
+}
+
+async function fetchBumpDetails({ bump, fetch, graph, plan, token }) {
+  const name = bump.dependency
+  const packageMeta = await fetchPackageMeta({ fetch, name, version: bump.to })
+  const range = { fetch, repo: packageMeta.repo, name, from: bump.fromVersion, to: bump.to, token }
+
+  const [downloads, notes, commits, advisories] = await Promise.all([
+    fetchWeeklyDownloads({ fetch, name, version: bump.to }),
+    fetchReleaseNotes({ ...range, isMajor: bump.isMajor }),
+    fetchCommits(range),
+    Promise.all(
+      bump.advisories.map(async (ghsa) => {
+        const advisory = await fetchAdvisory({ fetch, ghsa, token })
+        return { ghsa, summary: '', description: '', severity: '', ...advisory }
+      }),
+    ),
+  ])
+
+  return {
+    advisories,
+    affects: resolveAffects({ graph, originDirs: plan.originDirs?.[bump.id] ?? [] }),
+    commits,
+    downloads,
+    notes,
+    packageMeta,
+  }
+}
