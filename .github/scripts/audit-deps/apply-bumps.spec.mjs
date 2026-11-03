@@ -4,12 +4,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import {
-  applyBumps,
-  NonRaisingBumpError,
-  setSpecifierVersion,
-  UnsupportedSpecifierError,
-} from './apply-bumps.mjs'
+import { applyBumps, NonRaisingBumpError } from './apply-bumps.mjs'
 
 const catalogManifest = '{\n  "dependencies": {\n    "dep": "catalog:"\n  }\n}\n'
 
@@ -38,12 +33,6 @@ async function makeRepo({ files }) {
 function readRepoFile({ cwd, file }) {
   return readFile(path.join(cwd, file), 'utf8')
 }
-
-describe('setSpecifierVersion', () => {
-  it.each(['>=1.0.0', 'workspace:*'])('should throw for %s', (spec) => {
-    expect(() => setSpecifierVersion({ spec, version: '2.0.0' })).toThrow(UnsupportedSpecifierError)
-  })
-})
 
 describe('applyBumps', () => {
   it('should edit each manifest and keep every other byte', async () => {
@@ -105,7 +94,10 @@ describe('applyBumps', () => {
   it.each([
     ['5.7.0', '5.6.1'],
     ['5.6.1', '5.6.1'],
-  ])('should throw when the manifest spec %s already reaches %s', async (spec, to) => {
+    ['>=5.0.0', '5.6.1'],
+    ['^4.0.0 || ^5.0.0', '5.6.1'],
+    ['workspace:*', '5.6.1'],
+  ])('should throw when the only manifest spec %s cannot be raised to %s', async (spec, to) => {
     const pkg = `{\n  "dependencies": {\n    "dep": "${spec}"\n  }\n}\n`
     const cwd = await makeRepo({ files: { 'a/package.json': pkg } })
 
@@ -113,6 +105,22 @@ describe('applyBumps', () => {
       applyBumps({ bumps: [bump({ to, manifests: ['a/package.json'] })], cwd }),
     ).rejects.toThrow(NonRaisingBumpError)
     expect(await readRepoFile({ cwd, file: 'a/package.json' })).toBe(pkg)
+  })
+
+  it('should leave a manifest with a range it cannot raise and raise the others', async () => {
+    const a = '{\n  "dependencies": {\n    "dep": ">=5.0.0"\n  }\n}\n'
+    const b = '{\n  "dependencies": {\n    "dep": "^5.6.0"\n  }\n}\n'
+    const cwd = await makeRepo({ files: { 'a/package.json': a, 'b/package.json': b } })
+
+    const { changes } = await applyBumps({
+      bumps: [bump({ to: '5.6.1', manifests: ['a/package.json', 'b/package.json'] })],
+      cwd,
+    })
+
+    expect(await readRepoFile({ cwd, file: 'a/package.json' })).toBe(a)
+    expect(changes).toEqual([
+      { file: 'b/package.json', after: '^5.6.1', before: '^5.6.0', dependency: 'dep' },
+    ])
   })
 
   it('should skip a manifest already at the target and raise the others', async () => {

@@ -20,27 +20,13 @@ const DEPENDENCY_SECTIONS = [
 const WORKSPACE_FILE = 'pnpm-workspace.yaml'
 const SPECIFIER_PATTERN = /^([\^~]?)(\d+\.\d+\.\d+)$/
 
-export class UnsupportedSpecifierError extends Error {
-  constructor({ spec }) {
-    super(`Unsupported dependency specifier "${spec}"; only exact, ^ and ~ ranges can be bumped.`)
-    this.name = 'UnsupportedSpecifierError'
-  }
-}
-
 export class NonRaisingBumpError extends Error {
   constructor({ dependency, version }) {
-    super(`Every ${dependency} specifier already reaches ${version}; the bump raises none.`)
+    super(
+      `No ${dependency} specifier can be raised to ${version}: each already reaches it or is a range that is not exact, ^ or ~.`,
+    )
     this.name = 'NonRaisingBumpError'
   }
-}
-
-/** Returns `spec` with its version set to `version`. The `^` or `~` prefix does not change. */
-export function setSpecifierVersion({ spec, version }) {
-  const match = SPECIFIER_PATTERN.exec(spec)
-  if (!match) {
-    throw new UnsupportedSpecifierError({ spec })
-  }
-  return `${match[1]}${version}`
 }
 
 /**
@@ -48,7 +34,9 @@ export function setSpecifierVersion({ spec, version }) {
  * pnpm-workspace.yaml catalog. Only the version text is replaced, so the file formatting
  * does not change. This function does not run pnpm.
  * A specifier that is already at or above `bump.to` is not changed, because the edit would
- * do nothing or downgrade it. A bump that raises no specifier throws `NonRaisingBumpError`.
+ * do nothing or downgrade it. A range such as `>=1.0.0` or `^1.0.0 || ^2.0.0` is not changed;
+ * the re-audit shows whether the other edits fix the advisory. A bump that raises no specifier
+ * throws `NonRaisingBumpError`.
  * @param {{ bumps: Array<import('./bumps.mjs').Bump>, cwd: string }} params
  * @returns {Promise<{ changes: AppliedChange[] }>}
  */
@@ -102,12 +90,17 @@ export async function applyBumps({ bumps, cwd }) {
   return { changes }
 }
 
-/** Returns `spec` raised to `version`, or null when `spec` is already at or above `version`. */
+/**
+ * Returns `spec` raised to `version`, or null when `spec` is already at or above `version` or is
+ * not an exact, `^` or `~` version.
+ */
 function raiseSpecifier({ spec, version }) {
-  const after = setSpecifierVersion({ spec, version })
-  const [, , current] = SPECIFIER_PATTERN.exec(spec)
+  const match = SPECIFIER_PATTERN.exec(spec)
+  if (!match) {
+    return null
+  }
 
-  return compareVersions({ a: current, b: version }) < 0 ? after : null
+  return compareVersions({ a: match[2], b: version }) < 0 ? `${match[1]}${version}` : null
 }
 
 function findManifestSpecifier({ dependency, text }) {
