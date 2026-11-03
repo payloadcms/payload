@@ -239,19 +239,19 @@ export async function resolveTransformKeyCoverage({
     ({ path }) => !uploadClaimedKeys.has(path.slice('_transforms.'.length)),
   )
 
-  if (canApplyAtRequest && hasOnlyUnclaimedKeys) {
-    const { coverageErrors } = await planPersistedDefaultStages({
+  if (
+    canApplyAtRequest &&
+    hasOnlyUnclaimedKeys &&
+    (await canBuildAtRequest({
       collectionSlug,
-      doc: pipelineOriginalDoc,
       documentID,
       mimeType,
+      pipelineDoc,
+      pipelineOriginalDoc,
       req,
-      transforms: pipelineDoc._transforms,
-    })
-
-    if (coverageErrors.length === 0) {
-      return { isAppliedAtRequest: true }
-    }
+    }))
+  ) {
+    return { isAppliedAtRequest: true }
   }
 
   throw new ValidationError({ collection: collectionSlug, errors, req }, req.t)
@@ -275,4 +275,31 @@ export function assertTransformKeysCovered({
   if (errors.length > 0) {
     throw new ValidationError({ collection: collectionSlug, errors, req }, req.t)
   }
+}
+
+/**
+ * Whether request-time stages can build a file of this MIME type from the original, applying every
+ * saved key.
+ */
+export async function canBuildAtRequest({
+  collectionSlug,
+  documentID,
+  mimeType,
+  pipelineDoc,
+  pipelineOriginalDoc,
+  req,
+}: {
+  documentID?: number | string
+  mimeType: string
+} & PlanArgs): Promise<boolean> {
+  const { coverageErrors, plan: requestPlan } = await planPersistedDefaultStages({
+    collectionSlug,
+    doc: pipelineOriginalDoc,
+    documentID,
+    mimeType,
+    req,
+    transforms: pipelineDoc._transforms,
+  })
+
+  return requestPlan.pipeline.length > 0 && coverageErrors.length === 0
 }

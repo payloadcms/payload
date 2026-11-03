@@ -101,7 +101,7 @@ export async function handleDynamicFileRequest({
   })
 
   const requestedFile = getRequestedFile({ document, filename })
-  // A default file built at request time has no object, so its stages start from the original.
+  // A file built at request time has no object, so its stages start from the original.
   const { isBuiltAtRequest } = requestedFile
   // The original can share the main file's name, so it is asked for by role, not by name.
   const originalFile = {
@@ -168,6 +168,7 @@ export async function handleDynamicFileRequest({
         options,
         originalDoc: documentSnapshot,
         req,
+        variantName: requestedFile.variantName,
       })
 
       if (result.response) {
@@ -299,7 +300,7 @@ type RequestStage = {
 }
 
 /**
- * Plans the saved-state phase, when no default file is stored, then the request phase. Fails
+ * Plans the saved-state phase, when the requested file is not stored, then the request phase. Fails
  * before any file is read when a saved key that must run has no saved-state stage, or two.
  */
 async function planRequestPipeline({
@@ -315,7 +316,8 @@ async function planRequestPipeline({
   filename: string
   req: PayloadRequest
 }): Promise<RequestStage[]> {
-  const purposes = getRequestedFile({ document, filename }).isBuiltAtRequest
+  const requestedFile = getRequestedFile({ document, filename })
+  const purposes = requestedFile.isBuiltAtRequest
     ? (['persisted-default', 'request-override'] as const)
     : (['request-override'] as const)
   const pipeline: RequestStage[] = []
@@ -325,7 +327,7 @@ async function planRequestPipeline({
       collectionSlug: collection.config.slug,
       doc: documentSnapshot,
       documentID: document.id,
-      mimeType: getRequestedFile({ document, filename }).mimeType,
+      mimeType: requestedFile.mimeType,
       req,
     }
     let plan: PlannedTransformerPipeline

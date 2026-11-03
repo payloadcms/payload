@@ -18,6 +18,8 @@ export type OriginalFileData = {
 
 export type FileSize = {
   _objectKey?: string
+  /** `false` when the size has no stored file, because it is built when it is requested. */
+  _stored?: false | null
   filename: null | string
   filesize: null | number
   height: null | number

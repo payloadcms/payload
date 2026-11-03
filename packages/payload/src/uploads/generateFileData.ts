@@ -49,6 +49,7 @@ import {
 import { isFullCrop } from './transformState/cropUnits.js'
 import {
   assertTransformKeysCovered,
+  canBuildAtRequest,
   getStagesThatRun,
   planUploadPipeline,
   planUploadRebuild,
@@ -1106,6 +1107,54 @@ const processUpload = async <T>({
     } else if (isRequestTimeFile({ entry: currentFileData })) {
       // The default file is stored again, so it is no longer built at request time.
       fileData._stored = null
+    }
+
+    // Only Sharp's bridge stores sizes. Without it, request-time stages build each declared size
+    // from the original when it is requested.
+    const declaredVariants = collectionConfig.upload.variants ?? []
+    if (
+      !plannedBridgeTransformer &&
+      declaredVariants.length > 0 &&
+      fileData.original &&
+      (isAppliedAtRequest ||
+        (await canBuildAtRequest({
+          collectionSlug: collectionConfig.slug,
+          documentID,
+          mimeType: file.mimetype,
+          pipelineDoc,
+          pipelineOriginalDoc,
+          req,
+        })))
+    ) {
+      const { name: baseName, ext: baseExt } = parseFilename(fileData.filename!)
+      const plannedNames = new Set([fileData.filename, fileData.original.filename])
+      const variants: FileSizes = {}
+
+      for (const { name: variantName } of declaredVariants) {
+        const filename = await getUnplannedSafeFileName({
+          canUseName: (name) => !plannedNames.has(name),
+          collectionSlug: collectionConfig.slug,
+          desiredFilename: `${baseName}-${variantName}.${baseExt}`,
+          // A size with no stored file can keep a name this document used before.
+          excludeDocumentID: documentID,
+          prefix,
+          req,
+          staticPath: disableLocalStorage ? undefined : staticPath!,
+        })
+        plannedNames.add(filename)
+        variants[variantName] = {
+          _stored: false,
+          filename,
+          filesize: null,
+          height: null,
+          mimeType: null,
+          prefix: fileData.original.prefix,
+          url: null,
+          width: null,
+        }
+      }
+
+      fileData.variants = variants
     }
   } catch (err) {
     throw toFileUploadError({ err, req })

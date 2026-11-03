@@ -31,6 +31,7 @@ export type FileContentRequirement = 'full' | 'header' | 'none'
 export function getFileContentRequirement({
   filename,
   hasSizeEdits,
+  hasVariantsBuiltOnRequest = false,
   mimeType,
   uploadConfig,
 }: {
@@ -42,6 +43,11 @@ export function getFileContentRequirement({
    * only require a header probe.
    */
   hasSizeEdits?: boolean
+  /**
+   * Whether no transformer stores the collection's `variants`, so each one is built from the
+   * original when it is requested and does not need the uploaded bytes.
+   */
+  hasVariantsBuiltOnRequest?: boolean
   mimeType: string
   uploadConfig: SanitizedUploadConfig
 }): FileContentRequirement {
@@ -63,7 +69,9 @@ export function getFileContentRequirement({
   // without knowing which transformer is registered or how it is configured.
   const hasConfiguredAdjustments = Boolean(
     uploadConfig.hasImageAdjustments ||
-    (Array.isArray(uploadConfig.variants) && uploadConfig.variants.length > 0),
+    (!hasVariantsBuiltOnRequest &&
+      Array.isArray(uploadConfig.variants) &&
+      uploadConfig.variants.length > 0),
   )
 
   if (hasSizeEdits || (isResizableImage && hasConfiguredAdjustments) || isAnimatedImage(mimeType)) {
