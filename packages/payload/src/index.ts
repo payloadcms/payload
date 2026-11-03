@@ -1479,7 +1479,6 @@ export { JWTAuthentication } from './auth/strategies/jwt.js'
 export { incrementLoginAttempts } from './auth/strategies/local/incrementLoginAttempts.js'
 export { resetLoginAttempts } from './auth/strategies/local/resetLoginAttempts.js'
 export type {
-  AuthStrategy,
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
   AuthStrategyResult,
