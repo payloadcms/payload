@@ -1,0 +1,89 @@
+# Enforces action pinning only: every non-local action is pinned to a full commit SHA
+# (`unpinned-uses`), the SHA exists in that action's repo (`impostor-commit`), and the
+# `# vX.Y.Z` comment matches the SHA (`ref-version-mismatch`).
+# The other audits are disabled until their existing findings are triaged. Remove a `disable`
+# entry to enforce that audit. New zizmor releases enable new audits by default, so the CI step
+# pins the zizmor version.
+# Docs: https://docs.zizmor.sh/audits/
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        '*': hash-pin
+
+  adhoc-packages:
+    disable: true
+  anonymous-definition:
+    disable: true
+  archived-uses:
+    disable: true
+  artipacked:
+    disable: true
+  bot-conditions:
+    disable: true
+  cache-poisoning:
+    disable: true
+  concurrency-limits:
+    disable: true
+  dangerous-triggers:
+    disable: true
+  dependabot-cooldown:
+    disable: true
+  dependabot-execution:
+    disable: true
+  excessive-permissions:
+    disable: true
+  forbidden-uses:
+    disable: true
+  github-app:
+    disable: true
+  github-env:
+    disable: true
+  hardcoded-container-credentials:
+    disable: true
+  insecure-commands:
+    disable: true
+  insecure-url-scheme:
+    disable: true
+  known-vulnerable-actions:
+    disable: true
+  misfeature:
+    disable: true
+  obfuscation:
+    disable: true
+  overprovisioned-secrets:
+    disable: true
+  ref-confusion:
+    disable: true
+  secrets-inherit:
+    disable: true
+  secrets-outside-env:
+    disable: true
+  self-hosted-runner:
+    disable: true
+  self-repository:
+    disable: true
+  stale-action-refs:
+    disable: true
+  superfluous-actions:
+    disable: true
+  template-injection:
+    disable: true
+  typosquat-uses:
+    disable: true
+  undocumented-permissions:
+    disable: true
+  unpinned-images:
+    disable: true
+  unpinned-tools:
+    disable: true
+  unredacted-secrets:
+    disable: true
+  unsound-condition:
+    disable: true
+  unsound-contains:
+    disable: true
+  unsound-ternary:
+    disable: true
+  use-trusted-publishing:
+    disable: true
