@@ -32,7 +32,7 @@ on:
 # group keeps only its newest pending run, so each dry run gets its own group and cannot replace a
 # pending real run. The real-run test matches `is-default-inputs` below.
 concurrency:
-  group: ${{ github.ref == 'refs/heads/main' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'moderate') == 'moderate' && 'audit-dependencies-real' || format('audit-dependencies-dry-run-{0}', github.run_id) }}
+  group: ${{ github.ref == 'refs/heads/main' && (inputs.ref || 'both') == 'both' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'moderate') == 'moderate' && 'audit-dependencies-real' || format('audit-dependencies-dry-run-{0}', github.run_id) }}
   cancel-in-progress: false
 
 jobs:
@@ -54,9 +54,9 @@ jobs:
       # inputs.* are empty on `schedule`, so the defaults apply.
       scope: ${{ inputs.scope || 'consumer-facing' }}
       severity: ${{ inputs.audit-level || 'moderate' }}
-      # Only a run from main with the default scope and severity may change PRs. All other runs
-      # are dry runs.
-      is-default-inputs: ${{ github.ref == 'refs/heads/main' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'moderate') == 'moderate' }}
+      # Only a run from main with the default ref, scope and severity may change PRs. All other
+      # runs are dry runs.
+      is-default-inputs: ${{ github.ref == 'refs/heads/main' && (inputs.ref || 'both') == 'both' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'moderate') == 'moderate' }}
     secrets:
       AUDIT_DEPS_APP_CLIENT_ID: ${{ secrets.AUDIT_DEPS_APP_CLIENT_ID }}
       AUDIT_DEPS_APP_PRIVATE_KEY: ${{ secrets.AUDIT_DEPS_APP_PRIVATE_KEY }}
