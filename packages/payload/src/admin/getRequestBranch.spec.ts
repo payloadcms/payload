@@ -72,7 +72,7 @@ describe('getRequestBranch', () => {
       expect.objectContaining({
         collection: 'payload-branches',
         overrideAccess: false,
-        where: { slug: { equals: 'deleted' } },
+        where: { name: { equals: 'deleted' } },
       }),
     )
   })

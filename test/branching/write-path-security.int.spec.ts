@@ -56,7 +56,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
     await expect(
       payload.update({
         id: mainDocument.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: restrictedSlug,
         data: { title: 'edited on branch' },
         disableTransaction: true,
@@ -72,14 +72,14 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
       pagination: false,
       showHiddenFields: true,
       where: {
-        and: [{ _branch: { equals: branch.slug } }, { _branchDocID: { equals: mainDocument.id } }],
+        and: [{ _branch: { equals: branch.name } }, { _branchDocID: { equals: mainDocument.id } }],
       },
     })
     const changes = await payload.find({
       collection: branchChangesSlug,
       overrideAccess: true,
       pagination: false,
-      where: { branch: { equals: branch.slug } },
+      where: { branch: { equals: branch.name } },
     })
 
     expect(shadowRows.docs).toHaveLength(0)
@@ -103,7 +103,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
 
     await expect(
       payload.update({
-        branch: branch.slug,
+        branch: branch.name,
         collection: postsSlug,
         data: { title: 'closed branch title' },
         disableTransaction: true,
@@ -122,7 +122,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
       collection: branchChangesSlug,
       overrideAccess: true,
       pagination: false,
-      where: { branch: { equals: branch.slug } },
+      where: { branch: { equals: branch.name } },
     })
 
     expect(mainDocuments.docs.map(({ title }) => title)).toEqual([
@@ -151,7 +151,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
       await expect(
         payload.update({
           id: mainDocument.id,
-          branch: branch.slug,
+          branch: branch.name,
           collection: postsSlug,
           data: { title: 'closed branch title' },
           overrideAccess: true,
@@ -177,7 +177,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
     await expect(
       payload.updateGlobal({
         slug: headerGlobalSlug,
-        branch: branch.slug,
+        branch: branch.name,
         data: { navLabel: 'closed branch navigation' },
         disableTransaction: true,
         overrideAccess: true,
@@ -192,7 +192,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
       collection: branchChangesSlug,
       overrideAccess: true,
       pagination: false,
-      where: { branch: { equals: branch.slug } },
+      where: { branch: { equals: branch.name } },
     })
 
     expect(main.navLabel).toBe('main navigation')
@@ -218,7 +218,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
       await expect(
         payload.updateGlobal({
           slug: headerGlobalSlug,
-          branch: branch.slug,
+          branch: branch.name,
           data: { navLabel: 'closed branch navigation' },
           overrideAccess: true,
         }),
@@ -235,7 +235,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
 
     await payload.updateGlobal({
       slug: uninitializedGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { branchValue: 'branch-only value' },
       overrideAccess: true,
     })
@@ -246,14 +246,14 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
     })
     const onBranch = await payload.findGlobal({
       slug: uninitializedGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: true,
     })
     const changes = await payload.find({
       collection: branchChangesSlug,
       overrideAccess: true,
       pagination: false,
-      where: { branch: { equals: branch.slug } },
+      where: { branch: { equals: branch.name } },
     })
 
     expect(onMain.branchValue).not.toBe('branch-only value')
@@ -271,20 +271,20 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
 
     await payload.updateGlobal({
       slug: homepageGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { _status: 'published', heroTitle: 'historical branch title' },
       overrideAccess: true,
     })
     await payload.updateGlobal({
       slug: homepageGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { _status: 'published', heroTitle: 'current branch title' },
       overrideAccess: true,
     })
 
     const versions = await payload.findGlobalVersions({
       slug: homepageGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: true,
       pagination: false,
     })
@@ -300,14 +300,14 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
       payload.restoreGlobalVersion({
         id: historicalVersion!.id,
         slug: homepageGlobalSlug,
-        branch: branch.slug,
+        branch: branch.name,
         overrideAccess: true,
       }),
     ).rejects.toThrow()
 
     const onBranch = await payload.findGlobal({
       slug: homepageGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: true,
     })
 
@@ -323,7 +323,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
 
     await expect(
       payload.create({
-        branch: branch.slug,
+        branch: branch.name,
         collection: postsSlug,
         data: { title: 'created after closing' },
         disableTransaction: true,
@@ -337,7 +337,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
       overrideAccess: true,
       pagination: false,
       showHiddenFields: true,
-      where: { _branch: { equals: branch.slug } },
+      where: { _branch: { equals: branch.name } },
     })
 
     expect(branchRows.docs).toHaveLength(0)
@@ -375,7 +375,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
 
     await payload.restoreVersion({
       id: historicalVersion!.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: pagesSlug,
       overrideAccess: false,
     })
@@ -387,7 +387,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
     })
     const onBranch = await payload.findByID({
       id: mainDocument.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: pagesSlug,
       overrideAccess: true,
     })
@@ -395,7 +395,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
       collection: branchChangesSlug,
       overrideAccess: true,
       pagination: false,
-      where: { branch: { equals: branch.slug } },
+      where: { branch: { equals: branch.name } },
     })
 
     expect(onMain.title).toBe('current main title')
@@ -436,9 +436,9 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
     expect(historicalVersion).toBeDefined()
 
     const branch = await createBranch({ name: 'Restore Same Request', payload })
-    const req = await createPayloadRequest({ branch: branch.slug, payload })
+    const req = await createPayloadRequest({ branch: branch.name, payload })
     const cacheKey = createDataloaderCacheKey({
-      branch: branch.slug,
+      branch: branch.name,
       collectionSlug: pagesSlug,
       currentDepth: 0,
       depth: 1,
@@ -525,7 +525,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
         await expect(
           payload.restoreVersion({
             id: historicalVersion!.id,
-            branch: branch.slug,
+            branch: branch.name,
             collection: pagesSlug,
             overrideAccess: false,
             req,
@@ -551,7 +551,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
         showHiddenFields: true,
         where: {
           and: [
-            { _branch: { equals: branch.slug } },
+            { _branch: { equals: branch.name } },
             { _branchDocID: { equals: mainDocument.id } },
           ],
         },
@@ -560,11 +560,11 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
         collection: branchChangesSlug,
         overrideAccess: true,
         pagination: false,
-        where: { branch: { equals: branch.slug } },
+        where: { branch: { equals: branch.name } },
       })
       const sameRequestRead = await payload.findByID({
         id: mainDocument.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: pagesSlug,
         overrideAccess: true,
         req,
@@ -628,7 +628,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
         await expect(
           payload.restoreVersion({
             id: historicalVersion!.id,
-            branch: branch.slug,
+            branch: branch.name,
             collection: pagesSlug,
             overrideAccess: true,
             req,
@@ -648,7 +648,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
           showHiddenFields: true,
           where: {
             and: [
-              { _branch: { equals: branch.slug } },
+              { _branch: { equals: branch.name } },
               { _branchDocID: { equals: mainDocument.id } },
             ],
           },
@@ -657,7 +657,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
           collection: branchChangesSlug,
           overrideAccess: true,
           pagination: false,
-          where: { branch: { equals: branch.slug } },
+          where: { branch: { equals: branch.name } },
         })
 
         expect(shadowRows.docs).toHaveLength(0)
@@ -678,7 +678,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
           showHiddenFields: true,
           where: {
             and: [
-              { _branch: { equals: branch.slug } },
+              { _branch: { equals: branch.name } },
               { _branchDocID: { equals: mainDocument.id } },
             ],
           },
@@ -687,7 +687,7 @@ test.suite('Branching write-path security', { config: './config.ts' }, () => {
           collection: branchChangesSlug,
           overrideAccess: true,
           pagination: false,
-          where: { branch: { equals: branch.slug } },
+          where: { branch: { equals: branch.name } },
         })
 
         expect(persistedDocument.title).toBe('created before rejected branch restore')

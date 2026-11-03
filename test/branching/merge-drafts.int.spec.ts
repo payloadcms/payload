@@ -1,17 +1,13 @@
 import type { Payload } from 'payload'
 
 import { createPayloadRequest, resolveEffectiveOperations } from 'payload'
-
 import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { autosaveSlug, branchChangesSlug, branchesSlug, pagesSlug } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -45,7 +41,7 @@ test.suite('Branching: merge-drafts', { config: './config.ts', resetBetweenTests
     test.beforeEach(async () => {
       await payload.create({
         collection: branchesSlug,
-        data: { name: 'Draft merge', slug: 'draftmerge' },
+        data: { name: 'draftmerge' },
       })
 
       const page = await payload.create({
@@ -70,7 +66,7 @@ test.suite('Branching: merge-drafts', { config: './config.ts', resetBetweenTests
           collection,
           pagination: false,
           where: {
-            [collection === branchesSlug ? 'slug' : 'branch']: { equals: 'draftmerge' },
+            [collection === branchesSlug ? 'name' : 'branch']: { equals: 'draftmerge' },
           },
         })
 

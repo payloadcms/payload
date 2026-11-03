@@ -20,7 +20,7 @@ import {
   postsSlug,
 } from './shared.js'
 
-const branch = 'halloween-updates'
+const branch = 'Halloween Updates'
 
 test.suite('Branching: UI request context', { config: './config.ts' }, () => {
   test('should copy a branch-only document between locales', async ({ payload }) => {

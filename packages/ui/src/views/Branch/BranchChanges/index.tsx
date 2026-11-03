@@ -27,7 +27,6 @@ const baseClass = 'branch-changes'
 export const BranchChanges: React.FC<{
   branchID: number | string
   branchName: string
-  branchSlug: string
   changes: BranchChange[]
   historyPage?: number
   historyTotalPages?: number
@@ -37,7 +36,6 @@ export const BranchChanges: React.FC<{
 }> = ({
   branchID,
   branchName,
-  branchSlug,
   changes,
   historyPage = 1,
   historyTotalPages = 1,
@@ -91,12 +89,11 @@ export const BranchChanges: React.FC<{
     () => ({
       branchID,
       branchName,
-      branchSlug,
       changes: changes.filter((change) => selected.has(change.id)),
       selectedChangeIDs,
       totalChanges: changes.length,
     }),
-    [branchID, branchName, branchSlug, changes, selected, selectedChangeIDs],
+    [branchID, branchName, changes, selected, selectedChangeIDs],
   )
 
   const hasPending = changes.length > 0
@@ -146,7 +143,7 @@ export const BranchChanges: React.FC<{
             )}
             <ScheduledMerges
               branchID={branchID}
-              branchSlug={branchSlug}
+              branchName={branchName}
               schedules={scheduledMerges}
             />
           </section>
@@ -170,7 +167,7 @@ export const BranchChanges: React.FC<{
               {t('branching:untouchedDocumentsNote')}
             </p>
             <ChangedDocuments
-              branch={branchSlug}
+              branch={branchName}
               changes={changes}
               selected={selected}
               toggleAll={toggleAll}

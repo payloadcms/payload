@@ -40,7 +40,7 @@ test.describe('Branching hierarchy sidebar', () => {
 
       const branch = await payload.create({
         collection: branchesSlug,
-        data: { name: 'Hierarchy sidebar branch', slug: `hierarchy-${collection}` },
+        data: { name: `hierarchy-${collection}` },
       })
       const createdIDs: string[] = []
 
@@ -61,18 +61,18 @@ test.describe('Branching hierarchy sidebar', () => {
 
         await payload.update({
           id: root.id,
-          branch: branch.slug,
+          branch: branch.name,
           collection,
           data: { name: 'Branch root' },
         })
         await payload.update({
           id: child.id,
-          branch: branch.slug,
+          branch: branch.name,
           collection,
           data: { name: 'Branch child' },
         })
         await payload.create({
-          branch: branch.slug,
+          branch: branch.name,
           collection,
           data: { name: 'Branch-only root' },
         })
@@ -90,7 +90,7 @@ test.describe('Branching hierarchy sidebar', () => {
         await expect(tree.getByRole('treeitem', { name: 'Main child', exact: true })).toBeVisible()
 
         await switchBranch({ name: branch.name, page })
-        await expect(page).toHaveURL(new RegExp(`branch=${branch.slug}`))
+        await expect(page).toHaveURL((url) => url.searchParams.get('branch') === branch.name)
         await expect(tree.getByRole('treeitem', { name: 'Branch root', exact: true })).toBeVisible()
         await expect(
           tree.getByRole('treeitem', { name: 'Branch child', exact: true }),

@@ -1,22 +1,16 @@
 import type { Payload } from 'payload'
 
 import fs from 'fs'
-
 import path from 'path'
-
 import { commitTransaction, createPayloadRequest, initTransaction, killTransaction } from 'payload'
-
 import { expect, vi } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import {
   databaseAdapterSupportsTransactions,
   isPostgresDatabaseAdapter,
 } from '../__helpers/shared/databaseAdapterCapabilities.js'
-
 import { mongooseList } from '../__helpers/shared/isMongoose.js'
-
 import {
   deletionSafetyBranchGlobalSlug,
   deletionSafetyGlobalSlug,
@@ -28,9 +22,7 @@ import {
   deletionSafetyVersionedGlobalSlug,
   deletionSafetyVersionedTargetsSlug,
 } from './deletion-safety.config.js'
-
 import { deletionSafetySpy, resetDeletionSafetySpy } from './deletionSafetySpy.js'
-
 import { branchChangesSlug, branchesSlug } from './shared.js'
 
 const branchReferenceErrorMessage =
@@ -76,7 +68,7 @@ const createTrashedBranchOwner = async ({
 
   await payload.update({
     id: mainOwner.id,
-    branch: branch.slug,
+    branch: branch.name,
     collection: deletionSafetyOwnersSlug,
     data: {
       deletedAt: new Date().toISOString(),
@@ -186,7 +178,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     payload,
   }) => {
     const branch = await createBranch({ name: 'Referenced by main', payload })
-    const target = await createBranchTarget({ branch: branch.slug, payload })
+    const target = await createBranchTarget({ branch: branch.name, payload })
 
     await payload.create({
       collection: deletionSafetyOwnersSlug,
@@ -204,7 +196,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     ).rejects.toMatchObject({ message: branchReferenceErrorMessage, status: 409 })
 
     expect(deletionSafetySpy.ownerBeforeReadCount).toBe(0)
-    await expectTargetToRemain({ id: target.id, branch: branch.slug, payload })
+    await expectTargetToRemain({ id: target.id, branch: branch.name, payload })
   })
 
   test('should block a selected create discard when another branch row references its target', async ({
@@ -212,37 +204,37 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
   }) => {
     const targetBranch = await createBranch({ name: 'Target branch', payload })
     const ownerBranch = await createBranch({ name: 'Owner branch', payload })
-    const target = await createBranchTarget({ branch: targetBranch.slug, payload })
+    const target = await createBranchTarget({ branch: targetBranch.name, payload })
 
     await payload.create({
-      branch: ownerBranch.slug,
+      branch: ownerBranch.name,
       collection: deletionSafetyOwnersSlug,
       data: { target: target.id, title: 'other branch owner' },
       overrideAccess: true,
     })
 
     const createChange = await findCreateChange({
-      branch: targetBranch.slug,
+      branch: targetBranch.name,
       docID: target.id,
       payload,
     })
 
     await expect(
       payload.branches.discard({
-        branch: targetBranch.slug,
+        branch: targetBranch.name,
         changes: [createChange.id],
         overrideAccess: true,
       }),
     ).rejects.toMatchObject({ message: branchReferenceErrorMessage, status: 409 })
 
-    await expectTargetToRemain({ id: target.id, branch: targetBranch.slug, payload })
+    await expectTargetToRemain({ id: target.id, branch: targetBranch.name, payload })
   })
 
   test('should block discard when a trashed main row references branch-created content', async ({
     payload,
   }) => {
     const branch = await createBranch({ name: 'Referenced by trash', payload })
-    const target = await createBranchTarget({ branch: branch.slug, payload })
+    const target = await createBranchTarget({ branch: branch.name, payload })
     const owner = await payload.create({
       collection: deletionSafetyOwnersSlug,
       data: { target: target.id, title: 'trashed owner' },
@@ -257,10 +249,10 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     })
 
     await expect(
-      payload.branches.discard({ branch: branch.slug, overrideAccess: true }),
+      payload.branches.discard({ branch: branch.name, overrideAccess: true }),
     ).rejects.toMatchObject({ status: 409 })
 
-    await expectTargetToRemain({ id: target.id, branch: branch.slug, payload })
+    await expectTargetToRemain({ id: target.id, branch: branch.name, payload })
   })
 
   test('should keep a trashed branch copy from revealing its inherited main document', async ({
@@ -273,14 +265,14 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
     const defaultBranchDocument = await payload.findByID({
       id: mainOwner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyOwnersSlug,
       disableErrors: true,
       overrideAccess: true,
     })
     const trashedBranchDocument = await payload.findByID({
       id: mainOwner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyOwnersSlug,
       overrideAccess: true,
       trash: true,
@@ -304,7 +296,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
     await payload.update({
       id: mainOwner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyOwnersSlug,
       data: { deletedAt: null },
       overrideAccess: true,
@@ -313,7 +305,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
     const restoredBranchDocument = await payload.findByID({
       id: mainOwner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyOwnersSlug,
       overrideAccess: true,
     })
@@ -333,11 +325,11 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       payload,
     })
 
-    await payload.branches.discard({ branch: branch.slug, overrideAccess: true })
+    await payload.branches.discard({ branch: branch.name, overrideAccess: true })
 
     const inheritedBranchDocument = await payload.findByID({
       id: mainOwner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyOwnersSlug,
       overrideAccess: true,
     })
@@ -345,7 +337,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       branch: false,
       collection: deletionSafetyOwnersSlug,
       pagination: false,
-      where: { _branch: { equals: branch.slug } },
+      where: { _branch: { equals: branch.name } },
     })
 
     expect(inheritedBranchDocument.title).toBe('main owner')
@@ -360,7 +352,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
     await payload.delete({
       id: mainOwner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyOwnersSlug,
       overrideAccess: true,
       trash: true,
@@ -368,7 +360,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
     const deletedBranchDocument = await payload.findByID({
       id: mainOwner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyOwnersSlug,
       disableErrors: true,
       overrideAccess: true,
@@ -383,11 +375,11 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     expect(deletedBranchDocument).toBeNull()
     expect(mainDocument.title).toBe('main owner')
 
-    await payload.branches.discard({ branch: branch.slug, overrideAccess: true })
+    await payload.branches.discard({ branch: branch.name, overrideAccess: true })
 
     const inheritedBranchDocument = await payload.findByID({
       id: mainOwner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyOwnersSlug,
       overrideAccess: true,
     })
@@ -399,7 +391,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     payload,
   }) => {
     const branch = await createBranch({ name: 'Referenced by global', payload })
-    const target = await createBranchTarget({ branch: branch.slug, payload })
+    const target = await createBranchTarget({ branch: branch.name, payload })
 
     await payload.updateGlobal({
       slug: deletionSafetyGlobalSlug,
@@ -412,25 +404,25 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     await expect(
       payload.delete({
         id: target.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: deletionSafetyTargetsSlug,
         overrideAccess: true,
       }),
     ).rejects.toMatchObject({ status: 409 })
 
     expect(deletionSafetySpy.globalBeforeReadCount).toBe(0)
-    await expectTargetToRemain({ id: target.id, branch: branch.slug, payload })
+    await expectTargetToRemain({ id: target.id, branch: branch.name, payload })
   })
 
   test('should allow direct deletion when only the branch-created target itself references it', async ({
     payload,
   }) => {
     const branch = await createBranch({ name: 'Self-referencing target', payload })
-    const target = await createBranchTarget({ branch: branch.slug, payload })
+    const target = await createBranchTarget({ branch: branch.name, payload })
 
     await payload.update({
       id: target.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       data: { relatedTarget: target.id },
       overrideAccess: true,
@@ -438,7 +430,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
     await payload.delete({
       id: target.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       overrideAccess: true,
     })
@@ -447,7 +439,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       branch: false,
       collection: deletionSafetyTargetsSlug,
       where: {
-        and: [{ id: { equals: target.id } }, { _branch: { equals: branch.slug } }],
+        and: [{ id: { equals: target.id } }, { _branch: { equals: branch.name } }],
       },
     })
 
@@ -459,7 +451,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
   }) => {
     const targetBranch = await createBranch({ name: 'Global target branch', payload })
     const ownerBranch = await createBranch({ name: 'Global owner branch', payload })
-    const target = await createBranchTarget({ branch: targetBranch.slug, payload })
+    const target = await createBranchTarget({ branch: targetBranch.name, payload })
 
     await payload.updateGlobal({
       slug: deletionSafetyBranchGlobalSlug,
@@ -469,7 +461,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     })
     await payload.updateGlobal({
       slug: deletionSafetyBranchGlobalSlug,
-      branch: ownerBranch.slug,
+      branch: ownerBranch.name,
       data: { target: target.id },
       overrideAccess: true,
     })
@@ -481,7 +473,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     })
     const ownerGlobal = await payload.findGlobal({
       slug: deletionSafetyBranchGlobalSlug,
-      branch: ownerBranch.slug,
+      branch: ownerBranch.name,
       overrideAccess: true,
     })
 
@@ -489,27 +481,27 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     expect(getRelationshipID(ownerGlobal.target)).toBe(target.id)
 
     const createChange = await findCreateChange({
-      branch: targetBranch.slug,
+      branch: targetBranch.name,
       docID: target.id,
       payload,
     })
 
     await expect(
       payload.branches.discard({
-        branch: targetBranch.slug,
+        branch: targetBranch.name,
         changes: [createChange.id],
         overrideAccess: true,
       }),
     ).rejects.toMatchObject({ message: branchReferenceErrorMessage, status: 409 })
 
-    await expectTargetToRemain({ id: target.id, branch: targetBranch.slug, payload })
+    await expectTargetToRemain({ id: target.id, branch: targetBranch.name, payload })
   })
 
   test('should not ignore an unselected global owner during a selected create discard', async ({
     payload,
   }) => {
     const branch = await createBranch({ name: 'Unselected global owner', payload })
-    const target = await createBranchTarget({ branch: branch.slug, payload })
+    const target = await createBranchTarget({ branch: branch.name, payload })
 
     await payload.updateGlobal({
       slug: deletionSafetyBranchGlobalSlug,
@@ -519,7 +511,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     })
     await payload.updateGlobal({
       slug: deletionSafetyBranchGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { target: target.id },
       overrideAccess: true,
     })
@@ -531,7 +523,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     })
     const ownerGlobal = await payload.findGlobal({
       slug: deletionSafetyBranchGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: true,
     })
 
@@ -539,27 +531,27 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     expect(getRelationshipID(ownerGlobal.target)).toBe(target.id)
 
     const createChange = await findCreateChange({
-      branch: branch.slug,
+      branch: branch.name,
       docID: target.id,
       payload,
     })
 
     await expect(
       payload.branches.discard({
-        branch: branch.slug,
+        branch: branch.name,
         changes: [createChange.id],
         overrideAccess: true,
       }),
     ).rejects.toMatchObject({ message: branchReferenceErrorMessage, status: 409 })
 
-    await expectTargetToRemain({ id: target.id, branch: branch.slug, payload })
+    await expectTargetToRemain({ id: target.id, branch: branch.name, payload })
   })
 
   test('should remove a branch-created target and its branch global version chain together', async ({
     payload,
   }) => {
     const branch = await createBranch({ name: 'Owned global history', payload })
-    const target = await createBranchTarget({ branch: branch.slug, payload })
+    const target = await createBranchTarget({ branch: branch.name, payload })
 
     await payload.updateGlobal({
       slug: deletionSafetyVersionedGlobalSlug,
@@ -569,7 +561,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     })
     await payload.updateGlobal({
       slug: deletionSafetyVersionedGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { target: target.id },
       overrideAccess: true,
     })
@@ -578,7 +570,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       branch: false,
       global: deletionSafetyVersionedGlobalSlug,
       pagination: false,
-      where: { _branch: { equals: branch.slug } },
+      where: { _branch: { equals: branch.name } },
     })
 
     expect(versionsBeforeDeletion.docs.length).toBeGreaterThan(0)
@@ -593,19 +585,19 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       branch: false,
       collection: deletionSafetyTargetsSlug,
       where: {
-        and: [{ id: { equals: target.id } }, { _branch: { equals: branch.slug } }],
+        and: [{ id: { equals: target.id } }, { _branch: { equals: branch.name } }],
       },
     })
     const remainingGlobal = await payload.db.findGlobal({
       slug: deletionSafetyVersionedGlobalSlug,
       branch: false,
-      where: { _branch: { equals: branch.slug } },
+      where: { _branch: { equals: branch.name } },
     })
     const remainingGlobalVersions = await payload.db.findGlobalVersions({
       branch: false,
       global: deletionSafetyVersionedGlobalSlug,
       pagination: false,
-      where: { _branch: { equals: branch.slug } },
+      where: { _branch: { equals: branch.name } },
     })
 
     expect(remainingTarget).toBeNull()
@@ -617,7 +609,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     payload,
   }) => {
     const branch = await createBranch({ name: 'Referenced by history', payload })
-    const target = await createBranchTarget({ branch: branch.slug, payload })
+    const target = await createBranchTarget({ branch: branch.name, payload })
     const owner = await payload.create({
       collection: deletionSafetyOwnersSlug,
       data: { target: target.id, title: 'historical owner' },
@@ -634,10 +626,10 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     })
 
     await expect(
-      payload.branches.discard({ branch: branch.slug, overrideAccess: true }),
+      payload.branches.discard({ branch: branch.name, overrideAccess: true }),
     ).rejects.toMatchObject({ status: 409 })
 
-    await expectTargetToRemain({ id: target.id, branch: branch.slug, payload })
+    await expectTargetToRemain({ id: target.id, branch: branch.name, payload })
   })
 
   test('should run upload cleanup when discarding an upload created on a branch', async ({
@@ -646,7 +638,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const branch = await createBranch({ name: 'Upload cleanup', payload })
     const fileData = Buffer.from('branch upload bytes')
     const upload = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       data: { alt: 'branch upload' },
       file: {
@@ -662,7 +654,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     expect(fs.existsSync(filePath)).toBe(true)
     resetDeletionSafetySpy()
 
-    await payload.branches.discard({ branch: branch.slug, overrideAccess: true })
+    await payload.branches.discard({ branch: branch.name, overrideAccess: true })
 
     expect(fs.existsSync(filePath)).toBe(false)
     expect(deletionSafetySpy.uploadAfterDeleteCount).toBe(1)
@@ -687,7 +679,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const draftFileData = Buffer.from('branch draft upload bytes')
     const draftUpload = await payload.update({
       id: mainUpload.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       data: { alt: 'branch draft upload' },
       draft: true,
@@ -710,13 +702,13 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     })
     const branchDraftAfterUpdate = await payload.findByID({
       id: mainUpload.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       draft: true,
       overrideAccess: true,
     })
     const branchVersionsAfterUpdate = await payload.findVersions({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       overrideAccess: true,
       pagination: false,
@@ -739,7 +731,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     expect(fs.existsSync(mainFilePath)).toBe(true)
     expect(fs.existsSync(draftFilePath)).toBe(true)
 
-    await payload.branches.discard({ branch: branch.slug, overrideAccess: true })
+    await payload.branches.discard({ branch: branch.name, overrideAccess: true })
 
     expect(fs.existsSync(mainFilePath)).toBe(true)
     expect(fs.existsSync(draftFilePath)).toBe(false)
@@ -764,7 +756,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const replacementFileData = Buffer.from('published branch replacement bytes')
     const branchUpload = await payload.update({
       id: mainUpload.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       data: { _status: 'published', alt: 'published branch replacement' },
       file: {
@@ -783,7 +775,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     })
     const branchUploadAfterUpdate = await payload.findByID({
       id: mainUpload.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       overrideAccess: true,
     })
@@ -791,11 +783,11 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       branch: false,
       collection: deletionSafetyMediaSlug,
       where: {
-        and: [{ _branch: { equals: branch.slug } }, { _branchDocID: { equals: mainUpload.id } }],
+        and: [{ _branch: { equals: branch.name } }, { _branchDocID: { equals: mainUpload.id } }],
       },
     })
     const branchVersionsAfterUpdate = await payload.findVersions({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       overrideAccess: true,
       pagination: false,
@@ -812,7 +804,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       filename: branchUpload.filename,
     })
     expect(branchShadow).toMatchObject({
-      _branch: branch.slug,
+      _branch: branch.name,
       _branchDocID: mainUpload.id,
       alt: 'published branch replacement',
       filename: branchUpload.filename,
@@ -838,14 +830,14 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         overrideAccess: true,
       })
       const branch = await createBranch({ name: 'Same request retry', payload })
-      const req = await createPayloadRequest({ branch: branch.slug, payload })
+      const req = await createPayloadRequest({ branch: branch.name, payload })
 
       deletionSafetySpy.rejectTargetAfterChangeID = mainTarget.id
 
       await expect(
         payload.update({
           id: mainTarget.id,
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           data: { title: 'rejected branch update' },
           overrideAccess: true,
@@ -855,7 +847,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
       const branchAfterFailure = await payload.findByID({
         id: mainTarget.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: deletionSafetyTargetsSlug,
         overrideAccess: true,
         req,
@@ -867,7 +859,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         pagination: false,
         showHiddenFields: true,
         where: {
-          and: [{ _branch: { equals: branch.slug } }, { _branchDocID: { equals: mainTarget.id } }],
+          and: [{ _branch: { equals: branch.name } }, { _branchDocID: { equals: mainTarget.id } }],
         },
       })
       const changesAfterFailure = await payload.find({
@@ -875,7 +867,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         overrideAccess: true,
         pagination: false,
         where: {
-          and: [{ branch: { equals: branch.slug } }, { 'doc.value': { equals: mainTarget.id } }],
+          and: [{ branch: { equals: branch.name } }, { 'doc.value': { equals: mainTarget.id } }],
         },
       })
 
@@ -887,7 +879,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
       const retriedUpdate = await payload.update({
         id: mainTarget.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: deletionSafetyTargetsSlug,
         data: { title: 'successful branch retry' },
         overrideAccess: true,
@@ -906,7 +898,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         pagination: false,
         showHiddenFields: true,
         where: {
-          and: [{ _branch: { equals: branch.slug } }, { _branchDocID: { equals: mainTarget.id } }],
+          and: [{ _branch: { equals: branch.name } }, { _branchDocID: { equals: mainTarget.id } }],
         },
       })
       const changesAfterRetry = await payload.find({
@@ -914,7 +906,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         overrideAccess: true,
         pagination: false,
         where: {
-          and: [{ branch: { equals: branch.slug } }, { 'doc.value': { equals: mainTarget.id } }],
+          and: [{ branch: { equals: branch.name } }, { 'doc.value': { equals: mainTarget.id } }],
         },
       })
 
@@ -936,7 +928,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         overrideAccess: true,
       })
       const branch = await createBranch({ name: 'Caller transaction first update', payload })
-      const req = await createPayloadRequest({ branch: branch.slug, payload })
+      const req = await createPayloadRequest({ branch: branch.name, payload })
       const didStartTransaction = await initTransaction(req)
       const callerTransactionID = await req.transactionID
 
@@ -946,7 +938,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         await expect(
           payload.update({
             id: mainTarget.id,
-            branch: branch.slug,
+            branch: branch.name,
             collection: deletionSafetyTargetsSlug,
             data: { title: 'rejected caller transaction update' },
             overrideAccess: true,
@@ -967,7 +959,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
           showHiddenFields: true,
           where: {
             and: [
-              { _branch: { equals: branch.slug } },
+              { _branch: { equals: branch.name } },
               { _branchDocID: { equals: mainTarget.id } },
             ],
           },
@@ -976,7 +968,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
           collection: branchChangesSlug,
           overrideAccess: true,
           pagination: false,
-          where: { branch: { equals: branch.slug } },
+          where: { branch: { equals: branch.name } },
         })
 
         expect(shadowRows.docs).toHaveLength(0)
@@ -1002,13 +994,13 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
       await payload.update({
         id: mainTarget.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: deletionSafetyTargetsSlug,
         data: { title: 'existing branch shadow' },
         overrideAccess: true,
       })
 
-      const req = await createPayloadRequest({ branch: branch.slug, payload })
+      const req = await createPayloadRequest({ branch: branch.name, payload })
       const didStartTransaction = await initTransaction(req)
       const callerTransactionID = await req.transactionID
 
@@ -1017,7 +1009,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       try {
         const result = await payload.update({
           id: mainTarget.id,
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           data: { title: 'caller transaction branch update' },
           overrideAccess: true,
@@ -1037,7 +1029,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         })
         const branchAfterUpdate = await payload.findByID({
           id: mainTarget.id,
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           overrideAccess: true,
         })
@@ -1070,13 +1062,13 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
       await payload.update({
         id: existingShadowTarget.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: deletionSafetyTargetsSlug,
         data: { title: 'existing branch shadow' },
         overrideAccess: true,
       })
 
-      const req = await createPayloadRequest({ branch: branch.slug, payload })
+      const req = await createPayloadRequest({ branch: branch.name, payload })
       const didStartTransaction = await initTransaction(req)
       const callerTransactionID = await req.transactionID
 
@@ -1084,7 +1076,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
       try {
         const result = await payload.update({
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           data: { title: 'caller transaction bulk replacement' },
           overrideAccess: true,
@@ -1111,13 +1103,13 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         })
         const branchExistingShadowTarget = await payload.findByID({
           id: existingShadowTarget.id,
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           overrideAccess: true,
         })
         const branchUntouchedTarget = await payload.findByID({
           id: untouchedTarget.id,
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           overrideAccess: true,
         })
@@ -1129,7 +1121,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
           showHiddenFields: true,
           where: {
             and: [
-              { _branch: { equals: branch.slug } },
+              { _branch: { equals: branch.name } },
               { _branchDocID: { equals: untouchedTarget.id } },
             ],
           },
@@ -1140,7 +1132,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
           pagination: false,
           where: {
             and: [
-              { branch: { equals: branch.slug } },
+              { branch: { equals: branch.name } },
               { 'doc.value': { equals: untouchedTarget.id } },
             ],
           },
@@ -1165,7 +1157,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const branch = await createBranch({ name: 'Branch-created draft upload cleanup', payload })
     const publishedFileData = Buffer.from('branch published upload bytes')
     const publishedUpload = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       data: { alt: 'branch published upload' },
       file: {
@@ -1179,7 +1171,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const draftFileData = Buffer.from('branch-created draft upload bytes')
     const draftUpload = await payload.update({
       id: publishedUpload.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       data: { alt: 'branch-created draft upload' },
       draft: true,
@@ -1196,7 +1188,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
     expect(fs.existsSync(draftFilePath)).toBe(true)
 
-    await payload.branches.discard({ branch: branch.slug, overrideAccess: true })
+    await payload.branches.discard({ branch: branch.name, overrideAccess: true })
 
     expect(fs.existsSync(publishedFilePath)).toBe(false)
     expect(fs.existsSync(draftFilePath)).toBe(false)
@@ -1228,7 +1220,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
     await payload.delete({
       id: target.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       overrideAccess: true,
     })
@@ -1247,7 +1239,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     expect(mainTarget.id).toBe(target.id)
     expect(remainingPreference.id).toBe(preference.id)
 
-    await payload.branches.discard({ branch: branch.slug, overrideAccess: true })
+    await payload.branches.discard({ branch: branch.name, overrideAccess: true })
 
     const preferenceAfterDiscard = await payload.findByID({
       id: preference.id,
@@ -1283,7 +1275,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     })
 
     const result = await payload.delete({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       overrideAccess: true,
       where: { id: { equals: target.id } },
@@ -1301,7 +1293,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
   test('should remove preferences when deleting a branch-created document', async ({ payload }) => {
     const branch = await createBranch({ name: 'Branch-created delete preference', payload })
-    const target = await createBranchTarget({ branch: branch.slug, payload })
+    const target = await createBranchTarget({ branch: branch.name, payload })
     const user = await payload.create({
       collection: 'users',
       data: { email: 'branch-created-delete-preference@example.com', password: 'test' },
@@ -1319,7 +1311,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
     await payload.delete({
       id: target.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       overrideAccess: true,
     })
@@ -1343,7 +1335,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       data: { title: 'mixed bulk main target' },
       overrideAccess: true,
     })
-    const branchCreatedTarget = await createBranchTarget({ branch: branch.slug, payload })
+    const branchCreatedTarget = await createBranchTarget({ branch: branch.name, payload })
     const user = await payload.create({
       collection: 'users',
       data: { email: 'mixed-bulk-delete-preference@example.com', password: 'test' },
@@ -1369,7 +1361,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     })
 
     const result = await payload.delete({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       overrideAccess: true,
       where: { id: { in: [mainTarget.id, branchCreatedTarget.id] } },
@@ -1390,7 +1382,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     payload,
   }) => {
     const branch = await createBranch({ name: 'Bulk delete final target', payload })
-    const target = await createBranchTarget({ branch: branch.slug, payload })
+    const target = await createBranchTarget({ branch: branch.name, payload })
     const titleAfterHook = 'updated during before delete'
     let afterDeleteDocument: Record<string, unknown> | undefined
 
@@ -1408,7 +1400,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     }
 
     const result = await payload.delete({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       overrideAccess: true,
       select: { title: true },
@@ -1437,7 +1429,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
       try {
         const rejectedDelete = await payload.delete({
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           overrideAccess: true,
           where: { id: { equals: target.id } },
@@ -1449,7 +1441,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
         await expectBranchDeleteToHaveRolledBack({
           id: target.id,
-          branch: branch.slug,
+          branch: branch.name,
           payload,
         })
       } finally {
@@ -1475,7 +1467,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
       try {
         const result = await payload.delete({
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           overrideAccess: true,
           where: { id: { equals: target.id } },
@@ -1486,7 +1478,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         expect(result.errors[0]?.message).toBe('Rejected target after delete')
         await expectBranchDeleteToHaveRolledBack({
           id: target.id,
-          branch: branch.slug,
+          branch: branch.name,
           payload,
         })
       } finally {
@@ -1505,14 +1497,14 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         data: { title: 'caller transaction delete target' },
         overrideAccess: true,
       })
-      const req = await createPayloadRequest({ branch: branch.slug, payload })
+      const req = await createPayloadRequest({ branch: branch.name, payload })
       const didStartTransaction = await initTransaction(req)
 
       expect(didStartTransaction).toBe(true)
 
       try {
         const result = await payload.delete({
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           overrideAccess: true,
           req,
@@ -1527,7 +1519,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         expect(req.transactionID).toBeTruthy()
         await expectBranchDeleteToHaveRolledBack({
           id: target.id,
-          branch: branch.slug,
+          branch: branch.name,
           payload,
         })
       } finally {
@@ -1551,20 +1543,20 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
       await payload.update({
         id: target.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: deletionSafetyTargetsSlug,
         data: { title: 'selected caller transaction branch target' },
         overrideAccess: true,
       })
 
-      const req = await createPayloadRequest({ branch: branch.slug, payload })
+      const req = await createPayloadRequest({ branch: branch.name, payload })
       const didStartTransaction = await initTransaction(req)
 
       expect(didStartTransaction).toBe(true)
 
       try {
         const result = await payload.delete({
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           overrideAccess: true,
           req,
@@ -1596,7 +1588,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
       await payload.update({
         id: target.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: deletionSafetyTargetsSlug,
         data: { title: 'branch target that will disappear' },
         overrideAccess: true,
@@ -1610,7 +1602,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
           collection: deletionSafetyTargetsSlug,
           req,
           where: {
-            and: [{ _branch: { equals: branch.slug } }, { _branchDocID: { equals: id } }],
+            and: [{ _branch: { equals: branch.name } }, { _branchDocID: { equals: id } }],
           },
         })
 
@@ -1628,7 +1620,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
       try {
         const result = await payload.delete({
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           overrideAccess: true,
           where: { id: { equals: target.id } },
@@ -1642,7 +1634,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         })
         const branchAfterDelete = await payload.findByID({
           id: target.id,
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           disableErrors: true,
           overrideAccess: true,
@@ -1670,7 +1662,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         data: { title: 'versioned main target before rejected delete' },
         overrideAccess: true,
       })
-      const req = await createPayloadRequest({ branch: branch.slug, payload })
+      const req = await createPayloadRequest({ branch: branch.name, payload })
       const originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
 
       deletionSafetySpy.rejectVersionedTargetAfterDeleteID = target.id
@@ -1678,7 +1670,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
       try {
         const rejectedDelete = await payload.delete({
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyVersionedTargetsSlug,
           overrideAccess: true,
           req,
@@ -1695,7 +1687,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
         const branchUpdate = await payload.update({
           id: target.id,
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyVersionedTargetsSlug,
           data: { title: 'branch update after rejected delete' },
           overrideAccess: true,
@@ -1726,7 +1718,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const branch = await createBranch({ name: 'Caller-owned bulk delete', payload })
     const fileData = Buffer.from('caller-owned bulk upload bytes')
     const upload = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       data: { alt: 'caller-owned bulk upload' },
       file: {
@@ -1737,7 +1729,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       },
       overrideAccess: true,
     })
-    const req = await createPayloadRequest({ branch: branch.slug, payload })
+    const req = await createPayloadRequest({ branch: branch.name, payload })
     req.transactionID = 'caller-owned-transaction'
     const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
     const deleteOneSpy = vi.spyOn(payload.db, 'deleteOne').mockImplementation(async (args) => {
@@ -1758,7 +1750,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     try {
       await expect(
         payload.delete({
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyMediaSlug,
           overrideAccess: true,
           req,
@@ -1836,7 +1828,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       deletionSafetySpy.rejectUploadAfterChange = true
 
       const result = await payload.update({
-        branch: branch.slug,
+        branch: branch.name,
         collection: deletionSafetyMediaSlug,
         data: { alt: 'branch bulk rollback replacement' },
         file: {
@@ -1856,7 +1848,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       })
       const branchUploadAfterRollback = await payload.findByID({
         id: upload.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: deletionSafetyMediaSlug,
         overrideAccess: true,
       })
@@ -2392,7 +2384,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
       try {
         const result = await payload.update({
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           data: { title: 'branch bulk replacement' },
           overrideAccess: true,
@@ -2413,13 +2405,13 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
         })
         const successfulBranchAfterUpdate = await payload.findByID({
           id: successfulTarget.id,
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           overrideAccess: true,
         })
         const failedBranchAfterUpdate = await payload.findByID({
           id: failedTarget.id,
-          branch: branch.slug,
+          branch: branch.name,
           collection: deletionSafetyTargetsSlug,
           overrideAccess: true,
         })
@@ -2431,7 +2423,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
           showHiddenFields: true,
           where: {
             and: [
-              { _branch: { equals: branch.slug } },
+              { _branch: { equals: branch.name } },
               { _branchDocID: { equals: successfulTarget.id } },
             ],
           },
@@ -2444,7 +2436,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
           showHiddenFields: true,
           where: {
             and: [
-              { _branch: { equals: branch.slug } },
+              { _branch: { equals: branch.name } },
               { _branchDocID: { equals: failedTarget.id } },
             ],
           },
@@ -2455,7 +2447,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
           pagination: false,
           where: {
             and: [
-              { branch: { equals: branch.slug } },
+              { branch: { equals: branch.name } },
               { 'doc.value': { equals: successfulTarget.id } },
             ],
           },
@@ -2466,7 +2458,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
           pagination: false,
           where: {
             and: [
-              { branch: { equals: branch.slug } },
+              { branch: { equals: branch.name } },
               { 'doc.value': { equals: failedTarget.id } },
             ],
           },
@@ -3471,7 +3463,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const branch = await createBranch({ name: 'Referenced upload', payload })
     const fileData = Buffer.from('referenced branch upload bytes')
     const upload = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       data: { alt: 'referenced branch upload' },
       draft: true,
@@ -3515,7 +3507,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     await expect(
       payload.delete({
         id: upload.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: deletionSafetyMediaSlug,
         overrideAccess: true,
       }),
@@ -3555,7 +3547,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const userWithCollection = { ...user, collection: 'users' } as const
     const fileData = Buffer.from('bulk referenced branch upload bytes')
     const upload = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       data: { alt: 'bulk referenced branch upload' },
       draft: true,
@@ -3614,7 +3606,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     resetDeletionSafetySpy()
 
     const result = await payload.delete({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       overrideAccess: true,
       select: { alt: true },
@@ -3666,7 +3658,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const sourceFileData = Buffer.from('source upload bytes')
     const targetFileData = Buffer.from('target upload bytes')
     const source = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       data: { alt: 'delayed source upload' },
       file: {
@@ -3678,7 +3670,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       overrideAccess: true,
     })
     const target = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       data: { alt: 'referenced target upload' },
       file: {
@@ -3705,7 +3697,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
     try {
       result = await payload.delete({
-        branch: branch.slug,
+        branch: branch.name,
         collection: deletionSafetyMediaSlug,
         overrideAccess: true,
         where: { id: { in: [source.id, target.id] } },
@@ -3717,7 +3709,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const [referencedID, deletedID] = deletionSafetySpy.bulkDeleteHookIDs
     const remainingReferencedDocument = await payload.findByID({
       id: referencedID!,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       disableErrors: true,
       overrideAccess: true,
@@ -3741,7 +3733,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const branch = await createBranch({ name: 'Final reference guard', payload })
     const fileData = Buffer.from('final guard upload bytes')
     const upload = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       data: { alt: 'final guard upload' },
       draft: true,
@@ -3799,7 +3791,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
     try {
       result = await payload.delete({
-        branch: branch.slug,
+        branch: branch.name,
         collection: deletionSafetyMediaSlug,
         overrideAccess: true,
         where: { id: { equals: upload.id } },
@@ -3810,7 +3802,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
 
     const remainingUpload = await payload.findByID({
       id: upload.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       disableErrors: true,
       overrideAccess: true,
@@ -3845,7 +3837,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const branch = await createBranch({ name: 'Selected bulk upload cleanup', payload })
     const fileData = Buffer.from('selected bulk branch upload bytes')
     const upload = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       data: { alt: 'selected bulk branch upload' },
       draft: true,
@@ -3879,14 +3871,14 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
       pagination: false,
       where: {
         and: [
-          { _branch: { equals: branch.slug } },
+          { _branch: { equals: branch.name } },
           { 'version.filename': { equals: upload.filename } },
         ],
       },
     })
 
     const result = await payload.delete({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       overrideAccess: true,
       select: { alt: true },
@@ -3922,7 +3914,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const branch = await createBranch({ name: 'Hook referenced upload', payload })
     const fileData = Buffer.from('hook referenced branch upload bytes')
     const upload = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyMediaSlug,
       data: { alt: 'hook referenced branch upload' },
       draft: true,
@@ -3962,7 +3954,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     await expect(
       payload.delete({
         id: upload.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: deletionSafetyMediaSlug,
         overrideAccess: true,
       }),
@@ -4021,7 +4013,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const job = await payload.create({
       collection: 'payload-jobs',
       data: {
-        input: { branch: branch.slug },
+        input: { branch: branch.name },
         processingUntil: new Date(Date.now() - 60_000).toISOString(),
         taskSlug: 'scheduleMerge',
         waitUntil: new Date(Date.now() - 120_000).toISOString(),
@@ -4052,7 +4044,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const activeJob = await payload.create({
       collection: 'payload-jobs',
       data: {
-        input: { branch: branch.slug },
+        input: { branch: branch.name },
         processingUntil: new Date(Date.now() + 60_000).toISOString(),
         taskSlug: 'scheduleMerge',
         waitUntil: new Date(Date.now() - 60_000).toISOString(),
@@ -4062,7 +4054,7 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     const queuedJob = await payload.create({
       collection: 'payload-jobs',
       data: {
-        input: { branch: branch.slug },
+        input: { branch: branch.name },
         taskSlug: 'scheduleMerge',
         waitUntil: new Date(Date.now() + 60_000).toISOString(),
       },
@@ -4093,19 +4085,19 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     payload,
   }) => {
     const branch = await createBranch({ name: 'Lease created during cleanup', payload })
-    const target = await createBranchTarget({ branch: branch.slug, payload })
+    const target = await createBranchTarget({ branch: branch.name, payload })
 
     await payload.create({
       collection: 'payload-jobs',
       data: {
         completedAt: new Date().toISOString(),
-        input: { branch: branch.slug },
+        input: { branch: branch.name },
         taskSlug: 'scheduleMerge',
         waitUntil: new Date(Date.now() - 120_000).toISOString(),
       },
       overrideAccess: true,
     })
-    deletionSafetySpy.activeLeaseBranchOnCompletedJobDelete = branch.slug
+    deletionSafetySpy.activeLeaseBranchOnCompletedJobDelete = branch.name
 
     await expect(
       payload.delete({
@@ -4116,6 +4108,6 @@ test.suite('Branch deletion safety', { config: './deletion-safety.config.ts' }, 
     ).rejects.toMatchObject({ status: 409 })
 
     expect(deletionSafetySpy.hasCreatedRaceJob).toBe(true)
-    await expectTargetToRemain({ id: target.id, branch: branch.slug, payload })
+    await expectTargetToRemain({ id: target.id, branch: branch.name, payload })
   })
 })

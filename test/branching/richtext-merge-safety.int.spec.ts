@@ -22,10 +22,16 @@ import { branchChangesSlug, branchesSlug } from './shared.js'
 const branchReferenceErrorMessage =
   'Branch-created content cannot be deleted while a surviving document or version references it.'
 
-const createBranch = ({ payload }: { payload: Payload }) =>
+const createBranch = ({
+  name = 'Rich text reference safety',
+  payload,
+}: {
+  name?: string
+  payload: Payload
+}) =>
   payload.create({
     collection: branchesSlug,
-    data: { name: 'Rich text reference safety' },
+    data: { name },
     overrideAccess: true,
   })
 
@@ -88,7 +94,7 @@ test.suite(
         overrideAccess: true,
       })
       const target = await payload.create({
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextTargetsSlug as never,
         data: { title: 'unselected relationship target' },
         overrideAccess: true,
@@ -96,20 +102,20 @@ test.suite(
 
       await payload.update({
         id: owner.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextOwnersSlug as never,
         data: { target: target.id } as never,
         overrideAccess: true,
       })
 
       const ownerChange = await findBranchChange({
-        branch: branch.slug,
+        branch: branch.name,
         collectionSlug: richTextOwnersSlug,
         docID: owner.id,
         payload,
       })
       const result = await payload.branches.merge({
-        branch: branch.slug,
+        branch: branch.name,
         changes: [ownerChange.id],
         overrideAccess: true,
       })
@@ -141,7 +147,7 @@ test.suite(
         overrideAccess: true,
       })
       const target = await payload.create({
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextTargetsSlug as never,
         data: { title: 'unselected rich text target' },
         overrideAccess: true,
@@ -149,7 +155,7 @@ test.suite(
 
       await payload.update({
         id: owner.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextOwnersSlug as never,
         data: {
           content: richTextWithNode({
@@ -164,13 +170,13 @@ test.suite(
       })
 
       const ownerChange = await findBranchChange({
-        branch: branch.slug,
+        branch: branch.name,
         collectionSlug: richTextOwnersSlug,
         docID: owner.id,
         payload,
       })
       const result = await payload.branches.merge({
-        branch: branch.slug,
+        branch: branch.name,
         changes: [ownerChange.id],
         overrideAccess: true,
       })
@@ -202,7 +208,7 @@ test.suite(
         overrideAccess: true,
       })
       const target = await payload.create({
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextTargetsSlug as never,
         data: { title: 'unselected rich text block target' },
         overrideAccess: true,
@@ -210,7 +216,7 @@ test.suite(
 
       await payload.update({
         id: owner.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextOwnersSlug as never,
         data: {
           content: richTextWithNode({
@@ -229,13 +235,13 @@ test.suite(
       })
 
       const ownerChange = await findBranchChange({
-        branch: branch.slug,
+        branch: branch.name,
         collectionSlug: richTextOwnersSlug,
         docID: owner.id,
         payload,
       })
       const result = await payload.branches.merge({
-        branch: branch.slug,
+        branch: branch.name,
         changes: [ownerChange.id],
         overrideAccess: true,
       })
@@ -262,7 +268,7 @@ test.suite(
         overrideAccess: true,
       })
       const media = await payload.create({
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextMediaSlug as never,
         data: { alt: 'unselected rich text inline-block upload' },
         file: {
@@ -276,7 +282,7 @@ test.suite(
 
       await payload.update({
         id: owner.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextOwnersSlug as never,
         data: {
           content: richTextWithNode({
@@ -293,13 +299,13 @@ test.suite(
       })
 
       const ownerChange = await findBranchChange({
-        branch: branch.slug,
+        branch: branch.name,
         collectionSlug: richTextOwnersSlug,
         docID: owner.id,
         payload,
       })
       const result = await payload.branches.merge({
-        branch: branch.slug,
+        branch: branch.name,
         changes: [ownerChange.id],
         overrideAccess: true,
       })
@@ -331,7 +337,7 @@ test.suite(
         overrideAccess: true,
       })
       const target = await payload.create({
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextTargetsSlug as never,
         data: { title: 'blocked merge target' },
         overrideAccess: true,
@@ -339,26 +345,26 @@ test.suite(
 
       await payload.update({
         id: owner.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextOwnersSlug as never,
         data: { target: target.id } as never,
         overrideAccess: true,
       })
 
       const ownerChange = await findBranchChange({
-        branch: branch.slug,
+        branch: branch.name,
         collectionSlug: richTextOwnersSlug,
         docID: owner.id,
         payload,
       })
       const targetChange = await findBranchChange({
-        branch: branch.slug,
+        branch: branch.name,
         collectionSlug: richTextTargetsSlug,
         docID: target.id,
         payload,
       })
       const result = await payload.branches.merge({
-        branch: branch.slug,
+        branch: branch.name,
         changes: [targetChange.id, ownerChange.id],
         overrideAccess: false,
         user: { ...editor, collection: 'users' },
@@ -384,7 +390,7 @@ test.suite(
         overrideAccess: true,
       })
       const target = await payload.create({
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextTargetsSlug as never,
         data: { title: 'selected relationship target' },
         overrideAccess: true,
@@ -392,26 +398,26 @@ test.suite(
 
       await payload.update({
         id: owner.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextOwnersSlug as never,
         data: { target: target.id } as never,
         overrideAccess: true,
       })
 
       const ownerChange = await findBranchChange({
-        branch: branch.slug,
+        branch: branch.name,
         collectionSlug: richTextOwnersSlug,
         docID: owner.id,
         payload,
       })
       const targetChange = await findBranchChange({
-        branch: branch.slug,
+        branch: branch.name,
         collectionSlug: richTextTargetsSlug,
         docID: target.id,
         payload,
       })
       const result = await payload.branches.merge({
-        branch: branch.slug,
+        branch: branch.name,
         changes: [targetChange.id, ownerChange.id],
         overrideAccess: true,
       })
@@ -445,7 +451,7 @@ test.suite(
 
       await payload.update({
         id: owner.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextOwnersSlug as never,
         data: {
           layout: [{ blockType: 'numeric-other-target-link', target: 42 }],
@@ -455,13 +461,13 @@ test.suite(
       })
 
       const target = await payload.create({
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextNumericTargetsSlug as never,
         data: { id: 42, title: 'branch target with same ID' } as never,
         overrideAccess: true,
       })
       const result = await payload.branches.merge({
-        branch: branch.slug,
+        branch: branch.name,
         overrideAccess: true,
       })
       const mainOwner = await payload.findByID({
@@ -481,14 +487,14 @@ test.suite(
       payload,
     }) => {
       const targetBranch = await createBranch({ payload })
-      const ownerBranch = await createBranch({ payload })
+      const ownerBranch = await createBranch({ name: 'Reference owner', payload })
       const owner = await payload.create({
         collection: richTextOwnersSlug as never,
         data: {} as never,
         overrideAccess: true,
       })
       const target = await payload.create({
-        branch: targetBranch.slug,
+        branch: targetBranch.name,
         collection: richTextTargetsSlug as never,
         data: { title: 'other branch target' },
         overrideAccess: true,
@@ -496,20 +502,20 @@ test.suite(
 
       await payload.update({
         id: owner.id,
-        branch: ownerBranch.slug,
+        branch: ownerBranch.name,
         collection: richTextOwnersSlug as never,
         data: { target: target.id } as never,
         overrideAccess: true,
       })
 
       const ownerChange = await findBranchChange({
-        branch: ownerBranch.slug,
+        branch: ownerBranch.name,
         collectionSlug: richTextOwnersSlug,
         docID: owner.id,
         payload,
       })
       const result = await payload.branches.merge({
-        branch: ownerBranch.slug,
+        branch: ownerBranch.name,
         changes: [ownerChange.id],
         overrideAccess: true,
       })

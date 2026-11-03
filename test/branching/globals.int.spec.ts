@@ -1,5 +1,4 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
-
 import type { Payload } from 'payload'
 
 import { expect } from 'vitest'
@@ -7,9 +6,7 @@ import { expect } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -17,7 +14,6 @@ import {
   homepageGlobalSlug,
   uninitializedGlobalSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -45,13 +41,13 @@ test.suite('Branching: globals', { config: './config.ts', resetBetweenTests: fal
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
-        where: { slug: { equals: 'globalwork' } },
+        where: { name: { equals: 'globalwork' } },
       })
 
       if (!existing.docs.length) {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Global work', slug: 'globalwork' },
+          data: { name: 'globalwork' },
         })
       }
 
@@ -69,7 +65,7 @@ test.suite('Branching: globals', { config: './config.ts', resetBetweenTests: fal
         const adapter = payload.db as MongooseAdapter
         const branchDoc = await payload.create({
           collection: branchesSlug,
-          data: { name: 'Mongo global index', slug: branch },
+          data: { name: branch },
         })
 
         try {

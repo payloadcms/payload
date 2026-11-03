@@ -1,25 +1,17 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
-
 import type { Payload, PayloadRequest } from 'payload'
 
 import { Types } from 'mongoose'
-
 import path from 'path'
-
 import { createPayloadRequest, defaultBranchMergeValidation, resolveBranch } from 'payload'
-
 import { expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import { branchChangesSlug, branchesSlug, nestedSlug, pagesSlug, uniqueSlug } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -69,7 +61,7 @@ test.suite(
       test.beforeEach(async () => {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Validation work', slug: branch },
+          data: { name: branch },
         })
 
         const mainDocument = await payload.create({
@@ -104,7 +96,7 @@ test.suite(
           const rows = await payload.find({
             collection,
             pagination: false,
-            where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: branch } },
+            where: { [collection === branchesSlug ? 'name' : 'branch']: { equals: branch } },
           })
 
           for (const row of rows.docs) {
@@ -282,7 +274,7 @@ test.suite(
         expect(beforeMerge).not.toHaveBeenCalled()
         expect(req.context).toBe(initialContext)
         expect(req.transactionID).toBe(initialTransactionID)
-        expect(resolveBranch({ req: req })).toBe(branch)
+        expect(resolveBranch({ req })).toBe(branch)
       })
 
       test('should reject writes made with the validation request', async () => {
@@ -365,7 +357,7 @@ test.suite(
         await payload.branches.merge({ branch, req: branchReq })
 
         expect(hookRequests.length).toBeGreaterThan(0)
-        expect(hookRequests.every((req) => resolveBranch({ req: req }) === 'main')).toBe(true)
+        expect(hookRequests.every((req) => resolveBranch({ req }) === 'main')).toBe(true)
         expect(
           hookRequests.every(
             (req) => (req.context as Record<string, unknown>)._branchBypass === undefined,

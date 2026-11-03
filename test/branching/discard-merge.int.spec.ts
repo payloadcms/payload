@@ -5,13 +5,9 @@ import { expect } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import { branchChangesSlug, branchesSlug, branchMergesSlug, postsSlug } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -61,7 +57,7 @@ test.suite('Branching: discard-merge', { config: './config.ts', resetBetweenTest
     test.beforeEach(async () => {
       await payload.create({
         collection: branchesSlug,
-        data: { name: 'Discard work', slug: 'discardwork' },
+        data: { name: 'discardwork' },
       })
 
       const doc = await payload.create({
@@ -100,7 +96,7 @@ test.suite('Branching: discard-merge', { config: './config.ts', resetBetweenTest
         const found = await payload.find({
           collection,
           pagination: false,
-          where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: 'discardwork' } },
+          where: { [collection === branchesSlug ? 'name' : 'branch']: { equals: 'discardwork' } },
         })
 
         for (const row of found.docs) {

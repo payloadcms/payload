@@ -109,7 +109,7 @@ test.suite('Branching query cost', { config: './config.ts', resetBetweenTests: f
     payload = createTrustedPayload(payloadInstance)
     install()
 
-    await payload.create({ collection: branchesSlug, data: { name: 'Perf', slug: branch } })
+    await payload.create({ collection: branchesSlug, data: { name: branch } })
   })
 
   test('should keep branch reads to one database query, like main', async () => {

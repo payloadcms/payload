@@ -1,7 +1,6 @@
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -11,6 +10,44 @@ import {
 } from './shared.js'
 
 test.suite('Branching internal collections', { config: './config.ts' }, () => {
+  test('should reject duplicate branch names instead of generating another identifier', async ({
+    payload,
+  }) => {
+    await payload.create({ collection: branchesSlug, data: { name: 'Campaign / 日本語' } })
+
+    await expect(
+      payload.create({ collection: branchesSlug, data: { name: 'Campaign / 日本語' } }),
+    ).rejects.toMatchObject({ data: { errors: [expect.objectContaining({ path: 'name' })] } })
+  })
+
+  test('should reject the reserved main branch name', async ({ payload }) => {
+    await expect(
+      payload.create({ collection: branchesSlug, data: { name: 'main' } }),
+    ).rejects.toMatchObject({ data: { errors: [expect.objectContaining({ path: 'name' })] } })
+  })
+
+  test('should require a branch name', async ({ payload }) => {
+    await expect(
+      payload.create({ collection: branchesSlug, data: { name: '' } }),
+    ).rejects.toMatchObject({ data: { errors: [expect.objectContaining({ path: 'name' })] } })
+  })
+
+  test('should preserve a branch name when updating its description', async ({ payload }) => {
+    const branch = await payload.create({
+      collection: branchesSlug,
+      data: { name: 'Campaign / 日本語' },
+    })
+
+    const updated = await payload.update({
+      id: branch.id,
+      collection: branchesSlug,
+      data: { name: 'Renamed', description: 'Updated description' },
+    })
+
+    expect(updated).toMatchObject({ name: branch.name, description: 'Updated description' })
+    expect(updated).not.toHaveProperty('slug')
+  })
+
   test('should restrict branch updates to branches the user can read', async ({ payload }) => {
     const user = await payload.create({
       collection: 'users',
@@ -125,7 +162,7 @@ test.suite('Branching internal collections', { config: './config.ts' }, () => {
     const existing = await payload.create({
       collection: branchChangesSlug,
       data: {
-        branch: branch.slug,
+        branch: branch.name,
         entityType: 'global',
         globalSlug: 'header',
         operation: 'update',
@@ -138,7 +175,7 @@ test.suite('Branching internal collections', { config: './config.ts' }, () => {
       payload.create({
         collection: branchChangesSlug,
         data: {
-          branch: branch.slug,
+          branch: branch.name,
           entityType: 'global',
           globalSlug: 'homepage',
           operation: 'update',
@@ -182,20 +219,20 @@ test.suite('Branching internal collections', { config: './config.ts' }, () => {
 
     await payload.update({
       id: post.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       data: { title: 'discarded branch title' },
       overrideAccess: true,
     })
     await payload.create({
       collection: branchMergesSlug,
-      data: { branch: branch.slug, changes: [], mergedAt: new Date().toISOString() },
+      data: { branch: branch.name, changes: [], mergedAt: new Date().toISOString() },
       overrideAccess: true,
     })
     await payload.create({
       collection: 'payload-jobs',
       data: {
-        input: { branch: branch.slug },
+        input: { branch: branch.name },
         taskSlug: 'scheduleMerge',
         waitUntil: new Date(Date.now() + 60_000).toISOString(),
       },
@@ -215,7 +252,7 @@ test.suite('Branching internal collections', { config: './config.ts' }, () => {
 
     const postOnRecreatedBranch = await payload.findByID({
       id: post.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       overrideAccess: true,
     })
@@ -223,13 +260,13 @@ test.suite('Branching internal collections', { config: './config.ts' }, () => {
       collection: branchChangesSlug,
       overrideAccess: true,
       pagination: false,
-      where: { branch: { equals: branch.slug } },
+      where: { branch: { equals: branch.name } },
     })
     const remainingMerges = await payload.find({
       collection: branchMergesSlug,
       overrideAccess: true,
       pagination: false,
-      where: { branch: { equals: branch.slug } },
+      where: { branch: { equals: branch.name } },
     })
     const remainingJobs = await payload.find({
       collection: 'payload-jobs',
@@ -238,7 +275,7 @@ test.suite('Branching internal collections', { config: './config.ts' }, () => {
       where: {
         and: [
           { taskSlug: { equals: 'scheduleMerge' } },
-          { 'input.branch': { equals: branch.slug } },
+          { 'input.branch': { equals: branch.name } },
         ],
       },
     })
@@ -259,7 +296,7 @@ test.suite('Branching internal collections', { config: './config.ts' }, () => {
     await payload.create({
       collection: 'payload-jobs',
       data: {
-        input: { branch: branch.slug },
+        input: { branch: branch.name },
         processingUntil: new Date(Date.now() + 60_000).toISOString(),
         taskSlug: 'scheduleMerge',
         waitUntil: new Date(Date.now() - 60_000).toISOString(),
@@ -281,7 +318,7 @@ test.suite('Branching internal collections', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
 
-    expect(preservedBranch.slug).toBe(branch.slug)
+    expect(preservedBranch.name).toBe(branch.name)
   })
 
   test('should refuse branch deletion when main references a branch-created document', async ({
@@ -293,7 +330,7 @@ test.suite('Branching internal collections', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
     const branchCategory = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: categoriesSlug,
       data: { name: 'branch category' },
       overrideAccess: true,
@@ -325,6 +362,6 @@ test.suite('Branching internal collections', { config: './config.ts' }, () => {
     })
 
     expect(preservedMainPost.category).toBe(branchCategory.id)
-    expect(preservedBranch.slug).toBe(branch.slug)
+    expect(preservedBranch.name).toBe(branch.name)
   })
 })

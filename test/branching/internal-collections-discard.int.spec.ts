@@ -1,7 +1,6 @@
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { branchesSlug, categoriesSlug, postsSlug } from './shared.js'
 
 test.suite('Branching internal collections', { config: './config.ts' }, () => {
@@ -24,7 +23,7 @@ test.suite('Branching internal collections', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
     const branchCategory = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: categoriesSlug,
       data: { name: 'branch category' },
       overrideAccess: true,
@@ -32,13 +31,13 @@ test.suite('Branching internal collections', { config: './config.ts' }, () => {
 
     await payload.update({
       id: mainPost.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       data: { category: branchCategory.id },
       overrideAccess: true,
     })
     await payload.branches.discard({
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: true,
     })
 

@@ -1,19 +1,14 @@
 import type { Payload } from 'payload'
 
 import { createPayloadRequest } from 'payload'
-
 import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import { branchChangesSlug, branchesSlug, postsSlug } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -47,7 +42,7 @@ test.suite(
       test.beforeEach(async () => {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Merge me', slug: 'mergeme' },
+          data: { name: 'mergeme' },
         })
 
         const main = await payload.create({
@@ -98,7 +93,7 @@ test.suite(
           const branches = await payload.find({
             collection: branchesSlug,
             pagination: false,
-            where: { slug: { equals: slug } },
+            where: { name: { equals: slug } },
           })
 
           for (const branchDoc of branches.docs) {
@@ -136,7 +131,7 @@ test.suite(
         const branchDoc = await payload.find({
           collection: branchesSlug,
           pagination: false,
-          where: { slug: { equals: 'mergeme' } },
+          where: { name: { equals: 'mergeme' } },
         })
 
         expect(editedOnMain.title).toBe('edited on branch')
@@ -208,7 +203,7 @@ test.suite(
         const branchDoc = await payload.find({
           collection: branchesSlug,
           pagination: false,
-          where: { slug: { equals: 'mergeme' } },
+          where: { name: { equals: 'mergeme' } },
         })
 
         expect(onMain.title).toBe('edited on branch')

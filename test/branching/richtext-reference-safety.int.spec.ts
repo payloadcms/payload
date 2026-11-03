@@ -22,10 +22,16 @@ import { branchChangesSlug, branchesSlug } from './shared.js'
 const branchReferenceErrorMessage =
   'Branch-created content cannot be deleted while a surviving document or version references it.'
 
-const createBranch = ({ payload }: { payload: Payload }) =>
+const createBranch = ({
+  name = 'Rich text reference safety',
+  payload,
+}: {
+  name?: string
+  payload: Payload
+}) =>
   payload.create({
     collection: branchesSlug,
-    data: { name: 'Rich text reference safety' },
+    data: { name },
     overrideAccess: true,
   })
 
@@ -83,7 +89,7 @@ test.suite(
     }) => {
       const branch = await createBranch({ payload })
       const target = await payload.create({
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextTargetsSlug as never,
         data: { title: 'branch target' },
         overrideAccess: true,
@@ -104,7 +110,7 @@ test.suite(
       })
 
       await expect(
-        payload.branches.discard({ branch: branch.slug, overrideAccess: true }),
+        payload.branches.discard({ branch: branch.name, overrideAccess: true }),
       ).rejects.toMatchObject({ message: branchReferenceErrorMessage, status: 409 })
     })
 
@@ -113,7 +119,7 @@ test.suite(
     }) => {
       const branch = await createBranch({ payload })
       const media = await payload.create({
-        branch: branch.slug,
+        branch: branch.name,
         collection: richTextMediaSlug as never,
         data: { alt: 'branch upload' },
         file: {
@@ -143,7 +149,7 @@ test.suite(
       })
 
       await expect(
-        payload.branches.discard({ branch: branch.slug, overrideAccess: true }),
+        payload.branches.discard({ branch: branch.name, overrideAccess: true }),
       ).rejects.toMatchObject({ message: branchReferenceErrorMessage, status: 409 })
       expect(fs.existsSync(mediaPath)).toBe(true)
     })

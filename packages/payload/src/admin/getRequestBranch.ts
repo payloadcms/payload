@@ -21,7 +21,7 @@ export async function getRequestBranch({ req }: { req: PayloadRequest }): Promis
         req,
         select: { id: true },
         user: req.user,
-        where: { slug: { equals: branchFromQuery } },
+        where: { name: { equals: branchFromQuery } },
       })
 
       if (!docs.length) {
