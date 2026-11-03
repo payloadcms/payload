@@ -218,15 +218,25 @@ export function toPipelineEdits({
     edits = { ...edits, focalPoint: nextFocalPoint }
   }
 
-  // A query crop is applied as sent: its `widthInPixels`/`heightInPixels` can also resize it.
-  if (!original || edits?.crop) {
+  if (!original) {
     return edits
+  }
+
+  // A rebuilt file rebuilds its sizes, which must keep the saved focal point.
+  const savedFocalPoint = isDeepStrictEqual(nextFocalPoint, centerFocalPoint)
+    ? undefined
+    : { focalPoint: nextFocalPoint }
+
+  // A query crop is applied as sent: its `widthInPixels`/`heightInPixels` can also resize it.
+  if (edits?.crop) {
+    return { ...savedFocalPoint, ...edits }
   }
 
   const hasCropChange = !isDeepStrictEqual(previous?.crop, next?.crop)
 
   if (next?.crop && (hasNewFile || hasCropChange || hasFocalPointChange)) {
     return {
+      ...savedFocalPoint,
       ...edits,
       crop: cropToPercent({ crop: next.crop, original }),
       heightInPixels: next.crop.height,
@@ -236,6 +246,7 @@ export function toPipelineEdits({
 
   if (previous?.crop && !next?.crop) {
     return {
+      ...savedFocalPoint,
       ...edits,
       crop: fullCrop,
       heightInPixels: original.height,
@@ -267,10 +278,15 @@ function getFocalPointWrite({
     return { x: Number(queryFocalPoint.x), y: Number(queryFocalPoint.y) }
   }
 
+  // Form data can send numbers as strings.
   const x =
-    isNumber(incoming.focalX) && incoming.focalX !== current?.focalX ? incoming.focalX : undefined
+    isNumber(incoming.focalX) && Number(incoming.focalX) !== current?.focalX
+      ? Number(incoming.focalX)
+      : undefined
   const y =
-    isNumber(incoming.focalY) && incoming.focalY !== current?.focalY ? incoming.focalY : undefined
+    isNumber(incoming.focalY) && Number(incoming.focalY) !== current?.focalY
+      ? Number(incoming.focalY)
+      : undefined
 
   if (x === undefined && y === undefined) {
     return undefined
