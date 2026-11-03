@@ -157,6 +157,34 @@ describe('generateFileData - client uploads without full contents', () => {
     expect(transformFile).not.toHaveBeenCalled()
   })
 
+  it('should plan the transformers again when the download changes the MIME type', async () => {
+    fetchFullClientUploadMock.mockImplementation(({ file }) =>
+      Promise.resolve({
+        ...file,
+        data: Buffer.alloc(0),
+        mimetype: 'video/quicktime',
+        tempFilePath,
+      }),
+    )
+    const mp4TransformFile = vi.fn(async () => ({ status: 'continue' as const }))
+    const quicktimeTransformFile = vi.fn(async () => ({ status: 'continue' as const }))
+    const req = createReq([
+      { slug: 'mp4', mimeTypes: ['video/mp4'], transformFile: mp4TransformFile },
+      { slug: 'quicktime', mimeTypes: ['video/quicktime'], transformFile: quicktimeTransformFile },
+    ])
+
+    await generateFileData({
+      collection,
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      req,
+    })
+
+    expect(mp4TransformFile).not.toHaveBeenCalled()
+    expect(quicktimeTransformFile).toHaveBeenCalledOnce()
+  })
+
   it('should keep the message and status of an error from the download', async () => {
     fetchFullClientUploadMock.mockRejectedValue(
       new APIError('Uploaded source size does not match the declared size.', 400),

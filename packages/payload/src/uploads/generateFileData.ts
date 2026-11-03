@@ -390,12 +390,12 @@ const processUpload = async <T>({
   // Errors from the deferred client-upload download and its checks keep their own message and status.
   let isFetchingClientUpload = false
 
-  try {
-    const pipeline = await planTransformerPipeline({
+  const planUploadPipeline = ({ mimeType }: { mimeType: string }) =>
+    planTransformerPipeline({
       args: {
         collectionSlug: collectionConfig.slug,
         doc: pipelineOriginalDoc,
-        mimeType: file.mimetype,
+        mimeType,
         operation: 'upload',
         originalDoc: pipelineOriginalDoc,
         req,
@@ -403,6 +403,9 @@ const processUpload = async <T>({
       capability: 'transformFile',
       transformers: req.payload.config.upload?.transformers ?? [],
     })
+
+  try {
+    let pipeline = await planUploadPipeline({ mimeType: file.mimetype })
 
     // A client upload can arrive with only a header probe or no contents (see
     // getFileContentRequirement.ts). Download it only when a stage needs its bytes, which
@@ -414,12 +417,18 @@ const processUpload = async <T>({
       pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
     ) {
       isFetchingClientUpload = true
+      const probedMimeType = file.mimetype
       file = await fetchFullClientUpload({ collectionSlug: collectionConfig.slug, file, req })
       // On req.file, the temp file is removed after the operation.
       req.file = file
       // The first check saw only a probe, so check the whole file before a transformer reads it.
       file = await checkFileAndUseDetectedType({ collection: collectionConfig, file, req })
       isFetchingClientUpload = false
+
+      // The plan was made for the probe's MIME type. Make it again for the checked type.
+      if (file.mimetype !== probedMimeType) {
+        pipeline = await planUploadPipeline({ mimeType: file.mimetype })
+      }
     }
 
     // A large client upload can arrive as a bounded probe alongside a temp file. Transformers

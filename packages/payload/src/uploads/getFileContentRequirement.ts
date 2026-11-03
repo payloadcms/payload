@@ -21,7 +21,8 @@ export type FileContentRequirement = 'full' | 'header' | 'none'
  * - `full`: local storage needs the real bytes, or a registered file transformer will adjust
  *   the image (`upload.hasImageAdjustments`), or the file is animated, or additional image
  *   sizes will be generated from it, or the collection restricts mime types (which also runs
- *   SVG/PDF content-safety checks that must see the whole file), or the request itself carries
+ *   SVG/PDF content-safety checks that must see the whole file), or the file is an SVG (its
+ *   safety check always runs and rejects a cut-off document), or the request itself carries
  *   a crop/resize edit (`uploadEdits`) that will be applied to the fetched bytes.
  * - `header`: the file is an image and only its dimensions are needed.
  * - `none`: nothing downstream reads file content at all.
@@ -47,7 +48,7 @@ export function getFileContentRequirement({
   const hasMimeTypeAllowList =
     Array.isArray(uploadConfig.mimeTypes) && uploadConfig.mimeTypes.length > 0
 
-  if (hasMimeTypeAllowList) {
+  if (hasMimeTypeAllowList || mimeType === 'image/svg+xml') {
     return 'full'
   }
 
