@@ -66,6 +66,7 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
         ],
       },
       index: true,
+      label: ({ t }) => t('branching:branchName'),
       required: true,
       unique: true,
       validate: (value: Parameters<typeof text>[0], options: Parameters<typeof text>[1]) =>
@@ -76,6 +77,7 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
     {
       name: 'description',
       type: 'text',
+      label: ({ t }) => t('branching:branchDescription'),
     },
     {
       name: 'status',

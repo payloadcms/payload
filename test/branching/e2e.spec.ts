@@ -271,7 +271,8 @@ test.describe('Branching', () => {
 
     try {
       await gotoAndWaitForForm(page, `${serverURL}/admin/collections/payload-branches/create`)
-      await expect(page.locator('#field-name')).toHaveAccessibleName('Name')
+      await expect(page.locator('#field-name')).toHaveAccessibleName('Branch name')
+      await expect(page.locator('#field-description')).toHaveAccessibleName('Branch description')
       await page.locator('#field-name').fill(name)
 
       const created = page.waitForResponse(
