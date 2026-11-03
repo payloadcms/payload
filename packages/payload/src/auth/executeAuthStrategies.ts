@@ -31,7 +31,6 @@ export const executeAuthStrategies = async (
     }
 
     if (result.user) {
-      // Lets code that runs later find the strategy that logged the user in
       result.user._strategy ??= strategy.name
       return result
     }
