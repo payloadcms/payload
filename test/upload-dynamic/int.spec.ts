@@ -107,6 +107,10 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
 
     expect(await readStoredFlag({ id: created.id, payload })).not.toBe(false)
     expect(created.filesize).toBeGreaterThan(0)
+    expect(await sharp(path.join(dynamicMediaDir, created.filename!)).metadata()).toMatchObject({
+      height: 600,
+      width: 800,
+    })
   })
 
   test('should treat a plain read of a dynamic file as an ordinary read, and query parameters as a transform', async ({

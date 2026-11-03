@@ -71,7 +71,7 @@ export const requestCropTransformer: UploadTransformer = {
   mimeTypes: ['image/*'],
 }
 
-/** Claims `crop` at upload time when a test sets `context.isUploadCropEnabled`. */
+/** Applies the saved crop at upload time when a test sets `context.isUploadCropEnabled`. */
 export const uploadCropTransformer: UploadTransformer = {
   slug: 'upload-crop',
   canTransform: ({ collectionSlug, operation, req }) =>
@@ -81,5 +81,20 @@ export const uploadCropTransformer: UploadTransformer = {
       ? { canTransform: true, handledTransformKeys: ['crop'] }
       : false,
   mimeTypes: ['image/*'],
-  transformFile: () => Promise.resolve({ status: 'continue' as const }),
+  transformFile: async ({ doc, file }) => {
+    const crop = (doc._transforms as { crop?: Crop } | null)?.crop
+
+    if (!crop) {
+      return { status: 'continue' }
+    }
+
+    const cropped = await sharp(Buffer.from(await file.arrayBuffer()))
+      .extract({ height: crop.height, left: crop.x, top: crop.y, width: crop.width })
+      .toBuffer()
+
+    return {
+      file: new File([new Uint8Array(cropped)], file.name, { type: file.type }),
+      status: 'continue',
+    }
+  },
 }
