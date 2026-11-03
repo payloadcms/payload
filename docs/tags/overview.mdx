@@ -8,7 +8,7 @@ keywords: tags, taxonomy, taxonomies, categories, hierarchy
 
 Tags classify content across collections. Use them for topics, categories, or other taxonomies where a document can have multiple assignments. Tags can nest under other tags to form a taxonomy tree.
 
-In Payload 4, tags are a preset built on the same [Hierarchy](../hierarchy/overview) foundation as [Folders](../folders/overview). Folders use single-folder assignment; tag fields allow multiple assignments by default.
+In Payload 4, tags are a preset built on the same [Hierarchy](../hierarchy/overview) foundation as [Folders](../folders/overview). A document can belong to one folder and have multiple tags.
 
 ## Quick Start
 
@@ -68,7 +68,7 @@ tags: {
 }
 ```
 
-The preset supplies a tag icon and defaults `allowHasMany` to `true`. It accepts the [folder preset options](../folders/overview#folder-configuration), plus `allowHasMany`. Explicit `hasMany` values on relationship fields take precedence over this discovery default.
+Setting `tags` adds a tag icon and defaults `allowHasMany` to `true`. You can use the [folder preset options](../folders/overview#folder-configuration) and set `allowHasMany`. A field with its own `hasMany` value uses that value instead.
 
 Do not also set `hierarchy` or `folders` on the taxonomy collection. The tag preset already enables hierarchy.
 
@@ -92,7 +92,7 @@ createTagField({
 | `required`      | Require a tag assignment.                                                                    |
 | `admin`         | Customize the relationship field's admin options.                                            |
 
-The helper creates an indexed relationship with a hierarchy field in the document sidebar. It generates the field name from `relationTo`. If the taxonomy collection sets a custom `parentFieldName`, Payload renames the related field to match during configuration sanitization.
+The helper creates an indexed relationship with a hierarchy field in the document sidebar. It generates the field name from `relationTo`. If the taxonomy collection sets a custom `parentFieldName`, Payload renames the related field to match when it prepares your config.
 
 For the default `topics` example, assign multiple topics using `_h_topics`:
 
@@ -127,8 +127,8 @@ Use your configured `parentFieldName` instead if you override it. This query mat
 
 ## Shared Hierarchy Behavior
 
-Tags support virtual breadcrumb paths, localized titles, collection restrictions, and optional joins. See [Hierarchy](../hierarchy/overview) for those shared options and path computation.
+See [Hierarchy](../hierarchy/overview) for breadcrumb paths, localized titles, collection restrictions, and joins.
 
-Deleting a tag also deletes its children in the taxonomy collection. Hierarchy deletion hooks clear referencing fields on related content; they do not delete those content documents.
+Deleting a tag also deletes its child tags. Payload clears the tag fields that reference the deleted tags, but keeps the related content documents.
 
 A content collection can use both `createFolderField` and `createTagField` to organize documents in folders and classify them with tags from separate collections.

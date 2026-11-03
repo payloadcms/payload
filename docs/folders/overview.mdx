@@ -8,12 +8,12 @@ keywords: folders, folder, content organization, hierarchy
 
 Folders group documents across collections and can nest inside other folders. In Payload 4, folders are a preset built on the [Hierarchy](../hierarchy/overview) foundation.
 
-Define a collection with `folders: true`, then add `createFolderField` to the content collections it organizes. The folder collection stores the tree; each related document selects one folder.
+Define a collection with `folders: true`, then add `createFolderField` to the content collections it organizes. The folder collection stores the tree, and each related document can select one folder.
 
 <Banner type="info">
-  Upgrading from Payload 3? The global `folders` configuration and the old
-  per-content-collection opt-in have changed. See the [migration
-  guide](../migration-guide/v4#folders-use-the-hierarchy-foundation).
+  In Payload 4, folder setup has moved from the root config to a folder
+  collection and relationship fields on your content collections. See the
+  [migration guide](../migration-guide/v4#folders-use-the-hierarchy-foundation).
 </Banner>
 
 ## Quick Start
@@ -71,7 +71,7 @@ folders: {
 }
 ```
 
-The preset uses a folder icon, enables header-button parent selection by default, and sets `allowHasMany: false`. Its options are:
+Setting `folders` adds a folder icon, uses a header button to select a parent folder, and sets `allowHasMany: false`. You can configure these options:
 
 | Option                   | Description                                                                                                                     |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -108,7 +108,7 @@ createFolderField({
 | `required`      | Require a folder assignment.                      |
 | `admin`         | Customize the relationship field's admin options. |
 
-The helper creates an indexed, single relationship and adds a header button for folder selection. It generates the field name from `relationTo`; `name`, `type`, `relationTo`, and `hasMany` are managed by the helper.
+The helper creates an indexed relationship to one folder and adds a header button for selecting it. The field name comes from `relationTo`. You can customize the options above; the helper sets the remaining field properties.
 
 For the default `folders` example, create a post with a folder assignment using `_h_folders`:
 
@@ -128,7 +128,7 @@ Use the configured `parentFieldName` instead if you override it.
 
 ## Shared Hierarchy Behavior
 
-Folders support virtual breadcrumb paths, localized titles, collection restrictions, and optional joins through the hierarchy foundation. See [Hierarchy](../hierarchy/overview) for configuration and path computation.
+See [Hierarchy](../hierarchy/overview) for breadcrumb paths, localized titles, collection restrictions, and joins.
 
 Deleting a folder also deletes its child folders. The hierarchy hooks clear folder references on related content documents without deleting those content documents.
 

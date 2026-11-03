@@ -65,9 +65,9 @@ export const Posts: CollectionConfig = {
 }
 ```
 
-This example uses a new `folders` collection and the default `_h_folders` relationship field. It does not migrate an existing Payload 3 folder collection or its assignments. Adapt your [database migration](../database/migrations) to the old folder collection slug and field name, including any overrides from your root `folders` config. Preserve folder IDs or remap references, migrate folder parent relationships and content assignments, and retain custom access rules. Account for versioned or draft data where applicable.
+This example uses a new `folders` collection and the default `_h_folders` relationship field. It does not migrate an existing Payload 3 folder collection or its assignments. Adapt your [database migration](../database/migrations) to the old folder collection slug and field name, including any overrides from your root `folders` config. Preserve folder IDs or remap references, migrate folder parent relationships and content assignments, and retain custom access rules. Include versions and drafts if your collections use them.
 
-If you retain the existing folder collection slug, define the new collection with that slug. You can use `folders.parentFieldName` to retain a relationship field name; related helper fields are renamed to match. Changing config alone does not rename stored data or database columns. The old `browseByFolder`, root `debug`, and root `collectionOverrides` options are not part of the new folder preset.
+To keep the existing folder collection slug, use it on the new collection config. Set `folders.parentFieldName` to keep a relationship field name. Payload renames related helper fields to match. Changing config alone does not rename stored data or database columns. The old `browseByFolder`, root `debug`, and root `collectionOverrides` options are not part of the new folder preset.
 
 For taxonomy support, define a separate collection with `tags: true` and connect content through `createTagField`. Each collection chooses one of `hierarchy`, `folders`, or `tags`; a content collection can reference multiple such collections through separate fields.
 

@@ -6,7 +6,7 @@ desc: Organize nested content, folders, and taxonomies with Payload's hierarchy 
 keywords: hierarchy, tree structure, nested documents, breadcrumbs, folders, tags, taxonomy
 ---
 
-Hierarchy is the foundation for organizing nested content in Payload. It maintains parent-child relationships within a collection and computes paths for URLs and breadcrumbs. [Folders](../folders/overview) and [Tags](../tags/overview) are presets built on this same foundation.
+Hierarchy lets you nest documents within a collection and generate paths for URLs and breadcrumbs. [Folders](../folders/overview) and [Tags](../tags/overview) use the same hierarchy system, with defaults for organizing content and building taxonomies.
 
 | Configuration | Use it for                                               | Relationships from other collections                      |
 | ------------- | -------------------------------------------------------- | --------------------------------------------------------- |
@@ -59,7 +59,7 @@ Pass `true` for defaults or an object to customize the hierarchy:
 | Option                       | Description                                                                                                                                                                                                                                                    |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `parentFieldName`            | Name of the parent relationship field. `hierarchy: true` defaults to `_h_<collectionSlug>`. Specify this when using an object.                                                                                                                                 |
-| `allowHasMany`               | Default cardinality used when discovering related hierarchy fields that omit `hasMany`. Defaults to `true`. The hierarchy's own parent field always has `hasMany: false`.                                                                                      |
+| `allowHasMany`               | Whether related fields allow multiple assignments when they omit `hasMany`. Defaults to `true`. The hierarchy's own parent field always has `hasMany: false`.                                                                                                  |
 | `collectionSpecific`         | Allow hierarchy items to restrict which related collections they accept. Defaults to `false`. Use `true` for a `hierarchyType` select field, or `{ fieldName: 'allowedTypes' }` for a custom name.                                                             |
 | `joinField`                  | Add a join field for direct children and related content, e.g. `{ name: 'children' }`. No join field is added by default. Supports additional [Join Field](../fields/join) options, except the generated `type`, `collection`, `on`, and `hasMany` properties. |
 | `slugField`                  | Existing field whose value supplies each slug path segment. When omitted, Payload slugifies the title from `admin.useAsTitle`.                                                                                                                                 |
@@ -68,9 +68,9 @@ Pass `true` for defaults or an object to customize the hierarchy:
 | `titlePathFieldName`         | Name of the virtual title path field. Defaults to `_h_titlePath`.                                                                                                                                                                                              |
 | `admin.injectSidebarTab`     | Add a sidebar tab for browsing this hierarchy. Defaults to `true`.                                                                                                                                                                                             |
 | `admin.treeLimit`            | Maximum number of items to load in tree views. Defaults to `100`.                                                                                                                                                                                              |
-| `admin.useHeaderButton`      | Control header-button parent selection. Set explicitly to choose header-button or inline parent selection.                                                                                                                                                     |
+| `admin.useHeaderButton`      | Choose whether to select a parent through a header button or an inline field.                                                                                                                                                                                  |
 | `admin.components.Icon`      | Custom icon for hierarchy items.                                                                                                                                                                                                                               |
-| `admin.components.SmallIcon` | Custom icon for compact hierarchy contexts. Falls back to `Icon`. Available on `hierarchy`; the folder and tag presets expose `Icon`.                                                                                                                          |
+| `admin.components.SmallIcon` | Custom icon for smaller hierarchy views. Falls back to `Icon`. Available on `hierarchy`; the folder and tag presets expose `Icon`.                                                                                                                             |
 
 ### With a Custom Parent Field
 
@@ -109,7 +109,7 @@ export const Categories: CollectionConfig = {
 
 ## Connecting Other Collections
 
-Use `createFolderField` or `createTagField` from `payload` to connect a content collection to a hierarchy collection. These helpers generate a relationship field named `_h_<hierarchyCollectionSlug>`. If the hierarchy sets a custom `parentFieldName`, Payload renames the related field to match during configuration sanitization.
+Use `createFolderField` or `createTagField` from `payload` to connect a content collection to a hierarchy collection. These helpers generate a relationship field named `_h_<hierarchyCollectionSlug>`. If the hierarchy sets a custom `parentFieldName`, Payload renames the related field to match when it prepares your config.
 
 For example, a `folders` collection with `folders: true` can organize both pages and media. Add `createFolderField({ relationTo: 'folders' })` to each content collection's `fields` array. The folders form their own tree, and pages and media reference folders in that tree.
 
@@ -117,7 +117,7 @@ See [Folders](../folders/overview) and [Tags](../tags/overview) for complete con
 
 ### Restricting Accepted Collections
 
-Set `collectionSpecific: true` on the hierarchy to let editors choose which related collections each item accepts. Payload adds a `hierarchyType` select field whose options come from collections with recognized hierarchy relationship fields. An empty selection allows all related collections.
+Set `collectionSpecific: true` on the hierarchy to let editors choose which related collections each item accepts. Payload adds a `hierarchyType` select field with an option for each collection connected through a hierarchy field. An empty selection allows all related collections.
 
 ### Querying Direct Children
 
@@ -192,6 +192,6 @@ Publishing a changed parent affects the shared structure across locales. Account
 
 ## Deleting Hierarchy Items
 
-Deleting a hierarchy item also deletes its children within the hierarchy collection. References from recognized related collections are cleared by the hierarchy deletion hooks. Related content documents are not deleted by those reference-cleanup hooks.
+Deleting a hierarchy item also deletes its children in that collection. Payload clears references to the deleted items on related content documents, but keeps the content documents themselves.
 
-Consider this behavior when choosing between nesting content directly, such as pages under pages, and assigning content to a separate folder or taxonomy collection.
+For example, deleting a page with child pages deletes those pages too. Deleting a folder clears the folder assignment on its posts without deleting the posts.
