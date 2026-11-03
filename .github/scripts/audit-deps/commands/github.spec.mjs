@@ -18,11 +18,12 @@ describe('runDecidePrSteps', () => {
     await writeFile(
       path.join(runnerTemp, 'audit-plan', 'plan.json'),
       JSON.stringify({
-        bumps: [],
+        bumps: [{ id: 'lodash-4' }, { id: 'react-19' }],
         noFix: [],
+        originDirs: {},
         prs: [
-          { branch: 'ci/audit-deps-fix-main-non-major', bumpIds: [], id: 'non-major' },
-          { branch: 'ci/audit-deps-fix-main-react-19', bumpIds: [], id: 'react-19' },
+          { branch: 'ci/audit-deps-fix-main-non-major', bumpIds: ['lodash-4'], id: 'non-major' },
+          { branch: 'ci/audit-deps-fix-main-react-19', bumpIds: ['react-19'], id: 'react-19' },
         ],
       }),
     )

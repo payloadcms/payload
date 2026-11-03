@@ -27,13 +27,14 @@ export function isDraftPr({ pr }) {
 }
 
 /**
- * Builds the full PR body from the plan and the fetched details. Text from outside the repo
- * enters the body only through `sanitizeOutsideText`, and outside URLs only through `safeUrl`.
+ * Builds the full PR body from the bumps of `pr`, in its order, and the fetched details. Text
+ * from outside the repo enters the body only through `sanitizeOutsideText`, and outside URLs only
+ * through `safeUrl`.
  * @returns {string}
  */
 export function renderPrBody({
   pr,
-  bumps,
+  bumps: prBumps,
   details,
   fixed,
   partly,
@@ -44,9 +45,6 @@ export function renderPrBody({
   runUrl,
   now = new Date(),
 }) {
-  const prBumps = pr.bumpIds
-    .map((bumpId) => bumps.find((bump) => bump.id === bumpId))
-    .filter(Boolean)
   const head = [
     isDraftPr({ pr }) ? renderMajorBanner({ prBumps, details }) : null,
     renderLeadLine({ fixed, partly, scope, severity }),

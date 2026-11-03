@@ -3,7 +3,8 @@
  * @property {string} id `<slug>-<target major>`, or `<slug>-<current major>-in-major` for an
  *   in-major bump
  * @property {string} dependency
- * @property {string} from specifier from the audit report, for example '^9.5.0' or 'catalog:'
+ * @property {string} from specifier from the audit report, for example '^9.5.0'. The audit
+ *   resolves `catalog:` specifiers to their catalog entry.
  * @property {string} fromVersion lowest version that `from` allows; '' when `from` holds no version
  * @property {string} to target version
  * @property {boolean} isMajor
@@ -270,7 +271,7 @@ function bumpsForDependency({ dependency, entries, report }) {
 }
 
 // Semver treats a minor change in 0.x as breaking. When the current version is unknown, as with
-// `catalog:`, only a change of major counts.
+// `>=0.2.0`, only a change of major counts.
 function isBreakingChange({ currentMajor, currentVersion, version }) {
   if (majorOf({ version }) > currentMajor) {
     return true

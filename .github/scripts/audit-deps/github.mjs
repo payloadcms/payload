@@ -5,6 +5,7 @@ import {
   hasForeignCommits,
   parseFingerprint,
 } from './decide.mjs'
+import { bumpsOfPr } from './plan.mjs'
 
 const BRANCH_PREFIX = 'ci/audit-deps-fix-'
 const MISSING_REF_STATUSES = new Set([404, 422])
@@ -14,10 +15,6 @@ const COMMENT_TAG = '<!-- audit-deps-comment -->'
 const STALE_COMMENT = 'The audit no longer needs this update.'
 const STALE_KEPT_BRANCH_COMMENT =
   'The audit no longer needs this update. The branch has commits from a person, so it was not deleted.'
-
-/**
- * @typedef {import('./bumps.mjs').Bump} Bump
- */
 
 /**
  * Decides the step for each planned PR and sets the step outputs `pr_steps` and `stale_prs` as
@@ -117,12 +114,7 @@ function setOutputs({ core, prSteps, staleNumbers }) {
 async function decideStepForPr({ github, openPr, owner, plan, pr, ref, repo }) {
   const prNumber = openPr?.number ?? null
   const headSha = openPr?.headSha ?? null
-  const expectedBumps = expectedBumpsFor({ plan, pr })
-  if (expectedBumps.length === 0) {
-    return { headSha, prNumber, step: 'skip' }
-  }
-
-  const fingerprint = fingerprintForPr({ bumps: expectedBumps, pr })
+  const fingerprint = fingerprintForPr({ bumps: bumpsOfPr({ plan, pr }), pr })
   if (!openPr) {
     const rejectedPr = await findRejectedPr({ github, owner, pr, ref, repo })
     const step = decidePrStep({ fingerprint, openPr: null, rejectedPr })
@@ -175,13 +167,6 @@ async function findBranchSha({ branch, github, owner, repo }) {
     }
     throw error
   }
-}
-
-/** @returns {Bump[]} */
-function expectedBumpsFor({ plan, pr }) {
-  const bumpsById = new Map(plan.bumps.map((bump) => [bump.id, bump]))
-
-  return pr.bumpIds.map((id) => bumpsById.get(id)).filter(Boolean)
 }
 
 async function listOpenBotPrs({ github, owner, ref, repo }) {

@@ -7,17 +7,10 @@ import { promisify } from 'node:util'
 import { applyBumps } from '../apply-bumps.mjs'
 import { classifyFixes } from '../bumps.mjs'
 import { findDisallowedChanges, listWorkingTreeChanges } from '../path-guard.mjs'
+import { bumpsOfPr, readPlan } from '../plan.mjs'
 import { readReport } from '../report.mjs'
 import { buildPr } from './pr.mjs'
-import {
-  errorMessage,
-  findBump,
-  readPlan,
-  requireOption,
-  toSummaryText,
-  writeJson,
-  writeSummary,
-} from './shared.mjs'
+import { errorMessage, requireOption, toSummaryText, writeJson, writeSummary } from './shared.mjs'
 
 const execFileAsync = promisify(execFile)
 
@@ -45,7 +38,7 @@ const BOT_IDENTITY = {
  * `run` spawns pnpm and the audit, and `renderPr` builds the title and body.
  */
 export async function runPreparePrs({ options, run = spawnForExitCode, renderPr = buildPr }) {
-  const plan = await readPlan({ options })
+  const plan = await readPlan({ path: requireOption({ name: 'plan', options }) })
   const prSteps = JSON.parse(requireOption({ name: 'pr-steps-json', options }))
   const cwd = requireOption({ name: 'cwd', options })
   const outDir = requireOption({ name: 'out-dir', options })
@@ -103,7 +96,7 @@ async function preparePr({ baseSha, context, pr, prStep }) {
     const baseline = await listWorkingTreeChanges({ cwd })
 
     currentStep = 'apply'
-    const bumps = pr.bumpIds.map((bumpId) => findBump({ plan: context.plan, bumpId }))
+    const bumps = bumpsOfPr({ plan: context.plan, pr })
     await applyBumps({ bumps, cwd })
 
     currentStep = 'lockfile'

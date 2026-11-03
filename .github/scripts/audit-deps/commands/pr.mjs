@@ -7,8 +7,9 @@ import {
   fetchReleaseNotes,
   fetchWeeklyDownloads,
 } from '../upstream.mjs'
+import { bumpsOfPr, findPr } from '../plan.mjs'
 import { listPublishedPackages, resolveAffects } from '../workspace-graph.mjs'
-import { findBump, findPr, readToken, repoUrlFromEnv } from './shared.mjs'
+import { readToken, repoUrlFromEnv } from './shared.mjs'
 
 const BACKPORT_REF = '3.x'
 
@@ -19,7 +20,7 @@ const BACKPORT_REF = '3.x'
  */
 export async function buildPr({ cwd, plan, prId, reaudit, ref, runUrl, scope, severity }) {
   const pr = findPr({ plan, prId })
-  const prBumps = pr.bumpIds.map((bumpId) => findBump({ plan, bumpId }))
+  const prBumps = bumpsOfPr({ plan, pr })
   const graph = await listPublishedPackages({ cwd })
   const token = readToken()
 
@@ -35,7 +36,7 @@ export async function buildPr({ cwd, plan, prId, reaudit, ref, runUrl, scope, se
 
   const body = renderPrBody({
     pr,
-    bumps: plan.bumps,
+    bumps: prBumps,
     details,
     fixed,
     partly,

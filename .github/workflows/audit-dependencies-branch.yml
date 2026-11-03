@@ -97,7 +97,6 @@ jobs:
           --report="$RUNNER_TEMP/audit_output.json"
           --scope="$SCOPE"
           --ref="$REF"
-          --cwd="$GITHUB_WORKSPACE"
           --out="$RUNNER_TEMP/audit-plan/plan.json"
 
       - name: Decide PR steps

@@ -1,7 +1,7 @@
-import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { decidePrSteps } from '../github.mjs'
+import { readPlan } from '../plan.mjs'
 
 /**
  * Runs the `Decide PR steps` workflow step from actions/github-script. Reads `IS_DEFAULT_INPUTS`,
@@ -9,7 +9,7 @@ import { decidePrSteps } from '../github.mjs'
  * @param {{ context: any, core: any, env: Record<string, string | undefined>, github: any }} params
  */
 export async function runDecidePrSteps({ context, core, env, github }) {
-  const plan = await readJson({ file: path.join(env.RUNNER_TEMP, 'audit-plan', 'plan.json') })
+  const plan = await readPlan({ path: path.join(env.RUNNER_TEMP, 'audit-plan', 'plan.json') })
 
   await decidePrSteps({
     core,
@@ -20,8 +20,4 @@ export async function runDecidePrSteps({ context, core, env, github }) {
     ref: env.REF,
     repo: context.repo.repo,
   })
-}
-
-async function readJson({ file }) {
-  return JSON.parse(await readFile(file, 'utf8'))
 }
