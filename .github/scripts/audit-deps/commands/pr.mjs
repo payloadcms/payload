@@ -24,14 +24,12 @@ export async function buildPr({ cwd, plan, prId, reaudit, ref, runUrl, scope, se
   const graph = await listPublishedPackages({ cwd })
   const token = readToken()
 
-  const details = Object.fromEntries(
-    await Promise.all(
-      prBumps.map(async (bump) => [
-        bump.id,
-        await fetchBumpDetails({ bump, fetch, graph, plan, token }),
-      ]),
-    ),
-  )
+  // Each bump sends about ten GitHub requests at once. One bump at a time keeps a large group PR
+  // under GitHub's secondary rate limit, which would drop details from the body without an error.
+  const details = {}
+  for (const bump of prBumps) {
+    details[bump.id] = await fetchBumpDetails({ bump, fetch, graph, plan, token })
+  }
   const { fixed, partly } = classifyFixes({ bumps: prBumps, report: reaudit })
 
   const body = renderPrBody({
