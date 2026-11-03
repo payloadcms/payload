@@ -14,11 +14,14 @@ import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 import { markWrite } from './utilities/readAfterWrite.js'
 
-const isInitialJobClaim = (data: Record<string, unknown>): boolean =>
+/**
+ * A job claim only sets `processing: true` (and the `updatedAt` timestamp). Claims are written with a
+ * single conditional `UPDATE ... WHERE processing = false RETURNING id`, so when multiple runners select
+ * the same candidate jobs, only the runner whose update actually changed a row receives that job.
+ */
+const isJobClaim = (data: Record<string, unknown>): boolean =>
   data.processing === true &&
-  Object.keys(data).every(
-    (field) => field === 'processing' || field === 'processingToken' || field === 'updatedAt',
-  )
+  Object.keys(data).every((field) => field === 'processing' || field === 'updatedAt')
 
 export const updateJobs: UpdateJobs = async function updateMany(
   this: DrizzleAdapter,
@@ -79,7 +82,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
 
-  if (isInitialJobClaim(data)) {
+  if (isJobClaim(data)) {
     const _db = db as LibSQLDatabase
     const table = this.tables[tableName]
     const { row } = transformForWrite({

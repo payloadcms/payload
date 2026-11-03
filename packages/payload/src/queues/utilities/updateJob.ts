@@ -61,6 +61,19 @@ export async function updateJobs({
   const where = id ? { id: { equals: id } } : whereArg
 
   if (depth || req.payload.config?.jobs?.runHooks) {
+    if (!id && isJobClaim(data)) {
+      return claimJobsWithHooks({
+        data,
+        depth,
+        disableTransaction,
+        limit,
+        req,
+        returning,
+        sort,
+        where: where as Where,
+      })
+    }
+
     if (id && data.log && '$push' in data.log) {
       const job = await req.payload.findByID({
         id,
@@ -88,6 +101,89 @@ export async function updateJobs({
     return result.docs as Job[]
   }
 
+  return updateJobsInDatabase({ id, data, limit, req, returning, sort, where })
+}
+
+/**
+ * A claim marks jobs as `processing: true` before they are run. Database adapters perform claims
+ * conditionally, so that a job selected by multiple runners at the same time is claimed by only one of them.
+ */
+function isJobClaim(data: Partial<Job>): boolean {
+  return (
+    data.processing === true &&
+    Object.keys(data).every((field) => field === 'processing' || field === 'updatedAt')
+  )
+}
+
+/**
+ * `payload.update` selects documents and then updates them one by one, which is not atomic.
+ * When hooks or population are enabled, jobs are therefore claimed through the database adapter first,
+ * and only the jobs this runner actually claimed are passed through `payload.update` so that the
+ * collection hooks and `depth` population still run for them.
+ *
+ * Because the claim happens before `payload.update`, `originalDoc` in hooks for the claim update
+ * already has `processing: true`.
+ */
+async function claimJobsWithHooks({
+  data,
+  depth,
+  disableTransaction,
+  limit,
+  req,
+  returning,
+  sort,
+  where,
+}: ArgsWhere & BaseArgs): Promise<Job[] | null> {
+  const claimedJobs = await updateJobsInDatabase({
+    data: { ...data },
+    limit,
+    req,
+    returning: true,
+    sort,
+    where,
+  })
+
+  if (!claimedJobs?.length) {
+    return null
+  }
+
+  const claimedIDs = claimedJobs.map((job) => job.id)
+
+  const result = await req.payload.update({
+    collection: jobsCollectionSlug,
+    data,
+    depth,
+    disableTransaction,
+    limit: claimedIDs.length,
+    req,
+    where: { id: { in: claimedIDs } },
+  } as ManyOptions<any, any>)
+
+  if (returning === false || !result) {
+    return null
+  }
+
+  // Preserve the processing order the jobs were claimed in
+  const claimedOrder = new Map(claimedIDs.map((claimedID, index) => [claimedID, index]))
+
+  return (result.docs as Job[]).sort(
+    (a, b) => (claimedOrder.get(a.id) ?? 0) - (claimedOrder.get(b.id) ?? 0),
+  )
+}
+
+async function updateJobsInDatabase({
+  id,
+  data,
+  limit,
+  req,
+  returning,
+  sort,
+  where,
+}: {
+  id?: number | string
+  sort?: Sort
+  where?: Where
+} & Omit<BaseArgs, 'depth' | 'disableTransaction'>): Promise<Job[] | null> {
   const jobReq = {
     transactionID:
       req.payload.db.name !== 'mongoose'

@@ -755,6 +755,172 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.input.amountRetried).toBe(4)
   })
 
+  describe.each([
+    { label: 'without hooks', runHooks: false },
+    { label: 'with runHooks enabled', runHooks: true },
+  ])('multiple workers on the same queue ($label)', ({ runHooks }) => {
+    const queue = 'multi-worker'
+    let originalRunHooks: boolean | undefined
+
+    beforeEach(() => {
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      originalRunHooks = payload.config.jobs.runHooks
+      payload.config.jobs.runHooks = runHooks
+    })
+
+    afterEach(() => {
+      payload.config.jobs.runHooks = originalRunHooks
+    })
+
+    const queueJobs = async ({ count, message }: { count: number; message: string }) => {
+      const jobs = []
+
+      for (let i = 0; i < count; i++) {
+        jobs.push(
+          await payload.jobs.queue({
+            input: { message: `${message} ${i}` },
+            queue,
+            task: 'CreateSimple',
+          }),
+        )
+      }
+
+      return jobs
+    }
+
+    const countSimplesByMessage = async ({ message }: { message: string }) => {
+      const { docs } = await payload.find({
+        collection: 'simple',
+        limit: 0,
+        where: { title: { like: message } },
+      })
+
+      const counts: Record<string, number> = {}
+
+      for (const doc of docs) {
+        counts[doc.title as string] = (counts[doc.title as string] ?? 0) + 1
+      }
+
+      return counts
+    }
+
+    it('should run every job of a batch claimed by a single runner with the default limit', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      const message = 'single runner batch'
+      const jobs = await queueJobs({ count: 3, message })
+
+      const result = await payload.jobs.run({ queue, silent: true })
+
+      expect(Object.keys(result.jobStatus ?? {})).toHaveLength(jobs.length)
+
+      const counts = await countSimplesByMessage({ message })
+
+      expect(Object.values(counts)).toEqual([1, 1, 1])
+
+      const { docs: jobsAfterRun } = await payload.find({
+        collection: 'payload-jobs',
+        limit: 0,
+        where: { queue: { equals: queue } },
+      })
+
+      expect(jobsAfterRun).toHaveLength(jobs.length)
+
+      for (const job of jobsAfterRun) {
+        expect(job.processing).toBe(false)
+        expect(job.completedAt).toBeTruthy()
+      }
+    })
+
+    it('should run a job only once when multiple workers poll the same queue with limit 1', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      const message = 'limit 1 workers'
+      const [job] = await queueJobs({ count: 1, message })
+
+      const results = await Promise.all(
+        Array.from({ length: 10 }, () => payload.jobs.run({ limit: 1, queue, silent: true })),
+      )
+
+      const counts = await countSimplesByMessage({ message })
+
+      expect(Object.values(counts)).toEqual([1])
+
+      const workersThatRanTheJob = results.filter((result) => result.jobStatus?.[job!.id])
+
+      expect(workersThatRanTheJob).toHaveLength(1)
+    })
+
+    it('should run each job only once when multiple workers claim batches from the same queue', async () => {
+      payload.config.jobs.deleteJobOnComplete = true
+      const message = 'batch workers'
+      const jobs = await queueJobs({ count: 6, message })
+
+      const results = await Promise.all(
+        Array.from({ length: 5 }, () => payload.jobs.run({ queue, silent: true })),
+      )
+
+      const counts = await countSimplesByMessage({ message })
+
+      expect(Object.keys(counts)).toHaveLength(jobs.length)
+      expect(Object.values(counts).every((count) => count === 1)).toBe(true)
+
+      const timesEachJobRan = jobs.map(
+        (job) => results.filter((result) => result.jobStatus?.[job.id]).length,
+      )
+
+      expect(timesEachJobRan).toEqual(jobs.map(() => 1))
+
+      // With deleteJobOnComplete, every job is cleaned up once it completes
+      const remainingJobs = await payload.count({
+        collection: 'payload-jobs',
+        where: { queue: { equals: queue } },
+      })
+
+      expect(remainingJobs.totalDocs).toBe(0)
+    })
+
+    it('should run a job only once when multiple workers run the same job by ID', async () => {
+      payload.config.jobs.deleteJobOnComplete = true
+      const message = 'run by ID workers'
+      const [job] = await queueJobs({ count: 1, message })
+
+      const results = await Promise.all(
+        Array.from({ length: 10 }, () => payload.jobs.runByID({ id: job!.id, silent: true })),
+      )
+
+      const counts = await countSimplesByMessage({ message })
+
+      expect(Object.values(counts)).toEqual([1])
+
+      const workersThatRanTheJob = results.filter((result) => result.jobStatus?.[job!.id])
+
+      expect(workersThatRanTheJob).toHaveLength(1)
+
+      const remainingJobs = await payload.count({
+        collection: 'payload-jobs',
+        where: { id: { equals: job!.id } },
+      })
+
+      expect(remainingJobs.totalDocs).toBe(0)
+    })
+
+    it('should not run a job by ID that another runner is already processing', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      const message = 'run by ID while processing'
+      const [job] = await queueJobs({ count: 1, message })
+
+      await payload.update({
+        id: job!.id,
+        collection: 'payload-jobs',
+        data: { processing: true },
+      })
+
+      const result = await payload.jobs.runByID({ id: job!.id, silent: true })
+
+      expect(result.noJobsRemaining).toBe(true)
+      expect(await countSimplesByMessage({ message })).toEqual({})
+    })
+  })
+
   it('ensure backoff strategy of task is respected', async () => {
     payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
