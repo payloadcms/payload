@@ -2627,9 +2627,15 @@ describe('Versions', () => {
       await titleField.fill('')
       await waitForAutoSaveToRunAndComplete(page, 'error')
 
+      // The previous autosave's indicator can still be showing, so wait for the save itself.
+      const autosaved = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'PATCH' &&
+          response.url().includes('autosave=true') &&
+          response.ok(),
+      )
       await titleField.fill('New title')
-
-      await waitForAutoSaveToRunAndComplete(page)
+      await autosaved
 
       await page.reload()
 
@@ -2682,8 +2688,15 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('')
 
       // Now has updated data
+      // The previous autosave's indicator can still be showing, so wait for the save itself.
+      const autosaved = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'PATCH' &&
+          response.url().includes('autosave=true') &&
+          response.ok(),
+      )
       await titleField.fill('New title')
-      await waitForAutoSaveToRunAndComplete(page)
+      await autosaved
       await expect(page.locator('#field-title')).toHaveValue('New title')
 
       await page.reload()

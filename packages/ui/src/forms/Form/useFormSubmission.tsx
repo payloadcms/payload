@@ -77,7 +77,7 @@ export const useFormSubmission = ({
 
   const [isDisabled, _setIsDisabled] = useState(isDisabledFromProps || false)
 
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isSubmitted, _setIsSubmitted] = useState(false)
 
   const [successfulSubmitCount, setSuccessfulSubmitCount] = useState(0)
 
@@ -112,9 +112,17 @@ export const useFormSubmission = ({
   const method = 'method' in props ? props?.method : undefined
   const validateDrafts = hasDraftValidationEnabled(docConfig)
 
+  const submittedRef = useRef(false)
+
+  const setIsSubmitted = useCallback((isSubmitted: boolean) => {
+    // Queued form-state requests read this before React renders the updated submitted state.
+    submittedRef.current = isSubmitted
+    _setIsSubmitted(isSubmitted)
+  }, [])
+
   const setIsDisabled = useCallback(
     (isDisabled: boolean) => {
-      // Recovery callbacks can submit again before React renders the updated disabled state.
+      // The submit guard reads this before React renders the updated disabled state.
       contextRef.current.disabled = isDisabled
       _setIsDisabled(isDisabled)
     },
@@ -610,7 +618,7 @@ export const useFormSubmission = ({
     if (typeof isSubmittedFromProps === 'boolean') {
       setIsSubmitted(isSubmittedFromProps)
     }
-  }, [isSubmittedFromProps])
+  }, [isSubmittedFromProps, setIsSubmitted])
 
   return {
     backgroundProcessing: isBackgroundProcessing,
@@ -625,6 +633,7 @@ export const useFormSubmission = ({
     setSubmitted: setIsSubmitted,
     submit,
     submitted: isSubmitted,
+    submittedRef,
     successfulSubmitCount,
   }
 }

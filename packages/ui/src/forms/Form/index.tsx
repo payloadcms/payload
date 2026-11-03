@@ -209,6 +209,7 @@ export const Form: React.FC<FormProps> = (props) => {
     setSubmitted,
     submit,
     submitted,
+    submittedRef,
     successfulSubmitCount,
   } = useFormSubmission({
     contextRef,
@@ -506,7 +507,7 @@ export const Form: React.FC<FormProps> = (props) => {
             // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
             serverState = await onChangeFn({
               formState: requestFormState,
-              submitted,
+              submitted: submittedRef.current,
             })
           }
 
