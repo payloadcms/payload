@@ -828,10 +828,12 @@ test.describe('Form State', () => {
 test.describe('Shared form request queue', () => {
   let payload: PayloadTestSDK<Config>
   let serverURL: string
+
   const createdDocs: {
     collection: 'autosave-posts' | 'draft-posts' | 'posts'
     id: Post['id']
   }[] = []
+
   const releases = new Set<() => void>()
 
   test.beforeAll(async () => {
@@ -846,10 +848,13 @@ test.describe('Shared form request queue', () => {
   test.afterEach(async ({ page }) => {
     releases.forEach((release) => release())
     releases.clear()
+
     await page.unrouteAll({ behavior: 'ignoreErrors' })
+
     for (const { collection, id } of createdDocs) {
       await payload.delete({ collection, id, overrideAccess: true })
     }
+
     createdDocs.length = 0
   })
 
@@ -859,24 +864,30 @@ test.describe('Shared form request queue', () => {
       data: { title: 'Initial value' },
       overrideAccess: true,
     })
+
     const captured = Promise.withResolvers<void>()
     const released = Promise.withResolvers<void>()
 
     createdDocs.push({ collection: postsSlug, id: doc.id })
     releases.add(released.resolve)
+
     await page.route(`**/api/${postsSlug}/${doc.id}**`, async (route) => {
       if (route.request().method() !== 'PATCH') {
         return route.continue()
       }
+
       captured.resolve()
+
       await released.promise
       await route.fulfill({ response: await route.fetch() })
     })
+
     await page.goto(new AdminUrlUtil(serverURL, postsSlug).edit(doc.id))
     await waitForFormReady(page)
     const title = page.locator('#field-title')
 
     await title.fill('Keyboard save')
+
     const modifier = await page.evaluate(() =>
       navigator.userAgent.includes('Mac OS X') ? 'Meta' : 'Control',
     )
@@ -884,7 +895,9 @@ test.describe('Shared form request queue', () => {
     await title.press(`${modifier}+s`)
     await captured.promise
     await expect(title).toBeDisabled()
+
     released.resolve()
+
     await expect(title).toBeEnabled()
     await expect(title).toBeFocused()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
@@ -898,6 +911,7 @@ test.describe('Shared form request queue', () => {
       data: { title: 'Initial value' },
       overrideAccess: true,
     })
+
     const captured = Promise.withResolvers<void>()
     const released = Promise.withResolvers<void>()
     const saved = Promise.withResolvers<Record<string, unknown>>()
@@ -908,6 +922,7 @@ test.describe('Shared form request queue', () => {
     releases.add(released.resolve)
     await page.goto(editURL)
     await waitForFormReady(page)
+
     await page.route(
       (url) => url.href === editURL || url.pathname.startsWith('/_serverFn/'),
       async (route) => {
@@ -924,23 +939,29 @@ test.describe('Shared form request queue', () => {
         await route.fulfill({ response })
       },
     )
+
     await page.route(`**/api/${postsSlug}/${doc.id}**`, async (route) => {
       if (route.request().method() !== 'PATCH') {
         return route.continue()
       }
+
       saveCount += 1
       saved.resolve(readSubmittedData({ body: route.request().postData() ?? '' }))
       await route.fulfill({ response: await route.fetch() })
     })
+
     await page.locator('#field-title').fill('Edited value')
     await page.clock.runFor(500)
     await captured.promise
     await page.locator('#action-save').click()
     await page.clock.runFor(500)
     expect(saveCount).toBe(0)
+
     await expect(page.locator('#action-save')).toBeDisabled()
     await expect(page.locator('#field-title')).toBeDisabled()
+
     released.resolve()
+
     await expect(saved.promise).resolves.toMatchObject({ title: 'Edited value' })
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
@@ -952,16 +973,19 @@ test.describe('Shared form request queue', () => {
       draft: true,
       overrideAccess: true,
     })
+
     const captured = Promise.withResolvers<void>()
     const released = Promise.withResolvers<void>()
     const saved = Promise.withResolvers<Record<string, unknown>>()
 
     createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
     releases.add(released.resolve)
+
     await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
       if (route.request().method() !== 'PATCH') {
         return route.continue()
       }
+
       const isAutosave = new URL(route.request().url()).searchParams.get('autosave') === 'true'
 
       if (isAutosave) {
@@ -971,19 +995,24 @@ test.describe('Shared form request queue', () => {
         await released.promise
         return route.fulfill({ response })
       }
+
       saved.resolve(readSubmittedData({ body: route.request().postData() ?? '' }))
       await route.fulfill({ response: await route.fetch() })
     })
+
     await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
     await waitForFormReady(page)
     await page.locator('#field-title').fill('Updated value')
     await page.clock.runFor(200)
     await captured.promise
     await expect(page.locator('#field-computedTitle')).toHaveValue('Initial value')
+
     await page
       .locator('form.collection-edit__form')
       .evaluate((form: HTMLFormElement) => form.requestSubmit())
+
     released.resolve()
+
     await expect(saved.promise).resolves.toMatchObject({ computedTitle: 'Updated value' })
     await expect(page.locator('#field-computedTitle')).toHaveValue('Updated value')
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
@@ -998,6 +1027,7 @@ test.describe('Shared form request queue', () => {
       draft: true,
       overrideAccess: true,
     })
+
     const captured = Promise.withResolvers<void>()
     const released = Promise.withResolvers<void>()
     const explicitSaved = Promise.withResolvers<void>()
@@ -1005,22 +1035,28 @@ test.describe('Shared form request queue', () => {
 
     createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
     releases.add(released.resolve)
+
     await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
       if (route.request().method() !== 'PATCH') {
         return route.continue()
       }
+
       const isAutosave = new URL(route.request().url()).searchParams.get('autosave') === 'true'
+
       if (isAutosave && !didHoldAutosave) {
         didHoldAutosave = true
         captured.resolve()
         await released.promise
       }
+
       const response = await route.fetch()
       await route.fulfill({ response })
+
       if (!isAutosave) {
         explicitSaved.resolve()
       }
     })
+
     await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
     await waitForFormReady(page)
     await page.locator('#field-title').fill('First autosave')
@@ -1030,10 +1066,13 @@ test.describe('Shared form request queue', () => {
     await page.clock.runFor(1000)
     await page.waitForTimeout(100)
     await expect(page.locator('.autosave')).toBeVisible()
+
     await page.locator('form.collection-edit__form').evaluate((form: HTMLFormElement) => {
       form.requestSubmit()
     })
+
     released.resolve()
+
     await explicitSaved.promise
     await expect(page.locator('.collection-edit__form')).toHaveAttribute('data-form-ready', 'true')
     await page.clock.runFor(2000)
@@ -1047,6 +1086,7 @@ test.describe('Shared form request queue', () => {
       draft: true,
       overrideAccess: true,
     })
+
     const captured = Promise.withResolvers<void>()
     const released = Promise.withResolvers<void>()
     const editURL = new AdminUrlUtil(serverURL, draftPostsSlug).edit(doc.id)
@@ -1056,6 +1096,7 @@ test.describe('Shared form request queue', () => {
     releases.add(released.resolve)
     await page.goto(editURL)
     await waitForFormReady(page)
+
     await page.route(
       (url) => url.href === editURL || url.pathname.startsWith('/_serverFn/'),
       async (route) => {
@@ -1072,19 +1113,24 @@ test.describe('Shared form request queue', () => {
         await route.fulfill({ response })
       },
     )
+
     await page.route(`**/api/${draftPostsSlug}/${doc.id}**`, async (route) => {
       if (route.request().method() !== 'PATCH') {
         return route.continue()
       }
+
       statuses.push(readSubmittedData({ body: route.request().postData() ?? '' })._status)
       await route.fulfill({ response: await route.fetch() })
     })
+
     await page.locator('#field-title').fill('Published value')
     await page.clock.runFor(500)
     await captured.promise
     await page.locator('#action-save').click()
     await expect(page.locator('#action-save-draft')).toBeDisabled()
+
     released.resolve()
+
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     expect(statuses).toEqual(['published'])
   })
@@ -1098,6 +1144,7 @@ test.describe('Shared form request queue', () => {
       draft: true,
       overrideAccess: true,
     })
+
     const autosaveCaptured = Promise.withResolvers<void>()
     const autosaveReleased = Promise.withResolvers<void>()
     const saveCaptured = Promise.withResolvers<void>()
@@ -1106,10 +1153,12 @@ test.describe('Shared form request queue', () => {
     createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
     releases.add(autosaveReleased.resolve)
     releases.add(saveReleased.resolve)
+
     await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
       if (route.request().method() !== 'PATCH') {
         return route.continue()
       }
+
       const isAutosave = new URL(route.request().url()).searchParams.get('autosave') === 'true'
       const response = await route.fetch()
 
@@ -1120,8 +1169,10 @@ test.describe('Shared form request queue', () => {
         saveCaptured.resolve()
         await saveReleased.promise
       }
+
       await route.fulfill({ response })
     })
+
     await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
     await waitForFormReady(page)
     const title = page.locator('#field-title')
@@ -1129,15 +1180,21 @@ test.describe('Shared form request queue', () => {
     await title.fill('Autosaved value')
     await page.clock.runFor(200)
     await autosaveCaptured.promise
+
     // The save button is inert during autosave, so submit the form directly.
     await page
       .locator('form.collection-edit__form')
       .evaluate((form: HTMLFormElement) => form.requestSubmit())
+
     await expect(title).toBeDisabled()
+
     autosaveReleased.resolve()
+
     await saveCaptured.promise
     await expect(title).toBeDisabled()
+
     saveReleased.resolve()
+
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await expect(title).toBeEnabled()
   })
@@ -1148,26 +1205,32 @@ test.describe('Shared form request queue', () => {
       data: { title: 'Initial value' },
       overrideAccess: true,
     })
+
     const saved = Promise.withResolvers<void>()
     const captured = Promise.withResolvers<void>()
     const released = Promise.withResolvers<void>()
     const editURL = new AdminUrlUtil(serverURL, postsSlug).edit(doc.id)
+
     let didSave = false
     let saveCount = 0
 
     createdDocs.push({ collection: postsSlug, id: doc.id })
     releases.add(released.resolve)
+
     await page.goto(editURL)
     await waitForFormReady(page)
+
     await page.route(`**/api/${postsSlug}/${doc.id}**`, async (route) => {
       if (route.request().method() !== 'PATCH') {
         return route.continue()
       }
+
       saveCount += 1
       await route.fulfill({ response: await route.fetch() })
       didSave = true
       saved.resolve()
     })
+
     await page.route(
       (url) => url.href === editURL || url.pathname.startsWith('/_serverFn/'),
       async (route) => {
@@ -1178,13 +1241,16 @@ test.describe('Shared form request queue', () => {
         ) {
           return route.continue()
         }
+
         const response = await route.fetch()
 
         captured.resolve()
+
         await released.promise
         await route.fulfill({ response })
       },
     )
+
     const title = page.locator('#field-title')
 
     await title.fill('Saved value')
@@ -1192,11 +1258,14 @@ test.describe('Shared form request queue', () => {
     await page.locator('#action-save').click()
     await saved.promise
     await captured.promise
+
     // Fields stay disabled while processing, so only a direct submit can reach the guard here.
     await page
       .locator('form.collection-edit__form')
       .evaluate((form: HTMLFormElement) => form.requestSubmit())
+
     released.resolve()
+
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await expect(title).toBeEnabled()
     await page.clock.runFor(500)
