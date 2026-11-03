@@ -13,4 +13,4 @@ Pin every non-local action to a full 40-character commit SHA, with its exact ver
 ```
 
 - Get the SHA from the real tag, never from memory: `gh api repos/<owner>/<repo>/commits/<tag> --jq .sha`. Use the most specific tag (`v5.1.0`, not `v5`) in the comment.
-- CI checks this with [zizmor](https://docs.zizmor.sh) in the `lint` job (config: `.github/zizmor.yml`). Run it locally with the `version` from that job: `GH_TOKEN=$(gh auth token) uvx zizmor@1.32.0 .github`
+- CI checks this with [zizmor](https://docs.zizmor.sh) in the `lint` job (config: `.github/zizmor.yml`). Run it locally with the `version` from that job: `GH_TOKEN=$(gh auth token) uvx zizmor@1.31.1 .github`
