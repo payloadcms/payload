@@ -22,7 +22,7 @@ on:
       audit-level:
         description: The level of audit to run (low, moderate, high, critical)
         required: false
-        default: high
+        default: moderate
       debug:
         description: Enable debug logging
         required: false
@@ -51,9 +51,9 @@ jobs:
       ref: ${{ matrix.ref }}
       # inputs.* are empty on `schedule`; fall back to the defaults.
       scope: ${{ inputs.scope || 'consumer-facing' }}
-      severity: ${{ inputs.audit-level || 'high' }}
+      severity: ${{ inputs.audit-level || 'moderate' }}
       # Only runs from main may change PRs; runs from other branches are dry runs.
-      is-default-inputs: ${{ github.ref == 'refs/heads/main' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'high') == 'high' }}
+      is-default-inputs: ${{ github.ref == 'refs/heads/main' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'moderate') == 'moderate' }}
     secrets:
       AUDIT_DEPS_APP_CLIENT_ID: ${{ secrets.AUDIT_DEPS_APP_CLIENT_ID }}
       AUDIT_DEPS_APP_PRIVATE_KEY: ${{ secrets.AUDIT_DEPS_APP_PRIVATE_KEY }}
