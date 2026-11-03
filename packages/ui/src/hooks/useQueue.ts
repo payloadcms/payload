@@ -137,6 +137,8 @@ const createQueue = (): UseQueueResult => {
  *     return result.value
  *   }
  * }
+ *
+ * @internal - this hook may be removed or receive breaking changes in minor releases.
  */
 export function useQueue(): UseQueueResult {
   const queueRef = useRef<UseQueueResult>(undefined)
