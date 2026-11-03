@@ -432,16 +432,21 @@ export function fieldsToJSONSchema({
   // shares the read-shaped def when byte-identical; otherwise registers an `Input`-suffixed twin so
   // the write shape doesn't collide with the read one.
   const registerNamedInterface = (name: string, schema: JSONSchema4): string => {
+    // json-schema-to-typescript names a type after its `title`, so a json field's own schema
+    // title is replaced with the registered name.
+    const withTitle = (key: string): JSONSchema4 =>
+      schema.title === undefined ? schema : { ...schema, title: key }
+
     if (variant === 'input') {
       const outputDef = interfaceNameDefinitions.get(name)
-      if (outputDef && JSON.stringify(outputDef) === JSON.stringify(schema)) {
+      if (outputDef && JSON.stringify(outputDef) === JSON.stringify(withTitle(name))) {
         return name
       }
       const inputName = `${name}Input`
-      interfaceNameDefinitions.set(inputName, schema)
+      interfaceNameDefinitions.set(inputName, withTitle(inputName))
       return inputName
     }
-    interfaceNameDefinitions.set(name, schema)
+    interfaceNameDefinitions.set(name, withTitle(name))
     return name
   }
 

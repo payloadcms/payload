@@ -88,6 +88,17 @@ describe('toPipelineEdits', () => {
     expect(edits).toMatchObject({ crop: { unit: '%' }, focalPoint: { x: 30, y: 70 } })
   })
 
+  it('should send the saved focal point with a changed crop, so sizes keep it', () => {
+    const focalPoint = { x: 30, y: 70 }
+    const edits = pipelineEdits({
+      next: { crop, focalPoint },
+      nextFocalPoint: focalPoint,
+      previous: { crop: { ...crop, x: 0 }, focalPoint },
+    })
+
+    expect(edits).toMatchObject({ crop: { unit: '%' }, focalPoint })
+  })
+
   it('should send the saved crop for a new file', () => {
     expect(pipelineEdits({ hasNewFile: true, next: { crop }, previous: { crop } })).toHaveProperty(
       'crop',
@@ -131,6 +142,19 @@ describe('resolveUploadEdits', () => {
     })
 
     expect(applyTransformState({})._transforms).toStrictEqual({ custom: [1, null, 3] })
+  })
+
+  it('should save focalX and focalY sent as strings as numbers', async () => {
+    const { applyTransformState } = await resolveUploadEdits({
+      collectionSlug: 'media',
+      data: { focalX: '30', focalY: '70' },
+      focalPointEnabled: true,
+      operation: 'update',
+      originalDoc: { focalX: 50, focalY: 50 },
+      req: { query: {} } as unknown as PayloadRequest,
+    })
+
+    expect(applyTransformState({})._transforms).toStrictEqual({ focalPoint: { x: 30, y: 70 } })
   })
 
   it('should give the pipeline the rounded focal point that focalX and focalY store', async () => {
