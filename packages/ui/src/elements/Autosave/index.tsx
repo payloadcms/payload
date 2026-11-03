@@ -80,6 +80,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const autosaveSequenceRef = useRef(0)
   const retryAutosaveRef = useRef<(() => Promise<void>) | null>(null)
   const savingStartTimestampRef = useRef(0)
+  const wasSkippedWhileInvalidRef = useRef(false)
 
   const stopAutoSaveIndicator = useEffectEvent(() => {
     if (autosaveTimeoutRef.current) {
@@ -92,7 +93,14 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const handleAutosave = useEffectEvent(async () => {
     const { valid } = reduceFieldsToValuesWithValidation(formState, true)
 
-    if (!modified || (submitted && !valid && validateOnDraft)) {
+    wasSkippedWhileInvalidRef.current = false
+
+    if (!modified) {
+      return
+    }
+
+    if (submitted && !valid && validateOnDraft) {
+      wasSkippedWhileInvalidRef.current = true
       return
     }
 
@@ -226,6 +234,11 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     const { updatedAt: __, ...prevFormData } = previousDebouncedData.current
 
     if (dequal(formData, prevFormData) && dequal(uploadEdits, previousUploadEdits.current)) {
+      // Validity arrives with the form-state response after the values settle, so retry an autosave skipped while invalid.
+      if (wasSkippedWhileInvalidRef.current) {
+        void handleAutosave()
+      }
+
       return
     }
 
