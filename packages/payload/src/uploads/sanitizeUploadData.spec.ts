@@ -208,6 +208,23 @@ describe('restoreUploadDataFromDocument', () => {
     ).toEqual({ filename: 'current.png', thumbnailURL: null })
   })
 
+  it.for([
+    {
+      name: 'clear _stored when the restored version has a stored file',
+      document: {},
+      expected: null,
+    },
+    {
+      name: 'restore _stored when the restored version has a dynamic file',
+      document: { _stored: false },
+      expected: false,
+    },
+  ])('should $name', ({ document, expected }) => {
+    expect(
+      restoreUploadDataFromDocument({ _stored: false }, document, { clearMissing: true })._stored,
+    ).toBe(expected)
+  })
+
   it('should restore the selected value for localized generated file data', () => {
     expect(
       restoreUploadDataFromDocument(

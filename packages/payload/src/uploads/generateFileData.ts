@@ -300,6 +300,10 @@ const processUpload = async <T>({
         }
       : undefined
   const shouldStageCloudFiles = hasManagedCloudStorage && !hasProviderDirectReference
+  // The new file is kept as `original` only where it can be stored.
+  const isOriginalStored = Boolean(
+    !disableLocalStorage || shouldStageCloudFiles || providerOriginal,
+  )
 
   const staticPath = staticDir
 
@@ -541,8 +545,8 @@ const processUpload = async <T>({
       plan === rebuildPlan
         ? { isAppliedAtRequest: isRebuildAppliedAtRequest }
         : await resolveTransformKeyCoverage({
-            // The new file is stored as the original, so request-time stages can start from it.
-            canApplyAtRequest: true,
+            // Request-time stages start from the stored original, so one must be stored.
+            canApplyAtRequest: isOriginalStored,
             collectionSlug: collectionConfig.slug,
             documentID,
             mimeType,
@@ -858,7 +862,7 @@ const processUpload = async <T>({
       fileData.prefix = retainedOriginal.prefix
     }
 
-    if (!disableLocalStorage || shouldStageCloudFiles || providerOriginal) {
+    if (isOriginalStored) {
       const originalFilename =
         retainedOriginal?.filename ??
         providerOriginal?.filename ??
