@@ -3,11 +3,13 @@ import type { Payload, RequestContext } from 'payload'
 
 import { readdir, readFile, rm } from 'fs/promises'
 import path from 'path'
+import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { dynamicMediaDir, dynamicMediaSlug, publicCloudMediaSlug } from './shared.js'
+import { requestCropCalls } from './transformers.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 // 1600 x 1600 PNG
@@ -16,6 +18,7 @@ const savedCrop = { height: 600, width: 800, x: 100, y: 200 }
 
 test.suite('Dynamic default file', { config: './config.ts' }, () => {
   test.afterEach(async () => {
+    requestCropCalls.length = 0
     await rm(dynamicMediaDir, { force: true, recursive: true })
   })
 
@@ -40,7 +43,7 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     })
   }
 
-  // `_stored` is hidden from API output, so read the stored row.
+  // Reads the saved row, so the check does not depend on how the API shows a missing value.
   const readStoredFlag = async ({ id, payload }: { id: number | string; payload: Payload }) =>
     (
       (await payload.db.findOne({
@@ -80,16 +83,17 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     restClient,
   }) => {
     const created = await createImage({ payload })
-    const filePath = `/${dynamicMediaSlug}/file/${created.filename}`
+    const filePath = `/${dynamicMediaSlug}/file/${created.filename}` as const
 
     const plain = await restClient.GET(filePath)
     const original = await restClient.GET(`${filePath}?original=true`)
 
-    expect(await plain.json()).toEqual({
-      crop: savedCrop,
-      originalSize: (await readFile(imageFixture)).length,
-      purpose: 'persisted-default',
+    expect(await sharp(Buffer.from(await plain.arrayBuffer())).metadata()).toMatchObject({
+      format: 'png',
+      height: 600,
+      width: 800,
     })
+    expect(requestCropCalls).toEqual([{ crop: savedCrop, purpose: 'persisted-default' }])
     expect(Buffer.from(await original.arrayBuffer()).equals(await readFile(imageFixture))).toBe(
       true,
     )
@@ -110,7 +114,7 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     restClient,
   }) => {
     const created = await createImage({ payload })
-    const filePath = `/${dynamicMediaSlug}/file/${created.filename}`
+    const filePath = `/${dynamicMediaSlug}/file/${created.filename}` as const
 
     expect((await restClient.GET(filePath, { auth: false })).status).toBe(200)
     expect((await restClient.GET(`${filePath}?w=100`, { auth: false })).status).toBe(403)

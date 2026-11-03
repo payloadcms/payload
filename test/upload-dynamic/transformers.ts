@@ -1,12 +1,24 @@
 import type { UploadTransformer } from 'payload'
+import type { Sharp } from 'sharp'
+
+import sharp from 'sharp'
 
 import { dynamicMediaSlug, publicCloudMediaSlug } from './shared.js'
 
 const dynamicCollectionSlugs = [dynamicMediaSlug, publicCloudMediaSlug]
 
+type Crop = { height: number; width: number; x: number; y: number }
+
+/** Each `handleRequest` call of `requestCropTransformer`, so a test can check what it was given. */
+export const requestCropCalls: { crop: Crop | null; purpose: string }[] = []
+
+const toImageResponse = async ({ image, mimeType }: { image: Sharp; mimeType: string }) =>
+  new Response(new Uint8Array(await image.toBuffer()), { headers: { 'Content-Type': mimeType } })
+
 /**
- * Applies the saved crop when the file is requested, as a CDN transformer would, so the collection
- * stores only the original. A `w` query parameter adds a request-override stage.
+ * Applies the saved crop to the original when the file is requested, as a CDN transformer would,
+ * so the collection stores only the original. A `w` query parameter adds a request-override stage
+ * that resizes the cropped file.
  */
 export const requestCropTransformer: UploadTransformer = {
   slug: 'request-crop',
@@ -21,14 +33,37 @@ export const requestCropTransformer: UploadTransformer = {
 
     return req.searchParams?.has('w') ? { canTransform: true, options: { purpose } } : false
   },
-  handleRequest: async ({ doc, getOriginalFile, options }) => {
-    const original = await getOriginalFile()
+  handleRequest: async ({ doc, getOriginalFile, getSourceFile, mimeType, options, req }) => {
+    const { purpose } = options as { purpose: string }
+    const crop = (doc._transforms as { crop?: Crop } | null)?.crop ?? null
+
+    requestCropCalls.push({ crop, purpose })
+
+    if (purpose === 'persisted-default') {
+      const original = sharp(Buffer.from(await (await getOriginalFile()).arrayBuffer()))
+
+      return {
+        response: await toImageResponse({
+          image: crop
+            ? original.extract({
+                height: crop.height,
+                left: crop.x,
+                top: crop.y,
+                width: crop.width,
+              })
+            : original,
+          mimeType,
+        }),
+        status: 'continue',
+      }
+    }
+
+    const source = sharp(Buffer.from(await (await getSourceFile()).arrayBuffer()))
 
     return {
-      response: Response.json({
-        crop: (doc._transforms as { crop?: unknown } | null)?.crop ?? null,
-        originalSize: (await original.arrayBuffer()).byteLength,
-        purpose: (options as { purpose: string }).purpose,
+      response: await toImageResponse({
+        image: source.resize({ width: Number(req.searchParams.get('w')) }),
+        mimeType,
       }),
       status: 'continue',
     }
@@ -46,5 +81,5 @@ export const uploadCropTransformer: UploadTransformer = {
       ? { canTransform: true, handledTransformKeys: ['crop'] }
       : false,
   mimeTypes: ['image/*'],
-  transformFile: () => ({ status: 'continue' }),
+  transformFile: () => Promise.resolve({ status: 'continue' as const }),
 }
