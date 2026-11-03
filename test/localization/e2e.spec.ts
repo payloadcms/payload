@@ -908,19 +908,24 @@ describe('Localization', () => {
 
   describe('localize status', () => {
     test('should not show stale data modal when editing a localized global draft', async () => {
-      await page.goto(url.global(globalWithDraftsSlug))
-      await page.locator('#field-text').fill('EN Published')
-      await saveDocAndAssert(page)
+      const globalEndpoint = `${serverURL}/api/globals/${globalWithDraftsSlug}`
+      const englishResponse = await page.request.post(`${globalEndpoint}?locale=en`, {
+        data: { _status: 'published', text: 'EN Published' },
+      })
+      const spanishResponse = await page.request.post(`${globalEndpoint}?locale=es`, {
+        data: { _status: 'published', text: 'ES Published' },
+      })
+      const draftResponse = await page.request.post(`${globalEndpoint}?locale=es&draft=true`, {
+        data: { _status: 'draft', text: 'ES Draft' },
+      })
 
-      await changeLocale(page, spanishLocale)
-      await page.locator('#field-text').fill('ES Published')
-      await saveDocAndAssert(page)
+      expect(englishResponse.ok()).toBe(true)
+      expect(spanishResponse.ok()).toBe(true)
+      expect(draftResponse.ok()).toBe(true)
 
-      await page.locator('#field-text').fill('ES Draft')
-      await saveDocAndAssert(page, '#action-save-draft')
-
-      await page.reload()
+      await page.goto(`${url.global(globalWithDraftsSlug)}?locale=es`)
       await waitForFormReady(page)
+      await expect(page.locator('#field-text')).toHaveValue('ES Draft')
 
       const pageURL = page.url()
       const formStateResponse = page.waitForResponse((response) => {
