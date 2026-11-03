@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useCallback, useRef } from 'react'
 
 export type TaskContext = {
   /**
@@ -32,82 +32,6 @@ type QueueEntry = {
   task: Task<unknown>
 }
 
-const createQueue = (): UseQueueResult => {
-  let resetCount = 0
-  let isTaskRunning = false
-  let pendingTask: QueueEntry | undefined
-
-  const startTask = ({ entry }: { entry: QueueEntry }): void => {
-    isTaskRunning = true
-
-    const resetCountAtStart = resetCount
-
-    const context: TaskContext = {
-      isCurrent: () => resetCount === resetCountAtStart,
-    }
-
-    const taskPromise = (async () => entry.task(context))()
-
-    void taskPromise
-      .then(
-        (value) => entry.resolve({ status: 'completed', value }),
-        (error) => entry.reject(error),
-      )
-      .finally(() => {
-        isTaskRunning = false
-
-        const next = pendingTask
-        pendingTask = undefined
-
-        if (next) {
-          startTask({ entry: next })
-        }
-      })
-  }
-
-  const resetQueue = (): void => {
-    resetCount += 1
-
-    if (pendingTask) {
-      pendingTask.resolve({ status: 'superseded' })
-      pendingTask = undefined
-    }
-  }
-
-  const queueTask = <T>(options: { priority?: number; task: Task<T> }): Promise<QueueResult<T>> => {
-    let resolve!: (result: QueueResult<T>) => void
-    let reject!: (reason: unknown) => void
-
-    const result = new Promise<QueueResult<T>>((resolvePromise, rejectPromise) => {
-      resolve = resolvePromise
-      reject = rejectPromise
-    })
-
-    const entry: QueueEntry = {
-      priority: options.priority ?? Infinity,
-      reject,
-      resolve: resolve as (result: QueueResult<unknown>) => void,
-      task: options.task as Task<unknown>,
-    }
-
-    if (!isTaskRunning) {
-      startTask({ entry })
-      return result
-    }
-
-    if (!pendingTask || entry.priority <= pendingTask.priority) {
-      pendingTask?.resolve({ status: 'superseded' })
-      pendingTask = entry
-    } else {
-      resolve({ status: 'superseded' })
-    }
-
-    return result
-  }
-
-  return { queueTask, resetQueue }
-}
-
 /**
  * Runs asynchronous tasks one at a time, retaining at most one pending task to avoid building a backlog.
  * Pending work keeps the highest priority (lowest number), with newer tasks winning ties.
@@ -138,8 +62,80 @@ const createQueue = (): UseQueueResult => {
  * @internal - this hook may be removed or receive breaking changes in minor releases.
  */
 export function useQueue(): UseQueueResult {
-  const queueRef = useRef<UseQueueResult>(undefined)
-  queueRef.current ??= createQueue()
+  const resetCount = useRef(0)
+  const isTaskRunning = useRef(false)
+  const pendingTask = useRef<QueueEntry | undefined>(undefined)
 
-  return queueRef.current
+  const startTask = useCallback(function runTask(entry: QueueEntry): void {
+    isTaskRunning.current = true
+
+    const resetCountAtStart = resetCount.current
+
+    const context: TaskContext = {
+      isCurrent: () => resetCount.current === resetCountAtStart,
+    }
+
+    const taskPromise = (async () => entry.task(context))()
+
+    void taskPromise
+      .then(
+        (value) => entry.resolve({ status: 'completed', value }),
+        (error) => entry.reject(error),
+      )
+      .finally(() => {
+        isTaskRunning.current = false
+
+        const next = pendingTask.current
+        pendingTask.current = undefined
+
+        if (next) {
+          runTask(next)
+        }
+      })
+  }, [])
+
+  const resetQueue = useCallback((): void => {
+    resetCount.current += 1
+
+    if (pendingTask.current) {
+      pendingTask.current.resolve({ status: 'superseded' })
+      pendingTask.current = undefined
+    }
+  }, [])
+
+  const queueTask = useCallback<UseQueueResult['queueTask']>(
+    <T>(options: { priority?: number; task: Task<T> }): Promise<QueueResult<T>> => {
+      let resolve!: (result: QueueResult<T>) => void
+      let reject!: (reason: unknown) => void
+
+      const result = new Promise<QueueResult<T>>((resolvePromise, rejectPromise) => {
+        resolve = resolvePromise
+        reject = rejectPromise
+      })
+
+      const entry: QueueEntry = {
+        priority: options.priority ?? Infinity,
+        reject,
+        resolve: resolve as (result: QueueResult<unknown>) => void,
+        task: options.task as Task<unknown>,
+      }
+
+      if (!isTaskRunning.current) {
+        startTask(entry)
+        return result
+      }
+
+      if (!pendingTask.current || entry.priority <= pendingTask.current.priority) {
+        pendingTask.current?.resolve({ status: 'superseded' })
+        pendingTask.current = entry
+      } else {
+        resolve({ status: 'superseded' })
+      }
+
+      return result
+    },
+    [startTask],
+  )
+
+  return { queueTask, resetQueue }
 }
