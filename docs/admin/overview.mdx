@@ -280,6 +280,12 @@ app
   will already be set up correctly.
 </Banner>
 
+If you use Next.js, also pass the new route to `withPayload` in your `next.config.js`. Payload sends the headers that let the Admin Panel render the user's preferred color scheme on the server only on this route:
+
+```js
+export default withPayload(nextConfig, { adminRoute: '/' }) // highlight-line
+```
+
 <Banner type="info">
   **Advanced Routing:** For complex scenarios like nesting the admin panel at
   custom paths (e.g., `/admin/content`) or organizing multiple admin dashboards,
