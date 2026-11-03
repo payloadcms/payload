@@ -147,18 +147,21 @@ export function listNoFix({ report, scope }) {
  */
 export function classifyFixes({ bumps, report }) {
   const dependencies = new Set(bumps.map((bump) => bump.dependency))
-  const findingsByAdvisory = new Map(report.findings.map((finding) => [finding.advisory, finding]))
   const fixed = new Set()
   const partly = new Set()
 
   for (const advisory of bumps.flatMap((bump) => bump.advisories)) {
-    const finding = findingsByAdvisory.get(advisory)
+    // The monorepo audit does not merge by GHSA, so one GHSA can have one finding per module.
+    const findings = report.findings.filter((finding) => finding.advisory === advisory)
 
-    if (!finding) {
+    if (findings.length === 0) {
       fixed.add(advisory)
       continue
     }
-    if (!finding.bumps.some((entry) => dependencies.has(entry.dependency))) {
+    const isReachedThroughBump = findings.some((finding) =>
+      finding.bumps.some((entry) => dependencies.has(entry.dependency)),
+    )
+    if (!isReachedThroughBump) {
       partly.add(advisory)
     }
   }

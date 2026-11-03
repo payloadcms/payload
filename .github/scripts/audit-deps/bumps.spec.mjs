@@ -336,4 +336,19 @@ describe('classifyFixes', () => {
       partly: ['GHSA-uuid'],
     })
   })
+
+  it('should keep an advisory uncleared when any of its findings reaches a bumped dependency', () => {
+    const report = {
+      findings: [
+        ...reauditWith({ advisory: 'GHSA-uuid', dependency: '@google-cloud/storage' }).findings,
+        ...reauditWith({ advisory: 'GHSA-uuid', dependency: '@sentry/nextjs' }).findings,
+      ],
+      plan: { actions: [] },
+    }
+
+    expect(classifyFixes({ bumps: bumpsFor('@google-cloud/storage'), report })).toEqual({
+      fixed: [],
+      partly: [],
+    })
+  })
 })
