@@ -66,6 +66,20 @@ describe('fetchPackageMeta', () => {
     })
   })
 
+  it.each([
+    ['a parent segment', 'https://github.com/o/..'],
+    ['a dot owner', 'github:./r'],
+    ['a query in the owner', 'https://github.com/o?x=1/r'],
+    ['a query in the name', 'https://github.com/o/r?x=1'],
+  ])('should drop a repository with %s', async (_name, url) => {
+    const fetch = fakeFetch({ [packumentUrl('a')]: { versions: { '1.0.0': { repository: url } } } })
+
+    expect(await fetchPackageMeta({ fetch, name: 'a', version: '1.0.0' })).toEqual({
+      repo: null,
+      publishedAt: null,
+    })
+  })
+
   it('should return the empty shape on 403 and on thrown errors', async () => {
     const empty = { repo: null, publishedAt: null }
     const forbidden = fakeFetch({ [packumentUrl('a')]: { status: 403 } })

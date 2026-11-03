@@ -9,6 +9,8 @@ const VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/
 const STRICT_VERSION_PATTERN = /^\d+\.\d+\.\d+$/
 const HEADING_PATTERN = /^(#{1,3})\s+(.*)$/
 const REQUEST_TIMEOUT_MS = 30_000
+// Owner and name come from the packument and go unencoded into token-bearing API paths.
+const REPO_SEGMENT_PATTERN = /^(?!\.{1,2}$)[\w.-]+$/
 // A packument is the full npm registry document for a package. Each `fetch` function gets its
 // own packument cache, so a fake `fetch` in a test never reads data cached by another `fetch`.
 const packumentCaches = new WeakMap()
@@ -204,7 +206,7 @@ function parseRepository({ repository }) {
     url.match(/github\.com[/:]([^/\s]+)\/([^/\s#]+?)(?:\.git)?(?:[/#].*)?$/) ??
     url.match(/^github:([^/\s]+)\/([^/\s#]+?)(?:\.git)?$/) ??
     url.match(/^([\w.-]+)\/([\w.-]+)$/)
-  if (!match) {
+  if (!match || !REPO_SEGMENT_PATTERN.test(match[1]) || !REPO_SEGMENT_PATTERN.test(match[2])) {
     return null
   }
   return { owner: match[1], name: match[2], directory: directory || undefined }
