@@ -1,6 +1,7 @@
 import type { UploadTransformer } from 'payload'
 import type { Sharp } from 'sharp'
 
+import { registerUploadVariants } from 'payload'
 import sharp from 'sharp'
 
 import { dynamicMediaSlug, publicCloudMediaSlug } from './shared.js'
@@ -49,17 +50,13 @@ export const requestCropTransformer: UploadTransformer = {
 
     if (purpose === 'persisted-default') {
       const original = sharp(Buffer.from(await (await getOriginalFile()).arrayBuffer()))
+      const cropped = crop
+        ? original.extract({ height: crop.height, left: crop.x, top: crop.y, width: crop.width })
+        : original
 
       return {
         response: await toImageResponse({
-          image: crop
-            ? original.extract({
-                height: crop.height,
-                left: crop.x,
-                top: crop.y,
-                width: crop.width,
-              })
-            : original,
+          image: variantName === 'card' ? cropped.resize({ width: 400 }) : cropped,
           mimeType,
         }),
         status: 'continue',
@@ -76,15 +73,14 @@ export const requestCropTransformer: UploadTransformer = {
       status: 'continue',
     }
   },
-  // Declares a `card` size that is built on request, as a CDN transformer's size presets would be.
-  init: (config) => ({
-    ...config,
-    collections: config.collections?.map((collection) =>
-      collection.slug === dynamicMediaSlug && typeof collection.upload === 'object'
-        ? { ...collection, upload: { ...collection.upload, variants: [{ name: 'card' }] } }
-        : collection,
-    ),
-  }),
+  // Declares a `card` size, 400px wide, that is built on request, as a CDN transformer's size
+  // presets would be.
+  init: (config) =>
+    registerUploadVariants({
+      collections: { [dynamicMediaSlug]: { variants: [{ name: 'card' }] } },
+      config,
+      label: 'requestCropTransformer',
+    }),
   mimeTypes: ['image/*'],
 }
 
