@@ -36,7 +36,7 @@ type Args = {
   contextRef: RefObject<FormContextType>
   dispatchFields: Dispatch<FieldAction>
   formRef: RefObject<HTMLFormElement | null>
-  prevFormState: RefObject<FormState>
+  prevFormStateRef: RefObject<FormState>
   props: FormProps
   requestScopeRef: RefObject<unknown>
   scheduleRequest: UseQueueResult['queueTask']
@@ -47,7 +47,7 @@ export const useFormSubmission = ({
   contextRef,
   dispatchFields,
   formRef,
-  prevFormState,
+  prevFormStateRef,
   props,
   requestScopeRef,
   scheduleRequest,
@@ -417,7 +417,7 @@ export const useFormSubmission = ({
                 dispatchFields({
                   type: 'MERGE_SERVER_STATE',
                   acceptValues,
-                  prevStateRef: prevFormState,
+                  prevStateRef: prevFormStateRef,
                   serverState: newFormState,
                 })
               }
@@ -486,7 +486,7 @@ export const useFormSubmission = ({
                 errors: fieldErrors,
               }
 
-              prevFormState.current = fieldReducer(prevFormState.current, serverErrorAction)
+              prevFormStateRef.current = fieldReducer(prevFormStateRef.current, serverErrorAction)
               dispatchFields(serverErrorAction)
 
               nonFieldErrors.forEach((err) => {
@@ -566,7 +566,7 @@ export const useFormSubmission = ({
       setIsSubmitted,
       onNonFieldError,
       contextRef,
-      prevFormState,
+      prevFormStateRef,
       requestScopeRef,
       setIsValid,
     ],

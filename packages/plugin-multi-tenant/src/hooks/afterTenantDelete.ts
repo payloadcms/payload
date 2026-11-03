@@ -34,24 +34,23 @@ export const addTenantCleanup = ({
   usersSlug,
   usersTenantsArrayFieldName,
   usersTenantsArrayTenantFieldName,
-}: Args) => {
-  if (!collection.hooks) {
-    collection.hooks = {}
-  }
-  if (!collection.hooks?.afterDelete) {
-    collection.hooks.afterDelete = []
-  }
-  collection.hooks.afterDelete.push(
-    afterTenantDelete({
-      enabledSlugs,
-      tenantFieldName,
-      tenantsCollectionSlug,
-      usersSlug,
-      usersTenantsArrayFieldName,
-      usersTenantsArrayTenantFieldName,
-    }),
-  )
-}
+}: Args): CollectionConfig => ({
+  ...collection,
+  hooks: {
+    ...collection.hooks,
+    afterDelete: [
+      ...(collection.hooks?.afterDelete || []),
+      afterTenantDelete({
+        enabledSlugs,
+        tenantFieldName,
+        tenantsCollectionSlug,
+        usersSlug,
+        usersTenantsArrayFieldName,
+        usersTenantsArrayTenantFieldName,
+      }),
+    ],
+  },
+})
 
 export const afterTenantDelete =
   ({

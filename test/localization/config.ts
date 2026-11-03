@@ -39,6 +39,7 @@ import {
   localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
+  localizedStatusSharedGlobalSlug,
   portugueseLocale,
   publicationAccessGlobalSlug,
   publicationAccessSlug,
@@ -485,6 +486,7 @@ export default buildConfigWithDefaults({
         access: openAccess,
         fields: [
           ...localizedPublicationFields,
+          { name: 'sharedText', type: 'text' },
           {
             name: '_status',
             access: {
@@ -592,6 +594,51 @@ export default buildConfigWithDefaults({
       },
     ],
     globals: [
+      {
+        slug: localizedStatusSharedGlobalSlug,
+        fields: [
+          {
+            name: 'localizedText',
+            type: 'text',
+            localized: true,
+          },
+          {
+            name: 'sharedText',
+            type: 'text',
+          },
+          {
+            name: 'hiddenSharedText',
+            type: 'text',
+            hidden: true,
+          },
+          {
+            name: 'sharedRows',
+            type: 'array',
+            fields: [
+              { name: 'localizedText', type: 'text', localized: true },
+              { name: 'sharedText', type: 'text' },
+            ],
+          },
+          {
+            name: 'sharedBlocks',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'sharedTextBlock',
+                fields: [
+                  { name: 'localizedText', type: 'text', localized: true },
+                  { name: 'sharedText', type: 'text' },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: {
+          drafts: {
+            localizeStatus: true,
+          },
+        },
+      },
       {
         slug: localeValidationGlobalSlug,
         fields: getLocaleValidationFields(),
@@ -705,6 +752,7 @@ export default buildConfigWithDefaults({
         },
         fields: [
           ...localizedPublicationFields,
+          { name: 'sharedText', type: 'text' },
           {
             name: '_status',
             access: {

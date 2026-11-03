@@ -6,6 +6,8 @@ import type {
   TypeWithID,
 } from 'payload'
 
+import { isOriginalFileRequest } from 'payload/internal'
+
 import { buildPrefixWithObjectKey } from './buildPrefixWithObjectKey.js'
 import { buildUploadStoragePathData } from './buildStoragePathData.js'
 import { sanitizePrefix } from './sanitizePrefix.js'
@@ -24,6 +26,7 @@ export async function getFilePrefix({
   collectionPrefix,
   doc,
   filename,
+  isOriginal,
   prefixQueryParam,
   req,
   uploadReference,
@@ -33,6 +36,8 @@ export async function getFilePrefix({
   collectionPrefix?: string
   doc?: Partial<FileData> & TypeWithID
   filename: string
+  /** Serves the original when it shares the main file's name. */
+  isOriginal?: boolean
   /**
    * Only narrows the access-controlled fallback lookup below; never trusted or
    * returned directly. Prefer passing the access-checked document as `doc` instead.
@@ -45,7 +50,7 @@ export async function getFilePrefix({
   // The serve path already loaded and authorized this document — trust it over any
   // client-supplied upload reference or query prefix.
   if (doc) {
-    return getRepresentationPrefix({ doc, filename })
+    return getRepresentationPrefix({ doc, filename, isOriginal })
   }
 
   // Upload instructions call handlers without a document yet. Re-contain the claimed
@@ -115,20 +120,22 @@ export async function getFilePrefix({
   const found = files?.docs?.[0] as
     | ({ _objectKey?: string; prefix?: string } & Partial<FileData>)
     | undefined
-  return found ? getRepresentationPrefix({ doc: found, filename }) : ''
+  return found ? getRepresentationPrefix({ doc: found, filename, isOriginal }) : ''
 }
 
+/** The main file wins a shared filename unless the original is asked for. */
 const getRepresentationPrefix = ({
   doc,
   filename,
+  isOriginal,
 }: {
   doc: Partial<FileData>
   filename: string
+  isOriginal?: boolean
 }): string => {
-  const representation =
-    doc.original?.filename === filename
-      ? doc.original
-      : (Object.values(doc.variants ?? {}).find((variant) => variant?.filename === filename) ?? doc)
+  const representation = isOriginalFileRequest({ doc, filename, isOriginal })
+    ? doc.original!
+    : (Object.values(doc.variants ?? {}).find((variant) => variant?.filename === filename) ?? doc)
   return buildPrefixWithObjectKey({
     objectKey: representation._objectKey ?? (!doc.original?.filename ? doc._objectKey : undefined),
     prefix: representation.prefix ?? (!doc.original?.filename ? doc.prefix : undefined),

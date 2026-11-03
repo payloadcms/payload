@@ -4,6 +4,8 @@ import { render } from 'vitest-browser-react'
 import type { RenderTabServerFnReturnType } from './renderTabServerFn.js'
 
 import { SidebarTabsClient } from './index.client.js'
+import '../../../css/spacing.css'
+import '../../../css/theme.css'
 
 const { serverFunction, setPreference } = vi.hoisted(() => ({
   serverFunction: vi.fn(),

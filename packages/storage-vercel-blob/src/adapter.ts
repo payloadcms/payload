@@ -174,7 +174,10 @@ export function createVercelBlobAdapter({
       return data
     },
 
-    staticHandler: (req, { doc, headers, params: { filename, operation, uploadReference } }) =>
+    staticHandler: (
+      req,
+      { doc, headers, params: { filename, isOriginal, operation, uploadReference } },
+    ) =>
       getFile({
         baseUrl,
         cacheControlMaxAge,
@@ -183,6 +186,7 @@ export function createVercelBlobAdapter({
         doc,
         filename,
         incomingHeaders: headers,
+        isOriginal,
         operation,
         req,
         token,

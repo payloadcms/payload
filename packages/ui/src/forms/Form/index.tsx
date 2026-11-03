@@ -214,7 +214,7 @@ export const Form: React.FC<FormProps> = (props) => {
     contextRef,
     dispatchFields,
     formRef,
-    prevFormState,
+    prevFormStateRef: prevFormState,
     props,
     requestScopeRef,
     scheduleRequest,
