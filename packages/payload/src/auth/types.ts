@@ -215,9 +215,38 @@ export type AuthStrategyResult = {
 export type AuthStrategyFunction = (
   args: AuthStrategyFunctionArgs,
 ) => AuthStrategyResult | Promise<AuthStrategyResult>
+/** Tokens an auth strategy issues for clients that can't use its login themselves. */
+export type AuthStrategyTokens = {
+  accessToken: string
+  /** Seconds until `accessToken` expires. */
+  expiresIn?: number
+  /** Trades for new tokens with the strategy's `refreshToken`. */
+  refreshToken?: string
+}
+
 export type AuthStrategy = {
   authenticate: AuthStrategyFunction
+  /** Finds the user of an access token from `issueToken` or `refreshToken`. */
+  authenticateToken?: (args: {
+    req: PayloadRequest
+    token: string
+  }) => Promise<AuthenticatedUser | null>
+  /**
+   * Issues tokens for `req.user`, a user this strategy logged in, for clients that can't use its
+   * login themselves, like MCP clients. Plugins find the strategy through `req.user._strategy`, so
+   * leave it set to the strategy's `name`.
+   */
+  issueToken?: (args: { req: PayloadRequest }) => Promise<AuthStrategyTokens>
   name: string
+  /**
+   * Trades a refresh token from `issueToken` or an earlier refresh for new tokens.
+   *
+   * @returns `null` when the refresh token doesn't work anymore, like after its session ended
+   */
+  refreshToken?: (args: {
+    refreshToken: string
+    req: PayloadRequest
+  }) => Promise<AuthStrategyTokens | null>
 }
 
 export type LoginWithUsernameOptions =
