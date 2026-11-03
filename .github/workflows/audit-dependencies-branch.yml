@@ -117,6 +117,7 @@ jobs:
       # Each PR is one bot commit on top of the audited commit. A failed PR is recorded, and the
       # other PRs continue.
       - name: Prepare PRs
+        id: prepare
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PR_STEPS: ${{ steps.decide.outputs.pr_steps }}
@@ -146,8 +147,10 @@ jobs:
 
       # Real runs push with a lease on the branch head that Decide PR steps saw, so a push from a
       # person is not overwritten. Dry runs only write the summary.
+      # Publish needs the output of Prepare PRs. It runs when Mint App token fails, so the summary
+      # can report the missing token.
       - name: Publish PRs
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
