@@ -10,7 +10,7 @@ const dynamicCollectionSlugs = [dynamicMediaSlug, publicCloudMediaSlug]
 type Crop = { height: number; width: number; x: number; y: number }
 
 /** Each `handleRequest` call of `requestCropTransformer`, so a test can check what it was given. */
-export const requestCropCalls: { crop: Crop | null; purpose: string }[] = []
+export const requestCropCalls: { crop: Crop | null; purpose: string; variantName?: string }[] = []
 
 const toImageResponse = async ({ image, mimeType }: { image: Sharp; mimeType: string }) =>
   new Response(new Uint8Array(await image.toBuffer()), { headers: { 'Content-Type': mimeType } })
@@ -33,11 +33,19 @@ export const requestCropTransformer: UploadTransformer = {
 
     return req.searchParams?.has('w') ? { canTransform: true, options: { purpose } } : false
   },
-  handleRequest: async ({ doc, getOriginalFile, getSourceFile, mimeType, options, req }) => {
+  handleRequest: async ({
+    doc,
+    getOriginalFile,
+    getSourceFile,
+    mimeType,
+    options,
+    req,
+    variantName,
+  }) => {
     const { purpose } = options as { purpose: string }
     const crop = (doc._transforms as { crop?: Crop } | null)?.crop ?? null
 
-    requestCropCalls.push({ crop, purpose })
+    requestCropCalls.push({ crop, purpose, variantName })
 
     if (purpose === 'persisted-default') {
       const original = sharp(Buffer.from(await (await getOriginalFile()).arrayBuffer()))
@@ -68,6 +76,15 @@ export const requestCropTransformer: UploadTransformer = {
       status: 'continue',
     }
   },
+  // Declares a `card` size that is built on request, as a CDN transformer's size presets would be.
+  init: (config) => ({
+    ...config,
+    collections: config.collections?.map((collection) =>
+      collection.slug === dynamicMediaSlug && typeof collection.upload === 'object'
+        ? { ...collection, upload: { ...collection.upload, variants: [{ name: 'card' }] } }
+        : collection,
+    ),
+  }),
   mimeTypes: ['image/*'],
 }
 

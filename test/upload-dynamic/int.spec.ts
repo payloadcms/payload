@@ -1,4 +1,4 @@
-/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] -- Tests use the shared fixture wrapper. */
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.for"] }] -- Tests use the shared fixture wrapper. */
 import type { Payload, RequestContext } from 'payload'
 
 import { readdir, readFile, rm } from 'fs/promises'
@@ -26,11 +26,13 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     _transforms = { crop: savedCrop },
     collection = dynamicMediaSlug,
     context,
+    name = 'photo.png',
     payload,
   }: {
-    _transforms?: Record<string, unknown>
+    _transforms?: null | Record<string, unknown>
     collection?: typeof dynamicMediaSlug | typeof publicCloudMediaSlug
     context?: RequestContext
+    name?: string
     payload: Payload
   }) => {
     const bytes = await readFile(imageFixture)
@@ -39,7 +41,7 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
       collection,
       context,
       data: { _transforms },
-      file: { name: 'photo.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+      file: { name, data: bytes, mimetype: 'image/png', size: bytes.length },
     })
   }
 
@@ -193,5 +195,68 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
 
     expect(created.url).toMatch(new RegExp(`/api/${publicCloudMediaSlug}/file/photo\\.png$`))
     expect(created.original?.url).toMatch(/^https:\/\/files\.example\.test\//)
+  })
+
+  test.for([
+    ['a saved crop', { crop: savedCrop }],
+    ['no saved transforms', null],
+  ] as const)(
+    'should write a size entry with no stored file for an upload with %s',
+    async ([, _transforms], { payload }) => {
+      const created = await createImage({ _transforms, payload })
+
+      expect(created.variants?.card).toMatchObject({
+        _stored: false,
+        filename: 'photo-card.png',
+        filesize: null,
+        height: null,
+        mimeType: null,
+        width: null,
+      })
+      expect(await readdir(dynamicMediaDir)).toEqual([created.original?.filename])
+    },
+  )
+
+  test.for([
+    ['a saved crop', { crop: savedCrop }, savedCrop, 800],
+    ['no saved transforms', null, null, 1600],
+  ] as const)(
+    'should build a size from the original, with the size name, for an upload with %s',
+    async ([, _transforms, crop, width], { payload, restClient }) => {
+      const created = await createImage({ _transforms, payload })
+
+      const response = await restClient.GET(
+        `/${dynamicMediaSlug}/file/${created.variants?.card?.filename}`,
+      )
+
+      expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject({
+        width,
+      })
+      expect(requestCropCalls).toEqual([
+        { crop, purpose: 'persisted-default', variantName: 'card' },
+      ])
+    },
+  )
+
+  test('should give a size a free name when another file already uses it', async ({ payload }) => {
+    await createImage({ name: 'photo-card.png', payload })
+
+    const created = await createImage({ payload })
+
+    expect(created.variants?.card?.filename).toBe('photo-card-1.png')
+  })
+
+  test('should replace the size entries when a new file is uploaded', async ({ payload }) => {
+    const created = await createImage({ payload })
+    const bytes = await readFile(imageFixture)
+
+    const updated = await payload.update({
+      id: created.id,
+      collection: dynamicMediaSlug,
+      data: {},
+      file: { name: 'other.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+
+    expect(updated.variants?.card?.filename).toBe('other-card.png')
   })
 })

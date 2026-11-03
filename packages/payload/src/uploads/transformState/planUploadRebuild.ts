@@ -203,30 +203,19 @@ export async function resolveTransformKeyCoverage({
     ({ path }) => !uploadClaimedKeys.has(path.slice('_transforms.'.length)),
   )
 
-  if (canApplyAtRequest && hasOnlyUnclaimedKeys) {
-    const requestPlan = await planTransformerPipeline({
-      args: {
-        collectionSlug,
-        doc: pipelineOriginalDoc,
-        documentID,
-        mimeType,
-        operation: 'request',
-        originalDoc: pipelineOriginalDoc,
-        purpose: 'persisted-default',
-        req,
-      },
-      capability: 'handleRequest',
-      transformers: req.payload.config.upload?.transformers ?? [],
-    })
-
-    if (
-      getTransformKeyCoverageErrors({
-        claims: requestPlan.claims,
-        transforms: pipelineDoc._transforms,
-      }).length === 0
-    ) {
-      return { isAppliedAtRequest: true }
-    }
+  if (
+    canApplyAtRequest &&
+    hasOnlyUnclaimedKeys &&
+    (await canBuildAtRequest({
+      collectionSlug,
+      documentID,
+      mimeType,
+      pipelineDoc,
+      pipelineOriginalDoc,
+      req,
+    }))
+  ) {
+    return { isAppliedAtRequest: true }
   }
 
   throw new ValidationError({ collection: collectionSlug, errors, req }, req.t)
@@ -250,4 +239,43 @@ export function assertTransformKeysCovered({
   if (errors.length > 0) {
     throw new ValidationError({ collection: collectionSlug, errors, req }, req.t)
   }
+}
+
+/**
+ * Whether request-time stages can build a file of this MIME type from the original, applying every
+ * saved key.
+ */
+export async function canBuildAtRequest({
+  collectionSlug,
+  documentID,
+  mimeType,
+  pipelineDoc,
+  pipelineOriginalDoc,
+  req,
+}: {
+  documentID?: number | string
+  mimeType: string
+} & PlanArgs): Promise<boolean> {
+  const requestPlan = await planTransformerPipeline({
+    args: {
+      collectionSlug,
+      doc: pipelineOriginalDoc,
+      documentID,
+      mimeType,
+      operation: 'request',
+      originalDoc: pipelineOriginalDoc,
+      purpose: 'persisted-default',
+      req,
+    },
+    capability: 'handleRequest',
+    transformers: req.payload.config.upload?.transformers ?? [],
+  })
+
+  return (
+    requestPlan.pipeline.length > 0 &&
+    getTransformKeyCoverageErrors({
+      claims: requestPlan.claims,
+      transforms: pipelineDoc._transforms,
+    }).length === 0
+  )
 }

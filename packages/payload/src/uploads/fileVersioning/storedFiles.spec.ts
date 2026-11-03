@@ -22,6 +22,7 @@ it('should leave out a file entry that has no stored object', () => {
       _stored: false,
       filename: 'photo.png',
       original: { _objectKey: 'original-key', filename: 'photo.png' },
+      variants: { card: { _stored: false, filename: 'photo-card.png' } },
     },
     req: {} as PayloadRequest,
   })

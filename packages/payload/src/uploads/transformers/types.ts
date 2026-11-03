@@ -41,7 +41,7 @@ export type CanTransformArgs = {
   originalDoc: Readonly<Document>
   /**
    * The phase a request plan is for. `persisted-default` applies the saved `_transforms`, and runs
-   * only when no default file is stored. `request-override` applies the request's own parameters.
+   * only when the requested file is not stored. `request-override` applies the request's own parameters.
    * Not set on upload.
    */
   purpose?: 'persisted-default' | 'request-override'
@@ -118,6 +118,8 @@ export type HandleTransformRequestArgs<TOptions = unknown> = {
   /** A frozen snapshot of the requested document. */
   originalDoc: Readonly<Document>
   req: PayloadRequest
+  /** The name of the requested size in `upload.variants`, or `undefined` for the main file. */
+  variantName?: string
 }
 
 export type HandleTransformRequestResult =
