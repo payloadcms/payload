@@ -580,7 +580,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       }
     })
 
-    test('fetches the whole client-uploaded image when Sharp applies a saved crop', async ({
+    test('should fetch the whole client-uploaded image when Sharp applies a saved crop', async ({
       restClient,
     }) => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/2mb.jpg'))

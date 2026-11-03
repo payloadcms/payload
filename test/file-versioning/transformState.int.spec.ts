@@ -15,6 +15,7 @@ import { legacyFocalPoints } from './seedLegacyMedia.js'
 import {
   draftMediaDir,
   draftMediaSlug,
+  flipStageRuns,
   legacyMediaDir,
   legacyMediaSlug,
   transformedMediaDir,
@@ -433,6 +434,33 @@ test.suite('File transform state', { config: './config.ts' }, () => {
 
     expect(copy).toMatchObject({ height: 600, width: 800 })
     expect(copy._transforms).toEqual({ focalPoint: { x: 20, y: 30 } })
+  })
+
+  test('should keep the saved crop when another claimed key rebuilds the file', async ({
+    payload,
+  }) => {
+    const created = await createImage({ payload, _transforms: { crop: savedCrop } })
+
+    const updated = await updateImage({
+      id: created.id,
+      data: { _transforms: { crop: savedCrop, flip: { horizontal: true } } },
+      payload,
+    })
+
+    expect(updated).toMatchObject({ height: 600, width: 800 })
+    expect(await readStoredSize(updated.filename!)).toMatchObject({ height: 600, width: 800 })
+  })
+
+  test('should not apply claimed keys again when duplicating', async ({ payload }) => {
+    const created = await createImage({ payload, _transforms: { flip: { horizontal: true } } })
+    flipStageRuns.length = 0
+
+    // The copy is made from the flipped file, so the flip is already part of its files.
+    const copy = await payload.duplicate({ id: created.id, collection: transformedMediaSlug })
+
+    expect(flipStageRuns.length).toBeGreaterThan(0)
+    expect(flipStageRuns.every((flip) => flip === undefined)).toBe(true)
+    expect(copy._transforms).toBeNull()
   })
 
   test('should apply transform state to every document in a bulk update', async ({ payload }) => {

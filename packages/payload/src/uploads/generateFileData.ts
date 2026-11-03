@@ -51,8 +51,8 @@ import {
   planUploadPipeline,
   planUploadRebuild,
 } from './transformState/planUploadRebuild.js'
-import { resolveUploadEdits } from './transformState/resolveUploadEdits.js'
-import { isClaimRequired } from './transformState/transformKeyClaims.js'
+import { resolveUploadEdits, withSavedCrop } from './transformState/resolveUploadEdits.js'
+import { isClaimRequired, isFocalPointKey } from './transformState/transformKeyClaims.js'
 import { validateUploadURL } from './validateUploadURL.js'
 type Args<T> = {
   collection: Collection
@@ -191,7 +191,7 @@ const processUpload = async <T>({
   pipelineOriginalDoc,
   req,
   throwOnMissingFile,
-  uploadEdits,
+  uploadEdits: resolvedEdits,
 }: {
   pipelineDoc: Document
   pipelineOriginalDoc: Readonly<Document>
@@ -272,7 +272,7 @@ const processUpload = async <T>({
           isDuplicating: Boolean(isDuplicating),
           isExternalSource: Boolean(externalUploadSource),
           isLegacyReupload: shouldReupload(
-            uploadEdits,
+            resolvedEdits,
             incomingFileData as Record<string, unknown>,
           ),
           pipelineDoc,
@@ -284,6 +284,15 @@ const processUpload = async <T>({
           req,
           storedMimeType,
         }).catch((err: unknown) => throwUploadPipelineError({ err, req }))
+
+  const uploadEdits =
+    shouldRebuild && retainedOriginal
+      ? withSavedCrop({
+          edits: resolvedEdits,
+          original: retainedOriginal,
+          transforms: pipelineDoc._transforms,
+        })
+      : resolvedEdits
 
   if (shouldRebuild && fileSourceData) {
     const { filename, url } = fileSourceData
@@ -427,6 +436,18 @@ const processUpload = async <T>({
       plan,
       stagesThatRun,
     } = await planStages({ mimeType: file.mimetype })
+
+    // A duplicate is made from the source's main file, which already has the claimed keys
+    // applied. The copy drops them so they are not applied twice. A focal point only guides sizes.
+    if (isDuplicating && pipelineDoc._transforms) {
+      const appliedKeys = [...claimsOfStagesThatRun.values()]
+        .flat()
+        .filter((key) => !isFocalPointKey(key))
+      const keptTransforms = Object.fromEntries(
+        Object.entries(pipelineDoc._transforms).filter(([key]) => !appliedKeys.includes(key)),
+      )
+      pipelineDoc._transforms = Object.keys(keptTransforms).length ? keptTransforms : null
+    }
 
     // A client upload can arrive with only a header probe or no contents (see
     // getFileContentRequirement.ts). Download it only when a stage needs its bytes, which

@@ -38,3 +38,6 @@ export const legacyMediaDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   'legacy-media',
 )
+
+/** The `flip` value the flip stage saw on each run, in order. */
+export const flipStageRuns: unknown[] = []
