@@ -30,7 +30,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
         payload.update({
           id: doc.id,
           autosave: true,
-          branch: 'halloween-updates',
+          branch: 'Halloween Updates',
           collection: slugDraftsSlug,
           data: { slug: 'legacy-published-page', title: 'Branch edit' },
           draft: true,
@@ -105,7 +105,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
       const updated = await payload.update({
         id: doc.id,
         autosave: true,
-        branch: 'halloween-updates',
+        branch: 'Halloween Updates',
         collection: slugDraftsSlug,
         data: { _status: 'draft', slug: 'published-page', title },
         draft: true,
@@ -137,7 +137,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
       payload,
     }) => {
       await payload.create({
-        branch: 'halloween-updates',
+        branch: 'Halloween Updates',
         collection: slugDraftsSlug,
         data: { [field]: 'taken', title: 'First document' },
         overrideAccess: true,
@@ -145,7 +145,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
 
       await expect(
         payload.create({
-          branch: 'halloween-updates',
+          branch: 'Halloween Updates',
           collection: slugDraftsSlug,
           data: { [field]: 'taken', title: 'Second document' },
           overrideAccess: true,
@@ -160,7 +160,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
     payload,
   }) => {
     const doc = await payload.create({
-      branch: 'halloween-updates',
+      branch: 'Halloween Updates',
       collection: slugDraftsSlug,
       data: { slug: 'branch-only-slug', title: 'English title' },
       draft: true,
@@ -170,7 +170,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
 
     await payload.update({
       id: doc.id,
-      branch: 'halloween-updates',
+      branch: 'Halloween Updates',
       collection: slugDraftsSlug,
       data: { title: 'Spanish title' },
       draft: true,
@@ -185,7 +185,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
       draft: true,
       locale: ['en', 'es'],
       overrideAccess: true,
-      req: { branch: 'halloween-updates' },
+      req: { branch: 'Halloween Updates' },
     })
 
     expect(result).toMatchObject({ errors: [], valid: true })
@@ -244,7 +244,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
 
     const updated = await payload.update({
       id: doc.id,
-      branch: 'halloween-updates',
+      branch: 'Halloween Updates',
       collection: slugDraftsSlug,
       data: { title: 'Branch title' },
       draft: true,

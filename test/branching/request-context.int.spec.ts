@@ -1,17 +1,13 @@
 import type { Payload } from 'payload'
 
 import { assertBranchReadable, createPayloadRequest, isolateBranchState } from 'payload'
-
 import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { branchChangesSlug, branchesSlug, postsSlug } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -52,11 +48,11 @@ test.suite(
           const existing = await payload.find({
             collection: branchesSlug,
             pagination: false,
-            where: { slug: { equals: slug } },
+            where: { name: { equals: slug } },
           })
 
           if (!existing.docs.length) {
-            await payload.create({ collection: branchesSlug, data: { name: slug, slug } })
+            await payload.create({ collection: branchesSlug, data: { name: slug } })
           }
         }
       })
@@ -180,13 +176,13 @@ test.suite(
         const existing = await payload.find({
           collection: branchesSlug,
           pagination: false,
-          where: { slug: { equals: 'two-branch-read' } },
+          where: { name: { equals: 'two-branch-read' } },
         })
 
         if (!existing.docs.length) {
           await payload.create({
             collection: branchesSlug,
-            data: { name: 'Two branch read', slug: 'two-branch-read' },
+            data: { name: 'two-branch-read' },
           })
         }
       })
@@ -240,13 +236,13 @@ test.suite(
             id: docID,
             branch: 'main',
             collection: postsSlug,
-            req: isolateBranchState({ req: req }),
+            req: isolateBranchState({ req }),
           }),
           payload.findByID({
             id: docID,
             branch: 'two-branch-read',
             collection: postsSlug,
-            req: isolateBranchState({ req: req }),
+            req: isolateBranchState({ req }),
           }),
         ])
 
@@ -265,7 +261,7 @@ test.suite(
           id: docID,
           branch: 'main',
           collection: postsSlug,
-          req: isolateBranchState({ req: req }),
+          req: isolateBranchState({ req }),
         })
 
         const stillOnBranch = await payload.findByID({ id: docID, collection: postsSlug, req })
@@ -315,7 +311,7 @@ test.suite(
 
         await assertBranchReadable({ req })
 
-        const isolatedReq = isolateBranchState({ req: req })
+        const isolatedReq = isolateBranchState({ req })
         isolatedReq.branch = 'unreadable-branch'
         isolatedReq.user = null
 

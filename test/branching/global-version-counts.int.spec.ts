@@ -4,7 +4,7 @@ import { expect } from 'vitest'
 import { test } from '../__helpers/int/vitest.js'
 import { homepageGlobalSlug } from './shared.js'
 
-const branch = 'halloween-updates'
+const branch = 'Halloween Updates'
 
 test.suite('Branching: global version counts', { config: './config.ts' }, () => {
   test('should scope global version counts to the selected branch', async ({ payload }) => {

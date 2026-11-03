@@ -372,8 +372,8 @@ export function DefaultEditView({
           path: `/collections/${collectionSlug}/${document?.id}${qs.stringify(
             {
               ...(locale ? { locale } : {}),
-              ...(collectionSlug === branchesCollectionSlug && document?.slug
-                ? { branch: document.slug }
+              ...(collectionSlug === branchesCollectionSlug && document?.name
+                ? { branch: document.name }
                 : {}),
             },
             { addQueryPrefix: true },

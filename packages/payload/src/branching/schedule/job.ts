@@ -8,7 +8,7 @@ import { mergeBranch } from '../merge.js'
 import { branchesCollectionSlug } from '../types.js'
 
 export type ScheduleMergeTaskInput = {
-  /** Branch slug. Stored rather than the document ID: the slug is what `_branch` holds. */
+  /** Branch name. Stored rather than the document ID: the name is what `_branch` holds. */
   branch: string
   /** Change IDs to apply, or empty to apply whatever is pending when the job fires. */
   changes?: string[]
@@ -111,7 +111,7 @@ export const getScheduleMergeTask = ({
         overrideAccess: true,
         pagination: false,
         req,
-        where: { slug: { equals: input.branch } },
+        where: { name: { equals: input.branch } },
       })
     ).docs[0]
 

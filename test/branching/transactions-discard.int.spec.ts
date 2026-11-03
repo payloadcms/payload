@@ -1,17 +1,13 @@
 import type { Payload } from 'payload'
 
 import { createPayloadRequest } from 'payload'
-
 import { expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -19,7 +15,6 @@ import {
   pagesSlug,
   postsSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -28,8 +23,8 @@ let restClient: NextRESTClient
 
 let token: string
 
-const createBranchRecord = ({ name, slug }: { name: string; slug: string }) =>
-  payload.create({ collection: branchesSlug, data: { name, slug } })
+const createBranchRecord = ({ name }: { name: string }) =>
+  payload.create({ collection: branchesSlug, data: { name } })
 
 test.suite(
   'Branching: transactions-discard',
@@ -55,7 +50,7 @@ test.suite(
      * happens to have created the request object.
      */
     test.describe('Transactional integrity', () => {
-      let branchSlug: string
+      let branchName: string
       let deleteOneSpy: ReturnType<typeof vi.spyOn> | undefined
 
       test.afterEach(async () => {
@@ -76,7 +71,7 @@ test.suite(
           const found = await payload.find({
             collection,
             pagination: false,
-            where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: branchSlug } },
+            where: { [collection === branchesSlug ? 'name' : 'branch']: { equals: branchName } },
           })
 
           for (const row of found.docs) {
@@ -86,9 +81,9 @@ test.suite(
       })
 
       test('should leave a caller-owned transaction open when discard fails', async () => {
-        branchSlug = 'caller-owned-discard'
+        branchName = 'caller-owned-discard'
 
-        await createBranchRecord({ name: 'Caller-owned discard', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const mainDoc = await payload.create({
           collection: postsSlug,
           data: { title: 'Caller-owned original' },
@@ -96,7 +91,7 @@ test.suite(
 
         await payload.update({
           id: mainDoc.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Caller-owned edited' },
         })
@@ -107,7 +102,7 @@ test.suite(
             collection: postsSlug,
             pagination: false,
             showHiddenFields: true,
-            where: { _branch: { equals: branchSlug } },
+            where: { _branch: { equals: branchName } },
           })
         ).docs[0]!
         const req = await createPayloadRequest({ branch: false, payload })
@@ -126,7 +121,7 @@ test.suite(
 
         try {
           await expect(
-            payload.branches.discard({ branch: branchSlug, overrideAccess: true, req }),
+            payload.branches.discard({ branch: branchName, overrideAccess: true, req }),
           ).rejects.toThrow('Simulated caller-owned discard failure')
 
           expect(rollbackTransactionSpy).not.toHaveBeenCalled()

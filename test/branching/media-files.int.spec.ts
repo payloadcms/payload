@@ -1,13 +1,9 @@
 import { readFile, rm } from 'node:fs/promises'
-
 import path from 'node:path'
-
 import { fileURLToPath } from 'node:url'
-
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { branchesSlug, versionedMediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -25,13 +21,13 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
     payload,
     restClient,
   }) => {
-    const branchSlug = 'restore-media-on-branch'
+    const branchName = 'restore-media-on-branch'
     const originalFileData = await readFile(path.resolve(dirname, '../uploads/image.png'))
     const replacementFileData = await readFile(path.resolve(dirname, '../uploads/image.jpg'))
 
     await payload.create({
       collection: branchesSlug,
-      data: { name: 'Restore media on branch', slug: branchSlug },
+      data: { name: branchName },
     })
 
     const original = await payload.create({
@@ -48,7 +44,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
 
     await payload.update({
       id: original.id,
-      branch: branchSlug,
+      branch: branchName,
       collection: versionedMediaSlug,
       data: { alt: 'Branch metadata edit' },
       overrideAccess: true,
@@ -56,7 +52,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
 
     await payload.update({
       id: original.id,
-      branch: branchSlug,
+      branch: branchName,
       collection: versionedMediaSlug,
       data: { alt: 'Branch replacement banner' },
       file: {
@@ -75,7 +71,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
     })
     const branchVersionToRestore = allVersions.docs.find(
       (version) =>
-        version._branch === branchSlug &&
+        version._branch === branchName &&
         String(version._branchParent) === String(original.id) &&
         version.version.alt === 'Branch metadata edit',
     )
@@ -83,7 +79,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
     expect(branchVersionToRestore).toBeDefined()
 
     const response = await restClient.POST(
-      `/${versionedMediaSlug}/versions/${branchVersionToRestore!.id}?branch=${branchSlug}`,
+      `/${versionedMediaSlug}/versions/${branchVersionToRestore!.id}?branch=${branchName}`,
     )
 
     expect(response.status).toBe(200)
@@ -91,7 +87,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
     const [restoredOnBranch, unchangedOnMain] = await Promise.all([
       payload.findByID({
         id: original.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: versionedMediaSlug,
         overrideAccess: true,
       }),
@@ -104,7 +100,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
     ])
 
     expect(restoredOnBranch.alt).toBe('Branch metadata edit')
-    expect(restoredOnBranch.filename).toContain(branchSlug)
+    expect(restoredOnBranch.filename).toContain(branchName)
     expect(restoredOnBranch.filename).not.toBe(unchangedOnMain.filename)
     await expect(
       readFile(path.resolve(versionedMediaDirectory, restoredOnBranch.filename!)),
@@ -119,12 +115,12 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
   test('should retain branch ownership when restoring a raw branch version', async ({
     payload,
   }) => {
-    const branchSlug = 'restore-raw-branch-version'
+    const branchName = 'restore-raw-branch-version'
     const originalFileData = await readFile(path.resolve(dirname, '../uploads/image.png'))
 
     await payload.create({
       collection: branchesSlug,
-      data: { name: 'Restore raw branch version', slug: branchSlug },
+      data: { name: branchName },
     })
 
     const original = await payload.create({
@@ -141,7 +137,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
 
     await payload.update({
       id: original.id,
-      branch: branchSlug,
+      branch: branchName,
       collection: versionedMediaSlug,
       data: { alt: 'First branch version' },
       overrideAccess: true,
@@ -149,7 +145,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
 
     await payload.update({
       id: original.id,
-      branch: branchSlug,
+      branch: branchName,
       collection: versionedMediaSlug,
       data: { alt: 'Current branch version' },
       overrideAccess: true,
@@ -162,7 +158,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
     })
     const branchVersionToRestore = rawVersions.docs.find(
       (version) =>
-        version._branch === branchSlug &&
+        version._branch === branchName &&
         String(version._branchParent) === String(original.id) &&
         version.version.alt === 'First branch version',
     )
@@ -184,13 +180,13 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
       showHiddenFields: true,
     })
     const mainDocuments = rawDocuments.docs.filter((document) => document._branch === 'main')
-    const branchDocument = rawDocuments.docs.find((document) => document._branch === branchSlug)
+    const branchDocument = rawDocuments.docs.find((document) => document._branch === branchName)
 
     expect(mainDocuments).toHaveLength(1)
     expect(mainDocuments[0]!.id).toBe(original.id)
     expect(mainDocuments[0]!.alt).toBe('Original banner')
     expect(branchDocument).toMatchObject({
-      _branch: branchSlug,
+      _branch: branchName,
       _branchDocID: original.id,
       alt: 'First branch version',
     })
@@ -199,16 +195,16 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
   test('should retain a branch-created document identity when restoring its version', async ({
     payload,
   }) => {
-    const branchSlug = 'restore-branch-created-version'
+    const branchName = 'restore-branch-created-version'
     const originalFileData = await readFile(path.resolve(dirname, '../uploads/image.png'))
 
     await payload.create({
       collection: branchesSlug,
-      data: { name: 'Restore branch-created version', slug: branchSlug },
+      data: { name: branchName },
     })
 
     const branchCreated = await payload.create({
-      branch: branchSlug,
+      branch: branchName,
       collection: versionedMediaSlug,
       data: { alt: 'Created on branch' },
       file: {
@@ -222,7 +218,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
 
     await payload.update({
       id: branchCreated.id,
-      branch: branchSlug,
+      branch: branchName,
       collection: versionedMediaSlug,
       data: { alt: 'Updated on branch' },
       overrideAccess: true,
@@ -234,7 +230,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
       pagination: false,
     })
     const branchVersionToRestore = rawVersions.docs.find(
-      (version) => version._branch === branchSlug && version.version.alt === 'Created on branch',
+      (version) => version._branch === branchName && version.version.alt === 'Created on branch',
     )
 
     expect(branchVersionToRestore).toBeDefined()
@@ -265,7 +261,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
     expect(rawDocuments.docs).toHaveLength(1)
     expect(rawDocuments.docs[0]).toMatchObject({
       id: branchCreated.id,
-      _branch: branchSlug,
+      _branch: branchName,
       _branchDocID: null,
       alt: 'Created on branch',
     })

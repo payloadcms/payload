@@ -35,7 +35,7 @@ const createBranch = async ({
     overrideAccess: true,
   })
 
-  return branch.slug
+  return branch.name
 }
 
 const executeGraphQL = async ({

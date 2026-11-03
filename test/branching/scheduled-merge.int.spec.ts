@@ -1,21 +1,16 @@
+/* eslint-disable payload/no-relative-monorepo-imports -- Integration tests exercise internal branch helpers. */
 import type { Payload, PayloadRequest } from 'payload'
 
 import { createPayloadRequest } from 'payload'
-
 import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { scheduleMergeHandler } from '../../packages/ui/src/utilities/scheduleMergeHandler.js'
-
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import { branchChangesSlug, branchesSlug, branchMergesSlug, postsSlug } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -48,11 +43,8 @@ test.suite(
      */
     test.describe('Scheduled merge', () => {
       let mainDocID: number | string
-      // Captured rather than looked up by slug: `slug` de-duplicates against existing
-      // branches, so a leftover row would silently rename this one and every assertion
-      // would then be reading a different branch.
       let branchID: number | string
-      let branchSlug: string
+      let branchName: string
 
       /**
        * Queues a scheduled merge and fires it immediately.
@@ -66,7 +58,7 @@ test.suite(
         payload.jobs.runByID({
           id: (
             await payload.jobs.queue({
-              input: { branch: branchSlug, ...input },
+              input: { branch: branchName, ...input },
               overrideAccess: true,
               task: 'scheduleMerge',
               waitUntil: new Date(Date.now() - 60_000),
@@ -92,7 +84,7 @@ test.suite(
           payload.find({
             collection: branchChangesSlug,
             pagination: false,
-            where: { branch: { equals: branchSlug } },
+            where: { branch: { equals: branchName } },
           }),
           payload.find({
             collection: 'payload-jobs',
@@ -133,11 +125,11 @@ test.suite(
       test.beforeEach(async () => {
         const branchDoc = await payload.create({
           collection: branchesSlug,
-          data: { name: 'Scheduled', slug: 'scheduled' },
+          data: { name: 'scheduled' },
         })
 
         branchID = branchDoc.id
-        branchSlug = branchDoc.slug
+        branchName = branchDoc.name
 
         const doc = await payload.create({
           collection: postsSlug,
@@ -148,7 +140,7 @@ test.suite(
 
         await payload.update({
           id: mainDocID,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'edited on branch' },
         })
@@ -167,7 +159,7 @@ test.suite(
           const found = await payload.find({
             collection,
             pagination: false,
-            where: { branch: { equals: branchSlug } },
+            where: { branch: { equals: branchName } },
           })
 
           for (const row of found.docs) {
@@ -186,7 +178,7 @@ test.suite(
         const privateBranches = await payload.find({
           collection: branchesSlug,
           pagination: false,
-          where: { slug: { equals: 'private-visibility' } },
+          where: { name: { equals: 'private-visibility' } },
         })
 
         for (const privateBranch of privateBranches.docs) {
@@ -244,7 +236,7 @@ test.suite(
           expect((await readBranch()).mergeProgress).toBe('stale')
 
           const job = await payload.jobs.queue({
-            input: { branch: branchSlug, user: { relationTo: 'users', value: user.id } },
+            input: { branch: branchName, user: { relationTo: 'users', value: user.id } },
             overrideAccess: true,
             task: 'scheduleMerge',
             waitUntil: new Date(Date.now() - 60_000),
@@ -278,7 +270,7 @@ test.suite(
               payload.find({
                 collection: branchChangesSlug,
                 pagination: false,
-                where: { branch: { equals: branchSlug } },
+                where: { branch: { equals: branchName } },
               }),
               payload.findByID({ id: job.id, collection: 'payload-jobs' }),
             ])
@@ -324,7 +316,7 @@ test.suite(
 
         await expect(
           payload.branches.merge({
-            branch: branchSlug,
+            branch: branchName,
             closeBranch: true,
             overrideAccess: false,
             user: { ...user, collection: 'users' },
@@ -355,7 +347,7 @@ test.suite(
         const jobs = await payload.find({
           collection: 'payload-jobs',
           pagination: false,
-          where: { 'input.branch': { equals: branchSlug } },
+          where: { 'input.branch': { equals: branchName } },
         })
 
         expect(result).toHaveProperty('error')
@@ -365,7 +357,7 @@ test.suite(
       test('should deny cancellation when updateBranch access fails', async () => {
         const user = await createLifecycleRestrictedUser()
         const job = await payload.jobs.queue({
-          input: { branch: branchSlug },
+          input: { branch: branchName },
           overrideAccess: true,
           task: 'scheduleMerge',
           waitUntil: new Date(Date.now() + 60_000),
@@ -400,7 +392,7 @@ test.suite(
         const jobs = await payload.find({
           collection: 'payload-jobs',
           pagination: false,
-          where: { 'input.branch': { equals: branchSlug } },
+          where: { 'input.branch': { equals: branchName } },
         })
 
         expect(result).toHaveProperty('error')
@@ -410,7 +402,7 @@ test.suite(
       test('should deny cancellation when mergeBranch access fails', async () => {
         const user = await asDevUser()
         const job = await payload.jobs.queue({
-          input: { branch: branchSlug },
+          input: { branch: branchName },
           overrideAccess: true,
           task: 'scheduleMerge',
           waitUntil: new Date(Date.now() + 60_000),
@@ -442,7 +434,7 @@ test.suite(
         const jobs = await payload.find({
           collection: 'payload-jobs',
           pagination: false,
-          where: { 'input.branch': { equals: branchSlug } },
+          where: { 'input.branch': { equals: branchName } },
         })
 
         expect(result).not.toHaveProperty('error')
@@ -467,7 +459,7 @@ test.suite(
         // production, so the same fallback would turn a deleted account into an
         // unchecked one — this fails instead.
         const job = await payload.jobs.queue({
-          input: { branch: branchSlug, user: { relationTo: 'users', value: 999999 } },
+          input: { branch: branchName, user: { relationTo: 'users', value: 999999 } },
           overrideAccess: true,
           task: 'scheduleMerge',
           waitUntil: new Date(Date.now() - 60_000),
@@ -490,7 +482,7 @@ test.suite(
       test('should not cancel a scheduled merge for an inaccessible branch', async () => {
         const privateBranch = await payload.create({
           collection: branchesSlug,
-          data: { name: 'Private visibility', slug: 'private-visibility' },
+          data: { name: 'private-visibility' },
         })
         const restrictedUser = await payload.create({
           collection: 'users',
@@ -498,7 +490,7 @@ test.suite(
         })
         const job = await payload.jobs.queue({
           input: {
-            branch: privateBranch.slug,
+            branch: privateBranch.name,
             user: { relationTo: 'users', value: restrictedUser.id },
           },
           overrideAccess: true,
@@ -546,7 +538,7 @@ test.suite(
         const changes = await payload.find({
           collection: branchChangesSlug,
           pagination: false,
-          where: { branch: { equals: branchSlug } },
+          where: { branch: { equals: branchName } },
         })
 
         const realChangeID = String(changes.docs[0]!.id)

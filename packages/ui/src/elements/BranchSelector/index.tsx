@@ -53,25 +53,23 @@ export const BranchSelector: React.FC<{ className?: string }> = ({ className }) 
   // so the switcher names it — and pinning it at the top is also the way out.
   const activeOption: BranchOption =
     activeBranch === MAIN_BRANCH
-      ? { name: MAIN_BRANCH, slug: MAIN_BRANCH }
-      : (branches.find(({ slug }) => slug === activeBranch) ?? {
+      ? { name: MAIN_BRANCH }
+      : (branches.find(({ name }) => name === activeBranch) ?? {
           name: activeBranch,
-          slug: activeBranch,
         })
 
-  const { entries, slugByEntry } = useMemo(() => {
+  const { entries, nameByEntry } = useMemo(() => {
     // Everything except where you already are: the active branch is pinned above
     // the search, so listing it again would offer switching to it.
-    const options: BranchOption[] = [{ name: MAIN_BRANCH, slug: MAIN_BRANCH }, ...branches].filter(
-      ({ slug }) => slug !== activeBranch,
+    const options: BranchOption[] = [{ name: MAIN_BRANCH }, ...branches].filter(
+      ({ name }) => name !== activeBranch,
     )
 
-    const slugByEntry = new Map<ComboboxEntry, string>()
+    const nameByEntry = new Map<ComboboxEntry, string>()
 
     const entries = options.map((option) => {
-      const hasDistinctName = option.name !== option.slug
-
       const entry: ComboboxEntry = {
+        name: option.name,
         Component: (
           <span className={`${baseClass}__option`}>
             <span className={`${baseClass}__option-labels`}>
@@ -91,17 +89,14 @@ export const BranchSelector: React.FC<{ className?: string }> = ({ className }) 
             </span>
           </span>
         ),
-        // The slug is not rendered — editors name branches, the slug is derived —
-        // but it stays searchable, since it is what URLs and the API expose.
-        name: hasDistinctName ? `${option.name} ${option.slug}` : option.name,
       }
 
-      slugByEntry.set(entry, option.slug)
+      nameByEntry.set(entry, option.name)
 
       return entry
     })
 
-    return { entries, slugByEntry }
+    return { entries, nameByEntry }
   }, [activeBranch, branches, t])
 
   if (!showSelector) {
@@ -109,7 +104,7 @@ export const BranchSelector: React.FC<{ className?: string }> = ({ className }) 
   }
 
   const activeLabel =
-    branches.find(({ slug }) => slug === activeBranch)?.name ?? activeBranch ?? MAIN_BRANCH
+    branches.find(({ name }) => name === activeBranch)?.name ?? activeBranch ?? MAIN_BRANCH
 
   return (
     <Fragment>
@@ -180,7 +175,6 @@ export const BranchSelector: React.FC<{ className?: string }> = ({ className }) 
                   openMerge({
                     branchID: activeOption.id,
                     branchName: activeOption.name,
-                    branchSlug: activeOption.slug,
                     reviewURL: formatAdminURL({
                       adminRoute,
                       path: `/collections/${branchesCollectionSlug}/${activeOption.id}`,
@@ -200,10 +194,10 @@ export const BranchSelector: React.FC<{ className?: string }> = ({ className }) 
         // the popup is then only its two actions.
         minEntriesForSearch={entries.length ? 0 : 1}
         onSelect={(entry) => {
-          const slug = slugByEntry.get(entry)
+          const name = nameByEntry.get(entry)
 
-          if (slug) {
-            setBranch(slug)
+          if (name) {
+            setBranch(name)
           }
         }}
         portalClassName={`${baseClass}__popup`}

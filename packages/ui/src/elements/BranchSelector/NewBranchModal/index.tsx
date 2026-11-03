@@ -22,10 +22,6 @@ const baseClass = 'new-branch-modal'
 
 /**
  * Creates a branch without leaving the current view.
- *
- * The slug is derived from the name server-side rather than asked for, so the
- * only thing required here is a name — which is why this is a modal rather than
- * a trip to the collection's create view.
  */
 export const NewBranchModal: React.FC = () => {
   const { t } = useTranslation()
@@ -72,7 +68,7 @@ export const NewBranchModal: React.FC = () => {
       )
 
       const json = (await response.json()) as {
-        doc?: { slug?: string }
+        doc?: { name?: string }
         errors?: {
           data?: { errors?: { message: string; path: string }[] }
           message: string
@@ -82,12 +78,9 @@ export const NewBranchModal: React.FC = () => {
       if (!response.ok) {
         const fieldErrors = json?.errors?.flatMap(({ data }) => data?.errors ?? []) ?? []
 
-        // Field errors are reported against `slug`, which is derived rather than
-        // typed — naming it would point the editor at a field they never saw. The
-        // name is what they control, so that is what the message names.
         const messages = fieldErrors.length
           ? fieldErrors.map(({ message, path }) =>
-              path === 'slug' ? `${t('branching:branchName')}: ${message}` : message,
+              path === 'name' ? `${t('branching:branchName')}: ${message}` : message,
             )
           : (json?.errors?.map(({ message }) => message) ?? [])
 
@@ -105,8 +98,8 @@ export const NewBranchModal: React.FC = () => {
 
       // Creating a branch is a declaration of intent to work on it, so the
       // switch follows the save.
-      if (json?.doc?.slug) {
-        setBranch(json.doc.slug)
+      if (json?.doc?.name) {
+        setBranch(json.doc.name)
       }
     } catch (_err) {
       toast.error(t('error:unknown'))
@@ -127,6 +120,7 @@ export const NewBranchModal: React.FC = () => {
           }}
         >
           <TextInput
+            id="new-branch-name"
             label={t('branching:branchName')}
             onChange={(e) => setName(e.target.value)}
             path="name"
@@ -134,6 +128,7 @@ export const NewBranchModal: React.FC = () => {
             value={name}
           />
           <TextInput
+            id="new-branch-description"
             label={t('branching:branchDescription')}
             onChange={(e) => setDescription(e.target.value)}
             path="description"

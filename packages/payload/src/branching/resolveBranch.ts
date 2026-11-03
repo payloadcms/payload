@@ -322,8 +322,8 @@ export const loadBranchRow = async ({
     overrideAccess: true,
     pagination: false,
     req,
-    select: { slug: true, status: true },
-    where: { slug: { equals: branch } },
+    select: { name: true, status: true },
+    where: { name: { equals: branch } },
   })
 
   const row = (docs[0] as Record<string, unknown> | undefined) ?? null

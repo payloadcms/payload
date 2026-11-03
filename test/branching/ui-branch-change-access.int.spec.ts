@@ -9,7 +9,7 @@ import { test } from '../__helpers/int/vitest.js'
 import { hookSpy } from './hookSpy.js'
 import { headerGlobalSlug, postsSlug } from './shared.js'
 
-const branch = 'halloween-updates'
+const branch = 'Halloween Updates'
 
 test.suite('Branching: changed-document read access', { config: './config.ts' }, () => {
   test.afterEach(() => {

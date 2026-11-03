@@ -129,7 +129,7 @@ const discardBranchChangesInternal = async (
     overrideAccess,
     pagination: false,
     req,
-    where: { slug: { equals: branch } },
+    where: { name: { equals: branch } },
   })
 
   if (!branchDocs.docs[0]) {
@@ -414,7 +414,7 @@ const discardBranchChangesInternal = async (
 
   // The manifest this request memoized still lists the discarded documents as
   // shadowed, which would hide main's copies from any later read on this request.
-  resetBranchState({ req: req })
+  resetBranchState({ req })
 
   return result
 }

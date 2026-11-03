@@ -53,9 +53,9 @@ const formatWhen = (value: string) =>
  */
 export const ScheduledMerges: React.FC<{
   branchID: number | string
-  branchSlug: string
+  branchName: string
   schedules: ScheduledMerge[]
-}> = ({ branchID, branchSlug, schedules }) => {
+}> = ({ branchID, branchName, schedules }) => {
   const { t } = useTranslation()
   const { closeModal, openModal } = useModal()
   const { serverFunction } = useServerFunctions()
@@ -133,7 +133,7 @@ export const ScheduledMerges: React.FC<{
             {schedule.changes.length > 0 ? (
               // Read-only: what merges is decided, and the checkboxes on the review
               // list below are for a different, immediate decision.
-              <ChangedDocuments branch={branchSlug} changes={schedule.changes} selectable={false} />
+              <ChangedDocuments branch={branchName} changes={schedule.changes} selectable={false} />
             ) : (
               // A selection whose changes were all discarded since. The job will still
               // fire and find nothing, which is harmless but worth saying.

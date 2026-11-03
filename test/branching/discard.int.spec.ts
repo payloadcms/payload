@@ -1,17 +1,13 @@
 import type { Payload } from 'payload'
 
 import { createPayloadRequest } from 'payload'
-
 import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -19,7 +15,6 @@ import {
   postsSlug,
   restrictedSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -69,7 +64,7 @@ test.suite('Branching: discard', { config: './config.ts', resetBetweenTests: fal
     test.beforeEach(async () => {
       await payload.create({
         collection: branchesSlug,
-        data: { name: 'Discard work', slug: 'discardwork' },
+        data: { name: 'discardwork' },
       })
 
       const doc = await payload.create({
@@ -108,7 +103,7 @@ test.suite('Branching: discard', { config: './config.ts', resetBetweenTests: fal
         const found = await payload.find({
           collection,
           pagination: false,
-          where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: 'discardwork' } },
+          where: { [collection === branchesSlug ? 'name' : 'branch']: { equals: 'discardwork' } },
         })
 
         for (const row of found.docs) {
@@ -143,7 +138,7 @@ test.suite('Branching: discard', { config: './config.ts', resetBetweenTests: fal
         await payload.find({
           collection: branchesSlug,
           pagination: false,
-          where: { slug: { equals: 'discardwork' } },
+          where: { name: { equals: 'discardwork' } },
         })
       ).docs[0]
 
@@ -273,7 +268,7 @@ test.suite('Branching: discard', { config: './config.ts', resetBetweenTests: fal
     test('should deny a discard when discardBranch returns a non-matching query', async () => {
       const user = await asDevUser()
 
-      hookSpy.discardBranchAccess = () => ({ slug: { equals: 'another-branch' } })
+      hookSpy.discardBranchAccess = () => ({ name: { equals: 'another-branch' } })
 
       await expect(
         payload.branches.discard({
@@ -287,7 +282,7 @@ test.suite('Branching: discard', { config: './config.ts', resetBetweenTests: fal
     })
 
     test('should allow a discard when discardBranch returns a matching query', async () => {
-      hookSpy.discardBranchAccess = () => ({ slug: { equals: 'discardwork' } })
+      hookSpy.discardBranchAccess = () => ({ name: { equals: 'discardwork' } })
 
       const result = await payload.branches.discard({
         branch: 'discardwork',

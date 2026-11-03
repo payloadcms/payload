@@ -5,15 +5,10 @@ import { expect, vi } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { databaseAdapterSupportsTransactions } from '../__helpers/shared/databaseAdapterCapabilities.js'
-
 import { mongooseList } from '../__helpers/shared/isMongoose.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -21,7 +16,6 @@ import {
   pagesSlug,
   postsSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -62,7 +56,7 @@ test.suite('Branching: transactions', { config: './config.ts', resetBetweenTests
    * happens to have created the request object.
    */
   test.describe('Transactional integrity', () => {
-    let branchSlug: string
+    let branchName: string
     let deleteOneSpy: ReturnType<typeof vi.spyOn> | undefined
 
     test.afterEach(async () => {
@@ -83,7 +77,7 @@ test.suite('Branching: transactions', { config: './config.ts', resetBetweenTests
         const found = await payload.find({
           collection,
           pagination: false,
-          where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: branchSlug } },
+          where: { [collection === branchesSlug ? 'name' : 'branch']: { equals: branchName } },
         })
 
         for (const row of found.docs) {
@@ -96,11 +90,11 @@ test.suite('Branching: transactions', { config: './config.ts', resetBetweenTests
       'should roll back every change in a non-streaming merge when a later change fails',
       { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
       async () => {
-        branchSlug = 'txnmerge'
+        branchName = 'txnmerge'
 
         const branchDoc = await payload.create({
           collection: branchesSlug,
-          data: { name: 'Txn merge', slug: branchSlug },
+          data: { name: branchName },
         })
 
         const a = await payload.create({ collection: postsSlug, data: { title: 'A original' } })
@@ -180,11 +174,11 @@ test.suite('Branching: transactions', { config: './config.ts', resetBetweenTests
       'should roll back every change in a discard when a later change fails',
       { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
       async () => {
-        branchSlug = 'txndiscard'
+        branchName = 'txndiscard'
 
         const branchDoc = await payload.create({
           collection: branchesSlug,
-          data: { name: 'Txn discard', slug: branchSlug },
+          data: { name: branchName },
         })
 
         const a = await payload.create({ collection: postsSlug, data: { title: 'A original' } })
@@ -193,19 +187,19 @@ test.suite('Branching: transactions', { config: './config.ts', resetBetweenTests
 
         await payload.update({
           id: a.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'A edited' },
         })
         await payload.update({
           id: b.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'B edited' },
         })
         await payload.update({
           id: c.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'C edited' },
         })
@@ -215,7 +209,7 @@ test.suite('Branching: transactions', { config: './config.ts', resetBetweenTests
           collection: postsSlug,
           pagination: false,
           showHiddenFields: true,
-          where: { _branch: { equals: branchSlug } },
+          where: { _branch: { equals: branchName } },
         })
 
         const bShadow = shadowRows.docs.find((row) => String(row._branchDocID) === String(b.id))!
@@ -241,13 +235,13 @@ test.suite('Branching: transactions', { config: './config.ts', resetBetweenTests
         // batch is one transaction, so that drop must be undone too.
         const onBranchA = await payload.findByID({
           id: a.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
         })
 
         expect(onBranchA.title).toBe('A edited')
 
-        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const remainingChanges = await findBranchChanges({ branch: branchName })
 
         expect(remainingChanges.docs).toHaveLength(3)
       },

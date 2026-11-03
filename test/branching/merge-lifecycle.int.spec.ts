@@ -1,19 +1,15 @@
+/* eslint-disable payload/no-relative-monorepo-imports -- Integration tests exercise internal branch helpers. */
 import type { Payload } from 'payload'
 
 import { createPayloadRequest } from 'payload'
-
 import { expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { readCollectionMergeSnapshot } from '../../packages/payload/src/branching/readMergeSnapshot.js'
-
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -21,7 +17,6 @@ import {
   pagesSlug,
   postsSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -59,14 +54,14 @@ test.suite(
           await payload.find({
             collection: branchesSlug,
             pagination: false,
-            where: { slug: { equals: slug } },
+            where: { name: { equals: slug } },
           })
         ).docs[0]
 
       test.beforeEach(async () => {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Life cycle', slug: 'lifecycle' },
+          data: { name: 'lifecycle' },
         })
 
         const doc = await payload.create({
@@ -109,7 +104,7 @@ test.suite(
           const found = await payload.find({
             collection,
             pagination: false,
-            where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: 'lifecycle' } },
+            where: { [collection === branchesSlug ? 'name' : 'branch']: { equals: 'lifecycle' } },
           })
 
           for (const row of found.docs) {
