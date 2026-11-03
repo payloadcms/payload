@@ -18,7 +18,11 @@ import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { downloadFileToBuffer } from './downloadFileToBuffer.js'
 import { generateImageSizeFilename } from './generateImageSizeFilename.js'
 import { getFileByPath } from './getFileByPath.js'
-import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
+import {
+  getFileExtension,
+  getMimeTypeEssence,
+  getSanitizedUploadFilename,
+} from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName, incrementName } from './getSafeFilename.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
@@ -285,7 +289,8 @@ export const generateFileData = async <T>({
     detectedFileType &&
     (isProcessableImage(file.mimetype) ||
       isProcessableImage(detectedFileType.mime) ||
-      (file.mimetype.startsWith('video/') && detectedFileType.mime.startsWith('video/')))
+      (getMimeTypeEssence(file.mimetype).startsWith('video/') &&
+        getMimeTypeEssence(detectedFileType.mime).startsWith('video/')))
 
   if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
     file = { ...file, mimetype: detectedFileType.mime }
