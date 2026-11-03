@@ -28,11 +28,11 @@ on:
         required: false
         default: false
 
-# Only runs from main can change PRs, and they share one queue, so two of them never push to the
-# PR branches at the same time. Runs from other branches use their own queue, so they cannot
-# replace a pending run from main.
+# Real runs share one queue, so two of them never push to the PR branches at the same time. A
+# group keeps only its newest pending run, so each dry run gets its own group and cannot replace a
+# pending real run. The real-run test matches `is-default-inputs` below.
 concurrency:
-  group: audit-dependencies-${{ github.ref }}
+  group: ${{ github.ref == 'refs/heads/main' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'moderate') == 'moderate' && 'audit-dependencies-real' || format('audit-dependencies-dry-run-{0}', github.run_id) }}
   cancel-in-progress: false
 
 jobs:
