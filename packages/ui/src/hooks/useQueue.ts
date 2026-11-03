@@ -7,10 +7,6 @@ export type TaskContext = {
    * Scheduling another task alone does not invalidate this context.
    */
   isCurrent: () => boolean
-  /**
-   * Returns `true` if the queue has been reset since this task started.
-   */
-  isQueueReset: () => boolean
 }
 
 /** Runs when this task reaches the active position in the queue. */
@@ -46,11 +42,8 @@ const createQueue = (): UseQueueResult => {
 
     const resetCountAtStart = resetCount
 
-    const isQueueReset = () => resetCount !== resetCountAtStart
-
     const context: TaskContext = {
-      isCurrent: () => !isQueueReset(),
-      isQueueReset,
+      isCurrent: () => resetCount === resetCountAtStart,
     }
 
     const taskPromise = (async () => entry.task(context))()

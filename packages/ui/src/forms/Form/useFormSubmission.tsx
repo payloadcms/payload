@@ -238,14 +238,6 @@ export const useFormSubmission = ({
         }
       }
 
-      // Only put back what this submission took: an autosave must not release a queued save's disable.
-      const releaseForm = () => {
-        if (disableFormWhileProcessing) {
-          setIsProcessing(false)
-          setIsDisabled(false)
-        }
-      }
-
       try {
         if (options?.submissionType === 'autosave') {
           setIsBackgroundProcessing(true)
@@ -293,7 +285,6 @@ export const useFormSubmission = ({
           setIsValid(isValid)
 
           if (!isValid) {
-            releaseForm()
             setIsSubmitted(true)
             return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
           }
@@ -313,7 +304,6 @@ export const useFormSubmission = ({
         // If not valid, prevent submission
         if (!isValid) {
           errorToast(t('error:correctInvalidFields'))
-          releaseForm()
           setIsSubmitted(true)
           return
         }
@@ -338,7 +328,6 @@ export const useFormSubmission = ({
         if (!hasFormSubmitAction) {
           // No action provided, so we should return. An example where this happens are lexical link drawers. Upon submitting the drawer, we
           // want to close it without submitting the form. Stuff like validation would be handled by lexical before this, through beforeSubmit
-          releaseForm()
           setIsSubmitted(true)
           return
         }
@@ -382,10 +371,6 @@ export const useFormSubmission = ({
             preservePromiseToast = true
 
             await handleResponse(res, successToast, errorToast)
-
-            if (requestContext.isCurrent() && disableFormWhileProcessing) {
-              setIsProcessing(false)
-            }
 
             return
           }
@@ -440,20 +425,12 @@ export const useFormSubmission = ({
 
             setIsSubmitted(false)
 
-            if (disableFormWhileProcessing) {
-              setIsProcessing(false)
-            }
-
             if (redirect) {
               void startRouteTransition(() => router.push(redirect))
             } else if (!disableToast) {
               successToast(json.message || t('general:submissionSuccessful'))
             }
           } else {
-            if (disableFormWhileProcessing) {
-              setIsProcessing(false)
-            }
-
             setIsSubmitted(true)
 
             // When there was an error submitting a draft,
@@ -545,7 +522,6 @@ export const useFormSubmission = ({
           console.error('Error submitting form', err) // eslint-disable-line no-console
 
           if (isCurrentRequest) {
-            releaseForm()
             setIsSubmitted(true)
           }
 
@@ -553,6 +529,7 @@ export const useFormSubmission = ({
         }
       } finally {
         if (requestContext.isCurrent()) {
+          // Only put back what this submission took: an autosave must not release a queued save's disable.
           if (disableFormWhileProcessing) {
             setIsProcessing(false)
             setIsDisabled(isDisabledFromPropsRef.current || false)

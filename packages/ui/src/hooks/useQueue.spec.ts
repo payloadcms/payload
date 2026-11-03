@@ -155,12 +155,10 @@ describe('useQueue', () => {
   it('should supersede pending work on reset and invalidate the active context', async () => {
     const active = deferred()
     let isCurrent: (() => boolean) | undefined
-    let isQueueReset: (() => boolean) | undefined
     const queue = renderQueue()
     const running = queue.scheduleTask({
       task: async (context) => {
         isCurrent = context.isCurrent
-        isQueueReset = context.isQueueReset
         await active.promise
       },
     })
@@ -170,7 +168,6 @@ describe('useQueue', () => {
 
     await expect(pending).resolves.toEqual({ status: 'superseded' })
     expect(isCurrent?.()).toBe(false)
-    expect(isQueueReset?.()).toBe(true)
     active.resolve()
     await running
   })
