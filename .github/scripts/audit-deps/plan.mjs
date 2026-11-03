@@ -7,8 +7,8 @@ import { buildBumps, buildPrs, listNoFix } from './bumps.mjs'
  * @property {import('./bumps.mjs').Bump[]} bumps
  * @property {import('./bumps.mjs').PlannedPr[]} prs every PR names at least one bump in `bumps`
  * @property {import('./bumps.mjs').NoFix[]} noFix
- * @property {Record<string, string[]>} originDirs bump ID to the `packages/` folder names whose
- *   dependencies bring in its advisories
+ * @property {Record<string, string[]>} originDirs bump ID to the `packages/` folder names that
+ *   declare its dependency and get its advisories through it
  */
 
 /**
@@ -69,10 +69,17 @@ export function bumpsOfPr({ plan, pr }) {
   })
 }
 
+// An advisory can reach different origin packages through different dependencies, so each bump
+// takes only the origin packages that declare its own dependency.
 function originDirsFor({ bump, report }) {
   const dirs = report.findings
     .filter((finding) => bump.advisories.includes(finding.advisory))
-    .flatMap((finding) => finding.originPackages ?? [])
+    .flatMap((finding) => {
+      const origins = new Set(finding.originPackages ?? [])
+      return finding.bumps
+        .filter((entry) => entry.dependency === bump.dependency)
+        .flatMap((entry) => (entry.workspacePackages ?? []).filter((dir) => origins.has(dir)))
+    })
 
   return [...new Set(dirs)].sort()
 }

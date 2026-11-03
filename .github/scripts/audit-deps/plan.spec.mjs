@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import { buildPlan, bumpsOfPr, findPr, readPlan } from './plan.mjs'
 
-function fixEntry({ dependency, currentSpec, version }) {
+function fixEntry({ dependency, currentSpec, version, workspacePackages }) {
   const toMajor = Number.parseInt(version, 10)
   const fromMajor = Number.parseInt(currentSpec.replace(/^\D+/, ''), 10)
 
@@ -13,7 +13,7 @@ function fixEntry({ dependency, currentSpec, version }) {
     currentSpec,
     dependency,
     fix: { crossesMajor: toMajor > fromMajor, fromMajor, status: 'fix', toMajor, version },
-    workspacePackages: ['pkg'],
+    workspacePackages,
   }
 }
 
@@ -25,17 +25,38 @@ const report = {
   findings: [
     finding({
       advisory: 'GHSA-a',
-      bumps: [fixEntry({ dependency: 'dep', currentSpec: '^1.0.0', version: '1.0.5' })],
+      bumps: [
+        fixEntry({
+          dependency: 'dep',
+          currentSpec: '^1.0.0',
+          version: '1.0.5',
+          workspacePackages: ['plugin-b', 'plugin-a'],
+        }),
+      ],
       originPackages: ['plugin-b', 'plugin-a'],
     }),
     finding({
       advisory: 'GHSA-b',
-      bumps: [fixEntry({ dependency: 'dep', currentSpec: '^1.0.0', version: '1.0.9' })],
+      bumps: [
+        fixEntry({
+          dependency: 'dep',
+          currentSpec: '^1.0.0',
+          version: '1.0.9',
+          workspacePackages: ['plugin-a', 'storage-s3'],
+        }),
+      ],
       originPackages: ['plugin-a', 'storage-s3'],
     }),
     finding({
       advisory: 'GHSA-c',
-      bumps: [fixEntry({ dependency: 'other', currentSpec: '^2.0.0', version: '3.0.0' })],
+      bumps: [
+        fixEntry({
+          dependency: 'other',
+          currentSpec: '^2.0.0',
+          version: '3.0.0',
+          workspacePackages: ['ui'],
+        }),
+      ],
       originPackages: ['ui'],
     }),
     finding({ advisory: 'GHSA-d', bumps: [], originPackages: ['next'] }),
@@ -51,6 +72,58 @@ describe('buildPlan', () => {
       'dep-1': ['plugin-a', 'plugin-b', 'storage-s3'],
       'other-3': ['ui'],
     })
+  })
+
+  it('should give a bump only the origin folders that declare its dependency', () => {
+    const shared = finding({
+      advisory: 'GHSA-e',
+      bumps: [
+        fixEntry({
+          dependency: 'left',
+          currentSpec: '^1.0.0',
+          version: '1.0.1',
+          workspacePackages: ['plugin-a'],
+        }),
+        fixEntry({
+          dependency: 'right',
+          currentSpec: '^1.0.0',
+          version: '1.0.1',
+          workspacePackages: ['plugin-b'],
+        }),
+      ],
+      originPackages: ['plugin-a', 'plugin-b'],
+    })
+
+    const plan = buildPlan({
+      ref: 'main',
+      report: { findings: [shared], plan: { actions: [] } },
+      scope: 'consumer-facing',
+    })
+
+    expect(plan.originDirs).toEqual({ 'left-1': ['plugin-a'], 'right-1': ['plugin-b'] })
+  })
+
+  it('should give no origin folders for a monorepo finding, which has no origin packages', () => {
+    const monorepo = finding({
+      advisory: 'GHSA-f',
+      bumps: [
+        fixEntry({
+          dependency: 'left',
+          currentSpec: '^1.0.0',
+          version: '1.0.1',
+          workspacePackages: ['packages/plugin-a'],
+        }),
+      ],
+      originPackages: [],
+    })
+
+    const plan = buildPlan({
+      ref: 'main',
+      report: { findings: [monorepo], plan: { actions: [] } },
+      scope: 'monorepo',
+    })
+
+    expect(plan.originDirs).toEqual({ 'left-1': [] })
   })
 
   it('should plan PRs for the bumps and list the findings with no fix', () => {
