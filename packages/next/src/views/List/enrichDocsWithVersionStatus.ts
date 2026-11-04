@@ -37,43 +37,28 @@ export async function enrichDocsWithVersionStatus({
     return data
   }
 
-  // OPTIMIZATION: Single query to find all document IDs that have BOTH:
-  // 1. A draft version (latest=true, _status='draft')
-  // 2. A published version (_status='published')
-  // These are the documents with "changed" status
   try {
-    // TODO: This could be more efficient with a findDistinctVersions() API:
-    // const { values } = await req.payload.findDistinctVersions({
-    //   collection: collectionConfig.slug,
-    //   field: 'parent',
-    //   where: {
-    //     and: [
-    //       { parent: { in: draftDocIds } },
-    //       { 'version._status': { equals: 'published' } },
-    //     ],
-    //   },
-    // })
-    // const hasPublishedVersionSet = new Set(values)
-    //
-    // For now, we query all published versions but only select the 'parent' field
-    // to minimize data transfer, then deduplicate with a Set
-    const publishedVersions = await req.payload.findVersions({
+    const publishedDocuments = await req.payload.find({
       collection: collectionConfig.slug,
       depth: 0,
       limit: 0,
+      locale: req.locale,
+      overrideAccess: false,
       pagination: false,
+      req,
       select: {
-        parent: true,
+        id: true,
       },
+      user: req.user,
       where: {
         and: [
           {
-            parent: {
+            id: {
               in: draftDocIds,
             },
           },
           {
-            'version._status': {
+            _status: {
               equals: 'published',
             },
           },
@@ -81,15 +66,12 @@ export async function enrichDocsWithVersionStatus({
       },
     })
 
-    // Create a Set of document IDs that have published versions
-    const hasPublishedVersionSet = new Set(
-      publishedVersions.docs.map((version) => version.parent).filter(Boolean),
-    )
+    const hasPublishedDocumentSet = new Set(publishedDocuments.docs.map(({ id }) => id))
 
     // Enrich documents with display status
     const enrichedDocs = data.docs.map((doc) => {
       // If it's a draft and has a published version, show "changed"
-      if (doc._status === 'draft' && hasPublishedVersionSet.has(doc.id)) {
+      if (doc._status === 'draft' && hasPublishedDocumentSet.has(doc.id)) {
         return {
           ...doc,
           _displayStatus: 'changed' as const,
@@ -110,7 +92,7 @@ export async function enrichDocsWithVersionStatus({
     // If there's an error querying versions, just return the original data
     req.payload.logger.error({
       err: error,
-      msg: `Error checking version status for collection ${collectionConfig.slug}`,
+      msg: `Error checking published status for collection ${collectionConfig.slug}`,
     })
     return data
   }
