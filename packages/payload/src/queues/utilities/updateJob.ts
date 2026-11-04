@@ -31,6 +31,9 @@ type ArgsWhere = {
 
 type RunJobsArgs = (ArgsByID | ArgsWhere) & BaseArgs
 
+const pendingClaimHooksByReq = new WeakMap<object, Set<number | string>>()
+const patchedDbAdapters = new WeakSet<object>()
+
 /**
  * Convenience method for updateJobs by id
  */
@@ -116,13 +119,63 @@ function isJobClaim(data: Partial<Job>): boolean {
 }
 
 /**
+ * Ensures the initial `payload.db.find` performed by `payload.update` for a pre-claimed batch sees
+ * `processing: false` on the claimed documents, so collection and field hooks (`beforeValidate`,
+ * `beforeChange`, `afterChange`) observe the `false -> true` transition while the database rows
+ * remain locked with `processing: true`.
+ */
+function registerPendingClaimHooks(req: PayloadRequest, claimedIDs: (number | string)[]): void {
+  const db = req.payload?.db
+  if (!db || typeof db.find !== 'function') {
+    return
+  }
+
+  if (!patchedDbAdapters.has(db)) {
+    const originalFind = db.find.bind(db)
+
+    db.find = async (findArgs) => {
+      const claimedSet =
+        findArgs?.collection === jobsCollectionSlug && findArgs?.req
+          ? pendingClaimHooksByReq.get(findArgs.req)
+          : undefined
+
+      if (claimedSet && findArgs.req) {
+        pendingClaimHooksByReq.delete(findArgs.req)
+      }
+
+      const findResult = await originalFind(findArgs)
+
+      if (!claimedSet || !findResult?.docs?.length) {
+        return findResult
+      }
+
+      return {
+        ...findResult,
+        docs: findResult.docs.map((doc) =>
+          doc &&
+          typeof doc === 'object' &&
+          'id' in doc &&
+          claimedSet.has((doc as { id: number | string }).id)
+            ? { ...doc, processing: false }
+            : doc,
+        ),
+      }
+    }
+
+    patchedDbAdapters.add(db)
+  }
+
+  pendingClaimHooksByReq.set(req, new Set(claimedIDs))
+}
+
+/**
  * `payload.update` selects documents and then updates them one by one, which is not atomic.
  * When hooks or population are enabled, jobs are therefore claimed through the database adapter first,
  * and only the jobs this runner actually claimed are passed through `payload.update` so that the
  * collection hooks and `depth` population still run for them.
  *
- * Because the claim happens before `payload.update`, `originalDoc` in hooks for the claim update
- * already has `processing: true`.
+ * Pre-claim `processing: false` state is preserved for `originalDoc` / `previousDoc` in hooks, and any
+ * job whose hook update throws or fails is released back to `processing: false`.
  */
 async function claimJobsWithHooks({
   data,
@@ -148,25 +201,59 @@ async function claimJobsWithHooks({
   }
 
   const claimedIDs = claimedJobs.map((job) => job.id)
+  const claimReq = {
+    ...req,
+  } as PayloadRequest
 
-  const result = await req.payload.update({
-    collection: jobsCollectionSlug,
-    data,
-    depth,
-    disableTransaction,
-    limit: claimedIDs.length,
-    req,
-    where: { id: { in: claimedIDs } },
-  } as ManyOptions<any, any>)
+  registerPendingClaimHooks(claimReq, claimedIDs)
 
-  if (returning === false || !result) {
+  let result: Awaited<ReturnType<typeof req.payload.update>>
+  try {
+    result = await req.payload.update({
+      collection: jobsCollectionSlug,
+      data,
+      depth,
+      disableTransaction,
+      limit: claimedIDs.length,
+      req: claimReq,
+      where: { id: { in: claimedIDs } },
+    } as ManyOptions<any, any>)
+  } catch (error) {
+    await updateJobsInDatabase({
+      data: { processing: false },
+      req,
+      returning: false,
+      where: { id: { in: claimedIDs } },
+    })
+    throw error
+  } finally {
+    pendingClaimHooksByReq.delete(claimReq)
+  }
+
+  const erroredIDs = new Set((result?.errors ?? []).map((err) => err.id))
+  const updatedDocs = ((result?.docs as Job[] | undefined) ?? []).filter(
+    (doc) => !erroredIDs.has(doc.id) && doc.processing !== false,
+  )
+  const succeededIDs = new Set(updatedDocs.map((doc) => doc.id))
+  const failedIDs = claimedIDs.filter((claimedID) => !succeededIDs.has(claimedID))
+
+  if (failedIDs.length > 0) {
+    await updateJobsInDatabase({
+      data: { processing: false },
+      req,
+      returning: false,
+      where: { id: { in: failedIDs } },
+    })
+  }
+
+  if (returning === false || !updatedDocs.length) {
     return null
   }
 
   // Preserve the processing order the jobs were claimed in
   const claimedOrder = new Map(claimedIDs.map((claimedID, index) => [claimedID, index]))
 
-  return (result.docs as Job[]).sort(
+  return updatedDocs.sort(
     (a, b) => (claimedOrder.get(a.id) ?? 0) - (claimedOrder.get(b.id) ?? 0),
   )
 }
