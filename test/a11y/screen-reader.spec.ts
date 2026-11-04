@@ -416,8 +416,9 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       })
       const selectionControl = folder.getByRole('checkbox')
       await selectionControl.click()
+      await selectionControl.evaluate((element) => element.blur())
       const output = await captureScreenReaderOutput({
-        action: () => folder.focus(),
+        action: () => selectionControl.focus(),
         screenReader,
       })
 

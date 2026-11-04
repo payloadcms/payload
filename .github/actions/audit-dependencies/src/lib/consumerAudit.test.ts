@@ -91,6 +91,19 @@ describe('runConsumerAudit', () => {
     warn.mockRestore()
   })
 
+  it('fails when pnpm audit exits non-zero without advisories (no false clean)', async () => {
+    const run = vi.fn(({ args }: { args: string[]; cwd: string }): Promise<PnpmResult> => {
+      if (args[0] === 'install') {
+        return Promise.resolve({ code: 0, stderr: '', stdout: '' })
+      }
+      return Promise.resolve({ code: 1, stderr: 'ERR_PNPM_AUDIT_NO_LOCKFILE', stdout: '' })
+    })
+
+    await expect(runConsumerAudit({ packages: [pkg('a', { foo: '1' })], run })).rejects.toThrow(
+      /@payloadcms\/a.*exit code 1[\s\S]*ERR_PNPM_AUDIT_NO_LOCKFILE/,
+    )
+  })
+
   it('does not suppress advisories at pnpm level (allowlist handled in reporting)', async () => {
     const run = vi.fn(({ args }: { args: string[]; cwd: string }): Promise<PnpmResult> => {
       if (args[0] === 'install') {

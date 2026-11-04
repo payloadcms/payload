@@ -528,11 +528,17 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
               refreshedToken: {
                 type: GraphQLString,
               },
+              ...(collectionConfig.auth.refreshTokens
+                ? { refreshToken: { type: GraphQLString } }
+                : {}),
               user: {
                 type: collection.graphQL.JWT,
               },
             },
           }),
+          args: collectionConfig.auth.refreshTokens
+            ? { refreshToken: { type: GraphQLString } }
+            : undefined,
           resolve: refresh(collection),
         }
 
@@ -573,6 +579,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
                 exp: {
                   type: GraphQLInt,
                 },
+                ...(collectionConfig.auth.refreshTokens
+                  ? { refreshToken: { type: GraphQLString } }
+                  : {}),
                 token: {
                   type: GraphQLString,
                 },
