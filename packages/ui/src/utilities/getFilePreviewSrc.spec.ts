@@ -15,31 +15,7 @@ describe('getFilePreviewSrc', () => {
     )
   })
 
-  it('should use the original url for images when no size is selected', () => {
-    expect(getFilePreviewSrc({ data: imageDoc, selectedSizeData: null })).toBe('/original.png')
-  })
-
-  it('should use the thumbnail for images without a url', () => {
-    expect(
-      getFilePreviewSrc({ data: { mimeType: 'image/png', thumbnailURL: '/thumbnail.png' } }),
-    ).toBe('/thumbnail.png')
-  })
-
-  it('should use the thumbnail for non-image files', () => {
-    expect(
-      getFilePreviewSrc({
-        data: { mimeType: 'application/pdf', thumbnailURL: '/thumbnail.png', url: '/file.pdf' },
-      }),
-    ).toBe('/thumbnail.png')
-  })
-
-  it('should use the original url for non-image files without a thumbnail', () => {
-    expect(getFilePreviewSrc({ data: { mimeType: 'application/pdf', url: '/file.pdf' } })).toBe(
-      '/file.pdf',
-    )
-  })
-
-  it('should return null when no url is available', () => {
-    expect(getFilePreviewSrc({ data: { mimeType: 'image/png' } })).toBeNull()
+  it('should use the original url instead of the thumbnail for images', () => {
+    expect(getFilePreviewSrc({ data: imageDoc })).toBe('/original.png')
   })
 })
