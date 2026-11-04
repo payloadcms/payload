@@ -13,6 +13,7 @@ import {
 
 const SESSIONS_PATH = '/payload-upload-sessions'
 const BASE_RETRY_DELAY_MS = 500
+const CANCEL_RETRIES = 4
 
 /** A browser-side upload failure the Admin can describe in the user's language. */
 export class UploadSessionClientError extends Error {
@@ -26,6 +27,17 @@ export class UploadSessionClientError extends Error {
     )
     this.code = code
     this.name = 'UploadSessionClientError'
+  }
+}
+
+/** A session API request the server rejected. */
+class UploadSessionRequestError extends Error {
+  status: number
+
+  constructor({ message, status }: { message: string; status: number }) {
+    super(message)
+    this.name = 'UploadSessionRequestError'
+    this.status = status
   }
 }
 
@@ -289,6 +301,11 @@ export const resumeUploadSession = async ({
     if (stalledWindows > retries) {
       throw new UploadSessionClientError({ code: 'storageRejectedSegments' })
     }
+
+    // Throttled segments come back right away, so give storage time to recover first.
+    if (stalledWindows) {
+      await wait({ ms: getRetryDelay({ attempt: stalledWindows - 1 }), signal })
+    }
   }
 
   const { file: uploadedFile } = await requestSession<{ file: UploadInstructions['file'] }>({
@@ -302,12 +319,33 @@ export const resumeUploadSession = async ({
 }
 
 /** Cancels a session and releases its provider storage. */
-export const cancelUploadSession = ({
+export const cancelUploadSession = async ({
   id,
   apiRoute,
   serverURL,
-}: { id: number | string } & SessionRequestArgs): Promise<ClientUploadSession> =>
-  requestSession({ apiRoute, method: 'DELETE', path: `${SESSIONS_PATH}/${id}`, serverURL })
+}: { id: number | string } & SessionRequestArgs): Promise<ClientUploadSession> => {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await requestSession<ClientUploadSession>({
+        apiRoute,
+        method: 'DELETE',
+        path: `${SESSIONS_PATH}/${id}`,
+        serverURL,
+      })
+    } catch (err) {
+      // 409 while another request starts or finishes storage; the cancel can go ahead after it.
+      if (
+        attempt >= CANCEL_RETRIES ||
+        !(err instanceof UploadSessionRequestError) ||
+        err.status !== 409
+      ) {
+        throw err
+      }
+
+      await wait({ ms: getRetryDelay({ attempt }) })
+    }
+  }
+}
 
 /**
  * Sends one segment, retrying transient failures with exponential backoff and jitter. Expired
@@ -362,7 +400,7 @@ const sendSegment = async ({
       throw new Error('Upload failed after repeated retries.')
     }
 
-    await wait({ ms: BASE_RETRY_DELAY_MS * 2 ** attempt * (0.5 + Math.random()), signal })
+    await wait({ ms: getRetryDelay({ attempt }), signal })
   }
 }
 
@@ -391,10 +429,12 @@ const requestSession = async <T>({
     const { errors } = (await response.json().catch(() => ({ errors: [] }))) as {
       errors?: { message: string }[]
     }
-    throw new Error(
-      errors?.map(({ message }) => message).join(', ') ||
+    throw new UploadSessionRequestError({
+      message:
+        errors?.map(({ message }) => message).join(', ') ||
         `Upload session request failed with status ${response.status}`,
-    )
+      status: response.status,
+    })
   }
 
   return response.json() as Promise<T>
@@ -413,3 +453,7 @@ const wait = ({ ms, signal }: { ms: number; signal?: AbortSignal }) =>
       { once: true },
     )
   })
+
+/** Exponential backoff with jitter. */
+const getRetryDelay = ({ attempt }: { attempt: number }) =>
+  BASE_RETRY_DELAY_MS * 2 ** attempt * (0.5 + Math.random())
