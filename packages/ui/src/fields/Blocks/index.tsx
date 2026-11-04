@@ -80,15 +80,8 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
   const minRows = minRowsProp ?? (required ? 1 : 0)
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const {
-    addFieldRow,
-    dispatchFields,
-    getFields,
-    moveFieldRow,
-    removeFieldRow,
-    replaceState,
-    setModified,
-  } = useForm()
+  const { addFieldRow, dispatchFields, getFields, moveFieldRow, removeFieldRow, setModified } =
+    useForm()
   const currentLocale = useLocale()
   const locale = currentLocale?.code
   const {
@@ -280,7 +273,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
             path,
             rowIndex,
           })
-          replaceState(newState)
+          dispatchFields({ type: 'REPLACE_STATE', state: newState })
           setModified(true)
         },
         path,
@@ -294,7 +287,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
         toast.error(clipboardResult)
       }
     },
-    [clientBlocks, getFields, path, replaceState, setModified, t],
+    [clientBlocks, getFields, path, dispatchFields, setModified, t],
   )
 
   const pasteRowBelow = useCallback(
@@ -308,7 +301,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
             path,
             rowIndex: rowIndex + 1,
           })
-          replaceState(newState)
+          dispatchFields({ type: 'REPLACE_STATE', state: newState })
           setModified(true)
 
           setTimeout(() => {
@@ -326,7 +319,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
         toast.error(clipboardResult)
       }
     },
-    [clientBlocks, getFields, path, replaceState, setModified, t],
+    [clientBlocks, getFields, path, dispatchFields, setModified, t],
   )
 
   const pasteBlocks = useCallback(
@@ -337,10 +330,10 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
         formState,
         path,
       })
-      replaceState(newState)
+      dispatchFields({ type: 'REPLACE_STATE', state: newState })
       setModified(true)
     },
-    [getFields, path, replaceState, setModified],
+    [getFields, path, dispatchFields, setModified],
   )
 
   const hasMaxRows = maxRows && rows.length >= maxRows

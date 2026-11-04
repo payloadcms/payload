@@ -557,12 +557,16 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const replaceState = useCallback(
     (state: FormState) => {
+      resetSequenceRef.current += 1
+      resetRequestQueue()
+      formSequenceRef.current = 0
+      onChangeSequenceRef.current = 0
+      restoreRequestState()
       contextRef.current = { ...initContextState }
       _setModified(false)
-      // Replacing the data advances the form sequence, so in-flight responses can't overwrite the new state.
-      dispatchFields({ type: 'REPLACE_STATE', state })
+      dispatchFieldsWithoutIncrementingFormSequence({ type: 'REPLACE_STATE', state })
     },
-    [dispatchFields],
+    [dispatchFieldsWithoutIncrementingFormSequence, resetRequestQueue, restoreRequestState],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
