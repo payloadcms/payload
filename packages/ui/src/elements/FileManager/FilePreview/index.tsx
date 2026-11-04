@@ -38,11 +38,15 @@ export const FilePreview: React.FC<Props> = ({
   const hasVariants = uploadConfig?.variants?.length > 0
   const mimeType = (data?.mimeType as string) ?? ''
   const isImageFile = isImage(mimeType)
-  const fileSrc = (selectedSizeData?.url ?? data?.thumbnailURL ?? data?.url ?? null) as
-    | null
-    | string
-
   const originalUrl = data?.url as string | undefined
+  // The admin thumbnail is a small variant, so images preview the original file at full size.
+  const originalImageSrc = isImageFile ? originalUrl : undefined
+  const fileSrc = (selectedSizeData?.url ??
+    originalImageSrc ??
+    data?.thumbnailURL ??
+    originalUrl ??
+    null) as null | string
+
   const nativePreviewSrc = originalUrl ? appendCacheTag(originalUrl, imageCacheTag) : undefined
 
   // Built-in previews for native file types; images (and unknown types) fall back to the thumbnail.
