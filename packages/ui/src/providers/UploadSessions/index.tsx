@@ -125,6 +125,23 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
     [t],
   )
   const entriesRef = useRef(new Map<File, UploadEntry>())
+  /** One adoption per session while its stand-in file is tracked, e.g. when a dev-mode effect runs twice. */
+  const adoptionsRef = useRef(new Map<string, Promise<File | null>>())
+
+  /**
+   * Stops tracking an entry. A replacement may already be tracked under the same file (a renamed
+   * upload that restarted), so only the entry itself is removed. A removed adoption is forgotten,
+   * so the next `adopt` tracks a new stand-in instead of returning this untracked one.
+   */
+  const removeEntry = useCallback((entry: UploadEntry) => {
+    if (entriesRef.current.get(entry.formFile) === entry) {
+      entriesRef.current.delete(entry.formFile)
+    }
+
+    if (entry.isAdopted && entry.sessionID) {
+      adoptionsRef.current.delete(entry.sessionID)
+    }
+  }, [])
   const [waitingSaveCount, setWaitingSaveCount] = useState(0)
 
   const releaseWaitingSave = useCallback((entry: UploadEntry) => {
@@ -295,7 +312,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
           toast.dismiss(toastID)
 
           if (!entry.isAttached) {
-            entriesRef.current.delete(entry.formFile)
+            removeEntry(entry)
             await finishInBackground({
               intentRequest: entry.intentRequest,
               session: { ...(await session), hasIntent: entry.hasIntent },
@@ -305,7 +322,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         (err: unknown) => {
           entry.isSettled = true
           releaseWaitingSave(entry)
-          entriesRef.current.delete(entry.formFile)
+          removeEntry(entry)
 
           if (controller.signal.aborted) {
             toast.dismiss(toastID)
@@ -321,7 +338,15 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
 
       return true
     },
-    [finishInBackground, getEntityConfig, getErrorMessage, releaseWaitingSave, requestArgs, t],
+    [
+      finishInBackground,
+      getEntityConfig,
+      getErrorMessage,
+      releaseWaitingSave,
+      removeEntry,
+      requestArgs,
+      t,
+    ],
   )
 
   const cancel = useCallback<UploadSessionsContext['cancel']>(
@@ -332,7 +357,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         return
       }
 
-      entriesRef.current.delete(file)
+      removeEntry(entry)
       entry.controller.abort()
       releaseWaitingSave(entry)
       toast.dismiss(entry.toastID)
@@ -341,7 +366,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         .then(({ id }) => cancelUploadSession({ id, ...requestArgs }))
         .catch(() => {})
     },
-    [releaseWaitingSave, requestArgs],
+    [releaseWaitingSave, removeEntry, requestArgs],
   )
 
   const rekey = useCallback<UploadSessionsContext['rekey']>(({ from, to }) => {
@@ -372,14 +397,14 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         return
       }
 
-      entriesRef.current.delete(file)
+      removeEntry(entry)
 
       // Uploaded but never saved: offer a way back to the form without re-uploading.
       if (!entry.isWaitedOn) {
         void entry.session.then((session) => showReadyToFinish({ session }))
       }
     },
-    [showReadyToFinish],
+    [removeEntry, showReadyToFinish],
   )
 
   const getUploadedFile = useCallback<UploadSessionsContext['getUploadedFile']>(
@@ -430,8 +455,6 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
     [cancel, requestArgs, start],
   )
 
-  const adoptionsRef = useRef(new Map<string, Promise<File | null>>())
-
   const adoptSession = useCallback(
     async ({ sessionID }: { sessionID: string }): Promise<File | null> => {
       const session = await getUploadSession({ id: sessionID, ...requestArgs }).catch(() => null)
@@ -468,7 +491,6 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
     [requestArgs],
   )
 
-  /** Reuses one adoption per session, e.g. when a dev-mode effect runs twice. */
   const adopt = useCallback<UploadSessionsContext['adopt']>(
     ({ sessionID }) => {
       const existing = adoptionsRef.current.get(sessionID)

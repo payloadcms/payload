@@ -138,10 +138,15 @@ export const FileManager: React.FC<FileManagerProps> = ({
 
   const handleAdoptedFile = useCallback(
     (file: File) => {
+      // An adopted upload replacing a stored file shows like a picked replacement.
+      if (data?.filename) {
+        setRemovedFile(true)
+      }
+
       setValue(file)
       setFilename(file.name)
     },
-    [setValue],
+    [data?.filename, setValue],
   )
 
   const { onFileChange: onSessionFileChange } = useFileFieldUploadSession({
@@ -425,7 +430,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
                   />
                 </Dropzone>
               )}
-              {value && fileSrc && (
+              {value && (
                 <Fragment>
                   <Button
                     aria-label={t('general:cancel')}
@@ -436,7 +441,8 @@ export const FileManager: React.FC<FileManagerProps> = ({
                     round
                     tooltip={t('general:cancel')}
                   />
-                  {renderSelectedFilePreview(fileSrc)}
+                  {/* An adopted upload's bytes are in storage, so it has nothing to preview. */}
+                  {fileSrc && renderSelectedFilePreview(fileSrc)}
                   <div className={`${baseClass}__file-adjustments`}>
                     {/* Custom id so this editor doesn't collide with the hidden auto `filename` field. */}
                     <TextInput
