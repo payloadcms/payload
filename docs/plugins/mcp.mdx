@@ -287,10 +287,7 @@ MCP clients can sign in with OAuth. MCP requests without an authenticated user
 get a `401` whose `WWW-Authenticate` header links to the
 [protected resource metadata](https://www.rfc-editor.org/rfc/rfc9728) at
 `/api/mcp/oauth-protected-resource`, and the client starts its OAuth flow from
-there. No other setup is needed, and API keys keep working as before.
-
-Set `oauth: false` to turn this off. MCP requests without authorization then run
-access control with no user.
+there. Set `oauth: false` to turn this off.
 
 #### Sign in with Payload
 
@@ -305,9 +302,7 @@ expire after the collection's `tokenExpiration`, and the client then gets new
 ones with its [refresh token](../authentication/overview#refresh-tokens),
 without the user. The refresh token works as long as its session, which lasts
 30 days without a refresh, or the collection's `auth.refreshTokens.expiration`.
-Each one works once: if a used refresh token comes back later, someone copied
-it, and the client is signed out. Clients are signed out too when the user logs
-out of all sessions. Collections with `useSessions: false` get no refresh
+Collections with `useSessions: false` get no refresh
 tokens, so their clients sign in again when the access token expires.
 
 To give clients different tokens, pass `issueToken`. It runs when the user
