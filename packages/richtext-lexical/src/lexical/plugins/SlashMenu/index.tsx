@@ -15,6 +15,7 @@ import type {
 import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
 import './index.css'
 import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin/index.js'
+import { mergeDynamicGroups } from './mergeDynamicGroups.js'
 import { useMenuTriggerMatch } from './useMenuTriggerMatch.js'
 
 const baseClass = 'slash-menu-popup'
@@ -96,14 +97,17 @@ export function SlashMenuPlugin({
   const getDynamicItems = useCallback(() => {
     let groupWithItems: Array<SlashMenuGroup> = []
 
+    // queryString is '' for a bare '/', and null when the menu is closed
+    if (queryString == null) {
+      return groupWithItems
+    }
+
     for (const dynamicItem of editorConfig.features.slashMenu.dynamicGroups) {
-      if (queryString) {
-        const dynamicGroupWithItems = dynamicItem({
-          editor,
-          queryString,
-        })
-        groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
-      }
+      const dynamicGroupWithItems = dynamicItem({
+        editor,
+        queryString,
+      })
+      groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
     }
 
     return groupWithItems
@@ -162,29 +166,14 @@ export function SlashMenuPlugin({
       })
 
       groupsWithItems = groupsWithItems.filter((group) => group != null)
+    }
 
-      // Now add dynamic groups
-      const dynamicItemGroups = getDynamicItems()
-
-      // merge dynamic items into groups
-      for (const dynamicGroup of dynamicItemGroups) {
-        // 1. find the group with the same name or create new one
-        let group = groupsWithItems.find((group) => group.key === dynamicGroup.key)
-        if (!group) {
-          group = {
-            ...dynamicGroup,
-            items: [],
-          }
-        } else {
-          groupsWithItems = groupsWithItems.filter((group) => group.key !== dynamicGroup.key)
-        }
-
-        // 2. Add items to group items array and add to sanitized.slashMenu.groupsWithItems
-        if (group?.items?.length) {
-          group.items = group.items.concat(group.items)
-        }
-        groupsWithItems.push(group)
-      }
+    // Merge dynamic groups when the menu is open, including bare '/' (queryString === '')
+    if (queryString != null) {
+      groupsWithItems = mergeDynamicGroups({
+        dynamicGroups: getDynamicItems(),
+        groups: groupsWithItems,
+      })
     }
 
     return groupsWithItems
