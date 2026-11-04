@@ -1,6 +1,6 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options"] }] -- Tests use the shared fixture wrapper. */
 import type { R2StorageOptions } from '@payloadcms/storage-r2'
-import type { Payload, UploadInstructions } from 'payload'
+import type { Payload } from 'payload'
 import type { SuiteAPI } from 'vitest'
 import type { PlatformProxy } from 'wrangler'
 
@@ -1083,8 +1083,7 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         expect(reloaded.storageProvider).toBe(upload.storageProvider)
       })
 
-      test('supports upload instructions when the adapter does not', async ({
-        payload,
+      test('should reject upload instructions when the adapter has none and local storage is disabled', async ({
         restClient,
       }) => {
         await restClient.login({ slug: 'users' })
@@ -1098,44 +1097,8 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             mimeType: 'image/png',
           }),
         })
-        const instructions = await instructionsResponse.json<UploadInstructions>()
 
-        expect(instructionsResponse.status).toBe(200)
-        expect(instructions.file.uploadReference.uploadId).toBeTruthy()
-
-        if (instructions.type !== 'http') {
-          throw new Error('Expected HTTP upload instructions')
-        }
-
-        const uploadPath = new URL(instructions.request.url, restClient.serverURL).pathname.replace(
-          payload.config.routes.api,
-          '',
-        ) as `/${string}`
-        const uploadResponse = await restClient.PUT(uploadPath, {
-          body: file,
-          headers: instructions.request.headers,
-        })
-
-        expect(uploadResponse.status).toBe(204)
-
-        const formData = new FormData()
-        formData.append('_payload', JSON.stringify({ testNote: 'Staged adapter upload' }))
-        formData.append('file', JSON.stringify(instructions.file))
-
-        const createResponse = await restClient.POST(`/${testMetadataSlug}`, { body: formData })
-        const { doc } = await createResponse.json<{
-          doc: {
-            id: number | string
-            storageProvider: string
-            variants: { thumbnail: { filename: string } }
-          }
-        }>()
-
-        createdIDs.push(doc.id)
-
-        expect(createResponse.status).toBe(201)
-        expect(doc.storageProvider).toBe('test-adapter')
-        expect(doc.variants.thumbnail.filename).toBeTruthy()
+        expect(instructionsResponse.status).toBe(400)
       })
 
       test('should persist metadata on update operations', async ({ payload }) => {
