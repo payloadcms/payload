@@ -443,7 +443,7 @@
   },
   "dependencies": {
     "@lexical/clipboard": "0.50.0",
-    "@lexical/headless": "0.50.0",
+    "@lexical/headless": "0.53.0",
     "@lexical/html": "0.50.0",
     "@lexical/link": "0.50.0",
     "@lexical/list": "0.50.0",
