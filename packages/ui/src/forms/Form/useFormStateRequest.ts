@@ -15,6 +15,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
+import { mergeServerFormState } from './mergeServerFormState.js'
 import { useDocumentFormState } from './useDocumentFormState.js'
 
 /** Counts submissions so a form-state response can tell whether one overlapped it. */
@@ -47,8 +48,8 @@ export type FormStateRequests = {
 type Args = {
   contextRef: RefObject<FormContextType>
   dispatchFields: Dispatch<FieldAction>
-  /** Called after a queued request's state is applied. */
-  onApplied: () => void
+  /** Called with the merged form state after a queued request's response is applied. */
+  onApplied: (formState: FormState) => void
   prevFormStateRef: RefObject<FormState>
   props: Pick<FormProps, 'formStateArgs' | 'isDocumentForm'>
   queueTask: ReturnType<typeof useQueue>['queueTask']
@@ -184,8 +185,15 @@ export const useFormStateRequest = ({
         })
 
       if (isQueued) {
+        // Computed here because the transition render can stay pending, e.g. while server components load.
+        const mergedState = mergeServerFormState({
+          acceptValues,
+          currentState: contextRef.current.fields,
+          incomingState: successResponse.state,
+        })
+
         React.startTransition(merge)
-        current.onApplied()
+        current.onApplied(mergedState)
       } else {
         merge()
       }
