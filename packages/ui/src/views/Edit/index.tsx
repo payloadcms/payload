@@ -1,6 +1,6 @@
 'use client'
 
-import type { DocumentViewClientProps, User } from 'payload'
+import type { Data, DocumentViewClientProps, User } from 'payload'
 
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -156,7 +156,6 @@ export function DefaultEditView({
   const { isPreviewEnabled, setPreviewURL } = usePreviewURL()
 
   const abortOnChangeRef = useRef<AbortController>(null)
-  const abortOnSaveRef = useRef<AbortController>(null)
 
   const locale = params.get('locale')
 
@@ -312,9 +311,7 @@ export function DefaultEditView({
 
   const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
     async (json, ctx) => {
-      const { context, formState } = ctx || {}
-
-      const controller = handleAbortRef(abortOnSaveRef)
+      const { context } = ctx || {}
 
       const document = json?.doc || json?.result
 
@@ -379,43 +376,9 @@ export function DefaultEditView({
       }
 
       if (id || globalSlug) {
-        const docPreferences = await getDocPreferences()
-
-        const { livePreviewURL, previewURL, state } = await getFormState({
-          id,
-          collectionSlug,
-          data: document,
-          docPermissions,
-          docPreferences,
-          formState,
-          globalSlug,
-          operation,
-          renderAllFields: false,
-          returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
-          returnLockStatus: false,
-          returnPreviewURL: isPreviewEnabled,
-          schemaPath: schemaPathSegments.join('.'),
-          signal: controller.signal,
-          skipValidation: true,
-        })
-
-        // For upload collections, clear the file field from the returned state
-        // to prevent the File object from persisting in form state after save
-        if (upload && state) {
-          delete state.file
-        }
-
         // Unlock the document after save
         if (isLockingEnabled) {
           setDocumentIsLocked(false)
-        }
-
-        if (isLivePreviewEnabled && typeofLivePreviewURL === 'function') {
-          setLivePreviewURL(livePreviewURL)
-        }
-
-        if (isPreviewEnabled) {
-          setPreviewURL(previewURL)
         }
 
         reportUpdate({
@@ -426,10 +389,6 @@ export function DefaultEditView({
           operation: 'update',
           updatedAt,
         })
-
-        abortOnSaveRef.current = null
-
-        return state
       } else {
         reportUpdate({
           id,
@@ -461,27 +420,26 @@ export function DefaultEditView({
       router,
       resetUploadEdits,
       getDocPermissions,
-      getDocPreferences,
-      getFormState,
-      docPermissions,
-      operation,
-      isLivePreviewEnabled,
-      typeofLivePreviewURL,
-      isPreviewEnabled,
-      schemaPathSegments,
-      upload,
       isLockingEnabled,
       reportUpdate,
       drawerSlug,
       entitySlug,
       setDocumentIsLocked,
-      setLivePreviewURL,
-      setPreviewURL,
     ],
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState, submitted }) => {
+    async ({ formState: prevFormState, submitResponse, submitted }) => {
+      const isAfterSave = submitResponse !== undefined
+
+      // A create redirects or reloads the drawer with the new document, which loads its own form state.
+      if (isAfterSave && !id && !globalSlug) {
+        return
+      }
+
+      const savedResponse = submitResponse as { doc?: Data; result?: Data } | undefined
+      const savedDocument = savedResponse?.doc || savedResponse?.result
+
       const controller = handleAbortRef(abortOnChangeRef)
 
       // Capture save state before the async form-state request so we can detect
@@ -499,7 +457,7 @@ export function DefaultEditView({
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - editSessionStartTime
 
-      const updateLastEdited = isLockingEnabled && timeSinceLastUpdate >= 10000 // 10 seconds
+      const updateLastEdited = isLockingEnabled && !isAfterSave && timeSinceLastUpdate >= 10000 // 10 seconds
 
       if (updateLastEdited) {
         setEditSessionStartTime(currentTime)
@@ -509,6 +467,7 @@ export function DefaultEditView({
       // Skip this check entirely for autosave-enabled collections/globals to prevent
       // false positives from the user's own autosaves
       const checkForStaleData =
+        !isAfterSave &&
         !hasCheckedForStaleDataRef.current &&
         originalUpdatedAtRef.current &&
         operation === 'update' &&
@@ -525,6 +484,7 @@ export function DefaultEditView({
         id,
         checkForStaleData,
         collectionSlug,
+        data: savedDocument,
         docPermissions,
         docPreferences,
         formState: prevFormState,
@@ -533,7 +493,10 @@ export function DefaultEditView({
         originalUpdatedAt: checkForStaleData ? originalUpdatedAtRef.current : undefined,
         readOnly: isTrashed || isReadOnlyForIncomingUser,
         renderAllFields: false,
-        returnLockStatus: isLockingEnabled,
+        returnLivePreviewURL:
+          isAfterSave && isLivePreviewEnabled && typeofLivePreviewURL === 'function',
+        returnLockStatus: isLockingEnabled && !isAfterSave,
+        returnPreviewURL: isAfterSave && isPreviewEnabled,
         schemaPath: schemaPathSegments.join('.'),
         signal: controller.signal,
         skipValidation: !submitted,
@@ -544,9 +507,22 @@ export function DefaultEditView({
         return
       }
 
-      const { lockedState, staleDataState, state } = result
+      const { livePreviewURL, lockedState, previewURL, staleDataState, state } = result
 
-      if (isLockingEnabled) {
+      if (isAfterSave) {
+        // Clear the file field so the uploaded File object doesn't persist in form state after save
+        if (upload && state) {
+          delete state.file
+        }
+
+        if (isLivePreviewEnabled && typeofLivePreviewURL === 'function') {
+          setLivePreviewURL(livePreviewURL)
+        }
+
+        if (isPreviewEnabled) {
+          setPreviewURL(previewURL)
+        }
+      } else if (isLockingEnabled) {
         handleDocumentLocking(lockedState)
       }
 
@@ -581,6 +557,12 @@ export function DefaultEditView({
       autosaveEnabled,
       isTrashed,
       isReadOnlyForIncomingUser,
+      isLivePreviewEnabled,
+      typeofLivePreviewURL,
+      isPreviewEnabled,
+      upload,
+      setLivePreviewURL,
+      setPreviewURL,
     ],
   )
 
@@ -593,11 +575,9 @@ export function DefaultEditView({
 
   useEffect(() => {
     const abortOnChange = abortOnChangeRef.current
-    const abortOnSave = abortOnSaveRef.current
 
     return () => {
       abortAndIgnore(abortOnChange)
-      abortAndIgnore(abortOnSave)
     }
   }, [])
 

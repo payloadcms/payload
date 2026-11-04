@@ -9,10 +9,11 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
+import type { AcceptValues } from './mergeServerFormState.js'
 import type {
   FieldAction,
   Context as FormContextType,
@@ -62,6 +63,7 @@ export const useFormSubmission = ({
     disableSuccessStatus,
     disableValidationOnSubmit,
     handleResponse,
+    onChange,
     onSubmit,
     onSuccess,
     redirect,
@@ -110,6 +112,10 @@ export const useFormSubmission = ({
 
   isDisabledFromPropsRef.current = isDisabledFromProps
 
+  const onChangeRef = useRef(onChange)
+
+  onChangeRef.current = onChange
+
   const method = 'method' in props ? props?.method : undefined
   const validateDrafts = hasDraftValidationEnabled(docConfig)
 
@@ -120,6 +126,55 @@ export const useFormSubmission = ({
     submittedRef.current = isSubmitted
     _setIsSubmitted(isSubmitted)
   }, [])
+
+  const refreshFormState = useCallback(
+    ({
+      acceptValues,
+      submitResponse,
+    }: { acceptValues?: AcceptValues; submitResponse?: unknown } = {}) => {
+      void scheduleRequest({
+        priority: requestPriority.formState,
+        task: async (requestContext) => {
+          const onChangeFns = onChangeRef.current
+
+          if (!Array.isArray(onChangeFns)) {
+            return
+          }
+
+          let serverState: FormState | undefined
+          const requestFormState = deepCopyObjectSimpleWithoutReactComponents(
+            contextRef.current.fields,
+            { excludeFiles: true },
+          )
+
+          for (const onChangeFn of onChangeFns) {
+            // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
+            serverState = await onChangeFn({
+              formState: requestFormState,
+              submitResponse,
+              submitted: submittedRef.current,
+            })
+          }
+
+          if (!requestContext.isCurrent()) {
+            return
+          }
+
+          React.startTransition(() => {
+            dispatchFields({
+              type: 'MERGE_SERVER_STATE',
+              acceptValues,
+              prevStateRef: prevFormStateRef,
+              serverState,
+            })
+          })
+        },
+      }).catch((err) => {
+        console.error('Error in queued function:', err) // eslint-disable-line no-console
+      })
+    },
+    [contextRef, dispatchFields, prevFormStateRef, scheduleRequest],
+  )
 
   const setIsDisabled = useCallback(
     (isDisabled: boolean) => {
@@ -203,6 +258,8 @@ export const useFormSubmission = ({
       let errorToast, successToast
       let promiseToastID: number | string | undefined
       let preservePromiseToast = false
+      // Set once the request is sent; every sent submission ends with a form-state refresh.
+      let refreshArgs: { acceptValues?: AcceptValues; submitResponse?: unknown } | undefined
 
       const promise = new Promise((resolve, reject) => {
         successToast = resolve
@@ -356,6 +413,8 @@ export const useFormSubmission = ({
             return
           }
 
+          refreshArgs = {}
+
           if (res.status < 400 && !isModifiedWhileProcessing.current) {
             setIsModified(false)
           }
@@ -387,10 +446,12 @@ export const useFormSubmission = ({
           if (res.status < 400) {
             setSuccessfulSubmitCount((count) => count + 1)
 
+            refreshArgs = { acceptValues, submitResponse: json }
+
             if (typeof onSuccess === 'function') {
               const successScope = requestScopeRef.current
 
-              const newFormState = await onSuccess(json, {
+              await onSuccess(json, {
                 context,
                 formState: serializableFormState,
               })
@@ -406,15 +467,6 @@ export const useFormSubmission = ({
                   return { res }
                 }
                 return
-              }
-
-              if (newFormState) {
-                dispatchFields({
-                  type: 'MERGE_SERVER_STATE',
-                  acceptValues,
-                  prevStateRef: prevFormStateRef,
-                  serverState: newFormState,
-                })
               }
             }
 
@@ -533,6 +585,10 @@ export const useFormSubmission = ({
           if (options?.submissionType === 'autosave') {
             setIsBackgroundProcessing(false)
           }
+
+          if (refreshArgs) {
+            refreshFormState(refreshArgs)
+          }
         } else if (!preservePromiseToast && promiseToastID !== undefined) {
           toast.dismiss(promiseToastID)
         }
@@ -551,6 +607,7 @@ export const useFormSubmission = ({
       onSubmit,
       onSuccess,
       redirect,
+      refreshFormState,
       router,
       t,
       i18n,
@@ -631,6 +688,7 @@ export const useFormSubmission = ({
     disabled: isDisabled,
     modified: isModified,
     processing: isProcessing,
+    refreshFormState,
     restoreRequestState,
     setBackgroundProcessing: setIsBackgroundProcessing,
     setDisabled: setIsDisabled,
@@ -639,7 +697,6 @@ export const useFormSubmission = ({
     setSubmitted: setIsSubmitted,
     submit,
     submitted: isSubmitted,
-    submittedRef,
     successfulSubmitCount,
   }
 }

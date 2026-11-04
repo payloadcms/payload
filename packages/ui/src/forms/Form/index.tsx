@@ -3,7 +3,6 @@ import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { serialize } from 'object-to-formdata'
 import { type FormState, type PayloadRequest } from 'payload'
 import {
-  deepCopyObjectSimpleWithoutReactComponents,
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
   reduceFieldsToValues,
@@ -18,8 +17,6 @@ import type {
   FormFieldsContext as FormFieldsContextType,
   FormProps,
   GetDataByPath,
-  Submit,
-  SubmitOptions,
 } from './types.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
@@ -50,7 +47,6 @@ import {
 } from './context.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
-import { requestPriority } from './requestPriority.js'
 import { useFormSubmission } from './useFormSubmission.js'
 
 const baseClass = 'form'
@@ -68,7 +64,6 @@ export const Form: React.FC<FormProps> = (props) => {
     initialState, // fully formed initial field state
     isDocumentForm,
     isInitializing: initializingFromProps,
-    onChange,
     uuid,
   } = props
 
@@ -84,8 +79,6 @@ export const Form: React.FC<FormProps> = (props) => {
   const { queueTask: scheduleRequest, resetQueue } = useQueue()
   const requestScopeRef = useRef({})
   const unmountedRequestScopeRef = useRef<unknown>(undefined)
-  const hasSupersededFormStateRef = useRef(false)
-  const [formStateRefreshCount, setFormStateRefreshCount] = useState(0)
   const resetRequestQueue = useCallback(
     ({ isUnmounting = false }: { isUnmounting?: boolean } = {}) => {
       if (isUnmounting) {
@@ -213,15 +206,15 @@ export const Form: React.FC<FormProps> = (props) => {
     disabled,
     modified,
     processing,
+    refreshFormState,
     restoreRequestState,
     setBackgroundProcessing,
     setDisabled,
     setModified,
     setProcessing,
     setSubmitted,
-    submit: submitForm,
+    submit,
     submitted,
-    submittedRef,
     successfulSubmitCount,
   } = useFormSubmission({
     contextRef,
@@ -234,81 +227,6 @@ export const Form: React.FC<FormProps> = (props) => {
     setIsValid,
     unmountedRequestScopeRef,
   })
-
-  const executeOnChange = useEffectEvent(() => {
-    const requestScope = requestScopeRef.current
-
-    void scheduleRequest({
-      priority: requestPriority.formState,
-      task: async (requestContext) => {
-        hasSupersededFormStateRef.current = false
-
-        if (Array.isArray(onChange)) {
-          let serverState: FormState
-          const requestFormState = deepCopyObjectSimpleWithoutReactComponents(
-            contextRef.current.fields,
-            {
-              excludeFiles: true,
-            },
-          )
-
-          for (const onChangeFn of onChange) {
-            // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-            serverState = await onChangeFn({
-              formState: requestFormState,
-              submitted: submittedRef.current,
-            })
-          }
-
-          if (!requestContext.isCurrent()) {
-            return
-          }
-
-          React.startTransition(() => {
-            dispatchFields({
-              type: 'MERGE_SERVER_STATE',
-              prevStateRef: prevFormState,
-              serverState,
-            })
-          })
-        }
-      },
-    })
-      .then((result) => {
-        if (result.status === 'superseded' && requestScopeRef.current === requestScope) {
-          hasSupersededFormStateRef.current = true
-        }
-      })
-      .catch((err) => {
-        console.error('Error in queued function:', err) // eslint-disable-line no-console
-      })
-  })
-
-  const submit = useCallback<Submit>(
-    async <T extends Response, C extends Record<string, unknown>>(
-      options?: SubmitOptions<C>,
-      event?: React.FormEvent<HTMLFormElement>,
-    ) => {
-      const result = await submitForm<T, C>(options, event)
-
-      // A submission can supersede a pending form-state refresh.
-      // If it didn't succeed, its response didn't bring the latest server state, so refresh again.
-      if (result && result.res?.ok) {
-        hasSupersededFormStateRef.current = false
-      } else if (hasSupersededFormStateRef.current) {
-        setFormStateRefreshCount((count) => count + 1)
-      }
-
-      return result
-    },
-    [submitForm],
-  )
-
-  useEffect(() => {
-    if (formStateRefreshCount > 0) {
-      executeOnChange()
-    }
-  }, [formStateRefreshCount])
 
   const getFields = useCallback(() => contextRef.current.fields, [])
 
@@ -579,7 +497,7 @@ export const Form: React.FC<FormProps> = (props) => {
   useDebouncedEffect(
     () => {
       if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
-        executeOnChange()
+        refreshFormState()
       }
 
       prevFormState.current = formState

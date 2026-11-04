@@ -28,7 +28,17 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      */
     formState?: FormState
   },
-) => Promise<FormState | void> | void
+) => Promise<void> | void
+
+export type FormOnChangeArgs = {
+  formState: FormState
+  /**
+   * The JSON response of the submission this request follows.
+   * Only set on the form-state request the form makes after a successful submission.
+   */
+  submitResponse?: unknown
+  submitted?: boolean
+}
 
 export type FormProps = {
   beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
@@ -66,7 +76,11 @@ export type FormProps = {
   isDocumentForm?: boolean
   isInitializing?: boolean
   log?: boolean
-  onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]
+  /**
+   * Returns server form state to merge into the form.
+   * Runs after field changes and after every submission request, successful or not.
+   */
+  onChange?: ((args: FormOnChangeArgs) => Promise<FormState | undefined>)[]
   onSubmit?: (fields: FormState, data: Data) => void
   onSuccess?: FormOnSuccess
   redirect?: string
