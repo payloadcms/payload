@@ -4,9 +4,179 @@ import { ValidationError } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { localizedPostsSlug, postsSlug } from './shared.js'
+import { arrayFilteredPostsSlug, localizedPostsSlug, postsSlug } from './shared.js'
 
 test.suite('Compound index existence filters', { config: './config.ts', db: 'mongo' }, () => {
+  test('should validate shared key updates against indexes in other locales', async ({
+    payload,
+  }) => {
+    await payload.create({
+      collection: localizedPostsSlug,
+      data: { tenant: 'first', slug: 'shared' },
+      locale: 'de',
+      overrideAccess: true,
+    })
+    const doc = await payload.create({
+      collection: localizedPostsSlug,
+      data: { tenant: 'second', slug: 'shared' },
+      locale: 'de',
+      overrideAccess: true,
+    })
+
+    expect(
+      await payload.validate({
+        id: doc.id,
+        collection: localizedPostsSlug,
+        data: { tenant: 'first' },
+        locale: 'en',
+        overrideAccess: true,
+      }),
+    ).toMatchObject({ valid: false })
+    await expect(
+      payload.update({
+        id: doc.id,
+        collection: localizedPostsSlug,
+        data: { tenant: 'first' },
+        locale: 'en',
+        overrideAccess: true,
+      }),
+    ).rejects.toThrow(ValidationError)
+  })
+
+  test('should retain distinct locale values and exclude itself during shared key validation', async ({
+    payload,
+  }) => {
+    await payload.create({
+      collection: localizedPostsSlug,
+      data: { tenant: 'first', slug: 'english' },
+      locale: 'de',
+      overrideAccess: true,
+    })
+    const doc = await payload.create({
+      collection: localizedPostsSlug,
+      data: { tenant: 'second', slug: 'german' },
+      locale: 'de',
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      id: doc.id,
+      collection: localizedPostsSlug,
+      data: { slug: 'english' },
+      locale: 'en',
+      overrideAccess: true,
+    })
+
+    expect(
+      await payload.validate({
+        id: doc.id,
+        collection: localizedPostsSlug,
+        data: { tenant: 'first' },
+        locale: 'en',
+        overrideAccess: true,
+      }),
+    ).toMatchObject({ valid: true })
+    await payload.update({
+      id: doc.id,
+      collection: localizedPostsSlug,
+      data: { tenant: 'first' },
+      locale: 'en',
+      overrideAccess: true,
+    })
+    expect(
+      await payload.validate({
+        id: doc.id,
+        collection: localizedPostsSlug,
+        locale: 'en',
+        overrideAccess: true,
+      }),
+    ).toMatchObject({ valid: true })
+  })
+
+  test('should validate a changed current locale alongside stored locales', async ({ payload }) => {
+    await payload.create({
+      collection: localizedPostsSlug,
+      data: { tenant: 'same', slug: 'english' },
+      locale: 'en',
+      overrideAccess: true,
+    })
+    const doc = await payload.create({
+      collection: localizedPostsSlug,
+      data: { tenant: 'same', slug: 'german' },
+      locale: 'de',
+      overrideAccess: true,
+    })
+
+    expect(
+      await payload.validate({
+        id: doc.id,
+        collection: localizedPostsSlug,
+        data: { slug: 'english' },
+        locale: 'en',
+        overrideAccess: true,
+      }),
+    ).toMatchObject({ valid: false })
+    expect(
+      await payload.validate({
+        id: doc.id,
+        collection: localizedPostsSlug,
+        data: { slug: 'new-english' },
+        locale: 'en',
+        overrideAccess: true,
+      }),
+    ).toMatchObject({ valid: true })
+  })
+
+  test('should validate existence filters when a later array row contains null', async ({
+    payload,
+  }) => {
+    const data = { tenant: 'same', code: 'shared', items: [{}, { gate: null }] }
+
+    await payload.create({ collection: arrayFilteredPostsSlug, data, overrideAccess: true })
+    expect(
+      await payload.validate({ collection: arrayFilteredPostsSlug, data, overrideAccess: true }),
+    ).toMatchObject({ valid: false })
+    await expect(
+      payload.create({ collection: arrayFilteredPostsSlug, data, overrideAccess: true }),
+    ).rejects.toThrow(ValidationError)
+  })
+
+  test('should ignore array rows without the filter path and exclude itself', async ({
+    payload,
+  }) => {
+    await payload.create({
+      collection: arrayFilteredPostsSlug,
+      data: { tenant: 'same', code: 'shared', items: [{}] },
+      overrideAccess: true,
+    })
+    const data = { tenant: 'same', code: 'shared', items: [{ gate: 'present' }] }
+
+    expect(
+      await payload.validate({ collection: arrayFilteredPostsSlug, data, overrideAccess: true }),
+    ).toMatchObject({ valid: true })
+
+    const doc = await payload.create({
+      collection: arrayFilteredPostsSlug,
+      data,
+      overrideAccess: true,
+    })
+
+    expect(
+      await payload.validate({
+        id: doc.id,
+        collection: arrayFilteredPostsSlug,
+        overrideAccess: true,
+      }),
+    ).toMatchObject({ valid: true })
+    expect(
+      await payload.validate({
+        collection: arrayFilteredPostsSlug,
+        data: { tenant: 'same', code: 'shared', items: [] },
+        overrideAccess: true,
+      }),
+    ).toMatchObject({ valid: true })
+  })
+
   test('should allow multiple documents missing an indexed field in the same tenant', async ({
     payload,
   }) => {
@@ -119,6 +289,22 @@ test.suite('Compound index existence filters', { config: './config.ts', db: 'mon
     ).toMatchObject({ valid: false })
   })
 
+  test('should exclude the document being validated from raw candidates', async ({ payload }) => {
+    const doc = await payload.create({
+      collection: postsSlug,
+      data: { code: 'shared', gate: null, tenant: 'same' },
+      overrideAccess: true,
+    })
+
+    expect(
+      await payload.validate({
+        id: doc.id,
+        collection: postsSlug,
+        overrideAccess: true,
+      }),
+    ).toMatchObject({ valid: true })
+  })
+
   test('should enforce uniqueness when a filtered document is updated to include the field', async ({
     payload,
   }) => {
@@ -159,6 +345,22 @@ test.suite('Compound index existence filters', { config: './config.ts', db: 'mon
         data: { metadata: { code: 'shared' }, tenant: 'same' },
       }),
     ).rejects.toThrow(ValidationError)
+  })
+
+  test('should preserve nested null values when selecting required paths', async ({ payload }) => {
+    await payload.create({
+      collection: postsSlug,
+      data: { metadata: { code: null }, tenant: 'same' },
+      overrideAccess: true,
+    })
+
+    expect(
+      await payload.validate({
+        collection: postsSlug,
+        data: { metadata: { code: null }, tenant: 'same' },
+        overrideAccess: true,
+      }),
+    ).toMatchObject({ valid: false })
   })
 
   test('should create partial indexes for each locale in MongoDB', async ({ payload }) => {

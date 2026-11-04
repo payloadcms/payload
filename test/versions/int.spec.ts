@@ -3532,7 +3532,10 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         })
       })
 
-      test('should allow a version to be restored', async ({ payload, restClient }) => {
+      test('should restore a collection version through GraphQL', async ({
+        payload,
+        restClient,
+      }) => {
         // Update it
         const update = `mutation {
           updateAutosavePost(id: ${formatGraphQLID({ payload }, postID)}, data: {title: "${'Wrong title'}"}) {
@@ -3907,7 +3910,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(publishedVersion._status).toStrictEqual('published')
       })
 
-      test('should have different createdAt in a new version while the same version.createdAt', async ({
+      test('should keep the global creation time while assigning a new version creation time', async ({
         payload,
       }) => {
         await seedGlobalSiblingLocales({
@@ -4053,7 +4056,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         }
       })
 
-      test('should allow a version to be retrieved by ID', async ({ payload }) => {
+      test('should retrieve a global version by ID', async ({ payload }) => {
         const version = await payload.findGlobalVersionByID({
           id: globalVersionID,
           slug: autoSaveGlobalSlug,
@@ -4084,7 +4087,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
 
     test.describe('Update', () => {
-      test('should allow a version to save locales properly', async ({ payload }) => {
+      test('should save locales in a global version', async ({ payload }) => {
         const englishTitle = 'Title in EN'
         const spanishTitle = 'Title in ES'
 
@@ -4192,7 +4195,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         await payload.db.deleteVersions({ globalSlug: simpleDraftGlobalSlug, where: {} })
       })
 
-      test('should allow a version to be restored', async ({ payload }) => {
+      test('should restore a global version through the Local API', async ({ payload }) => {
         const title2 = 'Another updated title in EN'
 
         await seedGlobalSiblingLocales({
@@ -4404,6 +4407,95 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(current.title).toBe('locked draft')
       })
 
+      test('should publish when both the latest draft and live global match update access', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'unlocked' },
+          overrideAccess: true,
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'unlocked' },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        const published = await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'published with access' },
+          overrideAccess: false,
+          user,
+        })
+
+        expect(published.title).toBe('published with access')
+        expect(published._status).toBe('published')
+      })
+
+      test('should reject publishing an accessible draft when the live global fails update access', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'locked live' },
+          overrideAccess: true,
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'unlocked' },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        // Editing the accessible draft is allowed even though the live global is locked.
+        const draft = await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'unlocked' },
+          draft: true,
+          overrideAccess: false,
+          user,
+        })
+
+        expect(draft.title).toBe('unlocked')
+
+        const versionsBefore = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: restoreAccessGlobalSlug,
+            data: { _status: 'published', title: 'published by restricted user' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const liveGlobal = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          overrideAccess: true,
+        })
+        const latestDraft = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+        const versionsAfter = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          overrideAccess: true,
+        })
+
+        expect(liveGlobal.title).toBe('locked live')
+        expect(liveGlobal._status).toBe('published')
+        expect(latestDraft.title).toBe('unlocked')
+        expect(latestDraft._status).toBe('draft')
+        expect(versionsAfter.totalDocs).toBe(versionsBefore.totalDocs)
+      })
+
       test('should reject an id-based access constraint without treating the id as a parent', async ({
         payload,
       }) => {
@@ -4413,31 +4505,71 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           overrideAccess: true,
         })
 
-        const liveGlobal = await payload.findGlobal({
-          slug: restoreAccessGlobalSlug,
-          overrideAccess: true,
-        })
+        const liveGlobal = await payload.db.findGlobal({ slug: restoreAccessGlobalSlug })
+
+        expect(liveGlobal.id).toBeDefined()
 
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
-          data: { title: 'id access draft' },
+          data: { title: 'unlocked' },
           draft: true,
           overrideAccess: true,
         })
 
-        await expect(
-          payload.updateGlobal({
-            slug: restoreAccessGlobalSlug,
-            context: {
-              restoreAccessGlobalID: liveGlobal.id,
-              restoreAccessMode: 'idConstraint',
-            },
-            data: { title: 'id access updated' },
-            draft: true,
-            overrideAccess: false,
-            user,
-          }),
-        ).rejects.toThrow(Forbidden)
+        const { docs: versions } = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          limit: 1,
+          overrideAccess: true,
+          where: { latest: { equals: true } },
+        })
+
+        // Global drafts have no stable document ID. Neither the live row's ID
+        // nor the version row's ID may grant access to the draft.
+        const nonmatchingID =
+          typeof liveGlobal.id === 'number' ? liveGlobal.id + 1 : '000000000000000000000000'
+
+        for (const id of [liveGlobal.id, versions[0]!.id, nonmatchingID]) {
+          await expect(
+            payload.updateGlobal({
+              slug: restoreAccessGlobalSlug,
+              context: {
+                restoreAccessGlobalID: id,
+                restoreAccessMode: 'idConstraint',
+              },
+              data: { title: 'id access updated' },
+              draft: true,
+              overrideAccess: false,
+              user,
+            }),
+          ).rejects.toThrow(Forbidden)
+        }
+      })
+
+      test('should allow a matching id constraint on a non-versioned global', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessNoVersionsGlobalSlug,
+          data: { title: 'locked' },
+          overrideAccess: true,
+        })
+
+        const liveGlobal = await payload.db.findGlobal({ slug: restoreAccessNoVersionsGlobalSlug })
+
+        expect(liveGlobal.id).toBeDefined()
+
+        const updated = await payload.updateGlobal({
+          slug: restoreAccessNoVersionsGlobalSlug,
+          context: {
+            restoreAccessGlobalID: liveGlobal.id,
+            restoreAccessMode: 'idConstraint',
+          },
+          data: { title: 'updated by id' },
+          overrideAccess: false,
+          user,
+        })
+
+        expect(updated.title).toBe('updated by id')
       })
 
       test('should reject non-versioned global updates outside the access constraint', async ({
@@ -4994,7 +5126,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
 
     test.describe('Patch', () => {
-      test('should allow a draft to be patched', async ({ payload }) => {
+      test('should patch a global draft', async ({ payload }) => {
         const originalTitle = 'Here is a published global'
 
         await seedGlobalSiblingLocales({
@@ -5208,7 +5340,10 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       await createAndSetVersionID({ restClient })
     })
     test.describe('Read', () => {
-      test('should allow read of versions by version id', async ({ payload, restClient }) => {
+      test('should read global versions by version ID through GraphQL', async ({
+        payload,
+        restClient,
+      }) => {
         // language=graphql
         const query = `query {
           versionAutosaveGlobal(id: ${formatGraphQLID({ payload }, autosaveGlobalVersionID)}) {
@@ -5229,7 +5364,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(data.versionAutosaveGlobal.version.title).toStrictEqual(globalGraphQLOriginalTitle)
       })
 
-      test('should allow read of versions by querying version content', async ({ restClient }) => {
+      test('should query global versions by content through GraphQL', async ({ restClient }) => {
         // language=graphQL
         const query = `query {
           versionsAutosaveGlobal(where: { version__title: {equals: "${globalGraphQLOriginalTitle}" } }) {
@@ -5256,7 +5391,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
 
     test.describe('Restore', () => {
-      test('should allow a version to be restored', async ({ payload, restClient }) => {
+      test('should restore a global version through GraphQL', async ({ payload, restClient }) => {
         const updatedTitle = 'Wrong global title'
 
         // Update it
@@ -6682,7 +6817,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(globalData.title.de).toStrictEqual('German published')
       })
 
-      test('should not leak draft data', async ({ payload }) => {
+      test('should not leak global draft data when publishing an individual locale', async ({
+        payload,
+      }) => {
         // save spanish draft
         await payload.updateGlobal({
           slug: global,
@@ -6717,7 +6854,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(globalData.title.en).toStrictEqual('Eng published')
       })
 
-      test('should merge draft data from other locales when publishing all', async ({
+      test('should merge global draft data from other locales when publishing all', async ({
         payload,
       }) => {
         // save spanish draft
@@ -6771,7 +6908,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(publishedAll.title.en).toStrictEqual('Eng published')
       })
 
-      test('should publish non-default individual locale', async ({ payload }) => {
+      test('should publish a non-default individual global locale', async ({ payload }) => {
         // save spanish draft
         await payload.updateGlobal({
           slug: global,
@@ -6806,7 +6943,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(globalData.title.de).toStrictEqual('German published')
       })
 
-      test('should show correct data in latest version', async ({ payload }) => {
+      test('should show the latest global version after publishing an individual locale', async ({
+        payload,
+      }) => {
         // save spanish draft
         await payload.updateGlobal({
           slug: global,
