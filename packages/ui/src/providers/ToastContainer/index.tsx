@@ -93,6 +93,8 @@ export const ToastContainer: React.FC<{
       theme="dark"
       toastOptions={{
         classNames: {
+          actionButton: 'payload-toast-action-button',
+          cancelButton: 'payload-toast-cancel-button',
           closeButton: 'payload-toast-close-button',
           content: 'toast-content',
           error: 'toast-error',
