@@ -172,6 +172,7 @@ export const koTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: '잘못된 파일 형식: {{value}}',
     invalidRequestArgs: '요청에 잘못된 인수가 전달되었습니다: {{args}}',
     loadingDocument: 'ID가 {{id}}인 문서를 불러오는 중에 문제가 발생했습니다.',
+    loadingItems: '항목을 불러오지 못했습니다.',
     localesNotSaved_one: '다음 로케일을 저장할 수 없습니다:',
     localesNotSaved_other: '다음 로케일들을 저장할 수 없습니다:',
     logoutFailed: '로그아웃 실패했습니다.',
@@ -549,6 +550,9 @@ export const koTranslations: DefaultTranslationsObject = {
     toggle: '토글',
     trash: '휴지통',
     trashedCountSuccessfully: '{{count}} {{label}}가 휴지통으로 이동했습니다.',
+    treeLayout: '트리',
+    treeSearchResults:
+      '일치하는 문서를 일반 목록으로 표시합니다. 트리로 돌아가려면 검색, 필터 및 그룹화를 해제하세요.',
     true: '참',
     unauthorized: '권한 없음',
     unchecked: '선택되지 않음',

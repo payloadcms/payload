@@ -173,6 +173,7 @@ export const skTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Neplatný typ súboru: {{value}}',
     invalidRequestArgs: 'Neplatné argumenty odoslané v požiadavke: {{args}}',
     loadingDocument: 'Pri načítaní dokumentu s ID {{id}} došlo k chybe.',
+    loadingItems: 'Položky sa nepodarilo načítať.',
     localesNotSaved_one: 'Nasledujúci jazyk sa nepodarilo uložiť:',
     localesNotSaved_other: 'Nasledujúce jazyky sa nepodarilo uložiť:',
     logoutFailed: 'Odhlásenie zlyhalo.',
@@ -549,6 +550,9 @@ export const skTranslations: DefaultTranslationsObject = {
     toggle: 'Prepnúť',
     trash: 'Koš',
     trashedCountSuccessfully: '{{count}} {{label}} presunuté do koša.',
+    treeLayout: 'Strom',
+    treeSearchResults:
+      'Zodpovedajúce dokumenty sa zobrazujú ako plochý zoznam. Pre návrat k stromu zrušte vyhľadávanie, filtre a zoskupenie.',
     true: 'Pravda',
     unauthorized: 'Neoprávnený prístup',
     unchecked: 'Nevybrané',

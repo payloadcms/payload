@@ -174,6 +174,7 @@ export const plTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Nieprawidłowy typ pliku: {{value}}',
     invalidRequestArgs: 'Nieprawidłowe argumenty w żądaniu: {{args}}',
     loadingDocument: 'Wystapił problem podczas ładowania dokumentu o ID {{id}}.',
+    loadingItems: 'Nie udało się wczytać elementów.',
     localesNotSaved_one: 'Następującej lokalizacji nie można było zapisać:',
     localesNotSaved_other: 'Następujących lokalizacji nie można było zapisać:',
     logoutFailed: 'Wylogowanie nie powiodło się.',
@@ -552,6 +553,9 @@ export const plTranslations: DefaultTranslationsObject = {
     toggle: 'Przełącznik',
     trash: 'Śmieci',
     trashedCountSuccessfully: '{{count}} {{label}} przeniesiono do kosza.',
+    treeLayout: 'Drzewo',
+    treeSearchResults:
+      'Pasujące dokumenty są wyświetlane jako płaska lista. Wyczyść wyszukiwanie, filtry i grupowanie, aby wrócić do drzewa.',
     true: 'Prawda',
     unauthorized: 'Brak autoryzacji',
     unchecked: 'Niezaznaczone',

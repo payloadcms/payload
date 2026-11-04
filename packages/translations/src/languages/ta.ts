@@ -172,6 +172,7 @@ export const taTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'செல்லுபடியற்ற கோப்பு வகை: {{value}}',
     invalidRequestArgs: 'விண்ணப்பத்தில் தவறான அளவுருக்கள் அனுப்பப்பட்டுள்ளன: {{args}}',
     loadingDocument: 'ID {{id}} கொண்ட ஆவணத்தை ஏற்றும் போது ஒரு பிரச்சனை ஏற்பட்டது.',
+    loadingItems: 'உருப்படிகளை ஏற்ற முடியவில்லை.',
     localesNotSaved_one: 'பின்வரும் மொழி சேமிக்கப்படவில்லை:',
     localesNotSaved_other: 'பின்வரும் மொழிகள் சேமிக்கப்படவில்லை:',
     logoutFailed: 'வெளியேற்றம் தோல்வியடைந்தது.',
@@ -545,6 +546,9 @@ export const taTranslations: DefaultTranslationsObject = {
     toggle: 'மாற்று',
     trash: 'குப்பை',
     trashedCountSuccessfully: '{{count}} {{label}} குப்பைக்குச் செலுத்தப்பட்டது.',
+    treeLayout: 'மரம்',
+    treeSearchResults:
+      'பொருந்தும் ஆவணங்கள் தட்டையான பட்டியலாகக் காட்டப்படுகின்றன. மரத்திற்குத் திரும்ப தேடல், வடிப்பான்கள் மற்றும் குழுவாக்கத்தை நீக்கவும்.',
     true: 'உண்மை',
     unauthorized: 'அனுமதி இல்லை',
     unchecked: 'தேர்வு செய்யப்படாத',

@@ -177,6 +177,7 @@ export const caTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: "Tipus d'arxiu no vàlid: {{value}}",
     invalidRequestArgs: 'Arguments no vàlids en la sol·licitud: {{args}}',
     loadingDocument: "Hi ha hagut un problema carregant el document amb l'ID {{id}}.",
+    loadingItems: 'No s’han pogut carregar els elements.',
     localesNotSaved_one: "No s'ha pogut desar el següent idioma:",
     localesNotSaved_other: "No s'han pogut desar els següents idiomes:",
     logoutFailed: 'La desconnexió ha fallat.',
@@ -557,6 +558,9 @@ export const caTranslations: DefaultTranslationsObject = {
     toggle: 'Commuta',
     trash: 'Brossa',
     trashedCountSuccessfully: "{{count}} {{label}} s'ha mogut a la paperera.",
+    treeLayout: 'Arbre',
+    treeSearchResults:
+      'Els documents coincidents es mostren en una llista plana. Esborreu la cerca, els filtres i l’agrupació per tornar a l’arbre.',
     true: 'Veritat',
     unauthorized: 'No autoritzat',
     unchecked: 'Desmarcat',

@@ -172,6 +172,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Nederīgs faila tips: {{value}}',
     invalidRequestArgs: 'Pieprasījumā nodoti nederīgi argumenti: {{args}}',
     loadingDocument: 'Radās problēma, ielādējot dokumentu ar ID {{id}}.',
+    loadingItems: 'Neizdevās ielādēt vienumus.',
     localesNotSaved_one: 'Šo lokalizāciju nevarēja saglabāt:',
     localesNotSaved_other: 'Šīs lokalizācijas nevarēja saglabāt:',
     logoutFailed: 'Neizdevās atslēgties.',
@@ -551,6 +552,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     toggle: 'Pārslēgt',
     trash: 'Atkritumi',
     trashedCountSuccessfully: '{{count}} {{label}} pārvietoti uz miskasti.',
+    treeLayout: 'Koks',
+    treeSearchResults:
+      'Atbilstošie dokumenti tiek rādīti plakanā sarakstā. Lai atgrieztos kokā, notīriet meklēšanu, filtrus un grupēšanu.',
     true: 'Patiesi',
     unauthorized: 'Neautorizēts',
     unchecked: 'Neatzīmēts',

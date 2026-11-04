@@ -25,6 +25,7 @@ import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { NestedDocsProvider } from '../../providers/NestedDocs/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
@@ -65,6 +66,8 @@ export function DefaultListView(props: ListViewClientProps) {
     hasTrashPermission,
     hierarchyData,
     listMenuItems,
+    nestedDocExpanded,
+    nestedDocRows,
     newDocumentURL,
     NoResults,
     queryPreset,
@@ -79,7 +82,7 @@ export function DefaultListView(props: ListViewClientProps) {
   const wherePanelID = `list-controls-where-${instanceID}`
 
   const [Table] = useControllableState(InitialTable)
-  const [layout, setLayout] = useState<DocumentLayout>(documentLayout ?? 'table')
+  const [layout, setLayout] = useControllableState<DocumentLayout>(documentLayout ?? 'table')
 
   const { allowCreate, createNewDrawerSlug, isInDrawer } = useListDrawerContext()
   const { setPreference } = usePreferences()
@@ -128,13 +131,12 @@ export function DefaultListView(props: ListViewClientProps) {
   const { openModal } = useModal()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
+  const isNestedDocsTree = Boolean(collectionConfig.nestedDocs && layout === 'tree')
 
   const handleLayoutChange = async (nextLayout: DocumentLayout) => {
-    const preferencesKey = `collection-${collectionSlug}`
-
     setLayout(nextLayout)
-    await setPreference<CollectionPreferences>(preferencesKey, (preferences) => ({
-      ...(preferences ?? {}),
+    await setPreference<CollectionPreferences>(`collection-${collectionSlug}`, (preferences) => ({
+      ...preferences,
       documentLayout: nextLayout,
     }))
     router.refresh()
@@ -205,6 +207,7 @@ export function DefaultListView(props: ListViewClientProps) {
     !isInDrawer &&
     viewType === 'list' &&
     collectionConfig.hierarchy &&
+    !collectionConfig.nestedDocs &&
     typeof collectionConfig.hierarchy === 'object'
       ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
       : undefined
@@ -297,202 +300,252 @@ export function DefaultListView(props: ListViewClientProps) {
     >
       <Container className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
-          <SelectionProvider docs={docs} totalDocs={data?.totalDocs}>
-            {BeforeList}
-            <CollectionListHeader
-              collectionConfig={collectionConfig}
-              currentHierarchyItem={currentHierarchyItem}
-              Description={
-                Description || collectionConfig?.admin?.description ? (
-                  <div className={`${baseClass}__sub-header`}>
-                    <RenderCustomComponent
-                      CustomComponent={Description}
-                      Fallback={
-                        <ViewDescription
-                          collectionSlug={collectionSlug}
-                          description={collectionConfig?.admin?.description}
-                        />
-                      }
+          <NestedDocsProvider
+            collectionSlug={collectionSlug}
+            columns={columnState}
+            data={data}
+            enabled={Boolean(
+              isNestedDocsTree &&
+              nestedDocRows &&
+              !resolvedSearch &&
+              !hasActiveFilters &&
+              !isGroupingBy,
+            )}
+            initialExpanded={nestedDocExpanded}
+            rows={nestedDocRows}
+          >
+            <SelectionProvider
+              docs={docs}
+              totalDocs={isNestedDocsTree ? docs?.length : data?.totalDocs}
+              useNestedDocsData={Boolean(isNestedDocsTree && nestedDocRows)}
+            >
+              {BeforeList}
+              <CollectionListHeader
+                collectionConfig={collectionConfig}
+                currentHierarchyItem={currentHierarchyItem}
+                Description={
+                  Description || collectionConfig?.admin?.description ? (
+                    <div className={`${baseClass}__sub-header`}>
+                      <RenderCustomComponent
+                        CustomComponent={Description}
+                        Fallback={
+                          <ViewDescription
+                            collectionSlug={collectionSlug}
+                            description={collectionConfig?.admin?.description}
+                          />
+                        }
+                      />
+                    </div>
+                  ) : undefined
+                }
+                disableBulkDelete={disableBulkDelete}
+                disableBulkEdit={disableBulkEdit}
+                enableRowSelections={enableRowSelections}
+                hasCreatePermission={hasCreatePermission}
+                hasDeletePermission={hasDeletePermission}
+                hasTrashPermission={hasTrashPermission}
+                i18n={i18n}
+                isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
+                newDocumentURL={newDocumentURL}
+                showSelectAllAcrossPages={!isNestedDocsTree}
+                smallBreak={smallBreak}
+                viewType={viewType}
+              />
+              <ListControls
+                beforeActions={beforeActions}
+                collectionConfig={collectionConfig}
+                collectionSlug={collectionSlug}
+                disableQueryPresets={
+                  collectionConfig?.enableQueryPresets !== true || disableQueryPresets
+                }
+                hasCreatePermission={hasCreatePermission && viewType !== 'trash' && !isInDrawer}
+                hasDeletePermission={hasDeletePermission}
+                isWhereOpen={isWhereOpen}
+                layoutToggle={
+                  !hierarchyData && !isInDrawer ? (
+                    <LayoutToggle
+                      hasTreeLayout={Boolean(collectionConfig.nestedDocs) && viewType === 'list'}
+                      layout={layout}
+                      onChange={handleLayoutChange}
+                    />
+                  ) : undefined
+                }
+                listMenuItems={listMenuItems}
+                newDocumentURL={newDocumentURL}
+                onWhereToggle={() => setIsWhereOpen((prev) => !prev)}
+                queryPreset={queryPreset}
+                queryPresetPermissions={queryPresetPermissions}
+                renderedFilters={renderedFilters}
+                resolvedFilterOptions={resolvedFilterOptions}
+                viewType={viewType}
+                wherePanelID={wherePanelID}
+              />
+              {isWhereOpen && (
+                <div id={wherePanelID}>
+                  <ListWhereBuilder
+                    collectionPluralLabel={collectionConfig?.labels?.plural}
+                    collectionSlug={collectionSlug}
+                    fields={collectionConfig?.fields}
+                    onEmptyRemove={() => setIsWhereOpen(false)}
+                    renderedFilters={renderedFilters}
+                    resolvedFilterOptions={resolvedFilterOptions}
+                  />
+                </div>
+              )}
+              <div
+                aria-atomic="true"
+                className={`${baseClass}__search-status sr-only`}
+                role="status"
+              >
+                {isSearchSettled && resultsAnnouncement && (
+                  <span key={resolvedSearch || ''}>{resultsAnnouncement}</span>
+                )}
+              </div>
+              {BeforeListTable}
+              {isNestedDocsTree && (resolvedSearch || hasActiveFilters || isGroupingBy) && (
+                <p role="status">{i18n.t('general:treeSearchResults')}</p>
+              )}
+              {hierarchyData ? (
+                <DocumentSelectionProvider
+                  collectionData={{
+                    [collectionSlug]: { docs: hierarchyData.childrenData.docs },
+                    ...Object.fromEntries(
+                      Object.entries(hierarchyData.relatedDocumentsByCollection).map(
+                        ([slug, related]) => [slug, { docs: related.result.docs }],
+                      ),
+                    ),
+                  }}
+                >
+                  <HierarchyTable
+                    childrenData={hierarchyData.childrenData}
+                    collectionSlug={collectionSlug}
+                    hierarchyLabel={collectionLabel}
+                    key={hierarchyData.parentId}
+                    parentId={hierarchyData.parentId}
+                    relatedGroups={Object.entries(hierarchyData.relatedDocumentsByCollection).map(
+                      ([slug, related]) => ({
+                        collectionSlug: slug,
+                        data: related.result,
+                        fieldName: related.fieldName,
+                        hasMany: related.hasMany,
+                        label: related.label,
+                      }),
+                    )}
+                    useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+                  />
+                  <DocumentListSelection
+                    disableBulkDelete={disableBulkDelete}
+                    disableBulkEdit={disableBulkEdit}
+                  />
+                </DocumentSelectionProvider>
+              ) : docs?.length > 0 ? (
+                shouldRenderGrid && isDataGrouped ? (
+                  <GroupedDocumentGrid
+                    collectionSlug={collectionSlug}
+                    documentURLs={documentURLs}
+                    enableRowSelections={enableRowSelections}
+                    groups={groupedData}
+                    hierarchyParentFieldName={hierarchyParentFieldName}
+                    viewType={viewType}
+                  />
+                ) : shouldRenderGrid ? (
+                  <DocumentGrid
+                    adminRoute={adminRoute}
+                    collectionLabel={collectionLabel}
+                    collectionSlug={collectionSlug}
+                    docs={docs}
+                    documentURLs={documentURLs}
+                    enableRowSelections={enableRowSelections}
+                    hierarchyParentFieldName={hierarchyParentFieldName}
+                    useAsThumbnail={collectionConfig.admin.useAsThumbnail}
+                    useAsTitle={collectionConfig.admin.useAsTitle}
+                    viewType={viewType}
+                  />
+                ) : (
+                  <RelationshipProvider>{Table}</RelationshipProvider>
+                )
+              ) : null}
+              {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
+              {docs?.length === 0 &&
+                (NoResults ?? (
+                  <NoListResults
+                    Actions={
+                      hasCreatePermission && newDocumentURL && viewType !== 'trash'
+                        ? [
+                            isInDrawer ? (
+                              <Button
+                                el="button"
+                                key="create"
+                                onClick={() => openModal(createNewDrawerSlug)}
+                              >
+                                {i18n.t('general:createNewLabel', {
+                                  label: getTranslation(labels?.singular, i18n),
+                                })}
+                              </Button>
+                            ) : (
+                              <Button el="link" key="create" to={newDocumentURL}>
+                                {i18n.t('general:createNewLabel', {
+                                  label: getTranslation(labels?.singular, i18n),
+                                })}
+                              </Button>
+                            ),
+                          ]
+                        : []
+                    }
+                    description={
+                      viewType === 'trash'
+                        ? i18n.t('general:noTrashResults', {
+                            label: getTranslation(labels?.plural, i18n),
+                          })
+                        : i18n.t('general:noResultsDescription')
+                    }
+                    title={viewType !== 'trash' ? i18n.t('general:noResultsFound') : undefined}
+                    withMargin
+                  />
+                ))}
+              {AfterListTable}
+              {isNestedDocsTree &&
+                nestedDocRows &&
+                !resolvedSearch &&
+                !hasActiveFilters &&
+                smallBreak && (
+                  <div className={`${baseClass}__list-selection`}>
+                    <ListSelection
+                      collectionConfig={collectionConfig}
+                      disableBulkDelete={disableBulkDelete}
+                      disableBulkEdit={disableBulkEdit}
+                      label={collectionLabel}
+                      showSelectAllAcrossPages={false}
                     />
                   </div>
-                ) : undefined
-              }
-              disableBulkDelete={disableBulkDelete}
-              disableBulkEdit={disableBulkEdit}
-              enableRowSelections={enableRowSelections}
-              hasCreatePermission={hasCreatePermission}
-              hasDeletePermission={hasDeletePermission}
-              hasTrashPermission={hasTrashPermission}
-              i18n={i18n}
-              isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
-              newDocumentURL={newDocumentURL}
-              smallBreak={smallBreak}
-              viewType={viewType}
-            />
-            <ListControls
-              beforeActions={beforeActions}
-              collectionConfig={collectionConfig}
-              collectionSlug={collectionSlug}
-              disableQueryPresets={
-                collectionConfig?.enableQueryPresets !== true || disableQueryPresets
-              }
-              hasCreatePermission={hasCreatePermission && viewType !== 'trash' && !isInDrawer}
-              hasDeletePermission={hasDeletePermission}
-              isWhereOpen={isWhereOpen}
-              layoutToggle={
-                !hierarchyData && !isInDrawer ? (
-                  <LayoutToggle layout={layout} onChange={handleLayoutChange} />
-                ) : undefined
-              }
-              listMenuItems={listMenuItems}
-              newDocumentURL={newDocumentURL}
-              onWhereToggle={() => setIsWhereOpen((prev) => !prev)}
-              queryPreset={queryPreset}
-              queryPresetPermissions={queryPresetPermissions}
-              renderedFilters={renderedFilters}
-              resolvedFilterOptions={resolvedFilterOptions}
-              viewType={viewType}
-              wherePanelID={wherePanelID}
-            />
-            {isWhereOpen && (
-              <div id={wherePanelID}>
-                <ListWhereBuilder
-                  collectionPluralLabel={collectionConfig?.labels?.plural}
-                  collectionSlug={collectionSlug}
-                  fields={collectionConfig?.fields}
-                  onEmptyRemove={() => setIsWhereOpen(false)}
-                  renderedFilters={renderedFilters}
-                  resolvedFilterOptions={resolvedFilterOptions}
-                />
-              </div>
-            )}
-            <div aria-atomic="true" className={`${baseClass}__search-status sr-only`} role="status">
-              {isSearchSettled && resultsAnnouncement && (
-                <span key={resolvedSearch || ''}>{resultsAnnouncement}</span>
-              )}
-            </div>
-            {BeforeListTable}
-            {hierarchyData ? (
-              <DocumentSelectionProvider
-                collectionData={{
-                  [collectionSlug]: { docs: hierarchyData.childrenData.docs },
-                  ...Object.fromEntries(
-                    Object.entries(hierarchyData.relatedDocumentsByCollection).map(
-                      ([slug, related]) => [slug, { docs: related.result.docs }],
-                    ),
-                  ),
-                }}
-              >
-                <HierarchyTable
-                  childrenData={hierarchyData.childrenData}
-                  collectionSlug={collectionSlug}
-                  hierarchyLabel={collectionLabel}
-                  key={hierarchyData.parentId}
-                  parentId={hierarchyData.parentId}
-                  relatedGroups={Object.entries(hierarchyData.relatedDocumentsByCollection).map(
-                    ([slug, related]) => ({
-                      collectionSlug: slug,
-                      data: related.result,
-                      fieldName: related.fieldName,
-                      hasMany: related.hasMany,
-                      label: related.label,
-                    }),
-                  )}
-                  useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
-                />
-                <DocumentListSelection
-                  disableBulkDelete={disableBulkDelete}
-                  disableBulkEdit={disableBulkEdit}
-                />
-              </DocumentSelectionProvider>
-            ) : docs?.length > 0 ? (
-              shouldRenderGrid && isDataGrouped ? (
-                <GroupedDocumentGrid
-                  collectionSlug={collectionSlug}
-                  documentURLs={documentURLs}
-                  enableRowSelections={enableRowSelections}
-                  groups={groupedData}
-                  hierarchyParentFieldName={hierarchyParentFieldName}
-                  viewType={viewType}
-                />
-              ) : shouldRenderGrid ? (
-                <DocumentGrid
-                  adminRoute={adminRoute}
-                  collectionLabel={collectionLabel}
-                  collectionSlug={collectionSlug}
-                  docs={docs}
-                  documentURLs={documentURLs}
-                  enableRowSelections={enableRowSelections}
-                  hierarchyParentFieldName={hierarchyParentFieldName}
-                  useAsThumbnail={collectionConfig.admin.useAsThumbnail}
-                  useAsTitle={collectionConfig.admin.useAsTitle}
-                  viewType={viewType}
-                />
-              ) : (
-                <RelationshipProvider>{Table}</RelationshipProvider>
-              )
-            ) : null}
-            {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
-            {docs?.length === 0 &&
-              (NoResults ?? (
-                <NoListResults
-                  Actions={
-                    hasCreatePermission && newDocumentURL && viewType !== 'trash'
-                      ? [
-                          isInDrawer ? (
-                            <Button
-                              el="button"
-                              key="create"
-                              onClick={() => openModal(createNewDrawerSlug)}
-                            >
-                              {i18n.t('general:createNewLabel', {
-                                label: getTranslation(labels?.singular, i18n),
-                              })}
-                            </Button>
-                          ) : (
-                            <Button el="link" key="create" to={newDocumentURL}>
-                              {i18n.t('general:createNewLabel', {
-                                label: getTranslation(labels?.singular, i18n),
-                              })}
-                            </Button>
-                          ),
-                        ]
-                      : []
-                  }
-                  description={
-                    viewType === 'trash'
-                      ? i18n.t('general:noTrashResults', {
-                          label: getTranslation(labels?.plural, i18n),
-                        })
-                      : i18n.t('general:noResultsDescription')
-                  }
-                  title={viewType !== 'trash' ? i18n.t('general:noResultsFound') : undefined}
-                  withMargin
-                />
-              ))}
-            {AfterListTable}
-            {AfterList}
-            {docs?.length > 0 && !isGroupingBy && (
-              <PageControls
-                AfterPageControls={
-                  smallBreak ? (
-                    <div className={`${baseClass}__list-selection`}>
-                      <ListSelection
-                        collectionConfig={collectionConfig}
-                        disableBulkDelete={disableBulkDelete}
-                        disableBulkEdit={disableBulkEdit}
-                        label={collectionLabel}
-                        showSelectAllAcrossPages={!isGroupingBy}
-                      />
-                      <div className={`${baseClass}__list-selection-actions`}>{beforeActions}</div>
-                    </div>
-                  ) : null
-                }
-                collectionConfig={collectionConfig}
-                tableId={hierarchyData ? undefined : `payload-table-${collectionConfig.slug}`}
-              />
-            )}
-          </SelectionProvider>
+                )}
+              {AfterList}
+              {docs?.length > 0 &&
+                !isGroupingBy &&
+                (!isNestedDocsTree || resolvedSearch || hasActiveFilters) && (
+                  <PageControls
+                    AfterPageControls={
+                      smallBreak ? (
+                        <div className={`${baseClass}__list-selection`}>
+                          <ListSelection
+                            collectionConfig={collectionConfig}
+                            disableBulkDelete={disableBulkDelete}
+                            disableBulkEdit={disableBulkEdit}
+                            label={collectionLabel}
+                            showSelectAllAcrossPages={!isGroupingBy && !isNestedDocsTree}
+                          />
+                          <div className={`${baseClass}__list-selection-actions`}>
+                            {beforeActions}
+                          </div>
+                        </div>
+                      ) : null
+                    }
+                    collectionConfig={collectionConfig}
+                    tableId={hierarchyData ? undefined : `payload-table-${collectionConfig.slug}`}
+                  />
+                )}
+            </SelectionProvider>
+          </NestedDocsProvider>
         </TableColumnsProvider>
         {docs?.length > 0 && isGroupingBy && data.totalPages > 1 && (
           <PageControls collectionConfig={collectionConfig} />
