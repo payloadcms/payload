@@ -329,6 +329,8 @@ Only `sharpTransformer` stores size files, and only the sizes it registered. Whe
 
 Each save of a new file writes these entries again. A client upload (`clientUploads`) is not downloaded in full only because such sizes are declared.
 
+Every size must apply the saved keys, the same as the main file. When the saved keys can be applied only at request time, the owner of the sizes must also build them at request time. Otherwise the save fails before any file changes, and the error names each key that no stage can apply. For example, a `rotate` that only a request-time transformer applies cannot be saved on a collection whose sizes `sharpTransformer` stores.
+
 Request parameters never change `_transforms`. To save a change, update the document.
 
 ### Example: a multi-stage local transformer
