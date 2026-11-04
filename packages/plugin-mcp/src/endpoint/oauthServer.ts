@@ -192,7 +192,10 @@ const authorize: PayloadHandler = (req) => {
   const user = getBrowserUser(req)
 
   if (!user) {
-    const loginURL = formatAdminURL({ adminRoute: req.payload.config.routes.admin, path: '/login' })
+    const loginURL = formatAdminURL({
+      adminRoute: req.payload.config.routes.admin,
+      path: req.payload.config.admin.routes.login,
+    })
 
     return new Response(null, {
       headers: {
