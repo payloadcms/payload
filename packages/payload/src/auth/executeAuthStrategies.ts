@@ -31,6 +31,7 @@ export const executeAuthStrategies = async (
     }
 
     if (result.user) {
+      result.user._strategy ??= strategy.name
       return result
     }
   }
