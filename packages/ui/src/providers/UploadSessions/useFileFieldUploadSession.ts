@@ -33,6 +33,8 @@ export const useFileFieldUploadSession = ({
   uploadSessionsRef.current = uploadSessions
   const searchParams = useSearchParams()
   const sessionFileRef = useRef<File | null>(null)
+  /** Counts file selections, so an attached upload that arrives after the user picked a file is dropped. */
+  const selectionCountRef = useRef(0)
   const adoptedSessionID = isEnabled ? searchParams.get('uploadSession') : null
 
   const onFileChange = useCallback(
@@ -40,6 +42,8 @@ export const useFileFieldUploadSession = ({
       if (!isEnabled) {
         return
       }
+
+      selectionCountRef.current += 1
 
       const uploadSessions = uploadSessionsRef.current
 
@@ -76,12 +80,21 @@ export const useFileFieldUploadSession = ({
     }
 
     let isCancelled = false
+    const selectionCount = selectionCountRef.current
 
     void uploadSessionsRef.current.adopt({ sessionID: adoptedSessionID }).then((placeholder) => {
-      if (placeholder && !isCancelled) {
-        sessionFileRef.current = placeholder
-        onAdopt(placeholder)
+      if (!placeholder || isCancelled) {
+        return
       }
+
+      // The user picked a file meanwhile. Detaching keeps the session recoverable.
+      if (selectionCount !== selectionCountRef.current) {
+        uploadSessionsRef.current.detach({ file: placeholder })
+        return
+      }
+
+      sessionFileRef.current = placeholder
+      onAdopt(placeholder)
     })
 
     return () => {

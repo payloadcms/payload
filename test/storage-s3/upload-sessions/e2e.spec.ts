@@ -274,6 +274,52 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await context.close()
   })
 
+  test('should keep a file picked while an attached upload is still loading', async ({
+    browser,
+  }) => {
+    const { context, log, page } = await openCreateForm({ browser })
+
+    await pickFile(page)
+    await expect.poll(() => log.partPuts).toBe(3)
+    await page.getByRole('link', { name: 'Users' }).first().click()
+    await page.getByRole('button', { name: 'Leave anyway' }).click()
+
+    // Hold the attached upload's lookup until the user has picked another file.
+    let releaseLookup = () => {}
+    const lookupHeld = new Promise<void>((resolve) => {
+      releaseLookup = resolve
+    })
+
+    await page.route(/\/api\/payload-upload-sessions\/[^/]+$/, async (route) => {
+      if (route.request().method() === 'GET') {
+        await lookupHeld
+      }
+
+      await route.fallback()
+    })
+    await page.getByRole('button', { name: 'Finish saving' }).click()
+    await expect(page).toHaveURL(/uploadSession=/)
+    await page
+      .locator('input[type="file"]')
+      .first()
+      .setInputFiles({
+        name: 'picked-meanwhile.mp4',
+        buffer: randomBytes(1024),
+        mimeType: 'video/mp4',
+      })
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('picked-meanwhile.mp4')
+
+    await expect(page.getByRole('button', { name: 'Finish saving' })).toBeHidden()
+
+    releaseLookup()
+
+    // The attached upload is set aside, and stays available to finish later.
+    await expect(page.getByRole('button', { name: 'Finish saving' })).toBeVisible()
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('picked-meanwhile.mp4')
+
+    await context.close()
+  })
+
   test('should finish the save in the background for a file renamed while uploading', async ({
     browser,
   }) => {
@@ -363,6 +409,46 @@ test.describe('storage-s3 upload sessions E2E', () => {
     // Another form with unsaved changes must still prompt while that save runs.
     await page.getByRole('link', { name: 'Videos' }).first().click()
     await expect(page.getByRole('button', { name: 'Leave anyway' })).toBeVisible()
+
+    await context.close()
+  })
+
+  test('should cancel a session that was still being created when the file was removed', async ({
+    browser,
+  }) => {
+    const { context, log, page } = await openCreateForm({ browser })
+
+    // The server creates the session, but its response reaches the browser only after removal.
+    await page.route('**/api/payload-upload-sessions', async (route) => {
+      if (route.request().method() !== 'POST') {
+        return route.fallback()
+      }
+
+      const response = await route.fetch()
+
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await route.fulfill({ response }).catch(() => {})
+    })
+
+    await pickFile(page)
+    await expect
+      .poll(() => log.sessionCalls.includes('POST /api/payload-upload-sessions'))
+      .toBe(true)
+    await page.getByRole('button', { name: 'Cancel', exact: true }).first().click()
+
+    await expect
+      .poll(() => log.sessionCalls.some((call) => call.startsWith('DELETE ')), { timeout: 10_000 })
+      .toBe(true)
+
+    await expect
+      .poll(async () => {
+        const { docs } = await page.evaluate(() =>
+          fetch('/api/payload-upload-sessions').then((res) => res.json()),
+        )
+
+        return docs.length
+      })
+      .toBe(0)
 
     await context.close()
   })
