@@ -35,10 +35,7 @@ export const unseal = <T>({
   }
 
   try {
-    // Previous secrets can be public, like a default secret from source code, so only client IDs
-    // accept them. Client IDs grant nothing, and this keeps clients registered when the secret changes.
-    const secret = type === 'client' ? undefined : req.payload.config.secret
-    const data = JSON.parse(req.payload.decrypt(value, { secret }))
+    const data = JSON.parse(req.payload.decrypt(value, { secret: req.payload.config.secret }))
     return data.type === type && (!data.exp || data.exp > Date.now()) ? data : undefined
   } catch {
     return undefined
