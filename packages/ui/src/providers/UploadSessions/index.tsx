@@ -253,10 +253,11 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       // Avoid unhandled rejections when nothing is waiting on the upload.
       detached.catch(() => {})
 
+      // Not aborted with the upload: the server may already have created the session, and
+      // `cancel` needs its ID to release it.
       const session = createUploadSession({
         collectionSlug,
         file,
-        signal: controller.signal,
         targetID,
         ...requestArgs,
       })
