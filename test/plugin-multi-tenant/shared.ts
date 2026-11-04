@@ -16,5 +16,3 @@ export const multiTenantPostsSlug = 'multi-tenant-posts'
 
 export const foldersSlug = 'folders'
 export const mediaSlug = 'media'
-
-export const bulkActionPostsSlug = 'bulk-action-posts'

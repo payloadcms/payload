@@ -28,11 +28,11 @@ import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
 import {
   autosaveGlobalSlug,
-  bulkActionPostsSlug,
   foldersSlug,
   mediaSlug,
   menuItemsSlug,
   menuSlug,
+  multiTenantPostsSlug,
   tenantsSlug,
   usersSlug,
 } from './shared.js'
@@ -163,7 +163,7 @@ test.describe('Multi Tenant', () => {
           await expect
             .poll(async () => {
               const result = await payload.find({
-                collection: bulkActionPostsSlug,
+                collection: multiTenantPostsSlug,
                 overrideAccess: true,
                 depth: 0,
                 limit: 0,
@@ -205,20 +205,20 @@ test.describe('Multi Tenant', () => {
       })
       const tenantA = tenants.find(({ name }) => name === 'Blue Dog')!
       const tenantB = tenants.find(({ name }) => name === 'Steel Cat')!
-      const postsURL = new AdminUrlUtil(serverURL, bulkActionPostsSlug)
+      const postsURL = new AdminUrlUtil(serverURL, multiTenantPostsSlug)
       const isTrashView = action === 'restore'
       const initialStatus = action === 'publish' ? 'draft' : 'published'
 
       const docs = await Promise.all(
         Array.from({ length: 11 }, (_, index) =>
           payload.create({
-            collection: bulkActionPostsSlug,
+            collection: multiTenantPostsSlug,
             overrideAccess: true,
             data: {
               title: index < 9 ? `Batch ${index}` : `Outside ${index}`,
               description: 'Original',
               category: index < 3 || index >= 6 ? 'target' : 'other',
-              tenant: index < 6 || index >= 9 ? tenantA.id : tenantB.id,
+              tenant: [index < 6 || index >= 9 ? tenantA.id : tenantB.id],
               _status: initialStatus,
               ...(isTrashView && index !== 9 ? { deletedAt: '2026-01-01T00:00:00.000Z' } : {}),
             },
@@ -251,7 +251,7 @@ test.describe('Multi Tenant', () => {
       if (action === 'edit') {
         await page.getByRole('button', { name: 'Edit', exact: true }).click()
 
-        const drawer = page.locator(`#${modalPrefix}edit-${bulkActionPostsSlug}`)
+        const drawer = page.locator(`#${modalPrefix}edit-${multiTenantPostsSlug}`)
 
         await drawer.locator('.field-select .rs__control').click()
         await getSelectMenu({ page }).getByText('Description', { exact: true }).click()
@@ -265,7 +265,9 @@ test.describe('Multi Tenant', () => {
           })
           .click()
         await page
-          .locator(`#${modalPrefix}${action}-${bulkActionPostsSlug} [data-dialog-action="confirm"]`)
+          .locator(
+            `#${modalPrefix}${action}-${multiTenantPostsSlug} [data-dialog-action="confirm"]`,
+          )
           .click()
       } else if (action === 'restore') {
         const restoreButton = page.getByRole('button', { name: 'Restore', exact: true })

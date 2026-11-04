@@ -10,7 +10,6 @@ const dirname = path.dirname(filename)
 import type { Config as ConfigType } from './payload-types.js'
 
 import { AutosaveGlobal } from './collections/AutosaveGlobal.js'
-import { BulkActionPosts } from './collections/BulkActionPosts.js'
 import { Media } from './collections/Media.js'
 import { Menu } from './collections/Menu.js'
 import { MenuItems } from './collections/MenuItems.js'
@@ -21,7 +20,6 @@ import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
 import {
   autosaveGlobalSlug,
-  bulkActionPostsSlug,
   foldersSlug,
   mediaSlug,
   menuItemsSlug,
@@ -37,7 +35,6 @@ export const baseConfig: Partial<Config> = {
     MenuItems,
     Menu,
     AutosaveGlobal,
-    BulkActionPosts,
     Relationships,
     MultiTenantPosts,
     Media,
@@ -112,7 +109,6 @@ export const baseConfig: Partial<Config> = {
         ],
       },
       collections: {
-        [bulkActionPostsSlug]: {},
         [foldersSlug]: {},
         [menuItemsSlug]: {
           useTenantAccess: false,
