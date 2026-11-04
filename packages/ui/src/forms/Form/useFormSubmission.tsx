@@ -19,6 +19,7 @@ import type {
   Submit,
   SubmitOptions,
 } from './types.js'
+import type { RequestFormState, SubmissionActivity } from './useFormStateRequest.js'
 
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -36,7 +37,11 @@ type Args = {
   formRef: RefObject<HTMLFormElement | null>
   prevFormStateRef: RefObject<FormState>
   props: FormProps
+  requestFormState: RequestFormState
   setIsValid: FormContextType['setIsValid']
+  submissionActivityRef: RefObject<SubmissionActivity>
+  /** Kept in sync with the submitted state, for requests queued before React renders it. */
+  submittedRef: RefObject<boolean>
 }
 
 export const useFormSubmission = ({
@@ -45,7 +50,10 @@ export const useFormSubmission = ({
   formRef,
   prevFormStateRef,
   props,
+  requestFormState,
   setIsValid,
+  submissionActivityRef,
+  submittedRef,
 }: Args) => {
   const {
     action,
@@ -71,7 +79,15 @@ export const useFormSubmission = ({
 
   const [isDisabled, setIsDisabled] = useState(isDisabledFromProps || false)
 
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isSubmitted, _setIsSubmitted] = useState(false)
+
+  const setIsSubmitted = useCallback(
+    (isSubmitted: boolean) => {
+      submittedRef.current = isSubmitted
+      _setIsSubmitted(isSubmitted)
+    },
+    [submittedRef],
+  )
 
   const [successfulSubmitCount, setSuccessfulSubmitCount] = useState(0)
 
@@ -186,6 +202,13 @@ export const useFormSubmission = ({
           },
         })
       }
+
+      // Every successful submission is followed by a form-state request.
+      // A failed one already applies its errors, and a request built from the rejected state could mark fields fixed since then as invalid.
+      let followUpRequest: Omit<Parameters<RequestFormState>[0], 'submitted'> | undefined
+
+      submissionActivityRef.current.started += 1
+      submissionActivityRef.current.running += 1
 
       try {
         if (disableFormWhileProcessing) {
@@ -330,20 +353,13 @@ export const useFormSubmission = ({
           if (res.status < 400) {
             setSuccessfulSubmitCount((count) => count + 1)
 
+            followUpRequest = { acceptValues, savedDocument: json?.doc ?? json?.result }
+
             if (typeof onSuccess === 'function') {
-              const newFormState = await onSuccess(json, {
+              await onSuccess(json, {
                 context,
                 formState: serializableFormState,
               })
-
-              if (newFormState) {
-                dispatchFields({
-                  type: 'MERGE_SERVER_STATE',
-                  acceptValues,
-                  prevStateRef: prevFormStateRef,
-                  serverState: newFormState,
-                })
-              }
             }
 
             setIsSubmitted(false)
@@ -445,7 +461,11 @@ export const useFormSubmission = ({
           errorToast(err.message)
         }
       } finally {
-        // Reserved for releasing submission state once submissions are queued.
+        submissionActivityRef.current.running -= 1
+
+        if (followUpRequest) {
+          requestFormState({ ...followUpRequest, submitted: submittedRef.current })
+        }
       }
     },
     [
@@ -460,6 +480,7 @@ export const useFormSubmission = ({
       onSubmit,
       onSuccess,
       redirect,
+      requestFormState,
       router,
       t,
       i18n,
@@ -471,6 +492,9 @@ export const useFormSubmission = ({
       formRef,
       prevFormStateRef,
       setIsValid,
+      setIsSubmitted,
+      submissionActivityRef,
+      submittedRef,
     ],
   )
 
@@ -499,7 +523,7 @@ export const useFormSubmission = ({
     if (typeof isSubmittedFromProps === 'boolean') {
       setIsSubmitted(isSubmittedFromProps)
     }
-  }, [isSubmittedFromProps])
+  }, [isSubmittedFromProps, setIsSubmitted])
 
   return {
     backgroundProcessing: isBackgroundProcessing,

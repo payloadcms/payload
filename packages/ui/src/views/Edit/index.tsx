@@ -6,8 +6,7 @@ import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { FormProps } from '../../forms/Form/index.js'
-import type { FormOnSuccess } from '../../forms/Form/types.js'
+import type { FormOnSuccess, FormStateRequest } from '../../forms/Form/types.js'
 import type { LockedState } from '../../utilities/buildFormState.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
@@ -31,10 +30,8 @@ import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
-import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
-import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
@@ -87,7 +84,6 @@ export function DefaultEditView({
     documentIsLocked,
     documentLockState: documentLockStateRef,
     getDocPermissions,
-    getDocPreferences,
     globalSlug,
     hasPublishPermission,
     hasSavePermission,
@@ -142,7 +138,6 @@ export function DefaultEditView({
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
-  const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
   const { clearRouteCache } = useRouteCache()
   const {
@@ -154,9 +149,6 @@ export function DefaultEditView({
     url: livePreviewURL,
   } = useLivePreviewContext()
   const { isPreviewEnabled, setPreviewURL } = usePreviewURL()
-
-  const abortOnChangeRef = useRef<AbortController>(null)
-  const abortOnSaveRef = useRef<AbortController>(null)
 
   const locale = params.get('locale')
 
@@ -187,8 +179,6 @@ export function DefaultEditView({
 
   const hasCheckedForStaleDataRef = useRef(false)
   const originalUpdatedAtRef = useRef(data?.updatedAt)
-  const saveCounterRef = useRef(0)
-  const isSavingRef = useRef(false)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
   // Render can't read the current time, so check for expiry when the lock changes and expires
@@ -312,9 +302,7 @@ export function DefaultEditView({
 
   const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
     async (json, ctx) => {
-      const { context, formState } = ctx || {}
-
-      const controller = handleAbortRef(abortOnSaveRef)
+      const { context } = ctx || {}
 
       const document = json?.doc || json?.result
 
@@ -332,7 +320,6 @@ export function DefaultEditView({
       // This allows detecting if another user modifies the document after this save
       originalUpdatedAtRef.current = updatedAt
       hasCheckedForStaleDataRef.current = false
-      isSavingRef.current = false
 
       if (context?.incrementVersionCount !== false) {
         incrementVersionCount()
@@ -379,43 +366,9 @@ export function DefaultEditView({
       }
 
       if (id || globalSlug) {
-        const docPreferences = await getDocPreferences()
-
-        const { livePreviewURL, previewURL, state } = await getFormState({
-          id,
-          collectionSlug,
-          data: document,
-          docPermissions,
-          docPreferences,
-          formState,
-          globalSlug,
-          operation,
-          renderAllFields: false,
-          returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
-          returnLockStatus: false,
-          returnPreviewURL: isPreviewEnabled,
-          schemaPath: schemaPathSegments.join('.'),
-          signal: controller.signal,
-          skipValidation: true,
-        })
-
-        // For upload collections, clear the file field from the returned state
-        // to prevent the File object from persisting in form state after save
-        if (upload && state) {
-          delete state.file
-        }
-
         // Unlock the document after save
         if (isLockingEnabled) {
           setDocumentIsLocked(false)
-        }
-
-        if (isLivePreviewEnabled && typeofLivePreviewURL === 'function') {
-          setLivePreviewURL(livePreviewURL)
-        }
-
-        if (isPreviewEnabled) {
-          setPreviewURL(previewURL)
         }
 
         reportUpdate({
@@ -426,10 +379,6 @@ export function DefaultEditView({
           operation: 'update',
           updatedAt,
         })
-
-        abortOnSaveRef.current = null
-
-        return state
       } else {
         reportUpdate({
           id,
@@ -461,126 +410,110 @@ export function DefaultEditView({
       router,
       resetUploadEdits,
       getDocPermissions,
-      getDocPreferences,
-      getFormState,
-      docPermissions,
-      operation,
-      isLivePreviewEnabled,
-      typeofLivePreviewURL,
-      isPreviewEnabled,
-      schemaPathSegments,
-      upload,
       isLockingEnabled,
       reportUpdate,
       drawerSlug,
       entitySlug,
       setDocumentIsLocked,
-      setLivePreviewURL,
-      setPreviewURL,
     ],
   )
 
-  const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState, submitted }) => {
-      const controller = handleAbortRef(abortOnChangeRef)
+  const formStateRequest = useMemo<FormStateRequest>(
+    () => ({
+      args: ({ savedDocument }) => {
+        const isAfterSave = Boolean(savedDocument)
 
-      // Capture save state before the async form-state request so we can detect
-      // if a save was triggered while this request was in-flight
-      const saveCounterAtStart = saveCounterRef.current
-      const isSavingAtStart = isSavingRef.current
+        // Sync originalUpdatedAt with current data if it's NEWER (e.g., after router.refresh())
+        if (data?.updatedAt && data.updatedAt > originalUpdatedAtRef.current) {
+          originalUpdatedAtRef.current = data.updatedAt
+          // Reset check flag so we can detect new stale data
+          hasCheckedForStaleDataRef.current = false
+        }
 
-      // Sync originalUpdatedAt with current data if it's NEWER (e.g., after router.refresh())
-      if (data?.updatedAt && data.updatedAt > originalUpdatedAtRef.current) {
-        originalUpdatedAtRef.current = data.updatedAt
-        // Reset check flag so we can detect new stale data
-        hasCheckedForStaleDataRef.current = false
-      }
+        const currentTime = Date.now()
+        const timeSinceLastUpdate = currentTime - editSessionStartTime
 
-      const currentTime = Date.now()
-      const timeSinceLastUpdate = currentTime - editSessionStartTime
+        const updateLastEdited = isLockingEnabled && !isAfterSave && timeSinceLastUpdate >= 10000 // 10 seconds
 
-      const updateLastEdited = isLockingEnabled && timeSinceLastUpdate >= 10000 // 10 seconds
+        if (updateLastEdited) {
+          setEditSessionStartTime(currentTime)
+        }
 
-      if (updateLastEdited) {
-        setEditSessionStartTime(currentTime)
-      }
+        // Check for stale data on first edit only
+        // Skip this check entirely for autosave-enabled collections/globals to prevent
+        // false positives from the user's own autosaves
+        const checkForStaleData =
+          !isAfterSave &&
+          !hasCheckedForStaleDataRef.current &&
+          originalUpdatedAtRef.current &&
+          operation === 'update' &&
+          !isTrashed &&
+          !autosaveEnabled
 
-      // Check for stale data on first edit only
-      // Skip this check entirely for autosave-enabled collections/globals to prevent
-      // false positives from the user's own autosaves
-      const checkForStaleData =
-        !hasCheckedForStaleDataRef.current &&
-        originalUpdatedAtRef.current &&
-        operation === 'update' &&
-        !isTrashed &&
-        !autosaveEnabled
+        if (checkForStaleData) {
+          hasCheckedForStaleDataRef.current = true
+        }
 
-      if (checkForStaleData) {
-        hasCheckedForStaleDataRef.current = true
-      }
+        return {
+          checkForStaleData,
+          operation,
+          originalUpdatedAt: checkForStaleData ? originalUpdatedAtRef.current : undefined,
+          readOnly: isTrashed || isReadOnlyForIncomingUser,
+          returnLivePreviewURL:
+            isAfterSave && isLivePreviewEnabled && typeofLivePreviewURL === 'function',
+          returnLockStatus: isLockingEnabled && !isAfterSave,
+          returnPreviewURL: isAfterSave && isPreviewEnabled,
+          schemaPath: schemaPathSegments.join('.'),
+          updateLastEdited,
+        }
+      },
+      onResponse: (
+        { livePreviewURL, lockedState, previewURL, staleDataState, state },
+        { overlappedSubmit, savedDocument },
+      ) => {
+        if (savedDocument) {
+          // Clear the file field so the uploaded File object doesn't persist in form state after save
+          if (upload) {
+            delete state.file
+          }
 
-      const docPreferences = await getDocPreferences()
+          if (isLivePreviewEnabled && typeofLivePreviewURL === 'function') {
+            setLivePreviewURL(livePreviewURL)
+          }
 
-      const result = await getFormState({
-        id,
-        checkForStaleData,
-        collectionSlug,
-        docPermissions,
-        docPreferences,
-        formState: prevFormState,
-        globalSlug,
-        operation,
-        originalUpdatedAt: checkForStaleData ? originalUpdatedAtRef.current : undefined,
-        readOnly: isTrashed || isReadOnlyForIncomingUser,
-        renderAllFields: false,
-        returnLockStatus: isLockingEnabled,
-        schemaPath: schemaPathSegments.join('.'),
-        signal: controller.signal,
-        skipValidation: !submitted,
-        updateLastEdited,
-      })
+          if (isPreviewEnabled) {
+            setPreviewURL(previewURL)
+          }
 
-      if (!result) {
-        return
-      }
+          return
+        }
 
-      const { lockedState, staleDataState, state } = result
+        if (isLockingEnabled) {
+          handleDocumentLocking(lockedState)
+        }
 
-      if (isLockingEnabled) {
-        handleDocumentLocking(lockedState)
-      }
-
-      // Handle stale data detection.
-      // Skip if a save was in-flight when this request started, or if the save counter
-      // has advanced — either way the newer updatedAt is from our OWN save.
-      if (
-        staleDataState?.isStale &&
-        !isSavingAtStart &&
-        saveCounterRef.current === saveCounterAtStart
-      ) {
-        setShowStaleDataModal(true)
-      }
-
-      abortOnChangeRef.current = null
-
-      return state
-    },
+        // A save that overlapped this request makes the newer updatedAt our OWN, not stale data.
+        if (staleDataState?.isStale && !overlappedSubmit) {
+          setShowStaleDataModal(true)
+        }
+      },
+    }),
     [
       data?.updatedAt,
       editSessionStartTime,
       isLockingEnabled,
-      getDocPreferences,
-      getFormState,
-      id,
-      collectionSlug,
-      docPermissions,
-      globalSlug,
       operation,
       schemaPathSegments,
       handleDocumentLocking,
       autosaveEnabled,
       isTrashed,
       isReadOnlyForIncomingUser,
+      isLivePreviewEnabled,
+      typeofLivePreviewURL,
+      isPreviewEnabled,
+      upload,
+      setLivePreviewURL,
+      setPreviewURL,
     ],
   )
 
@@ -588,16 +521,6 @@ export function DefaultEditView({
   useEffect(() => {
     return () => {
       setShowTakeOverModal(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    const abortOnChange = abortOnChangeRef.current
-    const abortOnSave = abortOnSaveRef.current
-
-    return () => {
-      abortAndIgnore(abortOnChange)
-      abortAndIgnore(abortOnSave)
     }
   }, [])
 
@@ -723,16 +646,12 @@ export function DefaultEditView({
           disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission || isTrashed}
           disableSuccessStatus={!isEditing && depth < 2 && redirectAfterCreate !== false}
           disableValidationOnSubmit={!validateBeforeSubmit}
+          formStateRequest={formStateRequest}
           initialState={!isInitializing && initialState}
           isDocumentForm={true}
           isInitializing={isInitializing}
           key={`${isLocked}`}
           method={id ? 'PATCH' : 'POST'}
-          onChange={[onChange]}
-          onSubmit={() => {
-            saveCounterRef.current += 1
-            isSavingRef.current = true
-          }}
           onSuccess={onSave}
         >
           {isInDrawer && (

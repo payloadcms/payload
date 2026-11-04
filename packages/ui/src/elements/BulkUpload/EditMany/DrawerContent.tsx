@@ -5,9 +5,10 @@ import type { ClientCollectionConfig, SelectType } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { unflatten } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 
 import type { FormProps } from '../../../forms/Form/index.js'
+import type { FormStateRequest } from '../../../forms/Form/types.js'
 import type { OnFieldSelect } from '../../FieldSelect/index.js'
 import type { FieldOption } from '../../FieldSelect/reduceFieldOptions.js'
 import type { State } from '../FormsManager/reducer.js'
@@ -22,7 +23,6 @@ import { useAuth } from '../../../providers/Auth/index.js'
 import { DocumentInfoProvider } from '../../../providers/DocumentInfo/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { FieldSelect } from '../../FieldSelect/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { baseClass } from './index.js'
@@ -49,7 +49,6 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
   const { closeModal } = useModal()
   const { bulkUpdateForm } = useFormsManager()
   const { getFormState } = useServerFunctions()
-  const abortFormStateRef = React.useRef<AbortController>(null)
 
   const [selectedFields, setSelectedFields] = useState<FieldOption[]>([])
   const collectionPermissions = permissions?.collections?.[collection.slug]
@@ -63,36 +62,19 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     )
   }, [selectedFields])
 
-  const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState, submitted }) => {
-      const controller = handleAbortRef(abortFormStateRef)
-
-      const { state } = await getFormState({
+  const formStateRequest = useMemo<FormStateRequest>(
+    () => ({
+      args: {
         collectionSlug: collection.slug,
         docPermissions: collectionPermissions,
         docPreferences: null,
-        formState: prevFormState,
         operation: 'update',
         schemaPath: collection.slug,
         select,
-        signal: controller.signal,
-        skipValidation: !submitted,
-      })
-
-      abortFormStateRef.current = null
-
-      return state
-    },
-    [getFormState, collection, collectionPermissions, select],
+      },
+    }),
+    [collection.slug, collectionPermissions, select],
   )
-
-  useEffect(() => {
-    const abortFormState = abortFormStateRef.current
-
-    return () => {
-      abortAndIgnore(abortFormState)
-    }
-  }, [])
 
   const handleSubmit: FormProps['onSubmit'] = useCallback(
     (formState) => {
@@ -160,8 +142,8 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     >
       <Form
         className={`${baseClass}__form`}
+        formStateRequest={formStateRequest}
         isInitializing={isInitializing}
-        onChange={[onChange]}
         onSubmit={handleSubmit}
       >
         <div className={`${baseClass}__header`}>

@@ -1,5 +1,7 @@
 'use client'
 
+import type { FormStateRequest } from '@payloadcms/ui'
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
@@ -340,44 +342,35 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
   const { i18n, t } = useTranslation<object, string>()
 
-  const onChange = useCallback(
-    async ({ formState: prevFormState, submit }: { formState: FormState; submit?: boolean }) => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-
-      const controller = new AbortController()
-      onChangeAbortControllerRef.current = controller
+  const getRequestArgs = useCallback(
+    (prevFormState: FormState) => {
       const blockData = reduceFormStateToBlockData(prevFormState, formDataRef.current)
 
-      const { state: newFormState } = await getFormState({
-        id,
-        collectionSlug,
+      return {
         data: blockData,
         docPermissions: {
-          fields: true,
+          fields: true as const,
         },
-        docPreferences: await getDocPreferences(),
         documentFormState: parentDocumentFields,
-        formState: prevFormState,
-        globalSlug,
         initialBlockData: blockData,
-        operation: 'update',
+        operation: 'update' as const,
         readOnly: !isEditable,
-        renderAllFields: submit ? true : false,
         schemaPath: schemaFieldsPath,
-        signal: controller.signal,
-      })
-
-      if (!newFormState) {
-        return prevFormState
+        skipValidation: false,
       }
+    },
+    [schemaFieldsPath, parentDocumentFields, isEditable],
+  )
 
+  const applyServerState = useCallback(
+    (newFormState: FormState, prevFormState: FormState) => {
       if (prevFormState.blockName) {
         newFormState.blockName = prevFormState.blockName
       }
 
       const newFormStateData = reduceFormStateToBlockData(
         deepCopyObjectSimpleWithoutReactComponents(newFormState, { excludeFiles: true }),
-        blockData,
+        reduceFormStateToBlockData(prevFormState, formDataRef.current),
       ) as BlockFields
 
       setTimeout(() => {
@@ -395,39 +388,68 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           { tag: SKIP_DOM_SELECTION_TAG },
         )
       }, 0)
+    },
+    [blockType, editor, nodeKey],
+  )
 
-      if (submit) {
-        if (!CustomLabelFromProps) {
-          setCustomLabel(newFormState._components?.customComponents?.BlockLabel ?? undefined)
-        }
-        if (!CustomBlockFromProps) {
-          setCustomBlock(newFormState._components?.customComponents?.Block ?? undefined)
-        }
+  const formStateRequest = useMemo<FormStateRequest>(
+    () => ({
+      args: ({ formState }) => getRequestArgs(formState),
+      onResponse: ({ state }, { formState }) => applyServerState(state, formState),
+    }),
+    [getRequestArgs, applyServerState],
+  )
 
-        let rowErrorCount = 0
-        for (const formField of Object.values(newFormState)) {
-          if (formField?.valid === false) {
-            rowErrorCount++
-          }
-        }
-        setErrorCount(rowErrorCount)
+  // Only called when the form is submitted from the drawer, usually only the case if the block has a custom Block component.
+  const onBeforeSubmit = useCallback(
+    async ({ formState: prevFormState }: { formState: FormState }) => {
+      abortAndIgnore(onChangeAbortControllerRef.current)
+
+      const controller = new AbortController()
+      onChangeAbortControllerRef.current = controller
+
+      const { state: newFormState } = await getFormState({
+        id,
+        collectionSlug,
+        ...getRequestArgs(prevFormState),
+        docPreferences: await getDocPreferences(),
+        formState: prevFormState,
+        globalSlug,
+        renderAllFields: true,
+        signal: controller.signal,
+      })
+
+      if (!newFormState) {
+        return prevFormState
       }
+
+      applyServerState(newFormState, prevFormState)
+
+      if (!CustomLabelFromProps) {
+        setCustomLabel(newFormState._components?.customComponents?.BlockLabel ?? undefined)
+      }
+      if (!CustomBlockFromProps) {
+        setCustomBlock(newFormState._components?.customComponents?.Block ?? undefined)
+      }
+
+      let rowErrorCount = 0
+      for (const formField of Object.values(newFormState)) {
+        if (formField?.valid === false) {
+          rowErrorCount++
+        }
+      }
+      setErrorCount(rowErrorCount)
 
       return newFormState
     },
-
     [
       getFormState,
       id,
       collectionSlug,
       getDocPreferences,
       globalSlug,
-      schemaFieldsPath,
-      blockType,
-      parentDocumentFields,
-      isEditable,
-      editor,
-      nodeKey,
+      getRequestArgs,
+      applyServerState,
       CustomBlockFromProps,
       CustomLabelFromProps,
     ],
@@ -812,16 +834,11 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     return (
       <div data-block-drawer-slug={drawerSlug} style={{ display: 'contents' }}>
         <Form
-          beforeSubmit={[
-            async ({ formState }) => {
-              // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-              return await onChange({ formState, submit: true })
-            },
-          ]}
+          beforeSubmit={[onBeforeSubmit]}
           el="div"
           fields={clientBlock?.fields ?? []}
+          formStateRequest={formStateRequest}
           initialState={initialState}
-          onChange={[onChange]}
           onSubmit={(formState) => {
             // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
             const newData = reduceFormStateToBlockData(
@@ -878,7 +895,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     formUuid,
     initialState,
     nodeKey,
-    onChange,
+    formStateRequest,
+    onBeforeSubmit,
     submitted,
   ])
 

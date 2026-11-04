@@ -7,9 +7,9 @@ import type {
 } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
-import React, { useEffect } from 'react'
+import React from 'react'
 
-import type { FormProps } from '../../forms/Form/index.js'
+import type { FormStateRequest } from '../../forms/Form/types.js'
 import type { UserWithToken } from '../../providers/Auth/index.js'
 
 import { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
@@ -20,9 +20,7 @@ import { RenderFields } from '../../forms/RenderFields/index.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 
 const baseClass = 'create-first-user__form'
 
@@ -40,50 +38,27 @@ export const CreateFirstUserClient: React.FC<{
     getEntityConfig,
   } = useConfig()
 
-  const { getFormState } = useServerFunctions()
-
   const { t } = useTranslation()
   const { setUser } = useAuth()
 
-  const abortOnChangeRef = React.useRef<AbortController>(null)
-
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
 
-  const onChange: FormProps['onChange'][0] = React.useCallback(
-    async ({ formState: prevFormState, submitted }) => {
-      const controller = handleAbortRef(abortOnChangeRef)
-
-      const response = await getFormState({
+  const formStateRequest = React.useMemo<FormStateRequest>(
+    () => ({
+      args: {
         collectionSlug: userSlug,
         docPermissions,
         docPreferences,
-        formState: prevFormState,
         operation: 'create',
         schemaPath: userSlug,
-        signal: controller.signal,
-        skipValidation: !submitted,
-      })
-
-      abortOnChangeRef.current = null
-
-      if (response && response.state) {
-        return response.state
-      }
-    },
-    [userSlug, getFormState, docPermissions, docPreferences],
+      },
+    }),
+    [userSlug, docPermissions, docPreferences],
   )
 
   const handleFirstRegister = (data: UserWithToken) => {
     setUser(data)
   }
-
-  useEffect(() => {
-    const abortOnChange = abortOnChangeRef.current
-
-    return () => {
-      abortAndIgnore(abortOnChange)
-    }
-  }, [])
 
   return (
     <Form
@@ -92,6 +67,7 @@ export const CreateFirstUserClient: React.FC<{
         path: `/${userSlug}/first-register`,
       })}
       className={baseClass}
+      formStateRequest={formStateRequest}
       initialState={{
         ...initialState,
         'confirm-password': {
@@ -101,7 +77,6 @@ export const CreateFirstUserClient: React.FC<{
         },
       }}
       method="POST"
-      onChange={[onChange]}
       onSuccess={handleFirstRegister}
       redirect={admin}
       validationOperation="create"

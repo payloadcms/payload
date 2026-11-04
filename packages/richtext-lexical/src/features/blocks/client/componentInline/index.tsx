@@ -1,5 +1,6 @@
 'use client'
 
+import type { FormStateRequest } from '@payloadcms/ui'
 import type { BlocksFieldClient, ClientBlock, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -312,33 +313,47 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     clientBlock,
   ])
 
-  /**
-   * HANDLE ONCHANGE
-   */
-  const onChange = useCallback(
-    async ({ formState: prevFormState, submit }: { formState: FormState; submit?: boolean }) => {
+  const getRequestArgs = useCallback(
+    (prevFormState: FormState) => {
+      const blockData = reduceFormStateToBlockData(prevFormState, formDataRef.current)
+
+      return {
+        data: blockData,
+        docPermissions: {
+          fields: true as const,
+        },
+        documentFormState: parentDocumentFields,
+        initialBlockData: blockData,
+        operation: 'update' as const,
+        readOnly: !isEditable,
+        schemaPath: schemaFieldsPath,
+        skipValidation: false,
+      }
+    },
+    [parentDocumentFields, isEditable, schemaFieldsPath],
+  )
+
+  const formStateRequest = useMemo<FormStateRequest>(
+    () => ({ args: ({ formState }) => getRequestArgs(formState) }),
+    [getRequestArgs],
+  )
+
+  // Only called when the form is submitted from the drawer.
+  const onBeforeSubmit = useCallback(
+    async ({ formState: prevFormState }: { formState: FormState }) => {
       abortAndIgnore(onChangeAbortControllerRef.current)
 
       const controller = new AbortController()
       onChangeAbortControllerRef.current = controller
-      const blockData = reduceFormStateToBlockData(prevFormState, formDataRef.current)
 
       const { state } = await getFormState({
         id,
         collectionSlug,
-        data: blockData,
-        docPermissions: {
-          fields: true,
-        },
+        ...getRequestArgs(prevFormState),
         docPreferences: await getDocPreferences(),
-        documentFormState: parentDocumentFields,
         formState: prevFormState,
         globalSlug,
-        initialBlockData: blockData,
-        operation: 'update',
-        readOnly: !isEditable,
-        renderAllFields: submit ? true : false,
-        schemaPath: schemaFieldsPath,
+        renderAllFields: true,
         signal: controller.signal,
       })
 
@@ -346,13 +361,11 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
         return prevFormState
       }
 
-      if (submit) {
-        if (!CustomLabelFromProps) {
-          setCustomLabel(state['_components']?.customComponents?.BlockLabel)
-        }
-        if (!CustomBlockFromProps) {
-          setCustomBlock(state['_components']?.customComponents?.Block)
-        }
+      if (!CustomLabelFromProps) {
+        setCustomLabel(state['_components']?.customComponents?.BlockLabel)
+      }
+      if (!CustomBlockFromProps) {
+        setCustomBlock(state['_components']?.customComponents?.Block)
       }
 
       return state
@@ -362,14 +375,13 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       id,
       collectionSlug,
       getDocPreferences,
-      parentDocumentFields,
       globalSlug,
-      isEditable,
-      schemaFieldsPath,
+      getRequestArgs,
       CustomBlockFromProps,
       CustomLabelFromProps,
     ],
   )
+
   // cleanup effect
   useEffect(() => {
     const isStateOutOfSync = (formData: InlineBlockFields, initialState: FormState) => {
@@ -506,17 +518,12 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
 
   return (
     <Form
-      beforeSubmit={[
-        async ({ formState }) => {
-          // This is only called when form is submitted from drawer
-          return await onChange({ formState, submit: true })
-        },
-      ]}
+      beforeSubmit={[onBeforeSubmit]}
       disableValidationOnSubmit
       el="div"
       fields={clientBlock?.fields}
+      formStateRequest={formStateRequest}
       initialState={initialState || {}}
-      onChange={[onChange]}
       onSubmit={(formState) => {
         onFormSubmit(formState)
         toggleDrawer()

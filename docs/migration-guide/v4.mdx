@@ -887,6 +887,46 @@ If you only used `useDocumentInfo` for `title` / `setDocumentTitle`, drop the im
 
 Run `npx @payloadcms/codemod --transform migrate-document-title-context` to migrate automatically. The codemod splits mixed destructures, removes the `useDocumentInfo` import when no other properties are still used, and preserves any rename aliases (e.g. `{ title: docTitle }`).
 
+### `Form` makes its own form-state requests
+
+`Form` now requests server form state itself, after field changes and after every successful submission. A new `formStateRequest` prop shapes that request, and the `onChange` and `onSuccess` callbacks are side effects only: the `Form` no longer merges the state they return.
+
+This affects custom forms that pass `onChange` to fetch form state, or that return form state from `onSuccess`. Move the request args to `formStateRequest.args`, and any handling of the response to `formStateRequest.onResponse`:
+
+```diff
+'use client'
+import { Form } from '@payloadcms/ui'
+
+-const onChange = async ({ formState, submitted }) => {
+-  const { state } = await getFormState({
+-    collectionSlug,
+-    docPermissions,
+-    docPreferences: await getDocPreferences(),
+-    formState,
+-    operation: 'update',
+-    schemaPath,
+-    signal: controller.signal,
+-    skipValidation: !submitted,
+-  })
+-
+-  return state
+-}
++const formStateRequest = useMemo(
++  () => ({ args: { collectionSlug, docPermissions, operation: 'update', schemaPath } }),
++  [collectionSlug, docPermissions, schemaPath],
++)
+
+-<Form onChange={[onChange]}>
++<Form formStateRequest={formStateRequest}>
+```
+
+`Form` fills in the rest: the document's `id`, `collectionSlug`, `globalSlug`, `docPermissions` and preferences, the operation, the current `formState`, `skipValidation: !submitted`, and an abort signal. Pass `args` as a function to compute args per request; it receives the `formState` being sent and, after a successful submission, the `savedDocument`.
+
+BREAKING CHANGES:
+
+- The return value of `onChange` is ignored. `onChange` still runs at the same moments, debounced after field changes, so callbacks that only perform side effects keep working.
+- The return value of `onSuccess` is ignored. After a successful submission, `Form` requests fresh form state with the saved document as `data`, except after a create, where the form is replaced.
+
 ### Locale hooks can now return null
 
 The return type of `useLocale` is now `Locale | null`. It returns `null` when localization is disabled or configured without any locales. In Payload 3, the hook was typed as `Locale` and returned an empty object when localization was unavailable.

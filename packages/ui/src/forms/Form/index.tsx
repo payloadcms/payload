@@ -3,7 +3,6 @@ import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { serialize } from 'object-to-formdata'
 import { type FormState, type PayloadRequest } from 'payload'
 import {
-  deepCopyObjectSimpleWithoutReactComponents,
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
   reduceFieldsToValues,
@@ -17,6 +16,7 @@ import type {
   FormProps,
   GetDataByPath,
 } from './types.js'
+import type { SubmissionActivity } from './useFormStateRequest.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
@@ -46,6 +46,7 @@ import {
 } from './context.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
+import { useFormStateRequest } from './useFormStateRequest.js'
 import { useFormSubmission } from './useFormSubmission.js'
 
 const baseClass = 'form'
@@ -103,6 +104,18 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.fields = formState
 
   const prevFormState = useRef(formState)
+
+  const submittedRef = useRef(false)
+  const submissionActivityRef = useRef<SubmissionActivity>({ running: 0, started: 0 })
+
+  const requestFormState = useFormStateRequest({
+    contextRef,
+    dispatchFields,
+    formStateRequest: props.formStateRequest,
+    prevFormStateRef: prevFormState,
+    queueTask,
+    submissionActivityRef,
+  })
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -194,7 +207,10 @@ export const Form: React.FC<FormProps> = (props) => {
     formRef,
     prevFormStateRef: prevFormState,
     props,
+    requestFormState,
     setIsValid,
+    submissionActivityRef,
+    submittedRef,
   })
 
   const getFields = useCallback(() => contextRef.current.fields, [])
@@ -456,36 +472,25 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  const executeOnChange = useEffectEvent(() => {
-    queueTask(async () => {
-      if (Array.isArray(onChange)) {
-        let serverState: FormState
+  const notifyOnChange = useEffectEvent(() => {
+    if (!Array.isArray(onChange)) {
+      return
+    }
 
-        for (const onChangeFn of onChange) {
-          // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-          serverState = await onChangeFn({
-            formState: deepCopyObjectSimpleWithoutReactComponents(formState, {
-              excludeFiles: true,
-            }),
-            submitted,
-          })
-        }
-
-        React.startTransition(() => {
-          dispatchFields({
-            type: 'MERGE_SERVER_STATE',
-            prevStateRef: prevFormState,
-            serverState,
-          })
-        })
-      }
-    })
+    for (const onChangeFn of onChange) {
+      Promise.resolve(onChangeFn({ formState: contextRef.current.fields, submitted })).catch(
+        (err) => {
+          console.error('Error in onChange:', err) // eslint-disable-line no-console
+        },
+      )
+    }
   })
 
   useDebouncedEffect(
     () => {
       if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
-        executeOnChange()
+        requestFormState({ submitted })
+        notifyOnChange()
       }
 
       prevFormState.current = formState
