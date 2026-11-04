@@ -214,6 +214,7 @@ export const renderListView = async (
   const baseFilterConstraint = await (
     collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
   )?.({
+    context: drawerSlug ? 'relationship' : 'list',
     limit: query.limit,
     page: query.page,
     req,
