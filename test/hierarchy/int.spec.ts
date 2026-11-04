@@ -1705,6 +1705,14 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
         where: { email: { equals: devUser.email } },
       })
 
+      // The mixed string/number ID case requires a numeric-ID adapter: with
+      // string IDs, both entries would be identical strings and the test
+      // could not distinguish string-based from exact-value deduplication.
+      if (payload.db.defaultIDType !== 'number') {
+        return
+      }
+      expect(typeof rootPage.id).toBe('number')
+
       // Saved expanded-node preferences store the ID as a string while resolved
       // ancestors add the same ID as a number (e.g. "1" and 1). The parent's
       // children must be fetched and returned only once.
