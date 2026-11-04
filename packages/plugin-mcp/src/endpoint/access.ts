@@ -42,6 +42,12 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
     }
   }
 
+  // With OAuth, signed-out users can't use any MCP items, since the endpoint answers them with the
+  // challenge. Skipping the access checks saves work, and access callbacks only see signed-in users.
+  if (pluginConfig.oauth && !req.user) {
+    return { items: [], overrideAccess }
+  }
+
   return {
     items: await filterMCPItems({
       items: pluginConfig.items,

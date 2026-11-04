@@ -416,6 +416,30 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
 
         expect(metadata.authorization_servers).toEqual([`${restClient.serverURL}/issuer/`])
       })
+      it('should challenge signed-out requests when access callbacks expect a user', async ({
+        payload,
+        restClient,
+      }) => {
+        enableOAuth(payload)
+        const plugin = payload.config.plugins?.find(
+          (plugin) => plugin.slug === '@payloadcms/plugin-mcp',
+        ) as any
+        const tool = plugin.sanitizedOptions.items.find(
+          (item: any) => item.configKey === 'hiddenTool',
+        )
+        // With OAuth, only signed-in users can use MCP, so this callback expects a user
+        const access = vi
+          .spyOn(tool.tool, 'access')
+          .mockImplementation(({ req }: any) => req.user.email.endsWith('@payloadcms.com'))
+        onTestFinished(() => access.mockRestore())
+
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({ id: 1, jsonrpc: '2.0', method: 'tools/list', params: {} }),
+          headers: { Accept: 'application/json, text/event-stream' },
+        })
+
+        expect(response.status).toBe(401)
+      })
       it('should tell clients which scopes to request', async ({ payload, restClient }) => {
         enableOAuth(payload, {
           authorizationServers: ['https://auth.example.com'],
