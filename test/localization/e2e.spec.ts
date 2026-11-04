@@ -4,6 +4,7 @@ import type { GeneratedTypes } from '__helpers/shared/sdk/types.js'
 import { expect, test } from '@playwright/test'
 import { addArrayRow } from '__helpers/e2e/fields/array/index.js'
 import { addBlock } from '__helpers/e2e/fields/blocks/addBlock.js'
+import { isFormStateRequest } from '__helpers/e2e/isFormStateRequest.js'
 import { navigateToDoc } from '__helpers/e2e/navigateToDoc.js'
 import { openDocControls } from '__helpers/e2e/openDocControls.js'
 import { upsertPreferences } from '__helpers/e2e/preferences.js'
@@ -47,6 +48,7 @@ import {
   localeRestrictedSlug,
   localizedDraftsSlug,
   localizedPostsSlug,
+  localizedStatusSharedGlobalSlug,
   relationshipLocalizedSlug,
   spanishLocale,
   withRequiredLocalizedFields,
@@ -941,6 +943,48 @@ describe('Localization', () => {
   })
 
   describe('localize status', () => {
+    test('should not show stale data modal when editing a localized global draft', async () => {
+      const globalEndpoint = `${serverURL}/api/globals/${localizedStatusSharedGlobalSlug}`
+      const englishResponse = await page.request.post(`${globalEndpoint}?locale=en`, {
+        data: {
+          _status: 'published',
+          localizedText: 'EN Published',
+          sharedText: 'Shared baseline',
+        },
+      })
+      const spanishResponse = await page.request.post(`${globalEndpoint}?locale=es`, {
+        data: { _status: 'published', localizedText: 'ES Published' },
+      })
+      const draftResponse = await page.request.post(`${globalEndpoint}?locale=es&draft=true`, {
+        data: { _status: 'draft', localizedText: 'ES Draft' },
+      })
+
+      expect(englishResponse.ok()).toBe(true)
+      expect(spanishResponse.ok()).toBe(true)
+      expect(draftResponse.ok()).toBe(true)
+
+      await page.goto(`${url.global(localizedStatusSharedGlobalSlug)}?locale=es`)
+      await waitForFormReady(page)
+      await expect(page.locator('#field-localizedText')).toHaveValue('ES Draft')
+
+      const pageURL = page.url()
+      const formStateResponse = page.waitForResponse((response) => {
+        const request = response.request()
+
+        return isFormStateRequest({ pageURL, request }) && response.status() === 200
+      })
+
+      await page.locator('#field-localizedText').fill('Updated ES Draft')
+      await formStateResponse
+
+      await expect(page.locator('#document-stale-data')).toBeHidden()
+
+      await saveDocAndAssert(page, '#action-save-draft')
+      await page.reload()
+      await waitForFormReady(page)
+      await expect(page.locator('#field-localizedText')).toHaveValue('Updated ES Draft')
+    })
+
     describe('versions list', () => {
       test('should show currently published doc in version list', async () => {
         await changeLocale(page, defaultLocale)
