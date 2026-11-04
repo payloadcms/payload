@@ -471,6 +471,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepišite postojeće podatke u polju',
     pageNotFound: 'Stranica nije pronađena',
     pageNumberRange: 'Unesite broj stranice od 1 do {{totalPages}}.',
+    parentDocument: 'Nadređeni dokument',
     password: 'Lozinka',
     pasteBelow: 'Zalijepite u nastavku',
     pasteField: 'Zalijepi polje',

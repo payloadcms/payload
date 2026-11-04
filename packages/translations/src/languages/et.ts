@@ -468,6 +468,7 @@ export const etTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Kirjuta olemasolevad välja andmed üle',
     pageNotFound: 'Lehte ei leitud',
     pageNumberRange: 'Sisestage leheküljenumber vahemikus 1 kuni {{totalPages}}.',
+    parentDocument: 'Ülemdokument',
     password: 'Parool',
     pasteBelow: 'Kleebi allpool',
     pasteField: 'Kleebi väli',

@@ -452,6 +452,7 @@ export const thTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'เขียนทับข้อมูลในฟิลด์ที่มีอยู่แล้ว',
     pageNotFound: 'ไม่พบหน้าที่ต้องการ',
     pageNumberRange: 'ป้อนหมายเลขหน้าตั้งแต่ 1 ถึง {{totalPages}}',
+    parentDocument: 'เอกสารแม่',
     password: 'รหัสผ่าน',
     pasteBelow: 'วางด้านล่าง',
     pasteField: 'วางฟิลด์',

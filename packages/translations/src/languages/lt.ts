@@ -476,6 +476,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Perrašyti esamus lauko duomenis',
     pageNotFound: 'Puslapis nerastas',
     pageNumberRange: 'Įveskite puslapio numerį nuo 1 iki {{totalPages}}.',
+    parentDocument: 'Pirminis dokumentas',
     password: 'Slaptažodis',
     pasteBelow: 'Įklijuokite žemiau',
     pasteField: 'Įklijuoti lauką',

@@ -473,6 +473,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     overwriteExistingData: '既存のフィールドデータを上書きする',
     pageNotFound: 'ページが見つかりません',
     pageNumberRange: '1から{{totalPages}}までのページ番号を入力してください。',
+    parentDocument: '親ドキュメント',
     password: 'パスワード',
     pasteBelow: '以下に貼り付けてください',
     pasteField: 'フィールドを貼り付け',
