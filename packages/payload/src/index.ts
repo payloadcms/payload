@@ -1999,6 +1999,8 @@ export { createTagField } from './hierarchy/createTagField.js'
 export type { CreateTagFieldOptions } from './hierarchy/createTagField.js'
 export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
 export type { GetInitialTreeDataArgs, InitialTreeData } from './hierarchy/getInitialTreeData.js'
+export { getNestedDocsData } from './hierarchy/getNestedDocsData.js'
+export type { NestedDocRow } from './hierarchy/getNestedDocsData.js'
 export { injectHierarchyButton } from './hierarchy/injectHierarchyButton.js'
 export { resolveHierarchyCollections } from './hierarchy/resolveHierarchyCollections.js'
 export type {
