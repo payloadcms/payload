@@ -31,6 +31,10 @@ export type ResolvedDateFilterPlan = {
   timezone?: string
 }
 
+/**
+ * Resolves a calendar-day filter path to every matching date field and its effective timezone.
+ * Ambiguous paths with incompatible field configurations are rejected before adapter lowering.
+ */
 export const resolveDateFilterPlan = ({
   config,
   fields,

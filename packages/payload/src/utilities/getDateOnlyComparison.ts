@@ -16,6 +16,10 @@ export type DateOnlyComparison = {
 
 const fixedOffsetPattern = /^([+-])(\d{2}):(\d{2})$/
 
+/**
+ * Converts a calendar-day filter into timezone-aware, half-open instant constraints.
+ * Directional operators use the start of the selected day or the start of the next day.
+ */
 export const getDateOnlyComparison = ({
   date,
   operator,
