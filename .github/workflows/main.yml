@@ -575,7 +575,8 @@ jobs:
 
   # Test content-api integration with packed packages. Each job runs its own
   # ephemeral Content API instance pulled from Figma's ECR, backed by a Postgres
-  # service container and a LocalStack container for S3 storage tests. This
+  # service container, a Valkey container (required at startup for rate
+  # limiting), and a LocalStack container for S3 storage tests. This
   # gives each run an isolated sandbox, avoiding data collisions between
   # concurrent CI runs and removing the need for shared credentials.
   tests-content-api:
@@ -621,6 +622,15 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
+      valkey:
+        image: valkey/valkey:8
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "valkey-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v5
 
@@ -687,7 +697,10 @@ jobs:
             -e NODE_ENV=development \
             -e TARGET_ENV=development \
             -e CONTENT_API_PORT=8080 \
+            -e JWKS_URI=http://localhost:8080/.well-known/jwks.json \
             -e S3_ENDPOINT=http://localhost:4566 \
+            -e RATE_LIMIT_VALKEY_URL=redis://localhost:6379 \
+            -e VALKEY_URL=redis://localhost:6379 \
             "$IMAGE"
 
       - name: Wait for Content API to be ready
