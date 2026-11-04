@@ -41,7 +41,7 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: filter
         with:
@@ -203,9 +203,21 @@ jobs:
   lint:
     runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0
+
+      # Rules live in .github/zizmor.yml. Bump `version` deliberately: new releases add audits.
+      # The action only accepts zizmor versions released before it, so bump the action with it.
+      - name: Lint GitHub Actions pins
+        uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b # v0.8.0
+        with:
+          inputs: .github
+          version: 1.31.1
+          # `ref-version-mismatch` flags a missing version comment only in the pedantic persona.
+          persona: pedantic
+          advanced-security: false
+          annotations: true
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -227,7 +239,7 @@ jobs:
     runs-on: ubuntu-26.04
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -260,7 +272,7 @@ jobs:
     runs-on: ubuntu-26.04
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
 
@@ -278,7 +290,7 @@ jobs:
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true' || needs.changes.outputs.needs_visual == 'true'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -304,7 +316,7 @@ jobs:
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -323,13 +335,13 @@ jobs:
     outputs:
       matrix: ${{ steps.generate.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           sparse-checkout: |
             .github/workflows
             .tool-versions
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: .tool-versions
 
@@ -359,7 +371,7 @@ jobs:
       AWS_REGION: us-east-1
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -398,13 +410,13 @@ jobs:
     outputs:
       matrix: ${{ steps.generate.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           sparse-checkout: |
             .github/workflows
             .tool-versions
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: .tool-versions
 
@@ -424,7 +436,7 @@ jobs:
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true' || needs.changes.outputs.needs_a11y == 'true'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -466,7 +478,7 @@ jobs:
       PAYLOAD_DISABLE_CACHE_COMPONENTS: ${{ matrix.disableCacheComponents && 'true' || '' }}
       PAYLOAD_FRAMEWORK: ${{ matrix.framework }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -580,7 +592,7 @@ jobs:
     env:
       PAYLOAD_FRAMEWORK: ${{ matrix.framework }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -660,7 +672,7 @@ jobs:
     if: needs.changes.outputs.needs_visual == 'true'
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Start services
         uses: ./.github/actions/start-services
@@ -795,7 +807,7 @@ jobs:
           #   database: postgres
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -845,7 +857,7 @@ jobs:
     needs: [changes, build]
     if: needs.changes.outputs.build_approvals == 'true'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -861,7 +873,7 @@ jobs:
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -934,7 +946,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Node setup
         uses: ./.github/actions/setup
@@ -1074,7 +1086,7 @@ jobs:
       actions: read # for fetching base branch bundle stats
       pull-requests: write # for comments
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Node setup
         uses: ./.github/actions/setup
