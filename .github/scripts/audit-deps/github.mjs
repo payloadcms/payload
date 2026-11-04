@@ -86,12 +86,15 @@ async function closeStalePr({ github, owner, prNumber, ref, repo }) {
     commits: await listCommits({ github, owner, prNumber, repo }),
   })
 
-  await github.rest.issues.createComment({
-    body: withCommentTag({ text: hasPersonCommits ? STALE_KEPT_BRANCH_COMMENT : STALE_COMMENT }),
-    issue_number: prNumber,
-    owner,
-    repo,
-  })
+  // A prior run can comment and then fail to close, so a rerun does not comment twice.
+  if (!(await hasBotComment({ github, owner, prNumber, repo }))) {
+    await github.rest.issues.createComment({
+      body: withCommentTag({ text: hasPersonCommits ? STALE_KEPT_BRANCH_COMMENT : STALE_COMMENT }),
+      issue_number: prNumber,
+      owner,
+      repo,
+    })
+  }
   await github.rest.pulls.update({ owner, pull_number: prNumber, repo, state: 'closed' })
 
   if (!hasPersonCommits) {
@@ -104,6 +107,19 @@ function isBotPr({ owner, pr, ref, repo }) {
     pr.head.ref.startsWith(`${BRANCH_PREFIX}${ref}-`) &&
     pr.head.repo?.full_name === `${owner}/${repo}` &&
     pr.user?.type === 'Bot'
+  )
+}
+
+async function hasBotComment({ github, owner, prNumber, repo }) {
+  const comments = await github.paginate(github.rest.issues.listComments, {
+    issue_number: prNumber,
+    owner,
+    per_page: 100,
+    repo,
+  })
+
+  return comments.some(
+    (comment) => comment.user?.type === 'Bot' && comment.body?.includes(COMMENT_TAG),
   )
 }
 

@@ -20,8 +20,6 @@ const execFileAsync = promisify(execFile)
 const AUDIT_ACTION_ENTRY = fileURLToPath(
   new URL('../../../actions/audit-dependencies/dist/index.js', import.meta.url),
 )
-// The audit exits with 1 when findings remain, which is expected when some advisories have no fix.
-const MAX_AUDIT_EXIT_CODE = 1
 const BOT_IDENTITY = {
   GIT_AUTHOR_EMAIL: '41898282+github-actions[bot]@users.noreply.github.com',
   GIT_AUTHOR_NAME: 'github-actions[bot]',
@@ -60,6 +58,10 @@ export async function runPreparePrs({ options, run = spawnForExitCode, renderPr 
   }
   await mkdir(outDir, { recursive: true })
   const baseSha = await git({ args: ['rev-parse', 'HEAD'], cwd })
+  // With the base commit date, the same base and changes give the same commit on every run. A
+  // rerun then pushes nothing new and starts no CI run.
+  const baseDate = await git({ args: ['log', '-1', '--format=%cI', baseSha], cwd })
+  const commitEnv = { ...BOT_IDENTITY, GIT_AUTHOR_DATE: baseDate, GIT_COMMITTER_DATE: baseDate }
 
   const prepared = []
   for (const pr of plan.prs) {
@@ -73,7 +75,7 @@ export async function runPreparePrs({ options, run = spawnForExitCode, renderPr 
     }
     prepared.push(
       isPreparedStep({ step: prStep.step })
-        ? await preparePr({ baseSha, context, entry, pr })
+        ? await preparePr({ baseSha, commitEnv, context, entry, pr })
         : entry,
     )
   }
@@ -83,7 +85,7 @@ export async function runPreparePrs({ options, run = spawnForExitCode, renderPr 
   await writeSummary({ markdown: renderPreparedSummary({ prepared, ref: context.ref }) })
 }
 
-async function preparePr({ baseSha, context, entry, pr }) {
+async function preparePr({ baseSha, commitEnv, context, entry, pr }) {
   if (!isValidPrBranch({ branch: pr.branch, ref: context.ref })) {
     return { ...entry, failedStep: 'branch', reason: 'not a ci/audit-deps-fix branch' }
   }
@@ -142,7 +144,7 @@ async function preparePr({ baseSha, context, entry, pr }) {
     await git({
       args: ['-c', 'core.hooksPath=/dev/null', 'commit', '-q', '-m', title],
       cwd,
-      env: BOT_IDENTITY,
+      env: commitEnv,
     })
     const commit = await git({ args: ['rev-parse', 'HEAD'], cwd })
 
@@ -167,7 +169,8 @@ async function reauditPr({ context, pr }) {
     (info) => info.size,
     () => 0,
   )
-  if (code > MAX_AUDIT_EXIT_CODE || size === 0) {
+  // A non-zero exit means the re-audit may be incomplete, so it cannot show that a fix works.
+  if (code !== 0 || size === 0) {
     throw new Error(`re-audit exited ${code}`)
   }
 

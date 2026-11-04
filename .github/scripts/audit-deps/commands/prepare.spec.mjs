@@ -32,6 +32,7 @@ const plan = {
     bump({ id: 'dep-a-1', dependency: 'dep-a' }),
     bump({ id: 'dep-b-1', dependency: 'dep-b' }),
     bump({ advisories: [UNCLEARED_ADVISORY], id: 'dep-c-1', dependency: 'dep-c' }),
+    bump({ id: 'dep-d-1', dependency: 'dep-d' }),
   ],
   noFix: [],
   originDirs: {},
@@ -55,6 +56,12 @@ const plan = {
       kind: 'major',
     },
     {
+      branch: 'ci/audit-deps-fix-main-dep-d-1',
+      bumpIds: ['dep-d-1'],
+      id: 'dep-d-1',
+      kind: 'major',
+    },
+    {
       branch: 'ci/audit-deps-fix-main-skipped',
       bumpIds: ['dep-b-1'],
       id: 'skipped',
@@ -68,6 +75,7 @@ const prSteps = {
   'bad-branch': { headSha: null, prNumber: null, step: 'create' },
   'dep-b-1': { headSha: null, prNumber: null, step: 'create' },
   'dep-c-1': { headSha: null, prNumber: null, step: 'create' },
+  'dep-d-1': { headSha: null, prNumber: null, step: 'create' },
   'non-major': { headSha: null, prNumber: null, step: 'create' },
   skipped: { headSha: 'abc', prNumber: 95, step: 'skip' },
 }
@@ -95,13 +103,24 @@ describe('runPreparePrs', () => {
 
     await writeFile(
       path.join(repoDir, 'package.json'),
-      `${JSON.stringify({ dependencies: { 'dep-a': '^1.0.0', 'dep-b': '^1.0.0', 'dep-c': '^1.0.0' } }, null, 2)}\n`,
+      `${JSON.stringify({ dependencies: { 'dep-a': '^1.0.0', 'dep-b': '^1.0.0', 'dep-c': '^1.0.0', 'dep-d': '^1.0.0' } }, null, 2)}\n`,
     )
     await writeFile(path.join(repoDir, 'pnpm-lock.yaml'), "lockfileVersion: '9.0'\n")
     await writeFile(path.join(repoDir, '.gitignore'), 'ignored/\n')
     await git('init', '-q', '-b', 'main')
     await git('add', 'package.json', 'pnpm-lock.yaml', '.gitignore')
-    await git('-c', 'user.name=t', '-c', 'user.email=t@example.com', 'commit', '-q', '-m', 'init')
+    await execFileAsync(
+      'git',
+      ['-c', 'user.name=t', '-c', 'user.email=t@example.com', 'commit', '-q', '-m', 'init'],
+      {
+        cwd: repoDir,
+        env: {
+          ...process.env,
+          GIT_AUTHOR_DATE: '2020-01-02T03:04:05Z',
+          GIT_COMMITTER_DATE: '2020-01-02T03:04:05Z',
+        },
+      },
+    )
     baseSha = await git('rev-parse', 'HEAD')
     const failingHook = path.join(repoDir, '.git', 'hooks', 'pre-commit')
     await writeFile(failingHook, '#!/bin/sh\nexit 1\n')
@@ -131,7 +150,8 @@ describe('runPreparePrs', () => {
         ? [{ advisory: UNCLEARED_ADVISORY, bumps: [{ dependency: 'dep-c' }] }]
         : []
       await writeFile(env.INPUT_JSON, JSON.stringify({ findings, plan: { actions: [] } }))
-      return 1
+      // The audit exits 1 when its result may be incomplete, even if it wrote a report.
+      return env.INPUT_JSON.endsWith('reaudit-dep-d-1.json') ? 1 : 0
     }
 
     await runPreparePrs({
@@ -190,6 +210,22 @@ describe('runPreparePrs', () => {
     })
   })
 
+  it('should fail a PR whose re-audit reports an incomplete result', () => {
+    expect(entryFor('dep-d-1')).toMatchObject({
+      failedStep: 're-audit',
+      reason: 're-audit exited 1',
+    })
+  })
+
+  // A rerun on the same base with the same changes then gives the same commit, so its push is a
+  // no-op and starts no CI run.
+  it('should date the commit with the base commit date', async () => {
+    const { commit } = entryFor('dep-b-1')
+    const baseDate = await git('log', '-1', '--format=%cI', baseSha)
+
+    expect(await git('log', '-1', '--format=%aI %cI', commit)).toBe(`${baseDate} ${baseDate}`)
+  })
+
   it('should re-audit the audited tree with the action from the tooling checkout', () => {
     const toolingAction = fileURLToPath(
       new URL('../../../actions/audit-dependencies/dist/index.js', import.meta.url),
@@ -206,6 +242,7 @@ describe('runPreparePrs', () => {
       'non-major',
       'dep-b-1',
       'dep-c-1',
+      'dep-d-1',
       'skipped',
       'bad-branch',
     ])

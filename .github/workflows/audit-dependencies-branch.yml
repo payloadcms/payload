@@ -78,10 +78,9 @@ jobs:
 
       # Runs the audit bundle from the tooling folder the same way its action.yml does, with inputs
       # in `INPUT_*` variables. The audit reads the checked-out ref in the workspace.
+      # The audit exits 0 when it is complete, with or without findings. It exits 1 when its result
+      # may be incomplete. The job then stops here, so no PR is opened, updated or closed from it.
       - name: Run dependency audit
-        # The audit exits non-zero when it has findings. The plan step fails when the report is
-        # missing or invalid.
-        continue-on-error: true
         env:
           INPUT_JSON: ${{ runner.temp }}/audit_output.json
           INPUT_SCOPE: ${{ inputs.scope }}

@@ -88,6 +88,7 @@ function makeGithub({
   branches = {},
   closedBy = {},
   closedPrs = [],
+  comments = {},
   commits = {},
   deleteRefError = null,
   openPrs = [],
@@ -119,6 +120,7 @@ function makeGithub({
       get: vi.fn(async ({ issue_number }) => ({
         data: { closed_by: closedBy[issue_number] ?? null },
       })),
+      listComments: vi.fn(),
     },
     pulls: {
       get: vi.fn(async ({ pull_number }) => ({ data: prs[pull_number] })),
@@ -132,6 +134,9 @@ function makeGithub({
   const paginate = vi.fn(async (method, params) => {
     if (method === rest.pulls.list) {
       return openPrs
+    }
+    if (method === rest.issues.listComments) {
+      return comments[params.issue_number] ?? []
     }
     return commits[params.pull_number] ?? []
   })
@@ -353,6 +358,32 @@ describe('closeStalePrs', () => {
       ref: `heads/${PREFIX}gone-3`,
       repo: REPO,
     })
+  })
+
+  // A prior run can post the comment and then fail to close the PR.
+  it('should not comment again when the bot already left its stale comment', async () => {
+    const github = makeGithub({
+      comments: {
+        3: [
+          {
+            body: 'The audit no longer needs this update.\n\n<!-- audit-deps-comment -->',
+            user: { type: 'Bot' },
+          },
+        ],
+      },
+      prs: { 3: stalePr() },
+    })
+
+    await close(github)
+
+    expect(github.rest.issues.createComment).not.toHaveBeenCalled()
+    expect(github.rest.pulls.update).toHaveBeenCalledWith({
+      owner: OWNER,
+      pull_number: 3,
+      repo: REPO,
+      state: 'closed',
+    })
+    expect(github.rest.git.deleteRef).toHaveBeenCalled()
   })
 
   it('should keep the branch when a person committed to it', async () => {
