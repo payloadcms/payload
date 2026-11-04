@@ -1,6 +1,7 @@
 import type { PayloadRequest, SanitizedPermissions } from 'payload'
 
 import { getAccessResults, UnauthorizedError } from 'payload'
+import { extractBearerToken } from 'payload/shared'
 
 import type { AuthorizedMCP, MCPItem } from '../types.js'
 
@@ -45,7 +46,7 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
 
     // Only bearer tokens that no auth strategy accepted reach the hook, e.g. an OAuth access token.
     // API keys use the `<collection> API-Key <key>` scheme instead of `Bearer`, so they never do.
-    const bearerToken = headers.get('Authorization')?.match(/^Bearer (.+)$/)?.[1]
+    const bearerToken = extractBearerToken({ headers })
     if (!req.user && bearerToken && pluginConfig.oauth?.authenticate) {
       req.user = await pluginConfig.oauth.authenticate({ req, token: bearerToken })
     }
