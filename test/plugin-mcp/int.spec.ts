@@ -4585,6 +4585,23 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect((await registerRedirectURI(redirectURI)).status).toBe(400)
       }
     })
+    test('should not send users to the client for invalid sign-in requests', async ({
+      payload,
+      restClient,
+    }) => {
+      enableOAuth(payload, { type: 'builtin' })
+      // Anyone can register a client with their own site and link to a broken sign-in request
+      const { client_id } = await register(restClient)
+      const query = `?${new URLSearchParams({
+        client_id,
+        redirect_uri: redirectURI,
+        response_type: 'token',
+      })}`
+
+      const response = await restClient.GET(`/mcp/oauth/authorize${query}`, { auth: false })
+
+      expect(response.headers.get('Location')).toBe('/admin/mcp/authorize?error=invalid-link')
+    })
     test('should refuse Allow clicks made inside a frame', async ({ payload, restClient }) => {
       enableOAuth(payload, { type: 'builtin' })
       const { client_id } = await register(restClient)

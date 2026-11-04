@@ -179,12 +179,14 @@ const authorize: PayloadHandler = (req) => {
   const state = params.get('state')
   const codeChallenge = params.get('code_challenge')
 
+  // Not sent to the client's address: anyone can register a client, so that would let a link to
+  // this site send users to any site without them doing anything
   if (
     params.get('response_type') !== 'code' ||
     params.get('code_challenge_method') !== 'S256' ||
     !codeChallenge
   ) {
-    return redirect({ params: { error: OAuthErrorCode.InvalidRequest, state }, redirectURI })
+    return redirectToAuthorizeView({ params: { error: 'invalid-link' }, req })
   }
 
   const user = getBrowserUser(req)
