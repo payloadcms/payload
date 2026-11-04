@@ -62,11 +62,9 @@ export async function validateSearchParam({
   let paths: PathToQuery[] = []
   const { slug } = (collectionConfig || globalConfig)!
 
-  const blockReferencesPermissions = {}
-
   if (globalConfig && !policies.globals![slug]) {
     policies.globals![slug] = await getEntityPermissions({
-      blockReferencesPermissions,
+      blockReferencesPermissions: {},
       entity: globalConfig,
       entityType: 'global',
       fetchData: false,
@@ -178,7 +176,7 @@ export async function validateSearchParam({
         if (collectionSlug) {
           if (!policies.collections![collectionSlug]) {
             policies.collections![collectionSlug] = await getEntityPermissions({
-              blockReferencesPermissions,
+              blockReferencesPermissions: {},
               entity: req.payload.collections[collectionSlug]!.config,
               entityType: 'collection',
               fetchData: false,

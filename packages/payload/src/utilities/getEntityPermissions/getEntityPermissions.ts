@@ -18,6 +18,11 @@ import { populateFieldPermissions } from './populateFieldPermissions.js'
 
 type WhereQueryCache = { result: Promise<boolean>; where: Where }[]
 
+/**
+ * Permissions of referenced blocks within one entity, keyed by block slug, so each block's fields are walked
+ * once per entity. Pass a new object for each entity: field access receives the owning collection or global,
+ * so results cannot be shared across entities.
+ */
 export type BlockReferencesPermissions = Record<
   BlockSlug,
   BlockPermissions | Promise<BlockPermissions>

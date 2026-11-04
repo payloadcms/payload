@@ -3,6 +3,7 @@ import type { FieldAccess } from 'payload'
 export const parentsSlug = 'field-access-context-parents'
 export const childrenSlug = 'field-access-context-children'
 export const globalSlug = 'field-access-context-global'
+export const ownerScopedBlockSlug = 'owner-scoped'
 
 export type AccessLogEntry = {
   collectionSlug: string | undefined

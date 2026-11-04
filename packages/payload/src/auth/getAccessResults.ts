@@ -27,7 +27,6 @@ export async function getAccessResults({
   } else {
     results.canAccessAdmin = false
   }
-  const blockReferencesPermissions = {}
 
   await Promise.all(
     payload.config.collections.map(async (collection) => {
@@ -52,7 +51,7 @@ export async function getAccessResults({
       }
 
       const collectionPermissions = await getEntityPermissions({
-        blockReferencesPermissions,
+        blockReferencesPermissions: {},
         entity: collection,
         entityType: 'collection',
         fetchData: false,
@@ -72,7 +71,7 @@ export async function getAccessResults({
       }
 
       const globalPermissions = await getEntityPermissions({
-        blockReferencesPermissions,
+        blockReferencesPermissions: {},
         entity: global,
         entityType: 'global',
         fetchData: false,
