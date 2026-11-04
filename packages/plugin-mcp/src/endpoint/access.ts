@@ -8,10 +8,10 @@ import { getPluginConfig } from '../utils/getPluginConfig.js'
 
 export type GetAuthorizedMCPArgs = {
   /**
-   * Whether the caller answers signed-out requests with the OAuth challenge, like the HTTP
-   * endpoint. stdio can't, so OAuth doesn't change how its requests are authorized.
+   * Whether the request came through the HTTP endpoint, whose response can carry the OAuth
+   * challenge and headers from auth strategies. stdio has no response to carry them.
    */
-  canChallenge?: boolean
+  isHTTP?: boolean
   overrideAccess: boolean
   req: PayloadRequest
 }
@@ -21,12 +21,12 @@ export type GetAuthorizedMCPArgs = {
  * `overrideAccess` skips Payload and MCP item access checks.
  */
 export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<AuthorizedMCP> = async ({
-  canChallenge,
+  isHTTP = false,
   overrideAccess,
   req,
 }) => {
   const pluginConfig = getPluginConfig({ config: req.payload.config })
-  const isChallengedWhenSignedOut = canChallenge && Boolean(pluginConfig.oauth)
+  const isChallengedWhenSignedOut = isHTTP && Boolean(pluginConfig.oauth)
 
   if (pluginConfig.overrideGetAuthorizedMCP) {
     return await pluginConfig.overrideGetAuthorizedMCP({
