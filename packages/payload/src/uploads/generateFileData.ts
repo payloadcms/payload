@@ -1001,11 +1001,12 @@ const processUpload = async <T>({
       fileData._stored = null
     }
 
-    // Only Sharp's bridge stores sizes. Without it, request-time stages build each declared size
-    // from the original when it is requested.
+    // Only Sharp's bridge stores sizes. When it does not run, request-time stages build each
+    // declared size from the original when it is requested. A planned bridge does not run when the
+    // saved keys are applied at request time.
     const declaredVariants = collectionConfig.upload.variants ?? []
     if (
-      !plannedBridgeTransformer &&
+      !bridgeTransformer &&
       declaredVariants.length > 0 &&
       fileData.original &&
       (isAppliedAtRequest ||

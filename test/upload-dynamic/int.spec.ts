@@ -239,6 +239,15 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     },
   )
 
+  test('should write a size entry with no stored file when an upload bridge is planned but does not run', async ({
+    payload,
+  }) => {
+    const created = await createImage({ context: { isUploadBridgeEnabled: true }, payload })
+
+    expect(await readStoredFlag({ id: created.id, payload })).toBe(false)
+    expect(created.variants?.card).toMatchObject({ _stored: false, filename: 'photo-card.png' })
+  })
+
   test('should give a size a free name when another file already uses it', async ({ payload }) => {
     await createImage({ name: 'photo-card.png', payload })
 
