@@ -99,6 +99,7 @@ export const Select: React.FC<SelectFieldDiffClientProps> = ({
       : ''
 
   const { From, To } = getHTMLDiffComponents({
+    deletedLabel: i18n.t('general:deleted'),
     fromHTML: '<p>' + escapeDiffHTML(renderedValueFrom) + '</p>',
     postProcess: unescapeDiffHTML,
     toHTML: '<p>' + escapeDiffHTML(renderedValueTo) + '</p>',

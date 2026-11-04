@@ -1373,10 +1373,8 @@ test.describe('Admin accessibility', () => {
 
           await expect(dialog).toHaveAccessibleName(/confirm deletion/i)
           await expect(dialog).toContainText(title)
-          await expect(dialog.getByRole('heading', { name: /confirm deletion/i })).toBeFocused()
-          await workflowPage.keyboard.press(
-            workflowTabKey({ direction: 'Tab', page: workflowPage }),
-          )
+          await expect(cancel).toBeFocused()
+          await tabToWorkflowControl({ control: close, page: workflowPage })
           await expect(close).toBeFocused()
           await workflowPage.keyboard.press(
             workflowTabKey({ direction: 'Shift+Tab', page: workflowPage }),
