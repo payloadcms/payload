@@ -1026,7 +1026,7 @@ const processUpload = async <T>({
     ) {
       // The size is built from the original, so it takes the original's extension.
       const { name: baseName } = parseFilename(fileData.filename!)
-      const { ext: baseExt } = parseFilename(fileData.original.filename!)
+      const baseExt = getFileExtension(fileData.original.filename!)
       const plannedNames = new Set([fileData.filename, fileData.original.filename])
       const variants: FileSizes = {}
 
@@ -1034,7 +1034,7 @@ const processUpload = async <T>({
         const filename = await getUnplannedSafeFileName({
           canUseName: (name) => !plannedNames.has(name),
           collectionSlug: collectionConfig.slug,
-          desiredFilename: `${baseName}-${variantName}.${baseExt}`,
+          desiredFilename: `${baseName}-${variantName}${baseExt ? `.${baseExt}` : ''}`,
           // A size with no stored file can keep a name this document used before.
           excludeDocumentID: documentID,
           prefix,

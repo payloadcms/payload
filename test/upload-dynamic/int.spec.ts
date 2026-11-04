@@ -280,6 +280,12 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     expect(created.variants?.card?.filename).toBe('photo-card-1.png')
   })
 
+  test('should name a size with no extension when the original has none', async ({ payload }) => {
+    const created = await createImage({ name: 'photo', payload })
+
+    expect(created.variants?.card?.filename).toBe('photo-card')
+  })
+
   test('should rename a size with no stored file with the document', async ({ payload }) => {
     const created = await createImage({ payload })
 

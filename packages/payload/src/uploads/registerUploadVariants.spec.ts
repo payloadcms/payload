@@ -54,4 +54,19 @@ describe('registerUploadVariants', () => {
       'Invalid upload variants from transformer "cnd":\nno transformer in `upload.transformers` has the slug "cnd". Pass the slug of the transformer that registers the variants.',
     )
   })
+
+  it.each(['../card', 'a/card', 'a\\card'])(
+    'should reject the size name %j, which is not a safe file name part',
+    (name) => {
+      expect(() =>
+        registerUploadVariants({
+          collections: { media: { variants: [{ name }] } },
+          config: makeConfig(),
+          transformerSlug: 'cdn',
+        }),
+      ).toThrow(
+        `collections."media".variants uses name "${name}", which contains a path separator or "..". Size names are part of file names.`,
+      )
+    },
+  )
 })

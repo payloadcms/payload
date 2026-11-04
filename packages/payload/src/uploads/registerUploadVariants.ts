@@ -85,6 +85,12 @@ export function registerUploadVariants({
       }
       seenNames.add(variant.name)
 
+      if (/[/\\]|\.\./.test(variant.name)) {
+        errors.push(
+          `collections."${slug}".variants uses name "${variant.name}", which contains a path separator or "..". Size names are part of file names.`,
+        )
+      }
+
       if (RESERVED_VARIANT_NAMES.includes(variant.name)) {
         errors.push(
           `collections."${slug}".variants uses reserved name "${variant.name}", which collides with a built-in upload field. Choose a different name.`,
