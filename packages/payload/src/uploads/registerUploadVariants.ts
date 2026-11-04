@@ -21,15 +21,20 @@ const RESERVED_VARIANT_NAMES = [
  * on a collection. It writes onto copies and never changes the given config.
  *
  * @param label The transformer's name, used in error messages, for example `sharpTransformer`.
+ * @param transformerSlug The registering transformer's `slug`, saved as the owner of the sizes.
+ *   Payload writes size entries with no stored file only when this transformer builds files at
+ *   request time.
  */
 export function registerUploadVariants({
   collections,
   config,
   label,
+  transformerSlug,
 }: {
   collections: Partial<Record<string, { variants?: ImageSize[] }>>
   config: Config
   label: string
+  transformerSlug: string
 }): Config {
   const errors: string[] = []
 
@@ -117,6 +122,7 @@ export function registerUploadVariants({
             admin,
             generateImageName,
           })),
+          variantsTransformerSlug: transformerSlug,
         },
       }
     }),

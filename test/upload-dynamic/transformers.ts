@@ -82,6 +82,7 @@ export const requestCropTransformer: UploadTransformer = {
       collections: { [dynamicMediaSlug]: { variants: [{ name: 'card' }] } },
       config,
       label: 'requestCropTransformer',
+      transformerSlug: 'request-crop',
     }),
   mimeTypes: ['image/*'],
 }
@@ -124,6 +125,13 @@ export const uploadBridgeTransformer: TransformerWithInternalBridge & UploadTran
     collectionSlug === dynamicMediaSlug &&
     operation === 'upload' &&
     req.context?.isUploadBridgeEnabled === true,
+  init: (config) =>
+    registerUploadVariants({
+      collections: { [publicCloudMediaSlug]: { variants: [{ name: 'thumbnail' }] } },
+      config,
+      label: 'uploadBridgeTransformer',
+      transformerSlug: 'upload-bridge',
+    }),
   mimeTypes: ['image/*'],
   transformFile: () => Promise.resolve({ status: 'continue' }),
   [uploadTransformerInternal]: {

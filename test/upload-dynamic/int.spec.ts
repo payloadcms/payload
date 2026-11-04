@@ -321,6 +321,15 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     expect(created.variants?.card).toMatchObject({ _stored: false, filename: 'photo-card.png' })
   })
 
+  test('should write no size entry for a size whose transformer does not build at request time', async ({
+    payload,
+  }) => {
+    const created = await createImage({ collection: publicCloudMediaSlug, payload })
+
+    expect(created._stored).toBe(false)
+    expect(created.variants?.thumbnail?.filename ?? null).toBeNull()
+  })
+
   test('should give a size a free name when another file already uses it', async ({ payload }) => {
     await createImage({ name: 'photo-card.png', payload })
 

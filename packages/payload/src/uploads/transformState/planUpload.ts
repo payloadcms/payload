@@ -279,7 +279,7 @@ export function assertTransformKeysCovered({
 
 /**
  * Whether request-time stages can build a file of this MIME type from the original, applying every
- * saved key.
+ * saved key. With `requiredTransformerSlug`, that transformer must also be one of the stages.
  */
 export async function canBuildAtRequest({
   collectionSlug,
@@ -288,9 +288,11 @@ export async function canBuildAtRequest({
   pipelineDoc,
   pipelineOriginalDoc,
   req,
+  requiredTransformerSlug,
 }: {
   documentID?: number | string
   mimeType: string
+  requiredTransformerSlug?: string
 } & PlanArgs): Promise<boolean> {
   const { coverageErrors, plan: requestPlan } = await planPersistedDefaultStages({
     collectionSlug,
@@ -301,5 +303,10 @@ export async function canBuildAtRequest({
     transforms: pipelineDoc._transforms,
   })
 
-  return requestPlan.pipeline.length > 0 && coverageErrors.length === 0
+  return (
+    requestPlan.pipeline.length > 0 &&
+    (requiredTransformerSlug === undefined ||
+      requestPlan.pipeline.some((transformer) => transformer.slug === requiredTransformerSlug)) &&
+    coverageErrors.length === 0
+  )
 }

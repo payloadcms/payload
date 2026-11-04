@@ -23,7 +23,9 @@ describe('initSharpCollections', () => {
   it('should not throw when the config has no collections', () => {
     const config = makeConfig(undefined)
 
-    expect(() => initSharpCollections({ collections: {}, config })).not.toThrow()
+    expect(() =>
+      initSharpCollections({ collections: {}, config, transformerSlug: 'sharp' }),
+    ).not.toThrow()
   })
 
   it.each([
@@ -36,7 +38,11 @@ describe('initSharpCollections', () => {
         uploadCollection({ slug: 'media', upload: { crop: false, focalPoint: false } }),
       ])
 
-      const result = initSharpCollections({ collections: { media: sharpConfig }, config })
+      const result = initSharpCollections({
+        collections: { media: sharpConfig },
+        config,
+        transformerSlug: 'sharp',
+      })
 
       expect(result.collections?.[0]?.upload).toMatchObject(expected)
     },
@@ -50,6 +56,7 @@ describe('initSharpCollections', () => {
     const result = initSharpCollections({
       collections: { media: { variants: [{ name: 'thumbnail', width: 100 }] } },
       config,
+      transformerSlug: 'sharp',
     })
 
     expect(result.collections?.[0]?.upload).toMatchObject({
@@ -70,9 +77,9 @@ describe('initSharpCollections', () => {
     ({ collection, slug }) => {
       const config = makeConfig([collection])
 
-      expect(() => initSharpCollections({ collections: { [slug]: {} }, config })).toThrow(
-        new RegExp(`"${slug}"`),
-      )
+      expect(() =>
+        initSharpCollections({ collections: { [slug]: {} }, config, transformerSlug: 'sharp' }),
+      ).toThrow(new RegExp(`"${slug}"`))
     },
   )
 
@@ -93,6 +100,7 @@ describe('initSharpCollections', () => {
       initSharpCollections({
         collections: { media: { variants: variants as SharpCollectionConfig['variants'] } },
         config,
+        transformerSlug: 'sharp',
       }),
     ).toThrow(error)
   })
@@ -104,6 +112,7 @@ describe('initSharpCollections', () => {
       initSharpCollections({
         collections: { media: { variants: [{ name: 'noDimensions' }] } },
         config,
+        transformerSlug: 'sharp',
       }),
     ).not.toThrow()
   })

@@ -1109,23 +1109,25 @@ const processUpload = async <T>({
       fileData._stored = null
     }
 
-    // Only Sharp's bridge stores sizes. When it does not run, request-time stages build each
-    // declared size from the original when it is requested. A planned bridge does not run when the
-    // saved keys are applied at request time.
+    // Only Sharp's bridge stores sizes. When it does not run, the transformer that registered the
+    // sizes builds each one from the original when it is requested, if it runs at request time. A
+    // planned bridge does not run when the saved keys are applied at request time.
     const declaredVariants = collectionConfig.upload.variants ?? []
+    const variantsTransformerSlug = collectionConfig.upload.variantsTransformerSlug
     if (
       !bridgeTransformer &&
       declaredVariants.length > 0 &&
+      variantsTransformerSlug &&
       fileData.original &&
-      (isAppliedAtRequest ||
-        (await canBuildAtRequest({
-          collectionSlug: collectionConfig.slug,
-          documentID,
-          mimeType: file.mimetype,
-          pipelineDoc,
-          pipelineOriginalDoc,
-          req,
-        })))
+      (await canBuildAtRequest({
+        collectionSlug: collectionConfig.slug,
+        documentID,
+        mimeType: file.mimetype,
+        pipelineDoc,
+        pipelineOriginalDoc,
+        req,
+        requiredTransformerSlug: variantsTransformerSlug,
+      }))
     ) {
       const { name: baseName, ext: baseExt } = parseFilename(fileData.filename!)
       const plannedNames = new Set([fileData.filename, fileData.original.filename])

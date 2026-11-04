@@ -13,14 +13,17 @@ import type { SharpCollectionConfig } from './types.js'
 export function initSharpCollections({
   collections,
   config,
+  transformerSlug,
 }: {
   collections: Partial<Record<string, SharpCollectionConfig>>
   config: Config
+  transformerSlug: string
 }): Config {
   const registeredConfig = registerUploadVariants({
     collections,
     config,
     label: 'sharpTransformer',
+    transformerSlug,
   })
 
   // Write onto copies, never the caller's config or collection objects: a rebuilt config (e.g. on
