@@ -22,7 +22,7 @@
  *  - specify locales to show
  */
 
-import type { BrowserContext, Dialog, Locator, Page } from '@playwright/test'
+import type { BrowserContext, Dialog, Locator, Page, Route } from '@playwright/test'
 import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
@@ -92,7 +92,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 process.env.NEXT_BASE_PATH = BASE_PATH
 
-const { beforeAll, beforeEach, describe } = test
+const { afterEach, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let context: BrowserContext
@@ -436,6 +436,97 @@ describe('Versions', () => {
       errorOnUnpublishURL = new AdminUrlUtil(serverURL, errorOnUnpublishSlug)
       draftsNoReadVersionsURL = new AdminUrlUtil(serverURL, draftsNoReadVersionsSlug)
       versionURL = new AdminUrlUtil(serverURL, versionCollectionSlug)
+    })
+
+    describe('Publish during an autosave', () => {
+      // Each test pauses the clock of a page of its own, because the other tests share `page`.
+      let clockPage: Page
+
+      beforeEach(async () => {
+        ;({ page: clockPage } = await initPage({ context, serverURL }))
+
+        await clockPage.clock.install()
+      })
+
+      afterEach(async () => {
+        await clockPage.close()
+      })
+
+      test('should publish what the form holds once the autosave returns', async () => {
+        const { id } = await payload.create({
+          collection: autosaveCollectionSlug,
+          data: { _status: 'published', description: 'description', title: 'before' },
+          overrideAccess: true,
+        })
+
+        await openDocument({ page: clockPage, url: autosaveURL.edit(id) })
+
+        const autosaves = await holdAutosaves({ id, page: clockPage })
+
+        await pauseClock(clockPage)
+        await clockPage.locator('#field-title').fill('after')
+        await clockPage.clock.runFor(300)
+        await expect.poll(() => autosaves.held.length).toBe(1)
+
+        const publish = clockPage.locator('#action-save')
+
+        await expect(publish).toBeEnabled()
+        await publish.click()
+
+        // The form is disabled while the publish waits, and nothing has gone out.
+        await expect(clockPage.locator('#field-title')).toBeDisabled()
+        expect(autosaves.otherWrites).toHaveLength(0)
+
+        await autosaves.releaseAll()
+
+        await expect.poll(() => readAutosavePost({ id }).then((doc) => doc.title)).toBe('after')
+        expect((await readAutosavePost({ draft: true, id }))._status).toBe('published')
+      })
+
+      test('should autosave an edit made just before a publish the server refuses', async () => {
+        // Without a title, an autosave succeeds and a publish fails validation.
+        const { id } = await payload.create({
+          collection: autosaveCollectionSlug,
+          data: { description: 'description' } as never,
+          draft: true,
+          overrideAccess: true,
+        })
+
+        await openDocument({ page: clockPage, url: autosaveURL.edit(id) })
+
+        const autosaves = await holdAutosaves({ id, page: clockPage })
+        const description = clockPage.locator('#field-description')
+
+        await pauseClock(clockPage)
+        await description.fill('first edit')
+        await clockPage.clock.runFor(300)
+        await expect.poll(() => autosaves.held.length).toBe(1)
+
+        // Made while the autosave is in flight, and within the autosave interval of the click.
+        await description.fill('second edit')
+
+        const refused = clockPage.waitForResponse(
+          (response) =>
+            response.request().method() === 'PATCH' &&
+            new URL(response.url()).searchParams.get('autosave') !== 'true' &&
+            response.status() === 400,
+        )
+
+        await clockPage.locator('#action-save').click()
+        await expect(description).toBeDisabled()
+
+        // The interval ends while the publish is waiting.
+        await clockPage.clock.runFor(300)
+        await autosaves.releaseAll()
+        await refused
+        await expect(description).toBeEnabled()
+        await expect(description).toHaveValue('second edit')
+
+        await clockPage.clock.runFor(300)
+        await expect
+          .poll(() => readAutosavePost({ draft: true, id }).then((doc) => doc.description))
+          .toBe('second edit')
+      })
     })
 
     test('collection — should show "has published version" status in list view when draft is saved after publish', async () => {
@@ -3915,4 +4006,74 @@ async function expectDiffContent({
   } else {
     await expect.poll(readContent).toBe(expected)
   }
+}
+
+/**
+ * Opens the document, and waits until its form has finished initializing. The tests pause the page's
+ * clock next, and the form can't finish after that.
+ */
+async function openDocument({ page, url }: { page: Page; url: string }) {
+  await page.goto(url)
+  await expect(page.locator('form[data-form-ready="true"]')).toBeAttached()
+  await expect(page.locator('#field-title')).toBeEditable()
+}
+
+async function pauseClock(page: Page) {
+  await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 1000)
+}
+
+/**
+ * Holds the document's autosave requests until the test releases them, and records any other write
+ * to the document. Autosaves after the release aren't held.
+ */
+async function holdAutosaves({ id, page }: { id: number | string; page: Page }) {
+  const held: Route[] = []
+  let holding = true
+  const otherWrites: string[] = []
+  const documentPath = `/api/${autosaveCollectionSlug}/${id}`
+
+  page.on('request', (request) => {
+    const requestURL = new URL(request.url())
+
+    if (
+      requestURL.pathname.endsWith(documentPath) &&
+      request.method() === 'PATCH' &&
+      requestURL.searchParams.get('autosave') !== 'true'
+    ) {
+      otherWrites.push(request.url())
+    }
+  })
+
+  await page.route(
+    (requestURL) =>
+      requestURL.pathname.endsWith(documentPath) &&
+      requestURL.searchParams.get('autosave') === 'true',
+    async (route) => {
+      if (holding && route.request().method() === 'PATCH') {
+        held.push(route)
+      } else {
+        await route.fallback()
+      }
+    },
+  )
+
+  return {
+    held,
+    otherWrites,
+    releaseAll: async () => {
+      holding = false
+      await Promise.all(held.splice(0).map((route) => route.fallback()))
+    },
+  }
+}
+
+async function readAutosavePost({ id, draft = false }: { draft?: boolean; id: number | string }) {
+  const { docs } = await payload.find({
+    collection: autosaveCollectionSlug,
+    draft,
+    overrideAccess: true,
+    where: { id: { equals: id } },
+  })
+
+  return docs[0]!
 }

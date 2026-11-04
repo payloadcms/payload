@@ -137,6 +137,11 @@ export const Form: React.FC<FormProps> = (props) => {
   const backgroundProcessingRef = useRef(backgroundProcessing)
 
   /**
+   * Resolves the submits that are waiting for background processing to end.
+   */
+  const backgroundProcessingWaitersRef = useRef<(() => void)[]>([])
+
+  /**
    * Flag to track if the form was modified _during a submission_, e.g. while autosave is running.
    * Useful in order to avoid resetting `modified` to false wrongfully after a submit.
    * For example, if the user modifies a field while the a background process (autosave) is running,
@@ -151,6 +156,10 @@ export const Form: React.FC<FormProps> = (props) => {
   const setBackgroundProcessing = useCallback((backgroundProcessing: boolean) => {
     backgroundProcessingRef.current = backgroundProcessing
     _setBackgroundProcessing(backgroundProcessing)
+
+    if (!backgroundProcessing) {
+      backgroundProcessingWaitersRef.current.splice(0).forEach((resolve) => resolve())
+    }
   }, [])
 
   const [modified, _setModified] = useState(false)
@@ -292,8 +301,6 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
-      modifiedWhileProcessingRef.current = false
-
       // create new toast promise which will resolve manually later
       let errorToast, successToast
 
@@ -337,7 +344,23 @@ export const Form: React.FC<FormProps> = (props) => {
             : null
         setProcessing(true)
         setDisabled(true)
+
+        // Sending now would race the background submit on the server, so wait for it. The data is
+        // read below, after the wait, so this submit includes edits made in the meantime.
+        while (backgroundProcessingRef.current) {
+          await new Promise<void>((resolve) => {
+            backgroundProcessingWaitersRef.current.push(resolve)
+          })
+
+          // The end of the background submit cleared these
+          setProcessing(true)
+          setDisabled(true)
+        }
       }
+
+      // After the wait, so that the background submit's response doesn't clear `modified` for an edit
+      // made during it. Otherwise that edit would be lost if this submit is refused.
+      modifiedWhileProcessingRef.current = false
 
       if (waitForAutocomplete) {
         await wait(100)
