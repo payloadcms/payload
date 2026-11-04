@@ -8,3 +8,7 @@ export const mediaWithSignedDownloadsSlug = 'media-with-signed-downloads'
 export const mediaWithDirectAccessSlug = 'media-with-direct-access'
 export const mediaHeaderOnlySlug = 'media-header-only'
 export const mediaHeaderOnlyWithSizesSlug = 'media-header-only-with-sizes'
+
+export const videosSlug = 'videos'
+export const videosMissingBucketSlug = 'videos-missing-bucket'
+export const videosWithDraftsSlug = 'videos-with-drafts'
