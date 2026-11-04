@@ -719,7 +719,11 @@ test.describe('Branching', () => {
       await page.goto(withCurrentBranch({ page, href: postsURL.list }))
       await switchBranch({ name: branchName, page })
 
-      await page.locator('.table .row-1 a').first().click()
+      const row = page.locator('.table .row-1')
+
+      // The URL can update before the branch's list has finished rendering.
+      await expect(row.locator('.cell-title')).toContainText('Halloween Sale')
+      await row.locator('a').first().click()
 
       await expect(page.locator('.branch-selector__trigger-name')).toHaveText(branchName)
 
