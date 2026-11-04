@@ -7,6 +7,7 @@ import { registerUploadVariants } from './registerUploadVariants.js'
 const makeConfig = (): Config =>
   ({
     collections: [{ slug: 'media', fields: [], upload: { staticDir: 'media' } }],
+    upload: { transformers: [{ slug: 'cdn' }, { slug: 'sharp' }] },
   }) as unknown as Config
 
 describe('registerUploadVariants', () => {
@@ -14,7 +15,6 @@ describe('registerUploadVariants', () => {
     const result = registerUploadVariants({
       collections: { media: { variants: [{ name: 'card', width: 800 } as { name: string }] } },
       config: makeConfig(),
-      label: 'cdnTransformer',
       transformerSlug: 'cdn',
     })
 
@@ -29,7 +29,6 @@ describe('registerUploadVariants', () => {
     const config = registerUploadVariants({
       collections: { media: { variants: [{ name: 'thumbnail' }] } },
       config: makeConfig(),
-      label: 'sharpTransformer',
       transformerSlug: 'sharp',
     })
 
@@ -37,11 +36,22 @@ describe('registerUploadVariants', () => {
       registerUploadVariants({
         collections: { media: { variants: [{ name: 'card' }] } },
         config,
-        label: 'cdnTransformer',
         transformerSlug: 'cdn',
       }),
     ).toThrow(
-      'Invalid `cdnTransformer({ collections })` configuration:\ncdnTransformer collections."media" registers variants, but another transformer already registered variants on "media". Only one transformer can register variants on a collection.',
+      'Invalid upload variants from transformer "cdn":\ncollections."media" registers variants, but another transformer already registered variants on "media". Only one transformer can register variants on a collection.',
+    )
+  })
+
+  it('should throw when no configured transformer has the given slug', () => {
+    expect(() =>
+      registerUploadVariants({
+        collections: { media: { variants: [{ name: 'card' }] } },
+        config: makeConfig(),
+        transformerSlug: 'cnd',
+      }),
+    ).toThrow(
+      'Invalid upload variants from transformer "cnd":\nno transformer in `upload.transformers` has the slug "cnd". Pass the slug of the transformer that registers the variants.',
     )
   })
 })
