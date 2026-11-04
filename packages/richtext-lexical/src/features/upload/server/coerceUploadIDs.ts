@@ -43,7 +43,7 @@ export const coerceUploadIDs = (
       const idType =
         req.payload.collections[uploadNode.relationTo]?.customIDType || req.payload.db.defaultIDType
 
-      if (idType === 'number' && /^(?:0|[1-9]\d*)$/.test(uploadNode.value)) {
+      if (idType === 'number' && /^(?:0|-?[1-9]\d*)$/.test(uploadNode.value)) {
         const numericID = Number(uploadNode.value)
 
         if (Number.isSafeInteger(numericID)) {
