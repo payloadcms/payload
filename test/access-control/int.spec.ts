@@ -8,8 +8,15 @@ import type {
 } from 'payload'
 
 import path from 'path'
-import { AuthenticationError, createLocalReq, docAccessOperation, Forbidden } from 'payload'
-import { getEntityPermissions } from 'payload/internal'
+import {
+  AuthenticationError,
+  createLocalReq,
+  docAccessOperation,
+  Forbidden,
+  QueryError,
+} from 'payload'
+import { getEntityPermissions, sanitizePermissions } from 'payload/internal'
+import { getFieldPermissions } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
@@ -23,6 +30,7 @@ import {
   accessRelationParentSlug,
   asyncParentSlug,
   authSlug,
+  blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
   docLevelAccessSlug,
   firstArrayText,
@@ -73,6 +81,248 @@ describe('Access Control', () => {
   })
 
   describe('Fields', () => {
+    describe('block query access', () => {
+      it('should reuse block permissions with matching inherited access', async () => {
+        let evaluations = 0
+        const block = {
+          slug: 'shared',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              access: {
+                read: () => {
+                  evaluations++
+                  return true
+                },
+              },
+            },
+            { name: 'private', type: 'text', access: { read: () => false } },
+          ],
+        }
+        const entity = payload.collections[blocksFieldAccessSlug].config
+        const req = await createLocalReq({}, payload)
+        const permissions = await getEntityPermissions({
+          blockReferencesPermissions: {},
+          entity: {
+            ...entity,
+            fields: [
+              { name: 'first', type: 'blocks', blocks: [block] },
+              { name: 'second', type: 'blocks', blocks: [block] },
+            ] as unknown as typeof entity.fields,
+          },
+          entityType: 'collection',
+          fetchData: false,
+          operations: ['read'],
+          req,
+        })
+
+        expect(permissions.fields.first?.blocks?.shared?.fields.title?.read?.permission).toBe(true)
+        expect(permissions.fields.second?.blocks?.shared?.fields.title?.read?.permission).toBe(true)
+        expect(evaluations).toBe(1)
+        expect(permissions.fields.first?.blocks?.shared).not.toBe(
+          permissions.fields.second?.blocks?.shared,
+        )
+        const sanitized = sanitizePermissions({ collections: { [entity.slug]: permissions } })
+        expect(sanitized.collections[entity.slug].fields.first).not.toBe(true)
+        expect(sanitized.collections[entity.slug].fields.second).not.toBe(true)
+      })
+
+      it('should keep repeated block permissions finite and scoped to each parent', async () => {
+        const makeBlock = (slug: string, next: string) => {
+          const fields = [
+            { name: 'label', type: 'text' },
+            { name: 'children', type: 'blocks', blockReferences: [next], blocks: [] },
+          ]
+
+          return { slug, fields, flattenedFields: fields }
+        }
+
+        const self = makeBlock('self', 'self')
+        const first = makeBlock('first', 'second')
+        const second = makeBlock('second', 'first')
+        const req = await createLocalReq({}, payload)
+        const cyclicReq = {
+          ...req,
+          payload: Object.assign(Object.create(req.payload), {
+            blocks: { ...req.payload.blocks, first, second, self },
+          }),
+        }
+        const fields = [
+          {
+            name: 'restricted',
+            type: 'blocks',
+            access: { read: () => Promise.resolve(false) },
+            blockReferences: ['self'],
+            blocks: [],
+          },
+          {
+            name: 'allowed',
+            type: 'blocks',
+            access: { read: () => Promise.resolve(true) },
+            blockReferences: ['self'],
+            blocks: [],
+          },
+          {
+            name: 'paired',
+            type: 'blocks',
+            access: { read: () => Promise.resolve(true) },
+            blockReferences: ['first'],
+            blocks: [],
+          },
+        ]
+        const collection = payload.collections[blocksFieldAccessSlug].config
+        const permissions = await getEntityPermissions({
+          blockReferencesPermissions: {},
+          entity: { ...collection, fields: fields as unknown as typeof collection.fields },
+          entityType: 'collection',
+          fetchData: false,
+          operations: ['read'],
+          req: cyclicReq,
+        })
+
+        expect(permissions.fields.restricted?.blocks?.self?.fields.label?.read?.permission).toBe(
+          false,
+        )
+        expect(permissions.fields.allowed?.blocks?.self?.fields.label?.read?.permission).toBe(true)
+        expect(
+          permissions.fields.allowed?.blocks?.self?.fields.children?.blocks?.self?.read,
+        ).toEqual({ permission: false })
+        expect(() => JSON.stringify(permissions)).not.toThrow()
+
+        const originalFields = collection.fields
+        const originalFlattenedFields = collection.flattenedFields
+        const originalBlocks = payload.blocks
+        collection.fields = fields as unknown as typeof collection.fields
+        collection.flattenedFields = fields as unknown as typeof collection.flattenedFields
+        payload.blocks = cyclicReq.payload.blocks
+        try {
+          await expect(
+            payload.find({
+              collection: blocksFieldAccessSlug,
+              overrideAccess: false,
+              where: { 'allowed.children.label': { equals: 'example' } },
+            }),
+          ).rejects.toThrow(QueryError)
+          await expect(
+            payload.find({
+              collection: blocksFieldAccessSlug,
+              overrideAccess: false,
+              where: { 'paired.children.children.label': { equals: 'example' } },
+            }),
+          ).rejects.toThrow(QueryError)
+        } finally {
+          collection.fields = originalFields
+          collection.flattenedFields = originalFlattenedFields
+          payload.blocks = originalBlocks
+        }
+
+        const serialized = JSON.stringify(
+          sanitizePermissions({
+            canAccessAdmin: false,
+            collections: { cyclic: permissions },
+          }),
+        )
+        expect(serialized).not.toContain('payload.recursive-block-boundary')
+        const sanitized = JSON.parse(serialized)
+        expect(sanitized.collections.cyclic.fields.allowed.read).toBe(true)
+        const repeatedSelf =
+          sanitized.collections.cyclic.fields.allowed.blocks.self.fields.children.blocks.self
+        expect(repeatedSelf).toEqual({ fields: {} })
+        expect(
+          sanitized.collections.cyclic.fields.paired.blocks.first.fields.children.blocks.second
+            .fields.children.blocks.first,
+        ).toEqual({ fields: {} })
+        expect(
+          getFieldPermissions({
+            field: { name: 'label', type: 'text' },
+            operation: 'update',
+            parentName: 'children',
+            permissions: repeatedSelf.fields,
+          }),
+        ).toMatchObject({ operation: false, read: false })
+        expect(sanitizePermissions(sanitized)).toEqual(sanitized)
+      })
+
+      it('should reject constrained block children and allow readable siblings', async () => {
+        await expect(
+          payload.find({
+            collection: blocksFieldAccessSlug,
+            overrideAccess: false,
+            where: { 'editableBlocks.privateTitle': { equals: 'example' } },
+          }),
+        ).rejects.toThrow(QueryError)
+
+        await expect(
+          payload.find({
+            collection: blocksFieldAccessSlug,
+            overrideAccess: false,
+            where: { 'editableBlocks.title': { equals: 'Editable Block' } },
+          }),
+        ).rejects.toThrow(QueryError)
+
+        await expect(
+          payload.find({
+            collection: blocksFieldAccessSlug,
+            overrideAccess: false,
+            where: { 'editableBlocks.content': { equals: 'example' } },
+          }),
+        ).resolves.toHaveProperty('docs')
+
+        await expect(
+          payload.find({
+            collection: blocksFieldAccessSlug,
+            overrideAccess: true,
+            where: { 'editableBlocks.privateTitle': { equals: 'example' } },
+          }),
+        ).resolves.toHaveProperty('docs')
+      })
+
+      it('should apply referenced block child access to queries', async () => {
+        await expect(
+          payload.find({
+            collection: blocksFieldAccessSlug,
+            overrideAccess: false,
+            where: { 'editableBlockRefs.privateTitle': { equals: 'example' } },
+          }),
+        ).rejects.toThrow(QueryError)
+
+        await expect(
+          payload.find({
+            collection: blocksFieldAccessSlug,
+            overrideAccess: false,
+            where: { 'editableBlockRefs.title': { equals: 'Editable Block Reference' } },
+          }),
+        ).resolves.toHaveProperty('docs')
+      })
+
+      it('should reject constrained block queries before count reads data', async () => {
+        const adapterCount = vitest.spyOn(payload.db, 'count')
+
+        try {
+          await expect(
+            payload.count({
+              collection: blocksFieldAccessSlug,
+              overrideAccess: false,
+              where: { 'editableBlocks.privateTitle': { equals: 'example' } },
+            }),
+          ).rejects.toThrow(QueryError)
+          expect(adapterCount).not.toHaveBeenCalled()
+
+          await expect(
+            payload.count({
+              collection: blocksFieldAccessSlug,
+              overrideAccess: false,
+              where: { 'editableBlocks.content': { equals: 'example' } },
+            }),
+          ).resolves.toHaveProperty('totalDocs')
+          expect(adapterCount).toHaveBeenCalledOnce()
+        } finally {
+          adapterCount.mockRestore()
+        }
+      })
+    })
+
     it('should not affect hidden fields when patching data', async () => {
       const doc = await payload.create({
         collection: hiddenFieldsSlug,
