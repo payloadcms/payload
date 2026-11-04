@@ -16,6 +16,7 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { getFilePreviewSrc } from '../../utilities/getFilePreviewSrc.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -118,9 +119,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const selectedSizeData = selectedSize
     ? (data?.variants?.[selectedSize] as Record<string, unknown>)
     : null
-  const sidePanelFileSrc = (selectedSizeData?.url ?? data?.thumbnailURL ?? data?.url ?? null) as
-    | null
-    | string
+  const sidePanelFileSrc = getFilePreviewSrc({ data, selectedSizeData })
   const sidePanelMimeType = data?.mimeType as string | undefined
   const fileTypeIsAdjustable =
     !!sidePanelMimeType &&
@@ -369,6 +368,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
             <FilePreview
               collectionSlug={collectionSlug}
               data={data}
+              fileSrc={sidePanelFileSrc}
               imageCacheTag={imageCacheTag}
               selectedSize={selectedSize}
               selectedSizeData={selectedSizeData}

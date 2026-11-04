@@ -17,6 +17,8 @@ const baseClass = 'file-preview'
 
 type Props = {
   readonly data: Record<string, unknown>
+  /** The URL to preview, from `getFilePreviewSrc`. The toolbar uses the same URL. */
+  readonly fileSrc?: null | string
   readonly imageCacheTag?: false | string
   readonly selectedSize?: null | string
   readonly selectedSizeData?: null | Record<string, unknown>
@@ -26,6 +28,7 @@ type Props = {
 export const FilePreview: React.FC<Props> = ({
   collectionSlug,
   data,
+  fileSrc,
   imageCacheTag,
   selectedSize,
   selectedSizeData,
@@ -39,9 +42,6 @@ export const FilePreview: React.FC<Props> = ({
   const mimeType = (data?.mimeType as string) ?? ''
   const isImageFile = isImage(mimeType)
   const originalUrl = data?.url as string | undefined
-  const thumbnailUrl = data?.thumbnailURL as string | undefined
-  const selectedSizeUrl = selectedSizeData?.url as string | undefined
-  const fileSrc = getPreviewSrc({ isImageFile, originalUrl, selectedSizeUrl, thumbnailUrl })
 
   const nativePreviewSrc = originalUrl ? appendCacheTag(originalUrl, imageCacheTag) : undefined
 
@@ -64,7 +64,7 @@ export const FilePreview: React.FC<Props> = ({
         className={`${baseClass}__thumbnail`}
         collectionSlug={collectionSlug}
         doc={selectedSizeData || data}
-        fileSrc={fileSrc}
+        fileSrc={fileSrc ?? undefined}
         imageCacheTag={imageCacheTag}
         size="expand"
         uploadConfig={uploadConfig}
@@ -112,33 +112,4 @@ export const FilePreview: React.FC<Props> = ({
       </div>
     </div>
   )
-}
-
-/**
- * The admin thumbnail is often a small variant, so images preview the original file instead.
- */
-function getPreviewSrc({
-  isImageFile,
-  originalUrl,
-  selectedSizeUrl,
-  thumbnailUrl,
-}: {
-  isImageFile: boolean
-  originalUrl?: string
-  selectedSizeUrl?: string
-  thumbnailUrl?: string
-}): string | undefined {
-  if (selectedSizeUrl) {
-    return selectedSizeUrl
-  }
-
-  if (isImageFile && originalUrl) {
-    return originalUrl
-  }
-
-  if (thumbnailUrl) {
-    return thumbnailUrl
-  }
-
-  return originalUrl
 }
