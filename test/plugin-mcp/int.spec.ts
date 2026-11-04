@@ -4555,6 +4555,36 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
       }
     })
 
+    test('should only register redirect URIs that keep the code private', async ({
+      payload,
+      restClient,
+    }) => {
+      enableOAuth(payload, { type: 'builtin' })
+      const registerRedirectURI = (redirectURI: string) =>
+        restClient.POST('/mcp/oauth/register', {
+          body: JSON.stringify({ client_name: 'Test client', redirect_uris: [redirectURI] }),
+        })
+
+      // Web apps, apps listening on the user's computer, and desktop apps with their own scheme
+      for (const redirectURI of [
+        'https://example.com/callback',
+        'http://127.0.0.1:33418/callback',
+        'http://[::1]:33418/callback',
+        'cursor://anysphere.cursor-retrieval/oauth/callback',
+      ]) {
+        expect((await registerRedirectURI(redirectURI)).status).toBe(201)
+      }
+
+      // Plain http to another computer, which sends the code unencrypted, and browser schemes
+      // that run or show content instead of sending the code to an app
+      for (const redirectURI of [
+        'http://example.com/callback',
+        'javascript:alert(1)',
+        'data:text/html,hi',
+      ]) {
+        expect((await registerRedirectURI(redirectURI)).status).toBe(400)
+      }
+    })
     test('should refuse Allow clicks made inside a frame', async ({ payload, restClient }) => {
       enableOAuth(payload, { type: 'builtin' })
       const { client_id } = await register(restClient)

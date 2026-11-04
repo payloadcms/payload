@@ -141,9 +141,7 @@ const register: PayloadHandler = async (req) => {
   if (
     !Array.isArray(redirect_uris) ||
     !redirect_uris.length ||
-    !redirect_uris.every(
-      (uri) => typeof uri === 'string' && URL.canParse(uri) && !uri.includes('#'),
-    )
+    !redirect_uris.every(isValidRedirectURI)
   ) {
     return Response.json({ error: OAuthErrorCode.InvalidRedirectUri }, { status: 400 })
   }
@@ -363,6 +361,25 @@ const redirect = ({
 }
 
 /** Sends the browser to `MCPAuthorizeView`, with the Allow form or the reason it can't show it. */
+/**
+ * Accepts https, http to the user's own computer only, since the code would otherwise travel
+ * unencrypted, and app schemes like `cursor://` that desktop apps register to receive the code.
+ */
+const isValidRedirectURI = (uri: unknown): boolean => {
+  if (typeof uri !== 'string' || !URL.canParse(uri) || uri.includes('#')) {
+    return false
+  }
+
+  const { hostname, protocol } = new URL(uri)
+
+  if (protocol === 'http:') {
+    return ['[::1]', '127.0.0.1', 'localhost'].includes(hostname)
+  }
+
+  // Browser schemes that run or show content instead of sending the code to an app
+  return protocol !== 'javascript:' && protocol !== 'data:'
+}
+
 const redirectToAuthorizeView = ({
   params,
   req,
