@@ -270,6 +270,7 @@ export function DefaultListView(props: ListViewClientProps) {
                           disableBulkEdit={disableBulkEdit}
                           label={getTranslation(collectionConfig.labels.plural, i18n)}
                           showSelectAllAcrossPages={!isGroupingBy}
+                          viewType={viewType}
                         />
                         <div className={`${baseClass}__list-selection-actions`}>
                           {enableRowSelections && typeof onBulkSelect === 'function'
