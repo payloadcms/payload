@@ -478,11 +478,22 @@ export const promise = async ({
 
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
 
+          const fieldBlock = field.blocks.find((fieldBlock) =>
+            typeof fieldBlock === 'string'
+              ? fieldBlock === blockTypeToMatch
+              : fieldBlock.slug === blockTypeToMatch,
+          )
+
+          if (!fieldBlock) {
+            errors.push({
+              message: req.t('validation:invalidBlock', { block: blockTypeToMatch }),
+              path: `${path}.${rowIndex}.blockType`,
+            })
+            return
+          }
+
           const block: Block | undefined =
-            req.payload.blocks[blockTypeToMatch] ??
-            (field.blocks.find(
-              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-            ) as Block | undefined)
+            typeof fieldBlock === 'string' ? req.payload.blocks[fieldBlock] : fieldBlock
 
           const blockLabelPath =
             field?.label === false

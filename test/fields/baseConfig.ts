@@ -130,6 +130,14 @@ export const baseConfig: Partial<Config> = {
         {
           name: 'deduplicatedText',
           type: 'text',
+          hooks: {
+            beforeValidate: [
+              ({ req, value }) => {
+                req.context.configBlockVisited = true
+                return value
+              },
+            ],
+          },
         },
       ],
     },
@@ -181,6 +189,41 @@ export const baseConfig: Partial<Config> = {
           name: 'text',
           type: 'text',
           localized: true,
+        },
+      ],
+    },
+    {
+      slug: 'sharedBlock',
+      fields: [
+        {
+          name: 'globalText',
+          type: 'text',
+          hooks: {
+            afterChange: [
+              ({ req, value }) => {
+                req.context.globalBlockAfterChange = true
+                return value
+              },
+            ],
+            afterRead: [
+              ({ req, value }) => {
+                req.context.globalBlockRead = true
+                return value
+              },
+            ],
+            beforeChange: [
+              ({ req, value }) => {
+                req.context.globalBlockBeforeChange = true
+                return value
+              },
+            ],
+            beforeValidate: [
+              ({ req, value }) => {
+                req.context.globalBlockVisited = true
+                return value
+              },
+            ],
+          },
         },
       ],
     },
