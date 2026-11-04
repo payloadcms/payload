@@ -18,6 +18,7 @@ import { sanitizeQuery } from './sanitizeQuery.js'
 export { useListQuery } from './context.js'
 
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
+  baseFilter,
   children,
   collectionSlug,
   data,
@@ -165,6 +166,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   return (
     <ListQueryContext
       value={{
+        baseFilter,
         collectionSlug,
         data,
         defaultLimit: data?.limit,
