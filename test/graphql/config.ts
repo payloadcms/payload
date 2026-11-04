@@ -39,6 +39,40 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'virtual-fields',
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'posts',
+          name: 'post',
+        },
+        {
+          // A required field that is NOT virtual - stays non-null in the GraphQL schema
+          name: 'requiredTitle',
+          type: 'text',
+          required: true,
+        },
+        {
+          // Required + virtual (computed by a hook) - must be nullable in the GraphQL schema
+          name: 'virtualComputed',
+          type: 'text',
+          required: true,
+          virtual: true,
+          hooks: {
+            afterRead: [({ data }) => `computed-${data?.requiredTitle ?? ''}`],
+          },
+        },
+        {
+          // Required + virtual linked to a relationship path - must also be nullable
+          name: 'virtualFromRelation',
+          type: 'text',
+          required: true,
+          virtual: 'post.title',
+        },
+      ],
+      versions: false,
+    },
   ],
   globals: [
     {

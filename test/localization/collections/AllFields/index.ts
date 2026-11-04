@@ -98,6 +98,8 @@ export const AllFieldsLocalized: CollectionConfig = {
           name: 'localizedText',
           type: 'text',
           localized: true,
+          maxLength: 20,
+          minLength: 5,
         },
         {
           name: 'nonLocalizedText',
@@ -129,6 +131,8 @@ export const AllFieldsLocalized: CollectionConfig = {
           name: 'localizedItem',
           type: 'text',
           localized: true,
+          maxLength: 20,
+          minLength: 5,
         },
       ],
     },

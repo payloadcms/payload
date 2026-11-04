@@ -3,10 +3,11 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, JsonValue, PayloadRequest } from '../../../types/index.js'
-import type { Block, Field, TabAsField } from '../../config/types.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
+import { getBlockFromField } from '../../getBlockFromField.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
 import { getFallbackValue } from './getFallbackValue.js'
@@ -418,11 +419,7 @@ export const promise = async <T>({
           const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
           const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType
 
-          const block: Block | undefined =
-            req.payload.blocks[blockTypeToMatch] ??
-            ((field.blockReferences ?? field.blocks).find(
-              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-            ) as Block | undefined)
+          const block = getBlockFromField({ blockType: blockTypeToMatch, field, req })
 
           if (block) {
             row.blockType = blockTypeToMatch

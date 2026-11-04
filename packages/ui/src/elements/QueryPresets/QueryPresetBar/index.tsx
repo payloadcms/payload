@@ -217,7 +217,9 @@ export const QueryPresetBar: React.FC<{
             resetPreset={resetQueryPreset}
           />
           <Pill
-            aria-label={t('general:newLabel', { label: presetConfig?.labels?.singular })}
+            aria-label={t('general:newLabel', {
+              label: getTranslation(presetConfig?.labels?.singular, i18n),
+            })}
             className={`${baseClass}__create-new-preset`}
             icon={<PlusIcon />}
             id="create-new-preset"
@@ -266,7 +268,9 @@ export const QueryPresetBar: React.FC<{
                 onClick={() => openModal(confirmDeletePresetModalSlug)}
                 type="button"
               >
-                {t('general:deleteLabel', { label: presetConfig?.labels?.singular })}
+                {t('general:deleteLabel', {
+                  label: getTranslation(presetConfig?.labels?.singular, i18n),
+                })}
               </ListSelectionButton>
               <ListSelectionButton
                 id="edit-preset"
@@ -275,7 +279,9 @@ export const QueryPresetBar: React.FC<{
                 }}
                 type="button"
               >
-                {t('general:editLabel', { label: presetConfig?.labels?.singular })}
+                {t('general:editLabel', {
+                  label: getTranslation(presetConfig?.labels?.singular, i18n),
+                })}
               </ListSelectionButton>
             </Fragment>
           )}
@@ -303,7 +309,7 @@ export const QueryPresetBar: React.FC<{
             i18nKey="general:aboutToDelete"
             t={t}
             variables={{
-              label: presetConfig?.labels?.singular,
+              label: getTranslation(presetConfig?.labels?.singular, i18n),
               title: activePreset?.title,
             }}
           />

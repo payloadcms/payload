@@ -1,4 +1,4 @@
-import type { FlattenedBlock, FlattenedBlocksField } from 'payload'
+import type { FlattenedBlocksField } from 'payload'
 
 import { fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
@@ -12,6 +12,7 @@ import type {
 } from './types.js'
 
 import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
+import { getBlockFromField } from '../getBlockFromField.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -65,11 +66,7 @@ export const transformBlocks = ({
       return
     }
 
-    const matchedBlock =
-      adapter.payload.blocks[blockRow.blockType] ??
-      ((field.blockReferences ?? field.blocks).find(
-        (block) => typeof block !== 'string' && block.slug === blockRow.blockType,
-      ) as FlattenedBlock | undefined)
+    const matchedBlock = getBlockFromField({ adapter, blockType: blockRow.blockType, field })
 
     if (!matchedBlock) {
       return

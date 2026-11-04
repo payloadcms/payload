@@ -1,0 +1,29 @@
+name: Audit Dependencies
+description: Audit dependencies monorepo-wide or across the consumer-facing (published) surface.
+branding:
+  icon: shield
+  color: red
+inputs:
+  scope:
+    description: 'Which surface to audit: "consumer-facing" (published packages only) or "monorepo".'
+    required: false
+    default: consumer-facing
+  severity:
+    description: 'Minimum severity to report: low, moderate, high, or critical.'
+    required: false
+    default: high
+  json:
+    description: 'Path to write the JSON findings report.'
+    required: false
+    default: audit_output.json
+runs:
+  using: composite
+  steps:
+    - name: Run dependency audit
+      run: node ${{ github.action_path }}/dist/index.js
+      shell: bash
+      # https://github.com/actions/runner/issues/665#issuecomment-676581170
+      env:
+        INPUT_SCOPE: ${{ inputs.scope }}
+        INPUT_SEVERITY: ${{ inputs.severity }}
+        INPUT_JSON: ${{ inputs.json }}

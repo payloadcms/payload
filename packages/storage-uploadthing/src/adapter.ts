@@ -6,6 +6,11 @@ import type {
 import type { Field } from 'payload'
 import type { UTApi } from 'uploadthing/server'
 
+import {
+  CLIENT_UPLOAD_CONTEXT_CONTEXT_KEY,
+  CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY,
+} from 'payload'
+
 import type { ACL } from './index.js'
 
 import { deleteFile } from './deleteFile.js'
@@ -48,14 +53,22 @@ export function createUploadthingAdapter({
     handleDelete: ({ doc, filename, req }) =>
       deleteFile({ doc: doc as unknown as Record<string, unknown>, filename, req, utApi }),
 
-    handleUpload: async ({ clientUploadContext, data, file }) => {
+    handleUpload: async ({ clientUploadContext, data, file, req }) => {
+      // A processed client upload gets a new key, so the browser upload must be deleted.
+      const isProcessedClientUpload =
+        Boolean(file.tempFilePath) &&
+        file.tempFilePath === req.context?.[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]
       const result = await uploadFile({
         acl,
         buffer: file.buffer,
-        clientUploadContext,
+        clientUploadContext: isProcessedClientUpload
+          ? req.context[CLIENT_UPLOAD_CONTEXT_CONTEXT_KEY]
+          : clientUploadContext,
         data,
         filename: file.filename,
+        logger: req.payload.logger,
         mimeType: file.mimeType,
+        tempFilePath: file.tempFilePath,
         utApi,
       })
 

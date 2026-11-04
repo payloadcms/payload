@@ -30,6 +30,13 @@ export type ClientUploadData = {
  */
 export const CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY = 'payloadClientUploadTempFilePath'
 
+/**
+ * `req.context` key that keeps the client upload context once `generateFileData` removes it from
+ * a processed file, so a storage adapter can find the object the browser uploaded. Comes from a
+ * verified receipt only when the collection sets `requiresClientUploadReceipt`.
+ */
+export const CLIENT_UPLOAD_CONTEXT_CONTEXT_KEY = 'payloadClientUploadContext'
+
 export async function getFileFromClientUpload({
   file,
   req,
@@ -75,6 +82,7 @@ export async function getFileFromClientUpload({
     req.context = {}
   }
   req.context[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY] = tempFilePath
+  req.context[CLIENT_UPLOAD_CONTEXT_CONTEXT_KEY] = file.clientUploadContext
 
   return {
     name: file.filename,

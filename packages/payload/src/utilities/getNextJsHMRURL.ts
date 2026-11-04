@@ -21,8 +21,11 @@ export const getNextJsHMRURL = (): string => {
   const port = process.env.PORT || '3000'
   const hasHTTPS = process.env.USE_HTTPS === 'true' || process.argv.includes('--experimental-https')
   const protocol = hasHTTPS ? 'wss' : 'ws'
-  // The __NEXT_ASSET_PREFIX env variable is set for both assetPrefix and basePath (tested in Next.js 15.1.6)
-  const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
+  /**
+   * Next.js only inlines __NEXT_ASSET_PREFIX into bundled code. In dev, withPayload keeps `payload`
+   * external, so fall back to NEXT_BASE_PATH, which withPayload sets on process.env at runtime.
+   */
+  const prefix = process.env.__NEXT_ASSET_PREFIX || process.env.NEXT_BASE_PATH || ''
 
   return `${protocol}://localhost:${port}${prefix}${getHMRPath()}`
 }

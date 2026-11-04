@@ -49,6 +49,8 @@ import {
   restoreAccessNoVersionsGlobalSlug,
   secondaryAdminUserCollectionSlug,
   versionCollectionSlug,
+  versionsDisabledCollectionSlug,
+  versionsDisabledGlobalSlug,
 } from './slugs.js'
 
 let payload: Payload
@@ -5591,6 +5593,72 @@ describe('Versions', () => {
         expect(latestVersion.title.es).toBeFalsy()
         expect(latestVersion.title.en).toStrictEqual('New eng')
       })
+    })
+  })
+
+  describe('Collections - versions disabled', () => {
+    it('should throw NotFound when finding versions of a collection without versions', async () => {
+      await expect(
+        payload.findVersions({
+          collection: versionsDisabledCollectionSlug as any,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow(NotFound)
+    })
+
+    it('should throw NotFound when finding a version by ID of a collection without versions', async () => {
+      await expect(
+        payload.findVersionByID({
+          id: '1',
+          collection: versionsDisabledCollectionSlug as any,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow(NotFound)
+    })
+
+    it('should respond with 404 instead of 500 for REST versions of a collection without versions', async () => {
+      const response = await restClient.GET(`/${versionsDisabledCollectionSlug}/versions`)
+
+      expect(response.status).toBe(404)
+    })
+
+    it('should respond with 404 instead of 500 for a REST version by ID of a collection without versions', async () => {
+      const response = await restClient.GET(`/${versionsDisabledCollectionSlug}/versions/1`)
+
+      expect(response.status).toBe(404)
+    })
+  })
+
+  describe('Globals - versions disabled', () => {
+    it('should throw NotFound when finding versions of a global without versions', async () => {
+      await expect(
+        payload.findGlobalVersions({
+          slug: versionsDisabledGlobalSlug as any,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow(NotFound)
+    })
+
+    it('should throw NotFound when finding a version by ID of a global without versions', async () => {
+      await expect(
+        payload.findGlobalVersionByID({
+          id: '1',
+          slug: versionsDisabledGlobalSlug as any,
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow(NotFound)
+    })
+
+    it('should respond with 404 instead of 500 for REST versions of a global without versions', async () => {
+      const response = await restClient.GET(`/globals/${versionsDisabledGlobalSlug}/versions`)
+
+      expect(response.status).toBe(404)
+    })
+
+    it('should respond with 404 instead of 500 for a REST version by ID of a global without versions', async () => {
+      const response = await restClient.GET(`/globals/${versionsDisabledGlobalSlug}/versions/1`)
+
+      expect(response.status).toBe(404)
     })
   })
 })

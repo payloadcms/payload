@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Accessibility recording sample</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font:
+          18px/1.5 system-ui,
+          sans-serif;
+        color: light-dark(#252422, #ededeb);
+        background: light-dark(#faf9f6, #191919);
+      }
+      body {
+        margin: 0;
+        padding: 48px;
+        box-sizing: border-box;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      main {
+        max-width: 1000px;
+        margin: auto;
+      }
+      h1 {
+        font-size: 32px;
+        letter-spacing: -1px;
+        margin: 8px 0;
+      }
+      p {
+        color: light-dark(#66635e, #bbb8b0);
+      }
+      .eyebrow {
+        font-size: 12px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+      ol {
+        list-style: none;
+        padding: 0;
+        margin: 32px 0;
+        display: grid;
+        gap: 12px;
+      }
+      li {
+        padding: 20px 24px;
+        border: 1px solid light-dark(#d8d5cf, #66635e);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        background: light-dark(white, #232321);
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        background: transparent;
+        border: 1px solid light-dark(#bcb9b2, #77746c);
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      button:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 5px;
+      }
+      #status {
+        min-height: 28px;
+        color: light-dark(#66635e, #bbb8b0);
+        font-size: 16px;
+      }
+      .index {
+        color: light-dark(#77746c, #bbb8b0);
+        font-size: 14px;
+        margin-inline-end: 16px;
+      }
+      .hint {
+        font-size: 14px;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          color-scheme: dark;
+        }
+      }
+      @media (min-width: 768px) {
+        body {
+          padding: 64px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="eyebrow">Recorder sample · Keyboard interaction</div>
+      <h1>Build your story</h1>
+      <p>
+        Reorder sections without dragging. The recording makes input, focus, and updates visible.
+      </p>
+      <ol id="sections">
+        <li>
+          <span><span class="index">01</span>Introduction</span
+          ><button aria-label="Move Introduction down">Move down ↓</button>
+        </li>
+        <li>
+          <span><span class="index">02</span>Highlights</span
+          ><button aria-label="Move Highlights down">Move down ↓</button>
+        </li>
+        <li>
+          <span><span class="index">03</span>Next steps</span
+          ><button aria-label="Move Next steps down" disabled>Move down ↓</button>
+        </li>
+      </ol>
+      <button id="save">Save changes</button>
+      <p id="status" role="status" aria-atomic="true"></p>
+      <p class="hint">
+        Use Tab to move between controls and Enter to activate. This is a sample, not a Payload PR
+        demo.
+      </p>
+    </main>
+    <script>
+      const list = document.querySelector('#sections')
+      list.addEventListener('click', (event) => {
+        const button = event.target.closest('button')
+        if (!button) return
+        const row = button.closest('li'),
+          next = row.nextElementSibling
+        if (!next) return
+        const name = button
+          .getAttribute('aria-label')
+          .replace(/^Move /, '')
+          .replace(/ down$/, '')
+        next.after(row)
+        ;[...list.children].forEach((row, index) => {
+          row.querySelector('.index').textContent = String(index + 1).padStart(2, '0')
+          row.querySelector('button').disabled = index === list.children.length - 1
+        })
+        button.focus()
+        document.querySelector('#status').textContent =
+          name + ' moved to position ' + ([...list.children].indexOf(row) + 1) + ' of 3.'
+      })
+      document.querySelector('#save').addEventListener('click', () => {
+        document.querySelector('#status').textContent = 'All changes saved.'
+      })
+    </script>
+  </body>
+</html>

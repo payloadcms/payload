@@ -10,6 +10,8 @@ import {
   BASE_PATH,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
+  passwordCustomValidateSlug,
+  passwordMinLengthSlug,
   publicUsersSlug,
   saveToJWTKey,
   slug,
@@ -296,6 +298,31 @@ export default buildConfigWithDefaults({
         plural: 'API Keys',
         singular: 'API Key',
       },
+    },
+    {
+      slug: passwordMinLengthSlug,
+      auth: true,
+      fields: [
+        {
+          name: 'password',
+          type: 'text',
+          hidden: true,
+          minLength: 8,
+        },
+      ],
+    },
+    {
+      slug: passwordCustomValidateSlug,
+      auth: true,
+      fields: [
+        {
+          name: 'password',
+          type: 'text',
+          hidden: true,
+          validate: (value: null | string | undefined) =>
+            !value || /\d/.test(value) || 'Password must contain a number',
+        },
+      ],
     },
     {
       slug: publicUsersSlug,

@@ -7,6 +7,13 @@ import { versionDefaults } from '../versions/defaults.js'
 type EntityConfig = Pick<CollectionConfig | GlobalConfig, 'versions'>
 
 /**
+ * Check if an entity has versions enabled at all
+ */
+export const hasVersionsEnabled = (config: EntityConfig): boolean => {
+  return Boolean(config?.versions)
+}
+
+/**
  * Check if an entity has drafts enabled
  */
 export const hasDraftsEnabled = (config: EntityConfig): boolean => {

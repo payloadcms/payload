@@ -95,4 +95,6 @@ runs:
       shell: bash
       run: |
         supabase init
-        supabase start
+        # Integration tests connect directly to Postgres on port 54322.
+        # Start only the database to avoid pulling unused service images.
+        supabase start -x edge-runtime,studio,postgres-meta,logflare,vector,imgproxy,storage-api,gotrue,realtime,postgrest,kong,mailpit,supavisor

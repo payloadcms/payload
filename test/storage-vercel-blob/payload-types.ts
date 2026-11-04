@@ -72,6 +72,7 @@ export interface Config {
     'media-with-direct-access': MediaWithDirectAccess;
     'media-with-dynamic-prefix': MediaWithDynamicPrefix;
     'media-with-prefix': MediaWithPrefix;
+    'media-with-random-suffix': MediaWithRandomSuffix;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -85,6 +86,7 @@ export interface Config {
     'media-with-direct-access': MediaWithDirectAccessSelect<false> | MediaWithDirectAccessSelect<true>;
     'media-with-dynamic-prefix': MediaWithDynamicPrefixSelect<false> | MediaWithDynamicPrefixSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
+    'media-with-random-suffix': MediaWithRandomSuffixSelect<false> | MediaWithRandomSuffixSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -257,6 +259,35 @@ export interface MediaWithPrefix {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-random-suffix".
+ */
+export interface MediaWithRandomSuffix {
+  id: string;
+  _objectKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    square?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -324,6 +355,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media-with-prefix';
         value: string | MediaWithPrefix;
+      } | null)
+    | ({
+        relationTo: 'media-with-random-suffix';
+        value: string | MediaWithRandomSuffix;
       } | null)
     | ({
         relationTo: 'users';
@@ -505,6 +540,38 @@ export interface MediaWithPrefixSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-random-suffix_select".
+ */
+export interface MediaWithRandomSuffixSelect<T extends boolean = true> {
+  _objectKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        square?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

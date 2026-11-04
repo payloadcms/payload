@@ -15,6 +15,7 @@ import {
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
 import { randomUUID } from 'crypto'
+import { sql } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
@@ -2127,6 +2128,86 @@ describe('database', () => {
         }
       }
     })
+
+    describe(
+      'locale table _parent_id index (Postgres)',
+      { db: (adapter) => adapter.startsWith('postgres') || adapter.startsWith('vercel-postgres') },
+      () => {
+        // Returns the parenthesized column list of the dedicated (non-unique) `_parent_id`
+        // index on a locale table, e.g. "_parent_id". Throws if the index is missing.
+        const getParentIDIndexColumns = async (tableName: string): Promise<string> => {
+          const db = payload.db as PostgresAdapter
+          const schemaName = db.schemaName || 'public'
+          const result = await db.drizzle.execute(sql`
+            SELECT indexdef FROM pg_indexes
+            WHERE schemaname = ${schemaName}
+              AND tablename = ${tableName}
+              AND indexdef ILIKE '%(_parent_id)%'
+              AND indexdef NOT ILIKE '%unique%'
+          `)
+
+          const indexdef = result.rows[0]?.indexdef as string | undefined
+
+          if (!indexdef) {
+            throw new Error(`Expected a non-unique _parent_id index on ${tableName}`)
+          }
+
+          return indexdef.slice(indexdef.lastIndexOf('(') + 1, indexdef.lastIndexOf(')'))
+        }
+
+        for (const tableName of ['customs_locales', '_customs_v_locales']) {
+          it(`should create a dedicated _parent_id index on ${tableName}`, async () => {
+            const columns = await getParentIDIndexColumns(tableName)
+
+            expect(columns.replaceAll('"', '').trim()).toBe('_parent_id')
+          })
+        }
+      },
+    )
+
+    describe(
+      'locale table _parent_id index (SQLite)',
+      { db: (adapter) => adapter.startsWith('sqlite') },
+      () => {
+        const getParentIDIndexColumns = async (tableName: string): Promise<string> => {
+          const rows = (await payload.db.drizzle.all(
+            sql.raw(
+              `SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name='${tableName}'`,
+            ),
+          )) as { name: string; sql: null | string }[]
+
+          // Match on the index's column list rather than the whole statement — the table name
+          // `${tableName}` itself contains `_locale`, so substring checks on `sql` are unreliable.
+          const normalizeColumns = (indexSql: string): string =>
+            indexSql
+              .slice(indexSql.lastIndexOf('(') + 1, indexSql.lastIndexOf(')'))
+              .replaceAll('`', '')
+              .replaceAll('"', '')
+              .replaceAll(' ', '')
+
+          const indexdef = rows.find(
+            (row) =>
+              typeof row.sql === 'string' &&
+              !row.sql.toLowerCase().includes('unique') &&
+              normalizeColumns(row.sql) === '_parent_id',
+          )?.sql
+
+          if (!indexdef) {
+            throw new Error(`Expected a non-unique _parent_id index on ${tableName}`)
+          }
+
+          return normalizeColumns(indexdef)
+        }
+
+        for (const tableName of ['customs_locales', '_customs_v_locales']) {
+          it(`should create a dedicated _parent_id index on ${tableName}`, async () => {
+            const columns = await getParentIDIndexColumns(tableName)
+
+            expect(columns).toBe('_parent_id')
+          })
+        }
+      },
+    )
 
     it('should create and read doc with custom db names', async () => {
       const relationA = await payload.create({

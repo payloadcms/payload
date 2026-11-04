@@ -108,12 +108,13 @@ export const serializeSlate = (children?: Node[], submissionData?: any): string 
         </li>
       `
         case 'link': {
-          let href = escapeHTML(sanitizeUrl(node.url ?? ''))
+          let href = node.url ?? ''
           if (submissionData) {
             href = replaceDoubleCurlys(href, submissionData)
           }
+          const safeHref = escapeHTML(sanitizeUrl(href))
           return `
-          <a href="${href}">
+          <a href="${safeHref}">
           ${serializeSlate(node.children, submissionData)}
         </a>
       `

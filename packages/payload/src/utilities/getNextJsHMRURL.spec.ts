@@ -13,6 +13,8 @@ describe('getNextJsHMRURL', () => {
     vi.mocked(getNextVersion).mockReturnValue('16.3.0')
     vi.stubEnv('PAYLOAD_HMR_URL_OVERRIDE', undefined)
     vi.stubEnv('PORT', '3000')
+    vi.stubEnv('__NEXT_ASSET_PREFIX', undefined)
+    vi.stubEnv('NEXT_BASE_PATH', undefined)
   })
 
   afterEach(() => {
@@ -76,5 +78,18 @@ describe('getNextJsHMRURL', () => {
     vi.stubEnv('__NEXT_ASSET_PREFIX', '/base')
 
     expect(getNextJsHMRURL()).toBe('ws://localhost:3000/base/_next/hmr')
+  })
+
+  it('should prefix the HMR path with the basePath when no assetPrefix is available', () => {
+    vi.stubEnv('NEXT_BASE_PATH', '/cms')
+
+    expect(getNextJsHMRURL()).toBe('ws://localhost:3000/cms/_next/hmr')
+  })
+
+  it('should prefer the assetPrefix over the basePath', () => {
+    vi.stubEnv('__NEXT_ASSET_PREFIX', '/assets')
+    vi.stubEnv('NEXT_BASE_PATH', '/cms')
+
+    expect(getNextJsHMRURL()).toBe('ws://localhost:3000/assets/_next/hmr')
   })
 })

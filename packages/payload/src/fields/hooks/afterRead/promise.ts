@@ -9,13 +9,14 @@ import type {
   SelectMode,
   SelectType,
 } from '../../../types/index.js'
-import type { Block, Field, TabAsField } from '../../config/types.js'
+import type { Field, TabAsField } from '../../config/types.js'
 import type { AfterReadArgs } from './index.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { getBlockSelect } from '../../../utilities/getBlockSelect.js'
 import { stripUnselectedFields } from '../../../utilities/stripUnselectedFields.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
+import { getBlockFromField } from '../../getBlockFromField.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
@@ -524,21 +525,17 @@ export const promise = async ({
         rows.forEach((row, rowIndex) => {
           const blockTypeToMatch = (row as JsonObject).blockType
 
-          const block: Block | undefined =
-            req.payload.blocks[blockTypeToMatch] ??
-            ((field.blockReferences ?? field.blocks).find(
-              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-            ) as Block | undefined)
-
-          const { blockSelect, blockSelectMode } = getBlockSelect({
-            block: block!,
-            // TODO: fix this
-            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-            select: select?.[field.name]!,
-            selectMode: selectMode!,
-          })
+          const block = getBlockFromField({ blockType: blockTypeToMatch, field, req })
 
           if (block) {
+            const { blockSelect, blockSelectMode } = getBlockSelect({
+              block,
+              // TODO: fix this
+              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+              select: select?.[field.name]!,
+              selectMode: selectMode!,
+            })
+
             traverseFields({
               blockData: row,
               collection,
@@ -578,11 +575,7 @@ export const promise = async ({
             localeRows.forEach((row, rowIndex) => {
               const blockTypeToMatch = row.blockType
 
-              const block: Block | undefined =
-                req.payload.blocks[blockTypeToMatch] ??
-                ((field.blockReferences ?? field.blocks).find(
-                  (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-                ) as Block | undefined)
+              const block = getBlockFromField({ blockType: blockTypeToMatch, field, req })
 
               if (block) {
                 traverseFields({

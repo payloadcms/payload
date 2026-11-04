@@ -10,7 +10,9 @@ import type {
   UploadCollectionSlug,
 } from 'payload'
 
+import escapeHTML from 'escape-html'
 import { sanitizeFields } from 'payload'
+import { sanitizeUrl } from 'payload/shared'
 
 import type { UploadFeaturePropsClient } from '../client/index.js'
 
@@ -188,18 +190,21 @@ export const UploadFeature = createServerFeature<
                     return `<img />`
                   }
 
-                  const url = getAbsoluteURL(uploadDocument?.value?.url ?? '', req?.payload)
+                  const url = escapeHTML(
+                    sanitizeUrl(getAbsoluteURL(uploadDocument?.value?.url ?? '', req?.payload)),
+                  )
 
-                  const alt =
+                  const alt = escapeHTML(
                     (node.fields?.alt as string) ||
-                    (uploadDocument?.value as { alt?: string })?.alt ||
-                    ''
+                      (uploadDocument?.value as { alt?: string })?.alt ||
+                      '',
+                  )
 
                   /**
                    * If the upload is not an image, return a link to the upload
                    */
                   if (!uploadDocument?.value?.mimeType?.startsWith('image')) {
-                    return `<a href="${url}" rel="noopener noreferrer">${uploadDocument.value?.filename}</a>`
+                    return `<a href="${url}" rel="noopener noreferrer">${escapeHTML(uploadDocument.value?.filename ?? '')}</a>`
                   }
 
                   /**
@@ -209,7 +214,7 @@ export const UploadFeature = createServerFeature<
                     !uploadDocument?.value?.sizes ||
                     !Object.keys(uploadDocument?.value?.sizes).length
                   ) {
-                    return `<img src="${url}" alt="${alt}" width="${uploadDocument?.value?.width}"  height="${uploadDocument?.value?.height}"/>`
+                    return `<img src="${url}" alt="${alt}" width="${escapeHTML(String(uploadDocument?.value?.width ?? ''))}" height="${escapeHTML(String(uploadDocument?.value?.height ?? ''))}"/>`
                   }
 
                   /**
@@ -234,15 +239,15 @@ export const UploadFeature = createServerFeature<
                     }
                     const imageSizeURL = getAbsoluteURL(imageSize?.url, req?.payload)
 
-                    pictureHTML += `<source srcset="${imageSizeURL}" media="(max-width: ${imageSize.width}px)" type="${imageSize.mimeType}">`
+                    pictureHTML += `<source srcset="${escapeHTML(imageSizeURL)}" media="(max-width: ${escapeHTML(String(imageSize.width))}px)" type="${escapeHTML(imageSize.mimeType)}">`
                   }
 
                   // Add the default img tag
-                  pictureHTML += `<img src="${url}" alt="${alt}" width="${uploadDocument.value?.width}" height="${uploadDocument.value?.height}">`
+                  pictureHTML += `<img src="${url}" alt="${alt}" width="${escapeHTML(String(uploadDocument.value?.width ?? ''))}" height="${escapeHTML(String(uploadDocument.value?.height ?? ''))}">`
                   pictureHTML += '</picture>'
                   return pictureHTML
                 } else {
-                  return `<img src="${id}" />`
+                  return `<img src="${escapeHTML(String(id))}" />`
                 }
               },
               nodeTypes: [UploadServerNode.getType()],

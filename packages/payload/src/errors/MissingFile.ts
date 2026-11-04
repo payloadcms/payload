@@ -11,5 +11,6 @@ export class MissingFile extends APIError {
       t ? t('error:noFilesUploaded') : en.translations.error.noFilesUploaded,
       httpStatus.BAD_REQUEST,
     )
+    this.name = 'MissingFile'
   }
 }

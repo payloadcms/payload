@@ -11,5 +11,6 @@ export class UnverifiedEmail extends APIError {
       t ? t('error:unverifiedEmail') : en.translations.error.unverifiedEmail,
       httpStatus.FORBIDDEN,
     )
+    this.name = 'UnverifiedEmail'
   }
 }

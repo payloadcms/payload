@@ -63,7 +63,7 @@ describe('localizeStatus migration', () => {
         // Step 3: Run the migration
         await localizeStatus.up({
           collectionSlug: 'testMigrationPosts',
-          db,
+          db: db.drizzle,
           payload,
           sql,
         })
@@ -122,7 +122,7 @@ describe('localizeStatus migration', () => {
         // Step 5: Test rollback
         await localizeStatus.down({
           collectionSlug: 'testMigrationPosts',
-          db,
+          db: db.drizzle,
           payload,
           sql,
         })
@@ -192,7 +192,7 @@ describe('localizeStatus migration', () => {
         // Step 2: Run the migration
         await localizeStatus.up({
           collectionSlug: 'testMigrationArticles',
-          db,
+          db: db.drizzle,
           payload,
           sql,
         })
@@ -240,7 +240,7 @@ describe('localizeStatus migration', () => {
         // Step 5: Test rollback
         await localizeStatus.down({
           collectionSlug: 'testMigrationArticles',
-          db,
+          db: db.drizzle,
           payload,
           sql,
         })
@@ -325,7 +325,7 @@ describe('localizeStatus migration', () => {
         // Run migration
         await localizeStatus.up({
           collectionSlug: 'testMigrationPosts',
-          db,
+          db: db.drizzle,
           payload,
           sql,
         })
@@ -464,7 +464,7 @@ describe('localizeStatus migration', () => {
         // Run migration
         await localizeStatus.up({
           collectionSlug: 'testMigrationArticles',
-          db,
+          db: db.drizzle,
           payload,
           sql,
         })
@@ -553,7 +553,7 @@ describe('localizeStatus migration', () => {
         await expect(
           localizeStatus.up({
             collectionSlug: 'testNoVersions',
-            db: payload.db,
+            db: payload.db.drizzle,
             payload,
             sql,
           }),

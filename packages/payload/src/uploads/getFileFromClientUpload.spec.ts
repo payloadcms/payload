@@ -6,7 +6,11 @@ import os from 'os'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
-import { type ClientUploadData, getFileFromClientUpload } from './getFileFromClientUpload.js'
+import {
+  CLIENT_UPLOAD_CONTEXT_CONTEXT_KEY,
+  type ClientUploadData,
+  getFileFromClientUpload,
+} from './getFileFromClientUpload.js'
 import { getImageSize } from './getImageSize.js'
 
 const MINIMAL_PNG = (() => {
@@ -234,6 +238,20 @@ describe('getFileFromClientUpload', () => {
     expect(arrayBufferTripwire).not.toHaveBeenCalled()
     const written = await fs.readFile(result.tempFilePath!)
     expect(written.toString()).toBe(chunks.map((chunk) => chunk.toString()).join(''))
+  })
+
+  it('saves the client upload context on req.context when it streams the file to disk', async () => {
+    const handler = vi.fn(async () => new Response('video-bytes', { status: 200 }))
+    const req = createReq({
+      handlers: [handler],
+      upload: { disableLocalStorage: true, mimeTypes: ['video/*'] },
+    })
+    const file = videoFile({ clientUploadContext: { key: 'browser-key' } })
+
+    const result = await getFileFromClientUpload({ file, req })
+    tempFilesToRemove.push(result.tempFilePath!)
+
+    expect(req.context[CLIENT_UPLOAD_CONTEXT_CONTEXT_KEY]).toEqual({ key: 'browser-key' })
   })
 
   it('runs every handler and uses the last one that returns a response, matching v3', async () => {

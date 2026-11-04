@@ -32,6 +32,21 @@ export const BlocksFieldAccess: CollectionConfig = {
               name: 'content',
               type: 'textarea',
             },
+            {
+              name: 'privateTitle',
+              type: 'text',
+              access: { read: () => false },
+            },
+          ],
+        },
+        {
+          slug: 'restrictedBlock',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              access: { read: () => false },
+            },
           ],
         },
       ],

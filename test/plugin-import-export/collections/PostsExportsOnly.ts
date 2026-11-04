@@ -11,7 +11,15 @@ export const PostsExportsOnly: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['id', 'title', '_status', 'content', 'updatedAt', 'createdAt'],
+    defaultColumns: [
+      'id',
+      'title',
+      'disabledForImportExport',
+      '_status',
+      'content',
+      'updatedAt',
+      'createdAt',
+    ],
   },
   access: {
     // Only allow read for users with the dev email (admin)
@@ -36,6 +44,15 @@ export const PostsExportsOnly: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
+    },
+    {
+      name: 'disabledForImportExport',
+      type: 'text',
+      custom: {
+        'plugin-import-export': {
+          disabled: true,
+        },
+      },
     },
   ],
 }

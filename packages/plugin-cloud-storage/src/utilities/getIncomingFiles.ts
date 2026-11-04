@@ -34,13 +34,14 @@ export function getIncomingFiles({
     files = [mainFile]
 
     if (data?.sizes) {
-      Object.entries(data.sizes).forEach(([key, resizedFileData]) => {
-        if (payloadUploadSizes?.[key] && resizedFileData.mimeType) {
+      Object.entries(data.sizes).forEach(([imageSizeName, resizedFileData]) => {
+        if (payloadUploadSizes?.[imageSizeName] && resizedFileData.mimeType) {
           files = files.concat([
             {
-              buffer: payloadUploadSizes[key],
+              buffer: payloadUploadSizes[imageSizeName],
               filename: `${resizedFileData.filename}`,
-              filesize: payloadUploadSizes[key].length,
+              filesize: payloadUploadSizes[imageSizeName].length,
+              imageSizeName,
               mimeType: resizedFileData.mimeType,
             },
           ])

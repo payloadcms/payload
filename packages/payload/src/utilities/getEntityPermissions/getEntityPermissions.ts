@@ -86,16 +86,7 @@ const topLevelGlobalPermissions = ['read', 'readVersions', 'update']
 export async function getEntityPermissions<TEntityType extends 'collection' | 'global'>(
   args: Args<TEntityType>,
 ): Promise<ReturnType<TEntityType>> {
-  const {
-    id,
-    blockReferencesPermissions,
-    data: _data,
-    entity,
-    entityType,
-    fetchData,
-    operations,
-    req,
-  } = args
+  const { id, data: _data, entity, entityType, fetchData, operations, req } = args
   const { locale: _locale, user } = req
 
   const locale = _locale ? _locale : undefined
@@ -140,6 +131,9 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
     entityType === 'collection' ? (entity as SanitizedCollectionConfig) : undefined
 
   const fieldsPermissions: FieldsPermissions = {}
+  // A permission tree is reusable only within this entity calculation. The caller's
+  // cache can be shared across collections and globals with different access rules.
+  const blockPermissionCache = new WeakMap<object, Map<string, BlockPermissions>>()
 
   const entityPermissions: ReturnType<TEntityType> = {
     fields: fieldsPermissions,
@@ -217,7 +211,8 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
   await Promise.all(wherePromises)
 
   populateFieldPermissions({
-    blockReferencesPermissions,
+    id,
+    blockPermissionCache,
     data,
     fields: entity.fields,
     operations,

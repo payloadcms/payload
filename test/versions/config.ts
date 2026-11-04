@@ -8,6 +8,7 @@ import AutosavePosts from './collections/Autosave.js'
 import AutosaveWithDraftButtonPosts from './collections/AutosaveWithDraftButton.js'
 import AutosaveWithDraftValidate from './collections/AutosaveWithDraftValidate.js'
 import AutosaveWithMultiSelectPosts from './collections/AutosaveWithMultiSelect.js'
+import AutosaveWithVirtual from './collections/AutosaveWithVirtual.js'
 import CustomIDs from './collections/CustomIDs.js'
 import { Diff } from './collections/Diff/index.js'
 import DisablePublish from './collections/DisablePublish.js'
@@ -33,6 +34,7 @@ import { SecondaryAdminUsers } from './collections/SecondaryAdminUsers.js'
 import { TextCollection } from './collections/Text.js'
 import { Users } from './collections/Users.js'
 import VersionPosts from './collections/Versions.js'
+import { VersionsDisabledCollection } from './collections/VersionsDisabled.js'
 import AutosaveGlobal from './globals/Autosave.js'
 import AutosaveWithDraftButtonGlobal from './globals/AutosaveWithDraftButton.js'
 import DisablePublishGlobal from './globals/DisablePublish.js'
@@ -43,6 +45,7 @@ import LocalizedGlobal from './globals/LocalizedGlobal.js'
 import { MaxVersions } from './globals/MaxVersions.js'
 import RestoreAccessGlobal, { RestoreAccessNoVersionsGlobal } from './globals/RestoreAccess.js'
 import SimpleDraftGlobal from './globals/SimpleDraft.js'
+import { VersionsDisabledGlobal } from './globals/VersionsDisabled.js'
 import { seed } from './seed.js'
 import { BASE_PATH } from './shared.js'
 import { draftWithUploadCloudStorageCollectionSlug } from './slugs.js'
@@ -63,6 +66,7 @@ export default buildConfigWithDefaults({
     Posts,
     AutosavePosts,
     AutosaveWithDraftButtonPosts,
+    AutosaveWithVirtual,
     AutosaveWithMultiSelectPosts,
     AutosaveWithDraftValidate,
     DraftPosts,
@@ -81,6 +85,7 @@ export default buildConfigWithDefaults({
     DraftsWithUploadCloudStorage,
     Media,
     Media2,
+    VersionsDisabledCollection,
     RestoreAccess,
     RestoreAccessLocalized,
     Users,
@@ -96,6 +101,7 @@ export default buildConfigWithDefaults({
     MaxVersions,
     DraftUnlimitedGlobal,
     SimpleDraftGlobal,
+    VersionsDisabledGlobal,
     RestoreAccessGlobal,
     RestoreAccessNoVersionsGlobal,
   ],

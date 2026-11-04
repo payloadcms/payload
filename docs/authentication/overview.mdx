@@ -82,6 +82,33 @@ valid and are rewritten to the current scheme after the next successful login, w
 new `salt`. Treat the stored format as internal and read these fields through Payload rather than
 deriving them yourself.
 
+New hashes use 600,000 iterations by default. Some environments, such as Cloudflare Workers, do not
+support more than 100,000 iterations. To support them, set `auth.passwordHashIterations` in your
+Payload Config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  auth: {
+    passwordHashIterations: 100000,
+  },
+  // ...
+})
+```
+
+Each iteration count uses its own scheme prefix, so hashes created with either count can be
+verified. After a successful login, a hash with a different count is rehashed with the configured
+count.
+
+<Banner type="warning">
+  **Note:** An environment limited to 100,000 iterations cannot verify existing
+  600,000-iteration hashes. Those users cannot log in there until they reset
+  their passwords. A user who logs in one time through a Node.js deployment with
+  `passwordHashIterations: 100000` also gets a new hash that the environment can
+  verify.
+</Banner>
+
 The following options are available:
 
 | Option                         | Description                                                                                                                                                                                                                 |

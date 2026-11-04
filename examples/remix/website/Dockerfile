@@ -1,4 +1,4 @@
-FROM node:22.14.0-alpine AS base
+FROM node:22.23.4-alpine AS base
 
 FROM base AS builder
 RUN apk add --no-cache libc6-compat

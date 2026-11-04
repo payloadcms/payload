@@ -46,8 +46,8 @@ import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.j
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import {
   buildAllLocalesPublicationHookDoc,
+  canApplyAllLocalesStatusChange,
   getAllLocalesPublicationStatus,
-  hasAuthorizedAllLocalesPublicationStatus,
   normalizeAllLocalesPublicationStatus,
   reconcileAllLocalesPublicationStatus,
 } from '../../versions/allLocalesPublicationStatus.js'
@@ -352,16 +352,16 @@ export const createOperation = async <
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
 
-    const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
-      data: publicationData,
-      fieldAccessDenied: !statusFieldAccess,
-      fieldValue: statusFieldValue,
-      status: allLocalesPublicationStatus,
+    const shouldApplyAllLocalesStatusChange = canApplyAllLocalesStatusChange({
+      canUpdateStatus: statusFieldAccess,
+      requestedStatus: allLocalesPublicationStatus,
+      statusAfterDocumentHooks: publicationData._status,
+      statusAfterFieldHooks: statusFieldValue,
     })
 
     if (
       allLocalesPublicationStatus &&
-      !hasAuthorizedPublicationStatus &&
+      !shouldApplyAllLocalesStatusChange &&
       statusFieldAccess &&
       typeof statusFieldValue === 'undefined' &&
       typeof duplicatedFromDocWithLocales._status === 'object' &&
@@ -372,7 +372,7 @@ export const createOperation = async <
     if (
       config.localization &&
       hasLocalizeStatusEnabled(collectionConfig) &&
-      hasAuthorizedPublicationStatus
+      shouldApplyAllLocalesStatusChange
     ) {
       let accessibleLocaleCodes = config.localization.localeCodes
 

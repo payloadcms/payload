@@ -4,6 +4,8 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
+import { CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY } from 'payload'
+
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
@@ -49,19 +51,33 @@ export function createVercelBlobAdapter({
         token,
       }),
 
-    handleUpload: async ({ data, file: { buffer, mimeType }, storageFilePath }) => {
+    handleUpload: async ({
+      data,
+      file: { buffer, imageSizeName, mimeType, tempFilePath },
+      req,
+      storageFilePath,
+    }) => {
+      // A processed client upload keeps the storage key from its receipt.
+      const isClientUpload =
+        Boolean(tempFilePath) &&
+        tempFilePath === req.context?.[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]
       const result = await uploadFile({
         access,
-        addRandomSuffix,
+        addRandomSuffix: addRandomSuffix && !isClientUpload,
         buffer,
         cacheControlMaxAge,
         mimeType,
         storageFilePath,
+        tempFilePath,
         token,
       })
 
       if (result.filename) {
-        data.filename = result.filename
+        if (imageSizeName !== undefined) {
+          data.sizes[imageSizeName].filename = result.filename
+        } else {
+          data.filename = result.filename
+        }
       }
 
       return data
