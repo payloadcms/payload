@@ -62,24 +62,23 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_09C09BAC".
+ * via the `definition` "LexicalNodes_073C441D".
  */
-export type LexicalNodes_09C09BAC =
+export type LexicalNodes_073C441D =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_09C09BAC>
+  | SerializedParagraphNode<LexicalNodes_073C441D>
   | SerializedBlockNode<BlockWithRelationship>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_09C09BAC>
+  | SerializedQuoteNode<LexicalNodes_073C441D>
   | SerializedRelationshipNode<
       | 'tenants'
       | 'users'
       | 'food-items'
       | 'food-menu'
       | 'autosave-global'
-      | 'bulk-action-posts'
       | 'relationships'
       | 'multi-tenant-posts'
       | 'notTenanted'
@@ -89,11 +88,11 @@ export type LexicalNodes_09C09BAC =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_09C09BAC, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_09C09BAC, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_09C09BAC>
-  | SerializedListItemNode<LexicalNodes_09C09BAC>
-  | SerializedHeadingNode<LexicalNodes_09C09BAC>;
+  | SerializedAutoLinkNode<LexicalNodes_073C441D, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_073C441D, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_073C441D>
+  | SerializedListItemNode<LexicalNodes_073C441D>
+  | SerializedHeadingNode<LexicalNodes_073C441D>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -118,7 +117,6 @@ export interface Config {
     'food-items': FoodItem;
     'food-menu': FoodMenu;
     'autosave-global': AutosaveGlobal;
-    'bulk-action-posts': BulkActionPost;
     relationships: Relationship;
     'multi-tenant-posts': MultiTenantPost;
     media: Media;
@@ -141,7 +139,6 @@ export interface Config {
     'food-items': FoodItemsSelect<false> | FoodItemsSelect<true>;
     'food-menu': FoodMenuSelect<false> | FoodMenuSelect<true>;
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
-    'bulk-action-posts': BulkActionPostsSelect<false> | BulkActionPostsSelect<true>;
     relationships: RelationshipsSelect<false> | RelationshipsSelect<true>;
     'multi-tenant-posts': MultiTenantPostsSelect<false> | MultiTenantPostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -270,7 +267,7 @@ export interface FoodItem {
   tenant?: (string | null) | Tenant;
   name: string;
   localizedName?: string | null;
-  content?: LexicalRichText<LexicalNodes_09C09BAC> | null;
+  content?: LexicalRichText<LexicalNodes_073C441D> | null;
   polymorphicRelationship?:
     | ({
         relationTo: 'relationships';
@@ -409,14 +406,15 @@ export interface AutosaveGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "bulk-action-posts".
+ * via the `definition` "multi-tenant-posts".
  */
-export interface BulkActionPost {
+export interface MultiTenantPost {
   id: string;
-  tenant?: (string | null) | Tenant;
+  tenant?: (string | Tenant)[] | null;
   title: string;
   description?: string | null;
   category?: ('target' | 'other') | null;
+  parent?: (string | null) | MultiTenantPost;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -429,26 +427,6 @@ export interface BulkActionPost {
   createdAt: string;
   deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "multi-tenant-posts".
- */
-export interface MultiTenantPost {
-  id: string;
-  tenant?: (string | Tenant)[] | null;
-  title: string;
-  parent?: (string | null) | MultiTenantPost;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -531,10 +509,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'autosave-global';
         value: string | AutosaveGlobal;
-      } | null)
-    | ({
-        relationTo: 'bulk-action-posts';
-        value: string | BulkActionPost;
       } | null)
     | ({
         relationTo: 'relationships';
@@ -722,22 +696,6 @@ export interface AutosaveGlobalSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "bulk-action-posts_select".
- */
-export interface BulkActionPostsSelect<T extends boolean = true> {
-  tenant?: T;
-  title?: T;
-  description?: T;
-  category?: T;
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  deletedAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relationships_select".
  */
 export interface RelationshipsSelect<T extends boolean = true> {
@@ -756,11 +714,15 @@ export interface RelationshipsSelect<T extends boolean = true> {
 export interface MultiTenantPostsSelect<T extends boolean = true> {
   tenant?: T;
   title?: T;
+  description?: T;
+  category?: T;
   parent?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -910,7 +872,6 @@ export interface CollectionQueryWidget {
       | 'food-items'
       | 'food-menu'
       | 'autosave-global'
-      | 'bulk-action-posts'
       | 'relationships'
       | 'multi-tenant-posts'
       | 'media'
@@ -944,7 +905,6 @@ export interface ActivityWidget {
           | 'food-items'
           | 'food-menu'
           | 'autosave-global'
-          | 'bulk-action-posts'
           | 'relationships'
           | 'multi-tenant-posts'
           | 'media'
