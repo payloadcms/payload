@@ -124,12 +124,6 @@ export const uploadBridgeTransformer: TransformerWithInternalBridge & UploadTran
     collectionSlug === dynamicMediaSlug &&
     operation === 'upload' &&
     req.context?.isUploadBridgeEnabled === true,
-  init: (config) =>
-    registerUploadVariants({
-      collections: { [publicCloudMediaSlug]: { variants: [{ name: 'thumbnail' }] } },
-      config,
-      transformerSlug: 'upload-bridge',
-    }),
   mimeTypes: ['image/*'],
   transformFile: () => Promise.resolve({ status: 'continue' }),
   [uploadTransformerInternal]: {

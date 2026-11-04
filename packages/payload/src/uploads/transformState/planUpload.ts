@@ -238,10 +238,16 @@ export async function resolveTransformKeyCoverage({
   const hasOnlyUnclaimedKeys = errors.every(
     ({ path }) => !uploadClaimedKeys.has(path.slice('_transforms.'.length)),
   )
+  // Every output must apply the saved keys. Sizes are stored at upload unless their owner builds
+  // them at request time, so with sizes the owner must be a request-time stage too.
+  const upload = req.payload.collections?.[collectionSlug]?.config.upload
+  const hasVariants = Boolean(upload?.variants?.length)
+  const canBuildVariantsAtRequest = !hasVariants || Boolean(upload?.variantsTransformerSlug)
 
   if (
     canApplyAtRequest &&
     hasOnlyUnclaimedKeys &&
+    canBuildVariantsAtRequest &&
     (await canBuildAtRequest({
       collectionSlug,
       documentID,
@@ -249,6 +255,7 @@ export async function resolveTransformKeyCoverage({
       pipelineDoc,
       pipelineOriginalDoc,
       req,
+      requiredTransformerSlug: hasVariants ? upload?.variantsTransformerSlug : undefined,
     }))
   ) {
     return { isAppliedAtRequest: true }
