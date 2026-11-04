@@ -985,6 +985,85 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         }
       })
 
+      test.describe('pasteURL restrictions on remote sources', () => {
+        let sourceRequestCount: number
+        let sourceServer: ReturnType<typeof createServer>
+        let sourcePort: number
+
+        test.beforeEach(async () => {
+          const remoteBytes = await fs.promises.readFile(path.resolve(dirname, './test-image.png'))
+
+          sourceRequestCount = 0
+          sourceServer = createServer((_req, res) => {
+            sourceRequestCount++
+            res.writeHead(200, {
+              'Content-Length': remoteBytes.length,
+              'Content-Type': 'image/png',
+            })
+            res.end(remoteBytes)
+          })
+          await new Promise((resolve) => sourceServer.listen(0, '127.0.0.1', resolve))
+          sourcePort = (sourceServer.address() as AddressInfo).port
+        })
+
+        test.afterEach(async () => {
+          sourceServer.closeAllConnections()
+          await new Promise((resolve) => sourceServer.close(resolve))
+        })
+
+        test('should reject a remote source when pasteURL is false', async ({ restClient }) => {
+          const response = await restClient.POST(`/${mediaSlug}`, {
+            body: JSON.stringify({
+              filename: 'image.png',
+              url: `http://127.0.0.1:${sourcePort}/image.png`,
+            }),
+          })
+
+          const { errors } = await response.json<{ errors: { message: string }[] }>()
+
+          expect(response.status).toBe(400)
+          expect(errors[0]?.message).toContain('Uploading files from URLs is disabled')
+          expect(sourceRequestCount).toBe(0)
+        })
+
+        test('should reject a remote source that is not in the pasteURL allowList', async ({
+          restClient,
+        }) => {
+          const response = await restClient.POST(`/${allowListMediaSlug}`, {
+            body: JSON.stringify({
+              filename: 'image.png',
+              url: `https://127.0.0.1:${sourcePort}/image.png`,
+            }),
+          })
+
+          const { errors } = await response.json<{ errors: { message: string }[] }>()
+
+          expect(response.status).toBe(400)
+          expect(errors[0]?.message).toContain('The provided file URL is not allowed.')
+          expect(sourceRequestCount).toBe(0)
+        })
+
+        test('should fetch a remote source that is in the pasteURL allowList', async ({
+          payload,
+          restClient,
+        }) => {
+          const response = await restClient.POST(`/${allowListMediaSlug}`, {
+            body: JSON.stringify({
+              filename: 'image.png',
+              url: `http://127.0.0.1:${sourcePort}/image.png`,
+            }),
+          })
+
+          expect(response.status).toBe(201)
+
+          const { doc } = await response.json<{ doc: { id: number | string } }>()
+
+          await payload.delete({ id: doc.id, collection: allowListMediaSlug, overrideAccess: true })
+
+          expect(sourceRequestCount).toBe(1)
+        })
+      })
+
       test('should URL encode filenames with spaces in both main url and size urls', async ({
         payload,
       }) => {
@@ -3865,7 +3944,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           overrideAccess: true,
         })
 
-        expect(doc.filename).toBe('cdn-image-original.png')
+        expect(doc.filename).toBe('cdn-image.png')
         expect(doc.mimeType).toBe('image/png')
       } finally {
         cdnServer.close()

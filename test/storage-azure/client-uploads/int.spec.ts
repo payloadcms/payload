@@ -323,7 +323,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     const { doc: seedDoc }: { doc: { filename: string; id: number | string } } =
       await seedRes.json()
 
-    expect(seedDoc.filename).toBe('duplicate-target-original.png')
+    expect(seedDoc.filename).toBe('duplicate-target.png')
 
     const signedURLRes = await restClient.POST('/upload-instructions', {
       body: JSON.stringify({
@@ -360,7 +360,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       new URL(signedURL).pathname.replace(`/devstoreaccount1/${TEST_CONTAINER}/`, ''),
     )
 
-    expect(blobKey).toMatch(/^[0-9a-f-]+\/duplicate-target-1-original\.png$/)
+    expect(blobKey).toMatch(/^[0-9a-f-]+\/duplicate-target-1\.png$/)
 
     await new BlockBlobClient(signedURL).uploadData(fileBuffer, {
       blobHTTPHeaders: { blobContentType: 'image/png' },
@@ -372,7 +372,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       await secondResponse.json()
 
     expect(secondResponse.status).toBe(201)
-    expect(secondDoc.filename).toBe('duplicate-target-1-original.png')
+    expect(secondDoc.filename).toBe('duplicate-target-1.png')
     expect(await containerClient.getBlobClient(blobKey).exists()).toBe(true)
 
     await payload.delete({ id: seedDoc.id, collection: mediaSlug, overrideAccess: true })

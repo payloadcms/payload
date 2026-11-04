@@ -12,6 +12,35 @@ describe('checkFileRestrictions', () => {
       },
     }) as unknown as PayloadRequest
 
+  it.each([
+    { mimeTypes: undefined, isAllowed: true },
+    { mimeTypes: ['application/xml'], isAllowed: true },
+    { mimeTypes: ['image/png'], isAllowed: false },
+  ])(
+    'should apply the configured type list to stylesheet content with allowed=$isAllowed',
+    async ({ mimeTypes, isAllowed }) => {
+      const fileContent = Buffer.from('<document><title>Reference</title></document>')
+      const result = checkFileRestrictions({
+        collection: { slug: 'media', upload: { mimeTypes, staticDir: '/tmp' } } as any,
+        file: {
+          data: fileContent,
+          mimetype: 'text/xsl',
+          name: 'reference.xsl',
+          size: fileContent.length,
+        },
+        req: createReq(),
+      })
+
+      if (isAllowed) {
+        await expect(result).resolves.toEqual({ ext: 'xml', mime: 'application/xml' })
+      } else {
+        await expect(result).rejects.toMatchObject({
+          data: { errors: [{ message: 'Invalid MIME type: application/xml.', path: 'file' }] },
+        })
+      }
+    },
+  )
+
   it('accepts a valid header-only ISO base media upload', async () => {
     const fullSize = 2 * 1024 * 1024
     const fileTypeBox = Buffer.alloc(24)

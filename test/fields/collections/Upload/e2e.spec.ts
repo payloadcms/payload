@@ -95,7 +95,7 @@ describe('Upload', () => {
 
     await expect(page.locator('.file-preview__thumbnail img')).toHaveAttribute(
       'src',
-      /\/api\/uploads\/file\/og-image(?:-\d+)?-original(?:-\d+)?\.jpg(\?.*)?$/,
+      /\/api\/uploads\/file\/og-image(?:-\d+)?\.jpg(\?.*)?$/,
     )
   })
 
@@ -123,7 +123,7 @@ describe('Upload', () => {
 
     await expect(page.locator('.file-preview__thumbnail img')).toHaveAttribute(
       'src',
-      /\/api\/uploads\/file\/og-image(?:-\d+)?-original(?:-\d+)?\.jpg(\?.*)?$/,
+      /\/api\/uploads\/file\/og-image(?:-\d+)?\.jpg(\?.*)?$/,
     )
   })
 
@@ -157,7 +157,7 @@ describe('Upload', () => {
     await uploadImage()
     await expect(page.locator('.file-preview__thumbnail img')).toHaveAttribute(
       'src',
-      /\/api\/uploads\/file\/payload(?:-\d+)?-original(?:-\d+)?\.jpg(\?.*)?$/,
+      /\/api\/uploads\/file\/payload(?:-\d+)?\.jpg(\?.*)?$/,
     )
   })
 
@@ -182,18 +182,15 @@ describe('Upload', () => {
     // Assert that the media field has the png upload
     await expect(
       page.locator('.field-type.upload .upload-relationship-details__filename a'),
-    ).toHaveAttribute('href', /\/api\/uploads\/file\/payload(?:-\d+)?-original(?:-\d+)?\.png$/)
+    ).toHaveAttribute('href', /\/api\/uploads\/file\/payload(?:-\d+)?\.png$/)
 
     await expect(
       page.locator('.field-type.upload .upload-relationship-details__filename a'),
-    ).toContainText(/payload(?:-\d+)?-original(?:-\d+)?\.png/)
+    ).toContainText(/payload(?:-\d+)?\.png/)
 
     await expect(
       page.locator('.field-type.upload .upload-relationship-details img'),
-    ).toHaveAttribute(
-      'src',
-      /\/api\/uploads\/file\/payload(?:-\d+)?-original(?:-\d+)?\.png(\?.*)?$/,
-    )
+    ).toHaveAttribute('src', /\/api\/uploads\/file\/payload(?:-\d+)?\.png(\?.*)?$/)
     await saveDocAndAssert(page)
   })
 

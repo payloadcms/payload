@@ -11,6 +11,7 @@ import {
   createdOnlySlug,
   customAuthorshipSlug,
   draftPostsSlug,
+  groupMenuSlug,
   menuSlug,
   noAuthorshipSlug,
   postsSlug,
@@ -193,6 +194,33 @@ export default buildConfigWithDefaults({
             type: 'text',
           },
         ],
+      },
+      {
+        // Drafts + a named group whose subfield has a default. On a first draft save, group
+        // traversal seeds the group key on the stored doc before the appended createdBy hook runs,
+        // so first-write detection must not rely on the post-traversal doc being empty.
+        slug: groupMenuSlug,
+        access: { read: () => true, update: () => true },
+        fields: [
+          {
+            name: 'settings',
+            type: 'group',
+            fields: [
+              {
+                name: 'label',
+                type: 'text',
+                defaultValue: 'Default label',
+              },
+            ],
+          },
+          {
+            name: 'title',
+            type: 'text',
+          },
+        ],
+        versions: {
+          drafts: true,
+        },
       },
     ],
     typescript: {

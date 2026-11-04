@@ -111,6 +111,7 @@ export const HasManyUploadDiff: React.FC<{
     : null
 
   const diffResult = getHTMLDiffComponents({
+    deletedLabel: i18n.t('general:deleted'),
     fromHTML:
       `<div class="${baseClass}-hasMany">` +
       (FromComponents
@@ -195,6 +196,7 @@ export const SingleUploadDiff: React.FC<{
     : '<p>' + '' + '</p>'
 
   const diffResult = getHTMLDiffComponents({
+    deletedLabel: i18n.t('general:deleted'),
     fromHTML: fromHtml,
     toHTML: toHtml,
     tokenizeByCharacter: false,

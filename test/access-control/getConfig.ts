@@ -133,6 +133,7 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'title',
           type: 'text',
         },
+        { name: 'privateTitle', type: 'text', access: { read: () => false } },
       ],
     },
   ],

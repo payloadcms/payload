@@ -31,7 +31,10 @@ export function ListSelection_v4({ count, ListActions, SelectionActions }: ListS
   const { t } = useTranslation()
 
   return (
-    <div className={baseClass}>
+    <div
+      className={baseClass}
+      onFocus={(event) => event.target.scrollIntoView({ block: 'nearest', inline: 'nearest' })}
+    >
       <span className={`${baseClass}__count`}>
         {t('general:selectedCount', { count, label: '' })}
       </span>

@@ -45,6 +45,39 @@ describe('getFilePrefix', () => {
     expect(req.payload.find).not.toHaveBeenCalled()
   })
 
+  describe('original sharing the main filename', () => {
+    const doc = {
+      id: '1',
+      _objectKey: 'main-key',
+      filename: 'photo.png',
+      original: { _objectKey: 'original-key', filename: 'photo.png', prefix: 'media' },
+      prefix: 'media',
+    }
+
+    it('should use the main file folder by default', async () => {
+      const result = await getFilePrefix({
+        collection: makeCollection(),
+        doc,
+        filename: 'photo.png',
+        req: makeReq(),
+      })
+
+      expect(result).toBe('media/main-key')
+    })
+
+    it('should use the original folder when the original is requested', async () => {
+      const result = await getFilePrefix({
+        collection: makeCollection(),
+        doc,
+        filename: 'photo.png',
+        req: makeReq(),
+        isOriginal: true,
+      })
+
+      expect(result).toBe('media/original-key')
+    })
+  })
+
   it('does not fall back to a lookup when the checked document has no prefix', async () => {
     const req = makeReq([{ prefix: 'db-prefix' }])
 

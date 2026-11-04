@@ -22,7 +22,7 @@
  *  - specify locales to show
  */
 
-import type { BrowserContext, Dialog, Page } from '@playwright/test'
+import type { BrowserContext, Dialog, Locator, Page } from '@playwright/test'
 import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
@@ -65,6 +65,7 @@ import {
   autosaveWithDraftButtonGlobal,
   autosaveWithDraftButtonSlug,
   autosaveWithDraftValidateSlug,
+  autosaveWithVirtualSlug,
   customIDSlug,
   diffCollectionSlug,
   disablePublishGlobalSlug,
@@ -105,6 +106,7 @@ describe('Versions', () => {
   let autosaveURL: AdminUrlUtil
   let autosaveWithDraftButtonURL: AdminUrlUtil
   let autosaveWithDraftValidateURL: AdminUrlUtil
+  let autosaveWithVirtualURL: AdminUrlUtil
   let draftWithValidateURL: AdminUrlUtil
   let draftWithChangeHookURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
@@ -427,6 +429,7 @@ describe('Versions', () => {
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       autosaveWithDraftButtonURL = new AdminUrlUtil(serverURL, autosaveWithDraftButtonSlug)
       autosaveWithDraftValidateURL = new AdminUrlUtil(serverURL, autosaveWithDraftValidateSlug)
+      autosaveWithVirtualURL = new AdminUrlUtil(serverURL, autosaveWithVirtualSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
@@ -811,7 +814,10 @@ describe('Versions', () => {
 
       const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
       await expect(drawer).toBeVisible()
-      await expect(drawer.locator('.id-label')).toBeVisible()
+      await expect(drawer.getByRole('heading', { level: 3 }).getByRole('link')).toHaveAttribute(
+        'href',
+        new RegExp(`/${autosaveCollectionSlug}/[^/]+$`),
+      )
     })
 
     test('collection - autosave - should redirect from create to edit URL after first save', async () => {
@@ -878,6 +884,145 @@ describe('Versions', () => {
       await expect(page.locator('#custom-field-label')).toHaveText(
         `Value in DocumentInfoContext: ${postID}`,
       )
+    })
+
+    test('collection - autosave - should not re-autosave when virtual fields change in the response', async () => {
+      // Virtual fields are recomputed by `afterRead` on every autosave response and merged back
+      // into form state. They must not be mistaken for user edits and trigger another autosave.
+      const { id: docID } = await payload.create({
+        collection: autosaveWithVirtualSlug,
+        data: {
+          array: [{ title: 'array title' }],
+          title: 'title',
+        },
+      })
+
+      await page.goto(autosaveWithVirtualURL.edit(docID))
+
+      await expect(page.locator('#field-titleDerived')).toHaveValue('derived:title')
+
+      const autosaveRequestURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${autosaveWithVirtualSlug}/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
+        serverURL,
+      })
+
+      // The double autosave only surfaces on the second edit, once the virtual value from the
+      // previous response has been merged into form state
+      await assertNetworkRequests(
+        page,
+        autosaveRequestURL,
+        async () => {
+          await page.locator('#field-title').fill('first change')
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
+
+      await expect(page.locator('#field-titleDerived')).toHaveValue('derived:first change')
+
+      await assertNetworkRequests(
+        page,
+        autosaveRequestURL,
+        async () => {
+          await page.locator('#field-title').fill('second change')
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
+
+      await expect(page.locator('#field-titleDerived')).toHaveValue('derived:second change')
+    })
+
+    test('collection - autosave - should not re-autosave when nested virtual fields change in the response', async () => {
+      const { id: docID } = await payload.create({
+        collection: autosaveWithVirtualSlug,
+        data: {
+          array: [{ title: 'array title' }],
+          title: 'title',
+        },
+      })
+
+      await page.goto(autosaveWithVirtualURL.edit(docID))
+
+      const nestedTitle = page.locator('#field-array__0__title')
+      await expect(nestedTitle).toHaveValue('array title')
+
+      const autosaveRequestURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${autosaveWithVirtualSlug}/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
+        serverURL,
+      })
+
+      await assertNetworkRequests(
+        page,
+        autosaveRequestURL,
+        async () => {
+          await nestedTitle.fill('first change')
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
+
+      await assertNetworkRequests(
+        page,
+        autosaveRequestURL,
+        async () => {
+          await nestedTitle.fill('second change')
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
+
+      await expect(page.locator('#field-array__0__titleDerived')).toHaveValue(
+        'derived:second change',
+      )
+    })
+
+    test('collection - autosave - should save edits to writable virtual fields', async () => {
+      const { id: docID } = await payload.create({
+        collection: autosaveWithVirtualSlug,
+        data: {
+          title: 'original title',
+        },
+      })
+
+      await page.goto(autosaveWithVirtualURL.edit(docID))
+
+      await expect(page.locator('#field-titleDerived')).toHaveValue('derived:original title')
+
+      const autosaveRequestURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${autosaveWithVirtualSlug}/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
+        serverURL,
+      })
+
+      await assertNetworkRequests(
+        page,
+        autosaveRequestURL,
+        async () => {
+          await page.locator('#field-editableTitle').fill('title from virtual input')
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
+
+      await expect(page.locator('#field-title')).toHaveValue('title from virtual input')
+
+      const { docs } = await payload.find({
+        collection: autosaveWithVirtualSlug,
+        draft: true,
+        where: {
+          id: { equals: docID },
+        },
+      })
+
+      expect(docs[0]?.title).toBe('title from virtual input')
     })
 
     test('collection - should show "save as draft" button when showSaveDraftButton is true', async () => {
@@ -2981,9 +3126,10 @@ describe('Versions', () => {
       await navigateToDiffVersionView(latestVersionDiff.id)
 
       const sourceField = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
-      await expect(sourceField.locator('.html-diff__diff-old')).toHaveText(
-        'textInRowInCollapsibleBlock2',
-      )
+      await expectDiffContent({
+        locator: sourceField.locator('.html-diff__diff-old'),
+        text: 'textInRowInCollapsibleBlock2',
+      })
 
       const replacementField = page.locator(
         '[data-field-path="blocks.1.textInRowInUnnamedTab2InBlock"]',
@@ -3136,7 +3282,7 @@ describe('Versions', () => {
 
       const number = page.locator('[data-field-path="number"]')
 
-      await expect(number.locator('.html-diff__diff-old')).toHaveText('1')
+      await expectDiffContent({ locator: number.locator('.html-diff__diff-old'), text: '1' })
       await expect(number.locator('.html-diff__diff-new')).toHaveText('2')
     })
 
@@ -3145,7 +3291,10 @@ describe('Versions', () => {
 
       const point = page.locator('[data-field-path="point"]')
 
-      await expect(point.locator('.html-diff__diff-old')).toHaveText('[\n 1,\n 2\n]')
+      await expectDiffContent({
+        locator: point.locator('.html-diff__diff-old'),
+        text: '[\n 1,\n 2\n]',
+      })
       await expect(point.locator('.html-diff__diff-new')).toHaveText('[\n 1,\n 3\n]')
     })
 
@@ -3154,7 +3303,7 @@ describe('Versions', () => {
 
       const radio = page.locator('[data-field-path="radio"]')
 
-      await expect(radio.locator('.html-diff__diff-old')).toHaveText('Option 1')
+      await expectDiffContent({ locator: radio.locator('.html-diff__diff-old'), text: 'Option 1' })
       await expect(radio.locator('.html-diff__diff-new')).toHaveText('Option 2')
     })
 
@@ -3171,9 +3320,10 @@ describe('Versions', () => {
         sort: 'createdAt',
       })
 
-      await expect(
-        relationship.locator('.html-diff__diff-old .relationship-diff__info'),
-      ).toHaveText(String(draftDocs?.docs?.[1]?.title))
+      await expectDiffContent({
+        locator: relationship.locator('.html-diff__diff-old .relationship-diff__info'),
+        text: String(draftDocs?.docs?.[1]?.title),
+      })
       await expect(
         relationship.locator('.html-diff__diff-new .relationship-diff__info'),
       ).toHaveText(String(draftDocs?.docs?.[2]?.title))
@@ -3199,7 +3349,7 @@ describe('Versions', () => {
       const newDiff = richtext.locator('.html-diff__diff-new')
 
       const oldHTML =
-        `Fugiat <span data-match-type="delete">essein</span> dolor aleiqua <span data-match-type="delete">cillum</span> proident ad cillum excepteur mollit reprehenderit mollit commodo. Pariatur incididunt non exercitation est mollit nisi <span data-match-type="delete">laboredeleteofficia</span> cupidatat amet commodo commodo proident occaecat.
+        `Fugiat <del data-match-type="delete"><span class="sr-only">Deleted: </span>essein</del> dolor aleiqua <del data-match-type="delete"><span class="sr-only">Deleted: </span>cillum</del> proident ad cillum excepteur mollit reprehenderit mollit commodo. Pariatur incididunt non exercitation est mollit nisi <del data-match-type="delete"><span class="sr-only">Deleted: </span>laboredeleteofficia</del> cupidatat amet commodo commodo proident occaecat.
       `.trim()
       const newHTML =
         `Fugiat <span data-match-type="create">esse new in</span> dolor aleiqua <span data-match-type="create">gillum</span> proident ad cillum excepteur mollit reprehenderit mollit commodo. Pariatur incididunt non exercitation est mollit nisi <span data-match-type="create">labore officia</span> cupidatat amet commodo commodo proident occaecat.`.trim()
@@ -3266,7 +3416,7 @@ describe('Versions', () => {
 
       const select = page.locator('[data-field-path="select"]')
 
-      await expect(select.locator('.html-diff__diff-old')).toHaveText('Option 1')
+      await expectDiffContent({ locator: select.locator('.html-diff__diff-old'), text: 'Option 1' })
       await expect(select.locator('.html-diff__diff-new')).toHaveText('Option 2')
     })
 
@@ -3321,9 +3471,10 @@ describe('Versions', () => {
         sort: 'createdAt',
       })
 
-      await expect(upload.locator('.html-diff__diff-old .upload-diff__info')).toHaveText(
-        String(uploadDocs?.docs?.[0]?.filename),
-      )
+      await expectDiffContent({
+        locator: upload.locator('.html-diff__diff-old .upload-diff__info'),
+        text: String(uploadDocs?.docs?.[0]?.filename),
+      })
       await expect(upload.locator('.html-diff__diff-new .upload-diff__info')).toHaveText(
         String(uploadDocs?.docs?.[1]?.filename),
       )
@@ -3436,9 +3587,10 @@ describe('Versions', () => {
 
       const blockDiff = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
 
-      await expect(blockDiff.locator('.html-diff__diff-old')).toHaveText(
-        'textInRowInCollapsibleBlock2',
-      )
+      await expectDiffContent({
+        locator: blockDiff.locator('.html-diff__diff-old'),
+        text: 'textInRowInCollapsibleBlock2',
+      })
       await expect(blockDiff.locator('.html-diff__diff-new')).toHaveText(
         'textInRowInCollapsibleBlock3',
       )
@@ -3642,7 +3794,10 @@ describe('Versions', () => {
       const text = page.locator('[data-field-path="text"]')
 
       // Verify that HTML characters are rendered as literal text, not interpreted as HTML
-      await expect(text.locator('.html-diff__diff-old')).toHaveText('<b>bold</b> & "quotes"')
+      await expectDiffContent({
+        locator: text.locator('.html-diff__diff-old'),
+        text: '<b>bold</b> & "quotes"',
+      })
       await expect(text.locator('.html-diff__diff-new')).toHaveText('<script>alert(1)</script>')
 
       // Cleanup
@@ -3695,7 +3850,11 @@ describe('Versions', () => {
       const json = page.locator('[data-field-path="json"]')
 
       // Verify that JSON with HTML characters renders the literal text
-      await expect(json.locator('.html-diff__diff-old')).toContainText('"<div class=\\"test\\">')
+      await expectDiffContent({
+        locator: json.locator('.html-diff__diff-old'),
+        text: '"<div class=\\"test\\">',
+        shouldContain: true,
+      })
       await expect(json.locator('.html-diff__diff-new')).toContainText(
         '"<span onclick=\\"alert(1)\\">',
       )
@@ -3728,4 +3887,32 @@ async function updateLocalizedContent({
   })
 
   await expect(response).toBeOK()
+}
+
+/** Compare source content separately from the removal cues verified by the accessibility regressions. */
+async function expectDiffContent({
+  locator,
+  shouldContain = false,
+  text,
+}: {
+  locator: Locator
+  shouldContain?: boolean
+  text: string
+}) {
+  await expect(locator).toBeVisible()
+  const expected = text.replace(/\s+/g, ' ').trim()
+
+  const readContent = () =>
+    locator.evaluate((element) => {
+      const copy = element.cloneNode(true) as HTMLElement
+
+      copy.querySelectorAll('.sr-only').forEach((cue) => cue.remove())
+      return (copy.textContent || '').replace(/\s+/g, ' ').trim()
+    })
+
+  if (shouldContain) {
+    await expect.poll(readContent).toContain(expected)
+  } else {
+    await expect.poll(readContent).toBe(expected)
+  }
 }

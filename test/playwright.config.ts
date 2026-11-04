@@ -1,3 +1,5 @@
+import type { ReporterDescription } from '@playwright/test'
+
 import { defineConfig, devices } from '@playwright/test'
 import dotenv from 'dotenv'
 import path from 'path'
@@ -11,6 +13,10 @@ dotenv.config({ path: path.resolve(dirname, '..', '.env') })
 
 const CI = process.env.CI === 'true'
 const isTanStack = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
+const a11yReporters: ReporterDescription[] =
+  process.env.A11Y_REPORT_PATH || process.env.A11Y_REPORT_DIR
+    ? [[path.resolve(dirname, '../.github/scripts/a11y/reporter.mjs')]]
+    : []
 
 let multiplier = CI ? 4 : 1
 let smallMultiplier = CI ? 3 : 1
@@ -64,13 +70,10 @@ export default defineConfig({
    * output folder) opts into an interactive HTML report locally — see `pnpm test:visual:preview`.
    */
   reporter: CI
-    ? [['list', { printSteps: true }], ['json']]
+    ? [['list', { printSteps: true }], ['json'], ...a11yReporters]
     : process.env.PLAYWRIGHT_HTML_REPORT
-      ? [
-          ['list', { printSteps: true }],
-          ['html', { open: 'never' }],
-        ]
-      : [['list', { printSteps: true }]],
+      ? [['list', { printSteps: true }], ['html', { open: 'never' }], ...a11yReporters]
+      : [['list', { printSteps: true }], ...a11yReporters],
   projects: [
     {
       name: 'chromium',

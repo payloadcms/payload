@@ -5,6 +5,33 @@ import { describe, expect, it } from 'vitest'
 import { multiTenantPlugin } from './index.js'
 
 describe('multiTenantPlugin', () => {
+  it('should preserve custom menu items and add one tenant action on each rebuild', async () => {
+    const customMenuItem = { path: '/components/CustomMenuItem.js#CustomMenuItem' }
+    const plugin = multiTenantPlugin({ collections: { posts: {} } })
+    const config = {
+      collections: [
+        { slug: 'users', auth: true, fields: [] },
+        { slug: 'tenants', fields: [] },
+        {
+          slug: 'posts',
+          admin: { components: { edit: { editMenuItems: [false, customMenuItem] } } },
+          fields: [],
+        },
+      ],
+    } as Config
+
+    for (let rebuild = 0; rebuild < 3; rebuild++) {
+      const builtConfig = await plugin(config)
+      const posts = builtConfig.collections?.find(({ slug }) => slug === 'posts')
+
+      expect(posts?.admin?.components?.edit?.editMenuItems).toEqual([
+        false,
+        customMenuItem,
+        { path: '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger' },
+      ])
+    }
+  })
+
   it('applies tenant assignment access defaults', async () => {
     let hasAllTenantAccess = false
     const plugin = multiTenantPlugin({

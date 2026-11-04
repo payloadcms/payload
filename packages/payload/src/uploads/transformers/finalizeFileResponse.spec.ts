@@ -51,17 +51,19 @@ describe('finalizeFileResponse', () => {
   })
 
   // XML classification itself is covered by getFileTypeIdentity.spec.ts.
-  it.each(['image/svg+xml; charset=utf-8', 'application/xml'])(
-    'should apply the upload CSP header to a %s response',
-    async (contentType) => {
-      const collection = makeCollection()
-      const response = new Response('<root />', { headers: { 'Content-Type': contentType } })
+  it.each([
+    'image/svg+xml; charset=utf-8',
+    'application/xml',
+    'text/xsl',
+    'TEXT/XSL; charset=utf-8',
+  ])('should apply the upload CSP header to a %s response', async (contentType) => {
+    const collection = makeCollection()
+    const response = new Response('<root />', { headers: { 'Content-Type': contentType } })
 
-      const result = await finalizeFileResponse({ collection, req: makeReq(), response })
+    const result = await finalizeFileResponse({ collection, req: makeReq(), response })
 
-      expect(result.headers.get('Content-Security-Policy')).toBe(uploadContentSecurityPolicy)
-    },
-  )
+    expect(result.headers.get('Content-Security-Policy')).toBe(uploadContentSecurityPolicy)
+  })
 
   it('should apply the upload CSP header when modifyResponseHeaders sets an XML content type', async () => {
     const modifyResponseHeaders = vi.fn(({ headers }: { headers: Headers }) => {
@@ -104,6 +106,30 @@ describe('finalizeFileResponse', () => {
 
     expect(result.headers.get('Content-Security-Policy')).toBe(uploadContentSecurityPolicy)
   })
+
+  it.each([
+    { sourceType: 'text/xsl', finalType: 'image/png' },
+    { sourceType: 'image/png', finalType: 'TEXT/XSL; charset=utf-8' },
+  ])(
+    'should retain the XML response policy from $sourceType to $finalType',
+    async ({ sourceType, finalType }) => {
+      const modifyResponseHeaders = vi.fn(({ headers }: { headers: Headers }) => {
+        headers.delete('Content-Security-Policy')
+        headers.set('Content-Type', finalType)
+
+        return headers
+      })
+      const response = new Response('<document />', { headers: { 'Content-Type': sourceType } })
+
+      const result = await finalizeFileResponse({
+        collection: makeCollection({ modifyResponseHeaders }),
+        req: makeReq(),
+        response,
+      })
+
+      expect(result.headers.get('Content-Security-Policy')).toBe(uploadContentSecurityPolicy)
+    },
+  )
 
   it('should not add a CSP header to a non-XML response', async () => {
     const collection = makeCollection()

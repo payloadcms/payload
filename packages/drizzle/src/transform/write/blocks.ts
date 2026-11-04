@@ -65,11 +65,12 @@ export const transformBlocks = ({
       return
     }
 
-    const matchedBlock =
-      adapter.payload.blocks[blockRow.blockType] ??
-      (field.blocks.find(
-        (block) => typeof block !== 'string' && block.slug === blockRow.blockType,
-      ) as FlattenedBlock | undefined)
+    const fieldBlock = field.blocks.find((block) =>
+      typeof block === 'string' ? block === blockRow.blockType : block.slug === blockRow.blockType,
+    )
+    const registeredBlocks: Record<string, FlattenedBlock | undefined> = adapter.payload.blocks
+    const matchedBlock: FlattenedBlock | undefined =
+      typeof fieldBlock === 'string' ? registeredBlocks[fieldBlock] : fieldBlock
 
     if (!matchedBlock) {
       return
