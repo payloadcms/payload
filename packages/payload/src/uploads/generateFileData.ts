@@ -9,12 +9,19 @@ import type { Document, PayloadRequest } from '../types/index.js'
 import type { ExternalUploadSource } from './sanitizeUploadData.js'
 import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
 
-import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
+import {
+  APIError,
+  FileRetrievalError,
+  FileUploadError,
+  Forbidden,
+  MissingFile,
+} from '../errors/index.js'
 import { isNumber } from '../utilities/isNumber.js'
+import { isURLAllowed } from '../utilities/isURLAllowed.js'
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { cropImage } from './cropImage.js'
-import { getExternalFile } from './getExternalFile.js'
+import { getExternalFile, resolveExternalFileURL } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
@@ -144,6 +151,22 @@ export const generateFileData = async <T>({
 
     if ((serverURL && url?.startsWith(serverURL)) || url?.startsWith('/')) {
       isLocalFile = true
+    }
+
+    // A caller-supplied URL must pass the same `pasteURL` policy as the paste-url endpoint.
+    // Checked outside the try below so policy errors reach the caller as 400s.
+    if (externalUploadSource) {
+      const { pasteURL } = collectionConfig.upload
+
+      if (pasteURL === false) {
+        throw new APIError('Uploading files from URLs is disabled for this collection.', 400)
+      }
+
+      const { url: resolvedURL } = resolveExternalFileURL({ req, url: externalUploadSource.url })
+
+      if (pasteURL?.allowList && !isURLAllowed(resolvedURL.href, pasteURL.allowList)) {
+        throw new APIError('The provided file URL is not allowed.', 400)
+      }
     }
 
     try {
