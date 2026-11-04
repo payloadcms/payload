@@ -41,7 +41,8 @@ export const FilePreview: React.FC<Props> = ({
   const originalUrl = data?.url as string | undefined
   const thumbnailUrl = data?.thumbnailURL as string | undefined
   const selectedSizeUrl = selectedSizeData?.url as string | undefined
-  const fileSrc = selectedSizeUrl ?? (isImageFile ? originalUrl : (thumbnailUrl ?? originalUrl))
+  const fileSrc =
+    selectedSizeUrl ?? (isImageFile ? originalUrl : undefined) ?? thumbnailUrl ?? originalUrl
 
   const nativePreviewSrc = originalUrl ? appendCacheTag(originalUrl, imageCacheTag) : undefined
 
