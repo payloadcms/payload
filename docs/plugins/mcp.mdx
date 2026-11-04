@@ -322,7 +322,7 @@ the same metadata from the site root. In Next.js, add
 import config from '@payload-config'
 import { oauthProtectedResourceHandler } from '@payloadcms/plugin-mcp'
 
-export const GET = oauthProtectedResourceHandler(config)
+export const GET = oauthProtectedResourceHandler({ config })
 ```
 
 In TanStack Start, add `[.]well-known.oauth-protected-resource.$.ts` to your
@@ -338,7 +338,7 @@ export const Route = createFileRoute('/.well-known/oauth-protected-resource/$')(
       handlers: {
         GET: async ({ request }) => {
           const { default: config } = await import('@payload-config')
-          return oauthProtectedResourceHandler(config)(request)
+          return oauthProtectedResourceHandler({ config })(request)
         },
       },
     },

@@ -25,11 +25,11 @@ export const oauthProtectedResourceEndpoint: PayloadHandler = (req) => getMetada
  * import config from '@payload-config'
  * import { oauthProtectedResourceHandler } from '@payloadcms/plugin-mcp'
  *
- * export const GET = oauthProtectedResourceHandler(config)
+ * export const GET = oauthProtectedResourceHandler({ config })
  * ```
  */
 export const oauthProtectedResourceHandler =
-  (config: Promise<SanitizedConfig> | SanitizedConfig) =>
+  ({ config }: { config: Promise<SanitizedConfig> | SanitizedConfig }) =>
   async (request: Request): Promise<Response> =>
     getMetadataResponse({
       req: await createPayloadRequest({ payload: await getPayload({ config }), req: request }),
