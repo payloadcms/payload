@@ -41,6 +41,7 @@ type Args = {
   requestScopeRef: RefObject<unknown>
   scheduleRequest: UseQueueResult['queueTask']
   setIsValid: FormContextType['setIsValid']
+  unmountedRequestScopeRef: RefObject<unknown>
 }
 
 export const useFormSubmission = ({
@@ -52,6 +53,7 @@ export const useFormSubmission = ({
   requestScopeRef,
   scheduleRequest,
   setIsValid,
+  unmountedRequestScopeRef,
 }: Args) => {
   const {
     action,
@@ -103,7 +105,6 @@ export const useFormSubmission = ({
    */
   const isModifiedWhileProcessing = useRef(false)
 
-  const requestAtUnmount = useRef<unknown>(undefined)
   const submitFocus = useRef<HTMLElement | null>(null)
   const isDisabledFromPropsRef = useRef(isDisabledFromProps)
 
@@ -140,15 +141,6 @@ export const useFormSubmission = ({
 
     _setIsModified(isModified)
   }, [])
-
-  useEffect(() => {
-    requestAtUnmount.current = undefined
-
-    return () => {
-      // Capture the active scope before Form's unmount cleanup resets the queue.
-      requestAtUnmount.current = requestScopeRef.current
-    }
-  }, [requestScopeRef])
 
   /**
    * Intercept the `setIsBackgroundProcessing` method to keep the ref in sync.
@@ -404,7 +396,7 @@ export const useFormSubmission = ({
               })
 
               if (!requestContext.isCurrent()) {
-                if (requestAtUnmount.current === successScope) {
+                if (unmountedRequestScopeRef.current === successScope) {
                   preservePromiseToast = true
 
                   if (!redirect && !disableToast) {
@@ -572,6 +564,7 @@ export const useFormSubmission = ({
       prevFormStateRef,
       requestScopeRef,
       setIsValid,
+      unmountedRequestScopeRef,
     ],
   )
 
@@ -584,8 +577,10 @@ export const useFormSubmission = ({
         return
       }
 
+      const shouldDisableForm = options?.disableFormWhileProcessing ?? true
+
       // Disable before queueing, like a direct submit, so the guard above rejects any submission made while this one waits.
-      if (options?.disableFormWhileProcessing ?? true) {
+      if (shouldDisableForm) {
         const activeElement = document.activeElement
 
         // Disabling the active field drops browser focus to the body.
@@ -598,14 +593,25 @@ export const useFormSubmission = ({
         setIsDisabled(true)
       }
 
+      const requestScope = requestScopeRef.current
+
       const result = await scheduleRequest({
         priority: requestPriority[options?.submissionType ?? 'submit'],
         task: (requestContext) => executeSubmit({ options, requestContext }),
       })
 
-      return result.status === 'completed' ? result.value : undefined
+      if (result.status === 'completed') {
+        return result.value
+      }
+
+      // A superseded submission never runs, so release the disable it took.
+      // Skip after a reset: it already restored request state, and a newer submission may own the disable.
+      if (shouldDisableForm && requestScopeRef.current === requestScope) {
+        setIsProcessing(false)
+        setIsDisabled(isDisabledFromPropsRef.current || false)
+      }
     },
-    [contextRef, executeSubmit, formRef, scheduleRequest, setIsDisabled],
+    [contextRef, executeSubmit, formRef, requestScopeRef, scheduleRequest, setIsDisabled],
   )
 
   useEffect(() => {

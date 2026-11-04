@@ -1064,7 +1064,6 @@ test.describe('Shared form request queue', () => {
     await captured.promise
     await page.locator('#field-title').fill('Pending autosave')
     await page.clock.runFor(1000)
-    await page.waitForTimeout(100)
     await expect(page.locator('.autosave')).toBeVisible()
 
     await page.locator('form.collection-edit__form').evaluate((form: HTMLFormElement) => {

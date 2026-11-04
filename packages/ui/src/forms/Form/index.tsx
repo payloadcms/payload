@@ -18,6 +18,8 @@ import type {
   FormFieldsContext as FormFieldsContextType,
   FormProps,
   GetDataByPath,
+  Submit,
+  SubmitOptions,
 } from './types.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
@@ -81,10 +83,20 @@ export const Form: React.FC<FormProps> = (props) => {
   const operation = useOperation()
   const { queueTask: scheduleRequest, resetQueue } = useQueue()
   const requestScopeRef = useRef({})
-  const resetRequestQueue = useCallback(() => {
-    requestScopeRef.current = {}
-    resetQueue()
-  }, [resetQueue])
+  const unmountedRequestScopeRef = useRef<unknown>(undefined)
+  const hasSupersededFormStateRef = useRef(false)
+  const [formStateRefreshCount, setFormStateRefreshCount] = useState(0)
+  const resetRequestQueue = useCallback(
+    ({ isUnmounting = false }: { isUnmounting?: boolean } = {}) => {
+      if (isUnmounting) {
+        unmountedRequestScopeRef.current = requestScopeRef.current
+      }
+
+      requestScopeRef.current = {}
+      resetQueue()
+    },
+    [resetQueue],
+  )
 
   const { getFormState } = useServerFunctions()
   const { getUploadHandler } = useUploadHandlers()
@@ -207,7 +219,7 @@ export const Form: React.FC<FormProps> = (props) => {
     setModified,
     setProcessing,
     setSubmitted,
-    submit,
+    submit: submitForm,
     submitted,
     submittedRef,
     successfulSubmitCount,
@@ -220,7 +232,83 @@ export const Form: React.FC<FormProps> = (props) => {
     requestScopeRef,
     scheduleRequest,
     setIsValid,
+    unmountedRequestScopeRef,
   })
+
+  const executeOnChange = useEffectEvent(() => {
+    const requestScope = requestScopeRef.current
+
+    void scheduleRequest({
+      priority: requestPriority.formState,
+      task: async (requestContext) => {
+        hasSupersededFormStateRef.current = false
+
+        if (Array.isArray(onChange)) {
+          let serverState: FormState
+          const requestFormState = deepCopyObjectSimpleWithoutReactComponents(
+            contextRef.current.fields,
+            {
+              excludeFiles: true,
+            },
+          )
+
+          for (const onChangeFn of onChange) {
+            // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
+            serverState = await onChangeFn({
+              formState: requestFormState,
+              submitted: submittedRef.current,
+            })
+          }
+
+          if (!requestContext.isCurrent()) {
+            return
+          }
+
+          React.startTransition(() => {
+            dispatchFields({
+              type: 'MERGE_SERVER_STATE',
+              prevStateRef: prevFormState,
+              serverState,
+            })
+          })
+        }
+      },
+    })
+      .then((result) => {
+        if (result.status === 'superseded' && requestScopeRef.current === requestScope) {
+          hasSupersededFormStateRef.current = true
+        }
+      })
+      .catch((err) => {
+        console.error('Error in queued function:', err) // eslint-disable-line no-console
+      })
+  })
+
+  const submit = useCallback<Submit>(
+    async <T extends Response, C extends Record<string, unknown>>(
+      options?: SubmitOptions<C>,
+      event?: React.FormEvent<HTMLFormElement>,
+    ) => {
+      const result = await submitForm<T, C>(options, event)
+
+      // A submission can supersede a pending form-state refresh.
+      // If it didn't succeed, its response didn't bring the latest server state, so refresh again.
+      if (result && result.res?.ok) {
+        hasSupersededFormStateRef.current = false
+      } else if (hasSupersededFormStateRef.current) {
+        setFormStateRefreshCount((count) => count + 1)
+      }
+
+      return result
+    },
+    [submitForm],
+  )
+
+  useEffect(() => {
+    if (formStateRefreshCount > 0) {
+      executeOnChange()
+    }
+  }, [formStateRefreshCount])
 
   const getFields = useCallback(() => contextRef.current.fields, [])
 
@@ -341,13 +429,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const replaceState = useCallback(
     (state: FormState) => {
-      resetRequestQueue()
-      restoreRequestState()
       contextRef.current = { ...initContextState }
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
-    [dispatchFields, setModified, resetRequestQueue, restoreRequestState],
+    [dispatchFields, setModified],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
@@ -416,7 +502,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
     return () => {
       abortAndIgnore(abortOnChange)
-      resetRequestQueue()
+      resetRequestQueue({ isUnmounting: true })
     }
   }, [resetRequestQueue])
 
@@ -489,45 +575,6 @@ export const Form: React.FC<FormProps> = (props) => {
   }, [locale])
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
-
-  const executeOnChange = useEffectEvent(() => {
-    void scheduleRequest({
-      priority: requestPriority.formState,
-      task: async (requestContext) => {
-        if (Array.isArray(onChange)) {
-          let serverState: FormState
-          const requestFormState = deepCopyObjectSimpleWithoutReactComponents(
-            contextRef.current.fields,
-            {
-              excludeFiles: true,
-            },
-          )
-
-          for (const onChangeFn of onChange) {
-            // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-            serverState = await onChangeFn({
-              formState: requestFormState,
-              submitted: submittedRef.current,
-            })
-          }
-
-          if (!requestContext.isCurrent()) {
-            return
-          }
-
-          React.startTransition(() => {
-            dispatchFields({
-              type: 'MERGE_SERVER_STATE',
-              prevStateRef: prevFormState,
-              serverState,
-            })
-          })
-        }
-      },
-    }).catch((err) => {
-      console.error('Error in queued function:', err) // eslint-disable-line no-console
-    })
-  })
 
   useDebouncedEffect(
     () => {

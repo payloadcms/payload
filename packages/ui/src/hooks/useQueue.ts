@@ -21,7 +21,10 @@ export type UseQueueResult = {
     priority?: number
     task: Task<T>
   }) => Promise<QueueResult<T>>
-  /** Invalidates active task contexts and supersedes pending work. */
+  /**
+   * Invalidates active task contexts and supersedes pending work.
+   * The active task is not aborted, so newly queued work still waits for it to settle.
+   */
   resetQueue: () => void
 }
 
@@ -39,7 +42,7 @@ type QueueEntry = {
  *
  * Use `queueTask` to await a completed result or a superseded status.
  * Task errors reject the returned promise.
- * `resetQueue` discards pending work and invalidates the active task's context without aborting its work.
+ * `resetQueue` discards pending work and invalidates the active task's context without aborting its work, so new tasks still wait for it to settle.
  * Tasks can check `isCurrent()` before applying results that arrive after a reset.
  *
  * @example
