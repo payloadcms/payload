@@ -300,7 +300,7 @@ In phase 1, the [rules for saved keys](#applying-saved-_transforms-keys) apply t
 
 #### Sizes with no stored file
 
-A transformer registers sizes in its `init` with `registerUploadVariants`. It checks that each collection exists and has uploads, and that each size name is unique and is not a built-in upload field name. Then it writes the sizes to the collection's sanitized `upload.variants`. Only one transformer can register sizes on a collection: a second one fails the build. `label` names the transformer in error messages.
+A transformer registers sizes in its `init` with `registerUploadVariants`. It checks that each collection exists and has uploads, and that each size name is unique and is not a built-in upload field name. Then it writes the sizes to the collection's sanitized `upload.variants`. Only one transformer can register sizes on a collection: a second one fails the build. `label` names the transformer in error messages. `transformerSlug` saves the transformer as the owner of the sizes.
 
 ```ts
 import type { UploadTransformer } from 'payload'
@@ -316,12 +316,13 @@ const cdnTransformer: UploadTransformer = {
       },
       config,
       label: 'cdnTransformer',
+      transformerSlug: 'cdn',
     }),
   // ...
 }
 ```
 
-Only `sharpTransformer` stores size files. When it does not process an upload, and request-time stages can build the file in phase 1, Payload writes an entry for each declared size, with no stored file:
+Only `sharpTransformer` stores size files. When it does not process an upload, and the owner of the sizes is one of the request-time stages that build the file in phase 1, Payload writes an entry for each declared size, with no stored file:
 
 - `filename` is the main file's name with the size name added, for example `photo-card.png`, changed when another file already uses that name. `generateImageName` is not used, because the size's dimensions are not known.
 - `_stored` is `false`. `width`, `height`, `filesize`, and `mimeType` are `null`.

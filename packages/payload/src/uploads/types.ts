@@ -439,6 +439,8 @@ export type SanitizedUploadConfig = {
    * only — not authored on the collection.
    */
   variants?: ImageSize[]
+  /** The `slug` of the transformer that registered `variants` with `registerUploadVariants`. */
+  variantsTransformerSlug?: string
 } & UploadConfig
 
 export type File = {

@@ -10,16 +10,18 @@ const makeConfig = (): Config =>
   }) as unknown as Config
 
 describe('registerUploadVariants', () => {
-  it('should register names and admin options only', () => {
+  it('should register names and admin options only, with the transformer as the owner', () => {
     const result = registerUploadVariants({
       collections: { media: { variants: [{ name: 'card', width: 800 } as { name: string }] } },
       config: makeConfig(),
       label: 'cdnTransformer',
+      transformerSlug: 'cdn',
     })
 
     expect(result.collections?.[0]?.upload).toEqual({
       staticDir: 'media',
       variants: [{ admin: undefined, generateImageName: undefined, name: 'card' }],
+      variantsTransformerSlug: 'cdn',
     })
   })
 
@@ -28,6 +30,7 @@ describe('registerUploadVariants', () => {
       collections: { media: { variants: [{ name: 'thumbnail' }] } },
       config: makeConfig(),
       label: 'sharpTransformer',
+      transformerSlug: 'sharp',
     })
 
     expect(() =>
@@ -35,6 +38,7 @@ describe('registerUploadVariants', () => {
         collections: { media: { variants: [{ name: 'card' }] } },
         config,
         label: 'cdnTransformer',
+        transformerSlug: 'cdn',
       }),
     ).toThrow(
       'Invalid `cdnTransformer({ collections })` configuration:\ncdnTransformer collections."media" registers variants, but another transformer already registered variants on "media". Only one transformer can register variants on a collection.',
