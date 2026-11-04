@@ -10,6 +10,7 @@ import type {
 import type React from 'react'
 import type { Dispatch } from 'react'
 
+import type { ServerFunctionsContextType } from '../../providers/ServerFunctions/index.js'
 import type { AcceptValues } from './mergeServerFormState.js'
 
 export type Preferences = {
@@ -30,15 +31,13 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
   },
 ) => Promise<void> | void
 
-export type FormOnChangeArgs = {
-  formState: FormState
-  /**
-   * The JSON response of the submission this request follows.
-   * Only set on the form-state request the form makes after a successful submission.
-   */
-  submitResponse?: unknown
-  submitted?: boolean
-}
+/**
+ * Args for the Form's `getFormState` requests, merged over the defaults the Form derives from the document, operation and current form state.
+ * `formState` and `signal` are always provided by the Form.
+ */
+export type FormStateArgs = Partial<
+  Omit<Parameters<ServerFunctionsContextType['getFormState']>[0], 'formState' | 'signal'>
+>
 
 export type FormProps = {
   beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
@@ -61,6 +60,12 @@ export type FormProps = {
    * feature of the Lexical Rich Text field)
    */
   fields?: ClientField[]
+  /**
+   * Args for the form-state requests the Form makes after field changes and after every successful submission.
+   * Pass a function to compute args from the form state being sent.
+   * The Form makes form-state requests only when this is set or `isDocumentForm` is true.
+   */
+  formStateArgs?: ((args: { formState: FormState }) => FormStateArgs) | FormStateArgs
   handleResponse?: (
     res: Response,
     successToast: (value: string) => void,
@@ -77,10 +82,10 @@ export type FormProps = {
   isInitializing?: boolean
   log?: boolean
   /**
-   * Returns server form state to merge into the form.
-   * Runs after field changes and after every submission request, successful or not.
+   * Called after field changes, once the server form state for them is applied.
+   * Side effects only: the return value is ignored.
    */
-  onChange?: ((args: FormOnChangeArgs) => Promise<FormState | undefined>)[]
+  onChange?: ((args: { formState: FormState; submitted: boolean }) => Promise<void> | void)[]
   onSubmit?: (fields: FormState, data: Data) => void
   onSuccess?: FormOnSuccess
   redirect?: string

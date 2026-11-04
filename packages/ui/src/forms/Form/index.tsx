@@ -47,6 +47,7 @@ import {
 } from './context.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
+import { useFormStateRequest } from './useFormStateRequest.js'
 import { useFormSubmission } from './useFormSubmission.js'
 
 const baseClass = 'form'
@@ -64,6 +65,7 @@ export const Form: React.FC<FormProps> = (props) => {
     initialState, // fully formed initial field state
     isDocumentForm,
     isInitializing: initializingFromProps,
+    onChange,
     uuid,
   } = props
 
@@ -76,20 +78,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { t } = useTranslation()
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
-  const { queueTask: scheduleRequest, resetQueue } = useQueue()
-  const requestScopeRef = useRef({})
-  const unmountedRequestScopeRef = useRef<unknown>(undefined)
-  const resetRequestQueue = useCallback(
-    ({ isUnmounting = false }: { isUnmounting?: boolean } = {}) => {
-      if (isUnmounting) {
-        unmountedRequestScopeRef.current = requestScopeRef.current
-      }
-
-      requestScopeRef.current = {}
-      resetQueue()
-    },
-    [resetQueue],
-  )
+  const { queueTask, resetQueue } = useQueue()
 
   const { getFormState } = useServerFunctions()
   const { getUploadHandler } = useUploadHandlers()
@@ -129,6 +118,23 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.fields = formStateRef.current
 
   const prevFormState = useRef(formState)
+
+  const submittedRef = useRef(false)
+
+  const hasPendingOnChangeRef = useRef(false)
+  const makesFormStateRequests = Boolean(isDocumentForm || props.formStateArgs)
+
+  const { fetchFormState, requestFormState } = useFormStateRequest({
+    contextRef,
+    dispatchFields,
+    onApplied: () => {
+      hasPendingOnChangeRef.current = true
+    },
+    prevFormStateRef: prevFormState,
+    props,
+    queueTask,
+    submittedRef,
+  })
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -206,7 +212,6 @@ export const Form: React.FC<FormProps> = (props) => {
     disabled,
     modified,
     processing,
-    refreshFormState,
     restoreRequestState,
     setBackgroundProcessing,
     setDisabled,
@@ -219,13 +224,13 @@ export const Form: React.FC<FormProps> = (props) => {
   } = useFormSubmission({
     contextRef,
     dispatchFields,
+    fetchFormState,
     formRef,
     prevFormStateRef: prevFormState,
     props,
-    requestScopeRef,
-    scheduleRequest,
+    queueTask,
     setIsValid,
-    unmountedRequestScopeRef,
+    submittedRef,
   })
 
   const getFields = useCallback(() => contextRef.current.fields, [])
@@ -302,8 +307,6 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
-      resetRequestQueue()
-      restoreRequestState()
       const controller = handleAbortRef(abortResetFormRef)
 
       const docPreferences = await getDocPreferences()
@@ -323,7 +326,10 @@ export const Form: React.FC<FormProps> = (props) => {
         skipValidation: true,
       })
 
+      // Reset after the awaits, so nothing queued while the new state loaded counts as current.
       contextRef.current = { ...initContextState }
+      resetQueue()
+      restoreRequestState()
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
 
@@ -339,19 +345,21 @@ export const Form: React.FC<FormProps> = (props) => {
       docPermissions,
       getDocPreferences,
       locale,
-      setModified,
-      resetRequestQueue,
+      resetQueue,
       restoreRequestState,
+      setModified,
     ],
   )
 
   const replaceState = useCallback(
     (state: FormState) => {
       contextRef.current = { ...initContextState }
+      resetQueue()
+      restoreRequestState()
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
-    [dispatchFields, setModified],
+    [dispatchFields, resetQueue, restoreRequestState, setModified],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
@@ -420,9 +428,9 @@ export const Form: React.FC<FormProps> = (props) => {
 
     return () => {
       abortAndIgnore(abortOnChange)
-      resetRequestQueue({ isUnmounting: true })
+      resetQueue()
     }
-  }, [resetRequestQueue])
+  }, [resetQueue])
 
   useEffect(() => {
     if (initializingFromProps !== undefined) {
@@ -464,16 +472,17 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useEffect(() => {
     if (initialState) {
-      resetRequestQueue()
-      restoreRequestState()
+      // Restore after replacing the context, so the submit guard sees the restored disabled state immediately.
       contextRef.current = { ...initContextState }
+      resetQueue()
+      restoreRequestState()
       dispatchFields({
         type: 'REPLACE_STATE',
         optimize: false,
         state: initialState,
       })
     }
-  }, [initialState, dispatchFields, resetRequestQueue, restoreRequestState])
+  }, [initialState, dispatchFields, resetQueue, restoreRequestState])
 
   useThrottledEffect(
     () => {
@@ -494,10 +503,36 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
+  const notifyOnChange = useEffectEvent(() => {
+    if (!Array.isArray(onChange)) {
+      return
+    }
+
+    for (const onChangeFn of onChange) {
+      Promise.resolve(onChangeFn({ formState: contextRef.current.fields, submitted })).catch(
+        (err) => {
+          console.error('Error in onChange:', err) // eslint-disable-line no-console
+        },
+      )
+    }
+  })
+
+  // onChange runs once the server state for a change is applied, which lands in the render after the merge.
+  useEffect(() => {
+    if (hasPendingOnChangeRef.current) {
+      hasPendingOnChangeRef.current = false
+      notifyOnChange()
+    }
+  }, [formState])
+
   useDebouncedEffect(
     () => {
       if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
-        refreshFormState()
+        if (makesFormStateRequests) {
+          requestFormState()
+        } else {
+          notifyOnChange()
+        }
       }
 
       prevFormState.current = formState

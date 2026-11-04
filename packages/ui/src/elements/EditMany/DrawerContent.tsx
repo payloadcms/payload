@@ -11,9 +11,9 @@ import {
   unflatten,
 } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 
-import type { FormProps } from '../../forms/Form/index.js'
+import type { FormStateArgs } from '../../forms/Form/types.js'
 import type { OnFieldSelect } from '../FieldSelect/index.js'
 import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
 import type { EditManyProps } from './index.js'
@@ -31,7 +31,6 @@ import { OperationContext } from '../../providers/Operation/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { Button } from '../Button/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
@@ -187,7 +186,6 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
   const [isInitializing, setIsInitializing] = useState(false)
 
   const router = useRouter()
-  const abortFormStateRef = React.useRef<AbortController>(null)
   const collectionPermissions = permissions?.collections?.[collection.slug]
   const searchParams = useSearchParams()
 
@@ -200,36 +198,17 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     )
   }, [selectedFields])
 
-  const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState, submitted }) => {
-      const controller = handleAbortRef(abortFormStateRef)
-
-      const { state } = await getFormState({
-        collectionSlug: collection.slug,
-        docPermissions: collectionPermissions,
-        docPreferences: null,
-        formState: prevFormState,
-        operation: 'update',
-        schemaPath: collection.slug,
-        select,
-        signal: controller.signal,
-        skipValidation: !submitted,
-      })
-
-      abortFormStateRef.current = null
-
-      return state
-    },
-    [getFormState, collection, collectionPermissions, select],
+  const formStateArgs = useMemo<FormStateArgs>(
+    () => ({
+      collectionSlug: collection.slug,
+      docPermissions: collectionPermissions,
+      docPreferences: null,
+      operation: 'update',
+      schemaPath: collection.slug,
+      select,
+    }),
+    [collection.slug, collectionPermissions, select],
   )
-
-  useEffect(() => {
-    const abortFormState = abortFormStateRef.current
-
-    return () => {
-      abortAndIgnore(abortFormState)
-    }
-  }, [])
 
   const queryString = useMemo((): string => {
     const whereConstraints: Where[] = []
@@ -346,8 +325,8 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
       <OperationContext value="update">
         <Form
           className={`${baseClass}__form`}
+          formStateArgs={formStateArgs}
           isInitializing={isInitializing}
-          onChange={[onChange]}
           onSuccess={onSuccess}
         >
           <div className={`${baseClass}__header`}>

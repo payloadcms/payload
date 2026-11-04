@@ -9,11 +9,10 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
-import type { AcceptValues } from './mergeServerFormState.js'
 import type {
   FieldAction,
   Context as FormContextType,
@@ -21,6 +20,7 @@ import type {
   Submit,
   SubmitOptions,
 } from './types.js'
+import type { FormStateRequests } from './useFormStateRequest.js'
 
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -36,25 +36,26 @@ import { requestPriority } from './requestPriority.js'
 type Args = {
   contextRef: RefObject<FormContextType>
   dispatchFields: Dispatch<FieldAction>
+  fetchFormState: FormStateRequests['fetchFormState']
   formRef: RefObject<HTMLFormElement | null>
   prevFormStateRef: RefObject<FormState>
   props: FormProps
-  requestScopeRef: RefObject<unknown>
-  scheduleRequest: UseQueueResult['queueTask']
+  queueTask: UseQueueResult['queueTask']
   setIsValid: FormContextType['setIsValid']
-  unmountedRequestScopeRef: RefObject<unknown>
+  /** Kept in sync with the submitted state, for requests queued before React renders it. */
+  submittedRef: RefObject<boolean>
 }
 
 export const useFormSubmission = ({
   contextRef,
   dispatchFields,
+  fetchFormState,
   formRef,
   prevFormStateRef,
   props,
-  requestScopeRef,
-  scheduleRequest,
+  queueTask,
   setIsValid,
-  unmountedRequestScopeRef,
+  submittedRef,
 }: Args) => {
   const {
     action,
@@ -63,7 +64,6 @@ export const useFormSubmission = ({
     disableSuccessStatus,
     disableValidationOnSubmit,
     handleResponse,
-    onChange,
     onSubmit,
     onSuccess,
     redirect,
@@ -112,68 +112,15 @@ export const useFormSubmission = ({
 
   isDisabledFromPropsRef.current = isDisabledFromProps
 
-  const onChangeRef = useRef(onChange)
-
-  onChangeRef.current = onChange
-
   const method = 'method' in props ? props?.method : undefined
   const validateDrafts = hasDraftValidationEnabled(docConfig)
 
-  const submittedRef = useRef(false)
-
-  const setIsSubmitted = useCallback((isSubmitted: boolean) => {
-    // Queued form-state requests read this before React renders the updated submitted state.
-    submittedRef.current = isSubmitted
-    _setIsSubmitted(isSubmitted)
-  }, [])
-
-  const refreshFormState = useCallback(
-    ({
-      acceptValues,
-      submitResponse,
-    }: { acceptValues?: AcceptValues; submitResponse?: unknown } = {}) => {
-      void scheduleRequest({
-        priority: requestPriority.formState,
-        task: async (requestContext) => {
-          const onChangeFns = onChangeRef.current
-
-          if (!Array.isArray(onChangeFns)) {
-            return
-          }
-
-          let serverState: FormState | undefined
-          const requestFormState = deepCopyObjectSimpleWithoutReactComponents(
-            contextRef.current.fields,
-            { excludeFiles: true },
-          )
-
-          for (const onChangeFn of onChangeFns) {
-            // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-            serverState = await onChangeFn({
-              formState: requestFormState,
-              submitResponse,
-              submitted: submittedRef.current,
-            })
-          }
-
-          if (!requestContext.isCurrent()) {
-            return
-          }
-
-          React.startTransition(() => {
-            dispatchFields({
-              type: 'MERGE_SERVER_STATE',
-              acceptValues,
-              prevStateRef: prevFormStateRef,
-              serverState,
-            })
-          })
-        },
-      }).catch((err) => {
-        console.error('Error in queued function:', err) // eslint-disable-line no-console
-      })
+  const setIsSubmitted = useCallback(
+    (isSubmitted: boolean) => {
+      submittedRef.current = isSubmitted
+      _setIsSubmitted(isSubmitted)
     },
-    [contextRef, dispatchFields, prevFormStateRef, scheduleRequest],
+    [submittedRef],
   )
 
   const setIsDisabled = useCallback(
@@ -258,8 +205,6 @@ export const useFormSubmission = ({
       let errorToast, successToast
       let promiseToastID: number | string | undefined
       let preservePromiseToast = false
-      // Set once the request is sent; every sent submission ends with a form-state refresh.
-      let refreshArgs: { acceptValues?: AcceptValues; submitResponse?: unknown } | undefined
 
       const promise = new Promise((resolve, reject) => {
         successToast = resolve
@@ -413,8 +358,6 @@ export const useFormSubmission = ({
             return
           }
 
-          refreshArgs = {}
-
           if (res.status < 400 && !isModifiedWhileProcessing.current) {
             setIsModified(false)
           }
@@ -446,34 +389,30 @@ export const useFormSubmission = ({
           if (res.status < 400) {
             setSuccessfulSubmitCount((count) => count + 1)
 
-            refreshArgs = { acceptValues, submitResponse: json }
-
             if (typeof onSuccess === 'function') {
-              const successScope = requestScopeRef.current
-
               await onSuccess(json, {
                 context,
                 formState: serializableFormState,
               })
-
-              if (!requestContext.isCurrent()) {
-                if (unmountedRequestScopeRef.current === successScope) {
-                  preservePromiseToast = true
-
-                  if (!redirect && !disableToast) {
-                    successToast(json.message || t('general:submissionSuccessful'))
-                  }
-
-                  return { res }
-                }
-                return
-              }
             }
 
+            // Part of the submission, so the next one can't start before the saved document's state is applied.
+            // Only after a success: a failed submission already applies its errors.
+            await fetchFormState({
+              acceptValues,
+              isCurrent: requestContext.isCurrent,
+              savedDocument: json?.doc ?? json?.result,
+              submitted: false,
+            })
+
+            // The save succeeded even if `onSuccess` reset or unmounted the form, so always settle the toast.
+            preservePromiseToast = true
             setIsSubmitted(false)
 
             if (redirect) {
-              void startRouteTransition(() => router.push(redirect))
+              if (requestContext.isCurrent()) {
+                void startRouteTransition(() => router.push(redirect))
+              }
             } else if (!disableToast) {
               successToast(json.message || t('general:submissionSuccessful'))
             }
@@ -585,10 +524,6 @@ export const useFormSubmission = ({
           if (options?.submissionType === 'autosave') {
             setIsBackgroundProcessing(false)
           }
-
-          if (refreshArgs) {
-            refreshFormState(refreshArgs)
-          }
         } else if (!preservePromiseToast && promiseToastID !== undefined) {
           toast.dismiss(promiseToastID)
         }
@@ -607,7 +542,6 @@ export const useFormSubmission = ({
       onSubmit,
       onSuccess,
       redirect,
-      refreshFormState,
       router,
       t,
       i18n,
@@ -619,9 +553,8 @@ export const useFormSubmission = ({
       onNonFieldError,
       contextRef,
       prevFormStateRef,
-      requestScopeRef,
+      fetchFormState,
       setIsValid,
-      unmountedRequestScopeRef,
     ],
   )
 
@@ -650,9 +583,9 @@ export const useFormSubmission = ({
         setIsDisabled(true)
       }
 
-      const requestScope = requestScopeRef.current
-
-      const result = await scheduleRequest({
+      // While a disabling submission waits, the guard above rejects every other submit, so only a reset can supersede it.
+      // Every reset restores request state, so a superseded submission has nothing to release.
+      const result = await queueTask({
         priority: requestPriority[options?.submissionType ?? 'submit'],
         task: (requestContext) => executeSubmit({ options, requestContext }),
       })
@@ -660,15 +593,8 @@ export const useFormSubmission = ({
       if (result.status === 'completed') {
         return result.value
       }
-
-      // A superseded submission never runs, so release the disable it took.
-      // Skip after a reset: it already restored request state, and a newer submission may own the disable.
-      if (shouldDisableForm && requestScopeRef.current === requestScope) {
-        setIsProcessing(false)
-        setIsDisabled(isDisabledFromPropsRef.current || false)
-      }
     },
-    [contextRef, executeSubmit, formRef, requestScopeRef, scheduleRequest, setIsDisabled],
+    [contextRef, executeSubmit, formRef, queueTask, setIsDisabled],
   )
 
   useEffect(() => {
@@ -688,7 +614,6 @@ export const useFormSubmission = ({
     disabled: isDisabled,
     modified: isModified,
     processing: isProcessing,
-    refreshFormState,
     restoreRequestState,
     setBackgroundProcessing: setIsBackgroundProcessing,
     setDisabled: setIsDisabled,
