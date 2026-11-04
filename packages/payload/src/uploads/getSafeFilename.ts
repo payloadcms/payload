@@ -91,3 +91,22 @@ export async function getSafeFileName({
 
   return modifiedFilename
 }
+
+/** Finds a name that is free in storage and that `canUseName` accepts for this save. */
+export async function getUnplannedSafeFileName({
+  canUseName,
+  desiredFilename,
+  ...args
+}: {
+  canUseName: (filename: string) => boolean
+} & Parameters<typeof getSafeFileName>[0]): Promise<string> {
+  let filename = desiredFilename
+
+  while (true) {
+    filename = await getSafeFileName({ ...args, desiredFilename: filename })
+    if (canUseName(filename)) {
+      return filename
+    }
+    filename = incrementName(filename)
+  }
+}
