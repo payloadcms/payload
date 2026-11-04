@@ -121,15 +121,12 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const submittedRef = useRef(false)
 
-  const hasPendingOnChangeRef = useRef(false)
   const makesFormStateRequests = Boolean(isDocumentForm || props.formStateArgs)
 
   const { fetchFormState, requestFormState } = useFormStateRequest({
     contextRef,
     dispatchFields,
-    onApplied: () => {
-      hasPendingOnChangeRef.current = true
-    },
+    onApplied: (appliedFormState) => notifyOnChange(appliedFormState),
     prevFormStateRef: prevFormState,
     props,
     queueTask,
@@ -503,27 +500,17 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  const notifyOnChange = useEffectEvent(() => {
+  const notifyOnChange = useEffectEvent((changedFormState: FormState) => {
     if (!Array.isArray(onChange)) {
       return
     }
 
     for (const onChangeFn of onChange) {
-      Promise.resolve(onChangeFn({ formState: contextRef.current.fields, submitted })).catch(
-        (err) => {
-          console.error('Error in onChange:', err) // eslint-disable-line no-console
-        },
-      )
+      Promise.resolve(onChangeFn({ formState: changedFormState, submitted })).catch((err) => {
+        console.error('Error in onChange:', err) // eslint-disable-line no-console
+      })
     }
   })
-
-  // onChange runs once the server state for a change is applied, which lands in the render after the merge.
-  useEffect(() => {
-    if (hasPendingOnChangeRef.current) {
-      hasPendingOnChangeRef.current = false
-      notifyOnChange()
-    }
-  }, [formState])
 
   useDebouncedEffect(
     () => {
@@ -531,7 +518,7 @@ export const Form: React.FC<FormProps> = (props) => {
         if (makesFormStateRequests) {
           requestFormState()
         } else {
-          notifyOnChange()
+          notifyOnChange(formState)
         }
       }
 
