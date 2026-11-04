@@ -101,6 +101,7 @@ export type LexicalNodes_47553BF6 =
       | 'custom-ids'
       | 'diff'
       | 'text'
+      | 'point-versions'
       | 'restore-access'
       | 'restore-access-localized'
       | 'users'
@@ -142,6 +143,7 @@ export type LexicalNodes_84E9EB04 =
       | 'custom-ids'
       | 'diff'
       | 'text'
+      | 'point-versions'
       | 'restore-access'
       | 'restore-access-localized'
       | 'users'
@@ -193,6 +195,7 @@ export interface Config {
     'custom-ids': CustomId;
     diff: Diff;
     text: Text;
+    'point-versions': PointVersion;
     'draft-with-upload': DraftWithUpload;
     'draft-with-upload-cloud-storage': DraftWithUploadCloudStorage;
     media: Media;
@@ -231,6 +234,7 @@ export interface Config {
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     diff: DiffSelect<false> | DiffSelect<true>;
     text: TextSelect<false> | TextSelect<true>;
+    'point-versions': PointVersionsSelect<false> | PointVersionsSelect<true>;
     'draft-with-upload': DraftWithUploadSelect<false> | DraftWithUploadSelect<true>;
     'draft-with-upload-cloud-storage': DraftWithUploadCloudStorageSelect<false> | DraftWithUploadCloudStorageSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -405,6 +409,8 @@ export interface User {
         id: string;
         createdAt?: string | null;
         expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
       }[]
     | null;
   password?: string | null;
@@ -449,6 +455,8 @@ export interface SecondaryAdminUser {
         id: string;
         createdAt?: string | null;
         expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
       }[]
     | null;
   password?: string | null;
@@ -1308,6 +1316,22 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "point-versions".
+ */
+export interface PointVersion {
+  id: string;
+  title?: string | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-with-upload".
  */
 export interface DraftWithUpload {
@@ -1749,6 +1773,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'text';
         value: string | Text;
+      } | null)
+    | ({
+        relationTo: 'point-versions';
+        value: string | PointVersion;
       } | null)
     | ({
         relationTo: 'draft-with-upload';
@@ -2312,6 +2340,17 @@ export interface TextSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "point-versions_select".
+ */
+export interface PointVersionsSelect<T extends boolean = true> {
+  title?: T;
+  point?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-with-upload_select".
  */
 export interface DraftWithUploadSelect<T extends boolean = true> {
@@ -2487,6 +2526,8 @@ export interface UsersSelect<T extends boolean = true> {
         id?: T;
         createdAt?: T;
         expiresAt?: T;
+        refreshCount?: T;
+        refreshedAt?: T;
       };
 }
 /**
@@ -2512,6 +2553,8 @@ export interface SecondaryAdminUsersSelect<T extends boolean = true> {
         id?: T;
         createdAt?: T;
         expiresAt?: T;
+        refreshCount?: T;
+        refreshedAt?: T;
       };
 }
 /**
@@ -3199,6 +3242,7 @@ export interface CollectionQueryWidget {
       | 'custom-ids'
       | 'diff'
       | 'text'
+      | 'point-versions'
       | 'draft-with-upload'
       | 'draft-with-upload-cloud-storage'
       | 'media'
@@ -3251,6 +3295,7 @@ export interface ActivityWidget {
           | 'custom-ids'
           | 'diff'
           | 'text'
+          | 'point-versions'
           | 'draft-with-upload'
           | 'draft-with-upload-cloud-storage'
           | 'media'
