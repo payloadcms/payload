@@ -105,6 +105,36 @@ describe('planSegments', () => {
     ).toBe(24 * MiB)
   })
 
+  it('should cap a preferred segment size above the provider maximum', () => {
+    const plan = planSegments({
+      collectionTransfer: { preferredSegmentSize: 6 * GiB },
+      limits: s3Limits,
+      size: 100 * MiB,
+    })
+
+    expect(plan.segmentSize).toBe(5 * GiB)
+    expect(plan.segments).toHaveLength(1)
+  })
+
+  it('should round down to the granularity when rounding up passes the maximum', () => {
+    const plan = planSegments({
+      collectionTransfer: { preferredSegmentSize: 100 * MiB },
+      limits: { ...s3Limits, maximumSegmentSize: 50 * MiB + 1, segmentSizeGranularity: MiB },
+      size: 200 * MiB,
+    })
+
+    expect(plan.segmentSize).toBe(50 * MiB)
+  })
+
+  it('should reject a file that cannot fit within the segment limits', () => {
+    expect(() =>
+      planSegments({
+        limits: { ...s3Limits, maximumSegmentCount: 2, maximumSegmentSize: 10 * MiB },
+        size: 30 * MiB,
+      }),
+    ).toThrow('File cannot be split within the storage provider segment limits.')
+  })
+
   it('should cap preferred concurrency at the provider maximum', () => {
     const plan = planSegments({
       globalTransfer: { concurrency: 32 },

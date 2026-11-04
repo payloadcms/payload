@@ -272,7 +272,8 @@ export const getUploadSessionInstructions = async ({
       })
     : []
 
-  session = await updateSession({
+  // A cancel or completion may have run while storage was being read; never undo it.
+  session = await updateResumableSession({
     data: { error: null, lastActivityAt: new Date().toISOString(), status: 'active' },
     req,
     session,
@@ -458,16 +459,23 @@ export const cancelUploadSession = async ({
     return toClientSession({ session })
   }
 
+  // A completion that holds the lease may already have committed the object, so cancelling
+  // waits for it instead of deleting the object from under it. A failed session cannot be
+  // completing, so it needs no lease.
+  const cancellableSession =
+    session.status === 'failed' ? session : await claimLease({ req, session })
+
   const cancelledSession = await updateSession({
     data: {
       cancelledAt: new Date().toISOString(),
       cancelReason: 'user',
+      finalizingUntil: null,
       intent: null,
       reservationKey: getReservationKey(),
       status: 'cancelled',
     },
     req,
-    session,
+    session: cancellableSession,
   })
 
   return toClientSession({
@@ -518,16 +526,24 @@ export const sweepUploadSessions = async ({
       }
 
       if (session.status === 'pending' || session.status === 'active') {
+        // A completion running past expiry finishes first; a later sweep picks the session up.
+        const leasedSession = await tryClaimLease({ req, session })
+
+        if (!leasedSession) {
+          continue
+        }
+
         session = await updateSession({
           data: {
             cancelledAt: now,
             cancelReason: 'expired',
+            finalizingUntil: null,
             intent: null,
             reservationKey: getReservationKey(),
             status: 'cancelled',
           },
           req,
-          session,
+          session: leasedSession,
         })
       }
 
@@ -810,6 +826,23 @@ const claimLease = async ({
   req: PayloadRequest
   session: UploadSessionDoc
 }): Promise<UploadSessionDoc> => {
+  const claimedSession = await tryClaimLease({ req, session })
+
+  if (!claimedSession) {
+    throw new APIError('Another request is already working on this upload. Try again shortly.', 409)
+  }
+
+  return claimedSession
+}
+
+/** Like `claimLease`, but returns `null` when the lease is held or the session is no longer resumable. */
+const tryClaimLease = async ({
+  req,
+  session,
+}: {
+  req: PayloadRequest
+  session: UploadSessionDoc
+}): Promise<null | UploadSessionDoc> => {
   const now = new Date()
 
   const claimedSession = await req.payload.db.updateOne({
@@ -837,11 +870,7 @@ const claimLease = async ({
     },
   })
 
-  if (!claimedSession) {
-    throw new APIError('Another request is already working on this upload. Try again shortly.', 409)
-  }
-
-  return claimedSession as UploadSessionDoc
+  return (claimedSession as null | UploadSessionDoc) ?? null
 }
 
 /** Commits the provider upload after confirming every frozen segment has its exact size. */
@@ -1093,6 +1122,33 @@ const updateSession = async ({
     data: { ...data, updatedAt: new Date().toISOString() },
     req,
   })
+
+  return updatedSession as UploadSessionDoc
+}
+
+/** Writes only while the session is still pending or active, so a concurrent cancel or completion is never undone. */
+const updateResumableSession = async ({
+  data,
+  req,
+  session,
+}: {
+  data: Record<string, unknown>
+  req: PayloadRequest
+  session: UploadSessionDoc
+}): Promise<UploadSessionDoc> => {
+  const updatedSession = await req.payload.db.updateOne({
+    collection: slug,
+    data: { ...data, updatedAt: new Date().toISOString() },
+    options: { atomic: true },
+    req,
+    where: {
+      and: [{ id: { equals: session.id } }, { status: { in: ['pending', 'active'] } }],
+    },
+  })
+
+  if (!updatedSession) {
+    throw new APIError('This upload is no longer active.', 409)
+  }
 
   return updatedSession as UploadSessionDoc
 }

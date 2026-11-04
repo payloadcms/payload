@@ -27,20 +27,33 @@ export const planSegments = ({
     throw new APIError('File is larger than the storage provider allows.', 400)
   }
 
-  const preferredSegmentSize =
+  const preferredSegmentSize = Math.min(
     collectionTransfer?.preferredSegmentSize ??
-    globalTransfer?.preferredSegmentSize ??
-    limits.recommendedSegmentSize ??
-    defaultTransferConfig.preferredSegmentSize
+      globalTransfer?.preferredSegmentSize ??
+      limits.recommendedSegmentSize ??
+      defaultTransferConfig.preferredSegmentSize,
+    limits.maximumSegmentSize,
+  )
 
-  const minimumRequiredSize = Math.ceil(size / limits.maximumSegmentCount)
+  const requiredSegmentSize = Math.max(
+    Math.ceil(size / limits.maximumSegmentCount),
+    limits.minimumSegmentSize,
+  )
 
-  const segmentSize = roundUpToGranularity({
-    granularity: limits.segmentSizeGranularity,
-    value: Math.max(preferredSegmentSize, minimumRequiredSize, limits.minimumSegmentSize),
-  })
+  // Rounding up can pass the maximum when it is not a multiple of the granularity, so the
+  // largest allowed size is the fallback.
+  const segmentSize = [
+    roundUpToGranularity({
+      granularity: limits.segmentSizeGranularity,
+      value: Math.max(preferredSegmentSize, requiredSegmentSize),
+    }),
+    roundDownToGranularity({
+      granularity: limits.segmentSizeGranularity,
+      value: limits.maximumSegmentSize,
+    }),
+  ].find((candidate) => candidate >= requiredSegmentSize && candidate <= limits.maximumSegmentSize)
 
-  if (segmentSize > limits.maximumSegmentSize) {
+  if (segmentSize === undefined) {
     throw new APIError('File cannot be split within the storage provider segment limits.', 400)
   }
 
@@ -78,3 +91,6 @@ export const shouldUseSegmentedUpload = ({
 
 const roundUpToGranularity = ({ granularity, value }: { granularity: number; value: number }) =>
   granularity > 1 ? Math.ceil(value / granularity) * granularity : value
+
+const roundDownToGranularity = ({ granularity, value }: { granularity: number; value: number }) =>
+  granularity > 1 ? Math.floor(value / granularity) * granularity : value

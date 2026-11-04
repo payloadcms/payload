@@ -1,5 +1,10 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.options", "test.for", "test.each"] }] -- Tests use the shared fixture wrapper. */
-import type { ClientUploadSession, UploadInstructions, UploadSegmentRequest } from 'payload'
+import type {
+  ClientUploadSession,
+  Payload,
+  UploadInstructions,
+  UploadSegmentRequest,
+} from 'payload'
 
 import {
   AbortMultipartUploadCommand,
@@ -542,6 +547,84 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
     expect(Uploads ?? []).toHaveLength(0)
   })
 
+  test('should not cancel while a completion holds the lease', async ({ payload, restClient }) => {
+    const session = await createSession({ restClient })
+
+    await getInstructions({ restClient, session })
+    await holdLease({ payload, session })
+
+    const cancel = await restClient.DELETE(`${sessionsPath}/${session.id}`)
+
+    expect(cancel.status).toBe(409)
+    expect((await getSession({ restClient, session })).status).not.toBe('cancelled')
+
+    const { Uploads } = await getAWSClient().send(
+      new ListMultipartUploadsCommand({ Bucket: getTestBucketName() }),
+    )
+
+    expect(Uploads ?? []).toHaveLength(1)
+  })
+
+  test('should not expire a session while a completion holds the lease', async ({
+    payload,
+    restClient,
+  }) => {
+    const session = await createSession({ restClient })
+
+    await getInstructions({ restClient, session })
+    await holdLease({ payload, session })
+    await payload.db.updateOne({
+      id: session.id,
+      collection: uploadSessionsCollectionSlug,
+      data: { expiresAt: new Date(Date.now() - 1000).toISOString() },
+    })
+
+    // Listing runs the cleanup sweep.
+    await restClient.GET(sessionsPath)
+
+    const swept = await payload.db.findOne<{ status: string }>({
+      collection: uploadSessionsCollectionSlug,
+      where: { id: { equals: session.id } },
+    })
+
+    expect(swept?.status).toBe('active')
+  })
+
+  test('should not reactivate a session cancelled during an instructions request', async ({
+    payload,
+    restClient,
+  }) => {
+    const session = await createSession({ restClient })
+
+    await getInstructions({ restClient, session })
+
+    const segmented = payload.collections[videosSlug]!.config.upload.uploadInstructions!.segmented!
+    const reconcile = segmented.reconcile
+
+    // A cancel lands after the request has read the session but before it writes it back.
+    segmented.reconcile = async (args) => {
+      const reconciled = await reconcile(args)
+
+      await payload.db.updateOne({
+        id: session.id,
+        collection: uploadSessionsCollectionSlug,
+        data: { status: 'cancelled' },
+      })
+
+      return reconciled
+    }
+
+    try {
+      const instructions = await restClient.POST(`${sessionsPath}/${session.id}/instructions`)
+
+      expect(instructions.status).toBe(409)
+    } finally {
+      segmented.reconcile = reconcile
+    }
+
+    expect((await getSession({ restClient, session })).status).toBe('cancelled')
+  })
+
   test('should hide sessions from other users', async ({ payload, restClient }) => {
     const session = await createSession({ restClient })
     const otherUser = new RESTClientClass(payload.config)
@@ -741,6 +824,14 @@ const withBrowserFetch = async <T>({
     globalThis.fetch = originalFetch
   }
 }
+
+/** Simulates a completion in progress on another request. */
+const holdLease = ({ payload, session }: { payload: Payload; session: ClientUploadSession }) =>
+  payload.db.updateOne({
+    id: session.id,
+    collection: uploadSessionsCollectionSlug,
+    data: { finalizingUntil: new Date(Date.now() + 60_000).toISOString(), status: 'active' },
+  })
 
 /** Interrupted uploads leave multipart state that clearing objects does not remove. */
 const abortMultipartUploads = async () => {
