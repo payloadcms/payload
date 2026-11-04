@@ -3,10 +3,13 @@ import type { Payload, RequestContext } from 'payload'
 
 import { readdir, readFile, rm } from 'fs/promises'
 import path from 'path'
+import { createPayloadRequest } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Rename is a core operation tested before API wrappers.
+import { renameFileOperation } from '../../packages/payload/src/collections/operations/renameFile.js'
 import { test } from '../__helpers/int/vitest.js'
 import { dynamicMediaDir, dynamicMediaSlug, publicCloudMediaSlug } from './shared.js'
 import { requestCropCalls } from './transformers.js'
@@ -275,6 +278,20 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     const created = await createImage({ payload })
 
     expect(created.variants?.card?.filename).toBe('photo-card-1.png')
+  })
+
+  test('should rename a size with no stored file with the document', async ({ payload }) => {
+    const created = await createImage({ payload })
+
+    const renamed = await renameFileOperation({
+      id: created.id,
+      collection: payload.collections[dynamicMediaSlug],
+      filename: 'hero.png',
+      overrideAccess: true,
+      req: await createPayloadRequest({ payload }),
+    })
+
+    expect(renamed.variants?.card).toMatchObject({ _stored: false, filename: 'hero-card.png' })
   })
 
   test('should replace the size entries when a new file is uploaded', async ({ payload }) => {

@@ -959,6 +959,9 @@ const processUpload = async <T>({
         const imagePath = `${staticPath}/${imageName}`
 
         sizes[sizeName] = {
+          // An update merges into the saved entry, so a size that is stored again must clear the
+          // marker an earlier owner wrote when it built the size at request time.
+          ...(currentFileData?.variants?.[sizeName]?._stored === false ? { _stored: null } : {}),
           _objectKey: newObjectKey,
           filename: imageName,
           filesize: sizeBuffer.length,
