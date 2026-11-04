@@ -238,15 +238,16 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       if (hasMainRowData) {
         if (id) {
-          rowToInsert.row.id = id
-          ;[insertedRow] = await adapter.insert({
-            db,
-            onConflictDoUpdate: where
-              ? { set: rowToInsert.row, target, where }
-              : { set: rowToInsert.row, target },
-            tableName,
-            values: rowToInsert.row,
-          })
+          // A plain UPDATE: an INSERT ... ON CONFLICT would recreate a row deleted since it was read
+          ;[insertedRow] = await (db as LibSQLDatabase)
+            .update(adapter.tables[tableName])
+            .set(rowToInsert.row)
+            .where(
+              where
+                ? and(eq(adapter.tables[tableName].id, id), where)
+                : eq(adapter.tables[tableName].id, id),
+            )
+            .returning({ id: adapter.tables[tableName].id })
         } else {
           ;[insertedRow] = await adapter.insert({
             db,

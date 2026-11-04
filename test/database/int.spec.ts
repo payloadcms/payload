@@ -642,6 +642,39 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
       })
     })
 
+    test.options.describe('updateOne by id of a deleted document', { db: 'drizzle' }, () => {
+      test('should not recreate a document deleted after it was read', async ({ payload }) => {
+        const post = await payload.create({
+          collection: postsSlug,
+          data: { arrayWithIDs: [{ text: 'some text' }], title: 'to be deleted' },
+          overrideAccess: true,
+        })
+
+        const stale = await payload.db.findOne({
+          collection: postsSlug,
+          where: { id: { equals: post.id } },
+        })
+
+        await payload.delete({ id: post.id, collection: postsSlug, overrideAccess: true })
+
+        const result = await payload.db.updateOne({
+          id: post.id,
+          collection: postsSlug,
+          data: stale,
+        })
+
+        expect(result).toBeNull()
+
+        const { totalDocs } = await payload.find({
+          collection: postsSlug,
+          overrideAccess: true,
+          where: { id: { equals: post.id } },
+        })
+
+        expect(totalDocs).toBe(0)
+      })
+    })
+
     test('should allow createdAt to be set in updateVersion', async ({ payload }) => {
       const category = await payload.create({
         collection: 'categories',
