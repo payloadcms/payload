@@ -7,17 +7,20 @@ import type { PayloadRequest } from 'payload'
 export const seal = ({
   type,
   data,
-  expiresIn,
+  expiresInSeconds,
   req,
 }: {
   data: object
-  /** Seconds */
-  expiresIn?: number
+  expiresInSeconds?: number
   req: PayloadRequest
   type: string
 }): string =>
   req.payload.encrypt(
-    JSON.stringify({ ...data, type, exp: expiresIn && Date.now() + expiresIn * 1000 }),
+    JSON.stringify({
+      ...data,
+      type,
+      exp: expiresInSeconds && Date.now() + expiresInSeconds * 1000,
+    }),
   )
 
 export const unseal = <T>({

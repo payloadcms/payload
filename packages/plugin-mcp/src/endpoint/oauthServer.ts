@@ -215,7 +215,7 @@ const authorize: PayloadHandler = (req) => {
   }
 
   return redirectToAuthorizeView({
-    params: { consent: seal({ type: 'consent', data: consent, expiresIn: 20 * 60 * 60, req }) },
+    params: { consent: seal({ type: 'consent', data: consent, expiresInSeconds: 20 * 60, req }) },
     req,
   })
 }
@@ -252,7 +252,7 @@ const approve: PayloadHandler = async (req) => {
   }
 
   return redirect({
-    params: { code: seal({ type: 'code', data: code, expiresIn: 60, req }), state },
+    params: { code: seal({ type: 'code', data: code, expiresInSeconds: 60, req }), state },
     redirectURI,
   })
 }
