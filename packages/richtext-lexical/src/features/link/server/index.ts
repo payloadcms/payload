@@ -9,6 +9,7 @@ import type {
 
 import escapeHTML from 'escape-html'
 import { sanitizeFields } from 'payload'
+import { sanitizeUrl } from 'payload/shared'
 
 import type { NodeWithHooks } from '../../typesServer.js'
 import type { ClientProps } from '../client/index.js'
@@ -208,7 +209,9 @@ export const LinkFeature = createServerFeature<
                           : String(node.fields.doc?.value?.id)
                     }
 
-                    return `<a href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
+                    const safeHref = escapeHTML(sanitizeUrl(href))
+
+                    return `<a href="${safeHref}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
                   },
                   nodeTypes: [AutoLinkNode.getType()],
                 },
@@ -246,12 +249,14 @@ export const LinkFeature = createServerFeature<
                   showHiddenFields,
                 })
 
-                const href: string =
+                const href: string | undefined =
                   node.fields.linkType === 'custom'
-                    ? escapeHTML(node.fields.url)
+                    ? node.fields.url
                     : (node.fields.doc?.value as string)
+                // Internal link values can be missing or populated documents, so coerce before sanitizing
+                const safeHref = escapeHTML(sanitizeUrl(String(href ?? '')))
 
-                return `<a href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
+                return `<a href="${safeHref}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
               },
               nodeTypes: [LinkNode.getType()],
             },
