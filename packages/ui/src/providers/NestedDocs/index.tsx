@@ -1,5 +1,5 @@
 'use client'
-import type { Column, NestedDocRow, PaginatedDocs } from 'payload'
+import type { CollectionPreferences, Column, NestedDocRow, PaginatedDocs } from 'payload'
 
 import * as qs from 'qs-esm'
 import React, {
@@ -17,6 +17,7 @@ import type { ParentID, TreeCache } from './state.js'
 
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useListQuery } from '../ListQuery/index.js'
+import { usePreferences } from '../Preferences/index.js'
 import { usePathname, useRouter } from '../RouterAdapter/index.js'
 import { useServerFunctions } from '../ServerFunctions/index.js'
 import { appendTreePage, branchKey, createTreeCache, flattenTreeCache } from './state.js'
@@ -51,6 +52,7 @@ export function NestedDocsProvider({
   rows?: Record<string, NestedDocRow>
 }) {
   const { defaultLimit, defaultSort } = useListQuery()
+  const { setPreference } = usePreferences()
   const { getTableState } = useServerFunctions()
   const router = useRouter()
   const pathname = usePathname()
@@ -85,6 +87,13 @@ export function NestedDocsProvider({
     (next: TreeCache) => {
       const params = parseSearchParams(new URLSearchParams(window.location.search))
       params.treeExpanded = next.expanded.size > 0 ? [...next.expanded] : ''
+      void setPreference<CollectionPreferences>(`collection-${collectionSlug}`, (preferences) => ({
+        ...preferences,
+        layoutQueries: {
+          ...preferences?.layoutQueries,
+          tree: { ...preferences?.layoutQueries?.tree, treeExpanded: [...next.expanded] },
+        },
+      }))
       const url = `${pathname}${qs.stringify(params, { addQueryPrefix: true })}`
       if (router.replaceState) {
         router.replaceState(url)
@@ -92,7 +101,7 @@ export function NestedDocsProvider({
         window.history.replaceState(window.history.state, '', url)
       }
     },
-    [pathname, router],
+    [collectionSlug, pathname, router, setPreference],
   )
   const update = useCallback(
     (transform: (previous: TreeCache) => TreeCache) => {

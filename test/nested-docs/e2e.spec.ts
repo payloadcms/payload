@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { foldersSlug, pagesSlug } from './shared.js'
@@ -46,8 +47,155 @@ test.describe('Nested document tree', () => {
 
   test.beforeEach(async ({ page }) => {
     await initPage({ page, serverURL })
-    await page.goto(`${serverURL}/admin/collections/${pagesSlug}?sort=-title&limit=10`)
+    await page.goto(
+      `${serverURL}/admin/collections/${pagesSlug}?listLayout=tree&sort=-title&limit=10`,
+    )
     await page.getByRole('radio', { name: 'Tree', exact: true }).check()
+  })
+
+  test('should keep Table and Tree working states independent across switches and reloads', async ({
+    page,
+  }) => {
+    await page.getByRole('button', { name: 'Expand: About us', exact: true }).click()
+    await page.getByRole('radio', { name: 'Table', exact: true }).check()
+    await expect(page).toHaveURL(/listLayout=table/)
+    const search = page.getByRole('textbox', { name: 'Search', exact: true })
+    await search.fill('Careers')
+    await expect(page.getByRole('link', { name: 'Careers', exact: true })).toBeVisible()
+    await expect(page).toHaveURL(/search=Careers/)
+
+    await page.getByRole('radio', { name: 'Tree', exact: true }).check()
+    await expect(search).toHaveValue('')
+    await expect(
+      page.getByRole('button', { name: 'Collapse: About us', exact: true }),
+    ).toBeVisible()
+    await expect(page).not.toHaveURL(/search=Careers/)
+    await search.fill('Contact')
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Showing matching documents' }),
+    ).toBeVisible()
+    await page.reload()
+    await expect(search).toHaveValue('Contact')
+
+    await page.getByRole('radio', { name: 'Table', exact: true }).check()
+    await expect(search).toHaveValue('Careers')
+    await expect(page.getByRole('link', { name: 'Careers', exact: true })).toBeVisible()
+    await page.getByRole('radio', { name: 'Tree', exact: true }).check()
+    await expect(search).toHaveValue('Contact')
+    await page.goto(`${serverURL}/admin/collections/${pagesSlug}`)
+    await expect(search).toHaveValue('Contact')
+    await search.fill('')
+    await expect(
+      page.getByRole('button', { name: 'Collapse: About us', exact: true }),
+    ).toBeVisible()
+  })
+
+  test('should isolate grouping, sorting, filters and page size while sharing columns', async ({
+    page,
+  }) => {
+    const tableURL = new URL(`${serverURL}/admin/collections/${pagesSlug}`)
+    tableURL.searchParams.set('listLayout', 'table')
+    tableURL.searchParams.set('sort', 'title')
+    tableURL.searchParams.set('limit', '2')
+    tableURL.searchParams.set('groupBy', 'title')
+    tableURL.searchParams.set('where[title][equals]', 'Careers')
+    tableURL.searchParams.set('columns', JSON.stringify(['title', 'slug']))
+    await page.goto(tableURL.toString())
+    await expect(page.getByRole('radio', { name: 'Table', exact: true })).toBeChecked()
+    await page.getByRole('radio', { name: 'Tree', exact: true }).check()
+    await expect(page.getByRole('button', { name: 'Expand: About us', exact: true })).toBeVisible()
+    const treeQuery = new URL(page.url()).searchParams
+    expect(treeQuery.get('limit')).toBe('10')
+    expect(treeQuery.get('sort')).toBe('-title')
+    expect(treeQuery.has('groupBy')).toBe(false)
+    expect(treeQuery.has('where[title][equals]')).toBe(false)
+    expect(JSON.parse(treeQuery.get('columns')!)).toContain('slug')
+
+    await page.getByRole('radio', { name: 'Table', exact: true }).check()
+    await expect(page).toHaveURL(/groupBy=title/)
+    const restoredQuery = new URL(page.url()).searchParams
+    expect(restoredQuery.get('limit')).toBe('2')
+    expect(restoredQuery.get('sort')).toBe('title')
+    expect(restoredQuery.get('where[title][equals]')).toBe('Careers')
+    expect(JSON.parse(restoredQuery.get('columns')!)).toContain('slug')
+  })
+
+  test('should retain a fully collapsed tree when searching and clearing results', async ({
+    page,
+  }) => {
+    await page.getByRole('button', { name: 'Expand: About us', exact: true }).click()
+    await page.getByRole('textbox', { name: 'Search', exact: true }).fill('Careers')
+    await expect(page.getByRole('link', { name: 'Careers', exact: true })).toBeVisible()
+    await page.getByRole('textbox', { name: 'Search', exact: true }).fill('')
+    await page.getByRole('button', { name: 'Collapse: About us', exact: true }).click()
+    await page.getByRole('textbox', { name: 'Search', exact: true }).fill('Careers')
+    await expect(page.getByRole('link', { name: 'Careers', exact: true })).toBeVisible()
+    await page.getByRole('textbox', { name: 'Search', exact: true }).fill('')
+    await expect(page.getByRole('button', { name: 'Expand: About us', exact: true })).toBeVisible()
+    await page.reload()
+    await expect(page.getByRole('button', { name: 'Expand: About us', exact: true })).toBeVisible()
+  })
+
+  test('should preserve saved state when another layout is clicked during a pending switch', async ({
+    page,
+  }) => {
+    await page.goto(
+      `${serverURL}/admin/collections/${pagesSlug}?listLayout=table&search=Careers&sort=title&limit=2`,
+    )
+    await expect(page.getByRole('link', { name: 'Careers', exact: true })).toBeVisible()
+    let release = () => {}
+    let preferenceWrites = 0
+    const pending = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    await page.route('**/api/payload-preferences/collection-nested-pages', async (route) => {
+      if (route.request().method() === 'POST') {
+        preferenceWrites++
+        await pending
+      }
+      await route.continue()
+    })
+    try {
+      await page.getByRole('radio', { name: 'Tree', exact: true }).click()
+      await expect.poll(() => preferenceWrites).toBe(1)
+      await page.getByRole('radio', { name: 'Table', exact: true }).click()
+      await expect(page.getByRole('radio', { name: 'Tree', exact: true })).toBeChecked()
+      release()
+      await expect(
+        page.getByRole('button', { name: 'Expand: About us', exact: true }),
+      ).toBeVisible()
+      await expect(page.getByRole('textbox', { name: 'Search', exact: true })).toHaveValue('')
+      await page.getByRole('radio', { name: 'Table', exact: true }).check()
+      await expect(page.getByRole('textbox', { name: 'Search', exact: true })).toHaveValue(
+        'Careers',
+      )
+    } finally {
+      release()
+    }
+  })
+
+  test('should retain keyboard focus while switching layouts', async ({ page }, testInfo) => {
+    const tableToggle = page.getByRole('radio', { name: 'Table', exact: true })
+    await tableToggle.focus()
+    await tableToggle.press('Space')
+    await expect(page).toHaveURL(/listLayout=table/)
+    await expect(tableToggle).toBeFocused()
+    const treeToggle = page.getByRole('radio', { name: 'Tree', exact: true })
+    await treeToggle.focus()
+    await treeToggle.press('Space')
+    await expect(page.getByRole('button', { name: 'Expand: About us', exact: true })).toBeVisible()
+    await expect(treeToggle).toBeFocused()
+    await page
+      .locator('html')
+      .evaluate((element) => element.setAttribute('data-enhanced-contrast', ''))
+    await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+    const results = await runAxeScan({
+      page,
+      testInfo,
+      include: ['.collection-list'],
+      screenshotViolations: false,
+    })
+    expect(results.violations).toEqual([])
   })
 
   test('should expand with the keyboard, append children on scroll and retain focus', async ({
@@ -219,7 +367,9 @@ test.describe('Nested document tree', () => {
         }
       }
     })
-    await page.goto(`${serverURL}/admin/collections/${pagesSlug}?sort=-title&limit=10`)
+    await page.goto(
+      `${serverURL}/admin/collections/${pagesSlug}?listLayout=tree&sort=-title&limit=10`,
+    )
     await page.getByRole('button', { name: 'Expand: About us', exact: true }).click()
     const loadMore = page.getByRole('button', { name: 'Load more: About us', exact: true })
 
@@ -254,7 +404,9 @@ test.describe('Nested document tree', () => {
         ids.push(doc.id)
       }
       await page.setViewportSize({ width: 1280, height: 480 })
-      await page.goto(`${serverURL}/admin/collections/${pagesSlug}?sort=-title&limit=10`)
+      await page.goto(
+        `${serverURL}/admin/collections/${pagesSlug}?listLayout=tree&sort=-title&limit=10`,
+      )
       await expect(page.getByRole('button', { name: 'Next table page' })).toHaveCount(0)
       await page
         .getByRole('button', { name: 'Load more: Nested Pages', exact: true })
@@ -290,7 +442,9 @@ test.describe('Nested document tree', () => {
       overrideAccess: true,
     })
     try {
-      await page.goto(`${serverURL}/admin/collections/${pagesSlug}?sort=-title&limit=10`)
+      await page.goto(
+        `${serverURL}/admin/collections/${pagesSlug}?listLayout=tree&sort=-title&limit=10`,
+      )
       await page.getByRole('button', { name: 'Expand: About us', exact: true }).click()
       await expect(
         page.getByRole('button', { name: 'Expand: Our team', exact: true }),
@@ -436,7 +590,9 @@ test.describe('Nested document tree', () => {
             ).docs[0]['_h_page-folders'],
         )
         .toBe(folder.id)
-      await page.goto(`${serverURL}/admin/collections/${pagesSlug}?sort=-title&limit=10`)
+      await page.goto(
+        `${serverURL}/admin/collections/${pagesSlug}?listLayout=tree&sort=-title&limit=10`,
+      )
       await page.getByRole('button', { name: 'Expand: Contact', exact: true }).click()
       await expect(
         page.getByRole('link', { name: 'Move through sidebar', exact: true }),

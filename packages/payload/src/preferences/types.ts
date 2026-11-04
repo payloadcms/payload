@@ -1,3 +1,4 @@
+import type { ListQuery } from '../admin/functions/index.js'
 import type { DefaultDocumentIDType } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
@@ -34,12 +35,30 @@ export type ColumnPreference = {
   active: boolean
 }
 
+export type CollectionListQueryPreferences = Pick<
+  ListQuery,
+  | 'groupBy'
+  | 'limit'
+  | 'page'
+  | 'preset'
+  | 'queryByGroup'
+  | 'search'
+  | 'sort'
+  | 'treeExpanded'
+  | 'where'
+>
+
 export type CollectionPreferences = {
   columns?: ColumnPreference[]
   /** Controls whether a collection renders documents as a table or a grid of cards */
   documentLayout?: 'grid' | 'table' | 'tree'
   editViewType?: 'default' | 'live-preview'
   groupBy?: string
+  /** Query state is isolated between flat layouts and Tree; columns remain shared. */
+  layoutQueries?: {
+    table?: CollectionListQueryPreferences
+    tree?: CollectionListQueryPreferences
+  }
   limit?: number
   listViewType?: 'hierarchy' | 'list'
   preset?: DefaultDocumentIDType

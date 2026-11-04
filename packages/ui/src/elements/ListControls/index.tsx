@@ -90,7 +90,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       <div className={`${baseClass}__search-row`}>
         <div className={`${baseClass}__left`}>
           <ListSearchFilter
-            key={collectionSlug}
+            key={`${collectionSlug}-${query?.listLayout ?? 'default'}`}
             label={searchLabelTranslated}
             onSearchChange={handleSearchChange}
             onSearchInputChange={setSearchInput}
