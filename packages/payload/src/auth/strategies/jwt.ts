@@ -136,7 +136,7 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
   const requestDepth = req?.query?.depth
 
   try {
-    const token = extractJWT({ headers, payload })
+    const token = extractJWT({ headers, payload, req })
 
     if (!token) {
       if (headers.get('DisableAutologin') !== 'true') {
