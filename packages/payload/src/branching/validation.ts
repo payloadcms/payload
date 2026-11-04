@@ -8,6 +8,7 @@ import {
   validateCollectionData,
   validateGlobalData,
 } from '../utilities/entityInputSchema/validateEntityData.js'
+import { hasDraftValidationEnabled } from '../utilities/getVersionsConfig.js'
 import { traverseForLocalizedFields } from '../utilities/traverseForLocalizedFields.js'
 import {
   getGlobalMergeLocales,
@@ -55,7 +56,7 @@ export type BranchMergeValidate = (args: {
 }) => BranchMergeValidationResult | Promise<BranchMergeValidationResult>
 
 export const createMainBranchRequest = ({ req }: { req: PayloadRequest }): PayloadRequest => {
-  const targetReq = isolateBranchState({ req: req })
+  const targetReq = isolateBranchState({ req })
 
   targetReq.branch = MAIN_BRANCH
   targetReq.query = { ...targetReq.query }
@@ -202,24 +203,43 @@ export const defaultBranchMergeValidation: BranchMergeValidate = ({ candidates, 
       continue
     }
 
-    const candidateReq = isolateBranchState({ req: req })
+    const candidateReq = isolateBranchState({ req })
 
     if (candidate.locale) {
       candidateReq.locale = candidate.locale
     }
 
+    const entityConfig =
+      candidate.entityType === 'collection' && candidate.collectionSlug
+        ? req.payload.collections[candidate.collectionSlug]?.config
+        : req.payload.globals.config.find(({ slug }) => slug === candidate.globalSlug)
+    const shouldAllowEmptyFields = Boolean(
+      candidate.draft && entityConfig && !hasDraftValidationEnabled(entityConfig),
+    )
+    // Draft saves allow incomplete fields. Validate a copy without empty field values, while
+    // retaining the original candidate (including nulls that clear content) for the actual write.
+    const data =
+      shouldAllowEmptyFields && entityConfig
+        ? stripNonWritableFields({
+            data: candidate.data,
+            fields: entityConfig.fields,
+            payload: req.payload,
+            shouldStripNullValues: true,
+          })
+        : candidate.data
+
     try {
       if (candidate.entityType === 'collection' && candidate.collectionSlug) {
         validateCollectionData({
           slug: candidate.collectionSlug as never,
-          data: candidate.data,
-          partial: candidate.operation !== 'create',
+          data,
+          partial: shouldAllowEmptyFields || candidate.operation !== 'create',
           req: candidateReq,
         })
       } else if (candidate.entityType === 'global' && candidate.globalSlug) {
         validateGlobalData({
           slug: candidate.globalSlug as never,
-          data: candidate.data,
+          data,
           req: candidateReq,
         })
       }
@@ -267,38 +287,66 @@ const stripNonWritableFields = ({
   data,
   fields,
   payload,
+  shouldStripNullValues = false,
 }: {
   data: Record<string, unknown>
   fields: Field[]
   payload: Payload
+  shouldStripNullValues?: boolean
 }): Record<string, unknown> => {
   let writableData = { ...data }
 
   for (const field of fields) {
+    if (
+      shouldStripNullValues &&
+      'name' in field &&
+      field.name &&
+      writableData[field.name] === null
+    ) {
+      delete writableData[field.name]
+      continue
+    }
+
     if ('name' in field && field.name && (field.type === 'join' || fieldIsVirtual(field))) {
       delete writableData[field.name]
       continue
     }
 
     if (field.type === 'row' || field.type === 'collapsible') {
-      writableData = stripNonWritableFields({ data: writableData, fields: field.fields, payload })
+      writableData = stripNonWritableFields({
+        data: writableData,
+        fields: field.fields,
+        payload,
+        shouldStripNullValues,
+      })
       continue
     }
 
     if (field.type === 'tabs') {
       for (const tab of field.tabs) {
         if (!tabHasName(tab)) {
-          writableData = stripNonWritableFields({ data: writableData, fields: tab.fields, payload })
+          writableData = stripNonWritableFields({
+            data: writableData,
+            fields: tab.fields,
+            payload,
+            shouldStripNullValues,
+          })
           continue
         }
 
         const tabData = writableData[tab.name]
+
+        if (shouldStripNullValues && tabData === null) {
+          delete writableData[tab.name]
+          continue
+        }
 
         if (isRecord(tabData)) {
           writableData[tab.name] = stripNonWritableFields({
             data: tabData,
             fields: tab.fields,
             payload,
+            shouldStripNullValues,
           })
         }
       }
@@ -308,7 +356,12 @@ const stripNonWritableFields = ({
 
     if (field.type === 'group') {
       if (!('name' in field) || !field.name) {
-        writableData = stripNonWritableFields({ data: writableData, fields: field.fields, payload })
+        writableData = stripNonWritableFields({
+          data: writableData,
+          fields: field.fields,
+          payload,
+          shouldStripNullValues,
+        })
         continue
       }
 
@@ -319,6 +372,7 @@ const stripNonWritableFields = ({
           data: groupData,
           fields: field.fields,
           payload,
+          shouldStripNullValues,
         })
       }
 
@@ -331,7 +385,12 @@ const stripNonWritableFields = ({
       if (Array.isArray(rows)) {
         writableData[field.name] = rows.map((row) =>
           isRecord(row)
-            ? stripNonWritableFields({ data: row, fields: field.fields, payload })
+            ? stripNonWritableFields({
+                data: row,
+                fields: field.fields,
+                payload,
+                shouldStripNullValues,
+              })
             : row,
         )
       }
@@ -356,7 +415,12 @@ const stripNonWritableFields = ({
 
           return !block || typeof block === 'string'
             ? row
-            : stripNonWritableFields({ data: row, fields: block.fields, payload })
+            : stripNonWritableFields({
+                data: row,
+                fields: block.fields,
+                payload,
+                shouldStripNullValues,
+              })
         })
       }
     }

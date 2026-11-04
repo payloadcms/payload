@@ -9,6 +9,7 @@ import type { AdminContext } from './functions/index.js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { initAdminContext } from './initAdminContext.js'
+import { Forbidden } from '../errors/Forbidden.js'
 
 const {
   applyUserReadAccess,
@@ -268,6 +269,67 @@ describe('initAdminContext', () => {
     expect(result.req.locale).toBe('en')
     expect(findPreference).not.toHaveBeenCalled()
     expect(updatePreference).not.toHaveBeenCalled()
+  })
+
+  it.each(['/admin', '/admin/categories', '/admin/login', '/admin/create-first-user'])(
+    'should initialize anonymous access to %s on main despite a branch query',
+    async (route) => {
+      authenticate.mockResolvedValueOnce({ responseHeaders: new Headers(), user: null })
+      const find = vi.fn().mockRejectedValue(new Forbidden())
+      const branchingConfig = { ...config, branching: { enabled: true } } as SanitizedConfig
+
+      getPayload.mockResolvedValue({ ...payload, config: branchingConfig, find })
+
+      const result = await initAdminContext({
+        configPromise: branchingConfig,
+        importMap,
+        requestURL: `https://example.com${route}?branch=Test`,
+        serverAdapter,
+      })
+
+      expect(result.req.branch).toBe('main')
+      expect(result.req.query.branch).toBe('Test')
+      expect(result.user).toBeNull()
+      expect(find).not.toHaveBeenCalled()
+      expect(getAccessResults).toHaveBeenCalledWith({ req: result.req })
+    },
+  )
+
+  it('should enforce branch access for an authenticated admin request', async () => {
+    const find = vi.fn().mockRejectedValue(new Forbidden())
+    const branchingConfig = { ...config, branching: { enabled: true } } as SanitizedConfig
+
+    getPayload.mockResolvedValue({ ...payload, config: branchingConfig, find })
+
+    await expect(
+      initAdminContext({
+        configPromise: branchingConfig,
+        importMap,
+        requestURL: 'https://example.com/admin?branch=Test',
+        serverAdapter,
+      }),
+    ).rejects.toBeInstanceOf(Forbidden)
+    expect(find).toHaveBeenCalledWith(expect.objectContaining({ overrideAccess: false }))
+    expect(getAccessResults).not.toHaveBeenCalled()
+  })
+
+  it('should initialize on main when user read access fails with a branch query', async () => {
+    applyUserReadAccess.mockRejectedValueOnce(new Forbidden())
+    const find = vi.fn().mockRejectedValue(new Forbidden())
+    const branchingConfig = { ...config, branching: { enabled: true } } as SanitizedConfig
+
+    getPayload.mockResolvedValue({ ...payload, config: branchingConfig, find })
+
+    const result = await initAdminContext({
+      configPromise: branchingConfig,
+      importMap,
+      requestURL: 'https://example.com/admin?branch=Test',
+      serverAdapter,
+    })
+
+    expect(result.req.branch).toBe('main')
+    expect(result.user).toBeNull()
+    expect(find).not.toHaveBeenCalled()
   })
 
   it('should prefer explicit request overrides over requestURL', async () => {
