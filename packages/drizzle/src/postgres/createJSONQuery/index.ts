@@ -8,7 +8,11 @@ import { parseJSONPathSegment } from '../../utilities/parseJSONPathSegment.js'
 const operatorMap: Record<string, string> = {
   contains: '~',
   equals: '==',
+  greater_than: '>',
+  greater_than_equal: '>=',
   in: 'in',
+  less_than: '<',
+  less_than_equal: '<=',
   like: 'like_regex',
   not_equals: '!=',
   not_in: 'in',
@@ -49,10 +53,23 @@ export const createJSONQuery = ({ column, operator, pathSegments, value }: Creat
     .join('.')
 
   const fullPath = pathSegments.length === 1 ? '$[*]' : `$.${jsonPaths}`
+  const resolvedOperator = operator.startsWith('date_') ? operator.slice(5) : operator
 
   let sql = ''
 
-  if (['in', 'not_in'].includes(operator) && Array.isArray(value)) {
+  if (['date_equals', 'date_not_equals'].includes(operator) && Array.isArray(value)) {
+    const [start, end] = value
+
+    if (typeof start !== 'string' || typeof end !== 'string') {
+      throw new Error('Invalid date-only JSON comparison')
+    }
+
+    const predicate = `@ >= ${sanitizeValue(start)} && @ < ${sanitizeValue(end)}`
+
+    const pathExists = `jsonb_path_exists(${columnName}, '${fullPath} ? (${predicate})')`
+
+    sql = operator === 'date_not_equals' ? `${pathExists} IS NOT TRUE` : pathExists
+  } else if (['in', 'not_in'].includes(operator) && Array.isArray(value)) {
     sql = '('
     value.forEach((item, i) => {
       sql = `${sql}${createJSONQuery({ column, operator: operator === 'in' ? 'equals' : 'not_equals', pathSegments, value: item })}${i === value.length - 1 ? '' : ` ${operator === 'in' ? 'OR' : 'AND'} `}`
@@ -65,7 +82,7 @@ export const createJSONQuery = ({ column, operator, pathSegments, value }: Creat
 
     sql = `NOT jsonb_path_exists(${columnName}, '${fullPath} ? (@ ${mappedOperator.substring(1)} ${sanitizeValue(value, operator)})')`
   } else {
-    sql = `jsonb_path_exists(${columnName}, '${fullPath} ? (@ ${operatorMap[operator]} ${sanitizeValue(value, operator)})')`
+    sql = `jsonb_path_exists(${columnName}, '${fullPath} ? (@ ${operatorMap[resolvedOperator]} ${sanitizeValue(value, resolvedOperator)})')`
   }
 
   return sql

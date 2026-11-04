@@ -820,9 +820,6 @@ importers:
 
   packages/payload:
     dependencies:
-      '@date-fns/tz':
-        specifier: 1.2.0
-        version: 1.2.0
       '@next/env':
         specifier: 16.4.2
         version: 16.4.2

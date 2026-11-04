@@ -1,17 +1,111 @@
 import type { Column } from 'drizzle-orm'
 import type { FlattenedField } from 'payload'
+import type { ResolvedDateFilterTarget } from 'payload/shared'
 
 import { sql } from 'drizzle-orm'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { DrizzleAdapter, DrizzleOperandTransformHandler } from '../types.js'
 
+import { createJSONQuery } from '../postgres/createJSONQuery/index.js'
+import { buildDateComparisonConstraint, getDateOnlyJSONPaths } from './buildDateFilterConstraint.js'
 import { buildOperatorConstraint } from './buildOperatorConstraint.js'
 
 const textField = { name: 'title', type: 'text' } as unknown as FlattenedField
 const numberField = { name: 'age', type: 'number' } as unknown as FlattenedField
+const dateOnlyField = {
+  name: 'publishedOn',
+  timezone: { defaultTimezone: 'Europe/London' },
+  type: 'date',
+} as unknown as FlattenedField
+const datePlan = {
+  input: {
+    kind: 'calendarDay',
+    serialized: '2026-03-29',
+    value: { day: 29, month: 3, year: 2026 },
+  },
+  operator: 'equals',
+  pickerAppearance: 'default',
+  targets: [{ field: dateOnlyField, lineage: [] }],
+  timezone: 'Europe/London',
+} as const
 
 describe('buildOperatorConstraint', () => {
+  it('does not infer calendar-day semantics while building an ordinary operator', () => {
+    const equals = vi.fn(() => sql`equals`)
+    const adapter = {
+      operatorHandlers: [],
+      operators: {
+        equals,
+      },
+      payload: { config: {} },
+    } as unknown as DrizzleAdapter
+    const column = 'published_on' as unknown as Column
+
+    const result = buildOperatorConstraint({
+      adapter,
+      column,
+      field: dateOnlyField,
+      originalOperator: 'equals',
+      path: 'publishedOn',
+      resolvedOperator: 'equals',
+      value: '2026-03-29',
+    })
+
+    expect(equals).toHaveBeenCalledOnce()
+    expect(equals).toHaveBeenCalledWith(column, '2026-03-29')
+    expect(result).toBeDefined()
+  })
+
+  it('builds calendar-day equality only through the resolved date plan', () => {
+    const greaterThanEqual = vi.fn(() => sql`after-start`)
+    const lessThan = vi.fn(() => sql`before-end`)
+    const adapter = {
+      operatorHandlers: [],
+      operators: { greater_than_equal: greaterThanEqual, less_than: lessThan },
+    } as unknown as DrizzleAdapter
+    const column = 'published_on' as unknown as Column
+
+    const result = buildDateComparisonConstraint({
+      adapter,
+      column,
+      path: 'publishedOn',
+      plan: datePlan,
+      target: datePlan.targets[0],
+    })
+
+    expect(greaterThanEqual).toHaveBeenCalledWith(column, '2026-03-29T00:00:00.000Z')
+    expect(lessThan).toHaveBeenCalledWith(column, '2026-03-29T23:00:00.000Z')
+    expect(result).toBeDefined()
+  })
+
+  it('keeps a replacement handler authoritative for date-only equality', () => {
+    const sentinel = sql`replacement`
+    const build = vi.fn(() => sentinel)
+    const equalsOperator = vi.fn()
+    const adapter = {
+      operatorHandlers: [
+        { build, fieldTypes: ['date'], name: 'custom-date-equals', operators: ['equals'] },
+      ],
+      operators: { equals: equalsOperator },
+      payload: { config: {} },
+    } as unknown as DrizzleAdapter
+
+    const result = buildOperatorConstraint({
+      adapter,
+      column: 'published_on' as unknown as Column,
+      field: dateOnlyField,
+      originalOperator: 'equals',
+      path: 'publishedOn',
+      resolvedOperator: 'equals',
+      value: '2026-03-29',
+    })
+
+    expect(build).toHaveBeenCalledWith(expect.objectContaining({ value: '2026-03-29' }))
+    expect(equalsOperator).not.toHaveBeenCalled()
+    expect(result).toBe(sentinel)
+  })
+
   it('calls the default operator unchanged when no handlers are configured', () => {
     const sentinel = sql`sentinel`
     const containsOperator = vi.fn().mockReturnValue(sentinel)
@@ -264,5 +358,51 @@ describe('buildOperatorConstraint', () => {
 
     expect(containsOperator).not.toHaveBeenCalled()
     expect(build).not.toHaveBeenCalled()
+  })
+})
+
+describe('date-only JSON constraints', () => {
+  it('marks localized nested arrays at their stored JSON path', () => {
+    expect(
+      getDateOnlyJSONPaths({
+        target: {
+          field: dateOnlyField as ResolvedDateFilterTarget['field'],
+          lineage: [
+            { isLocalized: false, name: 'content', type: 'blocks' },
+            { isLocalized: true, locale: 'en', name: 'rows', type: 'array' },
+            { isLocalized: false, name: 'publishedOn', type: 'date' },
+          ],
+        },
+      }),
+    ).toEqual({
+      pathSegments: ['content', 'rows', 'en', 'publishedOn'],
+      repeatedPaths: ['rows.en'],
+    })
+  })
+
+  it('binds both day boundaries to the same JSON array value', () => {
+    expect(
+      createJSONQuery({
+        column: 'content',
+        operator: 'date_equals',
+        pathSegments: ['content', 'publishedOn'],
+        value: ['2026-03-29T00:00:00.000Z', '2026-03-29T23:00:00.000Z'],
+      }),
+    ).toBe(
+      `jsonb_path_exists(content, '$.publishedOn[*] ? (@ >= "2026-03-29T00:00:00.000Z" && @ < "2026-03-29T23:00:00.000Z")')`,
+    )
+  })
+
+  it('negates the whole JSON day predicate for not_equals', () => {
+    expect(
+      createJSONQuery({
+        column: 'content',
+        operator: 'date_not_equals',
+        pathSegments: ['content', 'publishedOn'],
+        value: ['2026-03-29T00:00:00.000Z', '2026-03-29T23:00:00.000Z'],
+      }),
+    ).toBe(
+      `jsonb_path_exists(content, '$.publishedOn[*] ? (@ >= "2026-03-29T00:00:00.000Z" && @ < "2026-03-29T23:00:00.000Z")') IS NOT TRUE`,
+    )
   })
 })

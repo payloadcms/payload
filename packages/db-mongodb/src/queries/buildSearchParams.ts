@@ -6,13 +6,15 @@ import type {
   PathToQuery,
   Payload,
 } from 'payload'
+import type { ResolvedDateFilterPlan, ResolvedDateFilterTarget } from 'payload/shared'
 
 import { Types } from 'mongoose'
 import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
 import {
-  getDateOnlyBounds,
+  getDateOnlyComparison,
   hasManyRelationshipOperatorSet,
   isNestedRelationshipQuery,
+  resolveDateFilterPlan,
   validOperatorSet,
 } from 'payload/shared'
 
@@ -106,6 +108,16 @@ export async function buildSearchParam({
     return undefined
   }
 
+  const dateFilterPlan = resolveDateFilterPlan({
+    config: payload.config,
+    fields,
+    locale,
+    operator,
+    parentIsLocalized,
+    path: sanitizedPath,
+    value: val,
+  })
+
   const [{ field, path }] = paths
 
   if (
@@ -153,6 +165,7 @@ export async function buildSearchParam({
     const sanitizedQueryValue = sanitizeQueryValue({
       field,
       hasCustomID,
+      isCalendarDate: dateFilterPlan?.input.kind === 'calendarDay',
       locale,
       operator,
       parentIsLocalized,
@@ -182,6 +195,16 @@ export async function buildSearchParam({
       // to work backwards from top
       const pathsToQuery = paths.slice(1).reverse()
       const parentPaths = paths.slice(0, -1).reverse()
+      const isCalendarDayNotEqualsThroughRepeatedPath =
+        dateFilterPlan?.input.kind === 'calendarDay' &&
+        operator === 'not_equals' &&
+        parentPaths.some(
+          ({ field }) =>
+            field.type === 'join' ||
+            ((field.type === 'relationship' || field.type === 'upload') &&
+              field.hasMany &&
+              typeof field.relationTo === 'string'),
+        )
 
       let relationshipQuery: SearchParam = {
         value: {},
@@ -210,7 +233,7 @@ export async function buildSearchParam({
             payload,
             where: {
               [subPath]: {
-                [formattedOperator]: val,
+                [isCalendarDayNotEqualsThroughRepeatedPath ? 'equals' : formattedOperator]: val,
               },
             },
           })
@@ -287,7 +310,7 @@ export async function buildSearchParam({
           if (pathsToQuery.length === 1) {
             return {
               path: joinPath ? '_id' : path,
-              value: { $in },
+              value: { [isCalendarDayNotEqualsThroughRepeatedPath ? '$nin' : '$in']: $in },
             }
           }
 
@@ -327,7 +350,10 @@ export async function buildSearchParam({
 
           const $in = await SubModel.distinct(joinPath, subQuery)
           if (i + 1 === pathsToQuery.length) {
-            return { path: '_id', value: { $in } }
+            return {
+              path: '_id',
+              value: { [isCalendarDayNotEqualsThroughRepeatedPath ? '$nin' : '$in']: $in },
+            }
           }
 
           relationshipQuery = { value: { _id: { $in } } }
@@ -343,7 +369,7 @@ export async function buildSearchParam({
         if (i + 1 === pathsToQuery.length) {
           relationshipQuery = {
             path,
-            value: { $in },
+            value: { [isCalendarDayNotEqualsThroughRepeatedPath ? '$nin' : '$in']: $in },
           }
         } else {
           const nextSubPath = pathsToQuery[i + 1]?.path
@@ -444,26 +470,8 @@ export async function buildSearchParam({
         return result
       }
 
-      if (
-        field.type === 'date' &&
-        formattedOperator === 'equals' &&
-        formattedValue instanceof Date &&
-        (!field.admin?.date?.pickerAppearance ||
-          ['dayOnly', 'default'].includes(field.admin.date.pickerAppearance))
-      ) {
-        const timezone =
-          (typeof field.timezone === 'object'
-            ? field.timezone.defaultTimezone
-            : field.timezone && payload.config.admin?.timezones?.defaultTimezone) || 'UTC'
-        const { startOfDay, startOfNextDay } = getDateOnlyBounds({
-          date: typeof val === 'string' ? val : formattedValue,
-          timezone,
-        })
-
-        return {
-          path,
-          value: { $gte: startOfDay, $lt: startOfNextDay },
-        }
+      if (dateFilterPlan?.input.kind === 'calendarDay') {
+        return buildDateFilterSearchParam({ plan: dateFilterPlan })
       }
 
       // Some operators like 'near' need to define a full query
@@ -482,6 +490,144 @@ export async function buildSearchParam({
     }
   }
   return undefined
+}
+
+const buildDateFilterSearchParam = ({
+  plan,
+}: {
+  plan: ResolvedDateFilterPlan
+}): SearchParam | undefined => {
+  if (plan.input.kind !== 'calendarDay' || !plan.timezone) {
+    return undefined
+  }
+
+  const comparison = getDateOnlyComparison({
+    date: plan.input.serialized,
+    operator: plan.operator,
+    timezone: plan.timezone,
+  })
+
+  if (!comparison) {
+    return undefined
+  }
+
+  const seenPaths = new Set<string>()
+  const targetQueries = plan.targets.flatMap((target) => {
+    const { arrayPaths, path } = getMongoDateTargetPath({ target })
+    const key = `${path}|${arrayPaths.join('|')}`
+
+    if (seenPaths.has(key)) {
+      return []
+    }
+
+    seenPaths.add(key)
+    const mongoConstraints = Object.fromEntries(
+      comparison.constraints.map((constraint) => [
+        operatorMap[constraint.operator],
+        constraint.value,
+      ]),
+    )
+
+    if (arrayPaths.length) {
+      if (plan.operator === 'not_equals') {
+        return [
+          buildArrayDateQuery({
+            arrayPaths,
+            isNegated: true,
+            path,
+            value: {
+              $gte: comparison.constraints[0]!.value,
+              $lt: comparison.constraints[1]!.value,
+            },
+          }),
+        ]
+      }
+
+      return [buildArrayDateQuery({ arrayPaths, path, value: mongoConstraints })]
+    }
+
+    return [
+      {
+        path,
+        value:
+          plan.operator === 'not_equals'
+            ? {
+                $not: {
+                  $gte: comparison.constraints[0]!.value,
+                  $lt: comparison.constraints[1]!.value,
+                },
+              }
+            : mongoConstraints,
+      },
+    ]
+  })
+
+  if (targetQueries.length === 1) {
+    return targetQueries[0]
+  }
+
+  const queryOperator = plan.operator === 'not_equals' ? '$and' : '$or'
+
+  return {
+    value: {
+      [queryOperator]: targetQueries.map(({ path, value }) => ({ [path!]: value })),
+    },
+  }
+}
+
+const getMongoDateTargetPath = ({
+  target,
+}: {
+  target: ResolvedDateFilterTarget
+}): { arrayPaths: string[]; path: string } => {
+  const arrayPaths: string[] = []
+  const pathSegments: string[] = []
+
+  for (const segment of target.lineage) {
+    pathSegments.push(segment.name)
+
+    if (segment.locale) {
+      pathSegments.push(segment.locale)
+    }
+
+    if (segment.type === 'array' || segment.type === 'blocks') {
+      arrayPaths.push(pathSegments.join('.'))
+    }
+  }
+
+  return { arrayPaths, path: pathSegments.join('.') }
+}
+
+const buildArrayDateQuery = ({
+  arrayPaths,
+  isNegated = false,
+  path,
+  value,
+}: {
+  arrayPaths: string[]
+  isNegated?: boolean
+  path: string
+  value: Record<string, unknown>
+}): SearchParam => {
+  const [outerArrayPath] = arrayPaths
+  const deepestArrayPath = arrayPaths.at(-1)!
+  let elementQuery: Record<string, unknown> = {
+    [path.slice(deepestArrayPath.length + 1)]: value,
+  }
+
+  for (let index = arrayPaths.length - 1; index > 0; index -= 1) {
+    const parentArrayPath = arrayPaths[index - 1]!
+    const arrayPath = arrayPaths[index]!
+
+    elementQuery = {
+      [arrayPath.slice(parentArrayPath.length + 1)]: { $elemMatch: elementQuery },
+    }
+  }
+
+  return {
+    path: outerArrayPath,
+    value: isNegated ? { $not: { $elemMatch: elementQuery } } : { $elemMatch: elementQuery },
+  }
 }
 
 /**

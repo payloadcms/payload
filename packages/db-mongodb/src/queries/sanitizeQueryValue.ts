@@ -7,6 +7,7 @@ import { fieldShouldBeLocalized } from 'payload/shared'
 type SanitizeQueryValueArgs = {
   field: FlattenedField
   hasCustomID: boolean
+  isCalendarDate?: boolean
   locale?: string
   operator: Operator
   parentIsLocalized: boolean
@@ -83,6 +84,7 @@ const getFieldFromSegments = ({
 export const sanitizeQueryValue = ({
   field,
   hasCustomID,
+  isCalendarDate,
   locale,
   operator,
   parentIsLocalized,
@@ -195,9 +197,11 @@ export const sanitizeQueryValue = ({
   }
 
   if (field.type === 'date' && typeof val === 'string' && operator !== 'exists') {
-    formattedValue = new Date(val)
-    if (Number.isNaN(Date.parse(formattedValue))) {
-      return undefined
+    if (!isCalendarDate) {
+      formattedValue = new Date(val)
+      if (Number.isNaN(Date.parse(formattedValue))) {
+        return undefined
+      }
     }
   }
 

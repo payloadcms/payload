@@ -964,6 +964,7 @@ export interface Alias {
  */
 export interface BlocksDoc {
   id: string;
+  compatibleDateBlocks?: (LondonDate | SecondDate)[] | null;
   testBlocksLocalized?: Cta[] | null;
   testBlocks?: Cta[] | null;
   createdBy?: {
@@ -983,9 +984,30 @@ export interface BlocksDoc {
  */
 export interface Cta {
   text?: string | null;
+  date?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'cta';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LondonDate".
+ */
+export interface LondonDate {
+  date?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'londonDate';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SecondDate".
+ */
+export interface SecondDate {
+  date?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'secondDate';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1767,6 +1789,24 @@ export interface AliasesSelect<T extends boolean = true> {
  * via the `definition` "blocks-docs_select".
  */
 export interface BlocksDocsSelect<T extends boolean = true> {
+  compatibleDateBlocks?:
+    | T
+    | {
+        londonDate?:
+          | T
+          | {
+              date?: T;
+              id?: T;
+              blockName?: T;
+            };
+        secondDate?:
+          | T
+          | {
+              date?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   testBlocksLocalized?:
     | T
     | {
@@ -1774,6 +1814,7 @@ export interface BlocksDocsSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              date?: T;
               id?: T;
               blockName?: T;
             };
@@ -1785,6 +1826,7 @@ export interface BlocksDocsSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              date?: T;
               id?: T;
               blockName?: T;
             };

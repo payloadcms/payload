@@ -85,6 +85,30 @@ const DateFields: CollectionConfig = {
       timezone: true,
     },
     {
+      name: 'relatedDates',
+      type: 'relationship',
+      hasMany: true,
+      relationTo: dateFieldsSlug,
+    },
+    {
+      name: 'localizedRelatedDates',
+      type: 'relationship',
+      hasMany: true,
+      localized: true,
+      relationTo: dateFieldsSlug,
+    },
+    {
+      name: 'relatedDate',
+      type: 'relationship',
+      relationTo: dateFieldsSlug,
+    },
+    {
+      name: 'joinedDates',
+      type: 'join',
+      collection: dateFieldsSlug,
+      on: 'relatedDate',
+    },
+    {
       name: 'dayAndTimeWithTimezone',
       type: 'date',
       required: true,
@@ -189,6 +213,7 @@ const DateFields: CollectionConfig = {
     {
       type: 'array',
       name: 'array',
+      localized: true,
       fields: [
         {
           name: 'date',

@@ -179,9 +179,7 @@ export function getLocalizedPaths({
               lastIncompletePath.complete = true
               lastIncompletePath.path = currentPath!
 
-              const nestedPathToQuery = pathSegments
-                .slice(nextSegmentIsLocale ? i + 2 : i + 1)
-                .join('.')
+              const nestedPathToQuery = pathSegments.slice(i + 1).join('.')
 
               if (nestedPathToQuery) {
                 let relatedCollection: SanitizedCollectionConfig

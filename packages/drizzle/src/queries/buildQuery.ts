@@ -13,6 +13,7 @@ export type BuildQueryJoinAliases = {
   // with parent
   isOneToMany?: boolean
   queryPath?: string
+  sourceTableName?: string
   table: GenericTable | PgTableWithColumns<any>
   type?: 'innerJoin' | 'leftJoin' | 'rightJoin'
 }[]

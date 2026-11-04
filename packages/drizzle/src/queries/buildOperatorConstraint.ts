@@ -23,6 +23,11 @@ type Args = {
   value: unknown
 }
 
+type ResolvedOperatorConstraint = {
+  context: DrizzleOperatorHandlerContext
+  replacement?: SQL
+}
+
 const isTransformHandler = (
   handler: DrizzleOperatorHandler,
 ): handler is DrizzleOperandTransformHandler => typeof handler.transformOperands === 'function'
@@ -49,6 +54,17 @@ const handlerMatches = (handler: DrizzleOperatorHandler, args: Args): boolean =>
  * replacement handler or falls back to `adapter.operators[resolvedOperator]`.
  */
 export const buildOperatorConstraint = (args: Args): SQL => {
+  const { adapter, resolvedOperator } = args
+  const { context, replacement } = resolveOperatorConstraint({ args })
+
+  if (replacement) {
+    return replacement
+  }
+
+  return adapter.operators[resolvedOperator](context.column, context.value)
+}
+
+export const resolveOperatorConstraint = ({ args }: { args: Args }): ResolvedOperatorConstraint => {
   const { adapter, field, locale, originalOperator, path, resolvedOperator } = args
 
   const matchingHandlers = (adapter.operatorHandlers ?? []).filter((handler) =>
@@ -93,7 +109,7 @@ export const buildOperatorConstraint = (args: Args): SQL => {
 
   if (replacementHandler) {
     try {
-      return replacementHandler.build({ ...context })
+      return { context, replacement: replacementHandler.build({ ...context }) }
     } catch (error) {
       throw new Error(
         `Operator handler "${replacementHandler.name}" threw while building the "${resolvedOperator}" comparison at path "${path}".`,
@@ -102,5 +118,5 @@ export const buildOperatorConstraint = (args: Args): SQL => {
     }
   }
 
-  return adapter.operators[resolvedOperator](context.column, context.value)
+  return { context }
 }
