@@ -1,13 +1,12 @@
 'use client'
 
-import type { DocumentViewClientProps, User } from 'payload'
+import type { DocumentViewClientProps } from 'payload'
 
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { FormOnSuccess, FormStateRequest } from '../../forms/Form/types.js'
-import type { LockedState } from '../../utilities/buildFormState.js'
+import type { FormOnSuccess, FormStateArgs } from '../../forms/Form/types.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
 import { DocumentDrawerHeader } from '../../elements/DocumentDrawer/DrawerHeader/index.js'
@@ -25,7 +24,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
-import { useLivePreviewContext, usePreviewURL } from '../../providers/LivePreview/context.js'
+import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
@@ -92,6 +91,7 @@ export function DefaultEditView({
     isEditing,
     isInitializing,
     isLocked,
+    isStale,
     isTrashed,
     lastUpdateTime,
     redirectAfterCreate,
@@ -101,6 +101,7 @@ export function DefaultEditView({
     setCurrentEditor,
     setData,
     setDocumentIsLocked,
+    setIsStale,
     setLastUpdateTime,
     unlockDocument,
     updateDocumentEditor,
@@ -144,11 +145,8 @@ export function DefaultEditView({
     isLivePreviewEnabled,
     isLivePreviewing,
     isPopupOpen,
-    setURL: setLivePreviewURL,
-    typeofLivePreviewURL,
     url: livePreviewURL,
   } = useLivePreviewContext()
-  const { isPreviewEnabled, setPreviewURL } = usePreviewURL()
 
   const locale = params.get('locale')
 
@@ -173,12 +171,6 @@ export function DefaultEditView({
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
-  const [showStaleDataModal, setShowStaleDataModal] = useState(false)
-
-  const [editSessionStartTime, setEditSessionStartTime] = useState(() => Date.now())
-
-  const hasCheckedForStaleDataRef = useRef(false)
-  const originalUpdatedAtRef = useRef(data?.updatedAt)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
   // Render can't read the current time, so check for expiry when the lock changes and expires
@@ -214,50 +206,33 @@ export function DefaultEditView({
 
   const nextHrefRef = React.useRef<null | string>(null)
 
-  const handleDocumentLocking = useCallback(
-    (lockedState: LockedState) => {
-      setDocumentIsLocked(true)
-      const previousOwnerID =
-        typeof documentLockStateRef.current?.user === 'object'
-          ? documentLockStateRef.current?.user?.id
-          : documentLockStateRef.current?.user
+  const currentEditorID = typeof currentEditor === 'object' ? currentEditor?.id : currentEditor
+  const previousEditorIDRef = useRef(currentEditorID)
 
-      if (lockedState && lockedState.user) {
-        const lockedUserID =
-          typeof lockedState.user === 'string' || typeof lockedState.user === 'number'
-            ? lockedState.user
-            : lockedState.user.id
+  // Another user took over the lock from the current user
+  useEffect(() => {
+    const previousEditorID = previousEditorIDRef.current
+    previousEditorIDRef.current = currentEditorID
 
-        if (!documentLockStateRef.current || lockedUserID !== previousOwnerID) {
-          if (previousOwnerID === user.id && lockedUserID !== user.id) {
-            setShowTakeOverModal(true)
-            documentLockStateRef.current.hasShownLockedModal = true
-          }
-
-          documentLockStateRef.current = {
-            hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
-            isLocked: true,
-            user: lockedState.user,
-          }
-          setCurrentEditor(lockedState.user as User)
-        }
-
-        // Update lastUpdateTime when lock state changes
-        if (lockedState.lastEditedAt) {
-          setLastUpdateTime(new Date(lockedState.lastEditedAt).getTime())
-        }
-      }
-    },
-    [documentLockStateRef, setCurrentEditor, setDocumentIsLocked, setLastUpdateTime, user?.id],
-  )
+    if (
+      isLockingEnabled &&
+      previousEditorID === user?.id &&
+      currentEditorID &&
+      currentEditorID !== user?.id &&
+      documentLockStateRef.current
+    ) {
+      setShowTakeOverModal(true)
+      documentLockStateRef.current.hasShownLockedModal = true
+    }
+  }, [currentEditorID, documentLockStateRef, isLockingEnabled, user?.id])
 
   const handleStaleDataReload = useCallback(() => {
     // Reset modal state so it can appear again if needed
-    setShowStaleDataModal(false)
+    setIsStale(false)
 
     // Refresh to get the latest data
     router.refresh()
-  }, [router])
+  }, [router, setIsStale])
 
   const handlePrevent = useCallback((nextHref: null | string) => {
     nextHrefRef.current = nextHref
@@ -315,11 +290,6 @@ export function DefaultEditView({
       }
 
       setLastUpdateTime(new Date(updatedAt).getTime())
-
-      // Update stale data check refs after successful save
-      // This allows detecting if another user modifies the document after this save
-      originalUpdatedAtRef.current = updatedAt
-      hasCheckedForStaleDataRef.current = false
 
       if (context?.incrementVersionCount !== false) {
         incrementVersionCount()
@@ -418,103 +388,9 @@ export function DefaultEditView({
     ],
   )
 
-  const formStateRequest = useMemo<FormStateRequest>(
-    () => ({
-      args: ({ savedDocument }) => {
-        const isAfterSave = Boolean(savedDocument)
-
-        // Sync originalUpdatedAt with current data if it's NEWER (e.g., after router.refresh())
-        if (data?.updatedAt && data.updatedAt > originalUpdatedAtRef.current) {
-          originalUpdatedAtRef.current = data.updatedAt
-          // Reset check flag so we can detect new stale data
-          hasCheckedForStaleDataRef.current = false
-        }
-
-        const currentTime = Date.now()
-        const timeSinceLastUpdate = currentTime - editSessionStartTime
-
-        const updateLastEdited = isLockingEnabled && !isAfterSave && timeSinceLastUpdate >= 10000 // 10 seconds
-
-        if (updateLastEdited) {
-          setEditSessionStartTime(currentTime)
-        }
-
-        // Check for stale data on first edit only
-        // Skip this check entirely for autosave-enabled collections/globals to prevent
-        // false positives from the user's own autosaves
-        const checkForStaleData =
-          !isAfterSave &&
-          !hasCheckedForStaleDataRef.current &&
-          originalUpdatedAtRef.current &&
-          operation === 'update' &&
-          !isTrashed &&
-          !autosaveEnabled
-
-        if (checkForStaleData) {
-          hasCheckedForStaleDataRef.current = true
-        }
-
-        return {
-          checkForStaleData,
-          operation,
-          originalUpdatedAt: checkForStaleData ? originalUpdatedAtRef.current : undefined,
-          readOnly: isTrashed || isReadOnlyForIncomingUser,
-          returnLivePreviewURL:
-            isAfterSave && isLivePreviewEnabled && typeofLivePreviewURL === 'function',
-          returnLockStatus: isLockingEnabled && !isAfterSave,
-          returnPreviewURL: isAfterSave && isPreviewEnabled,
-          schemaPath: schemaPathSegments.join('.'),
-          updateLastEdited,
-        }
-      },
-      onResponse: (
-        { livePreviewURL, lockedState, previewURL, staleDataState, state },
-        { overlappedSubmit, savedDocument },
-      ) => {
-        if (savedDocument) {
-          // Clear the file field so the uploaded File object doesn't persist in form state after save
-          if (upload) {
-            delete state.file
-          }
-
-          if (isLivePreviewEnabled && typeofLivePreviewURL === 'function') {
-            setLivePreviewURL(livePreviewURL)
-          }
-
-          if (isPreviewEnabled) {
-            setPreviewURL(previewURL)
-          }
-
-          return
-        }
-
-        if (isLockingEnabled) {
-          handleDocumentLocking(lockedState)
-        }
-
-        // A save that overlapped this request makes the newer updatedAt our OWN, not stale data.
-        if (staleDataState?.isStale && !overlappedSubmit) {
-          setShowStaleDataModal(true)
-        }
-      },
-    }),
-    [
-      data?.updatedAt,
-      editSessionStartTime,
-      isLockingEnabled,
-      operation,
-      schemaPathSegments,
-      handleDocumentLocking,
-      autosaveEnabled,
-      isTrashed,
-      isReadOnlyForIncomingUser,
-      isLivePreviewEnabled,
-      typeofLivePreviewURL,
-      isPreviewEnabled,
-      upload,
-      setLivePreviewURL,
-      setPreviewURL,
-    ],
+  const formStateArgs = useMemo<FormStateArgs>(
+    () => ({ readOnly: isTrashed || isReadOnlyForIncomingUser }),
+    [isTrashed, isReadOnlyForIncomingUser],
   )
 
   // Clean up when the component unmounts or when the document is unlocked
@@ -646,7 +522,7 @@ export function DefaultEditView({
           disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission || isTrashed}
           disableSuccessStatus={!isEditing && depth < 2 && redirectAfterCreate !== false}
           disableValidationOnSubmit={!validateBeforeSubmit}
-          formStateRequest={formStateRequest}
+          formStateArgs={formStateArgs}
           initialState={!isInitializing && initialState}
           isDocumentForm={true}
           isInitializing={isInitializing}
@@ -704,9 +580,7 @@ export function DefaultEditView({
               }}
             />
           )}
-          {showStaleDataModal && (
-            <DocumentStaleData isActive={showStaleDataModal} onReload={handleStaleDataReload} />
-          )}
+          {isStale && <DocumentStaleData isActive={isStale} onReload={handleStaleDataReload} />}
           {preventLeaveWithoutSaving && (
             <LeaveWithoutSaving
               modalSlug={drawerSlug ? `leave-without-saving-${drawerSlug}` : undefined}

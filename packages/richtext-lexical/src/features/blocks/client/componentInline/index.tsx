@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormStateRequest } from '@payloadcms/ui'
+import type { FormStateArgs } from '@payloadcms/ui'
 import type { BlocksFieldClient, ClientBlock, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -333,8 +333,8 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     [parentDocumentFields, isEditable, schemaFieldsPath],
   )
 
-  const formStateRequest = useMemo<FormStateRequest>(
-    () => ({ args: ({ formState }) => getRequestArgs(formState) }),
+  const formStateArgs = useCallback(
+    ({ formState }: { formState: FormState }): FormStateArgs => getRequestArgs(formState),
     [getRequestArgs],
   )
 
@@ -522,7 +522,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       disableValidationOnSubmit
       el="div"
       fields={clientBlock?.fields}
-      formStateRequest={formStateRequest}
+      formStateArgs={formStateArgs}
       initialState={initialState || {}}
       onSubmit={(formState) => {
         onFormSubmit(formState)

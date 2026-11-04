@@ -13,7 +13,7 @@ import {
 import * as qs from 'qs-esm'
 import React, { useCallback, useMemo, useState } from 'react'
 
-import type { FormStateRequest } from '../../forms/Form/types.js'
+import type { FormStateArgs } from '../../forms/Form/types.js'
 import type { OnFieldSelect } from '../FieldSelect/index.js'
 import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
 import type { EditManyProps } from './index.js'
@@ -198,16 +198,14 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     )
   }, [selectedFields])
 
-  const formStateRequest = useMemo<FormStateRequest>(
+  const formStateArgs = useMemo<FormStateArgs>(
     () => ({
-      args: {
-        collectionSlug: collection.slug,
-        docPermissions: collectionPermissions,
-        docPreferences: null,
-        operation: 'update',
-        schemaPath: collection.slug,
-        select,
-      },
+      collectionSlug: collection.slug,
+      docPermissions: collectionPermissions,
+      docPreferences: null,
+      operation: 'update',
+      schemaPath: collection.slug,
+      select,
     }),
     [collection.slug, collectionPermissions, select],
   )
@@ -327,7 +325,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
       <OperationContext value="update">
         <Form
           className={`${baseClass}__form`}
-          formStateRequest={formStateRequest}
+          formStateArgs={formStateArgs}
           isInitializing={isInitializing}
           onSuccess={onSuccess}
         >

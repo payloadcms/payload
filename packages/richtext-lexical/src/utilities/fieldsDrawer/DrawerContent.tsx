@@ -1,5 +1,5 @@
 'use client'
-import type { FormStateRequest } from '@payloadcms/ui'
+import type { FormStateArgs } from '@payloadcms/ui'
 import type { FormState } from 'payload'
 
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
@@ -12,7 +12,7 @@ import {
   useServerFunctions,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { FieldsDrawerProps } from './Drawer.js'
@@ -99,19 +99,17 @@ export const DrawerContent: React.FC<
     getDocPreferences,
   ])
 
-  const formStateRequest = useMemo<FormStateRequest>(
-    () => ({
-      args: ({ formState }) => ({
-        docPermissions: {
-          fields: true,
-        },
-        documentFormState: parentDocumentFields,
-        initialBlockFormState: formState,
-        operation: 'update',
-        readOnly: !isEditable,
-        schemaPath: schemaFieldsPath,
-        skipValidation: false,
-      }),
+  const formStateArgs = useCallback(
+    ({ formState }: { formState: FormState }): FormStateArgs => ({
+      docPermissions: {
+        fields: true,
+      },
+      documentFormState: parentDocumentFields,
+      initialBlockFormState: formState,
+      operation: 'update',
+      readOnly: !isEditable,
+      schemaPath: schemaFieldsPath,
+      skipValidation: false,
     }),
     [isEditable, parentDocumentFields, schemaFieldsPath],
   )
@@ -176,7 +174,7 @@ export const DrawerContent: React.FC<
       className="fields-drawer"
       disableValidationOnSubmit
       fields={Array.isArray(fields) ? fields : []}
-      formStateRequest={formStateRequest}
+      formStateArgs={formStateArgs}
       initialState={initialState}
       onSubmit={handleDrawerSubmit}
       uuid={uuid()}

@@ -889,9 +889,9 @@ Run `npx @payloadcms/codemod --transform migrate-document-title-context` to migr
 
 ### `Form` makes its own form-state requests
 
-`Form` now requests server form state itself, after field changes and after every successful submission. A new `formStateRequest` prop shapes that request, and the `onChange` and `onSuccess` callbacks are side effects only: the `Form` no longer merges the state they return.
+`Form` now requests server form state itself, after field changes and after every successful submission. A new `formStateArgs` prop opts a form in and passes the args the `Form` can't derive, and the `onChange` and `onSuccess` callbacks are side effects only: the `Form` no longer merges the state they return.
 
-This affects custom forms that pass `onChange` to fetch form state, or that return form state from `onSuccess`. Move the request args to `formStateRequest.args`, and any handling of the response to `formStateRequest.onResponse`:
+This affects custom forms that pass `onChange` to fetch form state, or that return form state from `onSuccess`. Pass the request args to `formStateArgs` instead:
 
 ```diff
 'use client'
@@ -911,20 +911,17 @@ import { Form } from '@payloadcms/ui'
 -
 -  return state
 -}
-+const formStateRequest = useMemo(
-+  () => ({ args: { collectionSlug, docPermissions, operation: 'update', schemaPath } }),
-+  [collectionSlug, docPermissions, schemaPath],
-+)
++const formStateArgs = useMemo(() => ({ schemaPath }), [schemaPath])
 
 -<Form onChange={[onChange]}>
-+<Form formStateRequest={formStateRequest}>
++<Form formStateArgs={formStateArgs}>
 ```
 
-`Form` fills in the rest: the document's `id`, `collectionSlug`, `globalSlug`, `docPermissions` and preferences, the operation, the current `formState`, `skipValidation: !submitted`, and an abort signal. Pass `args` as a function to compute args per request; it receives the `formState` being sent and, after a successful submission, the `savedDocument`.
+`Form` fills in the rest from the surrounding document and operation: `id`, `collectionSlug`, `globalSlug`, `docPermissions` and preferences, the operation, the current `formState`, `skipValidation: !submitted`, and an abort signal. Pass `formStateArgs` as a function to compute args from the `formState` being sent. A document's main form (`isDocumentForm`) also handles document locking, stale-data detection and preview URLs itself.
 
 BREAKING CHANGES:
 
-- The return value of `onChange` is ignored. `onChange` still runs at the same moments, debounced after field changes, so callbacks that only perform side effects keep working.
+- The return value of `onChange` is ignored. `onChange` now runs once the server form state for a change has been applied, so it receives the merged state.
 - The return value of `onSuccess` is ignored. After a successful submission, `Form` requests fresh form state with the saved document as `data`, except after a create, where the form is replaced.
 
 ### Locale hooks can now return null

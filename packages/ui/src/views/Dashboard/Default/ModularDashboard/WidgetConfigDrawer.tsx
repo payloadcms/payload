@@ -5,7 +5,7 @@ import type { ClientWidget, FormState } from 'payload'
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
-import type { FormStateRequest } from '../../../../forms/Form/types.js'
+import type { FormStateArgs } from '../../../../forms/Form/types.js'
 
 import { Drawer } from '../../../../elements/Drawer/index.js'
 import { Gutter } from '../../../../elements/Gutter/index.js'
@@ -91,18 +91,16 @@ export function WidgetConfigDrawer({
     }
   }, [fields, getFormState, isOpen, localeCode, widget.slug, widgetData])
 
-  const formStateRequest = useMemo<FormStateRequest>(
+  const formStateArgs = useMemo<FormStateArgs>(
     () => ({
-      args: {
-        docPermissions: {
-          fields: true,
-        },
-        docPreferences: EMPTY_WIDGET_PREFERENCES,
-        operation: 'update',
-        schemaPath: widget.slug,
-        skipValidation: false,
-        widgetSlug: widget.slug,
+      docPermissions: {
+        fields: true,
       },
+      docPreferences: EMPTY_WIDGET_PREFERENCES,
+      operation: 'update',
+      schemaPath: widget.slug,
+      skipValidation: false,
+      widgetSlug: widget.slug,
     }),
     [widget.slug],
   )
@@ -116,7 +114,7 @@ export function WidgetConfigDrawer({
           <OperationProvider operation="update">
             <Form
               fields={fields}
-              formStateRequest={formStateRequest}
+              formStateArgs={formStateArgs}
               initialState={initialState}
               onSubmit={(_, data) => {
                 onSave(mergeLocaleData(widgetData ?? {}, data, localeCode, fields))

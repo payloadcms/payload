@@ -9,7 +9,7 @@ import type {
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import type { FormStateRequest } from '../../forms/Form/types.js'
+import type { FormStateArgs } from '../../forms/Form/types.js'
 import type { UserWithToken } from '../../providers/Auth/index.js'
 
 import { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
@@ -43,15 +43,13 @@ export const CreateFirstUserClient: React.FC<{
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
 
-  const formStateRequest = React.useMemo<FormStateRequest>(
+  const formStateArgs = React.useMemo<FormStateArgs>(
     () => ({
-      args: {
-        collectionSlug: userSlug,
-        docPermissions,
-        docPreferences,
-        operation: 'create',
-        schemaPath: userSlug,
-      },
+      collectionSlug: userSlug,
+      docPermissions,
+      docPreferences,
+      operation: 'create',
+      schemaPath: userSlug,
     }),
     [userSlug, docPermissions, docPreferences],
   )
@@ -67,7 +65,7 @@ export const CreateFirstUserClient: React.FC<{
         path: `/${userSlug}/first-register`,
       })}
       className={baseClass}
-      formStateRequest={formStateRequest}
+      formStateArgs={formStateArgs}
       initialState={{
         ...initialState,
         'confirm-password': {

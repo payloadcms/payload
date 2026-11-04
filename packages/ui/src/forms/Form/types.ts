@@ -11,7 +11,6 @@ import type React from 'react'
 import type { Dispatch } from 'react'
 
 import type { ServerFunctionsContextType } from '../../providers/ServerFunctions/index.js'
-import type { BuildFormStateSuccessResult } from '../../utilities/buildFormState.js'
 import type { AcceptValues } from './mergeServerFormState.js'
 
 export type Preferences = {
@@ -33,51 +32,12 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
 ) => Promise<void> | void
 
 /**
- * Args for the form's `getFormState` request, merged over the Form's defaults.
+ * Args for the Form's `getFormState` requests, merged over the defaults the Form derives from the document, operation and current form state.
  * `formState` and `signal` are always provided by the Form.
  */
-export type FormStateRequestArgs = Partial<
+export type FormStateArgs = Partial<
   Omit<Parameters<ServerFunctionsContextType['getFormState']>[0], 'formState' | 'signal'>
 >
-
-export type FormStateRequestContext = {
-  /** The form state sent with this request. */
-  formState: FormState
-  /**
-   * The saved document.
-   * Only set on the request the Form makes after a successful submission.
-   * That request is skipped after a create, since the form is replaced.
-   */
-  savedDocument?: Data
-  /** The form's submitted state. Drives the default `skipValidation`. */
-  submitted: boolean
-}
-
-export type FormStateResponseContext = {
-  /**
-   * `true` if a submission was running when this request started, or started while it was in flight.
-   */
-  overlappedSubmit: boolean
-} & FormStateRequestContext
-
-/**
- * Shapes the form-state requests the Form makes after field changes and after every successful submission.
- */
-export type FormStateRequest = {
-  /**
-   * Args merged over the Form's defaults.
-   * The function form runs once per request, for args that change between requests.
-   */
-  args?: ((ctx: FormStateRequestContext) => FormStateRequestArgs) | FormStateRequestArgs
-  /**
-   * Runs with the full response before it is merged.
-   * Return a `FormState` to merge that instead of `response.state`.
-   */
-  onResponse?: (
-    response: BuildFormStateSuccessResult,
-    ctx: FormStateResponseContext,
-  ) => FormState | void
-}
 
 export type FormProps = {
   beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
@@ -101,10 +61,11 @@ export type FormProps = {
    */
   fields?: ClientField[]
   /**
-   * Shapes the form-state requests the Form makes.
-   * Without it, the Form makes no form-state requests.
+   * Args for the form-state requests the Form makes after field changes and after every successful submission.
+   * Pass a function to compute args from the form state being sent.
+   * The Form makes form-state requests only when this is set or `isDocumentForm` is true.
    */
-  formStateRequest?: FormStateRequest
+  formStateArgs?: ((args: { formState: FormState }) => FormStateArgs) | FormStateArgs
   handleResponse?: (
     res: Response,
     successToast: (value: string) => void,
@@ -121,8 +82,8 @@ export type FormProps = {
   isInitializing?: boolean
   log?: boolean
   /**
-   * Called after field changes, debounced, while the form is modified.
-   * Side effects only: the return value is ignored. Use `formStateRequest` to fetch server form state.
+   * Called after field changes, once the server form state for them is applied.
+   * Side effects only: the return value is ignored.
    */
   onChange?: ((args: { formState: FormState; submitted: boolean }) => Promise<void> | void)[]
   onSubmit?: (fields: FormState, data: Data) => void

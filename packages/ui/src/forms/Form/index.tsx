@@ -108,11 +108,17 @@ export const Form: React.FC<FormProps> = (props) => {
   const submittedRef = useRef(false)
   const submissionActivityRef = useRef<SubmissionActivity>({ running: 0, started: 0 })
 
+  const hasPendingOnChangeRef = useRef(false)
+  const makesFormStateRequests = Boolean(isDocumentForm || props.formStateArgs)
+
   const { fetchFormState, requestFormState } = useFormStateRequest({
     contextRef,
     dispatchFields,
-    formStateRequest: props.formStateRequest,
+    onApplied: () => {
+      hasPendingOnChangeRef.current = true
+    },
     prevFormStateRef: prevFormState,
+    props,
     queueTask,
     submissionActivityRef,
     submittedRef,
@@ -487,11 +493,22 @@ export const Form: React.FC<FormProps> = (props) => {
     }
   })
 
+  // onChange runs once the server state for a change is applied, which lands in the render after the merge.
+  useEffect(() => {
+    if (hasPendingOnChangeRef.current) {
+      hasPendingOnChangeRef.current = false
+      notifyOnChange()
+    }
+  }, [formState])
+
   useDebouncedEffect(
     () => {
       if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
-        requestFormState()
-        notifyOnChange()
+        if (makesFormStateRequests) {
+          requestFormState()
+        } else {
+          notifyOnChange()
+        }
       }
 
       prevFormState.current = formState

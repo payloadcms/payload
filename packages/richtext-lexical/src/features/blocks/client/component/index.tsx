@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormStateRequest } from '@payloadcms/ui'
+import type { FormProps, FormStateArgs } from '@payloadcms/ui'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
@@ -392,12 +392,15 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     [blockType, editor, nodeKey],
   )
 
-  const formStateRequest = useMemo<FormStateRequest>(
-    () => ({
-      args: ({ formState }) => getRequestArgs(formState),
-      onResponse: ({ state }, { formState }) => applyServerState(state, formState),
-    }),
-    [getRequestArgs, applyServerState],
+  const formStateArgs = useCallback(
+    ({ formState }: { formState: FormState }): FormStateArgs => getRequestArgs(formState),
+    [getRequestArgs],
+  )
+
+  // Write the applied form state back to the Lexical node.
+  const onChange = useMemo<FormProps['onChange']>(
+    () => [({ formState }) => applyServerState(formState, formState)],
+    [applyServerState],
   )
 
   // Only called when the form is submitted from the drawer, usually only the case if the block has a custom Block component.
@@ -837,8 +840,9 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           beforeSubmit={[onBeforeSubmit]}
           el="div"
           fields={clientBlock?.fields ?? []}
-          formStateRequest={formStateRequest}
+          formStateArgs={formStateArgs}
           initialState={initialState}
+          onChange={onChange}
           onSubmit={(formState) => {
             // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
             const newData = reduceFormStateToBlockData(
@@ -895,8 +899,9 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     formUuid,
     initialState,
     nodeKey,
-    formStateRequest,
+    formStateArgs,
     onBeforeSubmit,
+    onChange,
     submitted,
   ])
 

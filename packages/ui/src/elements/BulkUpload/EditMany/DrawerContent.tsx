@@ -8,7 +8,7 @@ import { unflatten } from 'payload/shared'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import type { FormProps } from '../../../forms/Form/index.js'
-import type { FormStateRequest } from '../../../forms/Form/types.js'
+import type { FormStateArgs } from '../../../forms/Form/types.js'
 import type { OnFieldSelect } from '../../FieldSelect/index.js'
 import type { FieldOption } from '../../FieldSelect/reduceFieldOptions.js'
 import type { State } from '../FormsManager/reducer.js'
@@ -62,16 +62,14 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     )
   }, [selectedFields])
 
-  const formStateRequest = useMemo<FormStateRequest>(
+  const formStateArgs = useMemo<FormStateArgs>(
     () => ({
-      args: {
-        collectionSlug: collection.slug,
-        docPermissions: collectionPermissions,
-        docPreferences: null,
-        operation: 'update',
-        schemaPath: collection.slug,
-        select,
-      },
+      collectionSlug: collection.slug,
+      docPermissions: collectionPermissions,
+      docPreferences: null,
+      operation: 'update',
+      schemaPath: collection.slug,
+      select,
     }),
     [collection.slug, collectionPermissions, select],
   )
@@ -142,7 +140,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     >
       <Form
         className={`${baseClass}__form`}
-        formStateRequest={formStateRequest}
+        formStateArgs={formStateArgs}
         isInitializing={isInitializing}
         onSubmit={handleSubmit}
       >
