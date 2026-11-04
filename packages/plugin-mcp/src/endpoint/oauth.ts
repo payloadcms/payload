@@ -7,6 +7,7 @@ import {
   OAuthErrorCode,
 } from '@modelcontextprotocol/server'
 import { createPayloadRequest, getPayload } from 'payload'
+import { formatAdminURL, stripTrailingSlash } from 'payload/shared'
 
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 
@@ -67,7 +68,14 @@ export const getMCPResource = ({ req }: { req: PayloadRequest }): string => {
     return resource({ req })
   }
 
-  return resource ?? new URL(`${config.routes.api}/mcp`, config.serverURL || req.url).href
+  if (resource) {
+    return resource
+  }
+
+  // Without the slash Next.js's `trailingSlash` would add, since the metadata link appends to it
+  const path = stripTrailingSlash(formatAdminURL({ apiRoute: config.routes.api, path: '/mcp' }))
+
+  return new URL(path, config.serverURL || req.url).href
 }
 
 const getMetadataResponse = async ({ req }: { req: PayloadRequest }): Promise<Response> => {

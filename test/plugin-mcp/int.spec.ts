@@ -1,6 +1,7 @@
 import type { Client, JsonSchemaType } from '@modelcontextprotocol/client'
 import type { Payload, PayloadRequest, UploadInstructions } from 'payload'
 
+import { oauthProtectedResourceHandler } from '@payloadcms/plugin-mcp'
 import { readFile } from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -399,6 +400,22 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           })
           .then((res) => res.json())
         expect((await postWithAuthorization(`Bearer ${token}`)).status).toBe(200)
+      })
+      it('should include the base path in the MCP address', async ({ payload, restClient }) => {
+        enableOAuth(payload)
+        // An app served under a Next.js base path
+        vi.stubEnv('NEXT_BASE_PATH', '/cms')
+        onTestFinished(() => {
+          vi.unstubAllEnvs()
+        })
+
+        const response = await oauthProtectedResourceHandler({ config: payload.config })(
+          new Request(`${restClient.serverURL}/.well-known/oauth-protected-resource/cms/api/mcp`),
+        )
+
+        await expect(response.json()).resolves.toMatchObject({
+          resource: `${restClient.serverURL}/cms/api/mcp`,
+        })
       })
       it('should serve authorization servers returned by a function of the request', async ({
         payload,
