@@ -122,6 +122,43 @@ describe('Date', () => {
     }).toPass()
   })
 
+  test('should preserve a filtered calendar day across browser timezones', async ({ browser }) => {
+    for (const timezoneId of ['America/Los_Angeles', 'Pacific/Auckland']) {
+      const context = await browser.newContext({ timezoneId })
+      const timezonePage = await context.newPage()
+
+      initPageConsoleErrorCatch(timezonePage)
+      await ensureCompilationIsDone({ page: timezonePage, serverURL })
+
+      try {
+        await goToListView(timezonePage)
+        const { condition } = await addListFilter({
+          fieldLabel: 'Default With Timezone',
+          operatorLabel: 'equals',
+          page: timezonePage,
+        })
+        const dateInput = condition.locator(
+          '.condition-value-date .date-time-picker__input-wrapper input',
+        )
+        const expectedDate = await timezonePage.evaluate(() => {
+          const date = new Date()
+
+          return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-15`
+        })
+
+        await dateInput.click()
+        await timezonePage
+          .locator('.react-datepicker__day--015:not(.react-datepicker__day--outside-month)')
+          .click()
+        await expect
+          .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+          .toContain(`[equals]=${expectedDate}`)
+      } finally {
+        await context.close()
+      }
+    }
+  })
+
   test('should display formatted date in useAsTitle', async () => {
     await goToListView(page)
     // Wait for hydration

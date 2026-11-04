@@ -1,4 +1,4 @@
-import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
+import { getDateOnlyComparison } from './getDateOnlyComparison.js'
 
 const isoDatePattern = /^\d{4}-\d{2}-\d{2}/
 
@@ -10,19 +10,21 @@ export const getDateOnlyBounds = ({
   timezone: string
 }): { startOfDay: Date; startOfNextDay: Date } => {
   const calendarDate =
-    typeof date === 'string'
-      ? isoDatePattern.test(date)
-        ? date
-        : new Date(date).toISOString()
-      : date.toISOString()
-  const year = Number(calendarDate.slice(0, 4))
-  const month = Number(calendarDate.slice(5, 7)) - 1
-  const day = Number(calendarDate.slice(8, 10))
-  const getBoundary = (dayOffset: number) =>
-    new Date(TZDate.tz(timezone, year, month, day + dayOffset).getTime())
+    typeof date === 'string' && isoDatePattern.test(date)
+      ? date.slice(0, 10)
+      : new Date(date).toISOString().slice(0, 10)
+  const comparison = getDateOnlyComparison({
+    date: calendarDate,
+    operator: 'equals',
+    timezone,
+  })
+
+  if (!comparison) {
+    throw new Error(`Could not resolve date-only bounds for ${calendarDate}.`)
+  }
 
   return {
-    startOfDay: getBoundary(0),
-    startOfNextDay: getBoundary(1),
+    startOfDay: comparison.constraints[0]!.value,
+    startOfNextDay: comparison.constraints[1]!.value,
   }
 }

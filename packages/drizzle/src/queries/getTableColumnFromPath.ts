@@ -1,8 +1,9 @@
-import type { SQL, Table } from 'drizzle-orm'
+import type { SQL } from 'drizzle-orm'
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
 import type { FlattenedField, NumberField, RelationshipField, TextField } from 'payload'
+import type { ResolvedDateFilterTarget } from 'payload/shared'
 
-import { and, eq, getTableName, like, or, sql } from 'drizzle-orm'
+import { and, eq, getTableName, like, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
 import { APIError, getFieldByPath } from 'payload'
 import { fieldShouldBeLocalized, tabHasName } from 'payload/shared'
@@ -62,6 +63,7 @@ type Args = {
    * If creating a new table name for arrays and blocks, this suffix should be appended to the table name
    */
   tableNameSuffix?: string
+  target?: ResolvedDateFilterTarget
   /**
    * The raw value of the query before sanitization
    */
@@ -90,6 +92,7 @@ export const getTableColumnFromPath = ({
   selectLocale,
   tableName,
   tableNameSuffix = '',
+  target,
   value,
 }: Args): TableColumn => {
   const fieldPath = incomingSegments[0]
@@ -116,8 +119,15 @@ export const getTableColumnFromPath = ({
   let localizedPathQuery = false
   if (field) {
     const pathSegments = [...incomingSegments]
+    const targetSegmentIndex = target ? target.lineage.length - pathSegments.length : -1
+    const targetSegment = target?.lineage[targetSegmentIndex]
 
     const isFieldLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
+
+    if (targetSegment?.locale) {
+      locale = targetSegment.locale
+      localizedPathQuery = true
+    }
 
     // If next segment is a locale,
     // we need to take it out and use it as the locale from this point on
@@ -182,6 +192,7 @@ export const getTableColumnFromPath = ({
           selectFields,
           selectLocale,
           tableName: newTableName,
+          target,
           value,
         })
       }
@@ -228,7 +239,15 @@ export const getTableColumnFromPath = ({
           }
         }
 
-        const hasBlockField = (field.blockReferences ?? field.blocks).some((_block) => {
+        const targetBlockSlug = targetSegment?.blockSlug
+        const blocks = targetBlockSlug
+          ? (field.blockReferences ?? field.blocks).filter((_block) =>
+              typeof _block === 'string'
+                ? _block === targetBlockSlug
+                : _block.slug === targetBlockSlug,
+            )
+          : (field.blockReferences ?? field.blocks)
+        const hasBlockField = blocks.some((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
 
           newTableName = resolveBlockTableName(
@@ -287,6 +306,7 @@ export const getTableColumnFromPath = ({
               selectFields: blockSelectFields,
               selectLocale,
               tableName: newTableName,
+              target,
               value,
             })
           } catch (_) {
@@ -355,6 +375,7 @@ export const getTableColumnFromPath = ({
           selectLocale,
           tableName: newTableName,
           tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
+          target,
           value,
         })
       }
@@ -472,6 +493,7 @@ export const getTableColumnFromPath = ({
             selectFields,
             selectLocale,
             tableName: relationshipTableName,
+            target,
             value,
           })
         }
@@ -561,6 +583,7 @@ export const getTableColumnFromPath = ({
           pathSegments: pathSegments.slice(1),
           selectFields,
           tableName: newTableName,
+          target,
           value,
         })
 
@@ -854,6 +877,7 @@ export const getTableColumnFromPath = ({
             selectFields,
             selectLocale,
             tableName: newTableName,
+            target,
             value,
           })
         } else if (
@@ -918,6 +942,7 @@ export const getTableColumnFromPath = ({
             pathSegments: pathSegments.slice(1),
             selectFields,
             tableName: newTableName,
+            target,
             value,
           })
         }
@@ -984,6 +1009,7 @@ export const getTableColumnFromPath = ({
             selectLocale,
             tableName: newTableName,
             tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
+            target,
             value,
           })
         }
@@ -1004,6 +1030,7 @@ export const getTableColumnFromPath = ({
           selectLocale,
           tableName: newTableName,
           tableNameSuffix,
+          target,
           value,
         })
       }

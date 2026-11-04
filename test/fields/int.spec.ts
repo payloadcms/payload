@@ -5150,6 +5150,76 @@ describe('Fields', () => {
   })
 
   describe('date fields with timezones', () => {
+    const createdDateIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdDateIDs) {
+        await payload.delete({ collection: dateFieldsSlug, id })
+      }
+      createdDateIDs.length = 0
+    })
+
+    it('should apply calendar-day operators in the configured timezone', async () => {
+      const dates = [
+        '2026-06-14T22:59:59.999Z',
+        '2026-06-14T23:00:00.000Z',
+        '2026-06-15T12:00:00.000Z',
+        '2026-06-15T23:00:00.000Z',
+      ]
+      const documents = await Promise.all(
+        dates.map((dateOnlyWithTimezone) =>
+          payload.create({
+            collection: dateFieldsSlug,
+            data: {
+              ...dateDoc,
+              array: [{ date: dateOnlyWithTimezone }],
+              dateOnlyWithTimezone,
+            },
+          }),
+        ),
+      )
+
+      createdDateIDs.push(...documents.map(({ id }) => id))
+
+      const expectedIndexes = {
+        equals: [1, 2],
+        greater_than: [3],
+        greater_than_equal: [1, 2, 3],
+        less_than: [0],
+        less_than_equal: [0, 1, 2],
+        not_equals: [0, 3],
+      } as const
+
+      for (const [operator, indexes] of Object.entries(expectedIndexes)) {
+        const result = await payload.find({
+          collection: dateFieldsSlug,
+          where: { dateOnlyWithTimezone: { [operator]: '2026-06-15' } },
+        })
+        const matchingIDs = result.docs.map(({ id }) => id)
+
+        expect(matchingIDs).toEqual(
+          expect.arrayContaining(indexes.map((index) => documents[index].id)),
+        )
+        expect(matchingIDs.filter((id) => createdDateIDs.includes(id))).toHaveLength(indexes.length)
+      }
+
+      const exactTimestamp = await payload.find({
+        collection: dateFieldsSlug,
+        where: { dateOnlyWithTimezone: { equals: '2026-06-15T12:00:00.000Z' } },
+      })
+
+      expect(exactTimestamp.docs.map(({ id }) => id)).toContain(documents[2].id)
+      expect(exactTimestamp.docs.map(({ id }) => id)).not.toContain(documents[1].id)
+
+      const repeatedDate = await payload.find({
+        collection: dateFieldsSlug,
+        where: { 'array.date': { equals: '2026-06-15' } },
+      })
+
+      expect(repeatedDate.docs.map(({ id }) => id)).toContain(documents[2].id)
+      expect(repeatedDate.docs.map(({ id }) => id)).not.toContain(documents[1].id)
+    })
+
     it('should create document with UTC offset timezone', async () => {
       const doc = await payload.create({
         collection: dateFieldsSlug,

@@ -688,6 +688,16 @@ export interface Alias {
  */
 export interface BlocksDoc {
   id: string;
+  dateBlocksGroup?: {
+    content?:
+      | {
+          date?: string | null;
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'groupedDate';
+        }[]
+      | null;
+  };
   testBlocksLocalized?:
     | {
         text?: string | null;
@@ -1395,6 +1405,21 @@ export interface AliasesSelect<T extends boolean = true> {
  * via the `definition` "blocks-docs_select".
  */
 export interface BlocksDocsSelect<T extends boolean = true> {
+  dateBlocksGroup?:
+    | T
+    | {
+        content?:
+          | T
+          | {
+              groupedDate?:
+                | T
+                | {
+                    date?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+      };
   testBlocksLocalized?:
     | T
     | {

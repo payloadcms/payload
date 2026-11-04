@@ -4,7 +4,7 @@ import type { FlattenedField, Operator, Sort, Where } from 'payload'
 import { and, getTableName, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { APIError, getFieldByPath, QueryError } from 'payload'
-import { isNestedRelationshipQuery, validOperatorSet } from 'payload/shared'
+import { isNestedRelationshipQuery, resolveDateFilterPlan, validOperatorSet } from 'payload/shared'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
@@ -14,6 +14,7 @@ import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js
 import { isValidStringID } from '../utilities/isValidStringID.js'
 import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
+import { buildDateFilterConstraint } from './buildDateFilterConstraint.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
@@ -129,6 +130,33 @@ export function parseParams({
 
               if (validOperatorSet.has(operator as Operator)) {
                 const val = where[relationOrPath][operator]
+                const normalizedPath = relationOrPath.replace(/__/g, '.')
+                const dateFilterPlan = resolveDateFilterPlan({
+                  config: adapter.payload.config,
+                  fields,
+                  locale,
+                  operator: operator as Operator,
+                  parentIsLocalized,
+                  path: normalizedPath,
+                  value: val,
+                })
+
+                if (dateFilterPlan?.input.kind === 'calendarDay') {
+                  constraints.push(
+                    buildDateFilterConstraint({
+                      adapter,
+                      aliasTable,
+                      fields,
+                      joins,
+                      parentIsLocalized,
+                      path: normalizedPath,
+                      plan: dateFilterPlan,
+                      selectLocale,
+                      tableName,
+                    }),
+                  )
+                  continue
+                }
 
                 const {
                   columnName,
@@ -147,7 +175,7 @@ export function parseParams({
                   joins,
                   locale,
                   parentIsLocalized,
-                  pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
+                  pathSegments: normalizedPath.split('.'),
                   selectFields,
                   selectLocale,
                   tableName,
