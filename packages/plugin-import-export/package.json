@@ -102,7 +102,7 @@
     "@faceless-ui/modal": "3.0.2",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "csv-parse": "5.6.0",
+    "csv-parse": "7.0.2",
     "csv-stringify": "6.5.2",
     "qs-esm": "8.0.1"
   },
