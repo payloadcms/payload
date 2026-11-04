@@ -12,6 +12,7 @@ import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
 import { isClientUploadAllowed } from './isClientUploadAllowed.js'
+import { createSegmentedUpload } from './segmentedUpload.js'
 import { uploadFile } from './uploadFile.js'
 
 interface CreateAzureAdapterArgs {
@@ -33,6 +34,8 @@ export function createAzureAdapter({
   getStorageClient,
   useCompositePrefixes = false,
 }: CreateAzureAdapterArgs): Adapter {
+  const clientUploadsAccess = typeof clientUploads === 'object' ? clientUploads.access : undefined
+
   const deleteStoredFile: DeleteFile = ({ storageFilePath }) =>
     deleteFile({ client: getStorageClient(), storageFilePath })
 
@@ -59,13 +62,20 @@ export function createAzureAdapter({
       },
       enabled: Boolean(clientUploads) && isClientUploadAllowed(collection),
       generate: generateUploadInstructions({
-        access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+        access: clientUploadsAccess,
         collectionPrefix: prefix,
         containerName,
         getStorageClient,
         useCompositePrefixes,
       }),
       requiresUploadReceipt: true,
+      segmented: createSegmentedUpload({
+        access: clientUploadsAccess,
+        collectionPrefix: prefix,
+        containerName,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
       useInAdmin: true,
     },
 
