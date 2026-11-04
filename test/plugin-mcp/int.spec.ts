@@ -4286,10 +4286,12 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
       query: string
       restClient: RESTClient
     }) =>
+      // The authorize endpoint sends the browser to the Allow page with the consent to show
       restClient
         .GET(`/mcp/oauth/authorize${query}`, { auth: false, headers })
-        .then((res) => res.text())
-        .then((page) => /name="consent" type="hidden" value="([^"]+)"/.exec(page)![1]!)
+        .then((res) =>
+          new URL(res.headers.get('Location')!, restClient.serverURL).searchParams.get('consent')!,
+        )
 
     const allow = ({
       consent,
@@ -4547,8 +4549,33 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         })
 
         expect(signInPage.headers.get('Location')).toContain('/admin/login')
-        expect((await allow({ consent, headers, restClient })).status).toBe(400)
+        expect((await allow({ consent, headers, restClient })).headers.get('Location')).toBe(
+          '/admin/mcp/authorize?error=expired',
+        )
       }
+    })
+
+    test('should refuse Allow clicks made inside a frame', async ({ payload, restClient }) => {
+      enableOAuth(payload, { type: 'builtin' })
+      const { client_id } = await register(restClient)
+      const query = `?${new URLSearchParams({
+        client_id,
+        code_challenge: 'challenge',
+        code_challenge_method: 'S256',
+        redirect_uri: redirectURI,
+        response_type: 'code',
+      })}`
+      const headers = await getBrowserHeaders(restClient)
+      const consent = await getConsent({ headers, query, restClient })
+
+      // What the browser sends when another site frames the Allow page
+      const response = await allow({
+        consent,
+        headers: { ...headers, 'Sec-Fetch-Dest': 'iframe' },
+        restClient,
+      })
+
+      expect(response.status).toBe(403)
     })
 
     test("should base the login server's issuer on oauth.resource", async ({

@@ -16,9 +16,9 @@ import { seal, unseal } from '../utils/seal.js'
 import { getMCPResource } from './oauth.js'
 import { issueLoginToken, refreshLoginToken } from './oauthLoginToken.js'
 
-type Client = { name: string; redirectURIs: string[] }
+export type Client = { name: string; redirectURIs: string[] }
 
-type Consent = {
+export type Consent = {
   clientID: string
   codeChallenge: string
   collection: string
@@ -33,6 +33,12 @@ type Code = {
   redirectURI: string
   tokens: MCPOAuthTokens
 }
+
+/** Why `MCPAuthorizeView` can't show the Allow form. */
+export type AuthorizeViewError = 'expired' | 'invalid-link'
+
+/** The admin page where users allow MCP clients, `MCPAuthorizeView`. */
+export const authorizeViewPath = '/mcp/authorize'
 
 type RefreshToken = {
   clientID: string
@@ -169,11 +175,7 @@ const authorize: PayloadHandler = (req) => {
 
   // Never redirect to an address the client didn't register
   if (!client || !redirectURI || !client.redirectURIs.includes(redirectURI)) {
-    return page({
-      content: '<p>Start the sign-in again from your MCP client.</p>',
-      status: 400,
-      title: 'This sign-in link is invalid',
-    })
+    return redirectToAuthorizeView({ params: { error: 'invalid-link' }, req })
   }
 
   const state = params.get('state')
@@ -209,30 +211,26 @@ const authorize: PayloadHandler = (req) => {
     userID: user.id,
   }
 
-  return page({
-    content: `<p>It will be able to use this app's MCP tools as ${escapeHTML(String(user.email ?? user.id))}, and you will return to ${escapeHTML(new URL(redirectURI).host || redirectURI)}.</p>
-<form method="post">
-<input name="consent" type="hidden" value="${seal({ type: 'consent', data: consent, expiresIn: 20 * 60 * 60, req })}">
-<button name="decision" type="submit" value="allow">Allow</button>
-<button name="decision" type="submit" value="deny">Deny</button>
-</form>`,
-    status: 200,
-    title: `Allow ${client.name} to use your account?`,
+  return redirectToAuthorizeView({
+    params: { consent: seal({ type: 'consent', data: consent, expiresIn: 20 * 60 * 60, req }) },
+    req,
   })
 }
 
 const approve: PayloadHandler = async (req) => {
+  // The Allow page is part of the admin panel, which other sites may be able to frame. Refusing
+  // clicks inside a frame stops them from tricking users into clicking Allow.
+  if (req.headers.get('Sec-Fetch-Dest') === 'iframe') {
+    return new Response(null, { status: 403 })
+  }
+
   const form = new URLSearchParams(await req.text!())
   const consent = unseal<Consent>({ type: 'consent', req, value: form.get('consent') })
   const user = getBrowserUser(req)
 
   // The form is only valid for the user it was shown to
   if (!consent || user?.id !== consent.userID || user.collection !== consent.collection) {
-    return page({
-      content: '<p>Start the sign-in again from your MCP client.</p>',
-      status: 400,
-      title: 'This sign-in request expired',
-    })
+    return redirectToAuthorizeView({ params: { error: 'expired' }, req })
   }
 
   const { clientID, codeChallenge, redirectURI, state } = consent
@@ -359,38 +357,21 @@ const redirect = ({
   return new Response(null, { headers: { Location: location.href }, status: 302 })
 }
 
-const page = ({
-  content,
-  status,
-  title,
+/** Sends the browser to `MCPAuthorizeView`, with the Allow form or the reason it can't show it. */
+const redirectToAuthorizeView = ({
+  params,
+  req,
 }: {
-  content: string
-  status: number
-  title: string
-}): Response =>
-  new Response(
-    `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHTML(title)}</title>
-<style>
-body { font-family: system-ui, sans-serif; margin: 4rem auto; max-width: 32rem; overflow-wrap: anywhere; padding: 0 1rem }
-button { font: inherit; margin-inline-end: 0.5rem; padding: 0.5rem 1rem }
-</style>
-</head>
-<body><h1>${escapeHTML(title)}</h1>${content}</body>
-</html>`,
-    {
-      headers: {
-        // Stop other sites from framing the page to trick users into clicking Allow
-        'Content-Security-Policy': "frame-ancestors 'none'",
-        'Content-Type': 'text/html; charset=utf-8',
-      },
-      status,
-    },
-  )
+  params: { consent: string } | { error: AuthorizeViewError }
+  req: PayloadRequest
+}): Response => {
+  const viewURL = formatAdminURL({
+    adminRoute: req.payload.config.routes.admin,
+    path: authorizeViewPath,
+  })
 
-const escapeHTML = (value: string): string =>
-  value.replace(/[&<>"']/g, (character) => `&#${character.charCodeAt(0)};`)
+  return new Response(null, {
+    headers: { Location: `${viewURL}?${new URLSearchParams(params)}` },
+    status: 302,
+  })
+}

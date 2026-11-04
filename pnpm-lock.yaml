@@ -1142,6 +1142,9 @@ importers:
         specifier: 4.23.15
         version: 4.23.15
     devDependencies:
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
       payload:
         specifier: workspace:*
         version: link:../payload
