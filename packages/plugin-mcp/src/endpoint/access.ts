@@ -44,7 +44,7 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
     headers.set('DisableAutologin', 'true')
     // Not `payload.auth()`, which also computes permissions that filterMCPItems computes anyway
     const { responseHeaders, user } = await executeAuthStrategies({
-      canSetHeaders: true,
+      canSetHeaders: isHTTP,
       headers,
       payload: req.payload,
       req,
