@@ -3,6 +3,7 @@ import path from 'node:path'
 
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { StoredFileRole } from '../../uploads/fileVersioning/types.js'
+import type { FileSize } from '../../uploads/types.js'
 import type { Collection } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -27,6 +28,7 @@ import {
   getStoredFileIdentity,
   withLegacyCloudUploadFileData,
 } from '../../uploads/fileVersioning/storedFiles.js'
+import { getUnplannedSafeFileName } from '../../uploads/getSafeFilename.js'
 import { isRequestTimeFile } from '../../uploads/isRequestTimeFile.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -179,6 +181,32 @@ export const renameFileOperation = async (
     const renamedOriginal = renamed.original as { filename?: string } | undefined
     if (isRequestTimeFile({ entry: stored }) && renamedOriginal?.filename) {
       renamed.filename = renamedOriginal.filename
+    }
+
+    // A size with no stored file has no file to copy, so only its name changes.
+    const renamedVariants = (renamed.variants ?? {}) as Record<string, FileSize | null>
+    const usedNames = new Set([
+      renamed.filename,
+      renamedOriginal?.filename,
+      ...Object.values(renamedVariants).map((variant) => variant?.filename),
+    ])
+    for (const variant of Object.values(renamedVariants)) {
+      if (variant?._stored !== false || typeof variant.filename !== 'string') {
+        continue
+      }
+      const suffix = variant.filename.startsWith(mainStem)
+        ? variant.filename.slice(mainStem.length)
+        : `-${variant.filename}`
+      variant.filename = await getUnplannedSafeFileName({
+        canUseName: (name) => !usedNames.has(name),
+        collectionSlug: collection.config.slug,
+        desiredFilename: `${newStem}${suffix}`,
+        excludeDocumentID: id,
+        prefix: variant.prefix ?? undefined,
+        req,
+        staticPath: operations ? undefined : collection.config.upload.staticDir,
+      })
+      usedNames.add(variant.filename)
     }
 
     const staticDir = collection.config.upload.staticDir

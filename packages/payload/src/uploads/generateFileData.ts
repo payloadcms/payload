@@ -35,7 +35,7 @@ import { getFileByPath } from './getFileByPath.js'
 import { fetchFullClientUpload as downloadFullClientUpload } from './getFileFromUploadInstructions.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
-import { getSafeFileName, incrementName } from './getSafeFilename.js'
+import { getSafeFileName, getUnplannedSafeFileName } from './getSafeFilename.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { hasFullFileContents } from './hasFullFileContents.js'
 import { isProcessableImage } from './isProcessableImage.js'
@@ -1205,25 +1205,6 @@ function getRequestTimeDefaultFileData({
     prefix: original.prefix,
     url: null,
     width: crop?.width ?? original.width ?? null,
-  }
-}
-
-/** Finds a name that is free in storage and that `canUseName` accepts for this save. */
-async function getUnplannedSafeFileName({
-  canUseName,
-  desiredFilename,
-  ...args
-}: {
-  canUseName: (filename: string) => boolean
-} & Parameters<typeof getSafeFileName>[0]): Promise<string> {
-  let filename = desiredFilename
-
-  while (true) {
-    filename = await getSafeFileName({ ...args, desiredFilename: filename })
-    if (canUseName(filename)) {
-      return filename
-    }
-    filename = incrementName(filename)
   }
 }
 
