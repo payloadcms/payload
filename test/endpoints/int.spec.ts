@@ -173,8 +173,11 @@ test.suite('Endpoints', { config: './config.ts' }, () => {
         .then((res) => res.json())
       const headers = { Authorization: `JWT ${token}` }
 
-      const authenticated = await restClient.GET(`/${userEndpoint}`, { headers })
-      const withoutAuth = await restClient.GET(`/${userEndpoint}/without-auth`, { headers })
+      const authenticated = await restClient.GET(`/${userEndpoint}`, { auth: false, headers })
+      const withoutAuth = await restClient.GET(`/${userEndpoint}/without-auth`, {
+        auth: false,
+        headers,
+      })
 
       await expect(authenticated.json()).resolves.toEqual({ email: devUser.email })
       await expect(withoutAuth.json()).resolves.toEqual({ email: null })
