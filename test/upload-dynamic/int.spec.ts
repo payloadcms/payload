@@ -321,6 +321,18 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     expect(created.variants?.card).toMatchObject({ _stored: false, filename: 'photo-card.png' })
   })
 
+  test('should write a size entry with no stored file when an upload bridge that does not own the size runs', async ({
+    payload,
+  }) => {
+    const created = await createImage({
+      _transforms: null,
+      context: { isUploadBridgeEnabled: true },
+      payload,
+    })
+
+    expect(created.variants?.card).toMatchObject({ _stored: false, filename: 'photo-card.png' })
+  })
+
   test('should write no size entry for a size whose transformer does not build at request time', async ({
     payload,
   }) => {

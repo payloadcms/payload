@@ -334,9 +334,9 @@ const cdnTransformer: UploadTransformer = {
 }
 ```
 
-Only `sharpTransformer` stores size files. When it does not process an upload, and the owner of the sizes is one of the request-time stages that build the file in phase 1, Payload writes an entry for each declared size, with no stored file:
+Only `sharpTransformer` stores size files, and only the sizes it registered. When the owner of the sizes does not store them at upload, and the owner is one of the request-time stages that build the file in phase 1, Payload writes an entry for each declared size, with no stored file:
 
-- `filename` is the main file's name with the size name added, for example `photo-card.png`, changed when another file already uses that name. `generateImageName` is not used, because the size's dimensions are not known.
+- `filename` is the main file's name with the size name added and the original's extension, for example `photo-card.png`, changed when another file already uses that name. `generateImageName` is not used, because the size's dimensions are not known.
 - `_stored` is `false`. `width`, `height`, `filesize`, and `mimeType` are `null`.
 - The size's URL runs phase 1 from the original, also when the main file is stored. `handleRequest` gets the size's name as `variantName`.
 
