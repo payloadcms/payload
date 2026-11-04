@@ -15,6 +15,7 @@ import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
 import { arrayDefaultValue } from './collections/Array/index.js'
+import { blockFieldHookCalls } from './collections/Blocks/hookCalls.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
 import { groupDefaultChild, groupDefaultValue } from './collections/Group/index.js'
@@ -3543,6 +3544,117 @@ describe('Fields', () => {
   })
 
   describe('blocks', () => {
+    const createdBlockIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdBlockIDs) {
+        await payload.delete({ collection: blockFieldsSlug, id })
+      }
+      createdBlockIDs.length = 0
+    })
+
+    it('should keep block rows within the field configuration', async () => {
+      const doc = await payload.create({
+        collection: blockFieldsSlug,
+        data: { blocks: [{ blockType: 'content', text: 'initial' }] },
+      })
+      createdBlockIDs.push(doc.id)
+
+      await expect(
+        payload.update({
+          collection: blockFieldsSlug,
+          id: doc.id,
+          data: { blocks: [{ blockType: 'relationships' }] } as any,
+        }),
+      ).rejects.toThrow('The following field is invalid: Blocks')
+
+      const updated = await payload.findByID({ collection: blockFieldsSlug, id: doc.id })
+      expect(updated.blocks[0].blockType).toBe('content')
+    })
+
+    it('should keep referenced blocks within the field configuration', async () => {
+      const doc = await payload.create({ collection: blockFieldsSlug, data: {} })
+      createdBlockIDs.push(doc.id)
+
+      await expect(
+        payload.update({
+          collection: blockFieldsSlug,
+          id: doc.id,
+          data: { deduplicatedBlocks: [{ blockType: 'conditionalReference' }] } as any,
+        }),
+      ).rejects.toThrow('The following field is invalid: Deduplicated Blocks')
+
+      const updated = await payload.findByID({ collection: blockFieldsSlug, id: doc.id })
+      expect(updated.deduplicatedBlocks).toHaveLength(0)
+    })
+
+    it('should apply block configuration with custom validation', async () => {
+      const doc = await payload.create({ collection: blockFieldsSlug, data: {} })
+      createdBlockIDs.push(doc.id)
+
+      await expect(
+        payload.update({
+          collection: blockFieldsSlug,
+          id: doc.id,
+          data: { blocksWithCustomValidation: [{ blockType: 'relationships' }] } as any,
+        }),
+      ).rejects.toThrow('The following field is invalid: Blocks With Custom Validation')
+    })
+
+    it('should apply block configuration when a condition is false', async () => {
+      const doc = await payload.create({ collection: blockFieldsSlug, data: {} })
+      createdBlockIDs.push(doc.id)
+
+      await expect(
+        payload.update({
+          collection: blockFieldsSlug,
+          id: doc.id,
+          data: {
+            conditionalGroup: {
+              conditionalConfiguration: [{ blockType: 'ConfigBlockTest' }],
+            },
+            showConditionalFields: false,
+          } as any,
+        }),
+      ).rejects.toThrow(
+        'The following field is invalid: Conditional Group > Conditional Configuration',
+      )
+    })
+
+    it('should only run hooks for configured block types', async () => {
+      const doc = await payload.create({ collection: blockFieldsSlug, data: {} })
+      createdBlockIDs.push(doc.id)
+      blockFieldHookCalls.length = 0
+
+      await payload
+        .update({
+          collection: blockFieldsSlug,
+          id: doc.id,
+          data: {
+            configuration: [{ blockType: 'ConfigBlockTest', deduplicatedText: 'observe' }],
+          } as any,
+        })
+        .catch(() => undefined)
+
+      expect(blockFieldHookCalls).toStrictEqual([])
+    })
+
+    it('should use the inline block schema for reading', async () => {
+      const doc = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          inlineCollisionBlocks: [{ blockType: 'ConfigBlockTest', inlineText: 'read-inline' }],
+        } as any,
+      })
+      createdBlockIDs.push(doc.id)
+      blockFieldHookCalls.length = 0
+
+      const readDoc = await payload.findByID({ collection: blockFieldsSlug, id: doc.id })
+
+      expect(blockFieldHookCalls).toStrictEqual(['inlineAfterRead'])
+      expect(readDoc.inlineCollisionBlocks[0].inlineText).toBe('read-inline')
+    })
+
     it('should retrieve doc with blocks', async () => {
       const blockFields = await payload.find({
         collection: 'block-fields',
@@ -3778,6 +3890,29 @@ describe('Fields', () => {
       expect(inHitResult.id).toStrictEqual(hit.id)
       expect(equalsMissResult).toBeUndefined()
       expect(inMissResult).toBeUndefined()
+    })
+
+    it('should query block types from their configured fields', async () => {
+      const doc = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          deduplicatedBlocks: [{ blockType: 'ConfigBlockTest', deduplicatedText: 'reference' }],
+          inlineCollisionBlocks: [{ blockType: 'ConfigBlockTest', inlineText: 'inline' }],
+        } as any,
+      })
+      createdBlockIDs.push(doc.id)
+
+      const inlineResult = await payload.find({
+        collection: blockFieldsSlug,
+        where: { 'inlineCollisionBlocks.blockType': { equals: 'ConfigBlockTest' } },
+      })
+      const referenceResult = await payload.find({
+        collection: blockFieldsSlug,
+        where: { 'deduplicatedBlocks.blockType': { equals: 'ConfigBlockTest' } },
+      })
+
+      expect(inlineResult.docs.map(({ id }) => id)).toContain(doc.id)
+      expect(referenceResult.docs.map(({ id }) => id)).toContain(doc.id)
     })
 
     it('should allow localized array of blocks', async () => {
