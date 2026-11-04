@@ -150,14 +150,17 @@ export const buildDateFilterConstraint = ({
 }
 
 export const getDateOnlyJSONPaths = ({
+  pathSegments: resolvedPathSegments,
   target,
 }: {
+  pathSegments: string[]
   target: ResolvedDateFilterTarget
 }): { pathSegments: string[]; repeatedPaths: string[] } => {
   const pathSegments: string[] = []
   const repeatedPaths: string[] = []
+  const lineage = target.lineage.slice(target.lineage.length - resolvedPathSegments.length)
 
-  for (const [index, segment] of target.lineage.entries()) {
+  for (const [index, segment] of lineage.entries()) {
     pathSegments.push(segment.name)
 
     if (index > 0 && segment.locale) {
@@ -202,6 +205,7 @@ const buildDateFilterTargetConstraint = ({
     collectionPath: path,
     fields,
     joins: targetJoins,
+    locale: plan.requestLocale,
     parentIsLocalized,
     pathSegments: target.lineage.map(({ name }) => name),
     selectFields: {},
@@ -239,6 +243,7 @@ const buildDateFilterTargetConstraint = ({
     }
 
     const { pathSegments, repeatedPaths } = getDateOnlyJSONPaths({
+      pathSegments: targetPath.pathSegments ?? target.lineage.map(({ name }) => name),
       target,
     })
 
@@ -248,6 +253,7 @@ const buildDateFilterTargetConstraint = ({
         operator: comparison.operator,
         pathSegments,
         treatAsArray: repeatedPaths,
+        treatRootAsArray: true,
         value: comparison.value,
       }),
     )

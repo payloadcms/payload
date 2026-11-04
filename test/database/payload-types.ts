@@ -964,6 +964,9 @@ export interface Alias {
  */
 export interface BlocksDoc {
   id: string;
+  dateBlocksGroup?: {
+    content?: GroupedDate[] | null;
+  };
   compatibleDateBlocks?: (LondonDate | SecondDate)[] | null;
   testBlocksLocalized?: Cta[] | null;
   testBlocks?: Cta[] | null;
@@ -977,6 +980,16 @@ export interface BlocksDoc {
   } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GroupedDate".
+ */
+export interface GroupedDate {
+  date?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'groupedDate';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1789,6 +1802,21 @@ export interface AliasesSelect<T extends boolean = true> {
  * via the `definition` "blocks-docs_select".
  */
 export interface BlocksDocsSelect<T extends boolean = true> {
+  dateBlocksGroup?:
+    | T
+    | {
+        content?:
+          | T
+          | {
+              groupedDate?:
+                | T
+                | {
+                    date?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+      };
   compatibleDateBlocks?:
     | T
     | {

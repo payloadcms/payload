@@ -43,7 +43,13 @@ const sanitizeValue = (value: unknown, operator?: string): string => {
   return `"${prefix}${escaped}"`
 }
 
-export const createJSONQuery = ({ column, operator, pathSegments, value }: CreateJSONQueryArgs) => {
+export const createJSONQuery = ({
+  column,
+  operator,
+  pathSegments,
+  treatRootAsArray,
+  value,
+}: CreateJSONQueryArgs) => {
   const columnName = typeof column === 'object' ? column.name : column
   const jsonPaths = pathSegments
     .slice(1)
@@ -52,7 +58,8 @@ export const createJSONQuery = ({ column, operator, pathSegments, value }: Creat
     })
     .join('.')
 
-  const fullPath = pathSegments.length === 1 ? '$[*]' : `$.${jsonPaths}`
+  const fullPath =
+    pathSegments.length === 1 ? '$[*]' : `${treatRootAsArray ? '$[*]' : '$'}.${jsonPaths}`
   const resolvedOperator = operator.startsWith('date_') ? operator.slice(5) : operator
 
   let sql = ''

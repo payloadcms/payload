@@ -7023,6 +7023,14 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     const res = await payload.create({
       collection: 'blocks-docs',
       data: {
+        dateBlocksGroup: {
+          content: [
+            {
+              blockType: 'groupedDate',
+              date: '2026-06-15T12:00:00.000Z',
+            },
+          ],
+        },
         testBlocks: [
           {
             blockType: 'cta',
@@ -7038,6 +7046,24 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     })
     expect(res.testBlocks[0]?.text).toBe('text')
     expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
+
+    for (const [operator, shouldMatch] of [
+      ['equals', true],
+      ['greater_than', true],
+      ['not_equals', false],
+    ] as const) {
+      const result = await payload.find({
+        collection: 'blocks-docs',
+        overrideAccess: true,
+        where: {
+          'dateBlocksGroup.content.date': {
+            [operator]: operator === 'greater_than' ? '2026-06-14' : '2026-06-15',
+          },
+        },
+      })
+
+      expect(result.docs.some(({ id }) => id === res.id)).toBe(shouldMatch)
+    }
 
     await payload.update({
       id: res.id,

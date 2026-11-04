@@ -365,6 +365,7 @@ describe('date-only JSON constraints', () => {
   it('marks localized nested arrays at their stored JSON path', () => {
     expect(
       getDateOnlyJSONPaths({
+        pathSegments: ['content', 'rows', 'publishedOn'],
         target: {
           field: dateOnlyField as ResolvedDateFilterTarget['field'],
           lineage: [
@@ -386,10 +387,11 @@ describe('date-only JSON constraints', () => {
         column: 'content',
         operator: 'date_equals',
         pathSegments: ['content', 'publishedOn'],
+        treatRootAsArray: true,
         value: ['2026-03-29T00:00:00.000Z', '2026-03-29T23:00:00.000Z'],
       }),
     ).toBe(
-      `jsonb_path_exists(content, '$.publishedOn[*] ? (@ >= "2026-03-29T00:00:00.000Z" && @ < "2026-03-29T23:00:00.000Z")')`,
+      `jsonb_path_exists(content, '$[*].publishedOn[*] ? (@ >= "2026-03-29T00:00:00.000Z" && @ < "2026-03-29T23:00:00.000Z")')`,
     )
   })
 
@@ -399,10 +401,30 @@ describe('date-only JSON constraints', () => {
         column: 'content',
         operator: 'date_not_equals',
         pathSegments: ['content', 'publishedOn'],
+        treatRootAsArray: true,
         value: ['2026-03-29T00:00:00.000Z', '2026-03-29T23:00:00.000Z'],
       }),
     ).toBe(
-      `jsonb_path_exists(content, '$.publishedOn[*] ? (@ >= "2026-03-29T00:00:00.000Z" && @ < "2026-03-29T23:00:00.000Z")') IS NOT TRUE`,
+      `jsonb_path_exists(content, '$[*].publishedOn[*] ? (@ >= "2026-03-29T00:00:00.000Z" && @ < "2026-03-29T23:00:00.000Z")') IS NOT TRUE`,
     )
+  })
+
+  it('builds paths relative to a JSON blocks column nested in a group', () => {
+    expect(
+      getDateOnlyJSONPaths({
+        pathSegments: ['content', 'publishedOn'],
+        target: {
+          field: dateOnlyField as ResolvedDateFilterTarget['field'],
+          lineage: [
+            { isLocalized: false, name: 'group', type: 'group' },
+            { isLocalized: false, name: 'content', type: 'blocks' },
+            { isLocalized: false, name: 'publishedOn', type: 'date' },
+          ],
+        },
+      }),
+    ).toEqual({
+      pathSegments: ['content', 'publishedOn'],
+      repeatedPaths: [],
+    })
   })
 })
