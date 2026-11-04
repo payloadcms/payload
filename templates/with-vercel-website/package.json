@@ -34,7 +34,7 @@
     "@payloadcms/plugin-seo": "3.82.1",
     "@payloadcms/richtext-lexical": "3.82.1",
     "@payloadcms/storage-vercel-blob": "3.82.1",
-    "@payloadcms/transformer-sharp": "3.82.1",
+    "@payloadcms/transformer-sharp": "4.0.0-beta.4",
     "@payloadcms/ui": "3.82.1",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-label": "^2.0.2",
@@ -82,7 +82,7 @@
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

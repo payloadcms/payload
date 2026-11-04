@@ -18,6 +18,8 @@ const cwd = PROJECT_ROOT
 
 const execaOpts: execa.Options = { stdio: 'inherit', cwd }
 
+const publishAttempts = 2
+
 type PackageDetails = {
   /** Name in package.json / npm registry */
   name: string
@@ -208,33 +210,29 @@ export async function publishSinglePackage(
       cmdArgs.push('--dry-run')
     }
 
-    const { exitCode, output } = await runPnpm(cmdArgs)
+    let lastExitCode = 0
 
-    if (exitCode === 0) {
-      console.log(`✅ ${pkg.name} published`)
-      return { name: pkg.name, success: true }
-    }
+    for (let attempt = 1; attempt <= publishAttempts; attempt++) {
+      const { exitCode, output } = await runPnpm(cmdArgs)
+      lastExitCode = exitCode
 
-    // An already-published conflict means a prior run landed this version; treat
-    // the re-run as an idempotent success rather than retrying (a retry would
-    // just conflict again). This is authoritative, unlike the CDN-cached read.
-    if (isAlreadyPublishedError(output)) {
-      console.log(`⏭️  ${pkg.name}@${pkg.version} already published, skipping`)
-      return { name: pkg.name, success: true }
-    }
+      // pnpm's streamed output already reports the successful publish
+      if (exitCode === 0) {
+        return { name: pkg.name, success: true }
+      }
 
-    console.log(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed (exit code ${exitCode})`)
-    console.log(`\nRetrying publish for ${pkg.name}...`)
-    const { exitCode: retryExitCode, output: retryOutput } = await runPnpm(cmdArgs)
+      // An already-published conflict means a prior run landed this version; treat
+      // the re-run as an idempotent success rather than retrying (a retry would
+      // just conflict again). This is authoritative, unlike the CDN-cached read.
+      if (isAlreadyPublishedError(output)) {
+        console.log(`⏭️  ${pkg.name}@${pkg.version} already published, skipping`)
+        return { name: pkg.name, success: true }
+      }
 
-    if (retryExitCode === 0) {
-      console.log(`✅ ${pkg.name} published (on retry)`)
-      return { name: pkg.name, success: true }
-    }
-
-    if (isAlreadyPublishedError(retryOutput)) {
-      console.log(`⏭️  ${pkg.name}@${pkg.version} already published, skipping`)
-      return { name: pkg.name, success: true }
+      if (attempt < publishAttempts) {
+        console.log(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed (exit code ${exitCode})`)
+        console.log(`\nRetrying publish for ${pkg.name}...`)
+      }
     }
 
     // Publish can report failure even though the version actually landed (e.g. a
@@ -247,7 +245,7 @@ export async function publishSinglePackage(
     return {
       name: pkg.name,
       success: false,
-      details: `pnpm publish failed for ${pkg.name} (exit code ${retryExitCode})`,
+      details: `pnpm publish failed for ${pkg.name} (exit code ${lastExitCode})`,
     }
   } catch (err: unknown) {
     console.error(err)

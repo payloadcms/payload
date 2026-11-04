@@ -86,6 +86,10 @@ export const STORAGE_ADAPTER_CONFIG: Record<StorageAdapter, StorageAdapterConfig
       media: true,
     },
     bucket: process.env.GCS_BUCKET || '',
+    options: {
+      apiEndpoint: process.env.GCS_ENDPOINT,
+      projectId: process.env.GCS_PROJECT_ID,
+    },
   })`,
     packageName: '@payloadcms/storage-gcs',
   },
@@ -130,6 +134,10 @@ export const STORAGE_ADAPTER_CONFIG: Record<StorageAdapter, StorageAdapterConfig
     packageName: '@payloadcms/storage-vercel-blob',
   },
 } as const
+
+export const SHARP_TRANSFORMER_PACKAGE = '@payloadcms/transformer-sharp'
+
+export const SHARP_TRANSFORMER_NAME = 'sharpTransformer'
 
 /**
  * Helper to get database adapter package name

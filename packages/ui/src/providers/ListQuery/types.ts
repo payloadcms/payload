@@ -15,7 +15,14 @@ type ContextHandlers = {
   handleWhereChange?: (where: Where) => Promise<void>
 }
 
-export type OnListQueryChange = (query: ListQuery) => void
+/**
+ * Returned promises are awaited; return values are otherwise ignored.
+ * The union of callbacks preserves TypeScript's `void` callback rule, allowing handlers such as `query => updates.push(query)`.
+ * A union of return types would reject synchronous handlers that return a value.
+ */
+export type OnListQueryChange =
+  | ((query: ListQuery) => Promise<unknown>)
+  | ((query: ListQuery) => void)
 
 export type ListQueryProps = {
   readonly children: React.ReactNode

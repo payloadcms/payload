@@ -13,7 +13,7 @@ const Context = createContext({
   isVisible: undefined,
   isWithinCollapsible: undefined,
   toggle: () => {},
-} as ContextType)
+})
 
 export const CollapsibleProvider: React.FC<{
   children?: React.ReactNode

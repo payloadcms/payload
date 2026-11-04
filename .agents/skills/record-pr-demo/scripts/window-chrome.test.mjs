@@ -283,7 +283,7 @@ test('should crossfade changed annotation text without restarting unchanged note
           remainingGhosts: root.querySelectorAll('[data-annotation-ghost]').length,
         }
       })
-      assert.equal(result.entering, 1)
+      assert.equal(result.entering, 0)
       assert.deepEqual(result.ghosts, [
         { text: 'First step', hidden: 'true' },
         { text: 'First explanation.', hidden: 'true' },
@@ -353,6 +353,80 @@ test('should show refresh status beside dimensions without moving content, inclu
       assert.equal(await status.textContent(), 'Refresh failed')
       await page.evaluate(() => window.chromeDemo.setRefreshState({ state: 'idle' }))
       assert.equal(await status.isVisible(), false)
+    },
+  })
+})
+
+test('should show the first step immediately when opening or restarting annotations', async () => {
+  await withChrome({
+    run: async ({ page }) => {
+      const states = await page.evaluate(() => {
+        const root = document.querySelector('#root').shadowRoot
+        const first = { index: 1, total: 2, title: 'Opening step', body: 'Visible immediately.' }
+        const states = []
+        const capture = () =>
+          states.push({
+            titleOpacity: getComputedStyle(root.querySelector('[data-note-title]')).opacity,
+            bodyOpacity: getComputedStyle(root.querySelector('[data-note-body]')).opacity,
+            animations:
+              root.querySelector('[data-note-title]').getAnimations().length +
+              root.querySelector('[data-note-body]').getAnimations().length,
+            ghosts: root.querySelectorAll('[data-annotation-ghost]').length,
+          })
+        window.chromeDemo.setAnnotation(first)
+        capture()
+        window.chromeDemo.setAnnotation({ ...first, index: 2, title: 'Later step' })
+        window.chromeDemo.setAnnotation(first)
+        capture()
+        window.chromeDemo.setAnnotation(null)
+        window.chromeDemo.setAnnotation(first)
+        capture()
+        return states
+      })
+      for (const state of states) {
+        assert.deepEqual(state, { titleOpacity: '1', bodyOpacity: '1', animations: 0, ghosts: 0 })
+      }
+    },
+  })
+})
+
+test('should divide the header only when annotation or accessibility content is visible', async () => {
+  await withChrome({
+    run: async ({ page }) => {
+      const dividerWidth = () =>
+        page
+          .locator('#root')
+          .locator('.change')
+          .evaluate((el) => getComputedStyle(el).borderBottomWidth)
+      assert.equal(await dividerWidth(), '0px')
+      await page.evaluate(() =>
+        window.chromeDemo.setAnnotation({
+          index: 1,
+          total: 1,
+          title: 'Visible step',
+          body: 'Supporting content.',
+        }),
+      )
+      assert.equal(await dividerWidth(), '1px')
+      await page.evaluate(() => window.chromeDemo.setAnnotation(null))
+      assert.equal(await dividerWidth(), '0px')
+      await page.evaluate(() => {
+        const root = document.createElement('div')
+        root.id = 'a11y-root'
+        document.body.append(root)
+        window.mountDemoChrome({
+          root,
+          accessibility: true,
+          change: { kind: 'Fix', title: 'Keyboard feedback', description: 'Visible commands.' },
+        })
+      })
+      assert.equal(
+        await page
+          .locator('#a11y-root')
+          .locator('.change')
+          .evaluate((el) => getComputedStyle(el).borderBottomWidth),
+        '1px',
+      )
     },
   })
 })

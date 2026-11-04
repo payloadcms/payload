@@ -275,8 +275,9 @@ test('should show fresh data', { tag: '@also-without-cache-components' }, async 
 
 ## Linting & Formatting
 
-- `pnpm run lint` - Run linter across all packages
+- `pnpm run lint` - Lint `packages/` and `tools/` with [oxlint](https://oxc.rs/docs/guide/usage/linter) (config: `oxlint.config.ts`). Runs in CI.
 - `pnpm run lint:fix` - Fix linting issues
+- `pnpm oxlint <paths>` - Lint one package or specific files (e.g. `pnpm oxlint packages/plugin-mcp`). Add `--fix` to fix issues
 - `pnpm run format` - Format the repo with [oxfmt](https://oxc.rs/docs/guide/usage/formatter) (config: `oxfmt.config.ts`)
 - `pnpm run format:check` - Check formatting (runs in CI)
 
@@ -290,6 +291,8 @@ test('should show fresh data', { tag: '@also-without-cache-components' }, async 
 ## Commit & PR Guidelines
 
 This repository follows [Conventional Commits](https://www.conventionalcommits.org/).
+
+Don't introduce breaking changes unless they fall under one of the exceptions in `docs/migration-guide/versioning.mdx`. The v4 migration guide records past breaking changes and is not permission to add new ones. If a change can't be made without breaking, flag it instead of working around it.
 
 ### PR Title Format
 
@@ -318,8 +321,8 @@ Examples:
 
 - LLMS.txt: <https://payloadcms.com/llms.txt>
 - LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
-- Node version: >=24.15.0
-- pnpm version: ^11.9.0
+- Node version: >=24.22.1
+- pnpm version: ^11.28.6
 
 ## Admin Panel
 

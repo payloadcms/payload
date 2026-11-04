@@ -46,3 +46,65 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           NPM_CONFIG_PROVENANCE: true
+
+  # Runs after publish so an SBOM failure never blocks npm. "Re-run failed jobs"
+  # retries only these jobs; release-ci (and its draft notes PATCH) does not run again.
+  generate-sboms:
+    name: generate-sboms
+    needs: publish
+    if: github.repository == 'payloadcms/payload'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+          persist-credentials: false
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Generate SBOMs
+        run: pnpm release-sbom --out-dir "$RUNNER_TEMP/sboms"
+      - name: Upload SBOMs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sboms-${{ github.ref_name }}
+          path: ${{ runner.temp }}/sboms/payload-sboms-*.zip
+          if-no-files-found: error
+          # A rerun of this job uploads the same artifact name again.
+          overwrite: true
+
+  # Separate job: holds contents: write and runs no installed dependency code.
+  attach-sboms:
+    name: attach-sboms
+    needs: generate-sboms
+    if: github.repository == 'payloadcms/payload'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout attach script
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+          persist-credentials: false
+          sparse-checkout: .github/scripts/sbom
+      - name: Download SBOMs
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: sboms-${{ github.ref_name }}
+          path: ${{ runner.temp }}/sboms
+      - name: Attach SBOMs to draft release
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { attachSboms } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/sbom/attach-sboms.mjs`)
+            await attachSboms({
+              core,
+              dir: `${process.env.RUNNER_TEMP}/sboms`,
+              github,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: process.env.GITHUB_REF_NAME,
+            })

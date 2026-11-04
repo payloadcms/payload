@@ -1,7 +1,8 @@
-import type { CollectionSlug, Data, ListQuery } from 'payload'
+import type { CollectionSlug, Data } from 'payload'
 
 import { createContext, use } from 'react'
 
+import type { OnListQueryChange } from '../../providers/ListQuery/types.js'
 import type { useSelection } from '../../providers/Selection/index.js'
 import type { UseDocumentDrawer } from '../DocumentDrawer/types.js'
 import type { Option } from '../ReactSelect/index.js'
@@ -16,7 +17,7 @@ export type ListDrawerContextProps = {
     selected: ReturnType<typeof useSelection>['selected'],
     collectionSlug?: CollectionSlug,
   ) => void
-  readonly onQueryChange?: (query: ListQuery) => void
+  readonly onQueryChange?: OnListQueryChange
   readonly onSelect?: (args: { collectionSlug: CollectionSlug; doc: Data }) => void
   readonly selectedOption?: Option<CollectionSlug>
   readonly setSelectedOption?: (option: Option<CollectionSlug>) => void

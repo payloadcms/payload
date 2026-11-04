@@ -6,7 +6,9 @@ import type { UseDraggableSortableReturn } from '../useDraggableSortable/types.j
 
 export type DragHandleProps = {
   attributes: React.AriaAttributes & UseDraggableArguments['attributes']
+  draggable?: boolean
   listeners: SyntheticListenerMap
+  setActivatorNodeRef?: (node: HTMLElement | null) => void
 } & UseDraggableArguments
 
 export type ChildFunction = (args: UseDraggableSortableReturn) => React.ReactNode

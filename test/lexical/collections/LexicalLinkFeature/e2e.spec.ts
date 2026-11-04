@@ -9,13 +9,14 @@ import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationI
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { lexicalLinkFeatureSlug } from '../../slugs.js'
 import { LexicalHelpers } from '../utils.js'
+import { openNestedUploadDrawer } from './utils.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
 
 const { beforeAll, beforeEach, describe } = test
 
-// Unlike the other suites, this one runs in parallel, as they run on the `lexical-fully-featured/create` URL and are "pure" tests
+// Keep these tests read-only so they can run in parallel.
 // PLEASE do not reset the database or perform any operations that modify it in this file.
 // TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
 // it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
@@ -51,7 +52,7 @@ describe('Lexical Link Feature', () => {
 
     await linkButton.click()
 
-    const customField = lexical.drawer.locator('#field-someText')
+    const customField = lexical.drawer.locator('input[name="someText"]')
 
     await expect(customField).toBeVisible()
   })
@@ -93,7 +94,7 @@ describe('Lexical Link Feature', () => {
 
     const longUrl =
       'https://example.com/some/very/long/path/that/should/cause/the/tooltip/to/overflow/when/displayed/in/the/editor/with/many/more/segments/to/make/it/even/longer'
-    const urlField = lexical.drawer.locator('#field-url')
+    const urlField = lexical.drawer.locator('input[name="url"]')
     await urlField.click()
     await urlField.clear()
     await urlField.pressSequentially(longUrl)
@@ -161,7 +162,7 @@ describe('Lexical Link Feature', () => {
 
     const longUrl =
       'https://example.com/some/very/long/path/that/should/cause/the/tooltip/to/overflow/when/displayed/in/the/editor/with/many/more/segments/to/make/it/even/longer'
-    const urlField = lexical.drawer.locator('#field-url')
+    const urlField = lexical.drawer.locator('input[name="url"]')
     await urlField.click()
     await urlField.clear()
     await urlField.pressSequentially(longUrl)
@@ -226,7 +227,7 @@ describe('Lexical Link Feature', () => {
     await linkButton.click()
 
     const shortUrl = 'https://google.com'
-    const urlField = lexical.drawer.locator('#field-url')
+    const urlField = lexical.drawer.locator('input[name="url"]')
     await urlField.click()
     await urlField.clear()
     await urlField.pressSequentially(shortUrl)
@@ -294,7 +295,7 @@ describe('Lexical Link Feature', () => {
     await linkButton.click()
 
     const shortUrl = 'https://google.com'
-    const urlField = lexical.drawer.locator('#field-url')
+    const urlField = lexical.drawer.locator('input[name="url"]')
     await urlField.click()
     await urlField.clear()
     await urlField.pressSequentially(shortUrl)
@@ -342,5 +343,42 @@ describe('Lexical Link Feature', () => {
         return tooltipRect.width < editorWidth * 0.5
       })
       .toBe(true)
+  })
+
+  test('should preserve unsaved link fields when resizing with a nested upload drawer open', async ({
+    page,
+  }) => {
+    const finalizedURL = 'https://example.com/nested-link'
+    const { lexical, linkDrawer, assetLabelField, selectedFilename, uploadDocumentDrawer } =
+      await openNestedUploadDrawer({ page, finalizedURL })
+
+    await page.setViewportSize({ width: 1100, height: 800 })
+    await expect(uploadDocumentDrawer).toBeVisible()
+    await expect(assetLabelField).toHaveValue('Client asset')
+    await expect(selectedFilename).toHaveText(/payload.*\.jpg/)
+
+    await uploadDocumentDrawer.getByRole('button', { name: 'Close' }).first().click()
+    await expect(uploadDocumentDrawer).toBeHidden()
+    await linkDrawer.getByRole('button', { name: 'Save changes', exact: true }).click()
+    await expect(lexical.editor.getByRole('link', { name: 'custom link' })).toHaveAttribute(
+      'href',
+      finalizedURL,
+    )
+
+    const createdLink = lexical.editor.getByRole('link', { name: 'custom link' })
+
+    await createdLink.dispatchEvent('mouseover')
+    await page.getByRole('button', { name: 'Edit link', exact: true }).click()
+    await expect(assetLabelField).toHaveValue('Client asset')
+    await expect(selectedFilename).toHaveText(/payload.*\.jpg/)
+    await assetLabelField.fill('Discard this edit')
+    await page.keyboard.press('Escape')
+    await expect(linkDrawer).toBeHidden()
+    await createdLink.dispatchEvent('mouseover')
+    await page.getByRole('button', { name: 'Edit link', exact: true }).click()
+    await expect(assetLabelField).toHaveValue('Client asset')
+    await expect(linkDrawer.getByRole('textbox', { name: 'Enter a URL', exact: true })).toHaveValue(
+      finalizedURL,
+    )
   })
 })

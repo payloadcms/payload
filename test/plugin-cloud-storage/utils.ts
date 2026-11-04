@@ -30,7 +30,9 @@ export async function clearTestBucket(client: AWS.S3Client, bucketName?: string)
     }),
   )
 
-  if (!listedObjects?.Contents?.length) return
+  if (!listedObjects?.Contents?.length) {
+    return
+  }
 
   const deleteParams = {
     Bucket: bucketName || process.env.S3_BUCKET,

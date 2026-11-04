@@ -1,9 +1,129 @@
 import type { CSSProperties } from 'react'
 
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
+import { page, userEvent } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
 
 import { Popup, PopupList } from './index.js'
+
+test.each([
+  { direction: 'left', side: 'left', width: 1000 },
+  { direction: 'right', side: 'right', width: 1000 },
+  { direction: 'left after flipping', side: 'right', width: 414 },
+] as const)(
+  'should protect fine diagonal movement toward a submenu opening to the $direction',
+  async ({ direction, side, width }) => {
+    await page.viewport(width, 720)
+
+    const onOpenLanguage = vi.fn()
+    const screen = await render(
+      <div
+        data-testid="pointer-surface"
+        style={{ inset: 0, padding: '64px 300px', position: 'fixed' }}
+      >
+        <Popup button="Root" popupType="menu" size="large" theme="auto">
+          <PopupList.MenuItem>
+            {['Theme', 'Language'].map((label) => (
+              <Popup
+                hoverSubmenu
+                key={label}
+                onToggleOpen={label === 'Language' ? onOpenLanguage : undefined}
+                popupAriaLabel={`${label} menu`}
+                popupType="menu"
+                renderButton={(buttonProps) => (
+                  <PopupList.SubmenuTrigger buttonProps={buttonProps}>
+                    {label}
+                  </PopupList.SubmenuTrigger>
+                )}
+                side={side}
+                theme="auto"
+              >
+                <div data-popup-prevent-close>
+                  {Array.from({ length: 3 }, (_, index) => (
+                    <PopupList.Button key={index} onClick={() => {}}>
+                      {`${label} option ${index}`}
+                    </PopupList.Button>
+                  ))}
+                </div>
+              </Popup>
+            ))}
+          </PopupList.MenuItem>
+        </Popup>
+      </div>,
+    )
+
+    await screen.getByRole('button', { name: 'Root' }).click()
+    const theme = screen.getByRole('menuitem', { name: 'Theme', exact: true })
+    const language = screen.getByRole('menuitem', { name: 'Language', exact: true })
+
+    await theme.hover()
+    await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+
+    const triggerBox = theme.element().getBoundingClientRect()
+    const siblingBox = language.element().getBoundingClientRect()
+    const menuBox = screen
+      .getByRole('menu', { name: 'Theme menu' })
+      .element()
+      .getBoundingClientRect()
+    const startX = triggerBox.left + triggerBox.width / 2
+    const isOnLeft = direction.startsWith('left')
+    const edgeX = isOnLeft ? menuBox.right : menuBox.left
+    const diagonalPoint = {
+      x: startX + (edgeX - startX) * 0.85,
+      y: siblingBox.top + siblingBox.height / 2,
+    }
+
+    expect(isOnLeft ? menuBox.right < startX : menuBox.left > startX).toBe(true)
+
+    const startY = triggerBox.top + triggerBox.height / 2
+    const steps = Math.ceil(Math.abs(diagonalPoint.x - startX))
+
+    // Keep moving by at most one horizontal pixel per event. Crossing the safe
+    // area can take longer than the 300 ms pause timeout.
+    for (let step = 1; step <= steps; step++) {
+      await userEvent.hover(screen.getByTestId('pointer-surface'), {
+        force: true,
+        position: {
+          x: startX + ((diagonalPoint.x - startX) * step) / steps,
+          y: startY + ((diagonalPoint.y - startY) * step) / steps,
+        },
+      })
+    }
+    expect(document.elementFromPoint(diagonalPoint.x, diagonalPoint.y)).toBe(language.element())
+    await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+    await expect.element(language).toHaveAttribute('aria-expanded', 'false')
+
+    const option = screen.getByRole('menuitem', { name: 'Theme option 2' })
+    await option.click()
+    const optionBox = option.element().getBoundingClientRect()
+    const returnX = optionBox.left + optionBox.width / 2
+    const returnY = optionBox.top + optionBox.height / 2
+    for (let step = 1; step <= steps; step++) {
+      await userEvent.hover(screen.getByTestId('pointer-surface'), {
+        force: true,
+        position: {
+          x: returnX + ((startX - returnX) * step) / steps,
+          y: returnY + ((startY - returnY) * step) / steps,
+        },
+      })
+    }
+    expect(onOpenLanguage).not.toHaveBeenCalled()
+    await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
+
+    // A deliberate click still reaches the row inside the safe area.
+    await userEvent.hover(screen.getByTestId('pointer-surface'), {
+      force: true,
+      position: diagonalPoint,
+    })
+    await language.click({
+      position: {
+        x: diagonalPoint.x - siblingBox.left,
+        y: diagonalPoint.y - siblingBox.top,
+      },
+    })
+    await expect.element(language).toHaveAttribute('aria-expanded', 'true')
+  },
+)
 
 test('should preserve ancestor menus while nested hover menus are active', async () => {
   const screen = await render(
@@ -99,13 +219,15 @@ test('should keep a reusable submenu trigger full width and highlighted over its
   expect(getComputedStyle(theme.element()).backgroundColor).toBe('rgb(1, 2, 3)')
 })
 
-test('should defer hover styling on a submenu trigger in a separate group', async () => {
-  const screen = await render(
+test('should switch siblings with the latest callbacks after a rerender', async () => {
+  const renderMenu = ({ onClose }: { onClose: () => void }) => (
     <div style={{ '--color-bg-selected-strong': 'rgb(1, 2, 3)' } as CSSProperties}>
       <Popup button="Root" popupType="menu" theme="auto">
         <PopupList.MenuItem>
           <Popup
             hoverSubmenu
+            onToggleClose={() => onClose()}
+            onToggleOpen={() => {}}
             popupType="menu"
             renderButton={(buttonProps) => (
               <PopupList.SubmenuTrigger buttonProps={buttonProps}>Theme</PopupList.SubmenuTrigger>
@@ -136,8 +258,11 @@ test('should defer hover styling on a submenu trigger in a separate group', asyn
           </Popup>
         </PopupList.MenuItem>
       </Popup>
-    </div>,
+    </div>
   )
+  const initialClose = vi.fn()
+  const latestClose = vi.fn()
+  const screen = await render(renderMenu({ onClose: initialClose }))
 
   await screen.getByRole('button', { name: 'Root' }).click()
   const theme = screen.getByRole('menuitem', { name: 'Theme' })
@@ -145,16 +270,20 @@ test('should defer hover styling on a submenu trigger in a separate group', asyn
 
   await theme.hover()
   await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
-  await language.hover()
+  await screen.rerender(renderMenu({ onClose: latestClose }))
+  language.element().focus()
+  await userEvent.keyboard('{Enter}')
 
-  expect(theme.element().getAttribute('aria-expanded')).toBe('true')
-  expect(getComputedStyle(language.element()).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+  expect(theme.element().getAttribute('aria-expanded')).toBe('false')
+  expect(language.element().getAttribute('aria-expanded')).toBe('true')
+  expect(initialClose).not.toHaveBeenCalled()
+  expect(latestClose).toHaveBeenCalledOnce()
 
   await expect.element(language).toHaveAttribute('aria-expanded', 'true')
   expect(getComputedStyle(language.element()).backgroundColor).toBe('rgb(1, 2, 3)')
 })
 
-test('should defer hover styling on an action in a separate group', async () => {
+test('should immediately close a hover submenu over a sibling action', async () => {
   const screen = await render(
     <div style={{ '--popup-item-bg-hover': 'rgb(1, 2, 3)' } as CSSProperties}>
       <Popup button="Root" popupType="menu" theme="auto">
@@ -191,11 +320,11 @@ test('should defer hover styling on an action in a separate group', async () => 
   await expect.element(theme).toHaveAttribute('aria-expanded', 'true')
   await account.hover()
 
-  expect(theme.element().getAttribute('aria-expanded')).toBe('true')
-  expect(getComputedStyle(account.element()).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+  expect(theme.element().getAttribute('aria-expanded')).toBe('false')
+  expect(getComputedStyle(account.element()).backgroundColor).toBe('rgb(1, 2, 3)')
 })
 
-test('should defer a sibling leaf hover state while a submenu is active', async () => {
+test('should immediately hand hover back to a sibling leaf', async () => {
   const screen = await render(
     <div style={{ '--popup-item-bg-hover': 'rgb(1, 2, 3)' } as CSSProperties}>
       <Popup button="Root" popupType="menu" theme="auto">
@@ -248,8 +377,7 @@ test('should defer a sibling leaf hover state while a submenu is active', async 
     document.querySelectorAll<HTMLElement>('[role="menuitem"]'),
   ).find((element) => element.textContent === 'Typography')
 
-  expect(colorElement?.getAttribute('aria-expanded')).toBe('true')
-  expect(getComputedStyle(typographyElement!).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+  expect(colorElement?.getAttribute('aria-expanded')).toBe('false')
 
   await expect.element(color).toHaveAttribute('aria-expanded', 'false')
   expect(getComputedStyle(typographyElement!).backgroundColor).toBe('rgb(1, 2, 3)')

@@ -6,6 +6,8 @@ import { APIError } from '../errors/APIError.js'
 
 type ClientUploadReceipt = {
   _objectKey?: string
+  /** Signed data the storage adapter needs back after upload, such as a provider upload ID. */
+  adapterData?: Record<string, unknown>
   allowOverwrite?: boolean
   collectionSlug: string
   expiresAt: number
@@ -23,6 +25,7 @@ const DOMAIN = 'payload-client-upload-receipt-v1'
 
 export const createClientUploadReceipt = ({
   _objectKey,
+  adapterData,
   allowOverwrite,
   collectionSlug,
   filename,
@@ -31,6 +34,7 @@ export const createClientUploadReceipt = ({
   storageFilePath,
 }: {
   _objectKey?: string
+  adapterData?: Record<string, unknown>
   allowOverwrite?: boolean
   collectionSlug: string
   filename: string
@@ -40,6 +44,7 @@ export const createClientUploadReceipt = ({
 }): `${string}.${string}` => {
   const data: ClientUploadReceipt = {
     ...(_objectKey !== undefined && { _objectKey }),
+    ...(adapterData !== undefined && { adapterData }),
     ...(allowOverwrite && { allowOverwrite: true }),
     collectionSlug,
     expiresAt: Date.now() + LIFETIME_MS,
@@ -48,9 +53,32 @@ export const createClientUploadReceipt = ({
     storageFilePath,
     ...getUser(req),
   }
-  const encodedReceipt = Buffer.from(JSON.stringify(data)).toString('base64url')
 
-  return `${encodedReceipt}.${sign({ encodedReceipt, secret: req.payload.secret })}`
+  return encodeReceipt({ data, secret: req.payload.secret })
+}
+
+/**
+ * Signs a copy of a receipt with more `adapterData`, such as a provider ID that exists only after
+ * the upload. Every other field, including the user and expiry, is kept from the original receipt.
+ */
+export const resignClientUploadReceipt = ({
+  adapterData,
+  collectionSlug,
+  req,
+  signedReceipt,
+}: {
+  adapterData: Record<string, unknown>
+  /** Rejects a receipt issued for another collection. */
+  collectionSlug?: string
+  req: PayloadRequest
+  signedReceipt: unknown
+}): `${string}.${string}` => {
+  const receipt = verifyClientUploadReceipt({ collectionSlug, req, signedReceipt })
+
+  return encodeReceipt({
+    data: { ...receipt, adapterData: { ...receipt.adapterData, ...adapterData } },
+    secret: req.payload.secret,
+  })
 }
 
 export const verifyClientUploadReceipt = ({
@@ -105,6 +133,18 @@ const getUser = (req: PayloadRequest) => ({
   userID: req.user?.id ?? null,
 })
 
+const encodeReceipt = ({
+  data,
+  secret,
+}: {
+  data: ClientUploadReceipt
+  secret: string
+}): `${string}.${string}` => {
+  const encodedReceipt = Buffer.from(JSON.stringify(data)).toString('base64url')
+
+  return `${encodedReceipt}.${sign({ encodedReceipt, secret })}`
+}
+
 const sign = ({ encodedReceipt, secret }: { encodedReceipt: string; secret: string }) =>
   crypto.createHmac('sha256', `${DOMAIN}:${secret}`).update(encodedReceipt).digest('base64url')
 
@@ -124,6 +164,10 @@ const isReceipt = (value: unknown): value is ClientUploadReceipt => {
   const data = value as Partial<ClientUploadReceipt>
   return (
     (data._objectKey === undefined || typeof data._objectKey === 'string') &&
+    (data.adapterData === undefined ||
+      (typeof data.adapterData === 'object' &&
+        data.adapterData !== null &&
+        !Array.isArray(data.adapterData))) &&
     (data.allowOverwrite === undefined || typeof data.allowOverwrite === 'boolean') &&
     typeof data.collectionSlug === 'string' &&
     typeof data.expiresAt === 'number' &&

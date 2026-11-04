@@ -13,7 +13,6 @@ import { createE2EConfig } from './utilities/e2e-matrix.ts'
 
 const nextSuites: TestConfig[] = [
   { file: '_community', shards: 1 },
-  { file: 'a11y', shards: 1 },
   { file: 'access-control', shards: 2 },
   { file: 'admin__e2e__general', shards: 3 },
   { file: 'admin__e2e__list-view', shards: 4 },

@@ -44,7 +44,7 @@ export const populate: PopulateFn = async ({
       collectionSlug,
       currentDepth: currentDepth! + 1,
       depth,
-      docID: id as string,
+      docID: id,
       draft,
       fallbackLocale: req.fallbackLocale!,
       locale: req.locale!,

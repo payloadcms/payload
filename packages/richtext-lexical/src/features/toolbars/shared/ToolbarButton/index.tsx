@@ -2,7 +2,7 @@
 import type { LexicalEditor } from 'lexical'
 
 import { Tooltip, useTranslation } from '@payloadcms/ui'
-import { $addUpdateTag } from 'lexical'
+import { $addUpdateTag, $getRoot, $getSelection, SKIP_SELECTION_FOCUS_TAG } from 'lexical'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { ToolbarGroupItem } from '../../types.js'
@@ -59,22 +59,52 @@ export const ToolbarButton = ({
       .join(' ')
   }, [active, enabled, item.key])
 
-  const handleClick = useCallback(() => {
-    if (!enabled) {
-      return
-    }
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (!enabled) {
+        return
+      }
 
-    editor.focus(() => {
-      editor.update(() => {
-        $addUpdateTag('toolbar')
+      if (event.detail === 0 && item.isActive) {
+        const button = event.currentTarget
+
+        editor.update(
+          () => {
+            $addUpdateTag('toolbar')
+            $addUpdateTag(SKIP_SELECTION_FOCUS_TAG)
+            if (!$getSelection()) {
+              $getRoot().selectEnd()
+            }
+            item.onSelect?.({ editor, isActive: active })
+          },
+          {
+            onUpdate: () => {
+              // Native selection repair can focus contenteditable in Chromium despite the tag.
+              if (
+                button.isConnected &&
+                button.ownerDocument.activeElement === editor.getRootElement()
+              ) {
+                button.focus({ preventScroll: true })
+              }
+            },
+          },
+        )
+        return
+      }
+
+      editor.focus(() => {
+        editor.update(() => {
+          $addUpdateTag('toolbar')
+        })
+        // We need to wrap the onSelect in the callback, so the editor is properly focused before the onSelect is called.
+        item.onSelect?.({
+          editor,
+          isActive: active,
+        })
       })
-      // We need to wrap the onSelect in the callback, so the editor is properly focused before the onSelect is called.
-      item.onSelect?.({
-        editor,
-        isActive: active,
-      })
-    })
-  }, [editor, item, active, enabled])
+    },
+    [editor, item, active, enabled],
+  )
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     // This fixes a bug where you are unable to click the button if you are in a NESTED editor (editor in blocks field in editor).

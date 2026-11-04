@@ -8,7 +8,6 @@ import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
-import { getOriginalFilename } from './fileVersioning/naming.js'
 import { getFileFromUploadInstructions } from './getFileFromUploadInstructions.js'
 
 vi.mock('./clientUploadReceipt.js', () => ({
@@ -65,11 +64,9 @@ const createUploadReferenceFile = (
   const uploadReference = overrides.uploadReference ?? {}
   const prefix = typeof uploadReference.prefix === 'string' ? uploadReference.prefix : ''
   const objectKey = 'upload-1'
-  const originalFilename =
-    filename.includes('/') || filename.includes('\\') ? filename : getOriginalFilename({ filename })
   const storageFilePath = prefix
-    ? `${prefix}/${objectKey}/${originalFilename}`
-    : `media/${objectKey}/${originalFilename}`
+    ? `${prefix}/${objectKey}/${filename}`
+    : `media/${objectKey}/${filename}`
   return {
     filename: 'video.mp4',
     mimeType: 'video/mp4',
@@ -309,6 +306,177 @@ describe('getFileFromUploadInstructions', () => {
       getFileFromUploadInstructions({ collectionSlug: 'media', file, req }),
     ).rejects.toThrow('Invalid upload reference.')
     expect(handler).not.toHaveBeenCalled()
+  })
+
+  it('should pass signed adapterData to the handler', async () => {
+    const handler = vi.fn(async () => new Response(Buffer.alloc(18), { status: 200 }))
+    const req = createReq([handler])
+    const file = createUploadReferenceFile()
+    file.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(file.uploadReference.signedReceipt as string),
+      adapterData: { providerUploadID: 'provider-1' },
+    })
+
+    const result = await getFileFromUploadInstructions({ collectionSlug: 'media', file, req })
+
+    tempFilesToClean.push(result.tempFilePath!)
+    expect(handler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        params: expect.objectContaining({
+          uploadReference: expect.objectContaining({
+            adapterData: { providerUploadID: 'provider-1' },
+          }),
+        }),
+      }),
+    )
+  })
+
+  it('should keep prefix and _objectKey from the receipt when adapterData contains them', async () => {
+    const handler = vi.fn(async () => new Response(Buffer.alloc(18), { status: 200 }))
+    const req = createReq([handler])
+    const file = createUploadReferenceFile()
+    file.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(file.uploadReference.signedReceipt as string),
+      adapterData: { _objectKey: 'other-upload', prefix: 'private' },
+    })
+
+    const result = await getFileFromUploadInstructions({ collectionSlug: 'media', file, req })
+
+    tempFilesToClean.push(result.tempFilePath!)
+    expect(result.uploadReference).toEqual({
+      _objectKey: 'upload-1',
+      adapterData: { _objectKey: 'other-upload', prefix: 'private' },
+      prefix: '',
+      signedReceipt: expect.any(String),
+    })
+  })
+
+  it('should pass extra uploadReference fields to the handler as clientData when receipts are on', async () => {
+    const handler = vi.fn(async () => new Response(Buffer.alloc(18), { status: 200 }))
+    const req = createReq([handler])
+    const file = createUploadReferenceFile({
+      uploadReference: { providerObjectID: 'object-1' },
+    })
+
+    const result = await getFileFromUploadInstructions({ collectionSlug: 'media', file, req })
+
+    tempFilesToClean.push(result.tempFilePath!)
+    expect(result.uploadReference).toEqual({
+      _objectKey: 'upload-1',
+      clientData: { providerObjectID: 'object-1' },
+      prefix: '',
+      signedReceipt: expect.any(String),
+    })
+  })
+
+  it('should pass extra uploadReference fields to the handler as clientData when receipts are off', async () => {
+    const handler = vi.fn(async () => new Response(Buffer.alloc(18), { status: 200 }))
+    const req = createReq([handler], { mimeTypes: ['video/*'], uploadInstructions: undefined })
+
+    const result = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: {
+        filename: 'video.mp4',
+        mimeType: 'video/mp4',
+        size: 18,
+        uploadReference: { prefix: '', providerObjectID: 'object-1' },
+      },
+      req,
+    })
+
+    tempFilesToClean.push(result.tempFilePath!)
+    expect(result.uploadReference).toEqual({
+      clientData: { providerObjectID: 'object-1' },
+      prefix: '',
+    })
+  })
+
+  it('should not copy reserved keys into clientData', async () => {
+    const handler = vi.fn(async () => new Response(Buffer.alloc(18), { status: 200 }))
+    const req = createReq([handler])
+    const file = createUploadReferenceFile({
+      uploadReference: {
+        adapterData: { providerUploadID: 'forged' },
+        clientData: { nested: true },
+        prefix: '',
+        providerObjectID: 'object-1',
+      },
+    })
+    file.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(file.uploadReference.signedReceipt as string),
+      adapterData: { providerUploadID: 'provider-1' },
+    })
+
+    const result = await getFileFromUploadInstructions({ collectionSlug: 'media', file, req })
+
+    tempFilesToClean.push(result.tempFilePath!)
+    expect(result.uploadReference).toEqual({
+      _objectKey: 'upload-1',
+      adapterData: { providerUploadID: 'provider-1' },
+      clientData: { providerObjectID: 'object-1' },
+      prefix: '',
+      signedReceipt: expect.any(String),
+    })
+  })
+
+  it('should not add clientData or unset keys when there are no extra fields', async () => {
+    const handler = vi.fn(async () => new Response(Buffer.alloc(18), { status: 200 }))
+    const req = createReq([handler], { mimeTypes: ['video/*'], uploadInstructions: undefined })
+
+    const result = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: {
+        filename: 'video.mp4',
+        mimeType: 'video/mp4',
+        size: 18,
+        uploadReference: { prefix: '' },
+      },
+      req,
+    })
+
+    tempFilesToClean.push(result.tempFilePath!)
+    expect(result.uploadReference).toStrictEqual({ prefix: '' })
+  })
+
+  it('should reject a receipt signed for the beta -original filename', async () => {
+    const req = createReq([vi.fn()], {})
+    const file = createUploadReferenceFile()
+    file.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(file.uploadReference.signedReceipt as string),
+      storageFilePath: 'media/upload-1/video-original.mp4',
+    })
+
+    await expect(
+      getFileFromUploadInstructions({ collectionSlug: 'media', file, req }),
+    ).rejects.toThrow('Invalid upload reference.')
+  })
+
+  it('should accept a receipt for the plain uploaded filename', async () => {
+    const storedFilename = 'video.mp4'
+    const handler = vi.fn(
+      async () =>
+        new Response(Buffer.alloc(18), { headers: { 'Content-Length': '18' }, status: 200 }),
+    )
+    const req = createReq([handler], {})
+    const file = createUploadReferenceFile()
+    file.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(file.uploadReference.signedReceipt as string),
+      storageFilePath: `media/upload-1/${storedFilename}`,
+    })
+
+    await getFileFromUploadInstructions({ collectionSlug: 'media', file, req })
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        params: expect.objectContaining({ filename: storedFilename }),
+      }),
+    )
+    expect(req.context?._payloadVerifiedProviderOriginal).toMatchObject({
+      filename: storedFilename,
+      key: `media/upload-1/${storedFilename}`,
+    })
   })
 
   it('fetches only a bounded header for an image with no configured adjustments', async () => {

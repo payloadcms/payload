@@ -40,7 +40,7 @@ const collectionTenantReadAccess: Access = ({ req }) => {
     'tenant.isPublic': {
       equals: true,
     },
-  } as Where
+  }
 }
 
 const collectionTenantUpdateAndDeleteAccess: Access = ({ req }) => {

@@ -23,6 +23,7 @@ import type { GenerateTitle } from '../../types.js'
 
 import { defaults } from '../../defaults.js'
 import { LengthIndicator } from '../../ui/LengthIndicator.js'
+import '../colors.css'
 import '../index.css'
 
 const { maxLength: maxLengthDefault, minLength: minLengthDefault } = defaults.title
@@ -165,7 +166,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         </div>
         <div
           style={{
-            color: '#9A9A9A',
+            color: 'var(--seo-description-color)',
           }}
         >
           {t('plugin-seo:lengthTipTitle', { maxLength, minLength })}

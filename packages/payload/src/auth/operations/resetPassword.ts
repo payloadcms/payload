@@ -1,10 +1,15 @@
-import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
+import type {
+  Collection,
+  DataFromCollectionSlug,
+  SanitizedCollectionConfig,
+} from '../../collections/config/types.js'
+import type { Validate } from '../../fields/config/types.js'
 import type { AuthCollectionSlug, AuthenticatedUser } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
-import { APIError, Forbidden } from '../../errors/index.js'
+import { APIError, Forbidden, ValidationError } from '../../errors/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -12,9 +17,8 @@ import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { applyUserReadAccess } from '../applyUserReadAccess.js'
-import { getFieldsToSign } from '../getFieldsToSign.js'
-import { jwtSign } from '../jwt.js'
-import { addSessionToUser, revokeSession } from '../sessions.js'
+import { createAuthToken } from '../createAuthToken.js'
+import { revokeSession } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
 
@@ -42,10 +46,7 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     data,
     depth,
     overrideAccess = false,
-    req: {
-      payload: { secret },
-      payload,
-    },
+    req: { payload },
     req,
   } = args
 
@@ -97,6 +98,14 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     if (!user) {
       throw new APIError('Token is either invalid or has expired.', httpStatus.FORBIDDEN)
     }
+
+    await validatePasswordField({
+      collectionConfig,
+      overrideAccess,
+      password: data.password,
+      req,
+      user,
+    })
 
     // TODO: replace this method
     const { hash, salt } = await generatePasswordSaltHash({
@@ -153,33 +162,25 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       req,
     })
 
-    await authenticateLocalStrategy({ doc, password: data.password })
+    await authenticateLocalStrategy({
+      doc,
+      password: data.password,
+      passwordHashIterations: payload.config.auth.passwordHashIterations,
+    })
 
     user = doc as AuthenticatedUser
     user.collection = collectionConfig.slug
     user._strategy = 'local-jwt'
 
-    const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
+    const { token, ...session } = await createAuthToken({
       collectionConfig,
       email: user.email!,
-      user,
-    }
-
-    const session = await addSessionToUser({
-      collectionConfig,
-      payload,
       req,
       user,
     })
 
     sessionUser = user
     sid = session.sid
-
-    if (sid) {
-      fieldsToSignArgs.sid = sid
-    }
-
-    const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
 
     // /////////////////////////////////////
     // beforeLogin - Collection
@@ -196,12 +197,6 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
           })) || user
       }
     }
-
-    const { token } = await jwtSign({
-      fieldsToSign,
-      secret,
-      tokenExpiration: collectionConfig.auth.tokenExpiration,
-    })
 
     req.user = user
 
@@ -257,6 +252,8 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
 
     return result
   } catch (error: unknown) {
+    // Logging in with the new password failed, e.g. in a `beforeLogin` hook, so remove the session
+    // it started
     if (sid) {
       await revokeSession({
         collectionConfig,
@@ -268,5 +265,53 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     }
     await killTransaction(req)
     throw error
+  }
+}
+
+/**
+ * Runs the `password` field override's validation, which `payload.db.updateOne` skips.
+ */
+async function validatePasswordField({
+  collectionConfig,
+  overrideAccess,
+  password,
+  req,
+  user,
+}: {
+  collectionConfig: SanitizedCollectionConfig
+  overrideAccess: boolean
+  password: string
+  req: PayloadRequest
+  user: AuthenticatedUser
+}): Promise<void> {
+  const passwordField = collectionConfig.flattenedFields.find((field) => field.name === 'password')
+
+  if (!passwordField || !('validate' in passwordField) || !passwordField.validate) {
+    return
+  }
+
+  const validate = passwordField.validate as Validate<string>
+  const dataToValidate = { ...user, password }
+
+  const validationResult = await validate(password, {
+    ...passwordField,
+    id: user.id,
+    blockData: {},
+    collectionSlug: collectionConfig.slug,
+    data: dataToValidate,
+    event: 'submit',
+    operation: 'update',
+    overrideAccess,
+    path: ['password'],
+    preferences: { fields: {} },
+    req,
+    siblingData: dataToValidate,
+  })
+
+  if (typeof validationResult === 'string') {
+    throw new ValidationError({
+      collection: collectionConfig.slug,
+      errors: [{ message: validationResult, path: 'password' }],
+    })
   }
 }

@@ -6,6 +6,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Mulai mengetik, atau tekan '/' untuk perintah...",
     slashMenuBasicGroupLabel: 'Dasar',
     slashMenuListGroupLabel: 'Daftar',
+    textStyle: 'Gaya teks',
     toolbarItemsActive: '{{count}} aktif',
   },
   ar: {
@@ -13,6 +14,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "ابدأ بالكتابة، أو اضغط على '/' للأوامر ...",
     slashMenuBasicGroupLabel: 'أساسي',
     slashMenuListGroupLabel: 'قوائم',
+    textStyle: 'نمط النص',
     toolbarItemsActive: '{{count}} نشط',
   },
   az: {
@@ -20,6 +22,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Yazmağa başlayın və ya əmrlər üçün '/' düyməsini basın...",
     slashMenuBasicGroupLabel: 'Əsas',
     slashMenuListGroupLabel: 'Siyahılar',
+    textStyle: 'Mətn üslubu',
     toolbarItemsActive: '{{count}} aktiv',
   },
   bg: {
@@ -27,6 +30,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Започнете да пишете или натиснете '/' за команди...",
     slashMenuBasicGroupLabel: 'Основен',
     slashMenuListGroupLabel: 'Списъци',
+    textStyle: 'Стил на текста',
     toolbarItemsActive: '{{count}} активни',
   },
   'bn-BD': {
@@ -34,6 +38,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "টাইপ করা শুরু করুন, অথবা কমান্ডের জন্য '/' চাপুন...",
     slashMenuBasicGroupLabel: 'মৌলিক',
     slashMenuListGroupLabel: 'তালিকা সমূহ',
+    textStyle: 'পাঠ্যের শৈলী',
     toolbarItemsActive: '{{count}} সক্রিয়',
   },
   'bn-IN': {
@@ -41,6 +46,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: 'টাইপ করতে শুরু করুন, অথবা কমান্ডের জন্য ‘/’ চাপুন...',
     slashMenuBasicGroupLabel: 'মৌলিক',
     slashMenuListGroupLabel: 'তালিকাসমূহ',
+    textStyle: 'পাঠ্যের শৈলী',
     toolbarItemsActive: '{{count}} সক্রিয়',
   },
   ca: {
@@ -48,6 +54,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Comença a escriure o prem '/' per a comandes...",
     slashMenuBasicGroupLabel: 'Bàsic',
     slashMenuListGroupLabel: 'Llistes',
+    textStyle: 'Estil de text',
     toolbarItemsActive: '{{count}} actiu',
   },
   cs: {
@@ -55,6 +62,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Začněte psát nebo stiskněte '/' pro příkazy...",
     slashMenuBasicGroupLabel: 'Základní',
     slashMenuListGroupLabel: 'Seznamy',
+    textStyle: 'Styl textu',
     toolbarItemsActive: '{{count}} aktivní',
   },
   da: {
@@ -62,6 +70,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Begynd at skrive, eller tryk på '/' for kommandoer...",
     slashMenuBasicGroupLabel: 'Grundlæggende',
     slashMenuListGroupLabel: 'Lister',
+    textStyle: 'Tekststil',
     toolbarItemsActive: '{{count}} aktive',
   },
   de: {
@@ -69,6 +78,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Beginne zu tippen oder drücke '/' für Befehle...",
     slashMenuBasicGroupLabel: 'Basis',
     slashMenuListGroupLabel: 'Listen',
+    textStyle: 'Textstil',
     toolbarItemsActive: '{{count}} aktiv',
   },
   en: {
@@ -76,6 +86,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Start typing, or press '/' for commands...",
     slashMenuBasicGroupLabel: 'Basic',
     slashMenuListGroupLabel: 'Lists',
+    textStyle: 'Text style',
     toolbarItemsActive: '{{count}} active',
   },
   es: {
@@ -83,6 +94,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Comience a escribir, o presione '/' para comandos...",
     slashMenuBasicGroupLabel: 'Básico',
     slashMenuListGroupLabel: 'Listas',
+    textStyle: 'Estilo de texto',
     toolbarItemsActive: '{{count}} activo',
   },
   et: {
@@ -90,6 +102,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Alusta kirjutamist või vajuta '/' käskude jaoks...",
     slashMenuBasicGroupLabel: 'Põhiline',
     slashMenuListGroupLabel: 'Loendid',
+    textStyle: 'Tekstistiil',
     toolbarItemsActive: '{{count}} aktiivne',
   },
   fa: {
@@ -97,6 +110,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "شروع به تایپ کنید، یا برای دستورات '/' را فشار دهید ...",
     slashMenuBasicGroupLabel: 'پایه',
     slashMenuListGroupLabel: 'لیست ها',
+    textStyle: 'سبک متن',
     toolbarItemsActive: '{{count}} فعال',
   },
   fr: {
@@ -104,6 +118,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Commencez à taper, ou appuyez sur '/' pour les commandes...",
     slashMenuBasicGroupLabel: 'De base',
     slashMenuListGroupLabel: 'Listes',
+    textStyle: 'Style de texte',
     toolbarItemsActive: '{{count}} actif',
   },
   he: {
@@ -111,6 +126,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "התחיל להקליד, או לחץ על '/' עבור פקודות ...",
     slashMenuBasicGroupLabel: 'בסיסי',
     slashMenuListGroupLabel: 'רשימות',
+    textStyle: 'סגנון טקסט',
     toolbarItemsActive: '{{count}} פעיל',
   },
   hr: {
@@ -118,6 +134,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Počnite tipkati, ili pritisnite '/' za naredbe...",
     slashMenuBasicGroupLabel: 'Osnovno',
     slashMenuListGroupLabel: 'Popisi',
+    textStyle: 'Stil teksta',
     toolbarItemsActive: '{{count}} aktivno',
   },
   hu: {
@@ -125,6 +142,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Kezdje el gépelni, vagy nyomja meg a '/' billentyűt a parancsokhoz...",
     slashMenuBasicGroupLabel: 'Alapvető',
     slashMenuListGroupLabel: 'Listák',
+    textStyle: 'Szövegstílus',
     toolbarItemsActive: '{{count}} aktív',
   },
   hy: {
@@ -132,6 +150,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Սկսեք գրել կամ սեղմեք '/' հրամանների համար...",
     slashMenuBasicGroupLabel: 'Հիմնական',
     slashMenuListGroupLabel: 'Ցուցակներ',
+    textStyle: 'Տեքստի ոճ',
     toolbarItemsActive: '{{count}} ակտիվ',
   },
   is: {
@@ -139,6 +158,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Byrjaðu að skrifa eða sláðu inn '/' fyrir skipanir...",
     slashMenuBasicGroupLabel: 'Grunnur',
     slashMenuListGroupLabel: 'Listar',
+    textStyle: 'Textastíll',
     toolbarItemsActive: '{{count}} virk',
   },
   it: {
@@ -146,6 +166,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Inizia a digitare, oppure premi '/' per i comandi...",
     slashMenuBasicGroupLabel: 'Base',
     slashMenuListGroupLabel: 'Elenchi',
+    textStyle: 'Stile del testo',
     toolbarItemsActive: '{{count}} attivo',
   },
   ja: {
@@ -153,6 +174,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "入力を開始するか、コマンドのために'/'を押してください…",
     slashMenuBasicGroupLabel: '基本的な',
     slashMenuListGroupLabel: 'リスト',
+    textStyle: 'テキストスタイル',
     toolbarItemsActive: '{{count}} アクティブ',
   },
   ko: {
@@ -160,6 +182,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "타이핑을 시작하거나, 명령어를 입력하려면 '/'를 누르세요...",
     slashMenuBasicGroupLabel: '기본적인',
     slashMenuListGroupLabel: '목록',
+    textStyle: '텍스트 스타일',
     toolbarItemsActive: '{{count}} 활성화된',
   },
   lt: {
@@ -167,6 +190,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Pradėkite rašyti arba paspauskite '/' komandoms...",
     slashMenuBasicGroupLabel: 'Pagrindinis',
     slashMenuListGroupLabel: 'Sąrašai',
+    textStyle: 'Teksto stilius',
     toolbarItemsActive: '{{count}} aktyvus',
   },
   lv: {
@@ -174,6 +198,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Sāciet rakstīt vai nospiediet '/' komandu ievadīšanai...",
     slashMenuBasicGroupLabel: 'Pamata',
     slashMenuListGroupLabel: 'Saraksti',
+    textStyle: 'Teksta stils',
     toolbarItemsActive: '{{count}} aktīvs',
   },
   my: {
@@ -181,6 +206,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Mula menaip, atau tekan '/' untuk arahan...",
     slashMenuBasicGroupLabel: 'အခြေခံ',
     slashMenuListGroupLabel: 'Senarai',
+    textStyle: 'စာသားပုံစံ',
     toolbarItemsActive: '{{count}} aktif',
   },
   nb: {
@@ -188,6 +214,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Begynn å skrive, eller trykk '/' for kommandoer...",
     slashMenuBasicGroupLabel: 'Grunnleggende',
     slashMenuListGroupLabel: 'Lister',
+    textStyle: 'Tekststil',
     toolbarItemsActive: '{{count}} aktiv',
   },
   nl: {
@@ -195,6 +222,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Begin met typen, of druk op '/' voor opdrachten...",
     slashMenuBasicGroupLabel: 'Basis',
     slashMenuListGroupLabel: 'Lijsten',
+    textStyle: 'Tekststijl',
     toolbarItemsActive: '{{count}} actief',
   },
   pl: {
@@ -202,6 +230,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Rozpocznij pisanie lub naciśnij '/' dla poleceń...",
     slashMenuBasicGroupLabel: 'Podstawowy',
     slashMenuListGroupLabel: 'Listy',
+    textStyle: 'Styl tekstu',
     toolbarItemsActive: '{{count}} aktywny',
   },
   pt: {
@@ -209,6 +238,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Comece a digitar, ou pressione '/' para comandos...",
     slashMenuBasicGroupLabel: 'Básico',
     slashMenuListGroupLabel: 'Listas',
+    textStyle: 'Estilo de texto',
     toolbarItemsActive: '{{count}} ativo',
   },
   ro: {
@@ -216,6 +246,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Începeți să tastați sau apăsați '/' pentru comenzi...",
     slashMenuBasicGroupLabel: 'De bază',
     slashMenuListGroupLabel: 'Liste',
+    textStyle: 'Stil de text',
     toolbarItemsActive: '{{count}} activ',
   },
   rs: {
@@ -223,6 +254,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Почните да куцате, или притисните '/' за команде...",
     slashMenuBasicGroupLabel: 'Основно',
     slashMenuListGroupLabel: 'Листе',
+    textStyle: 'Стил текста',
     toolbarItemsActive: '{{count}} активно',
   },
   'rs-latin': {
@@ -230,6 +262,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Počnite da kucate, ili pritisnite '/' za komande...",
     slashMenuBasicGroupLabel: 'Osnovno',
     slashMenuListGroupLabel: 'Liste',
+    textStyle: 'Stil teksta',
     toolbarItemsActive: '{{count}} aktivan',
   },
   ru: {
@@ -237,6 +270,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Начните печатать или нажмите '/' для команд...",
     slashMenuBasicGroupLabel: 'Базовый',
     slashMenuListGroupLabel: 'Списки',
+    textStyle: 'Стиль текста',
     toolbarItemsActive: '{{count}} активных',
   },
   sk: {
@@ -244,6 +278,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Začnite písať alebo stlačte '/' pre príkazy...",
     slashMenuBasicGroupLabel: 'Základný',
     slashMenuListGroupLabel: 'Zoznamy',
+    textStyle: 'Štýl textu',
     toolbarItemsActive: '{{count}} aktívne',
   },
   sl: {
@@ -251,6 +286,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: 'Začnite tipkati ali pritisnite "/" za ukaze...',
     slashMenuBasicGroupLabel: 'Osnovno',
     slashMenuListGroupLabel: 'Seznami',
+    textStyle: 'Slog besedila',
     toolbarItemsActive: '{{count}} aktivno',
   },
   sv: {
@@ -258,6 +294,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Börja skriva, eller tryck på '/' för kommandon...",
     slashMenuBasicGroupLabel: 'Grundläggande',
     slashMenuListGroupLabel: 'Listor',
+    textStyle: 'Textstil',
     toolbarItemsActive: '{{count}} aktiv',
   },
   ta: {
@@ -265,6 +302,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "எழுதத் தொடங்கவும், அல்லது கட்டளைகளுக்கு '/' அழுத்தவும்...",
     slashMenuBasicGroupLabel: 'அடிப்படை',
     slashMenuListGroupLabel: 'பட்டியல்கள்',
+    textStyle: 'உரை நடை',
     toolbarItemsActive: '{{count}} செயலில் உள்ளது',
   },
   th: {
@@ -272,6 +310,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "เริ่มพิมพ์หรือกด '/' สำหรับคำสั่ง...",
     slashMenuBasicGroupLabel: 'พื้นฐาน',
     slashMenuListGroupLabel: 'รายการ',
+    textStyle: 'รูปแบบข้อความ',
     toolbarItemsActive: '{{count}} ที่ใช้งานอยู่',
   },
   tr: {
@@ -279,6 +318,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Yazmaya başlayın veya komutlar için '/' tuşuna basın...",
     slashMenuBasicGroupLabel: 'Temel',
     slashMenuListGroupLabel: 'Listeler',
+    textStyle: 'Metin stili',
     toolbarItemsActive: '{{count}} aktif',
   },
   uk: {
@@ -286,6 +326,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Почніть друкувати, або натисніть '/' для команд...",
     slashMenuBasicGroupLabel: 'Базовий',
     slashMenuListGroupLabel: 'Списки',
+    textStyle: 'Стиль тексту',
     toolbarItemsActive: '{{count}} активний',
   },
   vi: {
@@ -293,6 +334,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "Bắt đầu gõ, hoặc nhấn '/' để gọi lệnh...",
     slashMenuBasicGroupLabel: 'Cơ bản',
     slashMenuListGroupLabel: 'Danh sách',
+    textStyle: 'Kiểu văn bản',
     toolbarItemsActive: '{{count}} đang hoạt động',
   },
   zh: {
@@ -300,6 +342,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "开始输入，或按'/'进行命令...",
     slashMenuBasicGroupLabel: '基础',
     slashMenuListGroupLabel: '列表',
+    textStyle: '文本样式',
     toolbarItemsActive: '{{count}} 活跃',
   },
   'zh-TW': {
@@ -307,6 +350,7 @@ export const i18n: Partial<GenericLanguages> = {
     placeholder: "開始輸入，或按'/'以使用命令...",
     slashMenuBasicGroupLabel: '基本的',
     slashMenuListGroupLabel: '清單',
+    textStyle: '文字樣式',
     toolbarItemsActive: '{{count}} 活躍中',
   },
 }

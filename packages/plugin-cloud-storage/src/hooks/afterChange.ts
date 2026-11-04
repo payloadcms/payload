@@ -45,7 +45,7 @@ export const getAfterChangeHook =
     // Restore upload metadata removed by select, including partially selected image sizes.
     const uploadData = select ? deepMergeWithSourceArrays<FileData & TypeWithID>(data, doc) : doc
     const withProxyPrefix = (upload: FileData & TypeWithID): FileData & TypeWithID => {
-      const { prefix } = upload as { prefix?: string } & FileData & TypeWithID
+      const { prefix } = upload
 
       if (disablePayloadAccessControl || hasCustomFileURL || !useCompositePrefixes || !prefix) {
         return upload
@@ -230,7 +230,7 @@ export const getAfterChangeHook =
           const newKeys = new Set(
             [...newFilenames].map((filename) =>
               resolveKey({
-                data: newFileData as { _objectKey?: string; prefix?: string },
+                data: newFileData,
                 filename,
               }),
             ),
@@ -241,7 +241,7 @@ export const getAfterChangeHook =
               return
             }
             const storageFilePath = resolveKey({
-              data: previousDoc as { _objectKey?: string; prefix?: string },
+              data: previousDoc,
               filename,
             })
             if (!newKeys.has(storageFilePath)) {

@@ -278,6 +278,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     and: '和',
     anotherUser: '另一位用户',
     anotherUserTakenOver: '另一位用户接管了此文档的编辑。',
+    apiResponse: 'API 响应',
     applyChanges: '应用更改',
     ascending: '升序',
     auto: '自动',
@@ -345,6 +346,13 @@ export const zhTranslations: DefaultTranslationsObject = {
     documentModified: '文档已修改',
     documentOutOfDate: '此文档最近已由其他用户更新。您当前的视图已过期。',
     documents: '文档',
+    dragCancelled: '已取消拖动{{label}}。',
+    dragDropped: '已放下{{label}}。 位置：第{{position}}项，共{{count}}项。',
+    dragInstructions:
+      '按Space或Enter拾起一行。使用方向键移动。使用VoiceOver时，请关闭Quick Nav并使用Command + 方向键。按Space或Enter放下，或按Escape取消。',
+    dragMoved: '{{label}}: {{direction}}. 位置：第{{position}}项，共{{count}}项。',
+    dragPickedUp: '已拾起{{label}}。 位置：第{{position}}项，共{{count}}项。',
+    dragToMove: '拖动以移动',
     dragToReorder: '拖动以重新排序',
     duplicate: '复制',
     duplicateWithoutSaving: '复制副本(不保存更改)。',
@@ -456,6 +464,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     reindexingAll: '正在重新索引所有 {{collections}}。',
     reloadDocument: '重新加载文档',
     remove: '移除',
+    removeFilter: '移除筛选器',
     rename: '重命名',
     replaceRow: '替换行',
     requiredFields: '标有 * 的字段为必填项。',
@@ -546,6 +555,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     yes: '是的',
   },
   hierarchy: {
+    folderLocation: '文件夹位置',
     goTo: '前往“{{name}}”',
     itemsMovedTo: '{{title}} 已移至 {{destination}}',
     itemsMovedToRoot: '{{title}}移至根目录',
@@ -673,6 +683,10 @@ export const zhTranslations: DefaultTranslationsObject = {
     type: '类型',
     aboutToPublishSelection: '您即将发布所选内容中的所有 {{label}}。 您确定吗？',
     aboutToRestore: '您将把这个 {{label}} 文档恢复到 {{versionDate}} 时的状态',
+    aboutToRestoreAsDraft:
+      '将 {{versionDate}} 的内容恢复为草稿。已发布的内容将保持不变，直到您从编辑器中发布。',
+    aboutToRestoreAsDraftAllLocales:
+      '将 {{versionDate}} 的所有语言版本的内容恢复为草稿。已发布的内容将保持不变，直到您从编辑器中发布。',
     aboutToRestoreGlobal: '您要将全局的 {{label}} 恢复到 {{versionDate}} 时的状态',
     aboutToRevertToPublished: '您将要把这个文档的内容还原到它的发布状态。您确定吗？',
     aboutToUnpublish: '您即将取消发布这个文档。您确定吗？',

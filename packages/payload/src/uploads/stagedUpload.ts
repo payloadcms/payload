@@ -264,7 +264,7 @@ const verifyUploadID = async (
       throw new Error()
     }
 
-    return payload as StagedUploadToken
+    return payload
   } catch {
     throw new APIError('Invalid or expired staged upload.', 400)
   }

@@ -47,7 +47,7 @@ export const restoreVersionTool = defineCollectionTool({
           text: `Version "${id}" restored successfully in collection "${slug}"!\nRestored document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
         },
       ],
-      doc: result as Record<string, unknown>,
+      doc: result,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'

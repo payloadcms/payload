@@ -144,6 +144,15 @@ describe('Admin routing', () => {
       },
     )
 
+    test('should return a completion promise for synchronous transition callbacks', async () => {
+      await page.goto(postsURL.create)
+      await page.getByRole('button', { name: 'Run synchronous transition' }).press('Enter')
+      await expect(page.getByRole('status', { name: 'Transition result' })).toHaveText(
+        'Transition complete',
+      )
+      await expect(page.locator('.progress-bar')).toBeHidden()
+    })
+
     test('should show route progress during navigation', async () => {
       await page.goto(postsURL.admin)
       await expect(page.locator('.progress-bar')).toBeHidden()

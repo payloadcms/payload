@@ -64,8 +64,8 @@ export const defineCLICommand = <TInput extends CLIInputSchema>(
     ...definition,
     allowUnknownOption: definition.allowUnknownOption ?? false,
     cli: cli === false ? false : overrides,
-    handler: definition.handler as CLICommand['handler'],
-    input: input as CLIInputSchema,
+    handler: definition.handler,
+    input,
     schema,
   }
 }

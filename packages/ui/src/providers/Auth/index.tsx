@@ -91,7 +91,7 @@ export function AuthProvider({
 
   const redirectToInactivityRoute = useCallback(() => {
     const baseAdminRoute = formatAdminURL({ adminRoute, path: '' })
-    startRouteTransition(() =>
+    void startRouteTransition(() =>
       router.replace(
         formatAdminURL({
           adminRoute,
@@ -104,7 +104,7 @@ export function AuthProvider({
   }, [router, adminRoute, logoutInactivityRoute, closeAllModals, startRouteTransition])
 
   const redirectToLoginRoute = useCallback(() => {
-    startRouteTransition(() =>
+    void startRouteTransition(() =>
       router.replace(
         formatAdminURL({
           adminRoute,

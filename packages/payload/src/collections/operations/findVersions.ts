@@ -249,10 +249,10 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       ...row,
       version: markHistoricalFileURLs({
         collectionSlug: collectionConfig.slug,
-        doc: row.version as Record<string, unknown>,
+        doc: row.version,
         req,
         versionID: row.id,
-      }) as TData,
+      }),
     }))
   }
 

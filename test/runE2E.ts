@@ -35,6 +35,7 @@ const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 const testRunCodes: { code: number; suiteName: string }[] = []
 const {
   _: args,
+  audit,
   bail,
   'fully-parallel': fullyParallel,
   grep,
@@ -46,7 +47,24 @@ const {
   'update-snapshots': updateSnapshots,
   workers,
 } = minimist(process.argv.slice(2), { alias: { g: 'grep' } })
-const suiteName = args[0]
+const suiteName = args[0] ?? (audit ? 'a11y' : undefined)
+let configFile = bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'
+let testFilePattern = '*e2e.spec.ts'
+
+if (audit && screenReader) {
+  throw new Error('Choose either --audit or --screen-reader.')
+}
+
+if (audit) {
+  if (suiteName !== 'a11y') {
+    throw new Error('Audit validation is only available for the a11y suite.')
+  }
+  configFile = 'playwright.audit.config.ts'
+  testFilePattern = 'WCAG.audit.spec.ts'
+} else if (screenReader) {
+  configFile = 'playwright.screen-reader.config.ts'
+  testFilePattern = '*screen-reader.spec.ts'
+}
 
 // `@visual` screenshot comparisons only run against a real production build (see
 // `expectScreenshot`) and are opted into explicitly, via `--grep @visual`, by the dedicated
@@ -57,8 +75,12 @@ const effectiveGrepInvert = grepInvert ?? (grep === '@visual' ? undefined : '@vi
 
 // Run all
 if (!suiteName) {
-  const testFilePattern = screenReader ? '*screen-reader.spec.ts' : '*e2e.spec.ts'
   let files = await globby(`${path.resolve(dirname).replace(/\\/g, '/')}/**/${testFilePattern}`)
+
+  // Accessibility has its own gated CI job; exclude it from aggregate runs.
+  if (process.env.CI === 'true' && !screenReader) {
+    files = files.filter((file) => path.relative(dirname, file).split(path.sep)[0] !== 'a11y')
+  }
 
   if (grep) {
     // Booting a server per suite is slow, so skip spec files that can't match. This only works
@@ -105,7 +127,6 @@ if (!suiteName) {
       grepArg: grep,
       grepInvertArg: effectiveGrepInvert,
       headedArg: headed,
-      screenReaderArg: screenReader,
       suitePaths: file,
       updateSnapshotsArg: updateSnapshots,
     })
@@ -127,7 +148,6 @@ if (!suiteName) {
     .resolve(dirname, inputSuitePath)
     .replaceAll('__', '/')
 
-  const testFilePattern = screenReader ? '*screen-reader.spec.ts' : '*e2e.spec.ts'
   const allSuitesInFolder = await globby(
     `${suiteFolderPath.replace(/\\/g, '/')}/${testFilePattern}`,
   )
@@ -145,12 +165,12 @@ if (!suiteName) {
   // Run all spec files in the folder with a single dev server and playwright invocation
   // This avoids port conflicts when multiple spec files exist in the same folder
   await executePlaywright({
+    bail,
     baseTestFolder,
     fullyParallelArg: fullyParallel,
     grepArg: grep,
     grepInvertArg: effectiveGrepInvert,
     headedArg: headed,
-    screenReaderArg: screenReader,
     shardArg: shard,
     suiteConfigPath,
     suitePaths: allSuitesInFolder,
@@ -175,7 +195,6 @@ async function executePlaywright({
   grepArg,
   grepInvertArg,
   headedArg,
-  screenReaderArg,
   shardArg,
   suiteConfigPath,
   suitePaths,
@@ -188,7 +207,6 @@ async function executePlaywright({
   grepArg?: string
   grepInvertArg?: string
   headedArg?: boolean
-  screenReaderArg?: boolean
   shardArg?: string
   suiteConfigPath?: string
   suitePaths: string | string[]
@@ -197,12 +215,7 @@ async function executePlaywright({
 }) {
   const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
   console.log(`Executing ${paths.join(', ')}...`)
-  const playwrightCfg = path.resolve(
-    dirname,
-    screenReaderArg
-      ? 'playwright.screen-reader.config.ts'
-      : `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
-  )
+  const playwrightCfg = path.resolve(dirname, configFile)
 
   const spawnDevArgs: string[] = [
     'dev',
@@ -245,6 +258,7 @@ async function executePlaywright({
 
   await resetServer({ child: server?.child, port: e2ePort })
 
+  const auditBailFlag = audit && bail && !process.env.CI ? ' --max-failures=1' : ''
   const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
   const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
   const workersFlag = workersArg !== undefined ? ` --workers=${workersArg}` : ''
@@ -253,7 +267,7 @@ async function executePlaywright({
   const headedFlag = headedArg ? ' --headed' : ''
   const updateSnapshotsFlag = updateSnapshotsArg ? ' --update-snapshots' : ''
   const cmd = slash(
-    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${grepFlag}${grepInvertFlag}${headedFlag}${updateSnapshotsFlag}`,
+    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${auditBailFlag}${grepFlag}${grepInvertFlag}${headedFlag}${updateSnapshotsFlag}`,
   )
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {

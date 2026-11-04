@@ -147,7 +147,7 @@ const TextFieldComponent: React.FC<TextFieldClientProps> = (props) => {
       showError={showError}
       style={styles}
       value={(value as string) || ''}
-      valueToRender={valueToRender as Option[]}
+      valueToRender={valueToRender}
     />
   )
 }

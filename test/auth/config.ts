@@ -12,6 +12,8 @@ import {
   BASE_PATH,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
+  passwordCustomValidateSlug,
+  passwordMinLengthSlug,
   publicUsersSlug,
   rotateSecretLoginSlug,
   rotateSecretOldSecret,
@@ -300,6 +302,33 @@ export default buildConfigWithDefaults({
           plural: 'API Keys',
           singular: 'API Key',
         },
+        versions: false,
+      },
+      {
+        slug: passwordMinLengthSlug,
+        auth: true,
+        fields: [
+          {
+            name: 'password',
+            type: 'text',
+            hidden: true,
+            minLength: 8,
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: passwordCustomValidateSlug,
+        auth: true,
+        fields: [
+          {
+            name: 'password',
+            type: 'text',
+            hidden: true,
+            validate: (value: null | string | undefined) =>
+              !value || /\d/.test(value) || 'Password must contain a number',
+          },
+        ],
         versions: false,
       },
       {

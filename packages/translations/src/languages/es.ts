@@ -301,6 +301,7 @@ export const esTranslations: DefaultTranslationsObject = {
     and: 'Y',
     anotherUser: 'Otro usuario',
     anotherUserTakenOver: 'Otro usuario ha tomado el control de la edición de este documento.',
+    apiResponse: 'Respuesta de la API',
     applyChanges: 'Aplicar Cambios',
     ascending: 'Ascendente',
     auto: 'Automático',
@@ -372,6 +373,13 @@ export const esTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Este documento ha sido actualizado recientemente por otro usuario. Su vista está desactualizada.',
     documents: 'Documentos',
+    dragCancelled: 'Arrastre de {{label}} cancelado.',
+    dragDropped: '{{label}} soltado. Posición {{position}} de {{count}}.',
+    dragInstructions:
+      'Pulse Space o Enter para recoger una fila. Use las flechas para moverla. Con VoiceOver, desactive Quick Nav y use Command + las flechas. Pulse Space o Enter para soltarla, o Escape para cancelar.',
+    dragMoved: '{{label}}: {{direction}}. Posición {{position}} de {{count}}.',
+    dragPickedUp: '{{label}} recogido. Posición {{position}} de {{count}}.',
+    dragToMove: 'Arrastrar para mover',
     dragToReorder: 'Arrastre para reordenar',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplicar sin guardar cambios',
@@ -488,6 +496,7 @@ export const esTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Reindexando todas las {{collections}}.',
     reloadDocument: 'Recargar documento',
     remove: 'Eliminar',
+    removeFilter: 'Eliminar filtro',
     rename: 'Renombrar',
     replaceRow: 'Reemplazar fila',
     requiredFields: 'Los campos marcados con * son obligatorios.',
@@ -580,6 +589,7 @@ export const esTranslations: DefaultTranslationsObject = {
     yes: 'Sí',
   },
   hierarchy: {
+    folderLocation: 'Ubicación de la carpeta',
     goTo: 'Ir a "{{name}}"',
     itemsMovedTo: '{{title}} se trasladó a {{destination}}',
     itemsMovedToRoot: '{{title}} se movió a la raíz',
@@ -716,6 +726,10 @@ export const esTranslations: DefaultTranslationsObject = {
       'Se publicarán todos los elementos seleccionados de {{label}}. ¿Desea continuar?',
     aboutToRestore:
       'Está a punto de restaurar este documento de {{label}} al estado en el que se encontraba el {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Restaure el contenido del {{versionDate}} como borrador. El contenido publicado permanecerá sin cambios hasta que publique desde el editor.',
+    aboutToRestoreAsDraftAllLocales:
+      'Restaure el contenido del {{versionDate}} como borrador en todos los idiomas. El contenido publicado permanecerá sin cambios hasta que publique desde el editor.',
     aboutToRestoreGlobal:
       'Está a punto de restaurar el {{label}} global al estado en el que se encontraba el {{versionDate}}.',
     aboutToRevertToPublished:

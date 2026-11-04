@@ -46,7 +46,7 @@
   }
   .segmented-control__input:focus-visible + .segmented-control__icon {
     outline: var(--stroke-width-small) solid var(--color-border-selected);
-    outline-offset: -1px;
+    outline-offset: var(--accessibility-outline-inset);
     box-shadow: none;
   }
 }

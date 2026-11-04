@@ -118,7 +118,7 @@ test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
         ).rejects.toThrow('Server document hook failed')
 
         expect(uploadedKeys).toHaveLength(4)
-        expect(uploadedKeys.some((key) => key.endsWith('/image-original.png'))).toBe(true)
+        expect(uploadedKeys.some((key) => key.endsWith('/image.png'))).toBe(true)
         expect((await list()).blobs).toEqual([])
         expect(
           (await payload.count({ collection: mediaSlug, overrideAccess: true })).totalDocs,
@@ -220,7 +220,7 @@ test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
 
       expect(upload.id).toBeTruthy()
       expect(upload.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
-      expect(upload.url).toContain('image-original.png')
+      expect(upload.url).toContain('image.png')
       expect(upload.url).not.toMatch(/^\/api\//)
 
       const response = await fetch(upload.url)
@@ -259,9 +259,9 @@ test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
       })
 
       expect(upload.id).toBeTruthy()
-      expect(upload.filename).toBe('image with spaces-original.png')
+      expect(upload.filename).toBe('image with spaces.png')
       expect(upload.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
-      expect(upload.url).toContain('image%20with%20spaces-original.png')
+      expect(upload.url).toContain('image%20with%20spaces.png')
 
       const response = await fetch(upload.url)
       expect(response.status).toBe(200)
@@ -297,8 +297,8 @@ test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
 
-      expect(upload1.filename).toBe('image-original.png')
-      expect(upload2.filename).toBe('image-original-1.png')
+      expect(upload1.filename).toBe('image.png')
+      expect(upload2.filename).toBe('image-1.png')
       expect(upload1.prefix).toBe(prefix)
       expect(upload2.prefix).toBe(prefix)
     })
@@ -345,8 +345,8 @@ test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
 
-      expect(upload1.filename).toBe('image-original.png')
-      expect(upload2.filename).toBe('image-original.png')
+      expect(upload1.filename).toBe('image.png')
+      expect(upload2.filename).toBe('image.png')
       expect(upload1.prefix).toBe(prefix)
       // New uploads store the document prefix beneath the collection prefix.
       expect(upload2.prefix).toBe(`${prefix}/different-prefix`)
@@ -375,8 +375,8 @@ test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
 
-      expect(tenantAUpload.filename).toBe('image-original.png')
-      expect(tenantBUpload.filename).toBe('image-original.png')
+      expect(tenantAUpload.filename).toBe('image.png')
+      expect(tenantBUpload.filename).toBe('image.png')
       expect(tenantAUpload.prefix).toBe('tenant-a')
       expect(tenantBUpload.prefix).toBe('tenant-b')
     })

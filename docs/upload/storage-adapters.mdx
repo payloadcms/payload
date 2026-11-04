@@ -504,6 +504,8 @@ When providing upload instructions, set `uploadInstructions.useInAdmin` to `true
 
 `staticHandler` receives `params.operation`: `'read'` for an ordinary file request (treat a missing value as `'read'`, for backward compatibility), or `'transform'` when Payload is reading the file's bytes on behalf of a [file transformer](./transformers), which only happens when at least one transformer is configured. For `'transform'`, return the full object body rather than a redirect to a signed/public URL, and skip `Range` handling, conditional/ETag short-circuiting, and `modifyResponseHeaders` — Payload applies headers once, on the final response, after every transformer has run. The five first-party adapters already implement this; a custom adapter only needs to branch on `operation` if it currently redirects to an external URL for `'read'`.
 
+`staticHandler` also receives `params.isOriginal`. It is `true` when the request URL includes `?original=true`. A cropped or otherwise processed upload stores its original under its own `_objectKey` with the same filename as the main file, so the filename alone does not identify which file to serve. The flag only chooses between the main file and the original when both have the requested filename. Other filenames, such as image sizes, ignore it. Pass `isOriginal` to `getFilePrefix`, and it returns the folder of the requested file. An adapter that ignores `isOriginal` always serves the main file, so the original of a processed upload cannot be reached by URL.
+
 ```ts
 import { buildConfig } from 'payload'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
@@ -524,6 +526,98 @@ export default buildConfig({
   // The rest of your config goes here
 })
 ```
+
+### Upload receipts#custom-upload-receipts
+
+When the browser uploads directly to your storage provider, the document request only carries an `uploadReference` that says where the file went. Set `uploadInstructions.requiresUploadReceipt` to `true` so that Payload only accepts references it signed. Sign them with `resolveSignedURLKey` from `@payloadcms/plugin-cloud-storage/utilities` and return its `uploadReference` from `generate`:
+
+```ts
+import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
+
+const adapter: GeneratedAdapter = {
+  // ...
+  uploadInstructions: {
+    enabled: true,
+    generate: async ({
+      collectionSlug,
+      docPrefix,
+      filename,
+      filesize,
+      mimeType,
+      req,
+    }) => {
+      // Check access before issuing an upload URL.
+      const { sanitizedFilename, storageFilePath, uploadReference } =
+        await resolveSignedURLKey({
+          adapterData: { providerUploadID: 'upload-123' },
+          collectionPrefix: 'media',
+          collectionSlug,
+          docPrefix,
+          filename,
+          req,
+        })
+
+      return {
+        type: 'http',
+        file: {
+          filename: sanitizedFilename,
+          mimeType,
+          size: filesize,
+          uploadReference,
+        },
+        request: {
+          method: 'PUT',
+          url: await createProviderUploadURL(storageFilePath),
+        },
+      }
+    },
+    requiresUploadReceipt: true,
+    useInAdmin: true,
+  },
+}
+```
+
+The receipt binds the upload to the user, collection, filename, and storage key, and expires after six hours. Upload the file to the returned `storageFilePath`; Payload rejects a receipt whose key does not end with `<prefix>/<_objectKey>/<original filename>`.
+
+Payload rebuilds `uploadReference` from the verified receipt before calling your upload handlers. Handlers receive `_objectKey`, `prefix`, `signedReceipt`, `adapterData`, and `clientData`:
+
+- `adapterData` is optional data your adapter needs back after the upload, such as a provider upload ID. Payload signs it into the receipt, so the browser cannot change it. It is not stored on the document.
+- `clientData` holds any other fields the browser added to `uploadReference`, such as an object ID the provider returned after the upload. Payload does not verify or read them, so check them before use, for example against `adapterData`. `clientData` is also set when receipts are off.
+
+```ts
+import type { UploadReference } from '@payloadcms/plugin-cloud-storage/types'
+
+staticHandler: async (req, { params }) => {
+  // Set only when Payload fetches a client upload; ordinary file reads have no reference.
+  const uploadReference = params.uploadReference as UploadReference | undefined
+
+  if (uploadReference) {
+    const { adapterData, clientData } = uploadReference
+    const expectedObjectID = await lookUpObjectID(adapterData?.providerUploadID)
+
+    if (clientData?.providerObjectID !== expectedObjectID) {
+      throw new Error('Upload does not match the signed upload ID')
+    }
+  }
+  // ...
+},
+```
+
+Instead of checking `clientData` with the provider in the handler, you can sign a value that exists only after the upload. To do this, call `resignClientUploadReceipt` from an endpoint your adapter's client handler calls after the upload, and send the new receipt with the document. It adds to `adapterData` and keeps every other field, including the user and expiry, so it only works before the receipt expires and, for a logged-in user, only in a request from that user. If your access check allows uploads without a login, anyone who has the receipt can re-sign it, so check ownership in your endpoint if you need it. The first receipt is still valid, so the browser can send it instead. If the field you add is required, reject the upload in your handler when it is missing.
+
+```ts
+import { resignClientUploadReceipt } from '@payloadcms/plugin-cloud-storage/utilities'
+
+// In your upload-complete endpoint, after confirming the object with the provider:
+const signedReceipt = resignClientUploadReceipt({
+  adapterData: { providerObjectID },
+  collectionSlug,
+  req,
+  signedReceipt: uploadReference.signedReceipt,
+})
+```
+
+Client uploads keep an [original and file history](./overview#file-versioning) only when a receipt is verified. Without `requiresUploadReceipt`, Payload does not verify `_objectKey`, `prefix`, or `signedReceipt`, and the upload has no original or file history.
 
 ## Plugin options
 

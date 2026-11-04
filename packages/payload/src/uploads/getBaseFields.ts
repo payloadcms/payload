@@ -4,6 +4,7 @@ import type { Field } from '../fields/config/types.js'
 import type { SanitizedUploadConfig } from './types.js'
 
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
+import { shouldRequestOriginal } from './isOriginalFileRequest.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
 import { validateUploadFilename } from './validateUploadFilename.js'
 
@@ -189,6 +190,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                   collectionSlug: collection.slug,
                   config,
                   filename: data?.original?.filename || originalDoc?.original?.filename,
+                  isOriginal: shouldRequestOriginal({ doc: data ?? originalDoc }),
                   relative: false,
                   serverURL: req.payload.config.serverURL,
                   urlOrPath: value,
@@ -201,6 +203,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                   collectionSlug: collection.slug,
                   config,
                   filename: data?.original?.filename || originalDoc?.original?.filename,
+                  isOriginal: shouldRequestOriginal({ doc: data ?? originalDoc }),
                   relative: true,
                   serverURL: req.payload.config.serverURL,
                   urlOrPath: value,

@@ -280,6 +280,7 @@ export const thTranslations: DefaultTranslationsObject = {
     and: 'และ',
     anotherUser: 'ผู้ใช้อื่น',
     anotherUserTakenOver: 'ผู้ใช้อื่นเข้าครอบครองการแก้ไขเอกสารนี้แล้ว',
+    apiResponse: 'การตอบกลับ API',
     applyChanges: 'ใช้การเปลี่ยนแปลง',
     ascending: 'น้อยไปมาก',
     auto: 'อัตโนมัติ',
@@ -349,6 +350,13 @@ export const thTranslations: DefaultTranslationsObject = {
     documentModified: 'เอกสารถูกแก้ไข',
     documentOutOfDate: 'เอกสารนี้ได้รับการปรับปรุงเมื่อเร็ว ๆ นี้โดยผู้ใช้คนอื่น มุมมองของคุณล้าสมัยแล้ว',
     documents: 'เอกสาร',
+    dragCancelled: 'ยกเลิกการลาก {{label}} แล้ว',
+    dragDropped: 'วาง {{label}} แล้ว ตำแหน่ง {{position}} จาก {{count}}',
+    dragInstructions:
+      'กด Space หรือ Enter เพื่อหยิบแถว ใช้ปุ่มลูกศรเพื่อย้าย เมื่อใช้ VoiceOver ให้ปิด Quick Nav และใช้ Command + ปุ่มลูกศร กด Space หรือ Enter เพื่อวาง หรือ Escape เพื่อยกเลิก',
+    dragMoved: '{{label}}: {{direction}}. ตำแหน่ง {{position}} จาก {{count}}',
+    dragPickedUp: 'หยิบ {{label}} แล้ว ตำแหน่ง {{position}} จาก {{count}}',
+    dragToMove: 'ลากเพื่อย้าย',
     dragToReorder: 'ลากเพื่อจัดลำดับใหม่',
     duplicate: 'สำเนา',
     duplicateWithoutSaving: 'สำเนาโดยไม่บันทึกการแก้ไข',
@@ -460,6 +468,7 @@ export const thTranslations: DefaultTranslationsObject = {
     reindexingAll: 'กำลังทำการจัดทำดัชนีใหม่ทั้งหมดใน {{collections}}.',
     reloadDocument: 'โหลดเอกสารใหม่',
     remove: 'ลบ',
+    removeFilter: 'นำตัวกรองออก',
     rename: 'เปลี่ยนชื่อ',
     replaceRow: 'แทนที่แถว',
     requiredFields: 'จำเป็นต้องกรอกช่องที่มีเครื่องหมาย *',
@@ -551,6 +560,7 @@ export const thTranslations: DefaultTranslationsObject = {
     yes: 'ใช่',
   },
   hierarchy: {
+    folderLocation: 'ตำแหน่งโฟลเดอร์',
     goTo: 'ไปที่ "{{name}}"',
     itemsMovedTo: '{{title}} ย้ายไปที่ {{destination}}',
     itemsMovedToRoot: '{{title}} ถูกย้ายไปยังราก',
@@ -680,6 +690,10 @@ export const thTranslations: DefaultTranslationsObject = {
     type: 'ประเภท',
     aboutToPublishSelection: 'คุณกำลังจะเผยแพร่ {{label}} ทั้งหมดในส่วนที่เลือก คุณแน่ใจไหม?',
     aboutToRestore: 'คุณกำลังจะคืนค่าเอกสาร {{label}} นี้กลับไปอยู่ในเวอร์ชันเมื่อวันที่ {{versionDate}}',
+    aboutToRestoreAsDraft:
+      'กู้คืนเนื้อหาจาก {{versionDate}} เป็นฉบับร่าง เนื้อหาที่เผยแพร่จะยังคงไม่เปลี่ยนแปลงจนกว่าคุณจะเผยแพร่จากตัวแก้ไข',
+    aboutToRestoreAsDraftAllLocales:
+      'กู้คืนเนื้อหาจาก {{versionDate}} เป็นฉบับร่างในทุกภาษา เนื้อหาที่เผยแพร่จะยังคงไม่เปลี่ยนแปลงจนกว่าคุณจะเผยแพร่จากตัวแก้ไข',
     aboutToRestoreGlobal: 'คุณกำลังจะคืนค่า global {{label}} กลับไปอยู่ในเวอร์ชันเมื่อวันที่ {{versionDate}}.',
     aboutToRevertToPublished:
       'คุณกำลังจะย้อนการเปลี่ยนแปลงของเอกสารนี้ไปยังเวอร์ชันที่เผยแพร่อยู่ คุณต้องการดำเนินการต่อหรือไม่?',

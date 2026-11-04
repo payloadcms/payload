@@ -19,7 +19,7 @@ Never report a task complete because the edit looks right. Confirm it. A silent 
 
 ## 0. Preconditions
 - Work on a clean git tree or a fresh branch.
-- Use Node >=24.15 (the exact engines floor is printed by the command in step 2).
+- Use Node >=24.22.1 (the exact engines floor is printed by the command in step 2).
 
 ## 1. Pre-upgrade migrations (do these on v3, before touching versions)
 Some migrations need the v3 tooling that v4 deletes, so they MUST run before the upgrade:

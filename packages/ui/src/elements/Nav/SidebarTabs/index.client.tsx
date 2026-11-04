@@ -1,7 +1,7 @@
 'use client'
 
 import { PREFERENCE_KEYS } from 'payload/shared'
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useId, useRef, useState } from 'react'
 
 import type { RenderTabServerFnArgs, RenderTabServerFnReturnType } from './renderTabServerFn.js'
 
@@ -11,6 +11,7 @@ import { SidebarTabsProvider } from '../../../providers/SidebarTabs/index.js'
 import { DelayedSpinner } from '../../DelayedSpinner/index.js'
 import { Tooltip } from '../../Tooltip/index.js'
 import { TabError } from './TabError/index.js'
+import './index.css'
 
 export type TabMetadata = {
   icon: React.ReactNode
@@ -42,13 +43,33 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
 }) => {
   const { setPreference } = usePreferences()
   const { serverFunction } = useServerFunctions()
+  const tabsID = useId()
 
   const [activeTabID, setActiveTabID] = useState(initialActiveTabID)
   const [tabContent, setTabContent] = useState<Record<string, React.ReactNode>>(initialTabContents)
   const [loadingTab, setLoadingTab] = useState<null | string>(null)
   const [hoveredTab, setHoveredTab] = useState<null | string>(null)
+  const [focusedTab, setFocusedTab] = useState<null | string>(null)
+  const [isTooltipDismissed, setIsTooltipDismissed] = useState(false)
   const loadingTabsRef = useRef<Set<string>>(new Set())
   const tabContentRef = useRef(initialTabContents)
+  // The retry button calls loadTabContent through this, since loadTabContent can't call itself
+  const loadTabContentRef = useRef<typeof loadTabContent>(null)
+
+  React.useEffect(() => {
+    if (!hoveredTab && !focusedTab) {
+      return
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsTooltipDismissed(true)
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [focusedTab, hoveredTab])
 
   // Update cached content when server provides new initialTabContents
   // This is needed because useState only uses initialValue on first mount
@@ -81,7 +102,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
       try {
         const result = (await serverFunction({
           name: 'render-tab',
-          args: { ...serverArgs, tabSlug } as RenderTabServerFnArgs,
+          args: { searchParams: serverArgs?.searchParams, tabSlug } satisfies RenderTabServerFnArgs,
         })) as RenderTabServerFnReturnType
 
         const newContent = {
@@ -106,7 +127,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
           delete clearedContent[tabSlug]
           tabContentRef.current = clearedContent
           setTabContent(clearedContent)
-          void loadTabContent(tabSlug, { serverArgs })
+          void loadTabContentRef.current?.(tabSlug, { serverArgs })
         }
 
         const newContent = {
@@ -118,11 +139,15 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
         setTabContent(newContent)
       } finally {
         loadingTabsRef.current.delete(tabSlug)
-        setLoadingTab(null)
+        setLoadingTab((currentTab) => (currentTab === tabSlug ? null : currentTab))
       }
     },
     [serverFunction],
   )
+
+  React.useEffect(() => {
+    loadTabContentRef.current = loadTabContent
+  }, [loadTabContent])
 
   const reloadTabContent = useCallback(
     (tabSlug: string, serverArgs?: Partial<RenderTabServerFnArgs>) => {
@@ -182,21 +207,36 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
 
             return (
               <button
+                aria-controls={`${tabsID}-panel-${tab.slug}`}
                 aria-selected={isActive}
                 className={`${baseClass}__tab ${isActive ? `${baseClass}__tab--active` : ''}`}
+                id={`${tabsID}-tab-${tab.slug}`}
                 key={tab.slug}
+                onBlur={() => setFocusedTab(null)}
                 onClick={() => handleTabChange(tab.slug)}
+                onFocus={(event) => {
+                  setFocusedTab(event.currentTarget.matches(':focus-visible') ? tab.slug : null)
+                  setIsTooltipDismissed(false)
+                }}
                 onKeyDown={(e) => handleTabKeyDown(e, index)}
-                onMouseEnter={() => setHoveredTab(tab.slug)}
+                onMouseEnter={() => {
+                  setHoveredTab(tab.slug)
+                  setIsTooltipDismissed(false)
+                }}
                 onMouseLeave={() => setHoveredTab(null)}
                 role="tab"
                 tabIndex={isActive ? 0 : -1}
                 type="button"
               >
                 <Tooltip
-                  className={`${baseClass}__tooltip`}
+                  className={[
+                    `${baseClass}__tooltip`,
+                    focusedTab === tab.slug && `${baseClass}__tooltip--focused`,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
                   position="bottom"
-                  show={hoveredTab === tab.slug}
+                  show={!isTooltipDismissed && (hoveredTab === tab.slug || focusedTab === tab.slug)}
                 >
                   {tab.label}
                 </Tooltip>
@@ -206,21 +246,33 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
             )
           })}
         </div>
-        <div className={`${baseClass}__content`} role="tabpanel">
-          <DelayedSpinner
-            baseClass={baseClass}
-            delay={loadingDelay}
-            isLoading={loadingTab === activeTabID}
-          />
+        <div className={`${baseClass}__content`}>
           {tabs.map((tab) => {
             const content = tabContent[tab.slug]
-            if (!content) {
-              return null
-            }
-            const isActive = tab.slug === activeTabID && loadingTab !== activeTabID
+            const isActive = tab.slug === activeTabID
             return (
-              <div key={tab.slug} style={isActive ? undefined : { display: 'none' }}>
-                {content}
+              <div
+                aria-labelledby={`${tabsID}-tab-${tab.slug}`}
+                hidden={!isActive}
+                id={`${tabsID}-panel-${tab.slug}`}
+                key={tab.slug}
+                role="tabpanel"
+                tabIndex={-1}
+              >
+                <DelayedSpinner
+                  baseClass={baseClass}
+                  delay={loadingDelay}
+                  isLoading={isActive && loadingTab === tab.slug}
+                />
+                <div style={loadingTab === tab.slug ? { display: 'none' } : undefined}>
+                  <React.Suspense
+                    fallback={
+                      <DelayedSpinner baseClass={baseClass} delay={loadingDelay} isLoading />
+                    }
+                  >
+                    {content}
+                  </React.Suspense>
+                </div>
               </div>
             )
           })}

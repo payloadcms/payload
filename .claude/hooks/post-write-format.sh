@@ -30,7 +30,7 @@ case "$FILE" in
     fi
     ;;
   *.js|*.jsx|*.ts|*.tsx)
-    pnpm eslint --flag v10_config_lookup_from_file --cache --fix "$FILE" >/dev/null 2>&1
+    pnpm oxlint --fix --no-error-on-unmatched-pattern "$FILE" >/dev/null 2>&1
     pnpm oxfmt "$FILE" >/dev/null 2>&1
     ;;
 esac

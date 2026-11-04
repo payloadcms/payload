@@ -73,7 +73,7 @@ test.suite(
       })
 
       payload = await new BasePayload().init({ config })
-      adapter = payload.db as unknown as DrizzleAdapter
+      adapter = payload.db
     })
 
     test.afterAll(async () => {

@@ -1,5 +1,5 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. MODIFY AT YOUR OWN RISK. */
-import { payloadApiHandlers } from '@payloadcms/tanstack-start/server'
+import { payloadApiHandlers } from '@payloadcms/tanstack-start/routes'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_payload/api/$')({

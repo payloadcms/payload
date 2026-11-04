@@ -413,7 +413,7 @@ describe('General', () => {
     describe('user menu', () => {
       const openThemeSubMenu = async () => {
         await openNav(page)
-        await page.locator('button[aria-label="Account"]').click()
+        await page.getByRole('button', { name: /^Account(?::|$)/ }).click()
         await page.getByRole('menuitem', { name: 'Theme' }).hover()
       }
 
@@ -425,7 +425,7 @@ describe('General', () => {
       test('should keep the open submenu parent highlighted while hovering a child item', async () => {
         await page.goto(postsUrl.admin)
         await openNav(page)
-        await page.locator('button[aria-label="Account"]').click()
+        await page.getByRole('button', { name: /^Account(?::|$)/ }).click()
 
         const language = page.getByRole('menuitem', { name: 'Language' })
 
@@ -507,7 +507,7 @@ describe('General', () => {
 
         // Logout lives inside the user menu popup
         await openNav(page)
-        await page.locator('button[aria-label="Account"]').click()
+        await page.getByRole('button', { name: /^Account(?::|$)/ }).click()
 
         // The custom Logout component (admin.components.logout.Button) renders an
         // anchor ending in `#custom`, replacing the default logout button.
@@ -857,7 +857,14 @@ describe('General', () => {
     test('nav — should save group collapse preferences', async () => {
       await page.goto(postsUrl.admin)
       await openNav(page)
-      await page.locator('#nav-group-One .nav-group__toggle').click()
+      await Promise.all([
+        page.waitForResponse(
+          (response) =>
+            new URL(response.url()).pathname.endsWith('/payload-preferences/nav') &&
+            response.request().method() === 'POST',
+        ),
+        page.locator('#nav-group-One .nav-group__toggle').click(),
+      ])
       const link = page.locator('#nav-group-one-collection-ones')
       await expect(link).toBeHidden()
     })
@@ -1354,8 +1361,6 @@ describe('General', () => {
 
     test('should allow custom translation of locale labels', async () => {
       await page.goto(postsUrl.account)
-      // Wait for hydration - otherwise playwright clicks the localizer early and nothing happens
-      await wait(1000)
 
       const selectOptionClass = '.popup__content .popup-button-list__button'
       const localeListItem1 = page.locator(selectOptionClass).nth(0)
@@ -1381,12 +1386,15 @@ describe('General', () => {
       // Change language to Spanish
       await languageField.click()
       await options.locator('text=Español').click()
+      await expect(page.locator('.step-nav__first')).toHaveText('Panel de Control')
 
       await checkLocaleLabels('Español (es)', 'Inglés (en)')
 
       // Change locale and language back to English
       await languageField.click()
       await options.locator('text=English').click()
+      await expect(page.locator('.step-nav__first')).toHaveText('Home')
+
       await openLocaleSelector(page)
       await expect(localeListItem1).toContainText('Spanish (es)')
     })
@@ -1538,7 +1546,7 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       ...overrides,
     },
     overrideAccess: true,
-  }) as unknown as Promise<Post>
+  })
 }
 
 async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
@@ -1549,5 +1557,5 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
       ...overrides,
     },
     overrideAccess: true,
-  }) as unknown as Promise<Geo>
+  })
 }

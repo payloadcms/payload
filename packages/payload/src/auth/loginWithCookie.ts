@@ -55,9 +55,10 @@ export const loginWithCookie = async <
     cookiePrefix: req.payload.config.cookiePrefix,
     returnCookieAsObject: returnCookieAsObject ?? false,
     token: result.token!,
-  }) as TReturnCookieAsObject extends true ? CookieObject : string
+  })
 
   if (collection.config.auth.removeTokenFromResponses) {
+    delete result.refreshToken
     delete result.token
   }
 

@@ -292,6 +292,7 @@ export const koTranslations: DefaultTranslationsObject = {
     and: '및',
     anotherUser: '다른 사용자',
     anotherUserTakenOver: '다른 사용자가 이 문서의 편집을 인수했습니다.',
+    apiResponse: 'API 응답',
     applyChanges: '변경 사항 적용',
     ascending: '오름차순',
     auto: '자동',
@@ -363,6 +364,13 @@ export const koTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       '이 문서는 최근에 다른 사용자에 의해 업데이트되었습니다. 귀하의 보기는 낡았습니다.',
     documents: '문서들',
+    dragCancelled: '{{label}} 드래그가 취소되었습니다.',
+    dragDropped: '{{label}}을 놓았습니다. {{count}}개 중 {{position}}번째 위치.',
+    dragInstructions:
+      'Space 또는 Enter를 눌러 행을 집으세요. 화살표 키로 이동하세요. VoiceOver에서는 Quick Nav를 끄고 Command + 화살표 키를 사용하세요. Space 또는 Enter를 눌러 놓거나 Escape를 눌러 취소하세요.',
+    dragMoved: '{{label}}: {{direction}}. {{count}}개 중 {{position}}번째 위치.',
+    dragPickedUp: '{{label}}을 집었습니다. {{count}}개 중 {{position}}번째 위치.',
+    dragToMove: '드래그하여 이동',
     dragToReorder: '드래그하여 순서 변경',
     duplicate: '복제',
     duplicateWithoutSaving: '변경 사항 저장 없이 복제',
@@ -477,6 +485,7 @@ export const koTranslations: DefaultTranslationsObject = {
     reindexingAll: '모든 {{collections}}를 다시 인덱싱하는 중입니다.',
     reloadDocument: '문서 다시 불러오기',
     remove: '제거',
+    removeFilter: '필터 제거',
     rename: '이름 변경',
     replaceRow: '행 교체',
     requiredFields: '*로 표시된 필드는 필수입니다.',
@@ -568,6 +577,7 @@ export const koTranslations: DefaultTranslationsObject = {
     yes: '네',
   },
   hierarchy: {
+    folderLocation: '폴더 위치',
     goTo: '"{{name}}"로 이동하십시오.',
     itemsMovedTo: '{{title}}은 {{destination}}으로 이동되었습니다.',
     itemsMovedToRoot: '{{title}}가 루트로 이동되었습니다.',
@@ -700,6 +710,10 @@ export const koTranslations: DefaultTranslationsObject = {
     type: '유형',
     aboutToPublishSelection: '선택한 {{label}}을(를) 게시하려고 합니다. 계속하시겠습니까?',
     aboutToRestore: '이 {{label}} 문서를 {{versionDate}}기준 버전으로 복원하려고 합니다.',
+    aboutToRestoreAsDraft:
+      '{{versionDate}}의 콘텐츠를 초안으로 복원합니다. 편집기에서 게시할 때까지 게시된 콘텐츠는 변경되지 않습니다.',
+    aboutToRestoreAsDraftAllLocales:
+      '{{versionDate}}의 콘텐츠를 모든 로케일에서 초안으로 복원합니다. 편집기에서 게시할 때까지 게시된 콘텐츠는 변경되지 않습니다.',
     aboutToRestoreGlobal: '글로벌 {{label}}을(를) {{versionDate}}기준 버전으로 복원하려고 합니다.',
     aboutToRevertToPublished:
       '이 문서의 변경 사항을 게시된 상태로 되돌리려고 합니다. 계속하시겠습니까?',

@@ -16,7 +16,7 @@ import { sanitizeFilename } from '../utilities/sanitizeFilename.js'
 import { sanitizeUploadPrefix } from '../utilities/sanitizeUploadPrefix.js'
 import { verifyClientUploadReceipt } from './clientUploadReceipt.js'
 import { docWithFilenameExists } from './docWithFilenameExists.js'
-import { getOriginalFilename, normalizeStorageKey } from './fileVersioning/naming.js'
+import { normalizeStorageKey } from './fileVersioning/naming.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
@@ -60,6 +60,7 @@ export const getFileFromUploadInstructions = async ({
   }
 
   const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
+  const clientData = getClientData({ uploadReference: file.uploadReference })
   let allowOverwrite = false
   let providerFilename = file.filename
   let verifiedOriginal:
@@ -82,24 +83,23 @@ export const getFileFromUploadInstructions = async ({
       signedReceipt,
     })
     allowOverwrite = receipt.allowOverwrite === true
-    let originalFilename: string
     let storageFilePath: string
 
     try {
-      originalFilename = getOriginalFilename({ filename: file.filename })
       storageFilePath = normalizeStorageKey({ key: receipt.storageFilePath })
     } catch {
       throw new APIError('Invalid upload reference.', 400)
     }
 
-    const expectedKeySuffix = [receipt.filePrefix, receipt._objectKey, originalFilename]
+    const isReceiptForUploadedFilename = path.posix.basename(storageFilePath) === file.filename
+    const expectedKeySuffix = [receipt.filePrefix, receipt._objectKey, file.filename]
       .filter(Boolean)
       .join('/')
 
     if (
       (!allowOverwrite &&
         (!receipt._objectKey ||
-          path.posix.basename(storageFilePath) !== originalFilename ||
+          !isReceiptForUploadedFilename ||
           !`/${storageFilePath}`.endsWith(`/${expectedKeySuffix}`))) ||
       ('prefix' in file.uploadReference && file.uploadReference.prefix !== receipt.filePrefix) ||
       ('_objectKey' in file.uploadReference &&
@@ -108,11 +108,11 @@ export const getFileFromUploadInstructions = async ({
       throw new APIError('Invalid upload reference.', 400)
     }
 
-    providerFilename = allowOverwrite ? file.filename : originalFilename
+    providerFilename = file.filename
     if (!allowOverwrite) {
       verifiedOriginal = {
         _objectKey: receipt._objectKey,
-        filename: originalFilename,
+        filename: file.filename,
         key: storageFilePath,
         prefix: receipt.filePrefix,
         signedReceipt: signedReceipt as string,
@@ -122,8 +122,21 @@ export const getFileFromUploadInstructions = async ({
       ...file,
       uploadReference: {
         _objectKey: receipt._objectKey,
+        ...(receipt.adapterData && { adapterData: receipt.adapterData }),
+        ...(clientData && { clientData }),
         prefix: receipt.filePrefix,
         signedReceipt,
+      },
+    }
+  } else {
+    const { _objectKey, prefix, signedReceipt } = file.uploadReference
+    file = {
+      ...file,
+      uploadReference: {
+        ...(_objectKey !== undefined && { _objectKey }),
+        ...(clientData && { clientData }),
+        ...(prefix !== undefined && { prefix }),
+        ...(signedReceipt !== undefined && { signedReceipt }),
       },
     }
   }
@@ -254,6 +267,30 @@ export const getFileFromUploadInstructions = async ({
   }
 }
 
+const reservedUploadReferenceKeys = new Set([
+  '_objectKey',
+  'adapterData',
+  'clientData',
+  'prefix',
+  'signedReceipt',
+])
+
+/**
+ * Collects the fields the client added to `uploadReference`. Payload never reads them, so
+ * adapters must verify them before use.
+ */
+const getClientData = ({
+  uploadReference,
+}: {
+  uploadReference: Record<string, unknown>
+}): Record<string, unknown> | undefined => {
+  const entries = Object.entries(uploadReference).filter(
+    ([key]) => !reservedUploadReferenceKeys.has(key),
+  )
+
+  return entries.length ? Object.fromEntries(entries) : undefined
+}
+
 /**
  * Whether the request's `uploadEdits` query param carries a crop or resize edit - reads the raw
  * `req.query.uploadEdits`, since a full parse (with its `data`/`originalDoc` focal-point
@@ -266,7 +303,7 @@ const requestHasSizeEdits = (req: PayloadRequest): boolean => {
     return false
   }
 
-  return hasCropOrResizeEdit(uploadEdits as UploadEdits)
+  return hasCropOrResizeEdit(uploadEdits)
 }
 
 /**

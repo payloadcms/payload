@@ -19,6 +19,7 @@ import type {
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
+import { supportedPasswordHashIterations } from '../auth/strategies/local/generatePasswordSaltHash.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
@@ -186,7 +187,7 @@ const addDefaultDashboardWidgets = ({
         components: {
           // Presents an inclusion filter (all collections checked by default) while persisting the
           // inverse as an exclusion list, so collections added later stay visible by default.
-          Field: '@payloadcms/ui#RecentlyViewedCollectionsField',
+          Field: '@payloadcms/ui#CollectionFilter',
         },
         description: ({ t }) => t('dashboard:widgetRecentlyViewedFilterDescription'),
       },
@@ -240,7 +241,7 @@ const addDefaultDashboardWidgets = ({
   })
   dashboard.widgets.push({
     slug: 'activity',
-    Component: '@payloadcms/ui/rsc#RecentlyViewedWidget',
+    Component: '@payloadcms/ui/rsc#ActivityWidget',
     fields: sanitizeFields({
       config: config as unknown as Config,
       existingFieldNames: new Set(),
@@ -306,6 +307,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   if (!(safetyBuffer! >= 0 && safetyBuffer! < duration!)) {
     throw new InvalidConfiguration(
       '`jobs.processingLease.safetyBuffer` must be non-negative and less than `jobs.processingLease.duration`.',
+    )
+  }
+
+  if (!supportedPasswordHashIterations.includes(configWithDefaults.auth!.passwordHashIterations!)) {
+    throw new InvalidConfiguration(
+      `\`auth.passwordHashIterations\` must be one of ${supportedPasswordHashIterations.join(', ')}.`,
     )
   }
 

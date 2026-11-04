@@ -67,14 +67,30 @@ test('should interpret horizontal RTL targets as distance from the start', async
   await withScroller({
     direction: 'rtl',
     run: async ({ locator, scroll }) => {
-      assert.deepEqual(await scroll(locator, { axis: 'x', to: 'end', duration: 50, settle: 0 }), {
-        position: -400,
-        target: -400,
-      })
-      assert.deepEqual(await scroll(locator, { axis: 'x', to: 'start', duration: 50, settle: 0 }), {
-        position: 0,
-        target: 0,
-      })
+      assert.deepEqual(
+        await scroll(locator, {
+          axis: 'x',
+          to: 'end',
+          duration: 50,
+          settle: 0,
+        }),
+        {
+          position: -400,
+          target: -400,
+        },
+      )
+      assert.deepEqual(
+        await scroll(locator, {
+          axis: 'x',
+          to: 'start',
+          duration: 50,
+          settle: 0,
+        }),
+        {
+          position: 0,
+          target: 0,
+        },
+      )
     },
   })
 })
@@ -107,12 +123,21 @@ test('should animate monotonically with sine easing and avoid hover churn', asyn
         const sample = (time) => {
           if (element.scrollLeft > 0 && !startedAt) startedAt = time
           if (startedAt)
-            window.samples.push({ time: time - startedAt, position: element.scrollLeft })
+            window.samples.push({
+              time: time - startedAt,
+              position: element.scrollLeft,
+            })
           window.sampleFrame = requestAnimationFrame(sample)
         }
         window.sampleFrame = requestAnimationFrame(sample)
       })
-      await scroll(locator, { axis: 'x', duration: 500, settle: 30 })
+      await scroll(locator, {
+        axis: 'x',
+        duration: 500,
+        settle: 30,
+        input: 'animation',
+        cursorPlacement: 'outside',
+      })
       const { samples, hoverCount } = await page.evaluate(() => {
         cancelAnimationFrame(window.sampleFrame)
         return { samples: window.samples, hoverCount: window.hoverCount }
@@ -161,7 +186,15 @@ test('should remove the anchor when the scroller disappears during animation', a
         },
       })
 
-      await assert.rejects(scroll(locator, { axis: 'x', duration: 300 }), /target was removed/)
+      await assert.rejects(
+        scroll(locator, {
+          axis: 'x',
+          duration: 300,
+          input: 'animation',
+          cursorPlacement: 'outside',
+        }),
+        /target was removed/,
+      )
       assert.equal(await page.locator('[data-pr-demo-scroll-anchor]').count(), 0)
     },
   })
@@ -177,8 +210,6 @@ test('should send real wheel events and never repair prevented input', async () 
       assert.deepEqual(
         await scroll(locator, {
           axis: 'x',
-          input: 'wheel',
-          cursorPlacement: 'inside',
           duration: 200,
           settle: 30,
         }),
@@ -189,19 +220,40 @@ test('should send real wheel events and never repair prevented input', async () 
       assert.ok(wheels.length > 1)
       assert.ok(wheels.every((delta) => delta > 0 && delta < 400))
       await locator.evaluate((element) => {
-        element.addEventListener('wheel', (event) => event.preventDefault(), { passive: false })
+        element.addEventListener('wheel', (event) => event.preventDefault(), {
+          passive: false,
+        })
       })
       await assert.rejects(
         scroll(locator, {
           axis: 'x',
           to: 'start',
-          input: 'wheel',
-          cursorPlacement: 'inside',
           duration: 0,
         }),
         /did not reach/,
       )
       assert.equal(await locator.evaluate((element) => element.scrollLeft), 400)
+    },
+  })
+})
+
+test('should pace whole-pixel wheel deltas over a short overflow range', async () => {
+  await withScroller({
+    run: async ({ locator, page, scroll }) => {
+      await locator.locator('#content').evaluate((element) => {
+        element.style.height = '168px'
+        element.addEventListener('wheel', (event) => {
+          window.wheelDeltas ??= []
+          window.wheelDeltas.push(event.deltaY)
+        })
+      })
+      assert.deepEqual(await scroll(locator, { duration: 1000, settle: 0 }), {
+        position: 144,
+        target: 144,
+      })
+      const deltas = await page.evaluate(() => window.wheelDeltas)
+      assert.ok(deltas.length > 5)
+      assert.ok(deltas.every(Number.isInteger))
     },
   })
 })

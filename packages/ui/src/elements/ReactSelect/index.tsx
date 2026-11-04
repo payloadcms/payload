@@ -183,6 +183,11 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         minHeight: undefined,
         ...externalStyles?.control?.(rsStyles, state),
       }),
+      input: (rsStyles, state) => ({
+        ...rsStyles,
+        gridTemplateColumns: undefined,
+        ...externalStyles?.input?.(rsStyles, state),
+      }),
       // Allow external option styles to override emotion defaults
       option: (rsStyles, state) => ({
         ...rsStyles,

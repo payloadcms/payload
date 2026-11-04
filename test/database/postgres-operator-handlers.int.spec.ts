@@ -112,12 +112,12 @@ const runOperatorHandlerConfigSuite = (
             name: 'handler-a',
             operators: ['contains'],
             build: ({ column }) => column as any,
-          } as PostgresOperatorHandler,
+          },
           {
             name: 'handler-b',
             operators: ['contains'],
             build: ({ column }) => column as any,
-          } as PostgresOperatorHandler,
+          },
         ])
 
         let thrown: unknown

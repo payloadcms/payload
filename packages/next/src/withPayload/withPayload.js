@@ -6,6 +6,10 @@
  */
 
 import { fileURLToPath } from 'node:url'
+import {
+  devServerExternalPackages as devServerExternalPayloadPackages,
+  serverExternalPackages as serverExternalPayloadPackages,
+} from 'payload/build-config'
 
 const poweredByHeader = {
   key: 'X-Powered-By',
@@ -142,77 +146,16 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       ]
     },
     serverExternalPackages: [
-      ...(nextConfig.serverExternalPackages || []),
-      // WHY: without externalizing graphql, a graphql version error will be thrown
-      // during runtime ("Ensure that there is only one instance of \"graphql\" in the node_modules\ndirectory.")
-      'graphql',
-      'drizzle-kit',
-      'drizzle-kit/api',
-      'sharp',
-      'libsql',
-      'require-in-the-middle',
-      'json-schema-to-typescript',
-      // Prevents turbopack build errors by the thread-stream package which is installed by pino
-      'pino',
-      // file-type v22 uses `import(specifier)` with a non-literal specifier, which Turbopack rejects
-      // with "Cannot find module as expression is too dynamic"
-      'file-type',
-      ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages !== true
-        ? /**
-           * Unless explicitly disabled by the user, by passing `devBundleServerPackages: true` to withPayload, we
-           * do not bundle server-only packages during dev for two reasons:
-           *
-           * 1. Performance: Fewer files to compile means faster compilation speeds.
-           * 2. Turbopack support: Webpack's externals are not supported by Turbopack.
-           *
-           * Regarding Turbopack support: Unlike webpack.externals, we cannot use serverExternalPackages to
-           * externalized packages that are not resolvable from the project root. So including a package like
-           * "drizzle-kit" in here would do nothing - Next.js will ignore the rule and still bundle the package -
-           * because it detects that the package is not resolvable from the project root (= not directly installed
-           * by the user in their own package.json).
-           *
-           * Instead, we can use serverExternalPackages for the entry-point packages that *are* installed directly
-           * by the user (e.g. db-postgres, which then installs drizzle-kit as a dependency).
-           *
-           *
-           *
-           * We should only do this during development, not build, because externalizing these packages can hurt
-           * the bundle size. Not only does it disable tree-shaking, it also risks installing duplicate copies of the
-           * same package.
-           *
-           * Example:
-           * - @payloadcms/richtext-lexical (in bundle) -> installs qs-esm (bundled because of importer)
-           * - payload (not in bundle, external) -> installs qs-esm (external because of importer)
-           * Result: we have two copies of qs-esm installed - one in the bundle, and one in node_modules.
-           *
-           * During development, these bundle size difference do not matter much, and development speed /
-           * turbopack support are more important.
-           */
-          [
-            'payload',
-            '@payloadcms/db-mongodb',
-            '@payloadcms/db-postgres',
-            '@payloadcms/db-sqlite',
-            '@payloadcms/db-vercel-postgres',
-            '@payloadcms/db-d1-sqlite',
-            '@payloadcms/drizzle',
-            '@payloadcms/email-nodemailer',
-            '@payloadcms/email-resend',
-            '@payloadcms/graphql',
-            '@payloadcms/payload-cloud',
-            '@payloadcms/plugin-redirects',
-            // TODO: Add the following packages, excluding their /client subpath exports, once Next.js supports it
-            // see: https://github.com/vercel/next.js/discussions/76991
-            //'@payloadcms/plugin-cloud-storage',
-            //'@payloadcms/plugin-sentry',
-            //'@payloadcms/plugin-stripe',
-            // @payloadcms/richtext-lexical
-            //'@payloadcms/storage-azure',
-            //'@payloadcms/storage-gcs',
-            //'@payloadcms/storage-s3',
-            //'@payloadcms/storage-vercel-blob',
-          ]
-        : []),
+      ...new Set([
+        ...(nextConfig.serverExternalPackages || []),
+        ...serverExternalPayloadPackages,
+        // file-type v22 uses `import(specifier)` with a non-literal specifier, which Turbopack rejects
+        // with "Cannot find module as expression is too dynamic"
+        'file-type',
+        ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages !== true
+          ? devServerExternalPayloadPackages
+          : []),
+      ]),
     ],
     webpack: (webpackConfig, webpackOptions) => {
       const incomingWebpackConfig =
@@ -241,7 +184,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
         externals: [
           ...(incomingWebpackConfig?.externals || []),
           /**
-           * See the explanation in the serverExternalPackages section above.
            * We need to force Webpack to emit require() calls for these packages, even though they are not
            * resolvable from the project root. You would expect this to error during runtime, but Next.js seems to be able to require these just fine.
            *

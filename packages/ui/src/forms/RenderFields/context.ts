@@ -32,7 +32,7 @@ export const FieldPathContext = React.createContext<string>(undefined)
  * @experimental This is an experimental API and may change at any time. Use at your own risk.
  */
 export const useFieldPath = () => {
-  const context = React.useContext(FieldPathContext)
+  const context = React.use(FieldPathContext)
 
   if (!context) {
     // swallow the error, not all fields are wrapped in a FieldPathContext

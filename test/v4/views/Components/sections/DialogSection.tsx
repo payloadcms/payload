@@ -27,6 +27,7 @@ export const DialogSection: React.FC<{ selectedComponent: string }> = ({ selecte
   const { openModal } = useModal()
   const [docLockedActive, setDocLockedActive] = useState(false)
   const [docTakeOverActive, setDocTakeOverActive] = useState(false)
+  const [lockedAt] = useState(() => Date.now())
 
   return (
     <Section id="dialog" selectedComponent={selectedComponent} title="Dialog">
@@ -115,7 +116,7 @@ export const DialogSection: React.FC<{ selectedComponent: string }> = ({ selecte
           isActive={docLockedActive}
           onReadOnly={() => setDocLockedActive(false)}
           onTakeOver={() => setDocLockedActive(false)}
-          updatedAt={Date.now()}
+          updatedAt={lockedAt}
           user={{ id: '123', collection: 'users', email: 'other@example.com' }}
         />
       </Variant>
