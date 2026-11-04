@@ -1,7 +1,9 @@
 import type { UploadTransformer } from 'payload'
+import type { TransformerWithInternalBridge } from 'payload/internal'
 import type { Sharp } from 'sharp'
 
 import { registerUploadVariants } from 'payload'
+import { uploadTransformerInternal } from 'payload/internal'
 import sharp from 'sharp'
 
 import { dynamicMediaSlug, publicCloudMediaSlug } from './shared.js'
@@ -109,5 +111,22 @@ export const uploadCropTransformer: UploadTransformer = {
       file: new File([new Uint8Array(cropped)], file.name, { type: file.type }),
       status: 'continue',
     }
+  },
+}
+
+/**
+ * A bridge like Sharp's that claims no keys, when a test sets `context.isUploadBridgeEnabled`. It is
+ * planned for the upload, but does not run when the saved keys are applied at request time.
+ */
+export const uploadBridgeTransformer: TransformerWithInternalBridge & UploadTransformer = {
+  slug: 'upload-bridge',
+  canTransform: ({ collectionSlug, operation, req }) =>
+    collectionSlug === dynamicMediaSlug &&
+    operation === 'upload' &&
+    req.context?.isUploadBridgeEnabled === true,
+  mimeTypes: ['image/*'],
+  transformFile: () => Promise.resolve({ status: 'continue' }),
+  [uploadTransformerInternal]: {
+    prepareUpload: ({ file }) => Promise.resolve([{ fieldPath: 'filename', file }]),
   },
 }
