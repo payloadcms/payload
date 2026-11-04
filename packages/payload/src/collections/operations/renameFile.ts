@@ -174,6 +174,12 @@ export const renameFileOperation = async (
       throw new APIError('The upload has no files to rename.', 400)
     }
 
+    // A dynamic main file has no file of its own. It is built from the original and shares its name.
+    const renamedOriginal = renamed.original as { filename?: string } | undefined
+    if (stored._stored === false && renamedOriginal?.filename) {
+      renamed.filename = renamedOriginal.filename
+    }
+
     const staticDir = collection.config.upload.staticDir
     const result = await runFileOperationPlan({
       cleanupStagedAfterWriteFailure: (objects) =>

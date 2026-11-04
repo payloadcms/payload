@@ -138,6 +138,28 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     )
   })
 
+  test('should rename the main file and the stored original of a dynamic document together', async ({
+    payload,
+  }) => {
+    const created = await createImage({ payload })
+
+    const renamed = await payload.renameFile({
+      id: created.id,
+      collection: dynamicMediaSlug,
+      filename: 'renamed.png',
+      overrideAccess: true,
+    })
+
+    expect(renamed).toMatchObject({
+      filename: 'renamed.png',
+      original: { filename: 'renamed.png' },
+      url: expect.stringMatching(/\/file\/renamed\.png$/),
+    })
+    expect(await readStoredFlag({ id: created.id, payload })).toBe(false)
+    // The version saved before the rename still uses the old file.
+    expect((await readdir(dynamicMediaDir)).sort()).toEqual(['photo.png', 'renamed.png'])
+  })
+
   test('should update the default file metadata when the crop changes, without writing a file', async ({
     payload,
   }) => {
