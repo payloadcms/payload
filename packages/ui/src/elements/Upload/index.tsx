@@ -178,10 +178,15 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
 
   const handleAdoptedFile = useCallback(
     (file: File) => {
+      // An adopted upload replacing a stored file shows like a picked replacement.
+      if (data?.filename) {
+        setRemovedFile(true)
+      }
+
       setValue(file)
       setFilename(file.name)
     },
-    [setValue],
+    [data?.filename, setValue],
   )
 
   const { onFileChange: onSessionFileChange } = useFileFieldUploadSession({
@@ -401,7 +406,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
           uploadConfig={uploadConfig}
         />
       )}
-      {((!uploadConfig.hideFileInputOnCreate && !data?.filename) || removedFile) && (
+      {((!uploadConfig.hideFileInputOnCreate && !data?.filename) || removedFile || value) && (
         <div className={`${baseClass}__upload`}>
           {!value && (
             <Dropzone onChange={handleFileSelection}>
@@ -450,7 +455,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
               </div>
             </Dropzone>
           )}
-          {value && fileSrc && (
+          {value && (
             <React.Fragment>
               <Button
                 aria-label={t('general:cancel')}
