@@ -22,7 +22,6 @@ export function initSharpCollections({
   const registeredConfig = registerUploadVariants({
     collections,
     config,
-    label: 'sharpTransformer',
     transformerSlug,
   })
 

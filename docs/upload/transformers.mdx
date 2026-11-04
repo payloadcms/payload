@@ -300,7 +300,7 @@ In phase 1, the [rules for saved keys](#applying-saved-_transforms-keys) apply t
 
 #### Sizes with no stored file
 
-A transformer registers sizes in its `init` with `registerUploadVariants`. It checks that each collection exists and has uploads, and that each size name is unique and is not a built-in upload field name. Then it writes the sizes to the collection's sanitized `upload.variants`. Only one transformer can register sizes on a collection: a second one fails the build. `label` names the transformer in error messages. `transformerSlug` saves the transformer as the owner of the sizes.
+A transformer registers sizes in its `init` with `registerUploadVariants`. It checks that each collection exists and has uploads, and that each size name is unique and is not a built-in upload field name. Then it writes the sizes to the collection's sanitized `upload.variants`. Only one transformer can register sizes on a collection: a second one fails the build. `transformerSlug` must be the slug of a transformer in `upload.transformers`. It saves that transformer as the owner of the sizes and names it in error messages.
 
 ```ts
 import type { UploadTransformer } from 'payload'
@@ -315,7 +315,6 @@ const cdnTransformer: UploadTransformer = {
         media: { variants: [{ name: 'card' }, { name: 'thumbnail' }] },
       },
       config,
-      label: 'cdnTransformer',
       transformerSlug: 'cdn',
     }),
   // ...

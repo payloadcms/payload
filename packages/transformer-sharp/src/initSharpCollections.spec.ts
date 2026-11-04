@@ -9,6 +9,7 @@ import { initSharpCollections } from './initSharpCollections.js'
 const makeConfig = (collections: Config['collections']): Config =>
   ({
     collections,
+    upload: { transformers: [{ slug: 'sharp' }] },
   }) as unknown as Config
 
 const uploadCollection = ({
