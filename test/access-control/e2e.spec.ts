@@ -861,7 +861,17 @@ describe('Access Control', () => {
 
       await expect(page.locator('.unauthorized__content h1')).toHaveText('Unauthorized')
 
+      const logoutResponse = page.waitForResponse(
+        (response) =>
+          response.url() === `${serverURL}/api/${publicUsersSlug}/logout` &&
+          response.request().method() === 'POST' &&
+          response.status() === 200,
+      )
+
       await page.goto(url.logout)
+
+      await logoutResponse
+      await expect(page).toHaveURL(url.login)
 
       await expect(page.locator('.payload-toast-container')).toContainText(
         'You have been logged out successfully.',

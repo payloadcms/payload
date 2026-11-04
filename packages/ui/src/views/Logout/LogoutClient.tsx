@@ -47,6 +47,7 @@ export const LogoutClient: React.FC<{
   // but fall back to the server-resolved user so the logout still fires when
   // the client auth state has already been cleared (see `user` prop above).
   const logoutUser = clientUser ?? serverUser
+  const logoutCollection = logoutUser?.collection
 
   const { startRouteTransition } = useRouteTransition()
 
@@ -73,12 +74,12 @@ export const LogoutClient: React.FC<{
   const handleLogOut = React.useCallback(async () => {
     if (!navigatingToLoginRef.current) {
       navigatingToLoginRef.current = true
-      await logOut()
+      await logOut({ collection: logoutCollection })
       toast(t('authentication:loggedOutSuccessfully'))
       void startRouteTransition(() => router.push(loginRoute))
       return
     }
-  }, [logOut, loginRoute, router, startRouteTransition, t])
+  }, [logOut, loginRoute, logoutCollection, router, startRouteTransition, t])
 
   useEffect(() => {
     if (isLoggedIn && !inactivity) {

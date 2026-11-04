@@ -355,19 +355,21 @@ export function AuthProvider({
     [apiRoute, authRequests, setLocalSession],
   )
 
-  const logOut = useCallback(async () => {
-    const logoutEvent = { type: TAB_SESSION_EVENT_TYPES.LOGGED_OUT } as const
-    const logoutPublication = tabSessionSync.broadcast(logoutEvent)
-    const collection = userRef.current?.collection
+  const logOut = useCallback(
+    async ({ collection }: { collection?: string } = {}) => {
+      const logoutEvent = { type: TAB_SESSION_EVENT_TYPES.LOGGED_OUT } as const
+      const logoutPublication = tabSessionSync.broadcast(logoutEvent)
 
-    await logOutSession({ collection })
+      await logOutSession({ collection: collection ?? userRef.current?.collection })
 
-    if (logoutPublication?.type === TAB_SESSION_EVENT_TYPES.LOGGED_OUT) {
-      tabSessionSync.broadcastLogoutSettlement(logoutPublication)
-    }
+      if (logoutPublication?.type === TAB_SESSION_EVENT_TYPES.LOGGED_OUT) {
+        tabSessionSync.broadcastLogoutSettlement(logoutPublication)
+      }
 
-    return true
-  }, [tabSessionSync, logOutSession])
+      return true
+    },
+    [tabSessionSync, logOutSession],
+  )
 
   const refreshPermissions = useCallback(
     async ({ locale }: { locale?: string } = {}) => {
