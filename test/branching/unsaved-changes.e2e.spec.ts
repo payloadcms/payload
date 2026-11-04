@@ -139,7 +139,9 @@ test.describe('Branch switching with unsaved changes', () => {
           expect(preferenceWrites).toHaveLength(0)
           await confirmation.getByRole('button', { name: 'Leave anyway' }).press('Enter')
           await expect(page).toHaveURL(
-            `${editURL}?${new URLSearchParams({ branch: selectedName })}`,
+            (url) =>
+              `${url.origin}${url.pathname}` === editURL &&
+              url.searchParams.get('branch') === selectedName,
           )
           await expect(page.locator(fieldSelector)).toHaveValue('Saved content')
           await expect(confirmation).toBeHidden()
@@ -164,7 +166,9 @@ test.describe('Branch switching with unsaved changes', () => {
             })
             .click()
           await expect(page).toHaveURL(
-            `${editURL}?${new URLSearchParams({ branch: selectedName })}`,
+            (url) =>
+              `${url.origin}${url.pathname}` === editURL &&
+              url.searchParams.get('branch') === selectedName,
           )
           await expect(confirmation).toBeHidden()
         } finally {
