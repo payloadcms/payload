@@ -41,8 +41,7 @@ export const FilePreview: React.FC<Props> = ({
   const originalUrl = data?.url as string | undefined
   const thumbnailUrl = data?.thumbnailURL as string | undefined
   const selectedSizeUrl = selectedSizeData?.url as string | undefined
-  const fileSrc =
-    selectedSizeUrl ?? (isImageFile ? originalUrl : undefined) ?? thumbnailUrl ?? originalUrl
+  const fileSrc = getPreviewSrc({ isImageFile, originalUrl, selectedSizeUrl, thumbnailUrl })
 
   const nativePreviewSrc = originalUrl ? appendCacheTag(originalUrl, imageCacheTag) : undefined
 
@@ -113,4 +112,33 @@ export const FilePreview: React.FC<Props> = ({
       </div>
     </div>
   )
+}
+
+/**
+ * The admin thumbnail is often a small variant, so images preview the original file instead.
+ */
+function getPreviewSrc({
+  isImageFile,
+  originalUrl,
+  selectedSizeUrl,
+  thumbnailUrl,
+}: {
+  isImageFile: boolean
+  originalUrl?: string
+  selectedSizeUrl?: string
+  thumbnailUrl?: string
+}): string | undefined {
+  if (selectedSizeUrl) {
+    return selectedSizeUrl
+  }
+
+  if (isImageFile && originalUrl) {
+    return originalUrl
+  }
+
+  if (thumbnailUrl) {
+    return thumbnailUrl
+  }
+
+  return originalUrl
 }
