@@ -2038,12 +2038,14 @@ describe('Fields', () => {
       if (payload.db.name === 'sqlite') {
         return
       }
+      // `localized` is unique and this suite does not reset data between tests
+      const uniqueLocalized = [12.5, -31.25]
 
       const created = await payload.create({
         collection: 'point-fields',
         data: {
           group,
-          localized,
+          localized: uniqueLocalized,
           point,
         },
       })
@@ -2060,7 +2062,7 @@ describe('Fields', () => {
 
       expect(updated.id).toEqual(created.id)
       expect(updated.point).toEqual(point)
-      expect(updated.localized).toEqual(localized)
+      expect(updated.localized).toEqual(uniqueLocalized)
       expect(updated.group).toMatchObject(group)
     })
 
@@ -2068,12 +2070,14 @@ describe('Fields', () => {
       if (payload.db.name === 'sqlite') {
         return
       }
+      // `localized` is unique and this suite does not reset data between tests
+      const uniqueLocalized = [-44.75, 18.5]
 
       const created = await payload.create({
         collection: 'point-fields',
         data: {
           group,
-          localized,
+          localized: uniqueLocalized,
           point,
         },
       })
@@ -2092,7 +2096,7 @@ describe('Fields', () => {
 
       expect(updated.id).toEqual(created.id)
       expect(updated.point).toEqual(point)
-      expect(updated.localized).toEqual(localized)
+      expect(updated.localized).toEqual(uniqueLocalized)
     })
 
     it('should not create duplicate point when unique', async () => {
