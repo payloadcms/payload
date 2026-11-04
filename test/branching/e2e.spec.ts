@@ -14,6 +14,7 @@ import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConf
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
+  autosaveSlug,
   branchChangesSlug,
   branchMergesSlug,
   headerGlobalSlug,
@@ -132,6 +133,7 @@ test.describe('Branching', () => {
     // Shadow rows are addressed by their real primary key, so these deletes
     // bypass branch resolution rather than writing tombstones.
     for (const collection of [
+      autosaveSlug,
       localizedSlug,
       slugDraftsSlug,
       mediaSlug,
@@ -206,6 +208,51 @@ test.describe('Branching', () => {
         .catch(() => {})
     }
   })
+
+  for (const branch of ['main', branchName]) {
+    for (const collection of [pagesSlug, postsSlug, autosaveSlug]) {
+      test(`should render the create document form for ${collection} on ${branch}`, async () => {
+        const query = new URLSearchParams({ branch })
+
+        await gotoAndWaitForForm(
+          page,
+          `${serverURL}/admin/collections/${collection}/create?${query}`,
+        )
+        await expect(page.locator('#field-title')).toBeVisible()
+        await expect(page.locator('#field-title')).toBeEditable()
+        await expect(page.locator('#field-title')).toHaveAccessibleName(/Title/)
+      })
+    }
+
+    test(`should render the create document form after renaming a draft slug on ${branch}`, async () => {
+      const draft = await payload.create({
+        branch,
+        collection: slugDraftsSlug,
+        data: {},
+        draft: true,
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: draft.id,
+        branch,
+        collection: slugDraftsSlug,
+        data: { slug: 'renamed-draft' },
+        draft: true,
+        locale: 'en',
+      })
+
+      const query = new URLSearchParams({ branch })
+
+      await gotoAndWaitForForm(
+        page,
+        `${serverURL}/admin/collections/${slugDraftsSlug}/create?${query}`,
+      )
+      await expect(page.locator('#field-title')).toBeVisible()
+      await expect(page.locator('#field-title')).toBeEditable()
+      await expect(page.locator('#field-title')).toHaveAccessibleName(/Title/)
+    })
+  }
 
   test('should create and switch using the exact name and report duplicate names', async () => {
     const name = 'Campaign / 日本語 & launch'
