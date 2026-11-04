@@ -36,7 +36,7 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
     throw new APIError('MCP overrideAccess must be "true" or "false".', 400)
   }
 
-  const authorizedMCP = await getAuthorizedMCP({ overrideAccess, req })
+  const authorizedMCP = await getAuthorizedMCP({ canChallenge: true, overrideAccess, req })
 
   if (pluginConfig.oauth && !req.user) {
     return oauthChallenge({ req })
