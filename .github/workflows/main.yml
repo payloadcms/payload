@@ -214,6 +214,8 @@ jobs:
         with:
           inputs: .github
           version: 1.31.1
+          # `ref-version-mismatch` flags a missing version comment only in the pedantic persona.
+          persona: pedantic
           advanced-security: false
           annotations: true
 
