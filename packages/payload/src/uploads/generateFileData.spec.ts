@@ -177,7 +177,11 @@ describe('generateFileData', () => {
     expect(result.data).toMatchObject({ mimeType: 'text/xsl' })
     expect(req.file?.data).toEqual(fileContent)
     expect(result.files).toEqual([
-      { buffer: fileContent, path: path.join(os.tmpdir(), 'reference-original.xsl') },
+      {
+        buffer: fileContent,
+        path: path.join(os.tmpdir(), 'reference.xsl'),
+        role: { type: 'default' },
+      },
     ])
   })
 
