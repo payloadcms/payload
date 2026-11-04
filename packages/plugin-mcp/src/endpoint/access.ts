@@ -43,7 +43,16 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
 
     headers.set('DisableAutologin', 'true')
     // Not `payload.auth()`, which also computes permissions that filterMCPItems computes anyway
-    req.user = (await executeAuthStrategies({ headers, payload: req.payload, req })).user
+    const { responseHeaders, user } = await executeAuthStrategies({
+      canSetHeaders: true,
+      headers,
+      payload: req.payload,
+      req,
+    })
+    req.user = user
+    if (responseHeaders) {
+      req.responseHeaders = responseHeaders
+    }
 
     // Only bearer tokens that no auth strategy accepted reach the hook, e.g. an OAuth access token.
     // API keys use the `<collection> API-Key <key>` scheme instead of `Bearer`, so they never do.
