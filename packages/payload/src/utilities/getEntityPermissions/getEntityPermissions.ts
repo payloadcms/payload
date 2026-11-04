@@ -12,7 +12,6 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { BlockSlug, DefaultDocumentIDType } from '../../index.js'
 import type { AllOperations, JsonObject, PayloadRequest, Where } from '../../types/index.js'
 
-import { getAccessOperationRequest } from '../getAccessOperationRequest.js'
 import { entityDocExists } from './entityDocExists.js'
 import { populateFieldPermissions } from './populateFieldPermissions.js'
 
@@ -59,10 +58,9 @@ const topLevelCollectionPermissions = [
   'read',
   'readVersions',
   'update',
-  'validate',
   'unlock',
 ]
-const topLevelGlobalPermissions = ['read', 'readVersions', 'update', 'validate']
+const topLevelGlobalPermissions = ['read', 'readVersions', 'update']
 
 /**
  * Build up permissions object for an entity (collection or global).
@@ -143,7 +141,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
 
   const entityPermissions: ReturnType<TEntityType> = {
     fields: fieldsPermissions,
-  }
+  } as ReturnType<TEntityType>
 
   const promises: Promise<void>[] = []
 
@@ -164,20 +162,9 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
       if (typeof accessFunction === 'function') {
         accessResults.push({
           operation,
-          result: Promise.resolve(
-            accessFunction({
-              id,
-              slug: entity.slug,
-              data,
-              req:
-                _operation === 'readVersions' || _operation === 'unlock'
-                  ? req
-                  : getAccessOperationRequest({
-                      operation: _operation,
-                      req,
-                    }),
-            }),
-          ),
+          result: Promise.resolve(accessFunction({ id, slug: entity.slug, data, req })) as Promise<
+            boolean | Where
+          >,
         })
       } else {
         entityPermissions[operation] = {
@@ -223,7 +210,6 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
   await Promise.all(wherePromises)
 
   populateFieldPermissions({
-    id,
     blockReferencesPermissions,
     collection: entityType === 'collection' ? (entity as SanitizedCollectionConfig) : null,
     data,
@@ -309,14 +295,15 @@ const processWhereQuery = ({
         entityPermissions[operation] = {
           permission: hasPermission,
           where: accessResult,
-        }
+        } as Permission
       }),
     )
   } else {
-    // TODO: 4.0: Investigate defaulting to `false` here, if where query is returned but ignored as we don't
-    // have the document data available. This seems more secure.
-    // Alternatively, we could set permission to a third state, like 'unknown'.
-    // Even after calling sanitizePermissions, the permissions will still be true if the where query is returned but ignored as we don't have the document data available.
-    entityPermissions[operation] = { permission: true, where: accessResult }
+    // When no document data is available we cannot evaluate the where query
+    // against an actual document, so default to `false` (more secure) rather
+    // than claiming the caller may perform the operation on every document.
+    // The constraint is still returned so clients that opt into re-deriving
+    // access themselves can apply it.
+    entityPermissions[operation] = { permission: false, where: accessResult } as Permission
   }
 }
