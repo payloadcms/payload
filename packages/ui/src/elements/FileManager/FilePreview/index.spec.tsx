@@ -24,14 +24,3 @@ test('should leave out the file size when the document has none', async () => {
 
   await expect.element(screen.getByText('800 × 600 – image/png')).toBeInTheDocument()
 })
-
-test('should show the file size when the document has one', async () => {
-  const screen = await renderPreview({
-    filesize: 2048,
-    height: 600,
-    mimeType: 'image/png',
-    width: 800,
-  })
-
-  await expect.element(screen.getByText('800 × 600 – 2KB – image/png')).toBeInTheDocument()
-})

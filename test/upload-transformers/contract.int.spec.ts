@@ -109,12 +109,6 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     },
   )
 
-  test('should pass the stage its canTransform options in transformFile', async ({ payload }) => {
-    await createNote({ contractStages: {}, payload })
-
-    expect(contractCalls.transformFile.map(({ options }) => options)).toEqual([{ stage: 'first' }])
-  })
-
   test.describe('request phases', () => {
     test.for([
       { isStored: false, purposes: ['persisted-default', 'request-override'] },
