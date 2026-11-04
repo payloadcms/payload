@@ -63,7 +63,7 @@ export function getLocalizedPaths({
       let fieldsToSearch: FlattenedField[]
       let _parentIsLocalized = parentIsLocalized
 
-      let matchedField!: FlattenedField
+      let matchedField: FlattenedField | undefined
 
       if (lastIncompletePath?.field?.type === 'blocks') {
         if (segment === 'blockType') {
@@ -82,7 +82,23 @@ export function getLocalizedPaths({
 
             matchedField = block.flattenedFields.find((field) => field.name === segment)!
             if (matchedField) {
-              break
+              const remainingPaths = getLocalizedPaths({
+                collectionSlug,
+                fields: block.flattenedFields,
+                globalSlug,
+                incomingPath: pathSegments.slice(i).join('.'),
+                locale,
+                overrideAccess,
+                parentIsLocalized: parentIsLocalized || lastIncompletePath.field.localized,
+                payload,
+                showHiddenFields,
+              })
+
+              // A same-named field in another block may be the one that supplies the full path.
+              if (remainingPaths.every(({ complete, invalid }) => complete && !invalid)) {
+                break
+              }
+              matchedField = undefined
             }
           }
         }
