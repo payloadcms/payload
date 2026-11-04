@@ -62,7 +62,7 @@ runs:
         fi
 
     - name: Setup Node@${{ inputs.node-version }}
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
       with:
         node-version: ${{ env.NODE_VERSION }}
 
