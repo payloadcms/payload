@@ -1,10 +1,12 @@
 import type { LexicalEditor } from 'lexical'
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import type { SlashMenuGroup, SlashMenuItem } from './LexicalTypeaheadMenuPlugin/types.js'
 
-import { mergeDynamicGroups } from './mergeDynamicGroups.js'
+import { applyDynamicGroups, mergeDynamicGroups } from './mergeDynamicGroups.js'
+
+const editor = {} as LexicalEditor
 
 const createItem = ({ key }: { key: string }): SlashMenuItem => ({
   Icon: () => null,
@@ -23,6 +25,50 @@ const createItem = ({ key }: { key: string }): SlashMenuItem => ({
 const createGroup = ({ items, key }: { items: SlashMenuItem[]; key: string }): SlashMenuGroup => ({
   items,
   key,
+})
+
+describe('applyDynamicGroups', () => {
+  it("should call each dynamicGroups callback with queryString '' and include its items for a bare slash", () => {
+    const staticItem = createItem({ key: 'paragraph' })
+    const dynamicItemA = createItem({ key: 'dynamic-a' })
+    const dynamicItemB = createItem({ key: 'dynamic-b' })
+    const groups = [createGroup({ items: [staticItem], key: 'basic' })]
+    const dynamicGroupFnA = vi.fn(() => [createGroup({ items: [dynamicItemA], key: 'basic' })])
+    const dynamicGroupFnB = vi.fn(() => [createGroup({ items: [dynamicItemB], key: 'custom' })])
+
+    const result = applyDynamicGroups({
+      dynamicGroupFns: [dynamicGroupFnA, dynamicGroupFnB],
+      editor,
+      groups,
+      queryString: '',
+    })
+
+    expect(dynamicGroupFnA).toHaveBeenCalledTimes(1)
+    expect(dynamicGroupFnA).toHaveBeenCalledWith({ editor, queryString: '' })
+    expect(dynamicGroupFnB).toHaveBeenCalledTimes(1)
+    expect(dynamicGroupFnB).toHaveBeenCalledWith({ editor, queryString: '' })
+    expect(result.map((group) => group.key)).toEqual(['basic', 'custom'])
+    expect(result[0]!.items.map((item) => item.key)).toEqual(['paragraph', 'dynamic-a'])
+    expect(result[1]!.items.map((item) => item.key)).toEqual(['dynamic-b'])
+  })
+
+  it('should not call dynamicGroups callbacks when queryString is null', () => {
+    const groups = [createGroup({ items: [createItem({ key: 'paragraph' })], key: 'basic' })]
+    const dynamicGroupFn = vi.fn(() => [
+      createGroup({ items: [createItem({ key: 'dynamic' })], key: 'custom' }),
+    ])
+
+    const result = applyDynamicGroups({
+      dynamicGroupFns: [dynamicGroupFn],
+      editor,
+      groups,
+      queryString: null,
+    })
+
+    expect(dynamicGroupFn).not.toHaveBeenCalled()
+    expect(result).toBe(groups)
+    expect(result.map((group) => group.key)).toEqual(['basic'])
+  })
 })
 
 describe('mergeDynamicGroups', () => {

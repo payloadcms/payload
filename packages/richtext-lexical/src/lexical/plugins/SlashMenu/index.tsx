@@ -1,7 +1,7 @@
 'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useTranslation } from '@payloadcms/ui'
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
@@ -15,7 +15,7 @@ import type {
 import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
 import './index.css'
 import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin/index.js'
-import { mergeDynamicGroups } from './mergeDynamicGroups.js'
+import { applyDynamicGroups } from './mergeDynamicGroups.js'
 import { useMenuTriggerMatch } from './useMenuTriggerMatch.js'
 
 const baseClass = 'slash-menu-popup'
@@ -94,25 +94,6 @@ export function SlashMenuPlugin({
     minLength: 0,
   })
 
-  const getDynamicItems = useCallback(() => {
-    let groupWithItems: Array<SlashMenuGroup> = []
-
-    // queryString is '' for a bare '/', and null when the menu is closed
-    if (queryString == null) {
-      return groupWithItems
-    }
-
-    for (const dynamicItem of editorConfig.features.slashMenu.dynamicGroups) {
-      const dynamicGroupWithItems = dynamicItem({
-        editor,
-        queryString,
-      })
-      groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
-    }
-
-    return groupWithItems
-  }, [editor, queryString, editorConfig?.features])
-
   const groups: SlashMenuGroup[] = useMemo(() => {
     let groupsWithItems: SlashMenuGroup[] = []
     for (const groupWithItem of editorConfig?.features.slashMenu.groups ?? []) {
@@ -169,18 +150,17 @@ export function SlashMenuPlugin({
     }
 
     // Merge dynamic groups when the menu is open, including bare '/' (queryString === '')
-    if (queryString != null) {
-      groupsWithItems = mergeDynamicGroups({
-        dynamicGroups: getDynamicItems(),
-        groups: groupsWithItems,
-      })
-    }
-
-    return groupsWithItems
+    return applyDynamicGroups({
+      dynamicGroupFns: editorConfig?.features.slashMenu.dynamicGroups ?? [],
+      editor,
+      groups: groupsWithItems,
+      queryString,
+    })
   }, [
+    editor,
     queryString,
+    editorConfig?.features.slashMenu.dynamicGroups,
     editorConfig?.features.slashMenu.groups,
-    getDynamicItems,
     featureClientSchemaMap,
     i18n,
     schemaPath,
