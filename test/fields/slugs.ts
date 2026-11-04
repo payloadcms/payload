@@ -64,3 +64,5 @@ export const collectionSlugs = [
   uploads3Slug,
   uiSlug,
 ]
+
+export const slugLocalizedRequiredSlug = 'slug-localized-required'

@@ -32,6 +32,7 @@ import SelectVersionsFields from './collections/SelectVersions/index.js'
 import SlugField from './collections/SlugField/index.js'
 import { SlugFieldAccess } from './collections/SlugFieldAccess/index.js'
 import { SlugFieldAutosave } from './collections/SlugFieldAutosave/index.js'
+import { SlugFieldLocalizedRequired } from './collections/SlugFieldLocalizedRequired/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import { TabsFields2 } from './collections/Tabs2/index.js'
 import TextFields from './collections/Text/index.js'
@@ -87,6 +88,7 @@ export const collections: CollectionConfig[] = [
   SlugField,
   SlugFieldAccess,
   SlugFieldAutosave,
+  SlugFieldLocalizedRequired,
   TabsFields2,
   TabsFields,
   TextFields,
