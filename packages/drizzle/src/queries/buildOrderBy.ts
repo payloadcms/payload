@@ -1,7 +1,7 @@
-import type { SQL, Table } from 'drizzle-orm'
+import type { AnyColumn, SQL, SQLWrapper, Table } from 'drizzle-orm'
 import type { FlattenedField, Sort } from 'payload'
 
-import { asc, desc } from 'drizzle-orm'
+import { asc, desc, sql } from 'drizzle-orm'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases, BuildQueryResult } from './buildQuery.js'
@@ -21,6 +21,13 @@ type Args = {
   sort?: Sort
   tableName: string
 }
+
+/**
+ * Postgres sorts NULL first in a descending sort, while MongoDB and SQLite sort it last.
+ * Postgres can't use a plain index for this order, so it's only for columns that can hold NULL.
+ */
+export const descNullsLast = (column: AnyColumn | SQLWrapper): SQL =>
+  sql`${desc(column)} nulls last`
 
 /**
  * Gets the order by column and direction constructed from the sort argument adds the column to the select fields and joins if necessary
@@ -89,7 +96,18 @@ export const buildOrderBy = ({
         value: sortProperty,
       })
       if (sortTable?.[sortTableColumnName]) {
-        let order = sortDirection === 'asc' ? asc : desc
+        // A left join can give a NOT NULL column NULLs, so only trust `notNull` on this table
+        const canBeNull =
+          !sortTable[sortTableColumnName].notNull ||
+          getNameFromDrizzleTable(sortTable) !== tableName
+
+        let order = desc
+
+        if (sortDirection === 'asc') {
+          order = asc
+        } else if (adapter.name === 'postgres' && canBeNull) {
+          order = descNullsLast
+        }
 
         if (rawSort) {
           order = () => rawSort

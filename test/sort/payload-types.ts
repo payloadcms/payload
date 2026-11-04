@@ -147,6 +147,13 @@ export interface Post {
   text?: string | null;
   number?: number | null;
   number2?: number | null;
+  array?:
+    | {
+        number?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  hasManyNumber?: number[] | null;
   group?: {
     text?: string | null;
     number?: number | null;
