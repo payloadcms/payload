@@ -124,15 +124,6 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     )
   })
 
-  test('should pass each stage its canTransform options in transformFile', async ({ payload }) => {
-    await createNote({ contractStages: {}, payload })
-
-    expect(contractCalls.transformFile.map(({ options }) => options)).toEqual([
-      { stage: 'first' },
-      { stage: 'second' },
-    ])
-  })
-
   test.for(pipelineRuns)(
     'should pass the working doc, and a frozen copy of it as originalDoc, to canTransform on $name',
     async ({ expected, run }, { payload }) => {

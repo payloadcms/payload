@@ -62,13 +62,7 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     expect(await readStoredFlag({ id: created.id, payload })).toBe(false)
     expect(created.filename).toBe(created.original?.filename)
     expect(await readdir(dynamicMediaDir)).toEqual([created.original?.filename])
-  })
-
-  test('should describe the default file with the crop size, the original MIME type and no file size', async ({
-    payload,
-  }) => {
-    const created = await createImage({ payload })
-
+    // The default file has the crop size, the original's MIME type and no file size.
     expect(created).toMatchObject({
       filesize: null,
       height: 600,
