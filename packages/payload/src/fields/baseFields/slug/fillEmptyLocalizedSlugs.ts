@@ -21,7 +21,8 @@ type Args = {
  * empty slug. Each empty locale derives from its own source value — a non-localized source applies
  * to every locale, so they follow it just like the active locale did — and falls back to a per-locale
  * `<singular>-<N>` only when that locale has no source. Both are deduped within the locale, so one
- * document never claims another's per-locale value.
+ * document never claims another's per-locale value. A required localized source must be translated
+ * before its locale is seeded; otherwise SQL would insert a locale row without its required source.
  *
  * Runs after field `beforeChange` (similar to the localized `_status` treatment). The slug field hook
  * only sees the active locale, so the other locales are filled here at the operation level. A slug
@@ -70,6 +71,15 @@ export const fillEmptyLocalizedSlugs = async ({
       const sourceForLocale = sourceField?.localized
         ? (source as Record<string, unknown> | undefined)?.[locale]
         : source
+
+      if (
+        sourceField?.localized &&
+        'required' in sourceField &&
+        sourceField.required &&
+        !hasValue(sourceForLocale)
+      ) {
+        continue
+      }
 
       const derived = sourceForLocale ? await slugify(sourceForLocale) : undefined
 
