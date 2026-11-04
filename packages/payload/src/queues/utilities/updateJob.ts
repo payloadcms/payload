@@ -1,5 +1,6 @@
+import type { BulkOperationResult, TypeWithID } from '../../collections/config/types.js'
 import type { ManyOptions } from '../../collections/operations/local/update.js'
-import type { UpdateJobsArgs } from '../../database/types.js'
+import type { Find, FindArgs, PaginatedDocs, UpdateJobsArgs } from '../../database/types.js'
 import type { Job, JobLog } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 
@@ -131,9 +132,11 @@ function registerPendingClaimHooks(req: PayloadRequest, claimedIDs: (number | st
   }
 
   if (!patchedDbAdapters.has(db)) {
-    const originalFind = db.find.bind(db)
+    const originalFind = db.find.bind(db) as Find
 
-    db.find = async (findArgs) => {
+    const wrappedFind: Find = async <T = TypeWithID>(
+      findArgs: FindArgs,
+    ): Promise<PaginatedDocs<T>> => {
       const claimedSet =
         findArgs?.collection === jobsCollectionSlug && findArgs?.req
           ? pendingClaimHooksByReq.get(findArgs.req)
@@ -143,7 +146,7 @@ function registerPendingClaimHooks(req: PayloadRequest, claimedIDs: (number | st
         pendingClaimHooksByReq.delete(findArgs.req)
       }
 
-      const findResult = await originalFind(findArgs)
+      const findResult = await originalFind<T>(findArgs)
 
       if (!claimedSet || !findResult?.docs?.length) {
         return findResult
@@ -156,12 +159,13 @@ function registerPendingClaimHooks(req: PayloadRequest, claimedIDs: (number | st
           typeof doc === 'object' &&
           'id' in doc &&
           claimedSet.has((doc as { id: number | string }).id)
-            ? { ...doc, processing: false }
+            ? ({ ...doc, processing: false } as T)
             : doc,
         ),
       }
     }
 
+    db.find = wrappedFind
     patchedDbAdapters.add(db)
   }
 
@@ -207,7 +211,7 @@ async function claimJobsWithHooks({
 
   registerPendingClaimHooks(claimReq, claimedIDs)
 
-  let result: Awaited<ReturnType<typeof req.payload.update>>
+  let result: BulkOperationResult<any, any>
   try {
     result = await req.payload.update({
       collection: jobsCollectionSlug,
@@ -230,7 +234,7 @@ async function claimJobsWithHooks({
     pendingClaimHooksByReq.delete(claimReq)
   }
 
-  const erroredIDs = new Set((result?.errors ?? []).map((err) => err.id))
+  const erroredIDs = new Set((result?.errors ?? []).map((err: { id: number | string }) => err.id))
   const updatedDocs = ((result?.docs as Job[] | undefined) ?? []).filter(
     (doc) => !erroredIDs.has(doc.id) && doc.processing !== false,
   )

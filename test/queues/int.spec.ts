@@ -1193,6 +1193,11 @@ describe('Queues - Payload', () => {
               ({ siblingData }) =>
                 (siblingData?.input as { simpleID?: number | string } | undefined)?.simpleID,
             ],
+            beforeChange: [
+              ({ siblingData }) => {
+                delete siblingData.relatedSimple
+              },
+            ],
           },
           relationTo: 'simple',
           virtual: true,
