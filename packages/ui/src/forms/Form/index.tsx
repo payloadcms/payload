@@ -108,13 +108,14 @@ export const Form: React.FC<FormProps> = (props) => {
   const submittedRef = useRef(false)
   const submissionActivityRef = useRef<SubmissionActivity>({ running: 0, started: 0 })
 
-  const requestFormState = useFormStateRequest({
+  const { fetchFormState, requestFormState } = useFormStateRequest({
     contextRef,
     dispatchFields,
     formStateRequest: props.formStateRequest,
     prevFormStateRef: prevFormState,
     queueTask,
     submissionActivityRef,
+    submittedRef,
   })
 
   const validateForm = useCallback(async () => {
@@ -204,10 +205,10 @@ export const Form: React.FC<FormProps> = (props) => {
   } = useFormSubmission({
     contextRef,
     dispatchFields,
+    fetchFormState,
     formRef,
     prevFormStateRef: prevFormState,
     props,
-    requestFormState,
     setIsValid,
     submissionActivityRef,
     submittedRef,
@@ -489,7 +490,7 @@ export const Form: React.FC<FormProps> = (props) => {
   useDebouncedEffect(
     () => {
       if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
-        requestFormState({ submitted })
+        requestFormState()
         notifyOnChange()
       }
 

@@ -19,7 +19,7 @@ import type {
   Submit,
   SubmitOptions,
 } from './types.js'
-import type { RequestFormState, SubmissionActivity } from './useFormStateRequest.js'
+import type { FormStateRequests, SubmissionActivity } from './useFormStateRequest.js'
 
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -34,10 +34,10 @@ import { fieldReducer } from './fieldReducer.js'
 type Args = {
   contextRef: RefObject<FormContextType>
   dispatchFields: Dispatch<FieldAction>
+  fetchFormState: FormStateRequests['fetchFormState']
   formRef: RefObject<HTMLFormElement | null>
   prevFormStateRef: RefObject<FormState>
   props: FormProps
-  requestFormState: RequestFormState
   setIsValid: FormContextType['setIsValid']
   submissionActivityRef: RefObject<SubmissionActivity>
   /** Kept in sync with the submitted state, for requests queued before React renders it. */
@@ -47,10 +47,10 @@ type Args = {
 export const useFormSubmission = ({
   contextRef,
   dispatchFields,
+  fetchFormState,
   formRef,
   prevFormStateRef,
   props,
-  requestFormState,
   setIsValid,
   submissionActivityRef,
   submittedRef,
@@ -203,10 +203,6 @@ export const useFormSubmission = ({
         })
       }
 
-      // Every successful submission is followed by a form-state request.
-      // A failed one already applies its errors, and a request built from the rejected state could mark fields fixed since then as invalid.
-      let followUpRequest: Omit<Parameters<RequestFormState>[0], 'submitted'> | undefined
-
       submissionActivityRef.current.started += 1
       submissionActivityRef.current.running += 1
 
@@ -353,14 +349,20 @@ export const useFormSubmission = ({
           if (res.status < 400) {
             setSuccessfulSubmitCount((count) => count + 1)
 
-            followUpRequest = { acceptValues, savedDocument: json?.doc ?? json?.result }
-
             if (typeof onSuccess === 'function') {
               await onSuccess(json, {
                 context,
                 formState: serializableFormState,
               })
             }
+
+            // Part of the submission, so the next one can't start before the saved document's state is applied.
+            // Only after a success: a failed submission already applies its errors.
+            await fetchFormState({
+              acceptValues,
+              savedDocument: json?.doc ?? json?.result,
+              submitted: false,
+            })
 
             setIsSubmitted(false)
             setIsProcessing(false)
@@ -462,10 +464,6 @@ export const useFormSubmission = ({
         }
       } finally {
         submissionActivityRef.current.running -= 1
-
-        if (followUpRequest) {
-          requestFormState({ ...followUpRequest, submitted: submittedRef.current })
-        }
       }
     },
     [
@@ -480,7 +478,7 @@ export const useFormSubmission = ({
       onSubmit,
       onSuccess,
       redirect,
-      requestFormState,
+      fetchFormState,
       router,
       t,
       i18n,
