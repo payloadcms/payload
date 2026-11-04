@@ -218,9 +218,11 @@ const authorize: PayloadHandler = (req) => {
 }
 
 const approve: PayloadHandler = async (req) => {
-  // The Allow page is part of the admin panel, which other sites may be able to frame. Refusing
-  // clicks inside a frame stops them from tricking users into clicking Allow.
-  if (req.headers.get('Sec-Fetch-Dest') === 'iframe') {
+  // The Allow page is part of the admin panel, which other sites may be able to frame. Only
+  // accepting clicks from a top-level page stops them from tricking users into clicking Allow.
+  // Browsers too old to send the header still get through.
+  const fetchDestination = req.headers.get('Sec-Fetch-Dest')
+  if (fetchDestination && fetchDestination !== 'document') {
     return new Response(null, { status: 403 })
   }
 

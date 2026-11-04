@@ -4568,14 +4568,26 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
       const headers = await getBrowserHeaders(restClient)
       const consent = await getConsent({ headers, query, restClient })
 
-      // What the browser sends when another site frames the Allow page
+      // What browsers send when another site frames the Allow page with an iframe, frame, object
+      // or embed element
+      for (const fetchDestination of ['iframe', 'frame', 'object', 'embed']) {
+        const response = await allow({
+          consent,
+          headers: { ...headers, 'Sec-Fetch-Dest': fetchDestination },
+          restClient,
+        })
+
+        expect(response.status).toBe(403)
+      }
+
+      // What browsers send when the user clicks Allow on the page itself
       const response = await allow({
         consent,
-        headers: { ...headers, 'Sec-Fetch-Dest': 'iframe' },
+        headers: { ...headers, 'Sec-Fetch-Dest': 'document' },
         restClient,
       })
 
-      expect(response.status).toBe(403)
+      expect(new URL(response.headers.get('Location')!).searchParams.get('code')).toBeTruthy()
     })
 
     test("should base the login server's issuer on oauth.resource", async ({
