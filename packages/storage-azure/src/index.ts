@@ -39,6 +39,10 @@ export type AzureStorageOptions = {
    * headers, so the browser issues a CORS preflight: your storage account's CORS
    * rules must allow the `OPTIONS` and `PUT` methods and the required headers
    * (allowed headers `*`, or at minimum `x-ms-*,content-type,content-length`).
+   *
+   * Files at or above the upload session threshold (64MB by default) use resumable upload
+   * sessions instead: Payload signs each block, and an interrupted upload continues from the
+   * blocks Azure already has.
    */
   clientUploads?: ClientUploadsConfig
 
