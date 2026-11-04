@@ -29,6 +29,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
 
   const filename = req.routeParams?.filename as string
   const prefix = req.searchParams?.get('prefix') ?? undefined
+  const isOriginal = req.searchParams?.get('original') === 'true'
 
   if (!collection.config.upload) {
     throw new APIError(
@@ -48,11 +49,18 @@ export const getFileHandler: PayloadHandler = async (req) => {
       versionID,
     })
 
-    return retrieveFileResponse({ collection, doc: historical, filename, prefix, req })
+    return retrieveFileResponse({
+      collection,
+      doc: historical,
+      filename,
+      isOriginal,
+      prefix,
+      req,
+    })
   }
 
   if (req.payload.config.upload.transformers.length > 0) {
-    return handleDynamicFileRequest({ collection, filename, prefix, req })
+    return handleDynamicFileRequest({ collection, filename, isOriginal, prefix, req })
   }
 
   const accessResult = (await checkFileAccess({
@@ -74,7 +82,14 @@ export const getFileHandler: PayloadHandler = async (req) => {
     throw new NotFound(req.t)
   }
 
-  return retrieveFileResponse({ collection, doc: accessResult ?? current, filename, prefix, req })
+  return retrieveFileResponse({
+    collection,
+    doc: accessResult ?? current,
+    filename,
+    isOriginal,
+    prefix,
+    req,
+  })
 }
 
 /**
@@ -87,6 +102,7 @@ export async function retrieveFileResponse({
   collection,
   doc,
   filename,
+  isOriginal,
   operation = 'read',
   prefix,
   req,
@@ -94,6 +110,7 @@ export async function retrieveFileResponse({
   collection: Collection
   doc?: TypeWithID
   filename: string
+  isOriginal?: boolean
   operation?: FileHandlerOperation
   prefix?: string
   req: PayloadRequest
@@ -109,6 +126,7 @@ export async function retrieveFileResponse({
         params: {
           collection: collection.config.slug,
           filename,
+          isOriginal,
           operation,
           prefix,
         },

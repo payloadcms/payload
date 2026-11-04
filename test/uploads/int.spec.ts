@@ -3865,7 +3865,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           overrideAccess: true,
         })
 
-        expect(doc.filename).toBe('cdn-image-original.png')
+        expect(doc.filename).toBe('cdn-image.png')
         expect(doc.mimeType).toBe('image/png')
       } finally {
         cdnServer.close()

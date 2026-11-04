@@ -1453,7 +1453,7 @@ describe('Dashboard', () => {
         expect.arrayContaining([
           expect.objectContaining({
             description: 'Uploaded from the dashboard',
-            filename: 'image-original.png',
+            filename: 'image.png',
           }),
         ]),
       )

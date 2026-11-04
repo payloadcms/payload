@@ -34,8 +34,8 @@ export default buildConfigWithDefaults({
     collections: [
       PostsCollection,
       AutosavePostsCollection,
-      DraftPostsCollection,
       ConditionsCollection,
+      DraftPostsCollection,
       UploadsCollection,
     ],
     globals: [{ slug: permissionSettingsSlug, fields: [{ name: 'title', type: 'text' }] }],

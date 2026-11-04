@@ -73,8 +73,15 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
   const minRows = minRowsProp ?? (required ? 1 : 0)
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, getFields, moveFieldRow, removeFieldRow, setModified } =
-    useForm()
+  const {
+    addFieldRow,
+    dispatchFields,
+    getFields,
+    moveFieldRow,
+    removeFieldRow,
+    replaceState,
+    setModified,
+  } = useForm()
   const submitted = useFormSubmitted()
   const currentLocale = useLocale()
   const locale = currentLocale?.code
@@ -253,7 +260,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
             path,
             rowIndex,
           })
-          dispatchFields({ type: 'REPLACE_STATE', state: newState })
+          replaceState(newState)
           setModified(true)
         },
         path,
@@ -267,7 +274,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
         toast.error(clipboardResult)
       }
     },
-    [fields, getFields, path, dispatchFields, setModified, t],
+    [fields, getFields, path, replaceState, setModified, t],
   )
 
   const pasteRowBelow = useCallback(
@@ -281,7 +288,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
             path,
             rowIndex: rowIndex + 1,
           })
-          dispatchFields({ type: 'REPLACE_STATE', state: newState })
+          replaceState(newState)
           setModified(true)
 
           setTimeout(() => {
@@ -299,7 +306,7 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
         toast.error(clipboardResult)
       }
     },
-    [fields, getFields, path, dispatchFields, scrollIdPrefix, setModified, t],
+    [fields, getFields, path, replaceState, scrollIdPrefix, setModified, t],
   )
 
   const pasteField = useCallback(
@@ -310,10 +317,10 @@ export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
         formState,
         path,
       })
-      dispatchFields({ type: 'REPLACE_STATE', state: newState })
+      replaceState(newState)
       setModified(true)
     },
-    [getFields, path, dispatchFields, setModified],
+    [getFields, path, replaceState, setModified],
   )
 
   const getDataToCopy = useCallback(

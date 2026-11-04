@@ -81,8 +81,8 @@ export interface Config {
   collections: {
     posts: Post;
     'autosave-posts': AutosavePost;
-    'draft-posts': DraftPost;
     conditions: Condition;
+    'draft-posts': DraftPost;
     uploads: Upload;
     'payload-kv': PayloadKv;
     users: User;
@@ -95,8 +95,8 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
-    'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     conditions: ConditionsSelect<false> | ConditionsSelect<true>;
+    'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -246,6 +246,8 @@ export interface User {
         id: string;
         createdAt?: string | null;
         expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
       }[]
     | null;
   password?: string | null;
@@ -333,6 +335,27 @@ export interface Upload {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditions".
+ */
+export interface Condition {
+  id: string;
+  showField?: boolean | null;
+  conditionalCustomField?: string | null;
+  conditionalRowField?: string | null;
+  conditionalCollapsibleField?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-posts".
  */
 export interface DraftPost {
@@ -376,27 +399,6 @@ export interface DraftPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "conditions".
- */
-export interface Condition {
-  id: string;
-  showField?: boolean | null;
-  conditionalCustomField?: string | null;
-  conditionalRowField?: string | null;
-  conditionalCollapsibleField?: string | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -428,12 +430,12 @@ export interface PayloadLockedDocument {
         value: string | AutosavePost;
       } | null)
     | ({
-        relationTo: 'draft-posts';
-        value: string | DraftPost;
-      } | null)
-    | ({
         relationTo: 'conditions';
         value: string | Condition;
+      } | null)
+    | ({
+        relationTo: 'draft-posts';
+        value: string | DraftPost;
       } | null)
     | ({
         relationTo: 'uploads';
@@ -615,6 +617,20 @@ export interface AutosavePostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditions_select".
+ */
+export interface ConditionsSelect<T extends boolean = true> {
+  showField?: T;
+  conditionalCustomField?: T;
+  conditionalRowField?: T;
+  conditionalCollapsibleField?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-posts_select".
  */
 export interface DraftPostsSelect<T extends boolean = true> {
@@ -662,20 +678,6 @@ export interface DraftPostsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "conditions_select".
- */
-export interface ConditionsSelect<T extends boolean = true> {
-  showField?: T;
-  conditionalCustomField?: T;
-  conditionalRowField?: T;
-  conditionalCollapsibleField?: T;
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -740,6 +742,8 @@ export interface UsersSelect<T extends boolean = true> {
         id?: T;
         createdAt?: T;
         expiresAt?: T;
+        refreshCount?: T;
+        refreshedAt?: T;
       };
 }
 /**
@@ -847,7 +851,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'posts' | 'autosave-posts' | 'draft-posts' | 'conditions' | 'uploads' | 'users';
+    relatedCollection: 'posts' | 'autosave-posts' | 'conditions' | 'draft-posts' | 'uploads' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -869,7 +873,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('posts' | 'autosave-posts' | 'draft-posts' | 'conditions' | 'uploads' | 'users')[] | null;
+    excludedCollections?: ('posts' | 'autosave-posts' | 'conditions' | 'draft-posts' | 'uploads' | 'users')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

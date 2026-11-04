@@ -585,8 +585,9 @@ test.describe('Linked autosave issues', () => {
     await page.locator('#field-title').fill('not ok')
     await page.clock.runFor(300)
     await earlier.captured
-    await page.locator('#action-save').click()
+    // Saving disables the form, so change the condition first and let the queued save displace its refresh.
     await page.locator('label[for="field-type-custom"]').click()
+    await page.locator('#action-save').click()
     await page.clock.runFor(1000)
 
     const rejected = page.waitForResponse(

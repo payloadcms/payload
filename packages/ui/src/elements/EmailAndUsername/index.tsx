@@ -9,6 +9,8 @@ import React from 'react'
 import { EmailField } from '../../fields/Email/index.js'
 import { TextField } from '../../fields/Text/index.js'
 import { FieldPathContext } from '../../forms/RenderFields/context.js'
+import { useAuth } from '../../providers/Auth/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import './index.css'
 
 const baseClass = 'login-fields'
@@ -34,6 +36,10 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
     readOnly,
     t,
   } = props
+
+  const { user } = useAuth()
+  const { id, collectionSlug } = useDocumentInfo()
+  const isOwnAccount = Boolean(user && user.id === id && user.collection === collectionSlug)
 
   function getAuthFieldPermission(fieldName: string, operation: 'read' | 'update') {
     const permissionsResult = getFieldPermissions({
@@ -85,7 +91,7 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
               field={{
                 name: 'email',
                 admin: {
-                  autoComplete: 'off',
+                  autoComplete: isOwnAccount ? 'email' : 'off',
                 },
                 label: t('general:email'),
                 required:
@@ -104,7 +110,7 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
               field={{
                 name: 'username',
                 admin: {
-                  autoComplete: 'off',
+                  autoComplete: isOwnAccount ? 'username' : 'off',
                 },
                 label: t('authentication:username'),
                 required: loginWithUsername && loginWithUsername.requireUsername,

@@ -100,7 +100,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const [modified, _setModified] = useState(false)
   const formSequenceRef = useRef(0)
   const requestQueueOptions = useMemo(() => ({ getSequence: () => formSequenceRef.current }), [])
-  const { reset: resetRequestQueue, schedule: scheduleRequest } = useQueue(requestQueueOptions)
+  const { queueTask: scheduleRequest, resetQueue: resetRequestQueue } =
+    useQueue(requestQueueOptions)
 
   const setModified = useCallback((modified: boolean) => {
     if (modified) {
@@ -245,8 +246,10 @@ export const Form: React.FC<FormProps> = (props) => {
     backgroundProcessing,
     disabled,
     disabledRef,
+    disableFormForSubmission,
     executeSubmit,
     processing,
+    releaseFormAfterSubmission,
     restoreRequestState,
     setBackgroundProcessing,
     setDisabled,
@@ -254,6 +257,7 @@ export const Form: React.FC<FormProps> = (props) => {
     setSubmitted,
     submissionErrorsRef,
     submitted,
+    submittedRef,
     successfulSubmitCount,
   } = useFormSubmission({
     contextRef,
@@ -272,7 +276,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const executeOnChange = useEffectEvent(() => {
     void scheduleRequest({
       priority: requestPriority.formState,
-      run: async (requestContext) => {
+      task: async (requestContext) => {
         if (onChangeSequenceRef.current === formSequenceRef.current) {
           return
         }
@@ -287,7 +291,10 @@ export const Form: React.FC<FormProps> = (props) => {
 
         for (const onChangeFn of onChange ?? []) {
           // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-          serverState = await onChangeFn({ formState: requestFormState, submitted })
+          serverState = await onChangeFn({
+            formState: requestFormState,
+            submitted: submittedRef.current,
+          })
         }
 
         if (serverState && requestContext.isCurrent()) {
@@ -326,11 +333,18 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
+      const shouldDisableForm = options?.disableFormWhileProcessing ?? true
+
+      // Disable before queueing, like a direct submit, so the guard above rejects any submission made while this one waits.
+      if (shouldDisableForm) {
+        disableFormForSubmission()
+      }
+
       const resetSequence = resetSequenceRef.current
       let didReceiveSuccessfulResponse = false
       const scheduledRequest = scheduleRequest({
         priority: requestPriority[options?.submissionType ?? 'submit'],
-        run: (requestContext) =>
+        task: (requestContext) =>
           executeSubmit({
             onResponse: ({ res }) => {
               didReceiveSuccessfulResponse = Boolean(res?.ok)
@@ -348,6 +362,16 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       const result = await scheduledRequest
+
+      // A superseded submission never runs, so release the disable it took.
+      // Skip after a reset: it already restored request state, and a newer submission may own the disable.
+      if (
+        result.status === 'superseded' &&
+        shouldDisableForm &&
+        resetSequence === resetSequenceRef.current
+      ) {
+        releaseFormAfterSubmission()
+      }
 
       // A failed submit may have displaced a refresh without returning replacement form state.
       if (
@@ -386,7 +410,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       return result.status === 'completed' ? result.value : undefined
     },
-    [executeSubmit, scheduleRequest],
+    [disableFormForSubmission, executeSubmit, releaseFormAfterSubmission, scheduleRequest],
   )
 
   const getFields = useCallback(() => contextRef.current.fields, [])
@@ -533,16 +557,12 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const replaceState = useCallback(
     (state: FormState) => {
-      resetSequenceRef.current += 1
-      resetRequestQueue()
-      formSequenceRef.current = 0
-      onChangeSequenceRef.current = 0
-      restoreRequestState()
       contextRef.current = { ...initContextState }
       _setModified(false)
-      dispatchFieldsWithoutIncrementingFormSequence({ type: 'REPLACE_STATE', state })
+      // Replacing the data advances the form sequence, so in-flight responses can't overwrite the new state.
+      dispatchFields({ type: 'REPLACE_STATE', state })
     },
-    [dispatchFieldsWithoutIncrementingFormSequence, resetRequestQueue, restoreRequestState],
+    [dispatchFields],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(

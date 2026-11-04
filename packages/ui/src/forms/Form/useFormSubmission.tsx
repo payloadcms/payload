@@ -12,7 +12,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { QueueContext } from '../../hooks/useQueue.js'
+import type { TaskContext } from '../../hooks/useQueue.js'
 import type { FieldAction, Context as FormContextType, FormProps, SubmitOptions } from './types.js'
 
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
@@ -77,7 +77,7 @@ export const useFormSubmission = ({
 
   const [isDisabled, _setDisabled] = useState(isDisabledFromProps || false)
 
-  const [isSubmitted, setSubmitted] = useState(false)
+  const [isSubmitted, _setSubmitted] = useState(false)
 
   const [successfulSubmitCount, setSuccessfulSubmitCount] = useState(0)
 
@@ -106,10 +106,40 @@ export const useFormSubmission = ({
   const method = 'method' in props ? props?.method : undefined
   const validateDrafts = hasDraftValidationEnabled(docConfig)
 
+  const submittedRef = useRef(false)
+
+  const setSubmitted = useCallback((isSubmitted: boolean) => {
+    // Queued form-state requests read this before React renders the updated submitted state.
+    submittedRef.current = isSubmitted
+    _setSubmitted(isSubmitted)
+  }, [])
+
   const setDisabled = useCallback((isDisabled: boolean) => {
     isDisabledRef.current = isDisabled
     _setDisabled(isDisabled)
   }, [])
+
+  /**
+   * Disables the form for an explicit submission before it is queued, so the submit guard rejects submissions made while it waits.
+   */
+  const disableFormForSubmission = useCallback(() => {
+    const activeElement = document.activeElement
+
+    // Disabling the active field drops browser focus to the body.
+    submitFocus.current =
+      activeElement instanceof HTMLElement && formRef.current?.contains(activeElement)
+        ? activeElement
+        : null
+
+    setProcessing(true)
+    setDisabled(true)
+  }, [formRef, setDisabled])
+
+  /** Releases the disable taken by `disableFormForSubmission`. */
+  const releaseFormAfterSubmission = useCallback(() => {
+    setProcessing(false)
+    setDisabled(isDisabledFromPropsRef.current)
+  }, [setDisabled])
 
   const setBackgroundProcessing = useCallback((isBackgroundProcessing: boolean) => {
     _setBackgroundProcessing(isBackgroundProcessing)
@@ -147,7 +177,7 @@ export const useFormSubmission = ({
     }: {
       onResponse: (args: { res: Response }) => void
       options: SubmitOptions | undefined
-      requestContext: QueueContext
+      requestContext: TaskContext
     }) => {
       const {
         acceptValues = true,
@@ -197,18 +227,6 @@ export const useFormSubmission = ({
         if (typeof promiseToastValue === 'number' || typeof promiseToastValue === 'string') {
           promiseToastID = promiseToastValue
         }
-      }
-
-      if (disableFormWhileProcessing) {
-        const activeElement = document.activeElement
-
-        // Disabling the active field drops browser focus to the body.
-        submitFocus.current =
-          activeElement instanceof HTMLElement && formRef.current?.contains(activeElement)
-            ? activeElement
-            : null
-        setProcessing(true)
-        setDisabled(true)
       }
 
       if (submissionType === 'autosave') {
@@ -559,12 +577,14 @@ export const useFormSubmission = ({
         }
 
         if (!requestContext.isQueueReset()) {
+          // Only put back what this submission took: an autosave must not release a queued save's disable.
+          if (disableFormWhileProcessing) {
+            releaseFormAfterSubmission()
+          }
+
           if (submissionType === 'autosave') {
             setBackgroundProcessing(false)
           }
-
-          setProcessing(false)
-          setDisabled(isDisabledFromPropsRef.current)
 
           if (submissionType === 'autosave' && !requestContext.isCurrent()) {
             onStaleRequest?.()
@@ -588,8 +608,8 @@ export const useFormSubmission = ({
       onSuccess,
       redirect,
       router,
+      releaseFormAfterSubmission,
       setBackgroundProcessing,
-      setDisabled,
       t,
       i18n,
       validateDrafts,
@@ -598,7 +618,6 @@ export const useFormSubmission = ({
       validateForm,
       onNonFieldError,
       contextRef,
-      formRef,
       formSequenceRef,
       isMountedRef,
       prevFormStateRef,
@@ -618,14 +637,16 @@ export const useFormSubmission = ({
     if (typeof isSubmittedFromProps === 'boolean') {
       setSubmitted(isSubmittedFromProps)
     }
-  }, [isSubmittedFromProps])
+  }, [isSubmittedFromProps, setSubmitted])
 
   return {
     backgroundProcessing: isBackgroundProcessing,
     disabled: isDisabled,
     disabledRef: isDisabledRef,
+    disableFormForSubmission,
     executeSubmit,
     processing: isProcessing,
+    releaseFormAfterSubmission,
     restoreRequestState,
     setBackgroundProcessing,
     setDisabled,
@@ -633,6 +654,7 @@ export const useFormSubmission = ({
     setSubmitted,
     submissionErrorsRef,
     submitted: isSubmitted,
+    submittedRef,
     successfulSubmitCount,
   }
 }

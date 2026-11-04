@@ -150,6 +150,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.auth = {
     ...(config.auth || {}),
     jwtOrder: config.auth?.jwtOrder ?? ['JWT', 'Bearer', 'cookie'],
+    passwordHashIterations: config.auth?.passwordHashIterations ?? 600000,
   }
 
   config.kv = config.kv ?? databaseKVAdapter()

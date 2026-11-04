@@ -30,20 +30,20 @@ describe('useQueue', () => {
     const active = deferred()
     const calls: string[] = []
     const queue = renderQueue({ getSequence: () => 0 })
-    const first = queue.schedule({
-      run: async () => {
+    const first = queue.queueTask({
+      task: async () => {
         calls.push('first')
         await active.promise
         return 'first result'
       },
     })
-    const dropped = queue.schedule({
-      run: async () => {
+    const dropped = queue.queueTask({
+      task: async () => {
         calls.push('dropped')
       },
     })
-    const latest = queue.schedule({
-      run: async () => {
+    const latest = queue.queueTask({
+      task: async () => {
         calls.push('latest')
         return 'latest result'
       },
@@ -62,15 +62,15 @@ describe('useQueue', () => {
     const active = deferred()
     const currentStates: boolean[] = []
     const queue = renderQueue({ getSequence: () => version })
-    const first = queue.schedule({
-      run: async ({ isCurrent }) => {
+    const first = queue.queueTask({
+      task: async ({ isCurrent }) => {
         currentStates.push(isCurrent())
         await active.promise
         currentStates.push(isCurrent())
       },
     })
-    const pending = queue.schedule({
-      run: async ({ isCurrent }) => {
+    const pending = queue.queueTask({
+      task: async ({ isCurrent }) => {
         currentStates.push(isCurrent())
       },
     })
@@ -87,19 +87,19 @@ describe('useQueue', () => {
     let isCurrent: (() => boolean) | undefined
     let isQueueReset: (() => boolean) | undefined
     const queue = renderQueue({ getSequence: () => 0 })
-    const running = queue.schedule({
-      run: async (context) => {
+    const running = queue.queueTask({
+      task: async (context) => {
         isCurrent = context.isCurrent
         isQueueReset = context.isQueueReset
         await active.promise
       },
     })
-    const pending = queue.schedule({
+    const pending = queue.queueTask({
       priority: 2,
-      run: async () => undefined,
+      task: async () => undefined,
     })
-    const superseded = queue.schedule({
-      run: async () => undefined,
+    const superseded = queue.queueTask({
+      task: async () => undefined,
     })
 
     await expect(superseded).resolves.toEqual({ status: 'superseded' })
@@ -114,8 +114,8 @@ describe('useQueue', () => {
     let version = 1
     const active = deferred()
     const queue = renderQueue({ getSequence: () => version })
-    const running = queue.schedule({
-      run: async ({ isCurrent, isQueueReset }) => {
+    const running = queue.queueTask({
+      task: async ({ isCurrent, isQueueReset }) => {
         expect(isCurrent()).toBe(true)
         expect(isQueueReset()).toBe(false)
         await active.promise
@@ -134,23 +134,23 @@ describe('useQueue', () => {
     const calls: string[] = []
     const queue = renderQueue({ getSequence: () => 0 })
 
-    void queue.schedule({
-      run: async () => {
+    void queue.queueTask({
+      task: async () => {
         calls.push('active')
         await active.promise
       },
     })
-    const low = queue.schedule({
+    const low = queue.queueTask({
       priority: 2,
-      run: async () => calls.push('low'),
+      task: async () => calls.push('low'),
     })
-    const medium = queue.schedule({
+    const medium = queue.queueTask({
       priority: 1,
-      run: async () => calls.push('medium'),
+      task: async () => calls.push('medium'),
     })
-    const high = queue.schedule({
+    const high = queue.queueTask({
       priority: 0,
-      run: async () => calls.push('high'),
+      task: async () => calls.push('high'),
     })
 
     active.resolve()
@@ -165,19 +165,19 @@ describe('useQueue', () => {
     const calls: string[] = []
     const queue = renderQueue({ getSequence: () => 0 })
 
-    void queue.schedule({
-      run: async () => {
+    void queue.queueTask({
+      task: async () => {
         calls.push('active')
         await active.promise
       },
     })
-    const high = queue.schedule({
+    const high = queue.queueTask({
       priority: 0,
-      run: async () => calls.push('high'),
+      task: async () => calls.push('high'),
     })
-    const low = queue.schedule({
+    const low = queue.queueTask({
       priority: 1,
-      run: async () => calls.push('low'),
+      task: async () => calls.push('low'),
     })
 
     active.resolve()
@@ -191,12 +191,12 @@ describe('useQueue', () => {
     const calls: string[] = []
     const queue = renderQueue()
 
-    void queue.schedule({ run: async () => active.promise })
-    const high = queue.schedule({
+    void queue.queueTask({ task: async () => active.promise })
+    const high = queue.queueTask({
       priority: 0,
-      run: async () => calls.push('high'),
+      task: async () => calls.push('high'),
     })
-    const low = queue.schedule({ run: async () => calls.push('low') })
+    const low = queue.queueTask({ task: async () => calls.push('low') })
 
     active.resolve()
     await expect(low).resolves.toEqual({ status: 'superseded' })
@@ -208,14 +208,14 @@ describe('useQueue', () => {
     const active = deferred()
     const calls: string[] = []
     const queue = renderQueue({ getSequence: () => 0 })
-    const rejected = queue.schedule({
-      run: async () => {
+    const rejected = queue.queueTask({
+      task: async () => {
         calls.push('active')
         await active.promise
       },
     })
-    const pending = queue.schedule({
-      run: async () => calls.push('pending'),
+    const pending = queue.queueTask({
+      task: async () => calls.push('pending'),
     })
 
     active.reject(new Error('active task failed'))
@@ -229,16 +229,16 @@ describe('useQueue', () => {
     let isCurrent: (() => boolean) | undefined
     let isQueueReset: (() => boolean) | undefined
     const queue = renderQueue({ getSequence: () => 0 })
-    const running = queue.schedule({
-      run: async (context) => {
+    const running = queue.queueTask({
+      task: async (context) => {
         isCurrent = context.isCurrent
         isQueueReset = context.isQueueReset
         await active.promise
       },
     })
-    const pending = queue.schedule({ run: async () => undefined })
+    const pending = queue.queueTask({ task: async () => undefined })
 
-    queue.reset()
+    queue.resetQueue()
 
     await expect(pending).resolves.toEqual({ status: 'superseded' })
     expect(isCurrent?.()).toBe(false)
@@ -252,14 +252,14 @@ describe('useQueue', () => {
     const calls: string[] = []
     const queue = renderQueue({ getSequence: () => 0 })
 
-    void queue.schedule({
-      run: async () => {
+    void queue.queueTask({
+      task: async () => {
         calls.push('active')
         await active.promise
       },
     })
-    const pending = queue.schedule({
-      run: async () => calls.push('pending'),
+    const pending = queue.queueTask({
+      task: async () => calls.push('pending'),
     })
 
     await Promise.resolve()
@@ -267,24 +267,5 @@ describe('useQueue', () => {
     active.resolve()
     await pending
     expect(calls).toEqual(['active', 'pending'])
-  })
-
-  it('should use one queue for legacy and scheduled tasks', async () => {
-    const active = deferred()
-    const calls: string[] = []
-    const queue = renderQueue()
-
-    queue.queueTask(async () => {
-      calls.push('legacy')
-      await active.promise
-    })
-    const scheduled = queue.schedule({
-      run: async () => calls.push('scheduled'),
-    })
-
-    expect(calls).toEqual(['legacy'])
-    active.resolve()
-    await scheduled
-    expect(calls).toEqual(['legacy', 'scheduled'])
   })
 })

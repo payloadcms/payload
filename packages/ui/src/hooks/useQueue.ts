@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react'
 
-export type QueueContext = {
+export type TaskContext = {
   /**
    * Returns `true` if the queue has not been reset and the external sequence still matches the one captured when this task started.
    * Recheck after awaiting work before applying results.
@@ -13,51 +13,87 @@ export type QueueContext = {
   isQueueReset: () => boolean
 }
 
-export type QueueTask<T> = {
-  /** Determines which pending task is retained. Lower values take precedence; defaults to `Infinity` (lowest priority). */
-  priority?: number
-  /** Runs when this task reaches the active position in the queue. */
-  run: (context: QueueContext) => Promise<T>
-}
+/** Runs when this task reaches the active position in the queue. */
+export type Task<T> = (context: TaskContext) => Promise<T>
 
 export type QueueResult<T> = { status: 'completed'; value: T } | { status: 'superseded' }
-
-type Queue = {
-  /** Invalidates active task contexts and supersedes pending work. */
-  reset: () => void
-  /** Adds work to the queue and reports whether it completed or was superseded. */
-  schedule: <T>(task: QueueTask<T>) => Promise<QueueResult<T>>
-}
 
 export type UseQueueOptions = {
   /** Returns the external sequence used to determine whether an active task is still current. */
   getSequence?: () => unknown
 }
 
-type PendingEntry = {
+export type UseQueueResult = {
+  /** Adds work to the queue and reports whether it completed or was superseded. */
+  queueTask: <T>(options: {
+    /** Determines which pending task is retained. Lower values take precedence; defaults to `Infinity` (lowest priority). */
+    priority?: number
+    task: Task<T>
+  }) => Promise<QueueResult<T>>
+  /**
+   * Invalidates active task contexts and supersedes pending work.
+   * The active task is not aborted, so newly queued work still waits for it to settle.
+   */
+  resetQueue: () => void
+}
+
+type QueueEntry = {
   priority: number
   reject: (reason: unknown) => void
   resolve: (result: QueueResult<unknown>) => void
-  run: (context: QueueContext) => Promise<unknown>
+  task: Task<unknown>
 }
 
-const initializeQueue = ({ getSequence }: { getSequence: () => unknown }): Queue => {
-  let resetCount = 0
-  let isActive = false
-  let pending: PendingEntry | undefined
+/**
+ * Runs asynchronous tasks one at a time, retaining at most one pending task to avoid building a backlog.
+ * Pending work keeps the highest priority (lowest number), with newer tasks winning ties.
+ * Scheduling new work never interrupts the active task.
+ *
+ * Use `queueTask` to await a completed result or a superseded status.
+ * Task errors reject the returned promise.
+ * `resetQueue` discards pending work and invalidates the active task's context without aborting its work, so new tasks still wait for it to settle.
+ * Tasks can check `isCurrent()` before applying results that arrive after a reset or an external sequence change.
+ *
+ * @example
+ * const { queueTask } = useQueue()
+ *
+ * const loadPosts = async () => {
+ *   const result = await queueTask({
+ *     priority: 0,
+ *     task: async () => {
+ *       const response = await fetch('/api/posts')
+ *       return response.json()
+ *     },
+ *   })
+ *
+ *   if (result.status === 'completed') {
+ *     return result.value
+ *   }
+ * }
+ *
+ * @internal - this hook may be removed or receive breaking changes in minor releases.
+ */
+export function useQueue(options: UseQueueOptions = {}): UseQueueResult {
+  const getSequenceRef = useRef(options.getSequence)
+  const resetCount = useRef(0)
+  const isTaskRunning = useRef(false)
+  const pendingTask = useRef<QueueEntry | undefined>(undefined)
 
-  const start = ({ entry }: { entry: PendingEntry }): void => {
-    isActive = true
+  getSequenceRef.current = options.getSequence
 
-    const resetCountAtStart = resetCount
-    const dispatchedSequence = getSequence()
-    const isQueueReset = () => resetCount !== resetCountAtStart
-    const context: QueueContext = {
-      isCurrent: () => !isQueueReset() && Object.is(getSequence(), dispatchedSequence),
+  const startTask = useCallback(function runTask(entry: QueueEntry): void {
+    isTaskRunning.current = true
+
+    const resetCountAtStart = resetCount.current
+    const sequenceAtStart = getSequenceRef.current?.()
+    const isQueueReset = () => resetCount.current !== resetCountAtStart
+
+    const context: TaskContext = {
+      isCurrent: () => !isQueueReset() && Object.is(getSequenceRef.current?.(), sequenceAtStart),
       isQueueReset,
     }
 
-    const taskPromise = (async () => entry.run(context))()
+    const taskPromise = (async () => entry.task(context))()
 
     void taskPromise
       .then(
@@ -65,103 +101,59 @@ const initializeQueue = ({ getSequence }: { getSequence: () => unknown }): Queue
         (error) => entry.reject(error),
       )
       .finally(() => {
-        isActive = false
+        isTaskRunning.current = false
 
-        const next = pending
-        pending = undefined
+        const next = pendingTask.current
+        pendingTask.current = undefined
 
         if (next) {
-          start({ entry: next })
+          runTask(next)
         }
       })
-  }
-
-  const reset = (): void => {
-    resetCount += 1
-
-    if (pending) {
-      pending.resolve({ status: 'superseded' })
-      pending = undefined
-    }
-  }
-
-  const schedule = <T>(task: QueueTask<T>): Promise<QueueResult<T>> => {
-    let resolve!: (result: QueueResult<T>) => void
-    let reject!: (reason: unknown) => void
-    const result = new Promise<QueueResult<T>>((resolvePromise, rejectPromise) => {
-      resolve = resolvePromise
-      reject = rejectPromise
-    })
-    const entry: PendingEntry = {
-      priority: task.priority ?? Infinity,
-      reject,
-      resolve: resolve as (result: QueueResult<unknown>) => void,
-      run: task.run as (context: QueueContext) => Promise<unknown>,
-    }
-
-    if (!isActive) {
-      start({ entry })
-      return result
-    }
-
-    if (!pending || entry.priority <= pending.priority) {
-      pending?.resolve({ status: 'superseded' })
-      pending = entry
-    } else {
-      resolve({ status: 'superseded' })
-    }
-
-    return result
-  }
-
-  return { reset, schedule }
-}
-
-type QueuedFunction = () => Promise<void>
-
-export type QueuedTaskOptions = {
-  /** Runs after the queued task settles. */
-  afterProcess?: () => void
-  /** Return `false` to skip the queued task. */
-  beforeProcess?: () => boolean | void
-}
-
-export type UseQueueResult = {
-  queueTask: (fn: QueuedFunction, options?: QueuedTaskOptions) => void
-} & Queue
-
-/**
- * Queues asynchronous work sequentially while retaining only the highest-priority pending task.
- * `queueTask` preserves the original fire-and-forget API; `schedule` returns the task result.
- */
-export function useQueue(options: UseQueueOptions = {}): UseQueueResult {
-  const getSequenceRef = useRef(options.getSequence)
-  getSequenceRef.current = options.getSequence
-
-  const queueRef = useRef<Queue>(undefined)
-  queueRef.current ??= initializeQueue({ getSequence: () => getSequenceRef.current?.() })
-
-  const queueTask = useCallback<UseQueueResult['queueTask']>((fn, taskOptions) => {
-    void queueRef.current.schedule({
-      run: async () => {
-        if (taskOptions?.beforeProcess?.() === false) {
-          return
-        }
-
-        try {
-          await fn()
-        } catch (error) {
-          console.error('Error in queued function:', error) // eslint-disable-line no-console
-        } finally {
-          taskOptions?.afterProcess?.()
-        }
-      },
-    })
   }, [])
 
-  return {
-    queueTask,
-    reset: queueRef.current.reset,
-    schedule: queueRef.current.schedule,
-  }
+  const resetQueue = useCallback((): void => {
+    resetCount.current += 1
+
+    if (pendingTask.current) {
+      pendingTask.current.resolve({ status: 'superseded' })
+      pendingTask.current = undefined
+    }
+  }, [])
+
+  const queueTask = useCallback<UseQueueResult['queueTask']>(
+    <T>(options: { priority?: number; task: Task<T> }): Promise<QueueResult<T>> => {
+      let resolve!: (result: QueueResult<T>) => void
+      let reject!: (reason: unknown) => void
+
+      const result = new Promise<QueueResult<T>>((resolvePromise, rejectPromise) => {
+        resolve = resolvePromise
+        reject = rejectPromise
+      })
+
+      const entry: QueueEntry = {
+        priority: options.priority ?? Infinity,
+        reject,
+        resolve: resolve as (result: QueueResult<unknown>) => void,
+        task: options.task as Task<unknown>,
+      }
+
+      if (!isTaskRunning.current) {
+        startTask(entry)
+        return result
+      }
+
+      if (!pendingTask.current || entry.priority <= pendingTask.current.priority) {
+        pendingTask.current?.resolve({ status: 'superseded' })
+        pendingTask.current = entry
+      } else {
+        resolve({ status: 'superseded' })
+      }
+
+      return result
+    },
+    [startTask],
+  )
+
+  return { queueTask, resetQueue }
 }

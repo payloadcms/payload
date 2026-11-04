@@ -40,3 +40,4 @@ export const localeValidationGlobalSlug = 'locale-validation-global'
 export const localeValidationBlockSlug = 'locale-validation-block'
 
 export const globalWithDraftsSlug = 'global-drafts'
+export const localizedStatusSharedGlobalSlug = 'localized-status-shared-global'

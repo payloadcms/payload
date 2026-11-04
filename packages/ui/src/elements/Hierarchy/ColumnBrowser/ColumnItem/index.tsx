@@ -47,29 +47,20 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
     [id, isDisabled, onSelect],
   )
 
-  const handleRowClick = useCallback(
-    (e: React.MouseEvent) => {
-      // Don't expand when clicking the checkbox
-      if ((e.target as HTMLElement).closest(`.${baseClass}__checkbox`)) {
-        return
-      }
-      if (hasChildren) {
-        onExpand({ id })
-      }
-    },
-    [hasChildren, id, onExpand],
-  )
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault()
-        if (hasChildren) {
-          onExpand({ id })
-        }
-      }
-    },
-    [hasChildren, id, onExpand],
+  const content = (
+    <>
+      <span className={`${baseClass}__title`} id={titleId} title={title}>
+        {title}
+      </span>
+      {hasSelectedDescendants && !isSelected && (
+        <span className={`${baseClass}__descendant-indicator`} />
+      )}
+      {hasChildren && (
+        <span className={`${baseClass}__chevron`}>
+          <ChevronIcon direction="right" />
+        </span>
+      )}
+    </>
   )
 
   return (
@@ -84,11 +75,21 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
       ]
         .filter(Boolean)
         .join(' ')}
-      onClick={isDisabled ? undefined : handleRowClick}
-      onKeyDown={isDisabled ? undefined : handleKeyDown}
-      role="button"
-      tabIndex={isDisabled ? -1 : 0}
     >
+      {hasChildren ? (
+        <button
+          aria-expanded={isExpanded}
+          className={`${baseClass}__content`}
+          disabled={isDisabled}
+          onClick={() => onExpand({ id })}
+          type="button"
+        >
+          {content}
+        </button>
+      ) : (
+        <div className={`${baseClass}__content`}>{content}</div>
+      )}
+
       <div className={`${baseClass}__checkbox`}>
         <CheckboxInput
           aria-labelledby={titleId}
@@ -98,20 +99,6 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
           variant="muted"
         />
       </div>
-
-      <span className={`${baseClass}__title`} id={titleId} title={title}>
-        {title}
-      </span>
-
-      {hasSelectedDescendants && !isSelected && (
-        <span className={`${baseClass}__descendant-indicator`} />
-      )}
-
-      {hasChildren && (
-        <span className={`${baseClass}__chevron`}>
-          <ChevronIcon direction="right" />
-        </span>
-      )}
     </div>
   )
 }

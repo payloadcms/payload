@@ -107,9 +107,9 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       where: { id: { equals: created.id } },
     })
 
-    expect(created.filename).toBe('photo-1-original.png')
+    expect(created.filename).toBe('photo-1.png')
     expect(stored.original).toMatchObject({
-      filename: 'photo-1-original.png',
+      filename: 'photo-1.png',
       filesize: bytes.length,
       mimeType: 'image/png',
     })
@@ -126,7 +126,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
 
     expect(versions[0]?.version.original).toMatchObject(persisted?.original)
     expect(versions[0]?.version.filename).toBe(persisted?.filename)
-    expect(await readdir(mediaDir)).toEqual(['photo-1-original.png'])
+    expect(await readdir(mediaDir)).toEqual(['photo-1.png'])
     expect(await readFile(path.join(mediaDir, created.filename!))).toEqual(bytes)
   })
 
@@ -168,8 +168,8 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     payload,
   }) => {
     for (const [fixture, mimetype, name, expectedFilename] of [
-      [pdfFixture, 'application/pdf', 'document.pdf', 'document-original.pdf'],
-      [videoFixture, 'video/mp4', 'clip.mp4', 'clip-original.mp4'],
+      [pdfFixture, 'application/pdf', 'document.pdf', 'document.pdf'],
+      [videoFixture, 'video/mp4', 'clip.mp4', 'clip.mp4'],
     ]) {
       const bytes = await readFile(fixture)
       const created = await payload.create({
@@ -186,6 +186,52 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       expect(stored?.original?.filename).toBe(stored?.filename)
       expect(await readFile(path.join(mediaDir, stored!.filename))).toEqual(bytes)
     }
+  })
+
+  test('should give the original a counter name when a new local upload is cropped', async ({
+    payload,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: transformedMediaSlug,
+      data: {},
+      file: { name: 'photo.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+      req: {
+        query: {
+          uploadEdits: {
+            crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+            heightInPixels: 800,
+            widthInPixels: 800,
+          },
+        },
+      },
+    })
+
+    expect(created.filename).toBe('photo.png')
+    expect(created.original?.filename).toBe('photo-1.png')
+    expect(await readFile(path.join(transformedMediaDir, 'photo-1.png'))).toEqual(bytes)
+    expect(await readFile(path.join(transformedMediaDir, 'photo.png'))).not.toEqual(bytes)
+  })
+
+  test('should not add original=true to original.url for local storage', async ({ payload }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: transformedMediaSlug,
+      data: {},
+      file: { name: 'photo.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+      req: {
+        query: {
+          uploadEdits: {
+            crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+            heightInPixels: 800,
+            widthInPixels: 800,
+          },
+        },
+      },
+    })
+
+    expect(created.original?.filename).not.toBe(created.filename)
+    expect(created.original?.url).toBe(`/api/${transformedMediaSlug}/file/photo-1.png`)
   })
 
   for (const overrideAccess of [false, true]) {
@@ -2509,6 +2555,45 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     })
 
     expect(stored?.original?.filename).toBeFalsy()
+  })
+
+  test('should still serve a beta local document whose original is named -original', async ({
+    payload,
+    restClient,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const croppedBytes = await sharp(imageFixture)
+      .extract({ height: 20, left: 0, top: 0, width: 40 })
+      .png()
+      .toBuffer()
+    await mkdir(mediaDir, { recursive: true })
+    await writeFile(path.join(mediaDir, 'beta.png'), croppedBytes)
+    await writeFile(path.join(mediaDir, 'beta-original.png'), bytes)
+
+    const beta = await payload.db.create({
+      collection: mediaSlug,
+      data: {
+        alt: 'beta',
+        filename: 'beta.png',
+        filesize: croppedBytes.byteLength,
+        mimeType: 'image/png',
+        original: {
+          filename: 'beta-original.png',
+          filesize: bytes.byteLength,
+          mimeType: 'image/png',
+          url: `/api/${mediaSlug}/file/beta-original.png`,
+        },
+        url: `/api/${mediaSlug}/file/beta.png`,
+      },
+    })
+
+    const read = await payload.findByID({ id: beta.id, collection: mediaSlug })
+    const mainResponse = await restClient.GET(`/${mediaSlug}/file/beta.png`)
+    const originalResponse = await restClient.GET(`/${mediaSlug}/file/beta-original.png`)
+
+    expect(read.original?.url).toBe(`/api/${mediaSlug}/file/beta-original.png`)
+    expect(Buffer.from(await mainResponse.arrayBuffer())).toEqual(croppedBytes)
+    expect(Buffer.from(await originalResponse.arrayBuffer())).toEqual(bytes)
   })
 
   test('should use a previously cropped stored file as the best available original', async ({

@@ -22,10 +22,9 @@ export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 export { FieldPathContext, useFieldPath } from '../../forms/RenderFields/context.js'
 export { useQueue } from '../../hooks/useQueue.js'
 export type {
-  QueueContext,
-  QueuedTaskOptions,
   QueueResult,
-  QueueTask,
+  Task,
+  TaskContext,
   UseQueueOptions,
   UseQueueResult,
 } from '../../hooks/useQueue.js'
