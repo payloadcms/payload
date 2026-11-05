@@ -25,7 +25,7 @@ import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { downloadFileToBuffer, resolveExternalFileURL } from './downloadFileToBuffer.js'
 import { generateImageSizeFilename } from './generateImageSizeFilename.js'
 import { getFileByPath } from './getFileByPath.js'
-import { fetchFullClientUpload } from './getFileFromUploadInstructions.js'
+import { fetchFullClientUpload as downloadFullClientUpload } from './getFileFromUploadInstructions.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName, incrementName } from './getSafeFilename.js'
@@ -53,7 +53,7 @@ type Args<T> = {
    * `fetchFullClientUpload`. A bulk update passes a shared download, so its documents download
    * the file once.
    */
-  fetchFullUpload?: typeof fetchFullClientUpload
+  fetchFullClientUpload?: typeof downloadFullClientUpload
   isDuplicating?: boolean
   operation: 'create' | 'update'
   originalDoc?: T
@@ -65,6 +65,13 @@ type Args<T> = {
 type Result<T> = Promise<{
   data: T
   files: FileToSave[]
+}>
+
+type ProcessUploadResult<T> = Promise<{
+  data: T
+  files: FileToSave[]
+  /** The final `_transforms` of the transformer `doc`, after every stage ran. */
+  transforms: Document['_transforms']
 }>
 
 const shouldReupload = (
@@ -154,7 +161,7 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
   // Transformers get the document as the operation would save it, and may change only its
   // `_transforms`. File processing runs before the hooks and validation, so those then run on
   // the transformers' changes.
-  const candidateDoc =
+  const docToSave =
     operation === 'update' ? { ...originalDoc, ...data } : isDuplicating ? originalDoc : data
   // A create from a URL reads its file later, so a saved crop is checked once the file is read.
   let edits = await resolveUploadEdits({
@@ -164,19 +171,18 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
   const hasTransformers = hasUploadTransformers({ req })
   // Without transformers nothing reads or changes the doc, so a shallow copy is enough.
   const createPipelineDoc = (): Document => {
-    const doc = edits.applyTransformState(candidateDoc)
+    const doc = edits.applyTransformState(docToSave)
 
     return hasTransformers ? deepCopyObject(doc) : { ...doc }
   }
-  let pipelineDoc = createPipelineDoc()
-  const result = await processUpload({
+  const { transforms, ...result } = await processUpload({
     ...args,
-    pipelineDoc,
+    hasTransformers,
+    pipelineDoc: createPipelineDoc(),
     resolveEditsForFile: edits.isWaitingForFile
       ? async (file) => {
           edits = await resolveUploadEdits({ ...editArgs, file })
-          pipelineDoc = createPipelineDoc()
-          return { pipelineDoc, uploadEdits: edits.uploadEdits }
+          return { pipelineDoc: createPipelineDoc(), uploadEdits: edits.uploadEdits }
         }
       : undefined,
     uploadEdits: edits.uploadEdits,
@@ -191,7 +197,7 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     ...result,
     data: {
       ...edits.applyTransformState(result.data),
-      _transforms: pipelineDoc._transforms ?? null,
+      _transforms: transforms ?? null,
     },
   }
 }
@@ -201,7 +207,8 @@ const processUpload = async <T>({
   data,
   draft,
   externalUploadSource,
-  fetchFullUpload = fetchFullClientUpload,
+  fetchFullClientUpload = downloadFullClientUpload,
+  hasTransformers,
   isDuplicating,
   operation,
   originalDoc,
@@ -212,6 +219,8 @@ const processUpload = async <T>({
   throwOnMissingFile,
   uploadEdits: initialUploadEdits,
 }: {
+  /** Whether any transformer is configured. Without one, the document is not copied. */
+  hasTransformers: boolean
   pipelineDoc: Document
   /**
    * Resolves the edits again for a file read during the operation, before any transformer runs.
@@ -221,13 +230,14 @@ const processUpload = async <T>({
     file: NonNullable<PayloadRequest['file']>,
   ) => Promise<{ pipelineDoc: Document; uploadEdits: UploadEdits }>
   uploadEdits: UploadEdits
-} & Args<T>): Result<T> => {
+} & Args<T>): ProcessUploadResult<T> => {
   let pipelineDoc = initialPipelineDoc
   let uploadEdits = initialUploadEdits
   if (!collectionConfig.upload) {
     return {
       data,
       files: [],
+      transforms: pipelineDoc._transforms,
     }
   }
 
@@ -369,6 +379,7 @@ const processUpload = async <T>({
     return {
       data: incomingFileData!,
       files: [],
+      transforms: pipelineDoc._transforms,
     }
   }
 
@@ -383,7 +394,7 @@ const processUpload = async <T>({
   setIncomingFileFields({ doc: pipelineDoc, file })
   // Only transformers read originalDoc, so it is copied only when there are some.
   const createOriginalDoc = (): Readonly<Document> =>
-    hasUploadTransformers({ req }) ? deepFreeze(deepCopyObject(pipelineDoc)) : pipelineDoc
+    hasTransformers ? deepFreeze(deepCopyObject(pipelineDoc)) : pipelineDoc
   let pipelineOriginalDoc = createOriginalDoc()
 
   if (!disableLocalStorage) {
@@ -441,19 +452,17 @@ const processUpload = async <T>({
     file.uploadReference &&
     pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
   ) {
-    const probedMimeType = file.mimetype
-    file = await fetchFullUpload({ collectionSlug: collectionConfig.slug, file, req })
-    // On req.file, the temp file is removed after the operation, also when the check fails.
-    req.file = file
-    // The first check saw only a probe, so check the whole file before a transformer reads it.
-    file = await checkFileAndUseDetectedType({ collection: collectionConfig, file, req })
-    // Hooks and storage plugins read req.file, so it must be the checked file. Later steps
-    // change this same object, for example to drop its upload reference.
-    req.file = file
+    const download = await downloadClientUpload({
+      collection: collectionConfig,
+      fetchFullClientUpload,
+      file,
+      req,
+    })
+    file = download.file
 
     // The plan was made for the probe's MIME type. Make it again for the checked type. No stage
     // has run yet, so originalDoc can still be made again.
-    if (file.mimetype !== probedMimeType) {
+    if (download.hasTypeChanged) {
       setIncomingFileFields({ doc: pipelineDoc, file })
       pipelineOriginalDoc = createOriginalDoc()
       pipeline = await planUploadPipeline({ mimeType: file.mimetype })
@@ -594,6 +603,7 @@ const processUpload = async <T>({
           ...(draft ? { _status: 'draft' } : {}),
         } as T,
         files: [],
+        transforms: pipelineDoc._transforms,
       }
     }
     const mainBuffer = fileWasTransformed
@@ -923,6 +933,7 @@ const processUpload = async <T>({
   return {
     data: newData,
     files: filesToSave,
+    transforms: pipelineDoc._transforms,
   }
 }
 
@@ -966,6 +977,35 @@ const checkFileAndUseDetectedType = async ({
   }
 
   return file
+}
+
+/**
+ * Downloads the whole client upload and checks it again, because the first check saw only a
+ * probe. Sets `req.file` to the result, so hooks, storage plugins and temp file cleanup see it.
+ */
+async function downloadClientUpload({
+  collection,
+  fetchFullClientUpload,
+  file: probedFile,
+  req,
+}: {
+  collection: SanitizedCollectionConfig
+  fetchFullClientUpload: typeof downloadFullClientUpload
+  file: NonNullable<PayloadRequest['file']>
+  req: PayloadRequest
+}): Promise<{ file: NonNullable<PayloadRequest['file']>; hasTypeChanged: boolean }> {
+  const downloadedFile = await fetchFullClientUpload({
+    collectionSlug: collection.slug,
+    file: probedFile,
+    req,
+  })
+  // On req.file, the temp file is removed after the operation, also when the check fails.
+  req.file = downloadedFile
+  const checkedFile = await checkFileAndUseDetectedType({ collection, file: downloadedFile, req })
+  // Later steps change this same object, for example to drop its upload reference.
+  req.file = checkedFile
+
+  return { file: checkedFile, hasTypeChanged: checkedFile.mimetype !== probedFile.mimetype }
 }
 
 const hasUploadTransformers = ({ req }: { req: PayloadRequest }): boolean =>

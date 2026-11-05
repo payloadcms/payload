@@ -1,8 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
-import path from 'node:path'
 
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
@@ -21,6 +19,7 @@ import { validateSortQuery } from '../../database/queryValidation/validateSortQu
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
+import { copyTempFileForDocument } from '../../uploads/copyTempFileForDocument.js'
 import { createSharedClientUploadDownload } from '../../uploads/createSharedClientUploadDownload.js'
 import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
@@ -356,12 +355,9 @@ export const updateOperation = async <
 
         const documentFile = req.file ? { ...req.file } : undefined
         if (collectionConfig.upload && documentFile?.tempFilePath) {
-          const extension = path.extname(documentFile.tempFilePath)
-          documentTempFilePath = path.join(
-            path.dirname(documentFile.tempFilePath),
-            `${path.basename(documentFile.tempFilePath, extension)}-${randomUUID()}${extension}`,
-          )
-          await fs.copyFile(documentFile.tempFilePath, documentTempFilePath)
+          documentTempFilePath = await copyTempFileForDocument({
+            tempFilePath: documentFile.tempFilePath,
+          })
           documentFile.tempFilePath = documentTempFilePath
         }
 
@@ -396,7 +392,7 @@ export const updateOperation = async <
                   : locale,
               localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
             }),
-            fetchFullUpload: sharedClientUploadDownload.fetchFullUpload,
+            fetchFullClientUpload: sharedClientUploadDownload.fetchFullClientUpload,
             operation: 'update',
             originalDoc: docWithLocales,
             overwriteExistingFiles,

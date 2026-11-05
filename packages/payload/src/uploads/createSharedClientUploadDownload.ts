@@ -1,9 +1,8 @@
 import fs from 'fs/promises'
-import { randomUUID } from 'node:crypto'
-import path from 'node:path'
 
 import type { PayloadRequest } from '../types/index.js'
 
+import { copyTempFileForDocument } from './copyTempFileForDocument.js'
 import { fetchFullClientUpload } from './getFileFromUploadInstructions.js'
 
 type UploadFile = NonNullable<PayloadRequest['file']>
@@ -15,13 +14,13 @@ type UploadFile = NonNullable<PayloadRequest['file']>
  * downloaded temp file, because processing a document can change or remove its file.
  */
 export const createSharedClientUploadDownload = (): {
-  fetchFullUpload: typeof fetchFullClientUpload
+  fetchFullClientUpload: typeof fetchFullClientUpload
   removeSharedDownload: () => Promise<void>
 } => {
   let sharedDownload: Promise<UploadFile> | undefined
 
   return {
-    fetchFullUpload: async (args) => {
+    fetchFullClientUpload: async (args) => {
       sharedDownload ??= fetchFullClientUpload(args)
       const downloadedFile = await sharedDownload
 
@@ -29,14 +28,10 @@ export const createSharedClientUploadDownload = (): {
         return downloadedFile
       }
 
-      const extension = path.extname(downloadedFile.tempFilePath)
-      const documentTempFilePath = path.join(
-        path.dirname(downloadedFile.tempFilePath),
-        `${path.basename(downloadedFile.tempFilePath, extension)}-${randomUUID()}${extension}`,
-      )
-      await fs.copyFile(downloadedFile.tempFilePath, documentTempFilePath)
-
-      return { ...downloadedFile, tempFilePath: documentTempFilePath }
+      return {
+        ...downloadedFile,
+        tempFilePath: await copyTempFileForDocument({ tempFilePath: downloadedFile.tempFilePath }),
+      }
     },
     removeSharedDownload: async () => {
       const downloadedFile = await sharedDownload?.catch(() => undefined)

@@ -270,7 +270,8 @@ export const fetchFullClientUpload = async ({
     throw new APIError('Upload has no complete file or upload reference.', 400)
   }
 
-  // A verified receipt stores the file under its original filename, not the submitted one.
+  // Download by the name the object was stored under. Something earlier in the operation, such
+  // as a hook, can rename the request file, so a verified receipt's filename comes first.
   const verifiedOriginal = req.context?._payloadVerifiedProviderOriginal as
     | { filename?: string }
     | undefined
