@@ -1,6 +1,6 @@
 # Shared recording chrome
 
-The preview, validation, and recording mount the same browser component: [WindowChrome/index.mjs](../scripts/WindowChrome/index.mjs). That component is the source of truth for layout, styling, animation, and conditional visibility. Scenarios supply presentation data and interactions; do not recreate the chrome or add scenario CSS.
+The preview, validation, and recording mount the same browser component: [WindowChrome/index.mjs](../scripts/WindowChrome/index.mjs). That component is the source of truth for layout, styling, and animation. Scenarios supply presentation data and interactions; do not recreate the chrome or add scenario CSS.
 
 ## Iterate without rendering video
 
@@ -31,6 +31,8 @@ export const presentation = {
 ```
 
 `--viewport` sets the initial application's CSS viewport. By default, the canvas fits that viewport at native scale, with room for the chrome and description: 1600×1148 for the default 1440×900 viewport, or 1600×1188 with accessibility feedback. It stays fixed during responsive resizing. An explicit `presentation.canvas` overrides both the composition and encoded video dimensions and may scale the app to fit. See [capture resolution and encoding](recording.md#capture-resolution-and-encoding).
+
+The window header automatically displays the current application viewport dimensions and updates them during resizing.
 
 ## URL bar
 
