@@ -107,6 +107,7 @@ Use semantic locators where practical. Assert each important state before contin
 
 The recorder supplies:
 
+- `chrome.back` / `chrome.forward`: visible recording-window history buttons. Use `await click(chrome.back)` or `await click(chrome.forward)` for paced pointer gestures; unavailable directions are disabled.
 - `baseURL`: normalized without a trailing slash;
 - `click(locator, options?)`: smoothly moves to a locator, pauses, clicks, and pauses again;
 - `expect`: Playwright assertions;

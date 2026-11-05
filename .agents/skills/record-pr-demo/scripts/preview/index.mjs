@@ -1,10 +1,12 @@
-import { mountDemoChrome } from '../WindowChrome/index.mjs'
+import { bindDemoHistory, mountDemoChrome } from '../WindowChrome/index.mjs'
 import { observeAccessibility } from '../accessibility-demo.mjs'
 
 const isAccessibility = new URLSearchParams(location.search).has('accessibility')
 
 const root = document.querySelector('#chrome')
+const application = document.createElement('iframe')
 const chrome = mountDemoChrome({
+  onNavigate: (direction) => application.contentWindow.history.go(direction),
   root,
   accessibility: isAccessibility,
   showAnnouncements: new URLSearchParams(location.search).has('announcements'),
@@ -17,12 +19,12 @@ const chrome = mountDemoChrome({
       : 'Browse and manage content on desktop, tablet, and mobile.',
   },
 })
-const application = document.createElement('iframe')
 application.slot = 'content'
 application.title = 'Responsive sample application'
 application.src = isAccessibility
   ? '/preview/accessibility-application.html'
   : '/preview/application.html'
+bindDemoHistory({ app: application, chrome })
 let stopAccessibility
 if (isAccessibility)
   application.addEventListener('load', () => {

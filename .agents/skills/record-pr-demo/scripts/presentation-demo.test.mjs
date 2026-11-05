@@ -430,3 +430,51 @@ for (const accessibility of [false, true]) {
     })
   })
 }
+
+test('should show the live application URL through navigation and browser history', async () => {
+  const { chromium, expect } = await import('@playwright/test')
+  const { createPresentation } = await import('./presentation-demo.mjs')
+  const browser = await chromium.launch({ headless: true })
+  let presentation
+  try {
+    const context = await browser.newContext()
+    await context.route('http://app.test/**', (route) =>
+      route.fulfill({
+        contentType: 'text/html',
+        body: '<h1>Application</h1>',
+      }),
+    )
+    const stage = await context.newPage()
+    presentation = await createPresentation({
+      page: stage,
+      baseURL: 'http://app.test',
+      viewport: { width: 1280, height: 720 },
+      pauseScale: 0,
+      options: {
+        change: { kind: 'Fix', title: 'URL bar', description: 'Follow the real application URL.' },
+      },
+    })
+    const address = stage.getByRole('textbox', { name: 'Application URL' })
+    await presentation.appPage.goto('http://app.test/editor')
+    await expect(address).toHaveText('http://app.test/editor')
+    await presentation.appPage.evaluate(() => history.pushState({}, '', '?locale=es'))
+    await expect(address).toHaveText('http://app.test/editor?locale=es')
+    await expect(presentation.chrome.back).toBeEnabled()
+    await expect(presentation.chrome.forward).toBeDisabled()
+    await presentation.chrome.back.click()
+    await expect(address).toHaveText('http://app.test/editor')
+    await expect(presentation.chrome.back).toBeDisabled()
+    await expect(presentation.chrome.forward).toBeEnabled()
+    await presentation.chrome.forward.click()
+    await expect(address).toHaveText('http://app.test/editor?locale=es')
+    await presentation.chrome.back.click()
+    await expect(address).toHaveText('http://app.test/editor')
+    await presentation.appPage.evaluate(() => history.replaceState({}, '', '?locale=en#title'))
+    await expect(address).toHaveText('http://app.test/editor?locale=en#title')
+    await presentation.appPage.goto('http://app.test/list?locale=en')
+    await expect(address).toHaveText('http://app.test/list?locale=en')
+  } finally {
+    await presentation?.stop()
+    await browser.close()
+  }
+})

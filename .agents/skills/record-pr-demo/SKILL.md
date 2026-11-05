@@ -21,6 +21,8 @@ Do not upload previews, rejected takes, raw WebM recordings, or files the user h
 
 Drive the application through browser gestures: paced pointer clicks, keystrokes, and wheel scrolling. Open the starting URL once, then navigate through visible controls. Use existing seeded data when possible. Optional `setup`/`teardown` hooks may seed and clean up recording-only data through the API outside the walkthrough. Within the scenario, use gestures to reach each demonstrated state; avoid API or Local API calls, direct navigation between steps, field filling, DOM mutations, and programmatic scrolling. Assertions and read-only DOM inspection may observe the result. Recording chrome, encoding, and verification remain harness operations. See [recording.md](references/recording.md#gesture-based-interactions) for the interaction contract and examples.
 
+Use `await click(chrome.back)` and `await click(chrome.forward)` for browser-history steps. The shared window chrome provides these real history controls beside the live URL bar, with normal cursor movement and click feedback.
+
 ## Required presentation chrome
 
 Every scenario must export `presentation` with a change kind (`Feature` or `Fix`), title, and description. Read [window-chrome.md](references/window-chrome.md) and use the shared component and live preview; do not invent wrapper CSS. Recordings, screenshot previews, and validation always mount the chrome. Keep the change description constant and use `showAnnotation({ title, body, index, total })` / `hideAnnotation()` for panel notes. Floating annotations and placement options (`type`, `position`, `width`) are unsupported.

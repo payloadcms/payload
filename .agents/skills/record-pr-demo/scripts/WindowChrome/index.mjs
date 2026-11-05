@@ -5,6 +5,7 @@ export function mountDemoChrome({
   viewport = { width: 1280, height: 720 },
   theme = 'light',
   showSize = true,
+  onNavigate,
   shouldAnimateAnnotations = true,
   accessibility = false,
   showAnnouncements = false,
@@ -45,6 +46,13 @@ export function mountDemoChrome({
     .header { height:36px; display:flex; align-items:center; justify-content:space-between; padding:0 12px 8px; gap:18px; }
     .dots { display:flex; gap:8px; }
     .dots span { width:10px; height:10px; border-radius:100%; background:var(--sub); opacity:.6; }
+    .history { display:flex; align-items:center; gap:3px; }
+    .history button { display:grid; place-items:center; width:28px; height:28px; padding:0; border:0; border-radius:6px; background:transparent; color:var(--ink); cursor:pointer; }
+    .history button:hover:not(:disabled) { background:var(--badge); }
+    .history button:disabled { color:var(--sub); opacity:.35; cursor:default; }
+    .history button:focus-visible { outline:2px solid #0d99ff; outline-offset:1px; }
+    .history svg { width:17px; height:17px; pointer-events:none; }
+    .address { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:1px solid var(--line); border-radius:7px; padding:3px 9px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; }
     .header-info { display:flex; align-items:center; justify-content:flex-end; gap:12px; min-width:0; }
     .refresh { display:flex; align-items:center; gap:0; color:var(--sub); font:12px/1.5 system-ui,sans-serif; white-space:nowrap; }
     .refresh[hidden] { display:none; }
@@ -107,7 +115,7 @@ export function mountDemoChrome({
       ${accessibility ? `<div class="accessibility" data-accessibility aria-hidden="true"><div class="announcement-line"><span class="kind a11y-badge" data-a11y-badge>a11y</span>${hasAnnouncements ? '<svg class="speaking-icon" data-speaking-icon aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v-3.5A5.5 5.5 0 1 1 12 8l1.5 2.5H12v2a1.5 1.5 0 0 1-1.5 1.5H8v3M15.5 8a3.5 3.5 0 0 1 0 5M17.5 5.5a7 7 0 0 1 0 10"/><circle cx="9.5" cy="7.5" r=".7" fill="currentColor" stroke="none"/></svg><span class="announcement" data-announcement>Waiting for an update…</span>' : ''}</div><div class="key-slot"><div class="keystroke-overlay" data-keystroke-overlay aria-hidden="true" hidden><span class="keystroke" data-keystroke></span></div></div></div>` : ''}
     </section>
     <div class="window" data-window>
-      <div class="header"><div class="dots" aria-hidden="true"><span></span><span></span><span></span></div><div class="header-info" data-header-info><span class="refresh" data-refresh role="status" aria-live="polite" aria-atomic="true" hidden><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path data-refresh-path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-refresh-text></span></span><span class="size" data-size></span></div></div>
+      <div class="header"><div class="dots" aria-hidden="true"><span></span><span></span><span></span></div><div class="history" aria-label="Browser history"><button type="button" data-back aria-label="Back" title="Back" disabled><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 6 10l6 6M6 10h11"/></svg></button><button type="button" data-forward aria-label="Forward" title="Forward" disabled><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4 6 6-6 6M14 10H3"/></svg></button></div><div class="address" data-url role="textbox" aria-label="Application URL" aria-readonly="true">about:blank</div><div class="header-info" data-header-info><span class="refresh" data-refresh role="status" aria-live="polite" aria-atomic="true" hidden><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path data-refresh-path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-refresh-text></span></span><span class="size" data-size></span></div></div>
       <div class="content" data-content><slot name="content"></slot></div>
     </div>
 
@@ -118,6 +126,8 @@ export function mountDemoChrome({
   find('[data-title]').textContent = change.title
   find('[data-description]').textContent = change.description
   find('[data-size]').hidden = !showSize
+  find('[data-back]').onclick = () => onNavigate?.(-1)
+  find('[data-forward]').onclick = () => onNavigate?.(1)
   const keyAnimations = new Set()
   const cancelKeyAnimations = () => {
     for (const animation of keyAnimations) animation.cancel()
@@ -253,6 +263,22 @@ export function mountDemoChrome({
   }
 
   return {
+    setHistoryState({ canGoBack, canGoForward }) {
+      if (isDestroyed) return
+      find('[data-back]').disabled = !canGoBack || !onNavigate
+      find('[data-forward]').disabled = !canGoForward || !onNavigate
+    },
+    setURL(value) {
+      if (isDestroyed) return
+      const url = new URL(value)
+      url.username = ''
+      url.password = ''
+      const displayURL = ['http:', 'https:', 'about:'].includes(url.protocol)
+        ? url.href
+        : url.protocol
+      find('[data-url]').textContent = displayURL
+      find('[data-url]').title = displayURL
+    },
     setAccessibilityState({ key, announcement, reset = false }) {
       if (!accessibility || isDestroyed) return
       if (reset) {
@@ -472,5 +498,36 @@ export function getDefaultCanvas({ viewport, accessibility = false }) {
   return {
     width: Math.ceil(Math.max(1600, viewport.width + 22 + 64) / 2) * 2,
     height: Math.ceil(Math.max(1000, viewport.height + 58 + 32 + panelHeight + 22 + 32) / 2) * 2,
+  }
+}
+
+/** Follows the iframe's own history without navigating the recording wrapper. */
+export function bindDemoHistory({ app, chrome }) {
+  let navigation
+  const sync = () => {
+    chrome.setURL(app.contentWindow.location.href)
+    chrome.setHistoryState({
+      canGoBack: navigation?.canGoBack ?? false,
+      canGoForward: navigation?.canGoForward ?? false,
+    })
+  }
+  const attach = () => {
+    navigation?.removeEventListener('currententrychange', sync)
+    // Opaque or external frames cannot expose their history to the recording wrapper.
+    try {
+      navigation = app.contentWindow.navigation
+      chrome.setURL(app.contentWindow.location.href)
+    } catch {
+      navigation = undefined
+      chrome.setHistoryState({ canGoBack: false, canGoForward: false })
+      return
+    }
+    navigation?.addEventListener('currententrychange', sync)
+    sync()
+  }
+  app.addEventListener('load', attach)
+  return () => {
+    app.removeEventListener('load', attach)
+    navigation?.removeEventListener('currententrychange', sync)
   }
 }

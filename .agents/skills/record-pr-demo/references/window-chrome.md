@@ -33,6 +33,14 @@ export const presentation = {
 
 `--viewport` sets the initial application's CSS viewport. By default, the canvas fits that viewport at native scale, with room for the chrome and description: 1600×1148 for the default 1440×900 viewport, or 1600×1188 with accessibility feedback. It stays fixed during responsive resizing. An explicit `presentation.canvas` overrides both the composition and encoded video dimensions and may scale the app to fit. See [capture resolution and encoding](recording.md#capture-resolution-and-encoding).
 
+## URL bar
+
+The window header shows the live application URL, including its query string and hash. It follows document navigation and History API changes, including browser Back. It is read-only and does not change the application's URL. Credentials in URLs are omitted; non-web content shows only its protocol. The live preview uses the same bar.
+
+## History buttons
+
+Back and Forward in the window header navigate the application's own frame history. Buttons disable when that direction is unavailable. Scenarios use `await click(chrome.back)` and `await click(chrome.forward)` so the cursor visibly clicks the controls. They share the standard cursor movement, dwell and click feedback.
+
 ## Presentation helpers
 
 - `showAnnotation({ title, body, index = 1, total = 1 })` replaces the step note. Pagination is one-based; the change title and description stay constant.

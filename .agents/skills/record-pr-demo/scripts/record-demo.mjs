@@ -235,7 +235,6 @@ async function executeDemo({
 
   await context.addInitScript(() => {
     window.addEventListener('DOMContentLoaded', () => {
-      if (document.documentElement.hasAttribute('data-pr-demo-stage')) return
       const cursor = document.createElement('div')
       cursor.setAttribute('data-pr-demo-cursor', 'mac-arrow')
       cursor.setAttribute('aria-hidden', 'true')
@@ -300,14 +299,40 @@ async function executeDemo({
         clickPulse.style.left = `${clickPoint.x - pointer.x}px`
         clickPulse.style.top = `${clickPoint.y - pointer.y}px`
       }
+      const cursorActivityType = 'payload-pr-demo-cursor-active'
+      window.addEventListener('message', (event) => {
+        if (event.data?.type !== cursorActivityType) return
+        const isParent = window.parent !== window && event.source === window.parent
+        const isChild = [...document.querySelectorAll('iframe')].some(
+          (frame) => frame.contentWindow === event.source,
+        )
+        if (isParent || isChild) {
+          cursor.style.transition = 'none'
+          cursor.style.opacity = '0'
+        }
+      })
       const positionCursor = ({ clientX, clientY }) => {
+        // Transfer cursor ownership between the recording chrome and its live app frame.
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: cursorActivityType }, '*')
+        } else {
+          for (const frame of document.querySelectorAll('iframe')) {
+            frame.contentWindow?.postMessage({ type: cursorActivityType }, '*')
+          }
+        }
         pointer = { x: clientX, y: clientY }
+        cursor.style.transition = 'opacity 120ms ease'
         promoteCursor()
         cursor.style.opacity = '1'
         cursor.style.transform = `translate(${clientX}px, ${clientY}px)`
         positionClickPulse()
       }
       document.addEventListener('mousemove', positionCursor, { passive: true })
+      document.addEventListener('mouseout', (event) => {
+        if (!event.relatedTarget || event.relatedTarget instanceof HTMLIFrameElement) {
+          cursor.style.opacity = '0'
+        }
+      })
       document.addEventListener(
         'mousedown',
         (event) => {
@@ -405,6 +430,7 @@ async function executeDemo({
           ? annotationInteractions.hideAnnotation()
           : annotationInteractions.showAnnotation(annotation),
       baseURL: parsedBaseURL.toString().replace(/\/$/, ''),
+      chrome: presentation.chrome,
       click: pointerInteractions.click,
       typeText: async ({ locator, text, clear = false, delay = 80 }) => {
         await pointerInteractions.click(locator)
@@ -537,7 +563,12 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
         const point = points.find(({ x, y }) => {
           if (right <= left || bottom <= top || x < left || x >= right || y < top || y >= bottom)
             return false
-          const hit = document.elementFromPoint(x, y)
+          let hit = document.elementFromPoint(x, y)
+          while (hit?.shadowRoot) {
+            const nested = hit.shadowRoot.elementFromPoint(x, y)
+            if (!nested || nested === hit) break
+            hit = nested
+          }
           return hit && element.contains(hit)
         })
         if (!point) {

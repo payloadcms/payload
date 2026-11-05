@@ -33,15 +33,18 @@ export async function createPresentation({
     const source = await readFile(new URL('./WindowChrome/index.mjs', import.meta.url), 'utf8')
     await stage.evaluate(
       async ({ source, options, viewport, shouldAnimateAnnotations }) => {
-        const { mountDemoChrome } = await import(`data:text/javascript;base64,${source}`)
+        const { mountDemoChrome, bindDemoHistory } = await import(
+          `data:text/javascript;base64,${source}`
+        )
         const root = document.querySelector('#demo-stage')
+        const app = document.createElement('iframe')
         window.demoChrome = mountDemoChrome({
           ...options,
+          onNavigate: (direction) => app.contentWindow.history.go(direction),
           root,
           viewport,
           shouldAnimateAnnotations,
         })
-        const app = document.createElement('iframe')
         app.setAttribute('data-pr-demo-app', '')
         app.name = 'pr-demo-app'
         app.title = 'Payload application'
@@ -57,6 +60,7 @@ export async function createPresentation({
           }
           window.addEventListener('message', window.demoAccessibilityListener)
         }
+        window.stopDemoHistory = bindDemoHistory({ app, chrome: window.demoChrome })
         root.append(app)
       },
       {
@@ -78,6 +82,15 @@ export async function createPresentation({
         },
         { method, value },
       )
+    const onAppNavigation = (navigatedFrame) => {
+      if (navigatedFrame === frame) {
+        void call({ method: 'setURL', value: frame.url() }).catch((error) => {
+          if (!stage.isClosed()) throw error
+        })
+      }
+    }
+    stage.on('framenavigated', onAppNavigation)
+    await call({ method: 'setURL', value: frame.url() })
     let currentViewport = { ...viewport }
     let isResizing = false
     let isRefreshing = false
@@ -146,6 +159,10 @@ export async function createPresentation({
     return {
       page: stage,
       appPage,
+      chrome: {
+        back: stage.getByRole('button', { name: 'Back', exact: true }),
+        forward: stage.getByRole('button', { name: 'Forward', exact: true }),
+      },
       startedAt,
       resizeWindow,
       setAnnotation: (value) => call({ method: 'setAnnotation', value }),
@@ -156,6 +173,8 @@ export async function createPresentation({
             new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
         ),
       stop: async () => {
+        stage.off('framenavigated', onAppNavigation)
+        await stage.evaluate(() => window.stopDemoHistory?.())
         if (options.accessibility) {
           await frame.evaluate(() => window.__stopDemoAccessibility?.()).catch(() => {})
           await stage.evaluate(() => {
