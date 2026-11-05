@@ -327,6 +327,7 @@ mcpPlugin({
       const { docs } = await req.payload.find({
         collection: 'users',
         overrideAccess: true,
+        limit: 1,
         where: { email: { equals: email } },
       })
 
