@@ -875,6 +875,99 @@ test.describe('Shared form request queue', () => {
     createdDocs.length = 0
   })
 
+  test('should preserve edits made during a queued autosave', async ({ page }) => {
+    const doc = await payload.create({
+      collection: autosavePostsSlug,
+      data: { title: 'Initial value' },
+      draft: true,
+      overrideAccess: true,
+    })
+    const saves = Array.from({ length: 3 }, () => ({
+      captured: Promise.withResolvers<void>(),
+      released: Promise.withResolvers<void>(),
+    }))
+    const submittedValues: unknown[] = []
+    const readDraftValue = async () => {
+      const { docs } = await payload.find({
+        collection: autosavePostsSlug,
+        draft: true,
+        overrideAccess: true,
+        where: { id: { equals: doc.id } },
+      })
+
+      return docs[0]?.restrictedValue
+    }
+
+    createdDocs.push({ collection: autosavePostsSlug, id: doc.id })
+    saves.forEach(({ released }) => releases.add(released.resolve))
+
+    await page.goto(new AdminUrlUtil(serverURL, autosavePostsSlug).edit(doc.id))
+    await waitForFormReady(page)
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+    await page.route(`**/api/${autosavePostsSlug}/${doc.id}**`, async (route) => {
+      if (
+        route.request().method() !== 'PATCH' ||
+        new URL(route.request().url()).searchParams.get('autosave') !== 'true'
+      ) {
+        return route.continue()
+      }
+
+      const save = saves[submittedValues.length]
+
+      submittedValues.push(
+        readSubmittedData({ body: route.request().postData() ?? '' }).restrictedValue,
+      )
+
+      const response = await route.fetch()
+
+      if (save) {
+        save.captured.resolve()
+        await save.released.promise
+      }
+
+      await route.fulfill({ response })
+    })
+
+    const field = page.locator('#field-restrictedValue')
+    const savingIndicator = page.locator('.autosave')
+
+    await field.fill('a')
+    await page.clock.runFor(100)
+    await saves[0].captured.promise
+
+    await field.fill('ab')
+    await page.clock.runFor(100)
+    await expect.poll(() => submittedValues).toEqual(['a'])
+
+    saves[0].released.resolve()
+    await saves[1].captured.promise
+    await expect.poll(() => submittedValues).toEqual(['a', 'ab'])
+    await expect(savingIndicator).toBeVisible()
+
+    await field.fill('abc')
+
+    // Elapse the saving indicator's minimum duration without firing the last edit's debounce.
+    await page.clock.setSystemTime(new Date(await page.evaluate(() => Date.now() + 2000)))
+    saves[1].released.resolve()
+    await expect(savingIndicator).toBeHidden()
+    await expect(field).toHaveValue('abc')
+    await expect.poll(() => submittedValues).toEqual(['a', 'ab'])
+    await expect.poll(readDraftValue).toBe('ab')
+
+    await page.clock.runFor(100)
+    await saves[2].captured.promise
+    await page.clock.setSystemTime(new Date(await page.evaluate(() => Date.now() + 2000)))
+    saves[2].released.resolve()
+    await expect(savingIndicator).toBeHidden()
+    await expect.poll(() => submittedValues).toEqual(['a', 'ab', 'abc'])
+    await expect.poll(readDraftValue).toBe('abc')
+
+    await page.reload()
+    await waitForFormReady(page)
+    await expect(field).toHaveValue('abc')
+  })
+
   test('should refresh conditional fields when an autosave supersedes a refresh and fails', async ({
     page,
   }) => {
