@@ -350,7 +350,7 @@ test('should spin the persistent refresh control without moving content, includi
       await page.evaluate(() => window.chromeDemo.setRefreshState({ state: 'refreshed' }))
       assert.equal(await status.textContent(), 'Refreshed')
       assert.equal(await refresh.isVisible(), true)
-      assert.equal(await refresh.evaluate((e) => getComputedStyle(e).opacity), '0.45')
+      assert.equal(await refresh.evaluate((e) => getComputedStyle(e).opacity), '0.35')
       await page.waitForTimeout(1100)
       assert.equal(await status.isVisible(), false)
       await page.evaluate(() => window.chromeDemo.setRefreshState({ state: 'failed' }))

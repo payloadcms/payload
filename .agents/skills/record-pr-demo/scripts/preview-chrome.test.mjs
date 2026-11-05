@@ -103,7 +103,7 @@ test('should refresh the real frame from the persistent toolbar button with keyb
     await expect.poll(() => loads).toBe(4)
     await expect(page.locator('#chrome').getByRole('status')).toHaveText('Refreshed')
     await expect(page.locator('[data-refresh-button]')).toBeVisible()
-    await expect(page.locator('[data-refresh-button]')).toHaveCSS('opacity', '0.45')
+    await expect(page.locator('[data-refresh-button]')).toHaveCSS('opacity', '0.35')
   } finally {
     await browser.close()
     await new Promise((resolve) => server.close(resolve))

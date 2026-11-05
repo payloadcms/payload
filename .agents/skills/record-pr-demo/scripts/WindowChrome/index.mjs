@@ -48,14 +48,14 @@ export function mountDemoChrome({
     .history { display:flex; align-items:center; gap:3px; }
     .history button { display:grid; place-items:center; width:28px; height:28px; padding:0; border:0; border-radius:6px; background:transparent; color:var(--ink); cursor:pointer; }
     .history button:hover:not(:disabled) { background:var(--badge); }
-    .history button:disabled { color:var(--sub); opacity:.35; cursor:default; }
+    .history button:disabled, .history .refresh { color:var(--sub); opacity:.35; }
+    .history button:disabled { cursor:default; }
     .history button:focus-visible { outline:2px solid #0d99ff; outline-offset:1px; }
     .history svg { width:17px; height:17px; pointer-events:none; }
     .address { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:1px solid var(--line); border-radius:7px; padding:3px 9px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; }
     .header:has([data-size][hidden]) .address { margin-inline-end:12px; }
     .header-info { display:flex; align-items:center; justify-content:flex-end; gap:12px; min-width:0; }
     .header-info:not(:has(> :not([hidden]))) { display:none; }
-    .history .refresh { color:var(--sub); opacity:.45; }
     .history .refresh:hover, .history .refresh:focus-visible, .history .refresh[data-state=refreshing] { opacity:1; }
     .refresh[data-state=refreshing] svg { animation:refresh-spin 650ms linear infinite; }
     @keyframes refresh-spin { to { transform:rotate(360deg); } }
