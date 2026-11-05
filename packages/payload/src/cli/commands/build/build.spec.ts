@@ -350,6 +350,15 @@ describe('build', () => {
       path.join(tanstackDir, 'package.json'),
       JSON.stringify({ dependencies: { '@tanstack/react-start': '1.168.26' } }),
     )
+
+    const viteDir = path.join(tanstackDir, 'node_modules', 'vite')
+
+    mkdirSync(path.join(viteDir, 'bin'), { recursive: true })
+    writeFileSync(
+      path.join(viteDir, 'package.json'),
+      JSON.stringify({ bin: { vite: 'bin/vite.js' }, name: 'vite', version: '1.0.0' }),
+    )
+    writeFileSync(path.join(viteDir, 'bin', 'vite.js'), '')
     cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tanstackDir)
 
     await build({ config: fakeConfig, forwardedArgs: ['--mode', 'staging'] })

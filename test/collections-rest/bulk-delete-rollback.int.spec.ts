@@ -9,7 +9,7 @@ test.suite('Collections REST - bulk delete rollback', { config: './config.ts' },
   )('should roll back when the batched deleteMany fails', async ({ payload }) => {
     const title = 'bulk-delete-failure'
 
-    await payload.create({
+    const post = await payload.create({
       collection: postsSlug,
       data: { title },
       overrideAccess: true,
@@ -18,6 +18,22 @@ test.suite('Collections REST - bulk delete rollback', { config: './config.ts' },
       collection: postsSlug,
       data: { title },
       overrideAccess: true,
+    })
+
+    const { docs: users } = await payload.find({
+      collection: 'users',
+      limit: 1,
+      overrideAccess: true,
+    })
+
+    const preference = await payload.create({
+      collection: 'payload-preferences',
+      data: {
+        key: `collection-${postsSlug}-${post.id}`,
+        value: { collapsed: true },
+      },
+      overrideAccess: true,
+      user: { ...users[0], collection: 'users' },
     })
 
     const originalDeleteMany = payload.db.deleteMany.bind(payload.db)
@@ -34,11 +50,10 @@ test.suite('Collections REST - bulk delete rollback', { config: './config.ts' },
 
     const result = await payload.delete({
       collection: postsSlug,
-      where: { title: { equals: title } },
       overrideAccess: true,
+      where: { title: { equals: title } },
     })
 
-    const deletedCollections = deleteManySpy.mock.calls.map(([args]) => args.collection)
     const transactionID = await beginSpy.mock.results[0]?.value
     const commitCalls = commitSpy.mock.calls.length
     const rollbackCalls = rollbackSpy.mock.calls.length
@@ -55,14 +70,22 @@ test.suite('Collections REST - bulk delete rollback', { config: './config.ts' },
     )
     expect(commitCalls).toBe(0)
     expect(rollbackCalls).toBe(transactionID ? 1 : 0)
-    expect(deletedCollections).not.toContain('payload-preferences')
 
     const remainingDocs = await payload.find({
       collection: postsSlug,
-      where: { title: { equals: title } },
       overrideAccess: true,
+      where: { title: { equals: title } },
     })
 
     expect(remainingDocs.docs).toHaveLength(2)
+
+    const { docs: remainingPreferences } = await payload.find({
+      collection: 'payload-preferences',
+      overrideAccess: true,
+      where: { id: { equals: preference.id } },
+    })
+
+    // Cleanup runs before deletion; only transactional adapters can restore it on failure.
+    expect(remainingPreferences).toHaveLength(transactionID ? 1 : 0)
   })
 })
