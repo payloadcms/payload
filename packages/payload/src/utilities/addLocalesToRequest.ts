@@ -77,7 +77,11 @@ export const sanitizeLocales = ({
 
   if (['*', 'all'].includes(locale)) {
     locale = 'all'
-  } else if (localization && !localization.localeCodes.includes(locale) && localization.fallback) {
+  } else if (localization && !localization.localeCodes.includes(locale)) {
+    // A missing or unknown locale resolves to the default locale. `localization.fallback` only
+    // controls whether missing *field values* fall back to another locale, so it must not be
+    // checked here: with `fallback: false`, `req.locale` would otherwise stay null and break
+    // localized queries (e.g. `where` on a localized field) and reads.
     locale = localization.defaultLocale
   }
 
