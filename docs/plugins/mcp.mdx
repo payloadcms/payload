@@ -153,22 +153,22 @@ authenticated user, provide an override object with `access: () => true`.
 
 ## Options
 
-| Option                                 | Type         | Description                                                                                                                                   |
-| -------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `collections`                          | `object`     | Map keyed by collection slug. See [Per-collection options](#per-collection-options).                                                          |
-| `globals`                              | `object`     | Map keyed by global slug. See [Per-global options](#per-global-options).                                                                      |
-| `tools`                                | `object`     | Cross-cutting custom tools, keyed by tool name. Values are `Tool` objects (use [`defineTool`](#defining-custom-tools-prompts-and-resources)). |
-| `prompts`                              | `object`     | Custom prompts, keyed by name. Values are `Prompt` objects (use [`definePrompt`](#prompts)).                                                  |
-| `resources`                            | `object`     | Custom resources, keyed by name. Values are `Resource` objects.                                                                               |
-| `disabled`                             | `boolean`    | Skip MCP endpoint registration.                                                                                                               |
-| `hooks.afterToolCall`                  | `function[]` | Run cross-cutting hooks after tool handlers return. See [MCP plugin hooks](#mcp-plugin-hooks).                                                |
-| `overrideGetAuthorizedMCP`             | `function`   | Replace the default MCP authorization resolver. See [Custom auth](#custom-auth).                                                              |
-| `oauth`                                | `object`     | How MCP clients sign in with OAuth: through Payload by default, or another authorization server. `false` turns it off. See [OAuth](#oauth).   |
-| `mcp.maxRequestBodySize`               | `number`     | Largest HTTP request body in bytes. Larger requests get a `413` response. Base64 file uploads count toward it. Default `4194304` (4 MiB).     |
-| `mcp.serverOptions.serverInfo.name`    | `string`     | The MCP server name advertised to clients. Default `'Payload MCP Server'`.                                                                    |
-| `mcp.serverOptions.serverInfo.version` | `string`     | The MCP server version. Default `'1.0.0'`.                                                                                                    |
-| `mcp.serverOptions.options`            | `object`     | Raw options passed through to the underlying `McpServer` from `@modelcontextprotocol/server`.                                                 |
-| `mcp.verboseLogs`                      | `boolean`    | When `true`, info/debug logs from the plugin surface in Payload's logger. Warnings and errors are always logged. Default `false`.             |
+| Option                                 | Type              | Description                                                                                                                                                         |
+| -------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `collections`                          | `object`          | Map keyed by collection slug. See [Per-collection options](#per-collection-options).                                                                                |
+| `globals`                              | `object`          | Map keyed by global slug. See [Per-global options](#per-global-options).                                                                                            |
+| `tools`                                | `object`          | Cross-cutting custom tools, keyed by tool name. Values are `Tool` objects (use [`defineTool`](#defining-custom-tools-prompts-and-resources)).                       |
+| `prompts`                              | `object`          | Custom prompts, keyed by name. Values are `Prompt` objects (use [`definePrompt`](#prompts)).                                                                        |
+| `resources`                            | `object`          | Custom resources, keyed by name. Values are `Resource` objects.                                                                                                     |
+| `disabled`                             | `boolean`         | Skip MCP endpoint registration.                                                                                                                                     |
+| `hooks.afterToolCall`                  | `function[]`      | Run cross-cutting hooks after tool handlers return. See [MCP plugin hooks](#mcp-plugin-hooks).                                                                      |
+| `overrideGetAuthorizedMCP`             | `function`        | Replace the default MCP authorization resolver. See [Custom auth](#custom-auth).                                                                                    |
+| `oauth`                                | `object \| false` | How MCP clients sign in with OAuth, through Payload or another authorization server. Defaults to on, with Payload as the authorization server. See [OAuth](#oauth). |
+| `mcp.maxRequestBodySize`               | `number`          | Largest HTTP request body in bytes. Larger requests get a `413` response. Base64 file uploads count toward it. Default `4194304` (4 MiB).                           |
+| `mcp.serverOptions.serverInfo.name`    | `string`          | The MCP server name advertised to clients. Default `'Payload MCP Server'`.                                                                                          |
+| `mcp.serverOptions.serverInfo.version` | `string`          | The MCP server version. Default `'1.0.0'`.                                                                                                                          |
+| `mcp.serverOptions.options`            | `object`          | Raw options passed through to the underlying `McpServer` from `@modelcontextprotocol/server`.                                                                       |
+| `mcp.verboseLogs`                      | `boolean`         | When `true`, info/debug logs from the plugin surface in Payload's logger. Warnings and errors are always logged. Default `false`.                                   |
 
 ### Per-collection options
 
