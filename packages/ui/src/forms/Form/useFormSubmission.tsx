@@ -274,9 +274,7 @@ export const useFormSubmission = ({
           setIsValid(isValid)
 
           if (!isValid) {
-            setIsProcessing(false)
             setIsSubmitted(true)
-            setDisabledBySubmission(false)
             return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
           }
         }
@@ -310,9 +308,7 @@ export const useFormSubmission = ({
         }
 
         if (!hasFormSubmitAction) {
-          setIsProcessing(false)
           setIsSubmitted(true)
-          setDisabledBySubmission(false)
           return
         }
 
@@ -343,7 +339,6 @@ export const useFormSubmission = ({
 
           if (typeof handleResponse === 'function') {
             await handleResponse(res, successToast, errorToast)
-            setIsProcessing(false)
             return
           }
 
@@ -383,7 +378,6 @@ export const useFormSubmission = ({
             }
 
             setIsSubmitted(false)
-            setIsProcessing(false)
 
             if (redirect) {
               void startRouteTransition(() => router.push(redirect))
@@ -391,7 +385,6 @@ export const useFormSubmission = ({
               successToast(json.message || t('general:submissionSuccessful'))
             }
           } else {
-            setIsProcessing(false)
             setIsSubmitted(true)
 
             // When there was an error submitting a draft,
@@ -475,9 +468,7 @@ export const useFormSubmission = ({
           return { formState: contextRef.current.fields, res }
         } catch (err) {
           console.error('Error submitting form', err) // eslint-disable-line no-console
-          setIsProcessing(false)
           setIsSubmitted(true)
-          setDisabledBySubmission(false)
           errorToast(err.message)
         }
       } catch (err) {
