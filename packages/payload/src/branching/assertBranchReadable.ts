@@ -92,7 +92,7 @@ export const assertBranchReadable = async ({
     overrideAccess: false,
     pagination: false,
     req,
-    where: { slug: { equals: branch } },
+    where: { name: { equals: branch } },
   })
 
   if (!docs.length) {

@@ -42,11 +42,7 @@ test.describe('Branch switching with unsaved changes', () => {
           const branch = await payload.create({
             collection: branchesSlug,
             overrideAccess: true,
-            data: {
-              name: branchName,
-              slug: branchName.toLowerCase().replaceAll(' ', '-'),
-              status: 'open',
-            },
+            data: { status: 'open', name: branchName },
           })
 
           createdBranchIDs.push(branch.id)
@@ -114,10 +110,10 @@ test.describe('Branch switching with unsaved changes', () => {
 
               expect(response.ok()).toBe(true)
               createdBranchIDs.push(doc.id)
-              return doc.slug as string
+              return doc.name as string
             }
 
-            return branch.slug
+            return branch.name
           }
 
           await chooseBranch({ name: `${branchName} Cancel` })
@@ -136,13 +132,17 @@ test.describe('Branch switching with unsaved changes', () => {
           await expect(page.locator(fieldSelector)).toHaveValue('Unsaved content')
           expect(preferenceWrites).toHaveLength(0)
 
-          const selectedSlug = await chooseBranch({ name: `${branchName} Confirm` })
+          const selectedName = await chooseBranch({ name: `${branchName} Confirm` })
 
           await expect(confirmation).toBeVisible()
           await expect(confirmation.locator(':focus')).toHaveCount(1)
           expect(preferenceWrites).toHaveLength(0)
           await confirmation.getByRole('button', { name: 'Leave anyway' }).press('Enter')
-          await expect(page).toHaveURL(`${editURL}?branch=${selectedSlug}`)
+          await expect(page).toHaveURL(
+            (url) =>
+              `${url.origin}${url.pathname}` === editURL &&
+              url.searchParams.get('branch') === selectedName,
+          )
           await expect(page.locator(fieldSelector)).toHaveValue('Saved content')
           await expect(confirmation).toBeHidden()
           await expect.poll(() => preferenceWrites.length).toBe(1)
@@ -165,7 +165,11 @@ test.describe('Branch switching with unsaved changes', () => {
               hasText: action === 'select' ? branchName : `${branchName} Confirm`,
             })
             .click()
-          await expect(page).toHaveURL(`${editURL}?branch=${selectedSlug}`)
+          await expect(page).toHaveURL(
+            (url) =>
+              `${url.origin}${url.pathname}` === editURL &&
+              url.searchParams.get('branch') === selectedName,
+          )
           await expect(confirmation).toBeHidden()
         } finally {
           await page.close()

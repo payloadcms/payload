@@ -1,21 +1,16 @@
+/* eslint-disable payload/no-relative-monorepo-imports -- Integration tests exercise internal branch helpers. */
 import type { Payload } from 'payload'
 
 import { createPayloadRequest } from 'payload'
-
 import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { readLocalizedBranchWrite } from '../../packages/payload/src/branching/readLocalizedBranchWrite.js'
-
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import { branchChangesSlug, branchesSlug, localizedSlug, nestedSlug } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -53,13 +48,13 @@ test.suite(
         const existing = await payload.find({
           collection: branchesSlug,
           pagination: false,
-          where: { slug: { equals: branch } },
+          where: { name: { equals: branch } },
         })
 
         if (!existing.docs.length) {
           await payload.create({
             collection: branchesSlug,
-            data: { name: 'Shape work', slug: branch },
+            data: { name: branch },
           })
         }
       })

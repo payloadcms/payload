@@ -132,7 +132,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           reportUpdate(deleteEvent)
 
           const hasDeletedActiveBranch =
-            collectionSlug === branchesCollectionSlug && branch && json.doc?.slug === branch
+            collectionSlug === branchesCollectionSlug && branch && json.doc?.name === branch
 
           return startRouteTransition(() =>
             router.push(

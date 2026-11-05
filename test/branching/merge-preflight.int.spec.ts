@@ -1,17 +1,13 @@
 import type { Payload } from 'payload'
 
 import { createPayloadRequest } from 'payload'
-
 import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -23,7 +19,6 @@ import {
   restrictedSlug,
   whereAccessSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -61,7 +56,7 @@ test.suite(
       test.beforeEach(async () => {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Access work', slug: 'accesswork' },
+          data: { name: 'accesswork' },
         })
 
         const editor = await payload.create({
@@ -202,7 +197,7 @@ test.suite(
           const rows = await payload.find({
             collection,
             pagination: false,
-            where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: 'accesswork' } },
+            where: { [collection === branchesSlug ? 'name' : 'branch']: { equals: 'accesswork' } },
           })
 
           for (const row of rows.docs) {

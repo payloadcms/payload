@@ -5,13 +5,9 @@ import { expect } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import { branchChangesSlug, branchesSlug, postsSlug } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -35,14 +31,14 @@ test.suite('Branching: merge-access', { config: './config.ts', resetBetweenTests
   })
 
   test.describe('Merge branch action access', () => {
-    const branchSlug = 'merge-action-access'
+    const branchName = 'merge-action-access'
     let mainDocID: number | string
 
     const pendingChanges = () =>
       payload.find({
         collection: branchChangesSlug,
         pagination: false,
-        where: { branch: { equals: branchSlug } },
+        where: { branch: { equals: branchName } },
       })
 
     const asDevUser = async () =>
@@ -57,7 +53,7 @@ test.suite('Branching: merge-access', { config: './config.ts', resetBetweenTests
     test.beforeEach(async () => {
       await payload.create({
         collection: branchesSlug,
-        data: { name: 'Merge action access', slug: branchSlug },
+        data: { name: branchName },
       })
       const mainDoc = await payload.create({
         collection: postsSlug,
@@ -68,7 +64,7 @@ test.suite('Branching: merge-access', { config: './config.ts', resetBetweenTests
 
       await payload.update({
         id: mainDocID,
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'edited on branch' },
       })
@@ -80,7 +76,7 @@ test.suite('Branching: merge-access', { config: './config.ts', resetBetweenTests
       const branches = await payload.find({
         collection: branchesSlug,
         pagination: false,
-        where: { slug: { equals: branchSlug } },
+        where: { name: { equals: branchName } },
       })
 
       for (const branch of branches.docs) {
@@ -105,7 +101,7 @@ test.suite('Branching: merge-access', { config: './config.ts', resetBetweenTests
 
       await expect(
         payload.branches.merge({
-          branch: branchSlug,
+          branch: branchName,
           dryRun: true,
           overrideAccess: false,
           user: { ...user, collection: 'users' },
@@ -121,11 +117,11 @@ test.suite('Branching: merge-access', { config: './config.ts', resetBetweenTests
     test('should deny a Local API merge when mergeBranch returns a non-matching query', async () => {
       const user = await asDevUser()
 
-      hookSpy.mergeBranchAccess = () => ({ slug: { equals: 'another-branch' } })
+      hookSpy.mergeBranchAccess = () => ({ name: { equals: 'another-branch' } })
 
       await expect(
         payload.branches.merge({
-          branch: branchSlug,
+          branch: branchName,
           overrideAccess: false,
           user: { ...user, collection: 'users' },
         }),
@@ -140,10 +136,10 @@ test.suite('Branching: merge-access', { config: './config.ts', resetBetweenTests
     test('should allow a dry run when mergeBranch returns a matching query', async () => {
       const user = await asDevUser()
 
-      hookSpy.mergeBranchAccess = () => ({ slug: { equals: branchSlug } })
+      hookSpy.mergeBranchAccess = () => ({ name: { equals: branchName } })
 
       const result = await payload.branches.merge({
-        branch: branchSlug,
+        branch: branchName,
         dryRun: true,
         overrideAccess: false,
         user: { ...user, collection: 'users' },
@@ -157,7 +153,7 @@ test.suite('Branching: merge-access', { config: './config.ts', resetBetweenTests
     test('should bypass mergeBranch when overrideAccess is true', async () => {
       hookSpy.mergeBranchAccess = () => false
 
-      await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+      await payload.branches.merge({ branch: branchName, overrideAccess: true })
 
       const onMain = await payload.findByID({ id: mainDocID, collection: postsSlug })
 

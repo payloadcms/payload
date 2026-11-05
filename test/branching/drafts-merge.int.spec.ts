@@ -5,11 +5,8 @@ import { expect } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { branchChangesSlug, branchesSlug, pagesSlug } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -40,13 +37,13 @@ test.suite('Branching: drafts-merge', { config: './config.ts', resetBetweenTests
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
-        where: { slug: { equals: 'draftwork' } },
+        where: { name: { equals: 'draftwork' } },
       })
 
       if (!existing.docs.length) {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Draft work', slug: 'draftwork' },
+          data: { name: 'draftwork' },
         })
       }
     })

@@ -30,14 +30,14 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
     })
     await payload.updateGlobal({
       slug: headerGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { navLabel: 'branch navigation' },
       overrideAccess: true,
     })
 
     const result = await payload.findGlobal({
       slug: headerGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: true,
       select: { navLabel: true },
     })
@@ -68,7 +68,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
       collection: categoriesSlug,
       data: {
         name: 'branch category',
-        _branch: branch.slug,
+        _branch: branch.name,
         _branchDocID: category.id,
         createdAt: category.createdAt,
         updatedAt: category.updatedAt,
@@ -80,7 +80,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
       collection: branchChangesSlug,
       data: {
         baseUpdatedAt: category.updatedAt,
-        branch: branch.slug,
+        branch: branch.name,
         collectionSlug: categoriesSlug,
         doc: { relationTo: categoriesSlug, value: category.id },
         documentID: String(category.id),
@@ -91,7 +91,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
     })
 
     const result = await payload.findDistinct({
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       field: 'category.name',
       overrideAccess: true,
@@ -137,26 +137,26 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
 
       await payload.update({
         id: first.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: postsSlug,
         data: { title: 'branch first' },
         overrideAccess: true,
       })
       await payload.update({
         id: second.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: postsSlug,
         data: { title: 'branch second' },
         overrideAccess: true,
       })
       await payload.delete({
         id: deleted.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: postsSlug,
         overrideAccess: true,
       })
       const created = await payload.create({
-        branch: branch.slug,
+        branch: branch.name,
         collection: postsSlug,
         data: { category: category.id, title: 'branch created' },
         overrideAccess: true,
@@ -165,7 +165,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
       findSpy.mockClear()
 
       const firstPage = await payload.find({
-        branch: branch.slug,
+        branch: branch.name,
         collection: postsSlug,
         limit: 2,
         overrideAccess: true,
@@ -173,7 +173,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
         sort: 'title',
       })
       const secondPage = await payload.find({
-        branch: branch.slug,
+        branch: branch.name,
         collection: postsSlug,
         limit: 2,
         overrideAccess: true,
@@ -181,19 +181,19 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
         sort: 'title',
       })
       const counted = await payload.count({
-        branch: branch.slug,
+        branch: branch.name,
         collection: postsSlug,
         overrideAccess: true,
       })
       const foundByID = await payload.findByID({
         id: second.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: postsSlug,
         overrideAccess: true,
       })
       const categoryWithPosts = await payload.findByID({
         id: category.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: categoriesSlug,
         joins: {
           posts: { count: true, limit: 10, sort: 'title' },
@@ -243,7 +243,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
       for (const [index, doc] of versionedMainDocs.entries()) {
         await payload.update({
           id: doc.id,
-          branch: branch.slug,
+          branch: branch.name,
           collection: pagesSlug,
           data: { title: `branch versioned ${index + 1}` },
           draft: true,
@@ -254,7 +254,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
       findSpy.mockClear()
 
       const versionedOnBranch = await payload.find({
-        branch: branch.slug,
+        branch: branch.name,
         collection: pagesSlug,
         draft: true,
         overrideAccess: true,
@@ -301,26 +301,26 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
 
     await payload.update({
       id: first.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       data: { title: 'branch first' },
       overrideAccess: true,
     })
     await payload.delete({
       id: deleted.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       overrideAccess: true,
     })
     const created = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       data: { title: 'branch created' },
       overrideAccess: true,
     })
 
     const firstPage = await payload.findDistinct({
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       field: 'id',
       limit: 2,
@@ -329,7 +329,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
       sort: 'id',
     })
     const secondPage = await payload.findDistinct({
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       field: 'id',
       limit: 2,
@@ -368,7 +368,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
 
       await payload.update({
         id: page.id,
-        branch: branch.slug,
+        branch: branch.name,
         collection: pagesSlug,
         data: { title: 'history on branch' },
         draft: true,
@@ -394,14 +394,14 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
 
       try {
         const history = await payload.findVersions({
-          branch: branch.slug,
+          branch: branch.name,
           collection: pagesSlug,
           overrideAccess: true,
           pagination: false,
           where: { parent: { equals: page.id } },
         })
         const count = await payload.countVersions({
-          branch: branch.slug,
+          branch: branch.name,
           collection: pagesSlug,
           overrideAccess: true,
           where: { parent: { equals: page.id } },
@@ -435,7 +435,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
       })
       await payload.updateGlobal({
         slug: headerGlobalSlug,
-        branch: branch.slug,
+        branch: branch.name,
         data: { navLabel: 'branch before update' },
         overrideAccess: true,
       })
@@ -464,7 +464,7 @@ test.suite('Branching database isolation', { config: './config.ts' }, () => {
       })
       const onBranch = await payload.findGlobal({
         slug: headerGlobalSlug,
-        branch: branch.slug,
+        branch: branch.name,
         overrideAccess: true,
       })
 

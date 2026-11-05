@@ -1,13 +1,9 @@
 import { readFile, rm } from 'node:fs/promises'
-
 import path from 'node:path'
-
 import { fileURLToPath } from 'node:url'
-
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { branchesSlug, versionedMediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -40,13 +36,13 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
   test('should retain the main and branch files in version history after merging', async ({
     payload,
   }) => {
-    const branchSlug = 'versioned-media-work'
+    const branchName = 'versioned-media-work'
     const originalFileData = await readFile(path.resolve(dirname, '../uploads/image.png'))
     const replacementFileData = await readFile(path.resolve(dirname, '../uploads/image.jpg'))
 
     await payload.create({
       collection: branchesSlug,
-      data: { name: 'Versioned media work', slug: branchSlug },
+      data: { name: branchName },
     })
 
     const original = await payload.create({
@@ -70,7 +66,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
 
     await payload.update({
       id: original.id,
-      branch: branchSlug,
+      branch: branchName,
       collection: versionedMediaSlug,
       data: { alt: 'Branch metadata edit' },
       overrideAccess: true,
@@ -78,7 +74,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
 
     const replacement = await payload.update({
       id: original.id,
-      branch: branchSlug,
+      branch: branchName,
       collection: versionedMediaSlug,
       data: { alt: 'Branch replacement banner' },
       file: {
@@ -96,7 +92,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
     })
     const ownedBranchVersions = branchVersionsBeforeMerge.docs.filter(
       (version) =>
-        version._branch === branchSlug && String(version._branchParent) === String(original.id),
+        version._branch === branchName && String(version._branchParent) === String(original.id),
     )
     const archivedBranchFilenames = ownedBranchVersions
       .map((version) => getStoredVersionFilename({ version: version.version }))
@@ -113,7 +109,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
       }),
       payload.findByID({
         id: original.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: versionedMediaSlug,
         overrideAccess: true,
       }),
@@ -136,7 +132,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
       readFile(path.resolve(versionedMediaDirectory, onBranchBeforeMerge.filename!)),
     ).resolves.toEqual(replacementFileData)
 
-    await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+    await payload.branches.merge({ branch: branchName, overrideAccess: true })
 
     const [onMainAfterMerge, mainVersionsAfterMerge] = await Promise.all([
       payload.findByID({
@@ -156,7 +152,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
       branch: false,
       collection: versionedMediaSlug,
       pagination: false,
-      where: { _branch: { equals: branchSlug } },
+      where: { _branch: { equals: branchName } },
     })
     const versionIDsBeforeMerge = new Set(
       mainVersionsBeforeMerge.docs.map((version) => String(version.id)),
@@ -197,13 +193,13 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
     payload,
     restClient,
   }) => {
-    const branchSlug = 'restore-merged-media'
+    const branchName = 'restore-merged-media'
     const originalFileData = await readFile(path.resolve(dirname, '../uploads/image.png'))
     const replacementFileData = await readFile(path.resolve(dirname, '../uploads/image.jpg'))
 
     await payload.create({
       collection: branchesSlug,
-      data: { name: 'Restore merged media', slug: branchSlug },
+      data: { name: branchName },
     })
 
     const original = await payload.create({
@@ -231,7 +227,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
 
     await payload.update({
       id: original.id,
-      branch: branchSlug,
+      branch: branchName,
       collection: versionedMediaSlug,
       data: { alt: 'Branch replacement banner' },
       file: {
@@ -243,7 +239,7 @@ test.suite('Branching versioned media files', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
 
-    await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+    await payload.branches.merge({ branch: branchName, overrideAccess: true })
 
     const response = await restClient.POST(
       `/${versionedMediaSlug}/versions/${originalMainVersion!.id}`,

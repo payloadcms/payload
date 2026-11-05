@@ -78,9 +78,9 @@ export const assertBranchCreatedDocumentsUnreferenced = async ({
     globalOwnerBranches = [
       MAIN_BRANCH,
       ...docs.flatMap((doc) => {
-        const branchSlug = (doc as Record<string, unknown>).slug
+        const branchName = (doc as Record<string, unknown>).name
 
-        return typeof branchSlug === 'string' ? [branchSlug] : []
+        return typeof branchName === 'string' ? [branchName] : []
       }),
     ]
 

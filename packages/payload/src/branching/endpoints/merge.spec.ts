@@ -32,7 +32,7 @@ test('should finish a streamed merge after consumer cancellation without mutatin
     data: { stream: true },
     headers: new Headers(),
     routeParams: { id: 'branch-id' },
-    payload: { config: { cors: [] }, findByID: vi.fn(async () => ({ slug: 'campaign' })), logger },
+    payload: { config: { cors: [] }, findByID: vi.fn(async () => ({ name: 'campaign' })), logger },
     transactionID: 'caller',
     user: { id: 'user' },
   } as unknown as PayloadRequest

@@ -116,7 +116,6 @@ vi.mock('../Modal/index.js', () => ({
 const mergeTarget = vi.hoisted(() => ({
   branchID: 'campaign-id',
   branchName: 'Campaign',
-  branchSlug: 'campaign',
   changes: [],
   totalChanges: 2,
 }))

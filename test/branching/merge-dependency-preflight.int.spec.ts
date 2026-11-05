@@ -94,7 +94,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
       overrideAccess: true,
     })
     const target = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: categoriesSlug,
       data: { name: 'unselected target' },
       overrideAccess: true,
@@ -102,14 +102,14 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
 
     await payload.update({
       id: owner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       data: { title: 'safe branch owner' },
       overrideAccess: true,
     })
 
     const ownerChange = await findBranchChange({
-      branch: branch.slug,
+      branch: branch.name,
       collectionSlug: postsSlug,
       docID: owner.id,
       payload,
@@ -117,7 +117,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
 
     hookSpy.beforeMerge = async ({ req }) => {
       await updateBranchPostDirectly({
-        branch: branch.slug,
+        branch: branch.name,
         data: { category: target.id },
         docID: owner.id,
         req,
@@ -125,7 +125,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
     }
 
     const result = await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       changes: [ownerChange.id],
       overrideAccess: true,
     })
@@ -166,14 +166,14 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
 
     await payload.update({
       id: owner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       data: { title: 'branch owner' },
       overrideAccess: true,
     })
 
     const target = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: categoriesSlug,
       data: { name: 'selected target' },
       overrideAccess: true,
@@ -181,7 +181,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
 
     await payload.update({
       id: owner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       data: { category: target.id },
       overrideAccess: true,
@@ -195,7 +195,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
     try {
       await expect(
         payload.branches.merge({
-          branch: branch.slug,
+          branch: branch.name,
           onProgress: ({ docID }) => {
             progressDocumentIDs.push(docID)
 
@@ -231,14 +231,14 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
 
     await payload.update({
       id: owner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       data: { title: 'branch localized owner' },
       overrideAccess: true,
     })
 
     const target = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: categoriesSlug,
       data: { name: 'selected localized target' },
       overrideAccess: true,
@@ -246,7 +246,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
 
     await payload.update({
       id: owner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       data: { localizedCategory: target.id } as never,
       locale: 'en',
@@ -254,7 +254,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
     })
 
     const result = await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: true,
     })
     const mainOwner = (await payload.findByID({
@@ -287,14 +287,14 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
 
     await payload.update({
       id: owner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       data: { title: 'branch reusable-block owner' },
       overrideAccess: true,
     })
 
     const target = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: categoriesSlug,
       data: { name: 'selected reusable-block target' },
       overrideAccess: true,
@@ -302,7 +302,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
 
     await payload.update({
       id: owner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       data: {
         sharedLayout: [{ blockType: localizedCategoryBlockSlug, category: target.id }],
@@ -312,7 +312,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
     })
 
     const result = await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: true,
     })
     const mainOwner = (await payload.findByID({
@@ -338,7 +338,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
       overrideAccess: true,
     })
     const target = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: categoriesSlug,
       data: { name: 'late target' },
       overrideAccess: true,
@@ -346,14 +346,14 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
 
     await payload.update({
       id: owner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: postsSlug,
       data: { title: 'safe branch owner' },
       overrideAccess: true,
     })
 
     const ownerChange = await findBranchChange({
-      branch: branch.slug,
+      branch: branch.name,
       collectionSlug: postsSlug,
       docID: owner.id,
       payload,
@@ -367,7 +367,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
 
     await expect(
       payload.branches.merge({
-        branch: branch.slug,
+        branch: branch.name,
         changes: [ownerChange.id],
         onProgress: async () => {
           if (!mergeRequest) {
@@ -375,7 +375,7 @@ test.suite('Branch merge dependency preflight', { config: './config.ts' }, () =>
           }
 
           await updateBranchPostDirectly({
-            branch: branch.slug,
+            branch: branch.name,
             data: { category: target.id },
             docID: owner.id,
             req: mergeRequest,

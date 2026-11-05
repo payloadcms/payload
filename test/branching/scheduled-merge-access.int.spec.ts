@@ -20,7 +20,7 @@ test.suite('Scheduled merge access', { config: './config.ts' }, () => {
     const req = await createPayloadRequest({ payload, user: admin })
 
     const result = await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: false,
       req,
       user: editor,
@@ -47,7 +47,7 @@ test.suite('Scheduled merge access', { config: './config.ts' }, () => {
 
     await expect(
       payload.branches.discard({
-        branch: branch.slug,
+        branch: branch.name,
         overrideAccess: false,
         req,
         user: editor,
@@ -61,7 +61,7 @@ test.suite('Scheduled merge access', { config: './config.ts' }, () => {
     const { admin, branch, doc, editor } = await createPendingChange({ payload })
     const req = await createPayloadRequest({ payload, user: admin })
     const jobID = await runScheduledMerge({
-      branch: branch.slug,
+      branch: branch.name,
       payload,
       req,
       userID: editor.id,
@@ -84,7 +84,7 @@ test.suite('Scheduled merge access', { config: './config.ts' }, () => {
 
     expect(job.hasError).toBe(true)
     expect(job.completedAt).toBeFalsy()
-    expect(job.error?.message).toContain(`Scheduled merge of branch "${branch.slug}" was refused:`)
+    expect(job.error?.message).toContain(`Scheduled merge of branch "${branch.name}" was refused:`)
     expect(onMain.title).toBe('original on main')
     expect(afterMerge.mergeProgress).toBeFalsy()
     expect(afterMerge.status).toBe('open')
@@ -102,7 +102,7 @@ test.suite('Scheduled merge access', { config: './config.ts' }, () => {
     })
 
     const jobID = await runScheduledMerge({
-      branch: branch.slug,
+      branch: branch.name,
       payload,
       req,
       userID: admin.id,
@@ -135,7 +135,7 @@ test.suite('Scheduled merge access', { config: './config.ts' }, () => {
     const { admin, branch, doc, editor } = await createPendingChange({ payload })
     const req = await createPayloadRequest({ payload, user: editor })
 
-    await runScheduledMerge({ branch: branch.slug, payload, req, userID: admin.id })
+    await runScheduledMerge({ branch: branch.name, payload, req, userID: admin.id })
 
     const onMain = await payload.findByID({
       id: doc.id,
@@ -150,11 +150,11 @@ test.suite('Scheduled merge access', { config: './config.ts' }, () => {
   test('should complete a scheduled merge when no changes remain pending', async ({ payload }) => {
     const { admin, branch } = await createPendingChange({ payload })
 
-    await payload.branches.discard({ branch: branch.slug, overrideAccess: true })
+    await payload.branches.discard({ branch: branch.name, overrideAccess: true })
 
     const req = await createPayloadRequest({ payload, user: admin })
     const jobID = await runScheduledMerge({
-      branch: branch.slug,
+      branch: branch.name,
       payload,
       req,
       userID: admin.id,
@@ -196,7 +196,7 @@ const createPendingChange = async ({ payload }: { payload: Payload }) => {
 
   await payload.update({
     id: doc.id,
-    branch: branch.slug,
+    branch: branch.name,
     collection: restrictedSlug,
     data: { title: 'edited on branch' },
     overrideAccess: true,

@@ -48,7 +48,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     })
     const secretTitle = 'private acquisition plan'
     const branchDocument = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityPagesSlug,
       data: { title: secretTitle },
       overrideAccess: true,
@@ -56,7 +56,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     const editorUser = { ...editor, collection: 'users' } as const
     await expect(
       payload.find({
-        branch: branch.slug,
+        branch: branch.name,
         collection: mergeSecurityPagesSlug,
         overrideAccess: false,
         pagination: false,
@@ -68,7 +68,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     mergeSecuritySpy.allowPageCreate = false
 
     const result = await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       dryRun: true,
       overrideAccess: false,
       user: editorUser,
@@ -137,14 +137,14 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
 
     await payload.update({
       id: mainDocument.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityPagesSlug,
       data: { deletedAt: new Date().toISOString() },
       overrideAccess: true,
     })
 
     const result = await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       dryRun: true,
       overrideAccess: false,
       user: { ...trashEditor, collection: 'users' },
@@ -168,7 +168,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     })
     const branch = await createBranch({ name: 'Denied trashed create', payload })
     const branchDocument = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityPagesSlug,
       data: {
         deletedAt: new Date().toISOString(),
@@ -178,7 +178,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     })
 
     const result = await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       dryRun: true,
       overrideAccess: false,
       user: { ...trashEditor, collection: 'users' },
@@ -195,7 +195,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
   test('should keep a rejected non-transactional branch create off main', async ({ payload }) => {
     const branch = await createBranch({ name: 'Rejected create merge', payload })
     const branchDocument = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityPostsSlug,
       data: { title: 'rejected during merge' },
       overrideAccess: true,
@@ -207,7 +207,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
 
     try {
       await expect(
-        payload.branches.merge({ branch: branch.slug, overrideAccess: true }),
+        payload.branches.merge({ branch: branch.name, overrideAccess: true }),
       ).rejects.toThrow('Rejected by create hook')
     } finally {
       payload.db.beginTransaction = beginTransaction
@@ -222,7 +222,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     })
     const remainingBranchDocument = await payload.findByID({
       id: branchDocument.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityPostsSlug,
       disableErrors: true,
       overrideAccess: true,
@@ -231,7 +231,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
       collection: branchChangesSlug,
       overrideAccess: true,
       pagination: false,
-      where: { branch: { equals: branch.slug } },
+      where: { branch: { equals: branch.name } },
     })
 
     expect(mainDocument).toBeNull()
@@ -256,14 +256,14 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
 
     await payload.update({
       id: existingDocument.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityPostsSlug,
       data: { title: 'after branch edit' },
       overrideAccess: true,
     })
 
     const branchDocument = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityPostsSlug,
       data: { title: 'permitted during merge' },
       overrideAccess: true,
@@ -274,7 +274,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
 
     try {
       await payload.branches.merge({
-        branch: branch.slug,
+        branch: branch.name,
         overrideAccess: false,
         user: { ...editor, collection: 'users' },
       })
@@ -322,7 +322,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     const replacementFileData = Buffer.from('normal access branch replacement bytes')
     const replacement = await payload.update({
       id: original.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityUploadsSlug,
       data: { _status: 'published', alt: 'branch replacement' },
       file: {
@@ -340,7 +340,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
 
     try {
       await payload.branches.merge({
-        branch: branch.slug,
+        branch: branch.name,
         overrideAccess: false,
         user: { ...editor, collection: 'users' },
       })
@@ -378,7 +378,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     })
     const publishedFileData = Buffer.from('branch-created published upload bytes')
     const published = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityUploadsSlug,
       data: { _status: 'published', alt: 'branch-created published upload' },
       file: {
@@ -392,7 +392,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     const draftFileData = Buffer.from('branch-created draft upload bytes')
     const draft = await payload.update({
       id: published.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityUploadsSlug,
       data: { alt: 'branch-created draft upload' },
       draft: true,
@@ -406,7 +406,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     })
 
     await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: false,
       user: { ...editor, collection: 'users' },
     })
@@ -439,7 +439,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     const branch = await createBranch({ name: 'Branch create unrelated merge file', payload })
     const branchFileData = Buffer.from('branch-created persisted upload bytes')
     const branchUpload = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityUploadsSlug,
       data: { alt: 'branch-created persisted upload' },
       file: {
@@ -461,7 +461,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     }
 
     await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: true,
       req: mergeReq,
     })
@@ -500,7 +500,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     const branchFileData = Buffer.from('existing branch replacement bytes')
     const replacement = await payload.update({
       id: original.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityUploadsSlug,
       data: { _status: 'published', alt: 'existing branch replacement' },
       file: {
@@ -522,7 +522,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     }
 
     await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: true,
       req: mergeReq,
     })
@@ -580,7 +580,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     const replacementFileData = Buffer.from('outer branch replacement bytes')
     const replacement = await payload.update({
       id: mainUpload.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityUploadsSlug,
       data: { alt: 'outer branch replacement' },
       file: {
@@ -596,7 +596,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     mergeSecuritySpy.nestedUploadTriggerAlt = 'outer branch replacement'
 
     await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: false,
       user: { ...editor, collection: 'users' },
     })
@@ -622,7 +622,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     const branch = await createBranch({ name: 'Branch create unrelated cloud file', payload })
     const branchFileData = Buffer.from('branch-created cloud upload bytes')
     const branchUpload = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: mergeSecurityCloudUploadsSlug,
       data: { alt: 'branch-created cloud upload' },
       file: {
@@ -648,7 +648,7 @@ test.suite('Branch merge security', { config: './merge-security.config.ts' }, ()
     }
 
     await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: true,
       req: mergeReq,
     })

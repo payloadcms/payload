@@ -138,9 +138,11 @@ Merging keeps the branch available by default. Pass `closeBranch: true` to close
 
 ## Use branches through APIs
 
+Each branch has a required, unique `name`. The selector searches that name, and the admin preference and `branch` query parameter use the same value. Names are immutable after creation, and `main` is reserved. URL-encode names when building query parameters.
+
 Create, list, update metadata, and delete branches through ordinary collection operations on `payload-branches`. The `payload.branches` Local API exposes only `merge` and `discard`.
 
-Local API operations inherit the branch associated with `req` unless explicitly overridden with `branch`, falling back to `main` when no branch context is available. Pass a branch slug to supported Local API operations:
+Local API operations inherit the branch associated with `req` unless explicitly overridden with `branch`, falling back to `main` when no branch context is available. Pass a branch name to supported Local API operations:
 
 ```ts
 const page = await payload.findByID({
@@ -161,7 +163,7 @@ await payload.update({
 })
 ```
 
-For REST, pass the branch slug as the `branch` query parameter:
+For REST, pass the branch name as the `branch` query parameter:
 
 ```text
 GET /api/pages?branch=fall-campaign

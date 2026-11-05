@@ -1,21 +1,15 @@
 import type { Payload, PayloadRequest } from 'payload'
 
 import { commitTransaction, createPayloadRequest, initTransaction, killTransaction } from 'payload'
-
 import { expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { databaseAdapterSupportsTransactions } from '../__helpers/shared/databaseAdapterCapabilities.js'
-
 import { mongooseList } from '../__helpers/shared/isMongoose.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -25,7 +19,6 @@ import {
   pagesSlug,
   postsSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -62,8 +55,8 @@ const transactionCapableMongooseAdapters = new Set(
   mongooseList.filter((adapter) => databaseAdapterSupportsTransactions({ adapter })),
 )
 
-const createBranchRecord = ({ name, slug }: { name: string; slug: string }) =>
-  payload.create({ collection: branchesSlug, data: { name, slug } })
+const createBranchRecord = ({ name }: { name: string }) =>
+  payload.create({ collection: branchesSlug, data: { name } })
 
 const findBranchChanges = ({ branch }: { branch: string }) =>
   payload.find({
@@ -112,7 +105,7 @@ test.suite(
      * happens to have created the request object.
      */
     test.describe('Transactional integrity', () => {
-      let branchSlug: string
+      let branchName: string
       let deleteOneSpy: ReturnType<typeof vi.spyOn> | undefined
 
       test.afterEach(async () => {
@@ -133,7 +126,7 @@ test.suite(
           const found = await payload.find({
             collection,
             pagination: false,
-            where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: branchSlug } },
+            where: { [collection === branchesSlug ? 'name' : 'branch']: { equals: branchName } },
           })
 
           for (const row of found.docs) {
@@ -146,9 +139,9 @@ test.suite(
         'should keep a branch merging when its transaction commit result is unknown',
         { db: (adapter) => transactionCapableMongooseAdapters.has(adapter) },
         async () => {
-          branchSlug = 'unknown-commit-merge'
+          branchName = 'unknown-commit-merge'
 
-          await createBranchRecord({ name: 'Unknown commit merge', slug: branchSlug })
+          await createBranchRecord({ name: branchName })
           const mainDocument = await payload.create({
             collection: postsSlug,
             data: { title: 'Unknown commit original' },
@@ -156,7 +149,7 @@ test.suite(
 
           await payload.update({
             id: mainDocument.id,
-            branch: branchSlug,
+            branch: branchName,
             collection: postsSlug,
             data: { title: 'Unknown commit edited' },
           })
@@ -191,18 +184,18 @@ test.suite(
 
           try {
             await expect(
-              payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+              payload.branches.merge({ branch: branchName, overrideAccess: true }),
             ).rejects.toBe(commitError)
 
             const branch = (
               await payload.find({
                 collection: branchesSlug,
                 pagination: false,
-                where: { slug: { equals: branchSlug } },
+                where: { name: { equals: branchName } },
               })
             ).docs[0]
-            const remainingChanges = await findBranchChanges({ branch: branchSlug })
-            const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+            const remainingChanges = await findBranchChanges({ branch: branchName })
+            const mergeEvent = await findBranchMergeEvent({ branch: branchName })
 
             expect(remainingChanges.docs).toHaveLength(1)
             expect({
@@ -220,7 +213,7 @@ test.suite(
             })
 
             await expect(
-              payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+              payload.branches.merge({ branch: branchName, overrideAccess: true }),
             ).rejects.toMatchObject({ status: 409 })
           } finally {
             commitSpy.mockRestore()
@@ -230,9 +223,9 @@ test.suite(
       )
 
       test('should retain source state when a later non-transactional merge write fails', async () => {
-        branchSlug = 'non-transactional-merge'
+        branchName = 'non-transactional-merge'
 
-        await createBranchRecord({ name: 'Non-transactional merge', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
 
         const first = await payload.create({
           collection: postsSlug,
@@ -245,13 +238,13 @@ test.suite(
 
         await payload.update({
           id: first.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'First edited' },
         })
         await payload.update({
           id: second.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Second edited' },
         })
@@ -266,7 +259,7 @@ test.suite(
 
         try {
           await expect(
-            payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+            payload.branches.merge({ branch: branchName, overrideAccess: true }),
           ).rejects.toThrow('Simulated non-transactional merge failure')
 
           const sourceRows = await payload.find({
@@ -274,10 +267,10 @@ test.suite(
             collection: postsSlug,
             pagination: false,
             showHiddenFields: true,
-            where: { _branch: { equals: branchSlug } },
+            where: { _branch: { equals: branchName } },
           })
-          const remainingChanges = await findBranchChanges({ branch: branchSlug })
-          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const remainingChanges = await findBranchChanges({ branch: branchName })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchName })
 
           expect(sourceRows.docs).toHaveLength(2)
           expect(remainingChanges.docs).toHaveLength(2)
@@ -296,9 +289,9 @@ test.suite(
       })
 
       test('should restore an earlier versioned target after a later non-transactional failure', async () => {
-        branchSlug = 'non-transactional-version-recovery'
+        branchName = 'non-transactional-version-recovery'
 
-        await createBranchRecord({ name: 'Non-transactional version recovery', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const versionedDocument = await payload.create({
           collection: pagesSlug,
           data: { title: 'Versioned original' },
@@ -310,13 +303,13 @@ test.suite(
 
         await payload.update({
           id: versionedDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: pagesSlug,
           data: { title: 'Versioned edited' },
         })
         await payload.update({
           id: failingDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Failure edited' },
         })
@@ -331,7 +324,7 @@ test.suite(
 
         try {
           await expect(
-            payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+            payload.branches.merge({ branch: branchName, overrideAccess: true }),
           ).rejects.toThrow('Simulated failure after versioned write')
 
           const onMain = await payload.findByID({
@@ -341,12 +334,12 @@ test.suite(
           })
           const onBranch = await payload.findByID({
             id: versionedDocument.id,
-            branch: branchSlug,
+            branch: branchName,
             collection: pagesSlug,
             draft: true,
           })
-          const remainingChanges = await findBranchChanges({ branch: branchSlug })
-          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const remainingChanges = await findBranchChanges({ branch: branchName })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchName })
           const recoveredChange = mergeEvent.changes.find(
             ({ collectionSlug }) => collectionSlug === pagesSlug,
           )
@@ -367,9 +360,9 @@ test.suite(
       })
 
       test('should restore an earlier versioned global after a later non-transactional failure', async () => {
-        branchSlug = 'non-transactional-global-version-recovery'
+        branchName = 'non-transactional-global-version-recovery'
 
-        await createBranchRecord({ name: 'Non-transactional global recovery', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         await payload.updateGlobal({
           slug: homepageGlobalSlug,
           data: { _status: 'published', heroTitle: 'Global versioned original' },
@@ -380,13 +373,13 @@ test.suite(
         })
         await payload.updateGlobal({
           slug: homepageGlobalSlug,
-          branch: branchSlug,
+          branch: branchName,
           data: { heroTitle: 'Global versioned edited' },
           draft: true,
         })
         await payload.updateGlobal({
           slug: headerGlobalSlug,
-          branch: branchSlug,
+          branch: branchName,
           data: { navLabel: 'Global failure edited' },
         })
 
@@ -398,7 +391,7 @@ test.suite(
 
         try {
           await expect(
-            payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+            payload.branches.merge({ branch: branchName, overrideAccess: true }),
           ).rejects.toThrow('Simulated failure after versioned global write')
 
           const onMain = await payload.findGlobal({
@@ -407,11 +400,11 @@ test.suite(
           })
           const onBranch = await payload.findGlobal({
             slug: homepageGlobalSlug,
-            branch: branchSlug,
+            branch: branchName,
             draft: true,
           })
-          const remainingChanges = await findBranchChanges({ branch: branchSlug })
-          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const remainingChanges = await findBranchChanges({ branch: branchName })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchName })
           const recoveredChange = mergeEvent.changes.find(
             ({ globalSlug }) => globalSlug === homepageGlobalSlug,
           )
@@ -433,12 +426,12 @@ test.suite(
           const req = await createPayloadRequest({ branch: false, payload })
 
           await payload.db.deleteBranchGlobal?.({
-            branch: branchSlug,
+            branch: branchName,
             globalSlug: homepageGlobalSlug,
             req,
           })
           await payload.db.deleteBranchGlobal?.({
-            branch: branchSlug,
+            branch: branchName,
             globalSlug: headerGlobalSlug,
             req,
           })
@@ -454,11 +447,11 @@ test.suite(
       })
 
       test('should remove a branch-created target after a later non-transactional failure', async () => {
-        branchSlug = 'non-transactional-create-recovery'
+        branchName = 'non-transactional-create-recovery'
 
-        await createBranchRecord({ name: 'Non-transactional create recovery', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const createdOnBranch = await payload.create({
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Created on branch' },
         })
@@ -469,7 +462,7 @@ test.suite(
 
         await payload.update({
           id: failingDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Failure edited' },
         })
@@ -484,7 +477,7 @@ test.suite(
 
         try {
           await expect(
-            payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+            payload.branches.merge({ branch: branchName, overrideAccess: true }),
           ).rejects.toThrow('Simulated failure after branch create')
 
           const onMain = await payload.find({
@@ -497,11 +490,11 @@ test.suite(
           })
           const onBranch = await payload.findByID({
             id: createdOnBranch.id,
-            branch: branchSlug,
+            branch: branchName,
             collection: postsSlug,
           })
-          const remainingChanges = await findBranchChanges({ branch: branchSlug })
-          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const remainingChanges = await findBranchChanges({ branch: branchName })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchName })
           const recoveredChange = mergeEvent.changes.find(
             ({ collectionSlug, operation }) =>
               collectionSlug === postsSlug && operation === 'create',
@@ -521,12 +514,9 @@ test.suite(
       })
 
       test('should record an unknown outcome when application progress cannot be persisted', async () => {
-        branchSlug = 'non-transactional-unknown-application'
+        branchName = 'non-transactional-unknown-application'
 
-        await createBranchRecord({
-          name: 'Non-transactional unknown application',
-          slug: branchSlug,
-        })
+        await createBranchRecord({ name: branchName })
         const versionedDocument = await payload.create({
           collection: pagesSlug,
           data: { title: 'Unknown application original' },
@@ -534,7 +524,7 @@ test.suite(
 
         await payload.update({
           id: versionedDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: pagesSlug,
           data: { title: 'Unknown application edited' },
         })
@@ -557,7 +547,7 @@ test.suite(
 
         try {
           await expect(
-            payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+            payload.branches.merge({ branch: branchName, overrideAccess: true }),
           ).rejects.toThrow('Simulated application progress failure')
 
           const onMain = await payload.findByID({
@@ -567,12 +557,12 @@ test.suite(
           })
           const onBranch = await payload.findByID({
             id: versionedDocument.id,
-            branch: branchSlug,
+            branch: branchName,
             collection: pagesSlug,
             draft: true,
           })
-          const remainingChanges = await findBranchChanges({ branch: branchSlug })
-          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const remainingChanges = await findBranchChanges({ branch: branchName })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchName })
 
           expect(onMain.title).toBe('Unknown application edited')
           expect(onBranch.title).toBe('Unknown application edited')
@@ -591,9 +581,9 @@ test.suite(
       })
 
       test('should preserve the merge error when recovery progress cannot be persisted', async () => {
-        branchSlug = 'non-transactional-unknown-recovery'
+        branchName = 'non-transactional-unknown-recovery'
 
-        await createBranchRecord({ name: 'Non-transactional unknown recovery', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const versionedDocument = await payload.create({
           collection: pagesSlug,
           data: { title: 'Unknown recovery original' },
@@ -605,13 +595,13 @@ test.suite(
 
         await payload.update({
           id: versionedDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: pagesSlug,
           data: { title: 'Unknown recovery edited' },
         })
         await payload.update({
           id: failingDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Unknown recovery failure edited' },
         })
@@ -640,7 +630,7 @@ test.suite(
 
         try {
           await expect(
-            payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+            payload.branches.merge({ branch: branchName, overrideAccess: true }),
           ).rejects.toThrow('Simulated original merge failure')
 
           const onMain = await payload.findByID({
@@ -650,12 +640,12 @@ test.suite(
           })
           const onBranch = await payload.findByID({
             id: versionedDocument.id,
-            branch: branchSlug,
+            branch: branchName,
             collection: pagesSlug,
             draft: true,
           })
-          const remainingChanges = await findBranchChanges({ branch: branchSlug })
-          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const remainingChanges = await findBranchChanges({ branch: branchName })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchName })
           const unresolvedChange = mergeEvent.changes.find(
             ({ collectionSlug }) => collectionSlug === pagesSlug,
           )
@@ -677,9 +667,9 @@ test.suite(
       })
 
       test('should report recovery as unavailable when the target version was pruned', async () => {
-        branchSlug = 'non-transactional-pruned-recovery'
+        branchName = 'non-transactional-pruned-recovery'
 
-        await createBranchRecord({ name: 'Non-transactional pruned recovery', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const versionedDocument = await payload.create({
           collection: pagesSlug,
           data: { title: 'Pruned recovery original' },
@@ -702,13 +692,13 @@ test.suite(
 
         await payload.update({
           id: versionedDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: pagesSlug,
           data: { title: 'Pruned recovery edited' },
         })
         await payload.update({
           id: failingDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Pruned recovery failure edited' },
         })
@@ -728,7 +718,7 @@ test.suite(
 
         try {
           await expect(
-            payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+            payload.branches.merge({ branch: branchName, overrideAccess: true }),
           ).rejects.toThrow('Simulated failure after pruning the recovery version')
 
           const onMain = await payload.findByID({
@@ -738,11 +728,11 @@ test.suite(
           })
           const onBranch = await payload.findByID({
             id: versionedDocument.id,
-            branch: branchSlug,
+            branch: branchName,
             collection: pagesSlug,
             draft: true,
           })
-          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchName })
           const unresolvedChange = mergeEvent.changes.find(
             ({ collectionSlug }) => collectionSlug === pagesSlug,
           )
@@ -762,9 +752,9 @@ test.suite(
       })
 
       test('should report that recovery restored over an intervening target edit', async () => {
-        branchSlug = 'non-transactional-intervening-target-recovery'
+        branchName = 'non-transactional-intervening-target-recovery'
 
-        await createBranchRecord({ name: 'Intervening target recovery', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const versionedDocument = await payload.create({
           collection: pagesSlug,
           data: { title: 'Intervening recovery original' },
@@ -776,13 +766,13 @@ test.suite(
 
         await payload.update({
           id: versionedDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: pagesSlug,
           data: { title: 'Intervening recovery branch edit' },
         })
         await payload.update({
           id: failingDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Intervening recovery failure edit' },
         })
@@ -803,7 +793,7 @@ test.suite(
 
         try {
           await expect(
-            payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+            payload.branches.merge({ branch: branchName, overrideAccess: true }),
           ).rejects.toThrow('Simulated failure after intervening target edit')
 
           const onMain = await payload.findByID({
@@ -811,7 +801,7 @@ test.suite(
             collection: pagesSlug,
             draft: true,
           })
-          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchName })
           const recoveredChange = mergeEvent.changes.find(
             ({ collectionSlug }) => collectionSlug === pagesSlug,
           )
@@ -830,9 +820,9 @@ test.suite(
       })
 
       test('should retain the original merge error when target recovery fails', async () => {
-        branchSlug = 'non-transactional-target-recovery-failure'
+        branchName = 'non-transactional-target-recovery-failure'
 
-        await createBranchRecord({ name: 'Target recovery failure', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const versionedDocument = await payload.create({
           collection: pagesSlug,
           data: { title: 'Recovery failure original' },
@@ -844,13 +834,13 @@ test.suite(
 
         await payload.update({
           id: versionedDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: pagesSlug,
           data: { title: 'Recovery failure branch edit' },
         })
         await payload.update({
           id: failingDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Later failure branch edit' },
         })
@@ -868,7 +858,7 @@ test.suite(
 
         try {
           await expect(
-            payload.branches.merge({ branch: branchSlug, overrideAccess: true }),
+            payload.branches.merge({ branch: branchName, overrideAccess: true }),
           ).rejects.toThrow('Simulated original merge failure before recovery')
 
           const onMain = await payload.findByID({
@@ -876,8 +866,8 @@ test.suite(
             collection: pagesSlug,
             draft: true,
           })
-          const remainingChanges = await findBranchChanges({ branch: branchSlug })
-          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const remainingChanges = await findBranchChanges({ branch: branchName })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchName })
           const failedRecovery = mergeEvent.changes.find(
             ({ collectionSlug }) => collectionSlug === pagesSlug,
           )
@@ -899,9 +889,9 @@ test.suite(
       })
 
       test('should retain committed target content when post-commit source cleanup fails', async () => {
-        branchSlug = 'post-commit-cleanup-failure'
+        branchName = 'post-commit-cleanup-failure'
 
-        await createBranchRecord({ name: 'Post-commit cleanup failure', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const mainDocument = await payload.create({
           collection: postsSlug,
           data: { title: 'Cleanup original' },
@@ -909,7 +899,7 @@ test.suite(
 
         await payload.update({
           id: mainDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Cleanup edited' },
         })
@@ -920,7 +910,7 @@ test.suite(
             collection: postsSlug,
             pagination: false,
             showHiddenFields: true,
-            where: { _branch: { equals: branchSlug } },
+            where: { _branch: { equals: branchName } },
           })
         ).docs[0]!
         const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
@@ -934,7 +924,7 @@ test.suite(
         })
 
         const result = await payload.branches.merge({
-          branch: branchSlug,
+          branch: branchName,
           overrideAccess: true,
         })
 
@@ -946,10 +936,10 @@ test.suite(
           collection: postsSlug,
           pagination: false,
           showHiddenFields: true,
-          where: { _branch: { equals: branchSlug } },
+          where: { _branch: { equals: branchName } },
         })
-        const remainingChanges = await findBranchChanges({ branch: branchSlug })
-        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+        const remainingChanges = await findBranchChanges({ branch: branchName })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchName })
 
         expect(onMain.title).toBe('Cleanup edited')
         expect(sourceRows.docs).toHaveLength(1)
@@ -966,9 +956,9 @@ test.suite(
       })
 
       test('should retry failed source cleanup without repeating the committed target write', async () => {
-        branchSlug = 'post-commit-cleanup-retry'
+        branchName = 'post-commit-cleanup-retry'
 
-        await createBranchRecord({ name: 'Post-commit cleanup retry', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const mainDocument = await payload.create({
           collection: postsSlug,
           data: { title: 'Cleanup retry original' },
@@ -976,7 +966,7 @@ test.suite(
 
         await payload.update({
           id: mainDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Cleanup retry edited' },
         })
@@ -987,7 +977,7 @@ test.suite(
             collection: postsSlug,
             pagination: false,
             showHiddenFields: true,
-            where: { _branch: { equals: branchSlug } },
+            where: { _branch: { equals: branchName } },
           })
         ).docs[0]!
         const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
@@ -1007,13 +997,13 @@ test.suite(
           }
         }
 
-        await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+        await payload.branches.merge({ branch: branchName, overrideAccess: true })
 
         expect(targetWriteCount).toBeGreaterThan(0)
 
         const targetWriteCountAfterFirstMerge = targetWriteCount
 
-        const failedEvent = await findBranchMergeEvent({ branch: branchSlug })
+        const failedEvent = await findBranchMergeEvent({ branch: branchName })
 
         expect(failedEvent).toMatchObject({
           changes: [
@@ -1027,7 +1017,7 @@ test.suite(
           status: 'cleanupFailed',
         })
 
-        await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+        await payload.branches.merge({ branch: branchName, overrideAccess: true })
 
         const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
         const sourceRows = await payload.find({
@@ -1035,10 +1025,10 @@ test.suite(
           collection: postsSlug,
           pagination: false,
           showHiddenFields: true,
-          where: { _branch: { equals: branchSlug } },
+          where: { _branch: { equals: branchName } },
         })
-        const remainingChanges = await findBranchChanges({ branch: branchSlug })
-        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+        const remainingChanges = await findBranchChanges({ branch: branchName })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchName })
 
         expect(onMain.title).toBe('Cleanup retry edited')
         expect(targetWriteCount).toBe(targetWriteCountAfterFirstMerge)
@@ -1053,12 +1043,9 @@ test.suite(
       })
 
       test('should claim the branch before retrying failed source cleanup', async () => {
-        branchSlug = 'post-commit-cleanup-retry-claim'
+        branchName = 'post-commit-cleanup-retry-claim'
 
-        const branchDocument = await createBranchRecord({
-          name: 'Cleanup retry claim',
-          slug: branchSlug,
-        })
+        const branchDocument = await createBranchRecord({ name: branchName })
         const mainDocument = await payload.create({
           collection: postsSlug,
           data: { title: 'Cleanup retry claim original' },
@@ -1066,7 +1053,7 @@ test.suite(
 
         await payload.update({
           id: mainDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Cleanup retry claim edited' },
         })
@@ -1077,7 +1064,7 @@ test.suite(
             collection: postsSlug,
             pagination: false,
             showHiddenFields: true,
-            where: { _branch: { equals: branchSlug } },
+            where: { _branch: { equals: branchName } },
           })
         ).docs[0]!
         const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
@@ -1091,7 +1078,7 @@ test.suite(
           return originalDeleteOne(args)
         })
 
-        await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+        await payload.branches.merge({ branch: branchName, overrideAccess: true })
 
         deleteOneSpy.mockRestore()
 
@@ -1112,13 +1099,13 @@ test.suite(
         })
         const retryResult = await payload.branches
           .merge({
-            branch: branchSlug,
+            branch: branchName,
             overrideAccess: true,
           })
           .finally(() => {
             updateSpy.mockRestore()
           })
-        const remainingChanges = await findBranchChanges({ branch: branchSlug })
+        const remainingChanges = await findBranchChanges({ branch: branchName })
 
         expect(statusWhenCleanupRetryStarted).toBe('merging')
         expect(retryResult.merged).toHaveLength(1)
@@ -1126,9 +1113,9 @@ test.suite(
       })
 
       test('should preserve newer source work during a failed cleanup retry', async () => {
-        branchSlug = 'post-commit-cleanup-retry-newer-source'
+        branchName = 'post-commit-cleanup-retry-newer-source'
 
-        await createBranchRecord({ name: 'Cleanup retry with newer source', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const mainDocument = await payload.create({
           collection: postsSlug,
           data: { title: 'Cleanup retry original' },
@@ -1136,7 +1123,7 @@ test.suite(
 
         await payload.update({
           id: mainDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'First merged source' },
         })
@@ -1147,7 +1134,7 @@ test.suite(
             collection: postsSlug,
             pagination: false,
             showHiddenFields: true,
-            where: { _branch: { equals: branchSlug } },
+            where: { _branch: { equals: branchName } },
           })
         ).docs[0]!
         const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
@@ -1161,22 +1148,22 @@ test.suite(
           return originalDeleteOne(args)
         })
 
-        await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+        await payload.branches.merge({ branch: branchName, overrideAccess: true })
         await payload.update({
           id: mainDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Newer source work' },
         })
 
         const retryResult = await payload.branches.merge({
-          branch: branchSlug,
+          branch: branchName,
           overrideAccess: true,
         })
         const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
         const onBranch = await payload.findByID({
           id: mainDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
         })
         const sourceRows = await payload.find({
@@ -1184,10 +1171,10 @@ test.suite(
           collection: postsSlug,
           pagination: false,
           showHiddenFields: true,
-          where: { _branch: { equals: branchSlug } },
+          where: { _branch: { equals: branchName } },
         })
-        const remainingChanges = await findBranchChanges({ branch: branchSlug })
-        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+        const remainingChanges = await findBranchChanges({ branch: branchName })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchName })
 
         expect(retryResult.merged).toHaveLength(0)
         expect(onMain.title).toBe('First merged source')
@@ -1203,11 +1190,11 @@ test.suite(
       })
 
       test('should retry branch-created version cleanup without repeating the target write', async () => {
-        branchSlug = 'post-commit-created-version-cleanup-retry'
+        branchName = 'post-commit-created-version-cleanup-retry'
 
-        await createBranchRecord({ name: 'Branch-created version cleanup retry', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const createdOnBranch = await payload.create({
-          branch: branchSlug,
+          branch: branchName,
           collection: pagesSlug,
           data: { title: 'Created version cleanup retry' },
         })
@@ -1230,16 +1217,16 @@ test.suite(
         }
 
         try {
-          await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+          await payload.branches.merge({ branch: branchName, overrideAccess: true })
 
           const targetWriteCountAfterFirstMerge = targetWriteCount
-          const failedEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const failedEvent = await findBranchMergeEvent({ branch: branchName })
 
           expect(failedEvent.status).toBe('cleanupFailed')
           expect(failedEvent.changes[0]?.sourceVersionIDs?.length).toBeGreaterThan(0)
 
           const retryResult = await payload.branches.merge({
-            branch: branchSlug,
+            branch: branchName,
             overrideAccess: true,
           })
           const onMain = await payload.findByID({
@@ -1247,8 +1234,8 @@ test.suite(
             collection: pagesSlug,
             draft: true,
           })
-          const remainingChanges = await findBranchChanges({ branch: branchSlug })
-          const eventAfterRetry = await findBranchMergeEvent({ branch: branchSlug })
+          const remainingChanges = await findBranchChanges({ branch: branchName })
+          const eventAfterRetry = await findBranchMergeEvent({ branch: branchName })
 
           expect(retryResult.merged).toHaveLength(1)
           expect(onMain.title).toBe('Created version cleanup retry')
@@ -1268,9 +1255,9 @@ test.suite(
       })
 
       test('should retry failed deletion-marker cleanup without repeating the deletion', async () => {
-        branchSlug = 'post-commit-deletion-cleanup-failure'
+        branchName = 'post-commit-deletion-cleanup-failure'
 
-        await createBranchRecord({ name: 'Post-commit deletion cleanup failure', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const mainDocument = await payload.create({
           collection: postsSlug,
           data: { title: 'Delete after commit' },
@@ -1278,7 +1265,7 @@ test.suite(
 
         await payload.delete({
           id: mainDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
         })
 
@@ -1288,7 +1275,7 @@ test.suite(
             collection: postsSlug,
             pagination: false,
             showHiddenFields: true,
-            where: { _branch: { equals: branchSlug } },
+            where: { _branch: { equals: branchName } },
           })
         ).docs[0]!
         const originalDeleteOne = payload.db.deleteOne.bind(payload.db)
@@ -1303,7 +1290,7 @@ test.suite(
         })
 
         const result = await payload.branches.merge({
-          branch: branchSlug,
+          branch: branchName,
           overrideAccess: true,
         })
 
@@ -1317,10 +1304,10 @@ test.suite(
           collection: postsSlug,
           pagination: false,
           showHiddenFields: true,
-          where: { _branch: { equals: branchSlug } },
+          where: { _branch: { equals: branchName } },
         })
-        const remainingChanges = await findBranchChanges({ branch: branchSlug })
-        const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+        const remainingChanges = await findBranchChanges({ branch: branchName })
+        const mergeEvent = await findBranchMergeEvent({ branch: branchName })
 
         expect(result.merged).toHaveLength(1)
         expect(onMain.docs).toHaveLength(0)
@@ -1333,7 +1320,7 @@ test.suite(
         })
 
         const retryResult = await payload.branches.merge({
-          branch: branchSlug,
+          branch: branchName,
           overrideAccess: true,
         })
         const sourceRowsAfterRetry = await payload.find({
@@ -1341,14 +1328,14 @@ test.suite(
           collection: postsSlug,
           pagination: false,
           showHiddenFields: true,
-          where: { _branch: { equals: branchSlug } },
+          where: { _branch: { equals: branchName } },
         })
         const changesAfterRetry = await payload.find({
           collection: branchChangesSlug,
           pagination: false,
-          where: { branch: { equals: branchSlug } },
+          where: { branch: { equals: branchName } },
         })
-        const eventAfterRetry = await findBranchMergeEvent({ branch: branchSlug })
+        const eventAfterRetry = await findBranchMergeEvent({ branch: branchName })
 
         expect(retryResult.merged).toHaveLength(1)
         expect(sourceRowsAfterRetry.docs).toHaveLength(0)
@@ -1362,16 +1349,16 @@ test.suite(
       })
 
       test('should retry failed global cleanup without repeating the committed target write', async () => {
-        branchSlug = 'post-commit-global-cleanup-failure'
+        branchName = 'post-commit-global-cleanup-failure'
 
-        await createBranchRecord({ name: 'Post-commit global cleanup failure', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         await payload.updateGlobal({
           slug: headerGlobalSlug,
           data: { navLabel: 'Global cleanup original' },
         })
         await payload.updateGlobal({
           slug: headerGlobalSlug,
-          branch: branchSlug,
+          branch: branchName,
           data: { navLabel: 'Global cleanup edited' },
         })
 
@@ -1386,13 +1373,13 @@ test.suite(
 
         try {
           const result = await payload.branches.merge({
-            branch: branchSlug,
+            branch: branchName,
             overrideAccess: true,
           })
           const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
-          const onBranch = await payload.findGlobal({ slug: headerGlobalSlug, branch: branchSlug })
-          const remainingChanges = await findBranchChanges({ branch: branchSlug })
-          const failedEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const onBranch = await payload.findGlobal({ slug: headerGlobalSlug, branch: branchName })
+          const remainingChanges = await findBranchChanges({ branch: branchName })
+          const failedEvent = await findBranchMergeEvent({ branch: branchName })
 
           expect(result.merged).toHaveLength(1)
           expect(onMain.navLabel).toBe('Global cleanup edited')
@@ -1407,15 +1394,15 @@ test.suite(
 
           const targetWriteCountAfterFirstMerge = targetWriteCount
           const retryResult = await payload.branches.merge({
-            branch: branchSlug,
+            branch: branchName,
             overrideAccess: true,
           })
           const changesAfterRetry = await payload.find({
             collection: branchChangesSlug,
             pagination: false,
-            where: { branch: { equals: branchSlug } },
+            where: { branch: { equals: branchName } },
           })
-          const eventAfterRetry = await findBranchMergeEvent({ branch: branchSlug })
+          const eventAfterRetry = await findBranchMergeEvent({ branch: branchName })
 
           expect(retryResult.merged).toHaveLength(1)
           expect(targetWriteCount).toBe(targetWriteCountAfterFirstMerge)
@@ -1430,7 +1417,7 @@ test.suite(
           deleteBranchGlobalSpy.mockRestore()
 
           await payload.db.deleteBranchGlobal?.({
-            branch: branchSlug,
+            branch: branchName,
             globalSlug: headerGlobalSlug,
             req: await createPayloadRequest({ branch: false, payload }),
           })
@@ -1442,19 +1429,16 @@ test.suite(
       })
 
       test('should preserve newer global source work during a failed cleanup retry', async () => {
-        branchSlug = 'post-commit-global-cleanup-newer-source'
+        branchName = 'post-commit-global-cleanup-newer-source'
 
-        await createBranchRecord({
-          name: 'Global cleanup retry with newer source',
-          slug: branchSlug,
-        })
+        await createBranchRecord({ name: branchName })
         await payload.updateGlobal({
           slug: headerGlobalSlug,
           data: { navLabel: 'Global cleanup retry original' },
         })
         await payload.updateGlobal({
           slug: headerGlobalSlug,
-          branch: branchSlug,
+          branch: branchName,
           data: { navLabel: 'First global merged source' },
         })
 
@@ -1463,24 +1447,24 @@ test.suite(
           .mockRejectedValueOnce(new Error('Simulated global cleanup failure before newer work'))
 
         try {
-          await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+          await payload.branches.merge({ branch: branchName, overrideAccess: true })
           await payload.updateGlobal({
             slug: headerGlobalSlug,
-            branch: branchSlug,
+            branch: branchName,
             data: { navLabel: 'Newer global source work' },
           })
 
           const retryResult = await payload.branches.merge({
-            branch: branchSlug,
+            branch: branchName,
             overrideAccess: true,
           })
           const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
           const onBranch = await payload.findGlobal({
             slug: headerGlobalSlug,
-            branch: branchSlug,
+            branch: branchName,
           })
-          const remainingChanges = await findBranchChanges({ branch: branchSlug })
-          const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const remainingChanges = await findBranchChanges({ branch: branchName })
+          const mergeEvent = await findBranchMergeEvent({ branch: branchName })
 
           expect(retryResult.merged).toHaveLength(0)
           expect(onMain.navLabel).toBe('First global merged source')
@@ -1496,7 +1480,7 @@ test.suite(
           deleteBranchGlobalSpy.mockRestore()
 
           await payload.db.deleteBranchGlobal?.({
-            branch: branchSlug,
+            branch: branchName,
             globalSlug: headerGlobalSlug,
             req: await createPayloadRequest({ branch: false, payload }),
           })
@@ -1508,9 +1492,9 @@ test.suite(
       })
 
       test('should batch registry cleanup after ordered target lifecycle writes', async () => {
-        branchSlug = 'batched-registry-cleanup'
+        branchName = 'batched-registry-cleanup'
 
-        await createBranchRecord({ name: 'Batched registry cleanup', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const firstDocument = await payload.create({
           collection: postsSlug,
           data: { title: 'Batch cleanup first original' },
@@ -1522,13 +1506,13 @@ test.suite(
 
         await payload.update({
           id: firstDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Batch cleanup first edited' },
         })
         await payload.update({
           id: secondDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Batch cleanup second edited' },
         })
@@ -1537,7 +1521,7 @@ test.suite(
           collection: branchChangesSlug,
           pagination: false,
           sort: 'createdAt',
-          where: { branch: { equals: branchSlug } },
+          where: { branch: { equals: branchName } },
         })
         const batchProcessing = payload.db.batchProcessing.bind(payload.db)
         const batchProcessingSpy = vi
@@ -1569,7 +1553,7 @@ test.suite(
         }
 
         try {
-          await payload.branches.merge({ branch: branchSlug, overrideAccess: true })
+          await payload.branches.merge({ branch: branchName, overrideAccess: true })
 
           expect(batchProcessingSpy).toHaveBeenCalledWith({
             operations: pendingChanges.docs.map(({ id }) => ({
@@ -1605,9 +1589,9 @@ test.suite(
       })
 
       test('should preserve failed and unattempted outcomes from registry cleanup batches', async () => {
-        branchSlug = 'partial-registry-cleanup-batch'
+        branchName = 'partial-registry-cleanup-batch'
 
-        await createBranchRecord({ name: 'Partial registry cleanup batch', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const firstDocument = await payload.create({
           collection: postsSlug,
           data: { title: 'Partial batch first original' },
@@ -1619,13 +1603,13 @@ test.suite(
 
         await payload.update({
           id: firstDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Partial batch first edited' },
         })
         await payload.update({
           id: secondDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Partial batch second edited' },
         })
@@ -1645,16 +1629,16 @@ test.suite(
 
         try {
           const result = await payload.branches.merge({
-            branch: branchSlug,
+            branch: branchName,
             overrideAccess: true,
           })
           const remainingChanges = await payload.find({
             collection: branchChangesSlug,
             pagination: false,
             sort: 'createdAt',
-            where: { branch: { equals: branchSlug } },
+            where: { branch: { equals: branchName } },
           })
-          const failedEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const failedEvent = await findBranchMergeEvent({ branch: branchName })
 
           expect(result.merged).toHaveLength(2)
           expect(remainingChanges.docs).toHaveLength(2)
@@ -1671,13 +1655,13 @@ test.suite(
           ])
 
           const retryResult = await payload.branches.merge({
-            branch: branchSlug,
+            branch: branchName,
             overrideAccess: true,
           })
           const changesAfterRetry = await payload.find({
             collection: branchChangesSlug,
             pagination: false,
-            where: { branch: { equals: branchSlug } },
+            where: { branch: { equals: branchName } },
           })
 
           expect(retryResult.merged).toHaveLength(2)
@@ -1688,9 +1672,9 @@ test.suite(
       })
 
       test('should retry a rejected registry cleanup batch without repeating target writes', async () => {
-        branchSlug = 'rejected-registry-cleanup-batch'
+        branchName = 'rejected-registry-cleanup-batch'
 
-        await createBranchRecord({ name: 'Rejected registry cleanup batch', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const mainDocument = await payload.create({
           collection: postsSlug,
           data: { title: 'Rejected batch original' },
@@ -1698,7 +1682,7 @@ test.suite(
 
         await payload.update({
           id: mainDocument.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Rejected batch edited' },
         })
@@ -1718,11 +1702,11 @@ test.suite(
 
         try {
           const firstResult = await payload.branches.merge({
-            branch: branchSlug,
+            branch: branchName,
             overrideAccess: true,
           })
           const targetWriteCountAfterFirstMerge = targetWriteCount
-          const failedEvent = await findBranchMergeEvent({ branch: branchSlug })
+          const failedEvent = await findBranchMergeEvent({ branch: branchName })
 
           expect(firstResult.merged).toHaveLength(1)
           expect(failedEvent.status).toBe('cleanupFailed')
@@ -1733,11 +1717,11 @@ test.suite(
           })
 
           const retryResult = await payload.branches.merge({
-            branch: branchSlug,
+            branch: branchName,
             overrideAccess: true,
           })
-          const remainingChanges = await findBranchChanges({ branch: branchSlug })
-          const eventAfterRetry = await findBranchMergeEvent({ branch: branchSlug })
+          const remainingChanges = await findBranchChanges({ branch: branchName })
+          const eventAfterRetry = await findBranchMergeEvent({ branch: branchName })
 
           expect(retryResult.merged).toHaveLength(1)
           expect(targetWriteCount).toBe(targetWriteCountAfterFirstMerge)
@@ -1752,9 +1736,9 @@ test.suite(
       })
 
       test('should leave a caller-owned transaction open when merge fails', async () => {
-        branchSlug = 'caller-owned-merge'
+        branchName = 'caller-owned-merge'
 
-        await createBranchRecord({ name: 'Caller-owned merge', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const mainDoc = await payload.create({
           collection: postsSlug,
           data: { title: 'Caller-owned original' },
@@ -1762,7 +1746,7 @@ test.suite(
 
         await payload.update({
           id: mainDoc.id,
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           data: { title: 'Caller-owned edited' },
         })
@@ -1779,7 +1763,7 @@ test.suite(
 
         try {
           await expect(
-            payload.branches.merge({ branch: branchSlug, overrideAccess: true, req }),
+            payload.branches.merge({ branch: branchName, overrideAccess: true, req }),
           ).rejects.toThrow('Simulated caller-owned merge failure')
 
           expect(rollbackTransactionSpy).not.toHaveBeenCalled()
@@ -1795,9 +1779,9 @@ test.suite(
         'should finalise a successful merge only after its caller-owned transaction commits',
         { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
         async () => {
-          branchSlug = 'caller-owned-successful-merge'
+          branchName = 'caller-owned-successful-merge'
 
-          await createBranchRecord({ name: 'Caller-owned successful merge', slug: branchSlug })
+          await createBranchRecord({ name: branchName })
           const mainDocument = await payload.create({
             collection: postsSlug,
             data: { title: 'Caller-owned success original' },
@@ -1805,7 +1789,7 @@ test.suite(
 
           await payload.update({
             id: mainDocument.id,
-            branch: branchSlug,
+            branch: branchName,
             collection: postsSlug,
             data: { title: 'Caller-owned success edited' },
           })
@@ -1815,9 +1799,9 @@ test.suite(
           expect(await initTransaction(req)).toBe(true)
 
           try {
-            await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+            await payload.branches.merge({ branch: branchName, overrideAccess: true, req })
 
-            const beforeCommit = await findBranchMergeEvent({ branch: branchSlug })
+            const beforeCommit = await findBranchMergeEvent({ branch: branchName })
 
             expect(beforeCommit.status).toBe('awaitingCommit')
             expect(beforeCommit.changes[0]?.applicationOutcome).toBe('applied')
@@ -1825,7 +1809,7 @@ test.suite(
 
             await commitTransaction(req)
 
-            const afterCommit = await findBranchMergeEvent({ branch: branchSlug })
+            const afterCommit = await findBranchMergeEvent({ branch: branchName })
 
             expect(afterCommit.status).toBe('succeeded')
             expect(afterCommit.changes[0]?.applicationOutcome).toBe('committed')
@@ -1842,9 +1826,9 @@ test.suite(
         'should reject newer source work before caller-owned cleanup',
         { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
         async () => {
-          branchSlug = 'caller-owned-newer-source-work'
+          branchName = 'caller-owned-newer-source-work'
 
-          await createBranchRecord({ name: 'Caller-owned newer source work', slug: branchSlug })
+          await createBranchRecord({ name: branchName })
           const mainDocument = await payload.create({
             collection: postsSlug,
             data: { title: 'Newer source original' },
@@ -1852,7 +1836,7 @@ test.suite(
 
           await payload.update({
             id: mainDocument.id,
-            branch: branchSlug,
+            branch: branchName,
             collection: postsSlug,
             data: { title: 'Merge candidate' },
           })
@@ -1862,12 +1846,12 @@ test.suite(
           expect(await initTransaction(req)).toBe(true)
 
           try {
-            await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+            await payload.branches.merge({ branch: branchName, overrideAccess: true, req })
 
             await expect(
               payload.update({
                 id: mainDocument.id,
-                branch: branchSlug,
+                branch: branchName,
                 collection: postsSlug,
                 data: { title: 'Newer branch work' },
               }),
@@ -1878,18 +1862,18 @@ test.suite(
             const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
             const onBranch = await payload.findByID({
               id: mainDocument.id,
-              branch: branchSlug,
+              branch: branchName,
               collection: postsSlug,
             })
-            const remainingChanges = await findBranchChanges({ branch: branchSlug })
+            const remainingChanges = await findBranchChanges({ branch: branchName })
             const branch = (
               await payload.find({
                 collection: branchesSlug,
                 pagination: false,
-                where: { slug: { equals: branchSlug } },
+                where: { name: { equals: branchName } },
               })
             ).docs[0]
-            const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+            const mergeEvent = await findBranchMergeEvent({ branch: branchName })
 
             expect(onMain.title).toBe('Merge candidate')
             expect(onBranch.title).toBe('Merge candidate')
@@ -1912,16 +1896,16 @@ test.suite(
         'should reject newer global work before caller-owned cleanup',
         { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
         async () => {
-          branchSlug = 'caller-owned-newer-global-work'
+          branchName = 'caller-owned-newer-global-work'
 
-          await createBranchRecord({ name: 'Caller-owned newer global work', slug: branchSlug })
+          await createBranchRecord({ name: branchName })
           await payload.updateGlobal({
             slug: headerGlobalSlug,
             data: { navLabel: 'Global source original' },
           })
           await payload.updateGlobal({
             slug: headerGlobalSlug,
-            branch: branchSlug,
+            branch: branchName,
             data: { navLabel: 'Global merge candidate' },
           })
 
@@ -1930,12 +1914,12 @@ test.suite(
           expect(await initTransaction(req)).toBe(true)
 
           try {
-            await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+            await payload.branches.merge({ branch: branchName, overrideAccess: true, req })
 
             await expect(
               payload.updateGlobal({
                 slug: headerGlobalSlug,
-                branch: branchSlug,
+                branch: branchName,
                 data: { navLabel: 'Newer global branch work' },
               }),
             ).rejects.toMatchObject({ status: 403 })
@@ -1945,10 +1929,10 @@ test.suite(
             const onMain = await payload.findGlobal({ slug: headerGlobalSlug })
             const onBranch = await payload.findGlobal({
               slug: headerGlobalSlug,
-              branch: branchSlug,
+              branch: branchName,
             })
-            const remainingChanges = await findBranchChanges({ branch: branchSlug })
-            const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+            const remainingChanges = await findBranchChanges({ branch: branchName })
+            const mergeEvent = await findBranchMergeEvent({ branch: branchName })
 
             expect(onMain.navLabel).toBe('Global merge candidate')
             expect(onBranch.navLabel).toBe('Global merge candidate')
@@ -1964,7 +1948,7 @@ test.suite(
             }
 
             await payload.db.deleteBranchGlobal?.({
-              branch: branchSlug,
+              branch: branchName,
               globalSlug: headerGlobalSlug,
               req: await createPayloadRequest({ branch: false, payload }),
             })
@@ -1980,9 +1964,9 @@ test.suite(
         'should record a successful merge as rolled back when its caller-owned transaction rolls back',
         { db: (adapter) => databaseAdapterSupportsTransactions({ adapter }) },
         async () => {
-          branchSlug = 'caller-owned-rolled-back-merge'
+          branchName = 'caller-owned-rolled-back-merge'
 
-          await createBranchRecord({ name: 'Caller-owned rolled-back merge', slug: branchSlug })
+          await createBranchRecord({ name: branchName })
           const mainDocument = await payload.create({
             collection: postsSlug,
             data: { title: 'Caller-owned rollback original' },
@@ -1990,7 +1974,7 @@ test.suite(
 
           await payload.update({
             id: mainDocument.id,
-            branch: branchSlug,
+            branch: branchName,
             collection: postsSlug,
             data: { title: 'Caller-owned rollback edited' },
           })
@@ -2000,24 +1984,24 @@ test.suite(
           expect(await initTransaction(req)).toBe(true)
 
           try {
-            await payload.branches.merge({ branch: branchSlug, overrideAccess: true, req })
+            await payload.branches.merge({ branch: branchName, overrideAccess: true, req })
             await killTransaction(req)
 
             const onMain = await payload.findByID({ id: mainDocument.id, collection: postsSlug })
             const onBranch = await payload.findByID({
               id: mainDocument.id,
-              branch: branchSlug,
+              branch: branchName,
               collection: postsSlug,
             })
-            const remainingChanges = await findBranchChanges({ branch: branchSlug })
+            const remainingChanges = await findBranchChanges({ branch: branchName })
             const branch = (
               await payload.find({
                 collection: branchesSlug,
                 pagination: false,
-                where: { slug: { equals: branchSlug } },
+                where: { name: { equals: branchName } },
               })
             ).docs[0]
-            const mergeEvent = await findBranchMergeEvent({ branch: branchSlug })
+            const mergeEvent = await findBranchMergeEvent({ branch: branchName })
 
             expect(onMain.title).toBe('Caller-owned rollback original')
             expect(onBranch.title).toBe('Caller-owned rollback edited')
@@ -2038,16 +2022,16 @@ test.suite(
       )
 
       test('should leave a caller-owned transaction open when a global merge fails', async () => {
-        branchSlug = 'caller-owned-global-merge'
+        branchName = 'caller-owned-global-merge'
 
-        await createBranchRecord({ name: 'Caller-owned global merge', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         await payload.updateGlobal({
           slug: headerGlobalSlug,
           data: { navLabel: 'Caller-owned global original' },
         })
         await payload.updateGlobal({
           slug: headerGlobalSlug,
-          branch: branchSlug,
+          branch: branchName,
           data: { navLabel: 'Caller-owned global edited' },
         })
 
@@ -2061,7 +2045,7 @@ test.suite(
 
         try {
           await expect(
-            payload.branches.merge({ branch: branchSlug, overrideAccess: true, req }),
+            payload.branches.merge({ branch: branchName, overrideAccess: true, req }),
           ).rejects.toThrow('Simulated caller-owned global merge failure')
 
           expect(rollbackTransactionSpy).not.toHaveBeenCalled()
@@ -2072,7 +2056,7 @@ test.suite(
           delete req.transactionID
 
           await payload.db.deleteBranchGlobal?.({
-            branch: branchSlug,
+            branch: branchName,
             globalSlug: headerGlobalSlug,
             req: await createPayloadRequest({ branch: false, payload }),
           })
@@ -2084,15 +2068,15 @@ test.suite(
       })
 
       test('should leave a caller-owned transaction open when a delete merge fails', async () => {
-        branchSlug = 'caller-owned-delete-merge'
+        branchName = 'caller-owned-delete-merge'
 
-        await createBranchRecord({ name: 'Caller-owned delete merge', slug: branchSlug })
+        await createBranchRecord({ name: branchName })
         const mainDoc = await payload.create({
           collection: postsSlug,
           data: { title: 'Caller-owned delete original' },
         })
 
-        await payload.delete({ id: mainDoc.id, branch: branchSlug, collection: postsSlug })
+        await payload.delete({ id: mainDoc.id, branch: branchName, collection: postsSlug })
 
         const req = await createPayloadRequest({ branch: false, payload })
         req.transactionID = 'caller-owned-delete-merge-transaction'
@@ -2110,7 +2094,7 @@ test.suite(
 
         try {
           await expect(
-            payload.branches.merge({ branch: branchSlug, overrideAccess: true, req }),
+            payload.branches.merge({ branch: branchName, overrideAccess: true, req }),
           ).rejects.toThrow('Simulated caller-owned delete merge failure')
 
           expect(rollbackTransactionSpy).not.toHaveBeenCalled()

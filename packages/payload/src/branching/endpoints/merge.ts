@@ -62,7 +62,7 @@ export const mergeBranchHandler: PayloadHandler = async (req) => {
     stream?: boolean
   }
 
-  const branch = branchDoc.slug as string
+  const branch = branchDoc.name as string
 
   if (body.stream && !body.dryRun) {
     return streamMerge({

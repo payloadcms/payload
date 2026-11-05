@@ -32,7 +32,7 @@ export const RenderBranchProvider = async ({
   let branches: BranchOption[] = []
   // Which branches have a merge queued, so the switcher can say so. One small query
   // rather than one per branch — the switcher renders on every admin page.
-  let scheduledSlugs = new Set<string>()
+  let scheduledNames = new Set<string>()
 
   try {
     const { docs } = await payload.find({
@@ -43,7 +43,7 @@ export const RenderBranchProvider = async ({
       req,
       // `id` so the switcher can link to the branch itself, not just switch to it;
       // `status` so a merged-but-open branch can be labelled as one.
-      select: { id: true, name: true, slug: true, status: true },
+      select: { id: true, name: true, status: true },
       sort: 'name',
       user: req.user,
       // Everything except `closed`. A `merged` branch is still a workspace — §16
@@ -55,15 +55,14 @@ export const RenderBranchProvider = async ({
     })
 
     branches = docs.reduce<BranchOption[]>((acc, doc) => {
-      const slug = typeof doc.slug === 'string' ? doc.slug : undefined
+      const name = typeof doc.name === 'string' ? doc.name : undefined
 
-      // `main` is a sentinel rather than a row, so a branch that claims the slug
+      // `main` is a sentinel rather than a row, so a branch that claims the name
       // would render a duplicate entry alongside the one the selector adds.
-      if (slug && slug !== MAIN_BRANCH) {
+      if (name && name !== MAIN_BRANCH) {
         acc.push({
           id: doc.id,
-          name: typeof doc.name === 'string' && doc.name ? doc.name : slug,
-          slug,
+          name,
           isMerged: doc.status === 'merged',
         })
       }
@@ -89,7 +88,7 @@ export const RenderBranchProvider = async ({
         },
       })
 
-      scheduledSlugs = new Set(
+      scheduledNames = new Set(
         scheduled
           .map((job) => (job as { input?: { branch?: string } }).input?.branch)
           .filter((value): value is string => Boolean(value)),
@@ -97,7 +96,7 @@ export const RenderBranchProvider = async ({
 
       branches = branches.map((option) => ({
         ...option,
-        isScheduled: scheduledSlugs.has(option.slug),
+        isScheduled: scheduledNames.has(option.name),
       }))
     }
   } catch (_err) {
@@ -108,7 +107,7 @@ export const RenderBranchProvider = async ({
   // Already resolved from the URL during request initialization,
   // so this is a read of what every query on this request actually used —
   // not a second source of truth that could disagree with the data on screen.
-  const activeBranch = resolveBranch({ req: req })
+  const activeBranch = resolveBranch({ req })
 
   return (
     <BranchProvider

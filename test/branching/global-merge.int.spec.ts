@@ -1,17 +1,13 @@
 import type { Payload } from 'payload'
 
 import { createPayloadRequest } from 'payload'
-
 import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -19,7 +15,6 @@ import {
   headerGlobalSlug,
   homepageGlobalSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -54,7 +49,7 @@ test.suite('Branching: global-merge', { config: './config.ts', resetBetweenTests
     test.beforeEach(async () => {
       const branchDoc = await payload.create({
         collection: branchesSlug,
-        data: { name: 'Global work', slug: branch },
+        data: { name: branch },
       })
 
       branchID = branchDoc.id
@@ -244,7 +239,7 @@ test.suite('Branching: global-merge', { config: './config.ts', resetBetweenTests
         collection: branchesSlug,
         overrideAccess: true,
         pagination: false,
-        where: { slug: { equals: branch } },
+        where: { name: { equals: branch } },
       })
 
       for (const branchDoc of branches.docs) {
@@ -260,7 +255,7 @@ test.suite('Branching: global-merge', { config: './config.ts', resetBetweenTests
       await cleanBranchState()
       await payload.create({
         collection: branchesSlug,
-        data: { name: 'Versioned global work', slug: branch },
+        data: { name: branch },
       })
       await payload.updateGlobal({
         slug: homepageGlobalSlug,
@@ -539,8 +534,11 @@ test.suite('Branching: global-merge', { config: './config.ts', resetBetweenTests
       })
 
       expect(publishedEN.localizedTitle).toBe('branch English')
+      expect(publishedEN._status).toBe('published')
       expect(publishedES.localizedTitle).toBe('main Spanish')
+      expect(publishedES._status).toBe('published')
       expect(draftES.localizedTitle).toBe('branch Spanish draft')
+      expect(draftES._status).toBe('draft')
     })
 
     test('should check access against every exact global write and locale', async () => {

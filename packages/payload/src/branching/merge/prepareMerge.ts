@@ -73,7 +73,7 @@ export const prepareMerge = async ({
     overrideAccess,
     pagination: false,
     req,
-    where: { slug: { equals: branch } },
+    where: { name: { equals: branch } },
   })
   const branchDoc = branchDocs.docs[0]
 

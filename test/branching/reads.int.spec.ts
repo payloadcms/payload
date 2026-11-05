@@ -5,9 +5,7 @@ import { expect } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -18,7 +16,6 @@ import {
   postsSlug,
   publicSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -48,11 +45,11 @@ test.suite('Branching: reads', { config: './config.ts', resetBetweenTests: false
     test.beforeAll(async () => {
       await payload.create({
         collection: branchesSlug,
-        data: { name: 'Halloween', slug: 'halloween' },
+        data: { name: 'halloween' },
       })
       await payload.create({
         collection: branchesSlug,
-        data: { name: 'Q4 Launch', slug: 'q4' },
+        data: { name: 'q4' },
       })
 
       for (let i = 0; i < 25; i++) {
@@ -229,13 +226,13 @@ test.suite('Branching: reads', { config: './config.ts', resetBetweenTests: false
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
-        where: { slug: { equals: branch } },
+        where: { name: { equals: branch } },
       })
 
       if (!existing.docs.length) {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Audit work', slug: branch },
+          data: { name: branch },
         })
       }
     })
@@ -399,13 +396,13 @@ test.suite('Branching: reads', { config: './config.ts', resetBetweenTests: false
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
-        where: { slug: { equals: branch } },
+        where: { name: { equals: branch } },
       })
 
       if (!existing.docs.length) {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Distinct work', slug: branch },
+          data: { name: branch },
         })
       }
     })
@@ -477,16 +474,13 @@ test.suite('Branching: reads', { config: './config.ts', resetBetweenTests: false
         const existing = await payload.find({
           collection: branchesSlug,
           pagination: false,
-          where: { slug: { equals: branch } },
+          where: { name: { equals: branch } },
         })
 
         if (!existing.docs.length) {
           await payload.create({
             collection: branchesSlug,
-            data: {
-              name: branch === privateBranch ? 'Private visibility' : 'Visibility',
-              slug: branch,
-            },
+            data: { name: branch },
           })
         }
       }

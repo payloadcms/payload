@@ -1,6 +1,11 @@
 'use client'
 
-import { branchesCollectionSlug, MAIN_BRANCH, PREFERENCE_KEYS } from 'payload/shared'
+import {
+  branchesCollectionSlug,
+  formatAdminURL,
+  MAIN_BRANCH,
+  PREFERENCE_KEYS,
+} from 'payload/shared'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -25,7 +30,6 @@ export type BranchOption = {
   /** A merge is queued for this branch — worth knowing before switching onto it. */
   isScheduled?: boolean
   name: string
-  slug: string
 }
 
 export type BranchContext = {
@@ -39,7 +43,7 @@ export type BranchContext = {
    * Switches the active branch: stores the choice in the user's preferences and
    * re-renders the current view against it.
    */
-  setBranch: (slug: string, options?: { refresh?: boolean }) => void
+  setBranch: (name: string, options?: { refresh?: boolean }) => void
 }
 
 const RequestBranchContext = createContext<string>(MAIN_BRANCH)
@@ -122,8 +126,8 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
   )
 
   const setBranch = useCallback(
-    (slug: string, { refresh = true }: { refresh?: boolean } = {}) => {
-      if (slug === activeBranch) {
+    (name: string, { refresh = true }: { refresh?: boolean } = {}) => {
+      if (name === activeBranch) {
         return
       }
 
@@ -131,19 +135,19 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
         navigate: () => {
           const generation = ++selectionGeneration.current
 
-          setActiveBranchState(slug)
+          setActiveBranchState(name)
 
           // Merge the selection without replacing other navigation preferences.
           void (async () => {
             try {
-              await setPreference(PREFERENCE_KEYS.NAV, { branch: slug }, true)
+              await setPreference(PREFERENCE_KEYS.NAV, { branch: name }, true)
 
               if (generation !== selectionGeneration.current) {
                 return
               }
 
               if (refresh) {
-                await navigateToBranch({ branch: slug })
+                await navigateToBranch({ branch: name })
               }
             } catch (_error) {
               if (generation === selectionGeneration.current) {
@@ -164,17 +168,17 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
   // from — the full create page, and any drawer that ever opens onto it.
   const { mostRecentUpdate } = useDocumentEvents()
 
-  const createdSlug =
+  const createdName =
     mostRecentUpdate?.entitySlug === branchesCollectionSlug &&
     mostRecentUpdate.operation === 'create'
-      ? (mostRecentUpdate.doc as { slug?: string } | undefined)?.slug
+      ? (mostRecentUpdate.doc as { name?: string } | undefined)?.name
       : undefined
   const [previousUpdate, setPreviousUpdate] = useState(mostRecentUpdate)
 
   if (previousUpdate !== mostRecentUpdate) {
     setPreviousUpdate(mostRecentUpdate)
-    if (createdSlug) {
-      setActiveBranchState(createdSlug)
+    if (createdName) {
+      setActiveBranchState(createdName)
     }
   }
 
@@ -184,22 +188,34 @@ export const BranchProvider: React.FC<BranchProviderProps> = ({
   })
 
   const navigateToCreatedBranch = useEffectEvent(({ branch }: { branch: string }) => {
-    if (new URL(window.location.href).searchParams.get('branch') !== branch) {
+    const url = new URL(window.location.href)
+
+    // The full create view is already navigating to the saved branch. Replacing
+    // its URL here would cancel that navigation and reopen the empty create form.
+    if (
+      !mostRecentUpdate?.drawerSlug &&
+      url.pathname ===
+        formatAdminURL({ adminRoute, path: `/collections/${branchesCollectionSlug}/create` })
+    ) {
+      return
+    }
+
+    if (url.searchParams.get('branch') !== branch) {
       return navigateToBranch({ branch, shouldReplace: true })
     }
   })
 
   useEffect(() => {
-    if (createdSlug) {
+    if (createdName) {
       // The full create view already redirects with the new branch. Drawers
       // need to update the current URL as well, without adding a history entry.
-      void setPreference(PREFERENCE_KEYS.NAV, { branch: createdSlug }, true)
-        .then(() => navigateToCreatedBranch({ branch: createdSlug }))
+      void setPreference(PREFERENCE_KEYS.NAV, { branch: createdName }, true)
+        .then(() => navigateToCreatedBranch({ branch: createdName }))
         .catch(() => {
           handleCreatedPreferenceError()
         })
     }
-  }, [createdSlug, setPreference])
+  }, [createdName, setPreference])
 
   // Drops a stored selection pointing at a branch that no longer resolves, so
   // the next request starts clean on main instead of resurrecting it.

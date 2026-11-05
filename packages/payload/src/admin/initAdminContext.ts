@@ -14,6 +14,7 @@ import { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
 import { getAccessResults } from '../auth/getAccessResults.js'
 import { assertBranchReadable } from '../branching/assertBranchReadable.js'
+import { MAIN_BRANCH } from '../branching/types.js'
 import { getPayload } from '../index.js'
 import { createPayloadRequest } from '../utilities/createPayloadRequest.js'
 import { getRequestLanguage } from '../utilities/getRequestLanguage.js'
@@ -156,12 +157,6 @@ export async function initAdminContext({
 
     req.locale = locale?.code
 
-    if (!req.branch && !(req.context as Record<string, unknown> | undefined)?._branchBypass) {
-      req.branch = await getRequestBranch({ req })
-    }
-
-    await assertBranchReadable({ req })
-
     let userWithReadAccess = req.user
 
     if (!hasUserOverride && req.user) {
@@ -187,6 +182,18 @@ export async function initAdminContext({
         userWithReadAccess = null
       }
     }
+
+    if (!req.user) {
+      // Authentication views and redirects must render before checking branch access.
+      req.branch = MAIN_BRANCH
+    } else if (
+      !req.branch &&
+      !(req.context as Record<string, unknown> | undefined)?._branchBypass
+    ) {
+      req.branch = await getRequestBranch({ req })
+    }
+
+    await assertBranchReadable({ req })
 
     const permissions = await getAccessResults({ req })
 

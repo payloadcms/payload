@@ -1,21 +1,15 @@
 import type { Payload } from 'payload'
 
 import path from 'path'
-
 import { createPayloadRequest } from 'payload'
-
 import { fileURLToPath } from 'url'
-
 import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { branchChangesSlug, branchesSlug, mediaSlug } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -49,13 +43,13 @@ test.suite('Branching: uploads-merge', { config: './config.ts', resetBetweenTest
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
-        where: { slug: { equals: 'uploadwork' } },
+        where: { name: { equals: 'uploadwork' } },
       })
 
       if (!existing.docs.length) {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Upload work', slug: 'uploadwork' },
+          data: { name: 'uploadwork' },
         })
       }
     })

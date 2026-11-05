@@ -54,6 +54,12 @@ const createCollection = (uploadOverrides: Record<string, unknown> = {}): Collec
   }) as unknown as Collection
 
 describe('getBranchUploadFilename', () => {
+  it('should encode branch names containing spaces, path separators and Unicode', () => {
+    expect(getBranchUploadFilename({ branch: 'Campaign / 日本語', filename: 'photo.png' })).toBe(
+      `photo-${encodeURIComponent('Campaign / 日本語')}.png`,
+    )
+  })
+
   it('should preserve extensionless filenames', () => {
     expect(getBranchUploadFilename({ branch: 'campaign', filename: 'README' })).toBe(
       'README-campaign',

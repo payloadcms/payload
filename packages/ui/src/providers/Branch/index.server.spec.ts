@@ -19,7 +19,7 @@ describe('RenderBranchProvider', () => {
             if (collection === failedCollection) {
               throw new Error('Lookup failed')
             }
-            return { docs: [{ id: 'branch-1', name: 'Feature', slug: 'feature' }] }
+            return { docs: [{ id: 'branch-1', name: 'feature' }] }
           }),
         },
         user: { id: 'editor', collection: 'users' },

@@ -11,7 +11,6 @@ export type MergeTarget = {
   /** `payload-branches` document ID, for the merge endpoint's path. */
   branchID: number | string
   branchName: string
-  branchSlug: string
   /**
    * What will be applied, for the modal's summary — the selection where there is one.
    *
