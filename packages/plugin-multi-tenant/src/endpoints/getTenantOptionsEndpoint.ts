@@ -26,19 +26,20 @@ export const getTenantOptionsEndpoint = ({
       throw new APIError('Unauthorized', 401)
     }
 
+    const hasAccessToAllTenants = userHasAccessToAllTenants(user)
     const tenantOptions = await getTenantOptions({
+      hasAccessToAllTenants,
       payload,
       tenantsArrayFieldName,
       tenantsArrayTenantFieldName,
       tenantsCollectionSlug,
       useAsTitle,
       user,
-      userHasAccessToAllTenants,
     })
 
     return new Response(
       JSON.stringify({
-        hasAccessToAllTenants: userHasAccessToAllTenants(user),
+        hasAccessToAllTenants,
         tenantOptions,
       }),
     )

@@ -33,19 +33,19 @@ export const TenantSelectionProvider = async ({
       'TenantSelectionProvider requires `server` in ServerProps. Ensure your framework adapter (e.g. @payloadcms/next) populates ServerProps.server.',
     )
   }
+  const hasAccessToAllTenants = Boolean(user && userHasAccessToAllTenants(user))
   const tenantOptions = await getTenantOptions({
+    hasAccessToAllTenants,
     payload,
     tenantsArrayFieldName,
     tenantsArrayTenantFieldName,
     tenantsCollectionSlug,
     useAsTitle,
     user,
-    userHasAccessToAllTenants,
   })
 
   const cookies = await server.getCookies()
   const tenantCookie = cookies.get('payload-tenant')?.value
-  const hasAccessToAllTenants = Boolean(user && userHasAccessToAllTenants(user))
   let initialValue = undefined
 
   /**
