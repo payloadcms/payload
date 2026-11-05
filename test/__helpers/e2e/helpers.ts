@@ -185,10 +185,14 @@ export async function openLocaleSelector(page: Page): Promise<void> {
   const button = page.locator('.localizer .popup__trigger-wrap > button')
   const popup = page.locator('.popup__content')
 
-  if (!(await popup.isVisible())) {
-    await button.click()
-    await expect(popup).toBeVisible()
-  }
+  // Retry rather than click once: right after a re-render, e.g. from switching languages, a click
+  // can be lost or toggle a popup that still considers itself open back to closed.
+  await expect(async () => {
+    if (!(await popup.isVisible())) {
+      await button.click()
+    }
+    await expect(popup).toBeVisible({ timeout: 2000 })
+  }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 }
 
 export async function closeLocaleSelector(page: Page): Promise<void> {
