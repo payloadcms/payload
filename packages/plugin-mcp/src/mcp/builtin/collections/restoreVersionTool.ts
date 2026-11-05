@@ -19,7 +19,7 @@ export const restoreVersionTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: restoreVersionInputSchema,
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
   const { id, depth, draft, fallbackLocale, locale, populate, select } = input
@@ -32,7 +32,7 @@ export const restoreVersionTool = defineCollectionTool({
       collection: slug,
       depth,
       draft,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       req,
       ...(fallbackLocale !== undefined ? { fallbackLocale } : {}),
       ...(locale ? { locale } : {}),

@@ -19,7 +19,7 @@ export const findVersionsTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: findVersionsInputSchema,
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
   const {
@@ -44,7 +44,7 @@ export const findVersionsTool = defineCollectionTool({
       collection: slug,
       depth,
       limit,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       page,
       req,
       ...(draft !== undefined ? { draft } : {}),

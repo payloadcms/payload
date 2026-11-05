@@ -34,6 +34,21 @@ To do so, follow these steps:
 - Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
 - Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
 
+## CLI and AI agents
+
+Use the built-in [Payload CLI](https://payloadcms.com/docs/configuration/cli) for
+local development and coding-agent work:
+
+```sh
+pnpm payload help --json
+pnpm payload getConfigInfo --json
+pnpm payload getCollectionSchema --slug users --json
+```
+
+The [MCP plugin](https://payloadcms.com/docs/plugins/mcp) is installed and configured
+for authenticated access to a stable running server, such as your production
+deployment. Configure your MCP client with that server's URL and credentials.
+
 ## How it works
 
 The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:

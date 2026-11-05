@@ -126,6 +126,48 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         mcp.getHTTPResponses().some(({ method, status }) => method === 'POST' && status === 401),
       ).toBe(true)
     })
+    for (const nodeEnv of ['development', 'production', 'test', undefined]) {
+      for (const overrideAccess of ['true', 'false', '']) {
+        it(`should reject HTTP overrideAccess=${overrideAccess} when NODE_ENV is ${nodeEnv ?? 'unset'}`, async ({
+          restClient,
+        }) => {
+          vi.stubEnv('NODE_ENV', nodeEnv)
+
+          const response = await restClient.POST(`/mcp?overrideAccess=${overrideAccess}`, {
+            body: JSON.stringify({}),
+            headers: {
+              Accept: 'application/json, text/event-stream',
+              'Content-Type': 'application/json',
+            },
+          })
+
+          expect(response.status).toBe(400)
+          expect((await response.json()).errors[0].message).toBe(
+            'MCP overrideAccess is not supported. Authenticate with Payload instead.',
+          )
+        })
+      }
+    }
+
+    it('should reject HTTP access overrides for an authenticated user in development', async ({
+      getApiKey,
+      restClient,
+    }) => {
+      const apiKey = await getApiKey()
+      vi.stubEnv('NODE_ENV', 'development')
+
+      const response = await restClient.POST('/mcp?overrideAccess=true', {
+        body: JSON.stringify({}),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `users API-Key ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      expect(response.status).toBe(400)
+    })
+
     it('should keep simultaneous requests separate', async ({
       mcp,
       getApiKey,
@@ -957,10 +999,12 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(schema.properties?._status?.enum).toEqual(['draft', 'published'])
         expect(schema.properties?.badProperty).toBeUndefined()
       })
-      it('getCollectionSchema: should hide inaccessible collection fields unless access is overridden', async ({
+      it('getCollectionSchema: should hide inaccessible collection fields in development', async ({
         mcp,
         getApiKey,
       }) => {
+        vi.stubEnv('NODE_ENV', 'development')
+
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
         const schemaResponse = await client.callTool({
@@ -973,16 +1017,6 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(schema.properties?.email).toBeDefined()
         expect(schema.properties?.hash).toBeUndefined()
         expect(schema.required).not.toContain('hash')
-        vi.stubEnv('NODE_ENV', 'development')
-        const overrideClient = await mcp.connect(apiKey, { overrideAccess: true })
-        const overrideResponse = await overrideClient.callTool({
-          arguments: {
-            slug: 'users',
-          },
-          name: 'getCollectionSchema',
-        })
-        const overrideSchema = getToolDoc<JsonSchemaType>(overrideResponse)
-        expect(overrideSchema.properties?.hash).toBeDefined()
       })
       it('should create one document with createDocuments', async ({ mcp, getApiKey }) => {
         const apiKey = await getApiKey()
@@ -2544,10 +2578,12 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(callResponse.content[0].text).toContain('Global "site-settings"')
         expect(callResponse.content[0].text).toContain('```json')
       })
-      it('getGlobalSchema: should hide inaccessible global fields unless access is overridden', async ({
+      it('getGlobalSchema: should hide inaccessible global fields in development', async ({
         mcp,
         getApiKey,
       }) => {
+        vi.stubEnv('NODE_ENV', 'development')
+
         const apiKey = await getApiKey({
           fields: {
             'site-settings.contactEmail': {
@@ -2563,14 +2599,6 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         const schema = getToolDoc<JsonSchemaType>(schemaResponse)
         expect(schema.properties?.siteName).toBeDefined()
         expect(schema.properties?.contactEmail).toBeUndefined()
-        vi.stubEnv('NODE_ENV', 'development')
-        const overrideClient = await mcp.connect(apiKey, { overrideAccess: true })
-        const overrideResponse = await overrideClient.callTool({
-          arguments: { slug: 'site-settings' },
-          name: 'getGlobalSchema',
-        })
-        const overrideSchema = getToolDoc<JsonSchemaType>(overrideResponse)
-        expect(overrideSchema.properties?.contactEmail).toBeDefined()
       })
       it('should find site-settings global with select', async ({ mcp, getApiKey, payload }) => {
         await payload.updateGlobal({
@@ -2773,7 +2801,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(text).toContain('Globals: none')
         expect(text).not.toContain('site-settings')
       })
-      it('getConfigInfo: should include entities when access is overridden', async ({
+      it('getConfigInfo: should respect denied access in development', async ({
         mcp,
         getApiKey,
       }) => {
@@ -2790,11 +2818,11 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           },
         })
         vi.stubEnv('NODE_ENV', 'development')
-        const client = await mcp.connect(apiKey, { overrideAccess: true })
+        const client = await mcp.connect(apiKey)
         const response = await client.callTool({ arguments: {}, name: 'getConfigInfo' })
         const text = getToolText(response)
-        expect(text).toContain('pages')
-        expect(text).toContain('Globals: site-settings')
+        expect(text).not.toContain('pages')
+        expect(text).toContain('Globals: none')
       })
       it('getGlobalSchema: should not advertise global write tools when Payload access denies update', async ({
         mcp,
@@ -2959,18 +2987,6 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(getToolText(responseWriteFalse)).toContain(
           'MCP access to "getCollectionSchema" is not enabled for collection "pages"',
         )
-        vi.stubEnv('NODE_ENV', 'development')
-        const overrideClient = await mcp.connect(apiKey, { overrideAccess: true })
-        const overrideResponse = await overrideClient.callTool({
-          arguments: {
-            slug: 'pages',
-          },
-          name: 'getCollectionSchema',
-        })
-        expect(overrideResponse.isError).not.toBe(true)
-        const overrideSchema = getToolDoc<JsonSchemaType>(overrideResponse)
-        expect(overrideSchema.properties?.title).toBeDefined()
-        vi.unstubAllEnvs()
         const responseUpdateFalse = await (
           await mcp.connect(
             await getApiKey({

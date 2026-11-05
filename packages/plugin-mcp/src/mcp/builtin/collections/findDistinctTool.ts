@@ -19,7 +19,7 @@ export const findDistinctTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: findDistinctInputSchema,
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
   const { depth, field, limit, locale, page, populate, sort, trash, where } = input
@@ -31,7 +31,7 @@ export const findDistinctTool = defineCollectionTool({
       collection: slug,
       depth,
       field,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       req,
       ...(limit ? { limit } : {}),
       ...(locale ? { locale } : {}),
