@@ -4,7 +4,7 @@ import React from 'react'
 
 export type FileMetaProps = {
   filename: string
-  filesize: number
+  filesize: null | number
   height?: number
   mimeType: string
   url: string
@@ -32,19 +32,13 @@ export const FileMeta: React.FC<FileMetaProps> = (props) => {
         <CopyToClipboard defaultMessage={t('upload:copyURL')} value={fileURL} />
       </div>
       <div className={`${baseClass}__size-type`}>
-        {formatFilesize(filesize)}
-        {typeof width === 'number' && typeof height === 'number' && (
-          <React.Fragment>
-            &nbsp;-&nbsp;
-            {width}x{height}
-          </React.Fragment>
-        )}
-        {mimeType && (
-          <React.Fragment>
-            &nbsp;-&nbsp;
-            {mimeType}
-          </React.Fragment>
-        )}
+        {[
+          typeof filesize === 'number' ? formatFilesize(filesize) : null,
+          typeof width === 'number' && typeof height === 'number' ? `${width}x${height}` : null,
+          mimeType,
+        ]
+          .filter(Boolean)
+          .join('\u00a0-\u00a0')}
       </div>
     </div>
   )

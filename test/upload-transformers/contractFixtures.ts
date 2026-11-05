@@ -27,6 +27,7 @@ export type RecordedTransformFileCall = {
   docAtStart: Record<string, unknown>
   isDocFrozen: boolean
   isOriginalDocFrozen: boolean
+  options: unknown
   originalDoc: Record<string, unknown>
   originalSourceText: string
   slug: string
@@ -37,7 +38,7 @@ export type RecordedTransformFileCall = {
 /** The arguments each contract transformer received, in the order the calls ran. */
 export const contractCalls = {
   canTransform: [] as CanTransformArgs[],
-  handleRequest: [] as HandleTransformRequestArgs[],
+  handleRequest: [] as ({ slug: string } & HandleTransformRequestArgs)[],
   transformFile: [] as RecordedTransformFileCall[],
 }
 
@@ -62,7 +63,9 @@ const createContractTransformer = (stageName: ContractStageName): UploadTransfor
     contractCalls.canTransform.push(args)
 
     if (args.operation === 'request') {
-      return args.req.searchParams?.has('contract') ?? false
+      return args.req.searchParams?.has('contract')
+        ? { canTransform: true, options: { purpose: args.purpose } }
+        : false
     }
 
     const contractStages = args.req.context?.contractStages as ContractStages | undefined
@@ -72,10 +75,10 @@ const createContractTransformer = (stageName: ContractStageName): UploadTransfor
       return false
     }
 
-    return handledTransformKeys ? { canTransform: true, handledTransformKeys } : true
+    return { canTransform: true, handledTransformKeys, options: { stage: stageName } }
   },
   handleRequest: (args) => {
-    contractCalls.handleRequest.push(args)
+    contractCalls.handleRequest.push({ ...args, slug: `contract-${stageName}` })
 
     return Promise.resolve({ status: 'continue' })
   },
@@ -85,6 +88,7 @@ const createContractTransformer = (stageName: ContractStageName): UploadTransfor
       docAtStart: structuredClone(args.doc),
       isDocFrozen: Object.isFrozen(args.doc),
       isOriginalDocFrozen: Object.isFrozen(args.originalDoc),
+      options: args.options,
       originalDoc: args.originalDoc,
       originalSourceText: await readAllText(args.originalSource),
       slug: `contract-${stageName}`,

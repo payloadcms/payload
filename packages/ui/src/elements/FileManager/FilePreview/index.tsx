@@ -75,13 +75,14 @@ export const FilePreview: React.FC<Props> = ({
   const metaString = (() => {
     const w = (selectedSizeData?.width ?? data?.width) as number | undefined
     const h = (selectedSizeData?.height ?? data?.height) as number | undefined
+    const filesize = selectedSizeData?.filesize ?? data?.filesize
     const parts: string[] = []
     if (typeof w === 'number' && typeof h === 'number') {
       parts.push(`${w} × ${h}`)
     }
-    parts.push(
-      formatFilesize(((selectedSizeData?.filesize ?? (data?.filesize as number)) || 0) as number),
-    )
+    if (typeof filesize === 'number') {
+      parts.push(formatFilesize(filesize))
+    }
     if (data?.mimeType) {
       parts.push(data.mimeType as string)
     }
