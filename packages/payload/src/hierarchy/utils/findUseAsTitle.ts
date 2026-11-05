@@ -6,7 +6,13 @@ export function findUseAsTitleField(collectionConfig: CollectionConfig): {
   titleFieldName: string
 } {
   const titleFieldName = collectionConfig.admin?.useAsTitle || 'id'
-  return iterateFields({ fields: collectionConfig.fields, titleFieldName })
+  const result = iterateFields({ fields: collectionConfig.fields, titleFieldName })
+  if (!result) {
+    throw new Error(
+      `The hierarchy title field "${titleFieldName}" was not found. It cannot be nested within named fields i.e. named groups, named tabs, etc.`,
+    )
+  }
+  return result
 }
 
 /**
@@ -17,20 +23,19 @@ export function findFieldByName(
   collectionConfig: CollectionConfig,
   fieldName: string,
 ): { fieldName: string; localized: boolean } | undefined {
-  try {
-    const result = iterateFields({ fields: collectionConfig.fields, titleFieldName: fieldName })
-    return { fieldName: result.titleFieldName, localized: result.localized }
-  } catch {
+  const result = iterateFields({ fields: collectionConfig.fields, titleFieldName: fieldName })
+  if (!result) {
     return undefined
   }
+  return { fieldName: result.titleFieldName, localized: result.localized }
 }
 
-function iterateFields({ fields, titleFieldName }: { fields: Field[]; titleFieldName: string }): {
-  localized: boolean
-  titleFieldName: string
-} {
-  let titleField: { localized: boolean; titleFieldName: string } | undefined
-
+function iterateFields({ fields, titleFieldName }: { fields: Field[]; titleFieldName: string }):
+  | {
+      localized: boolean
+      titleFieldName: string
+    }
+  | undefined {
   if (titleFieldName === 'id') {
     return {
       localized: false,
@@ -55,7 +60,7 @@ function iterateFields({ fields, titleFieldName }: { fields: Field[]; titleField
         {
           const result = iterateFields({ fields: field.fields, titleFieldName })
           if (result) {
-            titleField = result
+            return result
           }
         }
         break
@@ -63,7 +68,7 @@ function iterateFields({ fields, titleFieldName }: { fields: Field[]; titleField
         if (!('name' in field)) {
           const result = iterateFields({ fields: field.fields, titleFieldName })
           if (result) {
-            titleField = result
+            return result
           }
         }
         break
@@ -72,19 +77,13 @@ function iterateFields({ fields, titleFieldName }: { fields: Field[]; titleField
           if (!('name' in tab)) {
             const result = iterateFields({ fields: tab.fields, titleFieldName })
             if (result) {
-              titleField = result
+              return result
             }
           }
         }
-    }
-
-    // If we found the field in recursion, return it
-    if (titleField) {
-      return titleField
+        break
     }
   }
 
-  throw new Error(
-    `The hierarchy title field "${titleFieldName}" was not found. It cannot be nested within named fields i.e. named groups, named tabs, etc.`,
-  )
+  return undefined
 }
