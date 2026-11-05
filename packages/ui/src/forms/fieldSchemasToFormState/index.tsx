@@ -79,6 +79,7 @@ type Args = {
   schemaPath: string
   select?: SelectType
   selectMode?: SelectMode
+  skipConditionChecks?: boolean
   skipValidation?: boolean
 }
 
@@ -104,6 +105,7 @@ export const fieldSchemasToFormState = async ({
   schemaPath,
   select,
   selectMode,
+  skipConditionChecks,
   skipValidation,
 }: Args): Promise<FormState> => {
   if (!clientFieldSchemaMap && renderFieldFn) {
@@ -164,6 +166,7 @@ export const fieldSchemasToFormState = async ({
       req,
       select,
       selectMode,
+      skipConditionChecks,
       skipValidation,
       state,
     })
