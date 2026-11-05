@@ -718,6 +718,10 @@ export const svTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Du kommer publicera alla {{label}} i urvalet. Är du säker?',
     aboutToRestore:
       'Du kommer återställa detta {{label}} dokumentet till det tillståndet som det var den {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Återställ innehållet från {{versionDate}} som ett utkast. Publicerat innehåll förblir oförändrat tills du publicerar från redigeraren.',
+    aboutToRestoreAsDraftAllLocales:
+      'Återställ innehållet från {{versionDate}} som ett utkast för alla språk. Publicerat innehåll förblir oförändrat tills du publicerar från redigeraren.',
     aboutToRestoreGlobal:
       'Du kommer återställa det globala {{label}} till det tillståndet som det var den {{versionDate}}.',
     aboutToRevertToPublished:

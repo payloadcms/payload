@@ -100,13 +100,17 @@ export function createR2Adapter({
         storageFilePath,
       }),
 
-    staticHandler: (req, { doc, headers, params: { filename, operation, uploadReference } }) =>
+    staticHandler: (
+      req,
+      { doc, headers, params: { filename, isOriginal, operation, uploadReference } },
+    ) =>
       getFile({
         bucket,
         collection,
         doc,
         filename,
         incomingHeaders: headers,
+        isOriginal,
         operation,
         prefix,
         req,

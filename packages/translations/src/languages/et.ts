@@ -711,6 +711,10 @@ export const etTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Olete avaldamas kõiki valitud {{label}}. Olete kindel?',
     aboutToRestore:
       'Olete taastamas seda {{label}} dokumenti seisundisse, milles see oli {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Taasta kuupäeva {{versionDate}} sisu mustandina. Avaldatud sisu jääb muutumatuks, kuni avaldad selle redaktoris.',
+    aboutToRestoreAsDraftAllLocales:
+      'Taasta kuupäeva {{versionDate}} sisu mustandina kõigis keeltes. Avaldatud sisu jääb muutumatuks, kuni avaldad selle redaktoris.',
     aboutToRestoreGlobal:
       'Olete taastamas globaalset {{label}} seisundisse, milles see oli {{versionDate}}.',
     aboutToRevertToPublished:

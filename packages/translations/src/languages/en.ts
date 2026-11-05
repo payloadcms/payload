@@ -717,6 +717,10 @@ export const enTranslations = {
       'You are about to publish all {{label}} in the selection. Are you sure?',
     aboutToRestore:
       'You are about to restore this {{label}} document to the state that it was in on {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Restore the content from {{versionDate}} as a draft. Published content will remain unchanged until you publish from the editor.',
+    aboutToRestoreAsDraftAllLocales:
+      'Restore the content from {{versionDate}} as a draft across all locales. Published content will remain unchanged until you publish from the editor.',
     aboutToRestoreGlobal:
       'You are about to restore the global {{label}} to the state that it was in on {{versionDate}}.',
     aboutToRevertToPublished:

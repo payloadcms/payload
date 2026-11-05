@@ -452,7 +452,6 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             filesize: initialOriginal?.filesize,
             height: initialOriginal?.height,
             mimeType: initialOriginal?.mimeType,
-            url: initialOriginal?.url,
             width: initialOriginal?.width,
           })
           expect(
@@ -463,8 +462,13 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             }),
           ).toBe(initialOriginalKey)
 
+          const originalURL = new URL(current.original!.url!, 'http://localhost')
+
+          expect(current.filename).toBe(current.original?.filename)
+          expect(originalURL.searchParams.get('original')).toBe('true')
+
           const originalResponse = await restClient.GET(
-            `/${versionedS3MediaSlug}/file/${current.original!.filename}`,
+            `${originalURL.pathname.replace(/^\/api/, '')}${originalURL.search}`,
           )
           expect(originalResponse.status).toBe(200)
           expect(Buffer.from(await originalResponse.arrayBuffer())).toEqual(bytes)
@@ -1181,13 +1185,11 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
         expect(updatedUpload.customStorageId).toBe(reloadedUpload.customStorageId)
         expect(updatedUpload.uploadTimestamp).toBe(reloadedUpload.uploadTimestamp)
 
-        const filenamesAreDifferent = upload.filename !== updatedUpload.filename
-        const storageIdsAreDifferent = updatedUpload.customStorageId !== initialStorageId
-        const timestampsAreDifferent = updatedUpload.uploadTimestamp !== initialTimestamp
-
-        // If filename changed, storage ID and timestamp should also change (new upload)
-        expect(filenamesAreDifferent).toBe(storageIdsAreDifferent)
-        expect(filenamesAreDifferent).toBe(timestampsAreDifferent)
+        // A replaced cloud file keeps its filename in a new `_objectKey` folder, so only the
+        // storage metadata shows that it is a new upload.
+        expect(updatedUpload.filename).toBe(upload.filename)
+        expect(updatedUpload.customStorageId).not.toBe(initialStorageId)
+        expect(updatedUpload.uploadTimestamp).not.toBe(initialTimestamp)
       })
     })
 

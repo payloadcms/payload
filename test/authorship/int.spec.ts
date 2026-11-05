@@ -11,6 +11,7 @@ import {
   adminsSlug,
   createdOnlySlug,
   customAuthorshipSlug,
+  groupMenuSlug,
   menuSlug,
   noAuthorshipSlug,
   postsSlug,
@@ -490,6 +491,32 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
 
     expect(updated.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
     expect(updated.createdBy).toEqual({ relationTo: adminsSlug, value: admin.id })
+  })
+
+  test('should set createdBy on a global first draft save when a named group precedes it', async () => {
+    const created = await payload.updateGlobal({
+      slug: groupMenuSlug,
+      data: { title: 'menu' },
+      depth: 0,
+      draft: true,
+      user: admin,
+    })
+
+    // The named group seeds its key on the stored doc during traversal; createdBy must still be
+    // stamped from the first-write snapshot taken before traversal.
+    expect(created.createdBy).toEqual({ relationTo: adminsSlug, value: admin.id })
+    expect(created.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
+
+    const updated = await payload.updateGlobal({
+      slug: groupMenuSlug,
+      data: { title: 'menu updated' },
+      depth: 0,
+      draft: true,
+      user,
+    })
+
+    expect(updated.createdBy).toEqual({ relationTo: adminsSlug, value: admin.id })
+    expect(updated.updatedBy).toEqual({ relationTo: usersSlug, value: user.id })
   })
 
   test('should apply overrides from createCreatedByField / createUpdatedByField while preserving stamping', async () => {

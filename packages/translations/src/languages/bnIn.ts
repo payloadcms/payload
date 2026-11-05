@@ -714,6 +714,10 @@ export const bnInTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'আপনি নির্বাচনে সমস্ত {{label}} প্রকাশ করতে চলেছেন। আপনি কি নিশ্চিত?',
     aboutToRestore:
       'আপনি এই {{label}} ডকুমেন্টটি {{versionDate}} তারিখে যে অবস্থায় ছিল সেই অবস্থায় পুনরুদ্ধার করতে চলেছেন।',
+    aboutToRestoreAsDraft:
+      '{{versionDate}} তারিখের বিষয়বস্তু খসড়া হিসেবে পুনরুদ্ধার করুন। সম্পাদক থেকে প্রকাশ না করা পর্যন্ত প্রকাশিত বিষয়বস্তু অপরিবর্তিত থাকবে।',
+    aboutToRestoreAsDraftAllLocales:
+      '{{versionDate}} তারিখের বিষয়বস্তু সব ভাষায় খসড়া হিসেবে পুনরুদ্ধার করুন। সম্পাদক থেকে প্রকাশ না করা পর্যন্ত প্রকাশিত বিষয়বস্তু অপরিবর্তিত থাকবে।',
     aboutToRestoreGlobal:
       'আপনি গ্লোবাল {{label}} কে {{versionDate}} তারিখে যে অবস্থায় ছিল সেই অবস্থায় পুনরুদ্ধার করতে চলেছেন।',
     aboutToRevertToPublished:

@@ -17,6 +17,7 @@ import {
   waitForLexicalReady,
 } from '../__helpers/e2e/helpers.js'
 import { toggleLivePreview } from '../__helpers/e2e/live-preview/toggleLivePreview.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -24,6 +25,7 @@ import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { DashboardHelper } from '../dashboard/utils.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { seededAPIKey } from './constants.js'
 
 const workflowUsers = new Map<Page, number | string>()
 
@@ -124,9 +126,12 @@ export async function expectOptionsToHaveAccessibleNames(
   return accessibleNames
 }
 
-export async function getFocusIndicatorStyle(element: Locator) {
-  return element.evaluate((node) => {
-    const style = getComputedStyle(node)
+export async function getFocusIndicatorStyle(
+  element: Locator,
+  { pseudoElement }: { pseudoElement?: '::after' | '::before' } = {},
+) {
+  return element.evaluate((node, pseudoElement) => {
+    const style = getComputedStyle(node, pseudoElement)
 
     return {
       backgroundColor: style.backgroundColor,
@@ -143,7 +148,7 @@ export async function getFocusIndicatorStyle(element: Locator) {
       outlineStyle: style.outlineStyle,
       outlineWidth: style.outlineWidth,
     }
-  })
+  }, pseudoElement)
 }
 
 type FocusIndicatorStyle = Awaited<ReturnType<typeof getFocusIndicatorStyle>>
@@ -158,9 +163,13 @@ export function hasRenderedFocusIndicator({
   const hasOutline =
     focusedStyle.outlineStyle !== 'none' &&
     Number.parseFloat(focusedStyle.outlineWidth) > 0 &&
-    isPaintedColor(focusedStyle.outlineColor)
+    isPaintedColor(focusedStyle.outlineColor) &&
+    (focusedStyle.outlineStyle !== unfocusedStyle.outlineStyle ||
+      focusedStyle.outlineWidth !== unfocusedStyle.outlineWidth ||
+      focusedStyle.outlineColor !== unfocusedStyle.outlineColor)
   const hasChangedBoxShadow =
-    focusedStyle.boxShadow !== 'none' && focusedStyle.boxShadow !== unfocusedStyle.boxShadow
+    focusedStyle.boxShadow !== unfocusedStyle.boxShadow &&
+    hasPaintedBoxShadow({ shadow: focusedStyle.boxShadow })
   const hasChangedBackground =
     focusedStyle.backgroundColor !== unfocusedStyle.backgroundColor &&
     isPaintedColor(focusedStyle.backgroundColor)
@@ -181,8 +190,35 @@ export function hasRenderedFocusIndicator({
   return hasOutline || hasChangedBoxShadow || hasChangedBackground || hasChangedBorder
 }
 
-function isPaintedColor(color: string) {
-  return color !== 'transparent' && !/rgba\([^)]*,\s*0\)$/.test(color)
+function hasPaintedBoxShadow({ shadow }: { shadow: string }) {
+  // Computed shadows have resolved colors and pixel lengths; split only between layers.
+  return shadow.split(/,(?![^(]*\))/).some((layer) => {
+    const color = layer.match(/[a-z-]+\([^)]*\)|transparent/i)?.[0]
+
+    if (!color || !isPaintedColor(color)) {
+      return false
+    }
+    const [offsetX, offsetY, blur = 0, spread = 0] = layer
+      .replace(color, '')
+      .replace(/\binset\b/, '')
+      .trim()
+      .split(/\s+/)
+      .map((length) => Number.parseFloat(length))
+
+    return (
+      Number.isFinite(offsetX) &&
+      Number.isFinite(offsetY) &&
+      (offsetX !== 0 || offsetY !== 0 || blur > 0 || spread > 0)
+    )
+  })
+}
+
+export function isPaintedColor(color: string) {
+  return (
+    color !== 'transparent' &&
+    !/(?:rgba|hsla)\([^)]*,\s*0(?:\.0+)?%?\s*\)$/i.test(color) &&
+    !/\/\s*0(?:\.0+)?%?\s*\)$/.test(color)
+  )
 }
 
 export async function gotoCreatePost({ page, postsURL }: { page: Page; postsURL: AdminUrlUtil }) {
@@ -229,6 +265,9 @@ export async function openFolderCreationLocation({
   return modal
 }
 
+/**
+ * Opens the seeded post after restoring the Title column, so persisted column preferences cannot hide its link.
+ */
 export async function gotoFirstPost({
   page,
   postsURL,
@@ -250,7 +289,8 @@ export async function gotoFirstPost({
   await expect(postLink).toHaveAttribute('href')
   const href = await postLink.getAttribute('href')
 
-  await page.goto(new URL(href!, serverURL).toString())
+  await postLink.click()
+  await expect(page).toHaveURL(new URL(href!, serverURL).toString())
   await waitForFormReady(page)
 }
 
@@ -437,6 +477,9 @@ export async function openLivePreview({
   await expect(page.locator('.live-preview-toolbar-controls')).toBeVisible()
 }
 
+/**
+ * Clears prior capture logs before the action; returned speech still requires checking that it belongs to the intended interaction.
+ */
 export async function captureScreenReader({
   action,
   screenReader,
@@ -446,7 +489,16 @@ export async function captureScreenReader({
 }) {
   await screenReader.clearItemTextLog()
   await screenReader.clearSpokenPhraseLog()
-  return screenReader.capture(action)
+  const capture = await screenReader.capture(action)
+
+  if (process.env.PAYLOAD_SCREEN_READER_DEBUG === 'true') {
+    console.info(
+      '[screen-reader-capture]',
+      JSON.stringify({ itemText: capture.itemText, spokenPhrase: capture.spokenPhrase }),
+    )
+  }
+
+  return capture
 }
 
 export async function captureScreenReaderOutput({
@@ -460,51 +512,88 @@ export async function captureScreenReaderOutput({
   return `${capture.itemText} ${capture.spokenPhrase}`.replace(/\s+/g, ' ').trim()
 }
 
+/**
+ * Searches a bounded reader traversal. A DOM start locator only aligns the VoiceOver cursor when explicitly requested; dialog entry and skip-link activation are opt-in.
+ */
 export async function navigateScreenReaderTo({
   matches,
+  maxSteps = 150,
   screenReader,
+  shouldEnterDialogs = false,
+  shouldMoveCursorToKeyboardFocus = false,
+  shouldResetCursor = true,
+  shouldSkipToContent = false,
+  startAt,
 }: {
   matches: RegExp
+  maxSteps?: number
   screenReader: ScreenReaderPlaywright
+  shouldEnterDialogs?: boolean
+  shouldMoveCursorToKeyboardFocus?: boolean
+  shouldResetCursor?: boolean
+  shouldSkipToContent?: boolean
+  startAt?: Locator
 }) {
+  if (startAt) {
+    await expect(startAt).toHaveCount(1)
+    await expect(startAt).toBeVisible()
+  }
+
   await screenReader.clearItemTextLog()
   await screenReader.clearSpokenPhraseLog()
-  await screenReader.navigateToWebContent()
+  if (shouldResetCursor) {
+    await screenReader.navigateToWebContent()
+  }
 
-  for (let index = 0; index < 150; index++) {
-    const output = `${await screenReader.itemText()} ${await screenReader.lastSpokenPhrase()}`
-      .replace(/\s+/g, ' ')
-      .trim()
+  if (startAt) {
+    await captureScreenReader({ action: () => startAt.focus(), screenReader })
+    await expect(startAt).toBeFocused()
+    if (shouldMoveCursorToKeyboardFocus && screenReader.name === 'VoiceOver') {
+      const { voiceOverKeyCodeCommands } = await import('@guidepup/guidepup')
+
+      // DOM focus does not establish the VoiceOver cursor's starting position.
+      await screenReader.perform(voiceOverKeyCodeCommands.moveCursorToKeyboardFocus)
+    }
+  }
+
+  let hasSkippedToContent = false
+
+  for (let index = 0; index < maxSteps; index++) {
+    const itemText = await screenReader.itemText()
+    const spokenPhrase = await screenReader.lastSpokenPhrase()
+    const output = `${itemText} ${spokenPhrase}`.replace(/\s+/g, ' ').trim()
+
+    if (process.env.PAYLOAD_SCREEN_READER_DEBUG === 'true') {
+      console.info(
+        '[screen-reader-navigation]',
+        JSON.stringify({ index, itemText, matches: matches.source, spokenPhrase }),
+      )
+    }
+
+    if (shouldSkipToContent && !hasSkippedToContent && /^skip to content\b/i.test(itemText)) {
+      hasSkippedToContent = true
+      await screenReader.act()
+      continue
+    }
 
     matches.lastIndex = 0
     if (matches.test(output)) {
       return output
     }
-    await screenReader.next()
+    if (
+      shouldEnterDialogs &&
+      screenReader.name === 'VoiceOver' &&
+      /\bweb dialog\b/i.test(itemText)
+    ) {
+      await screenReader.interact()
+    } else {
+      await screenReader.next()
+    }
   }
 
   throw new Error(
     `Screen reader did not reach ${matches}. Visited: ${JSON.stringify(await screenReader.itemTextLog())}`,
   )
-}
-
-export async function expectPopupCursorToMove({
-  expectedItem,
-  screenReader,
-  trigger,
-}: {
-  expectedItem: RegExp
-  screenReader: ScreenReaderPlaywright
-  trigger: Locator
-}) {
-  await trigger.focus()
-  const capture = await captureScreenReader({
-    action: () => trigger.press('Enter'),
-    screenReader,
-  })
-
-  expect.soft(capture.itemText).toMatch(expectedItem)
-  await trigger.page().keyboard.press('Escape')
 }
 
 export async function inContrastThemes({
@@ -933,6 +1022,9 @@ export async function openDashboardEditor({ page, serverURL }: { page: Page; ser
   return page.locator('.dashboard-breadcrumb-dropdown__editing')
 }
 
+/**
+ * Adds a widget and returns a locator bound to its ID, so later reordering or deletion cannot silently retarget another widget.
+ */
 export async function addCollectionQueryWidget({ page }: { page: Page }) {
   const widgets = page.locator('.widget[data-slug^="collection-query-"]')
   const previousCount = await widgets.count()
@@ -948,7 +1040,13 @@ export async function addCollectionQueryWidget({ page }: { page: Page }) {
   await expect(widgets).toHaveCount(previousCount + 1)
   await expect(widgets.last().locator('.collection-query-widget')).toBeVisible()
   await expect(widgets.last().locator('.draggable')).toBeFocused()
-  return widgets.last()
+  const widgetID = await widgets.last().getAttribute('data-slug')
+
+  if (!widgetID) {
+    throw new Error('Added Collection Query widget has no ID')
+  }
+
+  return page.locator(`.widget[data-slug="${widgetID}"]`)
 }
 
 export async function insertTextBlockWithKeyboard({ page }: { page: Page }) {
@@ -1170,8 +1268,167 @@ export async function openLLMInstructions({ page, serverURL }: { page: Page; ser
   return field
 }
 
+export async function disableWorkflowAutoLogin({
+  page,
+  serverURL,
+}: {
+  page: Page
+  serverURL: string
+}) {
+  // Keep the test-only header off cross-origin assets, where it triggers CORS preflights.
+  await page.route(`${serverURL}/**`, async (route) => {
+    await route.continue({
+      headers: { ...route.request().headers(), DisableAutologin: 'true' },
+    })
+  })
+}
+
+export async function scanA11y({
+  name,
+  page,
+  include,
+  testInfo = test.info(),
+}: {
+  include?: string[]
+  name: string
+  page: Page
+  testInfo?: TestInfo
+}) {
+  const run = async () => {
+    const startedAt = performance.now()
+    const results = await runAxeScan({
+      defaultExcludes: false,
+      include,
+      page,
+      screenshotViolations: false,
+      testInfo,
+    })
+
+    testInfo.annotations.push({
+      type: 'a11y-scan',
+      description: JSON.stringify({
+        name,
+        durationMs: Math.round(performance.now() - startedAt),
+        violations: results.violations.length,
+      }),
+    })
+    expect.soft(results.violations, `Axe checkpoint: ${name}`).toEqual([])
+  }
+
+  await test.step(`axe: ${name}`, run)
+}
+
+export async function expectNoPageOverflow({ page }: { page: Page }) {
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      ),
+    )
+    .toBe(true)
+}
+
+export async function tabToSignInControl({ control, page }: { control: Locator; page: Page }) {
+  await expect(control).toBeVisible()
+  await expect(control).toBeEnabled()
+  // Bound traversal so a missing/unreachable control fails instead of hanging.
+  for (let tabCount = 0; tabCount < 12; tabCount++) {
+    if (await control.evaluate((element) => element === element.ownerDocument.activeElement)) {
+      return
+    }
+    await page.keyboard.press(workflowTabKey({ direction: 'Tab', page }))
+  }
+  await expect(control).toBeFocused()
+}
+
+/**
+ * Opens document deletion through real keyboard navigation and returns the More options opener for focus-restoration checks without confirming deletion.
+ */
+export async function openWorkflowDeleteDialog({ page }: { page: Page }) {
+  const menu = page.locator('.doc-controls__popup .popup__trigger-wrap button')
+
+  await tabToWorkflowControl({ control: menu, page })
+  await page.keyboard.press('Enter')
+  const trigger = page.getByRole('menuitem', { name: 'Delete', exact: true })
+
+  await expect(trigger).toBeVisible()
+  for (let index = 0; index < 12; index++) {
+    if (await trigger.evaluate((element) => element === element.ownerDocument.activeElement)) {
+      break
+    }
+    await page.keyboard.press('ArrowDown')
+  }
+  await expect(trigger).toBeFocused()
+  await page.keyboard.press('Enter')
+  const dialog = page.locator('dialog[open][id^="delete-"]')
+
+  await expectFocusInside({ container: dialog, page })
+  return { dialog, trigger: menu }
+}
+
+export async function arrowToWorkflowItem({
+  item,
+  key = 'ArrowDown',
+  page,
+}: {
+  item: Locator
+  key?: 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'
+  page: Page
+}) {
+  for (let index = 0; index < 20; index++) {
+    if (await item.evaluate((element) => element === element.ownerDocument.activeElement)) {
+      return
+    }
+    await page.keyboard.press(key)
+  }
+  await expect(item).toBeFocused()
+}
+
+export async function deleteWorkflowPostsByTitle({
+  page,
+  serverURL,
+  title,
+}: {
+  page: Page
+  serverURL: string
+  title: string
+}) {
+  const response = await page.request.get(`${serverURL}/api/posts`, {
+    params: { draft: 'true', trash: 'true', 'where[title][equals]': title },
+  })
+
+  await expect(response).toBeOK()
+  for (const doc of (await response.json()).docs) {
+    await expect(await page.request.delete(`${serverURL}/api/posts/${doc.id}?trash=true`)).toBeOK()
+  }
+}
+
+export async function chooseWorkflowUpload({ page }: { page: Page }) {
+  const select = page.getByRole('button', { name: /select.*file/i })
+
+  await tabToWorkflowControl({ control: select, page })
+  const chooser = page.waitForEvent('filechooser')
+
+  await page.keyboard.press('Enter')
+  // Playwright supplies the file at the native picker boundary; in-app controls use the keyboard.
+  await (await chooser).setFiles(fileURLToPath(new URL('../uploads/image.png', import.meta.url)))
+  await expect(page.locator('.file-manager__selected-preview')).toBeVisible()
+}
+
+export async function enterWorkflowGrid({ grid, page }: { grid: Locator; page: Page }) {
+  // The grid has one roving Tab stop; Control+Home moves to its first header control.
+  await tabToWorkflowControl({ control: grid.locator('[tabindex="0"]').first(), page })
+  await page.keyboard.press('Control+Home')
+  await expect(grid.locator('thead').getByRole('checkbox')).toBeFocused()
+}
+
 export async function prepareSignInPage({ page, serverURL }: { page: Page; serverURL: string }) {
+  const contrastCookies = (await page.context().cookies()).filter(
+    ({ name }) => name === 'payload-high-contrast-mode',
+  )
+
   await page.context().clearCookies()
+  await page.context().addCookies(contrastCookies)
   const serverOrigin = new URL(serverURL).origin
 
   await page.route(
@@ -1199,10 +1456,27 @@ export async function tabToWorkflowControl({
   direction?: 'Shift+Tab' | 'Tab'
   page: Page
 }) {
+  await expect(control).toBeVisible()
+  await expect(control).toBeEnabled()
   // Traverse the real tab order, including document controls before the form.
-  for (let tabCount = 0; tabCount < 80; tabCount++) {
+  for (let tabCount = 0; tabCount < 160; tabCount++) {
     if (await control.evaluate((element) => element === element.ownerDocument.activeElement)) {
       return
+    }
+    // Lexical documents Escape followed by Tab as its exit gesture.
+    if (
+      await page
+        .locator(':focus')
+        .evaluateAll((elements) =>
+          elements.some(
+            (element) =>
+              element instanceof HTMLElement &&
+              element.isContentEditable &&
+              Boolean(element.closest('.rich-text-lexical')),
+          ),
+        )
+    ) {
+      await page.keyboard.press('Escape')
     }
     await page.keyboard.press(workflowTabKey({ direction, page }))
   }
@@ -1210,9 +1484,12 @@ export async function tabToWorkflowControl({
 }
 
 export async function prepareWorkflowPage({ page, serverURL }: { page: Page; serverURL: string }) {
-  await expect(await page.request.post(`${serverURL}/api/users/login`, { data: devUser })).toBeOK()
   const credentials = { email: `workflow-${randomUUID()}@example.com`, password: devUser.password }
-  const created = await page.request.post(`${serverURL}/api/users`, { data: credentials })
+  // API-key setup avoids concurrent logins overwriting the seeded admin's session list.
+  const created = await page.request.post(`${serverURL}/api/users`, {
+    data: credentials,
+    headers: { Authorization: `users API-Key ${seededAPIKey}` },
+  })
 
   await expect(created).toBeOK()
   const { doc } = (await created.json()) as { doc: { id: number | string } }
@@ -1222,17 +1499,16 @@ export async function prepareWorkflowPage({ page, serverURL }: { page: Page; ser
     await page.request.post(`${serverURL}/api/users/login`, { data: credentials }),
   ).toBeOK()
   await initPage({ page, serverURL })
-  page.removeAllListeners('console')
 }
 
 export async function cleanupWorkflowUsers({ serverURL }: { serverURL: string }) {
   for (const [page, id] of workflowUsers) {
     try {
-      // Logout journeys end anonymously; authenticate as the seeded admin to delete the fixture user.
       await expect(
-        await page.request.post(`${serverURL}/api/users/login`, { data: devUser }),
+        await page.request.delete(`${serverURL}/api/users/${id}`, {
+          headers: { Authorization: `users API-Key ${seededAPIKey}` },
+        }),
       ).toBeOK()
-      await expect(await page.request.delete(`${serverURL}/api/users/${id}`)).toBeOK()
     } finally {
       workflowUsers.delete(page)
     }
@@ -1310,7 +1586,49 @@ export async function expectPersistedWorkflowPost({
     })
 }
 
-function workflowTabKey({ direction, page }: { direction: 'Shift+Tab' | 'Tab'; page: Page }) {
+export async function withWorkflowPosts({
+  action,
+  labels,
+  page,
+  serverURL,
+}: {
+  action: (posts: Array<{ id: number | string; title: string }>) => Promise<void>
+  labels: string[]
+  page: Page
+  serverURL: string
+}) {
+  const prefix = 'Accessibility collection ' + randomUUID()
+  const posts: Array<{ id: number | string; title: string }> = []
+
+  try {
+    for (const label of labels) {
+      const title = prefix + ' ' + label
+      const response = await page.request.post(serverURL + '/api/posts', {
+        data: { _status: 'published', title },
+      })
+
+      expect(response.ok()).toBe(true)
+      const { doc } = await response.json()
+      posts.push({ id: doc.id, title })
+    }
+    await action(posts)
+  } finally {
+    const responses = await Promise.all(
+      posts.map(({ id }) => page.request.delete(serverURL + '/api/posts/' + id + '?trash=true')),
+    )
+    for (const response of responses) {
+      expect(response.ok() || response.status() === 404).toBe(true)
+    }
+  }
+}
+
+export function workflowTabKey({
+  direction,
+  page,
+}: {
+  direction: 'Shift+Tab' | 'Tab'
+  page: Page
+}) {
   // With default macOS settings, Safari uses Option-Tab to include buttons and links.
   return process.platform === 'darwin' &&
     page.context().browser()?.browserType().name() === 'webkit'
@@ -1318,26 +1636,37 @@ function workflowTabKey({ direction, page }: { direction: 'Shift+Tab' | 'Tab'; p
     : direction
 }
 
+/**
+ * Prepares labeled, collapsed rows for drag assertions. A supplied post ID uses existing fixture rows instead of exercising asynchronous row creation.
+ */
 export async function openDragReorderField({
   kind,
   page,
   postsURL,
+  postID,
   rowCount = 2,
 }: {
   kind: 'Array' | 'Blocks'
   page: Page
+  postID?: number | string
   postsURL: AdminUrlUtil
   rowCount?: 2 | 3
 }) {
-  await gotoCreatePost({ page, postsURL })
-
-  if (kind === 'Array') {
+  if (postID !== undefined) {
+    await page.goto(postsURL.edit(postID))
+    await waitForFormReady(page)
+  } else if (kind === 'Array') {
+    await gotoCreatePost({ page, postsURL })
     await page.locator('#field-items .array-field__add-row').click()
-    await expect(page.locator('#field-items input[name$=".label"]')).toBeVisible()
+    // Array sub-fields mount asynchronously after adding a row.
+    await expect(page.locator('#field-items input[name$=".label"]')).toBeVisible({
+      timeout: 15000,
+    })
     for (let index = 1; index < rowCount; index++) {
       await page.locator('#field-items .array-field__add-row').click()
     }
   } else {
+    await gotoCreatePost({ page, postsURL })
     await addBlock({ blockToSelect: 'Text block', fieldName: 'layout', page })
     await expect(page.locator('#field-layout input[name$=".text"]')).toBeVisible()
     for (let index = 1; index < rowCount; index++) {

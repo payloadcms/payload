@@ -11,6 +11,7 @@ import { SidebarTabsProvider } from '../../../providers/SidebarTabs/index.js'
 import { DelayedSpinner } from '../../DelayedSpinner/index.js'
 import { Tooltip } from '../../Tooltip/index.js'
 import { TabError } from './TabError/index.js'
+import './index.css'
 
 export type TabMetadata = {
   icon: React.ReactNode
@@ -48,10 +49,27 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   const [tabContent, setTabContent] = useState<Record<string, React.ReactNode>>(initialTabContents)
   const [loadingTab, setLoadingTab] = useState<null | string>(null)
   const [hoveredTab, setHoveredTab] = useState<null | string>(null)
+  const [focusedTab, setFocusedTab] = useState<null | string>(null)
+  const [isTooltipDismissed, setIsTooltipDismissed] = useState(false)
   const loadingTabsRef = useRef<Set<string>>(new Set())
   const tabContentRef = useRef(initialTabContents)
   // The retry button calls loadTabContent through this, since loadTabContent can't call itself
   const loadTabContentRef = useRef<typeof loadTabContent>(null)
+
+  React.useEffect(() => {
+    if (!hoveredTab && !focusedTab) {
+      return
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsTooltipDismissed(true)
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [focusedTab, hoveredTab])
 
   // Update cached content when server provides new initialTabContents
   // This is needed because useState only uses initialValue on first mount
@@ -194,18 +212,31 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
                 className={`${baseClass}__tab ${isActive ? `${baseClass}__tab--active` : ''}`}
                 id={`${tabsID}-tab-${tab.slug}`}
                 key={tab.slug}
+                onBlur={() => setFocusedTab(null)}
                 onClick={() => handleTabChange(tab.slug)}
+                onFocus={(event) => {
+                  setFocusedTab(event.currentTarget.matches(':focus-visible') ? tab.slug : null)
+                  setIsTooltipDismissed(false)
+                }}
                 onKeyDown={(e) => handleTabKeyDown(e, index)}
-                onMouseEnter={() => setHoveredTab(tab.slug)}
+                onMouseEnter={() => {
+                  setHoveredTab(tab.slug)
+                  setIsTooltipDismissed(false)
+                }}
                 onMouseLeave={() => setHoveredTab(null)}
                 role="tab"
                 tabIndex={isActive ? 0 : -1}
                 type="button"
               >
                 <Tooltip
-                  className={`${baseClass}__tooltip`}
+                  className={[
+                    `${baseClass}__tooltip`,
+                    focusedTab === tab.slug && `${baseClass}__tooltip--focused`,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
                   position="bottom"
-                  show={hoveredTab === tab.slug}
+                  show={!isTooltipDismissed && (hoveredTab === tab.slug || focusedTab === tab.slug)}
                 >
                   {tab.label}
                 </Tooltip>
@@ -226,7 +257,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
                 id={`${tabsID}-panel-${tab.slug}`}
                 key={tab.slug}
                 role="tabpanel"
-                tabIndex={0}
+                tabIndex={-1}
               >
                 <DelayedSpinner
                   baseClass={baseClass}
@@ -234,7 +265,13 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
                   isLoading={isActive && loadingTab === tab.slug}
                 />
                 <div style={loadingTab === tab.slug ? { display: 'none' } : undefined}>
-                  {content}
+                  <React.Suspense
+                    fallback={
+                      <DelayedSpinner baseClass={baseClass} delay={loadingDelay} isLoading />
+                    }
+                  >
+                    {content}
+                  </React.Suspense>
                 </div>
               </div>
             )

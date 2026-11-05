@@ -24,9 +24,25 @@ export default buildConfig({
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below.
       beforeLogin: ['@/components/BeforeLogin'],
-      // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below.
-      beforeDashboard: ['@/components/BeforeDashboard'],
+    },
+    dashboard: {
+      // The `GettingStarted` widget renders the onboarding steps below the welcome heading.
+      // Feel free to delete this at any time. Remove the widget and its `defaultLayout` entry.
+      widgets: [
+        {
+          slug: 'getting-started',
+          Component: '@/components/GettingStarted',
+          label: 'Getting Started',
+          minWidth: 'full',
+        },
+      ],
+      // Repeats the built-in default layout with `getting-started` inserted after `welcome`.
+      defaultLayout: [
+        { widgetSlug: 'welcome', width: 'full' },
+        { widgetSlug: 'getting-started', width: 'full' },
+        { widgetSlug: 'activity', width: 'full' },
+        { widgetSlug: 'collections', width: 'full' },
+      ],
     },
     importMap: {
       baseDir: path.resolve(dirname),
@@ -85,7 +101,7 @@ export default buildConfig({
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins,
-  secret: process.env.PAYLOAD_SECRET,
+  secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

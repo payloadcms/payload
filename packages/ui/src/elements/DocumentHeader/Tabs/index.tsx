@@ -70,16 +70,17 @@ export const DocumentTabs: React.FC<{
               }
 
               return (
-                <DefaultDocumentTab
-                  collectionConfig={collectionConfig}
-                  globalConfig={globalConfig}
-                  key={`tab-${index}`}
-                  path={viewPath}
-                  permissions={permissions}
-                  req={req}
-                  tabConfig={tabConfig}
-                  user={user}
-                />
+                <li key={`tab-${index}`}>
+                  <DefaultDocumentTab
+                    collectionConfig={collectionConfig}
+                    globalConfig={globalConfig}
+                    path={viewPath}
+                    permissions={permissions}
+                    req={req}
+                    tabConfig={tabConfig}
+                    user={user}
+                  />
+                </li>
               )
             })}
           </ul>

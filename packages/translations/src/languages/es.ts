@@ -726,6 +726,10 @@ export const esTranslations: DefaultTranslationsObject = {
       'Se publicarán todos los elementos seleccionados de {{label}}. ¿Desea continuar?',
     aboutToRestore:
       'Está a punto de restaurar este documento de {{label}} al estado en el que se encontraba el {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Restaure el contenido del {{versionDate}} como borrador. El contenido publicado permanecerá sin cambios hasta que publique desde el editor.',
+    aboutToRestoreAsDraftAllLocales:
+      'Restaure el contenido del {{versionDate}} como borrador en todos los idiomas. El contenido publicado permanecerá sin cambios hasta que publique desde el editor.',
     aboutToRestoreGlobal:
       'Está a punto de restaurar el {{label}} global al estado en el que se encontraba el {{versionDate}}.',
     aboutToRevertToPublished:

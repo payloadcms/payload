@@ -110,6 +110,12 @@ export default buildConfigWithDefaults({
     globals: [
       // ...add more globals here
       MenuGlobal,
+      {
+        ...MenuGlobal,
+        slug: 'workflow-menu',
+        admin: { hidden: ({ user }) => !user?.email?.startsWith('workflow-') },
+        versions: false,
+      },
     ],
     indexSortableFields: true,
     localization: {

@@ -733,6 +733,10 @@ export const deTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection:
       'Du bist dabei, alle {{label}} in der Auswahl zu veröffentlichen. Bist du dir sicher?',
     aboutToRestore: 'Du bist dabei, {{label}} auf den Stand vom {{versionDate}} zurückzusetzen.',
+    aboutToRestoreAsDraft:
+      'Stellen Sie den Inhalt vom {{versionDate}} als Entwurf wieder her. Veröffentlichte Inhalte bleiben unverändert, bis Sie sie im Editor veröffentlichen.',
+    aboutToRestoreAsDraftAllLocales:
+      'Stellen Sie den Inhalt vom {{versionDate}} für alle Sprachversionen als Entwurf wieder her. Veröffentlichte Inhalte bleiben unverändert, bis Sie sie im Editor veröffentlichen.',
     aboutToRestoreGlobal:
       'Du bist dabei, das globale Dokument {{label}} auf den Stand vom {{versionDate}} zurückzusetzen.',
     aboutToRevertToPublished:

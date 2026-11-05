@@ -712,6 +712,10 @@ export const ukTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Ви бажаєте опублікувати всі {{label}} у вибірці. Ви впевнені?',
     aboutToRestore:
       'Ви бажаєте відновити цей документ {{label}} до стану, в якому він знаходився {{versionDate}}. Ви впевнені?',
+    aboutToRestoreAsDraft:
+      'Відновіть вміст від {{versionDate}} як чернетку. Опублікований вміст залишатиметься незмінним, доки ви не опублікуєте його з редактора.',
+    aboutToRestoreAsDraftAllLocales:
+      'Відновіть вміст від {{versionDate}} як чернетку для всіх мовних версій. Опублікований вміст залишатиметься незмінним, доки ви не опублікуєте його з редактора.',
     aboutToRestoreGlobal:
       'Ви бажаєте відновити глобальний запис {{label}} до стану, в якому він знаходився {{versionDate}}. Ви впевнені?',
     aboutToRevertToPublished:

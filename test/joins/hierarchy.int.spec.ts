@@ -120,18 +120,18 @@ test.suite('Localized hierarchy joins', { config: './hierarchy.config.ts', db: '
       joins: { children: { count: true, limit: 1, page: 2, sort: 'id' } },
     })
 
+    // UUIDs do not necessarily sort in creation order.
+    const sortedChildIDs = [firstChild.id, secondChild.id].sort((a, b) => (a < b ? -1 : 1))
+
     expect(unpaginated.docs[0]).toMatchObject({
       children: {
-        docs: [
-          { relationTo: versionsSlug, value: firstChild.id },
-          { relationTo: versionsSlug, value: secondChild.id },
-        ],
+        docs: sortedChildIDs.map((id) => ({ relationTo: versionsSlug, value: id })),
         totalDocs: 2,
       },
     })
     expect(paginated.docs[0]).toMatchObject({
       children: {
-        docs: [{ relationTo: versionsSlug, value: secondChild.id }],
+        docs: [{ relationTo: versionsSlug, value: sortedChildIDs[1] }],
         hasNextPage: false,
         totalDocs: 2,
       },

@@ -715,6 +715,10 @@ export const hrTranslations: DefaultTranslationsObject = {
     type: 'Tip',
     aboutToPublishSelection: 'Upravo ćete objaviti sve {{label}} u izboru. Jeste li sigurni?',
     aboutToRestore: 'Vratit ćete {{label}} dokument u stanje u kojem je bio {{versionDate}}',
+    aboutToRestoreAsDraft:
+      'Vratite sadržaj od {{versionDate}} kao skicu. Objavljeni sadržaj ostat će nepromijenjen dok ga ne objavite iz uređivača.',
+    aboutToRestoreAsDraftAllLocales:
+      'Vratite sadržaj od {{versionDate}} kao skicu za sve jezike. Objavljeni sadržaj ostat će nepromijenjen dok ga ne objavite iz uređivača.',
     aboutToRestoreGlobal: 'Vratit ćete globalni {{label}} u stanje u kojem je bio {{versionDate}}.',
     aboutToRevertToPublished:
       'Vratit ćete promjene u dokumentu u objavljeno stanje. Jeste li sigurni? ',

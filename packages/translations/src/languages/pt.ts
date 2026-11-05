@@ -722,6 +722,10 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Você está prestes a publicar todos os {{label}} da seleção. Tem certeza?',
     aboutToRestore:
       'Você está prestes a restaurar o documento {{label}} para o estado em que ele se encontrava em {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Restaure o conteúdo de {{versionDate}} como rascunho. O conteúdo publicado permanecerá inalterado até que o publique a partir do editor.',
+    aboutToRestoreAsDraftAllLocales:
+      'Restaure o conteúdo de {{versionDate}} como rascunho em todos os idiomas. O conteúdo publicado permanecerá inalterado até que o publique a partir do editor.',
     aboutToRestoreGlobal:
       'Você está prestes a restaurar o Global {{label}} para o estado em que ele se encontrava em {{versionDate}}.',
     aboutToRevertToPublished:

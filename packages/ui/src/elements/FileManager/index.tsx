@@ -23,6 +23,7 @@ import { EditUpload } from '../EditUpload/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 import { getEditorFileSrc } from '../Upload/getEditorFileSrc.js'
+import { getFileDownloadSrc, getFilePreviewSrc } from '../Upload/getFilePreviewSrc.js'
 import { editDrawerSlug, sizePreviewSlug } from '../Upload/index.js'
 import { UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
 import { usePasteFromClipboard } from '../Upload/usePasteFromClipboard.js'
@@ -118,9 +119,8 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const selectedSizeData = selectedSize
     ? (data?.variants?.[selectedSize] as Record<string, unknown>)
     : null
-  const sidePanelFileSrc = (selectedSizeData?.url ?? data?.thumbnailURL ?? data?.url ?? null) as
-    | null
-    | string
+  const previewSrc = getFilePreviewSrc({ data, selectedSizeData })
+  const downloadSrc = getFileDownloadSrc({ data, selectedSizeData })
   const sidePanelMimeType = data?.mimeType as string | undefined
   const fileTypeIsAdjustable =
     !!sidePanelMimeType &&
@@ -144,8 +144,11 @@ export const FileManager: React.FC<FileManagerProps> = ({
         toast.error(t('error:invalidFileType'))
         return
       }
-      if (isNewFile && file instanceof File) {
-        setFileSrc(URL.createObjectURL(file))
+      if (isNewFile) {
+        setFilename(file?.name ?? '')
+        if (file instanceof File) {
+          setFileSrc(URL.createObjectURL(file))
+        }
       }
       setValue(file)
       setUploadControlFileUrl('')
@@ -294,6 +297,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
       <div className={`${baseClass}__selected-preview`}>
         <Thumbnail
           collectionSlug={collectionSlug}
+          doc={{ filename: filename || value?.name }}
           fileSrc={isImage(fileType) ? src : null}
           size="expand"
         />
@@ -352,7 +356,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
         {data?.filename && !removedFile && (
           <FileToolbar
             filename={data.filename as string}
-            fileSrc={sidePanelFileSrc}
+            fileSrc={downloadSrc}
             fileUrl={data?.url as string}
             hideRemoveFile={uploadConfig?.hideRemoveFile}
             isAdjustable={fileTypeIsAdjustable}
@@ -365,6 +369,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
             <FilePreview
               collectionSlug={collectionSlug}
               data={data}
+              fileSrc={previewSrc}
               imageCacheTag={imageCacheTag}
               selectedSize={selectedSize}
               selectedSizeData={selectedSizeData}

@@ -729,6 +729,10 @@ export const huTranslations: DefaultTranslationsObject = {
       'Arra készül, hogy az összes {{label}} elemet közzétegye a kijelölésben. biztos vagy ebben?',
     aboutToRestore:
       'Arra készül, hogy visszaállítsa ezt a {{label}} dokumentumot arra az állapotra, amelyben {{versionDate}}  napon volt.',
+    aboutToRestoreAsDraft:
+      'Állítsa vissza a {{versionDate}} időpontban mentett tartalmat piszkozatként. A közzétett tartalom változatlan marad, amíg nem teszi közzé a szerkesztőből.',
+    aboutToRestoreAsDraftAllLocales:
+      'Állítsa vissza a {{versionDate}} időpontban mentett tartalmat piszkozatként minden nyelvi változatban. A közzétett tartalom változatlan marad, amíg nem teszi közzé a szerkesztőből.',
     aboutToRestoreGlobal:
       'Arra készül, hogy visszaállítsa a {{label}} arra az állapotra, amelyben {{versionDate}} napon volt.',
     aboutToRevertToPublished:

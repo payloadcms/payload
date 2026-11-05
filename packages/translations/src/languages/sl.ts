@@ -715,6 +715,10 @@ export const slTranslations: DefaultTranslationsObject = {
     aboutToPublishSelection: 'Objavili boste vse {{label}} v izboru. Ste prepričani?',
     aboutToRestore:
       'Ta {{label}} dokument boste obnovili v stanje, v katerem je bil {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Obnovite vsebino z dne {{versionDate}} kot osnutek. Objavljena vsebina bo ostala nespremenjena, dokler je ne objavite iz urejevalnika.',
+    aboutToRestoreAsDraftAllLocales:
+      'Obnovite vsebino z dne {{versionDate}} kot osnutek za vse jezike. Objavljena vsebina bo ostala nespremenjena, dokler je ne objavite iz urejevalnika.',
     aboutToRestoreGlobal:
       'Globalni {{label}} boste obnovili v stanje, v katerem je bil {{versionDate}}.',
     aboutToRevertToPublished:

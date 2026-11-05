@@ -129,7 +129,7 @@ export type EntitiesFilterConfig = {
   tables?: string | string[]
 }
 
-export type RequireDrizzleKit = () => {
+export type RequireDrizzleKit = () => Promise<{
   generateDrizzleJson: (
     args: Record<string, unknown>,
     prevId?: string,
@@ -147,7 +147,7 @@ export type RequireDrizzleKit = () => {
     sqlStatements: string[]
   }>
   upSnapshot?: (snapshot: Record<string, unknown>) => DrizzleSnapshotJSON
-}
+}>
 
 export type Migration = {
   down: ({

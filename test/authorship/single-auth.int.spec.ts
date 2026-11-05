@@ -12,6 +12,7 @@ let payload: Payload
 let user: TestUser
 
 const createdPostIDs: (number | string)[] = []
+const createdUserIDs: (number | string)[] = []
 
 const createPost = async ({ data, user }: { data: Record<string, unknown>; user?: TestUser }) => {
   const doc = await payload.create({
@@ -45,6 +46,11 @@ test.suite(
         await payload.delete({ id, collection: postsSlug, overrideAccess: true }).catch(() => null)
       }
       createdPostIDs.length = 0
+
+      for (const id of createdUserIDs) {
+        await payload.delete({ id, collection: usersSlug, overrideAccess: true })
+      }
+      createdUserIDs.length = 0
     })
 
     test('should store createdBy and updatedBy as polymorphic references on create', async () => {
@@ -97,16 +103,46 @@ test.suite(
       expect(createdBy.value.email).toBe(user.email)
     })
 
-    test('should stamp createdBy on a global on first write', async () => {
+    test('should stamp and preserve createdBy on a global draft with defaults', async () => {
       const menu = await payload.updateGlobal({
         slug: menuSlug,
         data: { title: 'menu' },
         depth: 0,
+        draft: true,
         user,
       })
 
       expect(menu.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
       expect(menu.updatedBy).toEqual({ relationTo: usersSlug, value: user.id })
+
+      const editor = await payload.create({
+        collection: usersSlug,
+        data: { email: 'global-editor@payloadcms.com', password: 'test' },
+        overrideAccess: true,
+      })
+
+      createdUserIDs.push(editor.id)
+
+      const updatedMenu = await payload.updateGlobal({
+        slug: menuSlug,
+        data: { title: 'Edited draft' },
+        depth: 0,
+        draft: true,
+        user: { ...editor, collection: usersSlug },
+      })
+
+      expect(updatedMenu.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
+      expect(updatedMenu.updatedBy).toEqual({ relationTo: usersSlug, value: editor.id })
+
+      const savedMenu = await payload.findGlobal({
+        slug: menuSlug,
+        depth: 0,
+        draft: true,
+        overrideAccess: false,
+        user,
+      })
+
+      expect(savedMenu.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
     })
   },
 )

@@ -683,6 +683,10 @@ export const zhTranslations: DefaultTranslationsObject = {
     type: '类型',
     aboutToPublishSelection: '您即将发布所选内容中的所有 {{label}}。 您确定吗？',
     aboutToRestore: '您将把这个 {{label}} 文档恢复到 {{versionDate}} 时的状态',
+    aboutToRestoreAsDraft:
+      '将 {{versionDate}} 的内容恢复为草稿。已发布的内容将保持不变，直到您从编辑器中发布。',
+    aboutToRestoreAsDraftAllLocales:
+      '将 {{versionDate}} 的所有语言版本的内容恢复为草稿。已发布的内容将保持不变，直到您从编辑器中发布。',
     aboutToRestoreGlobal: '您要将全局的 {{label}} 恢复到 {{versionDate}} 时的状态',
     aboutToRevertToPublished: '您将要把这个文档的内容还原到它的发布状态。您确定吗？',
     aboutToUnpublish: '您即将取消发布这个文档。您确定吗？',

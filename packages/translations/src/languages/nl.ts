@@ -726,6 +726,10 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Je staat op het punt om alle {{label}} in de selectie te publiceren. Weet je het zeker?',
     aboutToRestore:
       'U staat op het punt dit {{label}} document te herstellen in de staat waarin het zich bevond op {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Herstel de inhoud van {{versionDate}} als concept. Gepubliceerde inhoud blijft ongewijzigd totdat u deze vanuit de editor publiceert.',
+    aboutToRestoreAsDraftAllLocales:
+      'Herstel de inhoud van {{versionDate}} als concept in alle talen. Gepubliceerde inhoud blijft ongewijzigd totdat u deze vanuit de editor publiceert.',
     aboutToRestoreGlobal:
       'U staat op het punt om de global {{label}} te herstellen in de staat waarin het zich bevond op {{versionDate}}.',
     aboutToRevertToPublished:
