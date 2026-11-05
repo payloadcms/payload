@@ -180,4 +180,24 @@ describe('downloadFileToBuffer', () => {
       ).rejects.toMatchObject({ status: 400 })
     },
   )
+test('should determine file size from buffer byteLength even without content-length header', async () => {
+    const noContentLengthResponse = () =>
+      new Response('hello world', {
+        headers: {
+          'content-type': 'text/plain',
+        },
+        status: 200,
+      })
+
+    vitest.spyOn(global, 'fetch').mockResolvedValue(noContentLengthResponse())
+    const req = createRequest({ serverURL: 'https://configured.example.com' })
+
+    const result = await downloadFileToBuffer({
+      data: { filename: 'test.txt', url: 'https://configured.example.com/test.txt' },
+      req,
+      uploadConfig: { skipSafeFetch: true },
+    })
+
+    expect(result.size).toBe(11)
+  })
 })
