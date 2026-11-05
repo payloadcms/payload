@@ -23,7 +23,9 @@ type PreferencesContext = {
   /**
    * @param key - a string identifier for the property being set
    * @param value - preference data to store
-   * @param merge - when true will combine the existing preference object batch the change into one request for objects, default = false
+   * @param merge - when true, combines the value with the existing preference stored under the key
+   * and batches concurrent changes to that key into one request, default = false. Awaiting the
+   * returned promise waits for the write to land either way.
    */
   setPreference: SetPreference
   syncPreference: <T = Preferences>(key: string, value: T) => void
@@ -43,8 +45,10 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   const contextRef = useRef({} as PreferencesContext)
   const preferencesRef = useRef({})
   const pendingUpdate = useRef({})
+  const scheduledMergedUpdates = useRef<Record<string, Promise<void>>>({})
   const pendingWrites = useRef<Record<string, number>>({})
   const updateQueues = useRef<Record<string, Promise<void>>>({})
+  const latestWrites = useRef<Record<string, Promise<void>>>({})
   const { config } = useConfig()
   const { user } = useAuth()
   const { i18n } = useTranslation()
@@ -60,6 +64,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
       pendingUpdate.current = {}
       pendingWrites.current = {}
       updateQueues.current = {}
+      latestWrites.current = {}
     }
   }, [user])
 
@@ -142,6 +147,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
           )
         })
 
+        latestWrites.current[key] = update
         updateQueues.current[key] = update.catch(() => undefined)
         try {
           await update
@@ -156,13 +162,18 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         pendingWrites.current[key] = (pendingWrites.current[key] ?? 0) + 1
 
         try {
-          await requests.post(
-            formatAdminURL({
-              apiRoute: api,
-              path: `/payload-preferences/${key}`,
-            }),
-            requestOptions(value, i18n.language),
-          )
+          const update = requests
+            .post(
+              formatAdminURL({
+                apiRoute: api,
+                path: `/payload-preferences/${key}`,
+              }),
+              requestOptions(value, i18n.language),
+            )
+            .then(() => undefined)
+
+          latestWrites.current[key] = update
+          await update
         } finally {
           pendingWrites.current[key] -= 1
         }
@@ -185,6 +196,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         }
 
         if (dequal(newValue, currentPreference)) {
+          await latestWrites.current[key]
           return
         }
 
@@ -195,6 +207,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         }
       } else {
         if (newValue === currentPreference) {
+          await latestWrites.current[key]
           return
         }
 
@@ -207,25 +220,46 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
           return
         }
 
-        // preference set in context here to prevent other updatePreference at the same time
-        preferencesRef.current[key] = pendingUpdate.current[key]
+        // Take this batch before awaiting persistence so later changes form a new batch.
+        const nextValue = pendingUpdate.current[key]
 
-        await requests.post(
-          formatAdminURL({
-            apiRoute: api,
-            path: `/payload-preferences/${key}`,
-          }),
-          requestOptions(preferencesRef.current[key], i18n.language),
+        delete pendingUpdate.current[key]
+        preferencesRef.current[key] = nextValue
+        pendingWrites.current[key] = (pendingWrites.current[key] ?? 0) + 1
+
+        const previousUpdate = updateQueues.current[key] ?? Promise.resolve()
+        const update = previousUpdate.then(() =>
+          requests.post(
+            formatAdminURL({
+              apiRoute: api,
+              path: `/payload-preferences/${key}`,
+            }),
+            requestOptions(nextValue, i18n.language),
+          ),
         )
 
-        // reset any changes for this key after sending the request
-        delete pendingUpdate.current[key]
+        const latestWrite = update.then(() => undefined)
+
+        latestWrites.current[key] = latestWrite
+        updateQueues.current[key] = latestWrite.catch(() => undefined)
+        try {
+          await update
+        } finally {
+          pendingWrites.current[key] -= 1
+        }
       }
 
-      // use timeout to allow multiple changes of different values using the same key in one request
-      setTimeout(() => {
-        void updatePreference()
-      })
+      // Callers coalesced into the same batch must all await its persisted write.
+      if (typeof scheduledMergedUpdates.current[key] === 'undefined') {
+        scheduledMergedUpdates.current[key] = new Promise<void>((resolve, reject) => {
+          setTimeout(() => {
+            delete scheduledMergedUpdates.current[key]
+            updatePreference().then(resolve, reject)
+          })
+        })
+      }
+
+      await scheduledMergedUpdates.current[key]
     },
     [api, getPreference, i18n.language, pendingUpdate, updateQueues],
   )
