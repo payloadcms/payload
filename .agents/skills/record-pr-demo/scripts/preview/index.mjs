@@ -83,7 +83,6 @@ function renderAt({ milliseconds }) {
       : null,
   )
   chrome.setSizeVisible({ isVisible: document.querySelector('#dimensions').checked })
-  chrome.setStoplightsVisible({ isVisible: document.querySelector('#stoplights').checked })
   timeline.value = String(time)
   document.querySelector('#time').textContent =
     `${(time / 1000).toFixed(2)} / ${(timelineDuration / 1000).toFixed(2)} s`
@@ -110,7 +109,7 @@ timeline.addEventListener('input', () => {
   renderAt({ milliseconds: Number(timeline.value) })
   stop()
 })
-for (const id of ['stoplights', 'dimensions', 'annotation'])
+for (const id of ['dimensions', 'annotation'])
   document
     .querySelector(`#${id}`)
     .addEventListener('change', () => renderAt({ milliseconds: time }))
