@@ -146,6 +146,15 @@ export const mergeServerFormState = ({
     }
 
     /**
+     * An explicit save accepts the server value for every field, so no local
+     * change remains in flight. Release the autosave protection as well -
+     * otherwise it would stick after the save and reject later server values.
+     */
+    if (shouldAcceptValue && acceptValues === true) {
+      delete newState[path].isModified
+    }
+
+    /**
      * The value stayed local because the field was modified after the request was sent.
      * Once a response echoes that local value back, the server has caught up with the
      * edit, so the protection is released - otherwise it would stick for the rest of

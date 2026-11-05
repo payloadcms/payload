@@ -63,7 +63,7 @@ describe('mergeServerFormState autosave protection', () => {
     expect(merged.title.isModified).toBe(true)
   })
 
-  it('explicit save still overrides local changes', () => {
+  it('explicit save overrides local changes and releases the protection', () => {
     const currentState: FormState = {
       color: { initialValue: 'light', isModified: true, value: 'dark' },
     }
@@ -73,5 +73,14 @@ describe('mergeServerFormState autosave protection', () => {
       incomingState: { color: { initialValue: 'light', value: 'light' } },
     })
     expect(merged.color.value).toBe('light')
+    expect(merged.color.isModified).toBeUndefined()
+
+    // a later autosave response with a changed server value is accepted again
+    const later = mergeServerFormState({
+      acceptValues: autosave,
+      currentState: merged,
+      incomingState: { color: { initialValue: 'light', value: 'blue' } },
+    })
+    expect(later.color.value).toBe('blue')
   })
 })
