@@ -58,6 +58,54 @@ const createAdapter = (
   }) as unknown as DrizzleAdapter
 
 describe('buildRawSchema', () => {
+  it('should separate logical nested row IDs from primary keys only for branchable entities', () => {
+    const nestedFields: NonNullable<Config['collections']>[number]['fields'] = [
+      {
+        name: 'items',
+        type: 'array',
+        fields: [{ name: 'label', type: 'text' }],
+      },
+      {
+        name: 'layout',
+        type: 'blocks',
+        blocks: [{ slug: 'headline', fields: [{ name: 'title', type: 'text' }] }],
+      },
+    ]
+    const config = sanitizeConfig({
+      branching: true,
+      collections: [
+        { slug: 'pages', fields: nestedFields },
+        { slug: 'excluded', branching: false, fields: nestedFields },
+      ],
+      globals: [{ slug: 'header', fields: nestedFields }],
+      secret: 'test-secret',
+    } as Config)
+    const adapter = createAdapter(config)
+
+    buildRawSchema({ adapter, setColumnID })
+
+    for (const tableName of [
+      'pages_items',
+      'pages_blocks_headline',
+      'header_items',
+      'header_blocks_headline',
+    ]) {
+      expect(adapter.rawTables[tableName].columns.id).toMatchObject({
+        type: 'serial',
+        primaryKey: true,
+      })
+      expect(adapter.rawTables[tableName].columns._uuid).toMatchObject({ type: 'varchar' })
+    }
+
+    for (const tableName of ['excluded_items', 'excluded_blocks_headline']) {
+      expect(adapter.rawTables[tableName].columns.id).toMatchObject({
+        type: 'varchar',
+        primaryKey: true,
+      })
+      expect(adapter.rawTables[tableName].columns._uuid).toBeUndefined()
+    }
+  })
+
   it('should build branch-scoped localized unique indexes in the locales table', () => {
     const config = sanitizeConfig({
       branching: true,
