@@ -278,7 +278,6 @@ export interface Config {
     menu: MenuInput;
     settings: SettingInput;
   };
-  strictDraftTypes: true;
   user: FallbackUser | User;
   jobs: {
     tasks: unknown;
@@ -1034,7 +1033,7 @@ export interface Menu {
  */
 export interface Setting {
   id: string;
-  siteName?: string | null;
+  siteName: string;
   createdBy?:
     | ({
         relationTo: 'fallback-users';
@@ -1600,7 +1599,7 @@ export interface MenuInput {
  */
 export interface SettingInput {
   id?: string;
-  siteName?: string | null;
+  siteName: string;
   createdBy?:
     | ({
         relationTo: 'fallback-users';

@@ -9,7 +9,7 @@ import { useSearchParams } from 'next/navigation'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 type Props = {
-  product: Product
+  product: Partial<Product> & Pick<Product, 'id'>
 }
 
 export function AddToCart({ product }: Props) {

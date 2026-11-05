@@ -1,4 +1,3 @@
-import type { FindOptions } from '../../../collections/operations/local/find.js'
 import type {
   GlobalSlug,
   Payload,
@@ -8,6 +7,7 @@ import type {
   User,
 } from '../../../index.js'
 import type {
+  DraftTransformGlobalWithSelect,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -43,10 +43,6 @@ type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = 
    */
   disableErrors?: boolean
   /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
-  /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
   fallbackLocale?: TypedFallbackLocale
@@ -80,8 +76,7 @@ type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = 
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & Pick<FindOptions<string, SelectType>, 'select'> &
-  Pick<GlobalFindOneArgs, 'flattenLocales'> &
+} & { select?: TSelect } & Pick<GlobalFindOneArgs, 'flattenLocales'> &
   Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = BaseFindOneOptions<
@@ -93,10 +88,15 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = Base
 export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
+  TDraft extends boolean = false,
 >(
   payload: Payload,
-  options: Options<TSlug, TSelect>,
-): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
+  options: { draft?: TDraft } & Options<TSlug, TSelect>,
+): Promise<
+  TDraft extends true
+    ? DraftTransformGlobalWithSelect<TSlug, TSelect>
+    : TransformGlobalWithSelect<TSlug, TSelect>
+> {
   const {
     slug: globalSlug,
     data,

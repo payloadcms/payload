@@ -10,7 +10,11 @@ import { VariantSelector } from './VariantSelector'
 import { useCurrency } from '@payloadcms/plugin-ecommerce/client/react'
 import { StockIndicator } from '@/components/product/StockIndicator'
 
-export function ProductDescription({ product }: { product: Product }) {
+export function ProductDescription({
+  product,
+}: {
+  product: Partial<Product> & Pick<Product, 'id'>
+}) {
   const { currency } = useCurrency()
   let amount = 0,
     lowestAmount = 0,

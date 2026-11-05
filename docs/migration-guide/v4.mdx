@@ -20,6 +20,48 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Strict draft types are always enabled
+
+The `typescript.strictDraftTypes` option has been removed. Remove it from your config and regenerate your types with `payload generate:types`. The `remove-strict-draft-types` transform in `@payloadcms/codemod` removes the option from inline config objects automatically.
+
+Local API draft reads (`find`, `findByID`, and `findGlobal` with `draft: true`) now type top-level required fields as optional because drafts can skip validation. Check that a field is present before using it:
+
+```ts
+const post = await payload.findByID({ collection: 'posts', id, draft: true })
+
+if (post.title !== undefined) {
+  post.title.toUpperCase()
+}
+```
+
+This transformation is shallow: required fields inside groups, array items, and blocks keep their existing types. Those nested fields can still be missing in an incomplete draft, so validate them at runtime before using them. The document's `id` remains required.
+
+With generated types, the `draft` option is rejected on collections and globals without drafts enabled, including `draft: false`. Remove the option from those calls. Creating a draft still allows incomplete data; creating a published document (with `draft: false` or without the option) requires all required fields.
+
+Generic helpers with a free type parameter such as `T extends CollectionSlug` or `T extends GlobalSlug` can also fail to compile: TypeScript cannot resolve whether that parameter supports drafts. This can affect published `create` calls even when `draft` is omitted. Prefer concrete collection or global slugs where possible. For read helpers that do not need a slug-specific return type, widening the parameter to the full slug union allows the conditional to resolve:
+
+```ts
+import type { CollectionSlug, Payload } from 'payload'
+
+function getDocuments({
+  collection,
+  draft,
+  payload,
+}: {
+  collection: CollectionSlug
+  draft: boolean
+  payload: Payload
+}) {
+  return payload.find({ collection, draft })
+}
+```
+
+Widening returns a union of document types and loses the association between each slug and its allowed draft option. The helper must ensure it only passes `draft` to draft-enabled collections. For generic code that must preserve that association, a narrowly scoped options assertion may be necessary, but only when the helper already guarantees compatible slug, draft, and data values. Widening is not a general solution for generic create helpers.
+
+`findGlobal({ select })` now infers the selected fields in its return type for both published and draft reads. Add any fields you access to `select`, or remove `select` to request the full document shape.
+
+These changes affect TypeScript types only. Runtime behavior is unchanged.
+
 ### Payload request creation is consolidated
 
 Payload request creation now uses `createPayloadRequest` for local contexts and `createPayloadRequestFromWebRequest` to convert a Web `Request`. Admin context setup is exposed as `initAdminContext`.

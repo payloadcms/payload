@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@/*": ["../../../templates/website/src/*"],
+      "@payload-config": ["../../../templates/website/src/payload.config.ts"]
+    }
+  },
+  "include": ["./**/*.ts"]
+}

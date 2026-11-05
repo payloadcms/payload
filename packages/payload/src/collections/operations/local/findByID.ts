@@ -11,6 +11,7 @@ import type {
 } from '../../../index.js'
 import type {
   ApplyDisableErrors,
+  DraftTransformCollectionWithSelect,
   PayloadRequest,
   PopulateType,
   TransformCollectionWithSelect,
@@ -120,10 +121,18 @@ export async function findByIDLocal<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<TSlug>,
+  TDraft extends boolean = false,
 >(
   payload: Payload,
-  options: Options<TSlug, TDisableErrors, TSelect>,
-): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> {
+  options: { draft?: TDraft } & Options<TSlug, TDisableErrors, TSelect>,
+): Promise<
+  ApplyDisableErrors<
+    TDraft extends true
+      ? DraftTransformCollectionWithSelect<TSlug, TSelect>
+      : TransformCollectionWithSelect<TSlug, TSelect>,
+    TDisableErrors
+  >
+> {
   const {
     id,
     collection: collectionSlug,

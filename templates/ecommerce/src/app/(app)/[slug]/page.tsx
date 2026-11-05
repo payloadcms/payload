@@ -63,8 +63,8 @@ export default async function Page({ params }: Args) {
 
   return (
     <article className="pt-16 pb-24">
-      <RenderHero {...hero} />
-      <RenderBlocks blocks={layout} />
+      {hero && <RenderHero {...hero} />}
+      {layout && <RenderBlocks blocks={layout} />}
     </article>
   )
 }
