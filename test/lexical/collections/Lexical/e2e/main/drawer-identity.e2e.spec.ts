@@ -93,6 +93,9 @@ test.describe('Lexical drawer request identity', () => {
 
       await waitForLexicalReady(richText)
 
+      await page.locator('#field-title').fill('Saved drawer identity')
+      await saveDocAndAssert(page)
+
       const permissions = Promise.withResolvers<void>()
       const permissionsCaptured = Promise.withResolvers<void>()
 
@@ -115,8 +118,7 @@ test.describe('Lexical drawer request identity', () => {
         await route.fulfill({ json, response })
       })
 
-      await page.locator('#field-title').fill('Saved drawer identity')
-      await saveDocAndAssert(page)
+      await page.getByRole('button', { name: 'Refresh document permissions' }).click()
       await permissionsCaptured.promise
       await expect(page.locator('#field-title')).toBeEnabled()
       await richText.locator('.LexicalEditorTheme__paragraph').first().click()
@@ -143,7 +145,7 @@ test.describe('Lexical drawer request identity', () => {
 
       await expect(drawer).toBeVisible()
       await expect(async () => {
-        await drawer.locator('#field-url').fill(linkURL)
+        await drawer.getByRole('textbox', { name: 'Enter a URL', exact: true }).fill(linkURL)
         await expect.poll(() => hasChanged, { timeout: 1000 }).toBe(true)
       }).toPass({ timeout: 10000 })
       await changed
@@ -177,6 +179,7 @@ test.describe('Lexical drawer request identity', () => {
       await expect(richText.locator(`[data-lexical-editor] a[href="${linkURL}"]`)).toHaveText(
         'Link',
       )
+      await saveDocAndAssert(page)
     } finally {
       releases.forEach((release) => release())
       if (!page.isClosed()) {

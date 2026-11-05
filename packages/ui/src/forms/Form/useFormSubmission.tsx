@@ -6,7 +6,6 @@ import type { Dispatch, RefObject } from 'react'
 import {
   deepCopyObjectSimpleWithoutReactComponents,
   hasDraftValidationEnabled,
-  reduceFieldsToValues,
   wait,
 } from 'payload/shared'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -14,6 +13,7 @@ import { toast } from 'sonner'
 
 import type { TaskContext } from '../../hooks/useQueue.js'
 import type { FieldAction, Context as FormContextType, FormProps, SubmitOptions } from './types.js'
+import type { UseFormStateResult } from './useFormState.js'
 
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -34,10 +34,12 @@ type Args = {
   isMountedRef: RefObject<boolean>
   prevFormStateRef: RefObject<FormState>
   props: FormProps
+  refreshFormStateAfterSave: UseFormStateResult['refreshFormStateAfterSave']
   resetSequenceRef: RefObject<number>
   setIsValid: FormContextType['setIsValid']
   setModifiedWithoutTracking: FormContextType['setModified']
-  validateForm: (isCurrentRequest?: () => boolean) => Promise<boolean>
+  submissionErrorsRef: UseFormStateResult['submissionErrorsRef']
+  validateForm: UseFormStateResult['validateForm']
 }
 
 export const useFormSubmission = ({
@@ -48,9 +50,11 @@ export const useFormSubmission = ({
   isMountedRef,
   prevFormStateRef,
   props,
+  refreshFormStateAfterSave,
   resetSequenceRef,
   setIsValid,
   setModifiedWithoutTracking: _setModified,
+  submissionErrorsRef,
   validateForm,
 }: Args) => {
   const {
@@ -58,7 +62,6 @@ export const useFormSubmission = ({
     beforeSubmit,
     disabled: isDisabledFromProps,
     disableSuccessStatus,
-    disableValidationOnSubmit,
     handleResponse,
     isDocumentForm,
     onSubmit,
@@ -92,15 +95,6 @@ export const useFormSubmission = ({
   const isDisabledRef = useRef(isDisabled)
   const isDisabledFromPropsRef = useRef(Boolean(isDisabledFromProps))
   const submitFocus = useRef<HTMLElement | null>(null)
-  const submissionErrorsRef = useRef<
-    | {
-        fields: FormState
-        /** Returns whether these errors still belong to the current form state and form instance. */
-        isCurrent: () => boolean
-      }
-    | undefined
-  >(undefined)
-
   isDisabledFromPropsRef.current = Boolean(isDisabledFromProps)
 
   const method = 'method' in props ? props?.method : undefined
@@ -108,11 +102,15 @@ export const useFormSubmission = ({
 
   const submittedRef = useRef(false)
 
-  const setSubmitted = useCallback((isSubmitted: boolean) => {
-    // Queued form-state requests read this before React renders the updated submitted state.
-    submittedRef.current = isSubmitted
-    _setSubmitted(isSubmitted)
-  }, [])
+  const setSubmitted = useCallback(
+    (isSubmitted: boolean) => {
+      // Queued form-state requests read this before React renders the updated submitted state.
+      submittedRef.current = isSubmitted
+      contextRef.current.submitted = isSubmitted
+      _setSubmitted(isSubmitted)
+    },
+    [contextRef],
+  )
 
   const setDisabled = useCallback((isDisabled: boolean) => {
     isDisabledRef.current = isDisabled
@@ -251,8 +249,6 @@ export const useFormSubmission = ({
           return
         }
 
-        const data = reduceFieldsToValues(contextRef.current.fields, true)
-
         const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
           contextRef.current.fields,
           {
@@ -294,10 +290,11 @@ export const useFormSubmission = ({
           }
         }
 
-        const isValid =
-          skipValidation || disableValidationOnSubmit
-            ? true
-            : await validateForm(requestContext.isCurrent)
+        const { data, isValid } = await validateForm({
+          isCurrent: requestContext.isCurrent,
+          isLocalSubmission: Boolean(onSubmit && !hasFormSubmitAction),
+          skipValidation,
+        })
 
         if (!requestContext.isCurrent()) {
           return
@@ -407,7 +404,6 @@ export const useFormSubmission = ({
               : undefined
           }
 
-          let newFormState: FormState | void
           const successSequence = formSequenceRef.current
           const successResetSequence = resetSequenceRef.current
 
@@ -415,8 +411,25 @@ export const useFormSubmission = ({
             setSuccessfulSubmitCount((count) => count + 1)
           }
 
+          if (requestContext.isCurrent()) {
+            try {
+              await refreshFormStateAfterSave({
+                acceptValues,
+                isCurrent: requestContext.isCurrent,
+                refreshPermissions: context?.getDocPermissions !== false,
+                savedDocument: json?.doc ?? json?.result,
+              })
+            } catch (err) {
+              toast.error(err instanceof Error ? err.message : t('error:unknown'))
+            }
+          }
+
+          if (requestContext.isQueueReset()) {
+            return
+          }
+
           if (typeof onSuccess === 'function') {
-            newFormState = await onSuccess(json, {
+            await onSuccess(json, {
               context,
               formState: serializableFormState,
               isCurrent: requestContext.isCurrent,
@@ -445,15 +458,6 @@ export const useFormSubmission = ({
 
           preservePromiseToast = true
           submissionErrorsRef.current = undefined
-
-          if (newFormState) {
-            dispatchFieldsWithoutIncrementingFormSequence({
-              type: 'MERGE_SERVER_STATE',
-              acceptValues,
-              prevStateRef: prevFormStateRef,
-              serverState: newFormState,
-            })
-          }
 
           _setModified(false)
           setSubmitted(false)
@@ -601,7 +605,8 @@ export const useFormSubmission = ({
       startRouteTransition,
       action,
       disableSuccessStatus,
-      disableValidationOnSubmit,
+      refreshFormStateAfterSave,
+      submissionErrorsRef,
       handleResponse,
       method,
       onSubmit,

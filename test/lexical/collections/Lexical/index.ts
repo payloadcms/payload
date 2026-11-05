@@ -123,6 +123,37 @@ export const lexicalBlocks: (Block | BlockSlug)[] = [
         type: 'select',
         options: ['value1', 'value2', 'value3'],
       },
+      {
+        name: 'showServerRequired',
+        type: 'checkbox',
+      },
+      {
+        name: 'serverRequired',
+        type: 'text',
+        access: {
+          read: ({ siblingData }) => Boolean(siblingData?.showServerRequired),
+        },
+        validate: (value, { siblingData }) =>
+          !siblingData?.showServerRequired || Boolean(value) || 'Server-required value missing',
+      },
+      {
+        name: 'showRequiredGroup',
+        type: 'checkbox',
+      },
+      {
+        name: 'requiredGroup',
+        type: 'group',
+        admin: {
+          condition: (_, siblingData) => Boolean(siblingData?.showRequiredGroup),
+        },
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+            required: true,
+          },
+        ],
+      },
     ],
   } satisfies Block,
   {
@@ -302,6 +333,15 @@ export const getLexicalFieldsCollection: (args: {
         required: true,
       },
       {
+        name: 'refreshPermissions',
+        type: 'ui',
+        admin: {
+          components: {
+            Field: '/collections/Lexical/RefreshPermissions/index.js#RefreshPermissions',
+          },
+        },
+      },
+      {
         name: 'lexicalRootEditor',
         type: 'richText',
       },
@@ -377,7 +417,7 @@ export const getLexicalFieldsCollection: (args: {
         type: 'textarea',
         hooks: {
           afterRead: [
-            async ({ data, req, siblingData }) => {
+            ({ data, req, siblingData }) => {
               const yourSanitizedEditorConfig = sanitizeServerEditorConfig(
                 editorConfig,
                 req.payload.config,

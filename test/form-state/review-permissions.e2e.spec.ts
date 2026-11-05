@@ -25,7 +25,7 @@ test.describe('Document permission refresh', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
   })
 
-  test('should apply saved field permissions after an unrelated edit', async ({ page }) => {
+  test('should apply saved field permissions before completing a save', async ({ page }) => {
     const doc = await payload.create({
       collection: draftPostsSlug,
       data: { content: 'Initial content', title: 'ok Initial permissions' },
@@ -59,15 +59,18 @@ test.describe('Document permission refresh', () => {
       })
 
       await page.locator('#field-title').fill('ok Saved permissions')
-      await saveDocAndAssert(page, '#action-save-draft')
+      await page.locator('#action-save-draft').click()
       await captured.promise
-      await expect(page.locator('#field-content')).toBeEditable()
-      await page.locator('#field-content').fill('Edited while permissions load')
+      await expect(page.locator('#field-content')).toBeDisabled()
+      await expect(page.locator('.payload-toast-container')).toContainText('Submitting')
       release.resolve()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await expect(page.locator('#field-content')).toBeEditable()
+      await page.locator('#field-content').fill('Edited after permissions load')
 
       await expect(page.locator('#field-title')).not.toBeEditable()
       await expect(page.locator('#field-title')).toHaveValue('ok Saved permissions')
-      await expect(page.locator('#field-content')).toHaveValue('Edited while permissions load')
+      await expect(page.locator('#field-content')).toHaveValue('Edited after permissions load')
       await expect(page.locator('#action-save-draft')).toBeEnabled()
     } finally {
       release.resolve()

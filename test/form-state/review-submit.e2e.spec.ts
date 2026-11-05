@@ -186,6 +186,61 @@ test.describe('Document submission outcomes', () => {
     expect(new URL(page.url()).pathname).toBe(`/admin/collections/${draftPostsSlug}/create`)
   })
 
+  test('should ignore save callbacks after resetting during the post-save refresh', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: draftPostsSlug,
+      data: { title: `ok Before save ${randomUUID()}` },
+      draft: true,
+      overrideAccess: true,
+    })
+    const captured = Promise.withResolvers<void>()
+    const released = Promise.withResolvers<void>()
+    let hasCaptured = false
+
+    createdIDs.add(doc.id)
+    releases.add(released.resolve)
+    await page.goto(url.edit(doc.id))
+    await waitForFormReady(page)
+    const documentState = page.locator('#document-info-state')
+    const originalData = (await documentState.getAttribute('data-document-data')) ?? ''
+
+    await page.route(`**/api/${draftPostsSlug}/access/${doc.id}**`, async (route) => {
+      const response = await route.fetch()
+
+      if (!hasCaptured) {
+        hasCaptured = true
+        captured.resolve()
+        await released.promise
+      }
+
+      await route.fulfill({ response })
+    })
+
+    await page.locator('#field-title').fill('ok Saved before reset')
+    await page.locator('#action-save-draft').click()
+    await captured.promise
+    await page.locator('#reset-form-state').click()
+    await page.locator('#field-title').fill('ok Edited after reset')
+
+    const refresh = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'POST' &&
+        (response.request().postData() ?? '').includes('form-state') &&
+        (response.request().postData() ?? '').includes('ok Edited after reset'),
+    )
+
+    released.resolve()
+    await refresh
+    await expect(documentState).toHaveAttribute('data-document-data', originalData)
+    await expect(page.locator('#field-title')).toHaveValue('ok Edited after reset')
+    await expect(page.locator('#action-save-draft')).toBeEnabled()
+    await expect(
+      page.locator('.payload-toast-container').filter({ hasText: 'successfully' }),
+    ).toHaveCount(0)
+  })
+
   async function holdServerFunction({ name, page }: { name: string; page: Page }) {
     const captured = Promise.withResolvers<void>()
     const released = Promise.withResolvers<void>()

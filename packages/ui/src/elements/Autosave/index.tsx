@@ -217,6 +217,12 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
      */
     const { updatedAt: _, ...formData } = reduceFieldsToValues(debouncedFormState)
     const { updatedAt: __, ...prevFormData } = previousDebouncedData.current
+    const { updatedAt: ___, ...currentFormData } = reduceFieldsToValues(getFields())
+
+    // Recovery can already be saving a newer revision than the debounced snapshot.
+    if (!dequal(formData, currentFormData)) {
+      return
+    }
 
     if (dequal(formData, prevFormData) && dequal(uploadEdits, previousUploadEdits.current)) {
       return

@@ -4,6 +4,7 @@ import type {
   FormField,
   FormState,
   Row,
+  SelectType,
   User,
   ValidationFieldError,
 } from 'payload'
@@ -41,7 +42,7 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
     /** Identifies background autosaves; omitted values represent explicit submissions. */
     submissionType?: SubmitOptions['submissionType']
   },
-) => Promise<FormState | void> | void
+) => Promise<void> | void
 
 export type FormProps = {
   beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
@@ -79,18 +80,30 @@ export type FormProps = {
   isDocumentForm?: boolean
   isInitializing?: boolean
   log?: boolean
-  onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]
+  /**
+   * Called with the updated form state after edits or validation for a local submission.
+   * Its return value is ignored.
+   */
+  onChange?: ((args: { formState: FormState; submitted: boolean }) => Promise<void> | void)[]
   onSubmit?: (fields: FormState, data: Data) => void
   /**
    * Handles successful submissions, including stale explicit document saves that still need metadata updates.
    * Check `ctx.isCurrent()` before applying response values.
    */
   onSuccess?: FormOnSuccess
+  /** Persistent read-only state used when rendering fields on the server. */
+  readOnly?: boolean
   redirect?: string
+  /** Identifies the server schema edited by this form. Defaults to the document schema for document forms. */
+  schemaPath?: string
+  /** Restricts the form to the selected fields, e.g. in the bulk edit drawer. */
+  select?: SelectType
   submitted?: boolean
   uuid?: string
   validationOperation?: 'create' | 'update'
   waitForAutocomplete?: boolean
+  /** Identifies a widget form independently of any surrounding document. */
+  widgetSlug?: string
 } & (
   | {
       action: (formData: FormData) => Promise<void>
@@ -352,6 +365,8 @@ export type Context = {
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted
   submit: Submit
+  /** Current submission state; use `useFormSubmitted` to subscribe to changes. */
+  submitted?: boolean
   uuid?: string
   validateForm: ValidateForm
 }
