@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
+import { versionedCloudFiles } from '../plugin-cloud-storage/versionedCloudStorage.js'
 import { dynamicMediaDir, dynamicMediaSlug, publicCloudMediaSlug } from './shared.js'
 import { requestCropCalls } from './transformers.js'
 
@@ -19,6 +20,8 @@ const savedCrop = { height: 600, width: 800, x: 100, y: 200 }
 test.suite('Dynamic default file', { config: './config.ts' }, () => {
   test.afterEach(async () => {
     requestCropCalls.length = 0
+    // The cloud collection keeps its files in this shared in-memory store.
+    versionedCloudFiles.clear()
     await rm(dynamicMediaDir, { force: true, recursive: true })
   })
 
@@ -27,18 +30,20 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     collection = dynamicMediaSlug,
     context,
     payload,
+    prefix,
   }: {
     _transforms?: Record<string, unknown>
     collection?: typeof dynamicMediaSlug | typeof publicCloudMediaSlug
     context?: RequestContext
     payload: Payload
+    prefix?: string
   }) => {
     const bytes = await readFile(imageFixture)
 
     return payload.create({
       collection,
       context,
-      data: { _transforms },
+      data: { _transforms, ...(prefix ? { prefix } : {}) },
       file: { name: 'photo.png', data: bytes, mimetype: 'image/png', size: bytes.length },
     })
   }
@@ -193,5 +198,39 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
 
     expect(created.url).toMatch(new RegExp(`/api/${publicCloudMediaSlug}/file/photo\\.png$`))
     expect(created.original?.url).toMatch(/^https:\/\/files\.example\.test\//)
+  })
+
+  test('should keep the folder in the URL of a file built at request time, so a file with the same name in another folder is not served', async ({
+    payload,
+    restClient,
+  }) => {
+    const otherCrop = { height: 100, width: 100, x: 0, y: 0 }
+
+    await createImage({ collection: publicCloudMediaSlug, payload, prefix: 'a' })
+    const second = await createImage({
+      _transforms: { crop: otherCrop },
+      collection: publicCloudMediaSlug,
+      payload,
+      prefix: 'b',
+    })
+    const { pathname, search } = new URL(second.url!, 'http://payload.local')
+
+    await restClient.GET(`${pathname.replace(/^\/api/, '')}${search}` as `/${string}`)
+
+    expect(requestCropCalls).toEqual([{ crop: otherCrop, purpose: 'persisted-default' }])
+  })
+
+  test('should keep the Payload route of a file built at request time when only its URL is selected', async ({
+    payload,
+  }) => {
+    const created = await createImage({ collection: publicCloudMediaSlug, payload })
+
+    const read = await payload.findByID({
+      id: created.id,
+      collection: publicCloudMediaSlug,
+      select: { url: true },
+    })
+
+    expect(read.url).toBe(created.url)
   })
 })

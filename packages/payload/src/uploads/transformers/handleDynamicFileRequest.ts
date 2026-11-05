@@ -98,8 +98,7 @@ export async function handleDynamicFileRequest({
 
   const requestedFile = getRequestedFile({ document, filename })
   // A default file built at request time has no object, so its stages start from the original.
-  const isBuiltAtRequest =
-    document._stored === false && requestedFile.filename === document.filename
+  const { isBuiltAtRequest } = requestedFile
   const storedFile = isBuiltAtRequest
     ? { filename: document.original?.filename ?? filename, isOriginal: true }
     : { filename, isOriginal: false }
@@ -210,6 +209,14 @@ export async function handleDynamicFileRequest({
     return finalizeFileResponse({ collection, req, response: currentResponse })
   }
 
+  // A file with no stored object has nothing to serve. Its source is the original, which must not
+  // be served in its place.
+  if (isBuiltAtRequest) {
+    throw new TransformerContractError(
+      `No transformer built "${requestedFile.filename}", which has no stored file. A stage that applies its saved transforms must return a response.`,
+    )
+  }
+
   // No transformer produced a response — serve the stored file through the normal path
   // (Range/ETag/redirect support, existing `modifyResponseHeaders` order).
   return retrieveFileResponse({ ...storedFile, collection, doc: document, prefix, req })
@@ -285,10 +292,9 @@ async function planRequestPipeline({
   filename: string
   req: PayloadRequest
 }): Promise<RequestStage[]> {
-  const purposes =
-    document._stored === false
-      ? (['persisted-default', 'request-override'] as const)
-      : (['request-override'] as const)
+  const purposes = getRequestedFile({ document, filename }).isBuiltAtRequest
+    ? (['persisted-default', 'request-override'] as const)
+    : (['request-override'] as const)
   const pipeline: RequestStage[] = []
 
   for (const purpose of purposes) {

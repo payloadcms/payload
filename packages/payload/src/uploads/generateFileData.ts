@@ -345,7 +345,10 @@ const processUpload = async <T>({
     file || !fileSourceData
       ? { isAppliedAtRequest: false, rebuildPlan: undefined, shouldRebuild: false }
       : await planUploadRebuild({
-          canApplyAtRequest: Boolean(storedOriginal),
+          // A rebuild keeps the stored original. A duplicate gets its own copy, which is written
+          // only where an original can be stored.
+          canApplyAtRequest:
+            Boolean(retainedOriginal) || (Boolean(duplicatedOriginal) && isOriginalStored),
           collectionSlug: collectionConfig.slug,
           documentID,
           // Not `uploadEdits`: a focal point change copies the saved crop into it, so the crop is
