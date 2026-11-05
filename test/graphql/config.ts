@@ -86,6 +86,91 @@ export default buildConfigWithDefaults({
         ],
         versions: false,
       },
+      {
+        slug: 'named-tabs-test',
+        fields: [
+          {
+            type: 'tabs',
+            tabs: [
+              {
+                name: 'tabWithRequiredField',
+                fields: [
+                  {
+                    name: 'title',
+                    type: 'text',
+                    required: true,
+                  },
+                ],
+              },
+              {
+                name: 'tabWithHiddenRequiredField',
+                fields: [
+                  {
+                    name: 'hiddenTitle',
+                    type: 'text',
+                    hidden: true,
+                    required: true,
+                  },
+                ],
+              },
+              {
+                name: 'tabWithVirtualRequiredField',
+                fields: [
+                  {
+                    name: 'virtualTitle',
+                    type: 'text',
+                    required: true,
+                    virtual: true,
+                  },
+                ],
+              },
+              {
+                name: 'tabWithConditionalRequiredField',
+                fields: [
+                  {
+                    name: 'conditionalTitle',
+                    type: 'text',
+                    admin: {
+                      condition: () => false,
+                    },
+                    required: true,
+                  },
+                ],
+              },
+              {
+                name: 'tabWithReadAccessRequiredField',
+                fields: [
+                  {
+                    name: 'readAccessTitle',
+                    type: 'text',
+                    access: {
+                      read: () => false,
+                    },
+                    required: true,
+                  },
+                ],
+              },
+              {
+                name: 'tabWithOptionalArray',
+                fields: [
+                  {
+                    name: 'items',
+                    type: 'array',
+                    fields: [
+                      {
+                        name: 'itemTitle',
+                        type: 'text',
+                        required: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
     ],
     globals: [
       {
