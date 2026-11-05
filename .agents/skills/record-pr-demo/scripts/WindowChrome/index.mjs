@@ -266,6 +266,11 @@ export function mountDemoChrome({
   }
 
   return {
+    setTheme(value) {
+      if (!['light', 'dark'].includes(value)) throw new Error('Theme must be light or dark')
+      if (isDestroyed) return
+      find('[data-canvas]').className = `stage ${value}`
+    },
     setHistoryState({ canGoBack, canGoForward }) {
       if (isDestroyed) return
       find('[data-back]').disabled = !canGoBack || !onNavigate

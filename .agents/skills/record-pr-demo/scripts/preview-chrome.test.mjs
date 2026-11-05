@@ -58,6 +58,37 @@ test('should scrub real responsive content without changing the title or footer 
     await page.getByRole('button', { name: 'Desktop', exact: true }).click()
     await page.getByRole('button', { name: 'Play resize', exact: true }).click()
     assert.equal(await page.locator('#chrome [data-size]').textContent(), '390 × 720')
+    await page.getByRole('button', { name: 'Dark', exact: true }).click()
+    assert.equal(
+      await page.getByRole('button', { name: 'Dark', exact: true }).getAttribute('aria-pressed'),
+      'true',
+    )
+    assert.equal(
+      await page.locator('[data-canvas]').evaluate((e) => getComputedStyle(e).backgroundColor),
+      'rgb(35, 35, 33)',
+    )
+    assert.equal(
+      await page
+        .frameLocator('iframe')
+        .locator('body')
+        .evaluate((e) => getComputedStyle(e).backgroundColor),
+      'rgb(25, 25, 25)',
+    )
+    assert.equal(await page.locator('[data-size]').textContent(), '390 × 720')
+    assert.equal(await page.locator('#timeline').inputValue(), '5200')
+    assert.equal(new URL(page.url()).searchParams.get('theme'), 'dark')
+    await page.getByRole('button', { name: 'Light', exact: true }).click()
+    assert.equal(
+      await page.locator('[data-canvas]').evaluate((e) => getComputedStyle(e).backgroundColor),
+      'rgb(241, 240, 237)',
+    )
+    assert.equal(
+      await page
+        .frameLocator('iframe')
+        .locator('body')
+        .evaluate((e) => getComputedStyle(e).backgroundColor),
+      'rgb(255, 255, 255)',
+    )
     await page.setViewportSize({ width: 320, height: 900 })
     assert.equal(
       await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),

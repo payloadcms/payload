@@ -10,8 +10,8 @@
         font:
           14px/1.5 system-ui,
           sans-serif;
-        color: #252422;
-        background: #fff;
+        color: light-dark(#252422, #ededeb);
+        background: light-dark(#fff, #191919);
       }
       body {
         max-width: 1120px;
@@ -29,17 +29,17 @@
         border: 0;
         border-radius: 100px;
         padding: 10px 18px;
-        background: #f3f2ef;
+        background: light-dark(#f3f2ef, #333330);
         color: inherit;
         min-height: 40px;
       }
       button:focus-visible,
       input:focus-visible {
-        outline: 2px solid #252422;
+        outline: 2px solid light-dark(#252422, #ededeb);
         outline-offset: 3px;
       }
       button[aria-pressed='true'] {
-        background: #e2e0db;
+        background: light-dark(#e2e0db, #555550);
       }
       .controls {
         display: flex;
@@ -57,10 +57,10 @@
         align-items: center;
         gap: 8px;
         min-height: 40px;
-        color: #66635e;
+        color: light-dark(#66635e, #bbb8b0);
       }
       input {
-        accent-color: #252422;
+        accent-color: light-dark(#252422, #ededeb);
       }
       .timeline {
         display: grid;
@@ -79,7 +79,7 @@
         font-variant-numeric: tabular-nums;
       }
       .status {
-        color: #66635e;
+        color: light-dark(#66635e, #bbb8b0);
         font-size: 12px;
         margin-top: 12px;
       }
@@ -101,6 +101,10 @@
         <button type="button" data-width="1280" aria-pressed="true">Desktop</button>
         <button type="button" data-width="768" aria-pressed="false">Tablet</button>
         <button type="button" data-width="390" aria-pressed="false">Mobile</button>
+      </div>
+      <div class="presets" role="group" aria-label="Theme">
+        <button type="button" data-theme="light" aria-pressed="true">Light</button>
+        <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
       </div>
       <button type="button" id="simulate-refresh">Simulate refresh</button>
       <label><input type="checkbox" id="annotation" checked />Annotation</label>

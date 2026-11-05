@@ -3,6 +3,8 @@ import { observeAccessibility } from '../accessibility-demo.mjs'
 
 const isAccessibility = new URLSearchParams(location.search).has('accessibility')
 
+let theme = new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light'
+
 const root = document.querySelector('#chrome')
 const application = document.createElement('iframe')
 const chrome = mountDemoChrome({
@@ -11,7 +13,7 @@ const chrome = mountDemoChrome({
   root,
   accessibility: isAccessibility,
   showAnnouncements: new URLSearchParams(location.search).has('announcements'),
-  theme: new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light',
+  theme,
   change: {
     kind: new URLSearchParams(location.search).get('kind') === 'fix' ? 'Fix' : 'Feature',
     title: isAccessibility ? 'Make keyboard interactions visible' : 'Responsive collection lists',
@@ -35,6 +37,27 @@ if (isAccessibility)
       report: (state) => chrome.setAccessibilityState(state),
     })
   })
+function applyTheme() {
+  chrome.setTheme(theme)
+  document.documentElement.style.colorScheme = theme
+  if (application.contentDocument?.body) {
+    application.contentDocument.body.style.colorScheme = theme
+  }
+  document.querySelectorAll('[data-theme]').forEach((button) => {
+    button.setAttribute('aria-pressed', String(button.dataset.theme === theme))
+  })
+}
+application.addEventListener('load', applyTheme)
+document.querySelectorAll('[data-theme]').forEach((button) => {
+  button.addEventListener('click', () => {
+    theme = button.dataset.theme
+    const url = new URL(location.href)
+    url.searchParams.set('theme', theme)
+    history.replaceState(null, '', url)
+    applyTheme()
+  })
+})
+applyTheme()
 root.append(application)
 const timeline = document.querySelector('#timeline')
 const play = document.querySelector('#play')

@@ -10,7 +10,7 @@ node .agents/skills/record-pr-demo/scripts/preview-chrome.mjs
 
 Open `http://127.0.0.1:4400`. Use `--port 4401` if needed. The server binds to loopback and serves only the preview assets. Edits appear on reload.
 
-The preview contains a sample application, not Payload Admin. Use its viewport controls and timeline to inspect resizing. Query options include `?theme=dark`, `?kind=fix`, and `?accessibility&announcements&kind=fix`. Review real application behavior in a scenario against the relevant Payload server.
+The preview contains a sample application, not Payload Admin. Use its viewport controls and timeline to inspect resizing. Light and Dark switch the chrome and sample application together, preserving the current viewport and timeline position. Query options include `?theme=dark`, `?kind=fix`, and `?accessibility&announcements&kind=fix`. Review real application behavior in a scenario against the relevant Payload server.
 
 ## Required scenario metadata
 
