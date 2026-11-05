@@ -15,7 +15,7 @@ import { formatAdminURL } from '../utilities/formatAdminURL.js'
 import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
-import { downloadFileToBuffer } from './downloadFileToBuffer.js'
+import { downloadFileToBuffer, resolveExternalFileURL } from './downloadFileToBuffer.js'
 import { generateImageSizeFilename } from './generateImageSizeFilename.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
@@ -31,6 +31,7 @@ import {
   getUploadTransformerInternal,
   setUploadFilePath,
 } from './transformers/uploadTransformerBridge.js'
+import { validateUploadURL } from './validateUploadURL.js'
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
@@ -212,6 +213,16 @@ export const generateFileData = async <T>({
 
     if ((serverURL && url?.startsWith(serverURL)) || url?.startsWith('/')) {
       isLocalFile = true
+    }
+
+    // A caller-supplied URL must pass the same `pasteURL` policy as the paste-url endpoint.
+    // Checked outside the try below so policy errors reach the caller as 400s.
+    if (externalUploadSource) {
+      validateUploadURL({
+        requireAllowList: false,
+        uploadConfig: collectionConfig.upload,
+        url: resolveExternalFileURL({ req, url: externalUploadSource.url }).url.href,
+      })
     }
 
     try {

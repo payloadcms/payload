@@ -3,7 +3,13 @@ import { describe, expect, it, vi } from 'vitest'
 import type { AllowlistEntry } from './allowlist'
 import type { AdvisoryHit, DirectDependency, PnpmAdvisory, ReportedFinding } from '../types'
 
-import { findStaleAllowlist, isResolvableBump, printAllowlistReview, toFindings } from './report'
+import {
+  findStaleAllowlist,
+  isResolvableBump,
+  listRegistryFailures,
+  printAllowlistReview,
+  toFindings,
+} from './report'
 
 const advisory = (overrides: Partial<PnpmAdvisory>): PnpmAdvisory => ({
   findings: [],
@@ -163,6 +169,19 @@ describe('printAllowlistReview', () => {
         workspacePackages: [],
       }),
     ).toBe(true)
+  })
+})
+
+describe('listRegistryFailures', () => {
+  it('lists each bump whose fix is unknown because the registry did not answer', () => {
+    const failures = listRegistryFailures([
+      reported('GHSA-reg-reg-reg00', { reason: 'registry', status: 'unknown' }),
+      reported('GHSA-spec-spec-spec', { reason: 'unsupported-spec', status: 'unknown' }),
+      reported('GHSA-fix-fix-fix00', { status: 'relock', version: '1.0.1' }),
+      reported('GHSA-none-none-none', { status: 'none' }),
+    ])
+
+    expect(failures).toEqual(['GHSA-reg-reg-reg00 through dep'])
   })
 })
 
