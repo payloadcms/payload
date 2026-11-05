@@ -25,6 +25,7 @@ export const presentation = {
   },
   // Optional canvas override: even dimensions, at least 800×600.
   showSize: true, // default
+  showStoplights: true, // set false to hide the decorative window dots
   theme: 'light', // 'light' or 'dark', fixed for the take
   accessibility: false,
   showAnnouncements: false,
@@ -32,6 +33,8 @@ export const presentation = {
 ```
 
 `--viewport` sets the initial application's CSS viewport. By default, the canvas fits that viewport at native scale, with room for the chrome and description: 1600×1148 for the default 1440×900 viewport, or 1600×1188 with accessibility feedback. It stays fixed during responsive resizing. An explicit `presentation.canvas` overrides both the composition and encoded video dimensions and may scale the app to fit. See [capture resolution and encoding](recording.md#capture-resolution-and-encoding).
+
+The live preview also has a **Stoplights** checkbox to hide or show the decorative window dots. Use `presentation.showStoplights: false` to hide them in a recording.
 
 ## URL bar
 
