@@ -116,8 +116,8 @@ export const Condition: React.FC<Props> = (props) => {
     async (nextOperator: Option<Operator>) => {
       const operatorValueTypes = getOperatorValueTypes(reducedField.field.type)
       const validOperatorValue = operatorValueTypes[nextOperator.value] || 'any'
-      const isCalendarDayValue = isDateOnlyFilterValue(internalValue)
       const dateField = reducedField.field.type === 'date' ? reducedField.field : undefined
+      const isCalendarDayValue = dateField !== undefined && isDateOnlyFilterValue(internalValue)
       const shouldPreserveCalendarDay =
         isCalendarDayValue &&
         dateField &&

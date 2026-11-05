@@ -218,6 +218,27 @@ describe('Date', () => {
     }
   })
 
+  test('should preserve date-shaped values when changing operators on non-date fields', async () => {
+    await goToListView(page)
+
+    const { condition } = await addListFilter({
+      fieldLabel: 'ID',
+      operatorLabel: 'equals',
+      page,
+      value: '2026-03-29',
+    })
+    const valueInput = condition.locator('.condition__value input')
+
+    await selectInput({
+      page,
+      selectLocator: condition.locator('.condition__operator'),
+      multiSelect: false,
+      option: 'is not equal to',
+    })
+
+    await expect(valueInput).toHaveValue('2026-03-29')
+  })
+
   test('should display formatted date in useAsTitle', async () => {
     await goToListView(page)
     // Wait for hydration
