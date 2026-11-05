@@ -2,7 +2,7 @@ import type { FlattenedField, SanitizedCollectionConfig } from 'payload'
 
 import { describe, expect, it } from 'vitest'
 
-import { getSchemaColumns } from './getSchemaColumns.js'
+import { getSchemaColumns, mergeColumns } from './getSchemaColumns.js'
 
 function createCollectionConfig(
   flattenedFields: FlattenedField[],
@@ -93,5 +93,60 @@ describe('getSchemaColumns', () => {
       expect(result[0]).toBe('id')
       expect(result).toEqual(['id', 'title', 'excerpt', 'createdAt', 'updatedAt'])
     })
+  })
+})
+
+describe('mergeColumns', () => {
+  it('should replace array schema columns with the column derived by a beforeExport hook', () => {
+    const schemaColumns = ['id', 'title', 'tags_0_label', 'tags_0_id', 'updatedAt', 'createdAt']
+    const dataColumns = ['id', 'title', 'tags', 'updatedAt', 'createdAt']
+
+    expect(mergeColumns(schemaColumns, dataColumns)).toEqual([
+      'id',
+      'title',
+      'tags',
+      'updatedAt',
+      'createdAt',
+    ])
+  })
+
+  it('should replace group schema columns with the column derived by a beforeExport hook', () => {
+    const schemaColumns = ['id', 'meta_title', 'meta_description', 'createdAt']
+    const dataColumns = ['id', 'meta', 'createdAt']
+
+    expect(mergeColumns(schemaColumns, dataColumns)).toEqual(['id', 'meta', 'createdAt'])
+  })
+
+  it('should keep array schema columns that are still present in the data', () => {
+    const schemaColumns = ['id', 'tags_0_label', 'tags_0_id', 'createdAt']
+    const dataColumns = [
+      'id',
+      'tags_0_label',
+      'tags_0_id',
+      'tags_1_label',
+      'tags_1_id',
+      'createdAt',
+    ]
+
+    expect(mergeColumns(schemaColumns, dataColumns)).toEqual([
+      'id',
+      'tags_0_label',
+      'tags_1_label',
+      'tags_0_id',
+      'tags_1_id',
+      'createdAt',
+    ])
+  })
+
+  it('should still replace a relationship column with columns derived from it', () => {
+    const schemaColumns = ['id', 'user', 'createdAt']
+    const dataColumns = ['id', 'user_id', 'user_email', 'createdAt']
+
+    expect(mergeColumns(schemaColumns, dataColumns)).toEqual([
+      'id',
+      'user_id',
+      'user_email',
+      'createdAt',
+    ])
   })
 })
