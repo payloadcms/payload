@@ -68,8 +68,8 @@ export type FormProps = {
   isInitializing?: boolean
   log?: boolean
   /**
-   * Called after an edit refresh or local submit validation applies server form state, including invalid state.
-   * Side effects only: the return value is ignored.
+   * Called with the updated form state after edits or validation for a local submission.
+   * Its return value is ignored.
    */
   onChange?: ((args: { formState: FormState; submitted: boolean }) => Promise<void> | void)[]
   onSubmit?: (fields: FormState, data: Data) => void
@@ -79,7 +79,7 @@ export type FormProps = {
   redirect?: string
   /** Identifies the server schema edited by this form. Defaults to the document schema for document forms. */
   schemaPath?: string
-  /** Restricts the form to the selected fields. Changes rebuild the selected fields automatically. */
+  /** Restricts the form to the selected fields, e.g. in the bulk edit drawer. */
   select?: SelectType
   submitted?: boolean
   uuid?: string
@@ -340,6 +340,8 @@ export type Context = {
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted
   submit: Submit
+  /** Current submission state; use `useFormSubmitted` to subscribe to changes. */
+  submitted?: boolean
   uuid?: string
   validateForm: ValidateForm
 }
