@@ -9,6 +9,9 @@ import type {
 } from '../features/typesClient.js'
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 import type { FeatureClientSchemaMap, LexicalRichTextFieldProps } from '../types.js'
+
+const FEATURE_SEPARATOR = '.lexical_internal_feature.'
+
 type Args = {
   clientFieldSchemaMap: ClientFieldSchemaMap
   fieldSchemaMap: FieldSchemaMap
@@ -37,6 +40,14 @@ export function initLexicalFeatures(args: Args): {
    * All modules added to the import map, keyed by the provided key, if feature.componentImports with type object is used
    */
   const featureClientImportMap: Record<string, any> | undefined = {}
+
+  /**
+   * The client schema map entries of all features of this rich text field
+   */
+  const featureEntries: ClientFieldSchemaMap =
+    getFeatureEntriesByPath({ clientFieldSchemaMap: args.clientFieldSchemaMap }).get(
+      args.schemaPath,
+    ) ?? new Map()
 
   for (const [featureKey, resolvedFeature] of resolvedFeatureMapArray) {
     clientFeatures[featureKey] = {}
@@ -84,7 +95,7 @@ export function initLexicalFeatures(args: Args): {
       featureClientSchemaMap[featureKey] = {}
 
       // Like args.fieldSchemaMap, we only want to include the sub-fields of the current feature
-      for (const [key, entry] of args.clientFieldSchemaMap.entries()) {
+      for (const [key, entry] of featureEntries) {
         if (key.startsWith(featureSchemaPath)) {
           featureClientSchemaMap[featureKey][key] = 'fields' in entry ? entry.fields : [entry]
         }
@@ -113,4 +124,46 @@ export function initLexicalFeatures(args: Args): {
     featureClientImportMap,
     featureClientSchemaMap,
   }
+}
+
+const featureEntriesCache = new WeakMap<ClientFieldSchemaMap, Map<string, ClientFieldSchemaMap>>()
+
+/**
+ * Groups the client schema map entries of lexical features by the rich text field they belong to,
+ * so each rendered rich text field does not have to scan the whole client schema map once per feature.
+ */
+function getFeatureEntriesByPath({
+  clientFieldSchemaMap,
+}: {
+  clientFieldSchemaMap: ClientFieldSchemaMap
+}): Map<string, ClientFieldSchemaMap> {
+  const cachedEntriesByPath = featureEntriesCache.get(clientFieldSchemaMap)
+
+  if (cachedEntriesByPath) {
+    return cachedEntriesByPath
+  }
+
+  const entriesByPath = new Map<string, ClientFieldSchemaMap>()
+
+  for (const [key, entry] of clientFieldSchemaMap) {
+    let separatorIndex = key.indexOf(FEATURE_SEPARATOR)
+
+    // A sub-field of a nested rich text field belongs to each of its rich text ancestors
+    while (separatorIndex !== -1) {
+      const path = key.slice(0, separatorIndex)
+      let entries = entriesByPath.get(path)
+
+      if (!entries) {
+        entries = new Map()
+        entriesByPath.set(path, entries)
+      }
+
+      entries.set(key, entry)
+      separatorIndex = key.indexOf(FEATURE_SEPARATOR, separatorIndex + 1)
+    }
+  }
+
+  featureEntriesCache.set(clientFieldSchemaMap, entriesByPath)
+
+  return entriesByPath
 }
