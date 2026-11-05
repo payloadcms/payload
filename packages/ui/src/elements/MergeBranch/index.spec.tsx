@@ -2,6 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { toast } from 'sonner'
 
 import { MergeBranchModal } from './index.js'
 
@@ -24,7 +25,11 @@ vi.mock('../../fields/Checkbox/Input.js', () => ({ CheckboxInput: () => null }))
 vi.mock('../../fields/FieldLabel/index.js', () => ({ FieldLabel: () => null }))
 vi.mock('../../fields/RadioGroup/Radio/index.js', () => ({ Radio: () => null }))
 vi.mock('../../providers/Config/index.js', () => ({
-  useConfig: () => ({ config: { routes: { api: '/api' }, serverURL: 'http://localhost:3000' } }),
+  useConfig: () => ({
+    config: { routes: { api: '/api' }, serverURL: 'http://localhost:3000' },
+    getEntityConfig: ({ collectionSlug }: { collectionSlug?: string }) =>
+      collectionSlug === 'posts' ? { labels: { singular: { en: 'Post', fr: 'Article' } } } : null,
+  }),
 }))
 vi.mock('../../providers/RouterAdapter/index.js', () => ({
   useRouter: () => ({ refresh }),
@@ -39,6 +44,7 @@ vi.mock('../../providers/ServerFunctions/index.js', () => ({
 }))
 vi.mock('../../providers/Translation/index.js', () => ({
   useTranslation: () => ({
+    i18n: { language: 'en' },
     t: (key: string, values?: Record<string, number | string>) => {
       if (key === 'branching:mergingProgress') {
         return `Merging ${values?.current} of ${values?.total}`
@@ -59,6 +65,7 @@ vi.mock('../../providers/Translation/index.js', () => ({
           'branching:mergeStarting': 'Starting merge',
           'branching:mergedCount': `${values?.count} change(s) merged.`,
           'branching:scheduleMerge': 'Schedule merge',
+          'error:correctInvalidFields': 'Please correct invalid fields.',
           'general:cancel': 'Cancel',
           'general:close': 'Close',
         }[key] ?? key
@@ -128,7 +135,7 @@ let mergeStreamController: ReadableStreamDefaultController<Uint8Array>
 
 beforeEach(() => {
   modalState.isOpen = true
-  closeMerge.mockClear()
+  vi.clearAllMocks()
   vi.stubGlobal('process', { env: {} })
   vi.stubGlobal(
     'fetch',
@@ -207,7 +214,11 @@ test('should report a blocked merge without a completed progress bar', async () 
           validationErrors: [
             {
               changeID: 'invalid-change',
-              message: 'A required field is missing',
+              collectionSlug: 'posts',
+              docID: 12,
+              locale: 'fr',
+              path: 'data.title',
+              message: 'Invalid input: expected string, received null',
             },
           ],
           warnings: [],
@@ -223,7 +234,11 @@ test('should report a blocked merge without a completed progress bar', async () 
   await expect.element(screen.getByRole('progressbar')).not.toBeInTheDocument()
   await expect.element(screen.getByRole('alert')).toBeVisible()
   await expect.element(screen.getByText('A dependency is unavailable')).toBeVisible()
-  await expect.element(screen.getByText('A required field is missing')).toBeVisible()
+  await expect
+    .element(screen.getByRole('listitem').nth(1))
+    .toHaveTextContent(
+      'Post / #12 / fr / data.title: Invalid input: expected string, received null',
+    )
 })
 
 test('should report a partial merge with the actual merged count and problems', async () => {
@@ -289,3 +304,48 @@ test('should clear the target after an external dismissal', async () => {
 
   await expect.poll(() => closeMerge.mock.calls.length).toBeGreaterThan(0)
 })
+
+test.each([true, false])(
+  'should show validation-only failures without claiming there are no changes (stream: %s)',
+  async (isStream) => {
+    const result = {
+      blocked: [],
+      canMerge: false,
+      mergeable: [],
+      merged: [],
+      validationErrors: [
+        {
+          changeID: 'invalid',
+          globalSlug: 'header',
+          locale: 'de',
+          path: 'data.title',
+          message: 'Invalid title',
+        },
+      ],
+      warnings: [],
+    }
+
+    if (!isStream) {
+      vi.mocked(fetch).mockResolvedValueOnce({ ok: false, json: async () => result } as Response)
+    }
+
+    const screen = await render(<MergeBranchModal />)
+
+    await screen.getByRole('button', { name: 'Merge' }).click()
+
+    if (isStream) {
+      mergeStreamController.enqueue(
+        new TextEncoder().encode(`${JSON.stringify({ result, type: 'complete' })}\n`),
+      )
+      mergeStreamController.close()
+    }
+
+    await expect.element(screen.getByRole('heading', { name: 'Merge blocked' })).toBeVisible()
+    await expect
+      .element(screen.getByRole('listitem'))
+      .toHaveTextContent('header / de / data.title: Invalid title')
+    await expect.element(screen.getByText('Please correct invalid fields.')).toBeVisible()
+    expect(toast.info).not.toHaveBeenCalled()
+    expect(toast.error).not.toHaveBeenCalledWith('error:unknown')
+  },
+)

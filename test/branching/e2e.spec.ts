@@ -21,6 +21,7 @@ import {
   homepageGlobalSlug,
   localizedSlug,
   mediaSlug,
+  mergeApprovalRequiredTitle,
   nestedSlug,
   pagesSlug,
   postsSlug,
@@ -1057,6 +1058,50 @@ test.describe('Branching', () => {
     /** Clicked by label rather than id, which the radio derives from edit depth. */
     const mergeMode = (label: string) =>
       page.locator('.merge-branch-modal__modes label').filter({ hasText: label })
+
+    test('should identify each document, locale, and field when merge validation fails', async () => {
+      const english = await payload.create({
+        branch: branchName,
+        collection: localizedSlug,
+        data: { title: mergeApprovalRequiredTitle },
+        draft: true,
+        locale: 'en',
+      })
+      const spanish = await payload.create({
+        branch: branchName,
+        collection: localizedSlug,
+        data: { title: mergeApprovalRequiredTitle },
+        draft: true,
+        locale: 'es',
+      })
+
+      await gotoBranchView()
+      await openMergeModal()
+
+      const modal = page.locator('.merge-branch-modal')
+
+      await modal.getByRole('button', { name: 'Merge', exact: true }).click()
+
+      const errors = modal.getByRole('alert')
+
+      await expect(modal.getByRole('heading', { name: 'Merge blocked', exact: true })).toBeVisible()
+      await expect(modal.getByRole('status')).toHaveText('Merge blocked')
+      await expect(errors).toContainText('Please correct invalid fields.')
+      await expect(errors.getByRole('listitem')).toHaveText([
+        `Localized Doc / #${english.id} / en / data.title: Editorial approval is required before merging.`,
+        `Localized Doc / #${spanish.id} / es / data.title: Editorial approval is required before merging.`,
+      ])
+      await expect(page.getByText('No changes on this branch yet.', { exact: true })).toHaveCount(0)
+      await expect(modal.getByRole('progressbar')).toHaveCount(0)
+
+      await modal
+        .locator('.dialog__footer')
+        .getByRole('button', { name: 'Close', exact: true })
+        .click()
+
+      await expect(modal).toBeHidden()
+      await expect(page.locator('.changed-docs__row')).toHaveCount(2)
+    })
 
     test('should require a date before a merge can be scheduled', async () => {
       await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Treat' } })
