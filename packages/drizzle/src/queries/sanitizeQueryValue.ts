@@ -6,6 +6,7 @@ import { validate as uuidValidate } from 'uuid'
 
 import type { DrizzleAdapter } from '../types.js'
 
+import { fitsPostgresSerialInteger } from '../utilities/fitsPostgresSerialInteger.js'
 import { getCollectionIdType } from '../utilities/getCollectionIdType.js'
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
@@ -16,6 +17,7 @@ type SanitizeQueryValueArgs = {
   columns?: {
     idType: 'number' | 'text' | 'uuid'
     rawColumn: SQL<unknown>
+    serialInteger?: boolean
   }[]
   field: Field | TabAsField
   isUUID: boolean
@@ -176,7 +178,7 @@ export const sanitizeQueryValue = ({
         }
 
         formattedColumns = columns
-          .map(({ idType, rawColumn }) => {
+          .map(({ idType, rawColumn, serialInteger }) => {
             let formattedValue: number | number[] | string | string[]
 
             if (Array.isArray(val)) {
@@ -187,7 +189,10 @@ export const sanitizeQueryValue = ({
                   if (idType === 'number') {
                     formattedValue = Number(eachVal)
 
-                    if (Number.isNaN(formattedValue)) {
+                    if (
+                      Number.isNaN(formattedValue) ||
+                      (serialInteger && !fitsPostgresSerialInteger(formattedValue))
+                    ) {
                       return null
                     }
                   } else {
@@ -204,7 +209,10 @@ export const sanitizeQueryValue = ({
             } else if (idType === 'number') {
               formattedValue = Number(val)
 
-              if (Number.isNaN(formattedValue)) {
+              if (
+                Number.isNaN(formattedValue) ||
+                (serialInteger && !fitsPostgresSerialInteger(formattedValue))
+              ) {
                 return null
               }
             } else {
