@@ -29,7 +29,7 @@ import {
   useTranslation,
   XIcon,
 } from '@payloadcms/ui'
-import { abortAndIgnore } from '@payloadcms/ui/shared'
+import { abortAndIgnore, reduceFormStateToData } from '@payloadcms/ui/shared'
 import { $getNodeByKey, $getRoot, SKIP_DOM_SELECTION_TAG } from 'lexical'
 import {
   type BlocksFieldClient,
@@ -52,10 +52,7 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
-import {
-  getCachedFormStateIfDataMatches,
-  reduceFormStateToBlockData,
-} from '../getCachedFormStateIfDataMatches.js'
+import { getCachedFormStateIfDataMatches } from '../getCachedFormStateIfDataMatches.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import {
   type BlockCollapsibleWithErrorProps,
@@ -280,9 +277,9 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           value: formData.blockName,
         }
 
-        const newFormStateData = reduceFormStateToBlockData(
-          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
-        ) as BlockFields
+        const newFormStateData = reduceFormStateToData({
+          formState: deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
+        }) as BlockFields
 
         // Things like default values may come back from the server => update the node with the new data
         editor.update(
@@ -348,10 +345,13 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         newFormState.blockName = prevFormState.blockName
       }
 
-      const newFormStateData = reduceFormStateToBlockData(
-        deepCopyObjectSimpleWithoutReactComponents(newFormState, { excludeFiles: true }),
-        reduceFormStateToBlockData(prevFormState, formDataRef.current),
-      ) as BlockFields
+      const newFormStateData = reduceFormStateToData({
+        formState: deepCopyObjectSimpleWithoutReactComponents(newFormState, { excludeFiles: true }),
+        initialData: reduceFormStateToData({
+          formState: prevFormState,
+          initialData: formDataRef.current,
+        }),
+      }) as BlockFields
 
       setTimeout(() => {
         editor.update(
@@ -771,10 +771,10 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
             onChange={onChange}
             onSubmit={(formState) => {
               // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-              const newData = reduceFormStateToBlockData(
+              const newData = reduceFormStateToData({
                 formState,
-                formDataRef.current,
-              ) as BlockFields
+                initialData: formDataRef.current,
+              }) as BlockFields
               newData.blockType = blockType
               editor.update(
                 () => {

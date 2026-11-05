@@ -22,7 +22,7 @@ import {
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { abortAndIgnore } from '@payloadcms/ui/shared'
+import { abortAndIgnore, reduceFormStateToData } from '@payloadcms/ui/shared'
 import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
 
 import './index.css'
@@ -42,10 +42,7 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
-import {
-  getCachedFormStateIfDataMatches,
-  reduceFormStateToBlockData,
-} from '../getCachedFormStateIfDataMatches.js'
+import { getCachedFormStateIfDataMatches } from '../getCachedFormStateIfDataMatches.js'
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
 export type InlineBlockComponentProps<
@@ -257,9 +254,9 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       })
 
       if (state) {
-        const newFormStateData = reduceFormStateToBlockData(
-          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
-        ) as InlineBlockFields
+        const newFormStateData = reduceFormStateToData({
+          formState: deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
+        }) as InlineBlockFields
 
         // Things like default values may come back from the server => update the node with the new data
         editor.update(
@@ -351,7 +348,10 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
    */
   const onFormSubmit = useCallback(
     (formState: FormState) => {
-      const newData = reduceFormStateToBlockData(formState, formDataRef.current)
+      const newData = reduceFormStateToData({
+        formState,
+        initialData: formDataRef.current,
+      })
       newData.blockType = blockType
 
       editor.update(

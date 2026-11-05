@@ -18,7 +18,7 @@ export const getCachedFormStateIfDataMatches = ({
     return false
   }
 
-  const cachedData = reduceFormStateToBlockData(cachedFormState)
+  const cachedData = reduceFormStateToData({ formState: cachedFormState })
   const currentData = normalizeData({
     data: formData,
     rowFieldPaths: getRowFieldPaths(cachedFormState),
@@ -28,9 +28,6 @@ export const getCachedFormStateIfDataMatches = ({
     ? cachedFormState
     : false
 }
-
-export const reduceFormStateToBlockData = (formState: FormState, currentData?: Data): Data =>
-  reduceFormStateToData({ formState, initialData: currentData })
 
 const getRowFieldPaths = (formState: FormState): Set<string> =>
   new Set(
