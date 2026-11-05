@@ -31,6 +31,9 @@ export const i18n: Partial<GenericLanguages> = {
   fa: {
     label: 'لیست بدون ترتیب',
   },
+  fi: {
+    label: 'Luettelo',
+  },
   fr: {
     label: 'Liste non ordonnée',
   },

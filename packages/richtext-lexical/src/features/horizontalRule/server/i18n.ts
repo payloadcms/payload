@@ -31,6 +31,9 @@ export const i18n: Partial<GenericLanguages> = {
   fa: {
     label: 'قاعده افقی',
   },
+  fi: {
+    label: 'Vaakaviiva',
+  },
   fr: {
     label: 'Règle horizontale',
   },
