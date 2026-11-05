@@ -110,104 +110,6 @@ const createConstraint = ({
   )`
 }
 
-const createDateOnlyConstraint = ({
-  column,
-  operator,
-  pathSegments,
-  treatAsArray,
-  value,
-}: Pick<
-  CreateJSONQueryArgs,
-  'column' | 'operator' | 'pathSegments' | 'treatAsArray' | 'value'
->): string => {
-  if (!column) {
-    throw new Error('A JSON column is required for a date-only comparison')
-  }
-
-  const rootColumn = typeof column === 'string' ? column : `"${column.name}"`
-  const alias = `${sanitizePathSegment(pathSegments[0])}_date_filter`
-  const nestedPathSegments = pathSegments.slice(1)
-  const buildPredicate = ({
-    expression,
-    pathIndex,
-    terminalPredicate,
-  }: {
-    expression: string
-    pathIndex: number
-    terminalPredicate: (jsonValue: string) => string
-  }): string => {
-    const segment = nestedPathSegments[pathIndex]
-
-    if (!segment) {
-      throw new Error('A nested JSON date path is required')
-    }
-
-    const sanitizedSegment = sanitizePathSegment(segment)
-
-    if (pathIndex === nestedPathSegments.length - 1) {
-      return terminalPredicate(`json_extract(${expression}, '$.${sanitizedSegment}')`)
-    }
-
-    const nestedExpression = `json_extract(${expression}, '$.${sanitizedSegment}')`
-
-    const nestedPath = nestedPathSegments.slice(0, pathIndex + 1).join('.')
-
-    if (!treatAsArray?.includes(nestedPath)) {
-      return buildPredicate({
-        expression: nestedExpression,
-        pathIndex: pathIndex + 1,
-        terminalPredicate,
-      })
-    }
-
-    const nestedAlias = `${alias}_${sanitizedSegment}_${pathIndex}`
-
-    return `EXISTS (SELECT 1 FROM json_each(${nestedExpression}) AS ${nestedAlias} WHERE ${buildPredicate(
-      {
-        expression: `${nestedAlias}.value`,
-        pathIndex: pathIndex + 1,
-        terminalPredicate,
-      },
-    )})`
-  }
-  const createRootPredicate = (terminalPredicate: (jsonValue: string) => string): string =>
-    `EXISTS (SELECT 1 FROM json_each(${rootColumn}) AS ${alias} WHERE ${buildPredicate({
-      expression: `${alias}.value`,
-      pathIndex: 0,
-      terminalPredicate,
-    })})`
-
-  if (['date_equals', 'date_not_equals'].includes(operator)) {
-    if (!Array.isArray(value) || typeof value[0] !== 'string' || typeof value[1] !== 'string') {
-      throw new Error('Invalid date-only JSON comparison')
-    }
-
-    const predicate = createRootPredicate(
-      (jsonValue) =>
-        `julianday(${jsonValue}) >= julianday('${escapeSQLValue(value[0])}') AND julianday(${jsonValue}) < julianday('${escapeSQLValue(value[1])}')`,
-    )
-
-    return `${operator === 'date_not_equals' ? 'NOT ' : ''}${predicate}`
-  }
-
-  const operatorMap: Record<string, string> = {
-    greater_than: '>',
-    greater_than_equal: '>=',
-    less_than: '<',
-    less_than_equal: '<=',
-  }
-  const comparisonOperator = operatorMap[operator.slice(5)]
-
-  if (!comparisonOperator || typeof value !== 'string') {
-    throw new Error('Invalid date-only JSON comparison')
-  }
-
-  return createRootPredicate(
-    (jsonValue) =>
-      `julianday(${jsonValue}) ${comparisonOperator} julianday('${escapeSQLValue(value)}')`,
-  )
-}
-
 export const createJSONQuery = ({
   column,
   operator,
@@ -218,19 +120,6 @@ export const createJSONQuery = ({
   treatRootAsArray,
   value,
 }: CreateJSONQueryArgs): string => {
-  if (
-    [
-      'date_equals',
-      'date_greater_than',
-      'date_greater_than_equal',
-      'date_less_than',
-      'date_less_than_equal',
-      'date_not_equals',
-    ].includes(operator)
-  ) {
-    return createDateOnlyConstraint({ column, operator, pathSegments, treatAsArray, value })
-  }
-
   if ((operator === 'in' || operator === 'not_in') && Array.isArray(value)) {
     let sql = ''
     for (const [i, v] of value.entries()) {

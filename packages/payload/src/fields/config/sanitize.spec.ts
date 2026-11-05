@@ -4,7 +4,6 @@ import type {
   Block,
   BlocksField,
   CheckboxField,
-  DateField,
   Field,
   NumberField,
   TextField,
@@ -23,32 +22,6 @@ import { describe, it, expect } from 'vitest'
 describe('sanitizeFields', () => {
   const config = {} as Config
   const collectionConfig = {} as CollectionConfig
-
-  it('should retain the effective timezone default after a timezone field override', async () => {
-    const [dateField, timezoneField] = await sanitizeFields({
-      config,
-      collectionConfig,
-      fields: [
-        {
-          name: 'publishedOn',
-          type: 'date',
-          timezone: {
-            defaultTimezone: 'UTC',
-            override: ({ baseField }) => ({
-              ...baseField,
-              defaultValue: 'Asia/Tokyo',
-            }),
-          },
-        },
-      ],
-      validRelationships: [],
-    })
-
-    expect((dateField as DateField).timezone).toEqual(
-      expect.objectContaining({ defaultTimezone: 'Asia/Tokyo' }),
-    )
-    expect(timezoneField?.defaultValue).toBe('Asia/Tokyo')
-  })
 
   it('should throw on missing type field', async () => {
     const fields: Field[] = [

@@ -123,18 +123,35 @@ describe('Date', () => {
   })
 
   test('should preserve a filtered calendar day across browser timezones', async ({ browser }) => {
-    for (const timezoneId of ['America/Los_Angeles', 'Pacific/Auckland']) {
+    const cases = [
+      {
+        operator: 'equals',
+        operatorLabel: 'equals',
+        timezoneId: 'America/Los_Angeles',
+      },
+      {
+        operator: 'greater_than_equal',
+        operatorLabel: 'is greater than or equal to',
+        timezoneId: 'Pacific/Auckland',
+      },
+      {
+        operator: 'greater_than',
+        operatorLabel: 'is greater than',
+        timezoneId: 'America/Los_Angeles',
+      },
+    ]
+
+    for (const { operator, operatorLabel, timezoneId } of cases) {
       const context = await browser.newContext({ timezoneId })
       const timezonePage = await context.newPage()
 
       initPageConsoleErrorCatch(timezonePage)
-      await ensureCompilationIsDone({ page: timezonePage, serverURL })
 
       try {
         await goToListView(timezonePage)
         const { condition } = await addListFilter({
           fieldLabel: 'Default With Timezone',
-          operatorLabel: 'equals',
+          operatorLabel,
           page: timezonePage,
         })
         const dateInput = condition.locator(
@@ -152,7 +169,7 @@ describe('Date', () => {
           .click()
         await expect
           .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
-          .toContain(`[equals]=${expectedDate}`)
+          .toContain(`[${operator}]=${expectedDate}`)
       } finally {
         await context.close()
       }

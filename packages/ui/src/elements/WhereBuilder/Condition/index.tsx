@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type {
   AddCondition,
@@ -32,7 +32,6 @@ import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
-import { getDateFilterOperatorValue, shouldSyncConditionValue } from './Date/getDateFilterValue.js'
 import { DefaultFilter } from './DefaultFilter/index.js'
 import { getOperatorValueTypes } from './validOperators.js'
 import './index.scss'
@@ -58,22 +57,9 @@ export const Condition: React.FC<Props> = (props) => {
 
   const reducedField = reducedFields.find((field) => field.value === fieldPath)
 
-  const normalizeDateValue = useCallback(
-    (value: Value): Value =>
-      reducedField?.field.type === 'date'
-        ? getDateFilterOperatorValue({
-            operator,
-            pickerAppearance: reducedField.field.admin?.date?.pickerAppearance,
-            value,
-          })
-        : value,
-    [operator, reducedField],
-  )
-
-  const [internalValue, setInternalValue] = useState<Value>(() => normalizeDateValue(value))
+  const [internalValue, setInternalValue] = useState<Value>(value)
 
   const debouncedValue = useDebounce(internalValue, 300)
-  const lastReportedCondition = useRef({ fieldPath, operator, value })
 
   const booleanSelect = ['exists'].includes(operator) || reducedField?.field?.type === 'checkbox'
 
@@ -90,17 +76,13 @@ export const Condition: React.FC<Props> = (props) => {
 
   const updateValue = useEffectEvent(async (debouncedValue: Value) => {
     if (operator) {
-      const normalizedValue =
-        debouncedValue === null || debouncedValue === '' ? undefined : debouncedValue
-
-      lastReportedCondition.current = { fieldPath, operator, value: normalizedValue }
       await updateCondition({
         type: 'value',
         andIndex,
         field: reducedField,
         operator,
         orIndex,
-        value: normalizedValue,
+        value: debouncedValue === null || debouncedValue === '' ? undefined : debouncedValue,
       })
     }
   })
@@ -108,24 +90,6 @@ export const Condition: React.FC<Props> = (props) => {
   useEffect(() => {
     void updateValue(debouncedValue)
   }, [debouncedValue])
-
-  useEffect(() => {
-    const lastReported = lastReportedCondition.current
-
-    if (
-      shouldSyncConditionValue({
-        fieldPath,
-        lastFieldPath: lastReported.fieldPath,
-        lastOperator: lastReported.operator,
-        lastReportedValue: lastReported.value,
-        operator,
-        value,
-      })
-    ) {
-      lastReportedCondition.current = { fieldPath, operator, value }
-      setInternalValue(normalizeDateValue(value))
-    }
-  }, [fieldPath, normalizeDateValue, operator, value])
 
   const disabled =
     (!reducedField?.value && typeof reducedField?.value !== 'number') ||
@@ -150,25 +114,15 @@ export const Condition: React.FC<Props> = (props) => {
     async (operator: Option<Operator>) => {
       const operatorValueTypes = getOperatorValueTypes(reducedField.field.type)
       const validOperatorValue = operatorValueTypes[operator.value] || 'any'
-      const nextValue =
-        reducedField.field.type === 'date'
-          ? getDateFilterOperatorValue({
-              operator: operator.value,
-              pickerAppearance: reducedField.field.admin?.date?.pickerAppearance,
-              value: internalValue,
-            })
-          : internalValue
       const isValidValue =
         validOperatorValue === 'any' ||
-        typeof nextValue === validOperatorValue ||
-        (validOperatorValue === 'boolean' && (nextValue === 'true' || nextValue === 'false'))
+        typeof value === validOperatorValue ||
+        (validOperatorValue === 'boolean' && (value === 'true' || value === 'false'))
 
       if (!isValidValue) {
         // if the current value is not valid for the new operator
         // reset the value before passing it to updateCondition
         setInternalValue(undefined)
-      } else if (nextValue !== internalValue) {
-        setInternalValue(nextValue)
       }
 
       await updateCondition({
@@ -177,10 +131,10 @@ export const Condition: React.FC<Props> = (props) => {
         field: reducedField,
         operator: operator.value,
         orIndex,
-        value: isValidValue ? nextValue : undefined,
+        value: isValidValue ? value : undefined,
       })
     },
-    [andIndex, internalValue, reducedField, orIndex, updateCondition],
+    [andIndex, reducedField, orIndex, updateCondition, value],
   )
 
   return (

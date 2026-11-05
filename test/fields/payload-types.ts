@@ -563,22 +563,6 @@ export interface BlockField {
         blockType: 'relationships';
       }[]
     | null;
-  blocksWithCustomValidation?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'customContent';
-      }[]
-    | null;
-  inlineCollisionBlocks?:
-    | {
-        inlineText?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'ConfigBlockTest';
-      }[]
-    | null;
   blockWithLabels?:
     | {
         text?: string | null;
@@ -1117,8 +1101,6 @@ export interface DateField {
   monthOnly?: string | null;
   defaultWithTimezone?: string | null;
   defaultWithTimezone_tz?: SupportedTimezones;
-  dateOnlyWithTimezone?: string | null;
-  dateOnlyWithTimezone_tz?: SupportedTimezones;
   /**
    * This date here should be required.
    */
@@ -2569,28 +2551,6 @@ export interface BlockFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
-  blocksWithCustomValidation?:
-    | T
-    | {
-        customContent?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  inlineCollisionBlocks?:
-    | T
-    | {
-        ConfigBlockTest?:
-          | T
-          | {
-              inlineText?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
   blockWithLabels?:
     | T
     | {
@@ -3063,8 +3023,6 @@ export interface DateFieldsSelect<T extends boolean = true> {
   monthOnly?: T;
   defaultWithTimezone?: T;
   defaultWithTimezone_tz?: T;
-  dateOnlyWithTimezone?: T;
-  dateOnlyWithTimezone_tz?: T;
   dayAndTimeWithTimezone?: T;
   dayAndTimeWithTimezone_tz?: T;
   dayAndTimeWithTimezoneFixed?: T;
