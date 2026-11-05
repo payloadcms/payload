@@ -431,6 +431,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       const sanitizedBlock = block
 
       if (sanitizedBlock._sanitized === true) {
+        config.blocks.push(flattenBlock({ block }))
         continue
       }
       sanitizedBlock._sanitized = true
