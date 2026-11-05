@@ -1880,6 +1880,43 @@ describe('database', () => {
       expect(migration?.batch).toStrictEqual(1)
     })
 
+    it(
+      'should run migrate without prompting when forceAcceptWarning is set and a dev migration exists',
+      { db: 'drizzle' },
+      async () => {
+        await payload.db.migrate()
+
+        // simulate a database that has been pushed to in dev mode
+        await payload.create({
+          collection: 'payload-migrations',
+          data: { batch: -1, name: 'dev' },
+        })
+
+        await payload.db.migrate({
+          forceAcceptWarning: true,
+          migrations: [
+            {
+              down: async () => {},
+              name: 'force_accept_warning_test',
+              up: async () => {},
+            },
+          ],
+        })
+
+        const { docs } = await payload.find({
+          collection: 'payload-migrations',
+          where: { name: { equals: 'force_accept_warning_test' } },
+        })
+
+        expect(docs[0]?.batch).toStrictEqual(2)
+
+        await payload.delete({
+          collection: 'payload-migrations',
+          where: { name: { in: ['dev', 'force_accept_warning_test'] } },
+        })
+      },
+    )
+
     it('should run migrate:status', async () => {
       let error
       try {
