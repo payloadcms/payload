@@ -264,7 +264,7 @@ const token: PayloadHandler = async (req) => {
     clientID &&
     (form.get('grant_type') === 'refresh_token'
       ? await refresh({ clientID, form, req })
-      : redeemCode({ clientID, form, req }))
+      : await redeemCode({ clientID, form, req }))
 
   if (!clientID || !tokens) {
     return Response.json({ error: OAuthErrorCode.InvalidGrant }, { status: 400 })
@@ -287,7 +287,7 @@ const token: PayloadHandler = async (req) => {
   )
 }
 
-const redeemCode = ({
+const redeemCode = async ({
   clientID,
   form,
   req,
@@ -295,7 +295,7 @@ const redeemCode = ({
   clientID: string
   form: URLSearchParams
   req: PayloadRequest
-}): MCPOAuthTokens | undefined => {
+}): Promise<MCPOAuthTokens | null | undefined> => {
   const code = unseal<Code>({ type: 'code', req, value: form.get('code') })
 
   if (
@@ -307,6 +307,17 @@ const redeemCode = ({
       .update(form.get('code_verifier') ?? '')
       .digest('base64url') === code.codeChallenge
   ) {
+    // A code must only work once. Trading it also trades its refresh token, with no leeway, so
+    // using the code again counts as a copied refresh token: it's refused, and the tokens revoked.
+    const hooks = getTokenHooks(req)
+    if (hooks.refreshToken && code.tokens.refreshToken) {
+      return await hooks.refreshToken({
+        refreshToken: code.tokens.refreshToken,
+        req,
+        reuseInterval: 0,
+      })
+    }
+
     return code.tokens
   }
 }

@@ -50,11 +50,14 @@ export const issueLoginToken = async ({
 export const refreshLoginToken = async ({
   refreshToken,
   req,
+  reuseInterval,
 }: {
   refreshToken: string
   req: PayloadRequest
+  /** See `redeemRefreshToken`. */
+  reuseInterval?: number
 }): Promise<MCPOAuthTokens | null> => {
-  const refreshed = await redeemRefreshToken({ refreshToken, req })
+  const refreshed = await redeemRefreshToken({ refreshToken, req, reuseInterval })
 
   return (
     refreshed && {

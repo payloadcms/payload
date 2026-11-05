@@ -338,10 +338,20 @@ export type MCPBuiltinOAuthConfig = {
    *
    * OAuth requires noticing copied refresh tokens: return a new refresh token every time, and
    * revoke the tokens when an already used refresh token comes back.
+   *
+   * It also runs when the client trades its authorization code, on the refresh token from
+   * `issueToken`, with `reuseInterval: 0`. OAuth requires a code to work only once, so refuse that
+   * refresh token if it was used before, even moments ago.
    */
   refreshToken?: (args: {
     refreshToken: string
     req: PayloadRequest
+    /**
+     * How long a refresh token that was just used may still be accepted, in milliseconds, e.g. for
+     * clients that refresh twice at once. `0` means not at all. When it's missing, use your usual
+     * leeway.
+     */
+    reuseInterval?: number
   }) => MaybePromise<MCPOAuthTokens | null>
   type: 'builtin'
 } & MCPOAuthSharedConfig

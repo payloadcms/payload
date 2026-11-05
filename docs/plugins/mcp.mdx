@@ -322,7 +322,8 @@ mcpPlugin({
       expiresIn: 60 * 60,
       refreshToken: await createRefreshToken(req.user),
     }),
-    refreshToken: async ({ refreshToken }) => await refreshTokens(refreshToken),
+    refreshToken: async ({ refreshToken, reuseInterval }) =>
+      await refreshTokens(refreshToken, { reuseInterval }),
   },
 })
 ```
@@ -331,6 +332,12 @@ Your `refreshToken` must notice copied refresh tokens, as OAuth requires:
 return a new refresh token each time, and revoke the tokens when an already used
 one comes back. Payload only makes sure a refresh token is used by the client it
 was issued to.
+
+`refreshToken` also runs when the client trades its authorization code, on the
+refresh token from `issueToken`, with `reuseInterval: 0`. OAuth requires a code
+to work only once, so refuse that refresh token if it was used before, even
+moments ago. Otherwise, `reuseInterval` is missing, and you can allow the leeway
+you usually do, e.g. for clients that refresh twice at once.
 
 #### Use another authorization server
 
