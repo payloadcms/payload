@@ -1,9 +1,11 @@
 import type { JSONSchema4 } from 'json-schema'
+import { compile } from 'json-schema-to-typescript'
 import { describe, it, expect } from 'vitest'
 
 import type { Config } from '../config/types.js'
 
 import { sanitizeConfig } from '../config/sanitize.js'
+import { InvalidConfiguration } from '../errors/index.js'
 import { configToJSONSchema } from './configToJSONSchema.js'
 import type { Block, BlocksField, RichTextField } from '../fields/config/types.js'
 
@@ -509,5 +511,69 @@ describe('configToJSONSchema', () => {
     ).oneOf![0]
     expect(grpBlocksInline).not.toHaveProperty('$ref')
     expect(grpBlocksInline.properties?.blockType).toStrictEqual({ const: 'myBlock' })
+  })
+
+  it('should handle object-form localization.locales with value fallback and generate valid schema for types', async () => {
+    // @ts-expect-error
+    const config: Config = {
+      collections: [
+        {
+          slug: 'posts',
+          fields: [{ name: 'title', type: 'text', localized: true }],
+        },
+      ],
+      localization: {
+        locales: [
+          { label: 'English', value: 'en' },
+          { label: 'French', value: 'fr' },
+        ],
+        defaultLocale: 'en',
+        fallback: true,
+      },
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    expect(sanitizedConfig.localization).toBeDefined()
+    if (sanitizedConfig.localization) {
+      expect(sanitizedConfig.localization.localeCodes).toEqual(['en', 'fr'])
+      expect(sanitizedConfig.localization.locales[0].code).toBe('en')
+      expect(sanitizedConfig.localization.locales[1].code).toBe('fr')
+    }
+
+    const schema = configToJSONSchema(sanitizedConfig, 'text')
+    expect((schema.properties?.locale as JSONSchema4)?.enum).toEqual(['en', 'fr'])
+    expect(
+      ((schema.properties?.fallbackLocale as JSONSchema4)?.oneOf?.[3] as JSONSchema4)?.enum,
+    ).toEqual(['en', 'fr'])
+
+    // Ensure json-schema-to-typescript compiles without crashing
+    const compiled = await compile(schema, 'Config')
+    expect(compiled).toMatch(/locale: ['"]en['"] \| ['"]fr['"]/)
+  })
+
+  it('should throw InvalidConfiguration if locale object lacks code and value', async () => {
+    // @ts-expect-error
+    const config: Config = {
+      collections: [{ slug: 'posts', fields: [] }],
+      localization: {
+        locales: [{ label: 'English' }],
+        defaultLocale: 'en',
+      },
+    }
+
+    await expect(sanitizeConfig(config)).rejects.toThrow(InvalidConfiguration)
+  })
+
+  it('should throw InvalidConfiguration if defaultLocale is not in configured locales', async () => {
+    // @ts-expect-error
+    const config: Config = {
+      collections: [{ slug: 'posts', fields: [] }],
+      localization: {
+        locales: [{ label: 'English', code: 'en' }],
+        defaultLocale: 'fr',
+      },
+    }
+
+    await expect(sanitizeConfig(config)).rejects.toThrow(InvalidConfiguration)
   })
 })
