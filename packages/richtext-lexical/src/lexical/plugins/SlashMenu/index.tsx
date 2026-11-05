@@ -15,7 +15,7 @@ import type {
 import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
 import './index.css'
 import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin/index.js'
-import { applyDynamicGroups } from './mergeDynamicGroups.js'
+import { resolveSlashMenuGroups } from './mergeDynamicGroups.js'
 import { useMenuTriggerMatch } from './useMenuTriggerMatch.js'
 
 const baseClass = 'slash-menu-popup'
@@ -95,64 +95,46 @@ export function SlashMenuPlugin({
   })
 
   const groups: SlashMenuGroup[] = useMemo(() => {
-    let groupsWithItems: SlashMenuGroup[] = []
-    for (const groupWithItem of editorConfig?.features.slashMenu.groups ?? []) {
-      groupsWithItems.push(groupWithItem)
-    }
+    const groupsWithItems: SlashMenuGroup[] = [...(editorConfig?.features.slashMenu.groups ?? [])]
 
-    if (queryString) {
-      // Normalize query string for flexible matching (remove spaces, hyphens, underscores)
-      const normalizedQuery = queryString.toLowerCase().replace(/[\s\-_]/g, '')
+    // Normalize query string for flexible matching (remove spaces, hyphens, underscores)
+    const normalizedQuery = queryString ? queryString.toLowerCase().replace(/[\s\-_]/g, '') : ''
 
-      // Filter current groups first
-      // @ts-expect-error - TODO: fix this
-      groupsWithItems = groupsWithItems.map((group) => {
-        const filteredItems = group.items.filter((item) => {
-          let itemTitle = item.key
-          if (item.label) {
-            itemTitle =
-              typeof item.label === 'function'
-                ? item.label({ featureClientSchemaMap, i18n, schemaPath })
-                : item.label
-          }
-
-          if (new RegExp(queryString, 'gi').exec(itemTitle)) {
-            return true
-          }
-
-          // Try normalized match (allows "nestedcontent" to match "Nested Content")
-          const normalizedTitle = itemTitle.toLowerCase().replace(/[\s\-_]/g, '')
-          if (normalizedTitle.includes(normalizedQuery)) {
-            return true
-          }
-
-          if (item.keywords != null) {
-            return item.keywords.some((keyword) => {
-              if (new RegExp(queryString, 'gi').exec(keyword)) {
-                return true
-              }
-              const normalizedKeyword = keyword.toLowerCase().replace(/[\s\-_]/g, '')
-              return normalizedKeyword.includes(normalizedQuery)
-            })
-          }
-          return false
-        })
-        if (filteredItems.length) {
-          return {
-            ...group,
-            items: filteredItems,
-          }
-        }
-        return null
-      })
-
-      groupsWithItems = groupsWithItems.filter((group) => group != null)
-    }
-
-    // Merge dynamic groups when the menu is open, including bare '/' (queryString === '')
-    return applyDynamicGroups({
+    return resolveSlashMenuGroups({
       dynamicGroupFns: editorConfig?.features.slashMenu.dynamicGroups ?? [],
       editor,
+      filterItem: queryString
+        ? (item) => {
+            let itemTitle = item.key
+            if (item.label) {
+              itemTitle =
+                typeof item.label === 'function'
+                  ? item.label({ featureClientSchemaMap, i18n, schemaPath })
+                  : item.label
+            }
+
+            if (new RegExp(queryString, 'gi').exec(itemTitle)) {
+              return true
+            }
+
+            // Try normalized match (allows "nestedcontent" to match "Nested Content")
+            const normalizedTitle = itemTitle.toLowerCase().replace(/[\s\-_]/g, '')
+            if (normalizedTitle.includes(normalizedQuery)) {
+              return true
+            }
+
+            if (item.keywords != null) {
+              return item.keywords.some((keyword) => {
+                if (new RegExp(queryString, 'gi').exec(keyword)) {
+                  return true
+                }
+                const normalizedKeyword = keyword.toLowerCase().replace(/[\s\-_]/g, '')
+                return normalizedKeyword.includes(normalizedQuery)
+              })
+            }
+            return false
+          }
+        : undefined,
       groups: groupsWithItems,
       queryString,
     })

@@ -4,7 +4,11 @@ import { describe, expect, it, vi } from 'vitest'
 
 import type { SlashMenuGroup, SlashMenuItem } from './LexicalTypeaheadMenuPlugin/types.js'
 
-import { applyDynamicGroups, mergeDynamicGroups } from './mergeDynamicGroups.js'
+import {
+  applyDynamicGroups,
+  mergeDynamicGroups,
+  resolveSlashMenuGroups,
+} from './mergeDynamicGroups.js'
 
 const editor = {} as LexicalEditor
 
@@ -22,9 +26,18 @@ const createItem = ({ key }: { key: string }): SlashMenuItem => ({
   },
 })
 
-const createGroup = ({ items, key }: { items: SlashMenuItem[]; key: string }): SlashMenuGroup => ({
+const createGroup = ({
   items,
   key,
+  label,
+}: {
+  items: SlashMenuItem[]
+  key: string
+  label?: string
+}): SlashMenuGroup => ({
+  items,
+  key,
+  ...(label !== undefined ? { label } : {}),
 })
 
 describe('applyDynamicGroups', () => {
@@ -68,6 +81,50 @@ describe('applyDynamicGroups', () => {
     expect(dynamicGroupFn).not.toHaveBeenCalled()
     expect(result).toBe(groups)
     expect(result.map((group) => group.key)).toEqual(['basic'])
+  })
+})
+
+describe('resolveSlashMenuGroups', () => {
+  it('should keep configured group position and label when query filters out all static items and dynamic groups refill that key', () => {
+    const groups = [
+      createGroup({
+        items: [createItem({ key: 'paragraph' })],
+        key: 'basic',
+        label: 'Basic',
+      }),
+      createGroup({
+        items: [createItem({ key: 'upload' })],
+        key: 'media',
+        label: 'Media',
+      }),
+      createGroup({
+        items: [createItem({ key: 'code' })],
+        key: 'advanced',
+        label: 'Advanced',
+      }),
+    ]
+    const dynamicItem = createItem({ key: 'custom-paragraph' })
+    const dynamicGroupFn = vi.fn(() => [
+      createGroup({
+        items: [dynamicItem],
+        key: 'basic',
+        label: 'Dynamic Basic',
+      }),
+    ])
+
+    const result = resolveSlashMenuGroups({
+      dynamicGroupFns: [dynamicGroupFn],
+      editor,
+      filterItem: (item) => item.key.includes('upload'),
+      groups,
+      queryString: 'up',
+    })
+
+    expect(result.map((group) => group.key)).toEqual(['basic', 'media'])
+    expect(result[0]!.label).toBe('Basic')
+    expect(result[0]!.items.map((item) => item.key)).toEqual(['custom-paragraph'])
+    expect(result[1]!.items.map((item) => item.key)).toEqual(['upload'])
+    expect(dynamicGroupFn).toHaveBeenCalledWith({ editor, queryString: 'up' })
   })
 })
 
