@@ -320,14 +320,35 @@ describe('createPolymorphicJoinWherePlan', () => {
     },
   )
 
+  it('accepts a has-many select mixed with a single select that shares option values', () => {
+    const variantTagsPlan = createPlan({ variantTags: { equals: 'available' } }).get('variantTags')
+
+    expect(variantTagsPlan.type).toBe('mixedSelect')
+    expect(variantTagsPlan.fieldsByCollection.get('articles')?.type).toBe('hasManySelect')
+    expect(variantTagsPlan.fieldsByCollection.get('notes')?.type).toBe('scalar')
+  })
+
+  it('marks a has-many select mixed with a single select as invalid when option values differ', () => {
+    const noteFieldsWithDifferentOptions = noteFields.map((field) =>
+      field.name === 'variantTags' ? { ...field, options: ['restricted'] } : field,
+    ) as Field[]
+    const mismatchedAdapter = createAdapter({
+      articles: { fields: articleFields, table: articlesTable },
+      notes: { fields: noteFieldsWithDifferentOptions, table: notesTable },
+    })
+
+    const variantTagsPlan = createPolymorphicJoinWherePlan({
+      adapter: mismatchedAdapter,
+      collections: ['articles', 'notes'],
+      where: { variantTags: { equals: 'available' } },
+    }).get('variantTags')
+
+    expect(variantTagsPlan.type).toBe('invalid')
+  })
+
   it.each([
     ['a field that is absent from every collection', { unknown: { equals: 'value' } }, 'unknown'],
     ['incompatible scalar field types', { variantValue: { equals: 'value' } }, 'variantValue'],
-    [
-      'a has-many select mixed with a scalar select',
-      { variantTags: { contains: 'available' } },
-      'variantTags',
-    ],
     ['a localized field', { localizedTitle: { equals: 'value' } }, 'localizedTitle'],
     ['a field stored in array rows', { 'entries.tags': { equals: 'value' } }, 'entries.tags'],
     [
