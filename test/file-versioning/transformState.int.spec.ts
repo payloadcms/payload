@@ -326,7 +326,7 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     // The copy is made from the flipped file, so the flip is already part of its files.
     const copy = await payload.duplicate({ id: created.id, collection: transformedMediaSlug })
 
-    // The stage ran for the copy, and saw no flip each time.
+    // The stage ran for the copy, and saw no flip each time, in doc or in originalDoc.
     expect(new Set(flipStageRuns)).toEqual(new Set([undefined]))
     expect(copy._transforms).toBeNull()
   })

@@ -533,6 +533,8 @@ const processUpload = async <T>({
       Object.entries(pipelineDoc._transforms).filter(([key]) => !appliedKeys.includes(key)),
     )
     pipelineDoc._transforms = Object.keys(keptTransforms).length ? keptTransforms : null
+    // No stage has run yet, so originalDoc is made again without the dropped keys.
+    pipelineOriginalDoc = createOriginalDoc()
   }
 
   // A client upload can arrive with only a header probe or no contents (see

@@ -88,8 +88,8 @@ export default buildConfigWithDefaults({
                 return { canTransform: true, handledTransformKeys: ['flip'] }
               },
               mimeTypes: ['image/*'],
-              transformFile: ({ doc }) => {
-                flipStageRuns.push(doc._transforms?.flip)
+              transformFile: ({ doc, originalDoc }) => {
+                flipStageRuns.push(doc._transforms?.flip, originalDoc._transforms?.flip)
                 return Promise.resolve({ status: 'continue' })
               },
             },
