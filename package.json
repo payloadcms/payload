@@ -183,7 +183,7 @@
   "devDependencies": {
     "@ai-sdk/openai": "3.0.30",
     "@axe-core/playwright": "4.11.0",
-    "@libsql/client": "0.14.0",
+    "@libsql/client": "0.18.0",
     "@next/bundle-analyzer": "16.3.3",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",

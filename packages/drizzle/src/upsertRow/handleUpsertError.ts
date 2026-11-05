@@ -34,7 +34,11 @@ export const handleUpsertError = ({
   }
 
   // PostgreSQL: 23505, SQLite: SQLITE_CONSTRAINT_UNIQUE
-  if (error?.code === '23505' || error?.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+  // @libsql/client 0.17+ reports the base code in `code` and the specific one in `extendedCode`
+  const isSqliteUnique =
+    error?.code === 'SQLITE_CONSTRAINT_UNIQUE' || error?.extendedCode === 'SQLITE_CONSTRAINT_UNIQUE'
+
+  if (error?.code === '23505' || isSqliteUnique) {
     let fieldName: null | string = null
 
     if (error.code === '23505') {
@@ -59,7 +63,7 @@ export const handleUpsertError = ({
           fieldName = match[1]
         }
       }
-    } else if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+    } else if (isSqliteUnique) {
       // SQLite - extract from message: "UNIQUE constraint failed: table.field[, table.field2, ...]"
       const regex = /UNIQUE constraint failed: ([^.]+)\.([^.,]+)/
       const match: string[] = error.message?.match(regex)
