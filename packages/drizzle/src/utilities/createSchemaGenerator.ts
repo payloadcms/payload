@@ -63,7 +63,6 @@ export const createSchemaGenerator = ({
 
     const tableDeclarations: string[] = []
     const enumDeclarations: string[] = []
-    const relationsDeclarations: string[] = []
 
     const addImport = (from: string, name: string) => {
       if (!importDeclarations[from]) {
@@ -300,8 +299,6 @@ ${Object.entries(table.columns)
 }))`
       : `export const relations = defineRelations(${relationsSchemaArg})`
 
-    relationsDeclarations.push(relationsDeclaration)
-
     if (enumDeclarations.length && !this.schemaName) {
       addImport(corePackage, enumImport)
     }
@@ -348,7 +345,7 @@ declare module '${this.packageName}' {
       schemaDeclaration,
       ...enumDeclarations,
       ...tableDeclarations,
-      ...relationsDeclarations,
+      relationsDeclaration,
       schemaType,
       finalDeclaration,
     ]

@@ -1,3 +1,5 @@
+import type { AnyRelationsBuilderConfig, RelationsRecord } from 'drizzle-orm'
+
 import { defineRelations } from 'drizzle-orm'
 
 import type { DrizzleAdapter } from '../types.js'
@@ -17,9 +19,9 @@ import type { DrizzleAdapter } from '../types.js'
  */
 export const buildDrizzleRelations = ({ adapter }: { adapter: DrizzleAdapter }) => {
   adapter.relations = defineRelations(adapter.tables, (r) => {
-    const config: Record<string, Record<string, any>> = {}
+    const config: AnyRelationsBuilderConfig = {}
 
-    const getTableConfig = (tableName: string): Record<string, any> => {
+    const getTableConfig = (tableName: string): RelationsRecord => {
       if (!config[tableName]) {
         config[tableName] = {}
       }
@@ -32,7 +34,7 @@ export const buildDrizzleRelations = ({ adapter }: { adapter: DrizzleAdapter }) 
     // FKs live on the `_locales` table rather than the parent, so the relation is owned by the
     // table its `from` columns belong to and colliding keys are mangled. These are only matched
     // by alias and are never referenced by key in `with` clauses.
-    const addRelationKey = (tableConfig: Record<string, any>, key: string, tableName: string) => {
+    const addRelationKey = (tableConfig: RelationsRecord, key: string, tableName: string) => {
       const columns = adapter.rawTables[tableName]?.columns ?? {}
       let relationKey = key
       while (relationKey in columns || relationKey in tableConfig) {

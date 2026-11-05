@@ -1,5 +1,4 @@
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
-import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
 
 import { alias } from 'drizzle-orm/pg-core'
 import { alias as aliasSQLite } from 'drizzle-orm/sqlite-core/alias'

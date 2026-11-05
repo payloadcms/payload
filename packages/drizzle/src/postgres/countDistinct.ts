@@ -1,5 +1,3 @@
-import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
-
 import { count, sql } from 'drizzle-orm'
 
 import type { BasePostgresAdapter, CountDistinct } from './types.js'
