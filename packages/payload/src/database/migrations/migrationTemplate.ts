@@ -1,5 +1,5 @@
 export const migrationTemplate = `
-import {
+import type {
   MigrateUpArgs,
   MigrateDownArgs,
 } from "@payloadcms/db-mongodb";
