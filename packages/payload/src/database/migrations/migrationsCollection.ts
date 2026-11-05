@@ -2,6 +2,16 @@ import type { CollectionConfig } from '../../collections/config/types.js'
 
 export const migrationsCollection: CollectionConfig = {
   slug: 'payload-migrations',
+  // Only the migration CLI and the dev push touch this collection, through
+  // the Local API with `overrideAccess: true`; nothing reads or writes it
+  // with access enforced. Without this, the default access applies and
+  // `/api/access` reports every operation as allowed for any admin user.
+  access: {
+    create: () => false,
+    delete: () => false,
+    read: () => false,
+    update: () => false,
+  },
   admin: {
     hidden: true,
   },
