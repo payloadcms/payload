@@ -18,6 +18,7 @@ type Args<T extends JsonObject> = {
   operation: BeforeValidateOperation
   overrideAccess: boolean
   req: PayloadRequest
+  skipHooks?: boolean
 }
 
 /**
@@ -40,6 +41,7 @@ export const beforeValidate = async <T extends JsonObject>({
   operation,
   overrideAccess,
   req,
+  skipHooks,
 }: Args<T>): Promise<T> => {
   await traverseFields({
     id,
@@ -60,6 +62,7 @@ export const beforeValidate = async <T extends JsonObject>({
     req,
     siblingData: incomingData,
     siblingDoc: doc!,
+    skipHooks,
   })
 
   return incomingData

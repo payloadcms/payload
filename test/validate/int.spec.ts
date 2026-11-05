@@ -31,6 +31,7 @@ import {
   defaultDraftPublishUploadCollectionSlug,
   defaultDraftValidationBlockSlug,
   publishCollectionSlug,
+  publishDefaultsGlobalSlug,
   publishGlobalSlug,
   validationAccessSourceGlobalSlug,
   validationAuthCollectionSlug,
@@ -3606,6 +3607,33 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
         en: 'draft',
         es: 'draft',
       })
+    })
+
+    test('should apply default values to a never saved locale during global publish-all', async ({
+      payload,
+    }) => {
+      await payload.updateGlobal({
+        slug: publishDefaultsGlobalSlug,
+        data: {
+          _status: 'published',
+          title: 'English published',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      const published = await payload.updateGlobal({
+        slug: publishDefaultsGlobalSlug,
+        data: {
+          _status: 'published',
+          title: 'English updated',
+        },
+        locale: 'en',
+        overrideAccess: true,
+        publishAllLocales: true,
+      })
+
+      expect(published.title).toBe('English updated')
     })
 
     test('should reject scheduled publish-all when a sibling locale is invalid', async ({

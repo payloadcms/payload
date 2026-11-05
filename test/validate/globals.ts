@@ -12,6 +12,7 @@ import {
 import {
   defaultDraftPublishGlobalSlug,
   defaultDraftValidationBlockSlug,
+  publishDefaultsGlobalSlug,
   publishGlobalSlug,
   validateAfterReadPreviousValue,
   validationAccessSourceGlobalSlug,
@@ -297,6 +298,23 @@ const publishGlobal: GlobalConfig = {
   },
 }
 
+const publishDefaultsGlobal: GlobalConfig = {
+  slug: publishDefaultsGlobalSlug,
+  dbName: 'publish_defaults_global',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      defaultValue: 'Default title',
+      localized: true,
+      required: true,
+    },
+  ],
+  versions: {
+    drafts: true,
+  },
+}
+
 const defaultDraftPublishGlobal: GlobalConfig = {
   slug: defaultDraftPublishGlobalSlug,
   dbName: 'default_global',
@@ -322,5 +340,6 @@ export const validationGlobals: GlobalConfig[] = [
   validationDraftSourceGlobal,
   validationAccessSourceGlobal,
   publishGlobal,
+  publishDefaultsGlobal,
   defaultDraftPublishGlobal,
 ]

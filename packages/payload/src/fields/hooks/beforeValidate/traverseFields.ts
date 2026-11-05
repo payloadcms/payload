@@ -39,6 +39,7 @@ type Args<T> = {
    * The original siblingData (not modified by any hooks)
    */
   siblingDoc: JsonObject
+  skipHooks?: boolean
 }
 
 export const traverseFields = async <T>({
@@ -61,6 +62,7 @@ export const traverseFields = async <T>({
   req,
   siblingData,
   siblingDoc,
+  skipHooks,
 }: Args<T>): Promise<void> => {
   unflattenData(siblingData)
 
@@ -90,6 +92,7 @@ export const traverseFields = async <T>({
         siblingData,
         siblingDoc,
         siblingFields: fields,
+        skipHooks,
       }),
     )
   })
