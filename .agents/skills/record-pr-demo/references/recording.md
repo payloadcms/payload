@@ -108,6 +108,7 @@ Use semantic locators where practical. Assert each important state before contin
 The recorder supplies:
 
 - `chrome.back` / `chrome.forward`: visible recording-window history buttons. Use `await click(chrome.back)` or `await click(chrome.forward)` for paced pointer gestures; unavailable directions are disabled.
+- `chrome.refresh`: reloads the application frame through the persistent toolbar button; use `await click(chrome.refresh)` for a visible refresh gesture.
 - `baseURL`: normalized without a trailing slash;
 - `click(locator, options?)`: smoothly moves to a locator, pauses, clicks, and pauses again;
 - `expect`: Playwright assertions;
@@ -139,7 +140,7 @@ await page.keyboard.type('Halloween Sale', { delay: 80 })
 await click(page.getByRole('button', { name: 'Save', exact: true }))
 ```
 
-If a refresh is part of the story, send the browser reload shortcut through keyboard input and assert the resulting UI. Do not call `page.reload()` to advance the application during the walkthrough. The shared refresh indicator remains available for recorder development and preview controls.
+If a refresh is part of the story, use `await click(chrome.refresh)` and assert the resulting UI. This visibly clicks the persistent toolbar button, reloads only the app frame, and spins the icon while it loads. Do not call `page.reload()` to advance the application during the walkthrough.
 
 The recorder supplies cursor and click feedback automatically. Scenarios do not mount or style it. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.
 

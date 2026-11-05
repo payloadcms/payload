@@ -7,6 +7,7 @@ const root = document.querySelector('#chrome')
 const application = document.createElement('iframe')
 const chrome = mountDemoChrome({
   onNavigate: (direction) => application.contentWindow.history.go(direction),
+  onRefresh: refreshApplication,
   root,
   accessibility: isAccessibility,
   showAnnouncements: new URLSearchParams(location.search).has('announcements'),
@@ -135,10 +136,7 @@ play.addEventListener('click', () => {
 })
 renderAt({ milliseconds: 0 })
 
-const refresh = document.querySelector('#refresh')
-refresh.addEventListener('click', async () => {
-  if (refresh.getAttribute('aria-disabled') === 'true') return
-  refresh.setAttribute('aria-disabled', 'true')
+async function refreshApplication() {
   chrome.setRefreshState({ state: 'refreshing' })
   const started = performance.now()
   const loaded = new Promise((resolve) =>
@@ -150,5 +148,4 @@ refresh.addEventListener('click', async () => {
     setTimeout(resolve, Math.max(0, 300 - (performance.now() - started))),
   )
   chrome.setRefreshState({ state: 'refreshed' })
-  refresh.setAttribute('aria-disabled', 'false')
-})
+}

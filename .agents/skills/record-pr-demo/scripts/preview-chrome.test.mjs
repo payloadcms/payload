@@ -70,7 +70,7 @@ test('should scrub real responsive content without changing the title or footer 
   }
 })
 
-test('should preview a real frame refresh beside dimensions with keyboard controls', async () => {
+test('should refresh the real frame from the persistent toolbar button with keyboard controls', async () => {
   const { server, url } = await startChromePreview({ port: 0 })
   const browser = await chromium.launch({ headless: true })
   try {
@@ -90,7 +90,7 @@ test('should preview a real frame refresh beside dimensions with keyboard contro
     await expect(page.locator('[data-size]')).toHaveText('390 × 720')
     await expect(page.locator('#chrome').getByRole('status')).toHaveText('Refreshed')
     assert.equal(loads, 2)
-    assert.equal(await button.evaluate((e) => e === document.activeElement), true)
+    assert.equal(await button.evaluate((e) => e === e.getRootNode().activeElement), true)
     await expect(page.locator('#chrome').getByRole('status')).toBeHidden()
     await page.getByLabel('Dimensions', { exact: true }).uncheck()
     await button.click()

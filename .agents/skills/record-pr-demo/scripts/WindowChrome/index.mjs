@@ -6,6 +6,7 @@ export function mountDemoChrome({
   theme = 'light',
   showSize = true,
   onNavigate,
+  onRefresh,
   shouldAnimateAnnotations = true,
   accessibility = false,
   showAnnouncements = false,
@@ -53,9 +54,8 @@ export function mountDemoChrome({
     .address { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:1px solid var(--line); border-radius:7px; padding:3px 9px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; }
     .header-info { display:flex; align-items:center; justify-content:flex-end; gap:12px; min-width:0; }
     .header-info:not(:has(> :not([hidden]))) { display:none; }
-    .refresh { display:flex; align-items:center; gap:0; color:var(--sub); font:12px/1.5 system-ui,sans-serif; white-space:nowrap; }
-    .refresh[hidden] { display:none; }
-    .refresh svg { width:14px; height:14px; flex:none; }
+    .history .refresh { color:var(--sub); opacity:.45; }
+    .history .refresh:hover, .history .refresh:focus-visible, .history .refresh[data-state=refreshing] { opacity:1; }
     .refresh[data-state=refreshing] svg { animation:refresh-spin 650ms linear infinite; }
     @keyframes refresh-spin { to { transform:rotate(360deg); } }
     @media (prefers-reduced-motion:reduce) { .refresh[data-state=refreshing] svg { animation:none; } }
@@ -87,7 +87,7 @@ export function mountDemoChrome({
     .progress-fill { stroke:var(--color-bg-brand, #0d99ff); stroke-dasharray:100; stroke-dashoffset:100; transition-property:stroke-dashoffset; transition-timing-function:cubic-bezier(.4,0,.2,1); }
     @media (prefers-reduced-motion:reduce) { .progress-fill { transition-property:none; } }
     .step-progress[hidden] { display:none; }
-    [data-step-count], [data-refresh-text] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+    [data-step-count], [data-refresh], [data-refresh-text] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
     .note-title { font-size:13px; font-weight:500; overflow-wrap:anywhere; }
     .body { min-width:0; font-size:13px; color:var(--sub); overflow-wrap:anywhere; }
     .accessibility { --history-fade-bg:var(--paper); grid-row:3; grid-column:1 / -1; min-height:0; align-self:stretch; display:flex; align-items:center; gap:12px; margin-inline:-24px; margin-block-end:-12px; padding:12px 24px; border-block-start:1px solid var(--line); border-radius:0 0 11px 11px; background:var(--history-fade-bg); pointer-events:none; }
@@ -114,7 +114,7 @@ export function mountDemoChrome({
       ${accessibility ? `<div class="accessibility" data-accessibility aria-hidden="true"><div class="announcement-line"><span class="kind a11y-badge" data-a11y-badge>a11y</span>${hasAnnouncements ? '<svg class="speaking-icon" data-speaking-icon aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v-3.5A5.5 5.5 0 1 1 12 8l1.5 2.5H12v2a1.5 1.5 0 0 1-1.5 1.5H8v3M15.5 8a3.5 3.5 0 0 1 0 5M17.5 5.5a7 7 0 0 1 0 10"/><circle cx="9.5" cy="7.5" r=".7" fill="currentColor" stroke="none"/></svg><span class="announcement" data-announcement>Waiting for an update…</span>' : ''}</div><div class="key-slot"><div class="keystroke-overlay" data-keystroke-overlay aria-hidden="true" hidden><span class="keystroke" data-keystroke></span></div></div></div>` : ''}
     </section>
     <div class="window" data-window>
-      <div class="header"><div class="history" aria-label="Browser history"><button type="button" data-back aria-label="Back" title="Back" disabled><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 6 10l6 6M6 10h11"/></svg></button><button type="button" data-forward aria-label="Forward" title="Forward" disabled><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4 6 6-6 6M14 10H3"/></svg></button></div><div class="address" data-url role="textbox" aria-label="Application URL" aria-readonly="true">about:blank</div><div class="header-info" data-header-info><span class="refresh" data-refresh role="status" aria-live="polite" aria-atomic="true" hidden><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path data-refresh-path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-refresh-text></span></span><span class="size" data-size></span></div></div>
+      <div class="header"><div class="history" aria-label="Browser history"><button type="button" data-back aria-label="Back" title="Back" disabled><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 6 10l6 6M6 10h11"/></svg></button><button type="button" data-forward aria-label="Forward" title="Forward" disabled><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4 6 6-6 6M14 10H3"/></svg></button><button type="button" class="refresh" data-refresh-button data-state="idle" aria-label="Refresh frame" title="Refresh frame"><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><span data-refresh role="status" aria-live="polite" aria-atomic="true" hidden><span data-refresh-text></span></span><div class="address" data-url role="textbox" aria-label="Application URL" aria-readonly="true">about:blank</div><div class="header-info" data-header-info><span class="size" data-size></span></div></div>
       <div class="content" data-content><slot name="content"></slot></div>
     </div>
 
@@ -127,6 +127,11 @@ export function mountDemoChrome({
   find('[data-size]').hidden = !showSize
   find('[data-back]').onclick = () => onNavigate?.(-1)
   find('[data-forward]').onclick = () => onNavigate?.(1)
+  find('[data-refresh-button]').onclick = () => {
+    if (find('[data-refresh-button]').dataset.state !== 'refreshing') {
+      void Promise.resolve(onRefresh?.()).catch(() => {})
+    }
+  }
   const keyAnimations = new Set()
   const cancelKeyAnimations = () => {
     for (const animation of keyAnimations) animation.cancel()
@@ -398,17 +403,10 @@ export function mountDemoChrome({
       clearTimeout(refreshTimer)
       if (isDestroyed) return
       const status = find('[data-refresh]')
+      const button = find('[data-refresh-button]')
       status.hidden = state === 'idle'
-      status.dataset.state = state
-      find('[data-refresh-path]').setAttribute(
-        'd',
-        {
-          idle: '',
-          refreshing: 'M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9',
-          refreshed: 'M3 8l3.2 3.2L13 4.5',
-          failed: 'M4 4l8 8M12 4l-8 8',
-        }[state],
-      )
+      button.dataset.state = state
+      button.setAttribute('aria-disabled', String(state === 'refreshing'))
       find('[data-refresh-text]').textContent = {
         idle: '',
         refreshing: 'Refreshing…',
@@ -418,6 +416,7 @@ export function mountDemoChrome({
       if (state === 'refreshed')
         refreshTimer = setTimeout(() => {
           status.hidden = true
+          button.dataset.state = 'idle'
           find('[data-refresh-text]').textContent = ''
         }, 650)
     },

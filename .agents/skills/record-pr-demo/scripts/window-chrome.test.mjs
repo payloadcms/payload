@@ -310,11 +310,13 @@ test('should crossfade changed annotation text without restarting unchanged note
   })
 })
 
-test('should show refresh status beside dimensions without moving content, including reduced motion', async () => {
+test('should spin the persistent refresh control without moving content, including reduced motion', async () => {
   await withChrome({
     run: async ({ page }) => {
       const root = page.locator('#root')
       const content = await root.locator('[data-content]').boundingBox()
+      const refresh = root.getByRole('button', { name: 'Refresh frame', exact: true })
+      assert.equal(await refresh.isVisible(), true)
       await page.getByLabel('Keep focus').focus()
       await page.evaluate(() => window.chromeDemo.setRefreshState({ state: 'refreshing' }))
       const status = root.getByRole('status')
@@ -347,6 +349,8 @@ test('should show refresh status beside dimensions without moving content, inclu
       )
       await page.evaluate(() => window.chromeDemo.setRefreshState({ state: 'refreshed' }))
       assert.equal(await status.textContent(), 'Refreshed')
+      assert.equal(await refresh.isVisible(), true)
+      assert.equal(await refresh.evaluate((e) => getComputedStyle(e).opacity), '0.45')
       await page.waitForTimeout(1100)
       assert.equal(await status.isVisible(), false)
       await page.evaluate(() => window.chromeDemo.setRefreshState({ state: 'failed' }))

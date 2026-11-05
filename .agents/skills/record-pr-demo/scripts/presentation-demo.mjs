@@ -41,6 +41,7 @@ export async function createPresentation({
         window.demoChrome = mountDemoChrome({
           ...options,
           onNavigate: (direction) => app.contentWindow.history.go(direction),
+          onRefresh: () => window.refreshDemoApplication(),
           root,
           viewport,
           shouldAnimateAnnotations,
@@ -156,12 +157,16 @@ export async function createPresentation({
         return typeof value === 'function' ? value.bind(owner) : value
       },
     })
+    const refreshBinding = await stage.exposeFunction('refreshDemoApplication', () =>
+      appPage.reload(),
+    )
     return {
       page: stage,
       appPage,
       chrome: {
         back: stage.getByRole('button', { name: 'Back', exact: true }),
         forward: stage.getByRole('button', { name: 'Forward', exact: true }),
+        refresh: stage.getByRole('button', { name: 'Refresh frame', exact: true }),
       },
       startedAt,
       resizeWindow,
@@ -174,6 +179,7 @@ export async function createPresentation({
         ),
       stop: async () => {
         stage.off('framenavigated', onAppNavigation)
+        await refreshBinding?.dispose()
         await stage.evaluate(() => window.stopDemoHistory?.())
         if (options.accessibility) {
           await frame.evaluate(() => window.__stopDemoAccessibility?.()).catch(() => {})
