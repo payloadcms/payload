@@ -39,7 +39,7 @@ type Args = {
   prevFormStateRef: RefObject<FormState>
   props: FormProps
   queueTask: UseQueueResult['queueTask']
-  refreshFormStateAfterSave: UseFormStateResult['refreshFormStateAfterSave']
+  refreshFormState: UseFormStateResult['refreshFormState']
   setIsValid: UseFormStateResult['setIsValid']
   setModified: UseFormStateResult['setModified']
   validateForm: UseFormStateResult['validateForm']
@@ -47,7 +47,7 @@ type Args = {
 
 /**
  * Supplies Form's `submit` method and tracks submission status, processing, and disabling during a save.
- * Uses `useFormState`'s validation and post-save refresh methods around the submission, then handles callbacks, errors, toasts, and redirects.
+ * Validates and refreshes form state around the submission, then handles callbacks, errors, toasts, and redirects.
  * Forms with an `onSubmit` callback can commit values locally without sending a save request.
  *
  * @example
@@ -63,7 +63,7 @@ export const useFormSubmission = ({
   prevFormStateRef,
   props,
   queueTask,
-  refreshFormStateAfterSave,
+  refreshFormState,
   setIsValid,
   setModified,
   validateForm,
@@ -268,75 +268,79 @@ export const useFormSubmission = ({
           },
         )
 
-        // Execute server side validations
-        if (Array.isArray(beforeSubmit)) {
-          let revalidatedFormState: FormState
+        let res
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let json: Record<string, any> = {}
 
-          await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
-            await priorOnChange
+        try {
+          // Execute server side validations
+          if (Array.isArray(beforeSubmit)) {
+            let revalidatedFormState: FormState
 
-            const result = await beforeSubmitFn({
-              formState: serializableFormState,
-            })
+            await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
+              await priorOnChange
 
-            revalidatedFormState = result
-          }, Promise.resolve())
+              const result = await beforeSubmitFn({
+                formState: serializableFormState,
+              })
+
+              revalidatedFormState = result
+            }, Promise.resolve())
+
+            if (!requestContext.isCurrent()) {
+              return
+            }
+
+            const isValid = Object.entries(revalidatedFormState).every(
+              ([, field]) => field.valid !== false,
+            )
+
+            setIsValid(isValid)
+
+            if (!isValid) {
+              setIsSubmitted(true)
+              return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
+            }
+          }
+
+          const { data, fields, isValid } = await validateForm({
+            isCurrent: requestContext.isCurrent,
+            isLocalSubmission: Boolean(onSubmit && !hasFormSubmitAction),
+            skipValidation,
+          })
 
           if (!requestContext.isCurrent()) {
             return
           }
 
-          const isValid = Object.entries(revalidatedFormState).every(
-            ([, field]) => field.valid !== false,
-          )
-
-          setIsValid(isValid)
-
           if (!isValid) {
+            errorToast(t('error:correctInvalidFields'))
             setIsSubmitted(true)
-            return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
-          }
-        }
-
-        const { data, fields, isValid } = await validateForm({
-          isCurrent: requestContext.isCurrent,
-          isLocalSubmission: Boolean(onSubmit && !hasFormSubmitAction),
-          skipValidation,
-        })
-
-        if (!requestContext.isCurrent()) {
-          return
-        }
-
-        if (!isValid) {
-          errorToast(t('error:correctInvalidFields'))
-          setIsSubmitted(true)
-          return
-        }
-
-        let overrides = {}
-
-        if (typeof overridesFromArgs === 'function') {
-          overrides = overridesFromArgs(fields)
-        } else if (typeof overridesFromArgs === 'object') {
-          overrides = overridesFromArgs
-        }
-
-        // If submit handler comes through via props, run that
-        if (onSubmit) {
-          for (const [key, value] of Object.entries(overrides)) {
-            data[key] = value
+            return
           }
 
-          onSubmit(fields, data)
-        }
+          let overrides = {}
 
-        if (!hasFormSubmitAction) {
-          setIsSubmitted(true)
-          return
-        }
+          if (typeof overridesFromArgs === 'function') {
+            overrides = overridesFromArgs(fields)
+          } else if (typeof overridesFromArgs === 'object') {
+            overrides = overridesFromArgs
+          }
 
-        try {
+          // If submit handler comes through via props, run that
+          if (onSubmit) {
+            for (const [key, value] of Object.entries(overrides)) {
+              data[key] = value
+            }
+
+            onSubmit(fields, data)
+          }
+
+          if (!hasFormSubmitAction) {
+            setIsSubmitted(true)
+            return
+          }
+
           const formData = await contextRef.current.createFormData(overrides, {
             data,
             mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
@@ -345,8 +349,6 @@ export const useFormSubmission = ({
           if (!requestContext.isCurrent()) {
             return
           }
-
-          let res
 
           if (typeof actionArg === 'string') {
             res = await requests[methodToUse.toLowerCase()](actionArg, {
@@ -369,168 +371,184 @@ export const useFormSubmission = ({
 
           isModifiedWhileProcessing.current = false
 
-          if (typeof handleResponse === 'function') {
-            preservePromiseToast = true
+          if (typeof handleResponse !== 'function') {
+            const contentType = res.headers.get('content-type')
+            const isJSON = contentType && contentType.indexOf('application/json') !== -1
 
-            await handleResponse(res, successToast, errorToast)
-
-            return
-          }
-
-          const contentType = res.headers.get('content-type')
-          const isJSON = contentType && contentType.indexOf('application/json') !== -1
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          let json: Record<string, any> = {}
-
-          if (isJSON) {
-            json = await res.json()
+            if (isJSON) {
+              json = await res.json()
+            }
           }
 
           if (!requestContext.isCurrent()) {
             return
           }
+        } finally {
+          const isSuccessfulResponse = res?.status < 400
 
-          if (res.status < 400) {
-            setSuccessfulSubmitCount((count) => count + 1)
-
+          if (
+            requestContext.isCurrent() &&
+            hasFormSubmitAction &&
+            (isSuccessfulResponse
+              ? typeof handleResponse !== 'function'
+              : options?.submissionType === 'autosave')
+          ) {
             try {
-              await refreshFormStateAfterSave({
-                acceptValues,
-                isCurrent: requestContext.isCurrent,
-                refreshPermissions: context?.getDocPermissions !== false,
-                savedDocument: json?.doc ?? json?.result,
-              })
-            } catch (err) {
-              // Persistence succeeded; a refresh failure must not turn this into a failed save.
-              toast.error(err instanceof Error ? err.message : t('error:unknown'))
-            }
-
-            if (requestContext.isCurrent() && typeof onSuccess === 'function') {
-              try {
-                await onSuccess(json, {
-                  context,
-                  formState: serializableFormState,
-                })
-              } catch (err) {
-                toast.error(err instanceof Error ? err.message : t('error:unknown'))
-              }
-            }
-
-            // The save succeeded even if `onSuccess` reset or unmounted the form, so always settle the toast.
-            preservePromiseToast = true
-            setIsSubmitted(false)
-
-            if (redirect) {
-              if (requestContext.isCurrent()) {
-                void startRouteTransition(() => router.push(redirect))
-              }
-            } else if (!disableToast) {
-              successToast(json.message || t('general:submissionSuccessful'))
-            }
-          } else {
-            setIsSubmitted(true)
-
-            // When there was an error submitting a draft,
-            // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
-            // Also keep the form as modified so the save button remains enabled for retry.
-            if (overridesFromArgs['_status'] === 'draft') {
-              setIsModified(true)
-
-              if (!validateDrafts) {
-                setIsSubmitted(false)
-              }
-            }
-
-            contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
-
-            if (json.message) {
-              errorToast(json.message)
-              return
-            }
-
-            if (Array.isArray(json.errors)) {
-              const [fieldErrors, nonFieldErrors] = json.errors.reduce(
-                ([fieldErrs, nonFieldErrs], err) => {
-                  const newFieldErrs = []
-                  const newNonFieldErrs = []
-
-                  if (err?.message) {
-                    newNonFieldErrs.push(err)
-                  }
-
-                  if (Array.isArray(err?.data?.errors)) {
-                    err.data?.errors.forEach((dataError) => {
-                      if (dataError?.path) {
-                        newFieldErrs.push(dataError)
-                      } else {
-                        newNonFieldErrs.push(dataError)
-                      }
-                    })
-                  }
-
-                  return [
-                    [...fieldErrs, ...newFieldErrs],
-                    [...nonFieldErrs, ...newNonFieldErrs],
-                  ]
-                },
-                [[], []],
+              // Refresh before applying save errors so the refresh cannot erase them.
+              await refreshFormState(
+                isSuccessfulResponse
+                  ? {
+                      type: 'afterSave',
+                      acceptValues,
+                      isCurrent: requestContext.isCurrent,
+                      refreshPermissions: context?.getDocPermissions !== false,
+                      savedDocument: json?.doc ?? json?.result,
+                    }
+                  : { type: 'refresh', isCurrent: requestContext.isCurrent },
               )
-
-              setIsValid(false)
-
-              const serverErrorAction = {
-                type: 'ADD_SERVER_ERRORS' as const,
-                errors: fieldErrors,
+            } catch (err) {
+              if (isSuccessfulResponse) {
+                // Persistence succeeded; a refresh failure must not turn this into a failed save.
+                toast.error(err instanceof Error ? err.message : t('error:unknown'))
+              } else {
+                console.error('Error refreshing form state', err) // eslint-disable-line no-console
               }
-
-              prevFormStateRef.current = fieldReducer(prevFormStateRef.current, serverErrorAction)
-              dispatchFields(serverErrorAction)
-
-              nonFieldErrors.forEach((err) => {
-                // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
-                if (
-                  onNonFieldError?.(
-                    err,
-                    () => void contextRef.current.submit({ overrides: overridesFromArgs }),
-                  )
-                ) {
-                  return
-                }
-
-                errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
-              })
-
-              return
             }
-
-            const message = errorMessages?.[res.status] || res?.statusText || t('error:unknown')
-
-            errorToast(message)
           }
-
-          return { formState: contextRef.current.fields, res }
-        } catch (err) {
-          const isCurrentRequest = requestContext.isCurrent()
-
-          if (!preservePromiseToast && !isCurrentRequest) {
-            return
-          }
-
-          console.error('Error submitting form', err) // eslint-disable-line no-console
-
-          if (isCurrentRequest) {
-            setIsSubmitted(true)
-          }
-
-          errorToast(err.message)
         }
-      } catch (err) {
-        if (!requestContext.isCurrent()) {
+
+        if (res.status >= 400 && !requestContext.isCurrent()) {
           return
         }
 
-        setIsSubmitted(true)
+        if (typeof handleResponse === 'function') {
+          preservePromiseToast = true
+
+          await handleResponse(res, successToast, errorToast)
+
+          return
+        }
+
+        if (res.status < 400) {
+          setSuccessfulSubmitCount((count) => count + 1)
+
+          if (requestContext.isCurrent() && typeof onSuccess === 'function') {
+            try {
+              await onSuccess(json, {
+                context,
+                formState: serializableFormState,
+              })
+            } catch (err) {
+              toast.error(err instanceof Error ? err.message : t('error:unknown'))
+            }
+          }
+
+          // The save succeeded even if `onSuccess` reset or unmounted the form, so always settle the toast.
+          preservePromiseToast = true
+          setIsSubmitted(false)
+
+          if (redirect) {
+            if (requestContext.isCurrent()) {
+              void startRouteTransition(() => router.push(redirect))
+            }
+          } else if (!disableToast) {
+            successToast(json.message || t('general:submissionSuccessful'))
+          }
+        } else {
+          setIsSubmitted(true)
+
+          // When there was an error submitting a draft,
+          // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
+          // Also keep the form as modified so the save button remains enabled for retry.
+          if (overridesFromArgs['_status'] === 'draft') {
+            setIsModified(true)
+
+            if (!validateDrafts) {
+              setIsSubmitted(false)
+            }
+          }
+
+          contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
+
+          if (json.message) {
+            errorToast(json.message)
+            return
+          }
+
+          if (Array.isArray(json.errors)) {
+            const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+              ([fieldErrs, nonFieldErrs], err) => {
+                const newFieldErrs = []
+                const newNonFieldErrs = []
+
+                if (err?.message) {
+                  newNonFieldErrs.push(err)
+                }
+
+                if (Array.isArray(err?.data?.errors)) {
+                  err.data?.errors.forEach((dataError) => {
+                    if (dataError?.path) {
+                      newFieldErrs.push(dataError)
+                    } else {
+                      newNonFieldErrs.push(dataError)
+                    }
+                  })
+                }
+
+                return [
+                  [...fieldErrs, ...newFieldErrs],
+                  [...nonFieldErrs, ...newNonFieldErrs],
+                ]
+              },
+              [[], []],
+            )
+
+            setIsValid(false)
+
+            const serverErrorAction = {
+              type: 'ADD_SERVER_ERRORS' as const,
+              errors: fieldErrors,
+            }
+
+            prevFormStateRef.current = fieldReducer(prevFormStateRef.current, serverErrorAction)
+            dispatchFields(serverErrorAction)
+
+            nonFieldErrors.forEach((err) => {
+              // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
+              if (
+                onNonFieldError?.(
+                  err,
+                  () => void contextRef.current.submit({ overrides: overridesFromArgs }),
+                )
+              ) {
+                return
+              }
+
+              errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
+            })
+
+            return
+          }
+
+          const message = errorMessages?.[res.status] || res?.statusText || t('error:unknown')
+
+          errorToast(message)
+        }
+
+        return { formState: contextRef.current.fields, res }
+      } catch (err) {
+        const isCurrentRequest = requestContext.isCurrent()
+
+        if (!preservePromiseToast && !isCurrentRequest) {
+          return
+        }
+
+        console.error('Error submitting form', err) // eslint-disable-line no-console
+
+        if (isCurrentRequest) {
+          setIsSubmitted(true)
+        }
+
         errorToast(err instanceof Error ? err.message : t('error:unknown'))
       } finally {
         if (requestContext.isCurrent()) {
@@ -560,7 +578,7 @@ export const useFormSubmission = ({
       onSubmit,
       onSuccess,
       redirect,
-      refreshFormStateAfterSave,
+      refreshFormState,
       validateForm,
       router,
       t,

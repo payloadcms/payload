@@ -238,6 +238,8 @@ export interface AutosavePost {
   title?: string | null;
   computedTitle?: string | null;
   restrictedValue?: string | null;
+  showConditionalField?: boolean | null;
+  conditionalField?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -440,6 +442,8 @@ export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
   computedTitle?: T;
   restrictedValue?: T;
+  showConditionalField?: T;
+  conditionalField?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

@@ -86,8 +86,8 @@ export const Form: React.FC<FormProps> = (props) => {
     isModified,
     isValid,
     prevFormStateRef,
+    queueFormStateRefresh,
     refreshFormState,
-    refreshFormStateAfterSave,
     resetFormState,
     setIsValid,
     setModified: setFormStateModified,
@@ -123,7 +123,7 @@ export const Form: React.FC<FormProps> = (props) => {
     prevFormStateRef,
     props,
     queueTask,
-    refreshFormStateAfterSave,
+    refreshFormState,
     setIsValid,
     setModified: setFormStateModified,
     validateForm,
@@ -383,7 +383,7 @@ export const Form: React.FC<FormProps> = (props) => {
         (isFirstRenderRef.current || !dequal(formState, prevFormStateRef.current)) &&
         isModified
       ) {
-        refreshFormState()
+        queueFormStateRefresh()
       }
 
       prevFormStateRef.current = formState
