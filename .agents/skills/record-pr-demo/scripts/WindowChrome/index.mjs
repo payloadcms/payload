@@ -60,7 +60,7 @@ export function mountDemoChrome({
     .refresh[data-state=refreshing] svg { animation:refresh-spin 650ms linear infinite; }
     @keyframes refresh-spin { to { transform:rotate(360deg); } }
     @media (prefers-reduced-motion:reduce) { .refresh[data-state=refreshing] svg { animation:none; } }
-    .size { padding:4px 9px; border-radius:7px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+    .size { padding:3px 9px; border:1px solid var(--line); border-radius:7px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; }
     .content { position:relative; overflow:hidden; border-radius:8px; background:var(--paper); }
     ::slotted([slot=content]) { display:block; width:100%; height:100%; border:0; }
     .footer { position:absolute; top:32px; left:50%; transform:translateX(-50%); width:min(1302px,calc(100% - 64px)); height:${accessibility ? 144 : 104}px; display:grid; grid-template-rows:${accessibility ? '32px minmax(0,1fr) 36px' : '32px minmax(0,1fr)'}; row-gap:4px; grid-template-columns:minmax(0,1fr); align-items:center; padding:12px 24px; border:1px solid var(--line); border-radius:12px; color:var(--ink); background:var(--paper); }
