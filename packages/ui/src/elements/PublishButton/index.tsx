@@ -185,7 +185,7 @@ export function PublishButton({
       },
     })
 
-    if (result) {
+    if (result && result.res.ok) {
       setUnpublishedVersionCount(0)
       setMostRecentVersionIsAutosaved(false)
       setHasPublishedDoc(true)
@@ -234,7 +234,7 @@ export function PublishButton({
         },
       })
 
-      if (result) {
+      if (result && result.res.ok) {
         setUnpublishedVersionCount(0)
         setMostRecentVersionIsAutosaved(false)
         setHasPublishedDoc(true)

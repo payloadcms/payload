@@ -63,7 +63,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
       })
     }
 
-    await submit({
+    const result = await submit({
       action,
       method,
       overrides: {
@@ -71,6 +71,10 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
       },
       skipValidation: true,
     })
+
+    if (!result || !result.res.ok) {
+      return
+    }
 
     setUnpublishedVersionCount((count) => count + 1)
   }, [submit, collectionSlug, globalSlug, api, locale, id, disabled, setUnpublishedVersionCount])
