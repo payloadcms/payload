@@ -121,10 +121,19 @@ describe('getFileContentRequirement', () => {
   it('requires only the header for a non-resizable but recognized image type', () => {
     expect(
       getFileContentRequirement({
-        mimeType: 'image/svg+xml',
+        mimeType: 'image/jxl',
         uploadConfig: createUploadConfig(),
       }),
     ).toBe('header')
+  })
+
+  it('requires the full file for an SVG so its safety check sees the whole document', () => {
+    expect(
+      getFileContentRequirement({
+        mimeType: 'image/svg+xml',
+        uploadConfig: createUploadConfig(),
+      }),
+    ).toBe('full')
   })
 
   it('requires the full file for an image when disableLocalStorage is not set', () => {
@@ -144,17 +153,4 @@ describe('getFileContentRequirement', () => {
       }),
     ).toBe('full')
   })
-
-  it.each(['video/mp4', 'image/png'])(
-    'requires the full file for %s when a transformFile transformer will process it',
-    (mimeType) => {
-      expect(
-        getFileContentRequirement({
-          hasTransformFileStages: true,
-          mimeType,
-          uploadConfig: createUploadConfig(),
-        }),
-      ).toBe('full')
-    },
-  )
 })
