@@ -13,6 +13,8 @@ export function findUpSync({
   dir: string
   fileNames?: string[]
 }): null | string {
+  // A relative dir never reaches root: path.dirname('.') === '.' and path.parse('.').root === ''
+  dir = path.resolve(dir)
   const { root } = path.parse(dir)
 
   while (true) {
@@ -60,6 +62,8 @@ export async function findUp({
   dir: string
   fileNames?: string[]
 }): Promise<null | string> {
+  // A relative dir never reaches root: path.dirname('.') === '.' and path.parse('.').root === ''
+  dir = path.resolve(dir)
   const { root } = path.parse(dir)
 
   while (true) {
