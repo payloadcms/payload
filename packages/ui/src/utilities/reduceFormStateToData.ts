@@ -27,6 +27,10 @@ export const reduceFormStateToData = ({
         return [path, { ...fieldState, value: null }]
       }
 
+      if (fieldState.rows.length === 0 && fieldState.value !== null) {
+        return [path, { ...fieldState, disableFormData: false, value: [] }]
+      }
+
       return [
         path,
         fieldState.value === null ? fieldState : { ...fieldState, disableFormData: true },

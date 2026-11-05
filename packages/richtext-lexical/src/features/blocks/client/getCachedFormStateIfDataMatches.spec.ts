@@ -219,7 +219,7 @@ describe('getCachedFormStateIfDataMatches', () => {
     expect(getCachedFormStateIfDataMatches({ cachedFormState, formData: {} })).toBe(cachedFormState)
   })
 
-  it('should omit empty row counts and unset values when converting form state to block data', () => {
+  it('should preserve empty arrays and omit unset values when converting form state to block data', () => {
     expect(
       reduceFormStateToData({
         formState: {
@@ -243,7 +243,8 @@ describe('getCachedFormStateIfDataMatches', () => {
         },
       }),
     ).toEqual({
-      sections: [{ id: 'section-1' }],
+      items: [],
+      sections: [{ id: 'section-1', items: [] }],
     })
   })
 
@@ -285,7 +286,7 @@ describe('getCachedFormStateIfDataMatches', () => {
         },
         initialData: { items: null },
       }),
-    ).toEqual({})
+    ).toEqual({ items: [] })
   })
 
   it('should keep a null-to-empty array change after a sibling field changes', () => {
@@ -304,7 +305,7 @@ describe('getCachedFormStateIfDataMatches', () => {
         },
         initialData: { items: null, title: 'Before' },
       }),
-    ).toEqual({ title: 'After' })
+    ).toEqual({ items: [], title: 'After' })
   })
 
   it.each([

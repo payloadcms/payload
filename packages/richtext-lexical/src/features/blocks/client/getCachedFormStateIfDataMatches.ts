@@ -18,10 +18,14 @@ export const getCachedFormStateIfDataMatches = ({
     return false
   }
 
-  const cachedData = reduceFormStateToData({ formState: cachedFormState })
+  const rowFieldPaths = getRowFieldPaths(cachedFormState)
+  const cachedData = normalizeData({
+    data: reduceFormStateToData({ formState: cachedFormState }),
+    rowFieldPaths,
+  })
   const currentData = normalizeData({
     data: formData,
-    rowFieldPaths: getRowFieldPaths(cachedFormState),
+    rowFieldPaths,
   })
 
   return dequal(withoutSystemBlockFields(cachedData), withoutSystemBlockFields(currentData))
