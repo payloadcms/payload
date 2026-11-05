@@ -43,5 +43,10 @@ export const PostsImportsOnly: CollectionConfig = {
       name: 'content',
       type: 'richText',
     },
+    {
+      name: 'author',
+      type: 'relationship',
+      relationTo: 'users',
+    },
   ],
 }
