@@ -258,6 +258,36 @@ export function toPipelineEdits({
 }
 
 /**
+ * The edits for a rebuild from the retained original. Another key can cause the rebuild, so the
+ * saved crop is applied again unless the edits already set a crop.
+ */
+export function withSavedCrop({
+  edits,
+  original,
+  transforms,
+}: {
+  edits: UploadEdits
+  original: { height?: null | number; width?: null | number }
+  transforms: TransformState | undefined
+}): UploadEdits {
+  const savedCrop = transforms?.crop
+
+  if (edits?.crop || !savedCrop || !original.width || !original.height) {
+    return edits
+  }
+
+  return {
+    ...edits,
+    crop: cropToPercent({
+      crop: savedCrop,
+      original: { height: original.height, width: original.width },
+    }),
+    heightInPixels: savedCrop.height,
+    widthInPixels: savedCrop.width,
+  }
+}
+
+/**
  * The focal point written through the query or through `focalX`/`focalY`. Each of `focalX` and
  * `focalY` can be sent alone. The admin sends back the stored, rounded values on every save, so a
  * value equal to the stored one is not a write and the exact saved value is kept.

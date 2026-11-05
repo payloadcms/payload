@@ -221,7 +221,7 @@ async function cancelUnusedBody(response: Response | undefined): Promise<void> {
   }
 }
 
-function planRequestPipeline({
+async function planRequestPipeline({
   collection,
   document,
   filename,
@@ -234,7 +234,7 @@ function planRequestPipeline({
 }): Promise<UploadTransformer[]> {
   const documentSnapshot = deepFreeze(deepCopyObject(document))
 
-  return planTransformerPipeline({
+  const { pipeline } = await planTransformerPipeline({
     args: {
       collectionSlug: collection.config.slug,
       doc: documentSnapshot,
@@ -247,6 +247,8 @@ function planRequestPipeline({
     capability: 'handleRequest',
     transformers: req.payload.config.upload.transformers,
   })
+
+  return pipeline
 }
 
 type AccessResult = { document?: ResolvedUploadDocument; isAllowed: true } | { isAllowed: false }
