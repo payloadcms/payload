@@ -182,9 +182,7 @@ describe('buildRawSchema', () => {
     expect(warn).not.toHaveBeenCalled()
   })
 
-  it('should warn about raw inline sub-table index and foreign key names that exceed 63 chars', async () => {
-    // Array sub-tables assign structural index/FK names inline (not via buildIndexName/
-    // buildForeignKeyName), so a long-but-valid array table name still overflows them.
+  it('should keep array sub-table index and foreign key names within 63 chars', async () => {
     const arrayFieldName = 'a'.repeat(58)
 
     const config = await sanitizeConfig({
@@ -208,16 +206,92 @@ describe('buildRawSchema', () => {
 
     buildRawSchema({ adapter, setColumnID })
 
-    const arrayTable = `p_${arrayFieldName}`
+    const arrayTable = adapter.rawTables[`p_${arrayFieldName}`]
+
+    expect(arrayTable).toBeDefined()
+    expect(arrayTable.indexes._orderIdx.name.length).toBeLessThanOrEqual(63)
+    expect(arrayTable.indexes._parentIDIdx.name.length).toBeLessThanOrEqual(63)
+    expect(arrayTable.foreignKeys._parentIDFk.name.length).toBeLessThanOrEqual(63)
 
     checkTruncatedIdentifiers({ adapter, logWarnings: true })
 
-    expect(arrayTable.length).toBeLessThanOrEqual(63)
-    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn).not.toHaveBeenCalled()
+  })
 
-    const message: string = warn.mock.calls[0][0]
+  it('should move a relationship foreign key past 63 chars to a named table-level foreign key', async () => {
+    const groupName = 'g'.repeat(40)
 
-    expect(message).toContain(`${arrayTable}_order_idx`)
-    expect(message).toContain(`${arrayTable}_parent_id_fk`)
+    const config = sanitizeConfig({
+      collections: [
+        {
+          slug: 'p',
+          fields: [
+            {
+              name: groupName,
+              type: 'group',
+              fields: [{ name: 'author', type: 'relationship', relationTo: 'authors' }],
+            },
+          ],
+          timestamps: false,
+          versions: false,
+        },
+        {
+          slug: 'authors',
+          fields: [],
+          timestamps: false,
+          versions: false,
+        },
+      ],
+    } as Config)
+
+    const adapter = createAdapter(config)
+
+    buildRawSchema({ adapter, setColumnID })
+
+    const table = adapter.rawTables.p
+    const columnKey = `${groupName}_author`
+
+    expect(table.columns[columnKey].reference).toBeUndefined()
+
+    const foreignKey = table.foreignKeys?.[`${columnKey}Fk`]
+
+    expect(foreignKey).toBeDefined()
+    expect(foreignKey?.name.length).toBeLessThanOrEqual(63)
+    expect(foreignKey?.name.endsWith('_fk')).toBe(true)
+    expect(foreignKey?.columns).toEqual([columnKey])
+    expect(foreignKey?.foreignColumns).toEqual([{ name: 'id', table: 'authors' }])
+    expect(foreignKey?.onDelete).toBe('set null')
+  })
+
+  it('should keep the inline reference for a relationship foreign key within 63 chars', async () => {
+    const config = sanitizeConfig({
+      collections: [
+        {
+          slug: 'posts',
+          fields: [{ name: 'author', type: 'relationship', relationTo: 'authors' }],
+          timestamps: false,
+          versions: false,
+        },
+        {
+          slug: 'authors',
+          fields: [],
+          timestamps: false,
+          versions: false,
+        },
+      ],
+    } as Config)
+
+    const adapter = createAdapter(config)
+
+    buildRawSchema({ adapter, setColumnID })
+
+    const table = adapter.rawTables.posts
+
+    expect(table.columns.author.reference).toEqual({
+      name: 'id',
+      onDelete: 'set null',
+      table: 'authors',
+    })
+    expect(table.foreignKeys?.authorFk).toBeUndefined()
   })
 })
