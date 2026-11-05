@@ -52,6 +52,7 @@ export function mountDemoChrome({
     .history button:focus-visible { outline:2px solid #0d99ff; outline-offset:1px; }
     .history svg { width:17px; height:17px; pointer-events:none; }
     .address { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:1px solid var(--line); border-radius:7px; padding:3px 9px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; }
+    .header:has([data-size][hidden]) .address { margin-inline-end:12px; }
     .header-info { display:flex; align-items:center; justify-content:flex-end; gap:12px; min-width:0; }
     .header-info:not(:has(> :not([hidden]))) { display:none; }
     .history .refresh { color:var(--sub); opacity:.45; }
