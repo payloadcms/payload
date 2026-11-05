@@ -83,7 +83,9 @@ export const getConstraints = (config: Config): Field => ({
                     data?.access?.[constraintOperation]?.constraint === 'specificUsers' &&
                     req.user
                   ) {
-                    return [...(data?.access?.[constraintOperation]?.users || []), req.user.id]
+                    return [
+                      ...new Set(data?.access?.[constraintOperation]?.users || []).add(req.user.id),
+                    ]
                   }
                 },
               ],

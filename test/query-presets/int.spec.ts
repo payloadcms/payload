@@ -206,6 +206,41 @@ test.suite('Query Presets', { config: './config.ts', resetBetweenTests: false },
       ).rejects.toThrow('You are not allowed to perform this action.')
     })
 
+    test('should not duplicate the current user when saving "specificUsers"', async ({
+      payload,
+    }) => {
+      const access = {
+        update: {
+          constraint: 'specificUsers' as const,
+          users: [adminUser.id, editorUser.id],
+        },
+      }
+
+      const preset = await payload.create({
+        collection: queryPresetsCollectionSlug,
+        user: adminUser,
+        overrideAccess: false,
+        data: {
+          title: 'Specific Users (No Duplicates)',
+          access,
+          relatedCollection: 'pages',
+        },
+      })
+
+      const updatedPreset = await payload.update({
+        collection: queryPresetsCollectionSlug,
+        id: preset.id,
+        user: adminUser,
+        overrideAccess: false,
+        depth: 0,
+        data: {
+          access,
+        },
+      })
+
+      expect(updatedPreset.access?.update?.users).toEqual([adminUser.id, editorUser.id])
+    })
+
     test('should respect access when set to "onlyMe"', async ({ payload }) => {
       const presetForOnlyMe = await payload.create({
         collection: queryPresetsCollectionSlug,
