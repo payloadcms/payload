@@ -36,3 +36,5 @@ export const trashMediaDir = path.resolve(
 
 /** The `flip` value the flip stage saw on each run, in order. */
 export const flipStageRuns: unknown[] = []
+/** The `doc.mimeType` the flip stage's `canTransform` saw on each upload plan, in order. */
+export const flipStagePlannedMimeTypes: unknown[] = []

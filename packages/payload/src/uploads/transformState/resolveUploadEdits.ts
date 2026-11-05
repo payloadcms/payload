@@ -303,9 +303,10 @@ export function toPipelineEdits({
 
 /**
  * The edits for a rebuild from the retained original. Another key can cause the rebuild, so the
- * saved crop is applied again unless the edits already set a crop.
+ * saved crop and focal point are applied again, unless the edits already set them. Without the
+ * focal point, the sizes would be built around the center.
  */
-export function withSavedCrop({
+export function withSavedEdits({
   edits,
   original,
   transforms,
@@ -315,19 +316,22 @@ export function withSavedCrop({
   transforms: TransformState | undefined
 }): UploadEdits {
   const savedCrop = transforms?.crop
-
-  if (edits?.crop || !savedCrop || !original.width || !original.height) {
-    return edits
-  }
+  const savedFocalPoint = transforms?.focalPoint
+  const canApplySavedCrop = !edits?.crop && savedCrop && original.width && original.height
 
   return {
     ...edits,
-    crop: cropToPercent({
-      crop: savedCrop,
-      original: { height: original.height, width: original.width },
-    }),
-    heightInPixels: savedCrop.height,
-    widthInPixels: savedCrop.width,
+    ...(canApplySavedCrop
+      ? {
+          crop: cropToPercent({
+            crop: savedCrop,
+            original: { height: original.height!, width: original.width! },
+          }),
+          heightInPixels: savedCrop.height,
+          widthInPixels: savedCrop.width,
+        }
+      : {}),
+    ...(!edits?.focalPoint && savedFocalPoint ? { focalPoint: savedFocalPoint } : {}),
   }
 }
 

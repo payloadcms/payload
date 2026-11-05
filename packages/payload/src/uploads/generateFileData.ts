@@ -51,7 +51,7 @@ import {
   planUploadPipeline,
   planUploadRebuild,
 } from './transformState/planUploadRebuild.js'
-import { resolveUploadEdits, withSavedCrop } from './transformState/resolveUploadEdits.js'
+import { resolveUploadEdits, withSavedEdits } from './transformState/resolveUploadEdits.js'
 import { isClaimRequired, isFocalPointKey } from './transformState/transformKeyClaims.js'
 import { validateUploadURL } from './validateUploadURL.js'
 type Args<T> = {
@@ -318,6 +318,12 @@ const processUpload = async <T>({
   let isLocalFile = false
 
   const storedMimeType = retainedOriginal?.mimeType ?? currentFileData?.mimeType
+  // A rebuild reads the retained original, so planning sees its size and type, as the stages
+  // will after the read. The name stays the main file's, as for the file that is read.
+  if (retainedOriginal) {
+    pipelineDoc.filesize = retainedOriginal.filesize
+    pipelineDoc.mimeType = retainedOriginal.mimeType
+  }
   // Only transformers read originalDoc, so it is copied only when there are some.
   const createOriginalDoc = (): Readonly<Document> =>
     hasTransformers ? deepFreeze(deepCopyObject(pipelineDoc)) : pipelineDoc
@@ -353,7 +359,7 @@ const processUpload = async <T>({
   let { rebuildPlan } = rebuildPlanning
 
   if (shouldRebuild && retainedOriginal) {
-    uploadEdits = withSavedCrop({
+    uploadEdits = withSavedEdits({
       edits: uploadEdits,
       original: retainedOriginal,
       transforms: pipelineDoc._transforms,
@@ -458,7 +464,7 @@ const processUpload = async <T>({
 
   // Transformers see the incoming file. Core sets the saved file fields from the output file
   // later, so the saved filename can still change, for example to avoid a name clash. A rebuild
-  // plan made before the read stays valid: it was made for this same stored file.
+  // plan made before the read stays valid: it already saw the retained original's fields.
   setIncomingFileFields({ doc: pipelineDoc, file })
   pipelineOriginalDoc = createOriginalDoc()
 

@@ -12,8 +12,11 @@ import type { FileVersionedTransformedMedia, UploadTransforms } from './payload-
 
 import { test } from '../__helpers/int/vitest.js'
 import {
+  convertedMediaDir,
+  convertedMediaSlug,
   draftMediaDir,
   draftMediaSlug,
+  flipStagePlannedMimeTypes,
   flipStageRuns,
   transformedMediaDir,
   transformedMediaSlug,
@@ -30,6 +33,7 @@ const toLocalPath = (url?: null | string) => new URL(url!, 'http://payload.local
 test.suite('File transform state', { config: './config.ts' }, () => {
   test.afterEach(async () => {
     await rm(transformedMediaDir, { force: true, recursive: true })
+    await rm(convertedMediaDir, { force: true, recursive: true })
     await rm(draftMediaDir, { force: true, recursive: true })
   })
 
@@ -182,6 +186,27 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     expect(updated).toMatchObject({ _transforms: null, height: 1600, width: 1600 })
     expect(updated.filename).toBe(updated.original?.filename)
     expect(await readFile(path.join(transformedMediaDir, updated.filename!))).toEqual(bytes)
+  })
+
+  test('should plan a rebuild with the fields of the original, not of the converted main file', async ({
+    payload,
+  }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: convertedMediaSlug,
+      data: { alt: 'converted' },
+      file: { name: 'converted.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+    flipStagePlannedMimeTypes.length = 0
+
+    await payload.update({
+      id: created.id,
+      collection: convertedMediaSlug,
+      data: { _transforms: { flip: { horizontal: true } } },
+    })
+
+    expect(created.mimeType).toBe('image/jpeg')
+    expect(flipStagePlannedMimeTypes).toEqual(['image/png'])
   })
 
   test('should keep the saved crop when only the focal point changes', async ({ payload }) => {
