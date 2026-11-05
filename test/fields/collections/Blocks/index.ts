@@ -440,6 +440,47 @@ export const BlockFields: CollectionConfig = {
       blocks: ['ConfigBlockTest'],
     },
     {
+      name: 'sharedBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'sharedBlock',
+          fields: [
+            {
+              name: 'inlineText',
+              type: 'text',
+              hooks: {
+                afterChange: [
+                  ({ req, value }) => {
+                    req.context.inlineBlockAfterChange = true
+                    return value
+                  },
+                ],
+                afterRead: [
+                  ({ req, value }) => {
+                    req.context.inlineBlockRead = true
+                    return value
+                  },
+                ],
+                beforeChange: [
+                  ({ req, value }) => {
+                    req.context.inlineBlockBeforeChange = true
+                    return value
+                  },
+                ],
+                beforeValidate: [
+                  ({ req, value }) => {
+                    req.context.inlineBlockVisited = true
+                    return value
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'configuration',
       type: 'blocks',
       blocks: ['conditionalReference'],
