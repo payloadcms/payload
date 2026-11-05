@@ -14,6 +14,7 @@ import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { requests } from '../../../utilities/api.js'
+import { formatBulkErrorDescription } from '../../../utilities/bulkErrorMessages.js'
 import { Button } from '../../Button/index.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { Translation } from '../../Translation/index.js'
@@ -128,7 +129,7 @@ export function ListEmptyTrashButton({
 
       if (json?.errors?.length > 0) {
         toast.error(json.message, {
-          description: json.errors.map((err) => err.message).join('\n'),
+          description: formatBulkErrorDescription({ errors: json.errors }),
         })
       }
 
