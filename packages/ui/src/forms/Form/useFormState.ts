@@ -463,27 +463,37 @@ export const useFormState = ({
           }
         }
 
-        const mergedState = mergeServerFormState({
+        const currentState = contextRef.current.fields ?? {}
+
+        // Validation uses the server's field set.
+        // Keep client-only fields without lastRenderedPath, such as Lexical block names.
+        const stateToMerge = isValidation
+          ? Object.fromEntries([
+              ...Object.entries(currentState).filter(
+                ([path, field]) =>
+                  !field.lastRenderedPath &&
+                  !current.props.select &&
+                  !Object.entries(successResponse.state).some(
+                    ([parentPath, parent]) =>
+                      parent.passesCondition === false && path.startsWith(`${parentPath}.`),
+                  ),
+              ),
+              ...Object.keys(successResponse.state).map((path) => [path, currentState[path] ?? {}]),
+            ])
+          : currentState
+
+        const appliedState = mergeServerFormState({
           acceptValues,
-          currentState: contextRef.current.fields ?? {},
+          currentState: stateToMerge,
           incomingState: successResponse.state,
         })
-
-        // Deselected fields can retain invalid state from an earlier attempt.
-        // Only the schema validated by this request participates in the local commit.
-        const appliedState =
-          isValidation && current.props.select
-            ? Object.fromEntries(
-                Object.entries(mergedState).filter(([path]) => path in successResponse.state),
-              )
-            : mergedState
 
         if (isValidation) {
           contextRef.current.fields = appliedState
         }
 
         const merge = () => {
-          if (appliedState !== mergedState) {
+          if (isValidation) {
             prevFormStateRef.current = appliedState
             dispatchFields({ type: 'REPLACE_STATE', state: appliedState })
             return
