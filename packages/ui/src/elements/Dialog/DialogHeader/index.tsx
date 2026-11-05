@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { Button } from '../../Button/index.js'
 import { useModal } from '../../Modal/index.js'
@@ -26,6 +27,7 @@ export const DialogHeader: React.FC<DialogHeaderProps> = ({
 }) => {
   const { slug, isConfirming } = useDialogContext()
   const { closeModal } = useModal()
+  const { t } = useTranslation()
 
   if (!title && !children && !showClose) {
     return null
@@ -42,7 +44,7 @@ export const DialogHeader: React.FC<DialogHeaderProps> = ({
         {children ? <div className={`${baseClass}__header-extras`}>{children}</div> : null}
         {showClose ? (
           <Button
-            aria-label="Close"
+            aria-label={t('general:close')}
             buttonStyle="ghost"
             disabled={isConfirming}
             icon={<XIcon />}
