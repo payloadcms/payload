@@ -455,9 +455,6 @@ export const useFormSubmission = ({
           setIsSubmitted(true)
           errorToast(err.message)
         }
-      } catch (err) {
-        setIsSubmitted(true)
-        errorToast(err instanceof Error ? err.message : t('error:unknown'))
       } finally {
         setDisabledBySubmission(false)
         setIsProcessing(false)
