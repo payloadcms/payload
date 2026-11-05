@@ -333,7 +333,7 @@ export function parseParams({
                       ...val.split(' ').map((word) =>
                         buildOperatorConstraint({
                           adapter,
-                          column: table[columnName],
+                          column: resolvedColumn,
                           field,
                           locale,
                           originalOperator,
