@@ -490,6 +490,13 @@ describe('Localization', () => {
         page.locator('.localizer.app-header__localizer .localizer-button__current-label'),
       ).toHaveText('English')
 
+      await expect
+        .poll(async () => {
+          const preference = await page.request.get(`${serverURL}/api/payload-preferences/locale`)
+          return (await preference.json()).value
+        })
+        .toBe(defaultLocale)
+
       const editedEnglishTitle = `${englishTitle} edited`
 
       await page.locator('#field-title').fill(editedEnglishTitle)
@@ -507,6 +514,12 @@ describe('Localization', () => {
         [defaultLocale]: editedEnglishTitle,
         [spanishLocale]: spanishTitle,
       })
+
+      await page.getByRole('link', { name: 'Localized Posts', exact: true }).last().click()
+      await expect(
+        page.locator('.app-header__localizer .localizer-button__current-label'),
+      ).toHaveText('English')
+      await expect(page.locator('.cell-title', { hasText: editedEnglishTitle })).toBeVisible()
     })
 
     test('should not render default locale in locale selector when prefs are not default', async () => {
@@ -633,6 +646,16 @@ describe('Localization', () => {
       await expect(
         page.locator('.app-header__localizer .localizer-button__current-label'),
       ).toHaveText('English')
+      await expect
+        .poll(async () => {
+          const preference = await page.request.get(`${serverURL}/api/payload-preferences/locale`)
+          return (await preference.json()).value
+        })
+        .toBe(defaultLocale)
+      // Simulate another tab changing the shared preference after this page was restored.
+      await page.request.post(`${serverURL}/api/payload-preferences/locale`, {
+        data: { value: spanishLocale },
+      })
       await openDocDrawer({
         page,
         selector: '#field-relationMultiRelationTo .relationship--single-value__drawer-toggler',

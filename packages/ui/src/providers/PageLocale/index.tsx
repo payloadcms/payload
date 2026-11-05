@@ -5,8 +5,10 @@ import type { Locale, ServerFunctionClient } from 'payload'
 import React, { createContext, use, useCallback, useEffect, useMemo } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
+import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { LocaleContext, useLocale, useLocaleLoading } from '../Locale/index.js'
+import { usePreferences } from '../Preferences/index.js'
 import { ServerFunctionsProvider, useServerFunctions } from '../ServerFunctions/index.js'
 
 // Only the outermost rendered-locale scope owns the shared page loading state.
@@ -20,6 +22,8 @@ export const PageLocaleProvider: React.FC<{
   const {
     config: { localization },
   } = useConfig()
+  const { user } = useAuth()
+  const { setPreference } = usePreferences()
   const hasParentScope = use(PageLocaleScopeContext)
   const contextLocale = useLocale()
   const { serverFunction } = useServerFunctions()
@@ -43,6 +47,19 @@ export const PageLocaleProvider: React.FC<{
       setLocaleIsLoading(false)
     }
   }, [hasParentScope, renderedLocaleCode, setLocaleIsLoading])
+
+  useEffect(() => {
+    if (
+      !hasParentScope &&
+      user?.id &&
+      renderedLocale?.code &&
+      renderedLocale.code !== contextLocale?.code
+    ) {
+      // Back can restore a cached page while the root still holds the newer locale.
+      // Keep future navigation without a locale parameter aligned with the restored page.
+      void setPreference<Locale['code']>('locale', renderedLocale.code)
+    }
+  }, [contextLocale?.code, hasParentScope, renderedLocale?.code, setPreference, user?.id])
 
   return (
     <PageLocaleScopeContext value={true}>
