@@ -1,6 +1,6 @@
 import type { FlattenedField } from 'payload'
 
-import { deepCopyObject } from 'payload'
+import { deepCopyObjectSimple } from 'payload'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { RowToInsert } from './types.js'
@@ -56,7 +56,7 @@ export const transformForWrite = ({
     blocksToDelete: rowToInsert.blocksToDelete,
     columnPrefix: '',
     // Traversal rewrites row IDs and annotates nested groups for relational storage.
-    data: deepCopyObject(data),
+    data: deepCopyObjectSimple(data),
     enableAtomicWrites,
     fieldPrefix: '',
     fields,
