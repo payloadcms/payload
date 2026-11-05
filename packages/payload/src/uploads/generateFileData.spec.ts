@@ -134,10 +134,10 @@ describe('generateFileData', () => {
       expect(req.payload.logger.warn).toHaveBeenCalledWith(expect.stringContaining('crop'))
     })
 
-    it('should not warn when only the default focal point is set', async () => {
+    it('should default the focal point to the center on create, without a crop warning', async () => {
       const req = createPngReq()
 
-      await generateFileData({
+      const result = await generateFileData({
         collection: createCollection({ focalPoint: true }),
         config: {} as SanitizedConfig,
         data: {},
@@ -146,20 +146,8 @@ describe('generateFileData', () => {
         req,
       })
 
-      expect(req.payload.logger.warn).not.toHaveBeenCalled()
-    })
-
-    it('should default the focal point to the center on create', async () => {
-      const result = await generateFileData({
-        collection: createCollection({ focalPoint: true }),
-        config: {} as SanitizedConfig,
-        data: {},
-        operation: 'create',
-        overwriteExistingFiles: true,
-        req: createPngReq(),
-      })
-
       expect(result.data).toMatchObject({ focalX: 50, focalY: 50 })
+      expect(req.payload.logger.warn).not.toHaveBeenCalled()
     })
 
     it('should save a focal point sent through the uploadEdits query param', async () => {

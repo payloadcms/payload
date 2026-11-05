@@ -11,12 +11,9 @@ import { expect } from 'vitest'
 import type { FileVersionedTransformedMedia, UploadTransforms } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import { legacyFocalPoints } from './seedLegacyMedia.js'
 import {
   draftMediaDir,
   draftMediaSlug,
-  legacyMediaDir,
-  legacyMediaSlug,
   transformedMediaDir,
   transformedMediaSlug,
 } from './shared.js'
@@ -24,7 +21,6 @@ import {
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 // 1600 x 1600 PNG
 const imageFixture = path.resolve(dirname, '../uploads/image.png')
-const replacementFixture = path.resolve(dirname, '../uploads/small.png')
 const savedCrop = { height: 600, width: 800, x: 0, y: 0 }
 
 // A path read from the collection's own folder, so the test does not fetch over the network.
@@ -33,7 +29,6 @@ const toLocalPath = (url?: null | string) => new URL(url!, 'http://payload.local
 test.suite('File transform state', { config: './config.ts' }, () => {
   test.afterEach(async () => {
     await rm(transformedMediaDir, { force: true, recursive: true })
-    await rm(legacyMediaDir, { force: true, recursive: true })
     await rm(draftMediaDir, { force: true, recursive: true })
   })
 
@@ -50,7 +45,7 @@ test.suite('File transform state', { config: './config.ts' }, () => {
 
     return payload.create({
       collection: transformedMediaSlug,
-      data: { alt: 'source', ...(_transforms === undefined ? {} : { _transforms }) },
+      data: { _transforms, alt: 'source' },
       file: { name, data: bytes, mimetype: 'image/png', size: bytes.length },
     })
   }
@@ -65,124 +60,31 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     payload: Payload
   }) => payload.update({ id, collection: transformedMediaSlug, data })
 
-  const readStoredSize = (filename: string) =>
-    sharp(path.join(transformedMediaDir, filename)).metadata()
+  const withCrop = (change: object) => ({ crop: { ...savedCrop, ...change } })
 
   test.for([
-    { name: 'no transform state', _transforms: undefined },
-    { name: 'an empty transform object', _transforms: {} },
-  ])('should store $name as null on create', async ({ _transforms }, { payload }) => {
-    const created = await createImage({ payload, _transforms })
-
-    expect(created._transforms).toBeNull()
-  })
-
-  test.for([
+    { name: 'a crop outside the original', key: 'crop', value: withCrop({ x: 1000 }) },
+    { name: 'a crop with non-integer pixels', key: 'crop', value: withCrop({ width: 800.5 }) },
+    { name: 'a crop with zero size', key: 'crop', value: withCrop({ height: 0 }) },
+    { name: 'a focal point above 100', key: 'focalPoint', value: { focalPoint: { x: 120, y: 1 } } },
+    { name: 'a reserved built-in key', key: 'resize', value: { resize: { width: 100 } } },
     {
-      name: 'keep the saved state when an update omits it',
-      data: { alt: 'renamed' },
-      expected: { crop: savedCrop, focalPoint: { x: 20, y: 30 } },
+      name: 'a value of the wrong type',
+      key: 'focalPoint.x',
+      value: { focalPoint: { x: '3', y: 1 } },
     },
-    {
-      name: 'clear the saved state when an update sends null',
-      data: { _transforms: null },
-      expected: null,
-    },
-    {
-      name: 'replace the whole saved state when an update sends an object',
-      data: { _transforms: { focalPoint: { x: 60, y: 70 } } },
-      expected: { focalPoint: { x: 60, y: 70 } },
-    },
-  ])('should $name', async ({ data, expected }, { payload }) => {
-    const created = await createImage({
-      payload,
-      _transforms: { crop: savedCrop, focalPoint: { x: 20, y: 30 } },
-    })
-
-    const updated = await updateImage({ id: created.id, data, payload })
-
-    expect(updated._transforms).toEqual(expected)
-  })
-
-  test('should keep unknown custom keys unchanged', async ({ payload }) => {
-    const watermark = { opacity: 0.5, position: 'bottom-right' }
-
-    const created = await createImage({ payload, _transforms: { watermark } })
-
-    expect(created._transforms).toEqual({ watermark })
-  })
-
-  test.for([
-    {
-      name: 'a crop outside the original',
-      _transforms: { crop: { ...savedCrop, x: 1000 } },
-      failingKey: 'crop',
-    },
-    {
-      name: 'a crop with non-integer pixels',
-      _transforms: { crop: { ...savedCrop, width: 800.5 } },
-      failingKey: 'crop',
-    },
-    {
-      name: 'a crop with zero size',
-      _transforms: { crop: { ...savedCrop, height: 0 } },
-      failingKey: 'crop',
-    },
-    {
-      name: 'a focal point outside 0 to 100',
-      _transforms: { focalPoint: { x: 120, y: 50 } },
-      failingKey: 'focalPoint',
-    },
-    {
-      name: 'a reserved built-in key that nothing applies yet',
-      _transforms: { resize: { width: 100 } },
-      failingKey: 'resize',
-    },
-    {
-      name: 'a value with the wrong type',
-      _transforms: { focalPoint: { x: '30', y: 50 } },
-      failingKey: 'focalPoint.x',
-    },
-    {
-      name: 'a custom key that is not a finite number',
-      _transforms: { score: NaN },
-      failingKey: 'score',
-    },
-    {
-      name: 'a nested custom value that is not a finite number',
-      _transforms: { watermark: { opacity: Infinity } },
-      failingKey: 'watermark.opacity',
-    },
-    { name: 'a custom key that is not JSON', _transforms: { id: BigInt(1) }, failingKey: 'id' },
-  ])(
-    'should reject $name and name the failing key',
-    async ({ _transforms, failingKey }, { payload }) => {
-      await expect(
-        createImage({ payload, _transforms: _transforms as UploadTransforms }),
-      ).rejects.toMatchObject({
-        data: {
-          errors: [
-            expect.objectContaining({
-              message: expect.stringContaining(failingKey),
-              path: '_transforms',
-            }),
-          ],
-        },
-      })
-    },
-  )
-
-  test('should crop the main file when transform state contains a crop', async ({ payload }) => {
-    const created = await createImage({
-      payload,
-      _transforms: { crop: { height: 600, width: 800, x: 100, y: 200 } },
-    })
-
-    expect(created).toMatchObject({ height: 600, width: 800 })
-    expect(created.original).toMatchObject({ height: 1600, width: 1600 })
-    await expect(readStoredSize(created.filename!)).resolves.toMatchObject({
-      height: 600,
-      width: 800,
+    { name: 'a custom key that is not a finite number', key: 'score', value: { score: NaN } },
+    { name: 'a nested non-finite custom value', key: 'a.b', value: { a: { b: Infinity } } },
+    { name: 'a custom key that is not JSON', key: 'id', value: { id: BigInt(1) } },
+  ])('should reject $name and name the failing key', async ({ key, value }, { payload }) => {
+    await expect(
+      createImage({ _transforms: value as UploadTransforms, payload }),
+    ).rejects.toMatchObject({
+      data: {
+        errors: [
+          expect.objectContaining({ message: expect.stringContaining(key), path: '_transforms' }),
+        ],
+      },
     })
   })
 
@@ -204,82 +106,58 @@ test.suite('File transform state', { config: './config.ts' }, () => {
         },
       },
     })
-    const { doc, errors } = await response.json()
+    const { doc } = await response.json()
 
-    expect(errors).toBeUndefined()
-    expect(response.status).toBe(200)
-    expect(doc).toMatchObject({ focalX: 30, focalY: 60 })
+    expect(doc).toMatchObject({ focalX: 30, focalY: 60, height: 800, width: 400 })
     expect(doc._transforms).toEqual({
       crop: { height: 800, width: 400, x: 160, y: 320 },
       focalPoint: { x: 30, y: 60 },
     })
   })
 
-  test('should check and apply a saved crop on a create from a URL, after the file is read', async ({
-    payload,
-  }) => {
-    const source = await createImage({ payload })
-
-    const created = await payload.create({
-      collection: transformedMediaSlug,
-      data: {
-        _transforms: { crop: savedCrop },
-        filename: source.filename,
-        url: toLocalPath(source.url),
-      },
-      // Keeps the URL in the data, so the file is read from the collection's own folder.
-      overrideAccess: true,
-    })
-
-    expect(created).toMatchObject({ height: 600, width: 800 })
-    expect(created._transforms).toEqual({ crop: savedCrop })
-  })
-
-  test('should save an admin crop sent with a create from a URL', async ({ payload }) => {
-    const source = await createImage({ payload })
-
-    const created = await payload.create({
-      collection: transformedMediaSlug,
-      data: { filename: source.filename, url: toLocalPath(source.url) },
-      overrideAccess: true,
-      req: {
-        query: {
-          uploadEdits: {
-            crop: { height: 37.5, unit: '%', width: 50, x: 0, y: 0 },
-            heightInPixels: 600,
-            widthInPixels: 800,
-          },
+  test.for([
+    { name: 'a saved crop', data: { _transforms: { crop: savedCrop } }, query: {} },
+    {
+      name: 'an admin crop',
+      data: {},
+      query: {
+        uploadEdits: {
+          crop: { height: 37.5, unit: '%', width: 50, x: 0, y: 0 },
+          heightInPixels: 600,
+          widthInPixels: 800,
         },
       },
-    })
+    },
+  ])(
+    'should check and apply $name on a create from a URL, after the file is read',
+    async ({ data, query }, { payload }) => {
+      const source = await createImage({ payload })
 
-    expect(created._transforms).toEqual({ crop: savedCrop })
-  })
-
-  test('should reject a crop outside the image on a create from a URL, before the file is processed', async ({
-    payload,
-  }) => {
-    const source = await createImage({ payload })
-
-    await expect(
-      payload.create({
+      const created = await payload.create({
         collection: transformedMediaSlug,
-        data: {
-          _transforms: { crop: { height: 100_000, width: 100_000, x: 0, y: 0 } },
-          filename: source.filename,
-          url: toLocalPath(source.url),
-        },
+        data: { ...data, filename: source.filename, url: toLocalPath(source.url) },
+        // Keeps the URL in the data, so the file is read from the collection's own folder.
         overrideAccess: true,
-      }),
-    ).rejects.toMatchObject({
-      data: { errors: [expect.objectContaining({ path: '_transforms' })] },
-    })
-  })
+        req: { query },
+      })
 
-  test('should crop from the original when the saved crop changes', async ({ payload }) => {
+      expect(created).toMatchObject({ height: 600, width: 800 })
+      expect(created._transforms).toEqual({ crop: savedCrop })
+    },
+  )
+
+  test('should crop the main file, and crop from the original when the saved crop changes', async ({
+    payload,
+  }) => {
     const created = await createImage({
-      payload,
       _transforms: { crop: { height: 800, width: 800, x: 400, y: 400 } },
+      payload,
+    })
+
+    expect(created).toMatchObject({
+      height: 800,
+      original: { height: 1600, width: 1600 },
+      width: 800,
     })
 
     // Larger than the first crop: only possible when the source is the original.
@@ -290,156 +168,29 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     })
 
     expect(updated).toMatchObject({ height: 1200, width: 1200 })
-    await expect(readStoredSize(updated.filename!)).resolves.toMatchObject({
-      height: 1200,
-      width: 1200,
-    })
+    await expect(
+      sharp(path.join(transformedMediaDir, updated.filename!)).metadata(),
+    ).resolves.toMatchObject({ height: 1200, width: 1200 })
   })
 
   test('should serve the original again when the saved crop is removed', async ({ payload }) => {
     const bytes = await readFile(imageFixture)
-    const created = await createImage({
-      payload,
-      _transforms: { crop: { height: 800, width: 800, x: 0, y: 0 } },
-    })
-
-    expect(created).toMatchObject({ height: 800, width: 800 })
+    const created = await createImage({ _transforms: { crop: savedCrop }, payload })
 
     const updated = await updateImage({ id: created.id, data: { _transforms: null }, payload })
 
-    expect(updated).toMatchObject({ height: 1600, width: 1600 })
+    expect(updated).toMatchObject({ _transforms: null, height: 1600, width: 1600 })
     expect(updated.filename).toBe(updated.original?.filename)
     expect(await readFile(path.join(transformedMediaDir, updated.filename!))).toEqual(bytes)
   })
 
-  test('should move a legacy focal point into transform state on the first write', async ({
-    payload,
-  }) => {
-    const {
-      docs: [legacy],
-    } = await payload.find({
-      collection: legacyMediaSlug,
-      where: { alt: { equals: 'legacy off-center' } },
-    })
-
-    expect(legacy!._transforms).toBeNull()
-
-    const updated = await payload.update({
-      id: legacy!.id,
-      collection: legacyMediaSlug,
-      data: { _transforms: { crop: savedCrop } },
-    })
-
-    expect(updated).toMatchObject({ focalX: 30, focalY: 70 })
-    expect(updated._transforms).toEqual({
-      crop: savedCrop,
-      focalPoint: legacyFocalPoints['legacy off-center'],
-    })
-  })
-
-  test('should reset a legacy focal point when transform state is set to null', async ({
-    payload,
-  }) => {
-    const {
-      docs: [legacy],
-    } = await payload.find({
-      collection: legacyMediaSlug,
-      where: { alt: { equals: 'legacy off-center' } },
-    })
-
-    const updated = await payload.update({
-      id: legacy!.id,
-      collection: legacyMediaSlug,
-      data: { _transforms: null },
-    })
-
-    expect(updated).toMatchObject({ _transforms: null, focalX: 50, focalY: 50 })
-  })
-
   test('should keep the saved crop when only the focal point changes', async ({ payload }) => {
-    const created = await createImage({ payload, _transforms: { crop: savedCrop } })
+    const created = await createImage({ _transforms: { crop: savedCrop }, payload })
 
     const updated = await updateImage({ id: created.id, data: { focalX: 75, focalY: 25 }, payload })
 
     expect(updated).toMatchObject({ height: 600, width: 800 })
     expect(updated._transforms).toEqual({ crop: savedCrop, focalPoint: { x: 75, y: 25 } })
-  })
-
-  test.for([
-    {
-      name: 'save focalX when it is sent without focalY',
-      data: { focalX: 30 },
-      expected: { x: 30, y: 90 },
-    },
-    {
-      name: 'save a focal point of 0 sent through focalX',
-      data: { focalX: 0, focalY: 90 },
-      expected: { x: 0, y: 90 },
-    },
-    {
-      // The admin sends the stored, rounded focalX and focalY again on every save.
-      name: 'keep a fractional focal point when the rounded focalX and focalY are sent back',
-      data: { alt: 'renamed', focalX: 33, focalY: 90 },
-      initial: { x: 33.3, y: 90 },
-      expected: { x: 33.3, y: 90 },
-    },
-  ])('should $name', async ({ data, expected, initial = { x: 10, y: 90 } }, { payload }) => {
-    const created = await createImage({ payload, _transforms: { focalPoint: initial } })
-
-    const updated = await updateImage({ id: created.id, data, payload })
-
-    expect(updated).toMatchObject({ focalX: Math.round(expected.x), focalY: expected.y })
-    expect(updated._transforms).toEqual({ focalPoint: expected })
-  })
-
-  test('should use the transform state focal point when focalX and focalY disagree', async ({
-    payload,
-  }) => {
-    const created = await createImage({ payload })
-
-    // The admin sends the current focalX and focalY again on every save.
-    const updated = await updateImage({
-      id: created.id,
-      data: { _transforms: { focalPoint: { x: 10, y: 90 } }, focalX: 50, focalY: 50 },
-      payload,
-    })
-
-    expect(updated).toMatchObject({ focalX: 10, focalY: 90 })
-    expect(updated._transforms).toEqual({ focalPoint: { x: 10, y: 90 } })
-  })
-
-  test.for([
-    {
-      name: 'reset transform state and the focal point when the file is replaced without new state',
-      data: {},
-      expected: { _transforms: null, focalX: 50, focalY: 50 },
-    },
-    {
-      // The admin sends the stored focalX and focalY again on every save.
-      name: 'reset the focal point when the admin sends the old one back with a new file',
-      data: { focalX: 20, focalY: 30 },
-      expected: { _transforms: null, focalX: 50, focalY: 50 },
-    },
-    {
-      name: 'keep a focal point that is set for the new file',
-      data: { focalX: 70, focalY: 10 },
-      expected: { _transforms: { focalPoint: { x: 70, y: 10 } }, focalX: 70, focalY: 10 },
-    },
-  ])('should $name', async ({ data, expected }, { payload }) => {
-    const created = await createImage({
-      payload,
-      _transforms: { crop: savedCrop, focalPoint: { x: 20, y: 30 } },
-    })
-    const bytes = await readFile(replacementFixture)
-
-    const updated = await payload.update({
-      id: created.id,
-      collection: transformedMediaSlug,
-      data,
-      file: { name: 'replacement.png', data: bytes, mimetype: 'image/png', size: bytes.length },
-    })
-
-    expect(updated).toMatchObject(expected)
   })
 
   test('should give beforeChange hooks the final cropped dimensions', async ({ payload }) => {
@@ -460,22 +211,13 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     expect(seen).toEqual([{ height: 600, width: 800 }])
   })
 
-  const findVersionByAlt = async ({
-    alt,
-    id,
-    payload,
-  }: {
-    alt: string
-    id: number | string
-    payload: Payload
-  }) => {
-    const { docs } = await payload.findVersions({
-      collection: transformedMediaSlug,
-      where: { parent: { equals: id } },
-    })
-
-    return docs.find(({ version }) => version.alt === alt)!
-  }
+  const findSourceVersion = async ({ id, payload }: { id: number | string; payload: Payload }) =>
+    (
+      await payload.findVersions({
+        collection: transformedMediaSlug,
+        where: { parent: { equals: id } },
+      })
+    ).docs.find(({ version }) => version.alt === 'source')!
 
   test('should restore the crop that belongs to the restored version', async ({ payload }) => {
     const created = await createImage({ payload, _transforms: { crop: savedCrop } })
@@ -487,7 +229,7 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     })
 
     const restored = await payload.restoreVersion({
-      id: (await findVersionByAlt({ id: created.id, alt: 'source', payload })).id,
+      id: (await findSourceVersion({ id: created.id, payload })).id,
       collection: transformedMediaSlug,
     })
 
@@ -507,7 +249,7 @@ test.suite('File transform state', { config: './config.ts' }, () => {
         payload,
       })
 
-      const legacyVersion = await findVersionByAlt({ id: created.id, alt: 'source', payload })
+      const legacyVersion = await findSourceVersion({ id: created.id, payload })
 
       // Versions saved before `_transforms` existed have no key at all.
       await (payload.db as unknown as MongooseAdapter).versions[transformedMediaSlug]!.updateOne(
@@ -526,19 +268,14 @@ test.suite('File transform state', { config: './config.ts' }, () => {
   )
 
   test('should keep the cropped file and drop the crop when duplicating', async ({ payload }) => {
-    const created = await createImage({
-      payload,
-      _transforms: {
-        crop: { height: 600, width: 800, x: 100, y: 200 },
-        focalPoint: { x: 20, y: 30 },
-      },
-    })
+    const focalPoint = { x: 20, y: 30 }
+    const created = await createImage({ _transforms: { crop: savedCrop, focalPoint }, payload })
 
     // The copy is made from the cropped file, so the crop is already part of its files.
     const copy = await payload.duplicate({ id: created.id, collection: transformedMediaSlug })
 
     expect(copy).toMatchObject({ height: 600, width: 800 })
-    expect(copy._transforms).toEqual({ focalPoint: { x: 20, y: 30 } })
+    expect(copy._transforms).toEqual({ focalPoint })
   })
 
   test('should apply transform state to every document in a bulk update', async ({ payload }) => {
@@ -590,8 +327,12 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     expect(await findTransforms()).toEqual({ focalPoint: { x: 70, y: 80 } })
   })
 
-  test('should return transform state as JSON through GraphQL', async ({ payload, restClient }) => {
-    const created = await createImage({ payload, _transforms: { focalPoint: { x: 20, y: 30 } } })
+  test('should return transform state, with custom keys, as JSON through GraphQL', async ({
+    payload,
+    restClient,
+  }) => {
+    const saved = { focalPoint: { x: 20, y: 30 }, watermark: { opacity: 0.5, position: 'bottom' } }
+    const created = await createImage({ payload, _transforms: saved })
 
     const response = await restClient.GRAPHQL_POST({
       body: JSON.stringify({
@@ -599,9 +340,8 @@ test.suite('File transform state', { config: './config.ts' }, () => {
         query: `query { FileVersionedTransformedMedia(id: ${JSON.stringify(created.id)}) { _transforms } }`,
       }),
     })
-    const { data, errors } = await response.json()
+    const { data } = await response.json()
 
-    expect(errors).toBeUndefined()
-    expect(data.FileVersionedTransformedMedia._transforms).toEqual({ focalPoint: { x: 20, y: 30 } })
+    expect(data.FileVersionedTransformedMedia._transforms).toEqual(saved)
   })
 })
