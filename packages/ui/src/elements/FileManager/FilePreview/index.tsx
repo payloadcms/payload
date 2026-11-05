@@ -8,6 +8,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { appendCacheTag } from '../../../utilities/appendCacheTag.js'
 import { MiniCarousel } from '../../MiniCarousel/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
+import { getFilePreviewSrc } from '../../Upload/getFilePreviewSrc.js'
 import { AudioPreview } from './AudioPreview/index.js'
 import { PdfPreview } from './PdfPreview/index.js'
 import { VideoPreview } from './VideoPreview/index.js'
@@ -17,8 +18,8 @@ const baseClass = 'file-preview'
 
 type Props = {
   readonly data: Record<string, unknown>
-  /** The image to preview, from `getFilePreviewSrc`. */
-  readonly fileSrc: null | string
+  /** The image to preview. Defaults to `getFilePreviewSrc` when omitted. */
+  readonly fileSrc?: null | string
   readonly imageCacheTag?: false | string
   readonly selectedSize?: null | string
   readonly selectedSizeData?: null | Record<string, unknown>
@@ -42,6 +43,7 @@ export const FilePreview: React.FC<Props> = ({
   const mimeType = (data?.mimeType as string) ?? ''
   const isImageFile = isImage(mimeType)
   const originalUrl = data?.url as string | undefined
+  const previewSrc = fileSrc ?? getFilePreviewSrc({ data, selectedSizeData })
 
   const nativePreviewSrc = originalUrl ? appendCacheTag(originalUrl, imageCacheTag) : undefined
 
@@ -64,7 +66,7 @@ export const FilePreview: React.FC<Props> = ({
         className={`${baseClass}__thumbnail`}
         collectionSlug={collectionSlug}
         doc={selectedSizeData || data}
-        fileSrc={fileSrc ?? undefined}
+        fileSrc={previewSrc ?? undefined}
         imageCacheTag={imageCacheTag}
         size="expand"
         uploadConfig={uploadConfig}
