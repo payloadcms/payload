@@ -7,7 +7,7 @@ import {
   type Operator,
   type TabAsField,
 } from 'payload'
-import { fieldAffectsData, getDateOnlyComparison } from 'payload/shared'
+import { fieldAffectsData, isDateOnlyFilter, isDateOnlyFilterValue } from 'payload/shared'
 import { validate as uuidValidate } from 'uuid'
 
 import type { DrizzleAdapter } from '../types.js'
@@ -135,14 +135,8 @@ export const sanitizeQueryValue = ({
 
   const isDateOnlyComparison =
     field.type === 'date' &&
-    Boolean(
-      getDateOnlyComparison({
-        config: adapter.payload.config,
-        field,
-        operator: operator as Operator,
-        value: val,
-      }),
-    )
+    isDateOnlyFilter({ field, operator: operator as Operator }) &&
+    isDateOnlyFilterValue(val)
 
   if (field.type === 'date' && operator !== 'exists' && !isDateOnlyComparison) {
     if (Array.isArray(formattedValue)) {

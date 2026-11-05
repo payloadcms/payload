@@ -160,14 +160,16 @@ export async function buildSearchParam({
       : undefined
 
   if (dateOnlyComparison && path) {
+    const range = Object.fromEntries(
+      dateOnlyComparison.constraints.map((constraint) => [
+        operatorMap[constraint.operator],
+        constraint.value,
+      ]),
+    )
+
     return {
       path,
-      value: Object.fromEntries(
-        dateOnlyComparison.constraints.map((constraint) => [
-          operatorMap[constraint.operator],
-          constraint.value,
-        ]),
-      ),
+      value: dateOnlyComparison.isNegated ? { $not: range } : range,
     }
   }
 

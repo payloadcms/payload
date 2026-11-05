@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -12,6 +12,7 @@ import { getColumnSelectorItem } from '../../../__helpers/e2e/columns/index.js'
 import { addListFilter } from '../../../__helpers/e2e/filters/addListFilter.js'
 import { saveDocAndAssert } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
+import { selectInput } from '../../../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -25,13 +26,14 @@ const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
 
-const { beforeAll, beforeEach, describe } = test
+const { afterEach, beforeAll, beforeEach, describe } = test
 
 const londonTimezone = 'Europe/London'
 const aucklandTimezone = 'Pacific/Auckland'
 const detroitTimezone = 'America/Detroit'
 
 let payload: PayloadTestSDK<Config>
+const browserContexts: BrowserContext[] = []
 let client: RESTClient
 let page: Page
 let serverURL: string
@@ -56,6 +58,10 @@ const getTimezoneOptionSelector = ({
 }
 
 describe('Date', () => {
+  afterEach(async () => {
+    await Promise.all(browserContexts.splice(0).map((context) => context.close()))
+  })
+
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
@@ -148,34 +154,70 @@ describe('Date', () => {
 
     for (const { operator, operatorLabel, timezoneId } of cases) {
       const context = await browser.newContext({ timezoneId })
+      browserContexts.push(context)
       const { page: timezonePage } = await initPage({ context, serverURL })
 
-      try {
-        await goToListView(timezonePage)
-        const { condition } = await addListFilter({
-          fieldLabel: 'Default With Timezone',
-          operatorLabel,
+      await goToListView(timezonePage)
+      const { condition } = await addListFilter({
+        fieldLabel: 'Default With Timezone',
+        operatorLabel,
+        page: timezonePage,
+      })
+      const dateInput = condition.locator(
+        '.condition-value-date .date-time-picker__input-wrapper input',
+      )
+      const expectedDate = await timezonePage.evaluate(() => {
+        const date = new Date()
+
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-15`
+      })
+
+      await dateInput.click()
+      await timezonePage
+        .locator('.react-datepicker__day--015:not(.react-datepicker__day--outside-month)')
+        .click()
+
+      if (operator === 'equals') {
+        await selectInput({
           page: timezonePage,
+          selectLocator: condition.locator('.condition__operator'),
+          multiSelect: false,
+          option: 'is greater than or equal to',
         })
-        const dateInput = condition.locator(
-          '.condition-value-date .date-time-picker__input-wrapper input',
-        )
-        const expectedDate = await timezonePage.evaluate(() => {
-          const date = new Date()
-
-          return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-15`
-        })
-
-        await dateInput.click()
-        await timezonePage
-          .locator('.react-datepicker__day--015:not(.react-datepicker__day--outside-month)')
-          .click()
         await expect
           .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
-          .toContain(`[${operator}]=${expectedDate}`)
-      } finally {
-        await context.close()
+          .toContain(`[greater_than_equal]=${expectedDate}`)
+
+        await selectInput({
+          page: timezonePage,
+          selectLocator: condition.locator('.condition__operator'),
+          multiSelect: false,
+          option: 'is not equal to',
+        })
+        await expect
+          .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+          .toContain(`[not_equals]=${expectedDate}`)
+
+        await selectInput({
+          page: timezonePage,
+          selectLocator: condition.locator('.condition__operator'),
+          multiSelect: false,
+          option: 'is in',
+        })
+        await expect(dateInput).toHaveValue('')
+        await expect
+          .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+          .not.toContain(expectedDate)
+        continue
       }
+
+      await expect
+        .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+        .toContain(`[${operator}]=${expectedDate}`)
+      await condition.locator('.react-datepicker__close-icon').click()
+      await expect
+        .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
+        .not.toContain(`[${operator}]=${expectedDate}`)
     }
   })
 

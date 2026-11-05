@@ -1,7 +1,7 @@
 import type { Column, SQL } from 'drizzle-orm'
 import type { FlattenedField, Operator } from 'payload'
 
-import { and } from 'drizzle-orm'
+import { and, not } from 'drizzle-orm'
 import { APIError } from 'payload'
 import { getDateOnlyComparison } from 'payload/shared'
 
@@ -64,16 +64,17 @@ export const buildOperatorConstraint = (args: Args): SQL => {
       : undefined
 
   if (dateOnlyComparison) {
-    return and(
+    const range = and(
       ...dateOnlyComparison.constraints.map((constraint) =>
         buildOperatorConstraint({
           ...args,
-          originalOperator: constraint.operator,
           resolvedOperator: constraint.operator,
           value: constraint.value.toISOString(),
         }),
       ),
     )!
+
+    return dateOnlyComparison.isNegated ? not(range) : range
   }
 
   const matchingHandlers = (adapter.operatorHandlers ?? []).filter((handler) =>
