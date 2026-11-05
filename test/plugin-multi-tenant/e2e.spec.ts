@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import mongoose from 'mongoose'
 import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -308,6 +309,159 @@ test.describe('Multi Tenant', () => {
 
       return expected
     }
+  })
+
+  test.describe('Single tenant selection', () => {
+    test.beforeEach(async () => {
+      const tenants = await payload.find({
+        collection: tenantsSlug,
+        overrideAccess: true,
+      })
+
+      for (const tenant of tenants.docs) {
+        if (tenant.name !== 'Blue Dog') {
+          await payload.delete({
+            collection: tenantsSlug,
+            id: String(tenant.id),
+            overrideAccess: true,
+          })
+        }
+      }
+
+      await page.context().clearCookies({ name: 'payload-tenant' })
+    })
+
+    test('should leave the tenant filter empty for users with access to all tenants', async () => {
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await page.goto(menuItemsURL.list)
+      await openNav(page)
+
+      const selector = page.locator('.tenant-selector')
+
+      await expect(selector).toBeVisible()
+      await expect
+        .poll(() => getSelectInputValue({ multiSelect: false, selectLocator: selector }))
+        .toBeFalsy()
+      await expect
+        .poll(async () =>
+          (await page.context().cookies()).find(({ name }) => name === 'payload-tenant'),
+        )
+        .toBeUndefined()
+    })
+
+    test('should keep the only tenant clearable after selection and navigation', async () => {
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await page.goto(menuItemsURL.list)
+      await openNav(page)
+
+      const selector = page.locator('.tenant-selector')
+
+      await selectInput({
+        multiSelect: false,
+        option: 'Blue Dog',
+        page,
+        selectLocator: selector,
+      })
+      await expect
+        .poll(() => getSelectInputValue({ multiSelect: false, selectLocator: selector }))
+        .toBe('Blue Dog')
+
+      await clearSelectInput({ selectLocator: selector })
+      await expect
+        .poll(() => getSelectInputValue({ multiSelect: false, selectLocator: selector }))
+        .toBeFalsy()
+
+      await page.goto(menuItemsURL.list)
+      await openNav(page)
+      await expect
+        .poll(() => getSelectInputValue({ multiSelect: false, selectLocator: selector }))
+        .toBeFalsy()
+      await expect
+        .poll(async () =>
+          (await page.context().cookies()).find(({ name }) => name === 'payload-tenant'),
+        )
+        .toBeUndefined()
+    })
+
+    test('should let an admin assign the only tenant to a legacy document', async () => {
+      test.skip(
+        Boolean(process.env.PAYLOAD_DATABASE && process.env.PAYLOAD_DATABASE !== 'mongodb'),
+        'The legacy document fixture uses MongoDB',
+      )
+
+      const item = await payload.find({
+        collection: menuItemsSlug,
+        overrideAccess: true,
+        where: { name: { equals: 'Spicy Mac' } },
+      })
+      const itemID = String(item.docs[0]?.id)
+      const mongoURL =
+        process.env.MONGODB_URL ||
+        process.env.DATABASE_URL ||
+        'mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0'
+      const connection = await mongoose.createConnection(mongoURL).asPromise()
+
+      try {
+        if (!connection.db) {
+          throw new Error('MongoDB connection is unavailable')
+        }
+
+        // Simulate a document created before the plugin added tenant validation.
+        const result = await connection.db
+          .collection(menuItemsSlug)
+          .updateOne({ _id: new mongoose.Types.ObjectId(itemID) }, { $unset: { tenant: 1 } })
+
+        expect(result.matchedCount).toBe(1)
+      } finally {
+        await connection.close()
+      }
+
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await page.goto(menuItemsURL.list)
+      await goToListDoc({
+        cellClass: '.cell-name',
+        page,
+        textToMatch: 'Spicy Mac',
+        urlUtil: menuItemsURL,
+      })
+
+      await expect(page.locator('#assign-tenant-field-modal')).toBeVisible()
+      await selectDocumentTenant({ page, payload, tenant: 'Blue Dog' })
+      await saveDocAndAssert(page)
+
+      const updatedItem = await payload.find({
+        collection: menuItemsSlug,
+        overrideAccess: true,
+        where: { id: { equals: itemID } },
+      })
+
+      expect(updatedItem.docs[0]?.tenant).toBeTruthy()
+    })
+
+    test('should auto-select the only tenant for an assigned user', async () => {
+      await loginClientSide({ data: credentials.blueDog, page, serverURL })
+      await page.goto(menuItemsURL.list)
+
+      await expect
+        .poll(async () =>
+          (await page.context().cookies()).find(({ name }) => name === 'payload-tenant'),
+        )
+        .toBeDefined()
+      await expect(page.locator('.tenant-selector')).toHaveCount(0)
+    })
+
+    test('should select a tenant when opening a tenant-global document', async () => {
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await page.context().clearCookies({ name: 'payload-tenant' })
+      await page.goto(globalMenuURL.list)
+
+      await expect(page).toHaveURL(new RegExp(`${globalMenuURL.list}/[^/]+$`))
+      await expect
+        .poll(async () =>
+          (await page.context().cookies()).find(({ name }) => name === 'payload-tenant'),
+        )
+        .toBeDefined()
+    })
   })
 
   test.describe('Filters', () => {

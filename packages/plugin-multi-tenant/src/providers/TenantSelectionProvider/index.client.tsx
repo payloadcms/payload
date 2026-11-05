@@ -18,6 +18,7 @@ type ContextType = {
    * - undefined means you are not viewing a document at all
    */
   entityType?: 'document' | 'global'
+  hasAccessToAllTenants: boolean
   /**
    * Hoists the forms modified state
    */
@@ -57,6 +58,7 @@ type ContextType = {
 
 const Context = createContext<ContextType>({
   entityType: undefined,
+  hasAccessToAllTenants: false,
   options: [],
   selectedTenantID: undefined,
   setEntityType: () => undefined,
@@ -102,11 +104,13 @@ const getTenantCookie = (args: { cookieName?: string } = {}): string | undefined
 
 export const TenantSelectionProviderClient = ({
   children,
+  initialHasAccessToAllTenants,
   initialTenantOptions,
   initialValue,
   tenantsCollectionSlug,
 }: {
   children: React.ReactNode
+  initialHasAccessToAllTenants: boolean
   initialTenantOptions: OptionObject[]
   initialValue?: number | string
   tenantsCollectionSlug: string
@@ -116,6 +120,9 @@ export const TenantSelectionProviderClient = ({
   )
   const [modified, setModified] = React.useState<boolean>(false)
   const [entityType, setEntityType] = React.useState<'document' | 'global' | undefined>(undefined)
+  const [hasAccessToAllTenants, setHasAccessToAllTenants] = React.useState(
+    initialHasAccessToAllTenants,
+  )
   const { user } = useAuth()
   const { config } = useConfig()
   const router = useRouter()
@@ -148,8 +155,7 @@ export const TenantSelectionProviderClient = ({
   const setTenant = React.useCallback<ContextType['setTenant']>(
     ({ id, refresh }) => {
       if (id === undefined) {
-        if (tenantOptions.length > 1 || tenantOptions.length === 0) {
-          // users with multiple tenants can clear the tenant selection
+        if (hasAccessToAllTenants || tenantOptions.length !== 1) {
           setTenantAndCookie({ id: undefined, refresh })
         } else if (tenantOptions[0]) {
           // if there is only one tenant, auto-select that tenant
@@ -166,7 +172,7 @@ export const TenantSelectionProviderClient = ({
         setTenantAndCookie({ id, refresh })
       }
     },
-    [tenantOptions, setTenantAndCookie],
+    [hasAccessToAllTenants, tenantOptions, setTenantAndCookie],
   )
 
   const syncTenants = React.useCallback(async () => {
@@ -182,14 +188,19 @@ export const TenantSelectionProviderClient = ({
         },
       )
 
-      const result = await req.json()
+      const result = (await req.json()) as {
+        hasAccessToAllTenants: boolean
+        tenantOptions: OptionObject[]
+      }
 
       if (result.tenantOptions && userID) {
+        setHasAccessToAllTenants(result.hasAccessToAllTenants)
         setTenantOptions(result.tenantOptions)
 
-        if (result.tenantOptions.length === 1) {
-          setSelectedTenantID(result.tenantOptions[0].value)
-          setTenantCookie({ value: String(result.tenantOptions[0].value) })
+        const onlyTenant = result.tenantOptions[0]
+        if (result.tenantOptions.length === 1 && onlyTenant && !result.hasAccessToAllTenants) {
+          setSelectedTenantID(onlyTenant.value)
+          setTenantCookie({ value: String(onlyTenant.value) })
         }
       }
     } catch (e) {
@@ -224,6 +235,8 @@ export const TenantSelectionProviderClient = ({
    * remounts, we sync them explicitly via this effect.
    */
   React.useEffect(() => {
+    setHasAccessToAllTenants(initialHasAccessToAllTenants)
+
     if (initialTenantOptions.length > 0) {
       setTenantOptions((prev) => {
         if (
@@ -235,12 +248,16 @@ export const TenantSelectionProviderClient = ({
         return initialTenantOptions
       })
 
-      if (initialTenantOptions.length === 1 && initialTenantOptions[0]) {
+      if (
+        !initialHasAccessToAllTenants &&
+        initialTenantOptions.length === 1 &&
+        initialTenantOptions[0]
+      ) {
         setSelectedTenantID(initialTenantOptions[0].value)
         setTenantCookie({ value: String(initialTenantOptions[0].value) })
       }
     }
-  }, [initialTenantOptions])
+  }, [initialHasAccessToAllTenants, initialTenantOptions])
 
   React.useEffect(() => {
     const hasTenantSelectionMismatch = initialValue && String(initialValue) !== getTenantCookie()
@@ -321,6 +338,7 @@ export const TenantSelectionProviderClient = ({
       <Context
         value={{
           entityType,
+          hasAccessToAllTenants,
           modified,
           options: tenantOptions,
           selectedTenantID,
