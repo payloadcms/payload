@@ -279,13 +279,28 @@ const approve = async ({
 const token: PayloadHandler = async (req) => {
   const form = new URLSearchParams(await req.text!())
   const clientID = form.get('client_id')
-  const tokens =
-    clientID &&
-    (form.get('grant_type') === 'refresh_token'
-      ? await refresh({ clientID, form, req })
-      : await redeemCode({ clientID, form, req }))
+  const grantType = form.get('grant_type')
 
-  if (!clientID || !tokens) {
+  if (grantType !== 'authorization_code' && grantType !== 'refresh_token') {
+    return Response.json(
+      { error: grantType ? OAuthErrorCode.UnsupportedGrantType : OAuthErrorCode.InvalidRequest },
+      { status: 400 },
+    )
+  }
+
+  const requiredParams =
+    grantType === 'refresh_token' ? ['refresh_token'] : ['code', 'code_verifier']
+
+  if (!clientID || requiredParams.some((param) => !form.get(param))) {
+    return Response.json({ error: OAuthErrorCode.InvalidRequest }, { status: 400 })
+  }
+
+  const tokens =
+    grantType === 'refresh_token'
+      ? await refresh({ clientID, form, req })
+      : await redeemCode({ clientID, form, req })
+
+  if (!tokens) {
     return Response.json({ error: OAuthErrorCode.InvalidGrant }, { status: 400 })
   }
 
@@ -318,7 +333,6 @@ const redeemCode = async ({
   const code = unseal<Code>({ type: 'code', req, value: form.get('code') })
 
   if (
-    form.get('grant_type') === 'authorization_code' &&
     code?.clientID === clientID &&
     // OAuth 2.1 clients leave it out, since PKCE does its job. OAuth 2.0 clients send it, and it must
     // match then.
