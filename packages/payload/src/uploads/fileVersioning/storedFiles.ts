@@ -10,6 +10,7 @@ import type {
 } from './types.js'
 
 import { generateFilePathOrURL } from '../generateFilePathOrURL.js'
+import { shouldRequestOriginal } from '../isOriginalFileRequest.js'
 import { normalizeStorageKey } from './naming.js'
 
 export const getStoredFileIdentity = ({ key }: StoredFileIdentity): string =>
@@ -64,7 +65,8 @@ export const collectStoredFiles = ({
       return
     }
     const representation = value as Record<string, unknown>
-    if (typeof representation.filename !== 'string') {
+    // A `_stored: false` entry is built when it is requested, so it has no object to copy or delete.
+    if (typeof representation.filename !== 'string' || representation._stored === false) {
       return
     }
     const filename = representation.filename
@@ -76,6 +78,7 @@ export const collectStoredFiles = ({
           collectionSlug: collection.slug,
           config: req.payload.config,
           filename,
+          isOriginal: role.type === 'original' && shouldRequestOriginal({ doc }),
           relative: true,
           urlOrPath: undefined,
         })

@@ -55,6 +55,11 @@ export const getBeforeChangeHook =
     const prefix = getObjectFolder(representation, data ?? originalDoc)
     let url = value
 
+    // An entry with no stored object is built when it is requested, so it keeps the Payload route.
+    if (representation?._stored === false) {
+      return url
+    }
+
     if (generateFileURL && filename) {
       url = await generateFileURL({
         collection,

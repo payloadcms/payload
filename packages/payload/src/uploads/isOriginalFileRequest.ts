@@ -3,6 +3,7 @@
 
 type SharedFilenameDoc = {
   _objectKey?: null | string
+  _stored?: boolean | null
   filename?: null | string
   original?: { _objectKey?: null | string; filename?: null | string } | null
 }
@@ -20,7 +21,8 @@ export const isOriginalFileRequest = ({
   doc.original?.filename === filename && (Boolean(isOriginal) || doc.filename !== filename)
 
 /**
- * The original's URL asks for the original when it is a separate object with the main file's name.
+ * The original's URL asks for the original when it is a separate object with the main file's name,
+ * or when the main file is built at request time from it.
  * `getStorageLocationSelect` in plugin-cloud-storage selects the fields this reads.
  */
 export const shouldRequestOriginal = ({ doc }: { doc?: SharedFilenameDoc }): boolean => {
@@ -29,6 +31,6 @@ export const shouldRequestOriginal = ({ doc }: { doc?: SharedFilenameDoc }): boo
   return Boolean(
     original?.filename &&
     original.filename === doc?.filename &&
-    (original._objectKey ?? null) !== (doc?._objectKey ?? null),
+    (doc._stored === false || (original._objectKey ?? null) !== (doc._objectKey ?? null)),
   )
 }

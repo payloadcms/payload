@@ -220,7 +220,7 @@ export function DefaultListView(props: ListViewClientProps) {
       return data.docs.map((doc) => {
         return {
           ...doc,
-          filesize: formatFilesize(doc.filesize),
+          filesize: typeof doc.filesize === 'number' ? formatFilesize(doc.filesize) : null,
         }
       })
     } else {

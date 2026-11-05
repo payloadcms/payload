@@ -39,19 +39,30 @@ export type CanTransformArgs = {
    * `originalDoc`: on an update, it already includes the incoming data.
    */
   originalDoc: Readonly<Document>
+  /**
+   * The phase a request plan is for. `persisted-default` applies the saved `_transforms`, and runs
+   * only when no default file is stored. `request-override` applies the request's own parameters.
+   * Not set on upload.
+   */
+  purpose?: 'persisted-default' | 'request-override'
   req: PayloadRequest
 }
 
 /**
  * `true` or `false` decides only whether the transformer runs. The object form also lists the
- * saved `_transforms` keys this stage applies. Every saved key that must run needs exactly one
- * claiming stage, or the upload fails before any file work.
+ * saved `_transforms` keys this stage applies, and the options this stage gets. Every saved key
+ * that must run needs exactly one claiming stage, or the operation fails before any file work.
  */
-export type CanTransformResult =
+export type CanTransformResult<TOptions = unknown> =
   | {
       canTransform: true
       /** The `_transforms` keys this stage applies, for example `['crop']`. */
       handledTransformKeys?: string[]
+      /**
+       * Passed as `options` to this stage's `transformFile` or `handleRequest`. A transformer
+       * planned in both request phases gets the options of each phase's own `canTransform` call.
+       */
+      options?: TOptions
     }
   | boolean
 
@@ -65,6 +76,7 @@ export type TransformFileArgs<TOptions = unknown> = {
   doc: Document
   /** The current pipeline file. The same file as `source`. */
   file: File
+  /** The options from this stage's `canTransform` result, or `undefined`. */
   options: TOptions
   /**
    * A frozen snapshot of the document, taken before the pipeline runs. This is not the hooks
@@ -88,14 +100,21 @@ export type TransformFileResult =
       status: 'continue'
     }
 
-export type HandleTransformRequestArgs = {
+export type HandleTransformRequestArgs<TOptions = unknown> = {
   collectionSlug: string
   /** The requested document. Read-only: a request does not save changes. */
   doc: Readonly<Document>
   documentID: number | string
   filename: string
+  /**
+   * Reads the retained original file. Each stage gets its own getter, which can be called once.
+   * Payload closes the response when the stage does not return it.
+   */
+  getOriginalFile: () => Promise<Response>
   getSourceFile: () => Promise<Response>
   mimeType: string
+  /** The options from this phase's `canTransform` result, or `undefined`. */
+  options: TOptions
   /** A frozen snapshot of the requested document. */
   originalDoc: Readonly<Document>
   req: PayloadRequest

@@ -75,19 +75,17 @@ export const UploadDiffHTMLConverterAsync: (args: {
             <div className={`${baseClass}__info`} data-enable-match="false">
               <strong>{filename}</strong>
               <div className={`${baseClass}__meta`}>
-                {formatFilesize(uploadDoc?.filesize)}
-                {typeof uploadDoc?.width === 'number' && typeof uploadDoc?.height === 'number' && (
-                  <React.Fragment>
-                    &nbsp;-&nbsp;
-                    {uploadDoc?.width}x{uploadDoc?.height}
-                  </React.Fragment>
-                )}
-                {uploadDoc?.mimeType && (
-                  <React.Fragment>
-                    &nbsp;-&nbsp;
-                    {uploadDoc?.mimeType}
-                  </React.Fragment>
-                )}
+                {[
+                  typeof uploadDoc?.filesize === 'number'
+                    ? formatFilesize(uploadDoc.filesize)
+                    : null,
+                  typeof uploadDoc?.width === 'number' && typeof uploadDoc?.height === 'number'
+                    ? `${uploadDoc.width}x${uploadDoc.height}`
+                    : null,
+                  uploadDoc?.mimeType,
+                ]
+                  .filter(Boolean)
+                  .join('\u00a0-\u00a0')}
               </div>
             </div>
           </div>
