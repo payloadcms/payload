@@ -221,7 +221,7 @@ describe('buildRawSchema', () => {
   it('should move a relationship foreign key past 63 chars to a named table-level foreign key', async () => {
     const groupName = 'g'.repeat(40)
 
-    const config = sanitizeConfig({
+    const config = await sanitizeConfig({
       collections: [
         {
           slug: 'p',
@@ -264,7 +264,7 @@ describe('buildRawSchema', () => {
   })
 
   it('should keep the inline reference for a relationship foreign key within 63 chars', async () => {
-    const config = sanitizeConfig({
+    const config = await sanitizeConfig({
       collections: [
         {
           slug: 'posts',
