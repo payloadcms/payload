@@ -136,16 +136,30 @@ play.addEventListener('click', () => {
 })
 renderAt({ milliseconds: 0 })
 
-async function refreshApplication() {
+let isRefreshing = false
+const simulateRefresh = document.querySelector('#simulate-refresh')
+simulateRefresh.addEventListener('click', () => refreshApplication({ minimumDuration: 1200 }))
+
+async function refreshApplication({ minimumDuration = 300 } = {}) {
+  if (isRefreshing) return
+  isRefreshing = true
+  simulateRefresh.setAttribute('aria-disabled', 'true')
   chrome.setRefreshState({ state: 'refreshing' })
-  const started = performance.now()
-  const loaded = new Promise((resolve) =>
-    application.addEventListener('load', resolve, { once: true }),
-  )
-  application.contentWindow.location.reload()
-  await loaded
-  await new Promise((resolve) =>
-    setTimeout(resolve, Math.max(0, 300 - (performance.now() - started))),
-  )
-  chrome.setRefreshState({ state: 'refreshed' })
+  try {
+    const started = performance.now()
+    const loaded = new Promise((resolve) =>
+      application.addEventListener('load', resolve, { once: true }),
+    )
+    application.contentWindow.location.reload()
+    await loaded
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.max(0, minimumDuration - (performance.now() - started))),
+    )
+    chrome.setRefreshState({ state: 'refreshed' })
+  } catch {
+    chrome.setRefreshState({ state: 'failed' })
+  } finally {
+    isRefreshing = false
+    simulateRefresh.setAttribute('aria-disabled', 'false')
+  }
 }

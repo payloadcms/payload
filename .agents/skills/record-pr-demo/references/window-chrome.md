@@ -67,7 +67,7 @@ Resizing changes the iframe's CSS dimensions, so responsive breakpoints run at t
 
 `await page.reload()` is a lower-level harness capability that reloads only the application iframe and reports loading, success, or failure in the chrome. Navigation and HTTP errors propagate to the scenario. Await a reload before starting another. Feature walkthroughs click `chrome.refresh` when demonstrating refresh; see the [gesture contract](recording.md#gesture-based-interactions).
 
-The **Refresh frame** button sits between Forward and the URL bar in both preview and recordings. It stays visible and dim when idle, spins while the app reloads, and returns to the same dim icon afterward. Scenarios can click it with `await click(chrome.refresh)`. Application-initiated navigations are not labeled as recorder refreshes.
+The **Refresh frame** button sits between Forward and the URL bar in both preview and recordings. It stays visible and dim when idle, spins while the app reloads, and returns to the same dim icon afterward. Scenarios can click it with `await click(chrome.refresh)`. The playground’s **Simulate refresh** control reloads the frame with a brief minimum loading duration so the spinner is easy to inspect. Application-initiated navigations are not labeled as recorder refreshes.
 
 ## Verification and accessibility boundaries
 
