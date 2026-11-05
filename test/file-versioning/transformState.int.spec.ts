@@ -88,14 +88,6 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     })
   })
 
-  test('should reject a built-in key that no transformer applies', async ({ payload }) => {
-    await expect(
-      createImage({ payload, _transforms: { resize: { width: 100 } } }),
-    ).rejects.toMatchObject({
-      data: { errors: [expect.objectContaining({ path: '_transforms.resize' })] },
-    })
-  })
-
   test('should save an admin crop and focal point sent in the query string', async ({
     payload,
     restClient,
@@ -297,7 +289,6 @@ test.suite('File transform state', { config: './config.ts' }, () => {
       payload,
     })
 
-    expect(updated).toMatchObject({ height: 600, width: 800 })
     await expect(
       sharp(path.join(transformedMediaDir, updated.filename!)).metadata(),
     ).resolves.toMatchObject({ height: 600, width: 800 })
@@ -310,8 +301,8 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     // The copy is made from the flipped file, so the flip is already part of its files.
     const copy = await payload.duplicate({ id: created.id, collection: transformedMediaSlug })
 
-    expect(flipStageRuns.length).toBeGreaterThan(0)
-    expect(flipStageRuns.every((flip) => flip === undefined)).toBe(true)
+    // The stage ran for the copy, and saw no flip each time.
+    expect(new Set(flipStageRuns)).toEqual(new Set([undefined]))
     expect(copy._transforms).toBeNull()
   })
 

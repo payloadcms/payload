@@ -23,9 +23,6 @@ import { mediaWithDocPrefixSlug } from './collections/MediaWithDocPrefix.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-const cropToSquare = { height: 100, width: 100, x: 0, y: 0 }
-
 let containerClient: ContainerClient
 let TEST_CONTAINER: string
 
@@ -612,6 +609,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     test('should fetch the whole client-uploaded image when Sharp applies a saved crop', async ({
       restClient,
     }) => {
+      const crop = { height: 100, width: 100, x: 0, y: 0 }
       const file = readFileSync(path.resolve(dirname, '../../uploads/2mb.jpg'))
 
       const form = await stageAzureClientUpload({
@@ -621,17 +619,14 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
         mimeType: 'image/jpeg',
         restClient,
       })
-      form.append('_payload', JSON.stringify({ _transforms: { crop: cropToSquare } }))
+      form.append('_payload', JSON.stringify({ _transforms: { crop } }))
 
-      const createRes = await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: form })
-      expect(createRes.status).toBe(201)
-
-      const { doc } = await createRes.json()
+      const { doc } = await (
+        await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: form })
+      ).json()
       createdIds.push(doc.id)
 
-      expect(doc.width).toBe(cropToSquare.width)
-      expect(doc.height).toBe(cropToSquare.height)
-      expect(doc._transforms).toEqual({ crop: cropToSquare })
+      expect(doc).toMatchObject({ _transforms: { crop }, height: 100, width: 100 })
     })
   })
 

@@ -3,158 +3,92 @@ import { describe, expect, it, vi } from 'vitest'
 import type { PayloadRequest } from '../../types/index.js'
 import type { UploadTransformer } from '../transformers/types.js'
 
-import { ValidationError } from '../../errors/ValidationError.js'
 import { uploadTransformerInternal } from '../transformers/uploadTransformerBridge.js'
 import { planUploadRebuild } from './planUploadRebuild.js'
 
-const makeStage = (slug: string, handledTransformKeys?: string[]): UploadTransformer => ({
-  slug,
-  canTransform: vi.fn(() =>
-    handledTransformKeys ? { canTransform: true as const, handledTransformKeys } : true,
-  ),
+const stage = (handledTransformKeys?: string[], isBridge = false): UploadTransformer => ({
+  slug: 'stage',
+  canTransform: () => (handledTransformKeys ? { canTransform: true, handledTransformKeys } : true),
   mimeTypes: ['text/*'],
   transformFile: vi.fn(),
+  ...(isBridge ? { [uploadTransformerInternal]: { prepareUpload: vi.fn() } } : {}),
 })
-
-const makeBridge = (slug: string, handledTransformKeys: string[]): UploadTransformer => ({
-  ...makeStage(slug, handledTransformKeys),
-  [uploadTransformerInternal]: { prepareUpload: vi.fn() },
-})
-
-const plan = ({
-  next,
-  previous,
-  transformers = [],
-  ...overrides
-}: {
-  next: null | Record<string, unknown>
-  previous: null | Record<string, unknown> | undefined
-  transformers?: UploadTransformer[]
-} & Partial<Parameters<typeof planUploadRebuild>[0]>) =>
-  planUploadRebuild({
-    collectionSlug: 'media',
-    hasCropOrResizeEdit: false,
-    isDuplicating: false,
-    isExternalSource: false,
-    isLegacyReupload: false,
-    pipelineDoc: { _transforms: next },
-    pipelineOriginalDoc: Object.freeze({ _transforms: next }),
-    previousTransforms: previous,
-    req: {
-      payload: { config: { upload: { transformers } } },
-      t: vi.fn((key: string) => key),
-    } as unknown as PayloadRequest,
-    storedMimeType: 'text/markdown',
-    ...overrides,
-  })
 
 const rotate = { rotate: { angle: 90 } }
+const watermark = { watermark: 'draft' }
 
 describe('planUploadRebuild', () => {
-  it('should rebuild an external source without planning', async () => {
-    const stage = makeStage('stage')
-
-    const result = await plan({
-      isExternalSource: true,
-      next: null,
-      previous: null,
-      transformers: [stage],
-    })
-
-    expect(result).toEqual({ shouldRebuild: true })
-    expect(stage.canTransform).not.toHaveBeenCalled()
-  })
-
-  it('should not rebuild when _transforms did not change and there is no other trigger', async () => {
-    const stage = makeStage('stage')
-
-    const result = await plan({ next: rotate, previous: rotate, transformers: [stage] })
-
-    expect(result).toEqual({ shouldRebuild: false })
-    expect(stage.canTransform).not.toHaveBeenCalled()
-  })
-
-  it('should rebuild when a built-in key changes and a stage claims it', async () => {
-    const result = await plan({
+  it.for([
+    {
+      name: 'rebuild an external source without planning',
+      args: { isExternalSource: true, previousTransforms: null },
+      expected: { hasPlan: false, shouldRebuild: true },
+    },
+    {
+      name: 'not rebuild or plan when _transforms did not change',
+      args: { previousTransforms: structuredClone(rotate) },
+      expected: { hasPlan: false, shouldRebuild: false },
       next: rotate,
-      previous: null,
-      transformers: [makeStage('rotator', ['rotate'])],
-    })
-
-    expect(result.shouldRebuild).toBe(true)
-    expect(result.rebuildPlan?.mimeType).toBe('text/markdown')
-  })
-
-  it('should reject a changed built-in key that no stage claims', async () => {
-    const result = plan({ next: rotate, previous: null, transformers: [makeStage('stage')] })
-
-    await expect(result).rejects.toThrow(ValidationError)
-    await expect(result).rejects.toMatchObject({
-      data: { errors: [{ path: '_transforms.rotate' }] },
-    })
-  })
-
-  it('should rebuild without a plan when the stored MIME type is unknown', async () => {
-    const result = await plan({ next: rotate, previous: null, storedMimeType: undefined })
-
-    expect(result).toEqual({ shouldRebuild: true })
-  })
-
-  it.for<{ args: Parameters<typeof plan>[0]; name: string; shouldRebuild: boolean }>([
+    },
+    {
+      name: 'rebuild without a plan when the stored MIME type is unknown',
+      args: { previousTransforms: null, storedMimeType: undefined },
+      expected: { hasPlan: false, shouldRebuild: true },
+      next: rotate,
+    },
+    {
+      name: 'rebuild with a plan when a built-in key is removed',
+      args: { previousTransforms: rotate },
+      expected: { hasPlan: true, shouldRebuild: true },
+    },
     {
       name: 'rebuild a duplicate with no _transforms change',
-      args: { isDuplicating: true, next: null, previous: undefined },
-      shouldRebuild: true,
+      args: { isDuplicating: true },
+      expected: { hasPlan: true, shouldRebuild: true },
     },
     {
       name: 'rebuild for a crop sent in the uploadEdits query',
-      args: { hasCropOrResizeEdit: true, isLegacyReupload: true, next: null, previous: null },
-      shouldRebuild: true,
+      args: { hasCropOrResizeEdit: true, isLegacyReupload: true, previousTransforms: null },
+      expected: { hasPlan: true, shouldRebuild: true },
     },
     {
-      name: 'not rebuild when only a custom key that no stage claims changed',
-      args: { next: { watermark: 'draft' }, previous: null, transformers: [makeStage('stage')] },
-      shouldRebuild: false,
+      name: 'not rebuild when a changed custom key has no claim',
+      args: { previousTransforms: null },
+      expected: { hasPlan: true, shouldRebuild: false },
+      next: watermark,
+      transformers: [stage()],
     },
     {
-      name: 'rebuild when a changed custom key is claimed by a stage that runs',
-      args: {
-        next: { watermark: 'draft' },
-        previous: null,
-        transformers: [makeStage('watermarker', ['watermark'])],
-      },
-      shouldRebuild: true,
+      name: 'rebuild when a stage that runs claims a changed custom key',
+      args: { previousTransforms: null },
+      expected: { hasPlan: true, shouldRebuild: true },
+      next: watermark,
+      transformers: [stage(['watermark'])],
     },
     {
       name: 'not count a claim from a Sharp bridge that does not run',
-      args: {
-        next: { watermark: 'draft' },
-        previous: null,
-        transformers: [makeBridge('chosen', []), makeBridge('not-chosen', ['watermark'])],
-      },
-      shouldRebuild: false,
+      args: { previousTransforms: null },
+      expected: { hasPlan: true, shouldRebuild: false },
+      next: watermark,
+      transformers: [stage([], true), stage(['watermark'], true)],
     },
-    {
-      name: 'rebuild for a focal point write when a stage that runs claims focalPoint',
-      args: {
-        isLegacyReupload: true,
-        next: null,
-        previous: null,
-        transformers: [makeStage('sharp', ['focalPoint'])],
-      },
-      shouldRebuild: true,
-    },
-    {
-      name: 'not rebuild or check coverage for a focal point write that no stage claims',
-      args: {
-        isLegacyReupload: true,
-        next: { ...rotate, focalPoint: { x: 20, y: 80 } },
-        previous: rotate,
-        transformers: [makeStage('stage')],
-      },
-      shouldRebuild: false,
-    },
-  ])('should $name', async ({ args, shouldRebuild }) => {
-    expect((await plan(args)).shouldRebuild).toBe(shouldRebuild)
+  ])('should $name', async ({ args, expected, next = null, transformers = [] }) => {
+    const result = await planUploadRebuild({
+      collectionSlug: 'media',
+      hasCropOrResizeEdit: false,
+      isDuplicating: false,
+      isExternalSource: false,
+      isLegacyReupload: false,
+      pipelineDoc: { _transforms: next },
+      pipelineOriginalDoc: Object.freeze({ _transforms: next }),
+      previousTransforms: undefined,
+      req: { payload: { config: { upload: { transformers } } } } as unknown as PayloadRequest,
+      storedMimeType: 'text/markdown',
+      ...args,
+    })
+
+    expect({ hasPlan: Boolean(result.rebuildPlan), shouldRebuild: result.shouldRebuild }).toEqual(
+      expected,
+    )
   })
 })

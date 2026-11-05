@@ -10,14 +10,11 @@ import type {
  * `context.contractStages`, so each test controls the stage without a transformer per test.
  */
 export type ContractStages = {
-  /**
-   * The `_transforms` keys each contract transformer claims. Without an entry, `contract-first`
-   * returns `true` and `contract-second` does not take part.
-   */
-  claims?: { first?: string[]; second?: string[] }
   first?: (
     args: TransformFileArgs,
   ) => Promise<TransformFileResult | void> | TransformFileResult | void
+  /** The `_transforms` keys the transformer claims. Without them, `canTransform` returns `true`. */
+  handledTransformKeys?: string[]
 }
 
 /** The arguments the contract transformer received, in the order the calls ran. */
@@ -43,13 +40,11 @@ export const contractTransformers: UploadTransformer[] = [
       contractCalls.canTransform.push(args)
 
       const contractStages = args.req.context?.contractStages as ContractStages | undefined
-      const handledTransformKeys = contractStages?.claims?.first
+      const handledTransformKeys = contractStages?.handledTransformKeys
 
-      if (!contractStages) {
-        return false
-      }
-
-      return handledTransformKeys ? { canTransform: true, handledTransformKeys } : true
+      return handledTransformKeys
+        ? { canTransform: true, handledTransformKeys }
+        : Boolean(contractStages)
     },
     mimeTypes: ['text/markdown', 'image/*'],
     transformFile: async (args) => {
@@ -59,16 +54,5 @@ export const contractTransformers: UploadTransformer[] = [
 
       return (await stage?.(args)) ?? { status: 'continue' }
     },
-  },
-  {
-    slug: 'contract-second',
-    canTransform: ({ req }) => {
-      const handledTransformKeys = (req.context?.contractStages as ContractStages | undefined)
-        ?.claims?.second
-
-      return handledTransformKeys ? { canTransform: true, handledTransformKeys } : false
-    },
-    mimeTypes: ['text/markdown'],
-    transformFile: () => Promise.resolve({ status: 'continue' }),
   },
 ]

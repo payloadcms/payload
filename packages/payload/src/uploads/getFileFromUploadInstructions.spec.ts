@@ -500,7 +500,15 @@ describe('getFileFromUploadInstructions', () => {
     })
   })
 
-  it('fetches only a bounded header for an image with no configured adjustments', async () => {
+  it.for([
+    { name: 'no configured adjustments', data: undefined },
+    // Whether a stage applies a saved crop is known only after planning, so generateFileData
+    // decides that download.
+    {
+      name: 'a _transforms crop in the request body',
+      data: { _transforms: { crop: { height: 1, width: 1, x: 0, y: 0 } } },
+    },
+  ])('fetches only a bounded header for an image with $name', async ({ data }) => {
     const handler = vi.fn(async (handlerReq: PayloadRequest) => {
       expect(handlerReq.headers.get('range')).toBe(`bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}`)
       return new Response(MINIMAL_PNG, {
@@ -513,6 +521,7 @@ describe('getFileFromUploadInstructions', () => {
     })
 
     const req = createReq([handler], {})
+    req.data = data
 
     const file = await getFileFromUploadInstructions({
       collectionSlug: 'media',
@@ -554,38 +563,6 @@ describe('getFileFromUploadInstructions', () => {
     tempFilesToClean.push(file.tempFilePath!)
     expect(file.data.length).toBe(0)
     expect(fs.readFileSync(file.tempFilePath!)).toEqual(MINIMAL_PNG)
-  })
-
-  it('fetches only a bounded header for an image when the request body includes a _transforms crop', async () => {
-    // Whether a stage applies the crop is known only after planning, so generateFileData decides
-    // the full download.
-    const handler = vi.fn(async (handlerReq: PayloadRequest) => {
-      expect(handlerReq.headers.get('range')).toBe(`bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}`)
-      return new Response(MINIMAL_PNG, {
-        headers: {
-          'Content-Range': `bytes 0-${MINIMAL_PNG.length - 1}/${MINIMAL_PNG.length}`,
-          'Content-Type': 'image/png',
-        },
-        status: 206,
-      })
-    })
-
-    const req = createReq([handler], {})
-    req.data = { _transforms: { crop: { height: 1, width: 1, x: 0, y: 0 } } }
-
-    const file = await getFileFromUploadInstructions({
-      collectionSlug: 'media',
-      file: createUploadReferenceFile({
-        filename: 'photo.png',
-        mimeType: 'image/png',
-        size: MINIMAL_PNG.length,
-      }),
-      req,
-    })
-
-    expect(handler).toHaveBeenCalledTimes(1)
-    expect(file.tempFilePath).toBeUndefined()
-    expect(file.data.equals(MINIMAL_PNG)).toBe(true)
   })
 
   it('stops reading once it has enough bytes to probe dimensions, even if the handler ignores the range hint', async () => {

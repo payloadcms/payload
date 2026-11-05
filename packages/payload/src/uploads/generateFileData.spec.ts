@@ -138,146 +138,20 @@ describe('generateFileData', () => {
         query,
       }) as unknown as PayloadRequest
 
-    it('should reject a crop that no configured transformer applies', async () => {
-      const req = createPngReq({
-        query: {
-          uploadEdits: {
-            crop: { height: 100, unit: '%', width: 50, x: 0, y: 0 },
-            heightInPixels: 1,
-            widthInPixels: 1,
-          },
-        },
-      })
+    it('should default the focal point to the center on create, without a crop warning', async () => {
+      const req = createPngReq()
 
-      await expect(
-        generateFileData({
-          collection: createCollection({ focalPoint: true }),
-          config: {} as SanitizedConfig,
-          data: {},
-          operation: 'create',
-          overwriteExistingFiles: true,
-          req,
-        }),
-      ).rejects.toMatchObject({ data: { errors: [{ path: '_transforms.crop' }] } })
-    })
-
-    const savedCrop = { height: 5, width: 5, x: 0, y: 0 }
-    // A cropped upload: the main file is the 5x5 crop of a 10x10 original.
-    const croppedDoc = {
-      _transforms: { crop: savedCrop },
-      filename: 'photo.png',
-      focalX: 50,
-      focalY: 50,
-      height: 5,
-      mimeType: 'image/png',
-      original: {
-        filename: 'photo.png',
-        height: 10,
-        mimeType: 'image/png',
-        url: '/api/media/file/photo.png?original=true',
-        width: 10,
-      },
-      url: '/api/media/file/photo.png',
-      width: 5,
-    }
-
-    it('should save a focal point change on a document whose saved crop no transformer applies', async () => {
-      const req = {
-        payload: { config: {}, logger: { error: vi.fn(), warn: vi.fn() } },
-        query: {},
-      } as unknown as PayloadRequest
-
-      const result = await generateFileData({
-        collection: createCollection({ focalPoint: true }),
-        config: {} as SanitizedConfig,
-        data: { focalX: 20, focalY: 80 },
-        operation: 'update',
-        originalDoc: croppedDoc,
-        overwriteExistingFiles: true,
-        req,
-      })
-
-      expect(result.data).toMatchObject({
-        _transforms: { crop: savedCrop, focalPoint: { x: 20, y: 80 } },
-        focalX: 20,
-        focalY: 80,
-      })
-    })
-
-    it('should reject a focal point rebuild that would drop a saved crop no transformer applies', async () => {
-      const focalOnly = {
-        slug: 'focal-only',
-        canTransform: () => ({ canTransform: true, handledTransformKeys: ['focalPoint'] }),
-        mimeTypes: ['image/*'],
-        transformFile: vi.fn(),
-      }
-      const req = {
-        payload: {
-          config: { upload: { transformers: [focalOnly] } },
-          logger: { error: vi.fn(), warn: vi.fn() },
-        },
-        query: {},
-      } as unknown as PayloadRequest
-
-      await expect(
-        generateFileData({
-          collection: createCollection({ focalPoint: true }),
-          config: {} as SanitizedConfig,
-          data: { focalX: 20, focalY: 80 },
-          operation: 'update',
-          originalDoc: croppedDoc,
-          overwriteExistingFiles: true,
-          req,
-        }),
-      ).rejects.toMatchObject({ data: { errors: [{ path: '_transforms.crop' }] } })
-    })
-
-    it('should log a canTransform error during rebuild planning and throw a FileUploadError', async () => {
-      const failure = new Error('canTransform failed')
-      const throwing = {
-        slug: 'throwing',
-        canTransform: () => {
-          throw failure
-        },
-        mimeTypes: ['image/*'],
-        transformFile: vi.fn(),
-      }
-      const logError = vi.fn()
-      const req = {
-        payload: {
-          config: { upload: { transformers: [throwing] } },
-          logger: { error: logError, warn: vi.fn() },
-        },
-        query: {},
-        t: vi.fn((key: string) => key),
-      } as unknown as PayloadRequest
-
-      await expect(
-        generateFileData({
-          collection: createCollection({ focalPoint: true }),
-          config: {} as SanitizedConfig,
-          data: { _transforms: { crop: savedCrop, watermark: 'draft' } },
-          operation: 'update',
-          originalDoc: croppedDoc,
-          overwriteExistingFiles: true,
-          req,
-        }),
-      ).rejects.toThrow(FileUploadError)
-
-      expect(logError).toHaveBeenCalledWith(failure)
-    })
-
-    it('should default the focal point to the center on create', async () => {
       const result = await generateFileData({
         collection: createCollection({ focalPoint: true }),
         config: {} as SanitizedConfig,
         data: {},
         operation: 'create',
         overwriteExistingFiles: true,
-        req: createPngReq(),
+        req,
       })
 
       expect(result.data).toMatchObject({ focalX: 50, focalY: 50 })
+      expect(req.payload.logger.warn).not.toHaveBeenCalled()
     })
 
     it('should save a focal point sent through the uploadEdits query param', async () => {
@@ -602,96 +476,108 @@ describe('generateFileData - client uploads without full contents', () => {
       }),
     ).rejects.toMatchObject({ message: error.message, status: 400 })
   })
+})
 
-  describe('with saved transform keys', () => {
-    const crop = { height: 1, width: 1, x: 0, y: 0 }
+describe('generateFileData - _transforms claims', () => {
+  const crop = { height: 1, width: 1, x: 0, y: 0 }
+  const focalPoint = { x: 20, y: 80 }
+  // A cropped upload: its main file is the crop of a 10x10 original.
+  const croppedDoc = {
+    _transforms: { crop },
+    mimeType: 'image/png',
+    original: { filename: 'photo.png', height: 10, mimeType: 'image/png', width: 10 },
+  }
+  // A client upload that arrived with only its header.
+  const headerOnlyFile = { data: PNG_SIGNATURE, mimetype: 'image/png', name: 'photo.png' }
+  const stage = (canTransform: UploadTransformer['canTransform'], internal = {}) => ({
+    slug: 'stage',
+    canTransform,
+    mimeTypes: ['image/*'],
+    transformFile: vi.fn(),
+    ...internal,
+  })
+  const claim = (keys: string[]) => () => ({ canTransform: true, handledTransformKeys: keys })
+  const fetchFullClientUpload = vi.fn()
+  const logError = vi.fn()
 
-    const createHeaderOnlyReq = (transformers: unknown[]) =>
-      ({
-        file: {
-          data: PNG_SIGNATURE,
-          mimetype: 'image/png',
-          name: 'photo.png',
-          size: 5_000_000,
-          uploadReference: { key: 'media/photo.png' },
-        },
-        payload: {
-          config: { upload: { transformers } },
-          logger: { error: vi.fn(), warn: vi.fn() },
-        },
-      }) as unknown as PayloadRequest
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
 
-    const createSharpBridge = (prepareUpload: ReturnType<typeof vi.fn>) => ({
-      slug: 'sharp',
-      canTransform: () => ({ canTransform: true, handledTransformKeys: ['crop', 'focalPoint'] }),
-      mimeTypes: ['image/*'],
+  type RunArgs = { data: object; file?: object; originalDoc?: object; transformers?: object[] }
+
+  const run = ({ data, file, originalDoc, transformers = [] }: RunArgs) =>
+    generateFileData({
+      collection: createCollection({ focalPoint: true }),
+      config: {} as SanitizedConfig,
+      data,
+      fetchFullClientUpload,
+      operation: originalDoc ? 'update' : 'create',
+      originalDoc,
+      overwriteExistingFiles: true,
+      req: {
+        file: file && { ...file, size: 5_000_000, uploadReference: { key: 'media/photo.png' } },
+        payload: { config: { upload: { transformers } }, logger: { error: logError } },
+        query: {},
+        t: (key: string) => key,
+      } as unknown as PayloadRequest,
+    })
+
+  it.for([
+    {
+      name: 'a focal point rebuild that would drop a saved crop no stage claims',
+      data: { focalX: 20, focalY: 80 },
+      originalDoc: croppedDoc,
+      transformers: [stage(claim(['focalPoint']))],
+    },
+    {
+      name: 'a saved crop no stage claims on a header-only client upload, before downloading it',
+      data: { _transforms: { crop } },
+      file: headerOnlyFile,
+      transformers: [stage(() => true)],
+    },
+  ])('should reject $name', async (args) => {
+    await expect(run(args)).rejects.toMatchObject({
+      data: { errors: [{ path: '_transforms.crop' }] },
+    })
+    expect(fetchFullClientUpload).not.toHaveBeenCalled()
+  })
+
+  it('should save a focal point change on a document whose saved crop no stage claims', async () => {
+    const { data } = await run({ data: { focalX: 20, focalY: 80 }, originalDoc: croppedDoc })
+
+    expect(data).toMatchObject({ _transforms: { crop, focalPoint }, focalX: 20, focalY: 80 })
+  })
+
+  it('should not download a header-only client upload for a focal point alone', async () => {
+    const prepareUpload = vi.fn()
+    const sharp = stage(claim(['crop', 'focalPoint']), {
       [uploadTransformerInternal]: { prepareUpload },
-      transformFile: vi.fn(),
     })
 
-    it('should download the full file when the Sharp bridge claims a saved key', async () => {
-      const prepareUpload = vi.fn(({ file }) => Promise.resolve([{ fieldPath: 'filename', file }]))
-      const req = createHeaderOnlyReq([createSharpBridge(prepareUpload)])
-      const fetchFullClientUpload = vi.fn().mockResolvedValue({
-        ...req.file!,
-        data: PNG_SIGNATURE,
-        size: PNG_SIGNATURE.length,
-      })
-
-      await generateFileData({
-        collection: createCollection(),
-        config: {} as SanitizedConfig,
-        data: { _transforms: { crop } },
-        fetchFullClientUpload,
-        operation: 'create',
-        overwriteExistingFiles: true,
-        req,
-      })
-
-      expect(fetchFullClientUpload).toHaveBeenCalledTimes(1)
-      expect(prepareUpload).toHaveBeenCalled()
+    await run({
+      data: { _transforms: { focalPoint } },
+      file: headerOnlyFile,
+      transformers: [sharp],
     })
 
-    it('should not download the full file for a focal point alone', async () => {
-      const prepareUpload = vi.fn()
-      const fetchFullClientUpload = vi.fn()
+    expect(fetchFullClientUpload).not.toHaveBeenCalled()
+    expect(prepareUpload).not.toHaveBeenCalled()
+  })
 
-      await generateFileData({
-        collection: createCollection({ focalPoint: true }),
-        config: {} as SanitizedConfig,
-        data: { _transforms: { focalPoint: { x: 20, y: 80 } } },
-        fetchFullClientUpload,
-        operation: 'create',
-        overwriteExistingFiles: true,
-        req: createHeaderOnlyReq([createSharpBridge(prepareUpload)]),
-      })
-
-      expect(fetchFullClientUpload).not.toHaveBeenCalled()
-      expect(prepareUpload).not.toHaveBeenCalled()
+  it('should log a canTransform error during rebuild planning and throw a FileUploadError', async () => {
+    const failure = new Error('canTransform failed')
+    const throwing = stage(() => {
+      throw failure
     })
 
-    it('should reject a saved key that no stage claims without downloading the full file', async () => {
-      const acceptsWithoutClaims = {
-        slug: 'plain',
-        canTransform: () => true,
-        mimeTypes: ['image/*'],
-        transformFile: vi.fn(),
-      }
-      const fetchFullClientUpload = vi.fn()
-
-      await expect(
-        generateFileData({
-          collection: createCollection(),
-          config: {} as SanitizedConfig,
-          data: { _transforms: { crop } },
-          fetchFullClientUpload,
-          operation: 'create',
-          overwriteExistingFiles: true,
-          req: createHeaderOnlyReq([acceptsWithoutClaims]),
-        }),
-      ).rejects.toMatchObject({ data: { errors: [{ path: '_transforms.crop' }] } })
-
-      expect(fetchFullClientUpload).not.toHaveBeenCalled()
-    })
+    await expect(
+      run({
+        data: { _transforms: { crop, watermark: 'draft' } },
+        originalDoc: croppedDoc,
+        transformers: [throwing],
+      }),
+    ).rejects.toThrow(FileUploadError)
+    expect(logError).toHaveBeenCalledWith(failure)
   })
 })

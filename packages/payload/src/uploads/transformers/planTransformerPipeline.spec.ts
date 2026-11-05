@@ -72,79 +72,37 @@ describe('planTransformerPipeline', () => {
     expect(thirdCanTransform).not.toHaveBeenCalled()
   })
 
-  it('should include a transformer whose canTransform returns an object result', async () => {
-    const transformer = makeTransformer({
-      canTransform: () => ({ canTransform: true }),
-      handleRequest: vi.fn(),
-    })
+  it('should plan the transformers that accept and record the keys each one claims', async () => {
+    const stage = (slug: string, canTransform?: UploadTransformer['canTransform']) =>
+      makeTransformer({ slug, canTransform, transformFile: vi.fn() })
+    const clipper = stage('clip', () => ({ canTransform: true, handledTransformKeys: ['clip'] }))
+    const objectResult = stage('object', () => ({ canTransform: true }))
+    const plain = stage('plain', () => true)
+    const declined = stage('no', () => false)
+    const declinedObject = stage('no-object', () => ({ canTransform: false }) as never)
+    const transformers = [clipper, objectResult, declined, plain, declinedObject]
 
-    const { claims, pipeline } = await planTransformerPipeline({
-      args: makeArgs(),
-      capability: 'handleRequest',
-      transformers: [transformer],
-    })
+    const { claims, pipeline } = await planUpload(transformers)
 
-    expect(pipeline).toEqual([transformer])
-    expect(claims.get(transformer)).toEqual([])
+    expect(pipeline).toEqual([clipper, objectResult, plain])
+    expect(pipeline.map((transformer) => claims.get(transformer))).toEqual([['clip'], [], []])
+    expect(claims.size).toBe(pipeline.length)
   })
 
-  it('should exclude a transformer whose object result is not canTransform: true', async () => {
-    const transformer = makeTransformer({
-      canTransform: () => ({ canTransform: false }) as never,
-      transformFile: vi.fn(),
-    })
-
-    const { pipeline } = await planUpload([transformer])
-
-    expect(pipeline).toEqual([])
-  })
-
-  it('should record the keys each planned transformer claims', async () => {
-    const clipper = makeTransformer({
-      canTransform: () => ({ canTransform: true, handledTransformKeys: ['clip', 'posterFrame'] }),
-      slug: 'clipper',
-      transformFile: vi.fn(),
-    })
-    const plain = makeTransformer({
-      canTransform: () => true,
-      slug: 'plain',
-      transformFile: vi.fn(),
-    })
-    const noPredicate = makeTransformer({ slug: 'no-predicate', transformFile: vi.fn() })
-
-    const { claims, pipeline } = await planUpload([clipper, plain, noPredicate])
-
-    expect(pipeline).toEqual([clipper, plain, noPredicate])
-    expect(claims.get(clipper)).toEqual(['clip', 'posterFrame'])
-    expect(claims.get(plain)).toEqual([])
-    expect(claims.get(noPredicate)).toEqual([])
-  })
-
-  it('should not record claims for a transformer that is not planned', async () => {
-    const declined = makeTransformer({
-      canTransform: () => false,
-      transformFile: vi.fn(),
-    })
-
-    const { claims } = await planUpload([declined])
-
-    expect(claims.has(declined)).toBe(false)
-  })
-
-  it.each([
+  it.for([
     ['a string', 'clip'],
     ['an array with a non-string', ['clip', 1]],
-    ['an array with an empty string', ['']],
+    ['an empty string', ['']],
   ])(
     'should throw a TransformerContractError naming the transformer when handledTransformKeys is %s',
-    async (_label, handledTransformKeys) => {
-      const transformer = makeTransformer({
-        canTransform: () => ({ canTransform: true, handledTransformKeys }) as never,
-        slug: 'bad-claims',
-        transformFile: vi.fn(),
-      })
-
-      const planning = planUpload([transformer])
+    async ([, handledTransformKeys]) => {
+      const planning = planUpload([
+        makeTransformer({
+          canTransform: () => ({ canTransform: true, handledTransformKeys }) as never,
+          slug: 'bad-claims',
+          transformFile: vi.fn(),
+        }),
+      ])
 
       await expect(planning).rejects.toThrow(TransformerContractError)
       await expect(planning).rejects.toThrow('"bad-claims"')
