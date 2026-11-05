@@ -26,5 +26,5 @@ export const ContractMedia: CollectionConfig = {
     beforeValidate: [recordHook('beforeValidate')],
   },
   upload: { staticDir: contractMediaDir },
-  versions: false,
+  versions: { drafts: true },
 }

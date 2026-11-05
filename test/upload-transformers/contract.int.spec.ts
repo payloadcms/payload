@@ -126,27 +126,37 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     })
   })
 
-  test('should reject an invalid _transforms change and keep the stored document and file', async ({
-    payload,
-  }) => {
-    const created = await createNote({ payload })
+  test.for([
+    { name: 'a value the schema rejects', draft: false, transforms: { crop: 'not-a-crop' } },
+    { name: 'a value JSON cannot store', draft: false, transforms: { contractScore: Number.NaN } },
+    {
+      name: 'a value the schema rejects, on a draft save',
+      draft: true,
+      transforms: { crop: 'not-a-crop' },
+    },
+  ])(
+    'should reject a _transforms change with $name and keep the stored document and file',
+    async ({ draft, transforms }, { payload }) => {
+      const created = await createNote({ payload })
 
-    await expect(
-      payload.update({
-        id: created.id,
-        collection: contractMediaSlug,
-        context: { contractStages: { first: setTransforms({ crop: 'not-a-crop' }) } },
-        data: {},
-        file: textFile('replacement'),
-      }),
-    ).rejects.toThrow()
+      await expect(
+        payload.update({
+          id: created.id,
+          collection: contractMediaSlug,
+          context: { contractStages: { first: setTransforms(transforms) } },
+          data: {},
+          draft,
+          file: textFile('replacement'),
+        }),
+      ).rejects.toThrow(TransformerContractError)
 
-    const stored = await payload.findByID({ id: created.id, collection: contractMediaSlug })
+      const stored = await payload.findByID({ id: created.id, collection: contractMediaSlug })
 
-    expect(stored.filename).toBe(created.filename)
-    expect(stored._transforms).toBeNull()
-    expect(await readFile(path.join(contractMediaDir, created.filename!), 'utf8')).toBe('hello')
-  })
+      expect(stored.filename).toBe(created.filename)
+      expect(stored._transforms).toBeNull()
+      expect(await readFile(path.join(contractMediaDir, created.filename!), 'utf8')).toBe('hello')
+    },
+  )
 
   // Regression for a bug in #18601, where bulk updates and updates by ID resolved transformer
   // changes differently.

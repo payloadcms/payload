@@ -4,6 +4,9 @@ import type { Document, PayloadRequest } from '../../types/index.js'
 import type { UploadTransformer } from './types.js'
 
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
+import { deepCopyObject } from '../../utilities/deepCopyObject.js'
+import { getNonJSONValueError } from '../transformState/resolveUploadEdits.js'
+import { getTransformStateError } from '../transformState/validateTransformState.js'
 import { createFileSource } from './createFileSource.js'
 
 /**
@@ -15,8 +18,9 @@ import { createFileSource } from './createFileSource.js'
  * so passing the same `File` through unchanged never copies its buffer.
  *
  * Each stage gets the same `doc` and changes it in place, so later stages and the caller see
- * earlier `_transforms` changes. A stage that changes any other field stops the pipeline with a
- * `TransformerContractError`. Returns the output file.
+ * earlier `_transforms` changes. A stage that changes any other field, or writes a `_transforms`
+ * value that is not valid, stops the pipeline with a `TransformerContractError`. Returns the output
+ * file.
  */
 export async function transformUploadFile({
   collectionSlug,
@@ -45,6 +49,8 @@ export async function transformUploadFile({
       continue
     }
 
+    const transformsBeforeStage = deepCopyObject(doc._transforms)
+
     const result = await transformer.transformFile({
       collectionSlug,
       doc,
@@ -57,6 +63,11 @@ export async function transformUploadFile({
     })
 
     assertOnlyTransformsChanged({ doc, originalDoc, transformerSlug: transformer.slug })
+    await assertValidTransformsChange({
+      next: doc._transforms,
+      previous: transformsBeforeStage,
+      transformerSlug: transformer.slug,
+    })
 
     if (result.file) {
       currentFile = result.file
@@ -89,6 +100,34 @@ function assertOnlyTransformsChanged({
   if (!isDeepStrictEqual(docFields, originalFields)) {
     throw new TransformerContractError(
       `The "${transformerSlug}" transformer changed a document field other than _transforms.`,
+    )
+  }
+}
+
+/**
+ * Draft saves skip field validation, and the JSON copy that checks submitted values runs before
+ * the stages. So a value that a stage writes is checked here. Values the stage did not change were
+ * already checked, and an error for them must not name the stage.
+ */
+async function assertValidTransformsChange({
+  next,
+  previous,
+  transformerSlug,
+}: {
+  next: unknown
+  previous: unknown
+  transformerSlug: string
+}): Promise<void> {
+  if (isDeepStrictEqual(next, previous)) {
+    return
+  }
+
+  const error =
+    getNonJSONValueError({ value: next }) ?? (await getTransformStateError({ value: next }))
+
+  if (error) {
+    throw new TransformerContractError(
+      `The "${transformerSlug}" transformer wrote an invalid _transforms value. ${error}`,
     )
   }
 }

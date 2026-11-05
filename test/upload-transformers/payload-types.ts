@@ -435,6 +435,7 @@ export interface ContractMedia {
   } | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -728,6 +729,7 @@ export interface ContractMediaSelect<T extends boolean = true> {
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
   url?: T;
   thumbnailURL?: T;
   filename?: T;
