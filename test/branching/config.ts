@@ -20,6 +20,7 @@ import {
   localizedSlug,
   maxVersionsSlug,
   mediaSlug,
+  mergeApprovalRequiredTitle,
   nestedSlug,
   numericIDSlug,
   pagesSlug,
@@ -109,10 +110,29 @@ export default buildConfigWithDefaults({
       hooks: {
         beforeMerge: (args) => hookSpy.beforeMerge?.(args),
       },
-      validate: (args) =>
-        hookSpy.branchValidation
-          ? hookSpy.branchValidation(args)
-          : defaultBranchMergeValidation(args),
+      validate: (args) => {
+        if (hookSpy.branchValidation) {
+          return hookSpy.branchValidation(args)
+        }
+
+        const approvalErrors = args.candidates
+          .filter(
+            ({ collectionSlug, data }) =>
+              collectionSlug === localizedSlug && data?.title === mergeApprovalRequiredTitle,
+          )
+          .map(({ changeID, collectionSlug, docID, locale }) => ({
+            changeID,
+            collectionSlug,
+            docID,
+            locale,
+            message: 'Editorial approval is required before merging.',
+            path: 'data.title',
+          }))
+
+        return approvalErrors.length
+          ? { errors: approvalErrors, valid: false }
+          : defaultBranchMergeValidation(args)
+      },
     },
     collections: [
       Folders,
@@ -457,20 +477,6 @@ export default buildConfigWithDefaults({
               return 'computed during read'
             },
             virtual: true,
-          },
-          {
-            name: 'metadata',
-            type: 'json',
-            localized: true,
-            jsonSchema: {
-              fileMatch: ['localized-branch-metadata.json'],
-              schema: {
-                type: 'object',
-                properties: { label: { type: 'string' } },
-                required: ['label'],
-              },
-              uri: 'payload://localized-branch-metadata.json',
-            },
           },
           { name: 'shared', type: 'text' },
         ],

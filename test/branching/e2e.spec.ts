@@ -21,6 +21,7 @@ import {
   homepageGlobalSlug,
   localizedSlug,
   mediaSlug,
+  mergeApprovalRequiredTitle,
   nestedSlug,
   pagesSlug,
   postsSlug,
@@ -1062,22 +1063,14 @@ test.describe('Branching', () => {
       const english = await payload.create({
         branch: branchName,
         collection: localizedSlug,
-        data: {
-          // @ts-expect-error -- Draft saves allow malformed JSON that merge preflight rejects.
-          metadata: { label: null },
-          title: 'Invalid English metadata',
-        },
+        data: { title: mergeApprovalRequiredTitle },
         draft: true,
         locale: 'en',
       })
       const spanish = await payload.create({
         branch: branchName,
         collection: localizedSlug,
-        data: {
-          // @ts-expect-error -- Draft saves allow malformed JSON that merge preflight rejects.
-          metadata: { label: 42 },
-          title: 'Invalid Spanish metadata',
-        },
+        data: { title: mergeApprovalRequiredTitle },
         draft: true,
         locale: 'es',
       })
@@ -1095,8 +1088,8 @@ test.describe('Branching', () => {
       await expect(modal.getByRole('status')).toHaveText('Merge blocked')
       await expect(errors).toContainText('Please correct invalid fields.')
       await expect(errors.getByRole('listitem')).toHaveText([
-        `Localized Doc / #${english.id} / en / data.metadata.label: Invalid input: expected string, received null`,
-        `Localized Doc / #${spanish.id} / es / data.metadata.label: Invalid input: expected string, received number`,
+        `Localized Doc / #${english.id} / en / data.title: Editorial approval is required before merging.`,
+        `Localized Doc / #${spanish.id} / es / data.title: Editorial approval is required before merging.`,
       ])
       await expect(page.getByText('No changes on this branch yet.', { exact: true })).toHaveCount(0)
       await expect(modal.getByRole('progressbar')).toHaveCount(0)

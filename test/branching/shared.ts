@@ -21,6 +21,8 @@ export const maxVersionsSlug = 'max-versions-docs'
 export const autosaveSlug = 'autosave-docs'
 /** Localized and nested fields: per-locale forking, and the sub-table write paths. */
 export const localizedSlug = 'localized-docs'
+/** Triggers the fixture's custom merge validator without relying on schema validation. */
+export const mergeApprovalRequiredTitle = 'Awaiting editorial approval'
 export const nestedSlug = 'nested-docs'
 
 export const headerGlobalSlug = 'header'

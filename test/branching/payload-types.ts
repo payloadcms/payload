@@ -645,10 +645,6 @@ export interface LocalizedDoc {
     | null;
   mergeGuardCategory?: (string | null) | Category;
   computedDefault?: string | null;
-  metadata?: {
-    label: string;
-    [k: string]: unknown;
-  } | null;
   shared?: string | null;
   _branch: string;
   _branchDocID?: (string | null) | LocalizedDoc;
@@ -1486,7 +1482,6 @@ export interface LocalizedDocsSelect<T extends boolean = true> {
       };
   mergeGuardCategory?: T;
   computedDefault?: T;
-  metadata?: T;
   shared?: T;
   _branch?: T;
   _branchDocID?: T;
