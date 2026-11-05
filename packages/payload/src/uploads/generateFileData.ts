@@ -193,10 +193,20 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     edits = await resolveUploadEdits(editArgs)
   }
 
+  // A stage can change the focal point, so focalX and focalY follow the final value, rounded as
+  // `resolveUploadEdits` rounds them.
+  const finalFocalPoint = (transforms as { focalPoint?: { x: number; y: number } } | null)
+    ?.focalPoint
+  const focalFields =
+    editArgs.focalPointEnabled && finalFocalPoint
+      ? { focalX: Math.round(finalFocalPoint.x), focalY: Math.round(finalFocalPoint.y) }
+      : {}
+
   return {
     ...result,
     data: {
       ...edits.applyTransformState(result.data),
+      ...focalFields,
       _transforms: transforms ?? null,
     },
   }

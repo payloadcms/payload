@@ -111,6 +111,21 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     expect(stored._transforms).toEqual({ contractScore: 1 })
   })
 
+  test('should save focalX and focalY from a focal point that a stage sets', async ({
+    payload,
+  }) => {
+    const created = await createNote({
+      contractStages: { first: setTransforms({ focalPoint: { x: 20.4, y: 80 } }) },
+      payload,
+    })
+
+    expect(created).toMatchObject({
+      _transforms: { focalPoint: { x: 20.4, y: 80 } },
+      focalX: 20,
+      focalY: 80,
+    })
+  })
+
   test('should reject an invalid _transforms change and keep the stored document and file', async ({
     payload,
   }) => {
