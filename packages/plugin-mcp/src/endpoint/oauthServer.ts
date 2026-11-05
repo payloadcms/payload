@@ -81,7 +81,7 @@ export const oauthServerEndpoints: Endpoint[] = [
     path: '/mcp/oauth/authorize',
   },
   {
-    handler: (req) => withIssuer(req, () => approve(req)),
+    handler: (req) => withIssuer(req, (issuer) => approve({ issuer, req })),
     method: 'post',
     path: '/mcp/oauth/authorize',
   },
@@ -119,6 +119,7 @@ const metadataResponse = (issuer: string): Response =>
   Response.json(
     {
       authorization_endpoint: `${issuer}/authorize`,
+      authorization_response_iss_parameter_supported: true,
       code_challenge_methods_supported: ['S256'],
       grant_types_supported: ['authorization_code', 'refresh_token'],
       // Required by OpenID discovery. No ID tokens are issued.
@@ -220,7 +221,13 @@ const authorize: PayloadHandler = (req) => {
   })
 }
 
-const approve: PayloadHandler = async (req) => {
+const approve = async ({
+  issuer,
+  req,
+}: {
+  issuer: string
+  req: PayloadRequest
+}): Promise<Response> => {
   // The Allow page is part of the admin panel, which other sites may be able to frame. Only
   // accepting clicks from a top-level page stops them from tricking users into clicking Allow.
   // Browsers too old to send the header still get through.
@@ -240,8 +247,13 @@ const approve: PayloadHandler = async (req) => {
 
   const { clientID, codeChallenge, redirectURI, state } = consent
 
+  // Responses to the client name this server in `iss`, so clients that use several authorization
+  // servers can tell which one answered
   if (form.get('decision') !== 'allow') {
-    return redirect({ params: { error: OAuthErrorCode.AccessDenied, state }, redirectURI })
+    return redirect({
+      params: { error: OAuthErrorCode.AccessDenied, iss: issuer, state },
+      redirectURI,
+    })
   }
 
   const code: Code = {
@@ -252,7 +264,11 @@ const approve: PayloadHandler = async (req) => {
   }
 
   return redirect({
-    params: { code: seal({ type: 'code', data: code, expiresInSeconds: 60, req }), state },
+    params: {
+      code: seal({ type: 'code', data: code, expiresInSeconds: 60, req }),
+      iss: issuer,
+      state,
+    },
     redirectURI,
   })
 }
@@ -373,7 +389,6 @@ const redirect = ({
   return new Response(null, { headers: { Location: location.href }, status: 302 })
 }
 
-/** Sends the browser to `MCPAuthorizeView`, with the Allow form or the reason it can't show it. */
 /**
  * Accepts https, http to the user's own computer only, since the code would otherwise travel
  * unencrypted, and app schemes like `cursor://` that desktop apps register to receive the code.
@@ -393,6 +408,7 @@ const isValidRedirectURI = (uri: unknown): boolean => {
   return protocol !== 'javascript:' && protocol !== 'data:'
 }
 
+/** Sends the browser to `MCPAuthorizeView`, with the Allow form or the reason it can't show it. */
 const redirectToAuthorizeView = ({
   params,
   req,

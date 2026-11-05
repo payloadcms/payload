@@ -4314,7 +4314,8 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
       const consent = await getConsent({ headers, query, restClient })
       const response = await allow({ consent, headers, restClient })
 
-      return new URL(response.headers.get('Location')!).searchParams.get('code')!
+      // What the client receives at its redirect address
+      return new URL(response.headers.get('Location')!).searchParams
     }
 
     const register = (restClient: RESTClient) =>
@@ -4328,7 +4329,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
     const startSignIn = async (restClient: RESTClient) => {
       const { client_id } = await register(restClient)
       const codeVerifier = `${randomUUID()}${randomUUID()}`
-      const code = await approve({
+      const callback = await approve({
         query: `?${new URLSearchParams({
           client_id,
           code_challenge: createHash('sha256').update(codeVerifier).digest('base64url'),
@@ -4338,6 +4339,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         })}`,
         restClient,
       })
+      const code = callback.get('code')!
 
       return { client_id, code, codeVerifier }
     }
