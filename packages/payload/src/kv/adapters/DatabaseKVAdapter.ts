@@ -49,6 +49,34 @@ export class DatabaseKVAdapter implements KVAdapter {
     return doc.data
   }
 
+  async getdel<T extends KVStoreValue>(key: string): Promise<null | T> {
+    const doc = await this.payload.db.findOne<{
+      data: T
+      id: number | string
+    }>({
+      collection: this.collectionSlug,
+      joins: false,
+      req,
+      select: {
+        data: true,
+        key: true,
+      },
+      where: { key: { equals: key } },
+    })
+
+    if (doc === null) {
+      return null
+    }
+
+    await this.payload.db.deleteOne({
+      collection: this.collectionSlug,
+      req,
+      where: { key: { equals: key } },
+    })
+
+    return doc.data
+  }
+
   async has(key: string): Promise<boolean> {
     const { totalDocs } = await this.payload.db.count({
       collection: this.collectionSlug,
@@ -71,6 +99,36 @@ export class DatabaseKVAdapter implements KVAdapter {
     })
 
     return result.docs.map((each) => each.key)
+  }
+
+  async mget<T extends KVStoreValue>(keys: readonly string[]): Promise<Array<null | T>> {
+    if (keys.length === 0) {
+      return []
+    }
+
+    const result = await this.payload.db.find<{
+      data: T
+      key: string
+    }>({
+      collection: this.collectionSlug,
+      joins: false,
+      limit: 0,
+      pagination: false,
+      req,
+      select: {
+        data: true,
+        key: true,
+      },
+      where: {
+        key: {
+          in: keys,
+        },
+      },
+    })
+
+    const map = new Map<string, T>(result.docs.map((doc) => [doc.key, doc.data]))
+
+    return keys.map((key) => map.get(key) ?? null)
   }
 
   async set(key: string, data: KVStoreValue): Promise<void> {

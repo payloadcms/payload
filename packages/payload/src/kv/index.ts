@@ -25,6 +25,13 @@ export interface KVAdapter {
   get<T extends KVStoreValue>(key: string): Promise<null | T>
 
   /**
+   * Retrieves and deletes a value from the store by its key.
+   * @param key - The key to look up and delete.
+   * @returns A promise that resolves to the value, or `null` if not found.
+   */
+  getdel?<T extends KVStoreValue>(key: string): Promise<null | T>
+
+  /**
    * Checks if a key exists in the store.
    * @param key - The key to check.
    * @returns A promise that resolves to `true` if the key exists, otherwise `false`.
@@ -36,6 +43,14 @@ export interface KVAdapter {
    * @returns A promise that resolves to an array of keys.
    */
   keys(): Promise<string[]>
+
+  /**
+   * Retrieves multiple values from the store by their keys.
+   * Order of results match order of keys.
+   * @param keys - The keys to look up.
+   * @returns A promise that resolves to an array of values aligned to the input keys.
+   */
+  mget?<T extends KVStoreValue>(keys: readonly string[]): Promise<Array<null | T>>
 
   /**
    * Sets a value in the store with the given key.
