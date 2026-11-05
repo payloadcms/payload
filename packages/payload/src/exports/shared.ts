@@ -111,6 +111,7 @@ export {
   type DateOnlyConstraint,
   getDateOnlyComparison,
   isDateOnlyFilter,
+  isDateOnlyFilterValue,
 } from '../utilities/getDateOnlyComparison.js'
 
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'

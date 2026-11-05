@@ -82,7 +82,14 @@ const DateFields: CollectionConfig = {
     {
       name: 'defaultWithTimezone',
       type: 'date',
-      timezone: { defaultTimezone: 'Europe/London' },
+      admin: {
+        date: {
+          overrides: { isClearable: true },
+        },
+      },
+      timezone: {
+        defaultTimezone: 'Europe/London',
+      },
     },
     {
       name: 'dayAndTimeWithTimezone',

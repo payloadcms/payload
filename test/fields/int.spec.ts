@@ -1,9 +1,10 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
-import type { Payload, ValidationError } from 'payload'
+import type { FlattenedField, Payload, ValidationError } from 'payload'
 
 import path from 'path'
 import { reload } from 'payload'
+import { getDateOnlyComparison } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
@@ -5157,6 +5158,7 @@ describe('Fields', () => {
           '2026-03-29T00:00:00.000Z',
           '2026-03-29T22:59:59.999Z',
           '2026-03-29T23:00:00.000Z',
+          null,
         ].map((defaultWithTimezone) =>
           payload.create({
             collection: dateFieldsSlug,
@@ -5177,6 +5179,7 @@ describe('Fields', () => {
             | 'greater_than_equal'
             | 'less_than'
             | 'less_than_equal'
+            | 'not_equals'
           value: string
         }) => {
           const result = await payload.find({
@@ -5191,6 +5194,12 @@ describe('Fields', () => {
 
         expect(equalsIDs).toHaveLength(2)
         expect(equalsIDs).toEqual(expect.arrayContaining([documents[1]!.id, documents[2]!.id]))
+        const notEqualsIDs = await findTestIDs({ operator: 'not_equals', value: '2026-03-29' })
+
+        expect(notEqualsIDs).toHaveLength(3)
+        expect(notEqualsIDs).toEqual(
+          expect.arrayContaining([documents[0]!.id, documents[3]!.id, documents[4]!.id]),
+        )
         const greaterThanEqualIDs = await findTestIDs({
           operator: 'greater_than_equal',
           value: '2026-03-29',
@@ -5198,7 +5207,7 @@ describe('Fields', () => {
 
         expect(greaterThanEqualIDs).toHaveLength(3)
         expect(greaterThanEqualIDs).toEqual(
-          expect.arrayContaining(documents.slice(1).map(({ id }) => id)),
+          expect.arrayContaining(documents.slice(1, 4).map(({ id }) => id)),
         )
         expect(await findTestIDs({ operator: 'greater_than', value: '2026-03-29' })).toEqual([
           documents[3]!.id,
@@ -5223,6 +5232,39 @@ describe('Fields', () => {
           documents.map(({ id }) => payload.delete({ collection: dateFieldsSlug, id })),
         )
       }
+    })
+
+    it('should use the sole supported timezone for calendar-day boundaries', () => {
+      const comparison = getDateOnlyComparison({
+        config: payload.config,
+        field: {
+          name: 'singletonTimezone',
+          type: 'date',
+          timezone: {
+            defaultTimezone: 'America/New_York',
+            supportedTimezones: [{ label: 'London', value: 'Europe/London' }],
+          },
+        } as FlattenedField,
+        operator: 'equals',
+        value: '2026-03-29',
+      })
+
+      expect(comparison?.constraints.map(({ value }) => value.toISOString())).toEqual([
+        '2026-03-29T00:00:00.000Z',
+        '2026-03-29T23:00:00.000Z',
+      ])
+
+      const earlyDateComparison = getDateOnlyComparison({
+        config: payload.config,
+        field: { name: 'earlyDate', type: 'date' } as FlattenedField,
+        operator: 'equals',
+        value: '0001-01-01',
+      })
+
+      expect(earlyDateComparison?.constraints.map(({ value }) => value.toISOString())).toEqual([
+        '0001-01-01T00:00:00.000Z',
+        '0001-01-02T00:00:00.000Z',
+      ])
     })
 
     it('should create document with UTC offset timezone', async () => {

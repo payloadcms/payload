@@ -1,7 +1,7 @@
 import type { SQL, Table } from 'drizzle-orm'
 import type { FlattenedField, Operator, Sort, Where } from 'payload'
 
-import { and, getTableName, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { and, getTableName, isNotNull, isNull, ne, not, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { APIError, getFieldByPath, QueryError } from 'payload'
 import { getDateOnlyComparison, isNestedRelationshipQuery, validOperatorSet } from 'payload/shared'
@@ -301,15 +301,17 @@ export function parseParams({
                 })
 
                 if (dateOnlyComparison) {
-                  constraints.push(
-                    and(
-                      ...dateOnlyComparison.constraints.map((constraint) =>
-                        adapter.operators[constraint.operator](
-                          resolvedColumn,
-                          constraint.value.toISOString(),
-                        ),
+                  const range = and(
+                    ...dateOnlyComparison.constraints.map((constraint) =>
+                      adapter.operators[constraint.operator](
+                        resolvedColumn,
+                        constraint.value.toISOString(),
                       ),
                     ),
+                  )
+
+                  constraints.push(
+                    dateOnlyComparison.isNegated ? or(isNull(resolvedColumn), not(range)) : range,
                   )
                   break
                 }

@@ -25,6 +25,8 @@ export type Props = {
 
 import type { Operator, Option as PayloadOption, ResolvedFilterOptions } from 'payload'
 
+import { isDateOnlyFilter, isDateOnlyFilterValue } from 'payload/shared'
+
 import type { Option } from '../../ReactSelect/index.js'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
@@ -111,13 +113,22 @@ export const Condition: React.FC<Props> = (props) => {
   )
 
   const handleOperatorChange = useCallback(
-    async (operator: Option<Operator>) => {
+    async (nextOperator: Option<Operator>) => {
       const operatorValueTypes = getOperatorValueTypes(reducedField.field.type)
-      const validOperatorValue = operatorValueTypes[operator.value] || 'any'
-      const isValidValue =
-        validOperatorValue === 'any' ||
-        typeof value === validOperatorValue ||
-        (validOperatorValue === 'boolean' && (value === 'true' || value === 'false'))
+      const validOperatorValue = operatorValueTypes[nextOperator.value] || 'any'
+      const isCalendarDayValue = isDateOnlyFilterValue(internalValue)
+      const dateField = reducedField.field.type === 'date' ? reducedField.field : undefined
+      const shouldPreserveCalendarDay =
+        isCalendarDayValue &&
+        dateField &&
+        isDateOnlyFilter({ field: dateField, operator }) &&
+        isDateOnlyFilter({ field: dateField, operator: nextOperator.value })
+      const isValidValue = isCalendarDayValue
+        ? shouldPreserveCalendarDay
+        : validOperatorValue === 'any' ||
+          typeof internalValue === validOperatorValue ||
+          (validOperatorValue === 'boolean' &&
+            (internalValue === 'true' || internalValue === 'false'))
 
       if (!isValidValue) {
         // if the current value is not valid for the new operator
@@ -129,12 +140,12 @@ export const Condition: React.FC<Props> = (props) => {
         type: 'operator',
         andIndex,
         field: reducedField,
-        operator: operator.value,
+        operator: nextOperator.value,
         orIndex,
-        value: isValidValue ? value : undefined,
+        value: isValidValue ? internalValue : undefined,
       })
     },
-    [andIndex, reducedField, orIndex, updateCondition, value],
+    [andIndex, internalValue, operator, reducedField, orIndex, updateCondition],
   )
 
   return (

@@ -9,11 +9,15 @@ export const getDateFilterValue = ({
   field,
   operator,
 }: {
-  date: Date
+  date: Date | null
   field: DateFieldClient
   operator: Operator
-}): Date | string => {
-  if (!isDateOnlyFilter({ field, operator })) {
+}): Date | null | string => {
+  if (
+    !(date instanceof Date) ||
+    Number.isNaN(date.getTime()) ||
+    !isDateOnlyFilter({ field, operator })
+  ) {
     return date
   }
 
