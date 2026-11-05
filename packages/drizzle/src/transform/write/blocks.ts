@@ -113,8 +113,6 @@ export const transformBlocks = ({
     // So move the ID to a uuid field for storage
     // and allow the database to generate a serial id automatically
     if (hasUUID) {
-      // The same data can be written again when saving a version after publishing.
-      blockRow = { ...blockRow }
       newRow.row._uuid = blockRow.id
       delete blockRow.id
     }
