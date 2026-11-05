@@ -1017,6 +1017,28 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'blocks-docs',
       fields: [
         {
+          name: 'dateBlocksArray',
+          type: 'array',
+          fields: [
+            {
+              name: 'content',
+              type: 'blocks',
+              blocks: [
+                {
+                  slug: 'arrayDate',
+                  fields: [
+                    {
+                      name: 'date',
+                      type: 'date',
+                      timezone: { defaultTimezone: 'America/Chicago' },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
           name: 'dateBlocksGroup',
           type: 'group',
           fields: [

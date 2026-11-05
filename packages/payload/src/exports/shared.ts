@@ -114,7 +114,6 @@ export { formatAdminURL, stripTrailingSlash } from '../utilities/formatAdminURL.
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
-export { getDateOnlyBounds } from '../utilities/getDateOnlyBounds.js'
 export {
   type DateOnlyComparison,
   getDateOnlyComparison,

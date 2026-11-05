@@ -28,7 +28,7 @@ export type ResolvedDateFilterPlan = {
   pickerAppearance?: string
   requestLocale?: string
   targets: ResolvedDateFilterTarget[]
-  timezone?: string
+  timezone: string
 }
 
 /**

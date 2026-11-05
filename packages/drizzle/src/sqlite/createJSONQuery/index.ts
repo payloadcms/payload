@@ -184,7 +184,7 @@ const createDateOnlyConstraint = ({
 
     const predicate = createRootPredicate(
       (jsonValue) =>
-        `${jsonValue} >= '${escapeSQLValue(value[0])}' AND ${jsonValue} < '${escapeSQLValue(value[1])}'`,
+        `julianday(${jsonValue}) >= julianday('${escapeSQLValue(value[0])}') AND julianday(${jsonValue}) < julianday('${escapeSQLValue(value[1])}')`,
     )
 
     return `${operator === 'date_not_equals' ? 'NOT ' : ''}${predicate}`
@@ -203,7 +203,8 @@ const createDateOnlyConstraint = ({
   }
 
   return createRootPredicate(
-    (jsonValue) => `${jsonValue} ${comparisonOperator} '${escapeSQLValue(value)}'`,
+    (jsonValue) =>
+      `julianday(${jsonValue}) ${comparisonOperator} julianday('${escapeSQLValue(value)}')`,
   )
 }
 

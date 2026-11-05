@@ -570,7 +570,7 @@ const buildDateFilterSearchParam = ({
 }: {
   plan: ResolvedDateFilterPlan
 }): SearchParam | undefined => {
-  if (plan.input.kind !== 'calendarDay' || !plan.timezone) {
+  if (plan.input.kind !== 'calendarDay') {
     return undefined
   }
 

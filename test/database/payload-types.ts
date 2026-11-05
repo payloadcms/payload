@@ -688,6 +688,20 @@ export interface Alias {
  */
 export interface BlocksDoc {
   id: string;
+  dateBlocksArray?:
+    | {
+        content?:
+          | {
+              date?: string | null;
+              date_tz?: SupportedTimezones;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'arrayDate';
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   dateBlocksGroup?: {
     content?:
       | {
@@ -1405,6 +1419,23 @@ export interface AliasesSelect<T extends boolean = true> {
  * via the `definition` "blocks-docs_select".
  */
 export interface BlocksDocsSelect<T extends boolean = true> {
+  dateBlocksArray?:
+    | T
+    | {
+        content?:
+          | T
+          | {
+              arrayDate?:
+                | T
+                | {
+                    date?: T;
+                    date_tz?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+        id?: T;
+      };
   dateBlocksGroup?:
     | T
     | {
