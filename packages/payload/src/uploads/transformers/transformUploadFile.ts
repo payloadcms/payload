@@ -5,6 +5,7 @@ import type { UploadTransformer } from './types.js'
 
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
+import { getChangedTransformKeys } from '../transformState/getChangedTransformKeys.js'
 import { getNonJSONValueError } from '../transformState/resolveUploadEdits.js'
 import { getTransformStateError } from '../transformState/validateTransformState.js'
 import { createFileSource } from './createFileSource.js'
@@ -18,11 +19,12 @@ import { createFileSource } from './createFileSource.js'
  * so passing the same `File` through unchanged never copies its buffer.
  *
  * Each stage gets the same `doc` and changes it in place, so later stages and the caller see
- * earlier `_transforms` changes. A stage that changes any other field, or writes a `_transforms`
- * value that is not valid, stops the pipeline with a `TransformerContractError`. Returns the output
- * file.
+ * earlier `_transforms` changes. A stage that changes any other field, changes a `_transforms` key
+ * that another stage claims, or writes a `_transforms` value that is not valid, stops the pipeline
+ * with a `TransformerContractError`. Returns the output file.
  */
 export async function transformUploadFile({
+  claims,
   collectionSlug,
   doc,
   file,
@@ -32,6 +34,8 @@ export async function transformUploadFile({
   pipeline,
   req,
 }: {
+  /** The `_transforms` keys each stage that runs claims. */
+  claims: ReadonlyMap<UploadTransformer, string[]>
   collectionSlug: string
   doc: Document
   file: File
@@ -63,6 +67,12 @@ export async function transformUploadFile({
     })
 
     assertOnlyTransformsChanged({ doc, originalDoc, transformerSlug: transformer.slug })
+    assertNoChangeToOtherClaims({
+      claims,
+      next: doc._transforms,
+      previous: transformsBeforeStage,
+      transformer,
+    })
     await assertValidTransformsChange({
       next: doc._transforms,
       previous: transformsBeforeStage,
@@ -101,6 +111,36 @@ function assertOnlyTransformsChanged({
     throw new TransformerContractError(
       `The "${transformerSlug}" transformer changed a document field other than _transforms.`,
     )
+  }
+}
+
+/**
+ * A stage may not change a `_transforms` key that another stage claims. The claiming stage may
+ * have read its value already: the Sharp bridge gets its crop before any stage runs. The saved
+ * value would then not match the file.
+ *
+ * Rejecting is the simple choice for now. To allow it later, core would read `_transforms` again
+ * after each stage and give the new value to the claiming stage.
+ */
+function assertNoChangeToOtherClaims({
+  claims,
+  next,
+  previous,
+  transformer,
+}: {
+  claims: ReadonlyMap<UploadTransformer, string[]>
+  next: Document['_transforms']
+  previous: Document['_transforms']
+  transformer: UploadTransformer
+}): void {
+  for (const key of getChangedTransformKeys({ next, previous })) {
+    for (const [claimer, claimedKeys] of claims) {
+      if (claimer !== transformer && claimedKeys.includes(key)) {
+        throw new TransformerContractError(
+          `The "${transformer.slug}" transformer changed _transforms.${key}, which the "${claimer.slug}" transformer applies.`,
+        )
+      }
+    }
   }
 }
 

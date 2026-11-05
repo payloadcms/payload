@@ -14,6 +14,7 @@ import { test } from '../__helpers/int/vitest.js'
 import {
   draftMediaDir,
   draftMediaSlug,
+  flipStageRuns,
   transformedMediaDir,
   transformedMediaSlug,
 } from './shared.js'
@@ -67,7 +68,6 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     { name: 'a crop with non-integer pixels', key: 'crop', value: withCrop({ width: 800.5 }) },
     { name: 'a crop with zero size', key: 'crop', value: withCrop({ height: 0 }) },
     { name: 'a focal point above 100', key: 'focalPoint', value: { focalPoint: { x: 120, y: 1 } } },
-    { name: 'a reserved built-in key', key: 'resize', value: { resize: { width: 100 } } },
     {
       name: 'a value of the wrong type',
       key: 'focalPoint.x',
@@ -85,6 +85,14 @@ test.suite('File transform state', { config: './config.ts' }, () => {
           expect.objectContaining({ message: expect.stringContaining(key), path: '_transforms' }),
         ],
       },
+    })
+  })
+
+  test('should reject a built-in key that no transformer applies', async ({ payload }) => {
+    await expect(
+      createImage({ payload, _transforms: { resize: { width: 100 } } }),
+    ).rejects.toMatchObject({
+      data: { errors: [expect.objectContaining({ path: '_transforms.resize' })] },
     })
   })
 
@@ -276,6 +284,35 @@ test.suite('File transform state', { config: './config.ts' }, () => {
 
     expect(copy).toMatchObject({ height: 600, width: 800 })
     expect(copy._transforms).toEqual({ focalPoint })
+  })
+
+  test('should keep the saved crop when another claimed key rebuilds the file', async ({
+    payload,
+  }) => {
+    const created = await createImage({ payload, _transforms: { crop: savedCrop } })
+
+    const updated = await updateImage({
+      id: created.id,
+      data: { _transforms: { crop: savedCrop, flip: { horizontal: true } } },
+      payload,
+    })
+
+    expect(updated).toMatchObject({ height: 600, width: 800 })
+    await expect(
+      sharp(path.join(transformedMediaDir, updated.filename!)).metadata(),
+    ).resolves.toMatchObject({ height: 600, width: 800 })
+  })
+
+  test('should not apply claimed keys again when duplicating', async ({ payload }) => {
+    const created = await createImage({ payload, _transforms: { flip: { horizontal: true } } })
+    flipStageRuns.length = 0
+
+    // The copy is made from the flipped file, so the flip is already part of its files.
+    const copy = await payload.duplicate({ id: created.id, collection: transformedMediaSlug })
+
+    expect(flipStageRuns.length).toBeGreaterThan(0)
+    expect(flipStageRuns.every((flip) => flip === undefined)).toBe(true)
+    expect(copy._transforms).toBeNull()
   })
 
   test('should apply transform state to every document in a bulk update', async ({ payload }) => {

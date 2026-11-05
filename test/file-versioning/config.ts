@@ -1,3 +1,5 @@
+import type { UploadTransformer } from 'payload'
+
 import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -12,9 +14,24 @@ import { Media } from './collections/Media/index.js'
 import { PlainMedia } from './collections/PlainMedia/index.js'
 import { TransformedMedia } from './collections/TransformedMedia/index.js'
 import { TrashMedia } from './collections/TrashMedia/index.js'
-import { convertedMediaSlug, transformedMediaSlug } from './shared.js'
+import { convertedMediaSlug, flipStageRuns, transformedMediaSlug } from './shared.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
+
+/** Claims `flip` on transformed media and records the value it sees. It does not change the file. */
+const flipStage: UploadTransformer = {
+  slug: 'flip-stage',
+  canTransform: ({ collectionSlug }) =>
+    collectionSlug === transformedMediaSlug && {
+      canTransform: true,
+      handledTransformKeys: ['flip'],
+    },
+  mimeTypes: ['image/*'],
+  transformFile: ({ doc }) => {
+    flipStageRuns.push(doc._transforms?.flip)
+    return Promise.resolve({ status: 'continue' })
+  },
+}
 const migrationDir = process.env.FILE_VERSIONING_MIGRATION_DIR
 const hasLegacySchema = process.env.FILE_VERSIONING_LEGACY_SCHEMA === 'true'
 
@@ -64,6 +81,7 @@ export default buildConfigWithDefaults({
                 },
               },
             }),
+            flipStage,
           ],
     },
     ...(migrationDb ? { db: migrationDb } : {}),
