@@ -128,7 +128,7 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     }
   }
 
-  const { applyTransformState, uploadEdits } = await resolveUploadEdits({
+  const editArgs = {
     collectionSlug: collection.config.slug,
     data,
     focalPointEnabled: collection.config.upload.focalPoint !== false,
@@ -136,10 +136,29 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     operation,
     originalDoc,
     req,
+  }
+  // A create from a URL reads its file later, so a saved crop is checked once the file is read.
+  let edits = await resolveUploadEdits({
+    ...editArgs,
+    canWaitForFile: operation === 'create' && !req.file,
   })
-  const result = await processUpload({ ...args, uploadEdits })
+  const result = await processUpload({
+    ...args,
+    resolveEditsForFile: edits.isWaitingForFile
+      ? async (file) => {
+          edits = await resolveUploadEdits({ ...editArgs, file })
+          return edits.uploadEdits
+        }
+      : undefined,
+    uploadEdits: edits.uploadEdits,
+  })
 
-  return { ...result, data: applyTransformState(result.data) }
+  if (edits.isWaitingForFile) {
+    // No file was read, so the crop cannot be checked. This throws its validation error.
+    edits = await resolveUploadEdits(editArgs)
+  }
+
+  return { ...result, data: edits.applyTransformState(result.data) }
 }
 
 const processUpload = async <T>({
@@ -152,9 +171,15 @@ const processUpload = async <T>({
   originalDoc,
   overwriteExistingFiles,
   req,
+  resolveEditsForFile,
   throwOnMissingFile,
-  uploadEdits,
-}: { uploadEdits: UploadEdits } & Args<T>): Result<T> => {
+  uploadEdits: initialUploadEdits,
+}: {
+  /** Resolves the edits again for a file read during the operation, before any transformer runs. */
+  resolveEditsForFile?: (file: NonNullable<PayloadRequest['file']>) => Promise<UploadEdits>
+  uploadEdits: UploadEdits
+} & Args<T>): Result<T> => {
+  let uploadEdits = initialUploadEdits
   if (!collectionConfig.upload) {
     return {
       data,
@@ -315,6 +340,10 @@ const processUpload = async <T>({
 
   if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
     file = { ...file, mimetype: detectedFileType.mime }
+  }
+
+  if (resolveEditsForFile) {
+    uploadEdits = await resolveEditsForFile(file)
   }
 
   if (!disableLocalStorage) {

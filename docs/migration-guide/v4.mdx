@@ -2174,7 +2174,8 @@ Upload collections now store `original` metadata and a `prefix` and `_objectKey`
 Upload collections now have a `_transforms` JSON field that saves the crop and focal point, so an edit can start again from the retained original. See [Saved crop and focal point](../upload/overview#saved-crop-and-focal-point).
 
 - `_transforms` is a reserved field name on upload collections. If an upload collection defines its own field named `_transforms`, rename it and move its data before you update.
-- `focalX` and `focalY` stay available and always match `_transforms.focalPoint`. For a document saved before `_transforms` existed, the first write copies its focal point into `_transforms`.
+- `focalX` and `focalY` stay available and match `_transforms.focalPoint` when it is set. For a document saved before `_transforms` existed, the first write that saves `_transforms` copies its focal point into `_transforms`.
+- Replacing the file now sets `focalX` and `focalY` to the center, unless the request sends a new focal point. Before, the old values stayed on the document, but the new image sizes did not use them.
 
 **Postgres and SQLite:** run `payload migrate:create`, check that it adds a `_transforms` column to each upload collection table and its versions table, then run `payload migrate`. Existing rows keep `null` until their next write.
 

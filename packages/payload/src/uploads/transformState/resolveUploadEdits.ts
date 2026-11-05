@@ -26,22 +26,36 @@ const fullCrop = { height: 100, unit: '%', width: 100, x: 0, y: 0 } as const
  * value to save and the edits that the upload pipeline applies to the original.
  */
 export async function resolveUploadEdits({
+  canWaitForFile,
   collectionSlug,
   data,
+  file: fileArg,
   focalPointEnabled,
   isDuplicating,
   operation,
   originalDoc,
   req,
 }: {
+  /**
+   * True when the file is read later in the operation, as on a create from a URL. A saved crop
+   * that needs the file's size then returns `isWaitingForFile`, and the caller resolves again
+   * with the read `file` before any transformer runs.
+   */
+  canWaitForFile?: boolean
   collectionSlug: string
   data: unknown
+  /** The new file. Defaults to `req.file`. */
+  file?: PayloadRequest['file']
   focalPointEnabled: boolean
   isDuplicating?: boolean
   operation: 'create' | 'update'
   originalDoc: unknown
   req: PayloadRequest
-}): Promise<{ applyTransformState: <T>(fileData: T) => T; uploadEdits: UploadEdits }> {
+}): Promise<{
+  applyTransformState: <T>(fileData: T) => T
+  isWaitingForFile?: boolean
+  uploadEdits: UploadEdits
+}> {
   const parsedEdits = parseUploadEditsFromReqOrIncomingData({
     data,
     isDuplicating,
@@ -66,17 +80,41 @@ export async function resolveUploadEdits({
 
   const incoming = (data ?? {}) as Document
   const current = (operation === 'update' ? originalDoc : undefined) as Document
-  const hasNewFile = Boolean(req.file)
+  const file = fileArg ?? req.file
+  const hasNewFile = Boolean(file)
   const queryEdits = req.query?.uploadEdits as undefined | UploadEdits
   const isSubmitted = Object.prototype.hasOwnProperty.call(incoming, '_transforms')
   // Crop coordinates belong to the replaced file, so a new file starts without them.
   const previous: TransformState = hasNewFile ? null : (current?._transforms ?? null)
+  const nonJSONValueError = isSubmitted
+    ? getNonJSONValueError({ value: incoming._transforms })
+    : undefined
+
+  if (nonJSONValueError) {
+    throw new ValidationError(
+      {
+        collection: collectionSlug,
+        errors: [{ message: nonJSONValueError, path: '_transforms' }],
+        req,
+      },
+      req.t,
+    )
+  }
+
   // Use the form JSON stores, so validation and processing see the value that is saved.
   const submitted = isSubmitted
     ? (JSON.parse(JSON.stringify(incoming._transforms ?? null)) as TransformState)
     : undefined
   const hasCrop = Boolean(submitted?.crop || queryEdits?.crop || previous?.crop)
-  const original = hasCrop ? await getOriginalDimensions({ current, hasNewFile, req }) : undefined
+  const original = hasCrop ? await getOriginalDimensions({ current, file }) : undefined
+
+  if ((submitted?.crop || queryEdits?.crop) && !original && canWaitForFile) {
+    return {
+      applyTransformState: (fileData) => fileData,
+      isWaitingForFile: true,
+      uploadEdits: parsedEdits,
+    }
+  }
 
   if (isSubmitted) {
     const message =
@@ -111,9 +149,14 @@ export async function resolveUploadEdits({
     previous,
     submitted,
   })
-  // A state without a focal point uses the center, unless it never had one.
+  // A state without a focal point uses the center, unless it never had one. A new file starts
+  // from the center too: the stored focal point belongs to the replaced file. `null` removes all
+  // edits, including a focal point saved before `_transforms` existed.
   const nextFocalPoint =
-    next?.focalPoint ?? (previous?.focalPoint ? centerFocalPoint : currentFocalPoint)
+    next?.focalPoint ??
+    (previous?.focalPoint || hasNewFile || (isSubmitted && submitted === null)
+      ? centerFocalPoint
+      : currentFocalPoint)
   const hasFocalPointChange = !isDeepStrictEqual(nextFocalPoint, currentFocalPoint)
   // `focalX`, `focalY` and the pipeline use whole numbers; `_transforms` keeps the exact value.
   const roundedFocalPoint = { x: Math.round(nextFocalPoint.x), y: Math.round(nextFocalPoint.y) }
@@ -298,15 +341,13 @@ function getFocalPointWrite({
 /** The original's size: the new file, the retained original, or the main file of an older upload. */
 async function getOriginalDimensions({
   current,
-  hasNewFile,
-  req,
+  file,
 }: {
   current?: Document
-  hasNewFile: boolean
-  req: PayloadRequest
+  file?: PayloadRequest['file']
 }): Promise<Dimensions | undefined> {
-  if (hasNewFile) {
-    return getImageSize({ file: req.file }).catch(() => undefined)
+  if (file) {
+    return getImageSize({ file }).catch(() => undefined)
   }
 
   const source = current?.original?.width ? current.original : current
@@ -373,4 +414,60 @@ function parseUploadEditsFromReqOrIncomingData(args: {
   }
 
   return uploadEdits
+}
+
+/**
+ * An error for the first value that JSON cannot store exactly, such as `NaN`, `Infinity` or a
+ * `BigInt`. Without this check, the JSON copy would save `null` in its place or throw.
+ */
+function getNonJSONValueError({
+  path = [],
+  value,
+}: {
+  path?: string[]
+  value: unknown
+}): string | undefined {
+  const name = path.join('.')
+
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') {
+    return undefined
+  }
+
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? undefined : `${name}: must be a finite number`
+  }
+
+  if (Array.isArray(value)) {
+    for (const [index, item] of value.entries()) {
+      // JSON stores a hole or `undefined` in an array as `null`.
+      const error =
+        item === undefined
+          ? undefined
+          : getNonJSONValueError({ path: [...path, String(index)], value: item })
+
+      if (error) {
+        return error
+      }
+    }
+
+    return undefined
+  }
+
+  const prototype = typeof value === 'object' ? Object.getPrototypeOf(value) : undefined
+
+  if (prototype === Object.prototype || prototype === null) {
+    for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+      // JSON leaves out a property set to `undefined`, the same as a property that is not sent.
+      const error =
+        item === undefined ? undefined : getNonJSONValueError({ path: [...path, key], value: item })
+
+      if (error) {
+        return error
+      }
+    }
+
+    return undefined
+  }
+
+  return `${name || '_transforms'}: must be a JSON value`
 }
