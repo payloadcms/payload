@@ -49,20 +49,25 @@ export function getRequestedFile({
 }: {
   document: ResolvedUploadDocument
   filename: string
-}): { filename: string; mimeType: string } {
+}): { filename: string; isBuiltAtRequest: boolean; mimeType: string } {
   if (document.filename !== filename) {
     if (document.original?.filename === filename && document.original.mimeType) {
-      return { filename, mimeType: document.original.mimeType }
+      return { filename, isBuiltAtRequest: false, mimeType: document.original.mimeType }
     }
 
     const size = Object.values(document.variants ?? {}).find((size) => size?.filename === filename)
 
     if (size?.filename && size.mimeType) {
-      return { filename: size.filename, mimeType: size.mimeType }
+      return { filename: size.filename, isBuiltAtRequest: false, mimeType: size.mimeType }
     }
   }
 
-  return { filename: document.filename, mimeType: document.mimeType }
+  return {
+    filename: document.filename,
+    // Only the default file of a document with no stored default is built at request time.
+    isBuiltAtRequest: document._stored === false,
+    mimeType: document.mimeType,
+  }
 }
 
 /**

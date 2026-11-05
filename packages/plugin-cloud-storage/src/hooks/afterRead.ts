@@ -50,15 +50,18 @@ export const getAfterReadHook =
     let url = value
 
     // An entry with no stored object is built when it is requested, so it keeps the Payload route.
-    if (filename && representation?._stored !== false) {
-      if (generateFileURL) {
+    // The route still needs the folder, so a file with the same name in another folder is not served.
+    const isStored = representation?._stored !== false
+
+    if (filename) {
+      if (isStored && generateFileURL) {
         url = await generateFileURL({
           collection,
           filename,
           prefix: objectFolder,
           size,
         })
-      } else if (disablePayloadAccessControl && adapter.generateURL) {
+      } else if (isStored && disablePayloadAccessControl && adapter.generateURL) {
         url = await adapter.generateURL({
           collection,
           data,
