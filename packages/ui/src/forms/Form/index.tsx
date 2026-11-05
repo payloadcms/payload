@@ -58,6 +58,7 @@ export const Form: React.FC<FormProps> = (props) => {
     action,
     children,
     className,
+    disabled: disabledFromProps = false,
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     el,
     initialState, // fully formed initial field state
@@ -89,6 +90,7 @@ export const Form: React.FC<FormProps> = (props) => {
    * For example the state could be submitted but invalid as field errors have been returned.
    */
   const [isValid, setIsValid] = useState(true)
+  const [isModified, setFormStateModified] = useState(false)
   const [initializing, setInitializing] = useState(initializingFromProps)
 
   const formRef = useRef<HTMLFormElement>(null)
@@ -177,8 +179,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const {
     backgroundProcessing,
-    disabled,
-    modified,
+    disabledBySubmission,
     processing,
     setBackgroundProcessing,
     setDisabled,
@@ -195,7 +196,10 @@ export const Form: React.FC<FormProps> = (props) => {
     prevFormStateRef: prevFormState,
     props,
     setIsValid,
+    setModified: setFormStateModified,
   })
+
+  const disabled = disabledFromProps || disabledBySubmission
 
   const getFields = useCallback(() => contextRef.current.fields, [])
 
@@ -290,7 +294,7 @@ export const Form: React.FC<FormProps> = (props) => {
         skipValidation: true,
       })
 
-      contextRef.current = { ...initContextState }
+      contextRef.current = { ...initContextState, disabled: contextRef.current.disabled }
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
 
@@ -312,7 +316,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const replaceState = useCallback(
     (state: FormState) => {
-      contextRef.current = { ...initContextState }
+      contextRef.current = { ...initContextState, disabled: contextRef.current.disabled }
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
@@ -428,7 +432,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useEffect(() => {
     if (initialState) {
-      contextRef.current = { ...initContextState }
+      contextRef.current = { ...initContextState, disabled: contextRef.current.disabled }
       dispatchFields({
         type: 'REPLACE_STATE',
         optimize: false,
@@ -484,14 +488,14 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
-      if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
+      if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && isModified) {
         executeOnChange()
       }
 
       prevFormState.current = formState
       isFirstRenderRef.current = false
     },
-    [modified, submitted, formState],
+    [isModified, submitted, formState],
     250,
   )
 
@@ -534,7 +538,7 @@ export const Form: React.FC<FormProps> = (props) => {
               <InitializingContext value={!isMounted || (isMounted && initializing)}>
                 <ProcessingContext value={processing}>
                   <BackgroundProcessingContext value={backgroundProcessing}>
-                    <ModifiedContext value={modified}>
+                    <ModifiedContext value={isModified}>
                       {/* eslint-disable-next-line @eslint-react/no-context-provider */}
                       <FormFieldsContext.Provider value={fieldsReducer}>
                         <SuccessfulSubmitCountContext value={successfulSubmitCount}>

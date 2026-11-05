@@ -37,8 +37,19 @@ type Args = {
   prevFormStateRef: RefObject<FormState>
   props: FormProps
   setIsValid: FormContextType['setIsValid']
+  setModified: FormContextType['setModified']
 }
 
+/**
+ * Provides Form's `submit` method and tracks submission status, processing, and disabling during a save.
+ * Tracks edits made during background saves so they remain marked as unsaved.
+ *
+ * @example
+ * const { submit, processing, submitted } = useFormSubmission(args)
+ *
+ * await submit()
+ * await submit({ overrides: { _status: 'draft' } })
+ */
 export const useFormSubmission = ({
   contextRef,
   dispatchFields,
@@ -46,6 +57,7 @@ export const useFormSubmission = ({
   prevFormStateRef,
   props,
   setIsValid,
+  setModified,
 }: Args) => {
   const {
     action,
@@ -67,9 +79,7 @@ export const useFormSubmission = ({
   const { i18n, t } = useTranslation()
   const onNonFieldError = useFormErrorHandler()
 
-  const [isModified, _setIsModified] = useState(false)
-
-  const [isDisabled, setIsDisabled] = useState(isDisabledFromProps || false)
+  const [disabledBySubmission, _setDisabledBySubmission] = useState(false)
 
   const [isSubmitted, setIsSubmitted] = useState(false)
 
@@ -98,6 +108,17 @@ export const useFormSubmission = ({
   const isModifiedWhileProcessing = useRef(false)
 
   const submitFocus = useRef<HTMLElement | null>(null)
+  const isDisabledFromPropsRef = useRef(isDisabledFromProps)
+
+  isDisabledFromPropsRef.current = isDisabledFromProps
+
+  const setDisabledBySubmission = useCallback(
+    (isDisabled: boolean) => {
+      contextRef.current.disabled = Boolean(isDisabledFromPropsRef.current || isDisabled)
+      _setDisabledBySubmission(isDisabled)
+    },
+    [contextRef],
+  )
 
   const method = 'method' in props ? props?.method : undefined
   const validateDrafts = hasDraftValidationEnabled(docConfig)
@@ -106,13 +127,16 @@ export const useFormSubmission = ({
    * Intercept the `setIsModified` method to track whether the event happened during background processing.
    * See the `isModifiedWhileProcessing` ref for more details.
    */
-  const setIsModified = useCallback((isModified: boolean) => {
-    if (isBackgroundProcessingRef.current) {
-      isModifiedWhileProcessing.current = true
-    }
+  const setIsModified = useCallback(
+    (isModified: boolean) => {
+      if (isBackgroundProcessingRef.current) {
+        isModifiedWhileProcessing.current = true
+      }
 
-    _setIsModified(isModified)
-  }, [])
+      setModified(isModified)
+    },
+    [setModified],
+  )
 
   /**
    * Intercept the `setIsBackgroundProcessing` method to keep the ref in sync.
@@ -198,7 +222,7 @@ export const useFormSubmission = ({
               : null
 
           setIsProcessing(true)
-          setIsDisabled(true)
+          setDisabledBySubmission(true)
         }
 
         if (waitForAutocomplete) {
@@ -235,9 +259,7 @@ export const useFormSubmission = ({
           setIsValid(isValid)
 
           if (!isValid) {
-            setIsProcessing(false)
             setIsSubmitted(true)
-            setIsDisabled(false)
             return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
           }
         }
@@ -252,9 +274,7 @@ export const useFormSubmission = ({
         // If not valid, prevent submission
         if (!isValid) {
           errorToast(t('error:correctInvalidFields'))
-          setIsProcessing(false)
           setIsSubmitted(true)
-          setIsDisabled(false)
           return
         }
 
@@ -278,9 +298,7 @@ export const useFormSubmission = ({
         if (!hasFormSubmitAction) {
           // No action provided, so we should return. An example where this happens are lexical link drawers. Upon submitting the drawer, we
           // want to close it without submitting the form. Stuff like validation would be handled by lexical before this, through beforeSubmit
-          setIsProcessing(false)
           setIsSubmitted(true)
-          setIsDisabled(false)
           return
         }
 
@@ -309,11 +327,8 @@ export const useFormSubmission = ({
 
           isModifiedWhileProcessing.current = false
 
-          setIsDisabled(false)
-
           if (typeof handleResponse === 'function') {
             await handleResponse(res, successToast, errorToast)
-            setIsProcessing(false)
             return
           }
 
@@ -347,7 +362,6 @@ export const useFormSubmission = ({
             }
 
             setIsSubmitted(false)
-            setIsProcessing(false)
 
             if (redirect) {
               void startRouteTransition(() => router.push(redirect))
@@ -355,7 +369,6 @@ export const useFormSubmission = ({
               successToast(json.message || t('general:submissionSuccessful'))
             }
           } else {
-            setIsProcessing(false)
             setIsSubmitted(true)
 
             // When there was an error submitting a draft,
@@ -439,13 +452,15 @@ export const useFormSubmission = ({
           return { formState: contextRef.current.fields, res }
         } catch (err) {
           console.error('Error submitting form', err) // eslint-disable-line no-console
-          setIsProcessing(false)
           setIsSubmitted(true)
-          setIsDisabled(false)
           errorToast(err.message)
         }
+      } catch (err) {
+        setIsSubmitted(true)
+        errorToast(err instanceof Error ? err.message : t('error:unknown'))
       } finally {
-        // Reserved for releasing submission state once submissions are queued.
+        setDisabledBySubmission(false)
+        setIsProcessing(false)
       }
     },
     [
@@ -476,7 +491,7 @@ export const useFormSubmission = ({
 
   const submit = useCallback<Submit>(
     async (options, event) => {
-      if (isDisabled) {
+      if (contextRef.current.disabled) {
         event?.preventDefault()
         return
       }
@@ -486,14 +501,8 @@ export const useFormSubmission = ({
 
       return executeSubmit(options)
     },
-    [executeSubmit, isDisabled],
+    [contextRef, executeSubmit],
   )
-
-  useEffect(() => {
-    if (typeof isDisabledFromProps === 'boolean') {
-      setIsDisabled(isDisabledFromProps)
-    }
-  }, [isDisabledFromProps])
 
   useEffect(() => {
     if (typeof isSubmittedFromProps === 'boolean') {
@@ -503,11 +512,10 @@ export const useFormSubmission = ({
 
   return {
     backgroundProcessing: isBackgroundProcessing,
-    disabled: isDisabled,
-    modified: isModified,
+    disabledBySubmission,
     processing: isProcessing,
     setBackgroundProcessing: setIsBackgroundProcessing,
-    setDisabled: setIsDisabled,
+    setDisabled: setDisabledBySubmission,
     setModified: setIsModified,
     setProcessing: setIsProcessing,
     setSubmitted: setIsSubmitted,
