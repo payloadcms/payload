@@ -119,7 +119,7 @@ export const BlockSelector: React.FC<Props> = (props) => {
                         : imageAltText
 
                     return (
-                      <li className={`${baseClass}__block`} key={index}>
+                      <li className={`${baseClass}__block`} data-block-slug={slug} key={index}>
                         <ThumbnailCard
                           alignLabel="left"
                           isSelected={selectedBlock === slug}
