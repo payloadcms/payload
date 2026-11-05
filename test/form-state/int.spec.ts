@@ -1004,6 +1004,41 @@ describe('Form State', () => {
     })
   })
 
+  it('should not accept values from the server for any field changed locally since the request was made, not only the one changed last', () => {
+    // The request was sent with these values
+    const requestState: Record<string, FieldState> = {
+      color: { initialValue: 'light', passesCondition: true, valid: true, value: 'light' },
+      size: { initialValue: 'small', passesCondition: true, valid: true, value: 'small' },
+      title: { initialValue: 'Test Post', passesCondition: true, valid: true, value: 'Test Post' },
+    }
+
+    // While it was pending, the user changed `color`, then `size`. Only `size` is still marked `isModified`
+    const currentState: Record<string, FieldState> = {
+      color: { ...requestState.color, value: 'dark' },
+      size: { ...requestState.size, isModified: true, value: 'large' },
+      title: requestState.title,
+    }
+
+    // The server answers with the values that were sent, `title` changed by a hook
+    const incomingStateFromServer: Record<string, FieldState> = {
+      color: requestState.color,
+      size: requestState.size,
+      title: { ...requestState.title, value: 'Test Post (modified on the server)' },
+    }
+
+    const newState = mergeServerFormState({
+      acceptValues: { overrideLocalChanges: false },
+      currentState,
+      incomingState: incomingStateFromServer,
+      requestState,
+    })
+
+    expect(newState.color?.value).toBe('dark')
+    expect(newState.size?.value).toBe('large')
+    // Not changed locally since the request was made, so the server value is accepted
+    expect(newState.title?.value).toBe('Test Post (modified on the server)')
+  })
+
   it('should preserve client row data after reorder and delete during autosave', () => {
     /**
      * Regression test for the "ghost item" bug.

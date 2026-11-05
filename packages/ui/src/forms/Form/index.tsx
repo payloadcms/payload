@@ -442,6 +442,7 @@ export const Form: React.FC<FormProps> = (props) => {
                 type: 'MERGE_SERVER_STATE',
                 acceptValues,
                 prevStateRef: prevFormState,
+                requestState: serializableFormState,
                 serverState: newFormState,
               })
             }

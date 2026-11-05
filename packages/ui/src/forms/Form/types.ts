@@ -202,6 +202,10 @@ export type ADD_ROW = {
 export type MERGE_SERVER_STATE = {
   acceptValues?: AcceptValues
   prevStateRef: React.RefObject<FormState>
+  /**
+   * The form state that was sent with the request `serverState` answers, see `mergeServerFormState`.
+   */
+  requestState?: FormState
   serverState: FormState
   type: 'MERGE_SERVER_STATE'
 }

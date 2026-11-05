@@ -22,6 +22,13 @@ type Args = {
   acceptValues?: AcceptValues
   currentState?: FormState
   incomingState: FormState
+  /**
+   * The form state that was sent with the request `incomingState` answers.
+   * With `overrideLocalChanges: false`, a field whose current value differs from the value sent was changed
+   * locally since the request was made, so its server value is not accepted. Without it, only the field
+   * marked `isModified` (the one changed last) is protected.
+   */
+  requestState?: FormState
 }
 
 /**
@@ -68,6 +75,23 @@ function parseArrayFieldPath(path: string): {
 }
 
 /**
+ * Whether a field's value was changed locally after `requestState` was sent.
+ * `isModified` only marks the field changed last, so when the user changes several fields while a request
+ * is pending, the earlier ones are only recognized by comparing their value with the one sent.
+ */
+function changedSinceRequest(
+  path: string,
+  currentState: FormState,
+  requestState: FormState | undefined,
+): boolean {
+  if (!requestState || !(path in requestState)) {
+    return false
+  }
+
+  return !dequal(currentState[path]?.value, requestState[path]?.value)
+}
+
+/**
  * This function receives form state from the server and intelligently merges it into the client state.
  * The server contains extra properties that the client may not have, e.g. custom components and error states.
  * We typically do not want to merge properties that rely on user input, however, such as values, unless explicitly requested.
@@ -83,6 +107,7 @@ export const mergeServerFormState = ({
   acceptValues,
   currentState = {},
   incomingState,
+  requestState,
 }: Args): FormState => {
   const newState = { ...currentState }
 
@@ -104,7 +129,8 @@ export const mergeServerFormState = ({
         acceptValues !== null &&
         // Note: Must be explicitly `false`, allow `null` or `undefined` to mean true
         acceptValues.overrideLocalChanges === false &&
-        !currentState[path]?.isModified)
+        !currentState[path]?.isModified &&
+        !changedSinceRequest(path, currentState, requestState))
 
     /**
      * For array row fields, verify the row IDs match at the given index before accepting
