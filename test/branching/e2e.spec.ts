@@ -1058,6 +1058,58 @@ test.describe('Branching', () => {
     const mergeMode = (label: string) =>
       page.locator('.merge-branch-modal__modes label').filter({ hasText: label })
 
+    test('should identify each document, locale, and field when merge validation fails', async () => {
+      const english = await payload.create({
+        branch: branchName,
+        collection: localizedSlug,
+        data: {
+          // @ts-expect-error -- Draft saves allow malformed JSON that merge preflight rejects.
+          metadata: { label: null },
+          title: 'Invalid English metadata',
+        },
+        draft: true,
+        locale: 'en',
+      })
+      const spanish = await payload.create({
+        branch: branchName,
+        collection: localizedSlug,
+        data: {
+          // @ts-expect-error -- Draft saves allow malformed JSON that merge preflight rejects.
+          metadata: { label: 42 },
+          title: 'Invalid Spanish metadata',
+        },
+        draft: true,
+        locale: 'es',
+      })
+
+      await gotoBranchView()
+      await openMergeModal()
+
+      const modal = page.locator('.merge-branch-modal')
+
+      await modal.getByRole('button', { name: 'Merge', exact: true }).click()
+
+      const errors = modal.getByRole('alert')
+
+      await expect(modal.getByRole('heading', { name: 'Merge blocked', exact: true })).toBeVisible()
+      await expect(modal.getByRole('status')).toHaveText('Merge blocked')
+      await expect(errors).toContainText('Please correct invalid fields.')
+      await expect(errors.getByRole('listitem')).toHaveText([
+        `Localized Doc / #${english.id} / en / data.metadata.label: Invalid input: expected string, received null`,
+        `Localized Doc / #${spanish.id} / es / data.metadata.label: Invalid input: expected string, received number`,
+      ])
+      await expect(page.getByText('No changes on this branch yet.', { exact: true })).toHaveCount(0)
+      await expect(modal.getByRole('progressbar')).toHaveCount(0)
+
+      await modal
+        .locator('.dialog__footer')
+        .getByRole('button', { name: 'Close', exact: true })
+        .click()
+
+      await expect(modal).toBeHidden()
+      await expect(page.locator('.changed-docs__row')).toHaveCount(2)
+    })
+
     test('should require a date before a merge can be scheduled', async () => {
       await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Treat' } })
       await gotoBranchView()

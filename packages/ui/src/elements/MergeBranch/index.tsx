@@ -2,11 +2,13 @@
 
 import type { MergeResult } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import { MAIN_BRANCH } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { MergeBranchModalPhase, MergeMode } from './types.js'
 
+import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { DialogBody, DialogFooter, DialogHeader, DialogModal } from '../Dialog/index.js'
@@ -59,7 +61,8 @@ const getModalPhase = ({
 
 export const MergeBranchModal: React.FC = () => {
   const { closeMerge, target } = useMergeBranch()
-  const { t } = useTranslation()
+  const { getEntityConfig } = useConfig()
+  const { i18n, t } = useTranslation()
   const { isModalOpen } = useModal()
   const [mode, setMode] = useState<MergeMode>('now')
   const [scheduledFor, setScheduledFor] = useState<Date | undefined>()
@@ -205,10 +208,32 @@ export const MergeBranchModal: React.FC = () => {
 
         {problems.length > 0 && (
           <div role="alert">
+            {Boolean(outcome?.validationErrors.length) && <p>{t('error:correctInvalidFields')}</p>}
             <ul className={`${baseClass}__blocked`}>
-              {problems.map((problem, index) => (
-                <li key={`${String(problem.changeID)}-${index}`}>{problem.message}</li>
-              ))}
+              {problems.map((problem, index) => {
+                const entity = getEntityConfig({
+                  collectionSlug: problem.collectionSlug,
+                  globalSlug: problem.globalSlug,
+                })
+                const label = entity
+                  ? getTranslation('labels' in entity ? entity.labels.singular : entity.label, i18n)
+                  : problem.collectionSlug || problem.globalSlug
+                const context = [
+                  label,
+                  problem.docID !== undefined && `#${problem.docID}`,
+                  'locale' in problem && problem.locale,
+                  'path' in problem && problem.path,
+                ]
+                  .filter(Boolean)
+                  .join(' / ')
+
+                return (
+                  <li key={`${String(problem.changeID)}-${index}`}>
+                    {context && <strong>{context}: </strong>}
+                    {problem.message}
+                  </li>
+                )
+              })}
             </ul>
           </div>
         )}

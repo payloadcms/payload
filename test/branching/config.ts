@@ -458,6 +458,20 @@ export default buildConfigWithDefaults({
             },
             virtual: true,
           },
+          {
+            name: 'metadata',
+            type: 'json',
+            localized: true,
+            jsonSchema: {
+              fileMatch: ['localized-branch-metadata.json'],
+              schema: {
+                type: 'object',
+                properties: { label: { type: 'string' } },
+                required: ['label'],
+              },
+              uri: 'payload://localized-branch-metadata.json',
+            },
+          },
           { name: 'shared', type: 'text' },
         ],
         hooks: {

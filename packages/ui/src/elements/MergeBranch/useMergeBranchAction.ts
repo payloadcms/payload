@@ -50,7 +50,7 @@ export const useMergeBranchAction = ({
 
       result.blocked.forEach(({ message }) => toast.error(message))
 
-      if (!result.merged.length && !result.blocked.length) {
+      if (!result.merged.length && !result.blocked.length && !result.validationErrors.length) {
         toast.info(t('branching:noChangesYet'))
       }
     },
@@ -87,8 +87,9 @@ export const useMergeBranchAction = ({
       if (!response.ok || !response.body) {
         const result = (await response.json().catch(() => null)) as MergeResult | null
 
-        if (result?.blocked?.length) {
+        if (result && (result.blocked?.length || result.validationErrors?.length)) {
           reportResult(result)
+          setOutcome(result)
         } else {
           toast.error(t('error:unknown'))
         }
