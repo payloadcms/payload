@@ -230,7 +230,7 @@ const approve = async ({
 }): Promise<Response> => {
   // The Allow page is part of the admin panel, which other sites may be able to frame. Only
   // accepting clicks from a top-level page stops them from tricking users into clicking Allow.
-  // Browsers too old to send the header still get through.
+  // Browsers too old to send the header get through here, but the page hides its buttons in frames.
   const fetchDestination = req.headers.get('Sec-Fetch-Dest')
   if (fetchDestination && fetchDestination !== 'document') {
     return new Response(null, { status: 403 })

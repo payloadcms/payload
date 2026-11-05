@@ -1,3 +1,3 @@
 'use client'
 
-export {}
+export { HiddenInFrames } from '../views/Authorize/HiddenInFrames/index.js'
