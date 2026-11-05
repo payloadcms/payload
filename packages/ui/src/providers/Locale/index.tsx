@@ -3,7 +3,6 @@
 import type { Locale } from 'payload'
 
 import { useSearchParams } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
 import React, { createContext, use, useCallback, useEffect, useRef, useState } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
@@ -21,38 +20,17 @@ export const LocaleLoadingContext = createContext({
   setLocaleIsLoading: (_: boolean) => undefined,
 })
 
-const fetchPreferences = async <T extends Record<string, unknown> | string>(
-  key: string,
-  apiRoute: string,
-): Promise<{ id: string; value: T }> =>
-  await fetch(
-    formatAdminURL({
-      apiRoute,
-      path: `/payload-preferences/${key}`,
-    }),
-    {
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'GET',
-    },
-  )?.then((res) => res.json() as Promise<{ id: string; value: T }>)
-
 export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Locale['code'] }> = ({
   children,
   /**
     The `locale` prop originates from the root layout, which does not have access to search params
-    This component uses the `useSearchParams` hook to get the locale from the URL as precedence over this prop
-    This prop does not update as the user navigates the site, because the root layout does not re-render
+    The URL locale takes precedence when initializing state. During navigation, PageLocaleProvider
+    synchronizes the locale resolved for each server-rendered page because the root layout does not re-render.
   */
   locale: initialLocaleFromPrefs,
 }) => {
   const {
-    config: {
-      localization = false,
-      routes: { api: apiRoute },
-    },
+    config: { localization = false },
   } = useConfig()
 
   const { user } = useAuth()
@@ -79,7 +57,6 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
   const [isLoading, setLocaleIsLoading] = useState(false)
 
   const prevLocale = useRef<Locale>(locale)
-  const latestLocaleRequest = useRef(0)
   const pendingPreferenceSync = useRef<Promise<void>>(Promise.resolve())
 
   const syncLocale = useCallback(
@@ -94,7 +71,6 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
         return
       }
 
-      latestLocaleRequest.current += 1
       setLocale(newLocale)
 
       if (user?.id) {
@@ -121,48 +97,6 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
 
     prevLocale.current = locale
   }, [locale])
-
-  useEffect(() => {
-    /**
-     * This effect should only run when `localeFromParams` changes, i.e. when the user clicks an anchor link
-     * The root layout, which sends the initial locale from prefs, will not re-render as the user navigates the site
-     * For this reason, we need to fetch the locale from prefs if the search params clears the `locale` query param
-     */
-    async function resetLocale() {
-      if (localization && user?.id) {
-        const request = ++latestLocaleRequest.current
-        let localeToUse = localeFromParams
-
-        if (!localeToUse) {
-          // A restored page may have just synchronized the locale in a child effect.
-          await pendingPreferenceSync.current
-
-          if (request !== latestLocaleRequest.current) {
-            return
-          }
-
-          localeToUse = await fetchPreferences<Locale['code']>('locale', apiRoute).then(
-            (res) => res.value,
-          )
-        }
-
-        if (request !== latestLocaleRequest.current) {
-          return
-        }
-
-        const newLocale =
-          findLocaleFromCode(localization, localeToUse) ||
-          findLocaleFromCode(localization, defaultLocale) ||
-          findLocaleFromCode(localization, localization?.locales?.[0]?.code)
-
-        if (newLocale) {
-          setLocale(newLocale)
-        }
-      }
-    }
-
-    void resetLocale()
-  }, [apiRoute, defaultLocale, localization, localeFromParams, user?.id])
 
   return (
     <LocaleContext value={locale}>
