@@ -435,6 +435,15 @@ describe('Localization', () => {
   })
 
   describe('locale preference', () => {
+    const createdDocIDs: string[] = []
+
+    test.afterEach(async () => {
+      await Promise.all(
+        createdDocIDs.map((id) => payload.delete({ id, collection: localizedPostsSlug })),
+      )
+      createdDocIDs.length = 0
+    })
+
     test('should set preference on locale change and use preference no locale param is present', async () => {
       await page.goto(url.create)
       await changeLocale(page, spanishLocale)
@@ -452,6 +461,7 @@ describe('Localization', () => {
         locale: defaultLocale,
       })
 
+      createdDocIDs.push(id)
       await payload.update({
         id,
         collection: localizedPostsSlug,
@@ -512,10 +522,14 @@ describe('Localization', () => {
   })
 
   describe('cached document drawer locale', () => {
+    const otherTabs: Page[] = []
     const parentIDs: string[] = []
     const relatedIDs: string[] = []
 
     test.afterEach(async () => {
+      await Promise.all(otherTabs.map((tab) => tab.close()))
+      otherTabs.length = 0
+
       await Promise.all(
         parentIDs.map((id) => payload.delete({ id, collection: relationshipLocalizedSlug })),
       )
@@ -524,6 +538,52 @@ describe('Localization', () => {
       )
       parentIDs.length = 0
       relatedIDs.length = 0
+    })
+
+    test('should keep document edits in their rendered locale when another tab changes preferences', async () => {
+      const english = 'English document in first tab'
+      const spanish = 'Spanish document in second tab'
+      const edited = 'English document edited in first tab'
+      const { id } = await payload.create({
+        collection: localizedPostsSlug,
+        data: { title: english },
+        locale: defaultLocale,
+      })
+
+      relatedIDs.push(id)
+      await payload.update({
+        id,
+        collection: localizedPostsSlug,
+        data: { title: spanish },
+        locale: spanishLocale,
+      })
+      await page.goto(url.edit(id))
+      await expect(page.locator('#field-title')).toHaveValue(english)
+
+      const otherTab = await context.newPage()
+
+      otherTabs.push(otherTab)
+      await otherTab.goto(url.edit(id))
+      await changeLocale(otherTab, spanishLocale)
+      await expect(otherTab.locator('#field-title')).toHaveValue(spanish)
+      await page.locator('#field-title').fill(edited)
+      await saveDocAndAssert(page)
+      await expect(
+        page.locator('.app-header__localizer .localizer-button__current-label'),
+      ).toHaveText('English')
+      await expect(otherTab.locator('#field-title')).toHaveValue(spanish)
+
+      const {
+        docs: [savedPost],
+      } = await payload.find({
+        collection: localizedPostsSlug,
+        locale: 'all',
+        where: { id: { equals: id } },
+      })
+      const preference = await page.request.get(`${serverURL}/api/payload-preferences/locale`)
+
+      expect(savedPost.title).toEqual({ [defaultLocale]: edited, [spanishLocale]: spanish })
+      expect(await preference.json()).toMatchObject({ value: spanishLocale })
     })
 
     test('should edit relationship drawers in the restored document locale after browser back', async () => {
