@@ -53,12 +53,15 @@ const handlerMatches = (handler: DrizzleOperatorHandler, args: Args): boolean =>
 export const buildOperatorConstraint = (args: Args): SQL => {
   const { adapter, field, locale, originalOperator, path, resolvedOperator } = args
 
-  const dateOnlyComparison = getDateOnlyComparison({
-    config: adapter.payload.config,
-    field,
-    operator: originalOperator,
-    value: args.value,
-  })
+  const dateOnlyComparison =
+    field.type === 'date' && adapter.payload
+      ? getDateOnlyComparison({
+          config: adapter.payload.config,
+          field,
+          operator: originalOperator,
+          value: args.value,
+        })
+      : undefined
 
   if (dateOnlyComparison) {
     return and(
