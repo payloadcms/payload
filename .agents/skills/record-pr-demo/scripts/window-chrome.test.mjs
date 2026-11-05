@@ -339,6 +339,24 @@ test('should spin the persistent refresh control without moving content, includi
         assert.ok(boxes.scroll <= boxes.width)
         assert.equal(await status.isVisible(), true)
       }
+      const completion = await page.evaluate(async () => {
+        const root = document.querySelector('#root').shadowRoot
+        const icon = root.querySelector('[data-refresh-icon]')
+        const animation = icon.getAnimations()[0]
+        animation.currentTime = 200
+        window.chromeDemo.setRefreshState({ state: 'refreshed' })
+        const continued = icon.getAnimations()[0] === animation
+        await new Promise((resolve) =>
+          icon.addEventListener('animationiteration', resolve, { once: true }),
+        )
+        return {
+          continued,
+          spinning: root.querySelector('[data-refresh-button]').hasAttribute('data-spinning'),
+        }
+      })
+      assert.equal(completion.continued, true)
+      assert.equal(completion.spinning, false)
+      await page.evaluate(() => window.chromeDemo.setRefreshState({ state: 'refreshing' }))
       await page.emulateMedia({ reducedMotion: 'reduce' })
       assert.equal(
         await root

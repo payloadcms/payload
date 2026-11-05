@@ -53,10 +53,10 @@ export function mountDemoChrome({
     .history svg { width:17px; height:17px; pointer-events:none; }
     .address { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:1px solid var(--line); border-radius:7px; padding:3px 9px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; }
     .header-info { display:flex; align-items:center; justify-content:flex-end; gap:12px; min-width:0; }
-    .history .refresh:hover, .history .refresh:focus-visible, .history .refresh[data-state=refreshing] { opacity:1; }
-    .refresh[data-state=refreshing] svg { animation:refresh-spin 650ms linear infinite; }
+    .history .refresh:hover, .history .refresh:focus-visible, .history .refresh[data-spinning] { opacity:1; }
+    .refresh[data-spinning] svg { animation:refresh-spin 650ms linear infinite; }
     @keyframes refresh-spin { to { transform:rotate(360deg); } }
-    @media (prefers-reduced-motion:reduce) { .refresh[data-state=refreshing] svg { animation:none; } }
+    @media (prefers-reduced-motion:reduce) { .refresh[data-spinning] svg { animation:none; } }
     .size { padding:3px 9px; border:1px solid var(--line); border-radius:7px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; }
     .content { position:relative; overflow:hidden; border-radius:8px; background:var(--paper); }
     ::slotted([slot=content]) { display:block; width:100%; height:100%; border:0; }
@@ -135,6 +135,9 @@ export function mountDemoChrome({
     keyAnimations.clear()
   }
   let refreshTimer
+  const finishRefreshSpin = () => {
+    find('[data-refresh-button]').removeAttribute('data-spinning')
+  }
   let currentViewport = viewport
   let isDestroyed = false
 
@@ -401,6 +404,15 @@ export function mountDemoChrome({
       if (isDestroyed) return
       const status = find('[data-refresh]')
       const button = find('[data-refresh-button]')
+      const icon = find('[data-refresh-icon]')
+      icon.removeEventListener('animationiteration', finishRefreshSpin)
+      if (state === 'refreshing') {
+        button.setAttribute('data-spinning', '')
+      } else if (icon.getAnimations().length) {
+        icon.addEventListener('animationiteration', finishRefreshSpin, { once: true })
+      } else {
+        finishRefreshSpin()
+      }
       status.hidden = state === 'idle'
       button.dataset.state = state
       button.setAttribute('aria-disabled', String(state === 'refreshing'))
@@ -461,6 +473,7 @@ export function mountDemoChrome({
     },
     destroy() {
       cancelKeyAnimations()
+      find('[data-refresh-icon]').removeEventListener('animationiteration', finishRefreshSpin)
       clearTimeout(refreshTimer)
       cancelAnnotationAnimations()
       cancelAnimation()
