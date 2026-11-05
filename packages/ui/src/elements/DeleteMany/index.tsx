@@ -161,6 +161,7 @@ export function DeleteMany({
               select: {},
               where: mergeListSearchAndWhere({
                 collectionConfig,
+                i18n,
                 search,
                 where: whereConstraint,
               }),

@@ -222,6 +222,7 @@ export const renderListView = async (
 
   let whereWithMergedSearch = mergeListSearchAndWhere({
     collectionConfig,
+    i18n: req.i18n,
     search: typeof query?.search === 'string' ? query.search : undefined,
     where: combineWhereConstraints([query?.where, baseFilterConstraint]),
   })

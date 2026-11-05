@@ -71,6 +71,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
 
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
+      i18n,
       search: searchParams.get('search'),
     })
 
@@ -104,7 +105,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
       },
       { addQueryPrefix: true },
     )
-  }, [collection, searchParams, selectAll, ids, locale, where])
+  }, [collection, i18n, searchParams, selectAll, ids, locale, where])
 
   const handlePublish = useCallback(async () => {
     const url = formatAdminURL({
