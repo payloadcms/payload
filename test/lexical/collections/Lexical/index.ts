@@ -333,15 +333,6 @@ export const getLexicalFieldsCollection: (args: {
         required: true,
       },
       {
-        name: 'refreshPermissions',
-        type: 'ui',
-        admin: {
-          components: {
-            Field: '/collections/Lexical/RefreshPermissions/index.js#RefreshPermissions',
-          },
-        },
-      },
-      {
         name: 'lexicalRootEditor',
         type: 'richText',
       },

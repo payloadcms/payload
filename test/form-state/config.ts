@@ -6,8 +6,6 @@ import { devUser } from '../credentials.js'
 import { AutosavePostsCollection, DraftPostsCollection } from './collections/Autosave/index.js'
 import { ConditionsCollection } from './collections/Conditions/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
-import { UploadsCollection } from './collections/Uploads/index.js'
-import { permissionSettingsSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -15,18 +13,6 @@ const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   config: {
     admin: {
-      components: {
-        views: {
-          formRequests: {
-            Component: './components/FormRequests/index.js#FormRequests',
-            path: '/form-requests',
-          },
-          permissionRequests: {
-            Component: './components/PermissionRequests/index.js#PermissionRequests',
-            path: '/permission-requests',
-          },
-        },
-      },
       importMap: {
         baseDir: path.resolve(dirname),
       },
@@ -36,10 +22,7 @@ export default buildConfigWithDefaults({
       AutosavePostsCollection,
       ConditionsCollection,
       DraftPostsCollection,
-      UploadsCollection,
     ],
-    globals: [{ slug: permissionSettingsSlug, fields: [{ name: 'title', type: 'text' }] }],
-    localization: { defaultLocale: 'en', locales: ['en', 'fr'] },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },

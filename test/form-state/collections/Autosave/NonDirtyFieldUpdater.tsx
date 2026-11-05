@@ -4,7 +4,7 @@ import { useAllFormFields, useForm } from '@payloadcms/ui'
 
 export const NonDirtyFieldUpdater = () => {
   const [, dispatchFields] = useAllFormFields()
-  const { getFields, replaceState, submit } = useForm()
+  const { getFields, replaceState } = useForm()
 
   return (
     <>
@@ -23,9 +23,6 @@ export const NonDirtyFieldUpdater = () => {
       </button>
       <button id="reset-form-state" onClick={() => replaceState(getFields())} type="button">
         Reset form state
-      </button>
-      <button id="queue-save" onClick={() => void submit()} type="button">
-        Queue save
       </button>
     </>
   )

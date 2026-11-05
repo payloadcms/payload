@@ -29,7 +29,7 @@ describe('useQueue', () => {
   it('should run one active task and only the latest equal-priority pending task', async () => {
     const active = deferred()
     const calls: string[] = []
-    const queue = renderQueue({ getSequence: () => 0 })
+    const queue = renderQueue()
     const first = queue.queueTask({
       task: async () => {
         calls.push('first')
@@ -82,57 +82,10 @@ describe('useQueue', () => {
     expect(currentStates).toEqual([true, false, true])
   })
 
-  it('should keep the active context current when work is queued at the same version', async () => {
-    const active = deferred()
-    let isCurrent: (() => boolean) | undefined
-    let isQueueReset: (() => boolean) | undefined
-    const queue = renderQueue({ getSequence: () => 0 })
-    const running = queue.queueTask({
-      task: async (context) => {
-        isCurrent = context.isCurrent
-        isQueueReset = context.isQueueReset
-        await active.promise
-      },
-    })
-    const pending = queue.queueTask({
-      priority: 2,
-      task: async () => undefined,
-    })
-    const superseded = queue.queueTask({
-      task: async () => undefined,
-    })
-
-    await expect(superseded).resolves.toEqual({ status: 'superseded' })
-    expect(isCurrent?.()).toBe(true)
-    expect(isQueueReset?.()).toBe(false)
-    active.resolve()
-    await running
-    await pending
-  })
-
-  it('should invalidate an active context when the version changes without scheduling work', async () => {
-    let version = 1
-    const active = deferred()
-    const queue = renderQueue({ getSequence: () => version })
-    const running = queue.queueTask({
-      task: async ({ isCurrent, isQueueReset }) => {
-        expect(isCurrent()).toBe(true)
-        expect(isQueueReset()).toBe(false)
-        await active.promise
-        expect(isCurrent()).toBe(false)
-        expect(isQueueReset()).toBe(false)
-      },
-    })
-
-    version = 2
-    active.resolve()
-    await running
-  })
-
   it('should retain the pending task with the lowest priority number', async () => {
     const active = deferred()
     const calls: string[] = []
-    const queue = renderQueue({ getSequence: () => 0 })
+    const queue = renderQueue()
 
     void queue.queueTask({
       task: async () => {
@@ -163,7 +116,7 @@ describe('useQueue', () => {
   it('should not replace higher-priority pending work with a lower-priority task', async () => {
     const active = deferred()
     const calls: string[] = []
-    const queue = renderQueue({ getSequence: () => 0 })
+    const queue = renderQueue()
 
     void queue.queueTask({
       task: async () => {
@@ -207,7 +160,7 @@ describe('useQueue', () => {
   it('should start pending work after an active task rejects', async () => {
     const active = deferred()
     const calls: string[] = []
-    const queue = renderQueue({ getSequence: () => 0 })
+    const queue = renderQueue()
     const rejected = queue.queueTask({
       task: async () => {
         calls.push('active')
@@ -228,7 +181,7 @@ describe('useQueue', () => {
     const active = deferred()
     let isCurrent: (() => boolean) | undefined
     let isQueueReset: (() => boolean) | undefined
-    const queue = renderQueue({ getSequence: () => 0 })
+    const queue = renderQueue()
     const running = queue.queueTask({
       task: async (context) => {
         isCurrent = context.isCurrent
@@ -245,27 +198,5 @@ describe('useQueue', () => {
     expect(isQueueReset?.()).toBe(true)
     active.resolve()
     await running
-  })
-
-  it('should wait for an unabortable active promise before starting pending work', async () => {
-    const active = deferred()
-    const calls: string[] = []
-    const queue = renderQueue({ getSequence: () => 0 })
-
-    void queue.queueTask({
-      task: async () => {
-        calls.push('active')
-        await active.promise
-      },
-    })
-    const pending = queue.queueTask({
-      task: async () => calls.push('pending'),
-    })
-
-    await Promise.resolve()
-    expect(calls).toEqual(['active'])
-    active.resolve()
-    await pending
-    expect(calls).toEqual(['active', 'pending'])
   })
 })

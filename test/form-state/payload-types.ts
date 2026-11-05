@@ -83,7 +83,6 @@ export interface Config {
     'autosave-posts': AutosavePost;
     conditions: Condition;
     'draft-posts': DraftPost;
-    uploads: Upload;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -97,7 +96,6 @@ export interface Config {
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
     conditions: ConditionsSelect<false> | ConditionsSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
-    uploads: UploadsSelect<false> | UploadsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -108,20 +106,15 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'fr') | ('en' | 'fr')[];
-  globals: {
-    'permission-settings': PermissionSetting;
-  };
-  globalsSelect: {
-    'permission-settings': PermissionSettingsSelect<false> | PermissionSettingsSelect<true>;
-  };
-  locale: 'en' | 'fr';
+  fallbackLocale: null;
+  globals: {};
+  globalsSelect: {};
+  locale: null;
   widgets: {
     welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
-    'upload-dropzone': UploadDropzoneWidget;
   };
   user: User;
   jobs: {
@@ -268,21 +261,7 @@ export interface AutosavePost {
   url?: string | null;
   programmaticValue?: string | null;
   content?: string | null;
-  slug?: string | null;
-  media?: (string | null) | Upload;
-  blocks?: (Text | Number)[] | null;
-  groups?:
-    | {
-        text?: string | null;
-        items?:
-          | {
-              text?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
+  blocks?: Text[] | null;
   restrictedValue?: string | null;
   createdBy?: {
     relationTo: 'users';
@@ -295,43 +274,6 @@ export interface AutosavePost {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "uploads".
- */
-export interface Upload {
-  id: string;
-  alt?: string | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  original?: {
-    filename?: string | null;
-    url?: string | null;
-    mimeType?: string | null;
-    filesize?: number | null;
-    width?: number | null;
-    height?: number | null;
-    prefix?: string | null;
-    _objectKey?: string | null;
-  };
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -369,22 +311,9 @@ export interface DraftPost {
   url?: string | null;
   programmaticValue?: string | null;
   content?: string | null;
-  slug?: string | null;
-  media?: (string | null) | Upload;
-  blocks?: (Text | Number)[] | null;
-  groups?:
-    | {
-        text?: string | null;
-        items?:
-          | {
-              text?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
+  blocks?: Text[] | null;
   restrictedValue?: string | null;
+  slug?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -436,10 +365,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'draft-posts';
         value: string | DraftPost;
-      } | null)
-    | ({
-        relationTo: 'uploads';
-        value: string | Upload;
       } | null)
     | ({
         relationTo: 'users';
@@ -576,8 +501,6 @@ export interface AutosavePostsSelect<T extends boolean = true> {
   url?: T;
   programmaticValue?: T;
   content?: T;
-  slug?: T;
-  media?: T;
   blocks?:
     | T
     | {
@@ -588,25 +511,6 @@ export interface AutosavePostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        number?:
-          | T
-          | {
-              number?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  groups?:
-    | T
-    | {
-        text?: T;
-        items?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        id?: T;
       };
   restrictedValue?: T;
   createdBy?: T;
@@ -640,8 +544,6 @@ export interface DraftPostsSelect<T extends boolean = true> {
   url?: T;
   programmaticValue?: T;
   content?: T;
-  slug?: T;
-  media?: T;
   blocks?:
     | T
     | {
@@ -652,64 +554,14 @@ export interface DraftPostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        number?:
-          | T
-          | {
-              number?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  groups?:
-    | T
-    | {
-        text?: T;
-        items?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-            };
-        id?: T;
       };
   restrictedValue?: T;
+  slug?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "uploads_select".
- */
-export interface UploadsSelect<T extends boolean = true> {
-  alt?: T;
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  original?:
-    | T
-    | {
-        filename?: T;
-        url?: T;
-        mimeType?: T;
-        filesize?: T;
-        width?: T;
-        height?: T;
-        prefix?: T;
-        _objectKey?: T;
-      };
-  focalX?: T;
-  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -796,36 +648,6 @@ export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "permission-settings".
- */
-export interface PermissionSetting {
-  id: string;
-  title?: string | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "permission-settings_select".
- */
-export interface PermissionSettingsSelect<T extends boolean = true> {
-  title?: T;
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "welcome_widget".
  */
 export interface WelcomeWidget {
@@ -851,7 +673,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'posts' | 'autosave-posts' | 'conditions' | 'draft-posts' | 'uploads' | 'users';
+    relatedCollection: 'posts' | 'autosave-posts' | 'conditions' | 'draft-posts' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -873,19 +695,9 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('posts' | 'autosave-posts' | 'conditions' | 'draft-posts' | 'uploads' | 'users')[] | null;
+    excludedCollections?: ('posts' | 'autosave-posts' | 'conditions' | 'draft-posts' | 'users')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "upload-dropzone_widget".
- */
-export interface UploadDropzoneWidget {
-  data?: {
-    excludedCollections?: 'uploads'[] | null;
-  };
-  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

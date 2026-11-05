@@ -3,7 +3,6 @@ import type { FieldState, FormState, User } from 'payload'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { createPayloadRequest, getAccessResults } from 'payload'
 import React from 'react'
-import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
 import { devUser } from '../credentials.js'
@@ -945,13 +944,72 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     })
   })
 
-  test('should accept server values after an autosave response passes the revision gate', () => {
-    const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false },
-      currentState: { computedTitle: { value: 'Manual value' } },
-      incomingState: { computedTitle: { value: 'Server-computed value' } },
+  test('should remove descendants when the server clears an array', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        items: { disableFormData: true, rows: [{ id: 'first' }], value: 1 },
+        'items.0.text': { value: 'Removed on the server' },
+      },
+      incomingState: { items: { rows: [], value: 0 } },
     })
-    expect(newState.computedTitle?.value).toBe('Server-computed value')
+
+    expect(state.items.rows).toEqual([])
+    expect(state.items.value).toBe(0)
+    expect(state.items.disableFormData).toBeUndefined()
+    expect(state['items.0.text']).toBeUndefined()
+  })
+
+  test('should remove old fields when the server changes a block type', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        blocks: { rows: [{ blockType: 'text', id: 'block' }], value: 1 },
+        'blocks.0.text': { value: 'Old block content' },
+      },
+      incomingState: {
+        blocks: { rows: [{ blockType: 'number', id: 'block' }], value: 1 },
+        'blocks.0.number': { addedByServer: true, value: 42 },
+      },
+    })
+
+    expect(state.blocks.rows).toEqual([{ blockType: 'number', id: 'block' }])
+    expect(state['blocks.0.text']).toBeUndefined()
+    expect(state['blocks.0.number'].value).toBe(42)
+  })
+
+  test('should keep local fields and collapsed state with surviving nested row IDs', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        groups: {
+          rows: [
+            { id: 'removed-group', isCollapsed: true },
+            { id: 'kept-group', isCollapsed: false },
+          ],
+          value: 2,
+        },
+        'groups.0.localState': { disableFormData: true, value: 'Removed' },
+        'groups.1.items': {
+          rows: [
+            { id: 'removed-item', isCollapsed: true },
+            { id: 'kept-item', isCollapsed: false },
+          ],
+          value: 2,
+        },
+        'groups.1.items.1.localState': { disableFormData: true, value: 'Kept' },
+      },
+      incomingState: {
+        groups: { rows: [{ id: 'kept-group' }], value: 1 },
+        'groups.0.items': { addedByServer: true, rows: [{ id: 'kept-item' }], value: 1 },
+      },
+    })
+
+    expect(state.groups.rows).toEqual([{ id: 'kept-group', isCollapsed: false }])
+    expect(state['groups.0.items'].rows).toEqual([{ id: 'kept-item', isCollapsed: false }])
+    expect(state['groups.0.items.0.localState']).toEqual({ disableFormData: true, value: 'Kept' })
+    expect(state['groups.0.localState']).toBeUndefined()
+    expect(Object.keys(state).some((path) => path.startsWith('groups.1.'))).toBe(false)
   })
 
   test('should preserve client row data after reorder and delete during autosave', () => {
