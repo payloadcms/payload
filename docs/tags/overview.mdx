@@ -1,0 +1,134 @@
+---
+title: Tags
+label: Overview
+order: 10
+desc: Build taxonomies with tags and nested categories using Payload's hierarchy foundation.
+keywords: tags, taxonomy, taxonomies, categories, hierarchy
+---
+
+Tags classify content across collections. Use them for topics, categories, or other taxonomies where a document can have multiple assignments. Tags can nest under other tags to form a taxonomy tree.
+
+In Payload 4, tags are a preset built on the same [Hierarchy](../hierarchy/overview) foundation as [Folders](../folders/overview). A document can belong to one folder and have multiple tags.
+
+## Quick Start
+
+Create a taxonomy collection with `tags: true`, then add `createTagField` to each content collection that uses it:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+import { createTagField } from 'payload'
+
+export const Topics: CollectionConfig = {
+  slug: 'topics',
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+  ],
+  tags: true,
+}
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    createTagField({
+      relationTo: 'topics',
+      label: 'Topics',
+    }),
+  ],
+}
+```
+
+Register both collections in your Payload config. Payload adds `_h_topics` as the topic collection's single parent relationship. The helper creates `_h_topics` on posts as a relationship that accepts multiple topics.
+
+For example, `Engineering` can contain `Frontend` and `Backend` topics. A post can reference both `Frontend` and `Backend`. Multiple assignments apply to the post's tag field; each topic still has only one parent in the taxonomy tree.
+
+## Tag Configuration
+
+Set `tags` on the taxonomy collection. Use `true` for defaults or an object for customization:
+
+```ts
+tags: {
+  collectionSpecific: true,
+  joinField: {
+    name: 'children',
+  },
+  parentFieldName: 'topic',
+}
+```
+
+Setting `tags` adds a tag icon and defaults `allowHasMany` to `true`. You can use the [folder preset options](../folders/overview#folder-configuration) and set `allowHasMany`. A field with its own `hasMany` value uses that value instead.
+
+Do not also set `hierarchy` or `folders` on the taxonomy collection. The tag preset already enables hierarchy.
+
+## Adding a Tag Field
+
+Import `createTagField` from `payload` and add its result to the content collection's `fields` array:
+
+```ts
+createTagField({
+  relationTo: 'topics',
+  label: 'Topics',
+  hasMany: true,
+})
+```
+
+| Option          | Description                                                                                  |
+| --------------- | -------------------------------------------------------------------------------------------- |
+| `relationTo` \* | Slug of the taxonomy collection.                                                             |
+| `hasMany`       | Allow multiple assignments. Defaults to `true`. Set `false` on this field to accept one tag. |
+| `label`         | Field label. Defaults to `'Tags'`.                                                           |
+| `required`      | Require a tag assignment.                                                                    |
+| `admin`         | Customize the relationship field's admin options.                                            |
+
+The helper creates an indexed relationship with a hierarchy field in the document sidebar. It generates the field name from `relationTo`. If the taxonomy collection sets a custom `parentFieldName`, Payload renames the related field to match when it prepares your config.
+
+For the default `topics` example, assign multiple topics using `_h_topics`:
+
+```ts
+const post = await payload.create({
+  collection: 'posts',
+  overrideAccess: false,
+  user,
+  data: {
+    title: 'Building an application',
+    _h_topics: [frontendTopicID, backendTopicID],
+  },
+})
+```
+
+Query documents assigned to a topic through that relationship:
+
+```ts
+const posts = await payload.find({
+  collection: 'posts',
+  overrideAccess: false,
+  user,
+  where: {
+    _h_topics: {
+      equals: frontendTopicID,
+    },
+  },
+})
+```
+
+Use your configured `parentFieldName` instead if you override it. This query matches the selected topic directly; it does not automatically include assignments to its descendants.
+
+## Shared Hierarchy Behavior
+
+See [Hierarchy](../hierarchy/overview) for breadcrumb paths, localized titles, collection restrictions, and joins.
+
+Deleting a tag also deletes its child tags. Payload clears the tag fields that reference the deleted tags, but keeps the related content documents.
+
+A content collection can use both `createFolderField` and `createTagField` to organize documents in folders and classify them with tags from separate collections.

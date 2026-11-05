@@ -2,117 +2,134 @@
 title: Folders
 label: Overview
 order: 10
-desc: Folders allow you to group documents across collections, and are a great way to organize your content.
-keywords: folders, folder, content organization
+desc: Organize documents across collections with folders built on Payload's hierarchy foundation.
+keywords: folders, folder, content organization, hierarchy
 ---
 
-Folders allow you to group documents across collections, and are a great way to organize your content. Folders are built on top of relationship fields, when you enable folders on a collection, Payload adds a hidden relationship field `folders`, that relates to a folder — or no folder. Folders also have the `folder` field, allowing folders to be nested within other folders.
+Folders group documents across collections and can nest inside other folders. In Payload 4, folders are a preset built on the [Hierarchy](../hierarchy/overview) foundation.
 
-The configuration for folders is done in two places, the collection config and the Payload config. The collection config is where you enable folders, and the Payload config is where you configure the global folder settings.
+Define a collection with `folders: true`, then add `createFolderField` to the content collections it organizes. The folder collection stores the tree, and each related document can select one folder.
 
-<Banner type="warning">
-  **Note:** The Folders feature is currently in beta and may be subject to
-  change in minor versions updates prior to being stable.
+<Banner type="info">
+  In Payload 4, folder setup has moved from the root config to a folder
+  collection and relationship fields on your content collections. See the
+  [migration guide](../migration-guide/v4#folders-use-the-hierarchy-foundation).
 </Banner>
 
-## Folder Configuration
+## Quick Start
 
-On the payload config, you can configure the following settings under the `folders` property:
+Create a folder collection and connect it to a content collection:
 
 ```ts
-// Type definition
+import type { CollectionConfig } from 'payload'
 
-type RootFoldersConfiguration = {
-  /**
-   * If true, the browse by folder view will be enabled
-   *
-   * @default true
-   */
-  browseByFolder?: boolean
-  /**
-   * An array of functions to be ran when the folder collection is initialized
-   * This allows plugins to modify the collection configuration
-   */
-  collectionOverrides?: (({
-    collection,
-  }: {
-    collection: CollectionConfig
-  }) => CollectionConfig | Promise<CollectionConfig>)[]
-  /**
-   * Ability to view hidden fields and collections related to folders
-   *
-   * @default false
-   */
-  debug?: boolean
-  /**
-   * The Folder field name
-   *
-   * @default "folder"
-   */
-  fieldName?: string
-  /**
-   * Slug for the folder collection
-   *
-   * @default "payload-folders"
-   */
-  slug?: string
+import { createFolderField } from 'payload'
+
+export const Folders: CollectionConfig = {
+  slug: 'folders',
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+  ],
+  folders: true,
+}
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    createFolderField({ relationTo: 'folders' }),
+  ],
 }
 ```
 
+Register both collections in your Payload config. To organize another collection in the same folders, add `createFolderField({ relationTo: 'folders' })` to that collection too.
+
+Payload adds `_h_folders` as the parent relationship on the folder collection. The helper creates a relationship with the same name on posts. A folder can contain child folders and documents from the related collections.
+
+## Folder Configuration
+
+Set `folders` on the collection that stores folders. Use `true` for defaults or an object for customization:
+
 ```ts
-// Example usage
+folders: {
+  collectionSpecific: true,
+  joinField: {
+    name: 'children',
+  },
+  parentFieldName: 'parentFolder',
+}
+```
 
-import { buildConfig } from 'payload'
+Setting `folders` adds a folder icon, uses a header button to select a parent folder, and sets `allowHasMany: false`. You can configure these options:
 
-const config = buildConfig({
-  // ...
-  folders: {
-    // highlight-start
-    debug: true, // optional
-    collectionOverrides: [
-      async ({ collection }) => {
-        return collection
-      },
-    ], // optional
-    fieldName: 'folder', // optional
-    slug: 'payload-folders', // optional
-    // highlight-end
+| Option                   | Description                                                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `parentFieldName`        | Parent relationship field name. Defaults to `_h_<collectionSlug>`. Related helper fields are renamed to match.                  |
+| `collectionSpecific`     | Let folders restrict which related collections they accept. Defaults to `false`. Use `true` or `{ fieldName: 'allowedTypes' }`. |
+| `joinField`              | Configure a join for direct child folders and assigned content, e.g. `{ name: 'children' }`.                                    |
+| `slugField`              | Existing field used for slug path segments.                                                                                     |
+| `slugify`                | Function used to slugify titles when `slugField` is not set.                                                                    |
+| `slugPathFieldName`      | Virtual slug path field name. Defaults to `_h_slugPath`.                                                                        |
+| `titlePathFieldName`     | Virtual title path field name. Defaults to `_h_titlePath`.                                                                      |
+| `admin.injectSidebarTab` | Add a sidebar tab for this folder hierarchy. Defaults to `true`.                                                                |
+| `admin.treeLimit`        | Maximum items to load in tree views. Defaults to `100`.                                                                         |
+| `admin.useHeaderButton`  | Use a header button to select a parent folder. Defaults to `true`.                                                              |
+| `admin.components.Icon`  | Override the folder icon.                                                                                                       |
+
+Do not also set `hierarchy` or `tags` on the folder collection. The folder preset already enables hierarchy.
+
+## Adding a Folder Field
+
+Import `createFolderField` from `payload` and add its result to the content collection's `fields` array:
+
+```ts
+createFolderField({
+  relationTo: 'folders',
+  label: 'Folder',
+  required: false,
+})
+```
+
+| Option          | Description                                       |
+| --------------- | ------------------------------------------------- |
+| `relationTo` \* | Slug of the folder hierarchy collection.          |
+| `label`         | Field label. Defaults to `'Folder'`.              |
+| `required`      | Require a folder assignment.                      |
+| `admin`         | Customize the relationship field's admin options. |
+
+The helper creates an indexed relationship to one folder and adds a header button for selecting it. The field name comes from `relationTo`. You can customize the options above; the helper sets the remaining field properties.
+
+For the default `folders` example, create a post with a folder assignment using `_h_folders`:
+
+```ts
+const post = await payload.create({
+  collection: 'posts',
+  overrideAccess: false,
+  user,
+  data: {
+    title: 'Getting started',
+    _h_folders: folderID,
   },
 })
 ```
 
-## Collection Configuration
+Use the configured `parentFieldName` instead if you override it.
 
-To enable folders on a collection, you need to set the `folders` property to `true` on the collection config. This will add a hidden relationship field to the collection that relates to a folder — or no folder.
+## Shared Hierarchy Behavior
 
-```ts
-// Type definition
+See [Hierarchy](../hierarchy/overview) for breadcrumb paths, localized titles, collection restrictions, and joins.
 
-type CollectionFoldersConfiguration =
-  | boolean
-  | {
-      /**
-       * If true, the collection will be included in the browse by folder view
-       *
-       * @default true
-       */
-      browseByFolder?: boolean
-    }
-```
+Deleting a folder also deletes its child folders. The hierarchy hooks clear folder references on related content documents without deleting those content documents.
 
-```ts
-// Example usage
-
-import { buildConfig } from 'payload'
-
-const config = buildConfig({
-  collections: [
-    {
-      slug: 'pages',
-      // highlight-start
-      folders: true, // defaults to false
-      // highlight-end
-    },
-  ],
-})
-```
+For multiple taxonomy assignments, use [Tags](../tags/overview). A content collection can have both folder and tag fields referencing separate hierarchy collections.

@@ -20,6 +20,57 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Folders use the hierarchy foundation
+
+Folders still exist in Payload 4. Both [Folders](../folders/overview) and [Tags](../tags/overview) are presets built on the [Hierarchy](../hierarchy/overview) foundation.
+
+In Payload 3, Payload generated a folder collection from the root `folders` configuration, and content collections opted in with `folders: true`. In Payload 4, you define the folder collection explicitly and set `folders: true` on that collection. Content collections connect to it with `createFolderField`.
+
+1. Remove the root `folders` configuration. Move folder collection customizations, including access control, fields, and hooks, onto an explicit collection config.
+2. Remove the old `folders` opt-in from content collections and add `createFolderField` to their fields.
+3. Register the folder collection and regenerate your types and import map.
+4. Migrate existing data and database schema before using the new configuration in production.
+
+For a new configuration:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+import { createFolderField } from 'payload'
+
+export const Folders: CollectionConfig = {
+  slug: 'folders',
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+  ],
+  folders: true,
+}
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
+    createFolderField({ relationTo: 'folders' }),
+  ],
+}
+```
+
+This example uses a new `folders` collection and the default `_h_folders` relationship field. It does not migrate an existing Payload 3 folder collection or its assignments. Adapt your [database migration](../database/migrations) to the old folder collection slug and field name, including any overrides from your root `folders` config. Preserve folder IDs or remap references, migrate folder parent relationships and content assignments, and retain custom access rules. Include versions and drafts if your collections use them.
+
+To keep the existing folder collection slug, use it on the new collection config. Set `folders.parentFieldName` to keep a relationship field name. Payload renames related helper fields to match. Changing config alone does not rename stored data or database columns. The old `browseByFolder`, root `debug`, and root `collectionOverrides` options are not part of the new folder preset.
+
+For taxonomy support, define a separate collection with `tags: true` and connect content through `createTagField`. Each collection chooses one of `hierarchy`, `folders`, or `tags`; a content collection can reference multiple such collections through separate fields.
+
 ### Payload request creation is consolidated
 
 Payload request creation now uses `createPayloadRequest` for local contexts and `createPayloadRequestFromWebRequest` to convert a Web `Request`. Admin context setup is exposed as `initAdminContext`.
