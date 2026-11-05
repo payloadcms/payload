@@ -1377,6 +1377,33 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
         expect(response.status).toEqual(200)
       })
 
+      for (const operator of ['like', 'contains', 'not_like'] as const) {
+        test.options(
+          `should query partial SQLite string IDs with ${operator}`,
+          { db: (adapter) => adapter === 'sqlite-uuid' || adapter === 'sqlite-uuidv7' },
+          async ({ restClient }) => {
+            const matchingPost = await createPost({ restClient }, { title: 'matching ID' })
+            const otherPost = await createPost({ restClient }, { title: 'other ID' })
+            const partialID = String(matchingPost.id).slice(-12)
+
+            const response = await restClient.GET(`/${postsSlug}`, {
+              query: {
+                where: {
+                  id: {
+                    [operator]: operator === 'not_like' ? `%${partialID}%` : partialID,
+                  },
+                },
+              },
+            })
+            const result = await response.json()
+
+            expect(response.status).toEqual(200)
+            expect(result.docs).toEqual([operator === 'not_like' ? otherPost : matchingPost])
+            expect(result.totalDocs).toEqual(1)
+          },
+        )
+      }
+
       test('exists - true', async ({ restClient }) => {
         const postWithDesc = await createPost({ restClient }, { description: 'exists' })
         await createPost({ restClient }, { description: undefined })
