@@ -15,6 +15,7 @@ import { httpStatus } from '../../utilities/httpStatus.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
+import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { planPersistedDefaultStages } from '../transformState/planPersistedDefaultStages.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
@@ -71,7 +72,8 @@ export async function handleDynamicFileRequest({
   // file built at request time shares the original's name, but is not the original.
   const hasNoTransformParams = req.searchParams?.size === 0
   const isStoredOriginalName =
-    resolvedDocument.original?.filename === filename && resolvedDocument._stored !== false
+    resolvedDocument.original?.filename === filename &&
+    !isRequestTimeFile({ entry: resolvedDocument })
 
   if (isOriginalRequest || (isStoredOriginalName && hasNoTransformParams)) {
     const permittedDocument = await withFileTransformAccessContext({

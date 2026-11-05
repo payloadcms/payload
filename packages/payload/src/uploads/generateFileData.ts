@@ -39,6 +39,7 @@ import { getSafeFileName, incrementName } from './getSafeFilename.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { hasFullFileContents } from './hasFullFileContents.js'
 import { isProcessableImage } from './isProcessableImage.js'
+import { isRequestTimeFile } from './isRequestTimeFile.js'
 import { parseFilename } from './parseFilename.js'
 import { transformUploadFile } from './transformers/transformUploadFile.js'
 import {
@@ -323,7 +324,9 @@ const processUpload = async <T>({
   // A copy of a dynamic upload starts from the source's original, because its default file has no
   // object.
   const duplicatedOriginal =
-    isDuplicating && currentFileData?._stored === false ? currentFileData.original : undefined
+    isDuplicating && isRequestTimeFile({ entry: currentFileData })
+      ? currentFileData?.original
+      : undefined
   const fileSourceData =
     externalUploadSource ?? retainedOriginal ?? duplicatedOriginal ?? currentFileData
   const existingOriginal = retainedOriginal ?? duplicatedOriginal ?? undefined
@@ -764,7 +767,7 @@ const processUpload = async <T>({
           url: retainedOriginal.url,
           variants: currentFileData?.variants,
           width: retainedOriginal.width,
-          ...(currentFileData?._stored === false ? { _stored: null } : {}),
+          ...(isRequestTimeFile({ entry: currentFileData }) ? { _stored: null } : {}),
           ...(draft ? { _status: 'draft' } : {}),
         } as T,
         files: [],
@@ -1100,7 +1103,7 @@ const processUpload = async <T>({
           fileToSave.role = { type: 'original' }
         }
       }
-    } else if (currentFileData?._stored === false) {
+    } else if (isRequestTimeFile({ entry: currentFileData })) {
       // The default file is stored again, so it is no longer built at request time.
       fileData._stored = null
     }

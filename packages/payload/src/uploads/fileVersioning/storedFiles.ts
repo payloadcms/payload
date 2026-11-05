@@ -11,6 +11,7 @@ import type {
 
 import { generateFilePathOrURL } from '../generateFilePathOrURL.js'
 import { shouldRequestOriginal } from '../isOriginalFileRequest.js'
+import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { normalizeStorageKey } from './naming.js'
 
 export const getStoredFileIdentity = ({ key }: StoredFileIdentity): string =>
@@ -66,7 +67,10 @@ export const collectStoredFiles = ({
     }
     const representation = value as Record<string, unknown>
     // A `_stored: false` entry is built when it is requested, so it has no object to copy or delete.
-    if (typeof representation.filename !== 'string' || representation._stored === false) {
+    if (
+      typeof representation.filename !== 'string' ||
+      isRequestTimeFile({ entry: representation })
+    ) {
       return
     }
     const filename = representation.filename

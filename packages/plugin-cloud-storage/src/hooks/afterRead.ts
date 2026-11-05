@@ -1,5 +1,7 @@
 import type { CollectionConfig, FieldHook, ImageSize } from 'payload'
 
+import { isRequestTimeFile } from 'payload/internal'
+
 import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { sanitizePrefix } from '../utilities/sanitizePrefix.js'
@@ -51,7 +53,7 @@ export const getAfterReadHook =
 
     // An entry with no stored object is built when it is requested, so it keeps the Payload route.
     // The route still needs the folder, so a file with the same name in another folder is not served.
-    const isStored = representation?._stored !== false
+    const isStored = !isRequestTimeFile({ entry: representation })
 
     if (filename) {
       if (isStored && generateFileURL) {

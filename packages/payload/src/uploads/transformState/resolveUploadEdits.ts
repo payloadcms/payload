@@ -7,6 +7,7 @@ import type { PixelCrop } from './cropUnits.js'
 import { ValidationError } from '../../errors/ValidationError.js'
 import { isNumber } from '../../utilities/isNumber.js'
 import { getImageSize } from '../getImageSize.js'
+import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { cropToPercent, cropToPixels, isFullCrop } from './cropUnits.js'
 import { getTransformStateError } from './validateTransformState.js'
 
@@ -71,7 +72,7 @@ export async function resolveUploadEdits({
   // `processUpload` in generateFileData.ts then also drops the other keys that a stage claims. A
   // source with no stored main file is copied from its original, so its copy keeps every key.
   if (isDuplicating) {
-    const isCopiedFromOriginal = (originalDoc as Document)?._stored === false
+    const isCopiedFromOriginal = isRequestTimeFile({ entry: originalDoc as Document })
     const applyTransformState = <T>(fileData: T): T => {
       if (isCopiedFromOriginal) {
         return fileData

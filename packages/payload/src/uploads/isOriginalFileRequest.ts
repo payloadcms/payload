@@ -1,3 +1,5 @@
+import { isRequestTimeFile } from './isRequestTimeFile.js'
+
 // A transformed original can share the main file's name in its own storage folder. These two
 // rules decide which file a shared name means, so the URL and the served file must agree.
 
@@ -31,6 +33,7 @@ export const shouldRequestOriginal = ({ doc }: { doc?: SharedFilenameDoc }): boo
   return Boolean(
     original?.filename &&
     original.filename === doc?.filename &&
-    (doc._stored === false || (original._objectKey ?? null) !== (doc._objectKey ?? null)),
+    (isRequestTimeFile({ entry: doc }) ||
+      (original._objectKey ?? null) !== (doc._objectKey ?? null)),
   )
 }

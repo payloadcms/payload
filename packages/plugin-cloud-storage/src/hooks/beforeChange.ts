@@ -1,5 +1,7 @@
 import type { CollectionConfig, FieldHook, ImageSize } from 'payload'
 
+import { isRequestTimeFile } from 'payload/internal'
+
 import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { sanitizePrefix } from '../utilities/sanitizePrefix.js'
@@ -56,7 +58,7 @@ export const getBeforeChangeHook =
     let url = value
 
     // An entry with no stored object is built when it is requested, so it keeps the Payload route.
-    if (representation?._stored === false) {
+    if (isRequestTimeFile({ entry: representation })) {
       return url
     }
 

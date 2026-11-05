@@ -5,26 +5,47 @@ import type { PayloadRequest } from '../../types/index.js'
 
 import { collectStoredFiles } from './storedFiles.js'
 
-it('should leave out a file entry that has no stored object', () => {
-  const collection = {
-    slug: 'media',
-    upload: {
-      fileOperations: {
-        resolveStorageKey: ({ _objectKey, filename }: { _objectKey?: string; filename: string }) =>
-          _objectKey ? `${_objectKey}/${filename}` : filename,
-      },
+const collection = {
+  slug: 'media',
+  upload: {
+    fileOperations: {
+      resolveStorageKey: ({ _objectKey, filename }: { _objectKey?: string; filename: string }) =>
+        _objectKey ? `${_objectKey}/${filename}` : filename,
     },
-  } as unknown as SanitizedCollectionConfig
+  },
+} as unknown as SanitizedCollectionConfig
 
+const original = { _objectKey: 'original-key', filename: 'photo.png' }
+
+it.for([
+  {
+    name: 'leave out a main file that has no stored object, and keep its original',
+    marker: { _stored: false },
+    expected: [{ key: 'original-key/photo.png', roles: [{ type: 'original' }] }],
+  },
+  {
+    name: 'keep a main file whose marker is null',
+    marker: { _stored: null },
+    expected: [
+      { key: 'main-key/photo.png', roles: [{ type: 'default' }] },
+      { key: 'original-key/photo.png', roles: [{ type: 'original' }] },
+    ],
+  },
+  {
+    name: 'keep a main file with no marker',
+    marker: {},
+    expected: [
+      { key: 'main-key/photo.png', roles: [{ type: 'default' }] },
+      { key: 'original-key/photo.png', roles: [{ type: 'original' }] },
+    ],
+  },
+])('should $name', ({ expected, marker }) => {
   const files = collectStoredFiles({
     collection,
-    doc: {
-      _stored: false,
-      filename: 'photo.png',
-      original: { _objectKey: 'original-key', filename: 'photo.png' },
-    },
+    doc: { ...marker, _objectKey: 'main-key', filename: 'photo.png', original },
     req: {} as PayloadRequest,
   })
 
-  expect(files).toEqual([{ key: 'original-key/photo.png', roles: [{ type: 'original' }] }])
+  expect(files).toEqual(expect.arrayContaining(expected))
+  expect(files).toHaveLength(expected.length)
 })
