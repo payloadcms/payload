@@ -50,7 +50,7 @@ import {
   getStagesThatRun,
   planUploadPipeline,
   planUploadRebuild,
-} from './transformState/planUploadRebuild.js'
+} from './transformState/planUpload.js'
 import { resolveUploadEdits, withSavedEdits } from './transformState/resolveUploadEdits.js'
 import { isClaimRequired, isFocalPointKey } from './transformState/transformKeyClaims.js'
 import { validateUploadURL } from './validateUploadURL.js'
@@ -335,15 +335,15 @@ const processUpload = async <T>({
           collectionSlug: collectionConfig.slug,
           // Not `uploadEdits`: a focal point change copies the saved crop into it, so the crop is
           // applied again if the file is rebuilt. That copy is not a crop edit.
+          hasCropOrFocalPointEdit: shouldReupload(
+            uploadEdits,
+            incomingFileData as Record<string, unknown>,
+          ),
           hasCropOrResizeEdit: hasCropOrResizeEdit(
             req.query?.uploadEdits as undefined | UploadEdits,
           ),
           isDuplicating: Boolean(isDuplicating),
           isExternalSource: Boolean(externalUploadSource),
-          isLegacyReupload: shouldReupload(
-            uploadEdits,
-            incomingFileData as Record<string, unknown>,
-          ),
           pipelineDoc,
           pipelineOriginalDoc,
           previousTransforms:
@@ -510,9 +510,7 @@ const processUpload = async <T>({
       throw toFileUploadError({ err, req })
     }
 
-    if (plan !== rebuildPlan) {
-      assertTransformKeysCovered({ collectionSlug: collectionConfig.slug, pipelineDoc, plan, req })
-    }
+    assertTransformKeysCovered({ collectionSlug: collectionConfig.slug, pipelineDoc, plan, req })
 
     return { plan, ...getStagesThatRun({ collectionSlug: collectionConfig.slug, plan }) }
   }
@@ -526,6 +524,7 @@ const processUpload = async <T>({
 
   // A duplicate is made from the source's main file, which already has the claimed keys
   // applied. The copy drops them so they are not applied twice. A focal point only guides sizes.
+  // `resolveUploadEdits` drops `crop` from a duplicate before this, even with no claimer.
   if (isDuplicating && pipelineDoc._transforms) {
     const appliedKeys = [...claimsOfStagesThatRun.values()]
       .flat()
@@ -585,8 +584,6 @@ const processUpload = async <T>({
     const canRunTransformers = plan.pipeline.length > 0 && hasFullFileContents(file)
 
     const bridgeTransformer = canRunTransformers ? plannedBridgeTransformer : undefined
-    // The chosen bridge's task options are private to it, so other bridges must not see them.
-    const bridgeTaskPipeline = stagesThatRun
 
     let originalWebFile: File | undefined
     let mainWebFile: File | undefined
@@ -624,7 +621,7 @@ const processUpload = async <T>({
               options: task.options,
               originalDoc: pipelineOriginalDoc,
               originalFile: originalWebFile!,
-              pipeline: bridgeTaskPipeline,
+              pipeline: stagesThatRun,
               req,
             })
 

@@ -68,6 +68,7 @@ export async function resolveUploadEdits({
 
   // A duplicate is made from the source's cropped main file, which becomes the copy's original.
   // The crop is already part of those files, so the copy keeps every other key but not `crop`.
+  // `processUpload` in generateFileData.ts then also drops the other keys that a stage claims.
   if (isDuplicating) {
     const applyTransformState = <T>(fileData: T): T => {
       const { crop: _crop, ...rest } = ((fileData as Document)._transforms ?? {}) as Document
@@ -279,13 +280,7 @@ export function toPipelineEdits({
   const hasCropChange = !isDeepStrictEqual(previous?.crop, next?.crop)
 
   if (next?.crop && (hasNewFile || hasCropChange || hasFocalPointChange)) {
-    return {
-      ...savedFocalPoint,
-      ...edits,
-      crop: cropToPercent({ crop: next.crop, original }),
-      heightInPixels: next.crop.height,
-      widthInPixels: next.crop.width,
-    }
+    return { ...savedFocalPoint, ...edits, ...toCropEdits({ crop: next.crop, original }) }
   }
 
   if (previous?.crop && !next?.crop) {
@@ -299,6 +294,21 @@ export function toPipelineEdits({
   }
 
   return edits
+}
+
+/** A saved crop in pixels as the `uploadEdits` crop: percent, plus its output size in pixels. */
+function toCropEdits({
+  crop,
+  original,
+}: {
+  crop: NonNullable<NonNullable<TransformState>['crop']>
+  original: { height: number; width: number }
+}): Pick<UploadEdits, 'crop' | 'heightInPixels' | 'widthInPixels'> {
+  return {
+    crop: cropToPercent({ crop, original }),
+    heightInPixels: crop.height,
+    widthInPixels: crop.width,
+  }
 }
 
 /**
@@ -322,14 +332,10 @@ export function withSavedEdits({
   return {
     ...edits,
     ...(canApplySavedCrop
-      ? {
-          crop: cropToPercent({
-            crop: savedCrop,
-            original: { height: original.height!, width: original.width! },
-          }),
-          heightInPixels: savedCrop.height,
-          widthInPixels: savedCrop.width,
-        }
+      ? toCropEdits({
+          crop: savedCrop,
+          original: { height: original.height!, width: original.width! },
+        })
       : {}),
     ...(!edits?.focalPoint && savedFocalPoint ? { focalPoint: savedFocalPoint } : {}),
   }

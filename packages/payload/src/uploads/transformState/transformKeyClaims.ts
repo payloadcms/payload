@@ -15,5 +15,5 @@ const builtInTransformKeys = new Set(Object.keys(transformStateObjectSchema.prop
 export const isClaimRequired = (key: string): boolean =>
   key !== 'focalPoint' && builtInTransformKeys.has(key)
 
-/** A focal point change alone keeps the triggers it had before claims (see `planUploadRebuild`). */
+/** A focal point change alone keeps the triggers it had before claims (see `planUploadRebuild` in planUpload.ts). */
 export const isFocalPointKey = (key: string): boolean => key === 'focalPoint'

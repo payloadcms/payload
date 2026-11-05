@@ -4,7 +4,7 @@ import type { PayloadRequest } from '../../types/index.js'
 import type { UploadTransformer } from '../transformers/types.js'
 
 import { uploadTransformerInternal } from '../transformers/uploadTransformerBridge.js'
-import { planUploadRebuild } from './planUploadRebuild.js'
+import { planUploadRebuild } from './planUpload.js'
 
 const stage = (handledTransformKeys?: string[], isBridge = false): UploadTransformer => ({
   slug: 'stage',
@@ -48,7 +48,7 @@ describe('planUploadRebuild', () => {
     },
     {
       name: 'rebuild for a crop sent in the uploadEdits query',
-      args: { hasCropOrResizeEdit: true, isLegacyReupload: true, previousTransforms: null },
+      args: { hasCropOrResizeEdit: true, hasCropOrFocalPointEdit: true, previousTransforms: null },
       expected: { hasPlan: true, shouldRebuild: true },
     },
     {
@@ -78,7 +78,7 @@ describe('planUploadRebuild', () => {
       hasCropOrResizeEdit: false,
       isDuplicating: false,
       isExternalSource: false,
-      isLegacyReupload: false,
+      hasCropOrFocalPointEdit: false,
       pipelineDoc: { _transforms: next },
       pipelineOriginalDoc: Object.freeze({ _transforms: next }),
       previousTransforms: undefined,
