@@ -162,7 +162,8 @@ export type BranchingConfig = {
     }) => Promise<void> | void
   }
   /**
-   * Replaces the default best-effort pre-merge content validation policy.
+   * Replaces the default best-effort pre-merge content validation policy, which skips
+   * unvalidated drafts and checks stored content as update data.
    * Ordinary write validation, hooks, access control, and database constraints still apply.
    */
   validate?: BranchMergeValidate

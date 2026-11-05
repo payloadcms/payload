@@ -8,7 +8,7 @@ import {
   validateCollectionData,
   validateGlobalData,
 } from '../utilities/entityInputSchema/validateEntityData.js'
-import { hasDraftValidationEnabled } from '../utilities/getVersionsConfig.js'
+import { hasDraftsEnabled, hasDraftValidationEnabled } from '../utilities/getVersionsConfig.js'
 import { traverseForLocalizedFields } from '../utilities/traverseForLocalizedFields.js'
 import {
   getGlobalMergeLocales,
@@ -194,12 +194,29 @@ export const prepareBranchMergeValidationCandidates = async ({
   return candidates
 }
 
-/** Best-effort structural validation for the exact candidates selected by merge. */
+/** Checks prepared content when the corresponding target write validates it. */
 export const defaultBranchMergeValidation: BranchMergeValidate = ({ candidates, req }) => {
   const errors: BranchMergeValidationError[] = []
 
   for (const candidate of candidates) {
     if (!candidate.data || candidate.operation === 'delete') {
+      continue
+    }
+
+    const entityConfig =
+      candidate.entityType === 'collection' && candidate.collectionSlug
+        ? req.payload.collections[candidate.collectionSlug]?.config
+        : req.payload.globals.config.find(({ slug }) => slug === candidate.globalSlug)
+
+    // Match normal writes: unvalidated drafts can retain any content accepted by a draft save.
+    // A published locale still validates, even when another locale makes the overall write a draft.
+    if (
+      candidate.draft &&
+      candidate.data._status !== 'published' &&
+      entityConfig &&
+      hasDraftsEnabled(entityConfig) &&
+      !hasDraftValidationEnabled(entityConfig)
+    ) {
       continue
     }
 
@@ -209,37 +226,19 @@ export const defaultBranchMergeValidation: BranchMergeValidate = ({ candidates, 
       candidateReq.locale = candidate.locale
     }
 
-    const entityConfig =
-      candidate.entityType === 'collection' && candidate.collectionSlug
-        ? req.payload.collections[candidate.collectionSlug]?.config
-        : req.payload.globals.config.find(({ slug }) => slug === candidate.globalSlug)
-    const shouldAllowEmptyFields = Boolean(
-      candidate.draft && entityConfig && !hasDraftValidationEnabled(entityConfig),
-    )
-    // Draft saves allow incomplete fields. Validate a copy without empty field values, while
-    // retaining the original candidate (including nulls that clear content) for the actual write.
-    const data =
-      shouldAllowEmptyFields && entityConfig
-        ? stripNonWritableFields({
-            data: candidate.data,
-            fields: entityConfig.fields,
-            payload: req.payload,
-            shouldStripNullValues: true,
-          })
-        : candidate.data
-
     try {
       if (candidate.entityType === 'collection' && candidate.collectionSlug) {
         validateCollectionData({
           slug: candidate.collectionSlug as never,
-          data,
-          partial: shouldAllowEmptyFields || candidate.operation !== 'create',
+          data: candidate.data,
+          // Branch-created rows are promoted through updates, just like existing main rows.
+          partial: true,
           req: candidateReq,
         })
       } else if (candidate.entityType === 'global' && candidate.globalSlug) {
         validateGlobalData({
           slug: candidate.globalSlug as never,
-          data,
+          data: candidate.data,
           req: candidateReq,
         })
       }
@@ -287,26 +286,14 @@ const stripNonWritableFields = ({
   data,
   fields,
   payload,
-  shouldStripNullValues = false,
 }: {
   data: Record<string, unknown>
   fields: Field[]
   payload: Payload
-  shouldStripNullValues?: boolean
 }): Record<string, unknown> => {
   let writableData = { ...data }
 
   for (const field of fields) {
-    if (
-      shouldStripNullValues &&
-      'name' in field &&
-      field.name &&
-      writableData[field.name] === null
-    ) {
-      delete writableData[field.name]
-      continue
-    }
-
     if ('name' in field && field.name && (field.type === 'join' || fieldIsVirtual(field))) {
       delete writableData[field.name]
       continue
@@ -317,7 +304,6 @@ const stripNonWritableFields = ({
         data: writableData,
         fields: field.fields,
         payload,
-        shouldStripNullValues,
       })
       continue
     }
@@ -329,24 +315,17 @@ const stripNonWritableFields = ({
             data: writableData,
             fields: tab.fields,
             payload,
-            shouldStripNullValues,
           })
           continue
         }
 
         const tabData = writableData[tab.name]
 
-        if (shouldStripNullValues && tabData === null) {
-          delete writableData[tab.name]
-          continue
-        }
-
         if (isRecord(tabData)) {
           writableData[tab.name] = stripNonWritableFields({
             data: tabData,
             fields: tab.fields,
             payload,
-            shouldStripNullValues,
           })
         }
       }
@@ -360,7 +339,6 @@ const stripNonWritableFields = ({
           data: writableData,
           fields: field.fields,
           payload,
-          shouldStripNullValues,
         })
         continue
       }
@@ -372,7 +350,6 @@ const stripNonWritableFields = ({
           data: groupData,
           fields: field.fields,
           payload,
-          shouldStripNullValues,
         })
       }
 
@@ -389,7 +366,6 @@ const stripNonWritableFields = ({
                 data: row,
                 fields: field.fields,
                 payload,
-                shouldStripNullValues,
               })
             : row,
         )
@@ -419,7 +395,6 @@ const stripNonWritableFields = ({
                 data: row,
                 fields: block.fields,
                 payload,
-                shouldStripNullValues,
               })
         })
       }

@@ -534,8 +534,11 @@ test.suite('Branching: global-merge', { config: './config.ts', resetBetweenTests
       })
 
       expect(publishedEN.localizedTitle).toBe('branch English')
+      expect(publishedEN._status).toBe('published')
       expect(publishedES.localizedTitle).toBe('main Spanish')
+      expect(publishedES._status).toBe('published')
       expect(draftES.localizedTitle).toBe('branch Spanish draft')
+      expect(draftES._status).toBe('draft')
     })
 
     test('should check access against every exact global write and locale', async () => {
