@@ -4370,6 +4370,205 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(current.title).toBe('current')
       })
 
+      test('should reject updates when the latest draft does not match access but the live global does', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'unlocked' },
+          overrideAccess: true,
+        })
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'locked draft' },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: restoreAccessGlobalSlug,
+            data: { title: 'updated' },
+            draft: true,
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+
+        expect(current.title).toBe('locked draft')
+      })
+
+      test('should publish when both the latest draft and live global match update access', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'unlocked' },
+          overrideAccess: true,
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'unlocked' },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        const published = await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'published with access' },
+          overrideAccess: false,
+          user,
+        })
+
+        expect(published.title).toBe('published with access')
+        expect(published._status).toBe('published')
+      })
+
+      test('should reject publishing an accessible draft when the live global fails update access', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'locked live' },
+          overrideAccess: true,
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'unlocked' },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        // Editing the accessible draft is allowed even though the live global is locked.
+        const draft = await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'unlocked' },
+          draft: true,
+          overrideAccess: false,
+          user,
+        })
+
+        expect(draft.title).toBe('unlocked')
+
+        const versionsBefore = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: restoreAccessGlobalSlug,
+            data: { _status: 'published', title: 'published by restricted user' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const liveGlobal = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          overrideAccess: true,
+        })
+        const latestDraft = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          draft: true,
+          overrideAccess: true,
+        })
+        const versionsAfter = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          overrideAccess: true,
+        })
+
+        expect(liveGlobal.title).toBe('locked live')
+        expect(liveGlobal._status).toBe('published')
+        expect(latestDraft.title).toBe('unlocked')
+        expect(latestDraft._status).toBe('draft')
+        expect(versionsAfter.totalDocs).toBe(versionsBefore.totalDocs)
+      })
+
+      test('should reject an id-based access constraint without treating the id as a parent', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'id access live' },
+          overrideAccess: true,
+        })
+
+        const liveGlobal = await payload.db.findGlobal({ slug: restoreAccessGlobalSlug })
+
+        expect(liveGlobal.id).toBeDefined()
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'unlocked' },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        const { docs: versions } = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          limit: 1,
+          overrideAccess: true,
+          where: { latest: { equals: true } },
+        })
+
+        // Global drafts have no stable document ID. Neither the live row's ID
+        // nor the version row's ID may grant access to the draft.
+        const nonmatchingID =
+          typeof liveGlobal.id === 'number' ? liveGlobal.id + 1 : '000000000000000000000000'
+
+        for (const id of [liveGlobal.id, versions[0]!.id, nonmatchingID]) {
+          await expect(
+            payload.updateGlobal({
+              slug: restoreAccessGlobalSlug,
+              context: {
+                restoreAccessGlobalID: id,
+                restoreAccessMode: 'idConstraint',
+              },
+              data: { title: 'id access updated' },
+              draft: true,
+              overrideAccess: false,
+              user,
+            }),
+          ).rejects.toThrow(Forbidden)
+        }
+      })
+
+      test('should allow a matching id constraint on a non-versioned global', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessNoVersionsGlobalSlug,
+          data: { title: 'locked' },
+          overrideAccess: true,
+        })
+
+        const liveGlobal = await payload.db.findGlobal({ slug: restoreAccessNoVersionsGlobalSlug })
+
+        expect(liveGlobal.id).toBeDefined()
+
+        const updated = await payload.updateGlobal({
+          slug: restoreAccessNoVersionsGlobalSlug,
+          context: {
+            restoreAccessGlobalID: liveGlobal.id,
+            restoreAccessMode: 'idConstraint',
+          },
+          data: { title: 'updated by id' },
+          overrideAccess: false,
+          user,
+        })
+
+        expect(updated.title).toBe('updated by id')
+      })
+
       test('should reject non-versioned global updates outside the access constraint', async ({
         payload,
       }) => {
