@@ -206,10 +206,16 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
                 }
               })
 
-              return matchedOption
+              return (
+                matchedOption || {
+                  label: String(val.value),
+                  relationTo: val.relationTo,
+                  value: val.value,
+                }
+              )
             }
 
-            return options.find((opt) => opt.value == val)
+            return options.find((opt) => opt.value == val) || { label: String(val), value: val }
           })
         }
 
