@@ -48,3 +48,41 @@ describe('azureStorage client uploads', () => {
     expect(providerCollections).toEqual(['direct-media'])
   })
 })
+
+const getMediaFieldNames = (config: Config): string[] =>
+  (config.collections?.find((collection) => collection.slug === 'media')?.fields ?? []).flatMap(
+    (field) => ('name' in field ? [field.name] : []),
+  )
+
+describe('azureStorage when disabled', () => {
+  it('should insert the prefix and object key fields when alwaysInsertFields is true', () => {
+    const config = azureStorage({
+      allowContainerCreate: false,
+      alwaysInsertFields: true,
+      baseURL: 'https://account.blob.core.windows.net',
+      collections: {
+        media: true,
+      },
+      connectionString: 'UseDevelopmentStorage=true',
+      containerName: 'media',
+      enabled: false,
+    })(createConfig()) as Config
+
+    expect(getMediaFieldNames(config)).toEqual(expect.arrayContaining(['prefix', '_objectKey']))
+  })
+
+  it('should not insert fields when alwaysInsertFields is not set', () => {
+    const config = azureStorage({
+      allowContainerCreate: false,
+      baseURL: 'https://account.blob.core.windows.net',
+      collections: {
+        media: true,
+      },
+      connectionString: 'UseDevelopmentStorage=true',
+      containerName: 'media',
+      enabled: false,
+    })(createConfig()) as Config
+
+    expect(getMediaFieldNames(config)).toEqual([])
+  })
+})
