@@ -840,6 +840,20 @@ describe('List View', () => {
       ).toBeHidden()
     })
 
+    test('should not throw when the where query references a field that is not filterable', async () => {
+      await page.goto(
+        `${postsUrl.list}${qs.stringify(
+          { where: { or: [{ and: [{ fieldThatDoesNotExist: { equals: 'value' } }] }] } },
+          { addQueryPrefix: true },
+        )}`,
+      )
+
+      await openListFilters(page, {})
+      await expect(page.locator('.condition__field')).toBeVisible()
+
+      await wait(1000) // wait past the condition's 300ms debounced value update
+    })
+
     test('should simply disable field filter when admin.disableListFilter is true but still exists in the query', async () => {
       await page.goto(
         `${postsUrl.list}${qs.stringify(
