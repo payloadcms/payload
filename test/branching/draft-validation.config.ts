@@ -4,12 +4,27 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 
 export const draftValidationSlug = 'draft-validation'
 export const strictDraftValidationSlug = 'strict-draft-validation'
+export const strictDraftValidationGlobalSlug = 'strict-draft-validation-global'
 export const draftValidationGlobalSlug = 'draft-validation-global'
 
 const fields: Field[] = [
   { name: 'title', type: 'text', localized: true, required: true },
   { name: 'content', type: 'richText', localized: true, required: true },
-  { name: 'slug', type: 'slug', localized: true, useAsSlug: 'title' },
+  { name: 'slug', type: 'slug', useAsSlug: 'title' },
+  {
+    name: 'metadata',
+    type: 'json',
+    localized: true,
+    jsonSchema: {
+      fileMatch: ['draft-merge-metadata.json'],
+      schema: {
+        type: 'object',
+        properties: { label: { type: 'string' } },
+        required: ['label'],
+      },
+      uri: 'payload://draft-merge-metadata.json',
+    },
+  },
   {
     name: 'details',
     type: 'group',
@@ -39,7 +54,14 @@ export default buildConfigWithDefaults({
         versions: { drafts: { validate: true } },
       },
     ],
-    globals: [{ slug: draftValidationGlobalSlug, fields, versions: { drafts: true } }],
+    globals: [
+      { slug: draftValidationGlobalSlug, fields, versions: { drafts: true } },
+      {
+        slug: strictDraftValidationGlobalSlug,
+        fields: [{ name: 'title', type: 'text', required: true }],
+        versions: { drafts: { validate: true } },
+      },
+    ],
     localization: { defaultLocale: 'en', locales: ['en', 'fr', 'de'] },
   },
   suite: 'branching',
