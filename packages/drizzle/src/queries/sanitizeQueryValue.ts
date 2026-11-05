@@ -2,12 +2,12 @@ import type { SQL } from 'drizzle-orm'
 
 import { APIError, createArrayFromCommaDelineated, type Field, type TabAsField } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
-import { validate as uuidValidate } from 'uuid'
 
 import type { DrizzleAdapter } from '../types.js'
 
 import { getCollectionIdType } from '../utilities/getCollectionIdType.js'
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
+import { isPostgresUUID } from '../utilities/isPostgresUUID.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
 import { isRawConstraint } from '../utilities/rawConstraint.js'
 
@@ -106,7 +106,7 @@ export const sanitizeQueryValue = ({
   }
 
   if (isUUID && typeof formattedValue === 'string') {
-    if (!uuidValidate(val)) {
+    if (!isPostgresUUID(val)) {
       formattedValue = null
     }
   }
@@ -191,7 +191,7 @@ export const sanitizeQueryValue = ({
                       return null
                     }
                   } else {
-                    if (idType === 'uuid' && !uuidValidate(eachVal)) {
+                    if (idType === 'uuid' && !isPostgresUUID(eachVal)) {
                       return null
                     }
 
