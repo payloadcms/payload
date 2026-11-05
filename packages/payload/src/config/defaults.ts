@@ -35,6 +35,7 @@ const defaultCLICommands: CLICommands = {
   'migrate:refresh': 'payload/cli/builtin#createMigrateRefreshCommand',
   'migrate:reset': 'payload/cli/builtin#createMigrateResetCommand',
   'migrate:status': 'payload/cli/builtin#createMigrateStatusCommand',
+  'migrate:unlock': 'payload/cli/builtin#createMigrateUnlockCommand',
   restoreGlobalVersion: 'payload/cli/builtin#createRestoreGlobalVersionCommand',
   restoreVersion: 'payload/cli/builtin#createRestoreVersionCommand',
   run: 'payload/cli/builtin#createRunCommand',

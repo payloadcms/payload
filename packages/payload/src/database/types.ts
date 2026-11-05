@@ -104,6 +104,8 @@ export interface BaseDatabaseAdapter {
     forceAcceptWarning?: boolean
     migrations?: Migration[]
     shouldPrompt?: boolean
+    /** Disable locking only for a single-instance bootstrap of the lock schema. */
+    skipLock?: boolean
   }) => Promise<MigrationResult | void>
   /**
    * Run any migration down functions that have been performed
@@ -152,6 +154,9 @@ export interface BaseDatabaseAdapter {
 
   queryDrafts: QueryDrafts
 
+  /** Release the migration lease only if it is still held by this instance. */
+  releaseMigrationLock?: ReleaseMigrationLock
+
   /**
    * Abort any changes since the start of the transaction.
    */
@@ -163,6 +168,9 @@ export interface BaseDatabaseAdapter {
   sessions?: {
     [id: string]: unknown
   }
+
+  /** Atomically claim and persist the migration lease outside any request transaction. */
+  tryAcquireMigrationLock?: TryAcquireMigrationLock
 
   /**
    * Updates a global that exists. If the global doesn't exist yet, this will not work - you should use `createGlobal` instead.
@@ -181,6 +189,13 @@ export interface BaseDatabaseAdapter {
 }
 
 export type Init = () => Promise<void> | void
+
+export type TryAcquireMigrationLock = (args: {
+  instanceId: string
+  timeout: number
+}) => Promise<{ acquired: boolean }>
+
+export type ReleaseMigrationLock = (args: { instanceId: string }) => Promise<void>
 
 type ConnectArgs = {
   hotReload: boolean
