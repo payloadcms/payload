@@ -38,6 +38,18 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
   const router = useRouter()
   const { t } = useTranslation()
   const selectionStatusID = React.useId()
+  const [failedThumbnailSrc, setFailedThumbnailSrc] = React.useState<string>()
+  const thumbnailSrc = thumbnail?.src
+
+  // The image can fail before hydration attaches onError, so check its state on mount too
+  const thumbnailRef = React.useCallback(
+    (image: HTMLImageElement | null) => {
+      if (image?.complete && image.naturalWidth === 0) {
+        image.decode().catch(() => setFailedThumbnailSrc(thumbnailSrc))
+      }
+    },
+    [thumbnailSrc],
+  )
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (!onSelect || event.detail === 0) {
@@ -111,12 +123,14 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         .filter(Boolean)
         .join(' ')}
     >
-      {thumbnail ? (
+      {thumbnail && thumbnail.src !== failedThumbnailSrc ? (
         <img
           alt={thumbnail.alt || ''}
           className={`${baseClass}__thumbnail`}
           decoding="async"
           loading={thumbnail.loading}
+          onError={() => setFailedThumbnailSrc(thumbnail.src)}
+          ref={thumbnailRef}
           src={thumbnail.src}
         />
       ) : (
