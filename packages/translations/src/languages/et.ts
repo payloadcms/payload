@@ -506,10 +506,15 @@ export const etTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Lisa fail',
     addFiles: 'Lisa failid',
+    aspectRatio: 'Kuvasuhe',
+    aspectRatioCustom: 'Kohandatud',
+    aspectRatioFreeform: 'Vaba',
+    aspectRatioOriginal: 'Originaalpilt',
     bulkUpload: 'Massiüleslaadimine',
     crop: 'Kärbi',
     cropToolDescription:
       'Lohista valitud ala nurki, joonista uus ala või kohanda väärtusi allpool.',
+    customAspectRatio: 'Kohandatud suhe',
     download: 'Laadige alla',
     dragAndDrop: 'Lohista ja aseta fail',
     dragAndDropHere: 'või lohista ja aseta fail siia',
@@ -521,6 +526,7 @@ export const etTranslations: DefaultTranslationsObject = {
     focalPoint: 'Fookuspunkt',
     focalPointDescription: 'Lohista fookuspunkti otse eelvaatel või kohanda väärtusi allpool.',
     height: 'Kõrgus',
+    invalidAspectRatio: 'Sisesta suhe kujul laius:kõrgus, näiteks 16:9.',
     lessInfo: 'Vähem infot',
     moreInfo: 'Rohkem infot',
     noFile: 'Pole faili',

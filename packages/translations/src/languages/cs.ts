@@ -509,10 +509,15 @@ export const csTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Přidat soubor',
     addFiles: 'Přidat soubory',
+    aspectRatio: 'Poměr stran',
+    aspectRatioCustom: 'Vlastní',
+    aspectRatioFreeform: 'Volný',
+    aspectRatioOriginal: 'Původní obrázek',
     bulkUpload: 'Hromadné nahrání',
     crop: 'Ořez',
     cropToolDescription:
       'Přetáhněte rohy vybrané oblasti, nakreslete novou oblast nebo upravte níže uvedené hodnoty.',
+    customAspectRatio: 'Vlastní poměr',
     download: 'Stáhnout',
     dragAndDrop: 'Přetáhněte soubor',
     dragAndDropHere: 'nebo sem přetáhněte soubor',
@@ -525,6 +530,7 @@ export const csTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Přetáhněte bod zaměření přímo na náhled nebo upravte níže uvedené hodnoty.',
     height: 'Výška',
+    invalidAspectRatio: 'Zadejte poměr ve tvaru šířka:výška, například 16:9.',
     lessInfo: 'Méně informací',
     moreInfo: 'Více informací',
     noFile: 'Žádný soubor',

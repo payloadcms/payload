@@ -511,10 +511,15 @@ export const lvTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Pievienot failu',
     addFiles: 'Pievienot failus',
+    aspectRatio: 'Malu attiecība',
+    aspectRatioCustom: 'Pielāgota',
+    aspectRatioFreeform: 'Brīva',
+    aspectRatioOriginal: 'Oriģinālais attēls',
     bulkUpload: 'Masveida augšupielāde',
     crop: 'Apgriezt',
     cropToolDescription:
       'Velciet atlasītā apgabala stūrus, uzzīmējiet jaunu apgabalu vai pielāgojiet vērtības zemāk.',
+    customAspectRatio: 'Pielāgota attiecība',
     download: 'Lejupielādēt',
     dragAndDrop: 'Ievelciet un nometiet failu',
     dragAndDropHere: 'vai ievelciet un nometiet failu šeit',
@@ -527,6 +532,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Velciet fokusa punktu tieši priekšskatījumā vai pielāgojiet vērtības zemāk.',
     height: 'Augstums',
+    invalidAspectRatio: 'Ievadiet attiecību formātā platums:augstums, piemēram, 16:9.',
     lessInfo: 'Mazāk informācijas',
     moreInfo: 'Vairāk informācijas',
     noFile: 'Nav faila',

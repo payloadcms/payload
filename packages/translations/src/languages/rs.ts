@@ -510,10 +510,15 @@ export const rsTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Додај датотеку',
     addFiles: 'Dodaj datoteke',
+    aspectRatio: 'Однос страница',
+    aspectRatioCustom: 'Прилагођено',
+    aspectRatioFreeform: 'Слободно',
+    aspectRatioOriginal: 'Оригинална слика',
     bulkUpload: 'Masovno otpremanje',
     crop: 'Исеците слику',
     cropToolDescription:
       'Превуците углове изабраног подручја, нацртајте ново подручје или прилагодите вредности испод.',
+    customAspectRatio: 'Прилагођени однос',
     download: 'Preuzmi',
     dragAndDrop: 'Превуците и испустите датотеку',
     dragAndDropHere: 'или превуците и испустите датотеку овде',
@@ -526,6 +531,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Превуците средишњу тачку директно на преглед или прилагодите вредности испод.',
     height: 'Висина',
+    invalidAspectRatio: 'Унесите однос као ширина:висина, на пример 16:9.',
     lessInfo: 'Мање информација',
     moreInfo: 'Више информација',
     noFile: 'Nema fajla',

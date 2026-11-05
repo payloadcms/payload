@@ -513,10 +513,15 @@ export const ptTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Adicionar arquivo',
     addFiles: 'Adicionar Arquivos',
+    aspectRatio: 'Proporção',
+    aspectRatioCustom: 'Personalizada',
+    aspectRatioFreeform: 'Livre',
+    aspectRatioOriginal: 'Imagem original',
     bulkUpload: 'Upload em Massa',
     crop: 'Cultura',
     cropToolDescription:
       'Arraste as bordas da área selecionada, desenhe uma nova área ou ajuste os valores abaixo.',
+    customAspectRatio: 'Proporção personalizada',
     download: 'Baixar',
     dragAndDrop: 'Arraste e solte um arquivo',
     dragAndDropHere: 'ou arraste um arquivo aqui',
@@ -529,6 +534,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Arraste o ponto focal diretamente na pré-visualização ou ajuste os valores abaixo.',
     height: 'Altura',
+    invalidAspectRatio: 'Insira uma proporção no formato largura:altura, por exemplo 16:9.',
     lessInfo: 'Ver menos',
     moreInfo: 'Ver mais',
     noFile: 'Sem arquivo',
