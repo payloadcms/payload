@@ -132,7 +132,7 @@ function registerPendingClaimHooks(req: PayloadRequest, claimedIDs: (number | st
   }
 
   if (!patchedDbAdapters.has(db)) {
-    const originalFind = db.find.bind(db) as Find
+    const originalFind = db.find.bind(db)
 
     const wrappedFind: Find = async <T = TypeWithID>(
       findArgs: FindArgs,

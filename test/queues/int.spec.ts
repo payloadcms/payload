@@ -979,7 +979,7 @@ describe('Queues - Payload', () => {
         afterChange: [
           ...(jobsCollectionConfig.hooks?.afterChange ?? []),
           ({ doc, operation, previousDoc }) => {
-            if (operation === 'update' && doc?.processing === true) {
+            if (operation === 'update' && doc?.processing === true && !doc?.log?.length) {
               claimAfterChanges.push({
                 id: doc.id,
                 currentProcessing: doc.processing,
@@ -992,7 +992,12 @@ describe('Queues - Payload', () => {
         beforeChange: [
           ...(jobsCollectionConfig.hooks?.beforeChange ?? []),
           ({ data, operation, originalDoc }) => {
-            if (operation === 'update' && data?.processing === true && originalDoc) {
+            if (
+              operation === 'update' &&
+              data?.processing === true &&
+              !data?.log?.length &&
+              originalDoc
+            ) {
               claimBeforeChanges.push({
                 id: originalDoc.id,
                 nextProcessing: data.processing,
