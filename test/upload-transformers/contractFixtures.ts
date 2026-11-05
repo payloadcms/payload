@@ -20,6 +20,8 @@ export type ContractStages = {
   /** The `_transforms` keys each stage claims. A stage without an entry returns `true`. */
   claims?: Partial<Record<ContractStageName, string[]>>
   first?: ContractStage
+  /** The `_transforms` keys each stage claims in the saved-state phase of a request. */
+  requestClaims?: Partial<Record<ContractStageName, string[]>>
   second?: ContractStage
 }
 
@@ -63,6 +65,13 @@ const createContractTransformer = (stageName: ContractStageName): UploadTransfor
     contractCalls.canTransform.push(args)
 
     if (args.operation === 'request') {
+      const requestClaims = (args.req.context?.contractStages as ContractStages | undefined)
+        ?.requestClaims?.[stageName]
+
+      if (requestClaims && args.purpose === 'persisted-default') {
+        return { canTransform: true, handledTransformKeys: requestClaims, options: {} }
+      }
+
       return args.req.searchParams?.has('contract')
         ? { canTransform: true, options: { purpose: args.purpose } }
         : false

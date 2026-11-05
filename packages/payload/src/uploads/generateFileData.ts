@@ -34,7 +34,7 @@ import { getFileByPath } from './getFileByPath.js'
 import { fetchFullClientUpload } from './getFileFromUploadInstructions.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
-import { getSafeFileName, incrementName } from './getSafeFilename.js'
+import { getSafeFileName, getUnplannedSafeFileName } from './getSafeFilename.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { hasFullFileContents } from './hasFullFileContents.js'
 import { isProcessableImage } from './isProcessableImage.js'
@@ -47,6 +47,7 @@ import {
 import { isFullCrop } from './transformState/cropUnits.js'
 import {
   assertTransformKeysCovered,
+  canBuildAtRequest,
   getStagesThatRun,
   planUploadPipeline,
   planUploadRebuild,
@@ -958,6 +959,9 @@ const processUpload = async <T>({
         const imagePath = `${staticPath}/${imageName}`
 
         sizes[sizeName] = {
+          // An update merges into the saved entry, so a size that is stored again must clear the
+          // marker an earlier owner wrote when it built the size at request time.
+          ...(currentFileData?.variants?.[sizeName]?._stored === false ? { _stored: null } : {}),
           _objectKey: newObjectKey,
           filename: imageName,
           filesize: sizeBuffer.length,
@@ -998,6 +1002,59 @@ const processUpload = async <T>({
     } else if (currentFileData?._stored === false) {
       // The default file is stored again, so it is no longer built at request time.
       fileData._stored = null
+    }
+
+    // A bridge stores only the sizes it owns. Otherwise the transformer that registered the sizes
+    // builds each one from the original when it is requested, if it runs at request time. A
+    // planned bridge does not run when the saved keys are applied at request time.
+    const declaredVariants = collectionConfig.upload.variants ?? []
+    const variantsTransformerSlug = collectionConfig.upload.variantsTransformerSlug
+    if (
+      declaredVariants.length > 0 &&
+      variantsTransformerSlug &&
+      bridgeTransformer?.slug !== variantsTransformerSlug &&
+      fileData.original &&
+      (await canBuildAtRequest({
+        collectionSlug: collectionConfig.slug,
+        documentID,
+        mimeType: file.mimetype,
+        pipelineDoc,
+        pipelineOriginalDoc,
+        req,
+        requiredTransformerSlug: variantsTransformerSlug,
+      }))
+    ) {
+      // The size is built from the original, so it takes the original's extension.
+      const { name: baseName } = parseFilename(fileData.filename!)
+      const baseExt = getFileExtension(fileData.original.filename!)
+      const plannedNames = new Set([fileData.filename, fileData.original.filename])
+      const variants: FileSizes = {}
+
+      for (const { name: variantName } of declaredVariants) {
+        const filename = await getUnplannedSafeFileName({
+          canUseName: (name) => !plannedNames.has(name),
+          collectionSlug: collectionConfig.slug,
+          desiredFilename: `${baseName}-${variantName}${baseExt ? `.${baseExt}` : ''}`,
+          // A size with no stored file can keep a name this document used before.
+          excludeDocumentID: documentID,
+          prefix,
+          req,
+          staticPath: disableLocalStorage ? undefined : staticPath!,
+        })
+        plannedNames.add(filename)
+        variants[variantName] = {
+          _stored: false,
+          filename,
+          filesize: null,
+          height: null,
+          mimeType: null,
+          prefix: fileData.original.prefix,
+          url: null,
+          width: null,
+        }
+      }
+
+      fileData.variants = variants
     }
   } catch (err) {
     if (isFetchingClientUpload) {
@@ -1043,25 +1100,6 @@ function getRequestTimeDefaultFileData({
     mimeType: original.mimeType,
     prefix: original.prefix,
     width: crop?.width ?? original.width ?? null,
-  }
-}
-
-/** Finds a name that is free in storage and that `canUseName` accepts for this save. */
-async function getUnplannedSafeFileName({
-  canUseName,
-  desiredFilename,
-  ...args
-}: {
-  canUseName: (filename: string) => boolean
-} & Parameters<typeof getSafeFileName>[0]): Promise<string> {
-  let filename = desiredFilename
-
-  while (true) {
-    filename = await getSafeFileName({ ...args, desiredFilename: filename })
-    if (canUseName(filename)) {
-      return filename
-    }
-    filename = incrementName(filename)
   }
 }
 

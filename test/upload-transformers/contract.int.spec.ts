@@ -598,10 +598,12 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     })
 
     const createImage = async ({
+      _transforms,
       contractStages,
       payload,
     }: {
-      contractStages: ContractStages
+      _transforms?: Record<string, unknown>
+      contractStages?: ContractStages
       payload: Payload
     }) => {
       const data = await readFile(path.resolve(dirname, 'image.png'))
@@ -609,11 +611,62 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       return payload.create({
         collection: variantMediaSlug,
         context: { contractStages },
-        data: {},
+        data: { _transforms },
         file: { name: 'image.png', data, mimetype: 'image/png', size: data.length },
         overrideAccess: true,
       })
     }
+
+    test('should reject a key that only a request-time stage claims on create, because the stored size cannot apply it', async ({
+      payload,
+    }) => {
+      await expect(
+        createImage({
+          _transforms: { rotate: { angle: 90 } },
+          contractStages: { requestClaims: { first: ['rotate'] } },
+          payload,
+        }),
+      ).rejects.toMatchObject({
+        data: { errors: [expect.objectContaining({ path: '_transforms.rotate' })] },
+      })
+
+      const { totalDocs } = await payload.count({
+        collection: variantMediaSlug,
+        overrideAccess: true,
+      })
+
+      expect(totalDocs).toBe(0)
+    })
+
+    test('should reject the same key on update, and keep the document and its stored size', async ({
+      payload,
+    }) => {
+      const created = await createImage({ payload })
+
+      await expect(
+        payload.update({
+          id: created.id,
+          collection: variantMediaSlug,
+          context: { contractStages: { requestClaims: { first: ['rotate'] } } },
+          data: { _transforms: { rotate: { angle: 90 } } },
+          overrideAccess: true,
+        }),
+      ).rejects.toMatchObject({
+        data: { errors: [expect.objectContaining({ path: '_transforms.rotate' })] },
+      })
+
+      expect(
+        await payload.findByID({
+          id: created.id,
+          collection: variantMediaSlug,
+          overrideAccess: true,
+        }),
+      ).toMatchObject({
+        _transforms: null,
+        filename: created.filename,
+        variants: { thumbnail: { filename: created.variants?.thumbnail?.filename } },
+      })
+    })
 
     test('should pass a stage its own canTransform options in every task, not the Sharp task', async ({
       payload,

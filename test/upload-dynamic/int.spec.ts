@@ -1,12 +1,15 @@
-/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] -- Tests use the shared fixture wrapper. */
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.for"] }] -- Tests use the shared fixture wrapper. */
 import type { Payload, RequestContext } from 'payload'
 
 import { readdir, readFile, rm } from 'fs/promises'
 import path from 'path'
+import { createPayloadRequest } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Rename is a core operation tested before API wrappers.
+import { renameFileOperation } from '../../packages/payload/src/collections/operations/renameFile.js'
 import { test } from '../__helpers/int/vitest.js'
 import { dynamicMediaDir, dynamicMediaSlug, publicCloudMediaSlug } from './shared.js'
 import { requestCropCalls } from './transformers.js'
@@ -26,11 +29,13 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     _transforms = { crop: savedCrop },
     collection = dynamicMediaSlug,
     context,
+    name = 'photo.png',
     payload,
   }: {
-    _transforms?: Record<string, unknown>
+    _transforms?: null | Record<string, unknown>
     collection?: typeof dynamicMediaSlug | typeof publicCloudMediaSlug
     context?: RequestContext
+    name?: string
     payload: Payload
   }) => {
     const bytes = await readFile(imageFixture)
@@ -39,7 +44,7 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
       collection,
       context,
       data: { _transforms },
-      file: { name: 'photo.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+      file: { name, data: bytes, mimetype: 'image/png', size: bytes.length },
     })
   }
 
@@ -193,5 +198,110 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
 
     expect(created.url).toMatch(new RegExp(`/api/${publicCloudMediaSlug}/file/photo\\.png$`))
     expect(created.original?.url).toMatch(/^https:\/\/files\.example\.test\//)
+  })
+
+  test.for([
+    ['a saved crop', { crop: savedCrop }],
+    ['no saved transforms', null],
+  ] as const)(
+    'should write a size entry with no stored file for an upload with %s',
+    async ([, _transforms], { payload }) => {
+      const created = await createImage({ _transforms, payload })
+
+      expect(created.variants?.card).toMatchObject({
+        _stored: false,
+        filename: 'photo-card.png',
+        filesize: null,
+        height: null,
+        mimeType: null,
+        width: null,
+      })
+      expect(await readdir(dynamicMediaDir)).toEqual([created.original?.filename])
+    },
+  )
+
+  test.for([
+    ['a saved crop', { crop: savedCrop }, savedCrop, 300],
+    ['no saved transforms', null, null, 400],
+  ] as const)(
+    'should build a size from the original, with the size name, for an upload with %s',
+    async ([, _transforms, crop, height], { payload, restClient }) => {
+      const created = await createImage({ _transforms, payload })
+
+      const response = await restClient.GET(
+        `/${dynamicMediaSlug}/file/${created.variants?.card?.filename}`,
+      )
+
+      expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject({
+        height,
+        width: 400,
+      })
+      expect(requestCropCalls).toEqual([
+        { crop, purpose: 'persisted-default', variantName: 'card' },
+      ])
+    },
+  )
+
+  test('should write a size entry with no stored file when an upload bridge is planned but does not run', async ({
+    payload,
+  }) => {
+    const created = await createImage({ context: { isUploadBridgeEnabled: true }, payload })
+
+    expect(await readStoredFlag({ id: created.id, payload })).toBe(false)
+    expect(created.variants?.card).toMatchObject({ _stored: false, filename: 'photo-card.png' })
+  })
+
+  test('should write a size entry with no stored file when an upload bridge that does not own the size runs', async ({
+    payload,
+  }) => {
+    const created = await createImage({
+      _transforms: null,
+      context: { isUploadBridgeEnabled: true },
+      payload,
+    })
+
+    expect(created.variants?.card).toMatchObject({ _stored: false, filename: 'photo-card.png' })
+  })
+
+  test('should give a size a free name when another file already uses it', async ({ payload }) => {
+    await createImage({ name: 'photo-card.png', payload })
+
+    const created = await createImage({ payload })
+
+    expect(created.variants?.card?.filename).toBe('photo-card-1.png')
+  })
+
+  test('should name a size with no extension when the original has none', async ({ payload }) => {
+    const created = await createImage({ name: 'photo', payload })
+
+    expect(created.variants?.card?.filename).toBe('photo-card')
+  })
+
+  test('should rename a size with no stored file with the document', async ({ payload }) => {
+    const created = await createImage({ payload })
+
+    const renamed = await renameFileOperation({
+      id: created.id,
+      collection: payload.collections[dynamicMediaSlug],
+      filename: 'hero.png',
+      overrideAccess: true,
+      req: await createPayloadRequest({ payload }),
+    })
+
+    expect(renamed.variants?.card).toMatchObject({ _stored: false, filename: 'hero-card.png' })
+  })
+
+  test('should replace the size entries when a new file is uploaded', async ({ payload }) => {
+    const created = await createImage({ payload })
+    const bytes = await readFile(imageFixture)
+
+    const updated = await payload.update({
+      id: created.id,
+      collection: dynamicMediaSlug,
+      data: {},
+      file: { name: 'other.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+
+    expect(updated.variants?.card?.filename).toBe('other-card.png')
   })
 })

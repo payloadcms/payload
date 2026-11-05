@@ -99,10 +99,8 @@ export async function handleDynamicFileRequest({
   const requestedFile = getRequestedFile({ document, filename })
   // A request never saves the document, so every stage gets the same read-only snapshot.
   const documentSnapshot = deepFreeze(deepCopyObject(document))
-  // A default file built at request time has no object, so its stages start from the original.
-  const isBuiltAtRequest =
-    document._stored === false && requestedFile.filename === document.filename
-  const storedFile = isBuiltAtRequest
+  // A file built at request time has no object, so its stages start from the original.
+  const storedFile = requestedFile.isBuiltAtRequest
     ? { filename: document.original?.filename ?? filename, isOriginal: true }
     : { filename, isOriginal: false }
 
@@ -175,6 +173,7 @@ export async function handleDynamicFileRequest({
         options,
         originalDoc: documentSnapshot,
         req,
+        variantName: requestedFile.variantName,
       })
 
       if (result.response) {
@@ -271,7 +270,7 @@ type RequestStage = {
 }
 
 /**
- * Plans the saved-state phase, when no default file is stored, then the request phase. Fails
+ * Plans the saved-state phase, when the requested file is not stored, then the request phase. Fails
  * before any file is read when a saved key that must run has no saved-state stage, or two.
  */
 async function planRequestPipeline({
@@ -286,10 +285,10 @@ async function planRequestPipeline({
   req: PayloadRequest
 }): Promise<RequestStage[]> {
   const documentSnapshot = deepFreeze(deepCopyObject(document))
-  const purposes =
-    document._stored === false
-      ? (['persisted-default', 'request-override'] as const)
-      : (['request-override'] as const)
+  const requestedFile = getRequestedFile({ document, filename })
+  const purposes = requestedFile.isBuiltAtRequest
+    ? (['persisted-default', 'request-override'] as const)
+    : (['request-override'] as const)
   const pipeline: RequestStage[] = []
 
   for (const purpose of purposes) {
@@ -298,7 +297,7 @@ async function planRequestPipeline({
         collectionSlug: collection.config.slug,
         doc: documentSnapshot,
         documentID: document.id,
-        mimeType: getRequestedFile({ document, filename }).mimeType,
+        mimeType: requestedFile.mimeType,
         operation: 'request',
         originalDoc: documentSnapshot,
         purpose,

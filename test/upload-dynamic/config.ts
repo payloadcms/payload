@@ -8,7 +8,11 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { publicVersionedCloudAdapter } from '../plugin-cloud-storage/versionedCloudStorage.js'
 import { dynamicMediaDir, dynamicMediaSlug, publicCloudMediaSlug } from './shared.js'
-import { requestCropTransformer, uploadCropTransformer } from './transformers.js'
+import {
+  requestCropTransformer,
+  uploadBridgeTransformer,
+  uploadCropTransformer,
+} from './transformers.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -55,7 +59,7 @@ export default buildConfigWithDefaults({
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
     upload: {
-      transformers: [uploadCropTransformer, requestCropTransformer],
+      transformers: [uploadCropTransformer, uploadBridgeTransformer, requestCropTransformer],
     },
   },
   seed: async (payload) => {

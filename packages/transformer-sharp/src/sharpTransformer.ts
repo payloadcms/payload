@@ -92,7 +92,7 @@ export function sharpTransformer(
       assertDynamicCollectionsExist({ config, dynamicOptions })
       assertCollectionsOwnedOnce({ collections, config, transformer })
 
-      return initSharpCollections({ collections, config })
+      return initSharpCollections({ collections, config, transformerSlug: transformer.slug })
     },
     mimeTypes: DEFAULT_MIME_TYPES,
     [uploadTransformerInternal]: {

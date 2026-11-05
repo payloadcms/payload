@@ -80,6 +80,16 @@ describe('getFileContentRequirement', () => {
     ).toBe('full')
   })
 
+  it('requires only the header for an image whose variants are built on request', () => {
+    expect(
+      getFileContentRequirement({
+        hasVariantsBuiltOnRequest: true,
+        mimeType: 'image/png',
+        uploadConfig: createUploadConfig({ variants: [{ name: 'card' }] }),
+      }),
+    ).toBe('header')
+  })
+
   it('requires only the header for an image with an empty variants array', () => {
     expect(
       getFileContentRequirement({
