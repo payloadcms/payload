@@ -964,16 +964,6 @@ export interface Alias {
  */
 export interface BlocksDoc {
   id: string;
-  dateBlocksArray?:
-    | {
-        content?: ArrayDate[] | null;
-        id?: string | null;
-      }[]
-    | null;
-  dateBlocksGroup?: {
-    content?: GroupedDate[] | null;
-  };
-  compatibleDateBlocks?: (LondonDate | SecondDate)[] | null;
   testBlocksLocalized?: Cta[] | null;
   testBlocks?: Cta[] | null;
   createdBy?: {
@@ -989,55 +979,13 @@ export interface BlocksDoc {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ArrayDate".
- */
-export interface ArrayDate {
-  date?: string | null;
-  date_tz?: SupportedTimezones;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'arrayDate';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "GroupedDate".
- */
-export interface GroupedDate {
-  date?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'groupedDate';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "Cta".
  */
 export interface Cta {
   text?: string | null;
-  date?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'cta';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LondonDate".
- */
-export interface LondonDate {
-  date?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'londonDate';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SecondDate".
- */
-export interface SecondDate {
-  date?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'secondDate';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1819,56 +1767,6 @@ export interface AliasesSelect<T extends boolean = true> {
  * via the `definition` "blocks-docs_select".
  */
 export interface BlocksDocsSelect<T extends boolean = true> {
-  dateBlocksArray?:
-    | T
-    | {
-        content?:
-          | T
-          | {
-              arrayDate?:
-                | T
-                | {
-                    date?: T;
-                    date_tz?: T;
-                    id?: T;
-                    blockName?: T;
-                  };
-            };
-        id?: T;
-      };
-  dateBlocksGroup?:
-    | T
-    | {
-        content?:
-          | T
-          | {
-              groupedDate?:
-                | T
-                | {
-                    date?: T;
-                    id?: T;
-                    blockName?: T;
-                  };
-            };
-      };
-  compatibleDateBlocks?:
-    | T
-    | {
-        londonDate?:
-          | T
-          | {
-              date?: T;
-              id?: T;
-              blockName?: T;
-            };
-        secondDate?:
-          | T
-          | {
-              date?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
   testBlocksLocalized?:
     | T
     | {
@@ -1876,7 +1774,6 @@ export interface BlocksDocsSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
-              date?: T;
               id?: T;
               blockName?: T;
             };
@@ -1888,7 +1785,6 @@ export interface BlocksDocsSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
-              date?: T;
               id?: T;
               blockName?: T;
             };

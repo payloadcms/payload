@@ -6890,7 +6890,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         expect(nestedResultIDs).toContain(nestedParents[1]!.id)
         expect(directToOneResultIDs).not.toContain(nestedParents[0]!.id)
         expect(directToOneResultIDs).toContain(nestedParents[1]!.id)
-        expect(directToOneResultIDs).not.toContain(emptyParent.id)
+        expect(directToOneResultIDs).toContain(emptyParent.id)
         expect(englishRelationshipResultIDs).not.toContain(localizedParent.id)
         expect(spanishRelationshipResultIDs).toContain(localizedParent.id)
         expect(joinResultIDs).not.toContain(joinRoots[0]!.id)

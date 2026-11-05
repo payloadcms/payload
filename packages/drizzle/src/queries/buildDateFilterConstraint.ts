@@ -1,6 +1,10 @@
 import type { Column, SQL, Table } from 'drizzle-orm'
 import type { FlattenedField } from 'payload'
-import type { ResolvedDateFilterPlan, ResolvedDateFilterTarget } from 'payload/shared'
+import type {
+  DateOnlyComparison,
+  ResolvedDateFilterPlan,
+  ResolvedDateFilterTarget,
+} from 'payload/shared'
 
 import { aliasedTable, and, exists, notExists, or, sql } from 'drizzle-orm'
 import { APIError } from 'payload'
@@ -43,7 +47,7 @@ export const buildDateComparisonConstraint = ({
 const resolveDateComparisonConstraint = ({
   adapter,
   column,
-  isJoined = false,
+  isCorrelated = false,
   locale,
   path,
   plan,
@@ -51,16 +55,12 @@ const resolveDateComparisonConstraint = ({
 }: {
   adapter: DrizzleAdapter
   column: Column | SQL
-  isJoined?: boolean
+  isCorrelated?: boolean
   locale?: string
   path: string
   plan: ResolvedDateFilterPlan
   target: ResolvedDateFilterTarget
 }): { constraint: SQL; isNegated: boolean } | undefined => {
-  if (plan.input.kind !== 'calendarDay') {
-    return undefined
-  }
-
   const { context, replacement } = resolveOperatorConstraint({
     args: {
       adapter,
@@ -78,26 +78,30 @@ const resolveDateComparisonConstraint = ({
     return { constraint: replacement, isNegated: false }
   }
 
-  const isNegated = isJoined && plan.operator === 'not_equals'
+  const normalizedComparison =
+    context.value === plan.input.serialized
+      ? plan.comparison
+      : getDateOnlyComparison({
+          date: context.value,
+          operator: plan.operator,
+          timezone: plan.timezone,
+        })
 
-  const comparison = getDateOnlyComparison({
-    date: context.value,
-    operator: isNegated ? 'equals' : plan.operator,
-    timezone: plan.timezone,
-  })
-
-  if (!comparison) {
+  if (!normalizedComparison) {
     return {
       constraint: adapter.operators[plan.operator](context.column, context.value),
       isNegated: false,
     }
   }
 
+  const comparison = isCorrelated ? normalizedComparison.repeated : normalizedComparison
+  const isNegated = isCorrelated && normalizedComparison.repeated.quantifier === 'none'
+
   const constraints = comparison.constraints.map((constraint) =>
     adapter.operators[constraint.operator](context.column, constraint.value.toISOString()),
   )
 
-  if (!isNegated && comparison.includesNull) {
+  if (!isCorrelated && normalizedComparison.includesNull) {
     constraints.unshift(adapter.operators.isNull(context.column, null))
   }
 
@@ -146,7 +150,11 @@ export const buildDateFilterConstraint = ({
     }),
   )
 
-  return (plan.operator === 'not_equals' ? and(...targetConstraints) : or(...targetConstraints))!
+  return (
+    plan.comparison.targetCombination === 'and'
+      ? and(...targetConstraints)
+      : or(...targetConstraints)
+  )!
 }
 
 export const getDateOnlyJSONPaths = ({
@@ -213,7 +221,7 @@ const buildDateFilterTargetConstraint = ({
     selectLocale,
     tableName,
     target,
-    value: plan.input.kind === 'calendarDay' ? plan.input.serialized : undefined,
+    value: plan.input.serialized,
   })
   const column =
     targetPath.rawColumn ||
@@ -226,18 +234,16 @@ const buildDateFilterTargetConstraint = ({
 
   if (adapter.blocksAsJSON && targetPath.field.type === 'blocks') {
     const resolvedPathSegments = targetPath.pathSegments ?? target.lineage.map(({ name }) => name)
-    const isNegatedAcrossRepeatedAncestor =
-      plan.operator === 'not_equals' &&
-      hasRepeatedAncestorOutsideJSONColumn({ resolvedPathSegments, target })
-
-    const comparison = getDateOnlyJSONComparisonFromPlan({
-      operator: isNegatedAcrossRepeatedAncestor ? 'equals' : plan.operator,
-      plan,
+    const isRepeatedOutsideJSON = hasRepeatedAncestorOutsideJSONColumn({
+      resolvedPathSegments,
+      target,
     })
-
-    if (!comparison) {
-      throw new APIError(`Could not build the calendar-day comparison for "${path}".`)
-    }
+    const isNegatedAcrossRepeatedAncestor =
+      isRepeatedOutsideJSON && plan.comparison.repeated.quantifier === 'none'
+    const comparison = getDateOnlyJSONComparison({
+      comparison: plan.comparison,
+      isPositiveMatch: isNegatedAcrossRepeatedAncestor,
+    })
 
     const { pathSegments, repeatedPaths } = getDateOnlyJSONPaths({
       pathSegments: resolvedPathSegments,
@@ -283,7 +289,7 @@ const buildDateFilterTargetConstraint = ({
   const resolvedDateConstraint = resolveDateComparisonConstraint({
     adapter,
     column,
-    isJoined: target.lineage.some(({ isRepeated }) => isRepeated),
+    isCorrelated: targetJoins.length > 0,
     locale: plan.requestLocale,
     path,
     plan,
@@ -343,39 +349,30 @@ const buildJoinedDateOnlySubquery = ({
   return isNegated ? notExists(matchingRows) : exists(matchingRows)
 }
 
-const getDateOnlyJSONComparisonFromPlan = ({
-  operator,
-  plan,
+const getDateOnlyJSONComparison = ({
+  comparison,
+  isPositiveMatch,
 }: {
-  operator: ResolvedDateFilterPlan['operator']
-  plan: ResolvedDateFilterPlan
-}): { operator: string; value: string | string[] } | undefined => {
-  if (plan.input.kind !== 'calendarDay') {
-    return undefined
-  }
+  comparison: DateOnlyComparison
+  isPositiveMatch: boolean
+}): { operator: string; value: string | string[] } => {
+  const repeated = comparison.repeated
 
-  const comparison = getDateOnlyComparison({
-    date: plan.input.serialized,
-    operator,
-    timezone: plan.timezone,
-  })
-
-  if (!comparison) {
-    return undefined
-  }
-
-  if (operator === 'equals' || operator === 'not_equals') {
+  if (repeated.constraints.length === 2) {
     return {
-      operator: operator === 'equals' ? 'date_equals' : 'date_not_equals',
-      value: comparison.constraints.map(({ value }) => value.toISOString()),
+      operator:
+        isPositiveMatch || repeated.quantifier === 'some' ? 'date_equals' : 'date_not_equals',
+      value: repeated.constraints.map(({ value }) => value.toISOString()),
     }
   }
 
-  const [constraint] = comparison.constraints
+  const [constraint] = repeated.constraints
 
-  return constraint
-    ? { operator: `date_${constraint.operator}`, value: constraint.value.toISOString() }
-    : undefined
+  if (!constraint) {
+    throw new APIError('Could not build the calendar-day JSON comparison.')
+  }
+
+  return { operator: `date_${constraint.operator}`, value: constraint.value.toISOString() }
 }
 
 const hasRepeatedAncestorOutsideJSONColumn = ({

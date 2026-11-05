@@ -3,16 +3,21 @@ import type { DateOnlyValue } from './dateOnlyFilter.js'
 
 import { getDateOnlyValue, isDateOnlyFilter, isValidDateFilterValue } from './dateOnlyFilter.js'
 
-type DateOnlyConstraint = {
+export type DateOnlyConstraint = {
   operator: 'greater_than_equal' | 'less_than'
   value: Date
 }
 
-export type DateOnlyComparison = {
+type DateOnlyConstraintGroup = {
   combination: 'and' | 'or'
   constraints: DateOnlyConstraint[]
-  includesNull?: true
 }
+
+export type DateOnlyComparison = {
+  includesNull?: true
+  repeated: { quantifier: 'none' | 'some' } & DateOnlyConstraintGroup
+  targetCombination: 'and' | 'or'
+} & DateOnlyConstraintGroup
 
 const fixedOffsetPattern = /^([+-])(\d{2}):(\d{2})$/
 
@@ -58,24 +63,38 @@ export const getDateOnlyComparison = ({
   const atOrAfterNextDay = { operator: 'greater_than_equal', value: startOfNextDay } as const
   const beforeStart = { operator: 'less_than', value: startOfDay } as const
   const beforeNextDay = { operator: 'less_than', value: startOfNextDay } as const
+  const dayRange: DateOnlyConstraintGroup = {
+    combination: 'and',
+    constraints: [atOrAfterStart, beforeNextDay],
+  }
+  const withLogicalSemantics = (
+    comparison: { includesNull?: true } & DateOnlyConstraintGroup,
+  ): DateOnlyComparison => ({
+    ...comparison,
+    repeated:
+      operator === 'not_equals'
+        ? { ...dayRange, quantifier: 'none' }
+        : { ...comparison, quantifier: 'some' },
+    targetCombination: operator === 'not_equals' ? 'and' : 'or',
+  })
 
   switch (operator) {
     case 'equals':
-      return { combination: 'and', constraints: [atOrAfterStart, beforeNextDay] }
+      return withLogicalSemantics(dayRange)
     case 'greater_than':
-      return { combination: 'and', constraints: [atOrAfterNextDay] }
+      return withLogicalSemantics({ combination: 'and', constraints: [atOrAfterNextDay] })
     case 'greater_than_equal':
-      return { combination: 'and', constraints: [atOrAfterStart] }
+      return withLogicalSemantics({ combination: 'and', constraints: [atOrAfterStart] })
     case 'less_than':
-      return { combination: 'and', constraints: [beforeStart] }
+      return withLogicalSemantics({ combination: 'and', constraints: [beforeStart] })
     case 'less_than_equal':
-      return { combination: 'and', constraints: [beforeNextDay] }
+      return withLogicalSemantics({ combination: 'and', constraints: [beforeNextDay] })
     case 'not_equals':
-      return {
+      return withLogicalSemantics({
         combination: 'or',
         constraints: [beforeStart, atOrAfterNextDay],
         includesNull: true,
-      }
+      })
   }
 }
 

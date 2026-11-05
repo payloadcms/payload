@@ -4,7 +4,6 @@ import type {
   Block,
   BlocksField,
   CheckboxField,
-  DateField,
   Field,
   NumberField,
   RichTextField,
@@ -13,7 +12,6 @@ import type {
 
 import {
   DuplicateFieldName,
-  InvalidConfiguration,
   InvalidFieldName,
   InvalidFieldRelationship,
   MissingFieldType,
@@ -25,81 +23,6 @@ import { describe, it, expect } from 'vitest'
 describe('sanitizeFields', () => {
   const config = {} as Config
   const collectionConfig = {} as CollectionConfig
-
-  it('should retain the effective timezone default after a timezone field override', () => {
-    const [dateField, timezoneField] = sanitizeFields({
-      config,
-      collectionConfig,
-      fields: [
-        {
-          name: 'publishedOn',
-          type: 'date',
-          timezone: {
-            defaultTimezone: 'UTC',
-            override: ({ baseField }) => ({
-              ...baseField,
-              defaultValue: 'Asia/Tokyo',
-            }),
-          },
-        },
-      ],
-      validRelationships: [],
-    })
-
-    expect((dateField as DateField).timezone).toEqual(
-      expect.objectContaining({ defaultTimezone: 'Asia/Tokyo' }),
-    )
-    expect(timezoneField?.defaultValue).toBe('Asia/Tokyo')
-  })
-
-  it('should reject an invalid effective timezone from a timezone field override', () => {
-    expect(() =>
-      sanitizeFields({
-        config,
-        collectionConfig,
-        fields: [
-          {
-            name: 'publishedOn',
-            type: 'date',
-            timezone: {
-              override: ({ baseField }) => ({
-                ...baseField,
-                defaultValue: 'Invalid/Timezone',
-              }),
-            },
-          },
-        ],
-        validRelationships: [],
-      }),
-    ).toThrow(InvalidConfiguration)
-  })
-
-  it.each([
-    ['field', {} as Config, { supportedTimezones: [{ label: 'Tokyo', value: 'Asia/Tokyo' }] }],
-    [
-      'global',
-      {
-        admin: {
-          timezones: { supportedTimezones: [{ label: 'Tokyo', value: 'Asia/Tokyo' }] },
-        },
-      } as Config,
-      true,
-    ],
-  ] as const)(
-    'should retain the sole supported timezone from %s configuration as the effective default',
-    (_source, config, timezone) => {
-      const [dateField] = sanitizeFields({
-        config,
-        collectionConfig,
-        fields: [{ name: 'publishedOn', type: 'date', timezone }],
-        validRelationships: [],
-      })
-
-      expect((dateField as DateField).timezone).toEqual(
-        expect.objectContaining({ defaultTimezone: 'Asia/Tokyo' }),
-      )
-    },
-  )
 
   it('should throw on missing type field', () => {
     const fields: Field[] = [

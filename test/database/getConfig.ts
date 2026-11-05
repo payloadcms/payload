@@ -1036,76 +1036,6 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'blocks-docs',
       fields: [
         {
-          name: 'dateBlocksArray',
-          type: 'array',
-          fields: [
-            {
-              name: 'content',
-              type: 'blocks',
-              blocks: [
-                {
-                  slug: 'arrayDate',
-                  fields: [
-                    {
-                      name: 'date',
-                      timezone: { defaultTimezone: 'America/Chicago' },
-                      type: 'date',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          name: 'dateBlocksGroup',
-          type: 'group',
-          fields: [
-            {
-              name: 'content',
-              type: 'blocks',
-              blocks: [
-                {
-                  slug: 'groupedDate',
-                  fields: [
-                    {
-                      name: 'date',
-                      timezone: { defaultTimezone: 'America/Chicago' },
-                      type: 'date',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          name: 'compatibleDateBlocks',
-          type: 'blocks',
-          blocks: [
-            {
-              slug: 'londonDate',
-              fields: [
-                {
-                  name: 'date',
-                  timezone: { defaultTimezone: 'Europe/London' },
-                  type: 'date',
-                },
-              ],
-            },
-            {
-              slug: 'secondDate',
-              fields: [
-                {
-                  name: 'date',
-                  timezone: { defaultTimezone: 'Europe/London' },
-                  type: 'date',
-                },
-              ],
-            },
-          ],
-        },
-        {
           name: 'testBlocksLocalized',
           type: 'blocks',
           blocks: [
@@ -1115,11 +1045,6 @@ export const getConfig: () => Partial<Config> = () => ({
                 {
                   name: 'text',
                   type: 'text',
-                },
-                {
-                  name: 'date',
-                  timezone: { defaultTimezone: 'America/Chicago' },
-                  type: 'date',
                 },
               ],
             },
@@ -1136,11 +1061,6 @@ export const getConfig: () => Partial<Config> = () => ({
                 {
                   name: 'text',
                   type: 'text',
-                },
-                {
-                  name: 'date',
-                  timezone: { defaultTimezone: 'America/Chicago' },
-                  type: 'date',
                 },
               ],
             },

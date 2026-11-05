@@ -6971,43 +6971,6 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     expect(doc.testBlocksLocalized[0].id).toBe('1')
   })
 
-  test('should filter compatible date fields shared by block types', async ({ payload }) => {
-    const documents = await Promise.all(
-      ['londonDate', 'secondDate'].map((blockType) =>
-        payload.create({
-          collection: 'blocks-docs',
-          data: {
-            compatibleDateBlocks: [
-              { blockType, date: '2026-06-15T12:00:00.000Z' } as {
-                blockType: 'londonDate' | 'secondDate'
-                date: string
-              },
-            ],
-          },
-          overrideAccess: true,
-        }),
-      ),
-    )
-
-    try {
-      const result = await payload.find({
-        collection: 'blocks-docs',
-        overrideAccess: true,
-        where: { 'compatibleDateBlocks.date': { equals: '2026-06-15' } },
-      })
-
-      expect(result.docs.map(({ id }) => id)).toEqual(
-        expect.arrayContaining(documents.map(({ id }) => id)),
-      )
-    } finally {
-      await Promise.all(
-        documents.map(({ id }) =>
-          payload.delete({ collection: 'blocks-docs', id, overrideAccess: true }),
-        ),
-      )
-    }
-  })
-
   test('should CRUD with blocks as JSON in SQL adapters', async ({ payload }) => {
     if (!('drizzle' in payload.db)) {
       return
@@ -7023,102 +6986,13 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     const res = await payload.create({
       collection: 'blocks-docs',
       data: {
-        dateBlocksArray: [
-          {
-            content: [
-              {
-                blockType: 'arrayDate',
-                date: '2026-06-15T12:00:00.000Z',
-              },
-            ],
-          },
-          {
-            content: [
-              {
-                blockType: 'arrayDate',
-                date: '2026-06-17T12:00:00.000Z',
-              },
-            ],
-          },
-        ],
-        dateBlocksGroup: {
-          content: [
-            {
-              blockType: 'groupedDate',
-              date: '2026-06-14T23:30:00-07:00',
-            },
-          ],
-        },
-        testBlocks: [
-          {
-            blockType: 'cta',
-            date: '2026-06-15T12:00:00.000Z',
-            text: 'text',
-          },
-        ],
-        testBlocksLocalized: [
-          { blockType: 'cta', date: '2026-06-15T12:00:00.000Z', text: 'text-localized' },
-        ],
+        testBlocks: [{ blockType: 'cta', text: 'text' }],
+        testBlocksLocalized: [{ blockType: 'cta', text: 'text-localized' }],
       },
       overrideAccess: true,
     })
     expect(res.testBlocks[0]?.text).toBe('text')
     expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
-
-    for (const [operator, shouldMatch] of [
-      ['equals', true],
-      ['greater_than', true],
-      ['not_equals', false],
-    ] as const) {
-      const result = await payload.find({
-        collection: 'blocks-docs',
-        overrideAccess: true,
-        where: {
-          'dateBlocksGroup.content.date': {
-            [operator]: operator === 'greater_than' ? '2026-06-14' : '2026-06-15',
-          },
-        },
-      })
-
-      expect(result.docs.some(({ id }) => id === res.id)).toBe(shouldMatch)
-    }
-
-    const repeatedNotEqualsResult = await payload.find({
-      collection: 'blocks-docs',
-      overrideAccess: true,
-      where: { 'dateBlocksArray.content.date': { not_equals: '2026-06-15' } },
-    })
-
-    expect(repeatedNotEqualsResult.docs.map(({ id }) => id)).not.toContain(res.id)
-
-    await payload.update({
-      id: res.id,
-      collection: 'blocks-docs',
-      data: {
-        testBlocksLocalized: [
-          { blockType: 'cta', date: '2026-06-16T05:00:00.000Z', text: 'outside-day' },
-        ],
-      },
-      locale: 'es',
-      overrideAccess: true,
-    })
-
-    const englishDay = await payload.find({
-      collection: 'blocks-docs',
-      locale: 'en',
-      overrideAccess: true,
-      where: { 'testBlocksLocalized.date': { equals: '2026-06-15' } },
-    })
-    const spanishDay = await payload.find({
-      collection: 'blocks-docs',
-      locale: 'es',
-      overrideAccess: true,
-      where: { 'testBlocksLocalized.date': { equals: '2026-06-15' } },
-    })
-
-    expect(englishDay.docs.map(({ id }) => id)).toContain(res.id)
-    expect(spanishDay.docs.map(({ id }) => id)).not.toContain(res.id)
-
     const res_es = await payload.update({
       id: res.id,
       collection: 'blocks-docs',

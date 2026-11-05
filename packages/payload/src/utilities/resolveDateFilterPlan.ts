@@ -2,10 +2,12 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { DateField, FlattenedField } from '../fields/config/types.js'
 import type { Operator } from '../types/index.js'
 import type { DateFilterInput } from './dateOnlyFilter.js'
+import type { DateOnlyComparison } from './getDateOnlyComparison.js'
 
 import { APIError } from '../errors/APIError.js'
 import { fieldShouldBeLocalized } from '../fields/config/types.js'
 import { classifyDateFilterInput, isDateOnlyPickerAppearance } from './dateOnlyFilter.js'
+import { getDateOnlyComparison } from './getDateOnlyComparison.js'
 
 export type ResolvedDatePathSegment = {
   blockSlug?: string
@@ -23,7 +25,8 @@ export type ResolvedDateFilterTarget = {
 }
 
 export type ResolvedDateFilterPlan = {
-  input: DateFilterInput
+  comparison: DateOnlyComparison
+  input: Extract<DateFilterInput, { kind: 'calendarDay' }>
   operator: Operator
   pickerAppearance?: string
   requestLocale?: string
@@ -114,7 +117,18 @@ export const resolveDateFilterPlan = ({
     )
   }
 
+  const comparison = getDateOnlyComparison({
+    date: input.serialized,
+    operator,
+    timezone: firstConfiguration.timezone,
+  })
+
+  if (!comparison) {
+    return undefined
+  }
+
   return {
+    comparison,
     input,
     operator,
     pickerAppearance: firstConfiguration.pickerAppearance,
