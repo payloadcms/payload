@@ -14,7 +14,10 @@ export const bin = async () => {
   const script = (typeof args._[0] === 'string' ? args._[0] : '').toLowerCase()
 
   if (script === 'generate:schema') {
-    return generateSchema(config)
+    const sortSchemaArg = args['sort-schema'] ?? args.sort
+    const shouldSortSchema = sortSchemaArg === true || sortSchemaArg === 'true'
+
+    return generateSchema(config, { sortSchema: shouldSortSchema })
   }
 
   console.log(`Unknown script: "${script}".`)
