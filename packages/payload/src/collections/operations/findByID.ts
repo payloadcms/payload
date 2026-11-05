@@ -129,6 +129,10 @@ export const findByIDOperation = async <
     (typeof id === 'string' && id.length > 0) || (typeof id === 'number' && Number.isFinite(id))
 
   if (!isValidID) {
+    if (disableErrors) {
+      return null!
+    }
+
     throw new NotFound(t)
   }
 
