@@ -221,6 +221,39 @@ describe('getCachedFormStateIfDataMatches', () => {
     expect(getCachedFormStateIfDataMatches({ cachedFormState, formData: {} })).toBe(cachedFormState)
   })
 
+  it('should reuse cached form state when group sub-field values match the current block data', () => {
+    const cachedFormState: FormState = {
+      id: { initialValue: 'block-1', value: 'block-1' },
+      label: { initialValue: 'Read more', value: 'Read more' },
+      'link.type': { initialValue: 'url', value: 'url' },
+      'link.url': { initialValue: '/about', value: '/about' },
+      'settings.visibility': { initialValue: 'visible', value: 'visible' },
+    }
+    const formData: Data = {
+      blockType: 'button',
+      id: 'block-1',
+      label: 'Read more',
+      link: { type: 'url', url: '/about' },
+      settings: { visibility: 'visible' },
+    }
+
+    expect(getCachedFormStateIfDataMatches({ cachedFormState, formData })).toBe(cachedFormState)
+  })
+
+  it('should rebuild form state when a group sub-field value changed', () => {
+    const cachedFormState: FormState = {
+      'link.type': { initialValue: 'url', value: 'url' },
+      'link.url': { initialValue: '/about', value: '/about' },
+    }
+
+    expect(
+      getCachedFormStateIfDataMatches({
+        cachedFormState,
+        formData: { link: { type: 'url', url: '/contact' } },
+      }),
+    ).toBe(false)
+  })
+
   it('should omit empty row counts and unset values when converting form state to block data', () => {
     expect(
       reduceFormStateToBlockData({
