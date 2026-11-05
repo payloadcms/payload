@@ -56,7 +56,10 @@ describe('static handler document locations', () => {
 
     expect(response.status).toBe(200)
     expect(await response.text()).toBe('file')
-    expect(head).toHaveBeenCalledWith(`https://example.com/legacy/original.png`, { token: 'token' })
+    expect(head).toHaveBeenCalledWith(`https://example.com/legacy/original.png`, {
+      storeId: undefined,
+      token: 'token',
+    })
     expect(fetchMock).toHaveBeenCalledWith(
       `https://example.com/legacy/original.png?2026-01-01T00:00:00.000Z`,
       expect.any(Object),

@@ -20,7 +20,16 @@ interface GetFileArgs {
   filename: string
   incomingHeaders?: Headers
   req: PayloadRequest
-  token: string
+  /**
+   * Store ID for OIDC authentication. When no `token` is provided, @vercel/blob
+   * resolves OIDC credentials from the environment and uses this store ID.
+   */
+  storeId?: string
+  /**
+   * Read/write token. When undefined, @vercel/blob resolves OIDC credentials
+   * from the environment instead.
+   */
+  token?: string
   useCompositePrefixes?: boolean
 }
 
@@ -34,6 +43,7 @@ export async function getFile({
   filename,
   incomingHeaders,
   req,
+  storeId,
   token,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
@@ -56,7 +66,7 @@ export async function getFile({
       useCompositePrefixes,
     })
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
-    const blobMetadata = await head(fileUrl, { token })
+    const blobMetadata = await head(fileUrl, { storeId, token })
     const { contentDisposition, contentType, size, uploadedAt } = blobMetadata
     const uploadedAtString = uploadedAt.toISOString()
     const fileKeyForETag = fileUrl.replace(`${baseUrl}/`, '')

@@ -17,7 +17,16 @@ interface CreateVercelBlobAdapterArgs {
   baseUrl: string
   cacheControlMaxAge: number
   clientUploads?: ClientUploadsConfig
-  token: string
+  /**
+   * Store ID used for OIDC authentication. Passed to @vercel/blob so it can
+   * target the right store when authenticating via OIDC (no read/write token).
+   */
+  storeId?: string
+  /**
+   * Read/write token. When undefined, @vercel/blob resolves OIDC credentials
+   * from the environment instead.
+   */
+  token?: string
   useCompositePrefixes?: boolean
 }
 
@@ -27,6 +36,7 @@ export function createVercelBlobAdapter({
   baseUrl,
   cacheControlMaxAge,
   clientUploads,
+  storeId,
   token,
   useCompositePrefixes = false,
 }: CreateVercelBlobAdapterArgs): Adapter {
@@ -48,6 +58,7 @@ export function createVercelBlobAdapter({
       deleteFile({
         baseUrl,
         storageFilePath,
+        storeId,
         token,
       }),
 
@@ -68,6 +79,7 @@ export function createVercelBlobAdapter({
         cacheControlMaxAge,
         mimeType,
         storageFilePath,
+        storeId,
         tempFilePath,
         token,
       })
@@ -94,6 +106,7 @@ export function createVercelBlobAdapter({
         filename,
         incomingHeaders: headers,
         req,
+        storeId,
         token,
         useCompositePrefixes,
       }),
