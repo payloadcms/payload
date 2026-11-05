@@ -414,6 +414,125 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
     })
   })
 
+  test.describe('localization', () => {
+    const createdDocs: { collection: 'categories' | 'pages'; id: number | string }[] = []
+
+    test.afterEach(async ({ payload }) => {
+      for (const { id, collection } of [...createdDocs].reverse()) {
+        await payload.delete({ id, collection, overrideAccess: true })
+      }
+      createdDocs.length = 0
+    })
+
+    // #16054: a child with no breadcrumbs in a locale used to be re-saved with the fallback
+    // locale's rows, row ids included, which clashed with that locale's own rows
+    test('should save a parent in a locale its children have no breadcrumbs in yet', async ({
+      payload,
+    }) => {
+      const parentDoc = await payload.create({
+        collection: 'pages',
+        data: { slug: 'locale-parent', _status: 'published', title: 'Locale Parent' },
+        overrideAccess: true,
+      })
+      createdDocs.push({ id: parentDoc.id, collection: 'pages' })
+
+      const childDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          slug: 'locale-child',
+          _status: 'published',
+          parent: parentDoc.id,
+          title: 'Locale Child',
+        },
+        overrideAccess: true,
+      })
+      createdDocs.push({ id: childDoc.id, collection: 'pages' })
+
+      await expect(
+        payload.update({
+          id: parentDoc.id,
+          collection: 'pages',
+          data: { _status: 'published' },
+          locale: 'de',
+          overrideAccess: true,
+        }),
+      ).resolves.toBeTruthy()
+
+      const childEn = await payload.findByID({
+        id: childDoc.id,
+        collection: 'pages',
+        locale: 'en',
+        overrideAccess: true,
+      })
+      // The child was never published in `de` (status is per locale), so its `de`
+      // breadcrumbs are in its draft
+      const childDe = await payload.findByID({
+        id: childDoc.id,
+        collection: 'pages',
+        draft: true,
+        fallbackLocale: false,
+        locale: 'de',
+        overrideAccess: true,
+      })
+
+      expect(childDe.breadcrumbs?.map(({ url }) => url)).toStrictEqual([
+        '/locale-parent',
+        '/locale-parent/locale-child',
+      ])
+      expect(childEn.breadcrumbs?.map(({ url }) => url)).toStrictEqual([
+        '/locale-parent',
+        '/locale-parent/locale-child',
+      ])
+
+      // Each locale keeps rows of its own
+      const enIDs = childEn.breadcrumbs?.map(({ id }) => id)
+      for (const { id } of childDe.breadcrumbs ?? []) {
+        expect(enIDs).not.toContain(id)
+      }
+    })
+
+    // Without drafts, each child is validated in the locale being saved, and an invalid child
+    // fails the parent save (#7977). The locale fallback used to hide a required value missing
+    // in that locale by copying another locale's value into it.
+    test('should not copy fallback values into a child that is invalid in that locale', async ({
+      payload,
+    }) => {
+      const parentDoc = await payload.create({
+        collection: 'categories',
+        data: { name: 'locale-parent' },
+        overrideAccess: true,
+      })
+      createdDocs.push({ id: parentDoc.id, collection: 'categories' })
+
+      const childDoc = await payload.create({
+        collection: 'categories',
+        data: { name: 'locale-child', owner: parentDoc.id },
+        overrideAccess: true,
+      })
+      createdDocs.push({ id: childDoc.id, collection: 'categories' })
+
+      await expect(
+        payload.update({
+          id: parentDoc.id,
+          collection: 'categories',
+          data: { name: 'locale-parent-de' },
+          locale: 'de',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('One or more children are invalid')
+
+      const childDe = await payload.findByID({
+        id: childDoc.id,
+        collection: 'categories',
+        fallbackLocale: false,
+        locale: 'de',
+        overrideAccess: true,
+      })
+
+      expect(childDe.name ?? null).toBeNull()
+    })
+  })
+
   test.describe('scheduled publish', () => {
     test('should allow scheduled publish on a collection with a nested-docs breadcrumbs field', async ({
       payload,
