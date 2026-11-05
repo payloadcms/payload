@@ -1,17 +1,12 @@
 {
   "name": "@payloadcms/plugin-mcp",
-  "version": "3.79.0",
+  "version": "4.0.0-beta.7",
   "description": "MCP (Model Context Protocol) capabilities with Payload",
   "keywords": [
-    "plugin",
     "mcp",
-    "model context protocol"
+    "model context protocol",
+    "plugin"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-mcp"
-  },
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "maintainers": [
@@ -21,56 +16,91 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-mcp"
+  },
+  "bin": {
+    "payload-mcp": "./bin.js"
+  },
+  "files": [
+    "src",
+    "dist",
+    "bin.js"
+  ],
   "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
+    },
+    "./stdio": {
+      "import": "./src/stdio.ts",
+      "types": "./src/stdio.ts",
+      "default": "./src/stdio.ts"
+    },
+    "./internal": {
+      "import": "./src/exports/internal.ts",
+      "types": "./src/exports/internal.ts",
+      "default": "./src/exports/internal.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "src",
-    "dist"
-  ],
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
+      },
+      "./stdio": {
+        "import": "./dist/stdio.js",
+        "types": "./dist/stdio.d.ts",
+        "default": "./dist/stdio.js"
+      },
+      "./internal": {
+        "import": "./dist/exports/internal.js",
+        "types": "./dist/exports/internal.d.ts",
+        "default": "./dist/exports/internal.js"
+      }
+    }
+  },
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
     "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "pack:plugin": "pnpm build && pnpm pack"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.25.2",
-    "@types/json-schema": "7.0.15",
-    "json-schema-to-zod": "2.6.1",
-    "mcp-handler": "^1.0.7",
-    "zod": "^3.25.50"
+    "@modelcontextprotocol/server": "2.4.0",
+    "tsx": "4.23.15"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*"
   },
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+  "//deps_notes": {
+    "tsx": "Required by the `bin.js` stdio mcp. Keep the version pinned to whatever `payload` ships to avoid duplicate installs."
   },
   "homepage:": "https://payloadcms.com"
 }

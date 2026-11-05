@@ -1,19 +1,24 @@
-import { status as httpStatus } from 'http-status'
-
-import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
-import type { AuthCollectionSlug, TypedUser } from '../../index.js'
+import type {
+  Collection,
+  DataFromCollectionSlug,
+  SanitizedCollectionConfig,
+} from '../../collections/config/types.js'
+import type { Validate } from '../../fields/config/types.js'
+import type { AuthCollectionSlug, AuthenticatedUser } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
-import { APIError, Forbidden } from '../../errors/index.js'
+import { APIError, Forbidden, ValidationError } from '../../errors/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { getFieldsToSign } from '../getFieldsToSign.js'
-import { jwtSign } from '../jwt.js'
-import { addSessionToUser, revokeSession } from '../sessions.js'
+import { applyUserReadAccess } from '../applyUserReadAccess.js'
+import { createAuthToken } from '../createAuthToken.js'
+import { revokeSession } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
 
@@ -40,13 +45,12 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     collection: { config: collectionConfig },
     data,
     depth,
-    overrideAccess,
-    req: {
-      payload: { secret },
-      payload,
-    },
+    overrideAccess = false,
+    req: { payload },
     req,
   } = args
+
+  assertNoValidationWrite(req)
 
   if (
     !Object.prototype.hasOwnProperty.call(data, 'token') ||
@@ -60,7 +64,7 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
   }
 
   let sid: string | undefined
-  let user: null | TypedUser = null
+  let sessionUser: AuthenticatedUser | null = null
 
   try {
     const shouldCommit = await initTransaction(req)
@@ -85,7 +89,7 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       },
     })
 
-    user = await payload.db.findOne<TypedUser>({
+    let user = await payload.db.findOne<AuthenticatedUser>({
       collection: collectionConfig.slug,
       req,
       where,
@@ -94,6 +98,14 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     if (!user) {
       throw new APIError('Token is either invalid or has expired.', httpStatus.FORBIDDEN)
     }
+
+    await validatePasswordField({
+      collectionConfig,
+      overrideAccess,
+      password: data.password,
+      req,
+      user,
+    })
 
     // TODO: replace this method
     const { hash, salt } = await generatePasswordSaltHash({
@@ -106,6 +118,11 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     user.hash = hash
 
     user.resetPasswordExpiration = new Date().toISOString()
+
+    if (collectionConfig.auth.maxLoginAttempts > 0) {
+      user.lockUntil = null
+      user.loginAttempts = 0
+    }
 
     if (collectionConfig.auth.verify) {
       user._verified = Boolean(user._verified)
@@ -134,6 +151,10 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     // Ensure updatedAt date is always updated
     user.updatedAt = new Date().toISOString()
 
+    if (collectionConfig.auth.useSessions) {
+      user.sessions = []
+    }
+
     const doc = await payload.db.updateOne({
       id: user.id,
       collection: collectionConfig.slug,
@@ -141,53 +162,43 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       req,
     })
 
-    await authenticateLocalStrategy({ doc, password: data.password })
+    await authenticateLocalStrategy({
+      doc,
+      password: data.password,
+      passwordHashIterations: payload.config.auth.passwordHashIterations,
+    })
 
-    const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
+    user = doc as AuthenticatedUser
+    user.collection = collectionConfig.slug
+    user._strategy = 'local-jwt'
+
+    const { token, ...session } = await createAuthToken({
       collectionConfig,
       email: user.email!,
-      user,
-    }
-
-    const session = await addSessionToUser({
-      collectionConfig,
-      payload,
       req,
       user,
     })
+
+    sessionUser = user
     sid = session.sid
-
-    if (sid) {
-      fieldsToSignArgs.sid = sid
-    }
-
-    const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
 
     // /////////////////////////////////////
     // beforeLogin - Collection
     // /////////////////////////////////////
 
-    let userBeforeLogin = user
-
     if (collectionConfig.hooks?.beforeLogin?.length) {
       for (const hook of collectionConfig.hooks.beforeLogin) {
-        userBeforeLogin =
+        user =
           (await hook({
             collection: args.collection?.config,
             context: args.req.context,
             req: args.req,
-            user: userBeforeLogin,
-          })) || userBeforeLogin
+            user,
+          })) || user
       }
     }
 
-    const { token } = await jwtSign({
-      fieldsToSign,
-      secret,
-      tokenExpiration: collectionConfig.auth.tokenExpiration,
-    })
-
-    req.user = userBeforeLogin
+    req.user = user
 
     // /////////////////////////////////////
     // afterLogin - Collection
@@ -195,38 +206,36 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
 
     if (collectionConfig.hooks?.afterLogin?.length) {
       for (const hook of collectionConfig.hooks.afterLogin) {
-        userBeforeLogin =
+        user =
           (await hook({
             collection: args.collection?.config,
             context: args.req.context,
             req: args.req,
             token,
-            user: userBeforeLogin,
-          })) || userBeforeLogin
+            user,
+          })) || user
       }
     }
 
-    const fullUser = await payload.findByID({
-      id: user.id,
-      collection: collectionConfig.slug,
-      depth,
+    user!.collection = collectionConfig.slug
+    user!._strategy = 'local-jwt'
+
+    const userWithReadAccess = await applyUserReadAccess({
+      collection: collectionConfig,
+      depth: depth!,
       overrideAccess,
       req,
-      trash: false,
+      showHiddenFields: false,
+      user: user!,
     })
 
     if (shouldCommit) {
       await commitTransaction(req)
     }
 
-    if (fullUser) {
-      fullUser.collection = collectionConfig.slug
-      fullUser._strategy = 'local-jwt'
-    }
-
     let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
       token,
-      user: fullUser,
+      user: userWithReadAccess,
     }
 
     // /////////////////////////////////////
@@ -243,16 +252,66 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
 
     return result
   } catch (error: unknown) {
+    // Logging in with the new password failed, e.g. in a `beforeLogin` hook, so remove the session
+    // it started
     if (sid) {
       await revokeSession({
         collectionConfig,
         payload,
         req,
         sid,
-        user,
+        user: sessionUser,
       })
     }
     await killTransaction(req)
     throw error
+  }
+}
+
+/**
+ * Runs the `password` field override's validation, which `payload.db.updateOne` skips.
+ */
+async function validatePasswordField({
+  collectionConfig,
+  overrideAccess,
+  password,
+  req,
+  user,
+}: {
+  collectionConfig: SanitizedCollectionConfig
+  overrideAccess: boolean
+  password: string
+  req: PayloadRequest
+  user: AuthenticatedUser
+}): Promise<void> {
+  const passwordField = collectionConfig.flattenedFields.find((field) => field.name === 'password')
+
+  if (!passwordField || !('validate' in passwordField) || !passwordField.validate) {
+    return
+  }
+
+  const validate = passwordField.validate as Validate<string>
+  const dataToValidate = { ...user, password }
+
+  const validationResult = await validate(password, {
+    ...passwordField,
+    id: user.id,
+    blockData: {},
+    collectionSlug: collectionConfig.slug,
+    data: dataToValidate,
+    event: 'submit',
+    operation: 'update',
+    overrideAccess,
+    path: ['password'],
+    preferences: { fields: {} },
+    req,
+    siblingData: dataToValidate,
+  })
+
+  if (typeof validationResult === 'string') {
+    throw new ValidationError({
+      collection: collectionConfig.slug,
+      errors: [{ message: validationResult, path: 'password' }],
+    })
   }
 }

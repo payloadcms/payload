@@ -4,20 +4,21 @@ import type {
   Payload,
   RequestContext,
   TypedLocale,
+  User,
 } from '../../../index.js'
 import type {
-  Document,
   PayloadRequest,
   PopulateType,
   SelectType,
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type { BulkOperationResult, SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { deleteOperation } from '../delete.js'
 import { deleteByIDOperation } from '../deleteByID.js'
 
@@ -51,12 +52,6 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   locale?: TypedLocale
   /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
-   */
-  overrideAccess?: boolean
-  /**
    * By default, document locks are ignored (`true`). Set to `false` to enforce locks and prevent operations when a document is locked by another user. [More details](https://payloadcms.com/docs/admin/locked-documents).
    * @default true
    */
@@ -83,12 +78,12 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * @default false
    */
   trash?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
-} & Pick<FindOptions<TSlug, TSelect>, 'select'>
+  user?: null | User
+} & Pick<FindOptions<TSlug, TSelect>, 'select'> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type ByIDOptions<
   TSlug extends CollectionSlug,
@@ -156,7 +151,7 @@ async function deleteLocal<
     collection: collectionSlug,
     depth,
     disableTransaction,
-    overrideAccess = true,
+    overrideAccess = false,
     overrideLock,
     populate,
     select,
@@ -181,7 +176,10 @@ async function deleteLocal<
     overrideAccess,
     overrideLock,
     populate,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     select,
     showHiddenFields,
     trash,

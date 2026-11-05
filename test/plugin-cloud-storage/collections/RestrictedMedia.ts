@@ -12,4 +12,5 @@ export const RestrictedMedia: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

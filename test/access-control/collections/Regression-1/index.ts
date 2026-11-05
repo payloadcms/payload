@@ -123,4 +123,5 @@ export const Regression1: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

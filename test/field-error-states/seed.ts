@@ -9,5 +9,6 @@ export const seed = async (payload: Payload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 }

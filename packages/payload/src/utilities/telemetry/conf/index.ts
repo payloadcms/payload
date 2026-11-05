@@ -32,9 +32,9 @@ const checkValueType = (key: string, value: unknown): void => {
   }
 }
 
-export class Conf<T extends Record<string, any> = Record<string, unknown>>
-  implements Iterable<[keyof T, T[keyof T]]>
-{
+export class Conf<T extends Record<string, any> = Record<string, unknown>> implements Iterable<
+  [keyof T, T[keyof T]]
+> {
   readonly #options: Readonly<Partial<Options>>
   private readonly _deserialize: Deserialize<T> = (value) => JSON.parse(value)
   private readonly _serialize: Serialize<T> = (value) => JSON.stringify(value, undefined, '\t')

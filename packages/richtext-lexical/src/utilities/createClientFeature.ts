@@ -9,7 +9,7 @@ import type {
   ResolvedClientFeatureMap,
 } from '../features/typesClient.js'
 import type { ClientEditorConfig } from '../lexical/config/types.js'
-import type { FeatureClientSchemaMap } from '../types.js'
+import type { FeatureClientSchemaMap } from '../types/index.js'
 
 export type CreateClientFeatureArgs<UnSanitizedClientProps, ClientProps> =
   | ((props: {

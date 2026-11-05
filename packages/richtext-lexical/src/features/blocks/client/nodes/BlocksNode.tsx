@@ -8,10 +8,18 @@ import {
 } from 'lexical'
 import React, { type JSX } from 'react'
 
-import type { BlockFieldsOptionalID, SerializedBlockNode } from '../../server/nodes/BlocksNode.js'
+import type { ViewMapBlockComponentProps } from '../../../../types/index.js'
+import type { BlockFieldsOptionalID, SerializedBlockNode } from '../../server/schema.js'
 
 import { ServerBlockNode } from '../../server/nodes/BlocksNode.js'
 import { BlockComponent } from '../component/index.js'
+
+export type BlockDecorateFunction = (
+  editor: LexicalEditor,
+  config: EditorConfig,
+  CustomBlock?: React.FC<ViewMapBlockComponentProps>,
+  CustomLabel?: React.FC<ViewMapBlockComponentProps>,
+) => JSX.Element
 
 export class BlockNode extends ServerBlockNode {
   static override clone(node: ServerBlockNode): ServerBlockNode {
@@ -23,26 +31,20 @@ export class BlockNode extends ServerBlockNode {
   }
 
   static override importJSON(serializedNode: SerializedBlockNode): BlockNode {
-    if (serializedNode.version === 1) {
-      // Convert (version 1 had the fields wrapped in another, unnecessary data property)
-      serializedNode = {
-        ...serializedNode,
-        fields: {
-          ...(serializedNode as any).fields.data,
-        },
-        version: 2,
-      }
-    }
     const node = $createBlockNode(serializedNode.fields)
     node.setFormat(serializedNode.format)
     return node
   }
 
-  override decorate(_editor: LexicalEditor, config: EditorConfig): JSX.Element {
+  override decorate(
+    ...[_editor, config, CustomBlock, CustomLabel]: Parameters<BlockDecorateFunction>
+  ): ReturnType<BlockDecorateFunction> {
     return (
       <BlockComponent
         cacheBuster={this.getCacheBuster()}
         className={config.theme.block ?? 'LexicalEditorTheme__block'}
+        CustomBlock={CustomBlock}
+        CustomLabel={CustomLabel}
         formData={this.getFields()}
         nodeKey={this.getKey()}
       />

@@ -1,0 +1,39 @@
+@layer payload-default {
+  .dots {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2px;
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--button-radius);
+    height: var(--spacer-4);
+    width: var(--spacer-4);
+
+    &:hover {
+      background-color: var(--color-bg-secondary-hover);
+    }
+
+    &.dots--no-background {
+      background-color: transparent;
+      width: auto;
+      height: auto;
+
+      &:hover {
+        background-color: transparent;
+      }
+    }
+
+    &.dots--horizontal {
+      flex-direction: row;
+    }
+
+    > div {
+      width: 2px;
+      height: 2px;
+      border-radius: 100%;
+      background-color: currentColor;
+    }
+  }
+}

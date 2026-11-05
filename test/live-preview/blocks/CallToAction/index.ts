@@ -1,6 +1,6 @@
 import type { Block } from 'payload'
 
-import { slateEditor } from '@payloadcms/richtext-slate'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { invertBackground } from '../../fields/invertBackground.js'
 import linkGroup from '../../fields/linkGroup.js'
@@ -17,7 +17,7 @@ export const CallToAction: Block = {
       name: 'richText',
       label: 'Rich Text',
       type: 'richText',
-      editor: slateEditor({}),
+      editor: lexicalEditor({}),
     },
     linkGroup({
       appearances: ['primary', 'secondary'],

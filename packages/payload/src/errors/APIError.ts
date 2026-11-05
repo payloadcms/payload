@@ -1,7 +1,7 @@
-import { status as httpStatus } from 'http-status'
+import { httpStatus } from '../utilities/httpStatus.js'
 
-// This gets dynamically reassigned during compilation
-export let APIErrorName = 'APIError'
+/** @deprecated Use `instanceof APIError` instead of name comparison. */
+export const APIErrorName = 'APIError'
 
 class ExtendableError<TData extends object = { [key: string]: unknown }> extends Error {
   data: TData
@@ -17,8 +17,6 @@ class ExtendableError<TData extends object = { [key: string]: unknown }> extends
       // show data in cause
       cause: data,
     })
-    APIErrorName = this.constructor.name
-    this.name = this.constructor.name
     this.message = message
     this.status = status
     this.data = data
@@ -30,6 +28,10 @@ class ExtendableError<TData extends object = { [key: string]: unknown }> extends
 
 /**
  * Class representing an API error.
+ *
+ * Every error class sets `this.name` explicitly rather than reading `this.constructor.name`, as
+ * minifiers rename classes and can inline them as anonymous class expressions, which would leave
+ * `name` mangled or empty in production builds. Subclasses should do the same.
  * @extends ExtendableError
  */
 export class APIError<
@@ -55,5 +57,6 @@ export class APIError<
       data,
       typeof isPublic === 'boolean' ? isPublic : status !== httpStatus.INTERNAL_SERVER_ERROR,
     )
+    this.name = 'APIError'
   }
 }

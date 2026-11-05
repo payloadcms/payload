@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { mergeLocalizedData } from './mergeLocalizedData.js'
 
 describe('mergeLocalizedData', () => {
-  const selectedLocales = ['en']
+  const localesToUpdate = ['en']
   const configBlockReferences = []
 
   describe('simple fields', () => {
@@ -38,7 +38,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales,
+        localesToUpdate,
       })
 
       expect(result.title).toEqual({
@@ -66,7 +66,7 @@ describe('mergeLocalizedData', () => {
           title: 'Old Title',
         },
         fields,
-        selectedLocales,
+        localesToUpdate,
       })
 
       expect(result.title).toBe('New Title')
@@ -78,10 +78,24 @@ describe('mergeLocalizedData', () => {
           title: 'Old Title',
         },
         fields,
-        selectedLocales,
+        localesToUpdate,
       })
 
       expect(missingData.title).toBe('Old Title')
+
+      const undefinedData = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales: {
+          title: undefined,
+        },
+        docWithLocales: {
+          title: 'Old Title',
+        },
+        fields,
+        localesToUpdate,
+      })
+
+      expect(undefinedData.title).toBe('Old Title')
 
       const updatedData = mergeLocalizedData({
         configBlockReferences: [],
@@ -90,7 +104,7 @@ describe('mergeLocalizedData', () => {
         },
         docWithLocales: {},
         fields,
-        selectedLocales,
+        localesToUpdate,
       })
 
       expect(updatedData.title).toBe('Updated Title')
@@ -144,7 +158,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales,
+        localesToUpdate,
       })
 
       expect(result.meta).toEqual({
@@ -204,7 +218,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales,
+        localesToUpdate,
       })
 
       expect(result.meta).toEqual({
@@ -251,7 +265,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales,
+        localesToUpdate,
       })
 
       expect(result.items).toEqual({
@@ -313,7 +327,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales,
+        localesToUpdate,
       })
 
       expect(result.items).toEqual([
@@ -372,7 +386,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales,
+        localesToUpdate,
       })
 
       expect(result.content).toEqual({
@@ -440,7 +454,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales,
+        localesToUpdate,
       })
 
       expect(result.content).toEqual({
@@ -504,7 +518,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales,
+        localesToUpdate,
       })
 
       expect(result.meta).toEqual({
@@ -554,7 +568,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales,
+        localesToUpdate,
       })
 
       expect(result.title).toEqual({
@@ -625,7 +639,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales,
+        localesToUpdate,
       })
 
       expect(result.outer).toEqual({
@@ -674,7 +688,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales: ['en', 'es'],
+        localesToUpdate: ['en', 'es'],
       })
 
       expect(result.title).toEqual({
@@ -736,7 +750,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales: ['es'],
+        localesToUpdate: ['es'],
       })
 
       expect(result.title).toEqual({
@@ -810,7 +824,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales: ['en'],
+        localesToUpdate: ['en'],
       })
 
       // Root non-localized field should be updated
@@ -865,7 +879,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales: ['en'],
+        localesToUpdate: ['en'],
       })
 
       expect(result.rowFieldLocalized).toEqual({
@@ -913,7 +927,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales: ['en'],
+        localesToUpdate: ['en'],
       })
 
       // es should be preserved
@@ -927,7 +941,7 @@ describe('mergeLocalizedData', () => {
   describe('block metadata preservation', () => {
     it('should preserve blockType, id, and blockName when existing doc has no blocks', () => {
       // Reproduces the bug where autosave creates a doc without blocks,
-      // then blocks are added and publishSpecificLocale drops metadata
+      // then blocks are added and publishing a specific locale drops metadata
       const fields: Field[] = [
         {
           name: 'layout',
@@ -966,7 +980,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales: ['en'],
+        localesToUpdate: ['en'],
       })
 
       expect(result.layout).toHaveLength(1)
@@ -1015,7 +1029,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales: ['en'],
+        localesToUpdate: ['en'],
       })
 
       expect(result.layout).toHaveLength(1)
@@ -1070,7 +1084,7 @@ describe('mergeLocalizedData', () => {
         dataWithLocales,
         docWithLocales,
         fields,
-        selectedLocales: ['en'],
+        localesToUpdate: ['en'],
       })
 
       expect(result.layout).toHaveLength(1)
@@ -1079,4 +1093,32 @@ describe('mergeLocalizedData', () => {
       expect(result.layout[0].body).toEqual({ en: 'New English', es: 'Old Spanish' })
     })
   })
+})
+
+describe('clearing non-localized rows', () => {
+  it.each(['array', 'blocks'] as const)(
+    'should preserve an explicit null for a non-localized %s field',
+    (type) => {
+      const fields: Field[] =
+        type === 'array'
+          ? [{ name: 'rows', type: 'array', fields: [{ name: 'text', type: 'text' }] }]
+          : [
+              {
+                name: 'rows',
+                type: 'blocks',
+                blocks: [{ slug: 'text', fields: [{ name: 'text', type: 'text' }] }],
+              },
+            ]
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales: { rows: null },
+        docWithLocales: { rows: [{ id: 'row-1', blockType: 'text', text: 'Published' }] },
+        fields,
+        localesToUpdate: ['en'],
+      })
+
+      expect(result.rows).toBeNull()
+    },
+  )
 })

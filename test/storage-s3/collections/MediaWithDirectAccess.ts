@@ -5,14 +5,6 @@ export const MediaWithDirectAccess: CollectionConfig = {
   upload: {
     disableLocalStorage: true,
     adminThumbnail: 'thumbnail',
-    imageSizes: [
-      {
-        name: 'thumbnail',
-        width: 400,
-        height: 300,
-        crop: 'center',
-      },
-    ],
   },
   fields: [
     {
@@ -21,4 +13,5 @@ export const MediaWithDirectAccess: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

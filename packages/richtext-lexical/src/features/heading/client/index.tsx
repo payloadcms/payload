@@ -21,7 +21,7 @@ import { H6Icon } from '../../../lexical/ui/icons/H6/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { slashMenuBasicGroupWithItems } from '../../shared/slashMenu/basicGroup.js'
 import { toolbarTextDropdownGroupWithItems } from '../../shared/toolbar/textDropdownGroup.js'
-import { MarkdownTransformer } from '../markdownTransformer.js'
+import { PAYLOAD_HEADING } from '../markdownTransformer.js'
 
 const $setHeading = (headingSize: HeadingTagType) => {
   const selection = $getSelection()
@@ -79,7 +79,7 @@ export const HeadingFeatureClient = createClientFeature<HeadingFeatureProps>(({ 
   ]
 
   return {
-    markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],
+    markdownTransformers: [PAYLOAD_HEADING(enabledHeadingSizes)],
     nodes: [HeadingNode],
     plugins: [
       {

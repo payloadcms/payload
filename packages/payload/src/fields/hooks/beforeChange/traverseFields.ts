@@ -2,7 +2,7 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
-import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
+import type { FieldOperation, JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -12,6 +12,7 @@ type Args = {
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
    */
   blockData?: JsonObject
+  blockFields?: Field[]
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -33,8 +34,9 @@ type Args = {
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
+  isValidationOperation?: boolean
   mergeLocaleActions: (() => Promise<void> | void)[]
-  operation: Operation
+  operation: FieldOperation
   overrideAccess: boolean
   parentIndexPath: string
   /**
@@ -53,7 +55,9 @@ type Args = {
    * The original siblingData with locales (not modified by any hooks)
    */
   siblingDocWithLocales: JsonObject
+  skipHooks?: boolean
   skipValidation?: boolean
+  submittedTopLevelFieldNames?: ReadonlySet<string>
 }
 
 /**
@@ -67,6 +71,7 @@ type Args = {
 export const traverseFields = async ({
   id,
   blockData,
+  blockFields,
   collection,
   context,
   data,
@@ -76,6 +81,7 @@ export const traverseFields = async ({
   fieldLabelPath,
   fields,
   global,
+  isValidationOperation,
   mergeLocaleActions,
   operation,
   overrideAccess,
@@ -87,7 +93,9 @@ export const traverseFields = async ({
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
+  skipHooks,
   skipValidation,
+  submittedTopLevelFieldNames,
 }: Args): Promise<void> => {
   const promises: Promise<void>[] = []
 
@@ -96,6 +104,7 @@ export const traverseFields = async ({
       promise({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,
@@ -106,6 +115,7 @@ export const traverseFields = async ({
         fieldIndex,
         fieldLabelPath,
         global,
+        isValidationOperation: isValidationOperation!,
         mergeLocaleActions,
         operation,
         overrideAccess,
@@ -118,7 +128,9 @@ export const traverseFields = async ({
         siblingDoc,
         siblingDocWithLocales,
         siblingFields: fields,
+        skipHooks: skipHooks!,
         skipValidation: skipValidation!,
+        submittedTopLevelFieldNames,
       }),
     )
   })

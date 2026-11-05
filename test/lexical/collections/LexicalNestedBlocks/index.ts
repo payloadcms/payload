@@ -20,8 +20,7 @@ export const BlockWithBlockRef: Block = {
     {
       name: 'nestedBlocks',
       type: 'blocks',
-      blockReferences: ['nestedBlock'],
-      blocks: [],
+      blocks: ['nestedBlock'],
     },
   ],
 }
@@ -47,10 +46,11 @@ export const LexicalNestedBlocks: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           BlocksFeature({
-            blocks: ['blockWithBlockRef' as BlockSlug],
+            blocks: ['blockWithBlockRef'],
           }),
         ],
       }),
     },
   ],
+  versions: false,
 }

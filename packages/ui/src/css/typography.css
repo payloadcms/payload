@@ -1,0 +1,173 @@
+@layer payload-default {
+  :root {
+    --text-body-family: 'Inter';
+    --text-heading-family: 'Inter';
+    --text-mono-family: 'Roboto Mono';
+
+    /* Body */
+    --text-body-small-font-size: 0.625rem; /* 10px */
+    --text-body-small-font-weight: 450;
+    --text-body-small-line-height: 0.875rem; /* 14px */
+    --text-body-small-letter-spacing: 0px;
+
+    --text-body-medium-font-size: 0.75rem; /* 12px */
+    --text-body-medium-font-weight: 450;
+    --text-body-medium-line-height: 1rem; /* 16px */
+    --text-body-medium-letter-spacing: -0.001px;
+
+    --text-body-large-font-size: 0.875rem; /* 14px */
+    --text-body-large-font-weight: 450;
+    --text-body-large-line-height: 1.25rem; /* 20px */
+    --text-body-large-letter-spacing: -0.005px;
+
+    --text-body-xl-font-size: 1rem; /* 16px */
+    --text-body-xl-font-weight: 450;
+    --text-body-xl-line-height: 1.375rem; /* 22px */
+    --text-body-xl-letter-spacing: -0.015px;
+
+    --text-body-2xl-font-size: 1.375rem; /* 22px */
+    --text-body-2xl-font-weight: 450;
+    --text-body-2xl-line-height: 1.75rem; /* 28px */
+    --text-body-2xl-letter-spacing: -0.176px;
+
+    /* Body — Bold */
+    --text-body-small-bold-font-size: 0.625rem; /* 10px */
+    --text-body-small-bold-font-weight: 550;
+    --text-body-small-bold-line-height: 0.875rem; /* 14px */
+    --text-body-small-bold-letter-spacing: 0px;
+
+    --text-body-medium-bold-font-size: 0.75rem; /* 12px */
+    --text-body-medium-bold-font-weight: 550;
+    --text-body-medium-bold-line-height: 1rem; /* 16px */
+    --text-body-medium-bold-letter-spacing: -0.001px;
+
+    --text-body-large-bold-font-size: 0.875rem; /* 14px */
+    --text-body-large-bold-font-weight: 550;
+    --text-body-large-bold-line-height: 1.25rem; /* 20px */
+    --text-body-large-bold-letter-spacing: -0.005px;
+
+    --text-body-xl-bold-font-size: 1rem; /* 16px */
+    --text-body-xl-bold-font-weight: 550;
+    --text-body-xl-bold-line-height: 1.375rem; /* 22px */
+    --text-body-xl-bold-letter-spacing: -0.015px;
+
+    --text-body-2xl-bold-font-size: 1.375rem; /* 22px */
+    --text-body-2xl-bold-font-weight: 550;
+    --text-body-2xl-bold-line-height: 1.75rem; /* 28px */
+    --text-body-2xl-bold-letter-spacing: -0.176px;
+
+    /* Body — Paragraph */
+    --text-body-small-paragraph-font-size: 0.625rem; /* 10px */
+    --text-body-small-paragraph-font-weight: 450;
+    --text-body-small-paragraph-line-height: 1rem; /* 16px */
+    --text-body-small-paragraph-letter-spacing: 0px;
+
+    --text-body-medium-paragraph-font-size: 0.75rem; /* 12px */
+    --text-body-medium-paragraph-font-weight: 450;
+    --text-body-medium-paragraph-line-height: 1.125rem; /* 18px */
+    --text-body-medium-paragraph-letter-spacing: 0px;
+
+    --text-body-large-paragraph-font-size: 0.875rem; /* 14px */
+    --text-body-large-paragraph-font-weight: 450;
+    --text-body-large-paragraph-line-height: 1.375rem; /* 22px */
+    --text-body-large-paragraph-letter-spacing: 0px;
+
+    --text-body-xl-paragraph-font-size: 1rem; /* 16px */
+    --text-body-xl-paragraph-font-weight: 450;
+    --text-body-xl-paragraph-line-height: 1.5rem; /* 24px */
+    --text-body-xl-paragraph-letter-spacing: 0px;
+
+    --text-body-2xl-paragraph-font-size: 1.375rem; /* 22px */
+    --text-body-2xl-paragraph-font-weight: 450;
+    --text-body-2xl-paragraph-line-height: 2.125rem; /* 34px */
+    --text-body-2xl-paragraph-letter-spacing: 0px;
+
+    /* Heading */
+    --text-heading-small-font-size: 0.875rem; /* 14px */
+    --text-heading-small-font-weight: 600;
+    --text-heading-small-line-height: 1.25rem; /* 20px */
+    --text-heading-small-letter-spacing: 0px;
+
+    --text-heading-medium-font-size: 1rem; /* 16px */
+    --text-heading-medium-font-weight: 600;
+    --text-heading-medium-line-height: 1.375rem; /* 22px */
+    --text-heading-medium-letter-spacing: -0.011px;
+
+    --text-heading-large-font-size: 1.25rem; /* 20px */
+    --text-heading-large-font-weight: 600;
+    --text-heading-large-line-height: 1.6875rem; /* 27px */
+    --text-heading-large-letter-spacing: -0.042px;
+
+    --text-heading-xl-font-size: 1.5rem; /* 24px */
+    --text-heading-xl-font-weight: 600;
+    --text-heading-xl-line-height: 1.9375rem; /* 31px */
+    --text-heading-xl-letter-spacing: -0.085px;
+
+    --text-heading-2xl-font-size: 2rem; /* 32px */
+    --text-heading-2xl-font-weight: 600;
+    --text-heading-2xl-line-height: 2.5rem; /* 40px */
+    --text-heading-2xl-letter-spacing: -0.203px;
+
+    --text-heading-3xl-font-size: 2.5rem; /* 40px */
+    --text-heading-3xl-font-weight: 600;
+    --text-heading-3xl-line-height: 2.9375rem; /* 47px */
+    --text-heading-3xl-letter-spacing: -0.367px;
+
+    --text-heading-4xl-font-size: 3rem; /* 48px */
+    --text-heading-4xl-font-weight: 600;
+    --text-heading-4xl-line-height: 3.3125rem; /* 53px */
+    --text-heading-4xl-letter-spacing: -0.576px;
+
+    /* Mono */
+    --text-mono-small-font-size: 0.6875rem; /* 11px */
+    --text-mono-small-weight: 400;
+    --text-mono-small-line-height: 1.125rem; /* 18px */
+    --text-mono-small-letter-spacing: 0.055px;
+
+    --text-mono-medium-font-size: 0.8125rem; /* 13px */
+    --text-mono-medium-weight: 400;
+    --text-mono-medium-line-height: 1.375rem; /* 22px */
+    --text-mono-medium-letter-spacing: 0.065px;
+
+    --text-mono-large-font-size: 0.9375rem; /* 15px */
+    --text-mono-large-weight: 400;
+    --text-mono-large-line-height: 1.5rem; /* 24px */
+    --text-mono-large-letter-spacing: 0.075px;
+
+    --text-mono-xl-font-size: 1.0625rem; /* 17px */
+    --text-mono-xl-weight: 400;
+    --text-mono-xl-line-height: 1.75rem; /* 28px */
+    --text-mono-xl-letter-spacing: 0.085px;
+
+    /* Legacy names default to the new tokens and remain independently overridable. */
+    --font-family-sans: var(--text-body-family);
+    --font-family-mono: var(--text-mono-family);
+    --text-letter-spacing: var(--text-body-medium-letter-spacing);
+
+    --text-body-small-font-family: var(--font-family-sans, var(--text-body-family));
+    --text-body-medium-font-family: var(--font-family-sans, var(--text-body-family));
+    --text-body-large-font-family: var(--font-family-sans, var(--text-body-family));
+
+    --text-body-small-strong-font-family: var(--font-family-sans, var(--text-body-family));
+    --text-body-small-strong-font-size: var(--text-body-small-bold-font-size);
+    --text-body-small-strong-font-weight: var(--text-body-small-bold-font-weight);
+    --text-body-small-strong-line-height: var(--text-body-small-bold-line-height);
+    --text-body-small-strong-letter-spacing: var(--text-body-small-bold-letter-spacing);
+
+    --text-body-medium-strong-font-family: var(--font-family-sans, var(--text-body-family));
+    --text-body-medium-strong-font-size: var(--text-body-medium-bold-font-size);
+    --text-body-medium-strong-font-weight: var(--text-body-medium-bold-font-weight);
+    --text-body-medium-strong-line-height: var(--text-body-medium-bold-line-height);
+    --text-body-medium-strong-letter-spacing: var(--text-body-medium-bold-letter-spacing);
+
+    --text-body-large-strong-font-family: var(--font-family-sans, var(--text-body-family));
+    --text-body-large-strong-font-size: var(--text-body-large-bold-font-size);
+    --text-body-large-strong-font-weight: var(--text-body-large-bold-font-weight);
+    --text-body-large-strong-line-height: var(--text-body-large-bold-line-height);
+    --text-body-large-strong-letter-spacing: var(--text-body-large-bold-letter-spacing);
+
+    --text-heading-small-font-family: var(--text-heading-family);
+    --text-heading-medium-font-family: var(--text-heading-family);
+    --text-heading-large-font-family: var(--text-heading-family);
+  }
+}

@@ -71,6 +71,7 @@ const queryPage = cache(async ({ locale, slug }: { locale: TypedLocale; slug: st
 
   const result = await payload.find({
     collection: 'pages',
+    depth: 2,
     draft,
     limit: 1,
     overrideAccess: draft,

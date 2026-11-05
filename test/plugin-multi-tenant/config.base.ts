@@ -10,6 +10,7 @@ const dirname = path.dirname(filename)
 import type { Config as ConfigType } from './payload-types.js'
 
 import { AutosaveGlobal } from './collections/AutosaveGlobal.js'
+import { Media } from './collections/Media.js'
 import { Menu } from './collections/Menu.js'
 import { MenuItems } from './collections/MenuItems.js'
 import { MultiTenantPosts } from './collections/MultiTenantPosts.js'
@@ -19,6 +20,8 @@ import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
 import {
   autosaveGlobalSlug,
+  foldersSlug,
+  mediaSlug,
   menuItemsSlug,
   menuSlug,
   multiTenantPostsSlug,
@@ -34,6 +37,7 @@ export const baseConfig: Partial<Config> = {
     AutosaveGlobal,
     Relationships,
     MultiTenantPosts,
+    Media,
     {
       slug: notTenantedSlug,
       admin: {
@@ -45,6 +49,24 @@ export const baseConfig: Partial<Config> = {
           type: 'text',
         },
       ],
+      versions: false,
+    },
+    {
+      slug: foldersSlug,
+      hierarchy: {
+        parentFieldName: 'folder',
+      },
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+        },
+      ],
+      versions: false,
     },
   ],
   admin: {
@@ -56,25 +78,38 @@ export const baseConfig: Partial<Config> = {
       beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
       graphics: {
         Logo: '/components/Logo/index.js#Logo',
-        Icon: '/components/Icon/index.js#Icon',
       },
     },
   },
-  onInit: async (payload) => {
-    // IMPORTANT: This should only seed, not clear the database.
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
   plugins: [
     multiTenantPlugin<ConfigType>({
-      // debug: true,
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
       useTenantsCollectionAccess: false,
       tenantField: {
         access: {},
       },
+      tenantsArrayField: {
+        rowFields: [
+          {
+            name: 'tenantRole',
+            type: 'select',
+            defaultValue: 'admin',
+            options: [
+              {
+                label: 'Admin',
+                value: 'admin',
+              },
+              {
+                label: 'Member',
+                value: 'member',
+              },
+            ],
+            saveToJWT: true,
+          },
+        ],
+      },
       collections: {
+        [foldersSlug]: {},
         [menuItemsSlug]: {
           useTenantAccess: false,
         },
@@ -86,10 +121,15 @@ export const baseConfig: Partial<Config> = {
         },
         ['relationships']: {},
         [multiTenantPostsSlug]: {
+          accessResultOverride: ({ accessKey, accessResult }) => {
+            multiTenantPostsAccessResultEvents.push({ accessKey, accessResult })
+            return accessResult
+          },
           tenantFieldOverrides: {
             hasMany: true,
           },
         },
+        [mediaSlug]: {},
       },
       i18n: {
         translations: {
@@ -111,6 +151,7 @@ export const baseConfig: Partial<Config> = {
         const fullTenant = await req.payload.findByID({
           collection: 'tenants',
           id: tenant,
+          overrideAccess: true,
         })
         if (
           fullTenant &&
@@ -120,7 +161,9 @@ export const baseConfig: Partial<Config> = {
           if (fullTenant.selectedLocales.includes('allLocales')) {
             return locales
           }
-          return locales.filter((locale) => fullTenant.selectedLocales?.includes(locale.code))
+          return locales.filter((locale) =>
+            fullTenant.selectedLocales?.includes(locale.code as any),
+          )
         }
       }
       return locales
@@ -130,3 +173,10 @@ export const baseConfig: Partial<Config> = {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 }
+
+export const multiTenantPostsAccessResultEvents: Array<{
+  accessKey: string
+  accessResult: unknown
+}> = []
+
+export { seed }

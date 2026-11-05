@@ -37,6 +37,17 @@ export const count: Count = async function count(
     session: await getSession(this, req),
   }
 
+  if (this.collation) {
+    const localizationConfig = this.payload.config.localization
+    const defaultLocale =
+      (typeof localizationConfig === 'object' && localizationConfig?.defaultLocale) || 'en'
+
+    options.collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
+      ...this.collation,
+    }
+  }
+
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
     // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
     // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,

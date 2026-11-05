@@ -3,8 +3,9 @@ import type { MouseEvent } from 'react'
 
 import React from 'react'
 
-import './index.scss'
+import { InfoIcon } from '../../icons/Info/index.js'
 import { Link } from '../Link/index.js'
+import './index.css'
 
 const baseClass = 'banner'
 
@@ -17,7 +18,7 @@ export type Props = Readonly<{
   icon?: React.ReactNode
   onClick?: onClick
   to?: string
-  type?: 'default' | 'error' | 'info' | 'success'
+  type?: 'brand' | 'danger' | 'default' | 'success' | 'warning'
 }>
 
 export type RenderedTypeProps = {
@@ -29,13 +30,15 @@ export type RenderedTypeProps = {
 
 export const Banner: React.FC<Props> = ({
   type = 'default',
-  alignIcon = 'right',
+  alignIcon = 'left',
   children,
   className,
-  icon,
+  icon: iconFromProps,
   onClick,
   to,
 }) => {
+  const icon = iconFromProps === undefined ? <InfoIcon /> : iconFromProps
+
   const classes = [
     baseClass,
     `${baseClass}--type-${type}`,
@@ -58,7 +61,12 @@ export const Banner: React.FC<Props> = ({
   }
 
   return (
-    <RenderedType className={classes} href={to || null} onClick={onClick}>
+    <RenderedType
+      className={classes}
+      data-test="payload-ui-barrel-sentinel"
+      href={to || null}
+      onClick={onClick}
+    >
       {icon && alignIcon === 'left' && <React.Fragment>{icon}</React.Fragment>}
       <span className={`${baseClass}__content`}>{children}</span>
       {icon && alignIcon === 'right' && <React.Fragment>{icon}</React.Fragment>}

@@ -1,8 +1,7 @@
-import { status as httpStatus } from 'http-status'
-
 import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { parseParams } from '../../utilities/parseParams/index.js'
 import { countOperation } from '../operations/count.js'
 

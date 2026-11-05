@@ -1,5 +1,7 @@
 import type { DrizzleAdapter } from '../types.js'
 
+import { maxGeneratedIdentifierLength } from './validateIdentifierLength.js'
+
 export const buildForeignKeyName = ({
   name,
   adapter,
@@ -11,9 +13,9 @@ export const buildForeignKeyName = ({
 }): string => {
   let foreignKeyName = `${name}${number ? `_${number}` : ''}_fk`
 
-  if (foreignKeyName.length > 60) {
+  if (foreignKeyName.length > maxGeneratedIdentifierLength) {
     const suffix = `${number ? `_${number}` : ''}_fk`
-    foreignKeyName = `${name.slice(0, 60 - suffix.length)}${suffix}`
+    foreignKeyName = `${name.slice(0, maxGeneratedIdentifierLength - suffix.length)}${suffix}`
   }
 
   if (!adapter.foreignKeys.has(foreignKeyName)) {

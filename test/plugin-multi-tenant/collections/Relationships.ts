@@ -20,4 +20,5 @@ export const Relationships: CollectionConfig = {
       relationTo: relationshipsSlug,
     },
   ],
+  versions: false,
 }

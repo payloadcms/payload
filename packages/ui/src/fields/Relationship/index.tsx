@@ -1,5 +1,5 @@
 'use client'
-import type { RelationshipFieldClientComponent, ValueWithRelation } from 'payload'
+import type { RelationshipFieldClientProps, ValueWithRelation } from 'payload'
 
 import React, { useCallback, useMemo } from 'react'
 
@@ -9,11 +9,11 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { RelationshipInput } from './Input.js'
-import './index.scss'
+import './index.css'
 
 export { RelationshipInput }
 
-const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => {
+const RelationshipFieldComponent: React.FC<RelationshipFieldClientProps> = (props) => {
   const {
     field,
     field: {

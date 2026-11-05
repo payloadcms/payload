@@ -1,10 +1,10 @@
 import { getTranslation } from '@payloadcms/translations'
-import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { parseParams } from '../../utilities/parseParams/index.js'
 import { createOperation } from '../operations/create.js'
 
@@ -12,8 +12,6 @@ export const createHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
   const { autosave, depth, draft, populate, publishAllLocales, select } = parseParams(req.query)
-
-  const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
 
   const doc = await createOperation({
     autosave,
@@ -23,7 +21,6 @@ export const createHandler: PayloadHandler = async (req) => {
     draft,
     populate,
     publishAllLocales,
-    publishSpecificLocale,
     req,
     select,
   })

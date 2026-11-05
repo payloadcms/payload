@@ -1,40 +1,27 @@
 import { execSync } from 'child_process'
 import { existsSync, readFileSync, rmSync } from 'fs'
 import path from 'path'
-import { type BlocksField, getPayload, type Payload } from 'payload'
+import { type BlocksField, getPayload } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
+import { test } from '../__helpers/int/vitest.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { testFilePath } from './testFilePath.js'
-
-let restClient: NextRESTClient
-let payload: Payload
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('Config', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('payload config', () => {
-    it('allows a custom field at the config root', () => {
+test.suite('Config', { config: './config.ts' }, () => {
+  test.describe('payload config', () => {
+    test('allows a custom field at the config root', ({ payload }) => {
       const { config } = payload
       expect(config.custom).toEqual({
         name: 'Customer portal',
       })
     })
 
-    it('allows a custom field in the root endpoints', () => {
+    test('allows a custom field in the root endpoints', ({ payload }) => {
       const endpoints = payload.config.endpoints
       const customEndpoint = endpoints?.find((endpoint) => endpoint.path === '/config')
 
@@ -43,16 +30,20 @@ describe('Config', () => {
       })
     })
 
-    it('should allow multiple getPayload calls using different configs in same process', async () => {
+    test('should allow multiple getPayload calls using different configs in same process', async () => {
       const payload2 = await getPayload({
         key: 'payload2',
         config: await buildConfigWithDefaults({
-          collections: [
-            {
-              slug: 'payload2',
-              fields: [{ name: 'title2', type: 'text' }],
-            },
-          ],
+          suite: 'config-payload2',
+          config: {
+            collections: [
+              {
+                slug: 'payload2',
+                fields: [{ name: 'title2', type: 'text' }],
+                versions: false,
+              },
+            ],
+          },
         }),
       })
 
@@ -60,6 +51,7 @@ describe('Config', () => {
       // creation will reset the db schema.
       const result2: any = await payload2.create({
         collection: 'payload2',
+        overrideAccess: true,
         data: {
           title2: 'Payload 2',
         },
@@ -70,18 +62,23 @@ describe('Config', () => {
       const payload3 = await getPayload({
         key: 'payload3',
         config: await buildConfigWithDefaults({
-          collections: [
-            {
-              slug: 'payload3',
-              fields: [{ name: 'title3', type: 'text' }],
-            },
-          ],
+          suite: 'config-payload3',
+          config: {
+            collections: [
+              {
+                slug: 'payload3',
+                fields: [{ name: 'title3', type: 'text' }],
+                versions: false,
+              },
+            ],
+          },
         }),
       })
 
       // If payload was still incorrectly cached, this would fail, as the old payload config would still be used
       const result3: any = await payload3.create({
         collection: 'payload3',
+        overrideAccess: true,
         data: {
           title3: 'Payload 3',
         },
@@ -94,15 +91,15 @@ describe('Config', () => {
     })
   })
 
-  describe('collection config', () => {
-    it('allows a custom field in collections', () => {
+  test.describe('collection config', () => {
+    test('allows a custom field in collections', ({ payload }) => {
       const [collection] = payload.config.collections
       expect(collection.custom).toEqual({
         externalLink: 'https://foo.bar',
       })
     })
 
-    it('allows a custom field in collection endpoints', () => {
+    test('allows a custom field in collection endpoints', ({ payload }) => {
       const [collection] = payload.config.collections
       const [endpoint] = collection.endpoints || []
 
@@ -111,7 +108,7 @@ describe('Config', () => {
       })
     })
 
-    it('allows a custom field in collection fields', () => {
+    test('allows a custom field in collection fields', ({ payload }) => {
       const [collection] = payload.config.collections
       const [field] = collection.fields
 
@@ -120,7 +117,7 @@ describe('Config', () => {
       })
     })
 
-    it('allows a custom field in blocks in collection fields', () => {
+    test('allows a custom field in blocks in collection fields', ({ payload }) => {
       const [collection] = payload.config.collections
       const [, blocksField] = collection.fields
 
@@ -129,26 +126,26 @@ describe('Config', () => {
       })
     })
 
-    it('properly merges collection.labels with defaults', () => {
+    test('properly merges collection.labels with defaults', ({ payload }) => {
       const [collection] = payload.config.collections
       expect(collection?.labels).toEqual({ plural: 'Pages', singular: 'Page' })
     })
   })
 
-  describe('global config', () => {
-    it('allows a custom field in globals', () => {
+  test.describe('global config', () => {
+    test('allows a custom field in globals', ({ payload }) => {
       const [global] = payload.config.globals
       expect(global.custom).toEqual({ foo: 'bar' })
     })
 
-    it('allows a custom field in global endpoints', () => {
+    test('allows a custom field in global endpoints', ({ payload }) => {
       const [global] = payload.config.globals
       const [endpoint] = global.endpoints || []
 
       expect(endpoint.custom).toEqual({ params: [{ name: 'name', type: 'string', in: 'query' }] })
     })
 
-    it('allows a custom field in global fields', () => {
+    test('allows a custom field in global fields', ({ payload }) => {
       const [global] = payload.config.globals
       const [field] = global.fields
 
@@ -158,14 +155,14 @@ describe('Config', () => {
     })
   })
 
-  describe('cors config', () => {
-    it('includes a custom header in Access-Control-Allow-Headers', async () => {
+  test.describe('cors config', () => {
+    test('includes a custom header in Access-Control-Allow-Headers', async ({ restClient }) => {
       const response = await restClient.GET(`/pages`)
       expect(response.headers.get('Access-Control-Allow-Headers')).toContain('x-custom-header')
     })
   })
 
-  describe('bin config', () => {
+  test.describe('bin config', () => {
     const executeCLI = (command: string) => {
       execSync(`pnpm tsx "${path.resolve(dirname, 'bin.ts')}" ${command}`, {
         env: {
@@ -184,7 +181,7 @@ describe('Config', () => {
       }
     }
 
-    it.skip('should execute a custom script', () => {
+    test.skip('should execute a custom script', () => {
       deleteTestFile()
       executeCLI('start-server')
       expect(JSON.parse(readFileSync(testFilePath, 'utf-8')).docs).toHaveLength(1)

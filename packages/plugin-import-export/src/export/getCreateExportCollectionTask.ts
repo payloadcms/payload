@@ -128,8 +128,21 @@ export const getCreateCollectionExportTask = (
         return { output: {} }
       }
 
+      // The job input omits custom fields, so read the export document once for the hooks.
+      const exportDoc = await req.payload.findByID({
+        id: input.id,
+        collection: input.exportCollection,
+        overrideAccess: true,
+        req,
+      })
+
+      if (!exportDoc) {
+        throw new Error(`Export document not found: ${input.id}`)
+      }
+
       await createExport({
         ...input,
+        exportDoc,
         req,
       })
 

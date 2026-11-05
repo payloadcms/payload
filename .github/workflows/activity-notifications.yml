@@ -12,20 +12,19 @@ on:
 
 jobs:
   run:
-    if: github.repository_owner == 'payloadcms'
-    runs-on: ubuntu-latest
+    if: github.repository == 'payloadcms/payload'
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       - name: Setup
         uses: ./.github/actions/setup
       - name: Popular Issues to Slack
         run: node ./.github/actions/activity/dist/popular-issues/index.js
-        continue-on-error: true
       - name: New Issues to Slack
         run: node ./.github/actions/activity/dist/new-issues/index.js
-        continue-on-error: true
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+      SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
       DEBUG: ${{ github.event.inputs.debug || 'false' }}

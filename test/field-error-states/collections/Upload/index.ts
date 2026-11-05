@@ -27,6 +27,7 @@ const Uploads: CollectionConfig = {
   upload: {
     staticDir: path.resolve(process.cwd(), 'test/field-error-states/collections/Upload/uploads'),
   },
+  versions: false,
 }
 
 export const uploadsDoc = {

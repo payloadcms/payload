@@ -41,4 +41,5 @@ export const Menu: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

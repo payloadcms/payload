@@ -1,0 +1,73 @@
+@layer payload-default {
+  .document-card {
+    position: relative;
+    overflow: hidden;
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-large);
+    background: var(--color-bg);
+  }
+  .document-card--selected {
+    border-color: var(--color-border-selected);
+  }
+  .document-card__thumbnail {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--color-bg-secondary);
+  }
+  .document-card__thumbnail--empty {
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: var(--spacer-6);
+      height: var(--spacer-6);
+    }
+
+    .icon--document {
+      color: var(--color-text-tertiary);
+    }
+  }
+  .document-card__content {
+    padding: var(--spacer-2-5);
+  }
+  .document-card__title {
+    display: inline-block;
+    overflow: hidden;
+    color: var(--color-text);
+    max-width: 100%;
+    text-overflow: ellipsis;
+    text-decoration: none;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+  .document-card--link .document-card__title::after {
+    position: absolute;
+    content: '';
+    inset: 0;
+  }
+  .document-card--link
+    .document-card__metadata
+    :is(a, button, input, select, textarea, [tabindex]) {
+    position: relative;
+    z-index: 1;
+  }
+  .document-card__title:focus:not(:focus-visible) {
+    opacity: 1;
+  }
+  .document-card:focus-visible {
+    border-radius: var(--radius-large);
+    box-shadow: 0 0 0 var(--stroke-width-small) var(--accessibility-focus-color);
+  }
+  .document-card__title:focus-visible {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--spacer-1);
+  }
+  .document-card__metadata {
+    margin-block-start: var(--spacer-1);
+    color: var(--color-text-secondary);
+  }
+}

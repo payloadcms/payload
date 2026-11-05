@@ -60,6 +60,55 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_464B7BF4".
+ */
+export type LexicalNodes_464B7BF4 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_464B7BF4>
+  | SerializedAutoLinkNode<LexicalNodes_464B7BF4, LexicalLinkFields_11D2ED94>
+  | SerializedLinkNode<LexicalNodes_464B7BF4, LexicalLinkFields_11D2ED94>
+  | SerializedBlockNode<NestedBlock>
+  | SerializedHorizontalRuleNode
+  | {
+      type: 'upload';
+      /**
+       * Lexical's internal serialization version for this node type.
+       */
+      version: number;
+      [k: string]: unknown;
+    }
+  | SerializedQuoteNode<LexicalNodes_464B7BF4>
+  | SerializedRelationshipNode<
+      | 'beforeOperation'
+      | 'before-change-hooks'
+      | 'before-validate'
+      | 'afterOperation'
+      | 'context-hooks'
+      | 'transforms'
+      | 'hooks'
+      | 'nested-after-read-hooks'
+      | 'nested-after-change-hooks'
+      | 'chaining-hooks'
+      | 'relations'
+      | 'hooks-users'
+      | 'data-hooks'
+      | 'before-delete-hooks'
+      | 'before-delete-2-hooks'
+      | 'value-hooks'
+      | 'after-read'
+      | 'override-access-hooks'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedListNode<LexicalNodes_464B7BF4>
+  | SerializedListItemNode<LexicalNodes_464B7BF4>
+  | SerializedHeadingNode<LexicalNodes_464B7BF4>;
 
 export interface Config {
   auth: {
@@ -84,6 +133,7 @@ export interface Config {
     'before-delete-2-hooks': BeforeDelete2Hook;
     'value-hooks': ValueHook;
     'after-read': AfterRead;
+    'override-access-hooks': OverrideAccessHook;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -108,6 +158,7 @@ export interface Config {
     'before-delete-2-hooks': BeforeDelete2HooksSelect<false> | BeforeDelete2HooksSelect<true>;
     'value-hooks': ValueHooksSelect<false> | ValueHooksSelect<true>;
     'after-read': AfterReadSelect<false> | AfterReadSelect<true>;
+    'override-access-hooks': OverrideAccessHooksSelect<false> | OverrideAccessHooksSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -124,6 +175,11 @@ export interface Config {
     'data-hooks-global': DataHooksGlobalSelect<false> | DataHooksGlobalSelect<true>;
   };
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
+  };
   user: HooksUser;
   jobs: {
     tasks: unknown;
@@ -155,9 +211,53 @@ export interface HooksUserAuthOperations {
 export interface BeforeOperation {
   id: string;
   category?: string | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hooks-users".
+ */
+export interface HooksUser {
+  id: string;
+  roles: ('admin' | 'user')[];
+  afterLoginHook?: boolean | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'hooks-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -166,6 +266,14 @@ export interface BeforeOperation {
 export interface BeforeChangeHook {
   id: string;
   title: string;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -177,6 +285,14 @@ export interface BeforeValidate {
   id: string;
   title?: string | null;
   selection?: ('a' | 'b') | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -187,6 +303,14 @@ export interface BeforeValidate {
 export interface AfterOperation {
   id: string;
   title: string;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -197,6 +321,14 @@ export interface AfterOperation {
 export interface ContextHook {
   id: string;
   value?: string | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -216,6 +348,14 @@ export interface Transform {
    * @maxItems 2
    */
   localizedTransform?: [number, number] | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -234,6 +374,14 @@ export interface Hook {
   collectionAfterChange?: boolean | null;
   collectionBeforeRead?: boolean | null;
   collectionAfterRead?: boolean | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -258,6 +406,14 @@ export interface NestedAfterReadHook {
       shouldPopulate?: (string | null) | Relation;
     };
   };
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -268,6 +424,14 @@ export interface NestedAfterReadHook {
 export interface Relation {
   id: string;
   title: string;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -286,20 +450,14 @@ export interface NestedAfterChangeHook {
         }[]
       | null;
   };
-  lexical?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
+  lexical?: LexicalRichText<LexicalNodes_464B7BF4> | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -311,35 +469,16 @@ export interface NestedAfterChangeHook {
 export interface ChainingHook {
   id: string;
   text?: string | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hooks-users".
- */
-export interface HooksUser {
-  id: string;
-  roles: ('admin' | 'user')[];
-  afterLoginHook?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'hooks-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -354,6 +493,14 @@ export interface DataHook {
   collection_beforeRead_collection?: string | null;
   collection_afterRead_collection?: string | null;
   collection_afterOperation_collection?: string | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -364,6 +511,14 @@ export interface DataHook {
 export interface BeforeDeleteHook {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -374,6 +529,14 @@ export interface BeforeDeleteHook {
 export interface BeforeDelete2Hook {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -386,6 +549,14 @@ export interface ValueHook {
   slug?: string | null;
   beforeValidate_value?: string | null;
   beforeChange_value?: string | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -396,6 +567,36 @@ export interface ValueHook {
 export interface AfterRead {
   id: string;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "override-access-hooks".
+ */
+export interface OverrideAccessHook {
+  id: string;
+  title?: string | null;
+  beforeReadCalled?: boolean | null;
+  beforeReadOverrideAccess?: boolean | null;
+  afterReadCalled?: boolean | null;
+  afterReadOverrideAccess?: boolean | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -490,6 +691,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'after-read';
         value: string | AfterRead;
+      } | null)
+    | ({
+        relationTo: 'override-access-hooks';
+        value: string | OverrideAccessHook;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -539,6 +744,8 @@ export interface PayloadMigration {
  */
 export interface BeforeOperationSelect<T extends boolean = true> {
   category?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -549,6 +756,8 @@ export interface BeforeOperationSelect<T extends boolean = true> {
  */
 export interface BeforeChangeHooksSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -559,6 +768,8 @@ export interface BeforeChangeHooksSelect<T extends boolean = true> {
 export interface BeforeValidateSelect<T extends boolean = true> {
   title?: T;
   selection?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -568,6 +779,8 @@ export interface BeforeValidateSelect<T extends boolean = true> {
  */
 export interface AfterOperationSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -577,6 +790,8 @@ export interface AfterOperationSelect<T extends boolean = true> {
  */
 export interface ContextHooksSelect<T extends boolean = true> {
   value?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -587,6 +802,8 @@ export interface ContextHooksSelect<T extends boolean = true> {
 export interface TransformsSelect<T extends boolean = true> {
   transform?: T;
   localizedTransform?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -604,6 +821,8 @@ export interface HooksSelect<T extends boolean = true> {
   collectionAfterChange?: T;
   collectionBeforeRead?: T;
   collectionAfterRead?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -631,6 +850,8 @@ export interface NestedAfterReadHooksSelect<T extends boolean = true> {
               shouldPopulate?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -651,6 +872,8 @@ export interface NestedAfterChangeHooksSelect<T extends boolean = true> {
             };
       };
   lexical?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -660,6 +883,8 @@ export interface NestedAfterChangeHooksSelect<T extends boolean = true> {
  */
 export interface ChainingHooksSelect<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -669,6 +894,8 @@ export interface ChainingHooksSelect<T extends boolean = true> {
  */
 export interface RelationsSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -679,6 +906,8 @@ export interface RelationsSelect<T extends boolean = true> {
 export interface HooksUsersSelect<T extends boolean = true> {
   roles?: T;
   afterLoginHook?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -686,6 +915,7 @@ export interface HooksUsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -708,6 +938,8 @@ export interface DataHooksSelect<T extends boolean = true> {
   collection_beforeRead_collection?: T;
   collection_afterRead_collection?: T;
   collection_afterOperation_collection?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -717,6 +949,8 @@ export interface DataHooksSelect<T extends boolean = true> {
  */
 export interface BeforeDeleteHooksSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -726,6 +960,8 @@ export interface BeforeDeleteHooksSelect<T extends boolean = true> {
  */
 export interface BeforeDelete2HooksSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -737,6 +973,8 @@ export interface ValueHooksSelect<T extends boolean = true> {
   slug?: T;
   beforeValidate_value?: T;
   beforeChange_value?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -746,6 +984,23 @@ export interface ValueHooksSelect<T extends boolean = true> {
  */
 export interface AfterReadSelect<T extends boolean = true> {
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "override-access-hooks_select".
+ */
+export interface OverrideAccessHooksSelect<T extends boolean = true> {
+  title?: T;
+  beforeReadCalled?: T;
+  beforeReadOverrideAccess?: T;
+  afterReadCalled?: T;
+  afterReadOverrideAccess?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -800,6 +1055,14 @@ export interface DataHooksGlobal {
   global_afterChange_global?: string | null;
   global_beforeRead_global?: string | null;
   global_afterRead_global?: string | null;
+  createdBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
+  updatedBy?: {
+    relationTo: 'hooks-users';
+    value: string | HooksUser;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -813,9 +1076,133 @@ export interface DataHooksGlobalSelect<T extends boolean = true> {
   global_afterChange_global?: T;
   global_beforeRead_global?: T;
   global_afterRead_global?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'beforeOperation'
+      | 'before-change-hooks'
+      | 'before-validate'
+      | 'afterOperation'
+      | 'context-hooks'
+      | 'transforms'
+      | 'hooks'
+      | 'nested-after-read-hooks'
+      | 'nested-after-change-hooks'
+      | 'chaining-hooks'
+      | 'relations'
+      | 'hooks-users'
+      | 'data-hooks'
+      | 'before-delete-hooks'
+      | 'before-delete-2-hooks'
+      | 'value-hooks'
+      | 'after-read'
+      | 'override-access-hooks';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'beforeOperation'
+          | 'before-change-hooks'
+          | 'before-validate'
+          | 'afterOperation'
+          | 'context-hooks'
+          | 'transforms'
+          | 'hooks'
+          | 'nested-after-read-hooks'
+          | 'nested-after-change-hooks'
+          | 'chaining-hooks'
+          | 'relations'
+          | 'hooks-users'
+          | 'data-hooks'
+          | 'before-delete-hooks'
+          | 'before-delete-2-hooks'
+          | 'value-hooks'
+          | 'after-read'
+          | 'override-access-hooks'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NestedLinkBlock".
+ */
+export interface NestedLinkBlock {
+  nestedRelationship?: (string | null) | Relation;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'nestedLinkBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_11D2ED94".
+ */
+export interface LexicalLinkFields_11D2ED94 {
+  linkBlocks?: NestedLinkBlock[] | null;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NestedBlock".
+ */
+export interface NestedBlock {
+  id: string;
+  blockType: 'nestedBlock';
+  nestedAfterChange?: string | null;
+  blockName?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -823,6 +1210,152 @@ export interface DataHooksGlobalSelect<T extends boolean = true> {
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 

@@ -7,28 +7,34 @@ import { tabHasName } from 'payload/shared'
 import React, { useState } from 'react'
 
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
+import { TabButton } from '../../../elements/Tabs/index.js'
+import { useFormInitializing } from '../../../forms/Form/context.js'
 import { WatchChildErrors } from '../../../forms/WatchChildErrors/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import './index.scss'
 
 const baseClass = 'tabs-field__tab-button'
 
 type TabProps = {
   readonly hidden?: boolean
+  readonly id?: string
   readonly isActive?: boolean
+  readonly panelID?: string
   readonly parentPath: string
   readonly setIsActive: () => void
   readonly tab: ClientTab
 }
 
 export const TabComponent: React.FC<TabProps> = ({
+  id,
   hidden,
   isActive,
+  panelID,
   parentPath,
   setIsActive,
   tab,
 }) => {
   const { i18n } = useTranslation()
+  const isInitializing = useFormInitializing()
   const [errorCount, setErrorCount] = useState(undefined)
 
   const path = [
@@ -42,21 +48,20 @@ export const TabComponent: React.FC<TabProps> = ({
   return (
     <React.Fragment>
       <WatchChildErrors fields={tab.fields} path={path} setErrorCount={setErrorCount} />
-      <button
-        className={[
-          baseClass,
-          fieldHasErrors && `${baseClass}--has-error`,
-          isActive && `${baseClass}--active`,
-          hidden && `${baseClass}--hidden`,
-        ]
-          .filter(Boolean)
-          .join(' ')}
+      <TabButton
+        className={baseClass}
+        disabled={isInitializing}
+        hasError={fieldHasErrors}
+        hidden={hidden}
+        id={id}
+        isActive={isActive}
+        modifierClassName={baseClass}
         onClick={setIsActive}
-        type="button"
+        panelID={panelID}
       >
         {tab.label ? getTranslation(tab.label, i18n) : tabHasName(tab) ? tab.name : ''}
         {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} />}
-      </button>
+      </TabButton>
     </React.Fragment>
   )
 }

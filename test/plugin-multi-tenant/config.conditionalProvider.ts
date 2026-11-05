@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-exports */
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { baseConfig } from './config.base.js'
+import { baseConfig, seed } from './config.base.js'
 
 /**
  * Extends the base multi-tenant config with a ConditionalWrapperProvider
@@ -10,12 +10,16 @@ import { baseConfig } from './config.base.js'
  * exercising the RSC prop sync fix.
  */
 export default buildConfigWithDefaults({
-  ...baseConfig,
-  admin: {
-    ...baseConfig.admin,
-    components: {
-      ...baseConfig.admin?.components,
-      providers: ['/components/ConditionalWrapperProvider/index.js#ConditionalWrapperProvider'],
+  suite: 'plugin-multi-tenant-conditional-provider',
+  config: {
+    ...baseConfig,
+    admin: {
+      ...baseConfig.admin,
+      components: {
+        ...baseConfig.admin?.components,
+        providers: ['/components/ConditionalWrapperProvider/index.js#ConditionalWrapperProvider'],
+      },
     },
   },
+  seed,
 })

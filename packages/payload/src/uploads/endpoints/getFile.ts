@@ -2,23 +2,34 @@ import type { Stats } from 'fs'
 
 import { fileTypeFromFile } from 'file-type'
 import fsPromises from 'fs/promises'
-import { status as httpStatus } from 'http-status'
 import path from 'path'
 
+import type { Collection, TypeWithID } from '../../collections/config/types.js'
 import type { PayloadHandler } from '../../config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { FileHandlerOperation } from '../types.js'
 
 import { APIError } from '../../errors/APIError.js'
-import { checkFileAccess } from '../../uploads/checkFileAccess.js'
-import { streamFile } from '../../uploads/fetchAPI-stream-file/index.js'
-import { getFileTypeFallback } from '../../uploads/getFileTypeFallback.js'
-import { parseRangeHeader } from '../../uploads/parseRangeHeader.js'
+import { NotFound } from '../../errors/NotFound.js'
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
+import { checkFileAccess } from '../checkFileAccess.js'
+import { streamFile } from '../fetchAPI-stream-file/index.js'
+import { resolveHistoricalFile } from '../fileVersioning/resolveHistoricalFile.js'
+import { getFileTypeFallback } from '../getFileTypeFallback.js'
+import { getFileExtension, isXmlMimeType } from '../getFileTypeIdentity.js'
+import { parseRangeHeader } from '../parseRangeHeader.js'
+import { handleDynamicFileRequest } from '../transformers/handleDynamicFileRequest.js'
+import { resolveUploadDocument } from '../transformers/resolveUploadDocument.js'
+import { uploadContentSecurityPolicy } from '../uploadContentSecurityPolicy.js'
 
 export const getFileHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
   const filename = req.routeParams?.filename as string
+  const prefix = req.searchParams?.get('prefix') ?? undefined
+  const isOriginal = req.searchParams?.get('original') === 'true'
 
   if (!collection.config.upload) {
     throw new APIError(
@@ -27,9 +38,35 @@ export const getFileHandler: PayloadHandler = async (req) => {
     )
   }
 
+  const versionID = req.searchParams?.get('version')
+
+  if (collection.config.versions && versionID) {
+    const historical = await resolveHistoricalFile({
+      collection,
+      filename,
+      prefix,
+      req,
+      versionID,
+    })
+
+    return retrieveFileResponse({
+      collection,
+      doc: historical,
+      filename,
+      isOriginal,
+      prefix,
+      req,
+    })
+  }
+
+  if (req.payload.config.upload.transformers.length > 0) {
+    return handleDynamicFileRequest({ collection, filename, isOriginal, prefix, req })
+  }
+
   const accessResult = (await checkFileAccess({
     collection,
     filename,
+    prefix,
     req,
   }))!
 
@@ -37,17 +74,61 @@ export const getFileHandler: PayloadHandler = async (req) => {
     return accessResult
   }
 
-  if (collection.config.upload.handlers?.length) {
+  const current = collection.config.versions
+    ? (accessResult ?? (await resolveUploadDocument({ collection, filename, prefix, req })))
+    : undefined
+
+  if (collection.config.versions && !current) {
+    throw new NotFound(req.t)
+  }
+
+  return retrieveFileResponse({
+    collection,
+    doc: accessResult ?? current,
+    filename,
+    isOriginal,
+    prefix,
+    req,
+  })
+}
+
+/**
+ * Shared by the ordinary `read` endpoint and, via `operation: 'transform'`, by
+ * `getSourceFileResponse` for internal source retrieval. `transform` ignores the
+ * `Range` header and skips `modifyResponseHeaders`/CORS wrapping, since those are
+ * applied once, later, to the transformer pipeline's final response.
+ */
+export async function retrieveFileResponse({
+  collection,
+  doc,
+  filename,
+  isOriginal,
+  operation = 'read',
+  prefix,
+  req,
+}: {
+  collection: Collection
+  doc?: TypeWithID
+  filename: string
+  isOriginal?: boolean
+  operation?: FileHandlerOperation
+  prefix?: string
+  req: PayloadRequest
+}): Promise<Response> {
+  if (collection.config.upload && collection.config.upload.handlers?.length) {
     let customResponse: null | Response | void = null
     const headers = new Headers()
 
     for (const handler of collection.config.upload.handlers) {
       customResponse = await handler(req, {
-        doc: accessResult,
+        doc: doc!,
         headers,
         params: {
           collection: collection.config.slug,
           filename,
+          isOriginal,
+          operation,
+          prefix,
         },
       })
       if (customResponse && customResponse instanceof Response) {
@@ -60,8 +141,16 @@ export const getFileHandler: PayloadHandler = async (req) => {
     }
   }
 
+  // Local filesystem fallback — cloud storage handlers return a Response above
+  // and have their own filename validation via sanitizeFilename.
   const fileDir = collection.config.upload?.staticDir || collection.config.slug
-  const filePath = path.resolve(`${fileDir}/${filename}`)
+  const resolvedDir = path.resolve(fileDir)
+  const filePath = path.resolve(resolvedDir, filename)
+
+  if (!filePath.startsWith(resolvedDir + path.sep)) {
+    throw new APIError('Invalid filename.', httpStatus.BAD_REQUEST)
+  }
+
   let stats: Stats
 
   try {
@@ -98,12 +187,18 @@ export const getFileHandler: PayloadHandler = async (req) => {
   const fileTypeResult = (await fileTypeFromFile(filePath)) || getFileTypeFallback(filePath)
   let mimeType = fileTypeResult.mime
 
-  if (filePath.endsWith('.svg') && fileTypeResult.mime === 'application/xml') {
+  if (
+    getFileExtension(filePath).toLowerCase() === 'svg' &&
+    fileTypeResult.mime === 'application/xml'
+  ) {
     mimeType = 'image/svg+xml'
   }
 
-  // Parse Range header for byte range requests
-  const rangeHeader = req.headers.get('range')
+  const isTransformSource = operation === 'transform'
+
+  // The client's Range header must never leak into an internal source retrieval —
+  // a transformer needs the complete original bytes to decode.
+  const rangeHeader = isTransformSource ? null : req.headers.get('range')
   const rangeResult = parseRangeHeader({
     fileSize: stats.size,
     rangeHeader,
@@ -129,8 +224,8 @@ export const getFileHandler: PayloadHandler = async (req) => {
   headers.set('Content-Type', mimeType)
   headers.set('Accept-Ranges', 'bytes')
 
-  if (mimeType === 'image/svg+xml') {
-    headers.set('Content-Security-Policy', "script-src 'none'")
+  if (isXmlMimeType(mimeType)) {
+    headers.set('Content-Security-Policy', uploadContentSecurityPolicy)
   }
 
   let data: ReadableStream
@@ -148,6 +243,10 @@ export const getFileHandler: PayloadHandler = async (req) => {
     headers.set('Content-Length', String(stats.size))
     data = streamFile({ filePath })
     status = httpStatus.OK
+  }
+
+  if (isTransformSource) {
+    return new Response(data, { headers, status })
   }
 
   headers = collection.config.upload?.modifyResponseHeaders

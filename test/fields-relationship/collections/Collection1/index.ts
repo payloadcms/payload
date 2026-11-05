@@ -13,4 +13,5 @@ export const Collection1: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
   },
+  versions: false,
 }

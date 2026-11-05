@@ -1,9 +1,9 @@
 'use client'
-import type { PointFieldClientComponent } from 'payload'
+import type { PointFieldClientProps } from 'payload'
 
 import { PointField } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomPointFieldClient: PointFieldClientComponent = (props) => {
+export const CustomPointFieldClient: React.FC<PointFieldClientProps> = (props) => {
   return <PointField {...props} />
 }

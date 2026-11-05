@@ -22,9 +22,7 @@ export type CreateServerFeatureArgs<UnSanitizedProps, SanitizedProps, ClientProp
         resolvedFeatures: ResolvedServerFeatureMap
         // unSanitized EditorConfig,
         unSanitizedEditorConfig: ServerEditorConfig
-      }) =>
-        | Promise<ServerFeature<SanitizedProps, ClientProps>>
-        | ServerFeature<SanitizedProps, ClientProps>)
+      }) => ServerFeature<SanitizedProps, ClientProps>)
     | Omit<ServerFeature<SanitizedProps, ClientProps>, 'sanitizedServerFeatureProps'>
 } & Pick<
   FeatureProviderServer<UnSanitizedProps, ClientProps>,
@@ -54,7 +52,7 @@ export const createServerFeature: <
     }
 
     if (typeof feature === 'function') {
-      featureProviderServer.feature = async ({
+      featureProviderServer.feature = ({
         config,
         featureProviderMap,
         isRoot,
@@ -62,7 +60,7 @@ export const createServerFeature: <
         resolvedFeatures,
         unSanitizedEditorConfig,
       }) => {
-        const toReturn = await feature({
+        const toReturn = feature({
           config,
           featureProviderMap,
           isRoot,

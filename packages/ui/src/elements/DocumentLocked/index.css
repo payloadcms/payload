@@ -1,0 +1,5 @@
+@layer payload-default {
+  .document-locked__updated-at {
+    margin-top: var(--spacer-2);
+  }
+}

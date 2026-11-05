@@ -1,0 +1,17 @@
+export type EntityInputSchema = {
+  $defs?: Record<string, boolean | EntityInputSchema>
+  $ref?: string
+  [key: string]: unknown
+  additionalProperties?: boolean | EntityInputSchema
+  anyOf?: Array<boolean | EntityInputSchema>
+  const?: unknown
+  /** Hidden from the schema shown to agents unless required. Validation still accepts it. */
+  deprecated?: boolean
+  description?: string
+  enum?: unknown[]
+  items?: EntityInputSchema | EntityInputSchema[]
+  oneOf?: Array<boolean | EntityInputSchema>
+  properties?: Record<string, EntityInputSchema>
+  required?: string[]
+  type?: string | string[]
+}

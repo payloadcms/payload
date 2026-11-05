@@ -1,12 +1,12 @@
 'use client'
 
-import type { SelectFieldClientComponent } from 'payload'
+import type { SelectFieldClientProps } from 'payload'
 
 import { FieldLabel, ReactSelect, useDocumentInfo, useField, useListQuery } from '@payloadcms/ui'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { applySortOrder, normalizeQueryParam, stripSortDash } from '../../utilities/sortHelpers.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'sort-order-field'
 
@@ -20,7 +20,7 @@ const options = [
 
 const defaultOption: OrderOption = options[0]
 
-export const SortOrder: SelectFieldClientComponent = (props) => {
+export const SortOrder: React.FC<SelectFieldClientProps> = (props) => {
   const { id } = useDocumentInfo()
   const { query } = useListQuery()
 
@@ -110,7 +110,6 @@ export const SortOrder: SelectFieldClientComponent = (props) => {
     <div className={baseClass}>
       <FieldLabel label={props.field.label} path={props.path} />
       <ReactSelect
-        className={baseClass}
         disabled={props.readOnly}
         inputId={`field-${props.path.replace(/\./g, '__')}`}
         isClearable={false}

@@ -27,6 +27,7 @@ export const getDoc = async <T>(args: {
       where,
       draft,
       trash: true, // Include trashed documents
+      overrideAccess: true,
     })
 
     if (docs[0]) {

@@ -6,6 +6,11 @@ export type ResendAdapterArgs = {
   apiKey: string
   defaultFromAddress: string
   defaultFromName: string
+  /**
+   * Override all emails to be sent to this address.
+   * Useful for testing.
+   */
+  overrideRecipientAddress?: string
 }
 
 type ResendAdapter = EmailAdapter<ResendResponse>
@@ -29,9 +34,14 @@ export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
     defaultFromAddress,
     defaultFromName,
     sendEmail: async (message) => {
+      const modifiedMessage = {
+        ...message,
+        ...(args.overrideRecipientAddress ? { to: args.overrideRecipientAddress } : {}),
+      }
+
       // Map the Payload email options to Resend email options
       const sendEmailOptions = mapPayloadEmailToResendEmail(
-        message,
+        modifiedMessage,
         defaultFromAddress,
         defaultFromName,
       )
@@ -45,19 +55,37 @@ export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
         method: 'POST',
       })
 
-      const data = (await res.json()) as ResendResponse
+      // Read the body as text first so a non-JSON response (e.g. an edge/CDN
+      // "Origin is disallowed" page, an empty body, or an HTML error page) does
+      // not surface as an opaque JSON parse error and hide the real failure.
+      const rawBody = await res.text()
 
-      if ('id' in data) {
-        return data
-      } else {
-        const statusCode = data.statusCode || res.status
-        let formattedError = `Error sending email: ${statusCode}`
-        if (data.name && data.message) {
-          formattedError += ` ${data.name} - ${data.message}`
+      let data: ResendResponse | undefined
+      if (rawBody) {
+        try {
+          data = JSON.parse(rawBody) as ResendResponse
+        } catch {
+          // Body was not JSON — fall through to the error handling below.
         }
-
-        throw new APIError(formattedError, statusCode)
       }
+
+      if (res.ok && data && 'id' in data) {
+        return data
+      }
+
+      const errorData = data && 'statusCode' in data ? data : undefined
+      const statusCode = errorData?.statusCode || res.status || 500
+      let formattedError = 'Error sending email'
+
+      if (errorData?.name && errorData?.message) {
+        formattedError += `: ${errorData.name} - ${errorData.message}`
+      } else if (rawBody) {
+        // No structured error shape — include the raw body so the underlying
+        // reason (e.g. "Origin is disallowed") reaches the caller.
+        formattedError += ` - ${rawBody}`
+      }
+
+      throw new APIError(formattedError, statusCode)
     },
   })
 
@@ -82,9 +110,10 @@ function mapPayloadEmailToResendEmail(
 
     // Optional
     attachments: mapAttachments(message.attachments),
+    headers: mapHeaders(message.headers),
     html: message.html?.toString() || '',
     text: message.text?.toString() || '',
-  } as ResendSendEmailOptions
+  }
 }
 
 function mapFromAddress(
@@ -94,6 +123,16 @@ function mapFromAddress(
 ): ResendSendEmailOptions['from'] {
   if (!address) {
     return `${defaultFromName} <${defaultFromAddress}>`
+  }
+
+  if (Array.isArray(address)) {
+    const first = address[0]
+
+    if (!first) {
+      return `${defaultFromName} <${defaultFromAddress}>`
+    }
+
+    return typeof first === 'string' ? first : `${first.name} <${first.address}>`
   }
 
   if (typeof address === 'string') {
@@ -126,14 +165,27 @@ function mapAttachments(
     return []
   }
 
-  return attachments.map((attachment) => {
-    if (!attachment.filename || !attachment.content) {
-      throw new APIError('Attachment is missing filename or content', 400)
+  return attachments.map((attachment): Attachment => {
+    if (!attachment.filename) {
+      throw new APIError('Attachment is missing filename', 400)
+    }
+
+    if (!attachment.content && !attachment.path) {
+      throw new APIError('Attachment is missing both content and path', 400)
+    }
+
+    // When both content and path are provided, content takes priority; path is ignored.
+    if (attachment.path && !attachment.content) {
+      const path = typeof attachment.path === 'string' ? attachment.path : attachment.path.href
+      return {
+        filename: attachment.filename,
+        path,
+      }
     }
 
     if (typeof attachment.content === 'string') {
       return {
-        content: Buffer.from(attachment.content),
+        content: attachment.content,
         filename: attachment.filename,
       }
     }
@@ -147,6 +199,32 @@ function mapAttachments(
 
     throw new APIError('Attachment content must be a string or a buffer', 400)
   })
+}
+
+function mapHeaders(headers: SendEmailOptions['headers']): Record<string, string> | undefined {
+  if (!headers) {
+    return undefined
+  }
+
+  // Array-of-objects form: [{ key: string; value: string }, ...]
+  if (Array.isArray(headers)) {
+    return headers.reduce<Record<string, string>>((acc, { key, value }) => {
+      acc[key] = value
+      return acc
+    }, {})
+  }
+
+  // Object form: { [key: string]: string | string[] | { prepared: boolean; value: string } }
+  return Object.entries(headers).reduce<Record<string, string>>((acc, [key, value]) => {
+    if (typeof value === 'string') {
+      acc[key] = value
+    } else if (Array.isArray(value)) {
+      acc[key] = value.join(', ')
+    } else {
+      acc[key] = value.value
+    }
+    return acc
+  }, {})
 }
 
 type ResendSendEmailOptions = {

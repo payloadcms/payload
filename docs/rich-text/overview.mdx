@@ -6,21 +6,11 @@ order: 10
 title: Rich Text Editor
 ---
 
-<Banner type="success">
+Payload's rich text editor powers the [rich text field](/docs/fields/rich-text). It is built on top of [Lexical](https://lexical.dev/), Meta's rich text framework, which provides the underlying foundation we extend with Payload-specific features.
 
-This documentation is about our new editor, based on Lexical (Meta's rich text editor). The previous default
-editor, based on Slate, has been deprecated and will be removed in 4.0. You can read [its documentation](/docs/rich-text/slate),
-or the [migration guide](/docs/rich-text/migration) to migrate from Slate to Lexical (recommended).
+We aim to offer the best editing experience you can imagine: healthy defaults out of the box, paired with the flexibility to customize every detail — from the “/” menu and toolbars (inline or fixed) to inserting any component or subfield you need.
 
-</Banner>
-
-The editor is the most important property of the [rich text field](/docs/fields/rich-text).
-
-As a key part of Payload, we are proud to offer you the best editing experience you can imagine. With healthy
-defaults out of the box, but also with the flexibility to customize every detail: from the “/” menu
-and toolbars (whether inline or fixed) to inserting any component or subfield you can imagine.
-
-To use the rich text editor, first you need to install it:
+To use the rich text editor, first install it:
 
 ```bash
 pnpm install @payloadcms/richtext-lexical
@@ -150,7 +140,9 @@ You can find more information about creating your own feature in our [building c
 
 Every single piece of saved data is 100% fully typed within lexical. It provides a type for every single node, which can be imported from `@payloadcms/richtext-lexical` - each type is prefixed with `Serialized`, e.g., `SerializedUploadNode`.
 
-To fully type the entire editor JSON, you can use our `TypedEditorState` helper type, which accepts a union of all possible node types as a generic. We don't provide a type that already contains all possible node types because they depend on which features you have enabled in your editor. Here is an example:
+If you have [generated types](#automatic-type-generation), each `richText` field is already fully typed - reference it directly (e.g. `Post['richText']`) instead of assembling a union by hand.
+
+To type editor state without generated types, use our `TypedEditorState` helper type, which accepts a union of all possible node types as a generic. We don't provide a type that already contains all possible node types because they depend on which features you have enabled in your editor. Here is an example:
 
 ```ts
 import type {
@@ -263,7 +255,48 @@ Make sure to only use types exported from `@payloadcms/richtext-lexical`, not fr
 
 ### Automatic type generation
 
-Lexical does not generate accurate type definitions for your richText fields for you yet - this will be improved in the future. Currently, it only outputs the rough shape of the editor JSON, which you can enhance using type assertions.
+When you [generate types](../typescript/generating-types), every `richText` field gets an accurate, fully-typed definition based on the exact features enabled on _that_ editor. Each field's nodes are narrowed to what the editor actually allows - including your custom blocks and the specific collections its relationship and upload nodes can point to.
+
+You can reference a field's editor state type straight from your generated types - no manual `TypedEditorState` union, no type assertions:
+
+```ts
+import type { Post } from './payload-types'
+
+// Fully typed and narrowed to this editor's nodes - use it wherever you need the field's type
+type PostRichText = Post['richText']
+```
+
+This data is also directly assignable to the `SerializedEditorState` that every [converter](./converting-html) accepts, so you can pass it straight through:
+
+```ts
+import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
+
+const html = convertLexicalToHTML({ data: post.richText })
+```
+
+### Building editor state
+
+Use the `buildEditorState` helper to construct editor state JSON from text and/or nodes. Pass your generated field type as the generic and the result is exactly that field's type - with the `nodes` you pass checked against that editor's allowed nodes:
+
+```ts
+import { buildEditorState } from '@payloadcms/richtext-lexical'
+
+import type { Post } from './payload-types'
+
+post.richText = buildEditorState<Post['richText']>({ text: 'Hello world' })
+```
+
+If you don't have a generated type, you can pass a node union instead (e.g. `buildEditorState<DefaultNodeTypes>({ text: 'Hello world' })`).
+
+To type an individual node you build by hand (for example a single block, or a `.map()` of nodes), use the `RichTextNodes` helper to pull a field's node union out of its generated type:
+
+```ts
+import type { RichTextNodes } from '@payloadcms/richtext-lexical'
+
+import type { Post } from './payload-types'
+
+type PostNode = RichTextNodes<Post['richText']>
+```
 
 ## Admin customization
 
@@ -308,6 +341,30 @@ You can customize the placeholder (the text that appears in the editor when it's
   }),
 }
 ```
+
+## Views
+
+Views let you define shared rendering logic for Lexical nodes that works in both the admin panel and JSX converters. You can define multiple named views (like `default`, `preview`, `debug`) and switch between them using the built-in view selector, then pass the same node maps to JSX converters for consistent rendering outside the editor.
+
+```ts
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
+export const Posts = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'content',
+      type: 'richText',
+      editor: lexicalEditor({
+        // Import path with #exportName to specify which view map to use
+        views: './views.js#postViews',
+      }),
+    },
+  ],
+}
+```
+
+Learn more about [Views](/docs/rich-text/views).
 
 ## Detecting empty editor state
 

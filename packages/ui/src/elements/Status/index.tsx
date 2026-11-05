@@ -12,7 +12,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'status'
 
@@ -39,7 +39,8 @@ export const Status: React.FC = () => {
   } = useConfig()
 
   const { reset: resetForm } = useForm()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const { i18n, t } = useTranslation()
 
   const revertModalSlug = `confirm-revert-${id}`
@@ -154,14 +155,13 @@ export const Status: React.FC = () => {
         title={`${t('version:status')}: ${t(`version:${displayStatusKey}`)}`}
       >
         <div className={`${baseClass}__value-wrap`}>
-          <span className={`${baseClass}__label`}>{t('version:status')}:&nbsp;</span>
           <span className={`${baseClass}__value`}>{t(`version:${displayStatusKey}`)}</span>
 
           {!isTrashed && canUpdate && hasPublishedDoc && statusToRender === 'changed' && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
-                buttonStyle="none"
+                buttonStyle="ghost"
                 className={`${baseClass}__action`}
                 id="action-revert-to-published"
                 onClick={() => toggleModal(revertModalSlug)}

@@ -13,9 +13,11 @@ import type {
 import type { MultiTenantPluginConfig } from '../../types.js'
 
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
-import './index.scss'
+import './index.css'
 
 const confirmLeaveWithoutSavingSlug = 'confirm-leave-without-saving'
+
+const baseClass = 'tenant-selector'
 
 export const TenantSelectorClient = ({
   disabled: disabledFromProps,
@@ -71,8 +73,9 @@ export const TenantSelectorClient = ({
   }
 
   return (
-    <div className="tenant-selector">
+    <div className={baseClass}>
       <SelectInput
+        className={`${baseClass}__select`}
         isClearable={['dashboard', 'list'].includes(viewType ?? '')}
         label={
           label ? getTranslation(label, i18n) : t('plugin-multi-tenant:nav-tenantSelector-label')

@@ -92,14 +92,16 @@ export async function loginClientSide(args: LoginArgs): Promise<void> {
     path: createFirstUser,
   })
 
-  if ((await page.locator('#nav-toggler').count()) > 0) {
-    // a user is already logged in - log them out
+  if ((await page.locator('.app-header__sidebar-toggle').count()) > 0) {
+    // a user is already logged in - open UserMenu and click logout
     await openNav(page)
-    await expect(page.locator('.nav__controls [aria-label="Log out"]')).toBeVisible()
-    await page.locator('.nav__controls [aria-label="Log out"]').click()
+    await page.locator('.user-menu__trigger').click()
+    const logoutAnchor = page.locator('a[href$="/logout"]')
+    await expect(logoutAnchor).toBeVisible()
+    await logoutAnchor.click()
 
     if (await page.locator('dialog#leave-without-saving').isVisible()) {
-      await page.locator('dialog#leave-without-saving #confirm-action').click()
+      await page.locator('dialog#leave-without-saving [data-dialog-action="confirm"]').click()
     }
 
     await page.waitForURL(loginRoute)
@@ -111,10 +113,7 @@ export async function loginClientSide(args: LoginArgs): Promise<void> {
   await wait(500)
   await page.click('[type=submit]')
 
-  await expect(page.locator('.step-nav__home')).toBeVisible()
-  if ((await page.locator('a.step-nav__home').count()) > 0) {
-    await page.locator('a.step-nav__home').click()
-  }
+  await expect(page.locator('.app-header')).toBeVisible()
 
   await page.waitForURL(adminRoute)
 

@@ -2,11 +2,18 @@ import mongoose from 'mongoose'
 
 import type { MongooseAdapter } from '../index.js'
 import type { GlobalModel } from '../types.js'
+import type { MongoSchemaBuildContext } from './schemaBuildContext.js'
 
 import { getBuildQueryPlugin } from '../queries/getBuildQueryPlugin.js'
 import { buildSchema } from './buildSchema.js'
 
-export const buildGlobalModel = (adapter: MongooseAdapter): GlobalModel | null => {
+export const buildGlobalModel = ({
+  adapter,
+  schemaBuildContext,
+}: {
+  adapter: MongooseAdapter
+  schemaBuildContext: MongoSchemaBuildContext
+}): GlobalModel | null => {
   if (adapter.payload.config.globals && adapter.payload.config.globals.length > 0) {
     const globalsSchema = new mongoose.Schema(
       {},
@@ -30,6 +37,8 @@ export const buildGlobalModel = (adapter: MongooseAdapter): GlobalModel | null =
         },
         configFields: globalConfig.fields,
         payload: adapter.payload,
+        schemaBuildContext,
+        schemaPath: `global:${globalConfig.slug}`,
       })
       Globals.discriminator(globalConfig.slug, globalSchema)
     })

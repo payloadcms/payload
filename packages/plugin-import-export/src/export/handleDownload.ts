@@ -2,6 +2,9 @@ import type { PayloadRequest } from 'payload'
 
 import { APIError } from 'payload'
 
+import type { ExportDoc } from '../types.js'
+
+import { getSubmittedFormValues } from '../utilities/getSubmittedFormValues.js'
 import { resolveLimit } from '../utilities/resolveLimit.js'
 import { createExport } from './createExport.js'
 
@@ -43,17 +46,19 @@ export const handleDownload = async (req: PayloadRequest, debug = false) => {
     }
 
     const { user } = req
-
-    body.data.userID = user?.id || user?.user?.id
-    body.data.userCollection = user?.collection || user?.user?.collection
+    const exportDoc = getSubmittedFormValues({
+      formData: body.data as Record<string, unknown>,
+    }) as ExportDoc
 
     const res = await createExport({
       ...body.data,
       debug,
       download: true,
+      exportDoc,
       maxLimit,
       req,
-      user: req.user,
+      userCollection: user?.collection,
+      userID: user?.id,
     })
 
     return res as Response

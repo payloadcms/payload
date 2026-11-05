@@ -60,6 +60,11 @@ export const promise = async <T>({
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
 
   if (fieldAffectsData(field)) {
+    if ('disableDuplicate' in field && field.disableDuplicate) {
+      delete siblingDoc[field.name]
+      return
+    }
+
     let fieldData = siblingDoc?.[field.name!]
     const fieldIsLocalized = localization && fieldShouldBeLocalized({ field, parentIsLocalized })
 
@@ -188,12 +193,17 @@ export const promise = async <T>({
                 rows.forEach((row, rowIndex) => {
                   const blockTypeToMatch = row.blockType
 
+                  const fieldBlock = field.blocks.find((curBlock) =>
+                    typeof curBlock === 'string'
+                      ? curBlock === blockTypeToMatch
+                      : curBlock.slug === blockTypeToMatch,
+                  )
                   const block: Block | undefined =
-                    req.payload.blocks[blockTypeToMatch] ??
-                    ((field.blockReferences ?? field.blocks).find(
-                      (curBlock) =>
-                        typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-                    ) as Block | undefined)
+                    typeof fieldBlock === 'string' ? req.payload.blocks[fieldBlock] : fieldBlock
+
+                  if (!block) {
+                    return
+                  }
 
                   promises.push(
                     traverseFields({
@@ -202,12 +212,12 @@ export const promise = async <T>({
                       collection,
                       context,
                       doc,
-                      fields: block!.fields,
+                      fields: block.fields,
                       overrideAccess,
                       parentIndexPath: '',
                       parentIsLocalized: parentIsLocalized || field.localized!,
                       parentPath: path + '.' + rowIndex,
-                      parentSchemaPath: schemaPath + '.' + block!.slug,
+                      parentSchemaPath: schemaPath + '.' + block.slug,
                       req,
                       siblingDoc: row,
                     }),
@@ -290,11 +300,13 @@ export const promise = async <T>({
             rows.forEach((row, rowIndex) => {
               const blockTypeToMatch = row.blockType
 
+              const fieldBlock = field.blocks.find((curBlock) =>
+                typeof curBlock === 'string'
+                  ? curBlock === blockTypeToMatch
+                  : curBlock.slug === blockTypeToMatch,
+              )
               const block: Block | undefined =
-                req.payload.blocks[blockTypeToMatch] ??
-                ((field.blockReferences ?? field.blocks).find(
-                  (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-                ) as Block | undefined)
+                typeof fieldBlock === 'string' ? req.payload.blocks[fieldBlock] : fieldBlock
 
               if (block) {
                 ;(row as JsonObject).blockType = blockTypeToMatch

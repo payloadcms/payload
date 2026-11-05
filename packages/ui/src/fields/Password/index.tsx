@@ -1,7 +1,7 @@
 'use client'
 import type { PasswordFieldValidation, PayloadRequest } from 'payload'
 
-import { password } from 'payload/shared'
+import { isFieldDisabled, password } from 'payload/shared'
 import React, { useCallback, useMemo } from 'react'
 
 import type { PasswordFieldProps } from './types.js'
@@ -12,21 +12,16 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
 import { isFieldRTL } from '../shared/index.js'
 import { PasswordInput } from './input.js'
+import './index.css'
 
 const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {
     autoComplete,
     field,
     field: {
-      admin: {
-        className,
-        disabled: disabledFromProps,
-        placeholder,
-        rtl,
-      } = {} as PasswordFieldProps['field']['admin'],
+      admin: { className, description, placeholder, rtl } = {},
       label,
       localized,
       required,
@@ -95,6 +90,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       autoComplete={autoComplete}
       BeforeInput={BeforeInput}
       className={className}
+      description={description}
       Description={Description}
       Error={Error}
       inputRef={inputRef}
@@ -106,7 +102,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       }}
       path={path}
       placeholder={placeholder}
-      readOnly={disabled || disabledFromProps}
+      readOnly={disabled || isFieldDisabled(field, 'field')}
       required={required}
       rtl={renderRTL}
       showError={showError}

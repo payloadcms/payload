@@ -1,0 +1,54 @@
+---
+title: Banner
+label: Banner
+order: 30
+desc: Display contextual information and status messages with Payload's Banner component.
+keywords: ui, component, banner, notice, status, message
+---
+
+The `Banner` component displays a short message that needs more emphasis than surrounding content. Use its type to communicate the purpose of the message.
+
+## Import
+
+Inside a Payload Admin Panel Custom Component:
+
+```tsx
+import { Banner } from '@payloadcms/ui'
+```
+
+You can also import the component directly:
+
+```tsx
+import { Banner } from '@payloadcms/ui/elements/Banner'
+```
+
+## Basic usage
+
+<ComponentPreview component="Banner" example="basic" />
+
+## Types
+
+Use `brand` for product context, `success` to confirm an action, `warning` to flag a risk, and `danger` when something failed. Use the default type for neutral messages.
+
+<ComponentPreview component="Banner" example="variants" />
+
+Keep banner copy concise and include the next action when the user must resolve something.
+
+## Accessibility
+
+- Use text that communicates the message without relying on color alone.
+- Include an icon only when it reinforces the meaning of the message.
+- Keep actionable banners keyboard accessible and give their action a clear purpose.
+
+## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop        | Type                                                         | Default     | Description                                 |
+| ----------- | ------------------------------------------------------------ | ----------- | ------------------------------------------- |
+| `children`  | `ReactNode`                                                  | —           | Message displayed inside the banner.        |
+| `type`      | `'default' \| 'brand' \| 'success' \| 'warning' \| 'danger'` | `'default'` | Sets the message style.                     |
+| `icon`      | `ReactNode`                                                  | —           | Displays an icon beside the message.        |
+| `alignIcon` | `'left' \| 'right'`                                          | `'left'`    | Positions the icon.                         |
+| `onClick`   | `(event: MouseEvent) => void`                                | —           | Makes the banner actionable.                |
+| `to`        | `string`                                                     | —           | Makes the banner navigate to the given URL. |

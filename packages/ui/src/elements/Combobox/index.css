@@ -1,0 +1,136 @@
+@layer payload-default {
+  /* Content controls the minimum width, including when the viewport is narrower
+     than Popup's size presets. */
+  .popup.combobox > .popup__content {
+    min-width: 0;
+  }
+
+  /* The combobox supplies its own padding so the search bar can span the full
+     width and sit flush against its dividing border. */
+  .popup__scroll-container:has(> .combobox__content) {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .combobox__content {
+    --combobox-min-width: calc(var(--spacer-6) * 6);
+    --combobox-available-width: calc(100vw - var(--spacer-3));
+
+    display: flex;
+    flex-direction: column;
+    min-width: min(var(--combobox-min-width), var(--combobox-available-width));
+    max-height: inherit;
+  }
+
+  /* Held steady while searching so the popup doesn't resize as entries filter out */
+  .combobox__content[data-width-locked] {
+    min-width: min(var(--combobox-locked-width), var(--combobox-available-width));
+  }
+
+  .combobox__search {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    height: calc(var(--spacer-5) + var(--spacer-2) + var(--stroke-width-small));
+    padding-inline: var(--spacer-2-5);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .combobox__search-bar {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    height: var(--spacer-4);
+    padding-inline-end: var(--spacer-2);
+    background: var(--color-bg-secondary);
+    border-radius: var(--button-radius);
+
+    &:focus-within {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
+  }
+
+  .combobox__search-bar svg {
+    display: block;
+    flex-shrink: 0;
+    color: var(--color-icon-secondary);
+  }
+
+  .combobox__search-input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    background: transparent;
+    border: none;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    color: var(--color-text);
+
+    &::placeholder {
+      color: var(--color-text-tertiary);
+    }
+
+    &:focus,
+    &:focus-visible {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  .combobox__entries {
+    min-height: 0;
+    padding-block: var(--spacer-2);
+    overflow-y: auto;
+  }
+
+  .popup__scroll-container:not(.popup__scroll-container--show-scrollbar)
+    > .combobox__content
+    > .combobox__entries {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .combobox__entry {
+    cursor: pointer;
+    display: flex;
+  }
+
+  .combobox__header {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    padding-block: var(--spacer-2);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .combobox__footer {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    padding-block: var(--spacer-2);
+    border-top: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .combobox__no-results {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(var(--spacer-6) + var(--spacer-2));
+    padding-block: var(--spacer-2);
+    padding-inline: var(--spacer-3);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    color: var(--color-text-secondary);
+  }
+}

@@ -138,9 +138,11 @@ Your Custom Views will be provided with the following props:
 | `payload`        | The [Payload](../local-api/overview) class.                                                                                        |
 
 <Banner type="warning">
-  **Note:** Some views may receive additional props, such as [Collection
-  Views](#collection-views) and [Global Views](#global-views). See the relevant
-  section for more details.
+  **Note:** The props above apply to **Root Views** and any view added at the
+  root level. Collection List Views and Collection/Global Edit Views receive a
+  different set of props specific to their context. See [List View
+  Props](./list-view#props) and [Document Views](./document-views) for their
+  respective prop references.
 </Banner>
 
 Here is an example of a Custom View component:
@@ -163,7 +165,7 @@ export function MyCustomView(props: AdminViewServerProps) {
 
 <Banner type="success">
   **Tip:** For consistent layout and navigation, you may want to wrap your
-  Custom View with one of the built-in [Templates](./overview#templates).
+  Custom View with one of the built-in [Templates](#view-templates).
 </Banner>
 
 ### View Templates
@@ -175,14 +177,15 @@ Here is an example of how to use the Default Template in your Custom View:
 ```tsx
 import type { AdminViewServerProps } from 'payload'
 
-import { DefaultTemplate } from '@payloadcms/next/templates'
 import { Gutter } from '@payloadcms/ui'
+import { DefaultTemplate } from '@payloadcms/ui/rsc'
 import React from 'react'
 
 export function MyCustomView({
   initPageResult,
   params,
   searchParams,
+  user,
 }: AdminViewServerProps) {
   return (
     <DefaultTemplate
@@ -192,7 +195,7 @@ export function MyCustomView({
       payload={initPageResult.req.payload}
       permissions={initPageResult.permissions}
       searchParams={searchParams}
-      user={initPageResult.req.user || undefined}
+      user={user}
       visibleEntities={initPageResult.visibleEntities}
     >
       <Gutter>
@@ -203,6 +206,8 @@ export function MyCustomView({
   )
 }
 ```
+
+The top-level `user` has field read access applied and should be used for values passed toward client-facing components, so restricted data never reaches the client. `initPageResult.req.user` retains the complete server-side identity and should be used for access-control checks and Local API queries — do not use it for values sent to the client, and do not rely on the filtered `user` for authorization decisions. See [Server principal vs. read-filtered user](./overview#server-principal-vs-read-filtered-user) for details.
 
 ### Securing Custom Views
 
@@ -315,7 +320,7 @@ The following options are available:
 | Property | Description                                                                                                                                     |
 | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `edit`   | The Edit View corresponds to a single Document for any given Collection and consists of various nested views. [More details](./document-views). |
-| `list`   | The List View is used to show a list of Documents for any given Collection. [More details](#list-view).                                         |
+| `list`   | The List View is used to show a list of Documents for any given Collection. [More details](./list-view).                                        |
 | `[key]`  | Any other key can be used to add a completely new Collection View. [More details](#adding-new-views).                                           |
 
 _For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._

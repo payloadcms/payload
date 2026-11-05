@@ -1,0 +1,22 @@
+@layer payload-default {
+  .query-preset-bar {
+    display: flex;
+    align-items: center;
+  }
+
+  .query-preset-bar__popup .popup-button-list__button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+}
+
+/* Destructive delete button - targets the portal content */
+.query-preset-bar__popup-content .popup-button-list__button.query-preset-bar__delete {
+  color: var(--color-text-danger);
+}
+
+.query-preset-bar__popup-content .popup-button-list__button.query-preset-bar__delete:hover {
+  color: var(--color-text-danger);
+  background-color: var(--color-bg-danger-tertiary);
+}

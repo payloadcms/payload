@@ -17,7 +17,7 @@ const removeCSSImports = {
     build.onLoad({ filter: /.*/ }, async (args) => {
       if (args.path.includes('node_modules') || !args.path.includes(dirname)) return
       const contents = await fs.promises.readFile(args.path, 'utf8')
-      const withRemovedImports = contents.replace(/import\s+.*\.scss';?[\r\n\s]*/g, '')
+      const withRemovedImports = contents.replace(/import\s+.*\.(scss|css)';?[\r\n\s]*/g, '')
       return { contents: withRemovedImports, loader: 'default' }
     })
   },
@@ -77,20 +77,42 @@ async function build() {
     bundle: true,
     minify: true,
     outdir: 'dist-styles',
+    loader: { '.svg': 'dataurl' },
     packages: 'external',
     plugins: [sassPlugin({ css: 'external' })],
   })
 
   try {
-    fs.renameSync('dist-styles/index.css', `${directoryArg}/styles.css`)
+    // The esbuild pass above bundles only component styles. The design tokens
+    // live in `src/css/*.css` (referenced via `src/styles.css`'s `@import`
+    // chain). `copyfiles` also copies `src/styles.css` to `dist/styles.css`,
+    // but the write below would overwrite it — dropping the tokens entirely.
+    // Consumers that load `styles.css` directly (the `@payloadcms/ui/css`
+    // export, and `css/app.css`'s `@import '../styles.css'`) would then get
+    // components with no CSS custom properties, so every `var(--spacer-*)`
+    // resolves empty (e.g. switch toggles collapse to 0×0). Prepend the token
+    // chain so the published `styles.css` is a complete, self-contained sheet.
+    // Read the tokens straight from `src/css/*.css` so this works regardless of
+    // `directoryArg` (e.g. `dist` for the normal build, `esbuild` for the
+    // bundle-size analysis build, which `copyfiles` does not populate).
+    const stylesEntry = fs.readFileSync('src/styles.css', 'utf8')
+    const tokenCss = [...stylesEntry.matchAll(/@import\s+['"]\.\/(css\/[^'"]+)['"]/g)]
+      .map((match) => fs.readFileSync(path.join('src', match[1]), 'utf8'))
+      .join('\n')
+    const componentCss = fs.readFileSync('dist-styles/index.css', 'utf8')
+
+    fs.writeFileSync(`${directoryArg}/styles.css`, `${tokenCss}\n${componentCss}`, 'utf8')
     fs.rmSync('dist-styles', { recursive: true })
   } catch (err) {
-    console.error(`Error while renaming index.css and dist-styles: ${err}`)
+    console.error(`Error while bundling styles.css and removing dist-styles: ${err}`)
     throw err
   }
 
   console.log('styles.css bundled successfully')
-  // Bundle `client.ts`
+
+  // Bundle `client.ts`. Admin code must import client code from this barrel only:
+  // subpaths like `@payloadcms/ui/elements/Link` stay unbundled for apps outside the
+  // admin panel, and hold their own copies of providers and contexts.
   const resultClient = await esbuild.build({
     entryPoints: ['dist/exports/client/index.js'],
     bundle: true,
@@ -132,6 +154,10 @@ function require(m) {
       'react-dom',
       'next',
       'crypto',
+      // `sonner` owns a module-level toast event bus that the mounted `<Toaster>`
+      // subscribes to. Keep it external so code that imports `sonner` directly
+      // dispatches to the same bus as the barrel's `<Toaster>`.
+      'sonner',
     ],
     //packages: 'external',
     minify: true,
@@ -147,8 +173,8 @@ function require(m) {
         }),*/
     ],
     sourcemap: true,
-    // 18.20.2 is the lowest version of node supported by Payload
-    target: 'node18.20.2',
+    // 24.22.1 is the lowest version of node supported by Payload
+    target: 'node24.22.1',
   })
   console.log('client.ts bundled successfully')
 
@@ -186,8 +212,8 @@ function require(m) {
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [removeCSSImports, commonjs()],
     sourcemap: true,
-    // 18.20.2 is the lowest version of node supported by Payload
-    target: 'node18.20.2',
+    // 24.22.1 is the lowest version of node supported by Payload
+    target: 'node24.22.1',
   })
   console.log('shared.ts bundled successfully')
 

@@ -22,4 +22,5 @@ export const FileMimeType: CollectionConfig = {
       name: 'title',
     },
   ],
+  versions: false,
 }

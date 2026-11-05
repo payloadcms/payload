@@ -30,6 +30,7 @@ export const resaveSelfAfterCreate =
         depth: 0,
         draft: collection?.versions?.drafts && doc._status !== 'published',
         locale,
+        overrideAccess: true,
         req,
       })
     } catch (err: unknown) {

@@ -1,7 +1,7 @@
 import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { SanitizedPermissions } from '../../auth/index.js'
-import type { ImportMap } from '../../bin/generateImportMap/index.js'
+import type { ImportMap } from '../../cli/commands/generateImportMap/generateImportMap.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { ClientConfig } from '../../config/client.js'
 import type {
@@ -19,7 +19,7 @@ import type { Data, StaticDescription } from '../types.js'
 import type { DocumentSubViewTypes } from './document.js'
 
 export type AdminViewConfig = {
-  Component: PayloadComponent
+  Component: PayloadComponent<AdminViewServerProps>
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
   meta?: MetaConfig
@@ -32,9 +32,12 @@ export type AdminViewConfig = {
 }
 
 export type AdminViewClientProps = {
-  browseByFolderSlugs?: SanitizedCollectionConfig['slug'][]
   clientConfig: ClientConfig
+  collectionSlug?: SanitizedCollectionConfig['slug']
+  docID?: number | string
   documentSubViewType?: DocumentSubViewTypes
+  folderID?: number | string
+  globalSlug?: SanitizedGlobalConfig['slug']
   viewType: ViewTypes
 }
 
@@ -46,7 +49,6 @@ export type AdminViewServerPropsOnly = {
    * @todo remove `docID` here as it is already contained in `initPageResult`
    */
   readonly docID?: number | string
-  readonly folderID?: number | string
   readonly globalConfig?: SanitizedGlobalConfig
   readonly importMap: ImportMap
   readonly initialData?: Data
@@ -90,16 +92,16 @@ export type InitPageResult = {
  */
 export type ViewTypes =
   | 'account'
-  | 'collection-folders'
   | 'createFirstUser'
   | 'dashboard'
   | 'document'
-  | 'folders'
+  | 'hierarchy'
   | 'list'
   | 'reset'
   | 'trash'
   | 'verify'
   | 'version'
+  | ({} & string)
 
 export type ServerPropsFromView = {
   collectionConfig?: SanitizedConfig['collections'][number]

@@ -36,6 +36,40 @@ export const BlocksFieldAccess: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'queryRestrictedBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'restrictedBlock',
+          fields: [
+            { name: 'title', type: 'text' },
+            { name: 'content', type: 'text', access: { read: () => false } },
+          ],
+        },
+        {
+          slug: 'summaryBlock',
+          fields: [
+            { name: 'details', type: 'group', fields: [{ name: 'summary', type: 'text' }] },
+            { name: 'shared', type: 'text' },
+          ],
+        },
+        {
+          slug: 'detailedBlock',
+          fields: [
+            { name: 'details', type: 'group', fields: [{ name: 'title', type: 'text' }] },
+            { name: 'shared', type: 'text', access: { read: () => false } },
+          ],
+        },
+      ],
+    },
+    { name: 'queryRestrictedBlockRefs', type: 'blocks', blocks: ['titleblock'] },
+    {
+      name: 'parentRestrictedBlockRefs',
+      type: 'blocks',
+      blocks: ['titleblock'],
+      access: { read: () => false },
+    },
     // Block field with normal blocks - WITH access control (should be read-only)
     {
       type: 'blocks',
@@ -65,8 +99,7 @@ export const BlocksFieldAccess: CollectionConfig = {
     {
       type: 'blocks',
       name: 'editableBlockRefs',
-      blocks: [],
-      blockReferences: ['titleblock'],
+      blocks: ['titleblock'],
     },
     // Block field with block references - WITH access control (should be read-only)
     {
@@ -77,8 +110,7 @@ export const BlocksFieldAccess: CollectionConfig = {
         create: () => false,
         update: () => false,
       },
-      blocks: [],
-      blockReferences: ['titleblock'],
+      blocks: ['titleblock'],
     },
     // Test tab with read-only blocks fields
     {
@@ -122,12 +154,12 @@ export const BlocksFieldAccess: CollectionConfig = {
                 create: () => false,
                 update: () => false,
               },
-              blocks: [],
-              blockReferences: ['titleblock'],
+              blocks: ['titleblock'],
             },
           ],
         },
       ],
     },
   ],
+  versions: { drafts: true },
 }

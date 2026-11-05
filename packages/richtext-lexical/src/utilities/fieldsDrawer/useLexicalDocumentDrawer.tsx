@@ -19,6 +19,7 @@ export const useLexicalDocumentDrawer = (
   DocumentDrawer: ReturnType<UseDocumentDrawer>[0]
   documentDrawerSlug: string
   DocumentDrawerToggler: ReturnType<UseDocumentDrawer>[1]
+  openDocumentDrawer: () => void
 } => {
   const [editor] = useLexicalComposerContext()
   const [selectionState, setSelectionState] = useState<BaseSelection | null>(null)
@@ -27,7 +28,7 @@ export const useLexicalDocumentDrawer = (
   const [
     DocumentDrawer,
     DocumentDrawerToggler,
-    { closeDrawer: closeDrawer, drawerSlug: documentDrawerSlug },
+    { closeDrawer: closeDrawer, drawerSlug: documentDrawerSlug, openDrawer },
   ] = useDocumentDrawer(args)
   const { modalState } = useModal()
 
@@ -72,10 +73,16 @@ export const useLexicalDocumentDrawer = (
     }
   }, [modalState, documentDrawerSlug, restoreSelection, wasOpen])
 
+  const openDocumentDrawer = useCallback(() => {
+    storeSelection()
+    openDrawer()
+  }, [storeSelection, openDrawer])
+
   return {
     closeDocumentDrawer,
     DocumentDrawer,
     documentDrawerSlug,
     DocumentDrawerToggler: (props) => <DocumentDrawerToggler {...props} onClick={storeSelection} />,
+    openDocumentDrawer,
   }
 }

@@ -1,33 +1,25 @@
-import type { CollectionSlug, Payload } from 'payload'
+import type { CollectionSlug } from 'payload'
 
-import path from 'path'
-import { createLocalReq } from 'payload'
+import { buildDefaultEditorState } from '@payloadcms/richtext-lexical'
+import { createPayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
+import { expect, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { postDoc } from './config.js'
 
-let restClient: NextRESTClient
-let payload: Payload
 let token: string
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('dataloader', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-
+test.suite('dataloader', { config: './config.ts' }, () => {
+  test.beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     if (loginResult.token) {
@@ -35,12 +27,8 @@ describe('dataloader', () => {
     }
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('graphql', () => {
-    it('should allow multiple parallel queries', async () => {
+  test.describe('graphql', () => {
+    test('should allow multiple parallel queries', async ({ restClient }) => {
       for (let i = 0; i < 100; i++) {
         const query = `
           query {
@@ -79,7 +67,7 @@ describe('dataloader', () => {
       }
     })
 
-    it('should allow querying via graphql', async () => {
+    test('should allow querying via graphql', async ({ restClient }) => {
       const query = `query {
         Posts {
           docs {
@@ -104,36 +92,22 @@ describe('dataloader', () => {
       expect(docs[0].title).toStrictEqual(postDoc.title)
     })
 
-    it('should avoid infinite loops', async () => {
+    test('should avoid infinite loops', async ({ payload }) => {
       const relationA = await payload.create({
         collection: 'relation-a',
         data: {
-          richText: [
-            {
-              children: [
-                {
-                  text: 'relation a',
-                },
-              ],
-            },
-          ],
+          richText: buildDefaultEditorState({ text: 'relation a' }),
         },
+        overrideAccess: true,
       })
 
       const relationB = await payload.create({
         collection: 'relation-b',
         data: {
           relationship: relationA.id,
-          richText: [
-            {
-              children: [
-                {
-                  text: 'relation b',
-                },
-              ],
-            },
-          ],
+          richText: buildDefaultEditorState({ text: 'relation b' }),
         },
+        overrideAccess: true,
       })
 
       expect(relationA.id).toBeDefined()
@@ -144,34 +118,27 @@ describe('dataloader', () => {
         collection: 'relation-a',
         data: {
           relationship: relationB.id,
-          richText: [
-            {
-              children: [
-                {
-                  text: 'relation a',
-                },
-              ],
-            },
-            {
-              type: 'relationship',
-              children: [
-                {
-                  text: '',
-                },
-              ],
-              relationTo: 'relation-b',
-              value: {
-                id: relationB.id,
+          richText: buildDefaultEditorState({
+            text: 'relation a',
+            nodes: [
+              {
+                type: 'relationship',
+                format: 'left',
+                relationTo: 'relation-b',
+                value: relationB.id,
+                version: 0,
               },
-            },
-          ],
+            ],
+          }),
         },
+        overrideAccess: true,
       })
 
       const relationANoDepth = await payload.findByID({
         id: relationA.id,
         collection: 'relation-a',
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(relationANoDepth.relationship).toStrictEqual(relationB.id)
@@ -180,25 +147,28 @@ describe('dataloader', () => {
         id: relationA.id,
         collection: 'relation-a',
         depth: 4,
+        overrideAccess: true,
       })
 
       const innerMostRelationship =
         // @ts-expect-error Deep typing not worth doing
-        relationAWithDepth.relationship.relationship.richText[1].value.relationship.relationship
+        relationAWithDepth.relationship.relationship.richText.root.children[1].value.relationship
+          .relationship
 
       expect(innerMostRelationship).toStrictEqual(relationB.id)
     })
   })
 
-  describe('find', () => {
-    it('should call the same query only once in a request', async () => {
-      const req = await createLocalReq({}, payload)
+  test.describe('find', () => {
+    test('should call the same query only once in a request', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload })
       const spy = vitest.spyOn(payload, 'find')
 
       const findArgs = {
         collection: 'items' as CollectionSlug,
         req,
         depth: 0,
+        overrideAccess: true,
         where: {
           name: { exists: true },
         },

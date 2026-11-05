@@ -1,4 +1,7 @@
-import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { Config } from '../../config/types.js'
+import type { RichTextSanitizer } from '../../fields/config/sanitize.js'
+import type { OrderableJoinInfo } from '../../fields/config/sanitizeJoinField.js'
+import type { SanitizedDrafts } from '../../versions/types.js'
 import type {
   CollectionConfig,
   SanitizedCollectionConfig,
@@ -6,50 +9,139 @@ import type {
   SanitizedJoins,
 } from './types.js'
 
-import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
+import { omitAPIKey } from '../../auth/baseFields/apiKey.js'
+import { apiKeyRevealEndpoint, authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
+import { withBaseAccess, withBaseAdminAccess } from '../../auth/withBaseAccess.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
+import {
+  createCreatedByField,
+  createUpdatedByField,
+  sanitizeAuthorship,
+} from '../../fields/baseFields/authorship/index.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
+import { buildFoldersHierarchy, buildTagsHierarchy } from '../../hierarchy/presets.js'
+import { sanitizeHierarchyCollection } from '../../hierarchy/sanitizeHierarchyCollection.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
+import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
-import { miniChalk } from '../../utilities/miniChalk.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
-import { defaultCollectionEndpoints } from '../endpoints/index.js'
+import {
+  isInheritedReadVersionsAccess,
+  markInheritedReadVersionsAccess,
+} from '../../versions/isInheritedReadVersionsAccess.js'
+import { defaultCollectionEndpoints, duplicateEndpoint } from '../endpoints/index.js'
 import {
   addDefaultsToAuthConfig,
   addDefaultsToCollectionConfig,
-  addDefaultsToLoginWithUsernameConfig,
+  createInheritedReadVersionsAccess,
 } from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
+import { validateUseAsThumbnail } from './useAsThumbnail.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
-export const sanitizeCollection = async (
+/**
+ * Warns at startup when custom collection views are misconfigured with a missing `path`.
+ * Views without `path` will never be matched by the router and are silently ignored.
+ */
+export const warnOnInvalidCustomViews = (collection: CollectionConfig): void => {
+  const views = collection.admin?.components?.views
+  if (!views || typeof views !== 'object') {
+    return
+  }
+
+  for (const [key, view] of Object.entries(views)) {
+    if (key === 'edit' || key === 'list') {
+      continue
+    }
+
+    if (view && typeof view === 'object' && 'Component' in view && !('path' in view)) {
+      console.warn(
+        `[Payload] Custom collection view "${key}" in collection "${collection.slug}" is missing a "path" property. The view will never be rendered.`,
+      )
+    }
+
+    if (view && typeof view === 'object' && 'path' in view && !('Component' in view)) {
+      console.warn(
+        `[Payload] Custom collection view "${key}" in collection "${collection.slug}" has a "path" but is missing a "Component". The view will never be rendered.`,
+      )
+    }
+  }
+}
+
+export const sanitizeCollection = (
   config: Config,
   collection: CollectionConfig,
-  /**
-   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
-   * so that you can sanitize them together, after the config has been sanitized.
-   */
-  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  richTextSanitizers?: RichTextSanitizer[],
   _validRelationships?: string[],
-): Promise<SanitizedCollectionConfig> => {
+  /**
+   * Tracker for orderable join fields - populated during sanitization
+   */
+  orderableJoins?: OrderableJoinInfo[],
+): SanitizedCollectionConfig => {
   if (collection._sanitized) {
     return collection as SanitizedCollectionConfig
   }
 
   collection._sanitized = true
 
+  warnOnInvalidCustomViews(collection)
+
   // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////
 
   const sanitized: CollectionConfig = addDefaultsToCollectionConfig(collection)
+
+  // /////////////////////////////////
+  // Convert folders/tags to hierarchy
+  // /////////////////////////////////
+
+  const presetCount = [sanitized.folders, sanitized.tags, sanitized.hierarchy].filter(
+    Boolean,
+  ).length
+  if (presetCount > 1) {
+    throw new Error(
+      `Collection "${sanitized.slug}": Only one of 'folders', 'tags', or 'hierarchy' can be specified`,
+    )
+  }
+
+  if (sanitized.folders) {
+    sanitized.labels = {
+      plural: 'Folders',
+      singular: 'Folder',
+      ...sanitized.labels,
+    }
+    sanitized.hierarchy = buildFoldersHierarchy(sanitized.folders, sanitized.slug)
+    // Set admin.group: false when sidebar tab enabled (folders accessed via tab)
+    const sidebarTabEnabled =
+      typeof sanitized.hierarchy === 'object' &&
+      sanitized.hierarchy.admin?.injectSidebarTab !== false
+    if (sidebarTabEnabled && sanitized.admin!.group === undefined) {
+      sanitized.admin!.group = false
+    }
+    delete sanitized.folders
+  }
+
+  if (sanitized.tags) {
+    sanitized.labels = {
+      plural: 'Tags',
+      singular: 'Tag',
+      ...sanitized.labels,
+    }
+    sanitized.hierarchy = buildTagsHierarchy(sanitized.tags, sanitized.slug)
+    // Tags also hidden from nav by default
+    if (sanitized.admin!.group === undefined) {
+      sanitized.admin!.group = false
+    }
+    delete sanitized.tags
+  }
 
   // /////////////////////////////////
   // Sanitize fields
@@ -61,17 +153,70 @@ export const sanitizeCollection = async (
 
   const polymorphicJoins: SanitizedJoin[] = []
 
-  sanitized.fields = await sanitizeFields({
+  // Inject createdBy / updatedBy (unless already defined) before sanitizing fields.
+  const authorship = sanitizeAuthorship(sanitized.authorship)
+  sanitized.authorship = authorship
+
+  if (authorship.createdBy || authorship.updatedBy) {
+    const authCollections = config
+      .collections!.filter((collectionConfig) => collectionConfig.auth)
+      .map((collectionConfig) => collectionConfig.slug)
+
+    let hasCreatedBy = false
+    let hasUpdatedBy = false
+
+    sanitized.fields.some((field) => {
+      if (fieldAffectsData(field)) {
+        if (field.name === 'createdBy') {
+          hasCreatedBy = true
+        }
+
+        if (field.name === 'updatedBy') {
+          hasUpdatedBy = true
+        }
+
+        // A user may spread `getAuthorshipFields` into their `fields` to customize these
+        // without knowing the auth collections; backfill the polymorphic relationTo here.
+        if (
+          (field.name === 'createdBy' || field.name === 'updatedBy') &&
+          field.type === 'relationship' &&
+          (!field.relationTo || (Array.isArray(field.relationTo) && field.relationTo.length === 0))
+        ) {
+          field.relationTo = authCollections
+        }
+      }
+
+      return hasCreatedBy && hasUpdatedBy
+    })
+
+    if (authCollections.length > 0) {
+      if (authorship.createdBy && !hasCreatedBy) {
+        sanitized.fields.push(createCreatedByField({ authCollections }))
+      }
+
+      if (authorship.updatedBy && !hasUpdatedBy) {
+        sanitized.fields.push(createUpdatedByField({ authCollections }))
+      }
+    }
+  }
+
+  sanitized.fields = sanitizeFields({
     collectionConfig: sanitized,
     config,
     fields: sanitized.fields,
     joinPath: '',
     joins,
+    orderableJoins,
     parentIsLocalized: false,
     polymorphicJoins,
-    richTextSanitizationPromises,
+    richTextSanitizers,
     validRelationships,
   })
+
+  if (sanitized.auth) {
+    // disable duplicate for auth enabled collections by default
+    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
+  }
 
   if (sanitized.endpoints !== false) {
     if (!sanitized.endpoints) {
@@ -82,6 +227,14 @@ export const sanitizeCollection = async (
       for (const endpoint of authCollectionEndpoints) {
         sanitized.endpoints.push(endpoint)
       }
+
+      if (
+        typeof sanitized.auth === 'object' &&
+        typeof sanitized.auth.useAPIKey === 'object' &&
+        sanitized.auth.useAPIKey.reveal === true
+      ) {
+        sanitized.endpoints.push(apiKeyRevealEndpoint)
+      }
     }
 
     if (sanitized.upload) {
@@ -91,7 +244,9 @@ export const sanitizeCollection = async (
     }
 
     for (const endpoint of defaultCollectionEndpoints) {
-      sanitized.endpoints.push(endpoint)
+      if (endpoint !== duplicateEndpoint || sanitized.disableDuplicate !== true) {
+        sanitized.endpoints.push(endpoint)
+      }
     }
   }
 
@@ -124,7 +279,7 @@ export const sanitizeCollection = async (
         name: 'updatedAt',
         type: 'date',
         admin: {
-          disableBulkEdit: true,
+          disabled: { bulkEdit: true },
           hidden: true,
         },
         index: true,
@@ -136,7 +291,7 @@ export const sanitizeCollection = async (
       sanitized.fields.push({
         name: 'createdAt',
         admin: {
-          disableBulkEdit: true,
+          disabled: { bulkEdit: true },
           hidden: true,
         },
         // The default sort for list view is createdAt. Thus, enabling indexing by default, is a major performance improvement, especially for large or a large amount of collections.
@@ -151,7 +306,7 @@ export const sanitizeCollection = async (
         name: 'deletedAt',
         type: 'date',
         admin: {
-          disableBulkEdit: true,
+          disabled: { bulkEdit: true },
           hidden: true,
         },
         index: true,
@@ -192,21 +347,10 @@ export const sanitizeCollection = async (
 
       const hasLocalizedFields = traverseForLocalizedFields(sanitized.fields)
 
-      if (config.localization) {
-        if (hasLocalizedFields && sanitized.versions.drafts.localizeStatus === undefined) {
-          sanitized.versions.drafts.localizeStatus = false
-        }
-      }
-
-      // TODO v4: remove this sanitization check, should not need to enable the experimental flag
-      if (sanitized.versions.drafts.localizeStatus && !config.experimental?.localizeStatus) {
-        sanitized.versions.drafts.localizeStatus = false
-        console.log(
-          miniChalk.yellowBold(
-            `Warning: "localizeStatus" for drafts is an experimental feature. To enable, set "experimental.localizeStatus" to true in your Payload config.`,
-          ),
-        )
-      }
+      // Auto-enable per-locale status when localization is configured and the collection has localized fields.
+      ;(sanitized.versions.drafts as SanitizedDrafts).localizeStatus = !!(
+        config.localization && hasLocalizedFields
+      )
 
       if (sanitized.versions.drafts.autosave === true) {
         sanitized.versions.drafts.autosave = {
@@ -221,7 +365,7 @@ export const sanitizeCollection = async (
       sanitized.fields = mergeBaseFields(
         sanitized.fields,
         baseVersionFields({
-          localized: sanitized.versions.drafts.localizeStatus ?? false,
+          localized: (sanitized.versions.drafts as SanitizedDrafts).localizeStatus ?? false,
         }),
       )
     }
@@ -229,13 +373,8 @@ export const sanitizeCollection = async (
     delete sanitized.versions
   }
 
-  if (sanitized.folders === true) {
-    sanitized.folders = {
-      browseByFolder: true,
-    }
-  } else if (sanitized.folders) {
-    sanitized.folders.browseByFolder = sanitized.folders.browseByFolder ?? true
-  }
+  // Sanitize hierarchy configuration (phase 1 - per collection)
+  sanitizeHierarchyCollection(sanitized, config)
 
   if (sanitized.upload) {
     if (sanitized.upload === true) {
@@ -256,6 +395,13 @@ export const sanitizeCollection = async (
     })
 
     sanitized.fields = mergeBaseFields(sanitized.fields, uploadFields)
+    sanitized.hooks = {
+      ...sanitized.hooks,
+      beforeRead: [
+        ({ doc, req }) => withLegacyCloudUploadFileData({ collection: sanitized, doc, req }),
+        ...(sanitized.hooks?.beforeRead || []),
+      ],
+    }
   }
 
   if (sanitized.auth) {
@@ -263,39 +409,60 @@ export const sanitizeCollection = async (
       typeof sanitized.auth === 'boolean' ? {} : sanitized.auth,
     )
 
-    // disable duplicate for auth enabled collections by default
-    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
-
-    if (sanitized.auth.loginWithUsername) {
-      if (sanitized.auth.loginWithUsername === true) {
-        sanitized.auth.loginWithUsername = addDefaultsToLoginWithUsernameConfig({})
-      } else {
-        const loginWithUsernameWithDefaults = addDefaultsToLoginWithUsernameConfig(
-          sanitized.auth.loginWithUsername,
-        )
-
-        // if allowEmailLogin is false, requireUsername must be true
-        if (loginWithUsernameWithDefaults.allowEmailLogin === false) {
-          loginWithUsernameWithDefaults.requireUsername = true
-        }
-        sanitized.auth.loginWithUsername = loginWithUsernameWithDefaults
-      }
-    } else {
-      sanitized.auth.loginWithUsername = false
+    if (sanitized.auth.refreshTokens && !sanitized.auth.useSessions) {
+      throw new Error(
+        `Collection "${sanitized.slug}": auth.refreshTokens requires auth.useSessions`,
+      )
     }
 
     if (!collection?.admin?.useAsTitle) {
       sanitized.admin!.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
     }
 
-    sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
+    if (sanitized.auth.useAPIKey) {
+      sanitized.hooks!.beforeRead!.unshift(omitAPIKey)
+    }
+
+    sanitized.fields = mergeBaseFields(
+      sanitized.fields,
+      getBaseAuthFields(sanitized.auth, sanitized.fields),
+    )
   }
 
   if (collection?.admin?.pagination?.limits?.length) {
     sanitized.admin!.pagination!.limits = collection.admin.pagination.limits
   }
 
-  validateUseAsTitle(sanitized)
+  for (const operation of ['create', 'delete', 'read', 'unlock', 'update', 'validate'] as const) {
+    sanitized.access![operation] = withBaseAccess({
+      slug: sanitized.slug,
+      access: sanitized.access?.[operation],
+      entityType: 'collection',
+      operation,
+    })
+  }
+
+  sanitized.access!.admin = withBaseAdminAccess({
+    slug: sanitized.slug,
+    access: sanitized.access?.admin,
+  })
+
+  if (sanitized.versions) {
+    const inheritsReadAccess = isInheritedReadVersionsAccess(sanitized.access!.readVersions)
+    const readVersions = inheritsReadAccess
+      ? createInheritedReadVersionsAccess(sanitized.access!.read!)
+      : sanitized.access!.readVersions
+    const readVersionsWithBaseAccess = withBaseAccess({
+      slug: sanitized.slug,
+      access: readVersions,
+      entityType: 'collection',
+      operation: 'readVersions',
+    })
+
+    sanitized.access!.readVersions = inheritsReadAccess
+      ? markInheritedReadVersionsAccess(readVersionsWithBaseAccess)
+      : readVersionsWithBaseAccess
+  }
 
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
@@ -303,6 +470,19 @@ export const sanitizeCollection = async (
   sanitizedConfig.polymorphicJoins = polymorphicJoins
 
   sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
+
+  validateUseAsTitle(sanitized)
+  validateUseAsThumbnail({ config: sanitizedConfig })
+
+  if (!sanitizedConfig.admin.useAsThumbnail) {
+    const uploadField = sanitizedConfig.flattenedFields.find(
+      (field) => fieldAffectsData(field) && field.type === 'upload',
+    )
+
+    if (uploadField && fieldAffectsData(uploadField)) {
+      sanitizedConfig.admin.useAsThumbnail = uploadField.name
+    }
+  }
 
   sanitizedConfig.sanitizedIndexes = sanitizeCompoundIndexes({
     fields: sanitizedConfig.flattenedFields,

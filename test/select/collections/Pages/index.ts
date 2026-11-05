@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
 import { lexicalEditor, LinkFeature } from '@payloadcms/richtext-lexical'
-import { slateEditor } from '@payloadcms/richtext-slate'
 
 // The TSlug generic can be passed to have type safety for `defaultPopulate`.
 // If avoided, the `defaultPopulate` type resolves to `SelectType`.
@@ -80,11 +79,6 @@ export const Pages: CollectionConfig<'pages'> = {
                 },
               }),
             },
-            {
-              name: 'richTextSlate',
-              type: 'richText',
-              editor: slateEditor({}),
-            },
           ],
         },
       ],
@@ -132,4 +126,5 @@ export const Pages: CollectionConfig<'pages'> = {
       ],
     },
   ],
+  versions: false,
 }

@@ -7,7 +7,7 @@ export const appendNonTrashedFilter = ({
   where,
 }: {
   deletedAtPath?: string
-  enableTrash: boolean
+  enableTrash?: boolean
   trash?: boolean
   where: Where
 }): Where => {

@@ -28,4 +28,6 @@ export const createMigration: CreateMigration = function createMigration({
   writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
 
   payload.logger.info({ msg: `Migration created at ${filePath}` })
+
+  return { created: true, path: filePath }
 }

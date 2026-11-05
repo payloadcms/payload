@@ -26,6 +26,7 @@ const Posts: CollectionConfig = {
       relationTo: draftCollectionSlug,
     },
   ],
+  versions: false,
 }
 
 export default Posts

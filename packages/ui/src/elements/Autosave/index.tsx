@@ -1,5 +1,4 @@
 'use client'
-// TODO: abstract the `next/navigation` dependency out from this component
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
@@ -27,10 +26,10 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
+import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'autosave'
 // The minimum time the saving state should be shown
@@ -52,7 +51,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const {
     docConfig,
-    lastUpdateTime,
     mostRecentVersionIsAutosaved,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
@@ -64,8 +62,10 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const modified = useFormModified()
   const submitted = useFormSubmitted()
 
-  const { code: locale } = useLocale()
-  const { i18n, t } = useTranslation()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
+  const { t } = useTranslation()
+  const { uploadEdits } = useUploadEdits()
 
   const interval = getAutosaveInterval(docConfig)
   const validateOnDraft = hasDraftValidationEnabled(docConfig)
@@ -79,6 +79,14 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const { queueTask } = useQueue()
 
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const stopAutoSaveIndicator = useEffectEvent(() => {
+    if (autosaveTimeoutRef.current) {
+      clearTimeout(autosaveTimeoutRef.current)
+    }
+
+    setSaving(false)
+  })
 
   const handleAutosave = useEffectEvent(() => {
     autosaveTimeoutRef.current = undefined
@@ -117,6 +125,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
               draft: true,
               'fallback-locale': 'null',
               locale,
+              uploadEdits: uploadEdits || undefined,
             },
             {
               addQueryPrefix: true,
@@ -191,6 +200,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const didMount = useRef(false)
   const previousDebouncedData = useRef(reduceFieldsToValues(debouncedFormState))
+  const previousUploadEdits = useRef(uploadEdits)
 
   // When debounced fields change, autosave
   useEffect(() => {
@@ -209,14 +219,15 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     const { updatedAt: _, ...formData } = reduceFieldsToValues(debouncedFormState)
     const { updatedAt: __, ...prevFormData } = previousDebouncedData.current
 
-    if (dequal(formData, prevFormData)) {
+    if (dequal(formData, prevFormData) && dequal(uploadEdits, previousUploadEdits.current)) {
       return
     }
 
     previousDebouncedData.current = formData
+    previousUploadEdits.current = uploadEdits
 
     handleAutosave()
-  }, [debouncedFormState])
+  }, [debouncedFormState, uploadEdits])
 
   /**
    * If component unmounts, clear the autosave timeout
@@ -227,25 +238,10 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     }
   }, [])
 
-  const stopAutoSaveIndicator = useEffectEvent(() => {
-    if (autosaveTimeoutRef.current) {
-      clearTimeout(autosaveTimeoutRef.current)
-    }
-
-    setSaving(false)
-  })
-
   return (
-    <div className={baseClass}>
+    <React.Fragment>
       {validateOnDraft && !isValid && <LeaveWithoutSaving />}
-      {saving && t('general:saving')}
-      {!saving && Boolean(lastUpdateTime) && (
-        <React.Fragment>
-          {t('version:lastSavedAgo', {
-            distance: formatTimeToNow({ date: lastUpdateTime, i18n }),
-          })}
-        </React.Fragment>
-      )}
-    </div>
+      {saving && <div className={baseClass}>{t('general:saving')}</div>}
+    </React.Fragment>
   )
 }

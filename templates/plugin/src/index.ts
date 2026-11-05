@@ -97,6 +97,7 @@ export const myPlugin =
             equals: 'seeded-by-plugin',
           },
         },
+        overrideAccess: true,
       })
 
       if (totalDocs === 0) {
@@ -105,6 +106,7 @@ export const myPlugin =
           data: {
             id: 'seeded-by-plugin',
           },
+          overrideAccess: true,
         })
       }
     }

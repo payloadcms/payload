@@ -23,4 +23,5 @@ export const AfterReadCollection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

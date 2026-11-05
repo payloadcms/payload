@@ -1,9 +1,9 @@
-import type { DateFieldServerComponent } from 'payload'
+import type { DateFieldServerProps } from 'payload'
 import type React from 'react'
 
 import { DateTimeField } from '@payloadcms/ui'
 
-export const CustomDateFieldServer: DateFieldServerComponent = ({
+export const CustomDateFieldServer: React.FC<DateFieldServerProps> = ({
   clientField,
   path,
   schemaPath,

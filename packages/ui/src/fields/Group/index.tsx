@@ -1,6 +1,6 @@
 'use client'
 
-import type { GroupFieldClientComponent } from 'payload'
+import type { GroupFieldClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { groupHasName } from 'payload/shared'
@@ -17,7 +17,7 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
+import './index.css'
 import { useRow } from '../Row/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { useTabs } from '../Tabs/provider.js'
@@ -25,7 +25,7 @@ import { GroupProvider, useGroup } from './provider.js'
 
 const baseClass = 'group-field'
 
-export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
+export const GroupFieldComponent: React.FC<GroupFieldClientProps> = (props) => {
   const {
     field,
     field: { admin: { className, description, hideGutter } = {}, fields, label },
@@ -81,8 +81,8 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
         <div className={`${baseClass}__wrap`}>
           {Boolean(Label || Description || label || fieldHasErrors) && (
             <div className={`${baseClass}__header`}>
-              {Boolean(Label || Description || label) && (
-                <header>
+              <div className={`${baseClass}__title-row`}>
+                {Boolean(Label || Description || label) && (
                   <RenderCustomComponent
                     CustomComponent={Label}
                     Fallback={
@@ -97,13 +97,13 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
                       </h3>
                     }
                   />
-                  <RenderCustomComponent
-                    CustomComponent={Description}
-                    Fallback={<FieldDescription description={description} path={path} />}
-                  />
-                </header>
-              )}
-              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+                )}
+                {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+              </div>
+              <RenderCustomComponent
+                CustomComponent={Description}
+                Fallback={<FieldDescription description={description} path={path} />}
+              />
             </div>
           )}
           {BeforeInput}
@@ -111,7 +111,6 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           {groupHasName(field) ? (
             <RenderFields
               fields={fields}
-              margins="small"
               parentIndexPath=""
               parentPath={path}
               parentSchemaPath={schemaPath}
@@ -121,7 +120,6 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           ) : (
             <RenderFields
               fields={fields}
-              margins="small"
               parentIndexPath={indexPath}
               parentPath={parentPath}
               parentSchemaPath={parentSchemaPath}

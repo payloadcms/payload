@@ -67,10 +67,9 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    relation: Relation;
-    'posts-versioned': PostsVersioned;
-    'posts-batches': PostsBatch;
-    posts: Post;
+    tickets: Ticket;
+    revenue: Revenue;
+    events: Event;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,10 +78,9 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    relation: RelationSelect<false> | RelationSelect<true>;
-    'posts-versioned': PostsVersionedSelect<false> | PostsVersionedSelect<true>;
-    'posts-batches': PostsBatchesSelect<false> | PostsBatchesSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
+    tickets: TicketsSelect<false> | TicketsSelect<true>;
+    revenue: RevenueSelect<false> | RevenueSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -90,21 +88,21 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'fr') | ('en' | 'fr')[];
-  globals: {
-    'global-versioned': GlobalVersioned;
-    global: Global;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
+  globals: {};
+  globalsSelect: {};
+  locale: 'en' | 'es';
+  widgets: {
+    count: CountWidget;
+    private: PrivateWidget;
+    revenue: RevenueWidget;
+    'page-query': PageQueryWidget;
+    configurable: ConfigurableWidget;
+    collections: CollectionsWidget;
   };
-  globalsSelect: {
-    'global-versioned': GlobalVersionedSelect<false> | GlobalVersionedSelect<true>;
-    global: GlobalSelect<false> | GlobalSelect<true>;
-  };
-  locale: 'en' | 'fr';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -130,118 +128,24 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation".
+ * via the `definition` "tickets".
  */
-export interface Relation {
-  id: number;
-  name?: string | null;
+export interface Ticket {
+  id: string;
+  title: string;
+  description?: string | null;
+  status: 'open' | 'in-progress' | 'closed';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  assignee?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-versioned".
- */
-export interface PostsVersioned {
-  id: number;
-  title?: string | null;
-  content?:
-    | {
-        text?: string | null;
-        relation?: (number | null) | Relation;
-        manyRelations?: (number | Relation)[] | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'textBlock';
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-batches".
- */
-export interface PostsBatch {
-  id: number;
-  title?: string | null;
-  content?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'textBlock';
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: number;
-  title?: string | null;
-  content?:
-    | (
-        | {
-            text?: string | null;
-            relation?: (number | null) | Relation;
-            manyRelations?: (number | Relation)[] | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textBlock';
-          }
-        | {
-            text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block_second';
-          }
-        | {
-            text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block_third';
-          }
-      )[]
-    | null;
-  localizedContent?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'textBlockLocalized';
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: number;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -259,38 +163,83 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "revenue".
+ */
+export interface Revenue {
+  id: string;
+  amount: number;
+  description: string;
+  date: string;
+  category: 'sales' | 'subscriptions' | 'services' | 'other';
+  source?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: string;
+  title: string;
+  description?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  location?: string | null;
+  type: 'meeting' | 'conference' | 'workshop' | 'webinar' | 'other';
+  organizer?: (string | null) | User;
+  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
-        relationTo: 'relation';
-        value: number | Relation;
+        relationTo: 'tickets';
+        value: string | Ticket;
       } | null)
     | ({
-        relationTo: 'posts-versioned';
-        value: number | PostsVersioned;
+        relationTo: 'revenue';
+        value: string | Revenue;
       } | null)
     | ({
-        relationTo: 'posts-batches';
-        value: number | PostsBatch;
-      } | null)
-    | ({
-        relationTo: 'posts';
-        value: number | Post;
+        relationTo: 'events';
+        value: string | Event;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -300,10 +249,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -323,7 +272,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -331,100 +280,43 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation_select".
+ * via the `definition` "tickets_select".
  */
-export interface RelationSelect<T extends boolean = true> {
-  name?: T;
+export interface TicketsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  status?: T;
+  priority?: T;
+  assignee?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-versioned_select".
+ * via the `definition` "revenue_select".
  */
-export interface PostsVersionedSelect<T extends boolean = true> {
-  title?: T;
-  content?:
-    | T
-    | {
-        textBlock?:
-          | T
-          | {
-              text?: T;
-              relation?: T;
-              manyRelations?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-batches_select".
- */
-export interface PostsBatchesSelect<T extends boolean = true> {
-  title?: T;
-  content?:
-    | T
-    | {
-        textBlock?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
+export interface RevenueSelect<T extends boolean = true> {
+  amount?: T;
+  description?: T;
+  date?: T;
+  category?: T;
+  source?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
+ * via the `definition` "events_select".
  */
-export interface PostsSelect<T extends boolean = true> {
+export interface EventsSelect<T extends boolean = true> {
   title?: T;
-  content?:
-    | T
-    | {
-        textBlock?:
-          | T
-          | {
-              text?: T;
-              relation?: T;
-              manyRelations?: T;
-              id?: T;
-              blockName?: T;
-            };
-        block_second?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-        block_third?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  localizedContent?:
-    | T
-    | {
-        textBlockLocalized?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
+  description?: T;
+  startDate?: T;
+  endDate?: T;
+  location?: T;
+  type?: T;
+  organizer?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -492,79 +384,69 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global-versioned".
+ * via the `definition` "count_widget".
  */
-export interface GlobalVersioned {
-  id: number;
-  content?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'textBlock';
-      }[]
-    | null;
-  _status?: ('draft' | 'published') | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+export interface CountWidget {
+  data?: {
+    title: string;
+    collection?: ('tickets' | 'events') | null;
+  };
+  width: 'x-small' | 'small' | 'medium';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global".
+ * via the `definition` "private_widget".
  */
-export interface Global {
-  id: number;
-  content?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'textBlock';
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+export interface PrivateWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global-versioned_select".
+ * via the `definition` "revenue_widget".
  */
-export interface GlobalVersionedSelect<T extends boolean = true> {
-  content?:
-    | T
-    | {
-        textBlock?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  _status?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
+export interface RevenueWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global_select".
+ * via the `definition` "page-query_widget".
  */
-export interface GlobalSelect<T extends boolean = true> {
-  content?:
-    | T
-    | {
-        textBlock?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
+export interface PageQueryWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "configurable_widget".
+ */
+export interface ConfigurableWidget {
+  data?: {
+    title: string;
+    description?: string | null;
+    relatedTicket?: (string | null) | Ticket;
+    nestedGroup?: {
+      nestedText?: string | null;
+    };
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -576,5 +458,6 @@ export interface Auth {
 
 
 declare module 'payload' {
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

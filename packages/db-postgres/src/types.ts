@@ -1,24 +1,19 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type {
   BasePostgresAdapter,
   GenericEnum,
   MigrateDownArgs,
   MigrateUpArgs,
+  PostgresQueryConfig,
   PostgresSchemaHook,
 } from '@payloadcms/drizzle/postgres'
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { DrizzleConfig, ExtractTablesWithRelations } from 'drizzle-orm'
+import type { DrizzleConfig } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import type {
-  PgDatabase,
-  PgQueryResultHKT,
-  PgSchema,
-  PgTableFn,
-  PgTransactionConfig,
-  PgWithReplicas,
-} from 'drizzle-orm/pg-core'
+import type { PgSchema, PgTableFn, PgTransactionConfig, PgWithReplicas } from 'drizzle-orm/pg-core'
+import type pg from 'pg'
 import type { Pool, PoolConfig } from 'pg'
 
-type PgDependency = typeof import('pg')
+type PgDependency = typeof pg
 
 export type Args = {
   /**
@@ -53,7 +48,7 @@ export type Args = {
   extensions?: string[]
   /** Generated schema from payload generate:db-schema file path */
   generateSchemaOutputFile?: string
-  idType?: 'serial' | 'uuid'
+  idType?: 'serial' | 'uuid' | 'uuidv7'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
@@ -65,7 +60,19 @@ export type Args = {
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
   push?: boolean
+  /**
+   * Customize how Payload's Drizzle query operators (`contains`, `like`, `not_like`, etc.) are
+   * built, for example to make text matching accent-insensitive with `postgresUnaccent()`.
+   */
+  query?: PostgresQueryConfig
   readReplicas?: string[]
+  /**
+   * How long (ms) after a write to keep routing reads to the primary instead
+   * of a read replica. Prevents stale reads caused by replication lag.
+   * Only relevant when `readReplicas` is set.
+   * @default 2000
+   */
+  readReplicasAfterWriteInterval?: number
   relationshipsSuffix?: string
   /**
    * The schema name to use for the database
@@ -99,7 +106,8 @@ export type PostgresAdapter = {
 
 declare module 'payload' {
   export interface DatabaseAdapter
-    extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
+    extends
+      Omit<Args, 'extensions' | 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
     afterSchemaInit: PostgresSchemaHook[]
 
@@ -113,7 +121,7 @@ declare module 'payload' {
      * Used for returning properly formed errors from unique fields
      */
     fieldConstraints: Record<string, Record<string, string>>
-    idType: Args['idType']
+    idType: NonNullable<Args['idType']>
     initializing: Promise<void>
     localesSuffix?: string
     logger: DrizzleConfig['logger']
@@ -128,13 +136,16 @@ declare module 'payload' {
       up: (args: MigrateUpArgs) => Promise<void>
     }[]
     push: boolean
+    readReplicasAfterWriteInterval: number
     rejectInitializing: () => void
     relationshipsSuffix?: string
     resolveInitializing: () => void
     schema: Record<string, unknown>
     schemaName?: Args['schemaName']
+    sessions: DrizzleAdapter['sessions']
     tableNameMap: Map<string, string>
     tablesFilter?: string[]
+    transactionOptions: PgTransactionConfig | undefined
     versionsSuffix?: string
   }
 }

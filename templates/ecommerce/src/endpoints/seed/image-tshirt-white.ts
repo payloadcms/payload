@@ -55,6 +55,7 @@ export const imageTshirtWhiteData: RequiredDataFromCollectionSlug<'media'> = {
           format: '',
           indent: 0,
           textFormat: 0,
+          textStyle: '',
           version: 1,
         },
       ],

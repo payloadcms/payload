@@ -17,7 +17,7 @@ const LocalizedGlobal: GlobalConfig = {
     },
   ],
   versions: {
-    drafts: true,
+    drafts: {},
   },
 }
 

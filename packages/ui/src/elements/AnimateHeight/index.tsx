@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react'
 
 import { usePatchAnimateHeight } from './usePatchAnimateHeight.js'
-import './index.scss'
+import './index.css'
 
 export const AnimateHeight: React.FC<{
   children: React.ReactNode

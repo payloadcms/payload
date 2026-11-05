@@ -1,11 +1,11 @@
 import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
-import sharp from 'sharp'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
-import { Media } from './collections/Media'
+import { Media, mediaSharpOptions } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
@@ -63,22 +63,37 @@ export default buildConfig({
       connectionString: process.env.POSTGRES_URL || '',
     },
   }),
-  collections: [Pages, Posts, Media, Categories, Users],
-  cors: [getServerSideURL()].filter(Boolean),
-  plugins: [
-    ...plugins,
-    vercelBlobStorage({
-      collections: {
-        media: true,
+  collections: [
+    {
+      slug: 'folders',
+      folders: true,
+      admin: {
+        useAsTitle: 'name',
       },
-      token: process.env.BLOB_READ_WRITE_TOKEN || '',
-    }),
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+          label: 'Folder Name',
+        },
+      ],
+    },
+    Pages,
+    Posts,
+    Media,
+    Categories,
+    Users,
   ],
+  cors: [getServerSideURL()].filter(Boolean),
+  plugins: [...plugins],
   globals: [Header, Footer],
-  secret: process.env.PAYLOAD_SECRET,
-  sharp,
+  secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
+  upload: {
+    transformers: [sharpTransformer({ collections: { media: mediaSharpOptions } })],
   },
   jobs: {
     access: {
@@ -98,4 +113,12 @@ export default buildConfig({
     },
     tasks: [],
   },
+  storage: [
+    vercelBlobStorage({
+      collections: {
+        media: true,
+      },
+      token: process.env.BLOB_READ_WRITE_TOKEN || '',
+    }),
+  ],
 })

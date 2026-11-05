@@ -1,0 +1,20 @@
+@layer payload-default {
+  .field-type.select {
+    position: relative;
+  }
+
+  .field-type.select--has-many > .field-label:not(.unstyled) {
+    font-size: var(--text-body-medium-bold-font-size);
+    font-weight: var(--text-body-medium-bold-font-weight);
+    line-height: var(--text-body-medium-bold-line-height);
+    letter-spacing: var(--text-body-medium-bold-letter-spacing);
+  }
+
+  .field-type.select.error .rs__control {
+    border-color: var(--field-color-border-error);
+
+    &:hover {
+      border-color: var(--field-color-border-error);
+    }
+  }
+}

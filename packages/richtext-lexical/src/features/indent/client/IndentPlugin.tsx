@@ -4,13 +4,21 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import {
+  $addUpdateTag,
   $getSelection,
   $isElementNode,
   $isRangeSelection,
+  $isRootOrShadowRoot,
+  BLUR_COMMAND,
+  COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
+  FOCUS_COMMAND,
   INDENT_CONTENT_COMMAND,
+  KEY_ESCAPE_COMMAND,
   KEY_TAB_COMMAND,
   OUTDENT_CONTENT_COMMAND,
+  SELECTION_CHANGE_COMMAND,
+  SKIP_DOM_SELECTION_TAG,
   TabNode,
 } from 'lexical'
 import { useEffect } from 'react'
@@ -21,6 +29,166 @@ import type { IndentFeatureProps } from '../server/index.js'
 export const IndentPlugin: PluginComponent<IndentFeatureProps> = ({ clientProps }) => {
   const [editor] = useLexicalComposerContext()
   const { disabledNodes, disableTabNode } = clientProps
+
+  useEffect(() => {
+    let canTabOut = false
+    let hasTabbedOut = false
+    const resetTabExit = () => {
+      canTabOut = false
+    }
+    let restoreTabIndexes: (() => void) | undefined
+    let restoreTabTimer: ReturnType<typeof setTimeout> | undefined
+    let rootEvents: AbortController | undefined
+
+    function resetKeyboardExit() {
+      resetTabExit()
+      hasTabbedOut = false
+    }
+
+    function handleKeyDownCapture(event: KeyboardEvent) {
+      if (event.key !== 'Tab' || !canTabOut) {
+        if (!['Escape', 'Shift', 'Tab'].includes(event.key)) {
+          resetTabExit()
+        }
+        return
+      }
+
+      const root = editor.getRootElement()
+
+      if (!root) {
+        return
+      }
+      resetTabExit()
+      hasTabbedOut = true
+      event.stopPropagation()
+      restoreTabIndexes?.()
+      clearTimeout(restoreTabTimer)
+
+      const container = root.closest('.rich-text-lexical') ?? root
+      const tabStops = new Set([
+        root,
+        ...container.querySelectorAll<HTMLElement>(
+          '[tabindex], [contenteditable="true"], a[href], button, input, select, textarea, summary, iframe, audio[controls], video[controls]',
+        ),
+      ])
+      const tabIndexes = new Map<HTMLElement, null | string>()
+
+      // Let the browser take Tab outside the entire editor, including decorator controls.
+      // Restore its tab stops after the native focus move so ordinary Tab navigation is unchanged.
+      for (const element of tabStops) {
+        tabIndexes.set(element, element.getAttribute('tabindex'))
+        element.setAttribute('tabindex', '-1')
+      }
+      restoreTabIndexes = () => {
+        for (const [element, tabIndex] of tabIndexes) {
+          if (tabIndex === null) {
+            element.removeAttribute('tabindex')
+          } else {
+            element.setAttribute('tabindex', tabIndex)
+          }
+        }
+        restoreTabIndexes = undefined
+      }
+      restoreTabTimer = setTimeout(() => restoreTabIndexes?.(), 0)
+      editor.update(() => $addUpdateTag(SKIP_DOM_SELECTION_TAG))
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape' && !event.defaultPrevented && editor.isEditable()) {
+        // A second press can dismiss the containing drawer; holding Escape must not.
+        if (canTabOut && !event.repeat) {
+          return
+        }
+        // Menus handle Escape first. This also reaches inputs inside decorator blocks.
+        event.preventDefault()
+        event.stopPropagation()
+        canTabOut = true
+      }
+    }
+
+    const unregisterRootListener = editor.registerRootListener((root) => {
+      rootEvents?.abort()
+      rootEvents = new AbortController()
+      const { signal } = rootEvents
+
+      /* eslint-disable @eslint-react/web-api/no-leaked-event-listener -- Aborted on root replacement and effect cleanup. */
+      root?.addEventListener('pointerdown', resetKeyboardExit, { signal })
+      root?.addEventListener('keydown', handleKeyDownCapture, { capture: true, signal })
+      root?.addEventListener('keydown', handleKeyDown, { signal })
+      /* eslint-enable @eslint-react/web-api/no-leaked-event-listener */
+    })
+
+    const unregisterCommands = mergeRegister(
+      editor.registerCommand(
+        KEY_ESCAPE_COMMAND,
+        (event) => {
+          if (!editor.isEditable()) {
+            return false
+          }
+          handleKeyDown(event)
+          return true
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        KEY_TAB_COMMAND,
+        () => {
+          const selection = $getSelection()
+          const isRootSelection =
+            $isRangeSelection(selection) &&
+            selection.isCollapsed() &&
+            $isRootOrShadowRoot(selection.anchor.getNode())
+
+          // A root selection between decorator blocks has no text block to indent.
+          if (!isRootSelection) {
+            return false
+          }
+          resetTabExit()
+          hasTabbedOut = true
+          $addUpdateTag(SKIP_DOM_SELECTION_TAG)
+          return true
+        },
+        COMMAND_PRIORITY_HIGH,
+      ),
+      editor.registerCommand(
+        BLUR_COMMAND,
+        () => {
+          resetTabExit()
+          return false
+        },
+        COMMAND_PRIORITY_HIGH,
+      ),
+      editor.registerCommand(
+        FOCUS_COMMAND,
+        () => {
+          resetKeyboardExit()
+          return false
+        },
+        COMMAND_PRIORITY_HIGH,
+      ),
+      editor.registerCommand(
+        SELECTION_CHANGE_COMMAND,
+        () => {
+          const root = editor.getRootElement()
+
+          // A delayed selectionchange must not reclaim focus after native Tab navigation.
+          if (hasTabbedOut && root?.ownerDocument.activeElement !== root) {
+            $addUpdateTag(SKIP_DOM_SELECTION_TAG)
+          }
+          return false
+        },
+        COMMAND_PRIORITY_HIGH,
+      ),
+    )
+
+    return () => {
+      unregisterCommands()
+      unregisterRootListener()
+      rootEvents?.abort()
+      clearTimeout(restoreTabTimer)
+      restoreTabIndexes?.()
+    }
+  }, [editor])
 
   useEffect(() => {
     if (!editor || !disabledNodes?.length) {

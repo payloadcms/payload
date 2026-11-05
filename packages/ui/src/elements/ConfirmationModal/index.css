@@ -1,0 +1,7 @@
+@layer payload-default {
+  .confirmation-modal__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+}

@@ -1,0 +1,283 @@
+'use client'
+
+import { PREFERENCE_KEYS } from 'payload/shared'
+import React, { useCallback, useId, useRef, useState } from 'react'
+
+import type { RenderTabServerFnArgs, RenderTabServerFnReturnType } from './renderTabServerFn.js'
+
+import { usePreferences } from '../../../providers/Preferences/index.js'
+import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
+import { SidebarTabsProvider } from '../../../providers/SidebarTabs/index.js'
+import { DelayedSpinner } from '../../DelayedSpinner/index.js'
+import { Tooltip } from '../../Tooltip/index.js'
+import { TabError } from './TabError/index.js'
+import './index.css'
+
+export type TabMetadata = {
+  icon: React.ReactNode
+  isDefaultActive?: boolean
+  label: string
+  /** Whether this tab can be loaded/revalidated via serverFunction */
+  lazyLoadable?: boolean
+  slug: string
+}
+
+export type SidebarTabsClientProps = {
+  baseClass: string
+  initialActiveTabID: string
+  initialTabContents: Record<string, React.ReactNode>
+  /**
+   * Delay before showing loading spinner (in ms), prevents flashing on fast loads
+   * @default 200
+   */
+  loadingDelay?: number
+  tabs: TabMetadata[]
+}
+
+export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
+  baseClass,
+  initialActiveTabID,
+  initialTabContents,
+  loadingDelay = 200,
+  tabs,
+}) => {
+  const { setPreference } = usePreferences()
+  const { serverFunction } = useServerFunctions()
+  const tabsID = useId()
+
+  const [activeTabID, setActiveTabID] = useState(initialActiveTabID)
+  const [tabContent, setTabContent] = useState<Record<string, React.ReactNode>>(initialTabContents)
+  const [loadingTab, setLoadingTab] = useState<null | string>(null)
+  const [hoveredTab, setHoveredTab] = useState<null | string>(null)
+  const [focusedTab, setFocusedTab] = useState<null | string>(null)
+  const [isTooltipDismissed, setIsTooltipDismissed] = useState(false)
+  const loadingTabsRef = useRef<Set<string>>(new Set())
+  const tabContentRef = useRef(initialTabContents)
+  // The retry button calls loadTabContent through this, since loadTabContent can't call itself
+  const loadTabContentRef = useRef<typeof loadTabContent>(null)
+
+  React.useEffect(() => {
+    if (!hoveredTab && !focusedTab) {
+      return
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsTooltipDismissed(true)
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [focusedTab, hoveredTab])
+
+  // Update cached content when server provides new initialTabContents
+  // This is needed because useState only uses initialValue on first mount
+  React.useEffect(() => {
+    tabContentRef.current = { ...tabContentRef.current, ...initialTabContents }
+    setTabContent((prev) => ({ ...prev, ...initialTabContents }))
+  }, [initialTabContents])
+
+  const loadTabContent = useCallback(
+    async (
+      tabSlug: string,
+      {
+        revalidate = false,
+        serverArgs,
+      }: { revalidate?: boolean; serverArgs?: Partial<RenderTabServerFnArgs> } = {},
+    ) => {
+      const hasCachedContent = Boolean(tabContentRef.current[tabSlug])
+
+      // Skip if already loaded (unless revalidating) or currently loading
+      if ((hasCachedContent && !revalidate) || loadingTabsRef.current.has(tabSlug)) {
+        return
+      }
+
+      // Mark as loading - only show spinner if no cached content
+      loadingTabsRef.current.add(tabSlug)
+      if (!hasCachedContent) {
+        setLoadingTab(tabSlug)
+      }
+
+      try {
+        const result = (await serverFunction({
+          name: 'render-tab',
+          args: { searchParams: serverArgs?.searchParams, tabSlug } satisfies RenderTabServerFnArgs,
+        })) as RenderTabServerFnReturnType
+
+        const newContent = {
+          ...tabContentRef.current,
+          [tabSlug]: result.component,
+        }
+
+        tabContentRef.current = newContent
+        setTabContent(newContent)
+      } catch (error) {
+        // On revalidate failure, keep showing cached content
+        if (hasCachedContent && revalidate) {
+          return
+        }
+
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+
+        const handleRetry = () => {
+          // Clear the error and retry loading, threading the original serverArgs through so the
+          // retry doesn't silently fall back to req.query-based rendering (the stale-tree bug).
+          const clearedContent = { ...tabContentRef.current }
+          delete clearedContent[tabSlug]
+          tabContentRef.current = clearedContent
+          setTabContent(clearedContent)
+          void loadTabContentRef.current?.(tabSlug, { serverArgs })
+        }
+
+        const newContent = {
+          ...tabContentRef.current,
+          [tabSlug]: <TabError message={errorMessage} onRetry={handleRetry} />,
+        }
+
+        tabContentRef.current = newContent
+        setTabContent(newContent)
+      } finally {
+        loadingTabsRef.current.delete(tabSlug)
+        setLoadingTab((currentTab) => (currentTab === tabSlug ? null : currentTab))
+      }
+    },
+    [serverFunction],
+  )
+
+  React.useEffect(() => {
+    loadTabContentRef.current = loadTabContent
+  }, [loadTabContent])
+
+  const reloadTabContent = useCallback(
+    (tabSlug: string, serverArgs?: Partial<RenderTabServerFnArgs>) => {
+      // Clear cached content to force reload
+      const clearedContent = { ...tabContentRef.current }
+      delete clearedContent[tabSlug]
+      tabContentRef.current = clearedContent
+      setTabContent(clearedContent)
+
+      void loadTabContent(tabSlug, { serverArgs })
+    },
+    [loadTabContent],
+  )
+
+  const handleTabChange = useCallback(
+    (slug: string) => {
+      setActiveTabID(slug)
+      void setPreference(PREFERENCE_KEYS.NAV_SIDEBAR_ACTIVE_TAB, { activeTab: slug })
+      // Only revalidate tabs that can be loaded via serverFunction
+      // Pre-rendered React elements (like default nav) can't be revalidated
+      const tab = tabs.find((t) => t.slug === slug)
+      void loadTabContent(slug, { revalidate: tab?.lazyLoadable ?? false })
+    },
+    [setPreference, loadTabContent, tabs],
+  )
+
+  const handleTabKeyDown = useCallback(
+    (e: React.KeyboardEvent, currentIndex: number) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault()
+        const direction = e.key === 'ArrowLeft' ? -1 : 1
+        const newIndex = (currentIndex + direction + tabs.length) % tabs.length
+        const newTab = tabs[newIndex]
+        handleTabChange(newTab.slug)
+        // Focus will be handled by the tabIndex change
+        setTimeout(() => {
+          document.querySelector<HTMLButtonElement>(`.${baseClass}__tab--active`)?.focus()
+        }, 0)
+      }
+    },
+    [baseClass, handleTabChange, tabs],
+  )
+
+  const activeContent = tabContent[activeTabID]
+
+  // If there's only one tab (the default nav), render it without tab UI
+  if (tabs.length === 1) {
+    return <>{activeContent}</>
+  }
+
+  return (
+    <SidebarTabsProvider activeTabSlug={activeTabID} reloadTabContent={reloadTabContent}>
+      <div className={baseClass}>
+        <div className={`${baseClass}__tabs scrollbar-thin`} role="tablist">
+          {tabs.map((tab, index) => {
+            const isActive = tab.slug === activeTabID
+
+            return (
+              <button
+                aria-controls={`${tabsID}-panel-${tab.slug}`}
+                aria-selected={isActive}
+                className={`${baseClass}__tab ${isActive ? `${baseClass}__tab--active` : ''}`}
+                id={`${tabsID}-tab-${tab.slug}`}
+                key={tab.slug}
+                onBlur={() => setFocusedTab(null)}
+                onClick={() => handleTabChange(tab.slug)}
+                onFocus={(event) => {
+                  setFocusedTab(event.currentTarget.matches(':focus-visible') ? tab.slug : null)
+                  setIsTooltipDismissed(false)
+                }}
+                onKeyDown={(e) => handleTabKeyDown(e, index)}
+                onMouseEnter={() => {
+                  setHoveredTab(tab.slug)
+                  setIsTooltipDismissed(false)
+                }}
+                onMouseLeave={() => setHoveredTab(null)}
+                role="tab"
+                tabIndex={isActive ? 0 : -1}
+                type="button"
+              >
+                <Tooltip
+                  className={[
+                    `${baseClass}__tooltip`,
+                    focusedTab === tab.slug && `${baseClass}__tooltip--focused`,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  position="bottom"
+                  show={!isTooltipDismissed && (hoveredTab === tab.slug || focusedTab === tab.slug)}
+                >
+                  {tab.label}
+                </Tooltip>
+                <span className={`${baseClass}__tab-icon`}>{tab.icon}</span>
+                <span className={`${baseClass}__tab-label`}>{tab.label}</span>
+              </button>
+            )
+          })}
+        </div>
+        <div className={`${baseClass}__content`}>
+          {tabs.map((tab) => {
+            const content = tabContent[tab.slug]
+            const isActive = tab.slug === activeTabID
+            return (
+              <div
+                aria-labelledby={`${tabsID}-tab-${tab.slug}`}
+                hidden={!isActive}
+                id={`${tabsID}-panel-${tab.slug}`}
+                key={tab.slug}
+                role="tabpanel"
+                tabIndex={-1}
+              >
+                <DelayedSpinner
+                  baseClass={baseClass}
+                  delay={loadingDelay}
+                  isLoading={isActive && loadingTab === tab.slug}
+                />
+                <div style={loadingTab === tab.slug ? { display: 'none' } : undefined}>
+                  <React.Suspense
+                    fallback={
+                      <DelayedSpinner baseClass={baseClass} delay={loadingDelay} isLoading />
+                    }
+                  >
+                    {content}
+                  </React.Suspense>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </SidebarTabsProvider>
+  )
+}

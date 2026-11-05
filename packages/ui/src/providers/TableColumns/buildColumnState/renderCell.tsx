@@ -11,16 +11,19 @@ import type {
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { formatAdminURL } from 'payload/shared'
+import React from 'react'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import {
   DefaultCell,
+  FolderIcon,
   RenderDefaultCell,
+  TagIcon,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../../../exports/client/index.js'
 import { hasOptionLabelJSXElement } from '../../../utilities/hasOptionLabelJSXElement.js'
+import { resolveDocumentListItemURL } from '../../../views/List/resolveDocumentListItemURL.js'
 import { findValueFromPath } from './findValueFromPath.js'
 
 type RenderCellArgs = {
@@ -30,6 +33,7 @@ type RenderCellArgs = {
   readonly customCellProps: DefaultCellComponentProps['customCellProps']
   readonly doc: Document
   readonly enableRowSelections: boolean
+  readonly hierarchyParentFieldName?: string
   readonly i18n: I18nClient
   readonly isLinkedColumn: boolean
   readonly payload: Payload
@@ -45,6 +49,7 @@ export function renderCell({
   customCellProps,
   doc,
   enableRowSelections,
+  hierarchyParentFieldName,
   i18n,
   isLinkedColumn,
   payload,
@@ -72,36 +77,17 @@ export function renderCell({
 
   if (isLinkedColumn && req) {
     const collectionConfig = payload.collections[collectionSlug]?.config
-    const formatDocURL = collectionConfig?.admin?.formatDocURL
+    const resolvedURL = resolveDocumentListItemURL({
+      collectionSlug,
+      doc,
+      formatDocURL: collectionConfig?.admin?.formatDocURL,
+      hierarchyParentFieldName,
+      req,
+      viewType,
+    })
 
-    if (typeof formatDocURL === 'function') {
-      // Generate the default URL that would normally be used
-      const adminRoute = req.payload.config.routes?.admin || '/admin'
-      const defaultURL = formatAdminURL({
-        adminRoute,
-        path: `/collections/${collectionSlug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(String(doc.id))}`,
-      })
-
-      const customURL = formatDocURL({
-        collectionSlug,
-        defaultURL,
-        doc,
-        req,
-        viewType,
-      })
-
-      if (customURL === null) {
-        // formatDocURL returned null = disable linking entirely
-        shouldLink = false
-      } else if (typeof customURL === 'string') {
-        // formatDocURL returned a string = use custom URL
-        shouldLink = true
-        customLinkURL = customURL
-      } else {
-        // formatDocURL returned unexpected type = disable linking for safety
-        shouldLink = false
-      }
-    }
+    shouldLink = resolvedURL !== null
+    customLinkURL = resolvedURL ?? undefined
   }
 
   // For _status field, use _displayStatus if available (for showing "changed" status in list view)
@@ -133,9 +119,55 @@ export function renderCell({
     }
   }
 
+  // Check if this is a hierarchy relationship field and pre-render the icon
+  let hierarchyIcon: React.ReactNode = undefined
+  let hierarchySmallIcon: React.ReactNode = undefined
+  if (clientField.type === 'relationship' && 'relationTo' in clientField) {
+    const relationTo = clientField.relationTo
+    if (typeof relationTo === 'string') {
+      const relatedCollectionConfig = payload.collections[relationTo]?.config
+      const hierarchyConfig = relatedCollectionConfig?.hierarchy
+      if (hierarchyConfig && typeof hierarchyConfig === 'object') {
+        const iconComponent = hierarchyConfig.admin?.components?.Icon
+        const smallIconComponent = hierarchyConfig.admin?.components?.SmallIcon
+        if (iconComponent) {
+          // Pre-render the custom icon
+          hierarchyIcon = RenderServerComponent({
+            Component: iconComponent,
+            importMap: payload.importMap,
+            key: `hierarchy-icon-${relationTo}`,
+          })
+        } else {
+          // Use default icon based on allowHasMany
+          hierarchyIcon =
+            hierarchyConfig.allowHasMany === false ? (
+              <FolderIcon key={`hierarchy-icon-${relationTo}`} />
+            ) : (
+              <TagIcon key={`hierarchy-icon-${relationTo}`} />
+            )
+        }
+        // Pre-render the small icon (used in compact display contexts)
+        if (smallIconComponent && smallIconComponent !== iconComponent) {
+          hierarchySmallIcon = RenderServerComponent({
+            Component: smallIconComponent,
+            importMap: payload.importMap,
+            key: `hierarchy-small-icon-${relationTo}`,
+          })
+        } else {
+          hierarchySmallIcon = hierarchyIcon
+        }
+      }
+    }
+  }
+
   const cellClientProps: DefaultCellComponentProps = {
     ...baseCellClientProps,
     cellData,
+    customCellProps: {
+      ...baseCellClientProps.customCellProps,
+      ...(hierarchyIcon ? { hierarchyIcon } : {}),
+      ...(hierarchySmallIcon ? { hierarchySmallIcon } : {}),
+    },
     field: enrichedClientField,
     link: shouldLink,
     linkURL: customLinkURL,

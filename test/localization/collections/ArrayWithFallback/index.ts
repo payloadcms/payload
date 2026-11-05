@@ -33,4 +33,5 @@ export const ArrayWithFallbackCollection: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

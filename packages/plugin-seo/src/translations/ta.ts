@@ -20,8 +20,7 @@ export const ta: GenericTranslationsObject = {
     missing: 'இல்லை',
     noImage: 'படம் இல்லை',
     preview: 'முன்னோட்டம்',
-    previewDescription:
-      'சரியான முடிவு பட்டியல்கள் உள்ளடக்கம் மற்றும் தேடல் தொடர்புக்கு ஏற்ப மாறலாம்.',
+    previewDescription: 'சரியான முடிவு பட்டியல்கள் உள்ளடக்கம் மற்றும் தேடல் தொடர்புக்கு ஏற்ப மாறலாம்.',
     tooLong: 'மிக நீளம்',
     tooShort: 'மிகக் குறைவு',
   },

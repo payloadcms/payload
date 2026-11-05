@@ -32,4 +32,5 @@ export const Users: CollectionConfig = {
       saveToJWT: true,
     },
   ],
+  versions: false,
 }

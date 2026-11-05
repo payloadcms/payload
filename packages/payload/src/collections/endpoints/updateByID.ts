@@ -1,9 +1,8 @@
-import { status as httpStatus } from 'http-status'
-
 import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { parseParams } from '../../utilities/parseParams/index.js'
 import { updateByIDOperation } from '../operations/updateByID.js'
 
@@ -17,7 +16,6 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
     overrideLock,
     populate,
     publishAllLocales,
-    publishSpecificLocale,
     select,
     trash,
     unpublishAllLocales,
@@ -33,7 +31,6 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
     overrideLock: overrideLock ?? false,
     populate,
     publishAllLocales,
-    publishSpecificLocale,
     req,
     select,
     trash,

@@ -17,6 +17,7 @@ import { useModal } from '@faceless-ui/modal'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
+import { toast } from 'sonner'
 
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 import type { ReloadDoc, ValueAsDataWithRelation } from './types.js'
@@ -34,10 +35,12 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
+import { getFilesFromClipboard } from '../../utilities/getFilesFromClipboard.js'
 import { normalizeRelationshipValue } from '../../utilities/normalizeRelationshipValue.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { UploadComponentHasMany } from './HasMany/index.js'
-import './index.scss'
+import './index.css'
 import { UploadComponentHasOne } from './HasOne/index.js'
 
 export const baseClass = 'upload'
@@ -121,7 +124,7 @@ export function UploadInput(props: UploadInputProps) {
 
   const { openModal } = useModal()
   const {
-    drawerSlug,
+    modalSlug: drawerSlug,
     setCollectionSlug,
     setInitialFiles,
     setMaxFiles,
@@ -129,8 +132,11 @@ export function UploadInput(props: UploadInputProps) {
     setSelectableCollections,
   } = useBulkUpload()
   const { permissions } = useAuth()
-  const { code } = useLocale()
+  const locale = useLocale()
+  const code = locale?.code
   const { i18n, t } = useTranslation()
+  const labelID = React.useId()
+  const a11yID = label ? labelID : undefined
 
   // This will be used by the bulk upload to allow you to select only collections you have create permissions for
   const collectionSlugsWithCreatePermission = useMemo(() => {
@@ -209,13 +215,6 @@ export function UploadInput(props: UploadInputProps) {
     collectionSlug: activeRelationTo,
   })
 
-  /**
-   * Track the last loaded value to prevent unnecessary reloads
-   */
-  const loadedValueRef = React.useRef<
-    (number | string)[] | null | number | string | ValueWithRelation | ValueWithRelation[]
-  >(null)
-
   const canCreate = useMemo(() => {
     if (!allowCreate) {
       return false
@@ -240,7 +239,12 @@ export function UploadInput(props: UploadInputProps) {
   )
 
   const populateDocs = React.useCallback(
-    async (items: ValueWithRelation[]): Promise<ValueAsDataWithRelation[]> => {
+    async (
+      items: ValueWithRelation[],
+      options?: {
+        signal?: AbortSignal
+      },
+    ): Promise<ValueAsDataWithRelation[]> => {
       if (!items?.length) {
         return []
       }
@@ -292,6 +296,7 @@ export function UploadInput(props: UploadInputProps) {
               'X-Payload-HTTP-Method-Override': 'GET',
             },
             method: 'POST',
+            signal: options?.signal,
           },
         )
         let docs: any[] = []
@@ -394,6 +399,8 @@ export function UploadInput(props: UploadInputProps) {
         setMaxFiles(maxRows)
       }
 
+      // The drawer resets its success callback on close, so register it again on every open
+      setOnSuccess(onUploadSuccess)
       openModal(drawerSlug)
     },
     [
@@ -408,13 +415,29 @@ export function UploadInput(props: UploadInputProps) {
       setInitialFiles,
       setSelectableCollections,
       setMaxFiles,
+      setOnSuccess,
+      onUploadSuccess,
     ],
   )
 
+  const handlePasteFromClipboard = useCallback(async () => {
+    try {
+      const files = await getFilesFromClipboard()
+      if (!files) {
+        toast.error(t('error:noFileFoundInClipboard'))
+        return
+      }
+      onLocalFileSelection(files)
+    } catch (_err) {
+      toast.error(t('error:unableToReadClipboard'))
+    }
+  }, [onLocalFileSelection, t])
+
   // only hasMany can bulk select
   const onListBulkSelect = React.useCallback<NonNullable<ListDrawerProps['onBulkSelect']>>(
-    async (docs) => {
+    async (docs, collectionSlug) => {
       const isPoly = Array.isArray(relationTo)
+      const relationToUse = isPoly ? collectionSlug || activeRelationTo : activeRelationTo
       const selectedDocIDs = []
 
       for (const [id, isSelected] of docs) {
@@ -423,25 +446,48 @@ export function UploadInput(props: UploadInputProps) {
         }
       }
 
-      const itemsToLoad = selectedDocIDs.map((id) => ({
-        relationTo: activeRelationTo,
+      if (!selectedDocIDs.length) {
+        return
+      }
+
+      const idsToApply = hasMany ? selectedDocIDs : selectedDocIDs.slice(0, 1)
+
+      const itemsToLoad = idsToApply.map((id) => ({
+        relationTo: relationToUse,
         value: id,
       }))
 
       const loadedDocs = await populateDocs(itemsToLoad)
       if (loadedDocs) {
-        setPopulatedDocs((currentDocs) => [...(currentDocs || []), ...loadedDocs])
+        setPopulatedDocs((currentDocs) =>
+          hasMany ? [...(currentDocs || []), ...loadedDocs] : loadedDocs,
+        )
       }
 
-      const newValues = selectedDocIDs.map((id) =>
-        isPoly ? { relationTo: activeRelationTo, value: id } : id,
+      const newValues = idsToApply.map((id) =>
+        isPoly ? { relationTo: relationToUse, value: id } : id,
       )
+
+      if (!hasMany) {
+        onChange(newValues[0])
+        closeListDrawer()
+        return
+      }
       // Normalize existing values before merging
       const normalizedExisting = Array.isArray(value) ? value.map(normalizeValue) : []
       onChange([...normalizedExisting, ...newValues])
       closeListDrawer()
     },
-    [activeRelationTo, closeListDrawer, onChange, populateDocs, value, relationTo, normalizeValue],
+    [
+      activeRelationTo,
+      closeListDrawer,
+      hasMany,
+      onChange,
+      populateDocs,
+      value,
+      relationTo,
+      normalizeValue,
+    ],
   )
 
   const onDocCreate = React.useCallback(
@@ -558,6 +604,8 @@ export function UploadInput(props: UploadInputProps) {
   )
 
   useEffect(() => {
+    const abortController = new AbortController()
+
     async function loadInitialDocs() {
       if (value) {
         let itemsToLoad: ValueWithRelation[] = []
@@ -614,24 +662,28 @@ export function UploadInput(props: UploadInputProps) {
         }
 
         if (itemsToLoad.length > 0) {
-          const loadedDocs = await populateDocs(itemsToLoad)
+          try {
+            const loadedDocs = await populateDocs(itemsToLoad, {
+              signal: abortController.signal,
+            })
 
-          if (loadedDocs) {
-            setPopulatedDocs(loadedDocs)
-            loadedValueRef.current = value
+            if (loadedDocs && !abortController.signal.aborted) {
+              setPopulatedDocs(loadedDocs)
+            }
+          } catch (_err) {
+            // Ignore aborted requests from superseded values / unmount
           }
         }
       } else {
         // Clear populated docs when value is cleared
         setPopulatedDocs([])
-        loadedValueRef.current = null
       }
     }
 
-    // Only load if value has changed from what we last loaded
-    const valueChanged = loadedValueRef.current !== value
-    if (valueChanged) {
-      void loadInitialDocs()
+    void loadInitialDocs()
+
+    return () => {
+      abortAndIgnore(abortController)
     }
   }, [populateDocs, value, relationTo])
 
@@ -646,6 +698,7 @@ export function UploadInput(props: UploadInputProps) {
 
   return (
     <div
+      aria-labelledby={a11yID}
       className={[
         fieldBaseClass,
         baseClass,
@@ -656,134 +709,159 @@ export function UploadInput(props: UploadInputProps) {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
+      role={a11yID ? 'group' : undefined}
       style={style}
     >
-      <RenderCustomComponent
-        CustomComponent={Label}
-        Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
-        }
-      />
-      <div className={`${baseClass}__wrap`}>
+      <div className={`${baseClass}__label`} id={a11yID}>
+        <RenderCustomComponent
+          CustomComponent={Label}
+          Fallback={
+            <FieldLabel
+              as="span"
+              label={label}
+              localized={localized}
+              path={path}
+              required={required}
+            />
+          }
+        />
+      </div>
+      {BeforeInput}
+      <div className={`${fieldBaseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
         />
-      </div>
-      {BeforeInput}
-      <div className={`${baseClass}__dropzoneAndUpload`}>
-        {hasMany && Array.isArray(value) && value.length > 0 ? (
-          <>
-            {populatedDocs && populatedDocs?.length > 0 ? (
-              <UploadComponentHasMany
-                displayPreview={displayPreview}
-                fileDocs={populatedDocs}
-                isSortable={isSortable && !readOnly}
-                onRemove={onRemove}
-                onReorder={onReorder}
-                readonly={readOnly}
-                reloadDoc={reloadDoc}
-                serverURL={serverURL}
-                showCollectionSlug={Array.isArray(relationTo)}
-              />
-            ) : (
-              <div className={`${baseClass}__loadingRows`}>
-                {value.map((id) => (
-                  <ShimmerEffect height="40px" key={typeof id === 'object' ? id.value : id} />
-                ))}
-              </div>
-            )}
-          </>
-        ) : null}
-        {!hasMany && value ? (
-          <>
-            {populatedDocs && populatedDocs?.length > 0 && populatedDocs[0].value ? (
-              <UploadComponentHasOne
-                displayPreview={displayPreview}
-                fileDoc={populatedDocs[0]}
-                onRemove={onRemove}
-                readonly={readOnly}
-                reloadDoc={reloadDoc}
-                serverURL={serverURL}
-                showCollectionSlug={Array.isArray(relationTo)}
-              />
-            ) : populatedDocs && value && !populatedDocs?.[0]?.value ? (
-              <>
-                {t('general:untitled')} - ID: {value}
-              </>
-            ) : (
-              <ShimmerEffect height="62px" />
-            )}
-          </>
-        ) : null}
-        {showDropzone ? (
-          <Dropzone
-            disabled={readOnly || !canCreate}
-            multipleFiles={hasMany}
-            onChange={onLocalFileSelection}
-          >
-            <div className={`${baseClass}__dropzoneContent`}>
-              <div className={`${baseClass}__dropzoneContent__buttons`}>
-                {canCreate && (
-                  <>
-                    <Button
-                      buttonStyle="pill"
-                      className={`${baseClass}__createNewToggler`}
-                      disabled={readOnly || !canCreate}
-                      onClick={() => {
-                        if (!readOnly) {
-                          if (hasMany) {
-                            onLocalFileSelection()
-                          } else {
-                            openCreateDocDrawer()
-                          }
-                        }
-                      }}
-                      size="small"
-                    >
-                      {t('general:createNew')}
-                    </Button>
-                    <span className={`${baseClass}__dropzoneContent__orText`}>
-                      {t('general:or')}
-                    </span>
-                  </>
-                )}
-                <Button
-                  buttonStyle="pill"
-                  className={`${baseClass}__listToggler`}
-                  disabled={readOnly}
-                  onClick={openListDrawer}
-                  size="small"
-                >
-                  {t('fields:chooseFromExisting')}
-                </Button>
-                <CreateDocDrawer onSave={onDocCreate} />
-                <ListDrawer
-                  allowCreate={canCreate}
-                  enableRowSelections={hasMany}
-                  onBulkSelect={onListBulkSelect}
-                  onSelect={onListSelect}
+        <div className={`${baseClass}__dropzoneAndUpload`}>
+          {hasMany && Array.isArray(value) && value.length > 0 ? (
+            <>
+              {populatedDocs && populatedDocs?.length > 0 ? (
+                <UploadComponentHasMany
+                  displayPreview={displayPreview}
+                  fileDocs={populatedDocs}
+                  isSortable={isSortable && !readOnly}
+                  onRemove={onRemove}
+                  onReorder={onReorder}
+                  readonly={readOnly}
+                  reloadDoc={reloadDoc}
+                  serverURL={serverURL}
+                  showCollectionSlug={Array.isArray(relationTo)}
                 />
-              </div>
-
-              {canCreate && !readOnly && (
-                <p className={`${baseClass}__dragAndDropText`}>
-                  {t('general:or')} {t('upload:dragAndDrop')}
-                </p>
+              ) : (
+                <div className={`${baseClass}__loadingRows`}>
+                  {value.map((id) => (
+                    <ShimmerEffect height="40px" key={typeof id === 'object' ? id.value : id} />
+                  ))}
+                </div>
               )}
-            </div>
-          </Dropzone>
-        ) : (
-          <>
-            {!readOnly &&
-            !populatedDocs &&
-            (!value ||
-              typeof maxRows !== 'number' ||
-              (Array.isArray(value) && value.length < maxRows)) ? (
-              <ShimmerEffect height="40px" />
-            ) : null}
-          </>
-        )}
+            </>
+          ) : null}
+          {!hasMany && value ? (
+            <>
+              {populatedDocs && populatedDocs?.length > 0 && populatedDocs[0].value ? (
+                <UploadComponentHasOne
+                  displayPreview={displayPreview}
+                  fileDoc={populatedDocs[0]}
+                  onRemove={onRemove}
+                  readonly={readOnly}
+                  reloadDoc={reloadDoc}
+                  serverURL={serverURL}
+                  showCollectionSlug={Array.isArray(relationTo)}
+                />
+              ) : populatedDocs && value && !populatedDocs?.[0]?.value ? (
+                <>
+                  {t('general:untitled')} - ID: {value}
+                </>
+              ) : (
+                <ShimmerEffect height="62px" />
+              )}
+            </>
+          ) : null}
+          {showDropzone ? (
+            <Dropzone
+              disabled={readOnly || !canCreate}
+              multipleFiles={hasMany}
+              onChange={onLocalFileSelection}
+            >
+              <div className={`${baseClass}__dropzoneContent`}>
+                <div className={`${baseClass}__dropzoneContent__buttons`}>
+                  {canCreate && (
+                    <>
+                      <Button
+                        buttonStyle="secondary"
+                        className={`${baseClass}__createNewToggler`}
+                        disabled={readOnly || !canCreate}
+                        onClick={() => {
+                          if (!readOnly) {
+                            if (hasMany) {
+                              onLocalFileSelection()
+                            } else {
+                              openCreateDocDrawer()
+                            }
+                          }
+                        }}
+                        size="medium"
+                      >
+                        {t('general:createNew')}
+                      </Button>
+                      <span className={`${baseClass}__dropzoneContent__orText`}>
+                        {t('general:or')}
+                      </span>
+                    </>
+                  )}
+                  <Button
+                    buttonStyle="secondary"
+                    className={`${baseClass}__listToggler`}
+                    disabled={readOnly}
+                    onClick={openListDrawer}
+                    size="medium"
+                  >
+                    {t('fields:chooseFromExisting')}
+                  </Button>
+                  {canCreate && !readOnly && (
+                    <>
+                      <span className={`${baseClass}__dropzoneContent__orText`}>
+                        {t('general:or')}
+                      </span>
+                      <Button
+                        aria-label={t('upload:pasteFromClipboard')}
+                        buttonStyle="secondary"
+                        className={`${baseClass}__pasteFromClipboard`}
+                        icon="clipboard"
+                        onClick={handlePasteFromClipboard}
+                        size="medium"
+                        tooltip={t('upload:pasteFromClipboard')}
+                      />
+                    </>
+                  )}
+                  <CreateDocDrawer onSave={onDocCreate} />
+                  <ListDrawer
+                    allowCreate={canCreate}
+                    enableRowSelections={hasMany}
+                    onBulkSelect={onListBulkSelect}
+                    onSelect={onListSelect}
+                  />
+                </div>
+
+                {canCreate && !readOnly && (
+                  <p className={`${baseClass}__dragAndDropText`}>
+                    {t('general:or')} {t('upload:dragAndDrop')}
+                  </p>
+                )}
+              </div>
+            </Dropzone>
+          ) : (
+            <>
+              {!readOnly &&
+              !populatedDocs &&
+              (!value ||
+                typeof maxRows !== 'number' ||
+                (Array.isArray(value) && value.length < maxRows)) ? (
+                <ShimmerEffect height="40px" />
+              ) : null}
+            </>
+          )}
+        </div>
       </div>
       {AfterInput}
       <RenderCustomComponent

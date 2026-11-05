@@ -6,12 +6,18 @@ export const orderableSlug = 'orderable'
 
 export const OrderableCollection: CollectionConfig = {
   slug: orderableSlug,
-  orderable: true,
+  access: {
+    update: () => ({
+      title: {
+        not_equals: 'Fixed position',
+      },
+    }),
+  },
   admin: {
-    useAsTitle: 'title',
     components: {
       beforeList: ['/Seed.tsx#Seed'],
     },
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -21,8 +27,10 @@ export const OrderableCollection: CollectionConfig = {
     {
       name: 'orderableField',
       type: 'relationship',
-      relationTo: orderableJoinSlug,
       localized: true,
+      relationTo: orderableJoinSlug,
     },
   ],
+  orderable: true,
+  versions: false,
 }

@@ -31,6 +31,7 @@ export const ArchiveBlock: React.FC<
       collection: 'products',
       depth: 1,
       limit,
+      overrideAccess: true,
       ...(flattenedCategories && flattenedCategories.length > 0
         ? {
             where: {

@@ -1,0 +1,12 @@
+.colored-tag-icon {
+  display: flex;
+}
+
+.hierarchy-cell__pill,
+.btn__icon {
+  .colored-tag-icon--custom-color {
+    .icon {
+      color: unset;
+    }
+  }
+}

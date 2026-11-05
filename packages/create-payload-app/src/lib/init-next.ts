@@ -1,27 +1,29 @@
-import type { CompilerOptions } from 'typescript'
-
 import * as p from '@clack/prompts'
-import { parse, stringify } from 'comment-json'
 import fs from 'fs'
 import fse from 'fs-extra'
 import globby from 'globby'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { promisify } from 'util'
 
 import type { CliArgs, DbType, NextAppDetails, NextConfigType, PackageManager } from '../types.js'
 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
 import { debug as origDebug, warning } from '../utils/log.js'
 import { moveMessage } from '../utils/messages.js'
+import {
+  DEFAULT_PAYLOAD_VERSION_TAG,
+  resolvePackageVersion,
+} from '../utils/resolvePackageVersion.js'
+import { configurePayloadTsConfig } from './configure-payload-tsconfig.js'
+import { ensurePnpmBuildApprovals } from './configure-pnpm-builds.js'
 import { installPackages } from './install-packages.js'
 import { wrapNextConfig } from './wrap-next-config.js'
 
-const readFile = promisify(fs.readFile)
-const writeFile = promisify(fs.writeFile)
-
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+/** Keep in sync with the `next` peer dependency range of `@payloadcms/next`. */
+export const minimumNextVersion = { major: 16, minor: 4 }
 
 type InitNextArgs = {
   dbType: DbType
@@ -29,7 +31,7 @@ type InitNextArgs = {
   packageManager: PackageManager
   projectDir: string
   useDistFiles?: boolean
-} & Pick<CliArgs, '--debug'>
+} & Pick<CliArgs, '--debug' | '--payload-version'>
 
 type InitNextResult =
   | { isSrcDir: boolean; nextAppDir?: string; reason: string; success: false }
@@ -89,7 +91,12 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
     return { ...configurationResult, isSrcDir, success: false }
   }
 
-  const { success: installSuccess } = await installDeps(projectDir, packageManager, dbType)
+  const { success: installSuccess } = await installDeps({
+    dbType,
+    packageManager,
+    projectDir,
+    versionOrTag: args['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG,
+  })
   if (!installSuccess) {
     installSpinner.stop('Failed to install dependencies', 1)
     return {
@@ -100,45 +107,12 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
     }
   }
 
-  // Add `@payload-config` to tsconfig.json `paths`
-  await addPayloadConfigToTsConfig(projectDir, isSrcDir)
+  await configurePayloadTsConfig({
+    configPath: path.resolve(projectDir, 'tsconfig.json'),
+    payloadConfigPath: configurationResult.payloadConfigPath,
+  })
   installSpinner.stop('Successfully installed Payload and dependencies')
   return { ...configurationResult, isSrcDir, nextAppDir, success: true }
-}
-
-async function addPayloadConfigToTsConfig(projectDir: string, isSrcDir: boolean) {
-  const tsConfigPath = path.resolve(projectDir, 'tsconfig.json')
-
-  // Check if tsconfig.json exists
-  if (!fs.existsSync(tsConfigPath)) {
-    warning(`Could not find tsconfig.json to add @payload-config path.`)
-    return
-  }
-  const userTsConfigContent = await readFile(tsConfigPath, {
-    encoding: 'utf8',
-  })
-  const userTsConfig = parse(userTsConfigContent) as {
-    compilerOptions?: CompilerOptions
-  }
-
-  const hasBaseUrl =
-    userTsConfig?.compilerOptions?.baseUrl && userTsConfig?.compilerOptions?.baseUrl !== '.'
-  const baseUrl = hasBaseUrl ? userTsConfig?.compilerOptions?.baseUrl : './'
-
-  if (!userTsConfig.compilerOptions && !('extends' in userTsConfig)) {
-    userTsConfig.compilerOptions = {}
-  }
-
-  if (
-    !userTsConfig.compilerOptions?.paths?.['@payload-config'] &&
-    userTsConfig.compilerOptions?.paths
-  ) {
-    userTsConfig.compilerOptions.paths = {
-      ...(userTsConfig.compilerOptions.paths || {}),
-      '@payload-config': [`${baseUrl}${isSrcDir ? 'src/' : ''}payload.config.ts`],
-    }
-    await writeFile(tsConfigPath, stringify(userTsConfig, null, 2), { encoding: 'utf8' })
-  }
 }
 
 async function installAndConfigurePayload(
@@ -221,17 +195,27 @@ async function installAndConfigurePayload(
   }
 }
 
-async function installDeps(projectDir: string, packageManager: PackageManager, dbType: DbType) {
+async function installDeps(args: {
+  dbType: DbType
+  packageManager: PackageManager
+  projectDir: string
+  versionOrTag?: string
+}) {
+  const { dbType, packageManager, projectDir, versionOrTag } = args
   const { getDbPackageName } = await import('./ast/adapter-config.js')
 
+  const version = await resolvePackageVersion({ packageName: 'payload', versionOrTag })
+
   const packagesToInstall = ['payload', '@payloadcms/next', '@payloadcms/richtext-lexical'].map(
-    (pkg) => `${pkg}@latest`,
+    (pkg) => `${pkg}@${version}`,
   )
 
-  packagesToInstall.push(`${getDbPackageName(dbType)}@latest`)
+  packagesToInstall.push(`${getDbPackageName(dbType)}@${version}`)
 
   // Match graphql version of @payloadcms/next
   packagesToInstall.push('graphql@^16.8.1')
+
+  await ensurePnpmBuildApprovals({ packageManager, projectDir })
 
   return await installPackages({ packageManager, packagesToInstall, projectDir })
 }
@@ -260,7 +244,7 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
   if (packageObj.dependencies?.next) {
     nextVersion = packageObj.dependencies.next
     // Match versions using regex matching groups
-    const versionMatch = /(?<major>\d+)/.exec(nextVersion)
+    const versionMatch = /(?<major>\d+)(?:\.(?<minor>\d+))?/.exec(nextVersion)
     if (!versionMatch) {
       p.log.warn(`Could not determine Next.js version from ${nextVersion}`)
       return {
@@ -272,9 +256,9 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
       }
     }
 
-    const { major } = versionMatch.groups as { major: string }
+    const { major, minor } = versionMatch.groups as { major: string; minor?: string }
     const majorVersion = parseInt(major)
-    if (majorVersion < 15) {
+    if (majorVersion < minimumNextVersion.major) {
       return {
         hasTopLevelLayout: false,
         isSrcDir,
@@ -282,6 +266,19 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
         nextConfigPath,
         nextVersion,
       }
+    }
+
+    // TODO: Older minor versions of the minimum major are only warned about, not rejected, to make
+    // migrating easier. This can be turned into a hard requirement in the future.
+    // A specifier without a minor version (e.g. `^16`) can resolve to any minor, so it is not warned about.
+    const isBelowMinimumMinor =
+      majorVersion === minimumNextVersion.major &&
+      minor !== undefined &&
+      parseInt(minor) < minimumNextVersion.minor
+    if (isBelowMinimumMinor) {
+      p.log.warn(
+        `Next.js v${nextVersion} is not supported. Upgrade to Next.js >= ${minimumNextVersion.major}.${minimumNextVersion.minor} to use Payload.`,
+      )
     }
   }
 

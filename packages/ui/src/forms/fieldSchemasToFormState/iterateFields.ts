@@ -4,6 +4,7 @@ import type {
   Data,
   DocumentPreferences,
   Field,
+  FieldOperation,
   FieldSchemaMap,
   FormState,
   FormStateWithoutComponents,
@@ -43,6 +44,7 @@ type Args = {
    */
   forceFullValue?: boolean
   fullData: Data
+  globalSlug?: string
   id?: number | string
   /**
    * Whether the field schema should be included in the state. @default false
@@ -56,7 +58,7 @@ type Args = {
   /**
    * operation is only needed for validation
    */
-  operation: 'create' | 'update'
+  operation: FieldOperation
   parentIndexPath: string
   parentPassesCondition?: boolean
   parentPath: string
@@ -97,6 +99,7 @@ export const iterateFields = async ({
   filter,
   forceFullValue = false,
   fullData,
+  globalSlug,
   includeSchema = false,
   mockRSCs,
   omitParents = false,
@@ -185,6 +188,7 @@ export const iterateFields = async ({
         filter,
         forceFullValue,
         fullData,
+        globalSlug,
         includeSchema,
         indexPath,
         mockRSCs,

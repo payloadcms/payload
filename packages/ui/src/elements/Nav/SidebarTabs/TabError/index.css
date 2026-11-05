@@ -1,0 +1,29 @@
+@layer payload-default {
+  .sidebar-tab-error__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.4;
+
+    strong {
+      font-weight: 600;
+    }
+
+    span {
+      opacity: 0.8;
+      font-size: 0.625rem;
+    }
+  }
+
+  .sidebar-tab-error__retry {
+    all: unset;
+    margin-top: var(--spacer-1);
+    font-size: 0.625rem;
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}

@@ -35,6 +35,7 @@ import { RelationshipField } from './Relationship/index.js'
 import { RichTextField } from './RichText/index.js'
 import { RowField } from './Row/index.js'
 import { SelectField } from './Select/index.js'
+import { SlugField } from './Slug/index.js'
 import { TabsField } from './Tabs/index.js'
 import { TextField } from './Text/index.js'
 import { TextareaField } from './Textarea/index.js'
@@ -51,6 +52,7 @@ export type FieldTypesComponents = {
 }
 
 export const fieldComponents: FieldTypesComponents = {
+  slug: SlugField,
   array: ArrayField,
   blocks: BlocksField,
   checkbox: CheckboxField,

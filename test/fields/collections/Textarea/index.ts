@@ -97,7 +97,7 @@ const TextareaFields: CollectionConfig = {
       name: 'fieldWithDefaultValue',
       type: 'textarea',
       defaultValue: async () => {
-        const defaultValue = new Promise((resolve) => setTimeout(() => resolve('some-value'), 1000))
+        const defaultValue = new Promise((resolve) => setTimeout(() => resolve('some-value'), 1))
 
         return defaultValue
       },
@@ -121,6 +121,7 @@ const TextareaFields: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }
 
 export default TextareaFields

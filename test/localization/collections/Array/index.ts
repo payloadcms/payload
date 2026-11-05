@@ -8,13 +8,34 @@ export const ArrayCollection: CollectionConfig = {
     {
       name: 'items',
       type: 'array',
-      localized: true,
       fields: [
         {
           name: 'text',
           type: 'text',
         },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              fields: [
+                {
+                  name: 'nestedItems',
+                  type: 'array',
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+              label: 'Nested',
+            },
+          ],
+        },
       ],
+      localized: true,
     },
   ],
+  versions: false,
 }

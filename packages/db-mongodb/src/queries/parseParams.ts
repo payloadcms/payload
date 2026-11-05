@@ -1,4 +1,4 @@
-import type { FilterQuery } from 'mongoose'
+import type { QueryFilter } from 'mongoose'
 import type { FlattenedField, Operator, Payload, Where } from 'payload'
 
 import { deepMergeWithCombinedArrays } from 'payload'
@@ -24,7 +24,7 @@ export async function parseParams({
   payload: Payload
   where: Where
 }): Promise<Record<string, unknown>> {
-  let result = {} as FilterQuery<any>
+  let result = {} as QueryFilter<any>
 
   if (typeof where === 'object') {
     // We need to determine if the whereKey is an AND, OR, or a schema path

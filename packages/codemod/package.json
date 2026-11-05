@@ -1,0 +1,55 @@
+{
+  "name": "@payloadcms/codemod",
+  "version": "4.0.0-beta.7",
+  "description": "Codemods for migrating Payload projects across versions.",
+  "homepage": "https://payloadcms.com",
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/codemod"
+  },
+  "bin": {
+    "payload-codemod": "bin/cli.js"
+  },
+  "files": [
+    "package.json",
+    "bin",
+    "dist",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "build": "pnpm typecheck && pnpm build:swc && pnpm build:copy-docs",
+    "build:copy-docs": "node scripts/copy-migration-guide.mjs",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
+    "test": "vitest --run",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@clack/prompts": "1.2.0",
+    "semver": "^7.8.5",
+    "ts-morph": "^28.0.0"
+  },
+  "devDependencies": {
+    "@swc/core": "1.15.3",
+    "@types/node": "24.12.3",
+    "@types/semver": "^7.7.1",
+    "rimraf": "6.0.1",
+    "typescript": "catalog:",
+    "vitest": "5.0.1"
+  },
+  "engines": {
+    "node": ">=24.22.1"
+  }
+}

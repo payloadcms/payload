@@ -2,8 +2,10 @@ import type {
   SerializedTableCellNode,
   SerializedTableNode,
   SerializedTableRowNode,
-} from '../../../../../nodeTypes.js'
+} from '../../../../../types/nodeTypes.js'
 import type { HTMLConverters } from '../types.js'
+
+import { isSafeCssColor } from '../../shared/cssColors.js'
 
 export const TableHTMLConverter: HTMLConverters<
   SerializedTableCellNode | SerializedTableNode | SerializedTableRowNode
@@ -25,16 +27,20 @@ export const TableHTMLConverter: HTMLConverters<
       nodes: node.children,
     }).join('')
 
-    const TagName = node.headerState > 0 ? 'th' : 'td'
-    const headerStateClass = `lexical-table-cell-header-${node.headerState}`
+    // Stored JSON is not type-checked, so only numbers may be interpolated into attributes
+    const headerState = typeof node.headerState === 'number' ? node.headerState : 0
+    const TagName = headerState > 0 ? 'th' : 'td'
+    const headerStateClass = `lexical-table-cell-header-${headerState}`
 
-    let style = 'border: 1px solid #ccc; padding: 8px;' + providedCSSString
-    if (node.backgroundColor) {
+    let style = 'border: var(--stroke-width-small) solid #ccc; padding: 8px;' + providedCSSString
+    if (node.backgroundColor && isSafeCssColor(node.backgroundColor)) {
       style += ` background-color: ${node.backgroundColor};`
     }
 
-    const colSpanAttr = node.colSpan && node.colSpan > 1 ? ` colspan="${node.colSpan}"` : ''
-    const rowSpanAttr = node.rowSpan && node.rowSpan > 1 ? ` rowspan="${node.rowSpan}"` : ''
+    const colSpanAttr =
+      typeof node.colSpan === 'number' && node.colSpan > 1 ? ` colspan="${node.colSpan}"` : ''
+    const rowSpanAttr =
+      typeof node.rowSpan === 'number' && node.rowSpan > 1 ? ` rowspan="${node.rowSpan}"` : ''
 
     return `<${TagName}
         class="lexical-table-cell ${headerStateClass}"

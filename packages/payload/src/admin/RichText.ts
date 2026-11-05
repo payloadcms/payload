@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { GenericLanguages, I18n } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
@@ -13,7 +13,14 @@ import type {
 } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { RequestContext, TypedFallbackLocale } from '../index.js'
-import type { JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
+import type {
+  BeforeValidateOperation,
+  FieldOperation,
+  JsonObject,
+  PayloadRequest,
+  PopulateType,
+} from '../types/index.js'
+import type { FieldsToJSONSchemaArgs } from '../utilities/configToJSONSchema.js'
 import type { RichTextFieldClientProps, RichTextFieldServerProps } from './fields/RichText.js'
 import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
 
@@ -76,7 +83,7 @@ export type BeforeValidateRichTextHookArgs<
   TSiblingData = any,
 > = {
   /** A string relating to which operation the field type is currently executing within. */
-  operation: 'create' | 'update'
+  operation: BeforeValidateOperation
   overrideAccess?: boolean
   /** The sibling data of the document before changes being applied. */
   previousSiblingDoc?: TSiblingData
@@ -107,7 +114,7 @@ export type BeforeChangeRichTextHookArgs<
   /** Only available in `beforeChange` field hooks */
   mergeLocaleActions?: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. */
-  operation?: 'create' | 'delete' | 'read' | 'update'
+  operation?: FieldOperation
   overrideAccess: boolean
   /** The sibling data of the document before changes being applied. */
   previousSiblingDoc?: TSiblingData
@@ -202,6 +209,11 @@ type RichTextAdapterBase<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
+  /** Convert between stored editor data and Markdown using the editor's configured features. */
+  converters?: {
+    fromMarkdown?: (args: { markdown: string }) => Value
+    toMarkdown?: (args: { data: Value }) => string
+  }
   /**
    * Provide a function that can be used to add items to the import map. This is useful for
    * making modules available to the client.
@@ -245,26 +257,32 @@ type RichTextAdapterBase<
   }) => void
   hooks?: RichTextHooks
   /**
-   * @deprecated - manually merge i18n translations into the config.i18n.translations object within the adapter provider instead.
-   * This property will be removed in v4.
-   */
-  i18n?: Partial<GenericLanguages>
-  /**
    * Return the JSON schema for the field value. The JSON schema is read by
    * `json-schema-to-typescript` which is used to generate types for this richtext field
    * payload-types.ts)
    */
-  outputSchema?: (args: {
-    collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
-    config?: SanitizedConfig
-    field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
-    i18n?: I18n
+  jsonSchema?: (
+    args: {
+      field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+      isRequired: boolean
+    } & Pick<
+      FieldsToJSONSchemaArgs,
+      | 'collectionIDFieldTypes'
+      | 'config'
+      | 'i18n'
+      | 'interfaceNameDefinitions'
+      | 'typeStringDefinitions'
+      | 'variant'
+    >,
+  ) => JSONSchema4
+  /** Editors configured for specific uses, initialized independently from this editor. */
+  presets?: {
     /**
-     * Allows you to define new top-level interfaces that can be re-used in the output schema.
+     * Editor to use for LLM instructions collection, with both Markdown converters.
+     * This provider should select its own features without inheriting unrestricted root features.
      */
-    interfaceNameDefinitions: Map<string, JSONSchema4>
-    isRequired: boolean
-  }) => JSONSchema4
+    llmInstructions?: MarkdownRichTextAdapterProvider<Value, AdapterProps, ExtraFieldProperties>
+  }
   /**
    * Provide validation function for the richText field. This function is run the same way
    * as other field validation functions.
@@ -319,6 +337,23 @@ export type RichTextAdapterProvider<
    */
   isRoot?: boolean
   parentIsLocalized: boolean
-}) =>
-  | Promise<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>>
-  | RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>
+}) => RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>
+
+/** A rich-text adapter that supports conversion to and from Markdown. */
+export type MarkdownRichTextAdapter<
+  Value extends object = any,
+  AdapterProps = any,
+  ExtraFieldProperties = any,
+> = {
+  converters: Required<
+    NonNullable<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>['converters']>
+  >
+} & RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>
+
+export type MarkdownRichTextAdapterProvider<
+  Value extends object = object,
+  AdapterProps = any,
+  ExtraFieldProperties = {},
+> = (
+  args: Parameters<RichTextAdapterProvider<Value, AdapterProps, ExtraFieldProperties>>[0],
+) => MarkdownRichTextAdapter<Value, AdapterProps, ExtraFieldProperties>

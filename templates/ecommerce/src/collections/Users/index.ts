@@ -86,4 +86,5 @@ export const Users: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }

@@ -14,9 +14,9 @@ export function isFieldRTL({
   locale,
   localizationConfig,
 }: {
-  fieldLocalized: boolean
-  fieldRTL: boolean
-  locale: Locale
+  fieldLocalized?: boolean
+  fieldRTL?: boolean
+  locale: Locale | null
   localizationConfig?: SanitizedLocalizationConfig
 }) {
   const hasMultipleLocales =

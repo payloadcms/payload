@@ -49,11 +49,11 @@ The following arguments are provided to the `preview` function:
 
 The `options` object contains the following properties:
 
-| Path         | Description                                           |
-| ------------ | ----------------------------------------------------- |
-| **`locale`** | The current locale of the Document being edited.      |
-| **`req`**    | The Payload Request object.                           |
-| **`token`**  | The JWT token of the currently authenticated user.    |
+| Path         | Description                                        |
+| ------------ | -------------------------------------------------- |
+| **`locale`** | The current locale of the Document being edited.   |
+| **`req`**    | The Payload Request object.                        |
+| **`token`**  | The JWT token of the currently authenticated user. |
 
 If your application requires a fully qualified URL, such as within deploying to Vercel Preview Deployments, you can use the `req` property to build this URL:
 
@@ -70,6 +70,14 @@ To enter draft mode, the URL provided to the `preview` function can point to a c
 ### Next.js
 
 If you're using Next.js, you can do the following code to enter [Draft Mode](https://nextjs.org/docs/app/building-your-application/configuring/draft-mode).
+
+<Banner type="info">
+  This walkthrough uses Next.js' `draftMode()` API and a `route.ts` handler.
+  TanStack Start has no `draftMode()` equivalent — implement the same concept in
+  a [server function](../local-api/server-functions) that verifies the preview
+  secret and sets your own draft cookie, then read that cookie in your loaders
+  to toggle `draft: true`.
+</Banner>
 
 #### Step 1: Format the Preview URL
 
@@ -108,7 +116,7 @@ Then, create an API route that verifies the preview secret, authenticates the us
 `/app/preview/route.ts`
 
 ```ts
-import type { CollectionSlug, PayloadRequest } from 'payload'
+import type { PayloadRequest } from 'payload'
 import { getPayload } from 'payload'
 
 import { draftMode } from 'next/headers'
@@ -130,8 +138,6 @@ export async function GET(
   const { searchParams } = new URL(req.url)
 
   const path = searchParams.get('path')
-  const collection = searchParams.get('collection') as CollectionSlug
-  const slug = searchParams.get('slug')
   const previewSecret = searchParams.get('previewSecret')
 
   if (previewSecret !== process.env.PREVIEW_SECRET) {
@@ -140,7 +146,7 @@ export async function GET(
     })
   }
 
-  if (!path || !collection || !slug) {
+  if (!path) {
     return new Response('Insufficient search params', { status: 404 })
   }
 

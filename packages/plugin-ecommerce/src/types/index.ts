@@ -1,5 +1,6 @@
 import type {
   Access,
+  AuthenticatedUser,
   CollectionConfig,
   CollectionSlug,
   DefaultDocumentIDType,
@@ -11,7 +12,6 @@ import type {
   PopulateType,
   SelectType,
   TypedCollection,
-  TypedUser,
   Where,
 } from 'payload'
 import type React from 'react'
@@ -44,6 +44,15 @@ type DefaultCartType = {
 }
 
 export type Cart = DefaultCartType
+
+type CartJoin = {
+  cart?: {
+    docs?: (Cart | DefaultDocumentIDType)[]
+  } | null
+}
+
+/** Adds the optional reverse `cart` join that a project may define on its user collection. */
+export type UserWithCart = AuthenticatedUser & CartJoin
 
 type InitiatePaymentReturnType = {
   /**
@@ -97,6 +106,18 @@ type ConfirmOrderReturnType = {
   transactionID: DefaultDocumentIDType
 }
 
+type FinalizeOrder = (args: {
+  /**
+   * The provider-validated data used to create the order. Core adds the canonical transaction
+   * relationship and owns all settlement side effects.
+   */
+  orderData: Record<string, unknown>
+  /**
+   * The ecommerce transaction that represents this payment.
+   */
+  transactionID: DefaultDocumentIDType
+}) => Promise<Record<string, unknown>>
+
 type ConfirmOrder = (args: {
   /**
    * The slug of the carts collection, defaults to 'carts'.
@@ -115,6 +136,11 @@ type ConfirmOrder = (args: {
     [key: string]: any // Allows for additional data to be passed through, such as payment method specific data
     customerEmail?: string
   }
+  /**
+   * Atomically claims the transaction, creates or finds its canonical order, and applies cart and
+   * inventory side effects. Payment adapters must call this exactly once, only after provider validation.
+   */
+  finalizeOrder: FinalizeOrder
   /**
    * The slug of the orders collection, defaults to 'orders'.
    */
@@ -141,14 +167,17 @@ export type PaymentAdapter = {
    * @example
    *
    * ```ts
-   * const confirmOrder: ConfirmOrder = async ({ data: { customerEmail }, ordersSlug, req, transactionsSlug }) => {
+   * const confirmOrder: ConfirmOrder = async ({ data, finalizeOrder, req, transactionsSlug }) => {
       // Confirm the payment with Stripe or another payment provider here
-      // Create an order in the orders collection here
-      // Update the record of the payment intent in the transactions collection here
+      const transactionID = 'txn_123'
+      const order = await finalizeOrder({
+        orderData: { status: 'processing' },
+        transactionID,
+      })
       return {
         message: 'Order confirmed successfully',
-        orderID: 'order_123',
-        transactionID: 'txn_123',
+        orderID: order.id,
+        transactionID,
         // Include any additional data required for the payment method here
       }
     }
@@ -233,7 +262,7 @@ export type PaymentAdapterClient = {
 export type Currency = {
   /**
    * The ISO 4217 currency code
-   * @example 'usd'
+   * @example 'USD'
    */
   code: string
   /**
@@ -252,6 +281,11 @@ export type Currency = {
    * @example '$'
    */
   symbol: string
+  /**
+   * The display format for the currency symbol in formatted output.
+   * @example 'symbol'
+   */
+  symbolDisplay?: 'code' | 'symbol'
 }
 
 /**
@@ -1049,5 +1083,5 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
   /**
    * The current authenticated user, or null if not logged in.
    */
-  user: null | TypedUser
+  user: null | UserWithCart
 }

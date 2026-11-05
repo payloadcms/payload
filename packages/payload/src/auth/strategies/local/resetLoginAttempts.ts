@@ -2,6 +2,8 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections
 import type { Payload } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 
+import { assertNoValidationWrite } from '../../../utilities/assertNoValidationWrite.js'
+
 type Args = {
   collection: SanitizedCollectionConfig
   doc: Record<string, unknown> & TypeWithID
@@ -15,6 +17,8 @@ export const resetLoginAttempts = async ({
   payload,
   req,
 }: Args): Promise<void> => {
+  assertNoValidationWrite(req)
+
   if (
     !('lockUntil' in doc && typeof doc.lockUntil === 'string') &&
     (!('loginAttempts' in doc) || doc.loginAttempts === 0)

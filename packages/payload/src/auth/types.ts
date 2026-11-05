@@ -1,6 +1,4 @@
-import type { DeepRequired } from 'ts-essentials'
-
-import type { CollectionSlug, GlobalSlug, Payload, TypedUser } from '../index.js'
+import type { CollectionSlug, GlobalSlug, Payload, User } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
 /**
@@ -20,6 +18,8 @@ export type BlockPermissions = {
   fields: FieldsPermissions
   read: Permission
   update: Permission
+  /** Permission to validate candidate block data without saving. */
+  validate: Permission
 }
 
 export type SanitizedBlockPermissions =
@@ -44,6 +44,8 @@ export type FieldPermissions = {
   fields?: FieldsPermissions
   read?: Permission
   update?: Permission
+  /** Permission to validate candidate field data without saving. */
+  validate?: Permission
 }
 
 export type SanitizedFieldPermissions =
@@ -53,6 +55,7 @@ export type SanitizedFieldPermissions =
       fields?: SanitizedFieldsPermissions
       read: true
       update: true
+      validate: true
     }
   | true
 
@@ -71,6 +74,8 @@ export type CollectionPermission = {
   // Auth-enabled Collections only
   unlock?: Permission
   update?: Permission
+  /** Permission to validate collection candidate data without saving. */
+  validate?: Permission
 }
 
 export type SanitizedCollectionPermission = {
@@ -82,6 +87,7 @@ export type SanitizedCollectionPermission = {
   // Auth-enabled Collections only
   unlock?: true
   update?: true
+  validate?: true
 }
 
 export type GlobalPermission = {
@@ -89,6 +95,8 @@ export type GlobalPermission = {
   read?: Permission
   readVersions?: Permission
   update?: Permission
+  /** Permission to validate global candidate data without saving. */
+  validate?: Permission
 }
 
 export type SanitizedGlobalPermission = {
@@ -96,6 +104,7 @@ export type SanitizedGlobalPermission = {
   read?: true
   readVersions?: true
   update?: true
+  validate?: true
 }
 
 export type DocumentPermissions = CollectionPermission | GlobalPermission
@@ -118,30 +127,46 @@ export type SanitizedPermissions = {
   }
 }
 
-type BaseUser = {
-  collection: string
-  email?: string
-  id: number | string
-  sessions?: Array<UserSession>
-  username?: string
+/**
+ * Fields injected onto a user at authentication time. They are never stored in the database and
+ * never present on a plain document read (e.g. `payload.findByID`) - only on the authenticated
+ * user (`req.user`, login/auth/me results, auth strategies).
+ */
+export type AuthRuntimeFields = {
+  /**
+   * The session ID of the current request. May be present on request-authenticated users when
+   * sessions are enabled.
+   */
+  _sid?: string
+  /**
+   * The name of the auth strategy that authenticated the request (e.g. `local-jwt`).
+   */
+  _strategy?: string
 }
 
 /**
- * @deprecated Use `TypedUser` instead. This will be removed in 4.0.
+ * Note: AuthenticatedUser still carries the write-only `password` from `User` (always `undefined` at runtime).
+ * Stripping it cleanly isn't possible, because auth operations build the authenticated user
+ * from a read `User` doc, so a `never`-typed `password` would break those assignments
  */
-export type UntypedUser = {
-  [key: string]: any
-} & BaseUser
-
 /**
- * `collection` is not available one the client. It's only available on the server (req.user)
- * On the client, you can access the collection via config.admin.user. Config can be accessed using the useConfig() hook
+ * The signed-in user: the read user plus the runtime auth markers (`_strategy`, `_sid`).
+ * Server authentication APIs may retain complete fields, while response boundaries apply read access.
  */
-export type ClientUser = {
-  [key: string]: any
-} & BaseUser
+export type AuthenticatedUser = AuthRuntimeFields & User
 
-export type UserSession = { createdAt: Date | string; expiresAt: Date | string; id: string }
+export type UserSession = {
+  createdAt?: Date | null | string
+  expiresAt: Date | string
+  id: string
+  /**
+   * How many times the session was refreshed with a refresh token. Refresh tokens remember it, so
+   * the latest one can be told apart from older ones.
+   */
+  refreshCount?: null | number
+  /** When the session was last refreshed with a refresh token. */
+  refreshedAt?: Date | null | string
+}
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
   req: PayloadRequest
   token: string
@@ -174,6 +199,8 @@ export type AuthStrategyFunctionArgs = {
   headers: Request['headers']
   isGraphQL?: boolean
   payload: Payload
+  /** The request that initiated authentication, when available. */
+  req?: PayloadRequest
   /**
    * The AuthStrategy name property from the payload config.
    */
@@ -182,12 +209,7 @@ export type AuthStrategyFunctionArgs = {
 
 export type AuthStrategyResult = {
   responseHeaders?: Headers
-  user:
-    | ({
-        _strategy?: string
-        collection?: string
-      } & TypedUser)
-    | null
+  user: AuthenticatedUser | null
 }
 
 export type AuthStrategyFunction = (
@@ -211,22 +233,29 @@ export type LoginWithUsernameOptions =
       requireUsername?: boolean
     }
 
+type AuthCookies = {
+  domain?: string
+  sameSite?: 'Lax' | 'None' | 'Strict' | boolean
+  secure?: boolean
+}
+
 export interface IncomingAuthType {
   /**
    * Set cookie options, including secure, sameSite, and domain. For advanced users.
    */
-  cookies?: {
-    domain?: string
-    sameSite?: 'Lax' | 'None' | 'Strict' | boolean
-    secure?: boolean
-  }
+  cookies?: AuthCookies
   /**
    * How many levels deep a user document should be populated when creating the JWT and binding the user to the req. Defaults to 0 and should only be modified if absolutely necessary, as this will affect performance.
    * @default 0
    */
   depth?: number
   /**
-   * Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.
+   * Controls whether Payload's built-in local auth strategy is disabled. Set to `true` to disable
+   * local authentication or `false` to keep it enabled.
+   *
+   * Pass an object to disable local authentication while configuring how its fields are retained.
+   * Only disable local authentication if you have replaced Payload's auth mechanisms with your own.
+   * @default false
    */
   disableLocalStrategy?:
     | {
@@ -235,9 +264,12 @@ export interface IncomingAuthType {
          * Useful when you do not want the database or types to vary depending on the auth configuration.
          */
         enableFields?: true
+        /**
+         * When auth fields are retained, make the password field optional.
+         */
         optionalPassword?: true
       }
-    | true
+    | boolean
   /**
    * Customize the way that the forgotPassword operation functions.
    * @link https://payloadcms.com/docs/authentication/email#forgot-password
@@ -250,6 +282,12 @@ export interface IncomingAuthType {
     expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
+    /**
+     * The minimum number of milliseconds between password reset emails for the same user.
+     * @default 15000
+     * Set to 0 to disable.
+     */
+    minRequestInterval?: number
   }
   /**
    * Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than maxLoginAttempts allows for.
@@ -265,6 +303,31 @@ export interface IncomingAuthType {
    * Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to 0 to disable.
    */
   maxLoginAttempts?: number
+  /**
+   * Lets clients stay logged in after their token expires. Logins also return a refresh token,
+   * which the refresh operation trades for a new token and a new refresh token. Each refresh token
+   * is meant to be used once. The one from right before still works for 30 seconds after a refresh,
+   * for clients that refresh twice at once. When a used one comes back otherwise, its session is
+   * logged out. Requires `useSessions`.
+   *
+   * Refresh tokens don't expire on their own. They work as long as their login session, which lasts
+   * `expiration` from the last refresh instead of `tokenExpiration`.
+   *
+   * @default false
+   * @link https://payloadcms.com/docs/authentication/overview#refresh-tokens
+   */
+  refreshTokens?:
+    | {
+        /**
+         * How many seconds a login session with a refresh token lasts without a refresh, which is
+         * how long its refresh token can be used. Every refresh starts this time again. The token
+         * itself still expires after `tokenExpiration`.
+         *
+         * @default 2592000 (30 days)
+         */
+        expiration?: number
+      }
+    | boolean
   /***
    * Set to true if you want to remove the token from the returned authentication API responses such as login or refresh.
    */
@@ -285,7 +348,15 @@ export interface IncomingAuthType {
    * @default false
    * @link https://payloadcms.com/docs/authentication/api-keys
    */
-  useAPIKey?: boolean
+  useAPIKey?:
+    | {
+        /**
+         * Allows administrators to reveal stored API keys from the Admin Panel.
+         * @default false
+         */
+        reveal?: boolean
+      }
+    | boolean
 
   /**
    * Use sessions for authentication. Enabled by default.
@@ -311,14 +382,35 @@ export type VerifyConfig = {
 }
 
 export interface Auth
-  extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'loginWithUsername' | 'verify'> {
-  forgotPassword?: {
-    expiration?: number
-    generateEmailHTML?: GenerateForgotPasswordEmailHTML
-    generateEmailSubject?: GenerateForgotPasswordEmailSubject
-  }
-  loginWithUsername: false | LoginWithUsernameOptions
-  verify?: boolean | VerifyConfig
+  extends
+    Omit<
+      IncomingAuthType,
+      | 'cookies'
+      | 'forgotPassword'
+      | 'lockTime'
+      | 'loginWithUsername'
+      | 'maxLoginAttempts'
+      | 'refreshTokens'
+      | 'strategies'
+      | 'tokenExpiration'
+      | 'useSessions'
+      | 'verify'
+    >,
+    Required<
+      Pick<
+        IncomingAuthType,
+        | 'forgotPassword'
+        | 'lockTime'
+        | 'maxLoginAttempts'
+        | 'strategies'
+        | 'tokenExpiration'
+        | 'useSessions'
+        | 'verify'
+      >
+    > {
+  cookies: Pick<AuthCookies, 'domain'> & Required<Pick<AuthCookies, 'sameSite' | 'secure'>>
+  loginWithUsername: false | Required<LoginWithUsernameOptions>
+  refreshTokens: { expiration: number } | false
 }
 
 export function hasWhereAccessResult(result: boolean | Where): result is Where {

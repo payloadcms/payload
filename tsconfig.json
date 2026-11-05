@@ -3,7 +3,6 @@
   "compilerOptions": {
     "composite": false,
     "noEmit": true,
-    "baseUrl": ".",
   },
   "references": [
     {
@@ -76,10 +75,10 @@
       "path": "./packages/plugin-multi-tenant"
     },
     {
-      "path": "./packages/richtext-slate"
+      "path": "./packages/richtext-lexical"
     },
     {
-      "path": "./packages/richtext-lexical"
+      "path": "./packages/transformer-sharp"
     },
     {
       "path": "./packages/translations"

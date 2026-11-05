@@ -24,10 +24,9 @@ export const connect: Connect = async function connect(
 
   const urlToConnect = this.url
 
-  const connectionOptions: { useFacet: undefined } & ConnectOptions = {
+  const connectionOptions: ConnectOptions = {
     autoIndex: true,
     ...this.connectOptions,
-    useFacet: undefined,
   }
 
   if (hotReload) {
@@ -93,8 +92,14 @@ export const connect: Connect = async function connect(
 
     if (this.ensureIndexes) {
       await Promise.all(
-        this.payload.config.collections.map(async (coll) => {
-          await this.collections[coll.slug]?.ensureIndexes()
+        [
+          ...this.payload.config.collections.flatMap((collection) => [
+            this.collections[collection.slug],
+            this.versions[collection.slug],
+          ]),
+          ...this.payload.config.globals.map((global) => this.versions[global.slug]),
+        ].map(async (model) => {
+          await model?.ensureIndexes()
         }),
       )
     }

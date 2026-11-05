@@ -3,6 +3,7 @@ import type DataLoader from 'dataloader'
 import type { OptionalKeys, RequiredKeys } from 'ts-essentials'
 import type { URL } from 'url'
 
+import type { ServerAdapter } from '../admin/adapters/server.js'
 import type {
   DataFromCollectionSlug,
   QueryDraftDataFromCollectionSlug,
@@ -11,6 +12,7 @@ import type {
 } from '../collections/config/types.js'
 import type payload from '../index.js'
 import type {
+  AuthenticatedUser,
   CollectionSlug,
   DataFromGlobalSlug,
   GlobalSlug,
@@ -20,15 +22,28 @@ import type {
   TypedCollectionSelect,
   TypedFallbackLocale,
   TypedLocale,
-  TypedUser,
 } from '../index.js'
-import type { Operator } from './constants.js'
+import type { File } from '../uploads/types.js'
+import type { HasManyRelationshipOperator, Operator } from './constants.js'
+export type { TypeWithID } from '../collections/config/types.js'
 export type { Payload } from '../index.js'
+
+export interface PayloadRequestAPI {
+  GraphQL: true
+  local: true
+  REST: true
+}
 
 export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: TypedFallbackLocale
+  /**
+   * Set by Payload only while running a collection's `read` access function for a
+   * dynamic file transformation request. Restored to its prior value immediately
+   * after that access check completes; never set for ordinary reads.
+   */
+  fileTransform?: true
   i18n: I18n
   /**
    * The requested locale if specified
@@ -45,7 +60,7 @@ export type CustomPayloadRequestProperties = {
   /**
    * The context in which the request is being made
    */
-  payloadAPI: 'GraphQL' | 'local' | 'REST'
+  payloadAPI: keyof PayloadRequestAPI
   /** Optimized document loader */
   payloadDataLoader: {
     /**
@@ -72,6 +87,15 @@ export type CustomPayloadRequestProperties = {
    * { collection: 'posts', id: '123' }
    */
   routeParams?: Record<string, unknown>
+  /**
+   * Framework abstraction for server-only navigation, cookies, and headers APIs.
+   * Populated by the framework adapter (e.g. `@payloadcms/next`). Plugins that
+   * have access to `req` should call methods here (`req.server.unauthorized()`,
+   * `req.server.redirect(...)`) instead of importing from `next/navigation` or
+   * `next/headers` directly. Optional because non-framework contexts (jobs,
+   * scripts, tests) construct requests without a server adapter.
+   */
+  server?: ServerAdapter
   /** Translate function - duplicate of i18n.t */
   t: TFunction
   /**
@@ -79,13 +103,8 @@ export type CustomPayloadRequestProperties = {
    * Can also be used to ensure consistency when multiple operations try to create a transaction concurrently on the same request.
    */
   transactionID?: number | Promise<number | string> | string
-  /**
-   * Used to ensure consistency when multiple operations try to create a transaction concurrently on the same request
-   * @deprecated This is not used anywhere, instead `transactionID` is used for the above. Will be removed in next major version.
-   */
-  transactionIDPromise?: Promise<void>
   /** The signed-in user */
-  user: null | TypedUser
+  user: AuthenticatedUser | null
 } & Pick<
   URL,
   'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
@@ -107,25 +126,19 @@ type PayloadRequestData = {
   data?: JsonObject
   /** The file on the request, same rules apply as the `data` property */
   file?: {
-    /**
-     * Context of the file when it was uploaded via client side.
-     */
-    clientUploadContext?: unknown
-    data: Buffer
-    mimetype: string
-    name: string
-    size: number
-    tempFilePath?: string
-  }
+    uploadReference?: unknown
+  } & File
+  /** All files from multipart form data, keyed by field name */
+  files?: Record<string, File | File[]>
 }
 export interface PayloadRequest
-  extends CustomPayloadRequestProperties,
-    Partial<Request>,
-    PayloadRequestData {
+  extends CustomPayloadRequestProperties, Partial<Request>, PayloadRequestData {
   headers: Request['headers']
+  /** The active Payload operation. */
+  operation?: Operation
 }
 
-export type { Operator }
+export type { HasManyRelationshipOperator, Operator }
 
 // Makes it so things like passing new Date() will error
 export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | JsonObject | boolean | null | number | string // TODO: Evaluate proper, strong type for this
@@ -137,7 +150,7 @@ export interface JsonObject {
 }
 
 export type WhereField = {
-  // any json-serializable value
+  // any json-serializable value, including a nested query for supported relationship operators
   [key in Operator]?: JsonValue
 }
 
@@ -157,7 +170,7 @@ export type DefaultValue =
       locale?: TypedLocale
       req: PayloadRequest
       user: PayloadRequest['user']
-    }) => SerializableValue)
+    }) => Promise<SerializableValue> | SerializableValue)
   | SerializableValue
 
 /**
@@ -183,7 +196,15 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any
 
-export type Operation = 'create' | 'delete' | 'read' | 'update'
+/**
+ * Operations exposed to access control and request lifecycle functions.
+ *
+ * On-demand validation uses the first-class `validate` value rather than substituting `create`
+ * or `update`.
+ */
+export type Operation = 'create' | 'delete' | 'read' | 'update' | 'validate'
+export type FieldOperation = Exclude<Operation, 'delete'>
+export type BeforeValidateOperation = Extract<FieldOperation, 'create' | 'update' | 'validate'>
 export type VersionOperations = 'readVersions'
 export type AuthOperations = 'unlock'
 export type AllOperations = AuthOperations | Operation | VersionOperations
@@ -207,6 +228,55 @@ export type SelectExcludeType = {
 export type SelectMode = 'exclude' | 'include'
 
 export type SelectType = SelectExcludeType | SelectIncludeType
+
+/**
+ * Operations that invoke an entity-level `select` function.
+ *
+ * Narrower than `HookOperationType`: `select` runs only for read- and
+ * write-path operations that materialize a document (`create`, `delete`,
+ * `read`, `restoreVersion`, `update`). Operations like `autosave`, `count`,
+ * `countVersions`, `forgotPassword`, `login`, `readDistinct`, `refresh`, and
+ * `resetPassword` do not invoke `select` and are intentionally excluded.
+ */
+export type SelectFnOperation = 'create' | 'delete' | 'read' | 'restoreVersion' | 'update'
+
+export type SelectFnArgs = {
+  operation: SelectFnOperation
+  req: PayloadRequest
+  /** The caller's `select` arg, or `undefined` if not provided. */
+  select?: SelectType
+}
+
+export type SelectFn<TSelect extends SelectType = SelectType> = (
+  args: SelectFnArgs,
+) => TSelect | undefined
+
+/**
+ * Shared shape for the entity-level `select` config used by Collections and Globals.
+ * The JSDoc on the `select` property is the single source of truth — pick from this
+ * type when defining the config:
+ *
+ *   & Pick<WithSelectFn<...>, 'select'>
+ */
+export type WithSelectFn<TSelect extends SelectType = SelectType> = {
+  /**
+   * Entity-level Select API configuration.
+   *
+   * A function that receives the current request context (`operation`, `req`,
+   * the caller's `select`) and returns the final `select` to apply, replacing
+   * the caller's. Return `undefined` to leave the caller's `select` unchanged.
+   *
+   * Useful to dynamically modify the caller's selection based on the request context:
+   *  - Forcing a field to be populated for reference within hooks / access control.
+   *  - Differentiating between API requests and admin panel requests, to optimize
+   *    the amount of data being queried in each case.
+   *
+   * Note: per-document data is not available — this runs before the read.
+   *
+   * @see https://payloadcms.com/docs/queries/select
+   */
+  select?: SelectFn<TSelect>
+}
 
 export type ApplyDisableErrors<T, DisableErrors = false> = false extends DisableErrors
   ? T
@@ -234,22 +304,26 @@ export type TransformDataWithSelect<
         // Handle include mode
         Select extends SelectIncludeType
         ? {
-            [K in keyof Data as K extends keyof Select
-              ? Select[K] extends object | true
-                ? K
-                : never
-              : // select 'id' always
-                K extends 'id'
-                ? K
-                : never]: Data[K]
+            [
+              K in keyof Data as K extends keyof Select
+                ? Select[K] extends object | true
+                  ? K
+                  : never
+                : // select 'id' always
+                  K extends 'id'
+                  ? K
+                  : never
+            ]: Data[K]
           }
         : // Handle exclude mode
           {
-            [K in keyof Data as K extends keyof Select
-              ? Select[K] extends object | undefined
-                ? K
-                : never
-              : K]: Data[K]
+            [
+              K in keyof Data as K extends keyof Select
+                ? Select[K] extends object | undefined
+                  ? K
+                  : never
+                : K
+            ]: Data[K]
           }
 
 export type TransformCollectionWithSelect<
@@ -274,6 +348,8 @@ export type TransformGlobalWithSelect<
   : DataFromGlobalSlug<TSlug>
 
 export type PopulateType = Partial<TypedCollectionSelect>
+
+export type { SharedLocalAPIOptions } from './operations.js'
 
 export type ResolvedFilterOptions = { [collection: string]: Where }
 

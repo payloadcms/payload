@@ -94,6 +94,11 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
+  };
   user: User | LoginWithEither | RequireEmail;
   jobs: {
     tasks: unknown;
@@ -169,6 +174,32 @@ export interface RequireEmailAuthOperations {
  */
 export interface User {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'login-with-either';
+        value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'login-with-either';
+        value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
+      } | null);
   updatedAt: string;
   createdAt: string;
   email?: string | null;
@@ -177,6 +208,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -195,6 +227,32 @@ export interface User {
  */
 export interface LoginWithEither {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'login-with-either';
+        value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'login-with-either';
+        value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
+      } | null);
   updatedAt: string;
   createdAt: string;
   email?: string | null;
@@ -203,6 +261,7 @@ export interface LoginWithEither {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -221,6 +280,32 @@ export interface LoginWithEither {
  */
 export interface RequireEmail {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'login-with-either';
+        value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'login-with-either';
+        value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
+      } | null);
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -229,6 +314,7 @@ export interface RequireEmail {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -342,6 +428,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -350,6 +438,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -365,6 +454,8 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "login-with-either_select".
  */
 export interface LoginWithEitherSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -373,6 +464,7 @@ export interface LoginWithEitherSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -388,6 +480,8 @@ export interface LoginWithEitherSelect<T extends boolean = true> {
  * via the `definition` "require-email_select".
  */
 export interface RequireEmailSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -396,6 +490,7 @@ export interface RequireEmailSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -445,6 +540,49 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'users' | 'login-with-either' | 'require-email';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?: ('users' | 'login-with-either' | 'require-email')[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -9,4 +9,5 @@ export const RelationshipFilterTrue: CollectionConfig = {
   },
   fields: baseRelationshipFields,
   slug: relationTrueFilterOptionSlug,
+  versions: false,
 }

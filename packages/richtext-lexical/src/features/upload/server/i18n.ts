@@ -89,7 +89,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Naloži',
   },
   sv: {
-    label: 'Ladda upp',
+    label: 'Uppladdning',
   },
   ta: {
     label: 'பதிவேற்றம்',

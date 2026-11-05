@@ -73,12 +73,14 @@ export const syncDocAsSearchIndex = async ({
         id,
         collection,
         locale: syncLocale,
+        overrideAccess: true,
         req,
         // Include trashed documents when the document being synced is trashed
         trash: isTrashDocument,
       })
     }
     dataToSave = await beforeSync({
+      collectionSlug: collection,
       originalDoc: docToSyncWith,
       payload,
       req,
@@ -116,6 +118,7 @@ export const syncDocAsSearchIndex = async ({
         },
         depth: 0,
         locale: syncLocale,
+        overrideAccess: true,
         req,
       })
     }
@@ -127,6 +130,7 @@ export const syncDocAsSearchIndex = async ({
           collection: searchSlug,
           depth: 0,
           locale: syncLocale,
+          overrideAccess: true,
           req,
           where: {
             'doc.relationTo': {
@@ -153,6 +157,7 @@ export const syncDocAsSearchIndex = async ({
             await payload.delete({
               collection: searchSlug,
               depth: 0,
+              overrideAccess: true,
               req,
               where: { id: { in: duplicativeDocIDs } },
             })
@@ -176,6 +181,7 @@ export const syncDocAsSearchIndex = async ({
                 id: searchDocID,
                 collection: searchSlug,
                 depth: 0,
+                overrideAccess: true,
                 req,
               })
             } catch (err: unknown) {
@@ -197,6 +203,7 @@ export const syncDocAsSearchIndex = async ({
                   },
                   depth: 0,
                   locale: syncLocale,
+                  overrideAccess: true,
                   req,
                 })
               } catch (err: unknown) {
@@ -215,6 +222,7 @@ export const syncDocAsSearchIndex = async ({
                 draft: false,
                 limit: 1,
                 locale: syncLocale,
+                overrideAccess: true,
                 pagination: false,
                 req,
                 where: {
@@ -240,6 +248,7 @@ export const syncDocAsSearchIndex = async ({
                     id: searchDocID,
                     collection: searchSlug,
                     depth: 0,
+                    overrideAccess: true,
                     req,
                   })
                 } catch (err: unknown) {
@@ -258,6 +267,7 @@ export const syncDocAsSearchIndex = async ({
               },
               depth: 0,
               locale: syncLocale,
+              overrideAccess: true,
               req,
             })
           } catch (err: unknown) {

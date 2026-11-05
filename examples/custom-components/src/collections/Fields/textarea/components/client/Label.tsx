@@ -1,10 +1,10 @@
 'use client'
-import type { TextareaFieldLabelClientComponent } from 'payload'
+import type { TextareaFieldLabelClientProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomTextareaFieldLabelClient: TextareaFieldLabelClientComponent = ({
+export const CustomTextareaFieldLabelClient: React.FC<TextareaFieldLabelClientProps> = ({
   field,
   path,
 }) => {

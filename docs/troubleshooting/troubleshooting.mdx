@@ -123,7 +123,7 @@ This is a common pitfall when using a monorepo setup with multiple packages. In 
 
 If you've pinned the versions and the error persists we recommend removing `.next/`, `node_modules/` and if possible deleting the lockfile and re-generating it to ensure that all packages in the monorepo are using the same version of the dependencies mentioned above.
 
-In some cases package managers will hoist dependencies to the root of the monorepo which can lead to multiple versions or multiple instances of the same package being installed in different locations.  
+In some cases package managers will hoist dependencies to the root of the monorepo which can lead to multiple versions or multiple instances of the same package being installed in different locations.
 Where possible it's best to install the Payload dependencies at the root of the monorepo to ensure only one version and one instance is installed across all packages.
 
 ## "Unauthorized, you must be logged in to make this request" when attempting to log in
@@ -144,6 +144,11 @@ To further investigate the issue:
 
 ## Using --experimental-https
 
+<Banner type="info">
+  This section applies to Next.js. If you're running the Admin Panel on TanStack
+  Start, configure HTTPS through Vite's dev server options instead.
+</Banner>
+
 If you are using the `--experimental-https` flag when starting your Payload server, you may run into issues with your WebSocket connection for HMR (Hot Module Reloading) in development mode.
 
 To resolve this, you can set the `USE_HTTPS` environment variable to `true` in your `.env` file:
@@ -157,7 +162,7 @@ This will ensure that the WebSocket connection uses the correct protocol (`wss:/
 Alternatively if more of your URL is dynamic, you can set the full URL for the WebSocket connection using the `PAYLOAD_HMR_URL_OVERRIDE` environment variable:
 
 ```
-PAYLOAD_HMR_URL_OVERRIDE=wss://localhost:3000/_next/webpack-hmr
+PAYLOAD_HMR_URL_OVERRIDE=wss://localhost:3000/_next/hmr
 ```
 
 ## Database password encoding issues

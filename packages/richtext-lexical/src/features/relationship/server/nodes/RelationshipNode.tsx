@@ -1,5 +1,3 @@
-import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
-import type { CollectionSlug, DataFromCollectionSlug } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
@@ -16,17 +14,7 @@ import {
   type NodeKey,
 } from 'lexical'
 
-import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
-
-export type RelationshipData = {
-  [TCollectionSlug in CollectionSlug]: {
-    relationTo: TCollectionSlug
-    value: DataFromCollectionSlug<TCollectionSlug> | number | string
-  }
-}[CollectionSlug]
-
-export type SerializedRelationshipNode = RelationshipData &
-  StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'relationship'>
+import type { RelationshipData, SerializedRelationshipNode } from '../schema.js'
 
 function $relationshipElementToServerNode(domNode: HTMLDivElement): DOMConversionOutput | null {
   const id = domNode.getAttribute('data-lexical-relationship-id')
@@ -88,10 +76,6 @@ export class RelationshipServerNode extends DecoratorBlockNode {
   }
 
   static override importJSON(serializedNode: SerializedRelationshipNode): RelationshipServerNode {
-    if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
-      serializedNode.value = (serializedNode.value as unknown as { id: string }).id
-    }
-
     const importedData: RelationshipData = {
       relationTo: serializedNode.relationTo,
       value: serializedNode.value,
@@ -133,7 +117,6 @@ export class RelationshipServerNode extends DecoratorBlockNode {
       ...super.exportJSON(),
       ...this.getData(),
       type: 'relationship',
-      version: 2,
     }
   }
 

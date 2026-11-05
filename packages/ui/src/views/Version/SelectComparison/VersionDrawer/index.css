@@ -1,0 +1,5 @@
+@layer payload-default {
+  .version-drawer .table {
+    width: 100%;
+  }
+}

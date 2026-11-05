@@ -15,7 +15,7 @@ import { getNodeCloseToPoint } from '../utils/getNodeCloseToPoint.js'
 import { getTopLevelNodeKeys } from '../utils/getTopLevelNodeKeys.js'
 import { isOnHandleElement } from '../utils/isOnHandleElement.js'
 import { setHandlePosition } from '../utils/setHandlePosition.js'
-import './index.scss'
+import './index.css'
 
 const ADD_BLOCK_MENU_CLASSNAME = 'add-block-menu'
 
@@ -114,9 +114,9 @@ function useAddBlockHandle(
   }, [scrollerElem, anchorElem, editor, hoveredElement])
 
   useEffect(() => {
-    if (menuRef.current && hoveredElement?.node) {
+    if (menuRef.current) {
       setHandlePosition(
-        hoveredElement?.elem,
+        hoveredElement?.elem ?? null,
         menuRef.current,
         anchorElem,
         blockHandleHorizontalOffset,

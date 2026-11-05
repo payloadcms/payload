@@ -6,11 +6,7 @@ import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
 
-import type {
-  Internal_UploadData,
-  SerializedUploadNode,
-  UploadData,
-} from '../../server/nodes/UploadNode.js'
+import type { Internal_UploadData, SerializedUploadNode, UploadData } from '../../server/schema.js'
 
 import { $convertUploadElement } from '../../server/nodes/conversions.js'
 import { UploadServerNode } from '../../server/nodes/UploadNode.js'
@@ -39,14 +35,6 @@ export class UploadNode extends UploadServerNode {
   }
 
   static override importJSON(serializedNode: SerializedUploadNode): UploadNode {
-    if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
-      serializedNode.value = (serializedNode.value as unknown as { id: string }).id
-    }
-    if (serializedNode.version === 2 && !serializedNode?.id) {
-      serializedNode.id = new ObjectID.default().toHexString()
-      serializedNode.version = 3
-    }
-
     const importedData: Internal_UploadData = {
       id: serializedNode.id,
       fields: serializedNode.fields,

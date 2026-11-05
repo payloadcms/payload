@@ -13,4 +13,5 @@ export const CollectionNotInView: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

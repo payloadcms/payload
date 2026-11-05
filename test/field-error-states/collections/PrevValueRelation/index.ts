@@ -11,4 +11,5 @@ export const PrevValueRelation: CollectionConfig = {
       type: 'relationship',
     },
   ],
+  versions: false,
 }

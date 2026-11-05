@@ -1,0 +1,28 @@
+@layer payload-default {
+  .live-preview-toolbar-controls {
+    display: contents;
+  }
+
+  .live-preview-toolbar-controls__breakpoint {
+    justify-self: start;
+  }
+
+  .live-preview-toolbar-controls__center {
+    display: flex;
+    align-items: center;
+    justify-self: center;
+    gap: var(--spacer-2);
+  }
+
+  .live-preview-toolbar-controls__zoom-percentage {
+    margin-right: var(--spacer-2);
+    color: var(--color-text-secondary);
+  }
+
+  .live-preview-toolbar-controls__end {
+    display: flex;
+    align-items: center;
+    justify-self: end;
+    gap: var(--spacer-1);
+  }
+}

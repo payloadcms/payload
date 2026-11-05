@@ -17,7 +17,7 @@ import {
   type SQL,
 } from 'drizzle-orm'
 
-type OperatorKeys =
+export type OperatorKeys =
   | 'and'
   | 'contains'
   | 'equals'
@@ -34,7 +34,13 @@ type OperatorKeys =
   | 'not_like'
   | 'or'
 
-export type Operators = Record<OperatorKeys, (column: Column, value: unknown) => SQL>
+/**
+ * The subset of operator keys that represent an actual user-facing comparison operator,
+ * excluding the `and`/`or` boolean combinators.
+ */
+export type DrizzleResolvedOperator = Exclude<OperatorKeys, 'and' | 'or'>
+
+export type Operators = Record<OperatorKeys, (column: Column | SQL, value: unknown) => SQL>
 
 export const operatorMap: Operators = {
   and,

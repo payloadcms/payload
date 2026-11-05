@@ -10,4 +10,5 @@ export const Collection2: CollectionConfig = {
     },
   ],
   slug: collection2Slug,
+  versions: false,
 }

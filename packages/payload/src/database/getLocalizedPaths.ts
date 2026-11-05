@@ -7,6 +7,8 @@ import {
   type FlattenedField,
 } from '../fields/config/types.js'
 import { APIError, type Payload, type SanitizedCollectionConfig } from '../index.js'
+import { SAFE_FIELD_PATH_REGEX } from '../types/constants.js'
+import { getFieldByPath } from '../utilities/getFieldByPath.js'
 
 export function getLocalizedPaths({
   collectionSlug,
@@ -17,6 +19,7 @@ export function getLocalizedPaths({
   overrideAccess = false,
   parentIsLocalized,
   payload,
+  showHiddenFields = false,
 }: {
   collectionSlug?: string
   fields: FlattenedField[]
@@ -29,6 +32,7 @@ export function getLocalizedPaths({
    */
   parentIsLocalized?: boolean
   payload: Payload
+  showHiddenFields?: boolean
 }): PathToQuery[] {
   const pathSegments = incomingPath.split('.')
   const localizationConfig = payload.config.localization
@@ -59,7 +63,7 @@ export function getLocalizedPaths({
       let fieldsToSearch: FlattenedField[]
       let _parentIsLocalized = parentIsLocalized
 
-      let matchedField!: FlattenedField
+      let matchedField: FlattenedField | undefined
 
       if (lastIncompletePath?.field?.type === 'blocks') {
         if (segment === 'blockType') {
@@ -68,8 +72,7 @@ export function getLocalizedPaths({
             type: 'text',
           }
         } else {
-          for (const _block of lastIncompletePath.field.blockReferences ??
-            lastIncompletePath.field.blocks) {
+          for (const _block of lastIncompletePath.field.blocks) {
             let block: FlattenedBlock
             if (typeof _block === 'string') {
               block = payload.blocks[_block]!
@@ -79,7 +82,23 @@ export function getLocalizedPaths({
 
             matchedField = block.flattenedFields.find((field) => field.name === segment)!
             if (matchedField) {
-              break
+              const remainingPaths = getLocalizedPaths({
+                collectionSlug,
+                fields: block.flattenedFields,
+                globalSlug,
+                incomingPath: pathSegments.slice(i).join('.'),
+                locale,
+                overrideAccess,
+                parentIsLocalized: parentIsLocalized || lastIncompletePath.field.localized,
+                payload,
+                showHiddenFields,
+              })
+
+              // A same-named field in another block may be the one that supplies the full path.
+              if (remainingPaths.every(({ complete, invalid }) => complete && !invalid)) {
+                break
+              }
+              matchedField = undefined
             }
           }
         }
@@ -131,7 +150,12 @@ export function getLocalizedPaths({
       }
 
       if (matchedField) {
-        if ('hidden' in matchedField && matchedField.hidden && !overrideAccess) {
+        if (
+          'hidden' in matchedField &&
+          matchedField.hidden &&
+          !overrideAccess &&
+          !showHiddenFields
+        ) {
           lastIncompletePath.invalid = true
         }
 
@@ -183,6 +207,19 @@ export function getLocalizedPaths({
                   }
 
                   relatedCollection = payload.collections[matchedField.collection]!.config
+
+                  const joinOnField = getFieldByPath({
+                    fields: relatedCollection.flattenedFields,
+                    path: matchedField.on,
+                  })?.field
+
+                  if (
+                    joinOnField &&
+                    (joinOnField.type === 'relationship' || joinOnField.type === 'upload') &&
+                    Array.isArray(joinOnField.relationTo)
+                  ) {
+                    throw new APIError('Not supported')
+                  }
                 } else {
                   relatedCollection = payload.collections[matchedField.relationTo as string]!.config
                 }
@@ -195,6 +232,7 @@ export function getLocalizedPaths({
                   locale,
                   parentIsLocalized: false,
                   payload,
+                  showHiddenFields,
                 })
 
                 paths = [...paths, ...remainingPaths]
@@ -209,7 +247,7 @@ export function getLocalizedPaths({
           case 'richText': {
             const upcomingSegments = pathSegments.slice(i + 1).join('.')
             pathSegments.forEach((path) => {
-              if (!/^\w+(?:\.\w+)*$/.test(path)) {
+              if (!SAFE_FIELD_PATH_REGEX.test(path)) {
                 lastIncompletePath.invalid = true
               }
             })

@@ -10,16 +10,15 @@
  *   PAYLOAD_DATABASE=mongodb tsx test/localization/testMigration.ts
  */
 
+import { localizeStatus } from '@payloadcms/db-mongodb/migration-utils'
 import { sql } from '@payloadcms/db-postgres'
+import { migratePostgresLocalizeStatus } from '@payloadcms/db-postgres/migration-utils'
 import { Types } from 'mongoose'
-import path from 'path'
-import { localizeStatus } from 'payload/migrations'
-import { fileURLToPath } from 'url'
+import { getPayload } from 'payload'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import { resetAndSeed } from '../__helpers/shared/clearAndSeed/resetAndSeed.js'
+import { getTestDataConfig } from '../__helpers/shared/clearAndSeed/testDataConfig.js'
+import testConfig from './localizeStatus.config.js'
 
 async function main() {
   console.log('🚀 Starting localizeStatus migration test...\n')
@@ -28,12 +27,15 @@ async function main() {
   console.log(`Database: ${dbType}\n`)
 
   // Initialize Payload
-  const { payload } = await initPayloadInt(
-    dirname,
-    undefined,
-    undefined,
-    'localizeStatus.config.ts',
-  )
+  const config = await testConfig
+  const payload = await getPayload({ config, cron: true })
+  const testDataConfig = getTestDataConfig(config)
+
+  if (!testDataConfig) {
+    throw new Error('Test suite metadata was not registered by buildConfigWithDefaults.')
+  }
+
+  await resetAndSeed({ payload, ...testDataConfig })
 
   console.log('✅ Payload initialized\n')
 
@@ -42,6 +44,7 @@ async function main() {
   const post = await payload.create({
     collection: 'testMigrationPosts',
     data: { title: 'Test Post' },
+    overrideAccess: true,
   })
   console.log(`   Created post: ${post.id}`)
 
@@ -49,6 +52,7 @@ async function main() {
     id: post.id,
     collection: 'testMigrationPosts',
     data: { _status: 'published', title: 'Published Post' },
+    overrideAccess: true,
   })
   console.log(`   Published post: ${post.id}\n`)
 
@@ -87,12 +91,12 @@ async function main() {
   // Step 3: Run migration
   console.log('🔄 Running UP migration...')
   if (dbType === 'mongodb') {
-    await localizeStatus.up({
+    await localizeStatus({
       collectionSlug: 'testMigrationPosts',
       payload,
     })
   } else {
-    await localizeStatus.up({
+    await migratePostgresLocalizeStatus({
       collectionSlug: 'testMigrationPosts',
       db: payload.db,
       payload,
@@ -138,55 +142,8 @@ async function main() {
   }
   console.log()
 
-  // Step 5: Run rollback
-  console.log('⏪ Running DOWN migration (rollback)...')
-  if (dbType === 'mongodb') {
-    await localizeStatus.down({
-      collectionSlug: 'testMigrationPosts',
-      payload,
-    })
-  } else {
-    await localizeStatus.down({
-      collectionSlug: 'testMigrationPosts',
-      db: payload.db,
-      payload,
-      sql,
-    })
-  }
-  console.log('✅ DOWN migration completed\n')
-
-  // Step 6: Check "rolled back" state
-  console.log('🔍 Checking ROLLED BACK state...')
-  if (dbType === 'mongodb') {
-    const connection = (payload.db as any).connection
-    const versionsCollection = '_testmigrationposts_versions'
-    const versions = await connection
-      .collection(versionsCollection)
-      .find({ parent: new Types.ObjectId(post.id) })
-      .toArray()
-
-    if (versions.length > 0) {
-      const latest = versions[versions.length - 1]
-      console.log(`   Latest version._status type: ${typeof latest.version._status}`)
-      console.log(`   Latest version._status value: ${latest.version._status}`)
-    }
-  } else {
-    const db = payload.db as any
-    const result = await db.drizzle.execute(sql`
-      SELECT id, version__status as _status
-      FROM _test_migration_posts_v
-      WHERE parent_id = ${post.id}
-      ORDER BY created_at DESC
-      LIMIT 1
-    `)
-    if (result.rows.length > 0) {
-      console.log(`   Latest version._status: ${result.rows[0]._status}`)
-    }
-  }
-  console.log()
-
   // Cleanup
-  await payload.db.destroy()
+  await payload.destroy()
   console.log('✨ Test completed successfully!')
 }
 

@@ -204,6 +204,7 @@ export const createOrdersCollection: (props: Props) => CollectionConfig = (props
       group: 'Ecommerce',
       useAsTitle: 'createdAt',
     },
+    authorship: false,
     fields,
     labels: {
       plural: ({ t }) =>

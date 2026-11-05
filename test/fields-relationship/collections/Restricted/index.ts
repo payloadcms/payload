@@ -13,4 +13,5 @@ export const Restricted: CollectionConfig = {
   },
   fields: baseRelationshipFields,
   slug: relationRestrictedSlug,
+  versions: false,
 }

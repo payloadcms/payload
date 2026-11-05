@@ -1,17 +1,17 @@
 'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
-import { usePathname } from 'next/navigation.js'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useEffect, useRef } from 'react'
 
 import { usePreferences } from '../../providers/Preferences/index.js'
+import { usePathname } from '../../providers/RouterAdapter/index.js'
 
 type NavContextType = {
   hydrated: boolean
   navOpen: boolean
   navRef: React.RefObject<HTMLDivElement | null>
-  setNavOpen: (value: boolean) => void
-  shouldAnimate: boolean
+  navToggleRef?: React.RefObject<HTMLAnchorElement | HTMLButtonElement | null>
+  setNavOpen: (value: boolean, persist?: boolean) => void
 }
 
 /**
@@ -22,7 +22,6 @@ export const NavContext = React.createContext<NavContextType>({
   navOpen: true,
   navRef: null,
   setNavOpen: () => {},
-  shouldAnimate: false,
 })
 
 export const useNav = () => React.use(NavContext)
@@ -50,16 +49,30 @@ export const NavProvider: React.FC<{
 
   const pathname = usePathname()
 
-  const { getPreference } = usePreferences()
+  const { getPreference, setPreference } = usePreferences()
   const navRef = useRef(null)
+  const navToggleRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null)
+  const previousBreakpoints = useRef({
+    large: largeBreak,
+    mid: midBreak,
+    small: smallBreak,
+  })
+  const previousPathname = useRef(pathname)
 
-  // initialize the nav to be closed
-  // this is because getting the preference is async
-  // so instead of closing it after the preference is loaded
-  // we will open it after the preference is loaded
-  const [navOpen, setNavOpen] = React.useState(initialIsOpen)
+  // The server supplies the saved open state for the initial render.
+  const [navOpen, setNavOpenState] = React.useState(initialIsOpen)
 
-  const [shouldAnimate, setShouldAnimate] = React.useState(false)
+  const setNavOpen = React.useCallback(
+    (value: boolean, persist = false) => {
+      setNavOpenState(value)
+
+      if (persist) {
+        void setPreference(PREFERENCE_KEYS.NAV, { open: value }, true)
+      }
+    },
+    [setPreference],
+  )
+
   const [hydrated, setHydrated] = React.useState(false)
 
   // on load check the user's preference and set "initial" state
@@ -77,10 +90,11 @@ export const NavProvider: React.FC<{
   // on smaller screens where the nav is a modal
   // close the nav when the user navigates away
   useEffect(() => {
-    if (smallBreak === true) {
+    if (previousPathname.current !== pathname && smallBreak === true) {
       setNavOpen(false)
     }
-  }, [pathname])
+    previousPathname.current = pathname
+  }, [pathname, setNavOpen, smallBreak])
 
   // on open and close, lock the body scroll
   // do not do this on desktop, the sidebar is not a modal
@@ -98,18 +112,25 @@ export const NavProvider: React.FC<{
   // close the nav when the user resizes down to mobile
   // the sidebar is a modal on mobile
   useEffect(() => {
-    if (largeBreak === true || midBreak === true || smallBreak === true) {
+    const previous = previousBreakpoints.current
+
+    if (
+      (largeBreak === true && previous.large === false) ||
+      (midBreak === true && previous.mid === false) ||
+      (smallBreak === true && previous.small !== true)
+    ) {
       setNavOpen(false)
     }
-    setHydrated(true)
 
-    const timeout = setTimeout(() => {
-      setShouldAnimate(true)
-    }, 100)
-    return () => {
-      clearTimeout(timeout)
+    previousBreakpoints.current = {
+      large: largeBreak,
+      mid: midBreak,
+      small: smallBreak,
     }
-  }, [largeBreak, midBreak, smallBreak])
+    if (typeof smallBreak === 'boolean') {
+      setHydrated(true)
+    }
+  }, [largeBreak, midBreak, setNavOpen, smallBreak])
 
   // when the component unmounts, clear all body scroll locks
   useEffect(() => {
@@ -121,7 +142,7 @@ export const NavProvider: React.FC<{
   }, [])
 
   return (
-    <NavContext value={{ hydrated, navOpen, navRef, setNavOpen, shouldAnimate }}>
+    <NavContext value={{ hydrated, navOpen, navRef, navToggleRef, setNavOpen }}>
       {children}
     </NavContext>
   )

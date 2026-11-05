@@ -33,4 +33,5 @@ export const LexicalBenchmark: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

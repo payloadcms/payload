@@ -13,4 +13,5 @@ export const GlobalHidden: GlobalConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

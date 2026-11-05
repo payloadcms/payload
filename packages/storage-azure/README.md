@@ -14,7 +14,23 @@ pnpm add @payloadcms/storage-azure
 
 - Configure the `collections` object to specify which collections should use the Azure Blob Storage adapter. The slug _must_ match one of your existing collection slugs.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
-- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client. You must allow CORS PUT method to your website.
+- When deploying to Vercel, server uploads are limited to 4.5MB. Set `clientUploads` to `true` to use upload instructions and send files directly to Azure.
+
+### Client uploads and CORS
+
+Client uploads (`clientUploads: true`) use the Azure Blob SDK, which splits large files into blocks and therefore avoids the ~5GB limit of a single upload request. Because the SDK sends `x-ms-*` headers, the browser issues a CORS preflight, so your storage account's CORS rules must allow the `OPTIONS` and `PUT` methods **and** the required headers.
+
+Configure a CORS rule on the Blob service (Storage account → **Resource sharing (CORS)**):
+
+| Field           | Value                                                    |
+| --------------- | -------------------------------------------------------- |
+| Allowed origins | Your site origin (e.g. `https://example.com`)            |
+| Allowed methods | `GET,PUT,OPTIONS` (add `HEAD` if reading in-browser)     |
+| Allowed headers | `*` (or at minimum `x-ms-*,content-type,content-length`) |
+| Exposed headers | `*`                                                      |
+| Max age         | `3600`                                                   |
+
+> If you previously configured CORS for the older single-`PUT` upload flow, broaden `Allowed headers` to include the `x-ms-*` headers when upgrading.
 
 ```ts
 import { azureStorage } from '@payloadcms/storage-azure'
@@ -42,12 +58,15 @@ export default buildConfig({
 
 ### Configuration Options
 
-| Option                 | Description                                                              | Default |
-| ---------------------- | ------------------------------------------------------------------------ | ------- |
-| `enabled`              | Whether or not to enable the plugin                                      | `true`  |
-| `collections`          | Collections to apply the Azure Blob adapter to                           |         |
-| `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist | `false` |
-| `baseURL`              | Base URL for the Azure Blob storage account                              |         |
-| `connectionString`     | Azure Blob storage connection string                                     |         |
-| `containerName`        | Azure Blob storage container name                                        |         |
-| `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.            |         |
+| Option                 | Description                                                                                                                                                                                                                                                               | Default     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `enabled`              | Whether or not to enable the plugin                                                                                                                                                                                                                                       | `true`      |
+| `collections`          | Collections to apply the Azure Blob adapter to                                                                                                                                                                                                                            |             |
+| `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist                                                                                                                                                                                                  | `false`     |
+| `containerAccess`      | Public access level for a container the plugin creates. `'private'` (default) serves blobs only through Payload's access-controlled route; `'blob'` / `'container'` expose them to anonymous clients directly from Azure. Has no effect on containers that already exist. | `'private'` |
+| `baseURL`              | Base URL for the Azure Blob storage account                                                                                                                                                                                                                               |             |
+| `connectionString`     | Azure Blob storage connection string                                                                                                                                                                                                                                      |             |
+| `containerName`        | Azure Blob storage container name                                                                                                                                                                                                                                         |             |
+| `clientUploads`        | Upload directly to Azure instead of through Payload.                                                                                                                                                                                                                      |             |
+
+> **Breaking change (private by default):** When `allowContainerCreate: true`, the plugin now creates containers with **private** access. Previously it created them with public `blob` access. If you relied on files being served directly from the anonymous Azure blob URL (typically alongside `disablePayloadAccessControl: true`), set `containerAccess: 'blob'` to restore the old behaviour. This only affects **newly created** containers — existing containers keep their current access level, so you must flip their ACL manually if needed.

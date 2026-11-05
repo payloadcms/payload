@@ -12,4 +12,5 @@ export const CustomID: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

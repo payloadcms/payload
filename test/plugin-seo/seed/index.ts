@@ -21,6 +21,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       collection: mediaSlug,
       data: {},
       file,
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -36,6 +37,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         title: 'Test Page',
       },
       req,
+      overrideAccess: true,
     })
 
     return true

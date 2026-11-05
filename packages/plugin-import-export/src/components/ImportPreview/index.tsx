@@ -11,6 +11,7 @@ import {
   useDebouncedEffect,
   useDocumentInfo,
   useField,
+  useForm,
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
@@ -25,9 +26,33 @@ import type {
 import type { ImportPreviewResponse } from '../../types.js'
 
 import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
-import './index.scss'
+import {
+  getFormStateSignature,
+  getSubmittedFormValues,
+} from '../../utilities/getSubmittedFormValues.js'
+import { RelationshipCell } from '../RelationshipCell/index.js'
+import './index.css'
 
 const baseClass = 'import-preview'
+
+// The file contents are sent separately as `fileData`.
+const nonSerializableFormKeys = ['file']
+
+/**
+ * Browser-native ArrayBuffer → base64. Avoids Node's `Buffer`, which is not
+ * available in the browser under bundlers that don't polyfill it (e.g. Vite),
+ * unlike Next's webpack build. Chunked to stay under `String.fromCharCode`'s
+ * argument-count limit for large files.
+ */
+const arrayBufferToBase64 = (arrayBuffer: ArrayBuffer): string => {
+  const bytes = new Uint8Array(arrayBuffer)
+  const chunkSize = 0x8000
+  let binary = ''
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize))
+  }
+  return btoa(binary)
+}
 
 export const ImportPreview: React.FC = () => {
   const [isPending, startTransition] = useTransition()
@@ -52,6 +77,11 @@ export const ImportPreview: React.FC = () => {
 
   // Access the file field directly from form fields
   const fileField = useFormFields(([fields]) => fields?.file || null)
+
+  const { getData } = useForm()
+  const formStateSignature = useFormFields(([fields]) =>
+    getFormStateSignature({ fields, omit: nonSerializableFormKeys }),
+  )
 
   const [dataToRender, setDataToRender] = useState<Record<string, unknown>[]>([])
   const [columns, setColumns] = useState<Column[]>([])
@@ -114,7 +144,7 @@ export const ImportPreview: React.FC = () => {
           if (fileField?.value && fileField.value instanceof File) {
             // File is being uploaded, read its contents
             const arrayBuffer = await fileField.value.arrayBuffer()
-            const base64 = Buffer.from(arrayBuffer).toString('base64')
+            const base64 = arrayBufferToBase64(arrayBuffer)
             fileData = base64
           } else if (url) {
             // File has been saved, fetch from URL
@@ -123,7 +153,7 @@ export const ImportPreview: React.FC = () => {
               throw new Error('Failed to fetch file')
             }
             const arrayBuffer = await response.arrayBuffer()
-            const base64 = Buffer.from(arrayBuffer).toString('base64')
+            const base64 = arrayBufferToBase64(arrayBuffer)
             fileData = base64
           }
 
@@ -141,6 +171,10 @@ export const ImportPreview: React.FC = () => {
               collectionSlug: targetCollectionSlug,
               fileData,
               format,
+              formData: getSubmittedFormValues({
+                formData: getData(),
+                omit: nonSerializableFormKeys,
+              }),
               previewLimit,
               previewPage,
             }),
@@ -223,7 +257,7 @@ export const ImportPreview: React.FC = () => {
                 active: true,
                 field,
                 Heading: label,
-                renderedCells: docs.map((doc) => {
+                renderedCells: docs.map((doc, rowIndex) => {
                   const value = getObjectDotNotation(doc, fieldPath)
 
                   if (value === undefined || value === null) {
@@ -231,10 +265,22 @@ export const ImportPreview: React.FC = () => {
                   }
 
                   // Format based on field type
-                  if (field.type === 'relationship' || field.type === 'upload') {
-                    // Handle relationships
+                  const shouldRenderGroupedRelationship =
+                    format === 'json' &&
+                    field.type === 'relationship' &&
+                    Array.isArray(field.relationTo)
+
+                  if (shouldRenderGroupedRelationship) {
+                    return (
+                      <RelationshipCell
+                        fieldPath={fieldPath}
+                        key={`${fieldPath}-${rowIndex}`}
+                        relationTo={field.relationTo}
+                        value={value}
+                      />
+                    )
+                  } else if (field.type === 'relationship' || field.type === 'upload') {
                     if (typeof value === 'object' && !Array.isArray(value)) {
-                      // Single relationship
                       const relationTo = Array.isArray(field.relationTo)
                         ? (value as any).relationTo
                         : field.relationTo
@@ -252,11 +298,9 @@ export const ImportPreview: React.FC = () => {
                         }
                       }
 
-                      // Fallback to ID
                       const id = (value as any).id || value
                       return `${getTranslation(relatedConfig?.labels?.singular || relationTo, i18n)}: ${id}`
                     } else if (Array.isArray(value)) {
-                      // Multiple relationships
                       return value
                         .map((item) => {
                           if (typeof item === 'object') {
@@ -286,7 +330,6 @@ export const ImportPreview: React.FC = () => {
                         .join(', ')
                     }
 
-                    // Just an ID
                     return String(value)
                   } else if (field.type === 'date') {
                     // Display date as string to avoid wrong locale/timezone conversion
@@ -470,6 +513,8 @@ export const ImportPreview: React.FC = () => {
       filename,
       mimeType,
       fileField?.value,
+      formStateSignature,
+      getData,
       collectionConfig,
       config,
       i18n,

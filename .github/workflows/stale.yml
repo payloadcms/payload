@@ -15,12 +15,12 @@ on:
 
 jobs:
   stale:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@b5d41d4e1d5dceea10e7104786b73624c18a190f # v10.2.0
         id: stale
         with:
           debug-only: ${{ inputs.dry-run || false }}
@@ -48,4 +48,6 @@ jobs:
 
       # TODO: Add a step to notify team
       - name: Print outputs
-        run: echo ${{ format('{0},{1}', toJSON(steps.stale.outputs.staled-issues-prs), toJSON(steps.stale.outputs.closed-issues-prs)) }}
+        env:
+          STALE_OUTPUTS: ${{ format('{0},{1}', toJSON(steps.stale.outputs.staled-issues-prs), toJSON(steps.stale.outputs.closed-issues-prs)) }}
+        run: printf '%s\n' "$STALE_OUTPUTS"

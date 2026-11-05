@@ -1,7 +1,7 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { getDependencies } from '../../index.js'
+import { getDependencies } from './getDependencies.js'
 import { compareVersions } from './versionUtils.js'
 
 const filename = fileURLToPath(import.meta.url)

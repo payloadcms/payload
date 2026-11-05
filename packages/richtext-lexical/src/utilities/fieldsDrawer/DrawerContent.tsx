@@ -4,23 +4,27 @@ import type { FormState } from 'payload'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
   Form,
-  FormSubmit,
   RenderFields,
   useDocumentForm,
   useDocumentInfo,
+  useEffectEvent,
   useServerFunctions,
-  useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { FieldsDrawerProps } from './Drawer.js'
 
 import { useEditorConfigContext } from '../../lexical/config/client/EditorConfigProvider.js'
+import { RegisterFormSubmit } from './useDrawerSubmit.js'
+import './index.css'
 
-export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'drawerTitle'>> = ({
+export const DrawerContent: React.FC<
+  {
+    submitRef: React.RefObject<(() => void) | null>
+  } & Omit<FieldsDrawerProps, 'drawerSlug' | 'drawerTitle'>
+> = ({
   data,
   featureKey,
   fieldMapOverride,
@@ -28,8 +32,8 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   schemaFieldsPathOverride,
   schemaPath,
   schemaPathSuffix,
+  submitRef,
 }) => {
-  const { t } = useTranslation()
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
   const { fields: parentDocumentFields } = useDocumentForm()
   const isEditable = useLexicalEditable()
@@ -50,6 +54,9 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath] // Field Schema
 
+  // Parent autosave updates this context without starting a new drawer editing session.
+  const getParentDocumentFields = useEffectEvent(() => parentDocumentFields)
+
   useEffect(() => {
     const controller = new AbortController()
 
@@ -62,9 +69,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
+        documentFormState: getParentDocumentFields(),
         globalSlug,
         initialBlockData: data,
         operation: 'update',
@@ -91,7 +96,6 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     isEditable,
     globalSlug,
     getDocPreferences,
-    parentDocumentFields,
   ])
 
   const onChange = useCallback(
@@ -108,9 +112,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
+        documentFormState: parentDocumentFields,
         formState: prevFormState,
         globalSlug,
         initialBlockFormState: prevFormState,
@@ -152,6 +154,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   return (
     <Form
       beforeSubmit={[onChange]}
+      className="fields-drawer"
       disableValidationOnSubmit
       fields={Array.isArray(fields) ? fields : []}
       initialState={initialState}
@@ -168,7 +171,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         permissions={true}
         readOnly={!isEditable}
       />
-      <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+      <RegisterFormSubmit submitRef={submitRef} />
     </Form>
   )
 }

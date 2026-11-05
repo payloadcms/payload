@@ -3,11 +3,11 @@ import * as os from 'node:os'
 import path from 'path'
 import { type Payload } from 'payload'
 
+import type { SeedFunction } from './testDataConfig.js'
+
 import { isErrorWithCode } from '../isErrorWithCode.js'
 import { resetDB } from './reset.js'
 import { createSnapshot, dbSnapshot, restoreFromSnapshot, uploadsDirCache } from './snapshot.js'
-
-type SeedFunction = (_payload: Payload) => Promise<void> | void
 
 export async function seedDB({
   _payload,
@@ -25,20 +25,53 @@ export async function seedDB({
   alwaysSeed?: boolean
   collectionSlugs: string[]
   deleteOnly?: boolean
-  seedFunction: SeedFunction
+  seedFunction?: SeedFunction
   /**
    * Key to uniquely identify the kind of snapshot. Each test suite should pass in a unique key
    */
   snapshotKey: string
   uploadsDir?: string | string[]
 }) {
+  const invalidateSnapshot = () => {
+    delete dbSnapshot[snapshotKey]
+    delete uploadsDirCache[snapshotKey]
+  }
+
+  const resetDatabase = async (): Promise<boolean> => {
+    try {
+      await resetDB(_payload, collectionSlugs)
+      return false
+    } catch (initialResetError) {
+      // Some database integration tests intentionally mutate or drop their schema.
+      // Reinitialize it once and retry so the next test still starts from a known-clean state.
+      if (!('drizzle' in _payload.db)) {
+        throw initialResetError
+      }
+
+      const previousForcePush = process.env.PAYLOAD_FORCE_DRIZZLE_PUSH
+      process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
+
+      try {
+        await _payload.db.init()
+        await _payload.db.connect()
+      } finally {
+        if (previousForcePush === undefined) {
+          delete process.env.PAYLOAD_FORCE_DRIZZLE_PUSH
+        } else {
+          process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = previousForcePush
+        }
+      }
+
+      await resetDB(_payload, collectionSlugs)
+      return true
+    }
+  }
+
   /**
    * Reset database
    */
-  try {
-    await resetDB(_payload, collectionSlugs)
-  } catch (error) {
-    console.error('Error in operation (resetting database):', error)
+  if (await resetDatabase()) {
+    invalidateSnapshot()
   }
   /**
    * Delete uploads directory if it exists
@@ -70,7 +103,7 @@ export async function seedDB({
    * Mongoose & Postgres: Restore snapshot of old data if available
    *
    * Note for postgres: For postgres, this needs to happen AFTER the tables were created.
-   * This does not work if I run payload.db.init or payload.db.connect anywhere. Thus, when resetting the database, we are not dropping the schema, but are instead only deleting the table values
+   * The reset preserves the schema so the cached rows can be restored without rebuilding it.
    */
   let restored = false
   if (
@@ -79,25 +112,27 @@ export async function seedDB({
     Object.keys(dbSnapshot[snapshotKey]).length &&
     !deleteOnly
   ) {
-    await restoreFromSnapshot(_payload, snapshotKey, collectionSlugs)
+    try {
+      await restoreFromSnapshot(_payload, snapshotKey, collectionSlugs)
 
-    /**
-     * Restore uploads dir if it exists
-     */
-    if (uploadsDirCache[snapshotKey]) {
-      for (const cache of uploadsDirCache[snapshotKey]) {
-        if (cache.originalDir && fs.existsSync(cache.cacheDir)) {
-          try {
+      /**
+       * Restore uploads dir if it exists
+       */
+      if (uploadsDirCache[snapshotKey]) {
+        for (const cache of uploadsDirCache[snapshotKey]) {
+          if (cache.originalDir && fs.existsSync(cache.cacheDir)) {
             fs.cpSync(cache.cacheDir, cache.originalDir, { recursive: true })
-          } catch (err) {
-            console.error('Error in operation (restoring uploads dir):', err)
-            throw err
           }
         }
       }
-    }
 
-    restored = true
+      restored = true
+    } catch {
+      // Snapshots are only a test-speed optimization. If a test changed the schema or adapter
+      // state, discard the stale cache and rebuild the canonical state with the seed function.
+      invalidateSnapshot()
+      await resetDatabase()
+    }
   }
 
   /**

@@ -4,15 +4,17 @@ import type { EditViewProps } from 'payload'
 import { useDraggable } from '@dnd-kit/core'
 import React from 'react'
 
-import { DragHandleIcon } from '../../../icons/DragHandle/index.js'
+import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { ToolbarControls } from './Controls/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'live-preview-toolbar'
 
 const DraggableToolbar: React.FC<EditViewProps> = (props) => {
   const { toolbarPosition } = useLivePreviewContext()
+  const { t } = useTranslation()
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: 'live-preview-toolbar',
@@ -36,11 +38,12 @@ const DraggableToolbar: React.FC<EditViewProps> = (props) => {
       <button
         {...listeners}
         {...attributes}
+        aria-label={t('general:dragToMove')}
         className={`${baseClass}__drag-handle`}
         ref={setNodeRef}
         type="button"
       >
-        <DragHandleIcon />
+        <AlignJustifiedIcon />
       </button>
       <ToolbarControls {...props} />
     </div>

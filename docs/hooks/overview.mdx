@@ -8,7 +8,13 @@ keywords: hooks, overview, config, configuration, documentation, Content Managem
 
 Hooks allow you to execute your own side effects during specific events of the Document lifecycle. They allow you to do things like mutate data, perform business logic, integrate with third-parties, or anything else, all during precise moments within your application.
 
-With Hooks, you can transform Payload from a traditional CMS into a fully-fledged application framework. There are many use cases for Hooks, including:
+<YouTube
+  id="zYhPeBi5PaU"
+  title="Payload Hooks Explained: When to Use Them, and when to pass logic to the Jobs Queue"
+/>
+With Hooks, you can transform Payload from a traditional CMS into a
+fully-fledged application framework. There are many use cases for Hooks,
+including:
 
 - Modify data before it is read or updated
 - Encrypt and decrypt sensitive data
@@ -100,7 +106,7 @@ Non-blocking (sometimes called “fire-and-forget”): If your hook does not ret
 <Banner type="success">
   **Tip:** If your hook executes a long-running task that doesn't affect the
   response in any way, consider [offloading it to the job
-  queue](#offloading-long-running-tasks). That will free up the request to
+  queue](#offloading-to-the-jobs-queue). That will free up the request to
   continue processing without waiting for the task to complete.
 </Banner>
 
@@ -126,6 +132,22 @@ const afterChange = ({ doc }) => {
 ## Server-only Execution
 
 Hooks are only triggered on the server and are automatically excluded from the client-side bundle. This means that you can safely use sensitive business logic in your Hooks without worrying about exposing it to the client.
+
+## Custom Error Messages
+
+You might want to return custom error messages in the API or admin panel in your hooks, if an operation cannot be performed - e.g. if a rate limit was exceeded. For this you can leverage the `APIError` class like this:
+
+```ts
+import { APIError, type CollectionBeforeChangeHook } from 'payload'
+
+const beforeChangeHook: CollectionBeforeChangeHook = async ({ data }) => {
+  ...
+  if (rateLimitExceeded) {
+     throw new APIError('You have sent too many requests', 429)
+  }
+  return data
+}
+```
 
 ## Performance
 
@@ -158,14 +180,17 @@ For example, the `read` operation runs on every read request, so avoid putting e
 }
 ```
 
-Instead, you might want to use a `beforeChange` or `afterChange` hook, which only runs when a document is created or updated.
+Instead, use `afterChange` for work that must run only after Payload saves a document. The `beforeChange` hook also runs during on-demand validation.
 
 ```ts
 {
   hooks: {
     beforeChange: [
-      async ({ context }) => {
-        // This is more acceptable here, although still should be mindful of performance
+      async ({ context, operation }) => {
+        if (operation === 'validate') {
+          return
+        }
+
         await doSomethingExpensive()
         // ...
       },

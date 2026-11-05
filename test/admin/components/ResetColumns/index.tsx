@@ -1,14 +1,14 @@
 'use client'
 
-import { Pill, useTableColumns } from '@payloadcms/ui'
+import { Button, useTableColumns } from '@payloadcms/ui'
 
 function ResetDefaultColumnsButton() {
   const { resetColumnsState } = useTableColumns()
 
   return (
-    <Pill id="reset-columns-button" onClick={resetColumnsState}>
+    <Button buttonStyle="pill" id="reset-columns-button" onClick={resetColumnsState} size="medium">
       Reset to default columns
-    </Pill>
+    </Button>
   )
 }
 

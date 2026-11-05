@@ -1,6 +1,7 @@
-import type { BlockRowLabelServerComponent } from 'payload'
+import type { BlockRowLabelServerProps } from 'payload'
+import type React from 'react'
 
-const CustomBlockLabel: BlockRowLabelServerComponent = ({ rowLabel }) => {
+const CustomBlockLabel: React.FC<BlockRowLabelServerProps> = ({ rowLabel }) => {
   return <div>{`Custom Block Label: ${rowLabel}`}</div>
 }
 

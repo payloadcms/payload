@@ -19,4 +19,5 @@ export const PostsWithLimits: CollectionConfig = {
       type: 'textarea',
     },
   ],
+  versions: false,
 }

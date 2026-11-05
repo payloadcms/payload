@@ -13,7 +13,7 @@ export const filterOutUploadFields = (fields: FieldWithPathClient[]): FieldWithP
     'url',
     'focalX',
     'focalY',
-    'sizes',
+    'variants',
   ]
 
   return fields.filter((field) => !baseUploadFieldNames.includes('name' in field && field.name))

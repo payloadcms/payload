@@ -1,7 +1,7 @@
 import type { Payload } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 
-import { sendEvent } from '../index.js'
+import { sendTelemetryEvent } from '../index.js'
 import { oneWayHash } from '../oneWayHash.js'
 
 export type AdminInitEvent = {
@@ -29,8 +29,7 @@ export const adminInit = ({ headers, payload, user }: Args): void => {
     userID = oneWayHash(String(user.id), payload.secret)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  sendEvent({
+  void sendTelemetryEvent({
     event: {
       type: 'admin-init',
       domainID: domainID!,

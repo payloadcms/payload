@@ -8,7 +8,6 @@ export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
   admin: {
     useAsTitle: 'title',
-    groupBy: true,
     defaultColumns: ['title', 'category', 'createdAt', 'updatedAt'],
   },
   enableQueryPresets: true,
@@ -28,7 +27,7 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
       virtual: 'category.title',
       admin: {
-        disableGroupBy: true,
+        disabled: { groupBy: true },
       },
     },
     {
@@ -63,5 +62,21 @@ export const PostsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'meta',
+      type: 'group',
+      fields: [
+        {
+          name: 'metaTitle',
+          type: 'text',
+        },
+        {
+          name: 'metaDescription',
+          type: 'text',
+          label: false,
+        },
+      ],
+    },
   ],
+  versions: false,
 }

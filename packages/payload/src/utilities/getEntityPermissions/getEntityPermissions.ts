@@ -12,6 +12,7 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { BlockSlug, DefaultDocumentIDType } from '../../index.js'
 import type { AllOperations, JsonObject, PayloadRequest, Where } from '../../types/index.js'
 
+import { getAccessOperationRequest } from '../getAccessOperationRequest.js'
 import { entityDocExists } from './entityDocExists.js'
 import { populateFieldPermissions } from './populateFieldPermissions.js'
 
@@ -58,9 +59,10 @@ const topLevelCollectionPermissions = [
   'read',
   'readVersions',
   'update',
+  'validate',
   'unlock',
 ]
-const topLevelGlobalPermissions = ['read', 'readVersions', 'update']
+const topLevelGlobalPermissions = ['read', 'readVersions', 'update', 'validate']
 
 /**
  * Build up permissions object for an entity (collection or global).
@@ -86,16 +88,7 @@ const topLevelGlobalPermissions = ['read', 'readVersions', 'update']
 export async function getEntityPermissions<TEntityType extends 'collection' | 'global'>(
   args: Args<TEntityType>,
 ): Promise<ReturnType<TEntityType>> {
-  const {
-    id,
-    blockReferencesPermissions,
-    data: _data,
-    entity,
-    entityType,
-    fetchData,
-    operations,
-    req,
-  } = args
+  const { id, data: _data, entity, entityType, fetchData, operations, req } = args
   const { locale: _locale, user } = req
 
   const locale = _locale ? _locale : undefined
@@ -138,10 +131,13 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
   const isLoggedIn = !!user
 
   const fieldsPermissions: FieldsPermissions = {}
+  // A permission tree is reusable only within this entity calculation. The caller's
+  // cache can be shared across collections and globals with different access rules.
+  const blockPermissionCache = new WeakMap<object, Map<string, BlockPermissions>>()
 
   const entityPermissions: ReturnType<TEntityType> = {
     fields: fieldsPermissions,
-  } as ReturnType<TEntityType>
+  }
 
   const promises: Promise<void>[] = []
 
@@ -162,7 +158,20 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
       if (typeof accessFunction === 'function') {
         accessResults.push({
           operation,
-          result: Promise.resolve(accessFunction({ id, data, req })) as Promise<boolean | Where>,
+          result: Promise.resolve(
+            accessFunction({
+              id,
+              slug: entity.slug,
+              data,
+              req:
+                _operation === 'readVersions' || _operation === 'unlock'
+                  ? req
+                  : getAccessOperationRequest({
+                      operation: _operation,
+                      req,
+                    }),
+            }),
+          ),
         })
       } else {
         entityPermissions[operation] = {
@@ -208,9 +217,12 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
   await Promise.all(wherePromises)
 
   populateFieldPermissions({
-    blockReferencesPermissions,
+    id,
+    blockPermissionCache,
+    collection: entityType === 'collection' ? (entity as SanitizedCollectionConfig) : null,
     data,
     fields: entity.fields,
+    global: entityType === 'global' ? (entity as SanitizedGlobalConfig) : null,
     operations,
     parentPermissionsObject: entityPermissions,
     permissionsObject: fieldsPermissions,
@@ -291,7 +303,7 @@ const processWhereQuery = ({
         entityPermissions[operation] = {
           permission: hasPermission,
           where: accessResult,
-        } as Permission
+        }
       }),
     )
   } else {
@@ -299,6 +311,6 @@ const processWhereQuery = ({
     // have the document data available. This seems more secure.
     // Alternatively, we could set permission to a third state, like 'unknown'.
     // Even after calling sanitizePermissions, the permissions will still be true if the where query is returned but ignored as we don't have the document data available.
-    entityPermissions[operation] = { permission: true, where: accessResult } as Permission
+    entityPermissions[operation] = { permission: true, where: accessResult }
   }
 }

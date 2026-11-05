@@ -1,4 +1,4 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { getConfig } from './getConfig.js'
+import { getConfig, seed } from './getConfig.js'
 
-export default buildConfigWithDefaults(getConfig())
+export default buildConfigWithDefaults({ suite: 'database', config: getConfig(), seed })

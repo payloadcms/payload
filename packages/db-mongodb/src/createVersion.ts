@@ -56,7 +56,7 @@ export const createVersion: CreateVersion = async function createVersion(
     timestamps: false,
   }
 
-  let [doc] = await Model.create([data], options, req)
+  let [doc] = await Model.create([data], options)
 
   const parentQuery = {
     $or: [

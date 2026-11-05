@@ -1,9 +1,9 @@
 import type { SerializedEditorState } from 'lexical'
-import type { RichTextFieldDiffServerComponent } from 'payload'
+import type { RichTextFieldDiffServerProps } from 'payload'
 
 import { FieldDiffContainer, getHTMLDiffComponents } from '@payloadcms/ui/rsc'
 
-import './index.scss'
+import './index.css'
 import '../bundled.css'
 
 import { formatAdminURL } from 'payload/shared'
@@ -13,7 +13,7 @@ import type {
   HTMLConvertersFunctionAsync,
   HTMLPopulateFn,
 } from '../../features/converters/lexicalToHtml/async/types.js'
-import type { SerializedLinkNode } from '../../nodeTypes.js'
+import type { SerializedLinkNode } from '../../types/nodeTypes.js'
 
 import { convertLexicalToHTMLAsync } from '../../features/converters/lexicalToHtml/async/index.js'
 import { getPayloadPopulateFn } from '../../features/converters/utilities/payloadPopulateFn.js'
@@ -25,16 +25,8 @@ import { UploadDiffHTMLConverterAsync } from './converters/upload/index.js'
 
 const baseClass = 'lexical-diff'
 
-export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (args) => {
-  const {
-    comparisonValue: valueFrom,
-    field,
-    i18n,
-    locale,
-    nestingLevel,
-    req,
-    versionValue: valueTo,
-  } = args
+export const LexicalDiffComponent: React.FC<RichTextFieldDiffServerProps> = async (args) => {
+  const { field, i18n, locale, nestingLevel, req, valueFrom, valueTo } = args
 
   const internalDocToHref = async ({
     linkNode,
@@ -87,6 +79,7 @@ export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (arg
   const payloadPopulateFn = await getPayloadPopulateFn({
     currentDepth: 0,
     depth: 1,
+    overrideAccess: false,
     req,
   })
   const fromHTML = await convertLexicalToHTMLAsync({
@@ -104,6 +97,7 @@ export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (arg
   })
 
   const { From, To } = getHTMLDiffComponents({
+    deletedLabel: i18n.t('general:deleted'),
     // Ensure empty paragraph is displayed for empty rich text fields - otherwise, toHTML may be displayed in the wrong column
     fromHTML: fromHTML?.length ? fromHTML : '<p></p>',
     toHTML: toHTML?.length ? toHTML : '<p></p>',

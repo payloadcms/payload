@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-import type { Transporter } from 'nodemailer'
-import type SMTPConnection from 'nodemailer/lib/smtp-connection'
+import type { SendMailOptions, Transporter } from 'nodemailer'
+import type SMTPTransport from 'nodemailer/lib/smtp-transport/index.js'
 import type { EmailAdapter } from 'payload'
 
 import nodemailer from 'nodemailer'
@@ -9,9 +9,17 @@ import { InvalidConfiguration } from 'payload'
 export type NodemailerAdapterArgs = {
   defaultFromAddress: string
   defaultFromName: string
+  /**
+   * Override all emails to be sent to this address.
+   * Useful for testing.
+   */
+  overrideRecipientAddress?: string
+  /**
+   * Skip verifying the email SMTP transport.
+   */
   skipVerify?: boolean
   transport?: Transporter
-  transportOptions?: SMTPConnection.Options
+  transportOptions?: SMTPTransport.Options
 }
 
 type NodemailerAdapter = EmailAdapter<unknown>
@@ -25,6 +33,7 @@ export const nodemailerAdapter = async (
   args?: NodemailerAdapterArgs,
 ): Promise<NodemailerAdapter> => {
   const { defaultFromAddress, defaultFromName, transport } = await buildEmail(args)
+  const overrideRecipientAddress = args?.overrideRecipientAddress
 
   const adapter: NodemailerAdapter = () => ({
     name: 'nodemailer',
@@ -32,9 +41,11 @@ export const nodemailerAdapter = async (
     defaultFromName,
     sendEmail: async (message) => {
       return await transport.sendMail({
-        from: `${defaultFromName} <${defaultFromAddress}>`,
         ...message,
-      })
+        from: message.from || `${defaultFromName} <${defaultFromAddress}>`,
+        ...(typeof message.inReplyTo === 'object' ? { inReplyTo: message.inReplyTo.address } : {}),
+        ...(overrideRecipientAddress ? { to: overrideRecipientAddress } : {}),
+      } as SendMailOptions)
     },
   })
   return adapter

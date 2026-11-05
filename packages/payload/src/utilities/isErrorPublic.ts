@@ -1,6 +1,6 @@
-import { status as httpStatus } from 'http-status'
-
 import type { SanitizedConfig } from '../config/types.js'
+
+import { httpStatus } from './httpStatus.js'
 
 type PayloadError = {
   isPublic?: boolean

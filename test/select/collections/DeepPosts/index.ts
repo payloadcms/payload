@@ -73,4 +73,5 @@ export const DeepPostsCollection: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

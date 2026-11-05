@@ -17,16 +17,25 @@ KEYFILE="/data/db/keyfile"
 INIT_FLAG="$DATA_DIR/.initialized"
 
 # Copy keyfile to writable location and set correct permissions
-cp "$KEYFILE_SRC" "$KEYFILE"
-chmod 400 "$KEYFILE"
-chown mongodb:mongodb "$KEYFILE" 2>/dev/null || true
+if [ ! -f "$KEYFILE" ]; then
+    cp "$KEYFILE_SRC" "$KEYFILE"
+    chmod 400 "$KEYFILE"
+    chown mongod:mongod "$KEYFILE" 2>/dev/null || true
+fi
+
+# maxTransactionLockRequestTimeoutMillis defaults to 5ms. Under CI CPU contention a
+# transient lock hold (e.g. concurrent version writes during seed/onInit) blows past 5ms,
+# and the transaction fails with a TransientTransactionError (LockTimeout) instead of
+# waiting. That crashes onInit and fails an entire suite. 100ms absorbs the contention
+# while still failing fast on genuine deadlocks.
 
 # Check if already initialized
 if [ -f "$INIT_FLAG" ]; then
     echo "MongoDB already initialized, starting with auth..."
     exec mongod --replSet rs0 --bind_ip_all --keyFile "$KEYFILE" \
         --setParameter searchIndexManagementHostAndPort=mongot:27028 \
-        --setParameter mongotHost=mongot:27028
+        --setParameter mongotHost=mongot:27028 \
+        --setParameter maxTransactionLockRequestTimeoutMillis=100
 fi
 
 echo "First run - initializing MongoDB without auth..."
@@ -123,5 +132,6 @@ exec mongod --replSet rs0 --bind_ip_all --keyFile "$KEYFILE" \
     --setParameter searchIndexManagementHostAndPort=mongot:27028 \
     --setParameter mongotHost=mongot:27028 \
     --setParameter useGrpcForSearch=true \
-    --setParameter skipAuthenticationToSearchIndexManagementServer=false
+    --setParameter skipAuthenticationToSearchIndexManagementServer=false \
+    --setParameter maxTransactionLockRequestTimeoutMillis=100
 

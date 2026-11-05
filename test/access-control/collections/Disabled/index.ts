@@ -39,4 +39,5 @@ export const Disabled: CollectionConfig = {
       fields: [disabledFromUpdateAccessControl()],
     },
   ],
+  versions: false,
 }

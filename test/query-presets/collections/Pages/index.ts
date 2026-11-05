@@ -21,4 +21,5 @@ export const Pages: CollectionConfig = {
       hasMany: true,
     },
   ],
+  versions: false,
 }

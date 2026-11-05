@@ -25,8 +25,7 @@ const Blocks: React.FC<{
 
           const isFormBlock = blockType === 'formBlock'
           // eslint-disable-next-line no-empty
-          {
-          }
+          {}
           // @ts-expect-error: Form is not defined
           const formID: string = isFormBlock && form && (typeof form === 'string' ? form : form.id)
 

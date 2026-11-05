@@ -3,8 +3,9 @@ import type {
   Collection,
   DataFromCollectionSlug,
 } from '../../collections/config/types.js'
-import type { AuthCollectionSlug, TypedUser } from '../../index.js'
+import type { AuthCollectionSlug, AuthenticatedUser, User } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
+import type { AuthRuntimeFields } from '../types.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
@@ -14,24 +15,27 @@ import {
   UnverifiedEmail,
   ValidationError,
 } from '../../errors/index.js'
-import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { commitTransaction, Forbidden, initTransaction } from '../../index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
-import { getFieldsToSign } from '../getFieldsToSign.js'
+import { applyUserReadAccess } from '../applyUserReadAccess.js'
+import { createAuthToken } from '../createAuthToken.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'
-import { jwtSign } from '../jwt.js'
-import { addSessionToUser, revokeSession } from '../sessions.js'
+import { revokeSession } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
+import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 
 export type LoginResult<TSlug extends AuthCollectionSlug> = {
   exp?: number
+  /** With `auth.refreshTokens`, trades for a new token after this one expires. */
+  refreshToken?: string
   token?: string
-  user?: DataFromCollectionSlug<TSlug>
+  user?: AuthRuntimeFields & DataFromCollectionSlug<TSlug>
 }
 
 export type Arguments<TSlug extends AuthCollectionSlug> = {
@@ -73,6 +77,8 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
 ): Promise<LoginResult<TSlug>> => {
   let args = incomingArgs
 
+  assertNoValidationWrite(args.req)
+
   if (args.collection.config.auth.disableLocalStrategy) {
     throw new Forbidden(args.req.t)
   }
@@ -94,12 +100,7 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     depth,
     overrideAccess = false,
     req,
-    req: {
-      fallbackLocale,
-      locale,
-      payload,
-      payload: { secret },
-    },
+    req: { payload },
     showHiddenFields,
   } = args
 
@@ -203,11 +204,11 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     where: whereConstraint,
   })
 
-  let user = (await payload.db.findOne<TypedUser>({
+  let user = (await payload.db.findOne<User>({
     collection: collectionConfig.slug,
     req,
     where: whereConstraint,
-  })) as TypedUser
+  })) as AuthenticatedUser
 
   checkLoginPermission({
     loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),
@@ -218,7 +219,13 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
   user.collection = collectionConfig.slug
   user._strategy = 'local-jwt'
 
-  const authResult = await authenticateLocalStrategy({ doc: user, password })
+  const authenticatedHash = user.hash
+  const authenticatedSalt = user.salt
+  const authResult = await authenticateLocalStrategy({
+    doc: user,
+    password,
+    passwordHashIterations: payload.config.auth.passwordHashIterations,
+  })
   user = sanitizeInternalFields(user)
 
   const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0
@@ -256,7 +263,7 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
      * get locked by parallel bad attempts in the meantime.
      */
     if (maxLoginAttemptsEnabled) {
-      const { lockUntil, loginAttempts } = (await payload.db.findOne<TypedUser>({
+      const { lockUntil, loginAttempts } = (await payload.db.findOne<User>({
         collection: collectionConfig.slug,
         req,
         select: {
@@ -275,25 +282,45 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
       })
     }
 
-    const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
+    const { exp, refreshToken, token, ...session } = await createAuthToken({
       collectionConfig,
       email: sanitizedEmail!,
-      user,
-    }
-
-    const session = await addSessionToUser({
-      collectionConfig,
-      payload,
       req,
+      shouldCreateRefreshToken: Boolean(collectionConfig.auth.refreshTokens),
       user,
     })
     sid = session.sid
 
-    if (sid) {
-      fieldsToSignArgs.sid = sid
-    }
+    if (
+      authResult.shouldUpdatePasswordHash &&
+      typeof authenticatedHash === 'string' &&
+      typeof authenticatedSalt === 'string'
+    ) {
+      try {
+        const { hash, salt } = await generatePasswordSaltHash({
+          collection: collectionConfig,
+          isPasswordAuthenticated: true,
+          password,
+          req,
+        })
 
-    const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
+        await payload.db.updateOne({
+          collection: collectionConfig.slug,
+          data: { hash, salt },
+          req,
+          select: { id: true },
+          where: {
+            id: { equals: user.id },
+            hash: { equals: authenticatedHash },
+            salt: { equals: authenticatedSalt },
+          },
+        })
+      } catch (err) {
+        // Rehashing is opportunistic and is retried on the next login, so a failure here
+        // must not reject an otherwise valid login or discard the session already created
+        payload.logger.error({ err, msg: 'Failed to update the stored password hash' })
+      }
+    }
 
     if (maxLoginAttemptsEnabled) {
       await resetLoginAttempts({
@@ -320,12 +347,6 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
       }
     }
 
-    const { exp, token } = await jwtSign({
-      fieldsToSign,
-      secret,
-      tokenExpiration: collectionConfig.auth.tokenExpiration,
-    })
-
     req.user = user
 
     // /////////////////////////////////////
@@ -349,42 +370,20 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     // afterRead - Fields
     // /////////////////////////////////////
 
-    user = await afterRead({
+    const userWithReadAccess = await applyUserReadAccess({
       collection: collectionConfig,
-      context: req.context,
       depth: depth!,
-      doc: user,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      draft: undefined,
-      fallbackLocale: fallbackLocale!,
-      global: null,
-      locale: locale!,
       overrideAccess,
       req,
       showHiddenFields: showHiddenFields!,
+      user,
     })
-
-    // /////////////////////////////////////
-    // afterRead - Collection
-    // /////////////////////////////////////
-
-    if (collectionConfig.hooks?.afterRead?.length) {
-      for (const hook of collectionConfig.hooks.afterRead) {
-        user =
-          (await hook({
-            collection: args.collection?.config,
-            context: req.context,
-            doc: user,
-            overrideAccess,
-            req,
-          })) || user
-      }
-    }
 
     let result: LoginResult<TSlug> = {
       exp,
+      refreshToken,
       token,
-      user,
+      user: userWithReadAccess,
     }
 
     // /////////////////////////////////////
@@ -409,6 +408,8 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
 
     return result
   } catch (error: unknown) {
+    // The password was right, but the login failed afterwards, e.g. in a `beforeLogin` hook, so
+    // remove the session it started
     if (sid) {
       await revokeSession({
         collectionConfig,

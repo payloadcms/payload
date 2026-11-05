@@ -1,5 +1,5 @@
 'use client'
-import type { TextareaFieldClientComponent, TextareaFieldValidation } from 'payload'
+import type { TextareaFieldClientProps, TextareaFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
@@ -12,13 +12,13 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
+import './index.css'
 import { isFieldRTL } from '../shared/index.js'
 import { TextareaInput } from './Input.js'
 
 export { TextareaInput, TextAreaInputProps }
 
-const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
+const TextareaFieldComponent: React.FC<TextareaFieldClientProps> = (props) => {
   const {
     field,
     field: {

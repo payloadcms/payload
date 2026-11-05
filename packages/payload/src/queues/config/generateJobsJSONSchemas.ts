@@ -16,6 +16,7 @@ export function generateJobsJSONSchemas(
    * if they have custom ID fields.
    */
   collectionIDFieldTypes: { [key: string]: 'number' | 'string' },
+  typeStringDefinitions: Set<string>,
   i18n?: I18n,
 ): {
   definitions?: Map<string, JSONSchema4>
@@ -39,13 +40,14 @@ export function generateJobsJSONSchemas(
         required: [],
       }
       if (task?.inputSchema?.length) {
-        const inputJsonSchema = fieldsToJSONSchema(
+        const inputJsonSchema = fieldsToJSONSchema({
           collectionIDFieldTypes,
-          flattenAllFields({ fields: task.inputSchema }),
-          interfaceNameDefinitions,
           config,
+          fields: flattenAllFields({ fields: task.inputSchema }),
           i18n,
-        )
+          interfaceNameDefinitions,
+          typeStringDefinitions,
+        })
 
         const fullInputJsonSchema: JSONSchema4 = {
           type: 'object',
@@ -58,13 +60,14 @@ export function generateJobsJSONSchemas(
         ;(fullTaskJsonSchema.required as string[]).push('input')
       }
       if (task?.outputSchema?.length) {
-        const outputJsonSchema = fieldsToJSONSchema(
+        const outputJsonSchema = fieldsToJSONSchema({
           collectionIDFieldTypes,
-          flattenAllFields({ fields: task.outputSchema }),
-          interfaceNameDefinitions,
           config,
+          fields: flattenAllFields({ fields: task.outputSchema }),
           i18n,
-        )
+          interfaceNameDefinitions,
+          typeStringDefinitions,
+        })
 
         const fullOutputJsonSchema: JSONSchema4 = {
           type: 'object',
@@ -92,8 +95,8 @@ export function generateJobsJSONSchemas(
 
             const toReturn: JSONSchema4 = {
               $ref: task.interfaceName
-                ? `#/definitions/${task.interfaceName}`
-                : `#/definitions/Task${normalizedTaskSlug}`,
+                ? `#/$defs/${task.interfaceName}`
+                : `#/$defs/Task${normalizedTaskSlug}`,
             }
 
             return [task.slug, toReturn]
@@ -125,13 +128,14 @@ export function generateJobsJSONSchemas(
       }
 
       if (workflow?.inputSchema?.length) {
-        const inputJsonSchema = fieldsToJSONSchema(
+        const inputJsonSchema = fieldsToJSONSchema({
           collectionIDFieldTypes,
-          flattenAllFields({ fields: workflow.inputSchema }),
-          interfaceNameDefinitions,
           config,
+          fields: flattenAllFields({ fields: workflow.inputSchema }),
           i18n,
-        )
+          interfaceNameDefinitions,
+          typeStringDefinitions,
+        })
 
         const fullInputJsonSchema: JSONSchema4 = {
           type: 'object',
@@ -159,8 +163,8 @@ export function generateJobsJSONSchemas(
 
             const toReturn: JSONSchema4 = {
               $ref: workflow.interfaceName
-                ? `#/definitions/${workflow.interfaceName}`
-                : `#/definitions/Workflow${normalizedWorkflowSlug}`,
+                ? `#/$defs/${workflow.interfaceName}`
+                : `#/$defs/Workflow${normalizedWorkflowSlug}`,
             }
 
             return [workflow.slug, toReturn]

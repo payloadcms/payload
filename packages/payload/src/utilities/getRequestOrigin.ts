@@ -1,4 +1,4 @@
-import type { CORSConfig, SanitizedConfig } from '../config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
 const getTrustedOrigins = (config: Pick<SanitizedConfig, 'cors' | 'csrf'>): null | string[] => {
@@ -13,7 +13,7 @@ const getTrustedOrigins = (config: Pick<SanitizedConfig, 'cors' | 'csrf'>): null
   if (Array.isArray(cors)) {
     cors.forEach((o) => origins.add(o))
   } else if (cors && typeof cors === 'object') {
-    const corsOrigins = (cors as CORSConfig).origins
+    const corsOrigins = cors.origins
     if (corsOrigins === '*') {
       return null
     }

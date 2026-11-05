@@ -3,7 +3,13 @@ import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations
 import type { ClientField, SanitizedFieldPermissions, SanitizedFieldsPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldIsHiddenOrDisabled,
+  fieldIsID,
+  tabHasName,
+  toWords,
+} from 'payload/shared'
 
 import type { ReducedField } from '../elements/WhereBuilder/types.js'
 
@@ -35,7 +41,7 @@ export const reduceFieldsToOptions = ({
 }: ReduceFieldOptionsArgs): ReducedField[] => {
   return fields.reduce((reduced, field) => {
     let pathPrefix = pathPrefixFromArgs
-    // Do not filter out `field.admin.disableListFilter` fields here, as these should still render as disabled if they appear in the URL query
+    // Do not filter out `field.admin.disabled.filter` fields here, as these should still render as disabled if they appear in the URL query
     // Filter out `virtual: true` fields since they are regular virtuals and not backed by a DB field
     if (
       (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||
@@ -45,7 +51,7 @@ export const reduceFieldsToOptions = ({
     }
 
     // IMPORTANT: We DON'T mutate field.name here because the field object is shared across
-    // multiple components (WhereBuilder, GroupByBuilder, etc.). Mutating it would break
+    // multiple components (WhereBuilder, GroupBy, etc.). Mutating it would break
     // permission checks and cause issues in other components that need the field name.
     // Instead, we use a flag to determine whether to include the field name in the path.
     let shouldIgnoreFieldName = false
@@ -66,9 +72,11 @@ export const reduceFieldsToOptions = ({
         if (typeof tab.label !== 'boolean') {
           const localizedTabLabel = getTranslation(tab.label, i18n)
 
-          const labelWithPrefix = labelPrefix
-            ? labelPrefix + ' > ' + localizedTabLabel
-            : localizedTabLabel
+          const labelWithPrefix = tabHasName(tab)
+            ? labelPrefix
+              ? labelPrefix + ' > ' + localizedTabLabel
+              : localizedTabLabel
+            : labelPrefix
 
           // Make sure we handle nested tabs
           const tabPathPrefix =
@@ -234,7 +242,7 @@ export const reduceFieldsToOptions = ({
           return acc
         }, [])
 
-        const localizedLabel = getTranslation(field.label || '', i18n)
+        const localizedLabel = field.label ? getTranslation(field.label, i18n) : toWords(field.name)
 
         const formattedLabel = labelPrefix
           ? combineFieldLabel({
@@ -255,9 +263,9 @@ export const reduceFieldsToOptions = ({
         }
 
         const formattedField: ReducedField = {
+          fieldPath,
           label: formattedLabel,
           plainTextLabel: `${labelPrefix ? labelPrefix + ' > ' : ''}${localizedLabel}`,
-          value: fieldPath,
           ...fieldTypeConditions[field.type],
           field,
           operators,

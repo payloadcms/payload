@@ -30,6 +30,7 @@ export default async function Page({ params: paramsPromise }: PageParams) {
         equals: slug,
       },
     },
+    overrideAccess: true,
   })
 
   const data = pageRes?.docs?.[0] as null | PageType
@@ -58,6 +59,7 @@ export async function generateStaticParams() {
     depth: 0,
     draft: true,
     limit: 100,
+    overrideAccess: true,
   })
 
   const pages = pagesRes?.docs

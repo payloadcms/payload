@@ -24,6 +24,11 @@ import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumn
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import {
+  TableSectionContent,
+  TableSectionHeader,
+  TableSectionRoot,
+} from '../elements/TableSection/index.js'
+import {
   GroupByHeader,
   GroupByPageControls,
   OrderableTable,
@@ -77,6 +82,7 @@ export const renderTable = ({
   groupByFieldPath,
   groupByValue,
   heading,
+  hierarchyParentFieldName,
   i18n,
   key = 'table',
   orderableFieldName,
@@ -84,6 +90,7 @@ export const renderTable = ({
   query,
   renderRowTypes,
   req,
+  showHeading,
   tableAppearance,
   useAsTitle,
   viewType,
@@ -101,6 +108,7 @@ export const renderTable = ({
   groupByFieldPath?: string
   groupByValue?: string
   heading?: string
+  hierarchyParentFieldName?: string
   i18n: I18nClient
   key?: string
   orderableFieldName: string
@@ -108,6 +116,8 @@ export const renderTable = ({
   query?: ListQuery
   renderRowTypes?: boolean
   req?: PayloadRequest
+  /** Show heading without requiring full groupBy context */
+  showHeading?: boolean
   tableAppearance?: 'condensed' | 'default'
   useAsTitle: CollectionConfig['admin']['useAsTitle']
   viewType?: ViewTypes
@@ -115,14 +125,21 @@ export const renderTable = ({
   columnState: Column[]
   Table: React.ReactNode
 } => {
-  // Ensure that columns passed as args comply with the field config, i.e. `hidden`, `disableListColumn`, etc.
+  // Ensure that columns passed as args comply with the field config, i.e. `hidden`, `disabled.column`, etc.
 
   let columnState: Column[]
   let clientFields: ClientField[] = clientCollectionConfig?.fields || []
   let serverFields: Field[] = collectionConfig?.fields || []
   const isPolymorphic = collections
 
-  const isGroupingBy = Boolean(collectionConfig?.admin?.groupBy && query?.groupBy)
+  const isGroupingBy = Boolean(query?.groupBy)
+  const tableId = [
+    'payload-table',
+    clientCollectionConfig?.slug || 'results',
+    isGroupingBy ? encodeURIComponent(String(groupByValue ?? key)) : undefined,
+  ]
+    .filter(Boolean)
+    .join('-')
 
   if (isPolymorphic) {
     clientFields = []
@@ -170,6 +187,7 @@ export const renderTable = ({
     | 'customCellProps'
     | 'enableRowSelections'
     | 'fieldPermissions'
+    | 'hierarchyParentFieldName'
     | 'i18n'
     | 'payload'
     | 'req'
@@ -181,6 +199,7 @@ export const renderTable = ({
     columns,
     enableRowSelections,
     fieldPermissions,
+    hierarchyParentFieldName,
     i18n,
     // sortColumnProps,
     customCellProps,
@@ -244,8 +263,13 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: <SelectAll />,
-      renderedCells: (data?.docs || []).map((_, i) => (
-        <SelectRow key={i} rowData={data?.docs[i]} />
+      renderedCells: (data?.docs || []).map((row, i) => (
+        <SelectRow
+          key={i}
+          rowData={row}
+          rowIndex={i}
+          selectRowLabel={getSelectRowLabel({ i18n, rowData: row, useAsTitle })}
+        />
       )),
     } as Column)
   }
@@ -255,27 +279,41 @@ export const renderTable = ({
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
       Table: (
-        <div
+        <TableSectionRoot
           className={['table-wrap', groupByValue !== undefined && `table-wrap--group-by`]
             .filter(Boolean)
             .join(' ')}
+          data-group-id={groupByValue}
           key={key}
         >
           <SelectionProvider docs={data?.docs || []} totalDocs={data?.totalDocs || 0}>
-            <GroupByHeader
-              collectionConfig={clientCollectionConfig}
-              groupByFieldPath={groupByFieldPath}
-              groupByValue={groupByValue}
-              heading={heading}
-            />
-            <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
-            <GroupByPageControls
-              collectionConfig={clientCollectionConfig}
-              data={data}
-              groupByValue={groupByValue}
-            />
+            <TableSectionHeader heading={heading}>
+              <GroupByHeader
+                collectionConfig={clientCollectionConfig}
+                groupByFieldPath={groupByFieldPath}
+                groupByValue={groupByValue}
+                heading={heading}
+                viewType={viewType}
+              />
+              <GroupByPageControls data={data} groupByValue={groupByValue} tableId={tableId} />
+            </TableSectionHeader>
+            <TableSectionContent>
+              <Table
+                appearance={tableAppearance}
+                ariaLabel={
+                  heading
+                    ? [getTranslation(clientCollectionConfig?.labels?.plural, i18n), heading]
+                        .filter(Boolean)
+                        .join(': ')
+                    : undefined
+                }
+                columns={columnsToUse}
+                data={data?.docs || []}
+                id={tableId}
+              />
+            </TableSectionContent>
           </SelectionProvider>
-        </div>
+        </TableSectionRoot>
       ),
     }
   }
@@ -285,14 +323,27 @@ export const renderTable = ({
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
       Table: (
-        <div className="table-wrap" key={key}>
-          <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
-        </div>
+        <TableSectionRoot className="table-wrap" key={key}>
+          {showHeading && heading && (
+            <TableSectionHeader>
+              <h4>{heading}</h4>
+            </TableSectionHeader>
+          )}
+          <TableSectionContent>
+            <Table
+              appearance={tableAppearance}
+              columns={columnsToUse}
+              data={data?.docs || []}
+              id={tableId}
+            />
+          </TableSectionContent>
+        </TableSectionRoot>
       ),
     }
   }
 
-  columnsToUse.unshift({
+  // Insert after _select column (index 1) so order is: _select, _dragHandle, ...rest
+  columnsToUse.splice(enableRowSelections ? 1 : 0, 0, {
     accessor: '_dragHandle',
     active: true,
     field: {
@@ -309,14 +360,35 @@ export const renderTable = ({
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
     Table: (
-      <div className="table-wrap" key={key}>
-        <OrderableTable
-          appearance={tableAppearance}
-          collection={clientCollectionConfig}
-          columns={columnsToUse}
-          data={data?.docs || []}
-        />
-      </div>
+      <TableSectionRoot className="table-wrap" key={key}>
+        <TableSectionContent>
+          <OrderableTable
+            appearance={tableAppearance}
+            collection={clientCollectionConfig}
+            columns={columnsToUse}
+            data={data?.docs || []}
+            id={tableId}
+          />
+        </TableSectionContent>
+      </TableSectionRoot>
     ),
   }
+}
+
+const getSelectRowLabel = ({
+  i18n,
+  rowData,
+  useAsTitle,
+}: {
+  i18n: I18nClient
+  rowData: { id: number | string } & Record<string, unknown>
+  useAsTitle: CollectionConfig['admin']['useAsTitle']
+}) => {
+  const title = useAsTitle ? rowData[useAsTitle] : undefined
+  const label =
+    typeof title === 'number' || (typeof title === 'string' && title)
+      ? String(title)
+      : String(rowData.id)
+
+  return i18n.t('general:selectLabel', { label })
 }

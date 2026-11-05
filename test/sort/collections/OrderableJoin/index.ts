@@ -49,4 +49,5 @@ export const OrderableJoinCollection: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

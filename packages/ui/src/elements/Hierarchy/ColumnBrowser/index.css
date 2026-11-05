@@ -1,0 +1,15 @@
+@layer payload-default {
+  .hierarchy-column-browser {
+    display: flex;
+    flex: 1;
+    overflow-x: auto;
+  }
+
+  .hierarchy-column-browser__column-wrapper {
+    flex-shrink: 0;
+  }
+
+  .hierarchy-column-browser__column-wrapper--loading {
+    padding: var(--spacer-3);
+  }
+}

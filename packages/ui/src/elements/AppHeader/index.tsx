@@ -1,47 +1,42 @@
 'use client'
-import { formatAdminURL } from 'payload/shared'
+import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useRef, useState } from 'react'
 
-import { Account } from '../../graphics/Account/index.js'
+import { useElementHeightVariable } from '../../hooks/useElementHeightVariable.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { LanguageIcon } from '../../icons/Language/index.js'
+import { SidebarIcon } from '../../icons/Sidebar/index.js'
 import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useEmbed } from '../../providers/Embed/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { Hamburger } from '../Hamburger/index.js'
-import { Link } from '../Link/index.js'
+import { Button } from '../Button/index.js'
 import { Localizer } from '../Localizer/index.js'
-import { LocalizerLabel } from '../Localizer/LocalizerLabel/index.js'
 import { useNav } from '../Nav/context.js'
-import { NavToggler } from '../Nav/NavToggler/index.js'
-import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { StepNav } from '../StepNav/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'app-header'
 
-type Props = {
-  CustomAvatar?: React.ReactNode
-  CustomIcon?: React.ReactNode
-}
-export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
-  const { t } = useTranslation()
-
+export function AppHeader() {
+  const { i18n, t } = useTranslation()
+  const locale = useLocale()
+  const localeLabel = locale && getTranslation(locale.label, i18n)
   const { Actions } = useActions()
 
+  const { navOpen, navToggleRef, setNavOpen } = useNav()
+  const { isEmbedded } = useEmbed()
+
   const {
-    config: {
-      admin: {
-        routes: { account: accountRoute },
-      },
-      localization,
-      routes: { admin: adminRoute },
-      serverURL,
-    },
+    config: { localization },
   } = useConfig()
 
-  const { navOpen } = useNav()
-
+  const headerRef = useRef<HTMLElement>(null)
   const customControlsRef = useRef<HTMLDivElement>(null)
   const [isScrollable, setIsScrollable] = useState(false)
+
+  useElementHeightVariable({ cssVar: '--app-header-height', ref: headerRef })
 
   useEffect(() => {
     const checkIsScrollable = () => {
@@ -63,16 +58,33 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
   const ActionComponents = Actions ? Object.values(Actions) : []
 
   return (
-    <header className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
-      <div className={`${baseClass}__bg`} />
+    <header
+      className={[
+        baseClass,
+        navOpen && `${baseClass}--nav-open`,
+        isEmbedded && `${baseClass}--embedded`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      ref={headerRef}
+    >
       <div className={`${baseClass}__content`}>
         <div className={`${baseClass}__wrapper`}>
-          <NavToggler className={`${baseClass}__mobile-nav-toggler`} tabIndex={-1}>
-            <Hamburger />
-          </NavToggler>
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
-              <StepNav className={`${baseClass}__step-nav`} CustomIcon={CustomIcon} />
+              <Button
+                aria-expanded={navOpen}
+                aria-label={`${navOpen ? t('general:close') : t('general:open')} ${t('general:menu')}`}
+                buttonStyle="ghost"
+                className={`${baseClass}__sidebar-toggle`}
+                icon={<SidebarIcon />}
+                onClick={() => setNavOpen(!navOpen, true)}
+                ref={navToggleRef}
+                type="button"
+              />
+              <div className={`${baseClass}__step-nav-wrapper`}>
+                <StepNav className={`${baseClass}__step-nav`} />
+              </div>
             </div>
             <div className={`${baseClass}__actions-wrapper`}>
               <div className={`${baseClass}__actions`} ref={customControlsRef}>
@@ -92,21 +104,30 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
               {isScrollable && <div className={`${baseClass}__gradient-placeholder`} />}
             </div>
             {localization && (
-              <LocalizerLabel ariaLabel="invisible" className={`${baseClass}__localizer-spacing`} />
+              <Localizer
+                className={`${baseClass}__localizer`}
+                renderButton={({ active, onClick, onKeyDown, ...ariaProps }) => (
+                  <Button
+                    aria-label={t('general:locale')}
+                    buttonStyle="secondary"
+                    extraButtonProps={{ onKeyDown, style: { padding: '0 var(--spacer-1) 0 0' } }}
+                    icon={<LanguageIcon size={24} />}
+                    iconPosition="left"
+                    onClick={onClick}
+                    selected={active}
+                    {...ariaProps}
+                  >
+                    <div className="localizer__button-content">
+                      {localeLabel}
+                      <ChevronIcon direction={active ? 'up' : 'down'} size={16} />
+                    </div>
+                  </Button>
+                )}
+              />
             )}
-            <Link
-              aria-label={t('authentication:account')}
-              className={`${baseClass}__account`}
-              href={formatAdminURL({ adminRoute, path: accountRoute })}
-              prefetch={false}
-              tabIndex={0}
-            >
-              <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
-            </Link>
           </div>
         </div>
       </div>
-      <Localizer className={`${baseClass}__localizer`} />
     </header>
   )
 }

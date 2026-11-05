@@ -1,12 +1,12 @@
 'use client'
 
 import type { DefaultNodeTypes, DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
-import type { JSONFieldClientComponent } from 'payload'
+import type { JSONFieldClientProps } from 'payload'
 
 import { buildEditorState, RenderLexical } from '@payloadcms/richtext-lexical/client'
 import React, { useState } from 'react'
 
-export const Component: JSONFieldClientComponent = () => {
+export const Component: React.FC<JSONFieldClientProps> = () => {
   const [value, setValue] = useState<DefaultTypedEditorState | undefined>(() =>
     buildEditorState<DefaultNodeTypes>({ text: 'state default' }),
   )

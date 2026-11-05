@@ -1,29 +1,35 @@
 import type { Config, Payload } from 'payload'
 
-import type { FolderInterface, Post } from '../payload-types.js'
+import type { Post } from '../payload-types.js'
 
 import { devUser } from '../../credentials.js'
+import { folderSlug } from '../shared.js'
 
-async function createPost(payload: Payload, { title, folder }: any): Promise<Post> {
+async function createPost(
+  payload: Payload,
+  { title, folder }: { folder?: string; title: string },
+): Promise<Post> {
   return payload.create({
     collection: 'posts',
     data: {
       title,
       folder,
     },
+    overrideAccess: true,
   })
 }
 
 async function createFolder(
   payload: Payload,
-  { name, folder }: Pick<FolderInterface, 'folder' | 'name'>,
-): Promise<FolderInterface> {
+  { name, folder }: { folder?: string; name: string },
+): Promise<{ folder?: string; id: string; name: string }> {
   return payload.create({
-    collection: 'payload-folders',
+    collection: folderSlug,
     data: {
       name,
       folder,
     },
+    overrideAccess: true,
   })
 }
 
@@ -34,6 +40,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 
   for (let i = 0; i < 12; i++) {

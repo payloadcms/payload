@@ -9,13 +9,14 @@ import type {
 import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 import { Thumbnail } from '../../../../Thumbnail/index.js'
 
 const baseClass = 'file'
 
-export interface FileCellProps
-  extends DefaultCellComponentProps<TextFieldClient | UploadFieldClient> {
+export interface FileCellProps extends DefaultCellComponentProps<
+  TextFieldClient | UploadFieldClient
+> {
   readonly collectionConfig: ClientCollectionConfig
 }
 
@@ -36,12 +37,15 @@ export const FileCell: React.FC<FileCellProps> = ({
 
     if (isFileImage) {
       fileSrc = getBestFitFromSizes({
-        sizes: rowData?.sizes,
+        sizes: rowData?.variants,
         thumbnailURL: rowData?.thumbnailURL,
         url: rowData?.url,
         width: rowData?.width,
       })
     }
+
+    const uploadConfig = collectionConfig?.upload
+    const imageCacheTag = uploadConfig?.cacheTags && rowData?.updatedAt
 
     return (
       <div className={baseClass}>
@@ -53,9 +57,9 @@ export const FileCell: React.FC<FileCellProps> = ({
             filename,
           }}
           fileSrc={fileSrc}
-          imageCacheTag={collectionConfig?.upload?.cacheTags && rowData?.updatedAt}
+          imageCacheTag={imageCacheTag}
           size="small"
-          uploadConfig={collectionConfig?.upload}
+          uploadConfig={uploadConfig}
         />
         <span className={`${baseClass}__filename`}>{String(filename)}</span>
       </div>

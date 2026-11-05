@@ -26,7 +26,10 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
 }: Args): Promise<Result<T>> {
   const testSuiteName = path.basename(dirname)
 
-  const port = 3000
+  // Default to 3000 if PORT is not set, but allow it to be overridden by the environment variable
+  const defaultPort = 3000
+
+  const port = process.env.PORT ? Number(process.env.PORT) : defaultPort
   process.env.PORT = String(port)
   process.env.PAYLOAD_CI_DEPENDENCY_CHECKER = 'true'
 
@@ -51,7 +54,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
         if (code === 0) {
           res()
         }
-        rej()
+        rej(new Error('closed with code ' + code))
       })
     })
   }

@@ -1,11 +1,11 @@
-import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime.js'
+import type { RouterAdapterRouter } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
 
 type GoBackProps = {
   adminRoute: string
   collectionSlug: string
-  router: AppRouterInstance
+  router: RouterAdapterRouter
   serverURL?: string
 }
 

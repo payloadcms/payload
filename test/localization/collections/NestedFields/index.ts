@@ -83,4 +83,5 @@ export const NestedFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

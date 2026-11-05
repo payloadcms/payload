@@ -19,12 +19,12 @@ export const GravatarAccountIcon: React.FC = () => {
 
   return (
     <img
-      alt="yas"
+      alt=""
       className="gravatar-account"
-      height={25}
+      height={24}
       src={`https://www.gravatar.com/avatar/${hash}${query}`}
       style={{ borderRadius: '50%' }}
-      width={25}
+      width={24}
     />
   )
 }

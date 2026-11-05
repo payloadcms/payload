@@ -10,6 +10,8 @@ import { parseParams } from './parseParams.js'
 
 export type BuildQueryJoinAliases = {
   condition: SQL
+  // with parent
+  isOneToMany?: boolean
   queryPath?: string
   table: GenericTable | PgTableWithColumns<any>
   type?: 'innerJoin' | 'leftJoin' | 'rightJoin'

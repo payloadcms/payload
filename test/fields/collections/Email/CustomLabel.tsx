@@ -1,10 +1,10 @@
 'use client'
 
-import type { EmailFieldClientComponent } from 'payload'
+import type { EmailFieldClientProps } from 'payload'
 
 import React from 'react'
 
-export const CustomLabel: EmailFieldClientComponent = ({ path }) => {
+export const CustomLabel: React.FC<EmailFieldClientProps> = ({ path }) => {
   return (
     <label className="custom-label" htmlFor={`field-${path?.replace(/\./g, '__')}`}>
       #label

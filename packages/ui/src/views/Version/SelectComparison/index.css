@@ -1,0 +1,5 @@
+@layer payload-default {
+  .compare-version-moreVersions {
+    color: var(--color-text-secondary);
+  }
+}

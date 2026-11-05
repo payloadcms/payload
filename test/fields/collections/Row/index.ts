@@ -4,7 +4,6 @@ import { rowFieldsSlug } from '../../slugs.js'
 
 const RowFields: CollectionConfig = {
   slug: rowFieldsSlug,
-  versions: true,
   admin: {
     defaultColumns: ['title', 'id'],
   },

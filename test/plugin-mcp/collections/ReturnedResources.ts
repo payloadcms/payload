@@ -29,4 +29,5 @@ export const ReturnedResources: CollectionConfig = {
       required: true,
     },
   ],
+  versions: false,
 }

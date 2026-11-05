@@ -1,5 +1,6 @@
+import { INLINE_CODE } from '@lexical/markdown'
+
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
-import { INLINE_CODE } from './markdownTransformers.js'
 
 export const InlineCodeFeature = createServerFeature({
   feature: {

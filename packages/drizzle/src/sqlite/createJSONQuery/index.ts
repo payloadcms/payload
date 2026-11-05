@@ -1,6 +1,7 @@
 import type { CreateJSONQueryArgs } from '../../types.js'
 
 import { escapeSQLValue } from '../../utilities/escapeSQLValue.js'
+import { sanitizePathSegment } from '../../utilities/sanitizePathSegment.js'
 
 type FromArrayArgs = {
   isRoot?: true
@@ -20,11 +21,12 @@ const fromArray = ({
   value,
 }: FromArrayArgs) => {
   const newPathSegments = pathSegments.slice(1)
-  const alias = `${pathSegments[isRoot ? 0 : 1]}_alias_${newPathSegments.length}`
+  const sanitizedSegment = sanitizePathSegment(pathSegments[isRoot ? 0 : 1])
+  const alias = `${sanitizedSegment}_alias_${newPathSegments.length}`
 
   return `EXISTS (
     SELECT 1
-    FROM json_each(${table}.${pathSegments[0]}) AS ${alias}
+    FROM json_each(${table}.${sanitizePathSegment(pathSegments[0])}) AS ${alias}
     WHERE ${createJSONQuery({
       operator,
       pathSegments: newPathSegments,
@@ -39,6 +41,7 @@ type CreateConstraintArgs = {
   alias?: string
   operator: string
   pathSegments: string[]
+  rootColumn?: string
   treatAsArray?: string[]
   value: boolean | number | string
 }
@@ -47,6 +50,7 @@ const createConstraint = ({
   alias,
   operator,
   pathSegments,
+  rootColumn,
   value,
 }: CreateConstraintArgs): string => {
   const newAlias = `${pathSegments[0]}_alias_${pathSegments.length - 1}`
@@ -61,25 +65,25 @@ const createConstraint = ({
 
   if (operator === 'exists') {
     if (pathSegments.length === 1) {
-      return `EXISTS (SELECT 1 FROM json_each("${pathSegments[0]}") AS ${newAlias})`
+      return `EXISTS (SELECT 1 FROM json_each(${rootColumn ?? `"${sanitizePathSegment(pathSegments[0])}"`}) AS ${newAlias})`
     }
 
     return `EXISTS (
       SELECT 1
-      FROM json_each(${alias}.value -> '${pathSegments[0]}') AS ${newAlias}
-      WHERE ${newAlias}.key = '${pathSegments[1]}'
+      FROM json_each(${alias}.value -> '${sanitizePathSegment(pathSegments[0])}') AS ${newAlias}
+      WHERE ${newAlias}.key = '${sanitizePathSegment(pathSegments[1])}'
     )`
   }
 
   if (operator === 'not_exists') {
     if (pathSegments.length === 1) {
-      return `NOT EXISTS (SELECT 1 FROM json_each("${pathSegments[0]}") AS ${newAlias})`
+      return `NOT EXISTS (SELECT 1 FROM json_each(${rootColumn ?? `"${sanitizePathSegment(pathSegments[0])}"`}) AS ${newAlias})`
     }
 
     return `NOT EXISTS (
       SELECT 1
-      FROM json_each(${alias}.value -> '${pathSegments[0]}') AS ${newAlias}
-      WHERE ${newAlias}.key = '${pathSegments[1]}'
+      FROM json_each(${alias}.value -> '${sanitizePathSegment(pathSegments[0])}') AS ${newAlias}
+      WHERE ${newAlias}.key = '${sanitizePathSegment(pathSegments[1])}'
     )`
   }
 
@@ -96,13 +100,13 @@ const createConstraint = ({
   }
 
   if (pathSegments.length === 1) {
-    return `EXISTS (SELECT 1 FROM json_each("${pathSegments[0]}") AS ${newAlias} WHERE ${newAlias}.value ${formattedOperator} '${formattedValue}')`
+    return `EXISTS (SELECT 1 FROM json_each(${rootColumn ?? `"${sanitizePathSegment(pathSegments[0])}"`}) AS ${newAlias} WHERE ${newAlias}.value ${formattedOperator} '${formattedValue}')`
   }
 
   return `EXISTS (
   SELECT 1
-  FROM json_each(${alias}.value -> '${pathSegments[0]}') AS ${newAlias}
-  WHERE COALESCE(${newAlias}.value ->> '${pathSegments[1]}', '') ${formattedOperator} '${formattedValue}'
+  FROM json_each(${alias}.value -> '${sanitizePathSegment(pathSegments[0])}') AS ${newAlias}
+  WHERE COALESCE(${newAlias}.value ->> '${sanitizePathSegment(pathSegments[1])}', '') ${formattedOperator} '${formattedValue}'
   )`
 }
 
@@ -121,7 +125,7 @@ export const createJSONQuery = ({
     for (const [i, v] of value.entries()) {
       sql = `${sql}${createJSONQuery({ column, operator: operator === 'in' ? 'equals' : 'not_equals', pathSegments, rawColumn, table, treatAsArray, treatRootAsArray, value: v })} ${i === value.length - 1 ? '' : ` ${operator === 'in' ? 'OR' : 'AND'} `}`
     }
-    return sql
+    return `(${sql})`
   }
 
   if (treatAsArray?.includes(pathSegments[1]) && table) {
@@ -138,6 +142,7 @@ export const createJSONQuery = ({
     alias: table,
     operator,
     pathSegments,
+    rootColumn: typeof column === 'string' ? column : column ? `"${column.name}"` : undefined,
     treatAsArray,
     value: value as CreateConstraintArgs['value'],
   })

@@ -11,9 +11,8 @@ export type MeResult<T extends PayloadTypesShape, TSlug extends AuthCollectionSl
   collection?: TSlug
   exp?: number
   message: string
-  strategy?: string
   token?: string
-  user: DataFromAuthSlug<T, TSlug>
+  user: { _strategy?: string } & DataFromAuthSlug<T, TSlug>
 }
 
 export async function me<T extends PayloadTypesShape, TSlug extends AuthCollectionSlug<T>>(

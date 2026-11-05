@@ -16,7 +16,7 @@ export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
   }
 }
 
-const flattenedFieldsCache = new Map<Field[], FlattenedField[]>()
+const flattenedFieldsCache = new WeakMap<Field[], FlattenedField[]>()
 
 /**
  * Flattens all fields in a collection, preserving the nested field structure.
@@ -55,30 +55,17 @@ export const flattenAllFields = ({
       }
 
       case 'blocks': {
-        const blocks: FlattenedBlock[] = []
-        let blockReferences: (FlattenedBlock | string)[] | undefined = undefined
-        if (field.blockReferences) {
-          blockReferences = []
-          for (const block of field.blockReferences) {
-            if (typeof block === 'string') {
-              blockReferences.push(block)
-              continue
-            }
-            blockReferences.push(flattenBlock({ block }))
+        const blocks: (FlattenedBlock | string)[] = []
+        for (const block of field.blocks) {
+          if (typeof block === 'string') {
+            blocks.push(block)
+            continue
           }
-        } else {
-          for (const block of field.blocks) {
-            if (typeof block === 'string') {
-              blocks.push(block)
-              continue
-            }
-            blocks.push(flattenBlock({ block }))
-          }
+          blocks.push(flattenBlock({ block }))
         }
 
         const resultField: FlattenedBlocksField = {
           ...field,
-          blockReferences,
           blocks,
         }
 

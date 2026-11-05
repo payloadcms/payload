@@ -60,16 +60,28 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_4EE6A29F".
+ */
+export type LexicalNodes_4EE6A29F =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_4EE6A29F>
+  | SerializedListNode<LexicalNodes_4EE6A29F>
+  | SerializedListItemNode<LexicalNodes_4EE6A29F>
+  | SerializedHeadingNode<LexicalNodes_4EE6A29F, 'h2' | 'h3' | 'h4'>;
 
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
     users: User;
     media: Media;
+    'dispatch-media': DispatchMedia;
     posts: Post;
     products: Product;
     rolls: Roll;
@@ -77,16 +89,17 @@ export interface Config {
     'returned-resources': ReturnedResource;
     pages: Page;
     'field-types': FieldType;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-llm-instructions': PayloadLlmInstruction;
   };
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'dispatch-media': DispatchMediaSelect<false> | DispatchMediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     rolls: RollsSelect<false> | RollsSelect<true>;
@@ -94,11 +107,11 @@ export interface Config {
     'returned-resources': ReturnedResourcesSelect<false> | ReturnedResourcesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'field-types': FieldTypesSelect<false> | FieldTypesSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-llm-instructions': PayloadLlmInstructionsSelect<false> | PayloadLlmInstructionsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -111,7 +124,12 @@ export interface Config {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: 'en' | 'es' | 'fr';
-  user: User | PayloadMcpApiKey;
+  widgets: {
+    collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
+  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -135,40 +153,40 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-export interface PayloadMcpApiKeyAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
-  };
-}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: string;
+  rbac?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
-  enableAPIKey?: boolean | null;
   apiKey?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -188,6 +206,40 @@ export interface User {
 export interface Media {
   id: string;
   alt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "dispatch-media".
+ */
+export interface DispatchMedia {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -225,6 +277,18 @@ export interface Post {
    * @maxItems 2
    */
   location?: [number, number] | null;
+  /**
+   * A virtual field that is computed and not stored in the database
+   */
+  computedTitle?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -238,6 +302,14 @@ export interface Product {
   title?: string | null;
   description?: string | null;
   price?: number | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -259,6 +331,14 @@ export interface Roll {
    * The user who rolled the die
    */
   user: string | User;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -280,6 +360,14 @@ export interface ModifiedPrompt {
    * The user sent the prompt to modify
    */
   user: string | User;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -301,6 +389,14 @@ export interface ReturnedResource {
    * The user sent the prompt to modify
    */
   user: string | User;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -311,17 +407,15 @@ export interface ReturnedResource {
 export interface Page {
   id: string;
   title: string;
-  layout?:
-    | (
-        | HeroBlock
-        | {
-            body?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textContent';
-          }
-      )[]
-    | null;
+  layout?: (HeroBlock | TextContent)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -335,6 +429,16 @@ export interface HeroBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'hero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextContent".
+ */
+export interface TextContent {
+  body?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textContent';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -404,8 +508,8 @@ export interface FieldType {
    * A group field with nested properties
    */
   groupField?: {
-    groupText?: string | null;
-    groupNumber?: number | null;
+    groupText: string;
+    groupNumber: number;
   };
   /**
    * An upload field
@@ -429,153 +533,17 @@ export interface FieldType {
    * Text field inside an unnamed tab
    */
   unnamedTabText?: string | null;
+  requireGroupField?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * API keys control which collections, resources, tools, and prompts MCP clients can access
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  /**
-   * The user that the API key is associated with.
-   */
-  user: string | User;
-  /**
-   * A useful label for the API key.
-   */
-  label?: string | null;
-  /**
-   * The purpose of the API key.
-   */
-  description?: string | null;
-  products?: {
-    /**
-     * Allow clients to find products.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create products.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update products.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete products.
-     */
-    delete?: boolean | null;
-  };
-  fieldTypes?: {
-    /**
-     * Allow clients to find field-types.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create field-types.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update field-types.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete field-types.
-     */
-    delete?: boolean | null;
-  };
-  pages?: {
-    /**
-     * Allow clients to find pages.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create pages.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update pages.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete pages.
-     */
-    delete?: boolean | null;
-  };
-  posts?: {
-    /**
-     * Allow clients to find posts.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create posts.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update posts.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete posts.
-     */
-    delete?: boolean | null;
-  };
-  media?: {
-    /**
-     * Allow clients to find media.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to update media.
-     */
-    update?: boolean | null;
-  };
-  siteSettings?: {
-    /**
-     * Allow clients to find site-settings global.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to update site-settings global.
-     */
-    update?: boolean | null;
-  };
-  'payload-mcp-tool'?: {
-    /**
-     * Rolls a virtual dice with a specified number of sides
-     */
-    diceRoll?: boolean | null;
-  };
-  'payload-mcp-resource'?: {
-    /**
-     * Data is a resource that contains special data.
-     */
-    data?: boolean | null;
-    /**
-     * Data is a resource that contains special data.
-     */
-    dataByID?: boolean | null;
-  };
-  'payload-mcp-prompt'?: {
-    /**
-     * Creates a prompt to process a message
-     */
-    echo?: boolean | null;
-  };
-  /**
-   * This field added by overrideApiKeyCollection
-   */
-  override?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -610,6 +578,10 @@ export interface PayloadLockedDocument {
         value: string | Media;
       } | null)
     | ({
+        relationTo: 'dispatch-media';
+        value: string | DispatchMedia;
+      } | null)
+    | ({
         relationTo: 'posts';
         value: string | Post;
       } | null)
@@ -636,21 +608,12 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'field-types';
         value: string | FieldType;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -660,15 +623,10 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   key?: string | null;
   value?:
     | {
@@ -695,19 +653,45 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions".
+ */
+export interface PayloadLlmInstruction {
+  id: string;
+  entitySlug: string;
+  title?: string | null;
+  entityType: 'collection' | 'global';
+  additionalInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
+  systemInstructions?: LexicalRichText<LexicalNodes_4EE6A29F> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  rbac?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
-  enableAPIKey?: T;
   apiKey?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -724,6 +708,27 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "dispatch-media_select".
+ */
+export interface DispatchMediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -745,6 +750,9 @@ export interface PostsSelect<T extends boolean = true> {
   content?: T;
   author?: T;
   location?: T;
+  computedTitle?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -757,6 +765,8 @@ export interface ProductsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   price?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -768,6 +778,8 @@ export interface RollsSelect<T extends boolean = true> {
   sides?: T;
   result?: T;
   user?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -779,6 +791,8 @@ export interface ModifiedPromptsSelect<T extends boolean = true> {
   original?: T;
   modified?: T;
   user?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -790,6 +804,8 @@ export interface ReturnedResourcesSelect<T extends boolean = true> {
   uri?: T;
   content?: T;
   user?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -811,6 +827,8 @@ export interface PagesSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -861,83 +879,11 @@ export interface FieldTypesSelect<T extends boolean = true> {
         namedTabText?: T;
       };
   unnamedTabText?: T;
+  requireGroupField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  user?: T;
-  label?: T;
-  description?: T;
-  products?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  fieldTypes?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  pages?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  posts?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  media?:
-    | T
-    | {
-        find?: T;
-        update?: T;
-      };
-  siteSettings?:
-    | T
-    | {
-        find?: T;
-        update?: T;
-      };
-  'payload-mcp-tool'?:
-    | T
-    | {
-        diceRoll?: T;
-      };
-  'payload-mcp-resource'?:
-    | T
-    | {
-        data?: T;
-        dataByID?: T;
-      };
-  'payload-mcp-prompt'?:
-    | T
-    | {
-        echo?: T;
-      };
-  override?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  enableAPIKey?: T;
-  apiKey?: T;
-  apiKeyIndex?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -981,6 +927,22 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-llm-instructions_select".
+ */
+export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
+  id?: T;
+  entitySlug?: T;
+  title?: T;
+  entityType?: T;
+  additionalInstructions?: T;
+  systemInstructions?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".
  */
 export interface SiteSetting {
@@ -1001,6 +963,14 @@ export interface SiteSetting {
    * Contact email address for the site
    */
   contactEmail?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1013,9 +983,77 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   siteDescription?: T;
   maintenanceMode?: T;
   contactEmail?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'users'
+      | 'media'
+      | 'dispatch-media'
+      | 'posts'
+      | 'products'
+      | 'rolls'
+      | 'modified-prompts'
+      | 'returned-resources'
+      | 'pages'
+      | 'field-types';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'users'
+          | 'media'
+          | 'dispatch-media'
+          | 'posts'
+          | 'products'
+          | 'rolls'
+          | 'modified-prompts'
+          | 'returned-resources'
+          | 'pages'
+          | 'field-types'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1025,8 +1063,89 @@ export interface Auth {
   [k: string]: unknown;
 }
 
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
+}
+
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

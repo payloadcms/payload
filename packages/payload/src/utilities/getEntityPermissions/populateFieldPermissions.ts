@@ -7,11 +7,15 @@ import type {
   GlobalPermission,
   Permission,
 } from '../../auth/types.js'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { DefaultDocumentIDType } from '../../index.js'
 import type { AllOperations, JsonObject, PayloadRequest } from '../../types/index.js'
-import type { BlockReferencesPermissions } from './getEntityPermissions.js'
 
 import { type Field, tabHasName } from '../../fields/config/types.js'
+import { deepCopyObject } from '../deepCopyObject.js'
+import { getAccessOperationRequest } from '../getAccessOperationRequest.js'
+import { markRecursiveBlockBoundary } from '../sanitizePermissions.js'
 
 const isThenable = (value: unknown): value is Promise<unknown> =>
   value != null && typeof (value as { then?: unknown }).then === 'function'
@@ -51,18 +55,26 @@ const setPermission = (
  */
 export const populateFieldPermissions = ({
   id,
-  blockReferencesPermissions,
+  activeBlocks = new Set<object>(),
+  blockPermissionCache,
+  collection,
   data,
   fields,
+  global,
   operations,
   parentPermissionsObject,
   permissionsObject,
   promises,
   req,
 }: {
-  blockReferencesPermissions: BlockReferencesPermissions
+  activeBlocks?: Set<object>
+  blockPermissionCache: WeakMap<object, Map<string, BlockPermissions>>
+  /** The collection which the fields belong to. If the fields belong to a global, this will be null. */
+  collection: null | SanitizedCollectionConfig
   data: JsonObject | undefined
   fields: Field[]
+  /** The global which the fields belong to. If the fields belong to a collection, this will be null. */
+  global: null | SanitizedGlobalConfig
   id?: DefaultDocumentIDType
   /**
    * Operations to check access for
@@ -87,20 +99,40 @@ export const populateFieldPermissions = ({
 
       if ('name' in field && field.name) {
         if (!permissionsObject[field.name]) {
-          permissionsObject[field.name] = {} as FieldPermissions
+          permissionsObject[field.name] = {}
         }
         const fieldPermissions: FieldPermissions = permissionsObject[field.name]!
 
         if ('access' in field && field.access && typeof field.access[operation] === 'function') {
-          const accessResult = field.access[operation]({
-            id,
-            data,
-            doc: data,
-            req,
-            // We cannot include siblingData or blockData here, as we do not have siblingData/blockData available once we reach block or array
-            // rows, as we're calculating schema permissions, which do not include individual rows.
-            // For consistency, it's thus better to never include the siblingData and blockData
-          })
+          const accessResult = field.access[operation](
+            collection
+              ? {
+                  id,
+                  collection,
+                  data,
+                  doc: data,
+                  req: getAccessOperationRequest({
+                    operation,
+                    req,
+                  }),
+                  // We cannot include siblingData or blockData here, as we do not have siblingData/blockData available once we reach block or array
+                  // rows, as we're calculating schema permissions, which do not include individual rows.
+                  // For consistency, it's thus better to never include the siblingData and blockData
+                }
+              : {
+                  id,
+                  data,
+                  doc: data,
+                  global: global!,
+                  req: getAccessOperationRequest({
+                    operation,
+                    req,
+                  }),
+                  // We cannot include siblingData or blockData here, as we do not have siblingData/blockData available once we reach block or array
+                  // rows, as we're calculating schema permissions, which do not include individual rows.
+                  // For consistency, it's thus better to never include the siblingData and blockData
+                },
+          )
 
           // Handle both sync and async access results
           if (isThenable(accessResult)) {
@@ -127,9 +159,12 @@ export const populateFieldPermissions = ({
 
         populateFieldPermissions({
           id,
-          blockReferencesPermissions,
+          activeBlocks,
+          blockPermissionCache,
+          collection,
           data,
           fields: field.fields,
+          global,
           operations,
           parentPermissionsObject: fieldPermissions,
           permissionsObject: fieldPermissions.fields,
@@ -138,10 +173,7 @@ export const populateFieldPermissions = ({
         })
       }
 
-      if (
-        ('blocks' in field && field.blocks?.length) ||
-        ('blockReferences' in field && field.blockReferences?.length)
-      ) {
+      if ('blocks' in field && field.blocks?.length) {
         if (!fieldPermissions.blocks) {
           fieldPermissions.blocks = {}
         }
@@ -158,7 +190,7 @@ export const populateFieldPermissions = ({
             parentPermissionsObject[operation as keyof typeof parentPermissionsObject] as Permission
           )?.permission
 
-          for (const _block of field.blockReferences ?? field.blocks) {
+          for (const _block of field.blocks) {
             const block = typeof _block === 'string' ? req.payload.blocks[_block] : _block
 
             // Skip if block doesn't exist (invalid block reference)
@@ -166,16 +198,7 @@ export const populateFieldPermissions = ({
               continue
             }
 
-            // Handle block references - check if we've seen this block before
-            if (typeof _block === 'string') {
-              const blockReferencePermissions = blockReferencesPermissions[_block]
-              if (blockReferencePermissions) {
-                // Reference the cached permissions (may be a promise or resolved object)
-                blocksPermissions[block.slug] = blockReferencePermissions as BlockPermissions
-                continue
-              }
-            }
-
+            // Reference permissions belong to this usage: callbacks and inheritance depend on context.
             // Initialize block permissions object if needed
             if (!blocksPermissions[block.slug]) {
               blocksPermissions[block.slug] = {} as BlockPermissions
@@ -196,7 +219,7 @@ export const populateFieldPermissions = ({
 
         // Process nested content for each unique block (once per block, not once per operation)
         const processedBlocks = new Set<string>()
-        for (const _block of field.blockReferences ?? field.blocks) {
+        for (const _block of field.blocks) {
           const block = typeof _block === 'string' ? req.payload.blocks[_block] : _block
 
           // Skip if block doesn't exist (invalid block reference)
@@ -214,24 +237,74 @@ export const populateFieldPermissions = ({
             blockPermission.fields = {}
           }
 
-          // Handle block references with caching - store as promise that will be resolved later
-          if (typeof _block === 'string' && !blockReferencesPermissions[_block]) {
-            // Mark this block as being processed by storing a reference
-            blockReferencesPermissions[_block] = blockPermission
+          // A recursive reference has no finite permission subtree. Deny this occurrence
+          // explicitly so sanitization cannot mistake its absent descendants for full access.
+          if (activeBlocks.has(block)) {
+            for (const operation of operations) {
+              if (
+                operation === 'create' ||
+                operation === 'read' ||
+                operation === 'update' ||
+                operation === 'validate'
+              ) {
+                setPermission(blockPermission, operation, false, promises)
+              }
+            }
+            markRecursiveBlockBoundary({ fields: blockPermission.fields })
+            continue
           }
 
-          // Recursively process block fields synchronously
-          populateFieldPermissions({
-            id,
-            blockReferencesPermissions,
-            data,
-            fields: block.fields,
-            operations,
-            parentPermissionsObject: blockPermission,
-            permissionsObject: blockPermission.fields,
-            promises,
-            req,
-          })
+          // Nested occurrences depend on the active ancestor path. At the root,
+          // identical inherited permissions have the same finite subtree.
+          const inherited = operations.map(
+            (operation) =>
+              (blockPermission[operation as keyof BlockPermissions] as Permission | undefined)
+                ?.permission,
+          )
+          const cacheKey = inherited.some(isThenable)
+            ? undefined
+            : operations.map((operation, index) => `${operation}:${inherited[index]}`).join('|')
+          const cached =
+            cacheKey === undefined ? undefined : blockPermissionCache.get(block)?.get(cacheKey)
+          if (activeBlocks.size === 0 && cached) {
+            // Sanitization mutates permissions, so occurrences cannot share an object.
+            blocksPermissions[block.slug] = deepCopyObject(cached)
+            continue
+          }
+
+          const pendingPromises = promises.length
+          activeBlocks.add(block)
+          try {
+            populateFieldPermissions({
+              id,
+              activeBlocks,
+              blockPermissionCache,
+              collection,
+              data,
+              fields: block.fields,
+              global,
+              operations,
+              parentPermissionsObject: blockPermission,
+              permissionsObject: blockPermission.fields,
+              promises,
+              req,
+            })
+          } finally {
+            activeBlocks.delete(block)
+          }
+          // Do not clone trees whose access results are still resolving.
+          if (
+            activeBlocks.size === 0 &&
+            cacheKey !== undefined &&
+            promises.length === pendingPromises
+          ) {
+            let byAccess = blockPermissionCache.get(block)
+            if (!byAccess) {
+              byAccess = new Map()
+              blockPermissionCache.set(block, byAccess)
+            }
+            byAccess.set(cacheKey, blockPermission)
+          }
         }
       }
     }
@@ -241,11 +314,14 @@ export const populateFieldPermissions = ({
       // Field does not have a name => same parentPermissionsObject
       populateFieldPermissions({
         id,
-        blockReferencesPermissions,
+        activeBlocks,
+        collection,
         data,
         fields: field.fields,
+        global,
         operations,
         // Field does not have a name here => use parent permissions object
+        blockPermissionCache,
         parentPermissionsObject,
         permissionsObject,
         promises,
@@ -269,7 +345,7 @@ export const populateFieldPermissions = ({
         for (const tab of field.tabs) {
           if (tabHasName(tab)) {
             if (!permissionsObject[tab.name]) {
-              permissionsObject[tab.name] = { fields: {} } as FieldPermissions
+              permissionsObject[tab.name] = { fields: {} }
             }
 
             const tabPermissions = permissionsObject[tab.name]!
@@ -291,9 +367,12 @@ export const populateFieldPermissions = ({
 
           populateFieldPermissions({
             id,
-            blockReferencesPermissions,
+            activeBlocks,
+            blockPermissionCache,
+            collection,
             data,
             fields: tab.fields,
+            global,
             operations,
             parentPermissionsObject: tabPermissions,
             permissionsObject: tabPermissions.fields,
@@ -304,11 +383,14 @@ export const populateFieldPermissions = ({
           // Tab does not have a name => same parentPermissionsObject
           populateFieldPermissions({
             id,
-            blockReferencesPermissions,
+            activeBlocks,
+            collection,
             data,
             fields: tab.fields,
+            global,
             operations,
             // Tab does not have a name here => use parent permissions object
+            blockPermissionCache,
             parentPermissionsObject,
             permissionsObject,
             promises,

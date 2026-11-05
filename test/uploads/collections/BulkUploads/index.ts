@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-import { bulkUploadsSlug } from '../../shared.js'
-
-import { fileURLToPath } from 'url'
 import path from 'path'
+import { fileURLToPath } from 'url'
+
+import { bulkUploadsSlug } from '../../shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -27,4 +27,5 @@ export const BulkUploadsCollection: CollectionConfig = {
       relationTo: ['simple-relationship'],
     },
   ],
+  versions: false,
 }

@@ -7,18 +7,21 @@ export type FileMetaProps = {
   filesize: number
   height?: number
   mimeType: string
-  sizes?: unknown
   url: string
+  variants?: unknown
   width?: number
 }
 
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { CopyToClipboard } from '../../CopyToClipboard/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'file-meta'
 
 export const FileMeta: React.FC<FileMetaProps> = (props) => {
   const { filename, filesize, height, mimeType, url: fileURL, width } = props
+
+  const { t } = useTranslation()
 
   return (
     <div className={baseClass}>
@@ -26,7 +29,7 @@ export const FileMeta: React.FC<FileMetaProps> = (props) => {
         <a href={fileURL} rel="noopener noreferrer" target="_blank">
           {filename}
         </a>
-        <CopyToClipboard defaultMessage="Copy URL" value={fileURL} />
+        <CopyToClipboard defaultMessage={t('upload:copyURL')} value={fileURL} />
       </div>
       <div className={`${baseClass}__size-type`}>
         {formatFilesize(filesize)}

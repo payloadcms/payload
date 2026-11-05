@@ -2,21 +2,15 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { SelectField, SelectFieldClient } from '../../fields/config/types.js'
 import type { SelectFieldValidation } from '../../fields/validations.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
-import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type SelectFieldClientWithoutType = MarkOptional<SelectFieldClient, 'type'>
@@ -35,45 +29,28 @@ export type SelectFieldClientProps = ClientFieldBase<SelectFieldClientWithoutTyp
 
 export type SelectFieldServerProps = SelectFieldBaseServerProps &
   ServerFieldBase<SelectField, SelectFieldClientWithoutType>
-
-export type SelectFieldServerComponent = FieldServerComponent<
-  SelectField,
-  SelectFieldClientWithoutType,
-  SelectFieldBaseServerProps
->
-
-export type SelectFieldClientComponent = FieldClientComponent<
-  SelectFieldClientWithoutType,
-  SelectFieldBaseClientProps
->
-
-export type SelectFieldLabelServerComponent = FieldLabelServerComponent<
+export type SelectFieldLabelServerProps = FieldLabelServerProps<
   SelectField,
   SelectFieldClientWithoutType
 >
 
-export type SelectFieldLabelClientComponent =
-  FieldLabelClientComponent<SelectFieldClientWithoutType>
+export type SelectFieldLabelClientProps = FieldLabelClientProps<SelectFieldClientWithoutType>
 
-export type SelectFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+export type SelectFieldDescriptionServerProps = FieldDescriptionServerProps<
   SelectField,
   SelectFieldClientWithoutType
 >
 
-export type SelectFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<SelectFieldClientWithoutType>
+export type SelectFieldDescriptionClientProps =
+  FieldDescriptionClientProps<SelectFieldClientWithoutType>
 
-export type SelectFieldErrorServerComponent = FieldErrorServerComponent<
+export type SelectFieldErrorServerProps = FieldErrorServerProps<
   SelectField,
   SelectFieldClientWithoutType
 >
 
-export type SelectFieldErrorClientComponent =
-  FieldErrorClientComponent<SelectFieldClientWithoutType>
+export type SelectFieldErrorClientProps = FieldErrorClientProps<SelectFieldClientWithoutType>
 
-export type SelectFieldDiffServerComponent = FieldDiffServerComponent<
-  SelectField,
-  SelectFieldClient
->
+export type SelectFieldDiffServerProps = FieldDiffServerProps<SelectField, SelectFieldClient>
 
-export type SelectFieldDiffClientComponent = FieldDiffClientComponent<SelectFieldClient>
+export type SelectFieldDiffClientProps = FieldDiffClientProps<SelectFieldClient>

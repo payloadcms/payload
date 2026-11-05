@@ -36,4 +36,5 @@ export const Products: CollectionConfig = {
     },
   ],
   timestamps: true,
+  versions: false,
 }

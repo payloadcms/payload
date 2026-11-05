@@ -1,9 +1,9 @@
-import type { PointFieldServerComponent } from 'payload'
+import type { PointFieldServerProps } from 'payload'
 import type React from 'react'
 
 import { PointField } from '@payloadcms/ui'
 
-export const CustomPointFieldServer: PointFieldServerComponent = ({
+export const CustomPointFieldServer: React.FC<PointFieldServerProps> = ({
   clientField,
   path,
   schemaPath,

@@ -60,7 +60,7 @@ export type BaseSQLiteArgs = {
   blocksAsJSON?: boolean
   /** Generated schema from payload generate:db-schema file path */
   generateSchemaOutputFile?: string
-  idType?: 'number' | 'uuid'
+  idType?: 'number' | 'uuid' | 'uuidv7'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string

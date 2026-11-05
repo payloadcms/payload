@@ -1,10 +1,9 @@
-import { status as httpStatus } from 'http-status'
-
 import type { PayloadHandler } from '../../config/types.js'
 import type { Where } from '../../types/index.js'
 
 import { getRequestGlobal } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { isNumber } from '../../utilities/isNumber.js'
 import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
 import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'

@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const handleDragOver = (e: DragEvent) => {
   e.preventDefault()
@@ -15,6 +15,8 @@ export type Props = {
   readonly className?: string
   readonly disabled?: boolean
   readonly dropzoneStyle?: 'default' | 'none'
+  readonly hasError?: boolean
+  readonly isFocusable?: boolean
   readonly multipleFiles?: boolean
   readonly onChange: (e: FileList) => void
 }
@@ -24,6 +26,8 @@ export function Dropzone({
   className,
   disabled = false,
   dropzoneStyle = 'default',
+  hasError = false,
+  isFocusable = true,
   multipleFiles,
   onChange,
 }: Props) {
@@ -114,14 +118,21 @@ export function Dropzone({
     baseClass,
     className,
     dragging ? 'dragging' : '',
-    `dropzoneStyle--${dropzoneStyle}`,
+    hasError && `${baseClass}--has-error`,
+    `${baseClass}--style-${dropzoneStyle}`,
   ]
     .filter(Boolean)
     .join(' ')
 
+  /* eslint-disable jsx-a11y/no-noninteractive-tabindex -- interactive via drag/drop/paste event listeners */
   return (
-    <div className={classes} ref={dropRef}>
+    <div
+      className={classes}
+      ref={dropRef}
+      tabIndex={isFocusable && dropzoneStyle !== 'none' ? 0 : undefined}
+    >
       {children}
     </div>
   )
+  /* eslint-enable jsx-a11y/no-noninteractive-tabindex */
 }

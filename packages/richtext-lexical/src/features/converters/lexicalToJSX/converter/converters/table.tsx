@@ -2,7 +2,7 @@ import type {
   SerializedTableCellNode,
   SerializedTableNode,
   SerializedTableRowNode,
-} from '../../../../../nodeTypes.js'
+} from '../../../../../types/nodeTypes.js'
 import type { JSXConverters } from '../types.js'
 
 export const TableJSXConverter: JSXConverters<
@@ -25,8 +25,9 @@ export const TableJSXConverter: JSXConverters<
       nodes: node.children,
     })
 
-    const TagName = node.headerState > 0 ? 'th' : 'td' // Use capital letter to denote a component
-    const headerStateClass = `lexical-table-cell-header-${node.headerState}`
+    const headerState = typeof node.headerState === 'number' ? node.headerState : 0
+    const TagName = headerState > 0 ? 'th' : 'td' // Use capital letter to denote a component
+    const headerStateClass = `lexical-table-cell-header-${headerState}`
     const style = {
       backgroundColor: node.backgroundColor || undefined, // Use undefined to avoid setting the style property if not needed
       border: '1px solid #ccc',

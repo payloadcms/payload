@@ -52,7 +52,7 @@ export const QueryPresetsGroupByCell: React.FC<DefaultCellComponentProps> = ({
   const direction = isDescending ? 'descending' : 'ascending'
 
   // Find the field option to get the proper label
-  const fieldOption = reducedFields.find((field) => field.value === fieldName)
+  const fieldOption = reducedFields.find((field) => field.fieldPath === fieldName)
   const displayLabel = fieldOption?.label || toWords(fieldName)
 
   return (

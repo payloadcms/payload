@@ -27,6 +27,7 @@ export function login(collection: Collection): any {
     context.headers['Set-Cookie'] = cookie
 
     if (collection.config.auth.removeTokenFromResponses) {
+      delete result.refreshToken
       delete result.token
     }
 

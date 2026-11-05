@@ -1,5 +1,7 @@
 'use client'
 
+import '../colors.css'
+
 import type { FieldType } from '@payloadcms/ui'
 import type { UploadFieldClientProps } from 'payload'
 
@@ -81,7 +83,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
         initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
-        locale: typeof locale === 'object' ? locale?.code : locale,
+        locale: locale?.code,
         title,
       } satisfies Omit<
         Parameters<GenerateImage>[0],
@@ -172,7 +174,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
         {hasGenerateImageFn && (
           <div
             style={{
-              color: '#9A9A9A',
+              color: 'var(--seo-description-color)',
             }}
           >
             {t('plugin-seo:imageAutoGenerationTip')}

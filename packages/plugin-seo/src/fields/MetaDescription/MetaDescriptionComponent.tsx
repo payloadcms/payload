@@ -1,5 +1,7 @@
 'use client'
 
+import '../colors.css'
+
 import type { FieldType } from '@payloadcms/ui'
 import type { TextareaFieldClientProps } from 'payload'
 
@@ -89,7 +91,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
         initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
-        locale: typeof locale === 'object' ? locale?.code : locale,
+        locale: locale?.code,
         title,
       } satisfies Omit<
         Parameters<GenerateDescription>[0],
@@ -165,7 +167,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         </div>
         <div
           style={{
-            color: '#9A9A9A',
+            color: 'var(--seo-description-color)',
           }}
         >
           {t('plugin-seo:lengthTipDescription', { maxLength, minLength })}

@@ -1,0 +1,57 @@
+@layer payload-default {
+  .toolbar-popup__button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    justify-content: center;
+    height: var(--spacer-4);
+    width: var(--spacer-4);
+    border: 0;
+    background: none;
+    border-radius: var(--radius-medium);
+    cursor: pointer;
+    padding: 0;
+
+    &:hover:not(.active):not([data-pressing]) {
+      background-color: var(--color-bg-transparent-hover);
+    }
+
+    &:active:not(.active),
+    &[data-pressing]:not(.active) {
+      background-color: var(--color-bg-transparent-pressed);
+    }
+
+    &.active {
+      background-color: var(--color-bg-selected);
+
+      &:hover {
+        background-color: var(--color-bg-selected-hover);
+      }
+
+      &:active {
+        background-color: var(--color-bg-selected-pressed);
+      }
+
+      svg {
+        color: var(--color-icon-selected);
+      }
+
+      .icon {
+        opacity: 1;
+      }
+    }
+
+    &.disabled {
+      cursor: not-allowed;
+
+      &:hover {
+        background: none;
+      }
+
+      .icon {
+        opacity: 0.2;
+      }
+    }
+  }
+}

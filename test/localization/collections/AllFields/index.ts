@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { slateEditor } from '@payloadcms/richtext-slate'
-
 import { allFieldsLocalizedSlug } from '../../shared.js'
 
 export const AllFieldsLocalized: CollectionConfig = {
@@ -63,12 +61,6 @@ export const AllFieldsLocalized: CollectionConfig = {
       type: 'date',
       localized: true,
     },
-    {
-      name: 'richTextSlate',
-      type: 'richText',
-      localized: true,
-      editor: slateEditor({}),
-    },
 
     // Localized group with localized children
     {
@@ -98,6 +90,8 @@ export const AllFieldsLocalized: CollectionConfig = {
           name: 'localizedText',
           type: 'text',
           localized: true,
+          maxLength: 20,
+          minLength: 5,
         },
         {
           name: 'nonLocalizedText',
@@ -129,6 +123,8 @@ export const AllFieldsLocalized: CollectionConfig = {
           name: 'localizedItem',
           type: 'text',
           localized: true,
+          maxLength: 20,
+          minLength: 5,
         },
       ],
     },
@@ -281,8 +277,6 @@ export const AllFieldsLocalized: CollectionConfig = {
     },
   ],
   versions: {
-    drafts: {
-      localizeStatus: true,
-    },
+    drafts: {},
   },
 }

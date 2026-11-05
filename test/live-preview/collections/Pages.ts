@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
-import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { Archive } from '../blocks/ArchiveBlock/index.js'
 import { CallToAction } from '../blocks/CallToAction/index.js'
@@ -19,6 +18,8 @@ export const Pages: CollectionConfig = {
     delete: () => true,
   },
   admin: {
+    description:
+      'This collections does not use drafts or autosave. Changes are sent to the iframe window in real-time to use for fully client-side rendering.',
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
     preview: (doc) => `/live-preview/${doc?.slug}`,
@@ -67,6 +68,14 @@ export const Pages: CollectionConfig = {
           label: 'Test',
           fields: [
             {
+              name: 'testNumber',
+              type: 'number',
+              label: 'Test Number Field',
+              admin: {
+                description: 'A number field for visual comparison with toolbar size inputs',
+              },
+            },
+            {
               name: 'localizedTitle',
               type: 'text',
               localized: true,
@@ -75,12 +84,6 @@ export const Pages: CollectionConfig = {
               name: 'relationToLocalized',
               type: 'relationship',
               relationTo: postsSlug,
-            },
-            {
-              label: 'Rich Text — Slate',
-              type: 'richText',
-              name: 'richTextSlate',
-              editor: slateEditor({}),
             },
             {
               label: 'Rich Text — Lexical',
@@ -210,4 +213,5 @@ export const Pages: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

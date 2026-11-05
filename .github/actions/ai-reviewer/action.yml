@@ -1,0 +1,28 @@
+name: AI PR Reviewer
+description: AI-powered PR code reviewer triggered by /ai-review comment
+inputs:
+  github-token:
+    description: GitHub token with repo permissions
+    required: true
+  ai-provider:
+    description: AI provider to use (anthropic)
+    required: false
+    default: anthropic
+  ai-api-key:
+    description: API key for the AI provider
+    required: true
+  max-diff-chars:
+    description: Maximum diff characters to send to the AI (larger diffs are rejected)
+    required: false
+    default: '100000'
+  ai-model:
+    description: AI model to use for the review
+    required: false
+    default: 'claude-sonnet-4-6'
+  ai-prompt-path:
+    description: Path to the review prompt file relative to workspace root
+    required: false
+    default: '.github/ai-reviewer-prompt.md'
+runs:
+  using: node24
+  main: dist/index.js

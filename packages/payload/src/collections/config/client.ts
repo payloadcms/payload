@@ -1,15 +1,16 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 
 import type { StaticDescription } from '../../admin/types.js'
-import type { ImportMap } from '../../bin/generateImportMap/index.js'
+import type { ImportMap } from '../../cli/commands/generateImportMap/generateImportMap.js'
 import type {
   LivePreviewConfig,
   ServerOnlyLivePreviewProperties,
   StaticLabel,
 } from '../../config/types.js'
 import type { ClientField } from '../../fields/config/client.js'
+import type { ClientHierarchyConfig } from '../../hierarchy/types.js'
 import type { Payload } from '../../types/index.js'
-import type { SanitizedUploadConfig } from '../../uploads/types.js'
+import type { SanitizedUploadConfig, UploadInstructionsCapability } from '../../uploads/types.js'
 import type { SanitizedCollectionConfig } from './types.js'
 
 import { createClientFields } from '../../fields/config/client.js'
@@ -23,8 +24,10 @@ export type ServerOnlyCollectionProperties = keyof Pick<
   | 'hooks'
   | 'indexes'
   | 'joins'
+  | 'llmInstructions'
   | 'polymorphicJoins'
   | 'sanitizedIndexes'
+  | 'select'
 >
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
@@ -34,12 +37,18 @@ export type ServerOnlyCollectionAdminProperties = keyof Pick<
 
 export type ServerOnlyUploadProperties = keyof Pick<
   SanitizedCollectionConfig['upload'],
+  | 'admin'
   | 'adminThumbnail'
   | 'externalFileHeaderFilter'
+  | 'fileOperations'
   | 'handlers'
   | 'modifyResponseHeaders'
-  | 'withMetadata'
+  | 'uploadInstructions'
 >
+
+type ClientUploadConfig = {
+  uploadInstructions: Pick<UploadInstructionsCapability, 'useInAdmin'>
+} & Omit<SanitizedUploadConfig, 'fileOperations' | 'uploadInstructions'>
 
 export type ClientCollectionConfig = {
   admin: {
@@ -56,18 +65,20 @@ export type ClientCollectionConfig = {
     | 'preview'
     | ServerOnlyCollectionAdminProperties
   >
-  auth?: { verify?: true } & Omit<
-    SanitizedCollectionConfig['auth'],
-    'forgotPassword' | 'strategies' | 'verify'
-  >
+  auth?: {
+    forgotPassword: Pick<SanitizedCollectionConfig['auth']['forgotPassword'], 'minRequestInterval'>
+    verify?: true
+  } & Omit<SanitizedCollectionConfig['auth'], 'forgotPassword' | 'strategies' | 'verify'>
   fields: ClientField[]
+  hierarchy?: ClientHierarchyConfig | false
   labels: {
     plural: StaticLabel
     singular: StaticLabel
   }
+  upload: ClientUploadConfig
 } & Omit<
   SanitizedCollectionConfig,
-  'admin' | 'auth' | 'fields' | 'labels' | ServerOnlyCollectionProperties
+  'admin' | 'auth' | 'fields' | 'hierarchy' | 'labels' | 'upload' | ServerOnlyCollectionProperties
 >
 
 const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
@@ -76,21 +87,25 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
   'endpoints',
   'custom',
   'joins',
+  'llmInstructions',
   'polymorphicJoins',
   'flattenedFields',
   'indexes',
   'sanitizedIndexes',
+  'select',
   // `upload`
   // `admin`
   // are all handled separately
 ]
 
 const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
+  'admin',
   'adminThumbnail',
   'externalFileHeaderFilter',
+  'fileOperations',
   'handlers',
   'modifyResponseHeaders',
-  'withMetadata',
+  'uploadInstructions',
 ]
 
 const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
@@ -126,7 +141,7 @@ export const createClientCollectionConfig = ({
           break
         }
 
-        clientCollection.admin = {} as ClientCollectionConfig['admin']
+        clientCollection.admin = {}
 
         for (const adminKey in collection.admin) {
           if (serverOnlyCollectionAdminProperties.includes(adminKey as any)) {
@@ -183,6 +198,10 @@ export const createClientCollectionConfig = ({
 
         clientCollection.auth = {} as { verify?: true } & SanitizedCollectionConfig['auth']
 
+        clientCollection.auth.forgotPassword = {
+          minRequestInterval: collection.auth.forgotPassword.minRequestInterval,
+        }
+
         if (collection.auth.cookies) {
           clientCollection.auth.cookies = collection.auth.cookies
         }
@@ -238,6 +257,19 @@ export const createClientCollectionConfig = ({
 
         break
 
+      case 'hierarchy': {
+        if (!collection.hierarchy || typeof collection.hierarchy !== 'object') {
+          clientCollection.hierarchy = false
+          break
+        }
+
+        // Strip slugify function as it can't cross server-client boundary
+        const { slugify: _slugify, ...clientHierarchy } = collection.hierarchy
+        clientCollection.hierarchy = clientHierarchy
+
+        break
+      }
+
       case 'labels':
         clientCollection.labels = {
           plural:
@@ -257,15 +289,19 @@ export const createClientCollectionConfig = ({
           break
         }
 
-        clientCollection.upload = {} as SanitizedUploadConfig
+        clientCollection.upload = {
+          uploadInstructions: {
+            useInAdmin: collection.upload.uploadInstructions?.useInAdmin ?? false,
+          },
+        } as ClientUploadConfig
 
         for (const uploadKey in collection.upload) {
           if (serverOnlyUploadProperties.includes(uploadKey as any)) {
             continue
           }
 
-          if (uploadKey === 'imageSizes') {
-            clientCollection.upload.imageSizes = collection.upload.imageSizes?.map((size) => {
+          if (uploadKey === 'variants') {
+            clientCollection.upload.variants = collection.upload.variants?.map((size) => {
               const sanitizedSize = { ...size }
               if ('generateImageName' in sanitizedSize) {
                 delete sanitizedSize.generateImageName

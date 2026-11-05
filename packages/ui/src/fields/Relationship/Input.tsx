@@ -7,6 +7,7 @@ import type {
   Where,
 } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import { dequal } from 'dequal/lite'
 import { formatAdminURL, wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -38,7 +39,7 @@ import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
 import { findOptionsByValue } from './findOptionsByValue.js'
 import { optionsReducer } from './optionsReducer.js'
-import './index.scss'
+import './index.css'
 import { MultiValueLabel } from './select-components/MultiValueLabel/index.js'
 import { SingleValue } from './select-components/SingleValue/index.js'
 
@@ -46,6 +47,7 @@ const baseClass = 'relationship'
 
 export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const {
+    AddNewRelationButton,
     AfterInput,
     allowCreate = true,
     allowEdit = true,
@@ -57,6 +59,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     Error,
     filterOptions,
     formatDisplayedOptions,
+    formatOptionLabel,
     hasMany,
     initialValue,
     isSortable = true,
@@ -70,7 +73,9 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     readOnly,
     relationTo,
     required,
+    selectOptionFields,
     showError,
+    size = 'large',
     sortOptions,
     style,
     value,
@@ -85,7 +90,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
 
   const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
     Parameters<ReactSelectAdapterProps['customProps']['onDocumentOpen']>[0]
@@ -256,6 +262,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 locale,
                 page: lastLoadedPageToUse,
                 select: {
+                  ...selectOptionFields,
                   [fieldToSearch]: true,
                 },
                 sort: fieldToSort,
@@ -356,6 +363,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       errorLoading,
       search,
       getEntityConfig,
+      selectOptionFields,
       sortOptions,
       maxResultsPerRequest,
       locale,
@@ -365,6 +373,10 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       t,
     ],
   )
+
+  const updateResultsEffectEvent: UpdateResults = useEffectEvent((args) => {
+    return updateResults(args)
+  })
 
   const updateSearch = useDebouncedCallback<{ search: string } & HasManyValueUnion>(
     ({ hasMany: hasManyArg, search: searchArg, value }) => {
@@ -438,6 +450,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           limit: idsToLoad.length,
           locale,
           select: {
+            ...selectOptionFields,
             [fieldToSelect]: true,
           },
           where: {
@@ -492,7 +505,32 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       return false
     }
 
-    const docID = mostRecentUpdate.doc.id
+    // Delete events only carry the deleted `id` (no `doc`), whereas create/update events
+    // carry the full `doc`. Resolve from both so the delete branch below can match.
+    const docID = mostRecentUpdate.doc?.id ?? mostRecentUpdate.id
+
+    // A document referenced by this field, deleted elsewhere (e.g. via the DeleteDocument
+    // event), should be removed from the value — otherwise it keeps showing as if it existed.
+    if (mostRecentUpdate.operation === 'delete') {
+      if (hasMany === true) {
+        const currentValue = Array.isArray(value) ? value : [value]
+        const valuesToSet = currentValue.filter((option: ValueWithRelation) => {
+          return !(option.value === docID && option.relationTo === mostRecentUpdate.entitySlug)
+        })
+
+        if (valuesToSet.length !== currentValue.length) {
+          onChange(valuesToSet)
+        }
+      } else if (
+        hasMany === false &&
+        value?.value === docID &&
+        value?.relationTo === mostRecentUpdate.entitySlug
+      ) {
+        onChange(null)
+      }
+
+      return
+    }
 
     let isMatchingUpdate = false
     if (mostRecentUpdate.operation === 'update') {
@@ -659,10 +697,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     [config.routes.admin, serverURL],
   )
 
-  const updateResultsEffectEvent: UpdateResults = useEffectEvent((args) => {
-    return updateResults(args)
-  })
-
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useEffect(() => {
@@ -741,6 +775,19 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const valueToRender = findOptionsByValue({ allowEdit, options, value })
 
+  const formatSelectOptionLabel = useMemo<ReactSelectAdapterProps['formatOptionLabel']>(() => {
+    if (typeof formatOptionLabel !== 'function') {
+      return undefined
+    }
+
+    return (option, { context }) =>
+      formatOptionLabel({
+        context,
+        defaultLabel: option.label as string,
+        doc: option.doc as Record<string, unknown> | undefined,
+      })
+  }, [formatOptionLabel])
+
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') {
     valueToRender.value = null
   }
@@ -758,6 +805,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-size={size}
       id={`field-${path.replace(/\./g, '__')}`}
       style={style}
     >
@@ -768,157 +816,146 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <RenderCustomComponent
-          CustomComponent={Error}
-          Fallback={<FieldError path={path} showError={showError} />}
-        />
         {BeforeInput}
         {errorLoading ? (
           <div className={`${baseClass}__error-loading`}>{errorLoading}</div>
         ) : (
           <div className={`${baseClass}__wrap`}>
-            <ReactSelect
-              backspaceRemovesValue={!(isDrawerOpen || isListDrawerOpen)}
-              components={{
-                MultiValueLabel,
-                SingleValue,
-                ...(appearance !== 'select' && { DropdownIndicator: null }),
-              }}
-              customProps={{
-                disableKeyDown: isDrawerOpen || isListDrawerOpen,
-                disableMouseDown: isDrawerOpen || isListDrawerOpen,
-                onDocumentOpen,
-              }}
-              disabled={readOnly || isDrawerOpen || isListDrawerOpen}
-              filterOption={enableWordBoundarySearch ? filterOption : undefined}
-              getOptionValue={(option: ValueWithRelation) => {
-                if (!option) {
-                  return undefined
-                }
-                return hasMany && Array.isArray(relationTo)
-                  ? `${option.relationTo}_${option.value}`
-                  : (option.value as string)
-              }}
-              isLoading={appearance === 'select' && isLoading}
-              isMulti={hasMany}
-              isSearchable={appearance === 'select'}
-              isSortable={isSortable}
-              menuIsOpen={appearance === 'select' ? menuIsOpen : false}
-              onChange={
-                !readOnly
-                  ? (selected) => {
-                      if (hasMany) {
-                        if (selected === null) {
-                          valueRef.current = []
-                          onChange([])
-                        } else {
-                          valueRef.current = selected as ValueWithRelation[]
-                          onChange(selected as ValueWithRelation[])
-                        }
-                      } else if (hasMany === false) {
-                        if (selected === null) {
-                          valueRef.current = null
-                          onChange(null)
-                        } else {
-                          valueRef.current = selected as ValueWithRelation
-                          onChange(selected as ValueWithRelation)
-                        }
-                      }
-                    }
-                  : undefined
-              }
-              onInputChange={(newSearch) =>
-                handleInputChange({
-                  search: newSearch,
-                  ...(hasMany === true
-                    ? {
-                        hasMany,
-                        value,
-                      }
-                    : {
-                        hasMany,
-                        value,
-                      }),
-                })
-              }
-              onMenuClose={() => {
-                setMenuIsOpen(false)
-              }}
-              onMenuOpen={() => {
-                if (appearance === 'drawer') {
-                  openListDrawer()
-                } else if (appearance === 'select') {
-                  setMenuIsOpen(true)
-                  if (!hasLoadedFirstPageRef.current) {
-                    setIsLoading(true)
-                    updateResultsEffectEvent({
-                      filterOptions,
-                      lastLoadedPage: {},
-                      onSuccess: () => {
-                        hasLoadedFirstPageRef.current = true
-                        setIsLoading(false)
-                      },
-                      ...(hasMany === true
-                        ? {
-                            hasMany,
-                            value,
-                          }
-                        : {
-                            hasMany,
-                            value,
-                          }),
-                    })
-                  }
-                }
-              }}
-              onMenuScrollToBottom={() => {
-                setIsLoading(true)
-                updateResultsEffectEvent({
-                  filterOptions,
-                  lastFullyLoadedRelation,
-                  lastLoadedPage,
-                  onSuccess: () => {
-                    setIsLoading(false)
-                  },
-                  search,
-                  sort: false,
-                  ...(hasMany === true
-                    ? {
-                        hasMany,
-                        value: initialValue,
-                      }
-                    : {
-                        hasMany,
-                        value: initialValue,
-                      }),
-                })
-              }}
-              options={
-                typeof formatDisplayedOptions === 'function'
-                  ? formatDisplayedOptions(options)
-                  : options
-              }
-              placeholder={placeholder}
-              showError={showError}
-              value={valueToRender ?? null}
-            />
-            {!readOnly && allowCreate && (
-              <AddNewRelation
-                path={path}
-                relationTo={relationTo}
-                {...(hasMany === true
-                  ? {
-                      hasMany,
-                      onChange,
-                      value,
-                    }
-                  : {
-                      hasMany,
-                      onChange,
-                      value,
-                    })}
+            <div className={`${baseClass}__input-wrap`}>
+              <RenderCustomComponent
+                CustomComponent={Error}
+                Fallback={<FieldError path={path} showError={showError} />}
               />
-            )}
+              <ReactSelect
+                aria-label={getTranslation(label, i18n)}
+                backspaceRemovesValue={!(isDrawerOpen || isListDrawerOpen)}
+                components={{
+                  MultiValueLabel,
+                  SingleValue,
+                  ...(appearance !== 'select' && { DropdownIndicator: null }),
+                }}
+                customProps={{
+                  disableKeyDown: isDrawerOpen || isListDrawerOpen,
+                  disableMouseDown: isDrawerOpen || isListDrawerOpen,
+                  onDocumentOpen,
+                }}
+                disabled={readOnly || isDrawerOpen || isListDrawerOpen}
+                filterOption={enableWordBoundarySearch ? filterOption : undefined}
+                formatOptionLabel={formatSelectOptionLabel}
+                getOptionValue={(option: ValueWithRelation) => {
+                  if (!option) {
+                    return undefined
+                  }
+                  return hasMany && Array.isArray(relationTo)
+                    ? `${option.relationTo}_${option.value}`
+                    : (option.value as string)
+                }}
+                isLoading={appearance === 'select' && isLoading}
+                isMulti={hasMany}
+                isSearchable={appearance === 'select'}
+                isSortable={isSortable}
+                menuIsOpen={appearance === 'select' ? menuIsOpen : false}
+                onChange={
+                  !readOnly
+                    ? (selected) => {
+                        if (hasMany) {
+                          if (selected === null) {
+                            valueRef.current = []
+                            onChange([])
+                          } else {
+                            valueRef.current = selected as ValueWithRelation[]
+                            onChange(selected as ValueWithRelation[])
+                          }
+                        } else if (hasMany === false) {
+                          if (selected === null) {
+                            valueRef.current = null
+                            onChange(null)
+                          } else {
+                            valueRef.current = selected as ValueWithRelation
+                            onChange(selected as ValueWithRelation)
+                          }
+                        }
+                      }
+                    : undefined
+                }
+                onInputChange={(newSearch) =>
+                  handleInputChange({
+                    search: newSearch,
+                    ...(hasMany === true
+                      ? {
+                          hasMany,
+                          value,
+                        }
+                      : {
+                          hasMany,
+                          value,
+                        }),
+                  })
+                }
+                onMenuClose={() => {
+                  setMenuIsOpen(false)
+                }}
+                onMenuOpen={() => {
+                  if (appearance === 'drawer') {
+                    openListDrawer()
+                  } else if (appearance === 'select') {
+                    setMenuIsOpen(true)
+                    if (!hasLoadedFirstPageRef.current) {
+                      setIsLoading(true)
+                      updateResultsEffectEvent({
+                        filterOptions,
+                        lastLoadedPage: {},
+                        onSuccess: () => {
+                          hasLoadedFirstPageRef.current = true
+                          setIsLoading(false)
+                        },
+                        ...(hasMany === true
+                          ? {
+                              hasMany,
+                              value,
+                            }
+                          : {
+                              hasMany,
+                              value,
+                            }),
+                      })
+                    }
+                  }
+                }}
+                onMenuScrollToBottom={() => {
+                  setIsLoading(true)
+                  updateResultsEffectEvent({
+                    filterOptions,
+                    lastFullyLoadedRelation,
+                    lastLoadedPage,
+                    onSuccess: () => {
+                      setIsLoading(false)
+                    },
+                    search,
+                    sort: false,
+                    ...(hasMany === true
+                      ? {
+                          hasMany,
+                          value: initialValue,
+                        }
+                      : {
+                          hasMany,
+                          value: initialValue,
+                        }),
+                  })
+                }}
+                options={
+                  typeof formatDisplayedOptions === 'function'
+                    ? formatDisplayedOptions(options)
+                    : options
+                }
+                placeholder={placeholder}
+                showError={showError}
+                value={valueToRender ?? null}
+              />
+            </div>
+            {AddNewRelationButton ??
+              (!readOnly && allowCreate ? <AddNewRelation {...props} /> : null)}
           </div>
         )}
         {AfterInput}

@@ -3,34 +3,48 @@ import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable.js'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
+import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui'
 
-import './ContentEditable.scss'
+import './ContentEditable.css'
 
 import * as React from 'react'
 
 import type { SanitizedClientEditorConfig } from '../config/types.js'
 
+import { useEditorConfigContext } from '../config/client/EditorConfigProvider.js'
+
 export function LexicalContentEditable({
   className,
   editorConfig,
+  instructionsID,
 }: {
   className?: string
   editorConfig: SanitizedClientEditorConfig
+  instructionsID?: string
 }): JSX.Element {
-  const { t } = useTranslation<{}, string>()
+  const { fieldProps } = useEditorConfigContext()
+  const { i18n, t } = useTranslation<{}, string>()
   const [_, { getTheme }] = useLexicalComposerContext()
+  const isEditable = useLexicalEditable()
   const theme = getTheme()
-
   return (
     <ContentEditable
-      aria-placeholder={t('lexical:general:placeholder')}
+      aria-describedby={instructionsID}
+      aria-label={getTranslation(fieldProps.field.label || '', i18n)}
+      aria-required={fieldProps.field.required || undefined}
       className={className ?? 'ContentEditable__root'}
-      placeholder={
-        <p className={theme?.placeholder}>
-          {editorConfig?.admin?.placeholder ?? t('lexical:general:placeholder')}
-        </p>
-      }
+      {...(isEditable
+        ? {
+            'aria-placeholder': t('lexical:general:placeholder'),
+            placeholder: (
+              <p className={theme?.placeholder}>
+                {editorConfig?.admin?.placeholder ?? t('lexical:general:placeholder')}
+              </p>
+            ),
+          }
+        : { placeholder: null })}
     />
   )
 }

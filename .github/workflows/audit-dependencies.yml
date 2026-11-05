@@ -1,53 +1,58 @@
 name: audit-dependencies
 
 on:
-  # Monday at 2am EST
+  # Daily at 2am EST
   schedule:
-    - cron: '0 7 * * 1'
+    - cron: '0 7 * * *'
   workflow_dispatch:
     inputs:
+      ref:
+        description: Which branch to audit
+        type: choice
+        required: true
+        options:
+          - both
+          - main
+          - 3.x
+        default: both
+      scope:
+        description: Which surface to audit (consumer-facing or monorepo)
+        required: false
+        default: consumer-facing
       audit-level:
         description: The level of audit to run (low, moderate, high, critical)
         required: false
-        default: high
-      debug:
-        description: Enable debug logging
-        required: false
-        default: false
+        default: moderate
 
-env:
-  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
-  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+# Real runs share one queue, so two of them never push to the PR branches at the same time. A
+# group keeps only its newest pending run, so each dry run gets its own group and cannot replace a
+# pending real run. The real-run test matches `is-default-inputs` below.
+concurrency:
+  group: ${{ github.ref == 'refs/heads/main' && (inputs.ref || 'both') == 'both' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'moderate') == 'moderate' && 'audit-dependencies-real' || format('audit-dependencies-dry-run-{0}', github.run_id) }}
+  cancel-in-progress: false
 
 jobs:
   audit:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-      - name: Setup
-        uses: ./.github/actions/setup
-
-      - name: Run audit dependencies script
-        id: audit_dependencies
-        run: ./.github/workflows/audit-dependencies.sh ${{ inputs.audit-level }}
-
-      - name: Slack notification on failure
-        if: failure()
-        uses: slackapi/slack-github-action@v2.1.1
-        with:
-          webhook: ${{ inputs.debug == 'true' && secrets.SLACK_TEST_WEBHOOK_URL || secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            {
-              "username": "GitHub Actions Bot",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "🚨 Actionable vulnerabilities found: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Script Run Details>"
-                  }
-                },
-              ]
-            }
+    name: audit (${{ matrix.ref }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # inputs.ref is empty on `schedule`; audit both main and 3.x.
+        ref: ${{ fromJSON(inputs.ref && inputs.ref != 'both' && format('["{0}"]', inputs.ref) || '["main","3.x"]') }}
+    # A called workflow gets only the permissions that its caller grants. Its Decide PR steps step
+    # reads PRs, so it needs pull-requests: read.
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: ./.github/workflows/audit-dependencies-branch.yml
+    with:
+      ref: ${{ matrix.ref }}
+      # inputs.* are empty on `schedule`, so the defaults apply.
+      scope: ${{ inputs.scope || 'consumer-facing' }}
+      severity: ${{ inputs.audit-level || 'moderate' }}
+      # Only a run from main with the default ref, scope and severity may change PRs. All other
+      # runs are dry runs.
+      is-default-inputs: ${{ github.ref == 'refs/heads/main' && (inputs.ref || 'both') == 'both' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'moderate') == 'moderate' }}
+    secrets:
+      AUDIT_DEPS_APP_CLIENT_ID: ${{ secrets.AUDIT_DEPS_APP_CLIENT_ID }}
+      AUDIT_DEPS_APP_PRIVATE_KEY: ${{ secrets.AUDIT_DEPS_APP_PRIVATE_KEY }}

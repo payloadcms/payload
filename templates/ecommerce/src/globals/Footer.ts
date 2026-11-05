@@ -21,4 +21,5 @@ export const Footer: GlobalConfig = {
       maxRows: 6,
     },
   ],
+  versions: false,
 }

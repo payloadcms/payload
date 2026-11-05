@@ -3,7 +3,7 @@ import type { ClientCollectionConfig, CodeFieldClient, DefaultCellComponentProps
 
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 export interface CodeCellProps extends DefaultCellComponentProps<CodeFieldClient> {
   readonly collectionConfig: ClientCollectionConfig

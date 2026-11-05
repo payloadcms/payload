@@ -1,0 +1,109 @@
+@layer payload-default {
+  .sidebar-tabs {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex-grow: 1;
+  }
+
+  .sidebar-tabs__tabs {
+    display: flex;
+    gap: 0;
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--button-radius);
+    margin: var(--spacer-2-5) var(--spacer-2-5) 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .sidebar-tabs__tab {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    height: var(--button-height);
+    cursor: pointer;
+    border-radius: var(--button-radius);
+    border: var(--stroke-width-small) solid transparent;
+    background-color: transparent;
+    color: var(--color-icon-secondary);
+    position: relative;
+
+    &:hover {
+      color: var(--color-icon);
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-inset);
+      border-radius: var(--button-radius);
+    }
+  }
+
+  .sidebar-tabs__tab--active {
+    background-color: var(--color-bg);
+    border-color: var(--color-border);
+    color: var(--color-icon);
+  }
+
+  .sidebar-tabs__tab-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Visually hidden but still accessible for screen readers */
+  .sidebar-tabs__tab-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .sidebar-tabs__tooltip {
+    pointer-events: auto;
+
+    &.sidebar-tabs__tooltip--focused {
+      display: block;
+    }
+
+    .tooltip__caret-stroke {
+      stroke: none;
+    }
+
+    /* Keep pointer travel across the tooltip's positioning gap inside its hover area. */
+    &::before {
+      content: '';
+      position: absolute;
+      inset-inline: 0;
+      block-size: var(--spacer-2-5);
+    }
+
+    &.tooltip--position-bottom::before {
+      inset-block-end: 100%;
+    }
+
+    &.tooltip--position-top::before {
+      inset-block-start: 100%;
+    }
+  }
+
+  .sidebar-tabs__content {
+    width: 100%;
+    flex-grow: 1;
+    position: relative;
+  }
+
+  .sidebar-tabs__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(var(--spacer-6) * 2.5);
+  }
+}

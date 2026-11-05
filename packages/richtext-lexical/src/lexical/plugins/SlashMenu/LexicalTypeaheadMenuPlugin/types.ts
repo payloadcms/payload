@@ -3,7 +3,7 @@ import type { LexicalEditor, Spread } from 'lexical'
 import type React from 'react'
 import type { RefObject } from 'react'
 
-import type { FeatureClientSchemaMap } from '../../../../types.js'
+import type { FeatureClientSchemaMap } from '../../../../types/index.js'
 
 export type SlashMenuItem = {
   /** The icon which is rendered in your slash menu item. */

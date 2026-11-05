@@ -1,0 +1,38 @@
+@layer payload-default {
+  .graphic-account {
+    vector-effect: non-scaling-stroke;
+    overflow: visible;
+    position: relative;
+  }
+
+  .graphic-account__bg {
+    fill: var(--color-bg-secondary);
+    stroke: var(--color-border);
+    stroke-width: var(--stroke-width-small);
+  }
+
+  .graphic-account__head,
+  .graphic-account__body {
+    fill: var(--color-icon-secondary);
+  }
+
+  .graphic-account--active .graphic-account__bg {
+    fill: var(--color-bg-selected);
+    stroke: var(--color-border-selected);
+  }
+
+  .graphic-account--active .graphic-account__head,
+  .graphic-account--active .graphic-account__body {
+    fill: var(--color-icon-selected);
+  }
+
+  .graphic-account:hover:not(.graphic-account--active) .graphic-account__bg {
+    fill: var(--color-bg-hover);
+    stroke: var(--color-border-strong);
+  }
+
+  .graphic-account:hover:not(.graphic-account--active) .graphic-account__head,
+  .graphic-account:hover:not(.graphic-account--active) .graphic-account__body {
+    fill: var(--color-icon);
+  }
+}

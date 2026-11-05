@@ -1,5 +1,7 @@
-import type { SerializedHeadingNode } from '../../../../../nodeTypes.js'
+import type { SerializedHeadingNode } from '../../../../../types/nodeTypes.js'
 import type { HTMLConverters } from '../types.js'
+
+import { ALLOWED_HEADING_TAGS } from '../../../../heading/constants.js'
 
 export const HeadingHTMLConverter: HTMLConverters<SerializedHeadingNode> = {
   heading: ({ node, nodesToHTML, providedStyleTag }) => {
@@ -7,6 +9,8 @@ export const HeadingHTMLConverter: HTMLConverters<SerializedHeadingNode> = {
       nodes: node.children,
     }).join('')
 
-    return `<${node.tag}${providedStyleTag}>${children}</${node.tag}>`
+    const tag = ALLOWED_HEADING_TAGS.has(node.tag) ? node.tag : 'h1'
+
+    return `<${tag}${providedStyleTag}>${children}</${tag}>`
   },
 }

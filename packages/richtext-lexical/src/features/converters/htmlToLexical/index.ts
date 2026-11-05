@@ -2,7 +2,7 @@ import { createHeadlessEditor } from '@lexical/headless'
 import { $getRoot, $getSelection, type SerializedLexicalNode } from 'lexical'
 
 import type { SanitizedServerEditorConfig } from '../../../lexical/config/types.js'
-import type { DefaultNodeTypes, TypedEditorState } from '../../../nodeTypes.js'
+import type { DefaultNodeTypes, TypedEditorState } from '../../../types/nodeTypes.js'
 
 import { getEnabledNodes } from '../../../lexical/nodes/index.js'
 import { $generateNodesFromDOM } from '../../../lexical-proxy/@lexical-html.js'

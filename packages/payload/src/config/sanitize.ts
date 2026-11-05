@@ -1,12 +1,14 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
-import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
+import type { RichTextSanitizer } from '../fields/config/sanitize.js'
+import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
 import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type {
   Config,
+  DashboardConfig,
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
@@ -17,14 +19,15 @@ import type {
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
+import { supportedPasswordHashIterations } from '../auth/strategies/local/generatePasswordSaltHash.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
-import { addFolderCollection } from '../folders/addFolderCollection.js'
-import { addFolderFieldToCollection } from '../folders/addFolderFieldToCollection.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
+import { resolveHierarchyCollections } from '../hierarchy/resolveHierarchyCollections.js'
 import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
+import { addLLMInstructions } from '../llm-instructions/addLLMInstructions.js'
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
@@ -33,19 +36,19 @@ import { getPreferencesCollection, preferencesCollectionSlug } from '../preferen
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
-import { flattenBlock } from '../utilities/flattenAllFields.js'
+import {
+  stagedUploadEndpoints,
+  uploadInstructionsEndpoint,
+} from '../uploads/endpoints/uploadInstructions.js'
+import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
-import { setupOrderable } from './orderable/index.js'
+import { addOrderableEndpoint, addOrderableFieldsAndHook } from './orderable/index.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
-
-  if (configToSanitize?.compatibility?.allowLocalizedWithinLocalized) {
-    process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized = 'true'
-  }
 
   // default logging level will be 'error' if not provided
   sanitizedConfig.loggingLevels = {
@@ -56,18 +59,6 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ValidationError: 'info',
     ...(sanitizedConfig.loggingLevels || {}),
   }
-  ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
-    slug: 'collections',
-    Component: '@payloadcms/next/rsc#CollectionCards',
-    minWidth: 'full',
-  })
-  sanitizedConfig.admin!.dashboard.defaultLayout ??= [
-    {
-      widgetSlug: 'collections',
-      width: 'full',
-    } satisfies WidgetInstance,
-  ]
-
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
     const firstCollectionWithAuth = sanitizedConfig.collections!.find(({ auth }) => Boolean(auth))
@@ -80,9 +71,9 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     }
   }
 
-  const userCollection = sanitizedConfig.collections!.find(
-    ({ slug }) => slug === sanitizedConfig.admin!.user,
-  )
+  const authCollections = sanitizedConfig.collections!.filter(({ auth }) => Boolean(auth))
+
+  const userCollection = authCollections.find(({ slug }) => slug === sanitizedConfig.admin!.user)
 
   if (!userCollection || !userCollection.auth) {
     throw new InvalidConfiguration(
@@ -113,23 +104,233 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   return sanitizedConfig as unknown as Partial<SanitizedConfig>
 }
 
-export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
+const addDefaultDashboardWidgets = ({
+  config,
+  richTextSanitizers,
+  validRelationships,
+}: {
+  config: Partial<SanitizedConfig>
+  richTextSanitizers: RichTextSanitizer[]
+  validRelationships: string[]
+}): void => {
+  const collectionQueryFields: NonNullable<Widget['fields']> = [
+    {
+      name: 'title',
+      type: 'text',
+      label: ({ t }) => t('dashboard:widgetTitleLabel'),
+    },
+    {
+      name: 'relatedCollection',
+      type: 'select',
+      label: ({ t }) => t('general:collection'),
+      // Only offer collections that are visible in the admin UI. Collections hidden via a function
+      // are kept since they may still be visible for some users.
+      options: (config.collections ?? [])
+        .filter((collection) => collection.admin?.hidden !== true)
+        .map((collection) => ({
+          label: collection.labels?.plural || collection.slug,
+          value: collection.slug,
+        })),
+      required: true,
+    },
+    {
+      name: 'where',
+      type: 'json',
+      admin: {
+        components: {
+          Field: '@payloadcms/ui#QueryPresetsWhereField',
+        },
+      },
+      label: ({ t }) => t('general:filters'),
+    },
+    {
+      name: 'sortField',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '@payloadcms/ui#CollectionQuerySortField',
+        },
+      },
+      label: ({ t }) => t('dashboard:widgetSortFieldLabel'),
+    },
+    {
+      name: 'sortDirection',
+      type: 'select',
+      defaultValue: 'desc',
+      label: ({ t }) => t('dashboard:widgetSortDirectionLabel'),
+      options: [
+        {
+          label: ({ t }) => t('general:ascending'),
+          value: 'asc',
+        },
+        {
+          label: ({ t }) => t('general:descending'),
+          value: 'desc',
+        },
+      ],
+    },
+    {
+      name: 'limit',
+      type: 'number',
+      defaultValue: 5,
+      label: ({ t }) => t('dashboard:widgetLimitLabel'),
+      max: 25,
+      min: 1,
+    },
+  ]
+
+  const recentlyViewedFields: NonNullable<Widget['fields']> = [
+    {
+      name: 'excludedCollections',
+      type: 'select',
+      admin: {
+        components: {
+          // Presents an inclusion filter (all collections checked by default) while persisting the
+          // inverse as an exclusion list, so collections added later stay visible by default.
+          Field: '@payloadcms/ui#CollectionFilter',
+        },
+        description: ({ t }) => t('dashboard:widgetRecentlyViewedFilterDescription'),
+      },
+      hasMany: true,
+      label: ({ t }) => t('general:collections'),
+      // Exclusion list, so an empty value shows every collection and newly added collections are
+      // included by default. Hidden collections are never offered as options.
+      options: (config.collections ?? [])
+        .filter((collection) => collection.admin?.hidden !== true)
+        .map((collection) => ({
+          label: collection.labels?.plural || collection.slug,
+          value: collection.slug,
+        })),
+    },
+  ]
+
+  const uploadCollections = (config.collections ?? []).filter(
+    (collection) =>
+      collection.upload &&
+      collection.upload.bulkUpload !== false &&
+      collection.admin?.hidden !== true,
+  )
+
+  const adminConfig: NonNullable<Config['admin']> = config.admin ?? { dashboard: { widgets: [] } }
+  const dashboard: DashboardConfig = (adminConfig.dashboard ??= { widgets: [] })
+
+  dashboard.widgets.push({
+    slug: 'welcome',
+    Component: '@payloadcms/ui/rsc#WelcomeWidget',
+    label: ({ t }) => t('general:welcome'),
+    maxWidth: 'full',
+    minWidth: 'full',
+  })
+  dashboard.widgets.push({
+    slug: 'collections',
+    Component: '@payloadcms/ui/rsc#CollectionCards',
+    minWidth: 'full',
+  })
+  dashboard.widgets.push({
+    slug: 'collection-query',
+    Component: '@payloadcms/ui/rsc#CollectionQueryWidget',
+    fields: sanitizeFields({
+      config: config as unknown as Config,
+      existingFieldNames: new Set(),
+      fields: collectionQueryFields,
+      parentIsLocalized: false,
+      richTextSanitizers,
+      validRelationships,
+    }),
+    minWidth: 'x-small',
+  })
+  dashboard.widgets.push({
+    slug: 'activity',
+    Component: '@payloadcms/ui/rsc#ActivityWidget',
+    fields: sanitizeFields({
+      config: config as unknown as Config,
+      existingFieldNames: new Set(),
+      fields: recentlyViewedFields,
+      parentIsLocalized: false,
+      richTextSanitizers,
+      validRelationships,
+    }),
+    label: ({ t }) => t('dashboard:widgetRecentsAndPinned'),
+    minWidth: 'small',
+  })
+  if (uploadCollections.length > 0) {
+    dashboard.widgets.push({
+      slug: 'upload-dropzone',
+      Component: '@payloadcms/ui/rsc#UploadDropzoneWidget',
+      fields: sanitizeFields({
+        config: config as unknown as Config,
+        existingFieldNames: new Set(),
+        fields: [
+          {
+            name: 'excludedCollections',
+            type: 'select',
+            admin: {
+              components: {
+                Field: '@payloadcms/ui#UploadDropzoneCollectionsField',
+              },
+            },
+            hasMany: true,
+            label: ({ t }) => t('general:collections'),
+            options: uploadCollections.map((collection) => ({
+              label: collection.labels?.plural || collection.slug,
+              value: collection.slug,
+            })),
+          },
+        ],
+        parentIsLocalized: false,
+        richTextSanitizers,
+        validRelationships,
+      }),
+      label: ({ t }) => t('dashboard:widgetUploadFiles'),
+      minWidth: 'x-small',
+    })
+  }
+  dashboard.defaultLayout ??= [
+    {
+      widgetSlug: 'welcome',
+      width: 'full',
+    } satisfies WidgetInstance,
+    {
+      widgetSlug: 'activity',
+      width: 'full',
+    } satisfies WidgetInstance,
+    {
+      widgetSlug: 'collections',
+      width: 'full',
+    } satisfies WidgetInstance,
+  ]
+}
+
+export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
+  const { duration, safetyBuffer } = configWithDefaults.jobs!.processingLease!
+  if (!(safetyBuffer! >= 0 && safetyBuffer! < duration!)) {
+    throw new InvalidConfiguration(
+      '`jobs.processingLease.safetyBuffer` must be non-negative and less than `jobs.processingLease.duration`.',
+    )
+  }
+
+  if (!supportedPasswordHashIterations.includes(configWithDefaults.auth!.passwordHashIterations!)) {
+    throw new InvalidConfiguration(
+      `\`auth.passwordHashIterations\` must be one of ${supportedPasswordHashIterations.join(', ')}.`,
+    )
+  }
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
 
-  // Add orderable fields
-  setupOrderable(config as SanitizedConfig)
-
   if (!config.endpoints) {
     config.endpoints = []
+  }
+
+  if (configWithDefaults.collections?.some(({ upload }) => upload)) {
+    config.endpoints.push(uploadInstructionsEndpoint, ...stagedUploadEndpoints)
   }
 
   for (const endpoint of authRootEndpoints) {
     config.endpoints.push(endpoint)
   }
 
-  if (config.localization && config.localization.locales?.length > 0) {
+  if (config.localization) {
     // clone localization config so to not break everything
     const firstLocale = config.localization.locales[0]
     if (typeof firstLocale === 'string') {
@@ -187,7 +388,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   config.i18n = i18nConfig
 
-  const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
+  const richTextSanitizers: RichTextSanitizer[] = []
 
   const schedulePublishCollections: CollectionSlug[] = []
 
@@ -204,20 +405,16 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     preferencesCollectionSlug,
   ]
 
-  if (config.folders !== false) {
-    validRelationships.push(config.folders!.slug)
-  }
-
   const dashboardWidgets = config.admin?.dashboard?.widgets ?? ([] as Widget[])
 
   for (const widget of dashboardWidgets) {
     if (widget.fields?.length) {
-      widget.fields = await sanitizeFields({
+      widget.fields = sanitizeFields({
         config: config as unknown as Config,
         existingFieldNames: new Set(),
         fields: widget.fields,
         parentIsLocalized: false,
-        richTextSanitizationPromises,
+        richTextSanitizers,
         validRelationships,
       })
     }
@@ -244,12 +441,12 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         ? formatLabels(sanitizedBlock.slug)
         : sanitizedBlock.labels
 
-      sanitizedBlock.fields = await sanitizeFields({
+      sanitizedBlock.fields = sanitizeFields({
         config: config as unknown as Config,
         existingFieldNames: new Set(),
         fields: sanitizedBlock.fields,
         parentIsLocalized: false,
-        richTextSanitizationPromises,
+        richTextSanitizers,
         validRelationships,
       })
 
@@ -259,7 +456,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
-  const folderEnabledCollections: SanitizedCollectionConfig[] = []
+  // Track orderable join fields during sanitization
+  const orderableJoins: OrderableJoinInfo[] = []
 
   for (let i = 0; i < config.collections!.length; i++) {
     if (collectionSlugs.has(config.collections![i]!.slug)) {
@@ -282,25 +480,59 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       }
     }
 
-    if (config.folders !== false && config.collections![i]!.folders) {
-      addFolderFieldToCollection({
-        collection: config.collections![i]!,
-        collectionSpecific: config.folders!.collectionSpecific,
-        folderFieldName: config.folders!.fieldName,
-        folderSlug: config.folders!.slug,
-      })
-    }
-
-    config.collections![i] = await sanitizeCollection(
+    config.collections![i] = sanitizeCollection(
       config as unknown as Config,
       config.collections![i]!,
-      richTextSanitizationPromises,
+      richTextSanitizers,
       validRelationships,
+      orderableJoins,
     )
+  }
 
-    if (config.folders !== false && config.collections![i]!.folders) {
-      folderEnabledCollections.push(config.collections![i]!)
+  // Process orderable features after all collections are sanitized
+  const fieldsToAdd = new Map<SanitizedCollectionConfig, string[]>()
+  const joinFieldPathsByCollection = new Map<string, Map<string, string>>()
+
+  // Handle collection.orderable
+  for (const collection of config.collections!) {
+    if (collection.orderable) {
+      const currentFields = fieldsToAdd.get(collection) || []
+      fieldsToAdd.set(collection, [...currentFields, '_order'])
+      collection.defaultSort = collection.defaultSort ?? '_order'
     }
+  }
+
+  // Handle orderable join fields (tracked during sanitization)
+  for (const joinInfo of orderableJoins) {
+    const targetCollection = config.collections!.find(
+      (c) => c.slug === joinInfo.targetCollectionSlug,
+    )
+    if (targetCollection) {
+      const currentFields = fieldsToAdd.get(targetCollection) || []
+      fieldsToAdd.set(targetCollection, [...currentFields, joinInfo.orderFieldName])
+
+      const currentJoinFieldPaths =
+        joinFieldPathsByCollection.get(targetCollection.slug) || new Map<string, string>()
+      currentJoinFieldPaths.set(joinInfo.orderFieldName, joinInfo.joinFieldOn)
+      joinFieldPathsByCollection.set(targetCollection.slug, currentJoinFieldPaths)
+    }
+  }
+
+  // Add fields, hooks, and update flattenedFields
+  for (const [collection, orderableFields] of fieldsToAdd) {
+    addOrderableFieldsAndHook(
+      collection,
+      config as unknown as Config,
+      orderableFields,
+      joinFieldPathsByCollection,
+    )
+    // Regenerate flattenedFields since we added new fields
+    collection.flattenedFields = flattenAllFields({ fields: collection.fields })
+  }
+
+  // Add endpoint if any orderable features exist
+  if (fieldsToAdd.size > 0) {
+    addOrderableEndpoint(config as SanitizedConfig, joinFieldPathsByCollection)
   }
 
   if (config.globals!.length > 0) {
@@ -309,19 +541,24 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         schedulePublishGlobals.push(config.globals![i]!.slug)
       }
 
-      config.globals![i] = await sanitizeGlobal(
+      config.globals![i] = sanitizeGlobal(
         config as unknown as Config,
         config.globals![i]!,
-        richTextSanitizationPromises,
+        richTextSanitizers,
         validRelationships,
       )
     }
   }
 
+  // Resolve hierarchy relationships across collections (also adds sidebar tabs)
+  resolveHierarchyCollections(config as unknown as Config)
+
   if (schedulePublishCollections.length || schedulePublishGlobals.length) {
     ;((config.jobs ??= {} as SanitizedJobsConfig).tasks ??= []).push(
       getSchedulePublishTask({
-        adminUserSlug: config.admin!.user,
+        authCollectionSlugs: config
+          .collections!.filter(({ auth }) => Boolean(auth))
+          .map(({ slug }) => slug),
         collections: schedulePublishCollections,
         globals: schedulePublishGlobals,
       }),
@@ -330,8 +567,12 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   ;(config.jobs ??= {} as SanitizedJobsConfig).enabled = Boolean(
     (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs?.tasks?.length) ||
-      (Array.isArray(configWithDefaults.jobs?.workflows) &&
-        configWithDefaults.jobs?.workflows?.length),
+    (Array.isArray(configWithDefaults.jobs?.workflows) &&
+      configWithDefaults.jobs?.workflows?.length),
+  )
+  config.jobs.hasConcurrency = Boolean(
+    config.jobs.tasks?.some((task) => task.concurrency) ||
+    config.jobs.workflows?.some((workflow) => workflow.concurrency),
   )
 
   // Need to add default jobs collection before locked documents collections
@@ -344,18 +585,17 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
     if (hasScheduleProperty) {
       config.jobs.scheduling = true
-      // Add payload-jobs-stats global for tracking when a job of a specific slug was last run
-      ;(config.globals ??= []).push(
-        await sanitizeGlobal(
-          config as unknown as Config,
-          getJobStatsGlobal(config as unknown as Config),
-          richTextSanitizationPromises,
-          validRelationships,
-        ),
-      )
-
-      config.jobs.stats = true
     }
+
+    // Add payload-jobs-stats global for tracking job system metadata.
+    ;(config.globals ??= []).push(
+      sanitizeGlobal(
+        config as unknown as Config,
+        getJobStatsGlobal(),
+        richTextSanitizers,
+        validRelationships,
+      ),
+    )
 
     let defaultJobsCollection = getDefaultJobsCollection(config.jobs)
 
@@ -363,68 +603,43 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       defaultJobsCollection = config.jobs.jobsCollectionOverrides({
         defaultJobsCollection,
       })
-
-      const hooks = defaultJobsCollection?.hooks
-      // @todo - delete this check in 4.0
-      if (hooks && config?.jobs?.runHooks !== true) {
-        for (const [hookKey, hook] of Object.entries(hooks)) {
-          const defaultAmount = hookKey === 'afterRead' || hookKey === 'beforeChange' ? 1 : 0
-          if (hook.length > defaultAmount) {
-            // eslint-disable-next-line no-console
-            console.warn(
-              `The jobsCollectionOverrides function is returning a collection with an additional ${hookKey} hook defined. These hooks will not run unless the jobs.runHooks option is set to true. Setting this option to true will negatively impact performance.`,
-            )
-            break
-          }
-        }
-      }
     }
-    const sanitizedJobsCollection = await sanitizeCollection(
+    const sanitizedJobsCollection = sanitizeCollection(
       config as unknown as Config,
       defaultJobsCollection,
-      richTextSanitizationPromises,
+      richTextSanitizers,
       validRelationships,
     )
 
     ;(config.collections ??= []).push(sanitizedJobsCollection)
   }
 
-  if (config.folders !== false && folderEnabledCollections.length) {
-    await addFolderCollection({
-      collectionSpecific: config.folders!.collectionSpecific,
-      config: config as unknown as Config,
-      folderEnabledCollections,
-      richTextSanitizationPromises,
-      validRelationships,
-    })
-  }
-
   const lockedDocumentsCollection = getLockedDocumentsCollection(config as unknown as Config)
 
   if (lockedDocumentsCollection) {
     configWithDefaults.collections!.push(
-      await sanitizeCollection(
+      sanitizeCollection(
         config as unknown as Config,
         lockedDocumentsCollection,
-        richTextSanitizationPromises,
+        richTextSanitizers,
         validRelationships,
       ),
     )
   }
 
   configWithDefaults.collections!.push(
-    await sanitizeCollection(
+    sanitizeCollection(
       config as unknown as Config,
       getPreferencesCollection(config as unknown as Config),
-      richTextSanitizationPromises,
+      richTextSanitizers,
       validRelationships,
     ),
   )
 
-  const migrations = await sanitizeCollection(
+  const migrations = sanitizeCollection(
     config as unknown as Config,
     migrationsCollection,
-    richTextSanitizationPromises,
+    richTextSanitizers,
     validRelationships,
   )
 
@@ -441,62 +656,67 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   if (queryPresetsCollections.length > 0) {
     configWithDefaults.collections!.push(
-      await sanitizeCollection(
+      sanitizeCollection(
         config as unknown as Config,
         getQueryPresetsConfig(config as unknown as Config),
-        richTextSanitizationPromises,
+        richTextSanitizers,
         validRelationships,
       ),
     )
   }
 
+  addDefaultDashboardWidgets({
+    config,
+    richTextSanitizers,
+    validRelationships,
+  })
+
   if (config.serverURL !== '') {
     config.csrf!.push(config.serverURL!)
   }
 
-  const uploadAdapters = new Set<string>()
-  // interact with all collections
-  for (const collection of config.collections!) {
-    // deduped upload adapters
-    if (collection.upload?.adapter) {
-      uploadAdapters.add(collection.upload.adapter)
-    }
+  if (!config.storage) {
+    config.storage = []
   }
 
   if (!config.upload) {
-    config.upload = { adapters: [] }
+    config.upload = { adapters: [], transformers: [] }
   }
 
   config.upload.adapters = Array.from(
     new Set(config.collections!.map((c) => c.upload?.adapter).filter(Boolean) as string[]),
   )
+  config.upload.transformers = config.upload.transformers ?? []
 
   // Pass through the email config as is so adapters don't break
   if (incomingConfig.email) {
     config.email = incomingConfig.email
   }
 
-  /*
-    Execute richText sanitization
-   */
   if (typeof incomingConfig.editor === 'function') {
-    config.editor = await incomingConfig.editor({
+    config.editor = incomingConfig.editor({
       config: config as SanitizedConfig,
       isRoot: true,
       parentIsLocalized: false,
     })
-    if (config.editor.i18n && Object.keys(config.editor.i18n).length >= 0) {
-      config.i18n.translations = deepMergeSimple(config.i18n.translations, config.editor.i18n)
-    }
   }
 
-  const promises: Promise<void>[] = []
+  if (config.llmInstructions !== false) {
+    const instructionsCollection = addLLMInstructions({ config: config as SanitizedConfig })
 
-  for (const sanitizeFunction of richTextSanitizationPromises) {
-    promises.push(sanitizeFunction(config as SanitizedConfig))
+    config.collections!.push(
+      sanitizeCollection(
+        config as unknown as Config,
+        instructionsCollection,
+        richTextSanitizers,
+        validRelationships,
+      ),
+    )
   }
 
-  await Promise.all(promises)
+  for (const sanitizeRichText of richTextSanitizers) {
+    sanitizeRichText(config as SanitizedConfig)
+  }
 
   return config as SanitizedConfig
 }

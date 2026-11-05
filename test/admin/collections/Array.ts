@@ -16,4 +16,5 @@ export const Array: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

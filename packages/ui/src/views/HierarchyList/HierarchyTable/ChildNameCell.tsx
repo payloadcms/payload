@@ -1,0 +1,60 @@
+'use client'
+
+import React from 'react'
+
+import type { SlotColumn } from './SlotTable.js'
+import type { TableRow } from './types.js'
+
+import { Link } from '../../../elements/Link/index.js'
+import { ChevronIcon } from '../../../icons/Chevron/index.js'
+import { FolderIcon } from '../../../icons/Folder/index.js'
+import { TagIcon } from '../../../icons/Tag/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
+import { getHierarchyListURL } from '../getHierarchyListURL.js'
+import { baseClass } from './types.js'
+
+export const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
+  const {
+    config: {
+      routes: { admin: adminRoute },
+    },
+    getEntityConfig,
+  } = useConfig()
+
+  const collectionConfig = getEntityConfig({ collectionSlug: row._collectionSlug })
+  const titleField = collectionConfig?.admin?.useAsTitle || 'id'
+  const rawTitle =
+    typeof row[titleField] === 'string' || typeof row[titleField] === 'number'
+      ? row[titleField]
+      : row.id
+  const title = typeof rawTitle === 'object' ? JSON.stringify(rawTitle) : String(rawTitle)
+  const hierarchyConfig =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy
+      : undefined
+  const isFolder = Boolean(hierarchyConfig && hierarchyConfig.allowHasMany === false)
+  const parentFieldName = hierarchyConfig?.parentFieldName || 'parent'
+
+  const hierarchyURL = getHierarchyListURL({
+    adminRoute,
+    collectionSlug: row._collectionSlug,
+    parentFieldName,
+    parentID: row.id,
+  })
+
+  const DefaultIcon = isFolder ? <FolderIcon /> : <TagIcon />
+
+  return (
+    <div className={`${baseClass}__name-cell`}>
+      <Link className={`${baseClass}__name-link cell-link`} href={hierarchyURL}>
+        <span className={`${baseClass}__name-icon`}>{row._hierarchyIcon || DefaultIcon}</span>
+        <span className={`${baseClass}__name-text`}>{title}</span>
+        {row._hasChildren && (
+          <span className={`${baseClass}__chevron`}>
+            <ChevronIcon direction="right" />
+          </span>
+        )}
+      </Link>
+    </div>
+  )
+}

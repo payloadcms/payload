@@ -3,17 +3,19 @@ import type { RichTextAdapter } from 'payload'
 import { genImportMapIterateFields } from 'payload'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
-import type { LexicalEditorProps } from '../types.js'
+import type { LexicalEditorArgs } from '../types/index.js'
 
 export const getGenerateImportMap =
   (args: {
-    lexicalEditorArgs?: LexicalEditorProps
+    lexicalEditorArgs?: LexicalEditorArgs
     resolvedFeatureMap: ResolvedServerFeatureMap
   }): RichTextAdapter['generateImportMap'] =>
   ({ addToImportMap, baseDir, config, importMap, imports }) => {
     addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell')
     addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalField')
     addToImportMap('@payloadcms/richtext-lexical/rsc#LexicalDiffComponent')
+
+    addToImportMap(args.lexicalEditorArgs?.views)
 
     for (const resolvedFeature of args.resolvedFeatureMap.values()) {
       if ('componentImports' in resolvedFeature) {

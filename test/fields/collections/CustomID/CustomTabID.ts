@@ -27,4 +27,5 @@ export const CustomTabID: CollectionConfig = {
     plural: 'Custom Tab IDs',
     singular: 'Custom Tab ID',
   },
+  versions: false,
 }

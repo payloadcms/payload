@@ -48,6 +48,7 @@ export const Posts: CollectionConfig = {
         create: ({ req: { user } }) => { ... },
         read: ({ req: { user } }) => { ... },
         update: ({ req: { user } }) => { ... },
+        validate: ({ req: { user } }) => { ... },
       },
       // highlight-end
     };
@@ -57,11 +58,12 @@ export const Posts: CollectionConfig = {
 
 The following options are available:
 
-| Function     | Purpose                                                                                                    |
-| ------------ | ---------------------------------------------------------------------------------------------------------- |
-| **`create`** | Allows or denies the ability to set a field's value when creating a new document. [More details](#create). |
-| **`read`**   | Allows or denies the ability to read a field's value. [More details](#read).                               |
-| **`update`** | Allows or denies the ability to update a field's value [More details](#update).                            |
+| Function       | Purpose                                                                                                                                       |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`create`**   | Allows or denies the ability to set a field's value when creating a new document. [More details](#create).                                    |
+| **`read`**     | Allows or denies the ability to read a field's value. [More details](#read).                                                                  |
+| **`update`**   | Allows or denies the ability to update a field's value. [More details](#update).                                                              |
+| **`validate`** | Optionally overrides `update` access for candidate field data during [on-demand validation](../validation/overview#access-control-and-hooks). |
 
 ### Create
 
@@ -72,8 +74,11 @@ Returns a boolean which allows or denies the ability to set a field's value when
 | Option            | Description                                                                                                                  |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **`req`**         | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
+| **`collection`**  | The collection config that owns the field (present only for collection-owned fields).                                        |
+| **`global`**      | The global config that owns the field (present only for global-owned fields).                                                |
 | **`data`**        | The full data passed to create the document.                                                                                 |
 | **`siblingData`** | Immediately adjacent field data passed to create the document.                                                               |
+| **`blockData`**   | The nearest parent block row data when this field is inside a block.                                                         |
 
 ### Read
 
@@ -84,9 +89,12 @@ Returns a boolean which allows or denies the ability to read a field's value. If
 | Option            | Description                                                                                                                  |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **`req`**         | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
+| **`collection`**  | The collection config that owns the field (present only for collection-owned fields).                                        |
+| **`global`**      | The global config that owns the field (present only for global-owned fields).                                                |
 | **`id`**          | `id` of the document being read                                                                                              |
 | **`doc`**         | The full document data.                                                                                                      |
 | **`siblingData`** | Immediately adjacent field data of the document being read.                                                                  |
+| **`blockData`**   | The nearest parent block row data when this field is inside a block.                                                         |
 
 ### Update
 
@@ -99,7 +107,10 @@ If `false` is returned and you attempt to update the field's value, the operatio
 | Option            | Description                                                                                                                  |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **`req`**         | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
+| **`collection`**  | The collection config that owns the field (present only for collection-owned fields).                                        |
+| **`global`**      | The global config that owns the field (present only for global-owned fields).                                                |
 | **`id`**          | `id` of the document being updated                                                                                           |
 | **`data`**        | The full data passed to update the document.                                                                                 |
 | **`siblingData`** | Immediately adjacent field data passed to update the document with.                                                          |
 | **`doc`**         | The full document data, before the update is applied.                                                                        |
+| **`blockData`**   | The nearest parent block row data when this field is inside a block.                                                         |

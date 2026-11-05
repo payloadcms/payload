@@ -1,17 +1,17 @@
 'use client'
-import type { RowFieldClientComponent } from 'payload'
+import type { RowFieldClientProps } from 'payload'
 
 import React from 'react'
 
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import './index.scss'
+import './index.css'
 import { RowProvider } from './provider.js'
 
 const baseClass = 'row'
 
-const RowFieldComponent: RowFieldClientComponent = (props) => {
+const RowFieldComponent: React.FC<RowFieldClientProps> = (props) => {
   const {
     field: { admin: { className, style } = {}, fields },
     forceRender = false,
@@ -32,7 +32,6 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
           className={`${baseClass}__fields`}
           fields={fields}
           forceRender={forceRender}
-          margins={false}
           parentIndexPath={indexPath}
           parentPath={parentPath}
           parentSchemaPath={parentSchemaPath}

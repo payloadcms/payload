@@ -89,7 +89,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Nimekiri',
   },
   sv: {
-    label: 'Kontrollista',
+    label: 'Checklista',
   },
   ta: {
     label: 'சரிபார்ப்பு பட்டியல்',

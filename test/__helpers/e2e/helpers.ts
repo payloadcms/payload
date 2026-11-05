@@ -1,16 +1,8 @@
-import type {
-  Browser,
-  BrowserContext,
-  CDPSession,
-  ChromiumBrowserContext,
-  Locator,
-  Page,
-} from '@playwright/test'
-import type { Config, SanitizedConfig } from 'payload'
+import type { BrowserContext, Locator, Page, Route } from '@playwright/test'
 
 import { expect } from '@playwright/test'
-import { defaults } from 'payload'
-import { formatAdminURL, wait } from 'payload/shared'
+import { addDefaultsToConfig, type Config, type SanitizedConfig } from 'payload'
+import { wait } from 'payload/shared'
 import { setTimeout } from 'timers/promises'
 
 import { POLL_TOPASS_TIMEOUT } from '../../playwright.config.js'
@@ -25,16 +17,6 @@ const networkConditions = {
     latency: 1000,
     upload: ((750 * 1000) / 8) * 0.9,
   },
-  'Slow 3G': {
-    download: ((500 * 1000) / 8) * 0.8,
-    latency: 2500,
-    upload: ((500 * 1000) / 8) * 0.8,
-  },
-  'Slow 4G': {
-    download: ((4 * 1000 * 1000) / 8) * 0.8,
-    latency: 1000,
-    upload: ((3 * 1000 * 1000) / 8) * 0.8,
-  },
   'Fast 4G': {
     download: ((20 * 1000 * 1000) / 8) * 0.8,
     latency: 1000,
@@ -45,119 +27,23 @@ const networkConditions = {
     latency: -1,
     upload: -1,
   },
+  'Slow 3G': {
+    download: ((500 * 1000) / 8) * 0.8,
+    latency: 2500,
+    upload: ((500 * 1000) / 8) * 0.8,
+  },
+  'Slow 4G': {
+    download: ((4 * 1000 * 1000) / 8) * 0.8,
+    latency: 1000,
+    upload: ((3 * 1000 * 1000) / 8) * 0.8,
+  },
 }
 
 /**
- * Ensure admin panel is loaded before running tests
- * @param page
- * @param serverURL
- */
-export async function ensureCompilationIsDone({
-  customAdminRoutes,
-  customRoutes,
-  page: pageFromArgs,
-  serverURL,
-  noAutoLogin,
-  browser,
-  readyURL,
-}: {
-  /**
-   * Provide a browser if you need this utility to create and close a temporary page for you.
-   */
-  browser?: Browser
-  customAdminRoutes?: AdminRoutes
-  customRoutes?: Config['routes']
-  noAutoLogin?: boolean
-  page?: Page
-  readyURL?: string
-  serverURL: string
-}): Promise<void> {
-  if (!pageFromArgs && !browser) {
-    throw new Error('Either page or browser must be provided')
-  }
-  if (pageFromArgs && browser) {
-    throw new Error('Either page or browser must be provided, not both')
-  }
-
-  const page = pageFromArgs ?? (await browser!.newPage())
-
-  const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
-
-  const adminURL = formatAdminURL({ adminRoute, path: '', serverURL })
-
-  const maxAttempts = 15
-  let attempt = 1
-
-  while (attempt <= maxAttempts) {
-    try {
-      console.log(
-        `Checking if compilation is done (attempt ${attempt}/${maxAttempts})...`,
-        readyURL ??
-          (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
-      )
-
-      // Commit is faster than waiting for the default waitUntil: load
-      await page.goto(adminURL, { waitUntil: 'commit' })
-
-      if (readyURL) {
-        await page.waitForURL(readyURL, { waitUntil: 'commit' })
-      } else {
-        await expect
-          .poll(
-            () => {
-              if (noAutoLogin) {
-                const baseAdminURL = adminURL + (adminURL.endsWith('/') ? '' : '/')
-                return (
-                  page.url() === `${baseAdminURL}create-first-user` ||
-                  page.url() === `${baseAdminURL}login`
-                )
-              } else {
-                return page.url() === adminURL
-              }
-            },
-            { timeout: POLL_TOPASS_TIMEOUT },
-          )
-          .toBe(true)
-      }
-
-      console.log('Successfully compiled')
-      if (browser) {
-        await page.close()
-      }
-      return
-    } catch (error) {
-      if (attempt === maxAttempts) {
-        console.error(
-          'Compilation not done yet. Giving up. The dev server is probably not running or crashed.',
-        )
-        throw error
-      }
-
-      console.log('Compilation not done yet. Retrying in 2 seconds...')
-      await wait(2000)
-      attempt++
-    }
-  }
-
-  if (noAutoLogin) {
-    if (browser) {
-      await page.close()
-    }
-    return
-  }
-  await expect(() => expect(page.locator('.template-default')).toBeVisible()).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await expect(page.locator('.dashboard__label').first()).toBeVisible()
-
-  if (browser) {
-    await page.close()
-  }
-}
-
-/**
- * CPU throttling & 2 different kinds of network throttling
+ * CPU throttling & 2 different kinds of network throttling.
+ *
+ * Returns a function that removes all throttling again. Call it once the throttled steps are done,
+ * otherwise every later test that shares the page runs throttled as well.
  */
 export async function throttleTest({
   context,
@@ -167,7 +53,7 @@ export async function throttleTest({
   context: BrowserContext
   delay: keyof typeof networkConditions
   page: Page
-}): Promise<CDPSession> {
+}): Promise<() => Promise<void>> {
   const cdpSession = await context.newCDPSession(page)
 
   await cdpSession.send('Network.emulateNetworkConditions', {
@@ -177,15 +63,31 @@ export async function throttleTest({
     uploadThroughput: networkConditions[delay].upload,
   })
 
-  await page.route('**/*', async (route) => {
+  const delayRequest = async (route: Route) => {
     await setTimeout(random(500, 1000))
-    await route.continue()
-  })
+    // Not `route.continue()`: requests still being delayed when throttling stops are continued by
+    // Playwright itself once the route is removed, and continuing them again would throw.
+    await route.fallback()
+  }
 
-  const client = await (page.context() as ChromiumBrowserContext).newCDPSession(page)
-  await client.send('Emulation.setCPUThrottlingRate', { rate: 8 }) // 8x slowdown
+  await page.route('**/*', delayRequest)
 
-  return client
+  await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 8 }) // 8x slowdown
+
+  return async () => {
+    await page.unroute('**/*', delayRequest)
+
+    await cdpSession.send('Network.emulateNetworkConditions', {
+      downloadThroughput: -1,
+      latency: 0,
+      offline: false,
+      uploadThroughput: -1,
+    })
+
+    await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+
+    await cdpSession.detach()
+  }
 }
 
 export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
@@ -212,7 +114,7 @@ export async function saveDocAndAssert(
     | '#action-publish'
     | '#action-save'
     | '#action-save-draft'
-    | '#publish-locale'
+    | '#publish-all-locales'
     | string = '#action-save',
   expectation: 'error' | 'success' = 'success',
   options?: {
@@ -223,7 +125,7 @@ export async function saveDocAndAssert(
   },
 ): Promise<void> {
   await wait(500) // TODO: Fix this
-  if (selector === '#publish-locale') {
+  if (selector === '#publish-all-locales') {
     // open dropdown
     const chevronButton = page.locator('.form-submit .popup__trigger-wrap > .popup-button')
     await chevronButton.click()
@@ -249,12 +151,17 @@ export async function saveDocAndAssert(
 
 export async function closeAllToasts(page: Locator | Page): Promise<void> {
   const toastCloseSelector = '.payload-toast-container button.payload-toast-close-button'
-  let count = await page.locator(toastCloseSelector).count()
+  const closeButtons = page.locator(toastCloseSelector)
 
-  while (count > 0) {
-    await page.locator(toastCloseSelector).first().click()
-    await expect(page.locator(toastCloseSelector)).toHaveCount(count - 1)
-    count--
+  while (true) {
+    const count = await closeButtons.count()
+
+    if (count === 0) {
+      break
+    }
+
+    await closeButtons.first().dispatchEvent('click')
+    await expect.poll(() => closeButtons.count()).toBeLessThan(count)
   }
 }
 
@@ -275,7 +182,7 @@ export async function openCreateDocDrawer(page: Page, fieldSelector: string): Pr
 }
 
 export async function openLocaleSelector(page: Page): Promise<void> {
-  const button = page.locator('.localizer button.popup-button')
+  const button = page.locator('.localizer .popup__trigger-wrap > button')
   const popup = page.locator('.popup__content')
 
   if (!(await popup.isVisible())) {
@@ -296,22 +203,20 @@ export async function closeLocaleSelector(page: Page): Promise<void> {
 export async function changeLocale(page: Page, newLocale: string) {
   await openLocaleSelector(page)
 
-  const currentlySelectedLocale = await page
-    .locator(`.popup__content .popup-button-list__button--selected .localizer__locale-code`)
-    .textContent()
+  const selectedLocale = await page
+    .locator(`.popup__content .popup-button-list__button--selected [data-locale]`)
+    .getAttribute('data-locale')
 
-  if (currentlySelectedLocale !== `(${newLocale})`) {
-    const localeToSelect = page
+  if (selectedLocale !== newLocale) {
+    const localeButton = page
       .locator('.popup__content .popup-button-list__button')
-      .locator('.localizer__locale-code', {
-        hasText: `${newLocale}`,
-      })
+      .filter({ has: page.locator(`[data-locale="${newLocale}"]`) })
 
-    await expect(async () => await expect(localeToSelect).toBeEnabled()).toPass({
+    await expect(async () => await expect(localeButton).toBeEnabled()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
 
-    await localeToSelect.click()
+    await localeButton.click()
 
     const regexPattern = new RegExp(`locale=${newLocale}`)
 
@@ -332,6 +237,30 @@ export async function waitForFormReady(page: Page) {
       timeout: POLL_TOPASS_TIMEOUT,
     })
     .toBe(true)
+}
+
+/**
+ * Wait until a Lexical editor within the given locator is fully interactive.
+ * Checks for `contenteditable="true"` on the Lexical root element, which is only
+ * present after React has hydrated, Lexical has initialized, and the editor is editable.
+ */
+export async function waitForLexicalReady(locator: Locator) {
+  await expect(
+    locator
+      .locator('> .rich-text-lexical__wrap [data-lexical-editor="true"][contenteditable="true"]')
+      .first(),
+  ).toBeVisible()
+}
+
+/**
+ * Navigate to a document page and wait for the form to be ready before interacting.
+ * Necessary because TanStack Start's hydration is asynchronous, and interacting
+ * with form inputs (e.g. setInputFiles) before hydration completes will silently
+ * fail since React event handlers are not yet attached.
+ */
+export async function gotoAndWaitForForm(page: Page, url: string) {
+  await page.goto(url)
+  await waitForFormReady(page)
 }
 
 export function exactText(text: string) {
@@ -381,91 +310,22 @@ export const findTableRow = async (page: Page, title: string): Promise<Locator> 
 }
 
 export async function switchTab(page: Page, selector: string) {
-  await page.locator(selector).click()
-  await wait(300)
-  await expect(page.locator(`${selector}.tabs-field__tab-button--active`)).toBeVisible()
+  const activeSelector = `${selector}.tabs-field__tab-button--active`
+
+  await expect(async () => {
+    await page.locator(selector).click()
+    await expect(page.locator(activeSelector)).toBeVisible({ timeout: 1000 })
+  }).toPass({ intervals: [300], timeout: 6000 })
 }
 
 export const openColumnControls = async (page: Page) => {
-  await page.locator('.list-controls__toggle-columns').click()
-  await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
-}
-
-/**
- * Throws an error when browser console error messages (with some exceptions) are thrown, thus resulting
- * in the e2e test failing.
- *
- * Useful to prevent the e2e test from passing when, for example, there are react missing key prop errors
- * @param page
- * @param options
- */
-export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: boolean }) {
-  const { ignoreCORS = false } = options || {} // Default to not ignoring CORS errors
-  const consoleErrors: string[] = []
-
-  let shouldCollectErrors = false
-
-  page.on('console', (msg) => {
-    if (
-      msg.type() === 'error' &&
-      // Playwright is seemingly loading CJS files from React Select, but Next loads ESM.
-      // This leads to classnames not matching. Ignore these God-awful errors
-      // https://github.com/JedWatson/react-select/issues/3590
-      !msg.text().includes('did not match. Server:') &&
-      !msg.text().includes('the server responded with a status of') &&
-      !msg.text().includes('Failed to fetch RSC payload for') &&
-      !msg.text().includes('Error loading language') &&
-      !msg.text().includes('Error: NEXT_NOT_FOUND') &&
-      !msg.text().includes('Error: NEXT_REDIRECT') &&
-      !msg.text().includes('Error getting document data') &&
-      !msg.text().includes('Failed trying to load default language strings') &&
-      !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted
-      !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') && // This is a weird error that happens in the console
-      // Conditionally ignore CORS errors based on the `ignoreCORS` option
-      !(
-        ignoreCORS &&
-        msg.text().includes('Access to fetch at') &&
-        msg.text().includes("No 'Access-Control-Allow-Origin' header is present")
-      ) &&
-      // Conditionally ignore network-related errors
-      !msg.text().includes('Failed to load resource: net::ERR_FAILED')
-    ) {
-      // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
-      // the the server responded with a status of error happens frequently. Will ignore it for now.
-      // Most importantly, this should catch react errors.
-      const { url, lineNumber, columnNumber } = msg.location() || {}
-      const locationSuffix = url ? `\n at ${url}:${lineNumber ?? 0}:${columnNumber ?? 0}` : ''
-      throw new Error(`Browser console error: ${msg.text()}${locationSuffix}`)
+  const columnSelector = page.locator('.popup__content .column-selector')
+  await expect(async () => {
+    if (!(await columnSelector.isVisible())) {
+      await page.locator('.columns-button__button').click()
     }
-
-    // Log ignored CORS-related errors for visibility
-    if (msg.type() === 'error' && msg.text().includes('Access to fetch at') && ignoreCORS) {
-      console.log(`Ignoring expected CORS-related error: ${msg.text()}`)
-    }
-
-    // Log ignored network-related errors for visibility
-    if (msg.type() === 'error' && msg.text().includes('Failed to load resource: net::ERR_FAILED')) {
-      console.log(`Ignoring expected network error: ${msg.text()}`)
-    }
-  })
-
-  // Capture uncaught errors that do not appear in the console
-  page.on('pageerror', (error) => {
-    if (shouldCollectErrors) {
-      const stack = error?.stack
-      const message = error?.message ?? String(error)
-      consoleErrors.push(`Page error: ${message}${stack ? `\n${stack}` : ''}`)
-    } else {
-      // Rethrow the original error to preserve stack, name, and other metadata
-      throw error
-    }
-  })
-
-  return {
-    consoleErrors,
-    collectErrors: () => (shouldCollectErrors = true), // Enable collection of errors for specific tests
-    stopCollectingErrors: () => (shouldCollectErrors = false), // Disable collection of errors after the test
-  }
+    await expect(columnSelector).toBeVisible({ timeout: 1500 })
+  }).toPass({ timeout: 18000 })
 }
 
 export function getRoutes({
@@ -480,6 +340,10 @@ export function getRoutes({
   }
   routes: NonNullable<SanitizedConfig['routes']>
 } {
+  const defaults = addDefaultsToConfig({
+    db: { defaultIDType: 'text', init: () => ({}) as any },
+    secret: '',
+  })
   let routes = defaults.routes
   let adminRoutes = defaults.admin?.routes
 
@@ -515,7 +379,7 @@ export async function runJobsQueue(args: RunJobsQueueArgs) {
   const queue = args?.queue ?? 'default'
 
   return await fetch(`${serverURL}/api/payload-jobs/run?queue=${queue}`, {
-    method: 'get',
     credentials: 'include',
+    method: 'get',
   })
 }

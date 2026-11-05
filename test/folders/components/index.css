@@ -1,0 +1,12 @@
+.colored-folder-icon {
+  display: flex;
+}
+
+.hierarchy-cell__pill,
+.btn__icon {
+  .colored-folder-icon--custom-color {
+    .icon {
+      color: unset;
+    }
+  }
+}

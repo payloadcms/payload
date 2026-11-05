@@ -39,7 +39,5 @@ type FormatTimeToNowArgs = {
 
 export const formatTimeToNow = ({ date, i18n }: FormatTimeToNowArgs): string => {
   const theDate = typeof date === 'string' ? new Date(date) : date
-  return i18n?.dateFNS
-    ? formatDistanceToNow(theDate, { locale: i18n.dateFNS })
-    : `${i18n.t('general:loading')}...`
+  return i18n?.dateFNS ? formatDistanceToNow(theDate, { locale: i18n.dateFNS }) : ''
 }

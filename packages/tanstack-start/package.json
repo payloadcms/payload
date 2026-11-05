@@ -1,0 +1,159 @@
+{
+  "name": "@payloadcms/tanstack-start",
+  "version": "4.0.0-beta.7",
+  "description": "TanStack Start framework adapter for Payload",
+  "homepage": "https://payloadcms.com",
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/tanstack-start"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
+    },
+    "./server": {
+      "import": "./src/exports/server.ts",
+      "types": "./src/exports/server.ts",
+      "default": "./src/exports/server.ts"
+    },
+    "./routes": {
+      "import": "./src/exports/routes.ts",
+      "types": "./src/exports/routes.ts",
+      "default": "./src/exports/routes.ts"
+    },
+    "./shared": {
+      "import": "./src/exports/shared.ts",
+      "types": "./src/exports/shared.ts",
+      "default": "./src/exports/shared.ts"
+    },
+    "./layouts": {
+      "import": "./src/exports/layouts.ts",
+      "types": "./src/exports/layouts.ts",
+      "default": "./src/exports/layouts.ts"
+    },
+    "./rsc": {
+      "types": "./src/exports/rsc.ts",
+      "browser": "./src/exports/rsc.browser.ts",
+      "import": "./src/exports/rsc.ts",
+      "default": "./src/exports/rsc.ts"
+    }
+  },
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
+      },
+      "./server": {
+        "import": "./dist/exports/server.js",
+        "types": "./dist/exports/server.d.ts",
+        "default": "./dist/exports/server.js"
+      },
+      "./routes": {
+        "import": "./dist/exports/routes.js",
+        "types": "./dist/exports/routes.d.ts",
+        "default": "./dist/exports/routes.js"
+      },
+      "./shared": {
+        "import": "./dist/exports/shared.js",
+        "types": "./dist/exports/shared.d.ts",
+        "default": "./dist/exports/shared.js"
+      },
+      "./layouts": {
+        "import": "./dist/exports/layouts.js",
+        "types": "./dist/exports/layouts.d.ts",
+        "default": "./dist/exports/layouts.js"
+      },
+      "./rsc": {
+        "types": "./dist/exports/rsc.d.ts",
+        "browser": "./dist/exports/rsc.browser.js",
+        "import": "./dist/exports/rsc.js",
+        "default": "./dist/exports/rsc.js"
+      }
+    }
+  },
+  "scripts": {
+    "build": "pnpm build:types && pnpm test:types && pnpm build:swc",
+    "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
+    "build:debug": "pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "test:types": "tsc --project test/tsconfig.json"
+  },
+  "dependencies": {
+    "@payloadcms/graphql": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "graphql-http": "1.22.4",
+    "qs-esm": "^7.0.2"
+  },
+  "devDependencies": {
+    "@tanstack/react-router": "^1.170.44",
+    "@tanstack/react-start": "^1.169.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "@vitejs/plugin-rsc": "^0.5.21",
+    "payload": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "vite": ">=8.0.0"
+  },
+  "peerDependencies": {
+    "@tanstack/react-router": "^1.170.44",
+    "@tanstack/react-start": "^1.169.1",
+    "@vitejs/plugin-react": "^6.0.0",
+    "@vitejs/plugin-rsc": "^0.5.21",
+    "graphql": "^16.8.1",
+    "payload": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "vite": ">=8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@vitejs/plugin-react": {
+      "optional": true
+    },
+    "@vitejs/plugin-rsc": {
+      "optional": true
+    },
+    "vite": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=24.22.1"
+  }
+}

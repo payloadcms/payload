@@ -27,4 +27,5 @@ export const Tenants: CollectionConfig = {
       required: true,
     },
   ],
+  versions: false,
 }

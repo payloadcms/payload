@@ -5,42 +5,24 @@ import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
-import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
 import { UnpublishManyDrawerContent } from './DrawerContent.js'
 
 export type UnpublishManyProps = {
   collection: ClientCollectionConfig
+  count: number
+  ids: (number | string)[]
+  /**
+   * When multiple UnpublishMany components are rendered on the page, this will differentiate them.
+   */
+  modalPrefix?: string
+  onSuccess?: () => void
+  selectAll: boolean
+  where?: Where
 }
 
 export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
-  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
-
-  return (
-    <UnpublishMany_v4
-      {...props}
-      count={count}
-      ids={selectedIDs}
-      onSuccess={() => toggleAll()}
-      selectAll={selectAll === SelectAllStatus.AllAvailable}
-    />
-  )
-}
-
-export const UnpublishMany_v4: React.FC<
-  {
-    count: number
-    ids: (number | string)[]
-    /**
-     * When multiple UnpublishMany components are rendered on the page, this will differentiate them.
-     */
-    modalPrefix?: string
-    onSuccess?: () => void
-    selectAll: boolean
-    where?: Where
-  } & UnpublishManyProps
-> = (props) => {
   const {
     collection,
     collection: { slug, versions } = {},

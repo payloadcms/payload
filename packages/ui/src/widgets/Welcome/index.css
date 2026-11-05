@@ -1,0 +1,25 @@
+@layer payload-default {
+  .welcome-widget {
+    overflow-wrap: anywhere;
+    padding-block: var(--spacer-2);
+  }
+
+  .welcome-widget__heading {
+    color: var(--color-text);
+    font-size: var(--text-heading-xl-font-size);
+    font-weight: var(--text-heading-xl-font-weight);
+    line-height: var(--text-heading-xl-line-height);
+    letter-spacing: var(--text-heading-xl-letter-spacing);
+    min-height: var(--spacer-5);
+    margin-block: 0;
+  }
+
+  .widget-wrapper--editing .welcome-widget {
+    padding-inline-end: calc(var(--spacer-6) + var(--spacer-3));
+  }
+
+  .widget-wrapper:has(.welcome-widget) .widget-wrapper__controls {
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+  }
+}

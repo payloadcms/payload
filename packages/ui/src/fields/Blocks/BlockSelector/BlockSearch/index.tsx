@@ -1,28 +1,32 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 
-import { SearchIcon } from '../../../../icons/Search/index.js'
+import { SearchInput } from '../../../../elements/Search/SearchInput/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'block-search'
 
 export const BlockSearch: React.FC<{ setSearchTerm: (term: string) => void }> = (props) => {
   const { setSearchTerm } = props
   const { t } = useTranslation()
+  const [value, setValue] = useState('')
 
-  const handleChange = (e) => {
-    setSearchTerm(e.target.value)
+  const handleChange = (search: string) => {
+    setValue(search)
+    setSearchTerm(search)
   }
 
   return (
     <div className={baseClass}>
-      <input
+      <SearchInput
+        aria-label={t('fields:searchForBlock')}
         className={`${baseClass}__input`}
         onChange={handleChange}
+        onClear={() => handleChange('')}
         placeholder={t('fields:searchForBlock')}
+        value={value}
       />
-      <SearchIcon />
     </div>
   )
 }

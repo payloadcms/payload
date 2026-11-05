@@ -1,5 +1,3 @@
-import { status as httpStatus } from 'http-status'
-
 import type { Collection } from '../collections/config/types.js'
 import type { ErrorResult, SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
@@ -8,6 +6,7 @@ import { APIError } from '../errors/APIError.js'
 import { getPayload } from '../index.js'
 import { formatErrors } from './formatErrors.js'
 import { headersWithCors } from './headersWithCors.js'
+import { httpStatus } from './httpStatus.js'
 import { isErrorPublic } from './isErrorPublic.js'
 import { logError } from './logError.js'
 import { mergeHeaders } from './mergeHeaders.js'

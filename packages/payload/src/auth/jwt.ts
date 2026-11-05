@@ -1,4 +1,6 @@
-import { SignJWT } from 'jose'
+import { SignJWT } from 'jose/jwt/sign'
+
+import { JWT_AUTH_VERSION } from './jwtAuth.js'
 
 export const jwtSign = async ({
   fieldsToSign,
@@ -13,7 +15,7 @@ export const jwtSign = async ({
   const issuedAt = Math.floor(Date.now() / 1000)
   const exp = issuedAt + tokenExpiration
   const token = await new SignJWT(fieldsToSign)
-    .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+    .setProtectedHeader({ alg: 'HS256', authVersion: JWT_AUTH_VERSION, typ: 'JWT' })
     .setIssuedAt(issuedAt)
     .setExpirationTime(exp)
     .sign(secretKey)

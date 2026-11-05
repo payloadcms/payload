@@ -1,10 +1,10 @@
 import { getTranslation } from '@payloadcms/translations'
-import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { httpStatus } from '../../utilities/httpStatus.js'
 import { parseParams } from '../../utilities/parseParams/index.js'
 import { updateOperation } from '../operations/update.js'
 

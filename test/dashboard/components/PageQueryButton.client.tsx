@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
+import { usePathname, useRouter, useSearchParams } from '@payloadcms/ui'
 import { useCallback } from 'react'
 
 type PageQueryButtonProps = {

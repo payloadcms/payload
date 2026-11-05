@@ -34,6 +34,17 @@ export const setColumnID: SetColumnID = ({ adapter, columns, fields }) => {
     return 'uuid'
   }
 
+  if (adapter.idType === 'uuidv7') {
+    columns.id = {
+      name: 'id',
+      type: 'uuid',
+      defaultV7: true,
+      primaryKey: true,
+    }
+
+    return 'uuid'
+  }
+
   columns.id = {
     name: 'id',
     type: 'integer',

@@ -3,8 +3,7 @@ import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter, useSearchParams } from 'next/navigation.js'
-import { formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
+import { combineWhereConstraints, formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -14,31 +13,31 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
+import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
-import './index.scss'
-
-const confirmManyRestoreDrawerSlug = `confirm-restore-many-docs`
-
-const baseClass = 'restore-many'
 
 export type Props = {
   collection: ClientCollectionConfig
+  modalPrefix?: string
   viewType?: ViewTypes
+  where?: Where
 }
 
 export const RestoreMany: React.FC<Props> = (props) => {
-  const { collection: { slug } = {}, viewType } = props
+  const { collection: { slug } = {}, modalPrefix, viewType, where } = props
+  const confirmManyRestoreDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-restore-many-docs`
 
   const { permissions } = useAuth()
   const {
     config: { collections, routes, serverURL },
   } = useConfig()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const router = useRouter()
   const { clearRouteCache } = useRouteCache()
   const searchParams = useSearchParams()
@@ -61,12 +60,7 @@ export const RestoreMany: React.FC<Props> = (props) => {
 
   const baseWhere = parseSearchParams(searchParams)?.where as Where
 
-  const finalWhere = {
-    and: [
-      ...(Array.isArray(baseWhere?.and) ? baseWhere.and : baseWhere ? [baseWhere] : []),
-      { deletedAt: { exists: true } },
-    ],
-  }
+  const finalWhere = combineWhereConstraints([baseWhere, where, { deletedAt: { exists: true } }])
 
   const handleRestore = async () => {
     const collectionConfig = collections.find((c) => c.slug === slug)
@@ -146,7 +140,7 @@ export const RestoreMany: React.FC<Props> = (props) => {
 
     toggleAll()
 
-    router.replace(
+    void router.replace(
       qs.stringify(
         {
           ...parseSearchParams(searchParams),
@@ -170,7 +164,6 @@ export const RestoreMany: React.FC<Props> = (props) => {
     <React.Fragment>
       <ListSelectionButton
         aria-label={t('general:restore')}
-        className="restore-documents__toggle"
         onClick={() => {
           openModal(confirmManyRestoreDrawerSlug)
         }}
@@ -190,19 +183,16 @@ export const RestoreMany: React.FC<Props> = (props) => {
               },
             )}
             {collectionConfig?.versions?.drafts && (
-              <div className={`${baseClass}__checkbox`}>
-                <CheckboxInput
-                  checked={restoreAsPublished}
-                  id="restore-as-published-many"
-                  label={t('general:restoreAsPublished')}
-                  name="restore-as-published-many"
-                  onToggle={(e) => setRestoreAsPublished(e.target.checked)}
-                />
-              </div>
+              <CheckboxInput
+                checked={restoreAsPublished}
+                id="restore-as-published-many"
+                label={t('general:restoreAsPublished')}
+                name="restore-as-published-many"
+                onToggle={(e) => setRestoreAsPublished(e.target.checked)}
+              />
             )}
           </React.Fragment>
         }
-        className={baseClass}
         confirmingLabel={t('general:restoring')}
         heading={t('general:confirmRestoration')}
         modalSlug={confirmManyRestoreDrawerSlug}

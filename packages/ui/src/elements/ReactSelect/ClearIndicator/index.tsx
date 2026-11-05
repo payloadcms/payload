@@ -3,35 +3,40 @@ import type { ClearIndicatorProps } from 'react-select'
 
 import React from 'react'
 
-import type { Option as OptionType } from '../types.js'
+import type { CustomSelectProps, Option as OptionType } from '../types.js'
 
-import { XIcon } from '../../../icons/X/index.js'
-import './index.scss'
+import { CircledXIcon } from '../../../icons/CircledX/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import './index.css'
 
 const baseClass = 'clear-indicator'
 
 export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (props) => {
-  const {
-    clearValue,
-    innerProps: { ref, ...restInnerProps },
-  } = props
+  const { clearValue, selectProps } = props
+  const { t } = useTranslation()
+  const { customProps } = selectProps as {
+    customProps?: CustomSelectProps
+  } & typeof selectProps
+  const label = customProps?.clearValueLabel || t('general:clear')
 
   return (
-    <div
+    <button
+      aria-label={label}
       className={baseClass}
-      // TODO Fix this - Broke with React 19 types
-      ref={typeof ref === 'string' ? null : ref}
-      {...restInnerProps}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          clearValue()
-          e.stopPropagation()
+      onClick={(event) => {
+        event.stopPropagation()
+        clearValue()
+      }}
+      onKeyDown={(event) => {
+        if (event.key === ' ') {
+          event.stopPropagation()
         }
       }}
-      role="button"
-      tabIndex={0}
+      onMouseDown={(event) => event.stopPropagation()}
+      onTouchEnd={(event) => event.stopPropagation()}
+      type="button"
     >
-      <XIcon className={`${baseClass}__icon`} />
-    </div>
+      <CircledXIcon className={`${baseClass}__icon`} size={24} />
+    </button>
   )
 }

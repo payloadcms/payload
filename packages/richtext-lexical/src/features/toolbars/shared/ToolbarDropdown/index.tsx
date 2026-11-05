@@ -11,7 +11,7 @@ import type { ToolbarDropdownGroup, ToolbarGroupItem } from '../../types.js'
 import type { ToolbarGroupState } from '../useToolbarStates.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
-import './index.scss'
+import './index.css'
 import { DropDown, DropDownItem } from './DropDown.js'
 
 const ToolbarItem = ({
@@ -19,12 +19,14 @@ const ToolbarItem = ({
   anchorElem,
   editor,
   enabled,
+  iconOnly,
   item,
 }: {
   active?: boolean
   anchorElem: HTMLElement
   editor: LexicalEditor
   enabled?: boolean
+  iconOnly?: boolean
   item: ToolbarGroupItem
 }) => {
   const { i18n } = useTranslation<{}, string>()
@@ -70,7 +72,7 @@ const ToolbarItem = ({
       item={item}
       itemKey={item.key}
       key={item.key}
-      tooltip={title}
+      tooltip={iconOnly ? title : undefined}
     >
       <span className="text">{croppedTitle}</span>
     </DropDownItem>
@@ -99,6 +101,18 @@ export const ToolbarDropdown = ({
   label?: string
 }) => {
   const { items, key: groupKey } = group
+  const { i18n } = useTranslation<Record<string, never>, string>()
+  const {
+    fieldProps: { featureClientSchemaMap, schemaPath },
+  } = useEditorConfigContext()
+  const activeItemLabels = groupState.activeItems.map((item) =>
+    typeof item.label === 'function'
+      ? item.label({ featureClientSchemaMap, i18n, schemaPath })
+      : item.label || item.key,
+  )
+  const dropdownLabel = groupKey === 'text' ? i18n.t('lexical:general:textStyle') : undefined
+  const buttonAriaLabel =
+    [...new Set([label, ...activeItemLabels, dropdownLabel].filter(Boolean))].join(', ') || groupKey
 
   const renderedItems = useMemo(() => {
     return items?.length
@@ -108,6 +122,7 @@ export const ToolbarDropdown = ({
             anchorElem={anchorElem}
             editor={editor}
             enabled={groupState.enabledItemKeys.includes(item.key)}
+            iconOnly={group.iconOnly}
             item={item}
             key={item.key}
           />
@@ -117,7 +132,7 @@ export const ToolbarDropdown = ({
 
   return (
     <DropDown
-      buttonAriaLabel={`${groupKey} dropdown`}
+      buttonAriaLabel={buttonAriaLabel}
       buttonClassName={[baseClass, `${baseClass}-${groupKey}`, ...(classNames || [])]
         .filter(Boolean)
         .join(' ')}

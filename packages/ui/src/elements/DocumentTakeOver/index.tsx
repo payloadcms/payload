@@ -4,13 +4,17 @@ import React, { useEffect } from 'react'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { Button } from '../Button/index.js'
-import { Modal, useModal } from '../Modal/index.js'
-import './index.scss'
+import {
+  DialogBody,
+  DialogCancel,
+  DialogConfirm,
+  DialogFooter,
+  DialogHeader,
+  DialogModal,
+} from '../Dialog/index.js'
+import { useModal } from '../Modal/index.js'
 
 const modalSlug = 'document-take-over'
-
-const baseClass = 'document-take-over'
 
 export const DocumentTakeOver: React.FC<{
   handleBackToDashboard: () => void
@@ -31,42 +35,24 @@ export const DocumentTakeOver: React.FC<{
   }, [isActive, openModal, closeModal])
 
   return (
-    <Modal
-      className={baseClass}
-      // // Fixes https://github.com/payloadcms/payload/issues/13778
-      closeOnBlur={false}
-      slug={modalSlug}
-    >
-      <div className={`${baseClass}__wrapper`}>
-        <div className={`${baseClass}__content`}>
-          <h1>{t('general:editingTakenOver')}</h1>
-          <p>{t('general:anotherUserTakenOver')}</p>
-        </div>
-        <div className={`${baseClass}__controls`}>
-          <Button
-            buttonStyle="primary"
-            id={`${modalSlug}-back-to-dashboard`}
-            onClick={() => {
-              startRouteTransition(() => handleBackToDashboard())
-            }}
-            size="large"
-          >
-            {t('general:backToDashboard')}
-          </Button>
-          <Button
-            buttonStyle="secondary"
-            id={`${modalSlug}-view-read-only`}
-            onClick={() => {
-              onReadOnly()
-              closeModal(modalSlug)
-              clearRouteCache()
-            }}
-            size="large"
-          >
-            {t('general:viewReadOnly')}
-          </Button>
-        </div>
-      </div>
-    </Modal>
+    <DialogModal closeOnEsc={false} slug={modalSlug}>
+      <DialogHeader title={t('general:editingTakenOver')} />
+      <DialogBody>
+        <p>{t('general:anotherUserTakenOver')}</p>
+      </DialogBody>
+      <DialogFooter>
+        <DialogCancel
+          label={t('general:viewReadOnly')}
+          onClick={() => {
+            onReadOnly()
+            clearRouteCache()
+          }}
+        />
+        <DialogConfirm
+          label={t('general:backToDashboard')}
+          onClick={() => startRouteTransition(() => handleBackToDashboard())}
+        />
+      </DialogFooter>
+    </DialogModal>
   )
 }

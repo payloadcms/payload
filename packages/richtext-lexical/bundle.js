@@ -16,9 +16,26 @@ const removeCSSImports = {
     build.onLoad({ filter: /.*/ }, async (args) => {
       if (args.path.includes('node_modules') || !args.path.includes(dirname)) return
       const contents = await fs.promises.readFile(args.path, 'utf8')
-      const withRemovedImports = contents.replace(/import\s+.*\.scss';?[\r\n\s]*/g, '')
+      // Remove both .scss and .css imports - all styles are bundled into bundled.css
+      // Preserve bundled.css import since that's the combined stylesheet
+      const withRemovedImports = contents
+        .replace(/import\s+['"][^'"]*\.scss['"];?[\r\n\s]*/g, '')
+        .replace(/import\s+['"][^'"]*(?<!bundled)\.css['"];?[\r\n\s]*/g, '')
       return { contents: withRemovedImports, loader: 'default' }
     })
+  },
+}
+
+// The client bundle is written to dist/exports/client, but the stylesheet stays in dist/field,
+// where the server-side Diff view imports it too. Pointing the bundle at that same file means the
+// admin compiles and loads the stylesheet once, instead of also loading a copy.
+const shareBundledCSS = {
+  name: 'share-bundled-css',
+  setup(build) {
+    build.onResolve({ filter: /\/bundled\.css$/ }, () => ({
+      external: true,
+      path: '../../field/bundled.css',
+    }))
   },
 }
 
@@ -40,13 +57,10 @@ async function build() {
 
   try {
     await fs.promises.rename(`${directoryArg}/bundled_scss/cssEntry.css`, `dist/field/bundled.css`)
-    fs.copyFileSync(
-      `dist/field/bundled.css`,
-      `${directoryArg}/exports/client_optimized/bundled.css`,
-    )
+
     fs.rmSync(`${directoryArg}/bundled_scss`, { recursive: true })
   } catch (err) {
-    console.error(`Error while renaming index.css: ${err}`)
+    console.error(`Error while moving CSS files: ${err}`)
     throw err
   }
 
@@ -96,11 +110,12 @@ async function build() {
     minify: true,
     metafile: true,
     treeShaking: true,
-    // 18.20.2 is the lowest version of node supported by Payload
-    target: 'node18.20.2',
+    // 24.22.1 is the lowest version of node supported by Payload
+    target: 'node24.22.1',
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [
       removeCSSImports,
+      shareBundledCSS,
       /*commonjs({
           ignore: ['date-fns', '@floating-ui/react'],
         }),*/

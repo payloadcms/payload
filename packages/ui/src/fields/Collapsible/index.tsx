@@ -1,5 +1,5 @@
 'use client'
-import type { CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
+import type { CollapsibleFieldClientProps, DocumentPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
@@ -17,12 +17,12 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
+import './index.css'
 import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'collapsible-field'
 
-const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
+const CollapsibleFieldComponent: React.FC<CollapsibleFieldClientProps> = (props) => {
   const {
     field,
     field: { admin: { className, description, initCollapsed = false } = {}, fields, label } = {},
@@ -130,6 +130,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
         <CollapsibleElement
           className={`${baseClass}__collapsible`}
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
+          hasContentRegion={Boolean(Label || getTranslation(label ?? '', i18n))}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
               <RowLabel CustomComponent={Label} label={getTranslation(label, i18n)} path={path} />
@@ -141,7 +142,6 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
         >
           <RenderFields
             fields={fields}
-            margins="small"
             parentIndexPath={indexPath}
             parentPath={parentPath}
             parentSchemaPath={parentSchemaPath}

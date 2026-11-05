@@ -1,0 +1,26 @@
+@layer payload-default {
+  .render-field-diffs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-3);
+
+    [role='banner'] {
+      /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
+      display: none !important;
+    }
+  }
+
+  .render-field-diffs__field {
+    overflow-wrap: anywhere;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-3);
+  }
+
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
+  @media (max-width: 768px) {
+    .render-field-diffs {
+      gap: calc(var(--spacer-4) - var(--spacer-1));
+    }
+  }
+}

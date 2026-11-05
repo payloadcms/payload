@@ -159,12 +159,12 @@ export const promise = async ({
 
   const shouldHoistLocalizedValue: boolean = Boolean(
     flattenLocales &&
-      fieldAffectsDataResult &&
-      typeof siblingDoc[field.name!] === 'object' &&
-      siblingDoc[field.name!] !== null &&
-      shouldLocalizeField &&
-      locale !== 'all' &&
-      req.payload.config.localization,
+    fieldAffectsDataResult &&
+    typeof siblingDoc[field.name!] === 'object' &&
+    siblingDoc[field.name!] !== null &&
+    shouldLocalizeField &&
+    locale !== 'all' &&
+    req.payload.config.localization,
   )
 
   if (fieldAffectsDataResult && shouldHoistLocalizedValue) {
@@ -192,6 +192,7 @@ export const promise = async ({
 
       if (fallbackValue) {
         switch (field.type) {
+          case 'slug':
           case 'text':
           case 'textarea': {
             if (value === '' || isNullOrUndefined) {
@@ -374,14 +375,27 @@ export const promise = async ({
     if (triggerAccessControl && field.access && field.access.read) {
       const canReadField = overrideAccess
         ? true
-        : await field.access.read({
-            id: doc.id as number | string,
-            blockData,
-            data: doc,
-            doc,
-            req,
-            siblingData: siblingDoc,
-          })
+        : await field.access.read(
+            collection
+              ? {
+                  id: doc.id as number | string,
+                  blockData,
+                  collection,
+                  data: doc,
+                  doc,
+                  req,
+                  siblingData: siblingDoc,
+                }
+              : {
+                  id: doc.id as number | string,
+                  blockData,
+                  data: doc,
+                  doc,
+                  global: global!,
+                  req,
+                  siblingData: siblingDoc,
+                },
+          )
 
       if (!canReadField) {
         allowDefaultValue = false
@@ -524,21 +538,23 @@ export const promise = async ({
         rows.forEach((row, rowIndex) => {
           const blockTypeToMatch = (row as JsonObject).blockType
 
+          const fieldBlock = field.blocks.find((curBlock) =>
+            typeof curBlock === 'string'
+              ? curBlock === blockTypeToMatch
+              : curBlock.slug === blockTypeToMatch,
+          )
           const block: Block | undefined =
-            req.payload.blocks[blockTypeToMatch] ??
-            ((field.blockReferences ?? field.blocks).find(
-              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-            ) as Block | undefined)
-
-          const { blockSelect, blockSelectMode } = getBlockSelect({
-            block: block!,
-            // TODO: fix this
-            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-            select: select?.[field.name]!,
-            selectMode: selectMode!,
-          })
+            typeof fieldBlock === 'string' ? req.payload.blocks[fieldBlock] : fieldBlock
 
           if (block) {
+            const { blockSelect, blockSelectMode } = getBlockSelect({
+              block,
+              // TODO: fix this
+              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+              select: select?.[field.name]!,
+              selectMode: selectMode!,
+            })
+
             traverseFields({
               blockData: row,
               collection,
@@ -578,11 +594,13 @@ export const promise = async ({
             localeRows.forEach((row, rowIndex) => {
               const blockTypeToMatch = row.blockType
 
+              const fieldBlock = field.blocks.find((curBlock) =>
+                typeof curBlock === 'string'
+                  ? curBlock === blockTypeToMatch
+                  : curBlock.slug === blockTypeToMatch,
+              )
               const block: Block | undefined =
-                req.payload.blocks[blockTypeToMatch] ??
-                ((field.blockReferences ?? field.blocks).find(
-                  (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-                ) as Block | undefined)
+                typeof fieldBlock === 'string' ? req.payload.blocks[fieldBlock] : fieldBlock
 
               if (block) {
                 traverseFields({

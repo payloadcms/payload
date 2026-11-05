@@ -4,7 +4,7 @@ import type {
   FormField,
   FormState,
   Row,
-  TypedUser,
+  User,
   ValidationFieldError,
 } from 'payload'
 import type React from 'react'
@@ -55,7 +55,7 @@ export type FormProps = {
     res: Response,
     successToast: (value: string) => void,
     errorToast: (value: string) => void,
-  ) => void
+  ) => unknown
   initialState?: FormState
   /**
    * Determines if this Form is the main, top-level Form of a document. If set to true, the
@@ -154,11 +154,6 @@ export type Reset = (data: unknown) => Promise<void>
 
 export type REPLACE_STATE = {
   optimize?: boolean
-  /**
-   * If `sanitize` is true, default values will be set for form field properties that are not present in the incoming state.
-   * For example, `valid` will be set to true if it is not present in the incoming state.
-   */
-  sanitize?: boolean
   state: FormState
   type: 'REPLACE_STATE'
 }
@@ -172,7 +167,7 @@ export type MODIFY_CONDITION = {
   path: string
   result: boolean
   type: 'MODIFY_CONDITION'
-  user: TypedUser
+  user: User
 }
 
 export type UPDATE = {
@@ -201,7 +196,7 @@ export type ADD_ROW = {
 
 export type MERGE_SERVER_STATE = {
   acceptValues?: AcceptValues
-  prevStateRef: React.RefObject<FormState>
+  prevStateRef?: React.RefObject<FormState>
   serverState: FormState
   type: 'MERGE_SERVER_STATE'
 }

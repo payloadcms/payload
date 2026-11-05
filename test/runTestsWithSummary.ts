@@ -1,6 +1,7 @@
 import { execSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
+import ts from 'typescript'
 import { fileURLToPath } from 'url'
 
 const filename = fileURLToPath(import.meta.url)
@@ -14,6 +15,7 @@ const TEST_SUITES = [
   'admin-root',
   'array-update',
   'auth',
+  'base-access',
   'collections-graphql',
   'collections-rest',
   'config',
@@ -25,10 +27,10 @@ const TEST_SUITES = [
   'field-paths',
   'fields-relationship',
   'folders',
-  'folders-browse-by-disabled',
   'form-state',
   'globals',
   'graphql',
+  'hierarchy',
   'hooks',
   'joins',
   'kv',
@@ -53,13 +55,14 @@ const TEST_SUITES = [
   'plugin-stripe',
   'plugins',
   'query-presets',
-  // 'queues', Not supported yet in content api
+  'queues',
   'relationships',
   'sdk',
   'select',
   'sort',
   'storage-azure',
   'storage-s3',
+  'tags',
   'trash',
   'uploads',
   'versions',
@@ -67,11 +70,38 @@ const TEST_SUITES = [
 ]
 
 interface SuiteResult {
+  /** Captured output for a suite that produced no parseable test report. */
+  diagnostic?: string
   duration: number
   failed: boolean
   name: string
   passed: number
   total: number
+}
+
+const isContentAPIMode = process.env.PAYLOAD_DATABASE === 'content-api'
+const contentAPISuiteTimeout = 120000
+// Chatty suites can exceed Node's 1 MiB execSync default; truncated stdout has
+// no JSON report, so the suite is recorded as 0/<collected>.
+const vitestExecMaxBuffer = 64 * 1024 * 1024
+const vitestBinary = './node_modules/.bin/vitest'
+const vitestJSONReportPath = path.join(dirname, '..', '.vitest', 'json', 'summary.json')
+const diagnosticMaxLines = 40
+const diagnosticMaxChars = 4000
+
+function getVitestEnv(options?: { unsetPayloadDatabase?: boolean }): NodeJS.ProcessEnv {
+  const env = {
+    ...process.env,
+    DISABLE_LOGGING: 'true',
+    NODE_NO_WARNINGS: '1',
+    NODE_OPTIONS: '--no-deprecation --no-experimental-strip-types',
+  }
+
+  if (options?.unsetPayloadDatabase) {
+    delete env.PAYLOAD_DATABASE
+  }
+
+  return env
 }
 
 function getTestDirectories(): string[] {
@@ -143,9 +173,11 @@ function parseTestResults(output: string): { passed: number; total: number } {
       try {
         const data = JSON.parse(candidate)
         if (typeof data.numPassedTests === 'number' && typeof data.numTotalTests === 'number') {
+          const excludedTests = data.numTodoTests || 0
+
           return {
             passed: data.numPassedTests,
-            total: data.numTotalTests,
+            total: Math.max(0, data.numTotalTests - excludedTests),
           }
         }
       } catch (e) {
@@ -160,30 +192,242 @@ function parseTestResults(output: string): { passed: number; total: number } {
   }
 }
 
+/**
+ * A suite that reports 0 passing usually died before the JSON reporter flushed,
+ * so the counts alone say nothing about why. Keep the tail of what it printed so
+ * the summary can surface an actionable error instead of a bare `0/<total>`.
+ */
+function extractDiagnostic(output: string): string | undefined {
+  const trimmed = output.trim()
+  if (!trimmed) {
+    return undefined
+  }
+
+  // Drop the JSON report if one was emitted; the interesting output precedes it.
+  const reportIndex = trimmed.lastIndexOf('{"numTotalTestSuites"')
+  const withoutReport = (reportIndex === -1 ? trimmed : trimmed.slice(0, reportIndex)).trim()
+  if (!withoutReport) {
+    return undefined
+  }
+
+  const lines = withoutReport.split('\n').slice(-diagnosticMaxLines)
+  const diagnostic = lines.join('\n')
+
+  return diagnostic.length > diagnosticMaxChars
+    ? `...\n${diagnostic.slice(-diagnosticMaxChars)}`
+    : diagnostic
+}
+
+function parseCollectedTests(output: string): number {
+  const jsonStart = output.lastIndexOf('\n[') + 1 || output.indexOf('[')
+  if (jsonStart === -1) {
+    return 0
+  }
+
+  let candidate = output.substring(jsonStart)
+
+  while (candidate.length > 10) {
+    try {
+      const data = JSON.parse(candidate)
+
+      if (Array.isArray(data)) {
+        return data.length
+      }
+    } catch (e) {
+      candidate = candidate.substring(0, candidate.length - 1)
+    }
+  }
+
+  return 0
+}
+
+function getCollectedTestCount(suiteName: string): number {
+  const testPath = path.join(dirname, suiteName, 'int.spec.ts')
+
+  for (const unsetPayloadDatabase of [false, true]) {
+    try {
+      const command = `${vitestBinary} list --project int ${testPath} --json`
+
+      const output = execSync(command, {
+        cwd: path.join(dirname, '..'),
+        encoding: 'utf8',
+        env: getVitestEnv({ unsetPayloadDatabase }),
+        maxBuffer: vitestExecMaxBuffer,
+        stdio: ['pipe', 'pipe', 'pipe'],
+        ...(isContentAPIMode ? { timeout: contentAPISuiteTimeout } : {}),
+      })
+
+      const count = parseCollectedTests(output)
+      if (count > 0) {
+        return count
+      }
+    } catch (error: unknown) {
+      let errorOutput = ''
+      if (error && typeof error === 'object') {
+        if ('stdout' in error) {
+          const stdout = (error as { stdout?: unknown }).stdout
+          if (typeof stdout === 'string') {
+            errorOutput += stdout
+          } else if (stdout && Buffer.isBuffer(stdout)) {
+            errorOutput += stdout.toString('utf8')
+          }
+        }
+        if ('stderr' in error) {
+          const stderr = (error as { stderr?: unknown }).stderr
+          if (typeof stderr === 'string') {
+            errorOutput += '\n' + stderr
+          } else if (stderr && Buffer.isBuffer(stderr)) {
+            errorOutput += '\n' + stderr.toString('utf8')
+          }
+        }
+      }
+
+      const count = parseCollectedTests(errorOutput)
+      if (count > 0) {
+        return count
+      }
+    }
+  }
+
+  return 0
+}
+
+function isBaseTestIdentifier(node: ts.Node): node is ts.Identifier {
+  return ts.isIdentifier(node) && (node.text === 'it' || node.text === 'test')
+}
+
+function isRunnableTestCall(node: ts.CallExpression): boolean {
+  const expression = node.expression
+
+  if (isBaseTestIdentifier(expression)) {
+    return true
+  }
+
+  if (ts.isPropertyAccessExpression(expression)) {
+    if (!isBaseTestIdentifier(expression.expression)) {
+      return false
+    }
+
+    return (
+      expression.name.text !== 'skip' &&
+      expression.name.text !== 'todo' &&
+      expression.name.text !== 'each'
+    )
+  }
+
+  if (ts.isCallExpression(expression) && ts.isPropertyAccessExpression(expression.expression)) {
+    const innerExpression = expression.expression
+
+    return isBaseTestIdentifier(innerExpression.expression) && innerExpression.name.text === 'each'
+  }
+
+  return false
+}
+
+function getStaticTestCount(suiteName: string): number {
+  const testPath = path.join(dirname, suiteName, 'int.spec.ts')
+  const sourceText = fs.readFileSync(testPath, 'utf8')
+  const sourceFile = ts.createSourceFile(
+    testPath,
+    sourceText,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  )
+  let count = 0
+
+  function visit(node: ts.Node) {
+    if (ts.isCallExpression(node) && isRunnableTestCall(node)) {
+      count++
+    }
+
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+
+  return count
+}
+
+function getExplicitSkippedTestCount(suiteName: string): number {
+  const testPath = path.join(dirname, suiteName, 'int.spec.ts')
+  const sourceText = fs.readFileSync(testPath, 'utf8')
+  const sourceFile = ts.createSourceFile(
+    testPath,
+    sourceText,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  )
+  let count = 0
+
+  function visit(node: ts.Node) {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'mongoIt' &&
+      process.env.PAYLOAD_DATABASE !== 'mongodb'
+    ) {
+      count++
+    }
+
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+      const { name, expression } = node.expression
+      if (
+        ts.isIdentifier(expression) &&
+        (expression.text === 'it' || expression.text === 'test') &&
+        name.text === 'skip'
+      ) {
+        count++
+      }
+    }
+
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+  return count
+}
+
 function runTestSuite(suiteName: string): SuiteResult {
   const startTime = Date.now()
   const result: SuiteResult = {
     name: suiteName,
+    duration: 0,
+    failed: false,
     passed: 0,
     total: 0,
-    failed: false,
-    duration: 0,
   }
+
+  fs.rmSync(vitestJSONReportPath, { force: true })
 
   try {
     const testPath = path.join(dirname, suiteName, 'int.spec.ts')
-    const command = `cross-env NODE_OPTIONS="--no-deprecation --no-experimental-strip-types" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true vitest run --project int ${testPath} --reporter=json`
+    const command = `${vitestBinary} run --project int ${testPath} --reporter=json --outputFile.json=${JSON.stringify(vitestJSONReportPath)}`
 
     const output = execSync(command, {
       cwd: path.join(dirname, '..'),
       encoding: 'utf8',
+      env: getVitestEnv(),
+      maxBuffer: vitestExecMaxBuffer,
       stdio: ['pipe', 'pipe', 'pipe'],
+      ...(isContentAPIMode ? { timeout: contentAPISuiteTimeout } : {}),
     })
 
-    // Parse Jest output to extract test counts
-    const parsed = parseTestResults(output)
+    const parsed = parseTestResults(fs.readFileSync(vitestJSONReportPath, 'utf8'))
     result.passed = parsed.passed
     result.total = parsed.total
+
+    if (result.total === 0) {
+      result.total = getCollectedTestCount(suiteName)
+    }
+    if (result.total === 0) {
+      result.total = getStaticTestCount(suiteName)
+    }
+
+    if (result.passed === 0) {
+      result.diagnostic = extractDiagnostic(output)
+    }
   } catch (error: unknown) {
     // Try to parse failure output from both stdout and stderr
     let errorOutput = ''
@@ -206,15 +450,29 @@ function runTestSuite(suiteName: string): SuiteResult {
       }
     }
 
-    const parsed = parseTestResults(errorOutput)
+    const report = fs.existsSync(vitestJSONReportPath)
+      ? fs.readFileSync(vitestJSONReportPath, 'utf8')
+      : ''
+    const parsed = parseTestResults(report)
     result.passed = parsed.passed
     result.total = parsed.total
 
-    // Only mark as failed if tests actually failed (not all passed)
-    // Some tests may exit with error code even if all tests pass
-    result.failed = result.passed < result.total
+    if (result.total === 0) {
+      result.total = getCollectedTestCount(suiteName)
+    }
+    if (result.total === 0) {
+      result.total = getStaticTestCount(suiteName)
+    }
+
+    if (result.passed === 0) {
+      result.diagnostic = extractDiagnostic(errorOutput)
+    }
   }
 
+  fs.rmSync(vitestJSONReportPath, { force: true })
+
+  result.total = Math.max(0, result.total - getExplicitSkippedTestCount(suiteName))
+  result.failed = result.passed < result.total
   result.duration = Date.now() - startTime
   return result
 }
@@ -307,6 +565,24 @@ function main() {
       const icon = r.passed === 0 ? '❌' : '⚠️'
       console.log(`   ${icon} ${r.name} (${r.passed}/${r.total})`)
     })
+
+    const suitesWithoutReport = results.filter((r) => r.passed === 0 && r.diagnostic)
+
+    if (suitesWithoutReport.length > 0) {
+      console.log('\n' + '='.repeat(80))
+      console.log('🔎 Suites that produced no test report')
+      console.log(
+        'These reported 0 passing because no JSON report was parsed, not because every test failed.',
+      )
+      console.log('='.repeat(80))
+
+      for (const r of suitesWithoutReport) {
+        console.log(`\n--- ${r.name} (${r.passed}/${r.total}) ---`)
+        console.log(r.diagnostic)
+      }
+      console.log()
+    }
+
     process.exit(1)
   } else {
     console.log('✅ All test suites passed!')

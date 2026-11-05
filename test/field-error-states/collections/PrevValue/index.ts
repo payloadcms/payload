@@ -34,7 +34,7 @@ export const PrevValue: CollectionConfig = {
 
         try {
           const relatedDocs = await fetch(
-            `http://localhost:3000/api/${collectionSlugs.prevValueRelation}${query}`,
+            `http://localhost:${process.env.PORT || 3000}/api/${collectionSlugs.prevValueRelation}${query}`,
             {
               credentials: 'include',
               headers: {
@@ -61,4 +61,5 @@ export const PrevValue: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

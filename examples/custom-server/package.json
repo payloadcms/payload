@@ -2,7 +2,7 @@
   "name": "payload-3-custom-server",
   "type": "module",
   "scripts": {
-    "build": "next build && tsc --project tsconfig.server.json",
+    "build": "payload build && tsc --project tsconfig.server.json",
     "dev": "nodemon",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
@@ -25,7 +25,7 @@
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/node": "^18.11.5",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",

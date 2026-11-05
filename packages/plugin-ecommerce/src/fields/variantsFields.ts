@@ -46,7 +46,7 @@ export const variantsFields: (props: Props) => Field[] = ({
           return enabledVariants && hasManyVariantTypes
         },
         defaultColumns: ['title', 'options', 'inventory', 'prices', '_status'],
-        disableListColumn: true,
+        disabled: { column: true },
       },
       collection: variantsSlug,
       label: ({ t }) =>

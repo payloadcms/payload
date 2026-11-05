@@ -2,8 +2,8 @@ import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 import { formatAdminURL } from 'payload/shared'
-import { POLL_TOPASS_TIMEOUT } from 'playwright.config.js'
 
+import { POLL_TOPASS_TIMEOUT } from '../../../playwright.config.js'
 import { getRoutes } from '../helpers.js'
 import { openNav } from '../toggleNav.js'
 
@@ -19,8 +19,9 @@ export const logout = async (page: Page, serverURL: string) => {
 }
 
 export const logoutViaNav = async (page: Page) => {
-  const { nav } = await openNav(page)
-  const logoutAnchor = nav.locator('a[title="Log out"]')
+  await openNav(page)
+  await page.locator('.user-menu__trigger').click()
+  const logoutAnchor = page.locator('a[href$="/logout"]')
   await expect(logoutAnchor).toBeVisible()
   await logoutAnchor.click()
 

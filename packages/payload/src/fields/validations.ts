@@ -1,10 +1,9 @@
-import Ajv from 'ajv'
+import { validateJSONSchema } from '#validateJSONSchema'
 import ObjectIdImport from 'bson-objectid'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 import type { TFunction } from '@payloadcms/translations'
-import type { JSONSchema4 } from 'json-schema'
 
 import type { RichTextAdapter } from '../admin/types.js'
 import type { CollectionSlug } from '../index.js'
@@ -26,6 +25,7 @@ import type {
   RelationshipValueSingle,
   RichTextField,
   SelectField,
+  SlugField,
   TextareaField,
   TextField,
   UploadField,
@@ -94,13 +94,21 @@ export const text: TextFieldValidation = (
   }
 
   if (required) {
-    if (!(typeof value === 'string' || Array.isArray(value)) || value?.length === 0) {
+    if (!value || ((typeof value === 'string' || Array.isArray(value)) && value.length === 0)) {
       return t('validation:required')
     }
   }
 
   return true
 }
+
+export type SlugFieldValidation = Validate<string, unknown, unknown, SlugField>
+
+// A slug is always populated by the field's hooks (source-derived or the `<singular>-<N>` fallback),
+// so an empty value is never a user error — `required` only drives the admin asterisk. Uniqueness is
+// enforced in the field's `beforeChange` hook (see generateSlug) rather than here, because draft
+// saves skip validation but still run hooks.
+export const slug: SlugFieldValidation = () => true
 
 export type PasswordFieldValidation = Validate<string, unknown, unknown, TextField>
 
@@ -204,7 +212,11 @@ export const email: EmailFieldValidation = (
   const emailRegex =
     /^(?!.*\.\.)[\w!#$%&'*+/=?^`{|}~-](?:[\w!#$%&'*+/=?^`{|}~.-]*[\w!#$%&'*+/=?^`{|}~-])?@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
 
-  if ((value && !emailRegex.test(value)) || (!value && required)) {
+  if (!value && required) {
+    return t('validation:required')
+  }
+
+  if (value && !emailRegex.test(value)) {
     return t('validation:emailAddress')
   }
 
@@ -298,7 +310,7 @@ export const textarea: TextareaFieldValidation = (
 export type CodeFieldValidation = Validate<string, unknown, unknown, CodeField>
 
 export const code: CodeFieldValidation = (value, { req: { t }, required }) => {
-  if (required && value === undefined) {
+  if (required && (!value || (typeof value === 'string' && value.length === 0))) {
     return t('validation:required')
   }
 
@@ -312,7 +324,7 @@ export type JSONFieldValidation = Validate<
   { jsonError?: string } & JSONField
 >
 
-export const json: JSONFieldValidation = (
+export const json: JSONFieldValidation = async (
   value,
   { jsonError, jsonSchema, req: { t }, required },
 ) => {
@@ -332,31 +344,6 @@ export const json: JSONFieldValidation = (
     return true
   }
 
-  const fetchSchema = ({ schema, uri }: { schema: JSONSchema4; uri: string }) => {
-    if (uri && schema) {
-      return schema
-    }
-    return fetch(uri)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok')
-        }
-        return response.json()
-      })
-      .then((_json) => {
-        const json = _json as {
-          id: string
-        }
-        const jsonSchemaSanitizations = {
-          id: undefined,
-          $id: json.id,
-          $schema: 'http://json-schema.org/draft-07/schema#',
-        }
-
-        return Object.assign(json, jsonSchemaSanitizations)
-      })
-  }
-
   if (required && !value) {
     return t('validation:required')
   }
@@ -366,18 +353,7 @@ export const json: JSONFieldValidation = (
   }
 
   if (jsonSchema && isNotEmpty(value)) {
-    try {
-      jsonSchema.schema = fetchSchema(jsonSchema)
-      const { schema } = jsonSchema
-      // @ts-expect-error missing types
-      const ajv = new Ajv()
-
-      if (!ajv.validate(schema, value)) {
-        return ajv.errorsText()
-      }
-    } catch (error) {
-      return error instanceof Error ? error.message : 'Unknown error'
-    }
+    return validateJSONSchema({ jsonSchema, value })
   }
   return true
 }
@@ -416,7 +392,7 @@ export const date: DateFieldValidation = (
   }
 
   if (value) {
-    return t('validation:notValidDate', { value })
+    return t('validation:notValidDate', { value: String(value) })
   }
 
   if (required) {
@@ -510,11 +486,11 @@ export const number: NumberFieldValidation = (
     const numberValue = parseFloat(number as unknown as string)
 
     if (typeof max === 'number' && numberValue > max) {
-      return t('validation:greaterThanMax', { label: t('general:value'), max, value })
+      return t('validation:greaterThanMax', { label: t('general:value'), max, value: numberValue })
     }
 
     if (typeof min === 'number' && numberValue < min) {
-      return t('validation:lessThanMin', { label: t('general:value'), min, value })
+      return t('validation:lessThanMin', { label: t('general:value'), min, value: numberValue })
     }
   }
 
@@ -632,7 +608,17 @@ const validateFilterOptions: Validate<
   RelationshipField | UploadField
 > = async (
   value,
-  { id, blockData, data, filterOptions, relationTo, req, req: { t, user }, siblingData },
+  {
+    id,
+    blockData,
+    data,
+    filterOptions,
+    overrideAccess,
+    relationTo,
+    req,
+    req: { t, user },
+    siblingData,
+  },
 ) => {
   if (typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -695,7 +681,9 @@ const validateFilterOptions: Validate<
           const result = await req.payloadDataLoader.find({
             collection,
             depth: 0,
+            disableErrors: true,
             limit: 0,
+            overrideAccess: overrideAccess ?? false,
             pagination: false,
             req,
             where: findWhere,
@@ -957,13 +945,13 @@ export type SelectFieldManyValidation = Validate<string[], unknown, unknown, Sel
 
 export type SelectFieldSingleValidation = Validate<string, unknown, unknown, SelectField>
 
-export const select: SelectFieldValidation = (
+export const select: SelectFieldValidation = async (
   value,
   { data, filterOptions, hasMany, options, req, req: { t }, required, siblingData },
 ) => {
   const filteredOptions =
     typeof filterOptions === 'function'
-      ? filterOptions({
+      ? await filterOptions({
           data,
           options,
           req,
@@ -1093,6 +1081,7 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
  * These can be re-used in custom validations
  */
 export const validations = {
+  slug,
   array,
   blocks,
   checkbox,

@@ -1,4 +1,4 @@
-import type { TaskConfig, TaskHandler, TaskType } from '../../../config/types/taskTypes.js'
+import type { TaskConfig, TaskHandler, TaskSlug } from '../../../config/types/taskTypes.js'
 
 import { dynamicImport } from '../../../../utilities/dynamicImport.js'
 
@@ -48,6 +48,6 @@ export async function getTaskHandlerFromConfig(taskConfig?: TaskConfig) {
   if (typeof taskConfig.handler === 'function') {
     return taskConfig.handler
   } else {
-    return await importHandlerPath<TaskHandler<TaskType>>(taskConfig.handler)
+    return await importHandlerPath<TaskHandler<TaskSlug>>(taskConfig.handler)
   }
 }

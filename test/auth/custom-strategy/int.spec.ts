@@ -1,16 +1,7 @@
-import type { Payload } from 'payload'
+import { expect } from 'vitest'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
-import { usersSlug } from './shared.js'
-
-let payload: Payload
-let restClient: NextRESTClient
+import { test } from '../../__helpers/int/vitest.js'
+import { strategyName, usersSlug } from './shared.js'
 
 const [code, secret, name] = ['test', 'strategy', 'Tester']
 
@@ -18,20 +9,9 @@ const headers = {
   'Content-Type': 'application/json',
 }
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('AuthStrategies', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname, 'auth/custom-strategy'))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('create user', () => {
-    beforeAll(async () => {
+test.suite('AuthStrategies', { config: './config.ts' }, () => {
+  test.describe('create user', () => {
+    test.beforeEach(async ({ restClient }) => {
       await restClient.POST(`/${usersSlug}`, {
         body: JSON.stringify({
           name,
@@ -42,7 +22,7 @@ describe('AuthStrategies', () => {
       })
     })
 
-    it('should return a logged in user from /me', async () => {
+    test('should return a logged in user from /me', async ({ restClient }) => {
       const response = await restClient.GET(`/${usersSlug}/me`, {
         headers: {
           code,
@@ -56,6 +36,19 @@ describe('AuthStrategies', () => {
       expect(response.headers.has('Smile-For-Me')).toBeTruthy()
       expect(response.status).toBe(200)
       expect(data.user.name).toBe(name)
+    })
+
+    test('should say which strategy logged the user in', async ({ restClient }) => {
+      const response = await restClient.GET(`/${usersSlug}/me`, {
+        headers: {
+          code,
+          secret,
+        },
+      })
+
+      const data = await response.json()
+
+      expect(data.user._strategy).toBe(strategyName)
     })
   })
 })

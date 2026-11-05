@@ -3,12 +3,18 @@ import * as fs from 'fs'
 import type { DatabaseAdapter, StorageAdapter } from './types.js'
 
 import { debug } from '../../utils/log.js'
-import { getDbPackageName, getStoragePackageName } from './adapter-config.js'
+import {
+  getDbPackageName,
+  getStoragePackageName,
+  SHARP_TRANSFORMER_PACKAGE,
+} from './adapter-config.js'
 import { ALL_DATABASE_ADAPTERS, ALL_STORAGE_ADAPTERS } from './types.js'
 
 type PackageJsonTransformOptions = {
+  addDependencies?: Record<string, string>
   databaseAdapter?: DatabaseAdapter
   packageName?: string
+  removeDependencies?: string[]
   removeSharp?: boolean
   storageAdapter?: StorageAdapter
 }
@@ -26,16 +32,26 @@ type PackageJsonStructure = {
 export function updatePackageJson(filePath: string, options: PackageJsonTransformOptions): void {
   debug(`[AST] Updating package.json: ${filePath}`)
 
-  // Phase 1: Detection
-  const pkg = parsePackageJson(filePath)
-
-  // Phase 2: Transformation
-  const transformed = transformPackageJson(pkg, options)
-
-  // Phase 3: Modification
-  writePackageJson(filePath, transformed)
+  const prepared = preparePackageJson({ filePath, options })
+  fs.writeFileSync(prepared.filePath, prepared.content)
 
   debug('[AST] ✓ package.json updated successfully')
+}
+
+export function preparePackageJson({
+  filePath,
+  options,
+}: {
+  filePath: string
+  options: PackageJsonTransformOptions
+}): { content: string; filePath: string } {
+  const pkg = parsePackageJson(filePath)
+  const transformed = transformPackageJson(pkg, options)
+
+  return {
+    content: `${JSON.stringify(transformed, null, 2)}\n`,
+    filePath,
+  }
 }
 
 // Helper functions
@@ -116,11 +132,33 @@ function transformPackageJson(
   // Remove sharp
   if (options.removeSharp && transformed.dependencies) {
     transformed.dependencies = { ...transformed.dependencies }
-    if (transformed.dependencies.sharp) {
-      delete transformed.dependencies.sharp
-      debug('[AST] Removed sharp dependency')
-    } else {
-      debug('[AST] Sharp dependency not found (already absent)')
+    for (const sharpPackage of ['sharp', SHARP_TRANSFORMER_PACKAGE]) {
+      if (transformed.dependencies[sharpPackage]) {
+        delete transformed.dependencies[sharpPackage]
+        debug(`[AST] Removed ${sharpPackage} dependency`)
+      } else {
+        debug(`[AST] ${sharpPackage} dependency not found (already absent)`)
+      }
+    }
+  }
+
+  if (options.addDependencies) {
+    transformed.dependencies = {
+      ...transformed.dependencies,
+      ...options.addDependencies,
+    }
+  }
+
+  if (options.removeDependencies) {
+    for (const dependencyGroup of ['dependencies', 'devDependencies'] as const) {
+      if (!transformed[dependencyGroup]) {
+        continue
+      }
+
+      transformed[dependencyGroup] = { ...transformed[dependencyGroup] }
+      for (const packageName of options.removeDependencies) {
+        delete transformed[dependencyGroup][packageName]
+      }
     }
   }
 
@@ -131,8 +169,4 @@ function transformPackageJson(
   }
 
   return transformed
-}
-
-function writePackageJson(filePath: string, pkg: PackageJsonStructure): void {
-  fs.writeFileSync(filePath, JSON.stringify(pkg, null, 2) + '\n')
 }

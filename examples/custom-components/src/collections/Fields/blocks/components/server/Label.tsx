@@ -1,9 +1,9 @@
-import type { BlocksFieldLabelServerComponent } from 'payload'
+import type { BlocksFieldLabelServerProps } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomBlocksFieldLabelServer: BlocksFieldLabelServerComponent = ({
+export const CustomBlocksFieldLabelServer: React.FC<BlocksFieldLabelServerProps> = ({
   clientField,
   path,
 }) => {

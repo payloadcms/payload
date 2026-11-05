@@ -14,6 +14,8 @@ const withBundleAnalyzer = bundleAnalyzer({
 export default withBundleAnalyzer(
   withPayload(
     {
+      cacheComponents: process.env.PAYLOAD_DISABLE_CACHE_COMPONENTS !== 'true',
+      partialPrefetching: process.env.PAYLOAD_DISABLE_CACHE_COMPONENTS !== 'true',
       devIndicators: {
         position: 'bottom-right',
       },
@@ -22,6 +24,9 @@ export default withBundleAnalyzer(
       },
       experimental: {
         fullySpecified: true,
+        // The `typescript` dependency is aliased to `@typescript/typescript6`, which only ships a
+        // `tsc6` bin. Next's CLI mode looks for `typescript/bin/tsc`, so use the compiler API instead.
+        useTypeScriptCli: false,
         serverActions: {
           bodySizeLimit: '5mb',
         },
@@ -29,8 +34,6 @@ export default withBundleAnalyzer(
       env: {
         PAYLOAD_CORE_DEV: 'true',
         ROOT_DIR: path.resolve(dirname),
-        // @todo remove in 4.0 - will behave like this by default in 4.0
-        PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY: 'true',
       },
       async redirects() {
         return [
@@ -47,7 +50,7 @@ export default withBundleAnalyzer(
             hostname: 'localhost',
           },
         ],
-        qualities: [5, 50, 75, 100]
+        qualities: [5, 50, 75, 100],
       },
       webpack: (webpackConfig) => {
         webpackConfig.resolve.extensionAlias = {

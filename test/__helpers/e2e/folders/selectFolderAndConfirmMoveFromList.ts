@@ -1,5 +1,7 @@
 import type { Page } from '@playwright/test'
 
+import { expect } from '@playwright/test'
+
 import { clickFolderCard } from './clickFolderCard.js'
 
 type Args = {
@@ -14,7 +16,14 @@ export async function selectFolderAndConfirmMoveFromList({
 }: Args): Promise<void> {
   const firstListItem = page.locator(`tbody .row-${rowIndex}`)
   const folderPill = firstListItem.locator('.move-doc-to-folder')
-  await folderPill.click()
+  const moveDrawer = page.locator('dialog .move-folder-drawer')
+
+  await expect(async () => {
+    if (await moveDrawer.isHidden()) {
+      await folderPill.click()
+    }
+    await expect(moveDrawer).toBeVisible()
+  }).toPass({ timeout: 30000 })
 
   if (folderName) {
     await clickFolderCard({ folderName, doubleClick: true, page })

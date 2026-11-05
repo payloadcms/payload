@@ -164,7 +164,7 @@ export const getFields = (options: GetFieldsOptions): Field[] => {
                   )
                   return Boolean(
                     typeof collectionConfig?.versions === 'object' &&
-                      collectionConfig?.versions?.drafts,
+                    collectionConfig?.versions?.drafts,
                   )
                 },
                 width: '25%',

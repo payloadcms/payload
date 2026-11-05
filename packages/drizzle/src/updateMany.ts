@@ -8,6 +8,7 @@ import type { DrizzleAdapter } from './types.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateMany: UpdateMany = async function updateMany(
@@ -39,7 +40,7 @@ export const updateMany: UpdateMany = async function updateMany(
     where: whereToUse,
   })
 
-  const db = await getTransaction(this, req)
+  const db = getPrimaryDb(this, await getTransaction(this, req))
 
   let idsToUpdate: (number | string)[] = []
 

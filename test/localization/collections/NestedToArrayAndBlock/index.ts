@@ -64,4 +64,5 @@ export const NestedToArrayAndBlock: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

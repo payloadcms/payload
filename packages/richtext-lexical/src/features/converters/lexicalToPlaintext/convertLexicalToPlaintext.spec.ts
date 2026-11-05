@@ -12,7 +12,7 @@ import type {
   SerializedTableRowNode,
   SerializedTableNode,
   SerializedTableCellNode,
-} from '../../../nodeTypes.js'
+} from '../../../types/nodeTypes.js'
 import { convertLexicalToPlaintext } from './sync/index.js'
 
 function textNode(text: string, bold?: boolean): SerializedTextNode {

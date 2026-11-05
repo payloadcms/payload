@@ -7,7 +7,7 @@ import React from 'react'
 
 import type { ReloadDoc } from '../types.js'
 
-import './index.scss'
+import './index.css'
 import { RelationshipContent } from '../RelationshipContent/index.js'
 import { UploadCard } from '../UploadCard/index.js'
 
@@ -62,7 +62,7 @@ export function UploadComponentHasOne(props: Props) {
 
   if (isImage(value.mimeType)) {
     thumbnailSrc = getBestFitFromSizes({
-      sizes: value.sizes,
+      sizes: value.variants,
       thumbnailURL: thumbnailSrc,
       url: src,
       width: value.width,
@@ -70,7 +70,7 @@ export function UploadComponentHasOne(props: Props) {
   }
 
   return (
-    <UploadCard className={[baseClass, className].filter(Boolean).join(' ')}>
+    <UploadCard className={[baseClass, className].filter(Boolean).join(' ')} readOnly={readonly}>
       <RelationshipContent
         allowEdit={!readonly}
         allowRemove={!readonly}

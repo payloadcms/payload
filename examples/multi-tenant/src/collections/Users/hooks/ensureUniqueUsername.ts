@@ -39,6 +39,7 @@ export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, 
     where: {
       and: constraints,
     },
+    overrideAccess: true,
   })
 
   if (findDuplicateUsers.docs.length > 0 && req.user) {
@@ -49,6 +50,7 @@ export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, 
       const attemptedTenantChange = await req.payload.findByID({
         // @ts-ignore - selectedTenant will match DB ID type
         id: selectedTenant,
+        overrideAccess: true,
         collection: 'tenants',
       })
 

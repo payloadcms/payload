@@ -11,7 +11,7 @@ import {
 import { useEffect } from 'react'
 
 import type { PluginComponent } from '../../../../typesClient.js'
-import type { LinkFields } from '../../../nodes/types.js'
+import type { LinkFields } from '../../../server/schema.js'
 import type { ClientProps } from '../../index.js'
 import type { LinkPayload } from '../floatingLinkEditor/types.js'
 
@@ -37,7 +37,7 @@ export const LinkPlugin: PluginComponent<ClientProps> = ({ clientProps }) => {
             payload.fields.linkType = clientProps.defaultLinkType as any
           }
           if (!payload.fields?.url) {
-            payload.fields.url = clientProps.defaultLinkURL as any
+            payload.fields.url = clientProps.defaultLinkURL
           }
           $toggleLink(payload as { fields: LinkFields } & LinkPayload)
           return true

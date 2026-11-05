@@ -3,7 +3,7 @@ import type { I18nClient } from '@payloadcms/translations'
 
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'error-pill'
 
@@ -30,7 +30,8 @@ export const ErrorPill: React.FC<ErrorPillProps> = (props) => {
     <div className={classes}>
       <div className={`${baseClass}__content`}>
         <span className={`${baseClass}__count`}>{count}</span>
-        {withMessage && ` ${count > 1 ? i18n.t('general:errors') : i18n.t('general:error')}`}
+        {withMessage &&
+          ` ${count > 1 ? i18n.t('general:errors').toLowerCase() : i18n.t('general:error').toLowerCase()}`}
       </div>
     </div>
   )

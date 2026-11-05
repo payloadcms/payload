@@ -7,7 +7,6 @@ export const groupDefaultChild = 'child takes priority'
 
 const GroupFields: CollectionConfig = {
   slug: groupFieldsSlug,
-  versions: true,
   admin: {
     defaultColumns: ['id', 'group', 'insideUnnamedGroup', 'deeplyNestedGroup'],
   },

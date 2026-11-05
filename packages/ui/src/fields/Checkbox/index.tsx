@@ -1,9 +1,5 @@
 'use client'
-import type {
-  CheckboxFieldClientComponent,
-  CheckboxFieldClientProps,
-  CheckboxFieldValidation,
-} from 'payload'
+import type { CheckboxFieldClientProps, CheckboxFieldValidation } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
@@ -22,20 +18,20 @@ import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { CheckboxInput } from './Input.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'checkbox'
 
 export { CheckboxFieldClientProps, CheckboxInput, type CheckboxInputProps }
 
-const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
+const CheckboxFieldComponent: React.FC<CheckboxFieldClientProps> = (props) => {
   const {
     id,
     checked: checkedFromProps,
     disableFormData,
     field,
     field: {
-      admin: { className, description } = {} as CheckboxFieldClientProps['field']['admin'],
+      admin: { className, description } = {},
       label,
       required,
     } = {} as CheckboxFieldClientProps['field'],
@@ -106,16 +102,18 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         .join(' ')}
       style={styles}
     >
-      <RenderCustomComponent
-        CustomComponent={Error}
-        Fallback={
-          <FieldError alignCaret={isRTL ? 'right' : 'left'} path={path} showError={showError} />
-        }
-      />
       <CheckboxInput
         AfterInput={AfterInput}
         BeforeInput={BeforeInput}
         checked={checked}
+        Error={
+          <RenderCustomComponent
+            CustomComponent={Error}
+            Fallback={
+              <FieldError alignCaret={isRTL ? 'right' : 'left'} path={path} showError={showError} />
+            }
+          />
+        }
         id={fieldID}
         inputRef={null}
         Label={Label}

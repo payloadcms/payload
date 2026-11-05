@@ -1,10 +1,10 @@
 import type {
   BuildFormStateArgs,
   ClientConfig,
-  ClientUser,
   ErrorResult,
   FormState,
   ServerFunction,
+  User,
 } from 'payload'
 
 import { canAccessAdmin, formatErrors, UnauthorizedError } from 'payload'
@@ -23,7 +23,7 @@ import { handleStaleDataCheck } from './handleStaleDataCheck.js'
 export type LockedState = {
   isLocked: boolean
   lastEditedAt: string
-  user?: ClientUser | number | string
+  user?: number | string | User
 }
 
 export type StaleDataState = {
@@ -120,6 +120,7 @@ export const buildFormState = async (
     skipClientConfigAuth,
     skipValidation,
     updateLastEdited,
+    user,
   } = args
 
   const selectMode = select ? getSelectMode(select) : undefined
@@ -215,6 +216,7 @@ export const buildFormState = async (
     documentData,
     fields,
     fieldSchemaMap: schemaMap,
+    globalSlug,
     initialBlockData: blockData,
     mockRSCs,
     operation,
@@ -223,7 +225,7 @@ export const buildFormState = async (
     previousFormState: formState,
     readOnly,
     renderAllFields,
-    renderFieldFn: renderField,
+    renderFieldFn: (args) => renderField({ ...args, user }),
     req,
     schemaPath,
     select,

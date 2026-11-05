@@ -1,4 +1,5 @@
-import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
+import type { Transformer } from '@lexical/markdown'
+import type { GenericLanguages, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type {
   Klass,
@@ -9,7 +10,9 @@ import type {
 } from 'lexical'
 import type {
   Field,
+  FieldOperation,
   FieldSchemaMap,
+  FieldsToJSONSchemaArgs,
   ImportMapGenerators,
   JsonObject,
   PayloadComponent,
@@ -26,9 +29,8 @@ import type {
 } from 'payload'
 
 import type { ServerEditorConfig } from '../lexical/config/types.js'
-import type { Transformer } from '../packages/@lexical/markdown/index.js'
-import type { LexicalRichTextField } from '../types.js'
-import type { HTMLConverter } from './converters/lexicalToHtml_deprecated/converter/types.js'
+import type { LexicalRichTextField } from '../types/index.js'
+import type { ElementNodeSchemaFn } from '../types/jsonSchemaHelpers.js'
 import type { BaseClientFeatureProps } from './typesClient.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = (args: {
@@ -103,9 +105,7 @@ export type FeatureProviderServer<
         resolvedFeatures: ResolvedServerFeatureMap
         // unSanitized EditorConfig,
         unSanitizedEditorConfig: ServerEditorConfig
-      }) =>
-        | Promise<ServerFeature<ServerFeatureProps, ClientFeatureProps>>
-        | ServerFeature<ServerFeatureProps, ClientFeatureProps>)
+      }) => ServerFeature<ServerFeatureProps, ClientFeatureProps>)
     | ServerFeature<ServerFeatureProps, ClientFeatureProps>
   key: string
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
@@ -166,7 +166,7 @@ export type AfterChangeNodeHookArgs<T extends SerializedLexicalNode> = {
 }
 export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
-  operation: 'create' | 'delete' | 'read' | 'update'
+  operation: FieldOperation
   /** The value of the node before any changes. Not available in afterRead hooks */
   originalNode: T
   overrideAccess: boolean
@@ -179,7 +179,7 @@ export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
   errors: ValidationFieldError[]
   mergeLocaleActions: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
-  operation: 'create' | 'delete' | 'read' | 'update'
+  operation: FieldOperation
   /** The value of the node before any changes. Not available in afterRead hooks */
   originalNode: T
   /**
@@ -217,20 +217,35 @@ export type BeforeValidateNodeHook<T extends SerializedLexicalNode> = (
   args: BaseNodeHookArgs<T> & BeforeValidateNodeHookArgs<T>,
 ) => Promise<T> | T
 
-// Define the node with hooks that use the node's exportJSON return type
+/** Arguments passed to each node's `jsonSchema` function. */
+export type JSONSchemaArgs = {
+  elementNodeSchema: ElementNodeSchemaFn
+  field: LexicalRichTextField
+  /** TS name of the node union - use in `tsType` annotations. */
+  nodeUnionName: string
+} & Pick<
+  FieldsToJSONSchemaArgs,
+  | 'collectionIDFieldTypes'
+  | 'config'
+  | 'i18n'
+  | 'interfaceNameDefinitions'
+  | 'typeStringDefinitions'
+  | 'variant'
+>
+
+export type JSONSchemaFn = (args: JSONSchemaArgs) => JSONSchema4
+
+// Match both overloads to infer the full JSON format. ReturnType selects the compact
+// overload, and LexicalExportJSON widens custom nodes' serialized type discriminants.
+type SerializedNodeJSON<T extends LexicalNode> = T['exportJSON'] extends {
+  (compact?: false): infer Serialized extends SerializedLexicalNode
+  // eslint-disable-next-line perfectionist/sort-object-types -- Overload order determines inference.
+  (compact: boolean): unknown
+}
+  ? Serialized
+  : never
+
 export type NodeWithHooks<T extends LexicalNode = any> = {
-  /**
-   * Allows you to define how a node can be serialized into different formats. Currently, only supports html.
-   * Markdown converters are defined in `markdownTransformers` and not here.
-   *
-   * @deprecated - will be removed in 4.0
-   */
-  converters?: {
-    /**
-     * @deprecated - will be removed in 4.0
-     */
-    html?: HTMLConverter<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
-  }
   /**
    * If a node includes sub-fields (e.g. block and link nodes), passing those subFields here will make payload
    * automatically populate, run hooks, and generate component import maps for them
@@ -239,14 +254,14 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
     /**
      * Optional. If not provided, all possible sub-fields should be returned.
      */
-    node?: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    node?: SerializedNodeJSON<ReplaceAny<T, LexicalNode>>
     req?: PayloadRequest
   }) => Field[] | null
   /**
    * If a node includes sub-fields, the sub-fields data needs to be returned here, alongside `getSubFields` which returns their schema.
    */
   getSubFieldsData?: (args: {
-    node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    node: SerializedNodeJSON<ReplaceAny<T, LexicalNode>>
     req: PayloadRequest
   }) => JsonObject
   /**
@@ -256,19 +271,23 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
    * In order for them to be populated correctly in graphQL, the population logic needs to be provided here.
    */
   graphQLPopulationPromises?: Array<
-    PopulationPromise<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
+    PopulationPromise<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>
   >
   /**
    * Just like payload fields, you can provide hooks which are run for this specific node. These are called Node Hooks.
    */
   hooks?: {
-    afterChange?: Array<AfterChangeNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
-    afterRead?: Array<AfterReadNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
-    beforeChange?: Array<BeforeChangeNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
-    beforeValidate?: Array<
-      BeforeValidateNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
-    >
+    afterChange?: Array<AfterChangeNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
+    afterRead?: Array<AfterReadNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
+    beforeChange?: Array<BeforeChangeNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
+    beforeValidate?: Array<BeforeValidateNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
   }
+  /**
+   * Returns the JSON Schema for this node, plus optional standalone TS
+   * source for helper types its `tsType` annotations reference. Nodes
+   * without this function are omitted from the strictly-typed union.
+   */
+  jsonSchema?: JSONSchemaFn
   /**
    * The actual lexical node needs to be provided here. This also supports [lexical node replacements](https://lexical.dev/docs/concepts/node-replacement).
    */
@@ -277,7 +296,7 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
    * This allows you to provide node validations, which are run when your document is being validated, alongside other payload fields.
    * You can use it to throw a validation error for a specific node in case its data is incorrect.
    */
-  validations?: Array<NodeValidation<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+  validations?: Array<NodeValidation<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
 }
 
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
@@ -297,23 +316,6 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
       }
     | ImportMapGenerators[0]
     | PayloadComponent[]
-  generatedTypes?: {
-    modifyOutputSchema: (args: {
-      collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
-      config?: SanitizedConfig
-      /**
-       * Current schema which will be modified by this function.
-       */
-      currentSchema: JSONSchema4
-      field: LexicalRichTextField
-      i18n?: I18n
-      /**
-       * Allows you to define new top-level interfaces that can be re-used in the output schema.
-       */
-      interfaceNameDefinitions: Map<string, JSONSchema4>
-      isRequired: boolean
-    }) => JSONSchema4
-  }
   generateSchemaMap?: (args: {
     config: SanitizedConfig
     field: RichTextField
@@ -367,31 +369,8 @@ export type ResolvedServerFeatureMap = Map<string, ResolvedServerFeature<any, an
 export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<any, any, any>>
 
 export type SanitizedServerFeatures = {
-  /**  The node types mapped to their converters */
-  converters: {
-    html: HTMLConverter[]
-  }
   /** The keys of all enabled features */
   enabledFeatures: string[]
-  generatedTypes: {
-    modifyOutputSchemas: Array<
-      (args: {
-        collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
-        config?: SanitizedConfig
-        /**
-         * Current schema which will be modified by this function.
-         */
-        currentSchema: JSONSchema4
-        field: LexicalRichTextField
-        i18n?: I18n
-        /**
-         * Allows you to define new top-level interfaces that can be re-used in the output schema.
-         */
-        interfaceNameDefinitions: Map<string, JSONSchema4>
-        isRequired: boolean
-      }) => JSONSchema4
-    >
-  }
   /**  The node types mapped to their hooks */
 
   getSubFields?: Map<

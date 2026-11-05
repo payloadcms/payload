@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--check {
+    /* Size is controlled by the icon component's `size` prop. */
+  }
+}

@@ -11,10 +11,7 @@ import {
 } from 'lexical'
 import * as React from 'react'
 
-import type {
-  RelationshipData,
-  SerializedRelationshipNode,
-} from '../../server/nodes/RelationshipNode.js'
+import type { RelationshipData, SerializedRelationshipNode } from '../../server/schema.js'
 
 import { RelationshipServerNode } from '../../server/nodes/RelationshipNode.js'
 
@@ -65,10 +62,6 @@ export class RelationshipNode extends RelationshipServerNode {
   }
 
   static override importJSON(serializedNode: SerializedRelationshipNode): RelationshipNode {
-    if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
-      serializedNode.value = (serializedNode.value as unknown as { id: string }).id
-    }
-
     const importedData: RelationshipData = {
       relationTo: serializedNode.relationTo,
       value: serializedNode.value,

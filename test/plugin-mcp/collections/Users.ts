@@ -8,11 +8,6 @@ export const Users: CollectionConfig = {
   admin: {
     useAsTitle: 'email',
   },
-  access: {
-    read: () => true,
-  },
-  fields: [
-    // Email added by default
-    // Add more fields as needed
-  ],
+  fields: [],
+  versions: false,
 }

@@ -13,4 +13,5 @@ export const DisableCopyToLocale: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

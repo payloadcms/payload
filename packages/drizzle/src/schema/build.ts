@@ -18,6 +18,7 @@ import type {
 import { createTableName } from '../createTableName.js'
 import { buildForeignKeyName } from '../utilities/buildForeignKeyName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
+import { isUUIDType } from '../utilities/isUUIDType.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -211,11 +212,11 @@ export const buildTable = ({
 
     localesIndexes._localeParent = {
       name: buildIndexName({
-        name: `${localeTableName}_locale_parent_id_unique`,
+        name: `${localeTableName}_parent_id_locale_unique`,
         adapter,
         appendSuffix: false,
       }),
-      on: ['_locale', '_parentID'],
+      on: ['_parentID', '_locale'],
       unique: true,
     }
 
@@ -619,8 +620,9 @@ export const buildTable = ({
           config: relationshipConfig,
           throwValidationError: true,
         })
-        let colType: 'integer' | 'numeric' | 'uuid' | 'varchar' =
-          adapter.idType === 'uuid' ? 'uuid' : 'integer'
+        let colType: 'integer' | 'numeric' | 'uuid' | 'varchar' = isUUIDType(adapter.idType)
+          ? 'uuid'
+          : 'integer'
         const relatedCollectionCustomIDType =
           adapter.payload.collections[relationshipConfig.slug]?.customIDType
 

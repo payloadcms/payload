@@ -17,14 +17,6 @@
       "type": "node-terminal"
     },
     {
-      "command": "pnpm tsx --no-deprecation test/dev.ts storage-uploadthing",
-      "cwd": "${workspaceFolder}",
-      "name": "Uploadthing",
-      "request": "launch",
-      "type": "node-terminal",
-      "envFile": "${workspaceFolder}/test/storage-uploadthing/.env"
-    },
-    {
       "command": "pnpm tsx --no-deprecation test/dev.ts live-preview",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Live Preview",

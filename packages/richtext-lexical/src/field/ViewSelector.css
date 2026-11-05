@@ -1,0 +1,32 @@
+.lexical-view-selector {
+  display: inline-flex;
+  margin-inline-start: var(--spacing-xs);
+  vertical-align: middle;
+}
+
+.lexical-view-selector__button {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacer-1);
+  padding: var(--spacer-1) var(--spacer-2);
+  background: transparent;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  box-sizing: border-box;
+
+  &:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text);
+  }
+}
+
+.lexical-view-selector__label {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.lexical-view-selector__icon {
+  flex-shrink: 0;
+}

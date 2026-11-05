@@ -1,16 +1,37 @@
 'use client'
-import type { CSSProperties } from 'react'
+import type { AriaAttributes, AriaRole, CSSProperties } from 'react'
 
 export * as PopupList from './PopupButtonList/index.js'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import React, {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import './index.scss'
-import { PopupTrigger } from './PopupTrigger/index.js'
+import { useModalFocus } from '../../providers/ModalFocus/index.js'
+import { ThemeProvider } from '../../providers/Theme/index.js'
+import './index.css'
+import { type PopupButtonRenderProps, PopupTrigger } from './PopupTrigger/index.js'
+import { createSubmenuScope, type SubmenuScope } from './SubmenuScope.js'
+import { useSubmenuPointerIntent } from './useSubmenuPointerIntent.js'
 
 const baseClass = 'popup'
+
+type PopupContextValue = {
+  closePopupChain: (options?: { restoreFocus?: boolean }) => void
+  popupRef: React.RefObject<HTMLDivElement | null>
+  popupRole?: AriaRole
+  submenuScope: SubmenuScope
+}
+
+const PopupContext = createContext<null | PopupContextValue>(null)
 
 /**
  * Selector for all elements the browser considers tabbable.
@@ -30,44 +51,50 @@ const TABBABLE_SELECTOR = [
   .map((s) => `${s}:not([tabindex="-1"])`)
   .join(', ')
 
+const MENU_ITEM_SELECTOR = '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]'
+const POPUP_CONTENT_SELECTOR = `.${baseClass}__content, .${baseClass}__hidden-content`
+
+const getMenuItems = (popup: HTMLElement): HTMLElement[] =>
+  Array.from(popup.querySelectorAll<HTMLElement>(MENU_ITEM_SELECTOR)).filter(
+    (item) => item.closest(POPUP_CONTENT_SELECTOR) === popup,
+  )
+
 export type PopupProps = {
   backgroundColor?: CSSProperties['backgroundColor']
   boundingRef?: React.RefObject<HTMLElement>
   button?: React.ReactNode
-  /**
-   * The class name to apply to the button that triggers the popup.
-   */
+  buttonAriaLabel?: string
   buttonClassName?: string
-  buttonSize?: 'large' | 'medium' | 'small' | 'xsmall'
-  buttonType?: 'custom' | 'default' | 'none'
+  buttonSize?: 'large' | 'medium'
+  buttonType?: 'custom' | 'default'
   caret?: boolean
   children?: React.ReactNode
-  /**
-   * The class name to apply to the popup container containing the trigger.
-   * This does not wrap the actual popup content, which is rendered in a portal.
-   */
   className?: string
   disabled?: boolean
-  /**
-   * Force control the open state of the popup, regardless of the trigger.
-   */
   forceOpen?: boolean
   /**
    * Preferred horizontal alignment of the popup, if there is enough space available.
+   * Nested menu popups use 'left' and 'right' as their preferred side instead.
+   * When omitted, nested menu popups prefer the right side.
    *
    * @default 'left'
    */
   horizontalAlign?: 'center' | 'left' | 'right'
+  hoverSubmenu?: boolean
   id?: string
   initActive?: boolean
   noBackground?: boolean
   onToggleClose?: () => void
   onToggleOpen?: (active: boolean) => void
-  /**
-   * Class name to apply to the portal container.
-   */
+  popupAriaLabel?: string
+  popupType?: AriaAttributes['aria-haspopup']
   portalClassName?: string
   render?: (args: { close: () => void }) => React.ReactNode
+  /**
+   * Render prop for custom trigger button. Receives onClick/onKeyDown/aria props.
+   * When provided, `button` and `buttonType` are ignored.
+   */
+  renderButton?: (props: PopupButtonRenderProps) => React.ReactNode
   showOnHover?: boolean
   /**
    * By default, the scrollbar is hidden. If you want to show it, set this to true.
@@ -76,7 +103,21 @@ export type PopupProps = {
    * @default false
    */
   showScrollbar?: boolean
-  size?: 'fit-content' | 'large' | 'medium' | 'small'
+  /**
+   * Position the popup to the side of the trigger instead of above/below.
+   * The popup's top edge aligns with the trigger's top edge (with viewport clamping).
+   * Automatically flips to the opposite side if there is not enough space.
+   * When set, `verticalAlign`, `horizontalAlign`, and the caret are ignored.
+   */
+  side?: 'left' | 'right'
+  size?: 'fit-content' | 'large' | 'small'
+  /**
+   * Theme for the popup content. Defaults to 'dark'.
+   * Set to 'auto' to inherit the current theme.
+   *
+   * @default 'dark'
+   */
+  theme?: 'auto' | 'dark' | 'light'
   /**
    * Preferred vertical alignment of the popup (position below or above the trigger),
    * if there is enough space available.
@@ -92,13 +133,14 @@ export type PopupProps = {
 /**
  * Component that renders a popup, as well as a button that triggers the popup.
  *
- * The popup is rendered in a portal, and is automatically positioned above / below the trigger,
+ * The popup is rendered next to its trigger in the DOM and positioned above / below it,
  * depending on the verticalAlign prop and the space available.
  */
 export const Popup: React.FC<PopupProps> = (props) => {
   const {
     id,
     button,
+    buttonAriaLabel,
     buttonClassName,
     buttonSize,
     buttonType = 'default',
@@ -107,21 +149,43 @@ export const Popup: React.FC<PopupProps> = (props) => {
     className,
     disabled,
     forceOpen,
-    horizontalAlign = 'left',
+    horizontalAlign: horizontalAlignProp,
+    hoverSubmenu = false,
     initActive = false,
     noBackground,
     onToggleClose,
     onToggleOpen,
+    popupAriaLabel,
+    popupType,
     portalClassName,
     render,
+    renderButton,
     showOnHover = false,
     showScrollbar = false,
-    size = 'medium',
+    side,
+    size = 'fit-content',
+    theme = 'dark',
     verticalAlign = 'bottom',
   } = props
 
   const popupRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
+  const { registerPopup } = useModalFocus()
+  const getTrigger = useCallback(
+    () => triggerRef.current?.querySelector<HTMLElement>('button, [tabindex="0"]') ?? null,
+    [],
+  )
+
+  useLayoutEffect(() => {
+    const container = containerRef.current
+
+    if (container) {
+      return registerPopup({ container, getTrigger })
+    }
+  }, [getTrigger, registerPopup])
+  const generatedContentId = useId()
+  const contentId = `${id || generatedContentId}-content`
 
   /**
    * Keeps track of whether the popup was opened via keyboard.
@@ -130,27 +194,129 @@ export const Popup: React.FC<PopupProps> = (props) => {
    */
   const openedViaKeyboardRef = useRef(false)
 
-  const [mounted, setMounted] = useState(false)
+  const parentPopup = use(PopupContext)
+  const popupRole = (popupType === true ? 'menu' : popupType || undefined) as AriaRole | undefined
+  const submenuScope = useState(() => createSubmenuScope())[0]
+  const isSubmenu = parentPopup?.popupRole === 'menu' && popupRole === 'menu'
+  const horizontalAlign = horizontalAlignProp ?? 'left'
+  const resolvedSide =
+    side ?? (isSubmenu ? (horizontalAlignProp === 'left' ? 'left' : 'right') : undefined)
+
   const [active, setActiveInternal] = useState(initActive)
   const [isOnTop, setIsOnTop] = useState(verticalAlign === 'top')
 
-  // Track when component is mounted to avoid SSR/client hydration mismatch
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
   const setActive = useCallback(
-    (isActive: boolean, viaKeyboard = false) => {
+    (isActive: boolean, viaKeyboard = false, coordinateParent = true) => {
       if (isActive) {
         openedViaKeyboardRef.current = viaKeyboard
+        if (coordinateParent && isSubmenu) {
+          parentPopup.submenuScope.requestOpen({
+            id: contentId,
+            viaKeyboard,
+          })
+          return
+        }
         onToggleOpen?.(true)
       } else {
         onToggleClose?.()
+        submenuScope.closeActiveBranch()
+        parentPopup?.submenuScope.release(contentId)
       }
       setActiveInternal(isActive)
     },
-    [onToggleClose, onToggleOpen],
+    [contentId, isSubmenu, onToggleClose, onToggleOpen, parentPopup, submenuScope],
   )
+
+  const closePopup = useCallback(
+    ({ restoreFocus = true }: { restoreFocus?: boolean } = {}) => {
+      const trigger = getTrigger()
+
+      setActive(false)
+      if (restoreFocus) {
+        requestAnimationFrame(() => trigger?.focus())
+      }
+    },
+    [getTrigger, setActive],
+  )
+  const close = useCallback(() => closePopup(), [closePopup])
+  const closePopupChain = useCallback(
+    (options: { restoreFocus?: boolean } = {}) => {
+      if (parentPopup) {
+        closePopup({ restoreFocus: false })
+        parentPopup.closePopupChain(options)
+        return
+      }
+
+      closePopup(options)
+    },
+    [closePopup, parentPopup],
+  )
+
+  const openFromParent = useCallback(
+    (viaKeyboard: boolean) => setActive(true, viaKeyboard, false),
+    [setActive],
+  )
+
+  const closeFromPointer = useCallback(() => {
+    const hasFocus = popupRef.current?.contains(document.activeElement)
+    const trigger = triggerRef.current?.querySelector<HTMLElement>('[aria-haspopup="menu"]')
+
+    closePopup({ restoreFocus: false })
+    if (hasFocus) {
+      trigger?.focus()
+    }
+  }, [closePopup])
+
+  const pointerIntent = useSubmenuPointerIntent({
+    active,
+    contentRef: popupRef,
+    enabled: isSubmenu && hoverSubmenu,
+    onClose: closeFromPointer,
+    onOpen: () =>
+      parentPopup?.submenuScope.requestOpen({
+        id: contentId,
+        viaPointer: true,
+      }),
+    onSafeAreaExpire: ({ x, y }) => {
+      const target = document.elementFromPoint(x, y)
+      const parentContent = parentPopup?.popupRef.current
+
+      if (parentContent && target?.closest(POPUP_CONTENT_SELECTOR) === parentContent) {
+        const trigger = target
+          .closest('.popup__submenu-hover-watch')
+          ?.querySelector<HTMLElement>('[aria-haspopup="menu"][aria-controls]')
+        const siblingId = trigger?.getAttribute('aria-controls')
+
+        if (siblingId && trigger?.getAttribute('aria-disabled') !== 'true') {
+          parentPopup?.submenuScope.requestOpen({ id: siblingId })
+          return
+        }
+      }
+
+      closeFromPointer()
+    },
+    triggerRef,
+  })
+
+  const submenuCallbacks = useRef({ closeFromPointer, openFromParent })
+  const parentSubmenuScope = parentPopup?.submenuScope
+
+  useEffect(() => {
+    submenuCallbacks.current = { closeFromPointer, openFromParent }
+  }, [closeFromPointer, openFromParent])
+
+  useEffect(() => {
+    if (!isSubmenu || !parentSubmenuScope) {
+      return
+    }
+
+    return parentSubmenuScope.register({
+      id: contentId,
+      closeBranch: () => submenuCallbacks.current.closeFromPointer(),
+      isPointerProtected: pointerIntent.isProtected,
+      open: (viaKeyboard) => submenuCallbacks.current.openFromParent(viaKeyboard),
+    })
+  }, [contentId, isSubmenu, parentSubmenuScope, pointerIntent.isProtected])
 
   // /////////////////////////////////////
   // Position Calculation
@@ -171,62 +337,126 @@ export const Popup: React.FC<PopupProps> = (props) => {
     const popupRect = popup.getBoundingClientRect()
 
     // Gap between the popup and the trigger/viewport edges (in pixels)
-    const offset = 10
-
-    // /////////////////////////////////////
-    // Vertical Positioning
-    // Calculates the `top` position in absolute page coordinates.
-    // Uses `verticalAlign` prop as the preferred direction, but flips
-    // to the opposite side if there's not enough viewport space.
-    // /////////////////////////////////////
+    const offset = 8
+    // Additional gap used in side mode so the child popup has breathing room from its parent
+    const sideOffset = 4
 
     let top: number
-    let onTop = verticalAlign === 'top'
+    let left: number
+    let caretLeft: number
 
-    if (verticalAlign === 'bottom') {
-      top = triggerRect.bottom + window.scrollY + offset
+    if (resolvedSide) {
+      // /////////////////////////////////////
+      // Side Positioning
+      // Places the popup to the left or right of the parent popup (not just the trigger),
+      // top-aligned with the trigger. Flips to the opposite side if there is not enough
+      // viewport space.
+      // /////////////////////////////////////
 
-      if (triggerRect.bottom + popupRect.height + offset > window.innerHeight) {
-        top = triggerRect.top + window.scrollY - popupRect.height - offset
-        onTop = true
+      const scrollContainer = popup.querySelector<HTMLElement>(
+        `:scope > .${baseClass}__scroll-container`,
+      )
+      const popupPaddingTop = scrollContainer
+        ? Number.parseFloat(window.getComputedStyle(scrollContainer).paddingTop) || 0
+        : 0
+
+      // Align the first menu item with the trigger by accounting for the popup's top padding.
+      top = triggerRect.top - popupPaddingTop
+      const maxTop = window.innerHeight - popupRect.height - offset
+      top = Math.max(offset, Math.min(top, maxTop))
+
+      // Use the parent popup's bounding rect as the reference for left/right positioning
+      // so the child appears 4px from the parent popup edge, not just the trigger button.
+      const anchorRect = parentPopup?.popupRef.current
+        ? parentPopup.popupRef.current.getBoundingClientRect()
+        : triggerRect
+
+      if (resolvedSide === 'left') {
+        left = anchorRect.left - popupRect.width - sideOffset
+        if (left < offset) {
+          // flip to right side
+          left = anchorRect.right + sideOffset
+        }
+      } else {
+        left = anchorRect.right + sideOffset
+        if (left + popupRect.width + offset > window.innerWidth) {
+          // flip to left side
+          left = anchorRect.left - popupRect.width - sideOffset
+        }
       }
+
+      left = Math.max(
+        offset,
+        Math.min(left, Math.max(offset, window.innerWidth - popupRect.width - offset)),
+      )
+
+      // Caret not used in side mode; set a neutral value
+      caretLeft = popupRect.width / 2
+
+      setIsOnTop(false)
     } else {
-      top = triggerRect.top + window.scrollY - popupRect.height - offset
+      // /////////////////////////////////////
+      // Vertical Positioning
+      // Calculates the `top` position in absolute page coordinates.
+      // Uses `verticalAlign` prop as the preferred direction, but flips
+      // to the opposite side if there's not enough viewport space.
+      // /////////////////////////////////////
 
-      if (triggerRect.top - popupRect.height - offset < 0) {
-        top = triggerRect.bottom + window.scrollY + offset
-        onTop = false
+      let onTop = verticalAlign === 'top'
+
+      if (verticalAlign === 'bottom') {
+        top = triggerRect.bottom + offset
+
+        if (triggerRect.bottom + popupRect.height + offset > window.innerHeight) {
+          // Try to flip above — only do so if there's actually enough room
+          const topIfAbove = triggerRect.top - popupRect.height - offset
+          if (topIfAbove >= 0) {
+            top = topIfAbove
+            onTop = true
+          }
+          // else: not enough room above either — keep below and let it overflow rather than going off-screen
+        }
+      } else {
+        top = triggerRect.top - popupRect.height - offset
+
+        if (triggerRect.top - popupRect.height - offset < 0) {
+          top = triggerRect.bottom + offset
+          onTop = false
+        }
       }
+
+      const maxTop = Math.max(offset, window.innerHeight - popupRect.height - offset)
+      top = Math.max(offset, Math.min(top, maxTop))
+
+      setIsOnTop(onTop)
+
+      // /////////////////////////////////////
+      // Horizontal Positioning
+      // Calculates the `left` position based on `horizontalAlign` prop:
+      // - 'left': aligns popup's left edge with trigger's left edge
+      // - 'right': aligns popup's right edge with trigger's right edge
+      // - 'center': centers popup horizontally relative to trigger
+      // Then clamps to keep the popup within viewport bounds.
+      // /////////////////////////////////////
+
+      left =
+        horizontalAlign === 'right'
+          ? triggerRect.right - popupRect.width
+          : horizontalAlign === 'center'
+            ? triggerRect.left + triggerRect.width / 2 - popupRect.width / 2
+            : triggerRect.left
+
+      left = Math.max(offset, Math.min(left, window.innerWidth - popupRect.width - offset))
+
+      // /////////////////////////////////////
+      // Caret Positioning
+      // Positions the caret arrow to point at the trigger's horizontal center.
+      // Clamps between 12px from edges to prevent caret from overflowing the popup.
+      // /////////////////////////////////////
+
+      const triggerCenter = triggerRect.left + triggerRect.width / 2
+      caretLeft = Math.max(12, Math.min(triggerCenter - left, popupRect.width - 12))
     }
-
-    setIsOnTop(onTop)
-
-    // /////////////////////////////////////
-    // Horizontal Positioning
-    // Calculates the `left` position based on `horizontalAlign` prop:
-    // - 'left': aligns popup's left edge with trigger's left edge
-    // - 'right': aligns popup's right edge with trigger's right edge
-    // - 'center': centers popup horizontally relative to trigger
-    // Then clamps to keep the popup within viewport bounds.
-    // /////////////////////////////////////
-
-    let left =
-      horizontalAlign === 'right'
-        ? triggerRect.right - popupRect.width
-        : horizontalAlign === 'center'
-          ? triggerRect.left + triggerRect.width / 2 - popupRect.width / 2
-          : triggerRect.left
-
-    left = Math.max(offset, Math.min(left, window.innerWidth - popupRect.width - offset))
-
-    // /////////////////////////////////////
-    // Caret Positioning
-    // Positions the caret arrow to point at the trigger's horizontal center.
-    // Clamps between 12px from edges to prevent caret from overflowing the popup.
-    // /////////////////////////////////////
-
-    const triggerCenter = triggerRect.left + triggerRect.width / 2
-    const caretLeft = Math.max(12, Math.min(triggerCenter - left, popupRect.width - 12))
 
     // /////////////////////////////////////
     // Apply Styles (only if changed)
@@ -238,9 +468,13 @@ export const Popup: React.FC<PopupProps> = (props) => {
     // /////////////////////////////////////
 
     const newTop = `${Math.round(top)}px`
-    const newLeft = `${Math.round(left + window.scrollX)}px`
+    const newLeft = `${Math.round(left)}px`
     const newCaretLeft = `${Math.round(caretLeft)}px`
+    const newPosition = 'fixed'
 
+    if (popup.style.position !== newPosition) {
+      popup.style.position = newPosition
+    }
     if (popup.style.top !== newTop) {
       popup.style.top = newTop
     }
@@ -250,18 +484,32 @@ export const Popup: React.FC<PopupProps> = (props) => {
     if (popup.style.getPropertyValue('--caret-left') !== newCaretLeft) {
       popup.style.setProperty('--caret-left', newCaretLeft)
     }
+    pointerIntent.updateSafeArea()
   })
 
   // /////////////////////////////////////
   // Click Outside Handler
   // Closes popup when clicking outside both the popup and trigger.
+  // Distinguishes between parent and child popups:
+  // - Click in child popup: parent stays open
+  // - Click in parent popup: child closes
   // /////////////////////////////////////
 
   const handleClickOutside = useEffectEvent((e: MouseEvent) => {
-    const isOutsidePopup = !popupRef.current?.contains(e.target as Node)
-    const isOutsideTrigger = !triggerRef.current?.contains(e.target as Node)
+    const target = e.target as Node
+    const isOutsidePopup = !popupRef.current?.contains(target)
+    const isOutsideTrigger = !triggerRef.current?.contains(target)
 
-    if (isOutsidePopup && isOutsideTrigger) {
+    // Check if click is inside a popup portal
+    const clickedPopupContent = (target as Element).closest?.('.popup__content')
+
+    // If the clicked popup contains this popup's trigger, it's a parent popup
+    // and we should close. If it doesn't contain our trigger, it's a child popup
+    // and we should stay open to avoid closing parent when interacting with child.
+    const isInsideChildPopup =
+      clickedPopupContent && !clickedPopupContent.contains(triggerRef.current)
+
+    if (isOutsidePopup && isOutsideTrigger && !isInsideChildPopup) {
       setActive(false)
     }
   })
@@ -270,8 +518,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
   // Keyboard Navigation
   // Handles keyboard interactions when popup is open:
   // - Escape: closes popup and returns focus to trigger
-  // - Tab/Shift+Tab: cycles through focusable items with wrapping
-  // - ArrowUp/ArrowDown: same as Shift+Tab/Tab for menu-style navigation
+  // - Tab/Shift+Tab: closes menus; dialogs retain normal document tab order
+  // - ArrowUp/ArrowDown: moves between menu items with wrapping
   // Focus is managed manually to support elements the browser might skip.
   // /////////////////////////////////////
 
@@ -281,14 +529,75 @@ export const Popup: React.FC<PopupProps> = (props) => {
       return
     }
 
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      setActive(false)
-      triggerRef.current?.querySelector<HTMLElement>('button, [tabindex="0"]')?.focus()
+    const activePopup = document.activeElement?.closest(`.${baseClass}__content`)
+    if (activePopup && activePopup !== popup) {
       return
     }
 
-    if (e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      e.stopPropagation()
+      closePopup()
+      return
+    }
+
+    if (e.key === 'ArrowRight' && popupRole === 'menu') {
+      const trigger = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>(
+        `.${baseClass}__trigger-wrap`,
+      )
+      const nestedTrigger = trigger?.querySelector<HTMLElement>('button, [role="menuitem"]')
+      if (nestedTrigger) {
+        e.preventDefault()
+        nestedTrigger.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }))
+        return
+      }
+    }
+
+    if (e.key === 'ArrowLeft' && parentPopup) {
+      e.preventDefault()
+      closePopup()
+      return
+    }
+
+    if (e.key === 'Tab' && popupRole === 'menu') {
+      if (e.shiftKey) {
+        e.preventDefault()
+        closePopupChain({ restoreFocus: true })
+        return
+      }
+
+      setTimeout(closePopupChain)
+      return
+    }
+
+    if (['ArrowDown', 'ArrowUp', 'End', 'Home'].includes(e.key)) {
+      const menuItems = getMenuItems(popup)
+      if (menuItems.length > 0) {
+        e.preventDefault()
+
+        const currentIndex = menuItems.findIndex((item) => item === document.activeElement)
+        const nextIndex =
+          e.key === 'Home'
+            ? 0
+            : e.key === 'End'
+              ? menuItems.length - 1
+              : e.key === 'ArrowUp'
+                ? currentIndex <= 0
+                  ? menuItems.length - 1
+                  : currentIndex - 1
+                : currentIndex === -1 || currentIndex === menuItems.length - 1
+                  ? 0
+                  : currentIndex + 1
+
+        menuItems.forEach((item, index) =>
+          item.setAttribute('tabindex', index === nextIndex ? '0' : '-1'),
+        )
+        menuItems[nextIndex].focus()
+        return
+      }
+    }
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       const focusable = Array.from(popup.querySelectorAll<HTMLElement>(TABBABLE_SELECTOR))
       if (focusable.length === 0) {
         return
@@ -297,7 +606,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       e.preventDefault()
 
       const currentIndex = focusable.findIndex((el) => el === document.activeElement)
-      const goBackward = e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey)
+      const goBackward = e.key === 'ArrowUp'
 
       let nextIndex: number
       if (currentIndex === -1) {
@@ -328,7 +637,14 @@ export const Popup: React.FC<PopupProps> = (props) => {
     // Check if the clicked element or any ancestor is an actionable element
     const actionable = target.closest('button, a[href], [role="button"], [role="menuitem"]')
     if (actionable && popupRef.current?.contains(actionable)) {
-      setActive(false)
+      if (actionable.closest(`.${baseClass}__content`) !== popupRef.current) {
+        return
+      }
+      // Don't close if clicking a nested popup's trigger — it will manage its own open state
+      if (actionable.closest(`.${baseClass}__trigger-wrap`)) {
+        return
+      }
+      closePopup()
     }
   })
 
@@ -338,6 +654,16 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   useEffect(() => {
     if (!active) {
+      const popup = popupRef.current
+      if (popup) {
+        // Clear inline position styles so the CSS `top: -9999px` rule on
+        // `.popup__hidden-content` takes effect. Without this, the inline
+        // styles set during positioning would win over the CSS rule, keeping
+        // portaled children (e.g. a ReactSelect menu) visually on-screen.
+        popup.style.position = ''
+        popup.style.top = ''
+        popup.style.left = ''
+      }
       return
     }
 
@@ -346,12 +672,32 @@ export const Popup: React.FC<PopupProps> = (props) => {
       return
     }
 
+    if (!popup.matches(':popover-open')) {
+      popup.showPopover()
+    }
+
+    const menuItems = getMenuItems(popup)
+    menuItems.forEach((item, index) => item.setAttribute('tabindex', index === 0 ? '0' : '-1'))
+
     // /////////////////////////////////////
     // Initial Position
-    // Calculate and apply popup position immediately on open.
+    // Calculate and apply popup position.
+    // getBoundingClientRect() forces synchronous layout.
+    //
+    // We call updatePosition() twice: once synchronously (so the popup
+    // snaps to roughly the right place immediately rather than flashing
+    // from -9999px) and once in a requestAnimationFrame, which fires
+    // after the browser has finished laying out the newly-visible popup
+    // content. The rAF call is the authoritative one — it catches cases
+    // where the popup height wasn't stable yet during the first call
+    // (e.g. ColumnSelection popup content rendering after hidden → visible
+    // class switch), which was causing incorrect flip-to-top decisions.
     // /////////////////////////////////////
 
     updatePosition()
+    const rafId = requestAnimationFrame(() => {
+      updatePosition()
+    })
 
     // /////////////////////////////////////
     // Focus Management
@@ -362,7 +708,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     if (openedViaKeyboardRef.current) {
       // Use requestAnimationFrame to ensure DOM is ready.
       requestAnimationFrame(() => {
-        const firstFocusable = popup.querySelector<HTMLElement>(TABBABLE_SELECTOR)
+        const firstFocusable = menuItems[0] ?? popup.querySelector<HTMLElement>(TABBABLE_SELECTOR)
         firstFocusable?.focus()
       })
     }
@@ -377,15 +723,19 @@ export const Popup: React.FC<PopupProps> = (props) => {
     window.addEventListener('resize', updatePosition)
     window.addEventListener('scroll', updatePosition, { capture: true, passive: true })
     document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('keydown', handleKeyDown)
+    popup.addEventListener('keydown', handleKeyDown)
     popup.addEventListener('click', handleActionableClick)
 
     return () => {
+      cancelAnimationFrame(rafId)
       window.removeEventListener('resize', updatePosition)
       window.removeEventListener('scroll', updatePosition, { capture: true })
       document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('keydown', handleKeyDown)
+      popup.removeEventListener('keydown', handleKeyDown)
       popup.removeEventListener('click', handleActionableClick)
+      if (popup.matches(':popover-open')) {
+        popup.hidePopover()
+      }
     }
   }, [active])
 
@@ -399,17 +749,22 @@ export const Popup: React.FC<PopupProps> = (props) => {
     <PopupTrigger
       active={active}
       button={button}
+      buttonAriaLabel={buttonAriaLabel}
       buttonType={buttonType}
       className={buttonClassName}
+      contentId={contentId}
       disabled={disabled}
+      isMenuItem={parentPopup?.popupRole === 'menu'}
       noBackground={noBackground}
+      popupType={popupType}
+      renderButton={renderButton}
       setActive={setActive}
       size={buttonSize}
     />
   )
 
   return (
-    <div className={[baseClass, className].filter(Boolean).join(' ')} id={id}>
+    <div className={[baseClass, className].filter(Boolean).join(' ')} id={id} ref={containerRef}>
       <div className={`${baseClass}__trigger-wrap`} ref={triggerRef}>
         {showOnHover ? (
           <div
@@ -421,46 +776,62 @@ export const Popup: React.FC<PopupProps> = (props) => {
           >
             {Trigger}
           </div>
+        ) : hoverSubmenu && isSubmenu ? (
+          <div {...pointerIntent.triggerProps} className={`${baseClass}__submenu-hover-watch`}>
+            {Trigger}
+          </div>
         ) : (
           Trigger
         )}
       </div>
 
-      {mounted
-        ? // We need to make sure the popup is part of the DOM (although invisible), even if it's not active.
-          // This ensures that components within the popup, like modals, do not unmount when the popup closes.
-          // Otherwise, modals opened from the popup will close unexpectedly when clicking within the modal, since
-          // that closes the popup due to the click outside handler.
-          createPortal(
-            <div
-              className={
-                active
-                  ? [
-                      `${baseClass}__content`,
-                      `${baseClass}--size-${size}`,
-                      isOnTop ? `${baseClass}--v-top` : `${baseClass}--v-bottom`,
-                      portalClassName,
-                    ]
-                      .filter(Boolean)
-                      .join(' ')
-                  : // Do not share any class names between active and disabled popups, to make sure
-                    // tests do not accidentally target inactive popups.
-                    `${baseClass}__hidden-content`
-              }
-              data-popup-id={id || undefined}
-              ref={popupRef}
-            >
-              <div
-                className={`${baseClass}__scroll-container${showScrollbar ? ` ${baseClass}__scroll-container--show-scrollbar` : ''}`}
-              >
-                {render?.({ close: () => setActive(false) })}
+      <PopupContext value={{ closePopupChain, popupRef, popupRole, submenuScope }}>
+        <div
+          {...pointerIntent.contentProps}
+          aria-label={popupAriaLabel}
+          className={
+            active
+              ? [
+                  `${baseClass}__content`,
+                  `${baseClass}--size-${size}`,
+                  resolvedSide
+                    ? `${baseClass}--side-${resolvedSide}`
+                    : isOnTop
+                      ? `${baseClass}--v-top`
+                      : `${baseClass}--v-bottom`,
+                  portalClassName,
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+              : // Do not share any class names between active and disabled popups, to make sure
+                // tests do not accidentally target inactive popups.
+                `${baseClass}__hidden-content`
+          }
+          data-popup-id={id || undefined}
+          data-theme={theme === 'auto' ? undefined : theme}
+          id={contentId}
+          popover="manual"
+          ref={popupRef}
+          role={popupRole}
+        >
+          <div
+            className={`${baseClass}__scroll-container${showScrollbar ? ` ${baseClass}__scroll-container--show-scrollbar` : ''}`}
+          >
+            {theme === 'auto' ? (
+              <>
+                {render?.({ close })}
                 {children}
-              </div>
-              {caret && <div className={`${baseClass}__caret`} />}
-            </div>,
-            document.body,
-          )
-        : null}
+              </>
+            ) : (
+              <ThemeProvider theme={theme}>
+                {render?.({ close })}
+                {children}
+              </ThemeProvider>
+            )}
+          </div>
+          {caret && !resolvedSide && <div className={`${baseClass}__caret`} />}
+        </div>
+      </PopupContext>
     </div>
   )
 }

@@ -1,9 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/swcrc",
   "sourceMaps": true,
-  "exclude": [
-    "/**/*.spec.ts"
-  ],
+  "exclude": ["\\.spec\\.[^/\\\\]+$"],
   "jsc": {
     "target": "esnext",
     "parser": {

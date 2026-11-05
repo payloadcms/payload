@@ -1,0 +1,38 @@
+.code-block-floating-collapse-button {
+  all: unset;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  position: absolute;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  height: var(--spacer-4);
+  bottom: calc(var(--spacer-2-5) * -1);
+  padding: var(--spacer-1) var(--spacer-2) var(--spacer-1) var(--spacer-1);
+  border-radius: var(--radius-medium);
+
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--text-body-medium-font-size);
+  line-height: var(--text-body-medium-line-height);
+  white-space: nowrap;
+
+  box-shadow: var(--elevation-100-canvas);
+
+  &:hover {
+    background: var(--color-bg-secondary-hover);
+    color: var(--color-text);
+  }
+
+  &:active {
+    background: var(--color-bg-secondary-pressed);
+  }
+
+  &:focus-visible {
+    outline: var(--stroke-width-small) solid var(--color-border-brand-strong);
+    outline-offset: calc(var(--stroke-width-small) / -1);
+  }
+}

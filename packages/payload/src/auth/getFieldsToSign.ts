@@ -4,6 +4,8 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 
+const reservedJWTFields = new Set(['collection', 'email', 'exp', 'iat', 'id', 'sid'])
+
 type TraverseFieldsArgs = {
   data: Record<string, unknown>
   fields: (Field | TabAsField)[]
@@ -103,7 +105,7 @@ const traverseFields = ({
               result[field.saveToJWT] = data[field.name]
               delete result[field.name]
             } else {
-              result[field.name] = data[field.name] as Record<string, unknown>
+              result[field.name] = data[field.name]
             }
           } else if (field.saveToJWT === false) {
             delete result[field.name]
@@ -121,21 +123,25 @@ export const getFieldsToSign = (args: {
 }): Record<string, unknown> => {
   const { collectionConfig, email, sid, user } = args
 
-  const result: Record<string, unknown> = {
-    id: user?.id,
-    collection: collectionConfig.slug,
-    email,
-  }
-
-  if (sid) {
-    result.sid = sid
-  }
+  const fieldsToSign = Object.create(null) as Record<string, unknown>
 
   traverseFields({
     data: user!,
     fields: collectionConfig.fields,
-    result,
+    result: fieldsToSign,
   })
 
-  return result
+  for (const fieldName of reservedJWTFields) {
+    delete fieldsToSign[fieldName]
+  }
+
+  fieldsToSign.id = user?.id
+  fieldsToSign.collection = collectionConfig.slug
+  fieldsToSign.email = email
+
+  if (sid) {
+    fieldsToSign.sid = sid
+  }
+
+  return fieldsToSign
 }

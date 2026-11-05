@@ -14,6 +14,7 @@ export type OperationArgs = {
   populate?: Record<string, unknown>
   select?: unknown
   sort?: Sort
+  trash?: boolean
   where?: Where
 }
 
@@ -34,6 +35,10 @@ export const buildSearchParams = (args: OperationArgs): string => {
 
   if (typeof args.draft === 'boolean') {
     search.draft = String(args.draft)
+  }
+
+  if (typeof args.trash === 'boolean') {
+    search.trash = String(args.trash)
   }
 
   if (typeof args.pagination === 'boolean') {
@@ -70,7 +75,8 @@ export const buildSearchParams = (args: OperationArgs): string => {
   }
 
   if (Object.keys(search).length > 0) {
-    return stringify(search, { addQueryPrefix: true })
+    // @ts-expect-error allowEmptyArrays is not in the type definition for qs-esm, but it is supported
+    return stringify(search, { addQueryPrefix: true, allowEmptyArrays: true })
   }
 
   return ''

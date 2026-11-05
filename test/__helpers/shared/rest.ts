@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { PaginatedDocs, TypedUser, Where } from 'payload'
+import type { PaginatedDocs, User, Where } from 'payload'
 
 import * as qs from 'qs-esm'
 
@@ -116,7 +116,7 @@ export class RESTClient {
 
   serverURL: string
 
-  public user: TypedUser
+  public user: User
 
   constructor(args: Args) {
     this.serverURL = args.serverURL

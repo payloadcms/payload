@@ -10,33 +10,33 @@ Below are all the Rich Text Features Payload offers. Everything is customizable;
 
 ## Features Overview
 
-| Feature Name                    | Included by default | Description                                                                                                                                                                         |
-| ------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`BoldFeature`**               | Yes                 | Adds support for bold text formatting.                                                                                                                                              |
-| **`ItalicFeature`**             | Yes                 | Adds support for italic text formatting.                                                                                                                                            |
-| **`UnderlineFeature`**          | Yes                 | Adds support for underlined text formatting.                                                                                                                                        |
-| **`StrikethroughFeature`**      | Yes                 | Adds support for strikethrough text formatting.                                                                                                                                     |
-| **`SubscriptFeature`**          | Yes                 | Adds support for subscript text formatting.                                                                                                                                         |
-| **`SuperscriptFeature`**        | Yes                 | Adds support for superscript text formatting.                                                                                                                                       |
-| **`InlineCodeFeature`**         | Yes                 | Adds support for inline code formatting.                                                                                                                                            |
-| **`ParagraphFeature`**          | Yes                 | Provides entries in both the slash menu and toolbar dropdown for explicit paragraph creation or conversion.                                                                         |
-| **`HeadingFeature`**            | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                |
-| **`AlignFeature`**              | Yes                 | Adds support for text alignment (left, center, right, justify)                                                                                                                      |
-| **`IndentFeature`**             | Yes                 | Adds support for text indentation with toolbar buttons                                                                                                                              |
-| **`UnorderedListFeature`**      | Yes                 | Adds support for unordered lists (ul)                                                                                                                                               |
-| **`OrderedListFeature`**        | Yes                 | Adds support for ordered lists (ol)                                                                                                                                                 |
-| **`ChecklistFeature`**          | Yes                 | Adds support for interactive checklists                                                                                                                                             |
-| **`LinkFeature`**               | Yes                 | Allows you to create internal and external links                                                                                                                                    |
-| **`RelationshipFeature`**       | Yes                 | Allows you to create block-level (not inline) relationships to other documents                                                                                                      |
-| **`BlockquoteFeature`**         | Yes                 | Allows you to create block-level quotes                                                                                                                                             |
-| **`UploadFeature`**             | Yes                 | Allows you to create block-level upload nodes - this supports all kinds of uploads, not just images                                                                                 |
-| **`HorizontalRuleFeature`**     | Yes                 | Adds support for horizontal rules / separators. Basically displays an `<hr>` element                                                                                                |
-| **`InlineToolbarFeature`**      | Yes                 | Provides a floating toolbar which appears when you select text. This toolbar only contains actions relevant for selected text                                                       |
-| **`FixedToolbarFeature`**       | No                  | Provides a persistent toolbar pinned to the top and always visible. Both inline and fixed toolbars can be enabled at the same time.                                                 |
-| **`BlocksFeature`**             | No                  | Allows you to use Payload's [Blocks Field](../fields/blocks) directly inside your editor. In the feature props, you can specify the allowed blocks - just like in the Blocks field. |
-| **`TreeViewFeature`**           | No                  | Provides a debug box under the editor, which allows you to see the current editor state live, the dom, as well as time travel. Very useful for debugging                            |
-| **`EXPERIMENTAL_TableFeature`** | No                  | Adds support for tables. This feature may be removed or receive breaking changes in the future - even within a stable lexical release, without needing a major release.             |
-| **`TextStateFeature`**          | No                  | Allows you to store key-value attributes within TextNodes and assign them inline styles.                                                                                            |
+| Feature Name                | Included by default | Description                                                                                                                                                                         |
+| --------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`BoldFeature`**           | Yes                 | Adds support for bold text formatting.                                                                                                                                              |
+| **`ItalicFeature`**         | Yes                 | Adds support for italic text formatting.                                                                                                                                            |
+| **`UnderlineFeature`**      | Yes                 | Adds support for underlined text formatting.                                                                                                                                        |
+| **`StrikethroughFeature`**  | Yes                 | Adds support for strikethrough text formatting.                                                                                                                                     |
+| **`SubscriptFeature`**      | Yes                 | Adds support for subscript text formatting.                                                                                                                                         |
+| **`SuperscriptFeature`**    | Yes                 | Adds support for superscript text formatting.                                                                                                                                       |
+| **`InlineCodeFeature`**     | Yes                 | Adds support for inline code formatting.                                                                                                                                            |
+| **`ParagraphFeature`**      | Yes                 | Provides entries in both the slash menu and toolbar dropdown for explicit paragraph creation or conversion.                                                                         |
+| **`HeadingFeature`**        | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                |
+| **`AlignFeature`**          | Yes                 | Adds support for text alignment (left, center, right, justify)                                                                                                                      |
+| **`IndentFeature`**         | Yes                 | Adds support for text indentation with toolbar buttons                                                                                                                              |
+| **`UnorderedListFeature`**  | Yes                 | Adds support for unordered lists (ul)                                                                                                                                               |
+| **`OrderedListFeature`**    | Yes                 | Adds support for ordered lists (ol)                                                                                                                                                 |
+| **`ChecklistFeature`**      | Yes                 | Adds support for interactive checklists                                                                                                                                             |
+| **`LinkFeature`**           | Yes                 | Allows you to create internal and external links                                                                                                                                    |
+| **`RelationshipFeature`**   | Yes                 | Allows you to create block-level (not inline) relationships to other documents                                                                                                      |
+| **`BlockquoteFeature`**     | Yes                 | Allows you to create block-level quotes                                                                                                                                             |
+| **`UploadFeature`**         | Yes                 | Allows you to create block-level upload nodes - this supports all kinds of uploads, not just images                                                                                 |
+| **`HorizontalRuleFeature`** | Yes                 | Adds support for horizontal rules / separators. Basically displays an `<hr>` element                                                                                                |
+| **`InlineToolbarFeature`**  | Yes                 | Provides a floating toolbar which appears when you select text. This toolbar only contains actions relevant for selected text                                                       |
+| **`FixedToolbarFeature`**   | No                  | Provides a persistent toolbar pinned to the top and always visible. Both inline and fixed toolbars can be enabled at the same time.                                                 |
+| **`BlocksFeature`**         | No                  | Allows you to use Payload's [Blocks Field](../fields/blocks) directly inside your editor. In the feature props, you can specify the allowed blocks - just like in the Blocks field. |
+| **`TreeViewFeature`**       | No                  | Provides a debug box under the editor, which allows you to see the current editor state live, the dom, as well as time travel. Very useful for debugging                            |
+| **`TableFeature`**          | No                  | Adds support for tables, with a toolbar button and slash menu entry for creation and editing.                                                                                       |
+| **`TextStateFeature`**      | No                  | Allows you to store key-value attributes within TextNodes and assign them inline styles.                                                                                            |
 
 ## In depth
 
@@ -409,7 +409,7 @@ For complete documentation including custom block components, the pre-built Code
 - Description: Provides a debug panel below the editor showing the editor's internal state, DOM tree, and time travel debugging.
 - Included by default: No
 
-### EXPERIMENTAL_TableFeature
+### TableFeature
 
 - Description: Adds support for tables with toolbar button and slash menu entry for creation and editing.
 - Included by default: No
@@ -439,8 +439,7 @@ type StateValues = {
 
 type StyleObject = {
   [K in keyof PropertiesHyphenFallback]?:
-    | Extract<PropertiesHyphenFallback[K], string>
-    | undefined
+    Extract<PropertiesHyphenFallback[K], string> | undefined
 }
 ```
 
@@ -478,3 +477,120 @@ This is what the example above will look like:
   srcLight="https://payloadcms.com/images/docs/text-state-feature.png"
   alt="Example usage in light and dark mode for TextStateFeature with defaultColors and some custom styles"
 />
+
+#### Rendering on the frontend
+
+When Lexical serializes a text node that has state applied, the state is stored under a `"$"` key in the node object. To apply the styles when rendering rich text on your frontend, you need a custom `text` JSX converter that reads from this key and maps the values back to your CSS config.
+
+**Step 1 — Share your state config**
+
+Extract your `TextStateFeature` state into a file with no package imports so it can be safely imported in both server and client contexts:
+
+```ts
+// src/fields/textStateConfig.ts
+
+export const textStateConfig = {
+  color: {
+    'text-red': {
+      label: 'Red',
+      css: {
+        color:
+          'light-dark(oklch(0.577 0.245 27.325), oklch(0.704 0.191 22.216))',
+      },
+    },
+    'text-blue': {
+      label: 'Blue',
+      css: {
+        color:
+          'light-dark(oklch(0.546 0.245 262.881), oklch(0.707 0.165 254.624))',
+      },
+    },
+    // ...other colors
+  },
+} as const
+```
+
+Then reference it in your field config:
+
+```ts
+// src/blocks/Content/config.ts
+
+import { TextStateFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { textStateConfig } from '@/fields/textStateConfig'
+
+{
+  name: 'richText',
+  type: 'richText',
+  editor: lexicalEditor({
+    features: ({ rootFeatures }) => [
+      ...rootFeatures,
+      TextStateFeature({
+        state: {
+          color: textStateConfig.color,
+        },
+      }),
+    ],
+  }),
+}
+```
+
+**Step 2 — Add a custom text converter**
+
+When using [`RichText` from `@payloadcms/richtext-lexical/react`](/docs/rich-text/converting-jsx#richtext-to-jsx), override the default `text` converter to read the `"$"` key and apply the corresponding CSS as inline styles:
+
+```tsx
+// src/components/RichText/index.tsx
+
+import { textStateConfig } from '@/fields/textStateConfig'
+import {
+  JSXConvertersFunction,
+  RichText as ConvertRichText,
+} from '@payloadcms/richtext-lexical/react'
+
+// Lexical serializes node state under the "$" key.
+const NODE_STATE_KEY = '$'
+
+// React's style prop requires camelCase, but TextStateFeature CSS uses hyphen-case.
+function hyphenToCamel(str: string): string {
+  return str.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase())
+}
+
+const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
+  ...defaultConverters,
+  text: (args) => {
+    const { node } = args
+
+    // Render standard formatting (bold, italic, etc.) using the default converter
+    let text =
+      typeof defaultConverters.text === 'function'
+        ? defaultConverters.text(args)
+        : node.text
+
+    // Apply TextStateFeature styles from the "$" key in the serialized node
+    const nodeState = (node as any)[NODE_STATE_KEY] as
+      Record<string, string> | undefined
+    if (nodeState) {
+      const styles: React.CSSProperties = {}
+      for (const [stateKey, stateValue] of Object.entries(nodeState)) {
+        const css = (textStateConfig as any)[stateKey]?.[stateValue]?.css
+        if (css) {
+          for (const [prop, value] of Object.entries(css)) {
+            ;(styles as any)[hyphenToCamel(prop)] = value
+          }
+        }
+      }
+      if (Object.keys(styles).length > 0) {
+        text = <span style={styles}>{text}</span>
+      }
+    }
+
+    return text
+  },
+})
+
+export default function RichText({ data, ...rest }) {
+  return <ConvertRichText converters={jsxConverters} data={data} {...rest} />
+}
+```
+
+The key insight is that `textStateConfig` is the single source of truth — it is passed directly to `TextStateFeature` in your field config and also imported by your frontend converter to resolve the CSS values at render time.

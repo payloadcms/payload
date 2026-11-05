@@ -1,6 +1,6 @@
 import type { Field } from 'payload'
 
-import { slateEditor } from '@payloadcms/richtext-slate'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export const hero: Field = {
   name: 'hero',
@@ -32,7 +32,7 @@ export const hero: Field = {
       name: 'richText',
       label: 'Rich Text',
       type: 'richText',
-      editor: slateEditor({}),
+      editor: lexicalEditor({}),
     },
     {
       name: 'media',

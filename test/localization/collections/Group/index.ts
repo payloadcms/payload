@@ -78,4 +78,5 @@ export const Group: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

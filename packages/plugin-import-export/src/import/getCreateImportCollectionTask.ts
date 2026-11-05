@@ -40,6 +40,7 @@ export const getCreateCollectionImportTask = (
       const importDoc = await req.payload.findByID({
         id: importId,
         collection: importCollection,
+        overrideAccess: true,
       })
 
       if (!importDoc) {
@@ -87,6 +88,7 @@ export const getCreateCollectionImportTask = (
           mimetype: fileMimetype,
         },
         format: fileMimetype === 'text/csv' ? 'csv' : 'json',
+        importDoc,
         importMode: (importDoc.importMode as 'create' | 'update' | 'upsert') || 'create',
         matchField: importDoc.matchField as string | undefined,
         maxLimit,
@@ -121,6 +123,7 @@ export const getCreateCollectionImportTask = (
             updated: result.updated,
           },
         },
+        overrideAccess: true,
       })
 
       return {

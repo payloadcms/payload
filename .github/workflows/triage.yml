@@ -18,19 +18,19 @@ permissions:
 
 jobs:
   debug-context:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: View context attributes
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: console.log({ context })
 
   label-created-by:
     name: label-on-open
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Tag with 'created-by'
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -48,6 +48,7 @@ jobs:
               'paulpopus',
               'r1tsuu',
               'GermanJablo',
+              'nathanlentz',
             ];
 
             const type = context.payload.pull_request ? 'pull_request' : 'issue';
@@ -88,9 +89,9 @@ jobs:
   triage:
     name: initial-triage
     if: github.event_name == 'issues'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           ref: ${{ github.event.pull_request.base.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -37,7 +37,17 @@ const UIFields: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'uiCustomServerCell',
+      type: 'ui',
+      admin: {
+        components: {
+          Cell: '/collections/UI/UICustomServerCell.js#UICustomServerCell',
+        },
+      },
+    },
   ],
+  versions: false,
 }
 
 export default UIFields

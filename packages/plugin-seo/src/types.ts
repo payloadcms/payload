@@ -1,4 +1,4 @@
-import type { DocumentInfoContext } from '@payloadcms/ui'
+import type { DocumentInfoContext, DocumentTitleContext } from '@payloadcms/ui'
 import type {
   CollectionConfig,
   CollectionSlug,
@@ -23,9 +23,9 @@ export type PartialDocumentInfoContext = Pick<
   | 'initialData'
   | 'initialState'
   | 'preferencesKey'
-  | 'title'
   | 'versionCount'
->
+> &
+  Pick<DocumentTitleContext, 'title'>
 
 export type GenerateTitle<T = any> = (
   args: {

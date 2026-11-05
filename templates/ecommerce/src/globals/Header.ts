@@ -21,4 +21,5 @@ export const Header: GlobalConfig = {
       maxRows: 6,
     },
   ],
+  versions: false,
 }

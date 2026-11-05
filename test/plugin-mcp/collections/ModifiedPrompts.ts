@@ -29,4 +29,5 @@ export const ModifiedPrompts: CollectionConfig = {
       required: true,
     },
   ],
+  versions: false,
 }

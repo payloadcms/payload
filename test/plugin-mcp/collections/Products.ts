@@ -16,4 +16,5 @@ export const Products: CollectionConfig = {
       type: 'number',
     },
   ],
+  versions: false,
 }

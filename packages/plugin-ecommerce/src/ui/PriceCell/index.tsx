@@ -1,11 +1,12 @@
 'use client'
+
 import type { DefaultCellComponentProps, TypedCollection } from 'payload'
 
 import { useTranslation } from '@payloadcms/ui'
 
 import type { CurrenciesConfig, Currency } from '../../types/index.js'
 
-import { convertFromBaseValue } from '../utilities.js'
+import { formatPrice } from '../utilities.js'
 
 type Props = {
   cellData?: number
@@ -16,7 +17,7 @@ type Props = {
 } & DefaultCellComponentProps
 
 export const PriceCell: React.FC<Props> = (args) => {
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { cellData, currenciesConfig, currency: currencyFromProps, rowData } = args
 
   const currency = currencyFromProps || currenciesConfig.supportedCurrencies[0]
@@ -27,7 +28,7 @@ export const PriceCell: React.FC<Props> = (args) => {
   }
 
   if (
-    (!cellData || typeof cellData !== 'number') &&
+    (cellData == null || typeof cellData !== 'number') &&
     'enableVariants' in rowData &&
     rowData.enableVariants
   ) {
@@ -35,15 +36,10 @@ export const PriceCell: React.FC<Props> = (args) => {
     return <span>{t('plugin-ecommerce:priceSetInVariants')}</span>
   }
 
-  if (!cellData) {
+  if (cellData == null) {
     // @ts-expect-error - plugin translations are not typed yet
     return <span>{t('plugin-ecommerce:priceNotSet')}</span>
   }
 
-  return (
-    <span>
-      {currency.symbol}
-      {convertFromBaseValue({ baseValue: cellData, currency })}
-    </span>
-  )
+  return <span>{formatPrice({ baseValue: cellData, currency, locale: i18n.language })}</span>
 }

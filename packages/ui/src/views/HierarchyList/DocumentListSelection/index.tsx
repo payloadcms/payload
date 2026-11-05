@@ -1,0 +1,203 @@
+'use client'
+
+import React, { Fragment, useMemo } from 'react'
+
+import { DeleteMany } from '../../../elements/DeleteMany/index.js'
+import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
+import { EditMany } from '../../../elements/EditMany/index.js'
+import { MoveMany } from '../../../elements/Hierarchy/MoveMany/index.js'
+import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
+import { PublishMany } from '../../../elements/PublishMany/index.js'
+import { UnpublishMany } from '../../../elements/UnpublishMany/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
+import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
+import { useHierarchy } from '../../../providers/Hierarchy/index.js'
+import { useRouteCache } from '../../../providers/RouteCache/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import {
+  getEffectiveHierarchyCollections,
+  getHierarchyCollectionRestrictions,
+} from '../../../utilities/hierarchyCollectionRestrictions.js'
+
+export type DocumentListSelectionProps = {
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
+  /** Icon to display in the move drawer */
+  hierarchyIcon?: React.ReactNode
+  hierarchySlug?: string
+}
+
+/**
+ * Separate component for single hierarchy item edit
+ * Isolates useDocumentDrawer hook so it only runs when actually needed
+ */
+const SingleHierarchyEdit: React.FC<{
+  collectionSlug: string
+  id: number | string
+  onSuccess: () => void
+}> = ({ id, collectionSlug, onSuccess }) => {
+  const { t } = useTranslation()
+  const [DocumentDrawer, , { openDrawer }] = useDocumentDrawer({
+    id,
+    collectionSlug,
+  })
+
+  return (
+    <Fragment>
+      <ListSelectionButton onClick={openDrawer}>{t('general:edit')}</ListSelectionButton>
+      <DocumentDrawer onSave={onSuccess} />
+    </Fragment>
+  )
+}
+
+export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
+  disableBulkDelete,
+  disableBulkEdit,
+  hierarchyIcon,
+  hierarchySlug,
+}) => {
+  const { clearAll, getSelectionsForActions, getSelectionsWithMetadata, getTotalCount } =
+    useDocumentSelection()
+  const { parent, refreshTree } = useHierarchy()
+  const { clearRouteCache } = useRouteCache()
+  const { config } = useConfig()
+  const { t } = useTranslation()
+
+  const count = getTotalCount()
+  const groupedSelections = getSelectionsForActions()
+
+  const collectionSlugs = Object.keys(groupedSelections)
+  const singleCollectionSelected = collectionSlugs.length === 1
+  const singleCollectionSlug = singleCollectionSelected ? collectionSlugs[0] : null
+
+  const collectionConfig = singleCollectionSlug
+    ? config.collections.find((collection) => collection.slug === singleCollectionSlug)
+    : null
+
+  const hierarchyCollectionConfig = hierarchySlug
+    ? config.collections.find((collection) => collection.slug === hierarchySlug)
+    : null
+
+  const { relatedCollectionSlugs } = useMemo(
+    () =>
+      getHierarchyCollectionRestrictions({
+        collectionConfig: hierarchyCollectionConfig ?? undefined,
+      }),
+    [hierarchyCollectionConfig],
+  )
+
+  const ids = singleCollectionSelected ? groupedSelections[singleCollectionSlug]?.ids || [] : []
+
+  const requiredCollections = useMemo(() => {
+    const selectionsWithMetadata = getSelectionsWithMetadata()
+    const required = new Set<string>()
+
+    for (const [collectionSlug, { selections }] of Object.entries(selectionsWithMetadata)) {
+      if (collectionSlug === hierarchySlug) {
+        for (const { metadata } of selections) {
+          for (const slug of getEffectiveHierarchyCollections({
+            allowedCollections: metadata.allowedCollections,
+            relatedCollectionSlugs,
+          })) {
+            required.add(slug)
+          }
+        }
+      } else {
+        required.add(collectionSlug)
+      }
+    }
+
+    return required.size > 0 ? Array.from(required) : undefined
+  }, [getSelectionsWithMetadata, hierarchySlug, relatedCollectionSlugs])
+
+  // Check if single hierarchy item is selected (for direct edit)
+  // Only available when hierarchySlug is provided
+  const singleHierarchySelected =
+    hierarchySlug && singleCollectionSlug === hierarchySlug && ids.length === 1 ? ids[0] : null
+
+  if (count === 0) {
+    return null
+  }
+
+  const handleActionSuccess = () => {
+    clearRouteCache()
+    if (hierarchySlug) {
+      refreshTree(hierarchySlug)
+    }
+    clearAll()
+  }
+
+  return (
+    <ListSelection_v4
+      count={count}
+      ListActions={[
+        <ListSelectionButton key="clear-all" onClick={() => clearAll()}>
+          {t('general:clearAll')}
+        </ListSelectionButton>,
+      ]}
+      SelectionActions={[
+        // Single hierarchy item selected - show direct edit button
+        singleHierarchySelected && hierarchySlug && (
+          <SingleHierarchyEdit
+            collectionSlug={hierarchySlug}
+            id={singleHierarchySelected}
+            key="single-edit"
+            onSuccess={handleActionSuccess}
+          />
+        ),
+        // Multiple items or non-hierarchy items - show bulk actions
+        !disableBulkEdit &&
+          !singleHierarchySelected &&
+          singleCollectionSelected &&
+          collectionConfig &&
+          ids.length > 0 && (
+            <Fragment key="bulk-actions">
+              <EditMany
+                collection={collectionConfig}
+                count={ids.length}
+                ids={ids}
+                modalPrefix="hierarchy-list"
+                onSuccess={handleActionSuccess}
+                selectAll={false}
+              />
+              <PublishMany
+                collection={collectionConfig}
+                count={ids.length}
+                ids={ids}
+                modalPrefix="hierarchy-list"
+                onSuccess={handleActionSuccess}
+                selectAll={false}
+              />
+              <UnpublishMany
+                collection={collectionConfig}
+                count={ids.length}
+                ids={ids}
+                modalPrefix="hierarchy-list"
+                onSuccess={handleActionSuccess}
+                selectAll={false}
+              />
+            </Fragment>
+          ),
+        !disableBulkDelete && (
+          <DeleteMany
+            afterDelete={handleActionSuccess}
+            key="bulk-delete"
+            modalPrefix="hierarchy-list"
+            selections={groupedSelections}
+          />
+        ),
+        hierarchySlug && (
+          <MoveMany
+            currentParentID={parent?.id || null}
+            hierarchySlug={hierarchySlug}
+            Icon={hierarchyIcon}
+            key="bulk-move"
+            onSuccess={handleActionSuccess}
+            requiredCollections={requiredCollections}
+            selections={groupedSelections}
+          />
+        ),
+      ].filter(Boolean)}
+    />
+  )
+}

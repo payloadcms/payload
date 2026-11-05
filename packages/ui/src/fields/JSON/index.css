@@ -1,0 +1,27 @@
+@layer payload-default {
+  .json-field {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+
+    &.error {
+      .code-editor {
+        border-color: var(--field-color-border-error);
+
+        &:hover {
+          border-color: var(--field-color-border-error);
+        }
+
+        &:focus-within {
+          border-color: var(--field-color-border-focus);
+        }
+      }
+
+      .monaco-editor-background,
+      .margin {
+        background-color: var(--color-bg-danger-tertiary);
+      }
+    }
+  }
+}

@@ -2,24 +2,25 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { exactText } from '../../helpers.js'
 import { openArrayRowActions } from '../array/openArrayRowActions.js'
 import { openBlocksDrawer } from './openBlocksDrawer.js'
 
-const selectBlockFromDrawer = async ({
+export const selectBlockFromDrawer = async ({
   blocksDrawer,
   blockToSelect,
 }: {
   blocksDrawer: Locator
   blockToSelect: string
 }) => {
-  const blockCard = blocksDrawer.locator('.blocks-drawer__block .thumbnail-card__label', {
-    hasText: blockToSelect,
-  })
+  // Find the thumbnail card button by its title attribute which matches the label
+  const blockButton = blocksDrawer.locator(`button.thumbnail-card[title="${blockToSelect}"]`)
 
-  await expect(blockCard).toBeVisible()
+  await expect(blockButton).toBeVisible()
 
-  await blocksDrawer.getByRole('button', { name: exactText(blockToSelect) }).click()
+  // Double-click to select and insert the block immediately
+  await blockButton.dblclick()
+
+  await expect(blocksDrawer).toBeHidden()
 }
 
 /**
@@ -40,6 +41,12 @@ export const addBlock = async ({
   const rowLocator = page.locator(
     `#field-${fieldName} > .blocks-field__rows > div > .blocks-field__row`,
   )
+
+  // Ensure the form has finished its initial render before counting existing
+  // rows. TanStack Start renders the document form client-side after navigation
+  // (unlike Next's SSR), so measuring immediately would under-count the field's
+  // default rows and break the post-add `numberOfPrevRows + 1` assertion.
+  await expect(page.locator('[data-form-ready="true"]').first()).toBeVisible()
 
   const numberOfPrevRows = await rowLocator.count()
 
@@ -79,6 +86,12 @@ export const addBlockBelow = async (
   const rowLocator = page.locator(
     `#field-${fieldName} > .blocks-field__rows > div > .blocks-field__row`,
   )
+
+  // Ensure the form has finished its initial render before counting existing
+  // rows. TanStack Start renders the document form client-side after navigation
+  // (unlike Next's SSR), so measuring immediately would under-count the field's
+  // default rows and break the post-add `numberOfPrevRows + 1` assertion.
+  await expect(page.locator('[data-form-ready="true"]').first()).toBeVisible()
 
   const numberOfPrevRows = await rowLocator.count()
 

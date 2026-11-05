@@ -1,0 +1,32 @@
+@layer payload-default {
+  .dialog.hierarchy-modal {
+    width: min(900px, calc(100vw - var(--spacer-6)));
+    height: min(700px, calc(100vh - var(--spacer-6)));
+    max-width: calc(100vw - var(--spacer-6));
+  }
+
+  .hierarchy-modal__content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--color-bg);
+    border-radius: var(--radius-large);
+    overflow: clip;
+  }
+
+  .dialog.hierarchy-modal .dialog__body {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .hierarchy-modal__columns {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+  }
+
+  .hierarchy-modal__toggler {
+    cursor: pointer;
+  }
+}

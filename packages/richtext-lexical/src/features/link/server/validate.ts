@@ -3,8 +3,8 @@ import type { Field } from 'payload'
 import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 
 import type { NodeValidation } from '../../typesServer.js'
-import type { SerializedAutoLinkNode, SerializedLinkNode } from '../nodes/types.js'
 import type { LinkFeatureServerProps } from './index.js'
+import type { SerializedAutoLinkNode, SerializedLinkNode } from './schema.js'
 
 export const linkValidation = (
   props: LinkFeatureServerProps,
@@ -28,7 +28,7 @@ export const linkValidation = (
       fields: sanitizedFieldsWithoutText, // Sanitized in feature.server.ts
       fieldSchemaMap: undefined,
       initialBlockData: node.fields,
-      operation: operation === 'create' || operation === 'update' ? operation : 'update',
+      operation,
       permissions: {},
       preferences,
       renderAllFields: false,

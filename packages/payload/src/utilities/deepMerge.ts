@@ -42,6 +42,38 @@ export function deepMergeWithSourceArrays<T extends object>(obj1: object, obj2: 
 }
 
 /**
+ * Deep-merges objects while replacing arrays and retaining target values when the source contains
+ * `undefined`. This matches partial update semantics, where `undefined` means that a stored value
+ * was omitted rather than cleared.
+ */
+export function deepMergeWithSourceArraysIgnoringUndefined<T extends object>(
+  obj1: object,
+  obj2: object,
+): T {
+  return deepMergeWithSourceArrays<T>(obj1, removeUndefinedProperties(obj2))
+}
+
+function removeUndefinedProperties<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map(removeUndefinedProperties) as T
+  }
+
+  if (
+    value === null ||
+    typeof value !== 'object' ||
+    (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)
+  ) {
+    return value
+  }
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([, nestedValue]) => nestedValue !== undefined)
+      .map(([key, nestedValue]) => [key, removeUndefinedProperties(nestedValue)]),
+  ) as T
+}
+
+/**
  * Fully-featured deepMerge. Does not clone React components by default.
  */
 export function deepMergeWithReactComponents<T extends object>(obj1: object, obj2: object): T {

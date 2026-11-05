@@ -1,11 +1,7 @@
-import path from 'path'
-import { type Payload } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import {
   applicationEndpoint,
   collectionSlug,
@@ -17,30 +13,16 @@ import {
   rootEndpoint,
 } from './shared.js'
 
-let payload: Payload
-let restClient: NextRESTClient
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Endpoints', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('Collections', () => {
-    it('should GET a static endpoint', async () => {
+test.suite('Endpoints', { config: './config.ts' }, () => {
+  test.describe('Collections', () => {
+    test('should GET a static endpoint', async ({ restClient }) => {
       const response = await restClient.GET(`/${collectionSlug}/say-hello/joe-bloggs`)
       const data = await response.json()
       expect(response.status).toBe(200)
       expect(data.message).toStrictEqual('Hey Joey!')
     })
 
-    it('should GET an endpoint with a parameter', async () => {
+    test('should GET an endpoint with a parameter', async ({ restClient }) => {
       const name = 'George'
       const response = await restClient.GET(`/${collectionSlug}/say-hello/${name}`)
       const data = await response.json()
@@ -48,7 +30,7 @@ describe('Endpoints', () => {
       expect(data.message).toStrictEqual(`Hello ${name}!`)
     })
 
-    it('should POST an endpoint with data', async () => {
+    test('should POST an endpoint with data', async ({ restClient }) => {
       const params = { name: 'George', age: 29 }
       const response = await restClient.POST(`/${collectionSlug}/whoami`, {
         body: JSON.stringify(params),
@@ -59,14 +41,14 @@ describe('Endpoints', () => {
       expect(data.age).toStrictEqual(params.age)
     })
 
-    it('should disable built-in endpoints when false', async () => {
+    test('should disable built-in endpoints when false', async ({ restClient }) => {
       const response = await restClient.GET(`/${noEndpointsCollectionSlug}`)
       expect(response.status).toBe(501)
     })
   })
 
-  describe('Globals', () => {
-    it('should call custom endpoint', async () => {
+  test.describe('Globals', () => {
+    test('should call custom endpoint', async ({ restClient }) => {
       const params = { globals: 'response' }
       const response = await restClient.POST(`/globals/${globalSlug}/${globalEndpoint}`, {
         body: JSON.stringify(params),
@@ -76,14 +58,14 @@ describe('Endpoints', () => {
       expect(response.status).toBe(200)
       expect(params).toMatchObject(data)
     })
-    it('should disable built-in endpoints when false', async () => {
+    test('should disable built-in endpoints when false', async ({ restClient }) => {
       const response = await restClient.GET(`/globals/${noEndpointsGlobalSlug}`)
       expect(response.status).toBe(501)
     })
   })
 
-  describe('API', () => {
-    it('should call custom endpoint', async () => {
+  test.describe('API', () => {
+    test('should call custom endpoint', async ({ restClient }) => {
       const params = { app: 'response' }
       const response = await restClient.POST(`/${applicationEndpoint}`, {
         body: JSON.stringify(params),
@@ -94,7 +76,7 @@ describe('Endpoints', () => {
       expect(params).toMatchObject(data)
     })
 
-    it('should have i18n on req', async () => {
+    test('should have i18n on req', async ({ restClient }) => {
       const response = await restClient.GET(`/${applicationEndpoint}/i18n`)
       const data = await response.json()
 
@@ -103,8 +85,8 @@ describe('Endpoints', () => {
     })
   })
 
-  describe('Root', () => {
-    it('should call custom root endpoint', async () => {
+  test.describe('Root', () => {
+    test('should call custom root endpoint', async ({ restClient }) => {
       const params = { root: 'response' }
       const response = await restClient.POST(`/${rootEndpoint}`, {
         body: JSON.stringify(params),
@@ -115,7 +97,7 @@ describe('Endpoints', () => {
       expect(params).toMatchObject(data)
     })
 
-    it('should call custom OPTIONS endpoint with custom CORS headers', async () => {
+    test('should call custom OPTIONS endpoint with custom CORS headers', async ({ restClient }) => {
       const response = await restClient.OPTIONS(`/${customCorsEndpoint}`)
       const data = await response.json()
 
@@ -127,6 +109,54 @@ describe('Endpoints', () => {
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe('https://custom-domain.com')
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe('POST, GET, OPTIONS')
       expect(response.headers.get('Access-Control-Allow-Headers')).toBe('X-Custom-Header')
+    })
+  })
+
+  test.describe('Open Graph image', () => {
+    test('should ignore description characters beyond the length limit', async ({ restClient }) => {
+      // Whitespace collapses when rendered, so any text visible past the first 200 characters
+      // would only appear in the image if the description were not clamped
+      const clampedDescription = ' '.repeat(200)
+
+      const clampedResponse = await restClient.GET('/og', {
+        auth: false,
+        query: { description: clampedDescription },
+      })
+      const overflowingResponse = await restClient.GET('/og', {
+        auth: false,
+        query: { description: `${clampedDescription}${'Overflow '.repeat(1_000)}` },
+      })
+
+      expect(clampedResponse.status).toBe(200)
+      expect(overflowingResponse.status).toBe(200)
+      expect(overflowingResponse.headers.get('Content-Type')).toBe('image/png')
+
+      const clampedImage = Buffer.from(await clampedResponse.arrayBuffer())
+      const overflowingImage = Buffer.from(await overflowingResponse.arrayBuffer())
+
+      expect(overflowingImage.equals(clampedImage)).toBe(true)
+    })
+
+    test('should render a description within the length limit intact', async ({ restClient }) => {
+      // Dropping the final character changes the image only if the full description is rendered
+      const description = 'A normal description that fits well within the length limit.'
+
+      const fullResponse = await restClient.GET('/og', {
+        auth: false,
+        query: { description },
+      })
+      const shortenedResponse = await restClient.GET('/og', {
+        auth: false,
+        query: { description: description.slice(0, -1) },
+      })
+
+      expect(fullResponse.status).toBe(200)
+      expect(shortenedResponse.status).toBe(200)
+
+      const fullImage = Buffer.from(await fullResponse.arrayBuffer())
+      const shortenedImage = Buffer.from(await shortenedResponse.arrayBuffer())
+
+      expect(fullImage.equals(shortenedImage)).toBe(false)
     })
   })
 })

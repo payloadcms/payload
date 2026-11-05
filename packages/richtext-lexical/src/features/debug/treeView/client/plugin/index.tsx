@@ -5,7 +5,7 @@ import * as React from 'react'
 
 import type { PluginComponent } from '../../../../typesClient.js'
 
-import './index.scss'
+import './index.css'
 
 export const TreeViewPlugin: PluginComponent<undefined> = () => {
   const [editor] = useLexicalComposerContext()

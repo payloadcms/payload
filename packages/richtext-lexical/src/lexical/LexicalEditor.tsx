@@ -5,6 +5,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
+import { useTranslation } from '@payloadcms/ui'
 import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
@@ -12,7 +13,7 @@ import { useEffect, useState } from 'react'
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
 import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
-import './LexicalEditor.scss'
+import './LexicalEditor.css'
 import { EditorPlugin } from './EditorPlugin.js'
 import { ClipboardPlugin } from './plugins/ClipboardPlugin/index.js'
 import { DecoratorPlugin } from './plugins/DecoratorPlugin/index.js'
@@ -20,6 +21,7 @@ import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/ind
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
 import { InsertParagraphAtEndPlugin } from './plugins/InsertParagraphAtEnd/index.js'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
+import { NodeViewOverridePlugin } from './plugins/NodeViewOverridePlugin/index.js'
 import { NormalizeSelectionPlugin } from './plugins/NormalizeSelection/index.js'
 import { SelectAllPlugin } from './plugins/SelectAllPlugin/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
@@ -30,12 +32,15 @@ export const LexicalEditor: React.FC<
   {
     editorContainerRef: React.RefObject<HTMLDivElement | null>
     isSmallWidthViewport: boolean
-  } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>
+  } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange' | 'rtl'>
 > = (props) => {
-  const { editorConfig, editorContainerRef, isSmallWidthViewport, onChange } = props
+  const { editorConfig, editorContainerRef, isSmallWidthViewport, onChange, rtl } = props
   const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
+  const { t } = useTranslation<Record<string, never>, string>()
+  const instructionsID = React.useId()
+  const hasTabIndentation = isEditable && editorConfig.features.enabledFeatures.includes('indent')
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -61,7 +66,7 @@ export const LexicalEditor: React.FC<
       editorConfigContext.blurEditor(editorConfigContext)
     }
 
-    const unregisterFocus = editor.registerCommand<MouseEvent>(
+    const unregisterFocus = editor.registerCommand(
       FOCUS_COMMAND,
       () => {
         handleFocus()
@@ -70,7 +75,7 @@ export const LexicalEditor: React.FC<
       COMMAND_PRIORITY_LOW,
     )
 
-    const unregisterBlur = editor.registerCommand<MouseEvent>(
+    const unregisterBlur = editor.registerCommand(
       BLUR_COMMAND,
       () => {
         handleBlur()
@@ -93,7 +98,7 @@ export const LexicalEditor: React.FC<
           return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
       })}
-      <div className="editor-container" ref={editorContainerRef}>
+      <div className="editor-container" dir={rtl ? 'rtl' : undefined} ref={editorContainerRef}>
         {editorConfig.features.plugins?.map((plugin) => {
           if (plugin.position === 'top') {
             return (
@@ -105,7 +110,10 @@ export const LexicalEditor: React.FC<
           contentEditable={
             <div className="editor-scroller">
               <div className="editor" ref={onRef}>
-                <LexicalContentEditable editorConfig={editorConfig} />
+                <LexicalContentEditable
+                  editorConfig={editorConfig}
+                  instructionsID={hasTabIndentation ? instructionsID : undefined}
+                />
               </div>
             </div>
           }
@@ -117,6 +125,7 @@ export const LexicalEditor: React.FC<
         <ClipboardPlugin />
         <TextPlugin features={editorConfig.features} />
         <SelectAllPlugin />
+        <NodeViewOverridePlugin />
         {isEditable && (
           <OnChangePlugin
             // Selection changes can be ignored here, reducing the
@@ -188,6 +197,11 @@ export const LexicalEditor: React.FC<
           }
         })}
       </div>
+      {hasTabIndentation && (
+        <p className="ContentEditable__keyboard-hint" id={instructionsID}>
+          {t('lexical:indent:keyboardHint')}
+        </p>
+      )}
       {editorConfig.features.plugins?.map((plugin) => {
         if (plugin.position === 'belowContainer') {
           return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />

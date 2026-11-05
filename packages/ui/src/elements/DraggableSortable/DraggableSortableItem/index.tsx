@@ -14,23 +14,26 @@ export const DraggableSortableItem: React.FC<
 > = (props) => {
   const { id, children, disabled } = props
 
-  const { attributes, isDragging, listeners, setNodeRef, transform, transition } =
-    useDraggableSortable({
-      id,
-      disabled,
-    })
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setActivatorNodeRef,
+    setNodeRef,
+    transform,
+    transition,
+  } = useDraggableSortable({
+    id,
+    disabled,
+  })
 
   return (
     <Fragment>
       {children({
-        attributes: {
-          ...attributes,
-          style: {
-            cursor: isDragging ? 'grabbing' : 'grab',
-          },
-        },
+        attributes,
         isDragging,
         listeners,
+        setActivatorNodeRef,
         setNodeRef,
         transform,
         transition,

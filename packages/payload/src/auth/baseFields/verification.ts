@@ -1,5 +1,7 @@
 import type { Field, FieldHook } from '../../fields/config/types.js'
 
+import { defaultAccess } from '../defaultAccess.js'
+
 const autoRemoveVerificationToken: FieldHook = ({ data, operation, originalDoc, value }) => {
   // If a user manually sets `_verified` to true,
   // and it was `false`, set _verificationToken to `null`.
@@ -20,9 +22,9 @@ export const verificationFields: Field[] = [
     name: '_verified',
     type: 'checkbox',
     access: {
-      create: ({ req: { user } }) => Boolean(user),
-      read: ({ req: { user } }) => Boolean(user),
-      update: ({ req: { user } }) => Boolean(user),
+      create: defaultAccess,
+      read: defaultAccess,
+      update: defaultAccess,
     },
     admin: {
       components: {
@@ -34,6 +36,10 @@ export const verificationFields: Field[] = [
   {
     name: '_verificationToken',
     type: 'text',
+    access: {
+      create: () => false,
+      update: () => false,
+    },
     hidden: true,
     hooks: {
       beforeChange: [autoRemoveVerificationToken],

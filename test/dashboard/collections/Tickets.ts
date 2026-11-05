@@ -2,6 +2,9 @@ import type { CollectionConfig } from 'payload'
 
 export const Tickets: CollectionConfig = {
   slug: 'tickets',
+  access: {
+    read: ({ req: { user } }) => Boolean(user) && user.email !== 'pins-restricted@payloadcms.com',
+  },
   admin: {
     group: 'Dashboard Data',
     useAsTitle: 'title',
@@ -66,4 +69,5 @@ export const Tickets: CollectionConfig = {
       relationTo: 'users',
     },
   ],
+  versions: false,
 }

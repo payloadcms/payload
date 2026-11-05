@@ -18,6 +18,7 @@ import {
   varchar,
   vector,
 } from 'drizzle-orm/pg-core'
+import { v7 as uuidv7 } from 'uuid'
 
 import type { RawColumn, RawTable } from '../../types.js'
 import type { BasePostgresAdapter } from '../types.js'
@@ -107,6 +108,10 @@ export const buildDrizzleTable = ({
 
         if (column.defaultRandom) {
           builder = builder.defaultRandom()
+        }
+
+        if (column.defaultV7) {
+          builder = builder.$defaultFn(() => uuidv7())
         }
 
         columns[key] = builder

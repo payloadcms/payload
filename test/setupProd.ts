@@ -16,8 +16,7 @@ export const tgzToPkgNameMap = {
   '@payloadcms/drizzle': 'payloadcms-drizzle-*',
   '@payloadcms/email-nodemailer': 'payloadcms-email-nodemailer-*',
   '@payloadcms/email-resend': 'payloadcms-email-resend-*',
-  '@payloadcms/eslint-config': 'payloadcms-eslint-config-*',
-  '@payloadcms/eslint-plugin': 'payloadcms-eslint-plugin-*',
+  '@payloadcms/figma': 'payloadcms-figma-*',
   '@payloadcms/graphql': 'payloadcms-graphql-*',
   '@payloadcms/live-preview': 'payloadcms-live-preview-*',
   '@payloadcms/live-preview-react': 'payloadcms-live-preview-react-*',
@@ -37,14 +36,14 @@ export const tgzToPkgNameMap = {
   '@payloadcms/plugin-seo': 'payloadcms-plugin-seo-*',
   '@payloadcms/plugin-stripe': 'payloadcms-plugin-stripe-*',
   '@payloadcms/richtext-lexical': 'payloadcms-richtext-lexical-*',
-  '@payloadcms/richtext-slate': 'payloadcms-richtext-slate-*',
   '@payloadcms/sdk': 'payloadcms-sdk-*',
   '@payloadcms/storage-azure': 'payloadcms-storage-azure-*',
   '@payloadcms/storage-gcs': 'payloadcms-storage-gcs-*',
   '@payloadcms/storage-r2': 'payloadcms-storage-r2-*',
   '@payloadcms/storage-s3': 'payloadcms-storage-s3-*',
-  '@payloadcms/storage-uploadthing': 'payloadcms-storage-uploadthing-*',
   '@payloadcms/storage-vercel-blob': 'payloadcms-storage-vercel-blob-*',
+  '@payloadcms/tanstack-start': 'payloadcms-tanstack-start-*',
+  '@payloadcms/transformer-sharp': 'payloadcms-transformer-sharp-*',
   '@payloadcms/translations': 'payloadcms-translations-*',
   '@payloadcms/ui': 'payloadcms-ui-*',
   'create-payload-app': 'create-payload-app-*',
@@ -65,14 +64,15 @@ export function setupProd() {
   const packageJsonString = fs.readFileSync(path.resolve(dirname, 'package.json'), 'utf8')
   const packageJson = JSON.parse(packageJsonString)
 
-  const allDependencies = {}
+  const allDependencies: Record<string, string> = {}
   // Go through all the dependencies and devDependencies, replace the normal package entry with the tgz entry
   for (const key of ['dependencies', 'devDependencies']) {
     const dependencies = packageJson[key]
     if (dependencies) {
       for (const [packageName, _packageVersion] of Object.entries(dependencies)) {
-        if (tgzToPkgNameMap[packageName]) {
-          const actualTgzPath = findActualTgzName(tgzToPkgNameMap[packageName])
+        const tgzPattern = tgzToPkgNameMap[packageName as keyof typeof tgzToPkgNameMap]
+        if (tgzPattern) {
+          const actualTgzPath = findActualTgzName(tgzPattern)
           if (actualTgzPath) {
             dependencies[packageName] = actualTgzPath
             allDependencies[packageName] = actualTgzPath
@@ -84,17 +84,19 @@ export function setupProd() {
     }
   }
 
-  // now add them all to overrides and pnpm.overrides as well
-  packageJson.pnpm = packageJson.pnpm || {}
-  packageJson.pnpm.overrides = packageJson.pnpm.overrides || {}
-  packageJson.overrides = packageJson.overrides || {}
-  for (const [packageName, packageVersion] of Object.entries(allDependencies)) {
-    packageJson.pnpm.overrides[packageName] = packageVersion
-    packageJson.overrides[packageName] = packageVersion
-  }
-
-  // write it out
+  // write out package.json (direct deps now point at local tarballs)
   fs.writeFileSync(path.resolve(dirname, 'package.json'), JSON.stringify(packageJson, null, 2))
+
+  /*
+   * Make test/ its own workspace root (no `--ignore-workspace`, which v11 uses to skip this file).
+   * Since v11 ignores package.json#pnpm, all config lives here: overrides pin @payloadcms deps to
+   * local tarballs (graphql mirrors the committed baseline), dangerouslyAllowAllBuilds keeps build
+   * scripts running, and verifyDepsBeforeRun stops re-installs on later `pnpm run` commands.
+   */
+  const overrides = { graphql: '16.8.1', ...allDependencies }
+  const overrideLines = Object.entries(overrides).map(([name, spec]) => `  '${name}': '${spec}'`)
+  const workspaceYaml = `verifyDepsBeforeRun: false\noverrides:\n${overrideLines.join('\n')}\ndangerouslyAllowAllBuilds: true\n`
+  fs.writeFileSync(path.resolve(dirname, 'pnpm-workspace.yaml'), workspaceYaml)
 }
 
 setupProd()

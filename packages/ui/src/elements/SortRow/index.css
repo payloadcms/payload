@@ -1,0 +1,22 @@
+@layer payload-default {
+  .sort-row {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-icon-secondary);
+    cursor: not-allowed;
+    border-radius: var(--button-radius);
+
+    &.active {
+      cursor: grab;
+
+      &:hover {
+        color: var(--color-icon);
+      }
+
+      .cell-_dragHandle > :focus-visible & {
+        color: var(--color-icon);
+      }
+    }
+  }
+}

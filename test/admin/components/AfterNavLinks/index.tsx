@@ -2,11 +2,8 @@
 
 import type { PayloadClientReactComponent, SanitizedConfig } from 'payload'
 
-import { useConfig } from '@payloadcms/ui'
-import LinkImport from 'next/link.js'
+import { Link, useConfig } from '@payloadcms/ui'
 import React from 'react'
-
-const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 const baseClass = 'after-nav-links'
 

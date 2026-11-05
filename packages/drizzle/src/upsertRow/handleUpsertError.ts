@@ -60,8 +60,8 @@ export const handleUpsertError = ({
         }
       }
     } else if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-      // SQLite - extract from message: "UNIQUE constraint failed: table.field"
-      const regex = /UNIQUE constraint failed: ([^.]+)\.([^.]+)/
+      // SQLite - extract from message: "UNIQUE constraint failed: table.field[, table.field2, ...]"
+      const regex = /UNIQUE constraint failed: ([^.]+)\.([^.,]+)/
       const match: string[] = error.message?.match(regex)
       if (match && match[2]) {
         if (adapter.fieldConstraints[tableName]) {
@@ -81,6 +81,7 @@ export const handleUpsertError = ({
           {
             message: req?.t ? req.t('error:valueMustBeUnique') : 'Value must be unique',
             path: fieldName,
+            tableName,
           },
         ],
         global: globalSlug,

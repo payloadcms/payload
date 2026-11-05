@@ -6,25 +6,6 @@ export const Media: CollectionConfig = {
     modifyResponseHeaders({ headers }) {
       headers.set('X-Universal-Truth', 'Set')
     },
-    resizeOptions: {
-      position: 'center',
-      width: 200,
-      height: 200,
-    },
-    imageSizes: [
-      {
-        height: 400,
-        width: 400,
-        crop: 'center',
-        name: 'square',
-      },
-      {
-        width: 900,
-        height: 450,
-        crop: 'center',
-        name: 'sixteenByNineMedium',
-      },
-    ],
   },
   fields: [
     {
@@ -33,4 +14,5 @@ export const Media: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

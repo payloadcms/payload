@@ -32,8 +32,8 @@ export const collectDisabledFieldPaths = (fields: Field[]): string[] => {
             const tabPath = parentPath ? `${parentPath}.${tab.name}` : tab.name
 
             // Prepare a ref for this named tab's children to inherit the path
-            const refObj = ref as Record<string, any>
-            const tabRef = refObj[tab.name] ?? {}
+            const refObj = ref as Record<string, unknown>
+            const tabRef = (refObj[tab.name] as Record<string, unknown>) ?? {}
             tabRef.path = tabPath
             tabRef.__manualRef = true // flag this as a manually constructed parentRef
             refObj[tab.name] = tabRef
@@ -59,15 +59,18 @@ export const collectDisabledFieldPaths = (fields: Field[]): string[] => {
         typeof (parentRef as { path?: unknown }).path === 'string'
       ) {
         parentPath = (parentRef as { path: string }).path
-      } else if ((ref as any)?.__manualRef && typeof (ref as any)?.path === 'string') {
+      } else if (
+        (ref as Record<string, unknown>).__manualRef &&
+        typeof (ref as Record<string, unknown>).path === 'string'
+      ) {
         // Fallback: if current ref is a manual tabRef, use its path
-        parentPath = (ref as any).path
+        parentPath = (ref as Record<string, unknown>).path as string
       }
 
       const fullPath = parentPath ? `${parentPath}.${field.name}` : field.name
 
       // Store current path for any nested children to use
-      ;(ref as any).path = fullPath
+      ;(ref as Record<string, unknown>).path = fullPath
 
       // If field is a data-affecting field and disabled via plugin config, collect its path
       if (fieldAffectsData(field) && field.custom?.['plugin-import-export']?.disabled) {

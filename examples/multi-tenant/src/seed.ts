@@ -8,6 +8,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload): Promise<void
       slug: 'gold',
       domain: 'gold.localhost',
     },
+    overrideAccess: true,
   })
 
   const tenant2 = await payload.create({
@@ -17,6 +18,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload): Promise<void
       slug: 'silver',
       domain: 'silver.localhost',
     },
+    overrideAccess: true,
   })
 
   const tenant3 = await payload.create({
@@ -26,6 +28,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload): Promise<void
       slug: 'bronze',
       domain: 'bronze.localhost',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -35,6 +38,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload): Promise<void
       password: 'demo',
       roles: ['super-admin'],
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -50,6 +54,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload): Promise<void
       ],
       username: 'tenant1',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -65,6 +70,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload): Promise<void
       ],
       username: 'tenant2',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -80,6 +86,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload): Promise<void
       ],
       username: 'tenant3',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -103,6 +110,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload): Promise<void
       ],
       username: 'multi-admin',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -112,6 +120,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload): Promise<void
       tenant: tenant1.id,
       title: 'Page for Tenant 1',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -121,6 +130,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload): Promise<void
       tenant: tenant2.id,
       title: 'Page for Tenant 2',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -130,5 +140,6 @@ export const seed: NonNullable<Config['onInit']> = async (payload): Promise<void
       tenant: tenant3.id,
       title: 'Page for Tenant 3',
     },
+    overrideAccess: true,
   })
 }

@@ -1,73 +1,68 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
-
 import React from 'react'
 
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
-import { EditManyBulkUploads } from '../EditMany/index.js'
+import { DialogFooter } from '../../Dialog/DialogFooter/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'bulk-upload--actions-bar'
 
-type Props = {
-  readonly collectionConfig: ClientCollectionConfig
-}
-
-export function ActionsBar({ collectionConfig }: Props) {
+export function ActionsBar() {
   const { activeIndex, forms, setActiveIndex } = useFormsManager()
   const { t } = useTranslation()
 
   return (
-    <div className={baseClass}>
-      <div className={`${baseClass}__navigation`}>
-        <p className={`${baseClass}__locationText`}>
-          <strong>{activeIndex + 1}</strong>
-          {` ${t('general:of')} `}
-          <strong>{forms.length}</strong>
-        </p>
+    <DialogFooter>
+      {forms.length > 1 && (
+        <div className={`${baseClass}__multipleFiles`}>
+          <div className={`${baseClass}__navigation`}>
+            <p className={`${baseClass}__locationText`}>
+              <strong>{activeIndex + 1}</strong>
+              {` ${t('general:of')} `}
+              <strong>{forms.length}</strong>
+            </p>
 
-        <div className={`${baseClass}__controls`}>
-          <Button
-            aria-label={t('general:previous')}
-            buttonStyle="none"
-            onClick={() => {
-              const nextIndex = activeIndex - 1
-              if (nextIndex < 0) {
-                setActiveIndex(forms.length - 1)
-              } else {
-                setActiveIndex(nextIndex)
-              }
-            }}
-            type="button"
-          >
-            <ChevronIcon direction="left" />
-          </Button>
-          <Button
-            aria-label={t('general:next')}
-            buttonStyle="none"
-            onClick={() => {
-              const nextIndex = activeIndex + 1
-              if (nextIndex === forms.length) {
-                setActiveIndex(0)
-              } else {
-                setActiveIndex(nextIndex)
-              }
-            }}
-            type="button"
-          >
-            <ChevronIcon direction="right" />
-          </Button>
+            <div className={`${baseClass}__controls`}>
+              <Button
+                aria-label={t('general:previous')}
+                buttonStyle="secondary"
+                icon={<ChevronIcon direction="left" />}
+                onClick={() => {
+                  const nextIndex = activeIndex - 1
+                  if (nextIndex < 0) {
+                    setActiveIndex(forms.length - 1)
+                  } else {
+                    setActiveIndex(nextIndex)
+                  }
+                }}
+                type="button"
+              />
+              <Button
+                aria-label={t('general:next')}
+                buttonStyle="secondary"
+                icon={<ChevronIcon direction="right" />}
+                onClick={() => {
+                  const nextIndex = activeIndex + 1
+                  if (nextIndex === forms.length) {
+                    setActiveIndex(0)
+                  } else {
+                    setActiveIndex(nextIndex)
+                  }
+                }}
+                type="button"
+              />
+            </div>
+          </div>
         </div>
-        <EditManyBulkUploads collection={collectionConfig} />
-      </div>
+      )}
 
       <Actions className={`${baseClass}__saveButtons`} />
-    </div>
+    </DialogFooter>
   )
 }
 
@@ -77,13 +72,14 @@ type ActionsProps = {
 export function Actions({ className }: ActionsProps) {
   const { getEntityConfig } = useConfig()
   const { t } = useTranslation()
-  const { collectionSlug, hasPublishPermission, hasSavePermission, saveAllDocs } = useFormsManager()
+  const { collectionSlug, hasPublishPermission, hasSavePermission, isInitializing, saveAllDocs } =
+    useFormsManager()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   return (
     <div className={[`${baseClass}__buttons`, className].filter(Boolean).join(' ')}>
-      {collectionConfig?.versions?.drafts && hasSavePermission ? (
+      {collectionConfig?.versions?.drafts && hasSavePermission && !isInitializing ? (
         <Button
           buttonStyle="secondary"
           onClick={() => void saveAllDocs({ overrides: { _status: 'draft' } })}
@@ -91,13 +87,13 @@ export function Actions({ className }: ActionsProps) {
           {t('version:saveDraft')}
         </Button>
       ) : null}
-      {collectionConfig?.versions?.drafts && hasPublishPermission ? (
+      {collectionConfig?.versions?.drafts && hasPublishPermission && !isInitializing ? (
         <Button onClick={() => void saveAllDocs({ overrides: { _status: 'published' } })}>
           {t('version:publish')}
         </Button>
       ) : null}
 
-      {!collectionConfig?.versions?.drafts && hasSavePermission ? (
+      {!collectionConfig?.versions?.drafts && hasSavePermission && !isInitializing ? (
         <Button onClick={() => void saveAllDocs()}>{t('general:save')}</Button>
       ) : null}
     </div>

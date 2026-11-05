@@ -1,3 +1,29 @@
+/**
+ * Operators that apply a nested `where` query to documents in a non-polymorphic, has-many
+ * relationship or upload field.
+ *
+ * `contains` matches at least one related document, `not_equals` matches none, and `equals`
+ * matches every related document. These operators keep their existing behavior with normal values.
+ *
+ * @example
+ * ```ts
+ * const where = {
+ *   ingredients: {
+ *     not_equals: {
+ *       isHealthy: { equals: false },
+ *     },
+ *   },
+ * }
+ * ```
+ */
+export const hasManyRelationshipOperators = ['contains', 'not_equals', 'equals'] as const
+
+export type HasManyRelationshipOperator = (typeof hasManyRelationshipOperators)[number]
+
+export const hasManyRelationshipOperatorSet = new Set<HasManyRelationshipOperator>(
+  hasManyRelationshipOperators,
+)
+
 export const validOperators = [
   'equals',
   'contains',
@@ -20,3 +46,9 @@ export const validOperators = [
 export type Operator = (typeof validOperators)[number]
 
 export const validOperatorSet = new Set<Operator>(validOperators)
+
+/**
+ * Matches a dot-separated path where each segment is a word character (a-zA-Z0-9_).
+ * Used to validate field paths before they are processed by query builders.
+ */
+export const SAFE_FIELD_PATH_REGEX = /^\w+(?:\.\w+)*$/

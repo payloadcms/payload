@@ -2,6 +2,8 @@ import type { Page } from '@playwright/test'
 
 import { wait } from 'payload/shared'
 
+import { waitForFormReady } from './helpers.js'
+
 export async function openDocDrawer({
   page,
   selector,
@@ -15,7 +17,7 @@ export async function openDocDrawer({
   if (withMetaKey) {
     clickProperties = { modifiers: ['ControlOrMeta'] }
   }
-  await wait(500) // wait for parent form state to initialize
+  await waitForFormReady(page)
   await page.locator(selector).click(clickProperties)
-  await wait(500) // wait for drawer form state to initialize
+  await waitForFormReady(page)
 }

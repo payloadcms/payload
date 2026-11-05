@@ -1,42 +1,20 @@
 'use client'
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
-import { upload } from '@vercel/blob/client'
-import { formatAdminURL } from 'payload/shared'
+import { put } from '@vercel/blob/client'
 
-export type VercelBlobClientUploadHandlerExtra = {
-  addRandomSuffix: boolean
-  baseURL: string
-  prefix: string
-}
+export const VercelBlobClientUploadHandler = createClientUploadHandler({
+  name: 'uploadToVercelBlob',
+  handler: async ({ data, file }) => {
+    const { pathname, token } = data as { pathname: string; token: string }
 
-export const VercelBlobClientUploadHandler =
-  createClientUploadHandler<VercelBlobClientUploadHandlerExtra>({
-    handler: async ({
-      apiRoute,
-      collectionSlug,
-      extra: { addRandomSuffix, baseURL, prefix = '' },
-      file,
-      serverHandlerPath,
-      serverURL,
-      updateFilename,
-    }) => {
-      const endpointRoute = formatAdminURL({
-        apiRoute,
-        path: serverHandlerPath,
-        serverURL,
-      })
-      const result = await upload(`${prefix}${file.name}`, file, {
-        access: 'public',
-        clientPayload: collectionSlug,
-        contentType: file.type,
-        handleUploadUrl: endpointRoute,
-      })
+    const result = await put(pathname, file, {
+      access: 'public',
+      contentType: file.type,
+      token,
+    })
 
-      // Update filename with suffix from returned url
-      if (addRandomSuffix) {
-        updateFilename(result.url.replace(`${baseURL}/`, ''))
-      }
-
-      return { prefix }
-    },
-  })
+    if (decodeURIComponent(result.pathname) !== decodeURIComponent(pathname)) {
+      throw new Error('The uploaded file was stored at an unexpected location')
+    }
+  },
+})

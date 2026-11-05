@@ -1,0 +1,20 @@
+@layer payload-default {
+  .publish-button__label--full {
+    display: inline;
+  }
+
+  .publish-button__label--short {
+    display: none;
+  }
+
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
+  @media (max-width: 1024px) {
+    .publish-button__label--full {
+      display: none;
+    }
+
+    .publish-button__label--short {
+      display: inline;
+    }
+  }
+}

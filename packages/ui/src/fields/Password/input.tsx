@@ -2,7 +2,7 @@
 import type { ChangeEvent } from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import React, { useState } from 'react'
 
 import type { PasswordInputProps } from './types.js'
 
@@ -10,9 +10,15 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import { useForm } from '../../forms/Form/context.js'
+import { EyeIcon } from '../../icons/Eye/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { fieldBaseClass } from '../shared/index.js'
-import './index.scss'
+import './index.css'
+
+const baseClass = 'password'
 
 export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
   const {
@@ -35,24 +41,31 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
     required,
     rtl,
     showError,
+    size = 'large',
     style,
     value,
     width,
   } = props
 
-  const { i18n } = useTranslation()
+  const { uuid } = useForm()
+  const editDepth = useEditDepth()
+  const { i18n, t } = useTranslation()
+  const errorID = showError ? generateFieldID(path, editDepth, uuid, 'field-error') : undefined
+
+  const [showPassword, setShowPassword] = useState(false)
 
   return (
     <div
       className={[
         fieldBaseClass,
-        'password',
+        baseClass,
         className,
         showError && 'error',
         readOnly && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
+      data-size={size}
       style={{
         ...style,
         width,
@@ -61,7 +74,13 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            hasRequiredAccessibleState
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
@@ -69,22 +88,35 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
         />
-        <div>
+        <div className="password__input-wrap">
           {BeforeInput}
           <input
+            aria-describedby={errorID}
+            aria-invalid={showError || undefined}
             aria-label={getTranslation(label, i18n)}
+            aria-required={required || undefined}
             autoComplete={autoComplete}
+            className="form-input"
             data-rtl={rtl}
             disabled={readOnly}
             id={`field-${path.replace(/\./g, '__')}`}
             name={path}
-            onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
+            onChange={onChange}
             onKeyDown={onKeyDown}
             placeholder={getTranslation(placeholder, i18n)}
             ref={inputRef}
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             value={value || ''}
           />
+          <button
+            aria-label={t(showPassword ? 'fields:hidePassword' : 'fields:showPassword')}
+            className="password__toggle-button"
+            disabled={readOnly}
+            onClick={() => setShowPassword((prev) => !prev)}
+            type="button"
+          >
+            <EyeIcon active={showPassword} size={24} />
+          </button>
           {AfterInput}
         </div>
         <RenderCustomComponent

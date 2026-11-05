@@ -1,0 +1,21 @@
+@layer payload-default {
+  .localizer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .localizer__button-content {
+    display: flex;
+    align-items: center;
+  }
+
+  .localizer .btn__content {
+    gap: 0;
+  }
+
+  .localizer .btn:not(.btn--selected) .btn__icon {
+    color: var(--color-icon-secondary);
+  }
+}

@@ -113,6 +113,7 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
       group: false,
       useAsTitle: 'title',
     },
+    authorship: false,
     fields,
     hooks: {
       beforeChange: [beforeChange({ productsSlug, variantOptionsSlug })],

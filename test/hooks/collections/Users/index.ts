@@ -19,10 +19,12 @@ export const seedHooksUsers = async (payload: Payload) => {
   await payload.create({
     collection: hooksUsersSlug,
     data: devUser,
+    overrideAccess: true,
   })
   await payload.create({
     collection: hooksUsersSlug,
     data: regularUser,
+    overrideAccess: true,
   })
 }
 
@@ -52,6 +54,7 @@ const Users: CollectionConfig = {
     afterLogin: [afterLoginHook],
     beforeLogin: [beforeLoginHook],
   },
+  versions: false,
 }
 
 export default Users

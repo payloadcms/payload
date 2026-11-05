@@ -46,13 +46,13 @@ import {
   convertPathToJSONTraversal,
   countDistinct,
   createJSONQuery,
+  createRequireDrizzleKit,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
   execute,
   init,
   insert,
-  requireDrizzleKit,
 } from '@payloadcms/drizzle/sqlite'
 import { like, notLike } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
@@ -64,9 +64,13 @@ import { connect } from './connect.js'
 
 const filename = fileURLToPath(import.meta.url)
 
+const requireDrizzleKit = createRequireDrizzleKit({
+  from: import.meta.url,
+})
+
 export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   const sqliteIDType = args.idType || 'number'
-  const payloadIDType = sqliteIDType === 'uuid' ? 'text' : 'number'
+  const payloadIDType = sqliteIDType === 'uuid' || sqliteIDType === 'uuidv7' ? 'text' : 'number'
   const allowIDOnCreate = args.allowIDOnCreate ?? false
 
   function adapter({ payload }: { payload: Payload }) {
@@ -151,6 +155,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      operatorHandlers: [],
       operators,
       prodMigrations: args.prodMigrations,
       wal,
@@ -244,9 +249,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   }
 }
 
-/**
- * @todo deprecate /types subpath export in 4.0
- */
 export type {
   Args as SQLiteAdapterArgs,
   CountDistinct,

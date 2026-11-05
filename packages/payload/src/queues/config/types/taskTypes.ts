@@ -15,25 +15,13 @@ export type TaskInputOutput = {
 }
 export type TaskHandlerResult<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
-> =
-  | {
-      /**
-       * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
-       */
-      errorMessage?: string
-      /**
-       * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
-       */
-      state: 'failed'
-    }
-  | {
-      output: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
-        ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['output']
-        : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
-          ? TTaskSlugOrInputOutput['output']
-          : never
-      state?: 'succeeded'
-    }
+> = {
+  output: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
+    ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['output']
+    : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
+      ? TTaskSlugOrInputOutput['output']
+      : never
+}
 
 export type TaskHandlerArgs<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
@@ -56,8 +44,10 @@ export type TaskHandlerArgs<
 /**
  * Inline tasks in JSON workflows have no input, as they can just get the input from job.taskStatus
  */
-export type TaskHandlerArgsNoInput<TWorkflowInput extends false | object = false> = {
-  job: Job<TWorkflowInput>
+export type TaskHandlerArgsNoInput<
+  TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object = object,
+> = {
+  job: Job<TWorkflowSlugOrInput>
   req: PayloadRequest
 }
 
@@ -68,10 +58,7 @@ export type TaskHandler<
   args: TaskHandlerArgs<TTaskSlugOrInputOutput, TWorkflowSlug>,
 ) => MaybePromise<TaskHandlerResult<TTaskSlugOrInputOutput>>
 
-/**
- * @todo rename to TaskSlug in 4.0, similar to CollectionSlug
- */
-export type TaskType = StringKeyOf<TypedJobs['tasks']>
+export type TaskSlug = StringKeyOf<TypedJobs['tasks']>
 
 // Extracts the type of `input` corresponding to each task
 export type TaskInput<T extends keyof TypedJobs['tasks']> = TypedJobs['tasks'][T]['input']
@@ -125,22 +112,9 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
       job: Job<any>
       req: PayloadRequest
       tasks: RunTaskFunctions
-    }) => MaybePromise<
-      | {
-          /**
-           * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
-           */
-          errorMessage?: string
-          /**
-           * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
-           */
-          state: 'failed'
-        }
-      | {
-          output: TTaskOutput
-          state?: 'succeeded'
-        }
-    >
+    }) => MaybePromise<{
+      output: TTaskOutput
+    }>
   },
 ) => Promise<TTaskOutput>
 
@@ -216,7 +190,7 @@ export type RetryConfig = {
 }
 
 export type TaskConfig<
-  TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput = TaskType,
+  TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput = TaskSlug,
 > = {
   /**
    * Job concurrency controls for preventing race conditions.

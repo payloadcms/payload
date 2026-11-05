@@ -47,6 +47,16 @@ export type BlockCollapsibleProps = {
    * @default true
    */
   removeButton?: boolean
+  /**
+   * Whether to show the drag handle icon
+   * @default true
+   */
+  showDragHandle?: boolean
+  /**
+   * Whether to show the row number
+   * @default true
+   */
+  showRowNumber?: boolean
 }
 
 export type BlockCollapsibleWithErrorProps = {
@@ -58,7 +68,11 @@ export type BlockContentProps = {
   baseClass: string
   BlockDrawer: React.FC
   Collapsible: React.FC<BlockCollapsibleWithErrorProps>
-  CustomBlock: React.ReactNode
+  /**
+   * Custom block component (pre-rendered ReactNode).
+   */
+  CustomBlock?: React.ReactNode
+  CustomLabel: React.ReactNode
   EditButton: React.FC
   errorCount: number
   formSchema: ClientField[]
@@ -68,15 +82,14 @@ export type BlockContentProps = {
   RemoveButton: React.FC
 }
 
-type BlockComponentContextType = {
+export type BlockComponentContextType = {
   BlockCollapsible: React.FC<BlockCollapsibleProps>
-} & Omit<BlockContentProps, 'Collapsible'>
+} & Omit<BlockContentProps, 'Collapsible' | 'CustomBlock' | 'CustomLabel'>
 
 const BlockComponentContext = createContext<BlockComponentContextType>({
   baseClass: 'LexicalEditorTheme__block',
   BlockCollapsible: () => null,
   BlockDrawer: () => null,
-  CustomBlock: null,
   EditButton: () => null,
   errorCount: 0,
   formSchema: [],
@@ -93,9 +106,9 @@ export const useBlockComponentContext = () => React.use(BlockComponentContext)
  * not the whole document.
  */
 export const BlockContent: React.FC<BlockContentProps> = (props) => {
-  const { Collapsible, ...contextProps } = props
+  const { Collapsible, CustomBlock, CustomLabel, ...contextProps } = props
 
-  const { BlockDrawer, CustomBlock, errorCount, formSchema } = contextProps
+  const { BlockDrawer, errorCount, formSchema } = contextProps
 
   const hasSubmitted = useFormSubmitted()
 
@@ -103,8 +116,8 @@ export const BlockContent: React.FC<BlockContentProps> = (props) => {
   const isEditable = useLexicalEditable()
 
   const CollapsibleWithErrorProps = useMemo(
-    () => (props: BlockCollapsibleProps) => {
-      const { children, ...rest } = props
+    () => (collapsibleProps: BlockCollapsibleProps) => {
+      const { children, ...rest } = collapsibleProps
       return (
         <Collapsible errorCount={errorCount} fieldHasErrors={fieldHasErrors} {...rest}>
           {children}
@@ -114,13 +127,14 @@ export const BlockContent: React.FC<BlockContentProps> = (props) => {
     [Collapsible, fieldHasErrors, errorCount],
   )
 
+  const blockContextValue: BlockComponentContextType = {
+    ...contextProps,
+    BlockCollapsible: CollapsibleWithErrorProps,
+  }
+
+  // Provide context for useBlockComponentContext() hook
   return CustomBlock ? (
-    <BlockComponentContext
-      value={{
-        ...contextProps,
-        BlockCollapsible: CollapsibleWithErrorProps,
-      }}
-    >
+    <BlockComponentContext value={blockContextValue}>
       {CustomBlock}
       <BlockDrawer />
     </BlockComponentContext>

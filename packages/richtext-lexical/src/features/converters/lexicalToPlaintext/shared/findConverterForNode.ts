@@ -1,6 +1,6 @@
 import type { SerializedLexicalNode } from 'lexical'
 
-import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../nodeTypes.js'
+import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../types/nodeTypes.js'
 import type { PlaintextConverter, PlaintextConverters } from '../sync/types.js'
 
 export function findConverterForNode<

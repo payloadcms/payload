@@ -1,7 +1,8 @@
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { Connect, Migration } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
+import { assertOperatorHandlerExtensionsInstalled } from '@payloadcms/drizzle/postgres'
 import { sql, VercelPool } from '@vercel/postgres'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { withReplicas } from 'drizzle-orm/pg-core'
@@ -42,19 +43,20 @@ export const connect: Connect = async function connect(
     // Passed the poolOptions if provided,
     // else have vercel/postgres detect the connection string from the environment
     this.drizzle = drizzle({
-      client,
+      client: client as pg.Pool,
       logger,
       schema: this.schema,
     })
 
     if (this.readReplicaOptions) {
+      this.primaryDrizzle = this.drizzle as any
       const readReplicas = this.readReplicaOptions.map((connectionString) => {
         const options = {
           ...this.poolOptions,
           connectionString,
         }
         const pool = new VercelPool(options)
-        return drizzle({ client: pool, logger, schema: this.schema })
+        return drizzle({ client: pool as unknown as pg.Pool, logger, schema: this.schema })
       })
       const myReplicas = withReplicas(this.drizzle, readReplicas as any)
       this.drizzle = myReplicas
@@ -94,6 +96,11 @@ export const connect: Connect = async function connect(
   }
 
   await this.createExtensions()
+
+  await assertOperatorHandlerExtensionsInstalled({
+    drizzle: this.drizzle,
+    operatorHandlers: this.operatorHandlers,
+  })
 
   // Only push schema if not in production
   if (

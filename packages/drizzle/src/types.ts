@@ -24,6 +24,7 @@ import type {
   BaseDatabaseAdapter,
   FlattenedField,
   MigrationData,
+  Operator,
   Payload,
   PayloadRequest,
 } from 'payload'
@@ -37,7 +38,7 @@ import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { QueryResult } from 'pg'
 
-import type { Operators } from './queries/operatorMap.js'
+import type { DrizzleResolvedOperator, Operators } from './queries/operatorMap.js'
 
 export type PostgresDB = NodePgDatabase<Record<string, unknown>>
 
@@ -121,7 +122,7 @@ export type Insert = (args: {
   values: Record<string, unknown> | Record<string, unknown>[]
 }) => Promise<Record<string, unknown>[]>
 
-export type RequireDrizzleKit = () => {
+export type RequireDrizzleKit = () => Promise<{
   generateDrizzleJson: (
     args: Record<string, unknown>,
   ) => DrizzleSnapshotJSON | Promise<DrizzleSnapshotJSON>
@@ -134,7 +135,7 @@ export type RequireDrizzleKit = () => {
     extensionsFilter?: string[],
   ) => Promise<{ apply; hasDataLoss; warnings }>
   upSnapshot?: (snapshot: Record<string, unknown>) => DrizzleSnapshotJSON
-}
+}>
 
 export type Migration = {
   down: ({
@@ -248,6 +249,8 @@ export type TimestampRawColumn = {
  */
 export type UUIDRawColumn = {
   defaultRandom?: boolean
+  /** App-side UUID v7 default (Postgres & SQLite); mutually exclusive with defaultRandom in practice */
+  defaultV7?: boolean
   type: 'uuid'
 } & BaseRawColumn
 
@@ -345,8 +348,7 @@ export interface BaseBlocksToJsonEntityToMigrate {
   originalData: Record<string, any>
 }
 
-export interface CollectionOrVersionBlocksToJsonEntityToMigrate
-  extends BaseBlocksToJsonEntityToMigrate {
+export interface CollectionOrVersionBlocksToJsonEntityToMigrate extends BaseBlocksToJsonEntityToMigrate {
   id: number | string
   slug: string
   type: 'collection' | 'collectionVersion' | 'globalVersion'
@@ -382,6 +384,60 @@ export interface BlocksToJsonMigrator {
   updatePayloadConfigFile(): Promise<void>
 }
 
+/**
+ * The information passed to a query-operator handler for one user-facing leaf comparison.
+ */
+export type DrizzleOperatorHandlerContext = {
+  adapter: DrizzleAdapter
+  column: Column | SQL
+  field: FlattenedField
+  locale?: string
+  /** The operator supplied by the Payload query, before any adapter conversions. */
+  originalOperator: Operator
+  path: string
+  /** The operator actually sent to the database after Payload's existing conversions. */
+  resolvedOperator: DrizzleResolvedOperator
+  storage: 'column'
+  value: unknown
+}
+
+/**
+ * Transforms the column and/or value of a matching operator before the default (or replacement)
+ * comparison runs. Multiple matching transform handlers compose in configuration order.
+ */
+export type DrizzleOperandTransformHandler = {
+  build?: never
+  /** Restricts the handler to these Payload field types. Omit to match every field type. */
+  fieldTypes?: FlattenedField['type'][]
+  name: string
+  operators: DrizzleResolvedOperator[]
+  transformOperands: (context: DrizzleOperatorHandlerContext) => {
+    column: Column | SQL
+    value: unknown
+  }
+}
+
+/**
+ * Replaces the default comparison for a matching operator entirely. Runs after every matching
+ * `transformOperands` handler has already run.
+ */
+export type DrizzleOperatorReplacementHandler = {
+  build: (context: DrizzleOperatorHandlerContext) => SQL
+  /** Restricts the handler to these Payload field types. Omit to match every field type. */
+  fieldTypes?: FlattenedField['type'][]
+  name: string
+  operators: DrizzleResolvedOperator[]
+  transformOperands?: never
+}
+
+export type DrizzleOperatorHandler =
+  | DrizzleOperandTransformHandler
+  | DrizzleOperatorReplacementHandler
+
+export type DrizzleQueryConfig = {
+  operatorHandlers?: DrizzleOperatorHandler[]
+}
+
 export interface DrizzleAdapter extends BaseDatabaseAdapter {
   blocksAsJSON?: boolean
   blocksToJsonMigrator?: BlocksToJsonMigrator
@@ -393,7 +449,6 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   drizzle: LibSQLDatabase | PostgresDB
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
-
   execute: Execute<unknown>
   features: {
     json?: boolean
@@ -403,18 +458,38 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+
   foreignKeys: Set<string>
-  idType: 'serial' | 'uuid'
+  idType: 'serial' | 'uuid' | 'uuidv7'
   indexes: Set<string>
   initializing: Promise<void>
   insert: Insert
+  /**
+   * Timestamp (ms) of the last write operation. When read replicas are configured,
+   * reads within `readReplicasAfterWriteInterval` ms of this timestamp are routed to the
+   * primary to guarantee read-after-write consistency.
+   */
+  lastWriteTimestamp?: number
   limitedBoundParameters?: boolean
   localesSuffix?: string
   logger: DrizzleConfig['logger']
+  operatorHandlers: DrizzleOperatorHandler[]
   operators: Operators
+  /**
+   * When read replicas are configured, holds the unwrapped primary drizzle instance
+   * (before withReplicas wrapping). Used for reads that are part of write operations
+   * to avoid replication lag.
+   */
+  primaryDrizzle?: PostgresDB
   push: boolean
   rawRelations: Record<string, Record<string, RawRelation>>
   rawTables: Record<string, RawTable>
+  /**
+   * How long (ms) after a write to route reads to the primary instead of a
+   * read replica. Avoids stale reads caused by replication lag.
+   * @default 2000
+   */
+  readReplicasAfterWriteInterval: number
 
   rejectInitializing: () => void
   relations: Record<string, GenericRelation>
@@ -447,8 +522,3 @@ export type RelationMap = Map<
     type: 'many' | 'one'
   }
 >
-
-/**
- * @deprecated - will be removed in 4.0. Use query + $dynamic() instead: https://orm.drizzle.team/docs/dynamic-query-building
- */
-export type { ChainedMethods } from './find/chainMethods.js'

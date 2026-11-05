@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 'use client'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@payloadcms/ui'
 
 export const Seed = () => {
   const router = useRouter()

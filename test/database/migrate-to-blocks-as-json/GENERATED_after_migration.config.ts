@@ -33,6 +33,7 @@ export default buildConfig({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'posts-versioned',
@@ -97,6 +98,7 @@ export default buildConfig({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: 'posts',
@@ -182,6 +184,7 @@ export default buildConfig({
           ],
         },
       ],
+      versions: false,
     },
   ],
   globals: [
@@ -227,6 +230,7 @@ export default buildConfig({
           ],
         },
       ],
+      versions: false,
     },
   ],
 })

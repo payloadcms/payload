@@ -4,6 +4,16 @@ import { parseParams, booleanParams, numberParams } from './index.js'
 
 describe('parseParams', () => {
   describe('boolean parameters', () => {
+    it('should parse disabled all-locale publication flags as false', () => {
+      const result = parseParams({
+        publishAllLocales: 'false',
+        unpublishAllLocales: 'false',
+      })
+
+      expect(result.publishAllLocales).toBe(false)
+      expect(result.unpublishAllLocales).toBe(false)
+    })
+
     booleanParams.forEach((param) => {
       describe(param, () => {
         it('should parse string "true" to boolean true', () => {
@@ -198,14 +208,6 @@ describe('parseParams', () => {
     })
   })
 
-  describe('publishSpecificLocale parameter', () => {
-    it('should pass through publishSpecificLocale as-is', () => {
-      const publishSpecificLocale = 'en'
-      const result = parseParams({ publishSpecificLocale })
-      expect(result.publishSpecificLocale).toBe(publishSpecificLocale)
-    })
-  })
-
   describe('field parameter', () => {
     it('should pass through field as-is', () => {
       const field = 'myField'
@@ -219,6 +221,23 @@ describe('parseParams', () => {
       const where = { name: { equals: 'test' } }
       const result = parseParams({ where })
       expect(result.where).toBe(where)
+    })
+
+    it('should parse where when it is a JSON string', () => {
+      const where = { read: { equals: false } }
+      const result = parseParams({ where: JSON.stringify(where) })
+      expect(result.where).toEqual(where)
+    })
+
+    it('should not process empty string where', () => {
+      const result = parseParams({ where: '' })
+      expect(result.where).toBe('')
+    })
+
+    it('should throw error for invalid JSON where', () => {
+      expect(() => {
+        parseParams({ where: 'invalid-json' })
+      }).toThrow()
     })
   })
 

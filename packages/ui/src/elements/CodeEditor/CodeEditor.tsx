@@ -1,4 +1,6 @@
 'use client'
+import type { Monaco, OnMount } from '@monaco-editor/react'
+
 import EditorImport from '@monaco-editor/react'
 import React, { useState } from 'react'
 
@@ -7,33 +9,81 @@ import type { Props } from './types.js'
 import { useTheme } from '../../providers/Theme/index.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import { defaultGlobalEditorOptions, defaultOptions } from './constants.js'
-import './index.scss'
+import './index.css'
 
 const Editor = 'default' in EditorImport ? EditorImport.default : EditorImport
 
 const baseClass = 'code-editor'
+const initializedTabFocusModes = new WeakSet<Monaco>()
+
+function definePayloadThemes(monaco: Monaco) {
+  monaco.editor.defineTheme('payload-light', {
+    base: 'vs',
+    colors: {
+      'editor.background': '#00000000',
+      'editor.lineHighlightBackground': '#00000000',
+      'editor.lineHighlightBorder': '#00000000',
+      'editorGutter.background': '#00000000',
+      'editorLineNumber.activeForeground': '#0000004d', // black at 30% opacity
+      'editorLineNumber.foreground': '#0000004d', // black at 30% opacity
+    },
+    inherit: true,
+    rules: [
+      { foreground: 'cb0b96', token: 'keyword' },
+      { foreground: '005cc5', token: 'identifier' },
+      { foreground: '093077', token: 'type.identifier' },
+      { foreground: '093077', token: 'delimiter' },
+      { foreground: '093077', token: 'delimiter.bracket' },
+      { foreground: 'c53e0d', token: 'string' },
+      { foreground: '093077', token: 'number' },
+      { foreground: '6a737d', token: 'comment' },
+    ],
+  })
+  monaco.editor.defineTheme('payload-dark', {
+    base: 'vs-dark',
+    colors: {
+      'editor.background': '#00000000',
+      'editor.lineHighlightBackground': '#00000000',
+      'editor.lineHighlightBorder': '#00000000',
+      'editorGutter.background': '#00000000',
+      'editorLineNumber.activeForeground': '#ffffffb3', // var(--color-text-secondary) - white at 70% opacity
+      'editorLineNumber.foreground': '#ffffffb3', // var(--color-text-secondary) - white at 70% opacity
+    },
+    inherit: true,
+    rules: [],
+  })
+}
 
 const CodeEditor: React.FC<Props> = (props) => {
   const {
     className,
     maxHeight,
-    minHeight,
+    minHeight = 48,
     options,
     readOnly,
     recalculatedHeightAt,
     value,
     ...rest
   } = props
-  const MIN_HEIGHT = minHeight ?? 56 // equivalent to 3 lines
+  const LINE_HEIGHT = 16 // Monaco editor line height at fontSize 11
+  const EDITOR_BORDER = 2 // 1px top + 1px bottom border
+  const CSS_CONTAINER_PADDING = 16 // 8px top + 8px bottom from CSS
   const prevCalculatedHeightAt = React.useRef<number | undefined>(recalculatedHeightAt)
+  const editorRef = React.useRef<Parameters<OnMount>[0]>(null)
+  const isNestedInLexicalRef = React.useRef(false)
+  const editableOptionsRef = React.useRef<null | Pick<
+    NonNullable<Props['options']>,
+    'domReadOnly' | 'editContext'
+  >>(null)
 
   // Extract per-model settings to avoid global conflicts
   const { insertSpaces, tabSize, trimAutoWhitespace, ...globalEditorOptions } = options || {}
+  const { domReadOnly, editContext } = globalEditorOptions
   const paddingFromProps = options?.padding
     ? (options.padding.top || 0) + (options.padding?.bottom || 0)
     : 0
 
-  const [dynamicHeight, setDynamicHeight] = useState(MIN_HEIGHT)
+  const [dynamicHeight, setDynamicHeight] = useState(minHeight)
   const { theme } = useTheme()
 
   const classes = [
@@ -49,18 +99,67 @@ const CodeEditor: React.FC<Props> = (props) => {
     if (recalculatedHeightAt && recalculatedHeightAt > prevCalculatedHeightAt.current) {
       setDynamicHeight(
         value
-          ? Math.max(MIN_HEIGHT, value.split('\n').length * 18 + 2 + paddingFromProps)
-          : MIN_HEIGHT,
+          ? Math.max(
+              minHeight,
+              value.split('\n').length * LINE_HEIGHT +
+                EDITOR_BORDER +
+                paddingFromProps +
+                CSS_CONTAINER_PADDING,
+            )
+          : minHeight,
       )
       prevCalculatedHeightAt.current = recalculatedHeightAt
     }
-  }, [value, MIN_HEIGHT, paddingFromProps, recalculatedHeightAt])
+  }, [value, minHeight, paddingFromProps, recalculatedHeightAt])
+
+  const updateReadOnlyOptions = React.useCallback(() => {
+    const editor = editorRef.current
+
+    if (!editor) {
+      return
+    }
+
+    if (readOnly) {
+      const currentOptions = editor.getRawOptions()
+
+      if (!editableOptionsRef.current) {
+        editableOptionsRef.current = {
+          domReadOnly: currentOptions.domReadOnly,
+          editContext: currentOptions.editContext,
+        }
+      }
+
+      if (currentOptions.domReadOnly !== true || currentOptions.editContext !== false) {
+        editor.updateOptions({ domReadOnly: true, editContext: false })
+      }
+    } else if (editableOptionsRef.current) {
+      editor.updateOptions({
+        domReadOnly: domReadOnly ?? editableOptionsRef.current.domReadOnly,
+        editContext: isNestedInLexicalRef.current
+          ? false
+          : (editContext ?? editableOptionsRef.current.editContext),
+      })
+      editableOptionsRef.current = null
+    } else if (isNestedInLexicalRef.current && editor.getRawOptions().editContext !== false) {
+      editor.updateOptions({ editContext: false })
+    }
+
+    return editor
+  }, [domReadOnly, editContext, readOnly])
+  const updateReadOnlyOptionsRef = React.useRef(updateReadOnlyOptions)
+
+  // The Monaco wrapper reapplies caller options on render, so enforce read-only state afterward.
+  React.useEffect(() => {
+    updateReadOnlyOptionsRef.current = updateReadOnlyOptions
+    updateReadOnlyOptions()
+  })
 
   return (
     <Editor
+      beforeMount={definePayloadThemes}
       className={classes}
       height={maxHeight ? Math.min(dynamicHeight, maxHeight) : dynamicHeight}
-      loading={<ShimmerEffect height={dynamicHeight} />}
+      loading={<ShimmerEffect height={minHeight} />}
       options={{
         ...defaultGlobalEditorOptions,
         ...globalEditorOptions,
@@ -76,7 +175,7 @@ const CodeEditor: React.FC<Props> = (props) => {
         tabSize: undefined,
         trimAutoWhitespace: undefined,
       }}
-      theme={theme === 'dark' ? 'vs-dark' : 'vs'}
+      theme={theme === 'dark' ? 'payload-dark' : 'payload-light'}
       value={value}
       {...rest}
       // Since we are not building an IDE and the container
@@ -87,12 +186,51 @@ const CodeEditor: React.FC<Props> = (props) => {
         rest.onChange?.(value, ev)
         setDynamicHeight(
           value
-            ? Math.max(MIN_HEIGHT, value.split('\n').length * 18 + 2 + paddingFromProps)
-            : MIN_HEIGHT,
+            ? Math.max(
+                minHeight,
+                value.split('\n').length * LINE_HEIGHT +
+                  EDITOR_BORDER +
+                  paddingFromProps +
+                  CSS_CONTAINER_PADDING,
+              )
+            : minHeight,
         )
       }}
       onMount={(editor, monaco) => {
+        editorRef.current = editor
+        // Set Monaco's shared default once, so its native toggle and announcements stay in sync.
+        // Mounting another editor must not reset the user's chosen mode.
+        if (!initializedTabFocusModes.has(monaco) && options?.tabFocusMode === undefined) {
+          initializedTabFocusModes.add(monaco)
+          editor.trigger('payload', 'editor.action.toggleTabFocusMode', null)
+        }
+
         rest.onMount?.(editor, monaco)
+
+        // Required to prevent copy/cut/paste from being hijacked by Lexical rich text editor
+        const domNode = editor.getDomNode()
+        const isNested = Boolean(domNode?.closest('[contenteditable="true"]'))
+
+        isNestedInLexicalRef.current = isNested
+
+        if (isNested) {
+          editor.updateOptions({ editContext: false })
+
+          const clipboardEvents = ['copy', 'cut', 'paste']
+          const stopPropagation = (event: Event) => {
+            event.stopPropagation()
+          }
+          for (const eventName of clipboardEvents) {
+            domNode.addEventListener(eventName, stopPropagation)
+          }
+          editor.onDidDispose(() => {
+            for (const eventName of clipboardEvents) {
+              domNode.removeEventListener(eventName, stopPropagation)
+            }
+          })
+        }
+
+        updateReadOnlyOptionsRef.current()
 
         // Set per-model options to avoid global conflicts
         const model = editor.getModel()
@@ -105,7 +243,13 @@ const CodeEditor: React.FC<Props> = (props) => {
         }
 
         setDynamicHeight(
-          Math.max(MIN_HEIGHT, editor.getValue().split('\n').length * 18 + 2 + paddingFromProps),
+          Math.max(
+            minHeight,
+            editor.getValue().split('\n').length * LINE_HEIGHT +
+              EDITOR_BORDER +
+              paddingFromProps +
+              CSS_CONTAINER_PADDING,
+          ),
         )
       }}
     />

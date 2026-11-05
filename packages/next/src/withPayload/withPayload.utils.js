@@ -1,4 +1,3 @@
- 
 /**
  * This was taken and modified from https://github.com/getsentry/sentry-javascript/blob/15256034ee8150a5b7dcb97d23eca1a5486f0cae/packages/nextjs/src/config/util.ts
  *
@@ -104,47 +103,4 @@ export function getNextjsVersion() {
     console.error('Payload: Error getting Next.js version', e)
     return undefined
   }
-}
-
-/**
- * Checks if the current Next.js version supports Turbopack externalize transitive dependencies.
- * This was introduced in Next.js v16.1.0-canary.3
- * @param {SemVer | undefined} version
- * @returns {boolean}
- */
-export function supportsTurbopackExternalizeTransitiveDependencies(version) {
-  if (!version) {
-    return false
-  }
-
-  const { canaryVersion, major, minor, patch } = version
-
-  if (major === undefined || minor === undefined) {
-    return false
-  }
-
-  if (major > 16) {
-    return true
-  }
-
-  if (major === 16) {
-    if (minor > 1) {
-      return true
-    }
-    if (minor === 1) {
-      // 16.1.1+ and canaries support this feature
-      if (patch > 0) {
-        return true
-      }
-      if (canaryVersion !== undefined) {
-        // 16.1.0-canary.3+
-        return canaryVersion >= 3
-      } else {
-        // Next.js 16.1.0
-        return true
-      }
-    }
-  }
-
-  return false
 }

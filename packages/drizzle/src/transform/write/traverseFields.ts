@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { APIError, type FlattenedField } from 'payload'
-import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
+import { expandOwnDottedKey, fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
@@ -198,7 +198,7 @@ export const traverseFields = ({
       } else {
         let value = data[field.name]
         let push = false
-        if (typeof value === 'object' && '$push' in value) {
+        if (value !== null && typeof value === 'object' && '$push' in value) {
           value = Array.isArray(value.$push) ? value.$push : [value.$push]
           push = true
         }
@@ -240,7 +240,7 @@ export const traverseFields = ({
     }
 
     if (field.type === 'blocks' && !adapter.blocksAsJSON) {
-      ;(field.blockReferences ?? field.blocks).forEach((block) => {
+      field.blocks.forEach((block) => {
         const matchedBlock =
           typeof block === 'string'
             ? adapter.payload.config.blocks.find((each) => each.slug === block)
@@ -356,9 +356,11 @@ export const traverseFields = ({
             blocksToDelete,
             columnPrefix: `${columnName}_`,
             data: groupData,
+            enableAtomicWrites,
             existingLocales,
             fieldPrefix: `${fieldName}_`,
             fields: field.flattenedFields,
+            forcedLocale,
             insideArrayOrBlock,
             locales,
             numbers,
@@ -694,6 +696,10 @@ export const traverseFields = ({
     }
 
     if (field.type === 'select' && field.hasMany) {
+      if (fieldData === undefined) {
+        return
+      }
+
       const selectTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
       if (!selects[selectTableName]) {
         selects[selectTableName] = []
@@ -814,23 +820,7 @@ export const traverseFields = ({
   // Handle dot-notation paths when no fields matched
   if (!fieldsMatched) {
     Object.keys(data).forEach((key) => {
-      if (key.includes('.')) {
-        // Split on first dot only
-        const firstDotIndex = key.indexOf('.')
-        const fieldName = key.substring(0, firstDotIndex)
-        const remainingPath = key.substring(firstDotIndex + 1)
-
-        // Create nested structure for this field
-        if (!data[fieldName]) {
-          data[fieldName] = {}
-        }
-
-        const nestedData = data[fieldName] as Record<string, unknown>
-
-        // Move the value to the nested structure
-        nestedData[remainingPath] = data[key]
-        delete data[key]
-
+      if (expandOwnDottedKey({ key, target: data })) {
         // Recursively process the newly created nested structure
         // The field traversal will naturally handle it if the field exists in the schema
         traverseFields({
