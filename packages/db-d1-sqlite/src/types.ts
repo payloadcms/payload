@@ -206,7 +206,7 @@ declare module 'payload' {
       up: (args: MigrateUpArgs) => Promise<void>
     }[]
     push: boolean
-    rejectInitializing: () => void
+    rejectInitializing: (err?: unknown) => void
     relationshipsSuffix?: string
     resolveInitializing: () => void
     schema: Record<string, GenericRelation | GenericTable>

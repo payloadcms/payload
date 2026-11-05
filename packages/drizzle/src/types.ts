@@ -491,7 +491,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    */
   readReplicasAfterWriteInterval: number
 
-  rejectInitializing: () => void
+  rejectInitializing: (err?: unknown) => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   requireDrizzleKit: RequireDrizzleKit

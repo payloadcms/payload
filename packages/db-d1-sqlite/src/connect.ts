@@ -48,7 +48,7 @@ export const connect: Connect = async function connect(
     const message = err instanceof Error ? err.message : String(err)
     this.payload.logger.error({ err, msg: `Error: cannot connect to SQLite: ${message}` })
     if (typeof this.rejectInitializing === 'function') {
-      this.rejectInitializing()
+      this.rejectInitializing(err)
     }
     console.error(err)
     throw new Error(`Error: cannot connect to SQLite: ${message}`)
