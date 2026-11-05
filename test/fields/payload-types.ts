@@ -238,11 +238,7 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {
-    'date-fields': {
-      joinedDates: 'date-fields';
-    };
-  };
+  collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     'select-versions-fields': SelectVersionsFieldsSelect<false> | SelectVersionsFieldsSelect<true>;
@@ -1341,14 +1337,6 @@ export interface DateField {
   monthOnly?: string | null;
   defaultWithTimezone?: string | null;
   defaultWithTimezone_tz?: SupportedTimezones;
-  relatedDates?: (string | DateField)[] | null;
-  localizedRelatedDates?: (string | DateField)[] | null;
-  relatedDate?: (string | null) | DateField;
-  joinedDates?: {
-    docs?: (string | DateField)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
   /**
    * This date here should be required.
    */
@@ -3543,10 +3531,6 @@ export interface DateFieldsSelect<T extends boolean = true> {
   monthOnly?: T;
   defaultWithTimezone?: T;
   defaultWithTimezone_tz?: T;
-  relatedDates?: T;
-  localizedRelatedDates?: T;
-  relatedDate?: T;
-  joinedDates?: T;
   dayAndTimeWithTimezone?: T;
   dayAndTimeWithTimezone_tz?: T;
   dayAndTimeWithTimezoneFixed?: T;

@@ -6566,349 +6566,81 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
   })
 
   test.describe('date fields with timezones', () => {
-    test('should filter an entire configured calendar day across databases', async ({
+    test('should filter configured calendar-day boundaries across databases', async ({
       payload,
     }) => {
       const documents = await Promise.all(
         [
-          {
-            array: [{ date: '2026-06-15T12:00:00.000Z' }, { date: '2026-06-17T12:00:00.000Z' }],
-            defaultWithTimezone: '2026-06-15T06:30:00.000Z',
-          },
-          {
-            array: [{ date: '2026-06-15T23:59:59.999Z' }],
-            defaultWithTimezone: '2026-06-16T05:59:59.999Z',
-          },
-          {
-            array: [{ date: '2026-06-17T12:00:00.000Z' }],
-            defaultWithTimezone: '2026-06-16T06:00:00.000Z',
-          },
-          {
-            array: [],
-            defaultWithTimezone: null,
-          },
-        ].map((data) =>
+          '2026-03-28T23:59:59.999Z',
+          '2026-03-29T00:00:00.000Z',
+          '2026-03-29T22:59:59.999Z',
+          '2026-03-29T23:00:00.000Z',
+        ].map((defaultWithTimezone) =>
           payload.create({
             collection: dateFieldsSlug,
-            data: { ...dateDoc, ...data },
+            data: { ...dateDoc, defaultWithTimezone },
             overrideAccess: true,
           }),
         ),
       )
 
       try {
-        const expectedDocumentIndexes = {
-          equals: [0, 1],
-          greater_than: [2],
-          greater_than_equal: [0, 1, 2],
-          less_than: [],
-          less_than_equal: [0, 1],
-          not_equals: [2, 3],
-        } as const
         const documentIDs = new Set(documents.map(({ id }) => id))
-
-        for (const [operator, expectedIndexes] of Object.entries(expectedDocumentIndexes)) {
+        const findTestIDs = async ({
+          operator,
+          value,
+        }: {
+          operator:
+            | 'equals'
+            | 'greater_than'
+            | 'greater_than_equal'
+            | 'less_than'
+            | 'less_than_equal'
+          value: string
+        }) => {
           const result = await payload.find({
             collection: dateFieldsSlug,
             overrideAccess: true,
-            where: { defaultWithTimezone: { [operator]: '2026-06-15' } },
+            where: { defaultWithTimezone: { [operator]: value } },
           })
-          const matchingTestIDs = result.docs
-            .map(({ id }) => id)
-            .filter((id) => documentIDs.has(id))
-            .sort()
-          const expectedIDs = expectedIndexes.map((index) => documents[index]!.id).sort()
 
-          expect(matchingTestIDs).toEqual(expectedIDs)
+          return result.docs.map(({ id }) => id).filter((id) => documentIDs.has(id))
         }
 
-        const exactTimestamp = await payload.find({
-          collection: dateFieldsSlug,
-          overrideAccess: true,
-          where: { defaultWithTimezone: { equals: '2026-06-15T06:30:00.000Z' } },
-        })
-        const equalArrayDay = await payload.find({
-          collection: dateFieldsSlug,
-          overrideAccess: true,
-          where: { 'array.date': { equals: '2026-06-15' } },
-        })
-        const unequalArrayDay = await payload.find({
-          collection: dateFieldsSlug,
-          overrideAccess: true,
-          where: { 'array.date': { not_equals: '2026-06-15' } },
+        const equalsIDs = await findTestIDs({ operator: 'equals', value: '2026-03-29' })
+
+        expect(equalsIDs).toHaveLength(2)
+        expect(equalsIDs).toEqual(expect.arrayContaining([documents[1]!.id, documents[2]!.id]))
+        const greaterThanEqualIDs = await findTestIDs({
+          operator: 'greater_than_equal',
+          value: '2026-03-29',
         })
 
-        expect(exactTimestamp.docs.map(({ id }) => id)).toContain(documents[0]?.id)
-        expect(exactTimestamp.docs.map(({ id }) => id)).not.toContain(documents[1]?.id)
-        expect(equalArrayDay.docs.map(({ id }) => id)).toContain(documents[0]?.id)
-        expect(unequalArrayDay.docs.map(({ id }) => id)).not.toContain(documents[0]?.id)
-        expect(unequalArrayDay.docs.map(({ id }) => id)).not.toContain(documents[1]?.id)
-        expect(unequalArrayDay.docs.map(({ id }) => id)).toContain(documents[2]?.id)
-        expect(unequalArrayDay.docs.map(({ id }) => id)).toContain(documents[3]?.id)
+        expect(greaterThanEqualIDs).toHaveLength(3)
+        expect(greaterThanEqualIDs).toEqual(
+          expect.arrayContaining(documents.slice(1).map(({ id }) => id)),
+        )
+        expect(await findTestIDs({ operator: 'greater_than', value: '2026-03-29' })).toEqual([
+          documents[3]!.id,
+        ])
+        expect(await findTestIDs({ operator: 'less_than', value: '2026-03-29' })).toEqual([
+          documents[0]!.id,
+        ])
+        const lessThanEqualIDs = await findTestIDs({
+          operator: 'less_than_equal',
+          value: '2026-03-29',
+        })
+
+        expect(lessThanEqualIDs).toHaveLength(3)
+        expect(lessThanEqualIDs).toEqual(
+          expect.arrayContaining(documents.slice(0, 3).map(({ id }) => id)),
+        )
+        expect(
+          await findTestIDs({ operator: 'equals', value: '2026-03-29T00:00:00.000Z' }),
+        ).toEqual([documents[1]!.id])
       } finally {
         await Promise.all(
           documents.map(({ id }) =>
-            payload.delete({ collection: dateFieldsSlug, id, overrideAccess: true }),
-          ),
-        )
-      }
-    })
-
-    test.options(
-      'should scope date-only not_equals to selected locales',
-      { db: 'drizzle' },
-      async ({ payload }) => {
-        const document = await payload.create({
-          collection: dateFieldsSlug,
-          data: {
-            ...dateDoc,
-            array: [{ date: '2026-06-17T12:00:00.000Z' }],
-          },
-          locale: 'en',
-          overrideAccess: true,
-        })
-
-        try {
-          await payload.update({
-            collection: dateFieldsSlug,
-            data: {
-              array: [{ date: '2026-06-15T12:00:00.000Z' }],
-            },
-            id: document.id,
-            locale: 'es',
-            overrideAccess: true,
-          })
-
-          const result = await payload.find({
-            collection: dateFieldsSlug,
-            locale: 'en',
-            overrideAccess: true,
-            where: { 'array.date': { not_equals: '2026-06-15' } },
-          })
-          const explicitLocaleResult = await payload.find({
-            collection: dateFieldsSlug,
-            locale: 'en',
-            overrideAccess: true,
-            where: { 'array.es.date': { not_equals: '2026-06-15' } },
-          })
-          expect(result.docs.map(({ id }) => id)).toContain(document.id)
-          expect(explicitLocaleResult.docs.map(({ id }) => id)).not.toContain(document.id)
-        } finally {
-          await payload.delete({
-            collection: dateFieldsSlug,
-            id: document.id,
-            overrideAccess: true,
-          })
-        }
-      },
-    )
-
-    test.options(
-      'should apply custom date operator handlers within repeated fields',
-      { db: 'drizzle' },
-      async ({ payload }) => {
-        const adapter = payload.db as {
-          operatorHandlers: {
-            fieldTypes?: string[]
-            name: string
-            operators: string[]
-            transformOperands: (args: { column: unknown }) => {
-              column: unknown
-              value: unknown
-            }
-          }[]
-        } & typeof payload.db
-        const originalHandlers = adapter.operatorHandlers
-        const document = await payload.create({
-          collection: dateFieldsSlug,
-          data: { ...dateDoc, array: [{ date: '2026-06-17T12:00:00.000Z' }] },
-          overrideAccess: true,
-        })
-
-        adapter.operatorHandlers = [
-          ...originalHandlers,
-          {
-            fieldTypes: ['date'],
-            name: 'shift-test-calendar-day',
-            operators: ['equals'],
-            transformOperands: ({ column }) => ({ column, value: '2026-06-17' }),
-          },
-        ]
-
-        try {
-          const result = await payload.find({
-            collection: dateFieldsSlug,
-            overrideAccess: true,
-            where: { 'array.date': { equals: '2026-06-15' } },
-          })
-
-          expect(result.docs.map(({ id }) => id)).toContain(document.id)
-        } finally {
-          adapter.operatorHandlers = originalHandlers
-          await payload.delete({
-            collection: dateFieldsSlug,
-            id: document.id,
-            overrideAccess: true,
-          })
-        }
-      },
-    )
-
-    test('should exclude calendar days across relationship traversal shapes', async ({
-      payload,
-    }) => {
-      const inDay = await payload.create({
-        collection: dateFieldsSlug,
-        data: { ...dateDoc, defaultWithTimezone: '2026-06-15T12:00:00.000Z' },
-        overrideAccess: true,
-      })
-      const outOfDay = await payload.create({
-        collection: dateFieldsSlug,
-        data: { ...dateDoc, defaultWithTimezone: '2026-06-17T12:00:00.000Z' },
-        overrideAccess: true,
-      })
-      const joinRoots = await Promise.all(
-        [{}, {}].map(() =>
-          payload.create({
-            collection: dateFieldsSlug,
-            data: dateDoc,
-            overrideAccess: true,
-          }),
-        ),
-      )
-      const relatedDocuments = await Promise.all(
-        [
-          {
-            defaultWithTimezone: '2026-06-15T12:00:00.000Z',
-            relatedDate: joinRoots[0]!.id,
-            relatedDates: [inDay.id, outOfDay.id],
-          },
-          { relatedDate: joinRoots[1]!.id, relatedDates: [outOfDay.id] },
-        ].map((data) =>
-          payload.create({
-            collection: dateFieldsSlug,
-            data: { ...dateDoc, ...data },
-            overrideAccess: true,
-          }),
-        ),
-      )
-      const additionalJoinedDocument = await payload.create({
-        collection: dateFieldsSlug,
-        data: {
-          ...dateDoc,
-          relatedDate: joinRoots[0]!.id,
-          relatedDates: [outOfDay.id],
-        },
-        overrideAccess: true,
-      })
-      const nestedParents = await Promise.all(
-        relatedDocuments.map(({ id }) =>
-          payload.create({
-            collection: dateFieldsSlug,
-            data: { ...dateDoc, relatedDate: id },
-            overrideAccess: true,
-          }),
-        ),
-      )
-      const emptyParent = await payload.create({
-        collection: dateFieldsSlug,
-        data: dateDoc,
-        overrideAccess: true,
-      })
-      const localizedParent = await payload.create({
-        collection: dateFieldsSlug,
-        data: { ...dateDoc, localizedRelatedDates: [inDay.id, outOfDay.id] },
-        locale: 'en',
-        overrideAccess: true,
-      })
-
-      try {
-        await payload.update({
-          collection: dateFieldsSlug,
-          data: { localizedRelatedDates: [outOfDay.id] },
-          id: localizedParent.id,
-          locale: 'es',
-          overrideAccess: true,
-        })
-
-        const directResult = await payload.find({
-          collection: dateFieldsSlug,
-          overrideAccess: true,
-          where: { 'relatedDates.defaultWithTimezone': { not_equals: '2026-06-15' } },
-        })
-        const nestedResult = await payload.find({
-          collection: dateFieldsSlug,
-          overrideAccess: true,
-          where: {
-            'relatedDate.relatedDates.defaultWithTimezone': { not_equals: '2026-06-15' },
-          },
-        })
-        const directToOneResult = await payload.find({
-          collection: dateFieldsSlug,
-          overrideAccess: true,
-          where: { 'relatedDate.defaultWithTimezone': { not_equals: '2026-06-15' } },
-        })
-        const englishRelationshipResult = await payload.find({
-          collection: dateFieldsSlug,
-          locale: 'en',
-          overrideAccess: true,
-          where: {
-            'localizedRelatedDates.en.defaultWithTimezone': { not_equals: '2026-06-15' },
-          },
-        })
-        const spanishRelationshipResult = await payload.find({
-          collection: dateFieldsSlug,
-          locale: 'en',
-          overrideAccess: true,
-          where: {
-            'localizedRelatedDates.es.defaultWithTimezone': { not_equals: '2026-06-15' },
-          },
-        })
-        const joinResult = await payload.find({
-          collection: dateFieldsSlug,
-          overrideAccess: true,
-          where: { 'joinedDates.relatedDates.defaultWithTimezone': { not_equals: '2026-06-15' } },
-        })
-        const directJoinResult = await payload.find({
-          collection: dateFieldsSlug,
-          overrideAccess: true,
-          where: { 'joinedDates.defaultWithTimezone': { not_equals: '2026-06-15' } },
-        })
-
-        const directResultIDs = directResult.docs.map(({ id }) => id)
-        const nestedResultIDs = nestedResult.docs.map(({ id }) => id)
-        const directToOneResultIDs = directToOneResult.docs.map(({ id }) => id)
-        const englishRelationshipResultIDs = englishRelationshipResult.docs.map(({ id }) => id)
-        const spanishRelationshipResultIDs = spanishRelationshipResult.docs.map(({ id }) => id)
-        const joinResultIDs = joinResult.docs.map(({ id }) => id)
-        const directJoinResultIDs = directJoinResult.docs.map(({ id }) => id)
-
-        expect(directResultIDs).not.toContain(relatedDocuments[0]!.id)
-        expect(directResultIDs).toContain(relatedDocuments[1]!.id)
-        expect(directResultIDs).toContain(emptyParent.id)
-        expect(nestedResultIDs).not.toContain(nestedParents[0]!.id)
-        expect(nestedResultIDs).toContain(nestedParents[1]!.id)
-        expect(directToOneResultIDs).not.toContain(nestedParents[0]!.id)
-        expect(directToOneResultIDs).toContain(nestedParents[1]!.id)
-        expect(directToOneResultIDs).toContain(emptyParent.id)
-        expect(englishRelationshipResultIDs).not.toContain(localizedParent.id)
-        expect(spanishRelationshipResultIDs).toContain(localizedParent.id)
-        expect(joinResultIDs).not.toContain(joinRoots[0]!.id)
-        expect(joinResultIDs).toContain(joinRoots[1]!.id)
-        expect(directJoinResultIDs).not.toContain(joinRoots[0]!.id)
-        expect(directJoinResultIDs).toContain(joinRoots[1]!.id)
-      } finally {
-        await Promise.all(
-          [
-            ...nestedParents,
-            emptyParent,
-            localizedParent,
-            additionalJoinedDocument,
-            ...relatedDocuments,
-            ...joinRoots,
-            inDay,
-            outOfDay,
-          ].map(({ id }) =>
             payload.delete({ collection: dateFieldsSlug, id, overrideAccess: true }),
           ),
         )

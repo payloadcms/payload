@@ -1,133 +1,144 @@
-import type { Operator } from '../types/index.js'
-import type { DateOnlyValue } from './dateOnlyFilter.js'
-
-import { getDateOnlyValue, isDateOnlyFilter, isValidDateFilterValue } from './dateOnlyFilter.js'
+import type { SanitizedConfig } from '../config/types.js'
+import type { DateFieldClient, FlattenedField } from '../fields/config/types.js'
+import type { Operator } from '../types/constants.js'
 
 export type DateOnlyConstraint = {
   operator: 'greater_than_equal' | 'less_than'
   value: Date
 }
 
-type DateOnlyConstraintGroup = {
-  combination: 'and' | 'or'
+export type DateOnlyComparison = {
   constraints: DateOnlyConstraint[]
 }
 
-export type DateOnlyComparison = {
-  includesNull?: true
-  repeated: { quantifier: 'none' | 'some' } & DateOnlyConstraintGroup
-  targetCombination: 'and' | 'or'
-} & DateOnlyConstraintGroup
-
+const calendarDayPattern = /^(\d{4})-(\d{2})-(\d{2})$/
 const fixedOffsetPattern = /^([+-])(\d{2}):(\d{2})$/
+const supportedOperators = new Set<Operator>([
+  'equals',
+  'greater_than',
+  'greater_than_equal',
+  'less_than',
+  'less_than_equal',
+])
 
-/**
- * Converts a calendar-day filter into timezone-aware, half-open instant constraints.
- * Directional operators use the start of the selected day or the start of the next day.
- */
-export const getDateOnlyComparison = ({
-  date,
+export const isDateOnlyFilter = ({
+  field,
   operator,
-  timezone,
 }: {
-  date: unknown
+  field: DateFieldClient | FlattenedField
   operator: Operator
-  timezone: string
-}): DateOnlyComparison | undefined => {
-  if (typeof date !== 'string') {
-    return undefined
+}): boolean => {
+  if (field.type !== 'date') {
+    return false
   }
 
-  const dateOnlyValue = getDateOnlyValue({ value: date })
+  const pickerAppearance = (field.admin?.date as { pickerAppearance?: string } | undefined)
+    ?.pickerAppearance
 
+  return (
+    supportedOperators.has(operator) &&
+    ['dayOnly', 'default'].includes(pickerAppearance ?? 'default')
+  )
+}
+
+/**
+ * Converts a date-only filter value into timestamp constraints in the field's configured timezone.
+ * Timestamp values and unsupported operators retain their existing comparison behavior.
+ */
+export const getDateOnlyComparison = ({
+  config,
+  field,
+  operator,
+  value,
+}: {
+  config: SanitizedConfig
+  field: FlattenedField
+  operator: Operator
+  value: unknown
+}): DateOnlyComparison | undefined => {
   if (
-    !dateOnlyValue ||
-    !isDateOnlyFilter({ operator }) ||
-    !isValidDateFilterValue({ value: date })
+    field.type !== 'date' ||
+    typeof value !== 'string' ||
+    !isDateOnlyFilter({ field, operator })
   ) {
     return undefined
   }
 
-  const { day, month, year } = dateOnlyValue
-  const calendarDate = getUTCCalendarDate({ day, month, year })
+  const match = calendarDayPattern.exec(value)
 
-  const startOfDay = getZonedMidnight({ day, month, timezone, year })
-  calendarDate.setUTCDate(calendarDate.getUTCDate() + 1)
-  const startOfNextDay = getZonedMidnight({
-    day: calendarDate.getUTCDate(),
-    month: calendarDate.getUTCMonth() + 1,
-    timezone,
-    year: calendarDate.getUTCFullYear(),
-  })
-  const atOrAfterStart = { operator: 'greater_than_equal', value: startOfDay } as const
-  const atOrAfterNextDay = { operator: 'greater_than_equal', value: startOfNextDay } as const
-  const beforeStart = { operator: 'less_than', value: startOfDay } as const
-  const beforeNextDay = { operator: 'less_than', value: startOfNextDay } as const
-  const dayRange: DateOnlyConstraintGroup = {
-    combination: 'and',
-    constraints: [atOrAfterStart, beforeNextDay],
+  if (!match) {
+    return undefined
   }
-  const withLogicalSemantics = (
-    comparison: { includesNull?: true } & DateOnlyConstraintGroup,
-  ): DateOnlyComparison => ({
-    ...comparison,
-    repeated:
-      operator === 'not_equals'
-        ? { ...dayRange, quantifier: 'none' }
-        : { ...comparison, quantifier: 'some' },
-    targetCombination: operator === 'not_equals' ? 'and' : 'or',
-  })
 
-  switch (operator) {
-    case 'equals':
-      return withLogicalSemantics(dayRange)
-    case 'greater_than':
-      return withLogicalSemantics({ combination: 'and', constraints: [atOrAfterNextDay] })
-    case 'greater_than_equal':
-      return withLogicalSemantics({ combination: 'and', constraints: [atOrAfterStart] })
-    case 'less_than':
-      return withLogicalSemantics({ combination: 'and', constraints: [beforeStart] })
-    case 'less_than_equal':
-      return withLogicalSemantics({ combination: 'and', constraints: [beforeNextDay] })
-    case 'not_equals':
-      return withLogicalSemantics({
-        combination: 'or',
-        constraints: [beforeStart, atOrAfterNextDay],
-        includesNull: true,
-      })
+  const date = {
+    day: Number(match[3]),
+    month: Number(match[2]),
+    year: Number(match[1]),
+  }
+
+  if (!isValidCalendarDay(date)) {
+    return undefined
+  }
+
+  const timezone =
+    (typeof field.timezone === 'object'
+      ? field.timezone.defaultTimezone
+      : field.timezone
+        ? config.admin.timezones.defaultTimezone
+        : undefined) ?? 'UTC'
+  const nextDate = addCalendarDay(date)
+  const start = getCalendarDayStart({ date, timezone })
+  const next = getCalendarDayStart({ date: nextDate, timezone })
+
+  if (operator === 'equals') {
+    return {
+      constraints: [
+        { operator: 'greater_than_equal', value: start },
+        { operator: 'less_than', value: next },
+      ],
+    }
+  }
+
+  if (operator === 'greater_than' || operator === 'greater_than_equal') {
+    return {
+      constraints: [
+        {
+          operator: 'greater_than_equal',
+          value: operator === 'greater_than' ? next : start,
+        },
+      ],
+    }
+  }
+
+  return {
+    constraints: [
+      {
+        operator: 'less_than',
+        value: operator === 'less_than' ? start : next,
+      },
+    ],
   }
 }
 
-const getUTCCalendarDate = ({
-  day,
-  month,
-  year,
-}: {
+type CalendarDay = {
   day: number
   month: number
   year: number
-}): Date => {
-  const date = new Date(0)
-
-  date.setUTCHours(0, 0, 0, 0)
-  date.setUTCFullYear(year, month - 1, day)
-
-  return date
 }
 
-const getZonedMidnight = ({
-  day,
-  month,
-  timezone,
-  year,
-}: {
-  day: number
-  month: number
-  timezone: string
-  year: number
-}): Date => {
-  const utcMidnight = getUTCCalendarDate({ day, month, year }).getTime()
-  const fixedOffset = timezone.match(fixedOffsetPattern)
+const addCalendarDay = ({ day, month, year }: CalendarDay): CalendarDay => {
+  const next = new Date(Date.UTC(year, month - 1, day + 1))
+
+  return {
+    day: next.getUTCDate(),
+    month: next.getUTCMonth() + 1,
+    year: next.getUTCFullYear(),
+  }
+}
+
+const getCalendarDayStart = ({ date, timezone }: { date: CalendarDay; timezone: string }): Date => {
+  const utcMidnight = Date.UTC(date.year, date.month - 1, date.day)
+  const fixedOffset = fixedOffsetPattern.exec(timezone)
 
   if (fixedOffset) {
     const direction = fixedOffset[1] === '+' ? 1 : -1
@@ -136,64 +147,54 @@ const getZonedMidnight = ({
     return new Date(utcMidnight - offsetMinutes * 60_000)
   }
 
-  const formatter = new Intl.DateTimeFormat('en-CA', {
+  const formatter = new Intl.DateTimeFormat('en-US', {
     day: '2-digit',
-    era: 'short',
     month: '2-digit',
     timeZone: timezone,
     year: 'numeric',
   })
-  const target = { day, month, year }
-  let instantBeforeDate = utcMidnight - 72 * 60 * 60 * 1000
-  let firstInstantInDate = utcMidnight + 72 * 60 * 60 * 1000
+  const target = toCalendarDayNumber(date)
+  let low = utcMidnight - 48 * 60 * 60 * 1000
+  let high = utcMidnight + 48 * 60 * 60 * 1000
 
-  if (
-    compareCalendarDateAtInstant({ formatter, instant: instantBeforeDate, target }) >= 0 ||
-    compareCalendarDateAtInstant({ formatter, instant: firstInstantInDate, target }) < 0
-  ) {
-    throw new Error(
-      `Could not resolve the first instant of ${year}-${month}-${day} in ${timezone}.`,
-    )
-  }
+  while (low < high) {
+    const midpoint = Math.floor((low + high) / 2)
 
-  while (firstInstantInDate - instantBeforeDate > 1) {
-    const midpoint = Math.floor((instantBeforeDate + firstInstantInDate) / 2)
-
-    if (compareCalendarDateAtInstant({ formatter, instant: midpoint, target }) >= 0) {
-      firstInstantInDate = midpoint
+    if (getFormattedCalendarDayNumber({ formatter, timestamp: midpoint }) < target) {
+      low = midpoint + 1
     } else {
-      instantBeforeDate = midpoint
+      high = midpoint
     }
   }
 
-  return new Date(firstInstantInDate)
+  return new Date(low)
 }
 
-const compareCalendarDateAtInstant = ({
+const getFormattedCalendarDayNumber = ({
   formatter,
-  instant,
-  target,
+  timestamp,
 }: {
   formatter: Intl.DateTimeFormat
-  instant: number
-  target: DateOnlyValue
+  timestamp: number
 }): number => {
-  const parts = Object.fromEntries(
-    formatter
-      .formatToParts(instant)
-      .filter(({ type }) => type !== 'literal')
-      .map(({ type, value }) => [type, value]),
-  ) as Record<'day' | 'era' | 'month' | 'year', string>
-  const yearOfEra = Number(parts.year)
-  const dateAtInstant = {
-    day: Number(parts.day),
-    month: Number(parts.month),
-    year: parts.era === 'BC' ? 1 - yearOfEra : yearOfEra,
-  }
+  const parts = formatter.formatToParts(timestamp)
+
+  return toCalendarDayNumber({
+    day: Number(parts.find(({ type }) => type === 'day')?.value),
+    month: Number(parts.find(({ type }) => type === 'month')?.value),
+    year: Number(parts.find(({ type }) => type === 'year')?.value),
+  })
+}
+
+const isValidCalendarDay = ({ day, month, year }: CalendarDay): boolean => {
+  const parsed = new Date(Date.UTC(year, month - 1, day))
 
   return (
-    dateAtInstant.year - target.year ||
-    dateAtInstant.month - target.month ||
-    dateAtInstant.day - target.day
+    parsed.getUTCFullYear() === year &&
+    parsed.getUTCMonth() === month - 1 &&
+    parsed.getUTCDate() === day
   )
 }
+
+const toCalendarDayNumber = ({ day, month, year }: CalendarDay): number =>
+  year * 10_000 + month * 100 + day

@@ -40,7 +40,6 @@ import { LineIcon } from '../../../icons/Line/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
-import { getDateFilterOperatorValue, shouldSyncConditionValue } from '../conditionValue.js'
 import { DefaultFilter } from './DefaultFilter/index.js'
 import { getOperatorValueTypes } from './validOperators.js'
 import './index.css'
@@ -69,25 +68,13 @@ export const Condition: React.FC<Props> = (props) => {
 
   const reducedField = reducedFields.find((field) => field.fieldPath === fieldPath)
 
-  const normalizeDateValue = useCallback(
-    (value: Value): Value =>
-      reducedField?.field.type === 'date'
-        ? getDateFilterOperatorValue({
-            operator,
-            pickerAppearance: reducedField.field.admin?.date?.pickerAppearance,
-            value,
-          })
-        : value,
-    [operator, reducedField],
-  )
-
-  const [internalValue, setInternalValue] = useState<Value>(() => normalizeDateValue(value))
+  const [internalValue, setInternalValue] = useState<Value>(value)
 
   const debouncedValue = useDebounce(internalValue, 300)
 
-  // Tracks the last row state reported upward so the downward sync can distinguish its echo from
-  // an external field, operator, or value change.
-  const lastReportedCondition = useRef({ fieldPath, operator, value })
+  // Tracks the last value this row reported upward, so the downward sync below can tell our own
+  // committed echo apart from a genuine external change (e.g. the row being cleared/reset).
+  const lastReportedValue = useRef<Value>(value)
 
   const booleanSelect = ['exists'].includes(operator) || reducedField?.field?.type === 'checkbox'
 
@@ -106,7 +93,7 @@ export const Condition: React.FC<Props> = (props) => {
     if (operator) {
       const normalizedValue =
         debouncedValue === null || debouncedValue === '' ? undefined : debouncedValue
-      lastReportedCondition.current = { fieldPath, operator, value: normalizedValue }
+      lastReportedValue.current = normalizedValue
       await updateCondition({
         type: 'value',
         andIndex,
@@ -122,25 +109,14 @@ export const Condition: React.FC<Props> = (props) => {
     void updateValue(debouncedValue)
   }, [debouncedValue])
 
-  // Sync external row changes down, but skip our own committed echo so this never clobbers
-  // in-progress typing.
+  // Sync external value changes (e.g. the row being cleared or reset to a placeholder) down into
+  // local state, but skip our own committed echo so this never clobbers in-progress typing.
   useEffect(() => {
-    const lastReported = lastReportedCondition.current
-
-    if (
-      shouldSyncConditionValue({
-        fieldPath,
-        lastFieldPath: lastReported.fieldPath,
-        lastOperator: lastReported.operator,
-        lastReportedValue: lastReported.value,
-        operator,
-        value,
-      })
-    ) {
-      lastReportedCondition.current = { fieldPath, operator, value }
-      setInternalValue(normalizeDateValue(value))
+    if (value !== lastReportedValue.current) {
+      lastReportedValue.current = value
+      setInternalValue(value)
     }
-  }, [fieldPath, normalizeDateValue, operator, value])
+  }, [value])
 
   const disabled = !reducedField?.fieldPath || isFieldDisabled(reducedField?.field, 'filter')
 
@@ -163,25 +139,15 @@ export const Condition: React.FC<Props> = (props) => {
     async (operator: Option<Operator>) => {
       const operatorValueTypes = getOperatorValueTypes(reducedField.field.type)
       const validOperatorValue = operatorValueTypes[operator.value] || 'any'
-      const nextValue =
-        reducedField.field.type === 'date'
-          ? getDateFilterOperatorValue({
-              operator: operator.value,
-              pickerAppearance: reducedField.field.admin?.date?.pickerAppearance,
-              value: internalValue,
-            })
-          : internalValue
       const isValidValue =
         validOperatorValue === 'any' ||
-        typeof nextValue === validOperatorValue ||
-        (validOperatorValue === 'boolean' && (nextValue === 'true' || nextValue === 'false'))
+        typeof value === validOperatorValue ||
+        (validOperatorValue === 'boolean' && (value === 'true' || value === 'false'))
 
       if (!isValidValue) {
         // if the current value is not valid for the new operator
         // reset the value before passing it to updateCondition
         setInternalValue(undefined)
-      } else if (nextValue !== internalValue) {
-        setInternalValue(nextValue)
       }
 
       await updateCondition({
@@ -190,10 +156,10 @@ export const Condition: React.FC<Props> = (props) => {
         field: reducedField,
         operator: operator.value,
         orIndex,
-        value: isValidValue ? nextValue : undefined,
+        value: isValidValue ? value : undefined,
       })
     },
-    [andIndex, internalValue, reducedField, orIndex, updateCondition],
+    [andIndex, reducedField, orIndex, updateCondition, value],
   )
 
   return (

@@ -12,20 +12,18 @@ export const addJoinTable = ({
   isOneToMany,
   joins,
   queryPath,
-  sourceTableName,
   table,
 }: {
   condition: SQL
   isOneToMany?: boolean
   joins: BuildQueryJoinAliases
   queryPath?: string
-  sourceTableName?: string
   table: GenericTable | PgTableWithColumns<any>
   type?: 'innerJoin' | 'leftJoin' | 'rightJoin'
 }) => {
   const name = getNameFromDrizzleTable(table)
 
   if (!joins.some((eachJoin) => getNameFromDrizzleTable(eachJoin.table) === name)) {
-    joins.push({ type, condition, isOneToMany, queryPath, sourceTableName, table })
+    joins.push({ type, condition, isOneToMany, queryPath, table })
   }
 }

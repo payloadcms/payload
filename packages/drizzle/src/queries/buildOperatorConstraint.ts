@@ -1,7 +1,9 @@
 import type { Column, SQL } from 'drizzle-orm'
 import type { FlattenedField, Operator } from 'payload'
 
+import { and } from 'drizzle-orm'
 import { APIError } from 'payload'
+import { getDateOnlyComparison } from 'payload/shared'
 
 import type {
   DrizzleAdapter,
@@ -21,11 +23,6 @@ type Args = {
   path: string
   resolvedOperator: DrizzleResolvedOperator
   value: unknown
-}
-
-type ResolvedOperatorConstraint = {
-  context: DrizzleOperatorHandlerContext
-  replacement?: SQL
 }
 
 const isTransformHandler = (
@@ -54,18 +51,27 @@ const handlerMatches = (handler: DrizzleOperatorHandler, args: Args): boolean =>
  * replacement handler or falls back to `adapter.operators[resolvedOperator]`.
  */
 export const buildOperatorConstraint = (args: Args): SQL => {
-  const { adapter, resolvedOperator } = args
-  const { context, replacement } = resolveOperatorConstraint({ args })
-
-  if (replacement) {
-    return replacement
-  }
-
-  return adapter.operators[resolvedOperator](context.column, context.value)
-}
-
-export const resolveOperatorConstraint = ({ args }: { args: Args }): ResolvedOperatorConstraint => {
   const { adapter, field, locale, originalOperator, path, resolvedOperator } = args
+
+  const dateOnlyComparison = getDateOnlyComparison({
+    config: adapter.payload.config,
+    field,
+    operator: originalOperator,
+    value: args.value,
+  })
+
+  if (dateOnlyComparison) {
+    return and(
+      ...dateOnlyComparison.constraints.map((constraint) =>
+        buildOperatorConstraint({
+          ...args,
+          originalOperator: constraint.operator,
+          resolvedOperator: constraint.operator,
+          value: constraint.value.toISOString(),
+        }),
+      ),
+    )!
+  }
 
   const matchingHandlers = (adapter.operatorHandlers ?? []).filter((handler) =>
     handlerMatches(handler, args),
@@ -109,7 +115,7 @@ export const resolveOperatorConstraint = ({ args }: { args: Args }): ResolvedOpe
 
   if (replacementHandler) {
     try {
-      return { context, replacement: replacementHandler.build({ ...context }) }
+      return replacementHandler.build({ ...context })
     } catch (error) {
       throw new Error(
         `Operator handler "${replacementHandler.name}" threw while building the "${resolvedOperator}" comparison at path "${path}".`,
@@ -118,5 +124,5 @@ export const resolveOperatorConstraint = ({ args }: { args: Args }): ResolvedOpe
     }
   }
 
-  return { context }
+  return adapter.operators[resolvedOperator](context.column, context.value)
 }

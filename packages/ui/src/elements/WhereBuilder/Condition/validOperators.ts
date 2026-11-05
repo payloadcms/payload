@@ -15,15 +15,15 @@ export const getOperatorValueTypes = (fieldType) => {
     /*
      * greater_than, greater_than_equal, less_than, less_than_equal:
      * Used for number and date fields:
-     * - For date fields, the value can be a Date or a semantic calendar-date string.
+     * - For date fields, the value is an object (e.g., Mon Feb 17 2025 12:00:00 GMT+0000).
      * - For number fields, the value is a string representing the number.
      */
-    greater_than: fieldType === 'date' ? 'any' : 'string',
-    greater_than_equal: fieldType === 'date' ? 'any' : 'string',
+    greater_than: fieldType === 'date' ? 'object' : 'string',
+    greater_than_equal: fieldType === 'date' ? 'object' : 'string',
     in: 'any',
     intersects: 'any',
-    less_than: fieldType === 'date' ? 'any' : 'string',
-    less_than_equal: fieldType === 'date' ? 'any' : 'string',
+    less_than: fieldType === 'date' ? 'object' : 'string',
+    less_than_equal: fieldType === 'date' ? 'object' : 'string',
     like: 'string',
     near: 'any',
     not_equals: 'any',

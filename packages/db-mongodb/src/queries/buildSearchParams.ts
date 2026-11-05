@@ -6,14 +6,13 @@ import type {
   PathToQuery,
   Payload,
 } from 'payload'
-import type { ResolvedDateFilterPlan, ResolvedDateFilterTarget } from 'payload/shared'
 
 import { Types } from 'mongoose'
 import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
 import {
+  getDateOnlyComparison,
   hasManyRelationshipOperatorSet,
   isNestedRelationshipQuery,
-  resolveDateFilterPlan,
   validOperatorSet,
 } from 'payload/shared'
 
@@ -107,16 +106,6 @@ export async function buildSearchParam({
     return undefined
   }
 
-  const dateFilterPlan = resolveDateFilterPlan({
-    config: payload.config,
-    fields,
-    locale,
-    operator,
-    parentIsLocalized,
-    path: sanitizedPath,
-    value: val,
-  })
-
   const [{ field, path }] = paths
 
   if (
@@ -160,11 +149,32 @@ export async function buildSearchParam({
     throw new APIError(`Invalid value for "${operator}" on path "${path}": expected a string.`, 400)
   }
 
+  const dateOnlyComparison =
+    paths.length === 1
+      ? getDateOnlyComparison({
+          config: payload.config,
+          field,
+          operator,
+          value: val,
+        })
+      : undefined
+
+  if (dateOnlyComparison && path) {
+    return {
+      path,
+      value: Object.fromEntries(
+        dateOnlyComparison.constraints.map((constraint) => [
+          operatorMap[constraint.operator],
+          constraint.value,
+        ]),
+      ),
+    }
+  }
+
   if (path) {
     const sanitizedQueryValue = sanitizeQueryValue({
       field,
       hasCustomID,
-      isCalendarDate: Boolean(dateFilterPlan),
       locale,
       operator,
       parentIsLocalized,
@@ -194,7 +204,6 @@ export async function buildSearchParam({
       // to work backwards from top
       const pathsToQuery = paths.slice(1).reverse()
       const parentPaths = paths.slice(0, -1).reverse()
-      const hasNoMatchingCalendarDay = dateFilterPlan?.comparison.repeated.quantifier === 'none'
 
       let relationshipQuery: SearchParam = {
         value: {},
@@ -223,7 +232,7 @@ export async function buildSearchParam({
             payload,
             where: {
               [subPath]: {
-                [hasNoMatchingCalendarDay ? 'equals' : formattedOperator]: val,
+                [formattedOperator]: val,
               },
             },
           })
@@ -300,7 +309,7 @@ export async function buildSearchParam({
           if (pathsToQuery.length === 1) {
             return {
               path: joinPath ? '_id' : path,
-              value: { [hasNoMatchingCalendarDay ? '$nin' : '$in']: $in },
+              value: { $in },
             }
           }
 
@@ -340,10 +349,7 @@ export async function buildSearchParam({
 
           const $in = await SubModel.distinct(joinPath, subQuery)
           if (i + 1 === pathsToQuery.length) {
-            return {
-              path: '_id',
-              value: { [hasNoMatchingCalendarDay ? '$nin' : '$in']: $in },
-            }
+            return { path: '_id', value: { $in } }
           }
 
           relationshipQuery = { value: { _id: { $in } } }
@@ -359,7 +365,7 @@ export async function buildSearchParam({
         if (i + 1 === pathsToQuery.length) {
           relationshipQuery = {
             path,
-            value: { [hasNoMatchingCalendarDay ? '$nin' : '$in']: $in },
+            value: { $in },
           }
         } else {
           const nextSubPath = pathsToQuery[i + 1]?.path
@@ -460,10 +466,6 @@ export async function buildSearchParam({
         return result
       }
 
-      if (dateFilterPlan) {
-        return buildDateFilterSearchParam({ plan: dateFilterPlan })
-      }
-
       // Some operators like 'near' need to define a full query
       // so if there is no operator key, just return the value
       if (!operatorKey) {
@@ -480,126 +482,6 @@ export async function buildSearchParam({
     }
   }
   return undefined
-}
-
-const buildDateFilterSearchParam = ({
-  plan,
-}: {
-  plan: ResolvedDateFilterPlan
-}): SearchParam | undefined => {
-  const { comparison } = plan
-
-  const seenPaths = new Set<string>()
-  const targetQueries = plan.targets.flatMap((target) => {
-    const { arrayPaths, path } = getMongoDateTargetPath({ target })
-    const key = `${path}|${arrayPaths.join('|')}`
-
-    if (seenPaths.has(key)) {
-      return []
-    }
-
-    seenPaths.add(key)
-    const scalarConstraints = Object.fromEntries(
-      comparison.constraints.map((constraint) => [
-        operatorMap[constraint.operator],
-        constraint.value,
-      ]),
-    )
-    const repeatedConstraints = Object.fromEntries(
-      comparison.repeated.constraints.map((constraint) => [
-        operatorMap[constraint.operator],
-        constraint.value,
-      ]),
-    )
-
-    if (arrayPaths.length) {
-      return [
-        buildArrayDateQuery({
-          arrayPaths,
-          isNegated: comparison.repeated.quantifier === 'none',
-          path,
-          value: repeatedConstraints,
-        }),
-      ]
-    }
-
-    return [
-      {
-        path,
-        value:
-          comparison.repeated.quantifier === 'none'
-            ? { $not: repeatedConstraints }
-            : scalarConstraints,
-      },
-    ]
-  })
-
-  if (targetQueries.length === 1) {
-    return targetQueries[0]
-  }
-
-  const queryOperator = comparison.targetCombination === 'and' ? '$and' : '$or'
-
-  return {
-    value: {
-      [queryOperator]: targetQueries.map(({ path, value }) => ({ [path!]: value })),
-    },
-  }
-}
-
-const getMongoDateTargetPath = ({
-  target,
-}: {
-  target: ResolvedDateFilterTarget
-}): { arrayPaths: string[]; path: string } => {
-  const arrayPaths: string[] = []
-  const pathSegments: string[] = []
-
-  for (const segment of target.lineage) {
-    pathSegments.push(segment.name)
-
-    if (segment.locale) {
-      pathSegments.push(segment.locale)
-    }
-
-    if (segment.type === 'array' || segment.type === 'blocks') {
-      arrayPaths.push(pathSegments.join('.'))
-    }
-  }
-
-  return { arrayPaths, path: pathSegments.join('.') }
-}
-
-const buildArrayDateQuery = ({
-  arrayPaths,
-  isNegated = false,
-  path,
-  value,
-}: {
-  arrayPaths: string[]
-  isNegated?: boolean
-  path: string
-  value: Record<string, unknown>
-}): SearchParam => {
-  const [outerArrayPath] = arrayPaths
-  const deepestArrayPath = arrayPaths.at(-1)!
-  let elementQuery: Record<string, unknown> = {
-    [path.slice(deepestArrayPath.length + 1)]: value,
-  }
-
-  for (let index = arrayPaths.length - 1; index > 0; index -= 1) {
-    const parentArrayPath = arrayPaths[index - 1]!
-    const arrayPath = arrayPaths[index]!
-
-    elementQuery = {
-      [arrayPath.slice(parentArrayPath.length + 1)]: { $elemMatch: elementQuery },
-    }
-  }
-
-  return {
-    path: outerArrayPath,
-    value: isNegated ? { $not: { $elemMatch: elementQuery } } : { $elemMatch: elementQuery },
-  }
 }
 
 /**

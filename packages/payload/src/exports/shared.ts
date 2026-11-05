@@ -129,20 +129,12 @@ export { canAccessAdmin } from '../utilities/canAccessAdmin.js'
 
 export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
 export {
-  classifyDateFilterInput,
-  type DateFilterInput,
-  type DateOnlyValue,
-  getDateOnlyValue,
-  isDateOnlyFilter,
-  isDateOnlyPickerAppearance,
-  isValidDateFilterValue,
-} from '../utilities/dateOnlyFilter.js'
-export {
   deepCopyObject,
   deepCopyObjectComplex,
   deepCopyObjectSimple,
   deepCopyObjectSimpleWithoutReactComponents,
 } from '../utilities/deepCopyObject.js'
+
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
@@ -171,7 +163,9 @@ export { getBlockSelect } from '../utilities/getBlockSelect.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
 export {
   type DateOnlyComparison,
+  type DateOnlyConstraint,
   getDateOnlyComparison,
+  isDateOnlyFilter,
 } from '../utilities/getDateOnlyComparison.js'
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
 
@@ -215,13 +209,6 @@ export {
 export { parseDocumentID } from '../utilities/parseDocumentID.js'
 
 export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
-
-export {
-  resolveDateFilterPlan,
-  type ResolvedDateFilterPlan,
-  type ResolvedDateFilterTarget,
-  type ResolvedDatePathSegment,
-} from '../utilities/resolveDateFilterPlan.js'
 
 export { sanitizeFilename } from '../utilities/sanitizeFilename.js'
 

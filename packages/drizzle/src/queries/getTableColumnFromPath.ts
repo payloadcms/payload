@@ -7,7 +7,6 @@ import type {
   RelationshipField,
   TextField,
 } from 'payload'
-import type { ResolvedDateFilterTarget } from 'payload/shared'
 
 import { and, eq, getTableName, like, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
@@ -45,7 +44,6 @@ type TableColumn = {
   getNotNullColumnByValue?: (val: unknown) => string
   pathSegments?: string[]
   rawColumn?: SQL
-  resolvedLocale?: string
   table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
 }
 
@@ -72,7 +70,6 @@ type Args = {
    * If creating a new table name for arrays and blocks, this suffix should be appended to the table name
    */
   tableNameSuffix?: string
-  target?: ResolvedDateFilterTarget
   /**
    * The raw value of the query before sanitization
    */
@@ -108,7 +105,6 @@ export const getTableColumnFromPath = ({
   selectLocale,
   tableName,
   tableNameSuffix = '',
-  target,
   value,
 }: Args): TableColumn => {
   const fieldPath = incomingSegments[0]
@@ -137,15 +133,8 @@ export const getTableColumnFromPath = ({
   if (field) {
     const pathSegments = [...incomingSegments]
     const fieldStoragePath = appendFieldToStoragePath({ field, path: constraintPath })
-    const targetSegmentIndex = target ? target.lineage.length - pathSegments.length : -1
-    const targetSegment = target?.lineage[targetSegmentIndex]
 
     const isFieldLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
-
-    if (targetSegment?.locale) {
-      locale = targetSegment.locale
-      localizedPathQuery = true
-    }
 
     // If next segment is a locale,
     // we need to take it out and use it as the locale from this point on
@@ -210,7 +199,6 @@ export const getTableColumnFromPath = ({
           selectFields,
           selectLocale,
           tableName: newTableName,
-          target,
           value,
         })
       }
@@ -257,15 +245,7 @@ export const getTableColumnFromPath = ({
           }
         }
 
-        const targetBlockSlug = targetSegment?.blockSlug
-        const blocks = targetBlockSlug
-          ? field.blocks.filter((_block) =>
-              typeof _block === 'string'
-                ? _block === targetBlockSlug
-                : _block.slug === targetBlockSlug,
-            )
-          : field.blocks
-        const hasBlockField = blocks.some((_block) => {
+        const hasBlockField = field.blocks.some((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
 
           newTableName = resolveBlockTableName(
@@ -322,7 +302,6 @@ export const getTableColumnFromPath = ({
               selectFields: blockSelectFields,
               selectLocale,
               tableName: newTableName,
-              target,
               value,
             })
           } catch (_) {
@@ -352,7 +331,6 @@ export const getTableColumnFromPath = ({
             field: blockTableColumn.field,
             pathSegments: pathSegments.slice(1),
             rawColumn: blockTableColumn.rawColumn,
-            resolvedLocale: blockTableColumn.resolvedLocale,
             table: blockTableColumn.table,
           }
         }
@@ -392,7 +370,6 @@ export const getTableColumnFromPath = ({
           selectLocale,
           tableName: newTableName,
           tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
-          target,
           value,
         })
       }
@@ -503,7 +480,6 @@ export const getTableColumnFromPath = ({
             fields: relationshipFields,
             joins,
             locale,
-            target,
             // A join reads from a different collection, so localization does not carry over
             parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
@@ -596,7 +572,6 @@ export const getTableColumnFromPath = ({
           fields: adapter.payload.collections[field.collection].config.flattenedFields,
           joins,
           locale,
-          target,
           // A join reads from a different collection, so localization does not carry over
           parentIsLocalized: false,
           pathSegments: pathSegments.slice(1),
@@ -898,7 +873,6 @@ export const getTableColumnFromPath = ({
             fields: relationshipFields,
             joins,
             locale,
-            target,
             // A relationship jumps to a different collection, so localization does not carry over
             parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
@@ -966,7 +940,6 @@ export const getTableColumnFromPath = ({
             fields: adapter.payload.collections[field.relationTo].config.flattenedFields,
             joins,
             locale,
-            target,
             // A relationship jumps to a different collection, so localization does not carry over
             parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
@@ -1038,7 +1011,6 @@ export const getTableColumnFromPath = ({
             selectLocale,
             tableName: newTableName,
             tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
-            target,
             value,
           })
         }
@@ -1059,7 +1031,6 @@ export const getTableColumnFromPath = ({
           selectLocale,
           tableName: newTableName,
           tableNameSuffix,
-          target,
           value,
         })
       }
@@ -1099,7 +1070,6 @@ export const getTableColumnFromPath = ({
       addJoinTable({
         condition,
         joins,
-        sourceTableName: newTableName,
         table: newTable,
       })
 
@@ -1116,7 +1086,6 @@ export const getTableColumnFromPath = ({
       constraints,
       field,
       pathSegments,
-      resolvedLocale: locale,
       table: targetTable,
     }
   }

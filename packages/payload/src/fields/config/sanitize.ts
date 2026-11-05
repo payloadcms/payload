@@ -590,17 +590,6 @@ export const sanitizeField = ({
         ? field.timezone.override({ baseField })
         : baseField
 
-    if (timezoneField.type === 'select' && typeof timezoneField.defaultValue === 'string') {
-      validateTimezones({
-        source: `field "${field.name}" timezone.override defaultValue`,
-        timezones: [{ label: timezoneField.defaultValue, value: timezoneField.defaultValue }],
-      })
-      field.timezone = {
-        ...(typeof field.timezone === 'object' ? field.timezone : {}),
-        defaultTimezone: timezoneField.defaultValue,
-      }
-    }
-
     result.fieldsToInsert = [timezoneField]
   }
 

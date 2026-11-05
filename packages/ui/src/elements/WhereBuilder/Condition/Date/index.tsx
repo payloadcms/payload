@@ -7,17 +7,12 @@ import type { DateFilterProps as Props } from './types.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { DatePickerField } from '../../../DatePicker/index.js'
-import { getDateFilterPickerValue, getDateFilterValue } from '../../conditionValue.js'
+import { getDateFilterPickerValue, getDateFilterValue } from './getDateFilterValue.js'
 
 const baseClass = 'condition-value-date'
 
-export const DateFilter: React.FC<Props> = ({
-  disabled,
-  field: { admin },
-  onChange,
-  operator,
-  value,
-}) => {
+export const DateFilter: React.FC<Props> = ({ disabled, field, onChange, operator, value }) => {
+  const { admin } = field
   const { date } = admin || {}
   const {
     config: {
@@ -27,7 +22,6 @@ export const DateFilter: React.FC<Props> = ({
   const { i18n, t } = useTranslation()
 
   const displayFormat = date?.displayFormat || dateFormatFromConfig
-  const pickerAppearance = date?.pickerAppearance || 'default'
 
   return (
     <div className={baseClass}>
@@ -35,11 +29,17 @@ export const DateFilter: React.FC<Props> = ({
         {...date}
         displayFormat={displayFormat}
         onChange={(date) =>
-          onChange(date ? getDateFilterValue({ date, operator, pickerAppearance }) : date)
+          onChange(
+            getDateFilterValue({
+              date,
+              field,
+              operator,
+            }),
+          )
         }
         placeholder={getTranslation(admin.placeholder, i18n) || t('general:enterAValue')}
         readOnly={disabled}
-        value={getDateFilterPickerValue({ pickerAppearance, value })}
+        value={getDateFilterPickerValue({ field, operator, value })}
       />
     </div>
   )
