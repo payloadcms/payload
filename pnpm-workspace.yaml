@@ -68,3 +68,18 @@ minimumReleaseAgeExclude:
   - '@next/swc-win32-x64-msvc@16.3.3'
   - eslint-config-next@16.3.3
   - next@16.3.3
+  - '@sentry/browser-utils@11.11.0'
+  - '@sentry/browser@11.11.0'
+  - '@sentry/bundler-plugins@11.11.0'
+  - '@sentry/cloudflare@11.11.0'
+  - '@sentry/core@11.11.0'
+  - '@sentry/feedback@11.11.0'
+  - '@sentry/nextjs@11.11.0'
+  - '@sentry/node@11.11.0'
+  - '@sentry/opentelemetry@11.11.0'
+  - '@sentry/react@11.11.0'
+  - '@sentry/replay-canvas@11.11.0'
+  - '@sentry/replay@11.11.0'
+  - '@sentry/server-runtime-injection@11.11.0'
+  - '@sentry/server-utils@11.11.0'
+  - '@sentry/vercel-edge@11.11.0'
