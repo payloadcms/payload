@@ -4,29 +4,13 @@ import type { Locale } from 'payload'
 
 import { useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
-import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { createContext, use, useEffect, useRef, useState } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 
 export const LocaleContext = createContext({} as Locale)
-
-type DocumentLocaleClaim = {
-  code: Locale['code']
-}
-
-type DocumentLocaleClaimContextValue = {
-  /**
-   * Called by a rendered document to make the global locale match the locale its data was rendered in.
-   * Returns a function that releases the claim.
-   */
-  claimDocumentLocale: (args: { code: Locale['code'] }) => () => void
-}
-
-export const DocumentLocaleClaimContext = createContext<DocumentLocaleClaimContextValue>({
-  claimDocumentLocale: () => () => undefined,
-})
 
 export const LocaleLoadingContext = createContext({
   localeIsLoading: false,
@@ -91,44 +75,6 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
 
   const prevLocale = useRef<Locale>(locale)
 
-  /**
-   * Locales claimed by currently mounted documents, most recent last.
-   * When the URL has no `locale` param, a mounted document's locale takes precedence over preferences,
-   * because the document's data was rendered in that locale (e.g. restored from the router cache on back navigation).
-   */
-  const documentLocaleClaims = useRef<DocumentLocaleClaim[]>([])
-
-  /**
-   * Incremented whenever the locale is set, so that a slower preferences request cannot overwrite a newer locale.
-   */
-  const latestLocaleRequest = useRef(0)
-
-  const claimDocumentLocale = useCallback<DocumentLocaleClaimContextValue['claimDocumentLocale']>(
-    ({ code }) => {
-      const claim: DocumentLocaleClaim = { code }
-      documentLocaleClaims.current = [...documentLocaleClaims.current, claim]
-
-      const claimedLocale = localization ? findLocaleFromCode(localization, code) : null
-
-      if (claimedLocale) {
-        latestLocaleRequest.current += 1
-        setLocale(claimedLocale)
-      }
-
-      return () => {
-        documentLocaleClaims.current = documentLocaleClaims.current.filter(
-          (existingClaim) => existingClaim !== claim,
-        )
-      }
-    },
-    [localization],
-  )
-
-  const documentLocaleClaimContextValue = useMemo(
-    () => ({ claimDocumentLocale }),
-    [claimDocumentLocale],
-  )
-
   useEffect(() => {
     /**
      * We need to set `isLoading` back to false once the locale is detected to be different
@@ -151,17 +97,9 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
      */
     async function resetLocale() {
       if (localization && user?.id) {
-        latestLocaleRequest.current += 1
-        const request = latestLocaleRequest.current
-
         const localeToUse =
           localeFromParams ||
-          documentLocaleClaims.current.at(-1)?.code ||
           (await fetchPreferences<Locale['code']>('locale', apiRoute)?.then((res) => res.value))
-
-        if (request !== latestLocaleRequest.current) {
-          return
-        }
 
         const newLocale =
           findLocaleFromCode(localization, localeToUse) ||
@@ -180,9 +118,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
   return (
     <LocaleContext value={locale}>
       <LocaleLoadingContext value={{ localeIsLoading: isLoading, setLocaleIsLoading }}>
-        <DocumentLocaleClaimContext value={documentLocaleClaimContextValue}>
-          {children}
-        </DocumentLocaleClaimContext>
+        {children}
       </LocaleLoadingContext>
     </LocaleContext>
   )

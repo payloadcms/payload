@@ -1,11 +1,6 @@
 import type { AdminViewServerProps, DocumentViewServerPropsOnly } from 'payload'
 
-import {
-  DocumentInfoProvider,
-  DocumentLocaleProvider,
-  EditDepthProvider,
-  HydrateAuthProvider,
-} from '@payloadcms/ui'
+import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound } from 'next/navigation.js'
@@ -123,70 +118,68 @@ export async function AccountView({
       })
 
     return (
-      <DocumentLocaleProvider locale={locale?.code}>
-        <DocumentInfoProvider
-          AfterFields={
-            <Settings
-              i18n={i18n}
-              languageOptions={languageOptions}
-              payload={payload}
-              theme={theme}
-              user={userWithReadAccess}
-            />
-          }
-          apiURL={formatAdminURL({
-            apiRoute: api,
-            path: `/${userSlug}/${user.id}`,
+      <DocumentInfoProvider
+        AfterFields={
+          <Settings
+            i18n={i18n}
+            languageOptions={languageOptions}
+            payload={payload}
+            theme={theme}
+            user={userWithReadAccess}
+          />
+        }
+        apiURL={formatAdminURL({
+          apiRoute: api,
+          path: `/${userSlug}/${user.id}`,
+        })}
+        collectionSlug={userSlug}
+        currentEditor={currentEditor}
+        docPermissions={docPermissions}
+        hasDeletePermission={hasDeletePermission}
+        hasPublishedDoc={hasPublishedDoc}
+        hasPublishPermission={hasPublishPermission}
+        hasSavePermission={hasSavePermission}
+        hasTrashPermission={hasTrashPermission}
+        id={user.id}
+        initialData={data}
+        initialState={formState}
+        isEditing
+        isLocked={isLocked}
+        lastUpdateTime={lastUpdateTime}
+        mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
+        unpublishedVersionCount={unpublishedVersionCount}
+        versionCount={versionCount}
+      >
+        <EditDepthProvider>
+          <DocumentHeader
+            collectionConfig={collectionConfig}
+            hideTabs
+            permissions={permissions}
+            req={req}
+            user={userWithReadAccess}
+          />
+          <HydrateAuthProvider permissions={permissions} />
+          {RenderServerComponent({
+            Component: config.admin?.components?.views?.account?.Component,
+            Fallback: EditView,
+            importMap: payload.importMap,
+            serverProps: {
+              doc: data,
+              hasPublishedDoc,
+              i18n,
+              initPageResult,
+              locale,
+              params,
+              payload,
+              permissions,
+              routeSegments: [],
+              searchParams,
+              user: userWithReadAccess,
+            } satisfies DocumentViewServerPropsOnly,
           })}
-          collectionSlug={userSlug}
-          currentEditor={currentEditor}
-          docPermissions={docPermissions}
-          hasDeletePermission={hasDeletePermission}
-          hasPublishedDoc={hasPublishedDoc}
-          hasPublishPermission={hasPublishPermission}
-          hasSavePermission={hasSavePermission}
-          hasTrashPermission={hasTrashPermission}
-          id={user.id}
-          initialData={data}
-          initialState={formState}
-          isEditing
-          isLocked={isLocked}
-          lastUpdateTime={lastUpdateTime}
-          mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
-          unpublishedVersionCount={unpublishedVersionCount}
-          versionCount={versionCount}
-        >
-          <EditDepthProvider>
-            <DocumentHeader
-              collectionConfig={collectionConfig}
-              hideTabs
-              permissions={permissions}
-              req={req}
-              user={userWithReadAccess}
-            />
-            <HydrateAuthProvider permissions={permissions} />
-            {RenderServerComponent({
-              Component: config.admin?.components?.views?.account?.Component,
-              Fallback: EditView,
-              importMap: payload.importMap,
-              serverProps: {
-                doc: data,
-                hasPublishedDoc,
-                i18n,
-                initPageResult,
-                locale,
-                params,
-                payload,
-                permissions,
-                routeSegments: [],
-                searchParams,
-                user: userWithReadAccess,
-              } satisfies DocumentViewServerPropsOnly,
-            })}
-            <AccountClient />
-          </EditDepthProvider>
-        </DocumentInfoProvider>
-      </DocumentLocaleProvider>
+          <AccountClient />
+        </EditDepthProvider>
+      </DocumentInfoProvider>
     )
   }
 

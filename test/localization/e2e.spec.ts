@@ -26,6 +26,7 @@ import {
   initPageConsoleErrorCatch,
   openLocaleSelector,
   saveDocAndAssert,
+  selectTableRow,
   throttleTest,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
@@ -125,6 +126,75 @@ describe('Localization', () => {
     // })
     await page.goto(url.admin)
     await changeLocale(page, 'en')
+  })
+
+  describe('cached list locale', () => {
+    const createdIDs: string[] = []
+
+    test.afterEach(async () => {
+      await Promise.all(
+        createdIDs.map((id) => payload.delete({ id, collection: localizedPostsSlug })),
+      )
+      createdIDs.length = 0
+    })
+
+    test('should bulk edit the rendered list locale after browser back navigation', async () => {
+      const english = 'Cached list English title'
+      const spanish = 'Cached list Spanish title'
+      const edited = 'Bulk edited English title'
+      const { id } = await payload.create({
+        collection: localizedPostsSlug,
+        data: { title: english },
+        locale: defaultLocale,
+      })
+
+      createdIDs.push(id)
+      await payload.update({
+        id,
+        collection: localizedPostsSlug,
+        data: { title: spanish },
+        locale: spanishLocale,
+      })
+      await page.goto(url.list)
+      await expect(page.locator('.cell-title', { hasText: english })).toBeVisible()
+      await changeLocale(page, spanishLocale)
+      await expect(page.locator('.cell-title', { hasText: spanish })).toBeVisible()
+      await page.goBack()
+      await expect(page).not.toHaveURL(/locale=/)
+      await expect(page.locator('.cell-title', { hasText: english })).toBeVisible()
+      await expect(
+        page.locator('.app-header__localizer .localizer-button__current-label'),
+      ).toHaveText('English')
+
+      await selectTableRow(page, english)
+      await page.locator('.edit-many__toggle').click()
+
+      const drawer = page.locator('.edit-many__main')
+
+      await drawer.locator('.field-select .rs__control').click()
+      await drawer.locator('.field-select .rs__option', { hasText: /^Full title$/ }).click()
+      await drawer.locator('#field-title').fill(edited)
+
+      const response = page.waitForResponse(
+        (res) =>
+          res.request().method() === 'PATCH' &&
+          new URL(res.url()).pathname.endsWith(`/${localizedPostsSlug}`),
+      )
+
+      await drawer.locator('.edit-many__save').click()
+      expect(new URL((await response).url()).searchParams.get('locale')).toBe(defaultLocale)
+      await expect(drawer).toBeHidden()
+
+      const {
+        docs: [savedPost],
+      } = await payload.find({
+        collection: localizedPostsSlug,
+        locale: 'all',
+        where: { id: { equals: id } },
+      })
+
+      expect(savedPost.title).toEqual({ [defaultLocale]: edited, [spanishLocale]: spanish })
+    })
   })
 
   describe('localizer', () => {
