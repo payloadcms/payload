@@ -618,7 +618,9 @@ The `inventory` option is used to enable or disable inventory tracking within Pa
 | ----------- | -------- | ------------------------------------------------------------------------- |
 | `fieldName` | `string` | Override the field name used to track inventory. Defaults to `inventory`. |
 
-For now it's quite rudimentary tracking with no integrations to 3rd party services. It will simply add an `inventory` field to the `variants` collection and decrement the inventory when an order is placed.
+For now it's quite rudimentary tracking with no integrations to 3rd party services. It will simply add an inventory field to the `products` and `variants` collections and decrement it when an order is placed. The field is named after `fieldName`, so the stock check performed on `initiate` and the decrement performed on `confirm-order` both use the configured field.
+
+Setting `inventory: false` omits the field, skips the stock check on `initiate` and skips the decrement on `confirm-order`. Price validation still runs.
 
 ## Payments
 
@@ -821,6 +823,8 @@ You can customise this validation by providing your own validation function via 
 
 The function should throw an error if the product or variant is not valid. If the function does not throw an error, the product or variant is considered valid.
 
+It also receives `inventoryFieldName`, the field configured for inventory tracking, or `false` when inventory tracking is disabled.
+
 The default validation function checks for the following:
 
 - A currency is provided.
@@ -831,6 +835,7 @@ The default validation function checks for the following:
 export const defaultProductsValidation: ProductsValidation = ({
   currenciesConfig,
   currency,
+  inventoryFieldName = 'inventory',
   product,
   quantity = 1,
   variant,
@@ -848,9 +853,13 @@ export const defaultProductsValidation: ProductsValidation = ({
       )
     }
 
+    const variantInventory = inventoryFieldName
+      ? variant[inventoryFieldName]
+      : undefined
+
     if (
-      variant.inventory === 0 ||
-      (variant.inventory && variant.inventory < quantity)
+      variantInventory === 0 ||
+      (variantInventory && variantInventory < quantity)
     ) {
       throw new Error(
         `Variant with ID ${variant.id} is out of stock or does not have enough inventory.`,
@@ -864,9 +873,13 @@ export const defaultProductsValidation: ProductsValidation = ({
       })
     }
 
+    const productInventory = inventoryFieldName
+      ? product[inventoryFieldName]
+      : undefined
+
     if (
-      product.inventory === 0 ||
-      (product.inventory && product.inventory < quantity)
+      productInventory === 0 ||
+      (productInventory && productInventory < quantity)
     ) {
       throw new Error(
         `Product is out of stock or does not have enough inventory.`,

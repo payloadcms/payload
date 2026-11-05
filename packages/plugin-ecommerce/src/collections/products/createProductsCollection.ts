@@ -5,6 +5,7 @@ import type { AccessConfig, CurrenciesConfig, InventoryConfig } from '../../type
 import { inventoryField } from '../../fields/inventoryField.js'
 import { pricesField } from '../../fields/pricesField.js'
 import { variantsFields } from '../../fields/variantsFields.js'
+import { getInventoryFieldName } from '../../utilities/inventory.js'
 
 type Props = {
   access: Pick<AccessConfig, 'adminOrPublishedStatus' | 'isAdmin'>
@@ -35,10 +36,13 @@ export const createProductsCollection: (props: Props) => CollectionConfig = (pro
     variantTypesSlug = 'variantTypes',
   } = props || {}
 
+  const inventoryFieldName = inventory ? getInventoryFieldName({ inventory }) : false
+
   const fields = [
-    ...(inventory
+    ...(inventoryFieldName
       ? [
           inventoryField({
+            fieldName: inventoryFieldName,
             overrides: {
               admin: {
                 condition: ({ enableVariants }) => !enableVariants,
@@ -47,7 +51,9 @@ export const createProductsCollection: (props: Props) => CollectionConfig = (pro
           }),
         ]
       : []),
-    ...(enableVariants ? variantsFields({ variantsSlug, variantTypesSlug }) : []),
+    ...(enableVariants
+      ? variantsFields({ inventoryFieldName, variantsSlug, variantTypesSlug })
+      : []),
     ...(currenciesConfig ? [...pricesField({ currenciesConfig })] : []),
   ]
 
