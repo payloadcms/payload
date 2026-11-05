@@ -168,9 +168,13 @@ describe('Localization', () => {
         .locator('.app-header__localizer .localizer-button')
         .getAttribute('data-locale')
       const titles = { [defaultLocale]: english, [spanishLocale]: spanish }
-      const otherLocale = [defaultLocale, spanishLocale].find((code) => code !== renderedLocale)
 
-      expect(Object.keys(titles)).toContain(renderedLocale)
+      if (renderedLocale !== defaultLocale && renderedLocale !== spanishLocale) {
+        throw new Error(`Unexpected rendered locale: ${renderedLocale}`)
+      }
+
+      const otherLocale = renderedLocale === defaultLocale ? spanishLocale : defaultLocale
+
       await expect(page.locator('.cell-title', { hasText: titles[renderedLocale] })).toBeVisible()
       await selectTableRow(page, titles[renderedLocale])
       await page.locator('.edit-many__toggle').click()
@@ -199,8 +203,10 @@ describe('Localization', () => {
         where: { id: { equals: id } },
       })
 
-      expect(savedPost.title[renderedLocale]).toBe(edited)
-      expect(savedPost.title[otherLocale]).toBe(titles[otherLocale])
+      expect(savedPost?.title).toEqual({
+        [otherLocale]: titles[otherLocale],
+        [renderedLocale]: edited,
+      })
     })
   })
 
@@ -582,7 +588,7 @@ describe('Localization', () => {
       })
       const preference = await page.request.get(`${serverURL}/api/payload-preferences/locale`)
 
-      expect(savedPost.title).toEqual({ [defaultLocale]: edited, [spanishLocale]: spanish })
+      expect(savedPost?.title).toEqual({ [defaultLocale]: edited, [spanishLocale]: spanish })
       expect(await preference.json()).toMatchObject({ value: spanishLocale })
     })
 
@@ -653,7 +659,7 @@ describe('Localization', () => {
         where: { id: { equals: related.id } },
       })
 
-      expect(savedPost.title).toEqual({ [defaultLocale]: edited, [spanishLocale]: spanish })
+      expect(savedPost?.title).toEqual({ [defaultLocale]: edited, [spanishLocale]: spanish })
     })
   })
 
