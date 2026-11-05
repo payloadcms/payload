@@ -2451,6 +2451,66 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         })
 
         expect(docs[0]).toBeDefined()
+        expect(docs).toHaveLength(1)
+
+        await cleanupDocuments({
+          collectionSlugs: [draftCollectionSlug],
+          payload,
+        })
+      })
+
+      test('should have exactly one latest version even with clock rollback (#19240)', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'V1',
+            title: 'V1',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        try {
+          vi.useFakeTimers()
+          const now = Date.now()
+          vi.setSystemTime(now - 10000)
+
+          await payload.update({
+            id: doc.id,
+            collection: draftCollectionSlug,
+            data: {
+              title: 'V2 - Drifted',
+            },
+            draft: true,
+            overrideAccess: true,
+          })
+        } finally {
+          vi.useRealTimers()
+        }
+
+        const { docs: latestDocs } = await payload.findVersions({
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          where: {
+            and: [
+              {
+                parent: {
+                  equals: doc.id,
+                },
+              },
+              {
+                latest: {
+                  equals: true,
+                },
+              },
+            ],
+          },
+        })
+
+        expect(latestDocs).toHaveLength(1)
+        expect(latestDocs[0].version.title).toBe('V2 - Drifted')
 
         await cleanupDocuments({
           collectionSlugs: [draftCollectionSlug],
