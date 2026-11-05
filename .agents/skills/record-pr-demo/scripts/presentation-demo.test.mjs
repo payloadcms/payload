@@ -212,7 +212,10 @@ test('should resize the live application iframe in the recorded page without ima
     assert.equal(await stage.locator('iframe').count(), 1)
     assert.equal(await presentation.appPage.getByRole('button').textContent(), 'Real button')
     for (const method of ['goBack', 'goForward']) {
-      await assert.rejects(() => presentation.appPage[method](), /not supported.*presentation/)
+      await assert.rejects(
+        () => presentation.appPage[method](),
+        new RegExp(`use await click\\(chrome\\.${method === 'goBack' ? 'back' : 'forward'}\\)`),
+      )
     }
     await presentation.resizeWindow({ width: 390, height: 720, duration: 500 })
     const widths = await presentation.appPage.evaluate(() => window.widths)

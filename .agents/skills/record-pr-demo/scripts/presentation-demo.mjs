@@ -13,7 +13,7 @@ export async function createPresentation({
   const wrapper = (route) =>
     route.fulfill({
       contentType: 'text/html',
-      body: '<!doctype html><html data-pr-demo-stage><head><meta charset="utf-8"><title>Demo recording</title><style>body{margin:0}</style></head><body><div id="demo-stage"></div></body></html>',
+      body: '<!doctype html><html><head><meta charset="utf-8"><title>Demo recording</title><style>body{margin:0}</style></head><body><div id="demo-stage"></div></body></html>',
     })
   if (options.accessibility) {
     const observerSource = await readFile(
@@ -149,7 +149,9 @@ export async function createPresentation({
           }
         if (property === 'goBack' || property === 'goForward')
           return async () => {
-            throw new Error(`${property} is not supported in presentation mode; use page.goto()`)
+            throw new Error(
+              `${property} is not supported in presentation mode; use await click(chrome.${property === 'goBack' ? 'back' : 'forward'})`,
+            )
           }
         if (property === 'addInitScript') return stage.context().addInitScript.bind(stage.context())
         const owner = property in target ? target : stage

@@ -325,16 +325,16 @@ test('should spin the persistent refresh control without moving content, includi
       const status = root.getByRole('status')
       assert.equal(await status.textContent(), 'Refreshing…')
       assert.equal(
-        await root.locator('[data-refresh-text]').evaluate((e) => getComputedStyle(e).position),
+        await root.locator('[data-refresh]').evaluate((e) => getComputedStyle(e).position),
         'absolute',
       )
-      assert.equal(await root.locator('[data-refresh-text]').evaluate((e) => e.clientWidth), 1)
+      assert.equal(await root.locator('[data-refresh]').evaluate((e) => e.clientWidth), 1)
       assert.equal(await root.locator('[data-size]').textContent(), '1280 × 720')
       assert.deepEqual(await root.locator('[data-content]').boundingBox(), content)
       for (const width of [768, 390]) {
         await page.evaluate((width) => window.chromeDemo.setViewport({ width, height: 720 }), width)
         const boxes = await root
-          .locator('[data-header-info]')
+          .locator('[data-size]')
           .evaluate((e) => ({ width: e.clientWidth, scroll: e.scrollWidth }))
         assert.ok(boxes.scroll <= boxes.width)
         assert.equal(await status.isVisible(), true)
