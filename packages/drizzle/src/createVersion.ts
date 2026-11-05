@@ -79,6 +79,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
         WHERE ${table.id} != ${result.id}
           AND ${table.parent} = ${parent}
           AND ${table.updatedAt} < ${result.updatedAt || updatedAt}
+          AND ${table.latest} IS NOT FALSE
       `,
     })
   }
