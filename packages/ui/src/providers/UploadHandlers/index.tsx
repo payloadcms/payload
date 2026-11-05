@@ -41,6 +41,7 @@ export const UploadHandlersProvider = ({ children }) => {
           collectionSlug,
           docPrefix,
           file,
+          retries: collectionConfig.upload.transfer?.retries,
           serverURL: config.serverURL,
           targetID,
         })
