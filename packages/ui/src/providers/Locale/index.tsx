@@ -4,13 +4,17 @@ import type { Locale } from 'payload'
 
 import { useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
-import React, { createContext, use, useEffect, useRef, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useRef, useState } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
+import { usePreferences } from '../Preferences/index.js'
 
 export const LocaleContext = createContext({} as Locale)
+
+// Separate from LocaleContext so page and drawer scopes can shadow the locale value.
+export const LocaleSyncContext = createContext((_code: Locale['code']): void => undefined)
 
 export const LocaleLoadingContext = createContext({
   localeIsLoading: false,
@@ -52,6 +56,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
   } = useConfig()
 
   const { user } = useAuth()
+  const { setPreference } = usePreferences()
 
   const defaultLocale = localization ? localization.defaultLocale : 'en'
 
@@ -74,6 +79,34 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
   const [isLoading, setLocaleIsLoading] = useState(false)
 
   const prevLocale = useRef<Locale>(locale)
+  const latestLocaleRequest = useRef(0)
+  const pendingPreferenceSync = useRef<Promise<void>>(Promise.resolve())
+
+  const syncLocale = useCallback(
+    (code: Locale['code']) => {
+      const newLocale = localization ? findLocaleFromCode(localization, code) : null
+
+      if (
+        !newLocale ||
+        newLocale.code === locale.code ||
+        (localeFromParams && localeFromParams !== code)
+      ) {
+        return
+      }
+
+      latestLocaleRequest.current += 1
+      setLocale(newLocale)
+
+      if (user?.id) {
+        pendingPreferenceSync.current = pendingPreferenceSync.current
+          .then(() => setPreference<Locale['code']>('locale', code))
+          .catch((error) => {
+            console.error(error) // eslint-disable-line no-console
+          })
+      }
+    },
+    [locale.code, localeFromParams, localization, setPreference, user?.id],
+  )
 
   useEffect(() => {
     /**
@@ -97,9 +130,25 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
      */
     async function resetLocale() {
       if (localization && user?.id) {
-        const localeToUse =
-          localeFromParams ||
-          (await fetchPreferences<Locale['code']>('locale', apiRoute)?.then((res) => res.value))
+        const request = ++latestLocaleRequest.current
+        let localeToUse = localeFromParams
+
+        if (!localeToUse) {
+          // A restored page may have just synchronized the locale in a child effect.
+          await pendingPreferenceSync.current
+
+          if (request !== latestLocaleRequest.current) {
+            return
+          }
+
+          localeToUse = await fetchPreferences<Locale['code']>('locale', apiRoute).then(
+            (res) => res.value,
+          )
+        }
+
+        if (request !== latestLocaleRequest.current) {
+          return
+        }
 
         const newLocale =
           findLocaleFromCode(localization, localeToUse) ||
@@ -118,7 +167,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
   return (
     <LocaleContext value={locale}>
       <LocaleLoadingContext value={{ localeIsLoading: isLoading, setLocaleIsLoading }}>
-        {children}
+        <LocaleSyncContext value={syncLocale}>{children}</LocaleSyncContext>
       </LocaleLoadingContext>
     </LocaleContext>
   )
