@@ -1,5 +1,7 @@
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
+import type { LazySourceGetter } from './createLazySourceGetter.js'
+import type { PlannedTransformerPipeline } from './planTransformerPipeline.js'
 import type { ResolvedUploadDocument } from './resolveUploadDocument.js'
 import type { UploadTransformer } from './types.js'
 
@@ -13,7 +15,7 @@ import { httpStatus } from '../../utilities/httpStatus.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
-import { getTransformKeyCoverageErrors } from '../transformState/getTransformKeyCoverageErrors.js'
+import { planPersistedDefaultStages } from '../transformState/planPersistedDefaultStages.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
@@ -99,9 +101,12 @@ export async function handleDynamicFileRequest({
   const requestedFile = getRequestedFile({ document, filename })
   // A default file built at request time has no object, so its stages start from the original.
   const { isBuiltAtRequest } = requestedFile
-  const storedFile = isBuiltAtRequest
-    ? { filename: document.original?.filename ?? filename, isOriginal: true }
-    : { filename, isOriginal: false }
+  // The original can share the main file's name, so it is asked for by role, not by name.
+  const originalFile = {
+    filename: document.original?.filename ?? document.filename,
+    isOriginal: Boolean(document.original?.filename),
+  }
+  const storedFile = isBuiltAtRequest ? originalFile : { filename, isOriginal: false }
 
   const source = createLazySourceGetter({
     retrieve: () => getSourceFileResponse({ ...storedFile, collection, document, prefix, req }),
@@ -118,47 +123,36 @@ export async function handleDynamicFileRequest({
     handedOutBodyControllers.delete(response)
   }
 
+  // A file with no stored object has nothing to serve. Its source is the original, which must not
+  // be served in its place, and a request stage must not start from the original either.
+  const assertDefaultFileBuilt = (): void => {
+    if (isBuiltAtRequest && !currentResponse) {
+      throw new TransformerContractError(
+        `No transformer built "${requestedFile.filename}", which has no stored file. A stage that applies its saved transforms must return a response.`,
+      )
+    }
+  }
+
   try {
-    for (const { options, transformer } of pipeline) {
+    for (const { options, purpose, transformer } of pipeline) {
+      if (purpose === 'request-override') {
+        assertDefaultFileBuilt()
+      }
+
       const previousResponse = currentResponse
       const handedOutResponses: Response[] = []
-      const createStageGetter = ({
-        getterName,
-        retrieve,
-      }: {
-        getterName: 'getOriginalFile' | 'getSourceFile'
-        retrieve: () => Promise<Response>
-      }) =>
-        createLazySourceGetter({
-          getterName,
-          retrieve: async () => {
-            const handedOutBodyController = new AbortController()
-            const handedOutResponse = withAbortableBody({
-              response: await retrieve(),
-              signal: handedOutBodyController.signal,
-            })
-            handedOutBodyControllers.set(handedOutResponse, handedOutBodyController)
-            handedOutResponses.push(handedOutResponse)
-
-            return handedOutResponse
-          },
-        })
-      const stageSource = createStageGetter({
+      const stageSource = createHandedOutGetter({
         getterName: 'getSourceFile',
+        handedOutBodyControllers,
+        handedOutResponses,
         retrieve: async () => currentResponse ?? (await source.get()),
       })
-      const stageOriginal = createStageGetter({
+      const stageOriginal = createHandedOutGetter({
         getterName: 'getOriginalFile',
+        handedOutBodyControllers,
+        handedOutResponses,
         retrieve: () =>
-          getSourceFileResponse({
-            collection,
-            document,
-            filename: document.original?.filename ?? document.filename,
-            // The original can share the main file's name, so ask for it by role, not by name.
-            isOriginal: Boolean(document.original?.filename),
-            prefix,
-            req,
-          }),
+          getSourceFileResponse({ ...originalFile, collection, document, prefix, req }),
       })
 
       const result = await transformer.handleRequest!({
@@ -196,6 +190,8 @@ export async function handleDynamicFileRequest({
         return finalizeFileResponse({ collection, req, response: currentResponse! })
       }
     }
+
+    assertDefaultFileBuilt()
   } catch (err) {
     req.payload.logger.error({ err, msg: 'Error running the file transformer pipeline' })
     for (const handedOutBodyController of handedOutBodyControllers.values()) {
@@ -209,17 +205,42 @@ export async function handleDynamicFileRequest({
     return finalizeFileResponse({ collection, req, response: currentResponse })
   }
 
-  // A file with no stored object has nothing to serve. Its source is the original, which must not
-  // be served in its place.
-  if (isBuiltAtRequest) {
-    throw new TransformerContractError(
-      `No transformer built "${requestedFile.filename}", which has no stored file. A stage that applies its saved transforms must return a response.`,
-    )
-  }
-
   // No transformer produced a response — serve the stored file through the normal path
   // (Range/ETag/redirect support, existing `modifyResponseHeaders` order).
   return retrieveFileResponse({ ...storedFile, collection, doc: document, prefix, req })
+}
+
+/**
+ * A single-use getter for one stage. Each response it hands out gets its own abort controller, so
+ * the pipeline can close the body later even when the stage locked it with a reader.
+ */
+function createHandedOutGetter({
+  getterName,
+  handedOutBodyControllers,
+  handedOutResponses,
+  retrieve,
+}: {
+  getterName: 'getOriginalFile' | 'getSourceFile'
+  /** Every handed-out body that is still open, for the whole pipeline. */
+  handedOutBodyControllers: Map<Response, AbortController>
+  /** The responses handed out to this stage. */
+  handedOutResponses: Response[]
+  retrieve: () => Promise<Response>
+}): LazySourceGetter {
+  return createLazySourceGetter({
+    getterName,
+    retrieve: async () => {
+      const handedOutBodyController = new AbortController()
+      const handedOutResponse = withAbortableBody({
+        response: await retrieve(),
+        signal: handedOutBodyController.signal,
+      })
+      handedOutBodyControllers.set(handedOutResponse, handedOutBodyController)
+      handedOutResponses.push(handedOutResponse)
+
+      return handedOutResponse
+    },
+  })
 }
 
 /**
@@ -298,33 +319,35 @@ async function planRequestPipeline({
   const pipeline: RequestStage[] = []
 
   for (const purpose of purposes) {
-    const plan = await planTransformerPipeline({
-      args: {
-        collectionSlug: collection.config.slug,
-        doc: documentSnapshot,
-        documentID: document.id,
-        mimeType: getRequestedFile({ document, filename }).mimeType,
-        operation: 'request',
-        originalDoc: documentSnapshot,
-        purpose,
-        req,
-      },
-      capability: 'handleRequest',
-      transformers: req.payload.config.upload.transformers,
-    })
+    const planArgs = {
+      collectionSlug: collection.config.slug,
+      doc: documentSnapshot,
+      documentID: document.id,
+      mimeType: getRequestedFile({ document, filename }).mimeType,
+      req,
+    }
+    let plan: PlannedTransformerPipeline
 
     if (purpose === 'persisted-default') {
-      const errors = getTransformKeyCoverageErrors({
-        claims: plan.claims,
+      const { coverageErrors, plan: persistedDefaultPlan } = await planPersistedDefaultStages({
+        ...planArgs,
         transforms: document._transforms,
       })
 
-      if (errors.length > 0) {
+      if (coverageErrors.length > 0) {
         throw new APIError(
-          `Cannot apply the saved transforms. ${errors.map(({ message, path }) => `${path}: ${message}`).join(' ')}`,
+          `Cannot apply the saved transforms. ${coverageErrors.map(({ message, path }) => `${path}: ${message}`).join(' ')}`,
           httpStatus.INTERNAL_SERVER_ERROR,
         )
       }
+
+      plan = persistedDefaultPlan
+    } else {
+      plan = await planTransformerPipeline({
+        args: { ...planArgs, operation: 'request', originalDoc: documentSnapshot, purpose },
+        capability: 'handleRequest',
+        transformers: req.payload.config.upload.transformers,
+      })
     }
 
     pipeline.push(

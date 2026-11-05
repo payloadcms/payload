@@ -58,10 +58,13 @@ export const contractTransformers: UploadTransformer[] = [
           }
         : false
     },
-    handleRequest: (args) => {
+    handleRequest: async (args) => {
       contractCalls.handleRequest.push({ ...args, slug: 'contract-first' })
 
-      return Promise.resolve({ status: 'continue' })
+      // A stage that applies the saved transforms must build the file. This one passes its source on.
+      return (args.options as { purpose?: string } | undefined)?.purpose === 'persisted-default'
+        ? { response: await args.getSourceFile(), status: 'continue' }
+        : { status: 'continue' }
     },
     mimeTypes: ['text/markdown', 'image/*'],
     transformFile: async (args) => {

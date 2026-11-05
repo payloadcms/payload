@@ -6,7 +6,7 @@ import { createHash } from 'crypto'
 
 import './index.css'
 
-import { formatFilesize } from 'payload/shared'
+import { formatFileMeta } from 'payload/shared'
 import React from 'react'
 
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
@@ -75,17 +75,12 @@ export const UploadDiffHTMLConverterAsync: (args: {
             <div className={`${baseClass}__info`} data-enable-match="false">
               <strong>{filename}</strong>
               <div className={`${baseClass}__meta`}>
-                {[
-                  typeof uploadDoc?.filesize === 'number'
-                    ? formatFilesize(uploadDoc.filesize)
-                    : null,
-                  typeof uploadDoc?.width === 'number' && typeof uploadDoc?.height === 'number'
-                    ? `${uploadDoc.width}x${uploadDoc.height}`
-                    : null,
-                  uploadDoc?.mimeType,
-                ]
-                  .filter(Boolean)
-                  .join('\u00a0-\u00a0')}
+                {formatFileMeta({
+                  filesize: uploadDoc?.filesize,
+                  height: uploadDoc?.height,
+                  mimeType: uploadDoc?.mimeType,
+                  width: uploadDoc?.width,
+                })}
               </div>
             </div>
           </div>

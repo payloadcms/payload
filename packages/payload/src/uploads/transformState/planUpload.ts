@@ -7,9 +7,20 @@ import { planTransformerPipeline } from '../transformers/planTransformerPipeline
 import { getUploadTransformerInternal } from '../transformers/uploadTransformerBridge.js'
 import { getChangedTransformKeys } from './getChangedTransformKeys.js'
 import { getTransformKeyCoverageErrors } from './getTransformKeyCoverageErrors.js'
+import { planPersistedDefaultStages } from './planPersistedDefaultStages.js'
 import { isClaimRequired, isFocalPointKey } from './transformKeyClaims.js'
 
 export type UploadPlan = { mimeType: string } & PlannedTransformerPipeline
+
+/**
+ * What an upload with no new file does with its stored file.
+ * - `keep`: nothing changes the file, so the stored files stay.
+ * - `rebuild`: upload stages build new files from the stored file.
+ * - `applyAtRequest`: request-time stages apply the saved keys, so no file is read or written.
+ * - `copyForRequest`: a copy reads the source's original to store its own, and request-time stages
+ *   apply the saved keys. No upload stage runs.
+ */
+export type UploadRebuildOutcome = 'applyAtRequest' | 'copyForRequest' | 'keep' | 'rebuild'
 
 type PlanArgs = {
   collectionSlug: string
@@ -50,14 +61,9 @@ export async function planUploadRebuild({
   /** The stored `_transforms` on an update; `undefined` when there is nothing to compare. */
   previousTransforms: Document['_transforms'] | undefined
   storedMimeType: string | undefined
-} & PlanArgs): Promise<{
-  /** The saved keys are applied when the file is requested, so no default file is stored. */
-  isAppliedAtRequest: boolean
-  rebuildPlan?: UploadPlan
-  shouldRebuild: boolean
-}> {
+} & PlanArgs): Promise<{ outcome: UploadRebuildOutcome; rebuildPlan?: UploadPlan }> {
   if (isExternalSource) {
-    return { isAppliedAtRequest: false, shouldRebuild: true }
+    return { outcome: 'rebuild' }
   }
 
   const changedKeys =
@@ -70,11 +76,11 @@ export async function planUploadRebuild({
   const hasNonFocalPointChange = changedKeys.some((key) => !isFocalPointKey(key))
 
   if (!isDuplicating && !hasNonFocalPointChange && !hasCropOrFocalPointEdit) {
-    return { isAppliedAtRequest: false, shouldRebuild: false }
+    return { outcome: 'keep' }
   }
 
   if (!storedMimeType) {
-    return { isAppliedAtRequest: false, shouldRebuild: true }
+    return { outcome: 'rebuild' }
   }
 
   const rebuildPlan = await planUploadPipeline({ ...planArgs, mimeType: storedMimeType })
@@ -90,7 +96,7 @@ export async function planUploadRebuild({
     })
 
   if (!shouldRebuild) {
-    return { isAppliedAtRequest: false, rebuildPlan, shouldRebuild }
+    return { outcome: 'keep', rebuildPlan }
   }
 
   const { isAppliedAtRequest } = await resolveTransformKeyCoverage({
@@ -101,7 +107,11 @@ export async function planUploadRebuild({
     plan: rebuildPlan,
   })
 
-  return { isAppliedAtRequest, rebuildPlan, shouldRebuild: !isAppliedAtRequest || isDuplicating }
+  if (!isAppliedAtRequest) {
+    return { outcome: 'rebuild', rebuildPlan }
+  }
+
+  return { outcome: isDuplicating ? 'copyForRequest' : 'applyAtRequest', rebuildPlan }
 }
 
 /**
@@ -230,27 +240,16 @@ export async function resolveTransformKeyCoverage({
   )
 
   if (canApplyAtRequest && hasOnlyUnclaimedKeys) {
-    const requestPlan = await planTransformerPipeline({
-      args: {
-        collectionSlug,
-        doc: pipelineOriginalDoc,
-        documentID,
-        mimeType,
-        operation: 'request',
-        originalDoc: pipelineOriginalDoc,
-        purpose: 'persisted-default',
-        req,
-      },
-      capability: 'handleRequest',
-      transformers: req.payload.config.upload?.transformers ?? [],
+    const { coverageErrors } = await planPersistedDefaultStages({
+      collectionSlug,
+      doc: pipelineOriginalDoc,
+      documentID,
+      mimeType,
+      req,
+      transforms: pipelineDoc._transforms,
     })
 
-    if (
-      getTransformKeyCoverageErrors({
-        claims: requestPlan.claims,
-        transforms: pipelineDoc._transforms,
-      }).length === 0
-    ) {
+    if (coverageErrors.length === 0) {
       return { isAppliedAtRequest: true }
     }
   }

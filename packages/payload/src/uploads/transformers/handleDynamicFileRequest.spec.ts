@@ -101,14 +101,36 @@ describe('handleDynamicFileRequest', () => {
       vi.mocked(checkFileAccess).mockResolvedValue(dynamicDocument)
     })
 
-    it('should fail, not serve the original, when no stage builds a file that has no stored file', async () => {
-      const transformer = stage(async () => ({ status: 'continue' }))
-      mockPipeline([transformer], new Map([[transformer, ['crop']]]))
+    it.each([
+      { name: 'no stage builds it', requestStages: [] },
+      {
+        name: 'the saved-transforms phase builds nothing and a request stage reads its source',
+        requestStages: [
+          stage(async ({ getSourceFile }) => ({
+            response: await getSourceFile(),
+            status: 'continue',
+          })),
+        ],
+      },
+    ])(
+      'should fail, not serve the original, for a file that has no stored file when $name',
+      async ({ requestStages }) => {
+        vi.mocked(getSourceFileResponse).mockResolvedValue(new Response('original'))
+        const cropStage = stage(async () => ({ status: 'continue' }))
+        vi.mocked(planTransformerPipeline)
+          .mockResolvedValueOnce({
+            claims: new Map([[cropStage, ['crop']]]),
+            options: new Map(),
+            pipeline: [cropStage],
+          })
+          .mockResolvedValueOnce({ claims: new Map(), options: new Map(), pipeline: requestStages })
 
-      await expect(
-        handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() }),
-      ).rejects.toThrow(TransformerContractError)
-    })
+        await expect(
+          handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() }),
+        ).rejects.toThrow(TransformerContractError)
+        expect(getSourceFileResponse).not.toHaveBeenCalled()
+      },
+    )
 
     it('should run only the request-override phase for a stored size of the document', async () => {
       const documentWithStoredSize = {

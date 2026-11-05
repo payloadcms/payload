@@ -12,6 +12,7 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
 import type { ExternalUploadSource } from './sanitizeUploadData.js'
 import type { PreparedUploadTransformation } from './transformers/uploadTransformerBridge.js'
+import type { PixelCrop } from './transformState/cropUnits.js'
 import type { FileData, FileSizes, FileToSave, OriginalFileData, UploadEdits } from './types.js'
 
 import {
@@ -301,7 +302,7 @@ const processUpload = async <T>({
       : undefined
   const shouldStageCloudFiles = hasManagedCloudStorage && !hasProviderDirectReference
   // The new file is kept as `original` only where it can be stored.
-  const isOriginalStored = Boolean(
+  const canStoreOriginal = Boolean(
     !disableLocalStorage || shouldStageCloudFiles || providerOriginal,
   )
 
@@ -325,7 +326,7 @@ const processUpload = async <T>({
     isDuplicating && currentFileData?._stored === false ? currentFileData.original : undefined
   const fileSourceData =
     externalUploadSource ?? retainedOriginal ?? duplicatedOriginal ?? currentFileData
-  const storedOriginal = retainedOriginal ?? duplicatedOriginal ?? undefined
+  const existingOriginal = retainedOriginal ?? duplicatedOriginal ?? undefined
   const documentID =
     operation === 'update' ? (originalDoc as TypeWithID | undefined)?.id : undefined
   let isLocalFile = false
@@ -333,9 +334,9 @@ const processUpload = async <T>({
   const storedMimeType = retainedOriginal?.mimeType ?? currentFileData?.mimeType
   // A rebuild reads the stored original, so planning sees its size and type, as the stages
   // will after the read. The name stays the main file's, as for the file that is read.
-  if (storedOriginal) {
-    pipelineDoc.filesize = storedOriginal.filesize
-    pipelineDoc.mimeType = storedOriginal.mimeType
+  if (existingOriginal) {
+    pipelineDoc.filesize = existingOriginal.filesize
+    pipelineDoc.mimeType = existingOriginal.mimeType
   }
   // Only transformers read originalDoc, so it is copied only when there are some.
   const createOriginalDoc = (): Readonly<Document> =>
@@ -343,12 +344,12 @@ const processUpload = async <T>({
   let pipelineOriginalDoc = createOriginalDoc()
   const rebuildPlanning =
     file || !fileSourceData
-      ? { isAppliedAtRequest: false, rebuildPlan: undefined, shouldRebuild: false }
+      ? { outcome: 'keep' as const, rebuildPlan: undefined }
       : await planUploadRebuild({
           // A rebuild keeps the stored original. A duplicate gets its own copy, which is written
           // only where an original can be stored.
           canApplyAtRequest:
-            Boolean(retainedOriginal) || (Boolean(duplicatedOriginal) && isOriginalStored),
+            Boolean(retainedOriginal) || (Boolean(duplicatedOriginal) && canStoreOriginal),
           collectionSlug: collectionConfig.slug,
           documentID,
           // Not `uploadEdits`: a focal point change copies the saved crop into it, so the crop is
@@ -373,11 +374,16 @@ const processUpload = async <T>({
         }).catch((err: unknown) => {
           throw toFileUploadError({ err, req })
         })
-  const { isAppliedAtRequest: isRebuildAppliedAtRequest, shouldRebuild } = rebuildPlanning
+  const { outcome: rebuildOutcome } = rebuildPlanning
   let { rebuildPlan } = rebuildPlanning
+  // A copy for request-time stages reads the source's original only to store its own copy.
+  const shouldReadStoredFile = rebuildOutcome === 'rebuild' || rebuildOutcome === 'copyForRequest'
+  const isRebuildAppliedAtRequest =
+    rebuildOutcome === 'applyAtRequest' || rebuildOutcome === 'copyForRequest'
 
-  // The retained original stays, and request-time stages build the default file from it.
-  if (isRebuildAppliedAtRequest && !shouldRebuild && retainedOriginal) {
+  // The retained original stays, and request-time stages build the default file from it. Only an
+  // update keeps an original, so `retainedOriginal` is always set here; the check narrows its type.
+  if (rebuildOutcome === 'applyAtRequest' && retainedOriginal) {
     return {
       data: {
         ...incomingFileData,
@@ -392,15 +398,15 @@ const processUpload = async <T>({
     }
   }
 
-  if (shouldRebuild && storedOriginal) {
+  if (shouldReadStoredFile && existingOriginal) {
     uploadEdits = withSavedEdits({
       edits: uploadEdits,
-      original: storedOriginal,
+      original: existingOriginal,
       transforms: pipelineDoc._transforms,
     })
   }
 
-  if (shouldRebuild && fileSourceData) {
+  if (shouldReadStoredFile && fileSourceData) {
     const { filename, url } = fileSourceData
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
       throw new Forbidden(req.t)
@@ -427,7 +433,7 @@ const processUpload = async <T>({
         const response = await getFileByPath(filePath)
         file = response
         overwriteExistingFiles = true
-      } else if (filename && storedOriginal && hasManagedCloudStorage) {
+      } else if (filename && existingOriginal && hasManagedCloudStorage) {
         const { retrieveFileResponse } = await import('./endpoints/getFile.js')
         const response = await retrieveFileResponse({
           collection: { config: collectionConfig },
@@ -444,7 +450,7 @@ const processUpload = async <T>({
         file = {
           name: filename,
           data: buffer,
-          mimetype: storedOriginal.mimeType,
+          mimetype: existingOriginal.mimeType,
           size: buffer.length,
         }
         overwriteExistingFiles = true
@@ -549,7 +555,7 @@ const processUpload = async <T>({
         ? { isAppliedAtRequest: isRebuildAppliedAtRequest }
         : await resolveTransformKeyCoverage({
             // Request-time stages start from the stored original, so one must be stored.
-            canApplyAtRequest: isOriginalStored,
+            canApplyAtRequest: canStoreOriginal,
             collectionSlug: collectionConfig.slug,
             documentID,
             mimeType,
@@ -865,7 +871,7 @@ const processUpload = async <T>({
       fileData.prefix = retainedOriginal.prefix
     }
 
-    if (isOriginalStored) {
+    if (canStoreOriginal) {
       const originalFilename =
         retainedOriginal?.filename ??
         providerOriginal?.filename ??
@@ -1127,7 +1133,7 @@ function getRequestTimeDefaultFileData({
   original: OriginalFileData
   transforms: Document['_transforms']
 }) {
-  const crop = (transforms as { crop?: { height: number; width: number } } | null | undefined)?.crop
+  const crop = (transforms as { crop?: PixelCrop } | null | undefined)?.crop
 
   return {
     _objectKey: null,
