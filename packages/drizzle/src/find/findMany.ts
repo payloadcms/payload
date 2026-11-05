@@ -1,12 +1,13 @@
 import type { FindArgs, FlattenedField, TypeWithID } from 'payload'
 
-import { asc, desc, inArray, max, min } from 'drizzle-orm'
+import { asc, desc, getTableName, inArray, max, min, sql } from 'drizzle-orm'
 
 import type { DrizzleAdapter } from '../types.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
 import { selectDistinct } from '../queries/selectDistinct.js'
 import { transform } from '../transform/read/index.js'
+import { buildInlinedInConstraint, canInlineValues } from '../utilities/buildInlinedInConstraint.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { getTransaction } from '../utilities/getTransaction.js'
 import { buildFindManyArgs } from './buildFindManyArgs.js'
@@ -170,7 +171,17 @@ export const findMany = async function find({
         orderedIDMap[id] = i
       })
       orderedIDs = Object.keys(orderedIDMap)
-      findManyArgs.where = inArray(adapter.tables[tableName].id, orderedIDs)
+
+      const ids = selectDistinctResult.map(({ id }) => id)
+
+      findManyArgs.where =
+        adapter.limitedBoundParameters && canInlineValues({ values: ids })
+          ? buildInlinedInConstraint({
+              column: sql.raw(`"${getTableName(adapter.tables[tableName])}"."id"`),
+              operator: 'in',
+              values: ids,
+            })
+          : inArray(adapter.tables[tableName].id, orderedIDs)
     }
   } else {
     findManyArgs.limit = limit

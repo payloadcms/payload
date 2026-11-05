@@ -31,7 +31,10 @@ const isReplacementHandler = (
   handler: DrizzleOperatorHandler,
 ): handler is DrizzleOperatorReplacementHandler => typeof handler.build === 'function'
 
-const handlerMatches = (handler: DrizzleOperatorHandler, args: Args): boolean => {
+const handlerMatches = (
+  handler: DrizzleOperatorHandler,
+  args: Pick<Args, 'field' | 'resolvedOperator'>,
+): boolean => {
   if (!handler.operators.includes(args.resolvedOperator)) {
     return false
   }
@@ -42,6 +45,19 @@ const handlerMatches = (handler: DrizzleOperatorHandler, args: Args): boolean =>
 
   return true
 }
+
+/**
+ * Whether a configured operator handler applies to the comparison, in which case it must be built
+ * with `buildOperatorConstraint` rather than written into the statement directly.
+ */
+export const hasOperatorHandler = ({
+  adapter,
+  field,
+  resolvedOperator,
+}: Pick<Args, 'adapter' | 'field' | 'resolvedOperator'>): boolean =>
+  (adapter.operatorHandlers ?? []).some((handler) =>
+    handlerMatches(handler, { field, resolvedOperator }),
+  )
 
 /**
  * Builds the final, user-facing SQL comparison for one query leaf: applies every matching
