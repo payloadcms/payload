@@ -110,7 +110,6 @@
     "console-table-printer": "2.12.1",
     "croner": "10.0.1",
     "dataloader": "2.2.3",
-    "deepmerge": "4.3.1",
     "file-type": "21.3.4",
     "get-tsconfig": "4.8.1",
     "http-status": "2.1.0",
