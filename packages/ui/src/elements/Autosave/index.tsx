@@ -17,6 +17,7 @@ import {
   useAllFormFields,
   useForm,
   useFormModified,
+  useFormProcessing,
   useFormSubmitted,
 } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
@@ -60,6 +61,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const [formState] = useAllFormFields()
   const modified = useFormModified()
+  const processing = useFormProcessing()
   const submitted = useFormSubmitted()
 
   const currentLocale = useLocale()
@@ -213,6 +215,14 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     }
 
     /**
+     * A submit that disabled the form is running, so an autosave would do nothing.
+     * This effect runs again when that submit ends, in case it was refused and left edits unsaved.
+     */
+    if (processing) {
+      return
+    }
+
+    /**
      * Ensure autosave only runs if the form data changes, not every time the entire form state changes
      * Remove `updatedAt` from comparison as it changes on every autosave interval.
      */
@@ -227,7 +237,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     previousUploadEdits.current = uploadEdits
 
     handleAutosave()
-  }, [debouncedFormState, uploadEdits])
+  }, [debouncedFormState, processing, uploadEdits])
 
   /**
    * If component unmounts, clear the autosave timeout
