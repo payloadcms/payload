@@ -1,3 +1,3 @@
 'use client'
 
-export { HiddenInFrames } from '../views/Authorize/HiddenInFrames/index.js'
+export { AllowButtons } from '../views/Authorize/AllowButtons/index.js'

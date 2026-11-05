@@ -1,6 +1,5 @@
 import type { AdminViewServerProps } from 'payload'
 
-import { Button } from '@payloadcms/ui'
 import { FormHeader, Logo, MinimalTemplate } from '@payloadcms/ui/rsc'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
@@ -8,7 +7,7 @@ import React from 'react'
 import type { AuthorizeViewError, Client, Consent } from '../../endpoint/oauthServer.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
-import { HiddenInFrames } from '../../exports/client.js'
+import { AllowButtons } from '../../exports/client.js'
 import { unseal } from '../../utils/seal.js'
 import './index.css'
 
@@ -68,35 +67,16 @@ export function MCPAuthorizeView({
               description={`It will be able to use this app's MCP tools as ${account}, and you will return to ${returnHost}.`}
               heading={`Allow ${client.name} to use your account?`}
             />
-            <HiddenInFrames>
-              <form
-                action={formatAdminURL({
-                  apiRoute: payload.config.routes.api,
-                  path: '/mcp/oauth/authorize',
-                })}
-                method="post"
-              >
-                <input name="consent" type="hidden" value={sealedConsent!} />
-                <div className={`${baseClass}__actions`}>
-                  <Button
-                    buttonStyle="primary"
-                    extraButtonProps={{ name: 'decision', value: 'allow' }}
-                    margin={false}
-                    type="submit"
-                  >
-                    Allow
-                  </Button>
-                  <Button
-                    buttonStyle="secondary"
-                    extraButtonProps={{ name: 'decision', value: 'deny' }}
-                    margin={false}
-                    type="submit"
-                  >
-                    Deny
-                  </Button>
-                </div>
-              </form>
-            </HiddenInFrames>
+            <form
+              action={formatAdminURL({
+                apiRoute: payload.config.routes.api,
+                path: '/mcp/oauth/authorize',
+              })}
+              method="post"
+            >
+              <input name="consent" type="hidden" value={sealedConsent!} />
+              <AllowButtons />
+            </form>
           </>
         ) : (
           <FormHeader
