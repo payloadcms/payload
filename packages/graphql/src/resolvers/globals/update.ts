@@ -39,7 +39,7 @@ export function update<TSlug extends GlobalSlug>(
 
     const options = {
       slug,
-      data: args.data,
+      data: (args.data ?? {}) as any,
       depth: 0,
       draft: args.draft,
       globalConfig,
