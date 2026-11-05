@@ -3,8 +3,8 @@ import type { Document, PayloadRequest } from '../../types/index.js'
 
 /**
  * A lazy, storage-neutral, read-only view of a file. No bytes are read until a method is
- * called, and each call reads the file again. A byte range is `numberOfBytes` bytes starting
- * at `startByte`, and must be inside `sizeInBytes`.
+ * called, and each call reads the file again. A byte range is up to `numberOfBytes` bytes
+ * starting at `startByte`. A range that runs past `sizeInBytes` stops at the end of the file.
  */
 export type FileSource = {
   filename: string

@@ -42,11 +42,20 @@ describe('createFileSource', () => {
       expect(await readStream(await createSource().streamFile(range))).toBe(expected)
     })
 
+    it('should read only the bytes before the end when a range runs past it', async () => {
+      const source = createSource()
+
+      expect(decode(await source.readFileBytes({ numberOfBytes: 1024, startByte: 4 }))).toBe('ef')
+      expect(await readStream(await source.streamFile({ numberOfBytes: 1024, startByte: 4 }))).toBe(
+        'ef',
+      )
+    })
+
     it.for([
       { name: 'a negative startByte', read: { numberOfBytes: 1, startByte: -1 } },
       { name: 'a fractional startByte', read: { numberOfBytes: 1, startByte: 0.5 } },
       { name: 'a zero numberOfBytes', read: { numberOfBytes: 0, startByte: 0 } },
-      { name: 'a range past the end of the file', read: { numberOfBytes: 2, startByte: 5 } },
+      { name: 'a read start past the end of the file', read: { numberOfBytes: 1, startByte: 7 } },
       { name: 'a zero numberOfBytes in a stream', stream: { numberOfBytes: 0 } },
       { name: 'a stream start past the end of the file', stream: { startByte: 7 } },
     ])('should reject $name', async ({ read, stream }) => {

@@ -34,7 +34,10 @@ export function createFileSource({ file }: { file: File }): FileSource {
   }
 }
 
-/** Checks a requested range against the file size. An omitted `numberOfBytes` means "to the end". */
+/**
+ * Checks a requested range against the file size. An omitted `numberOfBytes` means "to the end",
+ * and a range that runs past the end stops there, so a fixed-size header read works on any file.
+ */
 function resolveByteRange({
   numberOfBytes,
   sizeInBytes,
@@ -52,13 +55,14 @@ function resolveByteRange({
     throw new TransformerContractError('numberOfBytes must be a positive integer.')
   }
 
-  const endByte = numberOfBytes === undefined ? sizeInBytes : startByte + numberOfBytes
-
-  if (startByte > sizeInBytes || endByte > sizeInBytes) {
+  if (startByte > sizeInBytes) {
     throw new TransformerContractError(
-      `The byte range ${startByte}-${endByte} is outside the file size of ${sizeInBytes} bytes.`,
+      `startByte ${startByte} is past the end of the file (${sizeInBytes} bytes).`,
     )
   }
+
+  const endByte =
+    numberOfBytes === undefined ? sizeInBytes : Math.min(startByte + numberOfBytes, sizeInBytes)
 
   return { endByte, startByte }
 }

@@ -176,7 +176,10 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
 
   return {
     ...result,
-    data: { ...edits.applyTransformState(result.data), _transforms: pipelineDoc._transforms ?? null },
+    data: {
+      ...edits.applyTransformState(result.data),
+      _transforms: pipelineDoc._transforms ?? null,
+    },
   }
 }
 
@@ -387,50 +390,51 @@ const processUpload = async <T>({
     ? { ...uploadEdits, crop: undefined, heightInPixels: undefined, widthInPixels: undefined }
     : uploadEdits
 
-  // Errors from the deferred client-upload download and its checks keep their own message and status.
-  let isFetchingClientUpload = false
+  const planUploadPipeline = async ({ mimeType }: { mimeType: string }) => {
+    try {
+      return await planTransformerPipeline({
+        args: {
+          collectionSlug: collectionConfig.slug,
+          doc: pipelineOriginalDoc,
+          mimeType,
+          operation: 'upload',
+          originalDoc: pipelineOriginalDoc,
+          req,
+        },
+        capability: 'transformFile',
+        transformers: req.payload.config.upload?.transformers ?? [],
+      })
+    } catch (err) {
+      throw toFileUploadError({ err, req })
+    }
+  }
 
-  const planUploadPipeline = ({ mimeType }: { mimeType: string }) =>
-    planTransformerPipeline({
-      args: {
-        collectionSlug: collectionConfig.slug,
-        doc: pipelineOriginalDoc,
-        mimeType,
-        operation: 'upload',
-        originalDoc: pipelineOriginalDoc,
-        req,
-      },
-      capability: 'transformFile',
-      transformers: req.payload.config.upload?.transformers ?? [],
-    })
+  let pipeline = await planUploadPipeline({ mimeType: file.mimetype })
+
+  // A client upload can arrive with only a header probe or no contents (see
+  // getFileContentRequirement.ts). Download it only when a stage needs its bytes, which
+  // `canTransform` decides here with the real document. Sharp's bridge is excluded: the
+  // content requirement already covers what it needs. Errors from the download and its checks
+  // keep their own message and status.
+  if (
+    !hasFullFileContents(file) &&
+    file.uploadReference &&
+    pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
+  ) {
+    const probedMimeType = file.mimetype
+    file = await fetchFullClientUpload({ collectionSlug: collectionConfig.slug, file, req })
+    // On req.file, the temp file is removed after the operation.
+    req.file = file
+    // The first check saw only a probe, so check the whole file before a transformer reads it.
+    file = await checkFileAndUseDetectedType({ collection: collectionConfig, file, req })
+
+    // The plan was made for the probe's MIME type. Make it again for the checked type.
+    if (file.mimetype !== probedMimeType) {
+      pipeline = await planUploadPipeline({ mimeType: file.mimetype })
+    }
+  }
 
   try {
-    let pipeline = await planUploadPipeline({ mimeType: file.mimetype })
-
-    // A client upload can arrive with only a header probe or no contents (see
-    // getFileContentRequirement.ts). Download it only when a stage needs its bytes, which
-    // `canTransform` decides here with the real document. Sharp's bridge is excluded: the
-    // content requirement already covers what it needs.
-    if (
-      !hasFullFileContents(file) &&
-      file.uploadReference &&
-      pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
-    ) {
-      isFetchingClientUpload = true
-      const probedMimeType = file.mimetype
-      file = await fetchFullClientUpload({ collectionSlug: collectionConfig.slug, file, req })
-      // On req.file, the temp file is removed after the operation.
-      req.file = file
-      // The first check saw only a probe, so check the whole file before a transformer reads it.
-      file = await checkFileAndUseDetectedType({ collection: collectionConfig, file, req })
-      isFetchingClientUpload = false
-
-      // The plan was made for the probe's MIME type. Make it again for the checked type.
-      if (file.mimetype !== probedMimeType) {
-        pipeline = await planUploadPipeline({ mimeType: file.mimetype })
-      }
-    }
-
     // A large client upload can arrive as a bounded probe alongside a temp file. Transformers
     // need the whole file, so leave such an upload untouched rather than buffering it.
     const canRunTransformers = pipeline.length > 0 && hasFullFileContents(file)
@@ -489,7 +493,7 @@ const processUpload = async <T>({
                 ? pipelineDoc
                 : (sizeTaskDoc ??= deepFreeze(deepCopyObject(pipelineDoc)))
 
-            const { file: taskFile } = await transformUploadFile({
+            const taskFile = await transformUploadFile({
               collectionSlug: collectionConfig.slug,
               doc: taskDoc,
               file: task.file ?? originalWebFile!,
@@ -513,7 +517,7 @@ const processUpload = async <T>({
         hasDimensionsFromBridge = true
         sizeResults = results.filter((result) => result.fieldPath !== 'filename')
       } else {
-        const { file: transformedFile } = await transformUploadFile({
+        const transformedFile = await transformUploadFile({
           collectionSlug: collectionConfig.slug,
           doc: pipelineDoc,
           file: originalWebFile,
@@ -881,14 +885,7 @@ const processUpload = async <T>({
       fileData.variants = sizes
     }
   } catch (err) {
-    req.payload.logger.error(err)
-
-    // A broken transformer contract is a bug in the transformer, so it keeps its own message.
-    if (err instanceof TransformerContractError || isFetchingClientUpload) {
-      throw err
-    }
-
-    throw new FileUploadError(req.t)
+    throw toFileUploadError({ err, req })
   }
 
   newData = {
@@ -943,4 +940,14 @@ const checkFileAndUseDetectedType = async ({
   }
 
   return file
+}
+
+/**
+ * Logs a transformer or file processing error and hides its details behind a `FileUploadError`.
+ * A broken transformer contract is a bug in the transformer, so it keeps its own message.
+ */
+function toFileUploadError({ err, req }: { err: unknown; req: PayloadRequest }): Error {
+  req.payload.logger.error(err)
+
+  return err instanceof TransformerContractError ? err : new FileUploadError(req.t)
 }

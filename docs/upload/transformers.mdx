@@ -167,7 +167,7 @@ type FileSource = {
 
 - `readFileBytes` loads one small byte range into memory, for example a file header.
 - `streamFile` streams a byte range, or the whole file when called with no arguments.
-- A range starts at `startByte` (0 or more) and has `numberOfBytes` bytes (1 or more). A range outside `sizeInBytes` rejects with a `TransformerContractError`.
+- A range starts at `startByte` (0 or more) and has `numberOfBytes` bytes (1 or more). A range that runs past the end of the file returns only the bytes up to the end, so check the length of what you get back. A `startByte` past `sizeInBytes` rejects with a `TransformerContractError`.
 - When `signal` aborts, the read stops.
 
 There is no whole-file read. A transformer that needs the whole file in memory must read `streamFile()` and enforce its own byte limit.

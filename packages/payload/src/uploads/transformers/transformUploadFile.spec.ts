@@ -50,7 +50,7 @@ describe('transformUploadFile', () => {
       transformFile: vi.fn().mockResolvedValue({ status: 'continue' }),
     })
 
-    const result = await transformUploadFile({
+    const outputFile = await transformUploadFile({
       collectionSlug: 'media',
       file: new File(['original'], 'logo.png'),
       ...makeDocs(),
@@ -63,7 +63,7 @@ describe('transformUploadFile', () => {
     expect(second.transformFile).toHaveBeenCalledWith(
       expect.objectContaining({ file: replacement }),
     )
-    expect(result.file).toBe(replacement)
+    expect(outputFile).toBe(replacement)
   })
 
   it('should replace the file and stop the pipeline when a stage returns complete', async () => {
@@ -74,7 +74,7 @@ describe('transformUploadFile', () => {
     })
     const second = makeTransformer({ slug: 'second', transformFile: vi.fn() })
 
-    const result = await transformUploadFile({
+    const outputFile = await transformUploadFile({
       collectionSlug: 'media',
       file: new File(['original'], 'logo.png'),
       ...makeDocs(),
@@ -84,7 +84,7 @@ describe('transformUploadFile', () => {
       req: makeReq(),
     })
 
-    expect(result.file).toBe(completeFile)
+    expect(outputFile).toBe(completeFile)
     expect(second.transformFile).not.toHaveBeenCalled()
   })
 
@@ -137,7 +137,7 @@ describe('transformUploadFile', () => {
     ])
   })
 
-  it('should pass a _transforms change to later stages and return it in doc', async () => {
+  it('should pass a _transforms change to later stages and keep it in doc', async () => {
     const first = makeTransformer({
       slug: 'first',
       transformFile: vi.fn(({ doc }) => {
@@ -151,7 +151,7 @@ describe('transformUploadFile', () => {
     })
     const docs = makeDocs()
 
-    const result = await runPipeline({ ...docs, pipeline: [first, second] })
+    await runPipeline({ ...docs, pipeline: [first, second] })
 
     expect(second.transformFile).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -159,7 +159,7 @@ describe('transformUploadFile', () => {
         originalDoc: expect.objectContaining({ _transforms: null }),
       }),
     )
-    expect(result.doc._transforms).toEqual({ score: 1 })
+    expect(docs.doc._transforms).toEqual({ score: 1 })
     expect(docs.originalDoc._transforms).toBeNull()
   })
 

@@ -11,11 +11,12 @@ import { createFileSource } from './createFileSource.js'
  * order. Used both for the ordinary top-level upload call (`options: undefined`)
  * and, via the private v4 bridge's `transform` callback, once per legacy task
  * (the main file, crop output, or a named image size) with that task's own
- * `options`. Retains only the current accumulator — never a history array —
+ * `options`. Retains only the current file — never a history array —
  * so passing the same `File` through unchanged never copies its buffer.
  *
- * Each stage gets the same `doc`, so later stages see earlier `_transforms` changes. A stage
- * that changes any other field stops the pipeline with a `TransformerContractError`.
+ * Each stage gets the same `doc` and changes it in place, so later stages and the caller see
+ * earlier `_transforms` changes. A stage that changes any other field stops the pipeline with a
+ * `TransformerContractError`. Returns the output file.
  */
 export async function transformUploadFile({
   collectionSlug,
@@ -35,9 +36,9 @@ export async function transformUploadFile({
   originalFile: File
   pipeline: UploadTransformer[]
   req: PayloadRequest
-}): Promise<{ doc: Document; file: File }> {
+}): Promise<File> {
   const originalSource = createFileSource({ file: originalFile })
-  let accumulator = file
+  let currentFile = file
 
   for (const transformer of pipeline) {
     if (typeof transformer.transformFile !== 'function') {
@@ -47,26 +48,26 @@ export async function transformUploadFile({
     const result = await transformer.transformFile({
       collectionSlug,
       doc,
-      file: accumulator,
+      file: currentFile,
       options,
       originalDoc,
       originalSource,
       req,
-      source: createFileSource({ file: accumulator }),
+      source: createFileSource({ file: currentFile }),
     })
 
     assertOnlyTransformsChanged({ doc, originalDoc, transformerSlug: transformer.slug })
 
     if (result.file) {
-      accumulator = result.file
+      currentFile = result.file
     }
 
     if (result.status === 'complete') {
-      return { doc, file: accumulator }
+      return currentFile
     }
   }
 
-  return { doc, file: accumulator }
+  return currentFile
 }
 
 /**
