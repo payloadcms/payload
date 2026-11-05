@@ -357,6 +357,7 @@ export const updateOperation = async <
       fieldsToValidate: submittedTopLevelFieldNames,
       global: globalConfig,
       operation: 'update',
+      overrideAccess,
       req,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(globalConfig),
     } satisfies BeforeChangeArgs<JsonObject>
