@@ -34,7 +34,7 @@ Prefer 10–45 seconds. Avoid long typing sequences, setup screens, loading wait
 
 ## Editorial annotations over the recording
 
-Ordinary step walkthroughs use the [left sidebar](window-chrome.md#step-sidebar), with the complete step list declared in `presentation.annotationSteps`. The top panel remains available, including for accessibility feedback. The change title and description stay constant; step titles and bodies update through `showAnnotation` and `hideAnnotation`. Supply content and optional one-based `index`/`total`, which default to 1. If the scenario uses annotations, show the initial note before `ready()` and keep it visible at that marker. Starting annotations after an unannotated opening is rejected. Recordings without annotations remain supported. The shared component controls layout, progress, and transitions; see [window-chrome.md](window-chrome.md).
+For a known step sequence, declare `presentation.annotationSteps` and select the [sidebar API](window-chrome.md#step-sidebar). Call `showAnnotation` when an explanation becomes relevant and `hideAnnotation` when it no longer applies. Keep the scenario’s change metadata constant. Supply content and optional one-based `index`/`total`, which default to 1. If the scenario uses annotations, show the initial note before `ready()` and keep it visible at that marker. Starting annotations after an unannotated opening is rejected. Recordings without annotations remain supported. The shared component controls layout, progress, and transitions; see [window-chrome.md](window-chrome.md).
 
 ```js
 await showAnnotation({
@@ -47,7 +47,7 @@ await pause(1600)
 await hideAnnotation()
 ```
 
-Do not inject annotations into the application. Floating annotations and the old `type`, `position`, and `width` options are rejected with a migration error. Use the fixed panel component without scenario CSS. Check text fit, contrast, and timing in the rendered MP4, and include substantive explanation in the written PR walkthrough as a text alternative.
+Do not inject annotations into the application. Floating annotations and the old `type`, `position`, and `width` options are rejected with a migration error. Use the annotation API without scenario CSS. Check text fit, contrast, and timing in the rendered MP4, and include substantive explanation in the written PR walkthrough as a text alternative.
 
 ## Scenario module
 

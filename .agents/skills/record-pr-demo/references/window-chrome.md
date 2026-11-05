@@ -36,7 +36,7 @@ The window header automatically displays the current application viewport dimens
 
 ## Step sidebar
 
-Use `annotationLayout: 'left'` for a persistent list beside the window. Declare the complete ordered `annotationSteps` before recording so viewers can see previous, current, and upcoming steps:
+Use `annotationLayout: 'left'` when the walkthrough has a known sequence viewers may need to reference. Declare that sequence in `annotationSteps`:
 
 ```js
 const steps = [
@@ -62,11 +62,11 @@ export const presentation = {
 await showAnnotation({ ...steps[1], index: 2, total: steps.length })
 ```
 
-The sidebar renders descriptions only; titles remain required by the annotation API and support the top layout. Reuse the declared entry when calling `showAnnotation`: its body, index, and total must match the list. Add `kind: 'Bug'` only where a failure is visibly demonstrated. Setup and navigation steps should not receive a Bug pill. The main Bug pill identifies a before recording; use Fix for the after recording and Feature for a feature walkthrough.
+Each step accepts `title`, `body`, and optional `kind: 'Bug'`. Titles remain required by `showAnnotation`; the renderer decides which fields each layout displays. Reuse the declared entry when calling `showAnnotation`: its body, one-based index, and total must match the list. Use a step's `kind` to identify a demonstrated failure, not a setup or navigation action. The scenario's `change.kind` describes the whole walkthrough: Bug for before, Fix for after, or Feature for a feature demonstration.
 
-The shared renderer owns the dark sidebar styling, step pills, current-step dot, and opacity. It aligns with the application's initial rendered height and keeps that height and position during responsive resizing. Long lists scroll independently under the fixed header, automatically revealing the current step with reduced-motion support. Playground steps can also be selected and scrolled manually. Recordings do not expose inert step buttons.
+The renderer handles layout, styling, step indicators, and scrolling. Scripts should advance the current step through `showAnnotation`, rather than manipulating the sidebar DOM or scroll position. Playground step selection is an inspection control, not a scenario API.
 
-Omitting `annotationLayout` or using `'top'` preserves the compact top panel. Accessibility feedback uses the top panel, including when `--a11y on` is applied to a sidebar scenario. The playground offers Left/Top layouts, a Demo type selector, and a Many steps example. Right-side placement is unsupported.
+Omit `annotationLayout` or use `'top'` for the compact annotation API without a declared sequence. Accessibility mode automatically selects the compatible top presentation, including with `--a11y on`. The playground provides Left/Top layouts, Demo type, and Many steps controls for inspection.
 
 ## URL bar
 
