@@ -21,6 +21,13 @@ export const VariantOptionsSelector: React.FC<Props> = async (props) => {
     collection: productsSlug,
     depth: 0,
     draft: true,
+    joins: {
+      variants: {
+        // No limit: the duplicate warning below must see every existing variant.
+        // Without this the join falls back to the adapter default of 10.
+        limit: 0,
+      },
+    },
     overrideAccess: true,
     select: {
       variants: true,
@@ -47,6 +54,9 @@ export const VariantOptionsSelector: React.FC<Props> = async (props) => {
         depth: 1,
         joins: {
           options: {
+            // No limit: every option of the type must be selectable. Without
+            // this the join falls back to the adapter default of 10.
+            limit: 0,
             sort: 'value',
           },
         },
