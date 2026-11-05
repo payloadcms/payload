@@ -7,12 +7,14 @@ import { devUser } from '../credentials.js'
 import { ConvertedMedia } from './collections/ConvertedMedia/index.js'
 import { DraftMedia } from './collections/DraftMedia/index.js'
 import { LegacyMedia } from './collections/LegacyMedia/index.js'
+import { LegacyTransformMedia } from './collections/LegacyTransformMedia/index.js'
 import { LocalizedMedia } from './collections/LocalizedMedia/index.js'
 import { Media } from './collections/Media/index.js'
 import { PlainMedia } from './collections/PlainMedia/index.js'
 import { TransformedMedia } from './collections/TransformedMedia/index.js'
 import { TrashMedia } from './collections/TrashMedia/index.js'
-import { convertedMediaSlug, transformedMediaSlug } from './shared.js'
+import { seedLegacyMedia } from './seedLegacyMedia.js'
+import { convertedMediaSlug, legacyMediaSlug, transformedMediaSlug } from './shared.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const migrationDir = process.env.FILE_VERSIONING_MIGRATION_DIR
@@ -48,6 +50,7 @@ export default buildConfigWithDefaults({
           ConvertedMedia,
           TrashMedia,
           PlainMedia,
+          LegacyTransformMedia,
         ],
     localization: { defaultLocale: 'en', locales: ['en', 'de'] },
     upload: {
@@ -58,6 +61,9 @@ export default buildConfigWithDefaults({
               collections: {
                 [convertedMediaSlug]: {
                   formatOptions: { format: 'jpeg' },
+                },
+                [legacyMediaSlug]: {
+                  variants: [{ name: 'small', height: 200, width: 200 }],
                 },
                 [transformedMediaSlug]: {
                   variants: [{ name: 'small', height: 200, width: 200 }],
@@ -75,6 +81,9 @@ export default buildConfigWithDefaults({
       data: { email: devUser.email, password: devUser.password },
       overrideAccess: true,
     })
+    if (!hasLegacySchema) {
+      await seedLegacyMedia({ payload })
+    }
   },
   suite: 'file-versioning',
 })

@@ -14,6 +14,7 @@ import { devUser } from '../credentials.js'
 import {
   draftMediaDir,
   draftMediaSlug,
+  legacyMediaDir,
   localizedMediaDir,
   localizedMediaSlug,
   mediaDir,
@@ -35,6 +36,7 @@ test.suite('File rename', { config: './config.ts' }, () => {
     await rm(draftMediaDir, { force: true, recursive: true })
     await rm(localizedMediaDir, { force: true, recursive: true })
     await rm(transformedMediaDir, { force: true, recursive: true })
+    await rm(legacyMediaDir, { force: true, recursive: true })
     await rm(plainMediaDir, { force: true, recursive: true })
   })
 
