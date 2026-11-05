@@ -83,7 +83,8 @@ export async function resolveUploadEdits({
   const file = fileArg ?? req.file
   const hasNewFile = Boolean(file)
   const queryEdits = req.query?.uploadEdits as undefined | UploadEdits
-  const isSubmitted = Object.prototype.hasOwnProperty.call(incoming, '_transforms')
+  // `undefined` means not sent, as in JSON and as Local API callers often pass an unset key.
+  const isSubmitted = incoming._transforms !== undefined
   // Crop coordinates belong to the replaced file, so a new file starts without them.
   const previous: TransformState = hasNewFile ? null : (current?._transforms ?? null)
   const nonJSONValueError = isSubmitted

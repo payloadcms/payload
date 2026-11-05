@@ -144,6 +144,21 @@ describe('resolveUploadEdits', () => {
     expect(applyTransformState({})._transforms).toStrictEqual({ custom: [1, null, 3] })
   })
 
+  it('should keep the saved value when _transforms is undefined, as when it is omitted', async () => {
+    const saved = { custom: true }
+
+    const { applyTransformState } = await resolveUploadEdits({
+      collectionSlug: 'media',
+      data: { _transforms: undefined },
+      focalPointEnabled: false,
+      operation: 'update',
+      originalDoc: { _transforms: saved },
+      req: { query: {} } as unknown as PayloadRequest,
+    })
+
+    expect(applyTransformState({})._transforms).toStrictEqual(saved)
+  })
+
   it('should save focalX and focalY sent as strings as numbers', async () => {
     const { applyTransformState } = await resolveUploadEdits({
       collectionSlug: 'media',
