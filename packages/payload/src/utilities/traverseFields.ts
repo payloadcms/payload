@@ -360,22 +360,48 @@ export const traverseFields = ({
         typeof currentRef === 'object'
       ) {
         if (fieldAffectsData(field)) {
-          for (const key in currentRef as Record<string, unknown>) {
-            if (currentRef[key as keyof typeof currentRef]) {
-              traverseFields({
-                callback,
-                callbackStack,
-                config,
-                fields: field.fields,
-                fillEmpty,
-                isTopLevel: false,
-                leavesFirst,
-                parentIsLocalized: true,
-                parentPath: field.name ? `${parentPath}${field.name}.` : parentPath,
-                parentRef: currentParentRef,
-                ref: currentRef[key as keyof typeof currentRef],
-              })
+          // A localized group or tab can be reached in two shapes. In the database shape its
+          // keys are locale codes, each holding that locale's data. In a locale-resolved
+          // document, as returned by payload.find({ locale }), its keys are the group's own
+          // field names. Traverse that second shape directly, otherwise every field below the
+          // localized group is skipped because the first key is read as a locale.
+          const subFieldNames = field.fields.map((subField) =>
+            'name' in subField ? subField.name : undefined,
+          )
+          const isLocaleMap = !Object.keys(currentRef).some((key) => subFieldNames.includes(key))
+
+          if (isLocaleMap) {
+            for (const key in currentRef as Record<string, unknown>) {
+              if (currentRef[key as keyof typeof currentRef]) {
+                traverseFields({
+                  callback,
+                  callbackStack,
+                  config,
+                  fields: field.fields,
+                  fillEmpty,
+                  isTopLevel: false,
+                  leavesFirst,
+                  parentIsLocalized: true,
+                  parentPath: field.name ? `${parentPath}${field.name}.` : parentPath,
+                  parentRef: currentParentRef,
+                  ref: currentRef[key as keyof typeof currentRef],
+                })
+              }
             }
+          } else {
+            traverseFields({
+              callback,
+              callbackStack,
+              config,
+              fields: field.fields,
+              fillEmpty,
+              isTopLevel: false,
+              leavesFirst,
+              parentIsLocalized: true,
+              parentPath: field.name ? `${parentPath}${field.name}.` : parentPath,
+              parentRef: currentParentRef,
+              ref: currentRef,
+            })
           }
         } else {
           traverseFields({
