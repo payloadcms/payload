@@ -17,8 +17,8 @@ const baseClass = 'file-preview'
 
 type Props = {
   readonly data: Record<string, unknown>
-  /** The URL to preview, from `getFilePreviewSrc`. The toolbar uses the same URL. */
-  readonly fileSrc?: null | string
+  /** The image to preview, from `getFilePreviewSrc`. */
+  readonly fileSrc: null | string
   readonly imageCacheTag?: false | string
   readonly selectedSize?: null | string
   readonly selectedSizeData?: null | Record<string, unknown>
@@ -45,7 +45,7 @@ export const FilePreview: React.FC<Props> = ({
 
   const nativePreviewSrc = originalUrl ? appendCacheTag(originalUrl, imageCacheTag) : undefined
 
-  // Built-in previews for native file types; images (and unknown types) fall back to the thumbnail.
+  // Video, audio and PDF files use built-in players. Everything else shows `fileSrc` as an image.
   const renderBuiltInPreview = () => {
     if (nativePreviewSrc && !isImageFile) {
       if (mimeType.startsWith('video/')) {
