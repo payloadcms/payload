@@ -19,6 +19,7 @@ import { createTableName } from '../createTableName.js'
 import { buildForeignKeyName } from '../utilities/buildForeignKeyName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
+import { maxIdentifierLength } from '../utilities/validateIdentifierLength.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -185,7 +186,7 @@ export const buildTable = ({
     indexes,
   }
 
-  adapter.rawTables[tableName] = table
+  adapter.rawTables[tableName] = promoteLongInlineForeignKeys({ adapter, table })
 
   if (hasLocalizedField || localizedRelations.size) {
     const localeTableName = `${tableName}${adapter.localesSuffix}`
@@ -239,7 +240,10 @@ export const buildTable = ({
       indexes: localesIndexes,
     }
 
-    adapter.rawTables[localeTableName] = localesTable
+    adapter.rawTables[localeTableName] = promoteLongInlineForeignKeys({
+      adapter,
+      table: localesTable,
+    })
 
     const localeRelations: Record<string, RawRelation> = {
       _parentID: {
@@ -795,4 +799,45 @@ export const buildTable = ({
     hasManyTextField,
     relationsToBuild,
   }
+}
+
+/**
+ * Single-relation relationship/upload columns use Drizzle's inline `.references()`, which names
+ * the foreign key `<table>_<column>_<target>_<targetColumn>_fk` with no way to override it.
+ * When that name exceeds the Postgres identifier limit, Postgres stores a truncated name, so push
+ * never matches it and drops and re-adds the foreign key on every run, which can fail with
+ * "already exists". Those foreign keys are moved to explicitly named table-level foreign keys
+ * instead. Shorter names keep `.references()` unchanged.
+ */
+const promoteLongInlineForeignKeys = ({
+  adapter,
+  table,
+}: {
+  adapter: DrizzleAdapter
+  table: RawTable
+}): RawTable => {
+  for (const [columnKey, column] of Object.entries(table.columns)) {
+    if (!column.reference) {
+      continue
+    }
+
+    const { name: targetColumnName, onDelete, table: targetTableName } = column.reference
+    const drizzleForeignKeyName = `${table.name}_${column.name}_${targetTableName}_${targetColumnName}`
+
+    if (`${drizzleForeignKeyName}_fk`.length <= maxIdentifierLength) {
+      continue
+    }
+
+    table.foreignKeys ??= {}
+    table.foreignKeys[`${columnKey}Fk`] = {
+      name: buildForeignKeyName({ name: drizzleForeignKeyName, adapter }),
+      columns: [columnKey],
+      foreignColumns: [{ name: targetColumnName, table: targetTableName }],
+      onDelete,
+    }
+
+    delete column.reference
+  }
+
+  return table
 }
