@@ -19,7 +19,7 @@ import type {
   Submit,
   SubmitOptions,
 } from './types.js'
-import type { FormStateActions } from './useFormState.js'
+import type { UseFormStateResult } from './useFormState.js'
 
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -39,13 +39,23 @@ type Args = {
   prevFormStateRef: RefObject<FormState>
   props: FormProps
   queueTask: UseQueueResult['queueTask']
-  refreshFormStateAfterSave: FormStateActions['refreshFormStateAfterSave']
-  setIsValid: FormContextType['setIsValid']
-  /** Kept in sync with the submitted state, for requests queued before React renders it. */
-  submittedRef: RefObject<boolean>
-  validateForm: FormStateActions['validateForm']
+  refreshFormStateAfterSave: UseFormStateResult['refreshFormStateAfterSave']
+  setIsValid: UseFormStateResult['setIsValid']
+  setModified: UseFormStateResult['setModified']
+  validateForm: UseFormStateResult['validateForm']
 }
 
+/**
+ * Supplies Form's `submit` method and tracks submission status, processing, and disabling during a save.
+ * Uses `useFormState`'s validation and post-save refresh methods around the submission, then handles callbacks, errors, toasts, and redirects.
+ * Forms with an `onSubmit` callback can commit values locally without sending a save request.
+ *
+ * @example
+ * const { submit, processing, submitted } = useFormSubmission(args)
+ *
+ * await submit()
+ * await submit({ overrides: { _status: 'draft' } })
+ */
 export const useFormSubmission = ({
   contextRef,
   dispatchFields,
@@ -55,7 +65,7 @@ export const useFormSubmission = ({
   queueTask,
   refreshFormStateAfterSave,
   setIsValid,
-  submittedRef,
+  setModified,
   validateForm,
 }: Args) => {
   const {
@@ -77,9 +87,7 @@ export const useFormSubmission = ({
   const { i18n, t } = useTranslation()
   const onNonFieldError = useFormErrorHandler()
 
-  const [isModified, _setIsModified] = useState(false)
-
-  const [isDisabled, _setIsDisabled] = useState(isDisabledFromProps || false)
+  const [disabledBySubmission, _setDisabledBySubmission] = useState(false)
 
   const [isSubmitted, _setIsSubmitted] = useState(false)
 
@@ -117,17 +125,17 @@ export const useFormSubmission = ({
 
   const setIsSubmitted = useCallback(
     (isSubmitted: boolean) => {
-      submittedRef.current = isSubmitted
+      contextRef.current.submitted = isSubmitted
       _setIsSubmitted(isSubmitted)
     },
-    [submittedRef],
+    [contextRef],
   )
 
-  const setIsDisabled = useCallback(
+  const setDisabledBySubmission = useCallback(
     (isDisabled: boolean) => {
       // The submit guard reads this before React renders the updated disabled state.
-      contextRef.current.disabled = isDisabled
-      _setIsDisabled(isDisabled)
+      contextRef.current.disabled = Boolean(isDisabledFromPropsRef.current || isDisabled)
+      _setDisabledBySubmission(isDisabled)
     },
     [contextRef],
   )
@@ -136,13 +144,16 @@ export const useFormSubmission = ({
    * Intercept the `setIsModified` method to track whether the event happened during background processing.
    * See the `isModifiedWhileProcessing` ref for more details.
    */
-  const setIsModified = useCallback((isModified: boolean) => {
-    if (isBackgroundProcessingRef.current) {
-      isModifiedWhileProcessing.current = true
-    }
+  const setIsModified = useCallback(
+    (isModified: boolean) => {
+      if (isBackgroundProcessingRef.current) {
+        isModifiedWhileProcessing.current = true
+      }
 
-    _setIsModified(isModified)
-  }, [])
+      setModified(isModified)
+    },
+    [setModified],
+  )
 
   /**
    * Intercept the `setIsBackgroundProcessing` method to keep the ref in sync.
@@ -174,9 +185,9 @@ export const useFormSubmission = ({
 
   const restoreRequestState = useCallback(() => {
     setIsProcessing(false)
-    setIsDisabled(isDisabledFromPropsRef.current || false)
+    setDisabledBySubmission(false)
     setIsBackgroundProcessing(false)
-  }, [setIsBackgroundProcessing, setIsDisabled])
+  }, [setIsBackgroundProcessing, setDisabledBySubmission])
 
   const executeSubmit = useCallback(
     async ({
@@ -526,7 +537,7 @@ export const useFormSubmission = ({
           // Only put back what this submission took: an autosave must not release a queued save's disable.
           if (disableFormWhileProcessing) {
             setIsProcessing(false)
-            setIsDisabled(isDisabledFromPropsRef.current || false)
+            setDisabledBySubmission(false)
           }
 
           if (options?.submissionType === 'autosave') {
@@ -556,7 +567,7 @@ export const useFormSubmission = ({
       i18n,
       validateDrafts,
       waitForAutocomplete,
-      setIsDisabled,
+      setDisabledBySubmission,
       setIsModified,
       setIsSubmitted,
       onNonFieldError,
@@ -588,7 +599,7 @@ export const useFormSubmission = ({
             : null
 
         setIsProcessing(true)
-        setIsDisabled(true)
+        setDisabledBySubmission(true)
       }
 
       // While a disabling submission waits, the guard above rejects every other submit, so only a reset can supersede it.
@@ -602,14 +613,8 @@ export const useFormSubmission = ({
         return result.value
       }
     },
-    [contextRef, executeSubmit, formRef, queueTask, setIsDisabled],
+    [contextRef, executeSubmit, formRef, queueTask, setDisabledBySubmission],
   )
-
-  useEffect(() => {
-    if (typeof isDisabledFromProps === 'boolean') {
-      setIsDisabled(isDisabledFromProps)
-    }
-  }, [isDisabledFromProps, setIsDisabled])
 
   useEffect(() => {
     if (typeof isSubmittedFromProps === 'boolean') {
@@ -619,12 +624,11 @@ export const useFormSubmission = ({
 
   return {
     backgroundProcessing: isBackgroundProcessing,
-    disabled: isDisabled,
-    modified: isModified,
+    disabledBySubmission,
     processing: isProcessing,
     restoreRequestState,
     setBackgroundProcessing: setIsBackgroundProcessing,
-    setDisabled: setIsDisabled,
+    setDisabled: setDisabledBySubmission,
     setModified: setIsModified,
     setProcessing: setIsProcessing,
     setSubmitted: setIsSubmitted,

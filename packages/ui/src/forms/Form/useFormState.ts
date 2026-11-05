@@ -26,6 +26,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
 import { reduceFormStateToData } from '../../utilities/reduceFormStateToData.js'
 import { useDocumentForm } from './context.js'
+import { fieldReducer } from './fieldReducer.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
 import { requestPriority } from './requestPriority.js'
 
@@ -58,31 +59,28 @@ type FormValidationResult = {
   isValid: boolean
 }
 
-export type FormStateActions = {
+export type UseFormStateResult = {
+  /** Applies local field updates through the form reducer. */
+  dispatchFields: Dispatch<FieldAction>
+  /** Current fields, including their values, validation errors, and rendered components. */
+  formState: FormState
   /** True while rebuilding the selected schema. */
   isInitializing: boolean
-  /**
-   * Queues a server refresh for field edits and selected-field changes.
-   * Local forms notify onApplied without requesting server state.
-   * A failed background refresh retains the current fields and does not notify an applied result.
-   */
+  /** Whether the form has unsaved field changes. */
+  isModified: boolean
+  /** Whether the current fields pass validation. */
+  isValid: boolean
+  /** Baseline used to distinguish local edits from applied server state. */
+  prevFormStateRef: RefObject<FormState>
+  /** Queues a server refresh after field edits or changes to the selected fields. */
   refreshFormState: () => void
-  /**
-   * Refreshes document permissions and rebuilds state from the saved document before success callbacks run.
-   * Creates skip rebuilding because navigation or the containing drawer loads a new form.
-   * Rejects on refresh failure; the submission owner still reports the completed write as successful.
-   */
+  /** Calls `refreshFormState` with the saved document to refresh permissions and preview URLs. */
   refreshFormStateAfterSave: (args: AfterSaveArgs) => Promise<void>
-  /**
-   * Replaces fields with a fully rebuilt state for the supplied data and clears the modified flag.
-   * Uses the nested, widget, or document schema, without edit notifications or lock/preview updates.
-   */
+  /** Rebuilds field state from new data and clears the modified flag. */
   resetFormState: (data: unknown) => Promise<void>
-  /**
-   * For local submissions, requests server validation when a server schema is available.
-   * Then runs client validation unless disabled and returns the already-applied fields, data, and validity.
-   * Plain local forms use client validation only; failed or canceled server validation rejects rather than permitting a commit.
-   */
+  setIsValid: FormContextType['setIsValid']
+  setModified: FormContextType['setModified']
+  /** Checks the form before submission and returns its fields, data, and whether it's valid. */
   validateForm: (args?: ValidateArgs) => Promise<FormValidationResult>
 }
 
@@ -107,11 +105,9 @@ const LAST_EDITED_INTERVAL_MS = 10_000
 
 type Args = {
   contextRef: RefObject<FormContextType>
-  dispatchFields: Dispatch<FieldAction>
   /** Called with the merged form state after a refresh or local validation applies it. */
   onApplied: (formState: FormState, submitted?: boolean) => void
   onReset: () => void
-  prevFormStateRef: RefObject<FormState>
   props: Pick<
     FormProps,
     | 'disableValidationOnSubmit'
@@ -123,32 +119,48 @@ type Args = {
     | 'widgetSlug'
   >
   queueTask: UseQueueResult['queueTask']
-  submittedRef: RefObject<boolean>
 }
 
 /**
- * Supplies the methods Form uses to keep its state up to date as fields change and submissions complete.
- * It calls the getFormState server function to build fresh server state, then applies that state to the form.
- * It also keeps document permissions, locks, stale-data warnings, and preview URLs in sync.
+ * Maintains form state and provides methods to update fields, validate, refresh, and reset the form.
+ * Tracks whether the form is modified, valid, or initializing.
+ * Calls `getFormState` when server state needs to be refreshed.
  *
  * @example
- * const { refreshFormState, refreshFormStateAfterSave, validateForm, resetFormState } = useFormState(args)
+ * const { formState, dispatchFields, refreshFormState } = useFormState(args)
  *
- * refreshFormState() // Refresh after a field changes.
- * await refreshFormStateAfterSave({ savedDocument }) // Rebuild after a successful save.
- * const { data, fields, isValid } = await validateForm({ isLocalSubmission: true })
- * await resetFormState(data) // Rebuild from replacement data.
+ * dispatchFields({ type: 'UPDATE', path: 'title', value: 'Updated title' })
+ * refreshFormState() // Refresh server state after a local edit.
  */
 export const useFormState = ({
   contextRef,
-  dispatchFields,
   onApplied,
   onReset,
-  prevFormStateRef,
   props,
   queueTask,
-  submittedRef,
-}: Args): FormStateActions => {
+}: Args): UseFormStateResult => {
+  const [formState, setFormState] = useState<FormState>(() => props.initialState || {})
+  const formStateRef = useRef(formState)
+
+  const dispatchFields = useCallback<React.Dispatch<FieldAction>>(
+    (action) => {
+      const newState = fieldReducer(formStateRef.current, action)
+
+      // A queued task can start before React commits the preceding task's state update.
+      formStateRef.current = newState
+      contextRef.current.fields = newState
+      setFormState(newState)
+    },
+    [contextRef],
+  )
+
+  contextRef.current.fields = formStateRef.current
+
+  const prevFormStateRef = useRef(formState)
+
+  const [isValid, setIsValid] = useState(true)
+  const [isModified, setModified] = useState(false)
+
   const { user } = useAuth()
   const { config } = useConfig()
   const document = useDocumentInfo()
@@ -214,7 +226,7 @@ export const useFormState = ({
       const isReset = action.type === 'reset'
       const isValidation = action.type === 'validate'
       const savedDocument = action.type === 'afterSave' ? action.savedDocument : undefined
-      const submitted = isRefresh ? submittedRef.current : isValidation
+      const submitted = isRefresh ? Boolean(contextRef.current.submitted) : isValidation
 
       const acceptValues = isValidation
         ? true
@@ -519,10 +531,10 @@ export const useFormState = ({
         }
       }
     },
-    [contextRef, dispatchFields, prevFormStateRef, submittedRef],
+    [contextRef, dispatchFields, prevFormStateRef],
   )
 
-  const queueFormStateRefresh = useCallback<FormStateActions['refreshFormState']>(() => {
+  const queueFormStateRefresh = useCallback<UseFormStateResult['refreshFormState']>(() => {
     void queueTask({
       priority: requestPriority.formState,
       task: ({ isCurrent }) => refreshFormState({ type: 'refresh', isCurrent }),
@@ -605,14 +617,14 @@ export const useFormState = ({
         dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
       }
 
-      contextRef.current.setIsValid(isValid)
+      setIsValid(isValid)
 
       return isValid
     },
     [contextRef, dispatchFields],
   )
 
-  const validateForm = useCallback<FormStateActions['validateForm']>(
+  const validateForm = useCallback<UseFormStateResult['validateForm']>(
     async ({ isCurrent = () => true, isLocalSubmission = false, skipValidation = false } = {}) => {
       let isServerValidated = false
       let isValid = true
@@ -633,7 +645,7 @@ export const useFormState = ({
         : reduceFieldsToValues(fields, true)
 
       if (isCurrent()) {
-        contextRef.current.setIsValid(isValid)
+        setIsValid(isValid)
       }
 
       return { data, fields, isValid }
@@ -641,14 +653,14 @@ export const useFormState = ({
     [contextRef, refreshFormState, validateFields],
   )
 
-  const resetFormState = useCallback<FormStateActions['resetFormState']>(
+  const resetFormState = useCallback<UseFormStateResult['resetFormState']>(
     async (data) => {
       await refreshFormState({ type: 'reset', data })
     },
     [refreshFormState],
   )
 
-  const refreshFormStateAfterSave = useCallback<FormStateActions['refreshFormStateAfterSave']>(
+  const refreshFormStateAfterSave = useCallback<UseFormStateResult['refreshFormStateAfterSave']>(
     async (args) => {
       await refreshFormState({ ...args, type: 'afterSave' })
     },
@@ -671,17 +683,31 @@ export const useFormState = ({
 
   return useMemo(
     () => ({
+      dispatchFields,
+      formState,
       isInitializing,
+      isModified,
+      isValid,
+      prevFormStateRef,
       refreshFormState: queueFormStateRefresh,
       refreshFormStateAfterSave,
       resetFormState,
+      setIsValid,
+      setModified,
       validateForm,
     }),
     [
+      dispatchFields,
+      formState,
+      prevFormStateRef,
       refreshFormStateAfterSave,
       isInitializing,
+      isValid,
+      isModified,
       queueFormStateRefresh,
       resetFormState,
+      setIsValid,
+      setModified,
       validateForm,
     ],
   )

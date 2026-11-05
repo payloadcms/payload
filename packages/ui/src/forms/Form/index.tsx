@@ -13,7 +13,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type {
   CreateFormData,
-  FieldAction,
   Context as FormContextType,
   FormFieldsContext as FormFieldsContextType,
   FormProps,
@@ -40,7 +39,6 @@ import {
   SubmittedContext,
   SuccessfulSubmitCountContext,
 } from './context.js'
-import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
 import { useFormState } from './useFormState.js'
 import { useFormSubmission } from './useFormSubmission.js'
@@ -54,6 +52,7 @@ export const Form: React.FC<FormProps> = (props) => {
     action,
     children,
     className,
+    disabled: disabledFromProps = false,
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     el,
     initialState, // fully formed initial field state
@@ -74,64 +73,39 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const [isMounted, setIsMounted] = useState(false)
 
-  /**
-   * Tracks wether the form state passes validation.
-   * For example the state could be submitted but invalid as field errors have been returned.
-   */
-  const [isValid, setIsValid] = useState(true)
   const [initializing, setInitializing] = useState(initializingFromProps)
 
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
   const isFirstRenderRef = useRef(true)
 
-  const [formState, setFormState] = useState<FormState>(() => initialState || {})
-  const formStateRef = useRef(formState)
-
-  const dispatchFields = useCallback<React.Dispatch<FieldAction>>((action) => {
-    const newState = fieldReducer(formStateRef.current, action)
-
-    // A queued task can start before React commits the preceding task's state update.
-    formStateRef.current = newState
-    contextRef.current.fields = newState
-    setFormState(newState)
-  }, [])
-
-  const fieldsContextValue = useMemo<FormFieldsContextType>(
-    () => [formState, dispatchFields],
-    [formState, dispatchFields],
-  )
-
-  contextRef.current.fields = formStateRef.current
-
-  const prevFormState = useRef(formState)
-
-  const submittedRef = useRef(false)
-
   const {
+    dispatchFields,
+    formState,
     isInitializing: isFormStateInitializing,
+    isModified,
+    isValid,
+    prevFormStateRef,
     refreshFormState,
     refreshFormStateAfterSave,
     resetFormState,
+    setIsValid,
+    setModified: setFormStateModified,
     validateForm,
   } = useFormState({
     contextRef,
-    dispatchFields,
     onApplied: (appliedFormState, isSubmitted) => notifyOnChange(appliedFormState, isSubmitted),
     onReset: () => {
       resetQueue()
       restoreRequestState()
     },
-    prevFormStateRef: prevFormState,
     props,
     queueTask,
-    submittedRef,
   })
 
   const {
     backgroundProcessing,
-    disabled,
-    modified,
+    disabledBySubmission,
     processing,
     restoreRequestState,
     setBackgroundProcessing,
@@ -146,14 +120,21 @@ export const Form: React.FC<FormProps> = (props) => {
     contextRef,
     dispatchFields,
     formRef,
-    prevFormStateRef: prevFormState,
+    prevFormStateRef,
     props,
     queueTask,
     refreshFormStateAfterSave,
     setIsValid,
-    submittedRef,
+    setModified: setFormStateModified,
     validateForm,
   })
+
+  const disabled = disabledFromProps || disabledBySubmission
+
+  const fieldsContextValue = useMemo<FormFieldsContextType>(
+    () => [formState, dispatchFields],
+    [formState, dispatchFields],
+  )
 
   const getFields = useCallback(() => contextRef.current.fields, [])
 
@@ -229,7 +210,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const replaceState = useCallback(
     (state: FormState) => {
-      contextRef.current = { ...initContextState }
+      contextRef.current = {
+        ...initContextState,
+        disabled: contextRef.current.disabled,
+        submitted: contextRef.current.submitted,
+      }
       resetQueue()
       restoreRequestState()
       setModified(false)
@@ -320,6 +305,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.setProcessing = setProcessing
   contextRef.current.setBackgroundProcessing = setBackgroundProcessing
 
+  contextRef.current.submitted = submitted
   contextRef.current.setSubmitted = setSubmitted
   contextRef.current.setIsValid = setIsValid
   contextRef.current.disabled = disabled
@@ -343,7 +329,11 @@ export const Form: React.FC<FormProps> = (props) => {
   useEffect(() => {
     if (initialState) {
       // Restore after replacing the context, so the submit guard sees the restored disabled state immediately.
-      contextRef.current = { ...initContextState }
+      contextRef.current = {
+        ...initContextState,
+        disabled: contextRef.current.disabled,
+        submitted: contextRef.current.submitted,
+      }
       resetQueue()
       restoreRequestState()
       dispatchFields({
@@ -389,14 +379,17 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
-      if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
+      if (
+        (isFirstRenderRef.current || !dequal(formState, prevFormStateRef.current)) &&
+        isModified
+      ) {
         refreshFormState()
       }
 
-      prevFormState.current = formState
+      prevFormStateRef.current = formState
       isFirstRenderRef.current = false
     },
-    [modified, submitted, formState],
+    [isModified, submitted, formState],
     250,
   )
 
@@ -441,7 +434,7 @@ export const Form: React.FC<FormProps> = (props) => {
               >
                 <ProcessingContext value={processing}>
                   <BackgroundProcessingContext value={backgroundProcessing}>
-                    <ModifiedContext value={modified}>
+                    <ModifiedContext value={isModified}>
                       {/* eslint-disable-next-line @eslint-react/no-context-provider */}
                       <FormFieldsContext.Provider value={fieldsContextValue}>
                         <SuccessfulSubmitCountContext value={successfulSubmitCount}>
