@@ -116,4 +116,53 @@ describe('withPayload', () => {
       }
     }
   })
+
+  describe('headers', () => {
+    const colorSchemeHintHeaders = [
+      { key: 'Accept-CH', value: 'Sec-CH-Prefers-Color-Scheme' },
+      { key: 'Vary', value: 'Sec-CH-Prefers-Color-Scheme' },
+      { key: 'Critical-CH', value: 'Sec-CH-Prefers-Color-Scheme' },
+    ]
+
+    const poweredByRule = {
+      headers: [{ key: 'X-Powered-By', value: 'Next.js, Payload' }],
+      source: '/:path*',
+    }
+
+    it('should send the color scheme client hint headers on the admin route only', async () => {
+      const rules = await withPayload({}).headers()
+
+      expect(rules).toEqual([
+        poweredByRule,
+        { headers: colorSchemeHintHeaders, source: '/admin/:path*' },
+      ])
+    })
+
+    it.each([
+      ['/cms', '/cms/:path*'],
+      ['/cms/', '/cms/:path*'],
+      ['/', '/:path*'],
+    ])(
+      'should send the color scheme client hint headers on adminRoute %s',
+      async (adminRoute, source) => {
+        const rules = await withPayload({}, { adminRoute }).headers()
+
+        expect(rules).toContainEqual({ headers: colorSchemeHintHeaders, source })
+      },
+    )
+
+    it('should not add an empty header rule when poweredByHeader is false', async () => {
+      const rules = await withPayload({ poweredByHeader: false }).headers()
+
+      expect(rules).toEqual([{ headers: colorSchemeHintHeaders, source: '/admin/:path*' }])
+    })
+
+    it('should keep the headers from the Next.js config', async () => {
+      const customRule = { headers: [{ key: 'X-Custom', value: 'value' }], source: '/blog/:path*' }
+      const rules = await withPayload({ headers: async () => [customRule] }).headers()
+
+      expect(rules[0]).toBe(customRule)
+      expect(rules).toHaveLength(3)
+    })
+  })
 })

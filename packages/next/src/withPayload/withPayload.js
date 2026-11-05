@@ -19,6 +19,7 @@ const poweredByHeader = {
 /**
  * @param {import('next').NextConfig} nextConfig
  * @param {Object} [options] - Optional configuration options
+ * @param {string} [options.adminRoute] - The route of the Admin Panel. Set this to the same value as `routes.admin` in your Payload Config. @default '/admin'
  * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default false
  * */
 export const withPayload = (nextConfig = {}, options = {}) => {
@@ -125,7 +126,12 @@ export const withPayload = (nextConfig = {}, options = {}) => {
 
       return [
         ...(headersFromConfig || []),
+        ...(nextConfig.poweredByHeader !== false
+          ? [{ headers: [poweredByHeader], source: '/:path*' }]
+          : []),
         {
+          // Only the Admin Panel reads this hint. `Critical-CH` makes Chromium retry the first
+          // request to every route it is sent on, so sending it site-wide slows down the host app.
           headers: [
             {
               key: 'Accept-CH',
@@ -139,9 +145,8 @@ export const withPayload = (nextConfig = {}, options = {}) => {
               key: 'Critical-CH',
               value: 'Sec-CH-Prefers-Color-Scheme',
             },
-            ...(nextConfig.poweredByHeader !== false ? [poweredByHeader] : []),
           ],
-          source: '/:path*',
+          source: getAdminRouteSource({ adminRoute: options.adminRoute }),
         },
       ]
     },
@@ -247,6 +252,17 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   baseConfig.env.NEXT_TRAILING_SLASH = trailingSlash
 
   return baseConfig
+}
+
+/**
+ * @param {Object} args
+ * @param {string} [args.adminRoute]
+ * @returns {string} A Next.js header source that matches the Admin Panel and every route below it
+ */
+function getAdminRouteSource({ adminRoute = '/admin' }) {
+  const routeWithoutTrailingSlash = adminRoute.replace(/\/+$/, '')
+
+  return `${routeWithoutTrailingSlash}/:path*`
 }
 
 export default withPayload
