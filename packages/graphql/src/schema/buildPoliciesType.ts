@@ -171,6 +171,12 @@ type BuildPolicyType = {
       type: 'global'
     }
 )
+/**
+ * Builds a GraphQL object type representing the access-control policies for a collection or global.
+ *
+ * @param args - The arguments containing the entity, type, scope, and optional type suffix.
+ * @returns A GraphQL object type with the entity's policy fields.
+ */
 export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
   const { type, entity, scope, typeSuffix } = args
   const { slug, fields, graphQL, versions } = entity
@@ -217,7 +223,7 @@ export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
     operations.push('readVersions')
   }
 
-  const globalTypeName = formatName(`${global?.graphQL?.name || slug}${typeSuffix || ''}`)
+  const globalTypeName = formatName(`${entity?.graphQL?.name || slug}${typeSuffix || ''}`)
 
   return new GraphQLObjectType({
     name: globalTypeName,
