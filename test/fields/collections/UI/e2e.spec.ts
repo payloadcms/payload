@@ -73,7 +73,6 @@ describe('Radio', () => {
 
   test(
     'should render custom server Cell component in list view',
-    { framework: 'rsc' },
     async () => {
       await page.goto(url.list)
 
@@ -81,7 +80,7 @@ describe('Radio', () => {
     },
   )
 
-  test('should not render custom Cell component in edit view', { framework: 'next' }, async () => {
+  test('should not render custom Cell component in edit view', async () => {
     const {
       docs: [existingDoc],
     } = await payload.find({
