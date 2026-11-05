@@ -21,6 +21,7 @@ import { validateSortQuery } from '../../database/queryValidation/validateSortQu
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
+import { createSharedClientUploadDownload } from '../../uploads/createSharedClientUploadDownload.js'
 import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
@@ -338,6 +339,7 @@ export const updateOperation = async <
       : null
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
+    const sharedClientUploadDownload = createSharedClientUploadDownload()
 
     const processDocument = async (incomingDoc: (typeof docs)[number]) => {
       let docWithLocales = incomingDoc
@@ -394,6 +396,7 @@ export const updateOperation = async <
                   : locale,
               localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
             }),
+            fetchFullUpload: sharedClientUploadDownload.fetchFullUpload,
             operation: 'update',
             originalDoc: docWithLocales,
             overwriteExistingFiles,
@@ -481,8 +484,9 @@ export const updateOperation = async <
           message: error instanceof Error ? error.message : 'Unknown error',
         })
       } finally {
-        // generateFileData can replace the document's file with a full client upload download.
-        // That temp file is only on the document's request, so the operation cleanup misses it.
+        // generateFileData can replace the document's file with its copy of the shared client
+        // upload download. That copy is only on the document's request, so the operation
+        // cleanup misses it.
         const downloadedTempFilePath =
           documentReq !== req ? documentReq.file?.tempFilePath : undefined
 
@@ -504,13 +508,20 @@ export const updateOperation = async <
     const processSequentially =
       req.payload.db.bulkOperationsSingleTransaction || Boolean(collectionConfig.upload && req.file)
     let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
-    if (processSequentially) {
-      awaitedDocs = []
-      for (const doc of docs) {
-        awaitedDocs.push(await processDocument(doc))
+    try {
+      if (processSequentially) {
+        awaitedDocs = []
+        for (const doc of docs) {
+          awaitedDocs.push(await processDocument(doc))
+        }
+      } else {
+        awaitedDocs = await Promise.all(docs.map(processDocument))
       }
-    } else {
-      awaitedDocs = await Promise.all(docs.map(processDocument))
+    } finally {
+      // Each document removes its own copy; the shared download is removed once here.
+      await sharedClientUploadDownload.removeSharedDownload().catch((error) => {
+        req.payload.logger.error({ err: error, msg: 'Failed to remove temp file' })
+      })
     }
 
     await unlinkTempFiles({

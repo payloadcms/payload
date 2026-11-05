@@ -48,6 +48,12 @@ type Args<T> = {
   data: T
   draft?: boolean
   externalUploadSource?: ExternalUploadSource
+  /**
+   * Downloads a client upload that arrived without its whole contents. Defaults to
+   * `fetchFullClientUpload`. A bulk update passes a shared download, so its documents download
+   * the file once.
+   */
+  fetchFullUpload?: typeof fetchFullClientUpload
   isDuplicating?: boolean
   operation: 'create' | 'update'
   originalDoc?: T
@@ -188,6 +194,7 @@ const processUpload = async <T>({
   data,
   draft,
   externalUploadSource,
+  fetchFullUpload = fetchFullClientUpload,
   isDuplicating,
   operation,
   originalDoc,
@@ -422,7 +429,7 @@ const processUpload = async <T>({
     pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
   ) {
     const probedMimeType = file.mimetype
-    file = await fetchFullClientUpload({ collectionSlug: collectionConfig.slug, file, req })
+    file = await fetchFullUpload({ collectionSlug: collectionConfig.slug, file, req })
     // On req.file, the temp file is removed after the operation.
     req.file = file
     // The first check saw only a probe, so check the whole file before a transformer reads it.

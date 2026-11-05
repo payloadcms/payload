@@ -497,7 +497,7 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       expect(await stored.text()).toBe('CLIENT TEXT')
     })
 
-    test('removes the downloaded temp file of every document in a bulk update', async ({
+    test('downloads a client upload once for a bulk update and removes its temp files', async ({
       payload,
       restClient,
     }) => {
@@ -524,15 +524,26 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
         restClient,
       })
       const before = await listClientUploadTempFiles()
+      const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')
 
-      const updateRes = await restClient.PATCH(
-        `/${mediaHeaderOnlySlug}${qs.stringify({ where: { id: { in: ids } } }, { addQueryPrefix: true })}`,
-        { body: form },
-      )
-      const { docs, errors } = await updateRes.json()
+      try {
+        const updateRes = await restClient.PATCH(
+          `/${mediaHeaderOnlySlug}${qs.stringify({ where: { id: { in: ids } } }, { addQueryPrefix: true })}`,
+          { body: form },
+        )
+        const { docs, errors } = await updateRes.json()
 
-      expect(errors).toEqual([])
-      expect(docs).toHaveLength(2)
+        expect(errors).toEqual([])
+        expect(docs).toHaveLength(2)
+
+        // A whole-file download has no byte count. Every document's transformer accepts the
+        // upload, but the documents share one download.
+        const wholeFileDownloads = downloadSpy.mock.calls.filter((call) => call[1] === undefined)
+        expect(wholeFileDownloads).toHaveLength(1)
+      } finally {
+        downloadSpy.mockRestore()
+      }
+
       expect(await listClientUploadTempFiles()).toEqual(before)
     })
 
