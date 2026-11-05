@@ -42,8 +42,8 @@ type Args = {
   prevFormStateRef: RefObject<FormState>
   props: FormProps
   queueTask: UseQueueResult['queueTask']
+  queueFormStateRefresh: UseFormStateResult['queueFormStateRefresh']
   refreshFormState: UseFormStateResult['refreshFormState']
-  refreshFormStateAfterSave: UseFormStateResult['refreshFormStateAfterSave']
   resetSequenceRef: RefObject<number>
   setIsValid: FormContextType['setIsValid']
   setModifiedWithoutTracking: FormContextType['setModified']
@@ -60,8 +60,8 @@ export const useFormSubmission = ({
   prevFormStateRef,
   props,
   queueTask,
+  queueFormStateRefresh,
   refreshFormState,
-  refreshFormStateAfterSave,
   resetSequenceRef,
   setIsValid,
   setModifiedWithoutTracking: _setModified,
@@ -268,110 +268,137 @@ export const useFormSubmission = ({
           },
         )
 
-        // Execute server side validations
-        if (Array.isArray(beforeSubmit)) {
-          let revalidatedFormState: FormState
+        let res
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let json: Record<string, any> = {}
 
-          for (const beforeSubmitFn of beforeSubmit) {
-            revalidatedFormState = await beforeSubmitFn({
-              formState: serializableFormState,
-            })
+        try {
+          // Execute server side validations
+          if (Array.isArray(beforeSubmit)) {
+            let revalidatedFormState: FormState
 
-            if (!requestContext.isCurrent()) {
+            for (const beforeSubmitFn of beforeSubmit) {
+              revalidatedFormState = await beforeSubmitFn({
+                formState: serializableFormState,
+              })
+
+              if (!requestContext.isCurrent()) {
+                return
+              }
+            }
+
+            const isValid = Object.entries(revalidatedFormState).every(
+              ([, field]) => field.valid !== false,
+            )
+
+            setIsValid(isValid)
+
+            if (!isValid) {
+              setSubmitted(true)
+              dispatchFieldsWithoutIncrementingFormSequence({
+                type: 'REPLACE_STATE',
+                state: revalidatedFormState,
+              })
+              submissionErrorsRef.current = {
+                fields: revalidatedFormState,
+                isCurrent: requestContext.isCurrent,
+              }
               return
             }
           }
 
-          const isValid = Object.entries(revalidatedFormState).every(
-            ([, field]) => field.valid !== false,
-          )
+          const { data, isValid } = await validateForm({
+            isCurrent: requestContext.isCurrent,
+            isLocalSubmission: Boolean(onSubmit && !hasFormSubmitAction),
+            skipValidation,
+          })
+
+          if (!requestContext.isCurrent()) {
+            return
+          }
 
           setIsValid(isValid)
 
+          // If not valid, prevent submission
           if (!isValid) {
-            setSubmitted(true)
-            dispatchFieldsWithoutIncrementingFormSequence({
-              type: 'REPLACE_STATE',
-              state: revalidatedFormState,
-            })
             submissionErrorsRef.current = {
-              fields: revalidatedFormState,
+              fields: contextRef.current.fields,
               isCurrent: requestContext.isCurrent,
             }
+            errorToast(t('error:correctInvalidFields'))
+            setSubmitted(true)
             return
           }
-        }
 
-        const { data, isValid } = await validateForm({
-          isCurrent: requestContext.isCurrent,
-          isLocalSubmission: Boolean(onSubmit && !hasFormSubmitAction),
-          skipValidation,
-        })
+          let overrides = {}
 
-        if (!requestContext.isCurrent()) {
-          return
-        }
-
-        setIsValid(isValid)
-
-        // If not valid, prevent submission
-        if (!isValid) {
-          submissionErrorsRef.current = {
-            fields: contextRef.current.fields,
-            isCurrent: requestContext.isCurrent,
-          }
-          errorToast(t('error:correctInvalidFields'))
-          setSubmitted(true)
-          return
-        }
-
-        let overrides = {}
-
-        if (typeof overridesFromArgs === 'function') {
-          overrides = overridesFromArgs(contextRef.current.fields)
-        } else if (typeof overridesFromArgs === 'object') {
-          overrides = overridesFromArgs
-        }
-
-        // If submit handler comes through via props, run that
-        if (onSubmit) {
-          for (const [key, value] of Object.entries(overrides)) {
-            data[key] = value
+          if (typeof overridesFromArgs === 'function') {
+            overrides = overridesFromArgs(contextRef.current.fields)
+          } else if (typeof overridesFromArgs === 'object') {
+            overrides = overridesFromArgs
           }
 
-          onSubmit(contextRef.current.fields, data)
-        }
+          // If submit handler comes through via props, run that
+          if (onSubmit) {
+            for (const [key, value] of Object.entries(overrides)) {
+              data[key] = value
+            }
 
-        if (!hasFormSubmitAction) {
-          // No action provided, so we should return. An example where this happens are lexical link drawers. Upon submitting the drawer, we
-          // want to close it without submitting the form. Stuff like validation would be handled by lexical before this, through beforeSubmit
-          setSubmitted(true)
-          return
-        }
+            onSubmit(contextRef.current.fields, data)
+          }
 
-        const formData = await contextRef.current.createFormData(overrides, {
-          data,
-          mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
-        })
+          if (!hasFormSubmitAction) {
+            // No action provided, so we should return. An example where this happens are lexical link drawers. Upon submitting the drawer, we
+            // want to close it without submitting the form. Stuff like validation would be handled by lexical before this, through beforeSubmit
+            setSubmitted(true)
+            return
+          }
 
-        if (!requestContext.isCurrent()) {
-          return
-        }
-
-        let res
-
-        if (typeof actionArg === 'string') {
-          res = await requests[methodToUse.toLowerCase()](actionArg, {
-            body: formData,
-            headers: {
-              'Accept-Language': i18n.language,
-            },
+          const formData = await contextRef.current.createFormData(overrides, {
+            data,
+            mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
           })
-        } else if (typeof action === 'function') {
-          res = await action(formData)
-        }
 
-        onResponse({ res })
+          if (!requestContext.isCurrent()) {
+            return
+          }
+
+          if (typeof actionArg === 'string') {
+            res = await requests[methodToUse.toLowerCase()](actionArg, {
+              body: formData,
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+            })
+          } else if (typeof action === 'function') {
+            res = await action(formData)
+          }
+
+          onResponse({ res })
+
+          if (typeof handleResponse !== 'function') {
+            const contentType = res.headers.get('content-type')
+            const isJSON = contentType && contentType.indexOf('application/json') !== -1
+
+            if (isJSON) {
+              json = await res.json()
+            }
+          }
+        } finally {
+          if (
+            requestContext.isCurrent() &&
+            hasFormSubmitAction &&
+            !(res?.status < 400) &&
+            submissionType === 'autosave'
+          ) {
+            try {
+              // Refresh before applying save errors so the refresh cannot erase them.
+              await refreshFormState({ type: 'refresh', isCurrent: requestContext.isCurrent })
+            } catch (err) {
+              console.error('Error refreshing form state', err) // eslint-disable-line no-console
+            }
+          }
+        }
 
         if (typeof handleResponse === 'function') {
           if (requestContext.isCurrent()) {
@@ -381,16 +408,6 @@ export const useFormSubmission = ({
           }
 
           return
-        }
-
-        const contentType = res.headers.get('content-type')
-        const isJSON = contentType && contentType.indexOf('application/json') !== -1
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let json: Record<string, any> = {}
-
-        if (isJSON) {
-          json = await res.json()
         }
 
         if (res.status < 400) {
@@ -425,7 +442,8 @@ export const useFormSubmission = ({
 
           if (requestContext.isCurrent()) {
             try {
-              await refreshFormStateAfterSave({
+              await refreshFormState({
+                type: 'afterSave',
                 acceptValues,
                 isCurrent: requestContext.isCurrent,
                 refreshPermissions: context?.getDocPermissions !== false,
@@ -617,7 +635,7 @@ export const useFormSubmission = ({
       startRouteTransition,
       action,
       disableSuccessStatus,
-      refreshFormStateAfterSave,
+      refreshFormState,
       submissionErrorsRef,
       handleResponse,
       method,
@@ -699,7 +717,7 @@ export const useFormSubmission = ({
         isMountedRef.current &&
         resetSequence === resetSequenceRef.current
       ) {
-        refreshFormState({ force: true })
+        queueFormStateRefresh({ force: true })
       }
 
       if (result.status === 'superseded' && options?.submissionType === 'autosave') {
@@ -734,7 +752,7 @@ export const useFormSubmission = ({
       isMountedRef,
       releaseFormAfterSubmission,
       queueTask,
-      refreshFormState,
+      queueFormStateRefresh,
       resetSequenceRef,
     ],
   )

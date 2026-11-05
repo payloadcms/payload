@@ -80,9 +80,9 @@ export type UseFormStateResult = {
   prevFormStateRef: RefObject<FormState>
   queueTask: UseQueueResult['queueTask']
   /** Queues a server refresh after field edits or changes to the selected fields. */
-  refreshFormState: (args?: { force?: boolean }) => void
-  /** Calls `refreshFormState` with the saved document to refresh permissions and preview URLs. */
-  refreshFormStateAfterSave: (args: AfterSaveArgs) => Promise<void>
+  queueFormStateRefresh: (args?: { force?: boolean }) => void
+  /** Rebuilds field state within the active request using the current fields or a saved document. */
+  refreshFormState: (action: FormStateAction) => Promise<FormState | undefined>
   /** Rebuilds field state from new data and clears the modified flag. */
   resetFormState: (data: unknown) => Promise<void>
   resetQueue: UseQueueResult['resetQueue']
@@ -137,10 +137,10 @@ type Args = {
  * Calls `getFormState` when server state needs to be refreshed.
  *
  * @example
- * const { formState, dispatchFields, refreshFormState } = useFormState(args)
+ * const { formState, dispatchFields, queueFormStateRefresh } = useFormState(args)
  *
  * dispatchFields({ type: 'UPDATE', path: 'title', value: 'Updated title' })
- * refreshFormState() // Refresh server state after a local edit.
+ * queueFormStateRefresh() // Refresh server state after a local edit.
  */
 export const useFormState = ({
   contextRef,
@@ -601,7 +601,7 @@ export const useFormState = ({
     ],
   )
 
-  const queueFormStateRefresh = useCallback<UseFormStateResult['refreshFormState']>(
+  const queueFormStateRefresh = useCallback<UseFormStateResult['queueFormStateRefresh']>(
     ({ force = false } = {}) => {
       void queueTask({
         priority: requestPriority.formState,
@@ -742,13 +742,6 @@ export const useFormState = ({
     [refreshFormState],
   )
 
-  const refreshFormStateAfterSave = useCallback<UseFormStateResult['refreshFormStateAfterSave']>(
-    async (args) => {
-      await refreshFormState({ ...args, type: 'afterSave' })
-    },
-    [refreshFormState],
-  )
-
   const previousSelectRef = useRef<FormProps['select']>(undefined)
 
   useEffect(() => {
@@ -774,8 +767,8 @@ export const useFormState = ({
       isValid,
       prevFormStateRef,
       queueTask,
-      refreshFormState: queueFormStateRefresh,
-      refreshFormStateAfterSave,
+      queueFormStateRefresh,
+      refreshFormState,
       resetFormState,
       resetQueue,
       setIsValid,
@@ -791,7 +784,7 @@ export const useFormState = ({
       getFormSequence,
       prevFormStateRef,
       queueTask,
-      refreshFormStateAfterSave,
+      refreshFormState,
       isInitializing,
       isValid,
       isModified,

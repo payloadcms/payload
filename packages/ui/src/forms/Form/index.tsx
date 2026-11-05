@@ -86,8 +86,8 @@ export const Form: React.FC<FormProps> = (props) => {
     isValid,
     prevFormStateRef,
     queueTask,
+    queueFormStateRefresh,
     refreshFormState,
-    refreshFormStateAfterSave,
     resetFormState,
     resetQueue,
     setIsValid,
@@ -128,8 +128,8 @@ export const Form: React.FC<FormProps> = (props) => {
     prevFormStateRef,
     props,
     queueTask,
+    queueFormStateRefresh,
     refreshFormState,
-    refreshFormStateAfterSave,
     resetSequenceRef,
     setIsValid,
     setModifiedWithoutTracking,
@@ -411,7 +411,7 @@ export const Form: React.FC<FormProps> = (props) => {
   useDebouncedEffect(
     () => {
       if (isModified) {
-        refreshFormState()
+        queueFormStateRefresh()
       }
 
       prevFormStateRef.current = formState

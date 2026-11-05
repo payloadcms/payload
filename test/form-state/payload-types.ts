@@ -263,6 +263,8 @@ export interface AutosavePost {
   content?: string | null;
   blocks?: Text[] | null;
   restrictedValue?: string | null;
+  showConditionalField?: boolean | null;
+  conditionalField?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -513,6 +515,8 @@ export interface AutosavePostsSelect<T extends boolean = true> {
             };
       };
   restrictedValue?: T;
+  showConditionalField?: T;
+  conditionalField?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
