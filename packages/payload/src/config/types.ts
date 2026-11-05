@@ -516,13 +516,6 @@ export type Endpoint = {
    * Compatible with the Express router
    */
   path: string
-  /**
-   * Please add "root" routes under the /api folder in the Payload Project.
-   * https://nextjs.org/docs/app/api-reference/file-conventions/route
-   *
-   * @deprecated in 3.0
-   */
-  root?: never
 }
 
 /**
