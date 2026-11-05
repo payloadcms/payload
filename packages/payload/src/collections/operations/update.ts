@@ -110,7 +110,10 @@ export const updateOperation = async <
   }
 
   try {
-    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    const shouldCommit =
+      !args.disableTransaction &&
+      !args.req.payload.db.bulkOperationsSingleTransaction &&
+      (await initTransaction(args.req))
 
     if (args.collection.config.upload && !args.overrideAccess) {
       const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
