@@ -235,7 +235,12 @@ const approve = async ({
   // accepting clicks from a top-level page stops them from tricking users into clicking Allow.
   // Browsers too old to send the header get through here, but the page hides its buttons in frames.
   const fetchDestination = req.headers.get('Sec-Fetch-Dest')
-  if (fetchDestination && fetchDestination !== 'document') {
+  // Only the Allow page itself may submit the form, not a copy of it on another site
+  const fetchSite = req.headers.get('Sec-Fetch-Site')
+  if (
+    (fetchDestination && fetchDestination !== 'document') ||
+    (fetchSite && fetchSite !== 'same-origin')
+  ) {
     return new Response(null, { status: 403 })
   }
 
