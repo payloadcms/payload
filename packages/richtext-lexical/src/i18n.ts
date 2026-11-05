@@ -113,6 +113,12 @@ export const i18n: Partial<GenericLanguages> = {
     textStyle: 'سبک متن',
     toolbarItemsActive: '{{count}} فعال',
   },
+  fi: {
+    placeholder: "Aloita kirjoittaminen tai paina '/' komentoja varten...",
+    slashMenuBasicGroupLabel: 'Perus',
+    slashMenuListGroupLabel: 'Listat',
+    toolbarItemsActive: '{{count}} aktiivinen',
+  },
   fr: {
     insertParagraph: 'Insérer un paragraphe',
     placeholder: "Commencez à taper, ou appuyez sur '/' pour les commandes...",

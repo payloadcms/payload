@@ -31,6 +31,9 @@ export const i18n: Partial<GenericLanguages> = {
   fa: {
     label: 'روابط',
   },
+  fi: {
+    label: 'Suhde',
+  },
   fr: {
     label: 'Relation',
   },
