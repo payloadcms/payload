@@ -198,8 +198,68 @@ export const initiatePaymentHandler: InitiatePayment =
       const priceField = `priceIn${currency.toUpperCase()}`
       const quantity = item.quantity || 1
 
-      // If the item has a product but no variant, we assume the product has a price in the specified currency
-      if (item.product && !item.variant) {
+      // If the item has a variant, validate variant-specific pricing and inventory
+      if (item.variant) {
+        const id = typeof item.variant === 'object' ? item.variant.id : item.variant
+
+        const variant = await payload.findByID({
+          id,
+          collection: variantsSlug,
+          depth: 0,
+          overrideAccess: true,
+          select: {
+            inventory: true,
+            [priceField]: true,
+          },
+        })
+
+        if (!variant) {
+          return Response.json(
+            {
+              message: `Variant with ID ${item.variant} not found.`,
+            },
+            {
+              status: 404,
+            },
+          )
+        }
+
+        try {
+          if (productsValidation) {
+            await productsValidation({
+              currenciesConfig,
+              currency,
+              product: item.product,
+              quantity,
+              variant,
+            })
+          } else {
+            await defaultProductsValidation({
+              currenciesConfig,
+              currency,
+              product: item.product,
+              quantity,
+              variant,
+            })
+          }
+        } catch (error) {
+          payload.logger.error(
+            error,
+            'Error validating product or variant during payment initiation.',
+          )
+
+          return Response.json(
+            {
+              message: error,
+              ...(error instanceof Error ? { cause: error.cause } : {}),
+            },
+            {
+              status: 400,
+            },
+          )
+        }
+      } else if (item.product) {
+        // If the item has a product but no variant, validate product-level pricing and inventory
         const id = typeof item.product === 'object' ? item.product.id : item.product
 
         const product = await payload.findByID({
@@ -251,68 +311,7 @@ export const initiatePaymentHandler: InitiatePayment =
             },
           )
         }
-
-        if (item.variant) {
-          const id = typeof item.variant === 'object' ? item.variant.id : item.variant
-
-          const variant = await payload.findByID({
-            id,
-            collection: variantsSlug,
-            depth: 0,
-            overrideAccess: true,
-            select: {
-              inventory: true,
-              [priceField]: true,
-            },
-          })
-
-          if (!variant) {
-            return Response.json(
-              {
-                message: `Variant with ID ${item.variant} not found.`,
-              },
-              {
-                status: 404,
-              },
-            )
-          }
-
-          try {
-            if (productsValidation) {
-              await productsValidation({
-                currenciesConfig,
-                currency,
-                product: item.product,
-                quantity,
-                variant,
-              })
-            } else {
-              await defaultProductsValidation({
-                currenciesConfig,
-                currency,
-                product: item.product,
-                quantity,
-                variant,
-              })
-            }
-          } catch (error) {
-            payload.logger.error(
-              error,
-              'Error validating product or variant during payment initiation.',
-            )
-
-            return Response.json(
-              {
-                message: error,
-              },
-              {
-                status: 400,
-              },
-            )
-          }
-        }
       }
-    }
 
     try {
       const paymentResponse = await paymentMethod.initiatePayment({
