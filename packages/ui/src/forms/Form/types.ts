@@ -4,13 +4,13 @@ import type {
   FormField,
   FormState,
   Row,
+  SelectType,
   User,
   ValidationFieldError,
 } from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
 
-import type { ServerFunctionsContextType } from '../../providers/ServerFunctions/index.js'
 import type { AcceptValues } from './mergeServerFormState.js'
 
 export type Preferences = {
@@ -30,14 +30,6 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
     formState?: FormState
   },
 ) => Promise<void> | void
-
-/**
- * Args for the Form's `getFormState` requests, merged over the defaults the Form derives from the document, operation and current form state.
- * `formState` and `signal` are always provided by the Form.
- */
-export type FormStateArgs = Partial<
-  Omit<Parameters<ServerFunctionsContextType['getFormState']>[0], 'formState' | 'signal'>
->
 
 export type FormProps = {
   beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
@@ -60,12 +52,6 @@ export type FormProps = {
    * feature of the Lexical Rich Text field)
    */
   fields?: ClientField[]
-  /**
-   * Args for the form-state requests the Form makes after field changes and after every successful submission.
-   * Pass a function to compute args from the form state being sent.
-   * The Form makes form-state requests only when this is set or `isDocumentForm` is true.
-   */
-  formStateArgs?: ((args: { formState: FormState }) => FormStateArgs) | FormStateArgs
   handleResponse?: (
     res: Response,
     successToast: (value: string) => void,
@@ -82,17 +68,25 @@ export type FormProps = {
   isInitializing?: boolean
   log?: boolean
   /**
-   * Called after field changes, once the server form state for them is applied.
+   * Called after an edit refresh or local submit validation applies server form state, including invalid state.
    * Side effects only: the return value is ignored.
    */
   onChange?: ((args: { formState: FormState; submitted: boolean }) => Promise<void> | void)[]
   onSubmit?: (fields: FormState, data: Data) => void
   onSuccess?: FormOnSuccess
+  /** Persistent read-only state used when rendering fields on the server. */
+  readOnly?: boolean
   redirect?: string
+  /** Identifies the server schema edited by this form. Defaults to the document schema for document forms. */
+  schemaPath?: string
+  /** Restricts the form to the selected fields. Changes rebuild the selected fields automatically. */
+  select?: SelectType
   submitted?: boolean
   uuid?: string
   validationOperation?: 'create' | 'update'
   waitForAutocomplete?: boolean
+  /** Identifies a widget form independently of any surrounding document. */
+  widgetSlug?: string
 } & (
   | {
       action: (formData: FormData) => Promise<void>

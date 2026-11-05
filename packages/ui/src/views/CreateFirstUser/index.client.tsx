@@ -9,7 +9,6 @@ import type {
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import type { FormStateArgs } from '../../forms/Form/types.js'
 import type { UserWithToken } from '../../providers/Auth/index.js'
 
 import { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
@@ -20,6 +19,8 @@ import { RenderFields } from '../../forms/RenderFields/index.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
+import { OperationProvider } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'create-first-user__form'
@@ -30,7 +31,7 @@ export const CreateFirstUserClient: React.FC<{
   initialState: FormState
   loginWithUsername?: false | LoginWithUsernameOptions
   userSlug: string
-}> = ({ docPermissions, docPreferences, initialState, loginWithUsername, userSlug }) => {
+}> = ({ docPermissions, initialState, loginWithUsername, userSlug }) => {
   const {
     config: {
       routes: { admin, api: apiRoute },
@@ -43,72 +44,77 @@ export const CreateFirstUserClient: React.FC<{
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
 
-  const formStateArgs = React.useMemo<FormStateArgs>(
-    () => ({
-      collectionSlug: userSlug,
-      docPermissions,
-      docPreferences,
-      operation: 'create',
-      schemaPath: userSlug,
-    }),
-    [userSlug, docPermissions, docPreferences],
-  )
-
   const handleFirstRegister = (data: UserWithToken) => {
     setUser(data)
   }
 
   return (
-    <Form
-      action={formatAdminURL({
-        apiRoute,
-        path: `/${userSlug}/first-register`,
-      })}
-      className={baseClass}
-      formStateArgs={formStateArgs}
-      initialState={{
-        ...initialState,
-        'confirm-password': {
-          ...initialState['confirm-password'],
-          valid: initialState['confirm-password']['valid'] || false,
-          value: initialState['confirm-password']['value'] || '',
-        },
-      }}
-      method="POST"
-      onSuccess={handleFirstRegister}
-      redirect={admin}
-      validationOperation="create"
+    <DocumentInfoProvider
+      collectionSlug={userSlug}
+      currentEditor={null}
+      docPermissions={docPermissions}
+      hasPublishedDoc={false}
+      initialData={{}}
+      initialState={initialState}
+      isLocked={false}
+      lastUpdateTime={0}
+      mostRecentVersionIsAutosaved={false}
+      unpublishedVersionCount={0}
+      versionCount={0}
     >
-      <div className={`${baseClass}__inputWrap`}>
-        <EmailAndUsernameFields
-          loginWithUsername={loginWithUsername}
-          operation="create"
-          readOnly={false}
-          t={t}
-        />
-        <PasswordField
-          autoComplete="off"
-          field={{
-            name: 'password',
-            label: t('authentication:newPassword'),
-            required: true,
+      <OperationProvider operation="create">
+        <Form
+          action={formatAdminURL({
+            apiRoute,
+            path: `/${userSlug}/first-register`,
+          })}
+          className={baseClass}
+          initialState={{
+            ...initialState,
+            'confirm-password': {
+              ...initialState['confirm-password'],
+              valid: initialState['confirm-password']['valid'] || false,
+              value: initialState['confirm-password']['value'] || '',
+            },
           }}
-          path="password"
-        />
-        <ConfirmPasswordField />
-        <RenderFields
-          fields={collectionConfig.fields}
-          forceRender
-          parentIndexPath=""
-          parentPath=""
-          parentSchemaPath={userSlug}
-          permissions={true}
-          readOnly={false}
-        />
-      </div>
-      <div className={`${baseClass}__actions`}>
-        <FormSubmit size="large">{t('authentication:createUser')}</FormSubmit>
-      </div>
-    </Form>
+          method="POST"
+          onSuccess={handleFirstRegister}
+          redirect={admin}
+          schemaPath={userSlug}
+          validationOperation="create"
+        >
+          <div className={`${baseClass}__inputWrap`}>
+            <EmailAndUsernameFields
+              loginWithUsername={loginWithUsername}
+              operation="create"
+              readOnly={false}
+              t={t}
+            />
+            <PasswordField
+              autoComplete="off"
+              field={{
+                name: 'password',
+                label: t('authentication:newPassword'),
+                required: true,
+              }}
+              path="password"
+            />
+            <ConfirmPasswordField />
+            <RenderFields
+              fields={collectionConfig.fields}
+              forceRender
+              parentIndexPath=""
+              parentPath=""
+              parentSchemaPath={userSlug}
+              permissions={true}
+              readOnly={false}
+            />
+          </div>
+          <div className={`${baseClass}__actions`}>
+            <FormSubmit size="large">{t('authentication:createUser')}</FormSubmit>
+          </div>
+        </Form>
+      </OperationProvider>
+    </DocumentInfoProvider>
   )
 }

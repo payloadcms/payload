@@ -5,8 +5,6 @@ import type { ClientWidget, FormState } from 'payload'
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
-import type { FormStateArgs } from '../../../../forms/Form/types.js'
-
 import { Drawer } from '../../../../elements/Drawer/index.js'
 import { Gutter } from '../../../../elements/Gutter/index.js'
 import { useModal } from '../../../../elements/Modal/index.js'
@@ -91,20 +89,6 @@ export function WidgetConfigDrawer({
     }
   }, [fields, getFormState, isOpen, localeCode, widget.slug, widgetData])
 
-  const formStateArgs = useMemo<FormStateArgs>(
-    () => ({
-      docPermissions: {
-        fields: true,
-      },
-      docPreferences: EMPTY_WIDGET_PREFERENCES,
-      operation: 'update',
-      schemaPath: widget.slug,
-      skipValidation: false,
-      widgetSlug: widget.slug,
-    }),
-    [widget.slug],
-  )
-
   return (
     <Drawer slug={drawerSlug} title={`${t('general:edit')} ${widgetLabel}`}>
       <Gutter className="widget-config-drawer__content">
@@ -114,13 +98,13 @@ export function WidgetConfigDrawer({
           <OperationProvider operation="update">
             <Form
               fields={fields}
-              formStateArgs={formStateArgs}
               initialState={initialState}
               onSubmit={(_, data) => {
                 onSave(mergeLocaleData(widgetData ?? {}, data, localeCode, fields))
                 closeModal(drawerSlug)
               }}
               uuid={formUUID}
+              widgetSlug={widget.slug}
             >
               <RenderFields
                 fields={fields}

@@ -1,10 +1,10 @@
 'use client'
-import type { FormStateArgs } from '@payloadcms/ui'
 import type { FormState } from 'payload'
 
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
   Form,
+  OperationProvider,
   RenderFields,
   useDocumentForm,
   useDocumentInfo,
@@ -12,7 +12,7 @@ import {
   useServerFunctions,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { FieldsDrawerProps } from './Drawer.js'
@@ -38,8 +38,6 @@ export const DrawerContent: React.FC<
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
   const { fields: parentDocumentFields } = useDocumentForm()
   const isEditable = useLexicalEditable()
-
-  const onChangeAbortControllerRef = useRef(new AbortController())
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
@@ -80,7 +78,9 @@ export const DrawerContent: React.FC<
         signal: controller.signal,
       })
 
-      setInitialState(state)
+      if (!controller.signal.aborted && state) {
+        setInitialState(state)
+      }
     }
 
     void awaitInitialState()
@@ -99,96 +99,33 @@ export const DrawerContent: React.FC<
     getDocPreferences,
   ])
 
-  const formStateArgs = useCallback(
-    ({ formState }: { formState: FormState }): FormStateArgs => ({
-      docPermissions: {
-        fields: true,
-      },
-      documentFormState: parentDocumentFields,
-      initialBlockFormState: formState,
-      operation: 'update',
-      readOnly: !isEditable,
-      schemaPath: schemaFieldsPath,
-      skipValidation: false,
-    }),
-    [isEditable, parentDocumentFields, schemaFieldsPath],
-  )
-
-  // Only called when the form is submitted.
-  const onBeforeSubmit = useCallback(
-    async ({ formState: prevFormState }: { formState: FormState }) => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-
-      const controller = new AbortController()
-      onChangeAbortControllerRef.current = controller
-
-      const { state } = await getFormState({
-        id,
-        collectionSlug,
-        docPermissions: {
-          fields: true,
-        },
-        docPreferences: await getDocPreferences(),
-        documentFormState: parentDocumentFields,
-        formState: prevFormState,
-        globalSlug,
-        initialBlockFormState: prevFormState,
-        operation: 'update',
-        readOnly: !isEditable,
-        schemaPath: schemaFieldsPath,
-        signal: controller.signal,
-      })
-
-      if (!state) {
-        return prevFormState
-      }
-
-      return state
-    },
-    [
-      getFormState,
-      id,
-      isEditable,
-      collectionSlug,
-      getDocPreferences,
-      parentDocumentFields,
-      globalSlug,
-      schemaFieldsPath,
-    ],
-  )
-
-  // cleanup effect
-  useEffect(() => {
-    return () => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-    }
-  }, [])
-
   if (initialState === false) {
     return null
   }
 
   return (
-    <Form
-      beforeSubmit={[onBeforeSubmit]}
-      className="fields-drawer"
-      disableValidationOnSubmit
-      fields={Array.isArray(fields) ? fields : []}
-      formStateArgs={formStateArgs}
-      initialState={initialState}
-      onSubmit={handleDrawerSubmit}
-      uuid={uuid()}
-    >
-      <RenderFields
+    <OperationProvider operation="update">
+      <Form
+        className="fields-drawer"
+        disableValidationOnSubmit
         fields={Array.isArray(fields) ? fields : []}
-        forceRender
-        parentIndexPath=""
-        parentPath="" // See Blocks feature path for details as for why this is empty
-        parentSchemaPath={schemaFieldsPath}
-        permissions={true}
+        initialState={initialState}
+        onSubmit={handleDrawerSubmit}
         readOnly={!isEditable}
-      />
-      <RegisterFormSubmit submitRef={submitRef} />
-    </Form>
+        schemaPath={schemaFieldsPath}
+        uuid={uuid()}
+      >
+        <RenderFields
+          fields={Array.isArray(fields) ? fields : []}
+          forceRender
+          parentIndexPath=""
+          parentPath="" // See Blocks feature path for details as for why this is empty
+          parentSchemaPath={schemaFieldsPath}
+          permissions={true}
+          readOnly={!isEditable}
+        />
+        <RegisterFormSubmit submitRef={submitRef} />
+      </Form>
+    </OperationProvider>
   )
 }

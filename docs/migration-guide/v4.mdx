@@ -889,14 +889,11 @@ Run `npx @payloadcms/codemod --transform migrate-document-title-context` to migr
 
 ### `Form` makes its own form-state requests
 
-`Form` now requests server form state itself, after field changes and after every successful submission. A new `formStateArgs` prop opts a form in and passes the args the `Form` can't derive, and the `onChange` and `onSuccess` callbacks are side effects only: the `Form` no longer merges the state they return.
+`Form` owns server form-state requests after field changes and successful saves. Document forms derive their request information from the surrounding document and operation providers. Nested forms identify their schema with `schemaPath`; bulk forms restrict their fields with `select`, and widget forms identify their entity with `widgetSlug`.
 
-This affects custom forms that pass `onChange` to fetch form state, or that return form state from `onSuccess`. Pass the request args to `formStateArgs` instead:
+Remove callbacks that fetch and return server form state:
 
 ```diff
-'use client'
-import { Form } from '@payloadcms/ui'
-
 -const onChange = async ({ formState, submitted }) => {
 -  const { state } = await getFormState({
 -    collectionSlug,
@@ -908,21 +905,23 @@ import { Form } from '@payloadcms/ui'
 -    signal: controller.signal,
 -    skipValidation: !submitted,
 -  })
--
 -  return state
 -}
-+const formStateArgs = useMemo(() => ({ schemaPath }), [schemaPath])
-
--<Form onChange={[onChange]}>
-+<Form formStateArgs={formStateArgs}>
+-
+-<Form initialState={initialState} onChange={[onChange]}>
++<Form initialState={initialState} schemaPath={schemaPath}>
 ```
 
-`Form` fills in the rest from the surrounding document and operation: `id`, `collectionSlug`, `globalSlug`, `docPermissions` and preferences, the operation, the current `formState`, `skipValidation: !submitted`, and an abort signal. Pass `formStateArgs` as a function to compute args from the `formState` being sent. A document's main form (`isDocumentForm`) also handles document locking, stale-data detection and preview URLs itself.
+A document's main form uses `isDocumentForm` and does not need `schemaPath`. It also owns document locking, stale-data detection, permission refreshes and preview URLs. Pass persistent read-only state with `readOnly`; temporary `disabled` or processing state does not make fields read-only on the server.
+
+Plain custom forms without `isDocumentForm`, `schemaPath` or `widgetSlug` remain local, even when they receive `initialState` or are rendered inside a document provider. Initial state continues to be built before rendering the form.
 
 BREAKING CHANGES:
 
-- The return value of `onChange` is ignored. `onChange` now runs once the server form state for a change has been applied, so it receives the merged state.
-- The return value of `onSuccess` is ignored. After a successful submission, `Form` requests fresh form state with the saved document as `data`, except after a create, where the form is replaced.
+- The return values of `onChange` and `onSuccess` are ignored. Use them for side effects only.
+- `onChange` receives the merged state after an edit refresh or local submit validation, including invalid validation results. Validation notifications have `submitted: true`.
+- Schema-backed forms with a local `onSubmit` validate on the server before committing. Remove `beforeSubmit` callbacks whose only purpose is fetching server form state. Invalid state or a validation request failure prevents the local commit.
+- After a successful save, `Form` refreshes permissions and state before calling `onSuccess`. Creates skip the state refresh because they replace the form. A failed refresh does not change the successful save outcome or suppress `onSuccess`.
 
 ### `useQueue` tasks take an options object and report their outcome
 

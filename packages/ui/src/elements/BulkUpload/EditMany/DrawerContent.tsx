@@ -8,8 +8,6 @@ import { unflatten } from 'payload/shared'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import type { FormProps } from '../../../forms/Form/index.js'
-import type { FormStateArgs } from '../../../forms/Form/types.js'
-import type { OnFieldSelect } from '../../FieldSelect/index.js'
 import type { FieldOption } from '../../FieldSelect/reduceFieldOptions.js'
 import type { State } from '../FormsManager/reducer.js'
 import type { EditManyBulkUploadsProps } from './index.js'
@@ -21,7 +19,7 @@ import { RenderField } from '../../../forms/RenderFields/RenderField.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { DocumentInfoProvider } from '../../../providers/DocumentInfo/index.js'
-import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
+import { OperationProvider } from '../../../providers/Operation/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { FieldSelect } from '../../FieldSelect/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
@@ -43,12 +41,10 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     forms,
   } = props
 
-  const [isInitializing, setIsInitializing] = useState(false)
   const { permissions, user } = useAuth()
   const { i18n, t } = useTranslation()
   const { closeModal } = useModal()
   const { bulkUpdateForm } = useFormsManager()
-  const { getFormState } = useServerFunctions()
 
   const [selectedFields, setSelectedFields] = useState<FieldOption[]>([])
   const collectionPermissions = permissions?.collections?.[collection.slug]
@@ -61,18 +57,6 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
       }, {} as SelectType),
     )
   }, [selectedFields])
-
-  const formStateArgs = useMemo<FormStateArgs>(
-    () => ({
-      collectionSlug: collection.slug,
-      docPermissions: collectionPermissions,
-      docPreferences: null,
-      operation: 'update',
-      schemaPath: collection.slug,
-      select,
-    }),
-    [collection.slug, collectionPermissions, select],
-  )
 
   const handleSubmit: FormProps['onSubmit'] = useCallback(
     (formState) => {
@@ -88,38 +72,6 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     [closeModal, drawerSlug, bulkUpdateForm, selectedFields],
   )
 
-  const onFieldSelect = useCallback<OnFieldSelect>(
-    async ({ dispatchFields, formState, selected }) => {
-      setIsInitializing(true)
-
-      setSelectedFields(selected || [])
-
-      const { state } = await getFormState({
-        collectionSlug: collection.slug,
-        docPermissions: collectionPermissions,
-        docPreferences: null,
-        formState,
-        operation: 'update',
-        schemaPath: collection.slug,
-        select: unflatten(
-          selected.reduce((acc, option) => {
-            acc[option.value.path] = true
-            return acc
-          }, {} as SelectType),
-        ),
-        skipValidation: true,
-      })
-
-      dispatchFields({
-        type: 'MERGE_SERVER_STATE',
-        serverState: state,
-      })
-
-      setIsInitializing(false)
-    },
-    [getFormState, collection, collectionPermissions],
-  )
-
   const title = t('general:editingLabel', {
     count: forms.length,
     label: getTranslation(forms.length > 1 ? plural : singular, i18n),
@@ -129,6 +81,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     <DocumentInfoProvider
       collectionSlug={collection.slug}
       currentEditor={user}
+      docPermissions={collectionPermissions}
       hasPublishedDoc={false}
       id={null}
       initialData={{}}
@@ -138,65 +91,67 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
       unpublishedVersionCount={0}
       versionCount={0}
     >
-      <Form
-        className={`${baseClass}__form`}
-        formStateArgs={formStateArgs}
-        isInitializing={isInitializing}
-        onSubmit={handleSubmit}
-      >
-        <div className={`${baseClass}__header`}>
-          <Button
-            aria-label={t('general:close')}
-            buttonStyle="ghost"
-            className={`${baseClass}__header__close`}
-            icon={<ChevronIcon direction="left" size={24} />}
-            id={`close-drawer__${drawerSlug}`}
-            onClick={() => closeModal(drawerSlug)}
-          />
-          <h2 className={`${baseClass}__header__title`} title={title}>
-            {title}
-          </h2>
-          <div className={`${baseClass}__header__actions`}>
-            <Button disabled={selectedFields.length === 0} size="medium" type="submit">
-              {t('general:applyChanges')}
-            </Button>
-          </div>
-        </div>
-        <div className={`${baseClass}__body`}>
-          <div className={`${baseClass}__select-fields`}>
-            <FieldSelect
-              fields={fields}
-              onChange={onFieldSelect}
-              permissions={collectionPermissions.fields}
+      <OperationProvider operation="update">
+        <Form
+          className={`${baseClass}__form`}
+          onSubmit={handleSubmit}
+          schemaPath={collection.slug}
+          select={select}
+        >
+          <div className={`${baseClass}__header`}>
+            <Button
+              aria-label={t('general:close')}
+              buttonStyle="ghost"
+              className={`${baseClass}__header__close`}
+              icon={<ChevronIcon direction="left" size={24} />}
+              id={`close-drawer__${drawerSlug}`}
+              onClick={() => closeModal(drawerSlug)}
             />
-          </div>
-          {selectedFields.length === 0 ? null : (
-            <div className={`${baseClass}__edit`}>
-              <div className="render-fields">
-                <FieldPathContext value={undefined}>
-                  {selectedFields.map((option, i) => {
-                    const {
-                      value: { field, fieldPermissions, path },
-                    } = option
-
-                    return (
-                      <RenderField
-                        clientFieldConfig={field}
-                        indexPath=""
-                        key={`${path}-${i}`}
-                        parentPath=""
-                        parentSchemaPath=""
-                        path={path}
-                        permissions={fieldPermissions}
-                      />
-                    )
-                  })}
-                </FieldPathContext>
-              </div>
+            <h2 className={`${baseClass}__header__title`} title={title}>
+              {title}
+            </h2>
+            <div className={`${baseClass}__header__actions`}>
+              <Button disabled={selectedFields.length === 0} size="medium" type="submit">
+                {t('general:applyChanges')}
+              </Button>
             </div>
-          )}
-        </div>
-      </Form>
+          </div>
+          <div className={`${baseClass}__body`}>
+            <div className={`${baseClass}__select-fields`}>
+              <FieldSelect
+                fields={fields}
+                onChange={setSelectedFields}
+                permissions={collectionPermissions.fields}
+              />
+            </div>
+            {selectedFields.length === 0 ? null : (
+              <div className={`${baseClass}__edit`}>
+                <div className="render-fields">
+                  <FieldPathContext value={undefined}>
+                    {selectedFields.map((option, i) => {
+                      const {
+                        value: { field, fieldPermissions, path },
+                      } = option
+
+                      return (
+                        <RenderField
+                          clientFieldConfig={field}
+                          indexPath=""
+                          key={`${path}-${i}`}
+                          parentPath=""
+                          parentSchemaPath=""
+                          path={path}
+                          permissions={fieldPermissions}
+                        />
+                      )
+                    })}
+                  </FieldPathContext>
+                </div>
+              </div>
+            )}
+          </div>
+        </Form>
+      </OperationProvider>
     </DocumentInfoProvider>
   )
 }
