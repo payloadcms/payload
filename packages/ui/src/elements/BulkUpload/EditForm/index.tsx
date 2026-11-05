@@ -12,6 +12,7 @@ import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
+import { Context as UploadEditsContext } from '../../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
@@ -124,7 +125,18 @@ export function EditForm({
         submitted={submitted}
       >
         <div className={`${baseClass}__upload-layout`}>
-          {CustomUpload || (
+          {CustomUpload ? (
+            <UploadEditsContext
+              value={{
+                getUploadEdits: () => uploadEdits,
+                resetUploadEdits,
+                updateUploadEdits,
+                uploadEdits,
+              }}
+            >
+              {CustomUpload}
+            </UploadEditsContext>
+          ) : (
             <FileManager
               collectionSlug={collectionConfig.slug}
               initialState={initialState}
