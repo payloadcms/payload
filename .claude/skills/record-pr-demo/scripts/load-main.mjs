@@ -95,13 +95,19 @@ export async function loadSkill({ repository = REPOSITORY, projectRoot = process
     await cp(path.join(checkout, SKILL_PATH), path.join(staging, 'skill'), { recursive: true })
     await rm(checkout, { recursive: true, force: true })
     // ESM imports resolve beside the fetched scripts, not from the shell's cwd.
-    await symlink(dependencies, path.join(staging, 'node_modules'), 'dir')
+    await symlink(
+      dependencies,
+      path.join(staging, 'node_modules'),
+      process.platform === 'win32' ? 'junction' : 'dir',
+    )
     await writeFile(path.join(staging, '.complete'), `${revision}\n`)
     try {
       await rename(staging, snapshot)
     } catch (error) {
       if (!['EEXIST', 'ENOTEMPTY'].includes(error.code)) throw error
       await access(path.join(snapshot, '.complete'))
+      await access(result.skillFile)
+      await access(result.entrypoint)
     }
     return result
   } finally {

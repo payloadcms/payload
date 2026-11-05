@@ -54,6 +54,13 @@ test('should refresh main, reuse unchanged snapshots, resolve project dependenci
   const concurrent = await Promise.all([loadSkill(options), loadSkill(options)])
   assert.equal(concurrent[0].revision, concurrent[1].revision)
   assert.equal(await readFile(concurrent[0].skillFile, 'utf8'), 'version C')
+  await rm(concurrent[0].skillFile)
+  await assert.rejects(loadSkill(options), /ENOENT/)
+  await writeFile(concurrent[0].skillFile, 'version C')
+  const entrypoint = await readFile(concurrent[0].entrypoint, 'utf8')
+  await rm(concurrent[0].entrypoint)
+  await assert.rejects(loadSkill(options), /ENOENT/)
+  await writeFile(concurrent[0].entrypoint, entrypoint)
   await rm(path.join(source, skillPath, 'scripts/prepare-demo.mjs'))
   git(source, 'add', '.')
   git(
