@@ -4,7 +4,6 @@ export function mountDemoChrome({
   change,
   viewport = { width: 1280, height: 720 },
   theme = 'light',
-  showSize = true,
   onNavigate,
   onRefresh,
   shouldAnimateAnnotations = true,
@@ -53,9 +52,7 @@ export function mountDemoChrome({
     .history button:focus-visible { outline:2px solid #0d99ff; outline-offset:1px; }
     .history svg { width:17px; height:17px; pointer-events:none; }
     .address { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:1px solid var(--line); border-radius:7px; padding:3px 9px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; }
-    .header:has([data-size][hidden]) .address { margin-inline-end:12px; }
     .header-info { display:flex; align-items:center; justify-content:flex-end; gap:12px; min-width:0; }
-    .header-info:not(:has(> :not([hidden]))) { display:none; }
     .history .refresh:hover, .history .refresh:focus-visible, .history .refresh[data-state=refreshing] { opacity:1; }
     .refresh[data-state=refreshing] svg { animation:refresh-spin 650ms linear infinite; }
     @keyframes refresh-spin { to { transform:rotate(360deg); } }
@@ -125,7 +122,6 @@ export function mountDemoChrome({
   find('[data-kind]').dataset.kind = change.kind
   find('[data-title]').textContent = change.title
   find('[data-description]').textContent = change.description
-  find('[data-size]').hidden = !showSize
   find('[data-back]').onclick = () => onNavigate?.(-1)
   find('[data-forward]').onclick = () => onNavigate?.(1)
   find('[data-refresh-button]').onclick = () => {
@@ -420,9 +416,6 @@ export function mountDemoChrome({
           button.dataset.state = 'idle'
           find('[data-refresh-text]').textContent = ''
         }, 650)
-    },
-    setSizeVisible({ isVisible }) {
-      find('[data-size]').hidden = !isVisible
     },
     setAnnotation(annotation) {
       if (annotation === null) {

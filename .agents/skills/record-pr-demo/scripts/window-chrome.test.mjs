@@ -93,9 +93,12 @@ test('should fit application viewports without stretching content or moving the 
         assert.ok(Math.abs(bounds.width / bounds.height - viewport.width / viewport.height) < 0.002)
         assert.deepEqual(await page.locator('#root [data-footer]').boundingBox(), initial)
         assert.ok(initial.y + initial.height < bounds.y)
+        assert.equal(await page.locator('#root [data-size]').isVisible(), true)
+        assert.equal(
+          await page.locator('#root [data-size]').textContent(),
+          `${viewport.width} × ${viewport.height}`,
+        )
       }
-      await page.evaluate(() => window.chromeDemo.setSizeVisible({ isVisible: false }))
-      assert.equal(await page.locator('#root [data-size]').isVisible(), false)
       await page.evaluate(() => window.chromeDemo.destroy())
       assert.equal(await page.locator('#root [data-footer]').count(), 0)
     },

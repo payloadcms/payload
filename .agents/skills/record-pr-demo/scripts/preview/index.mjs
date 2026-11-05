@@ -83,7 +83,6 @@ function renderAt({ milliseconds }) {
         : { ...step, total: 3 }
       : null,
   )
-  chrome.setSizeVisible({ isVisible: document.querySelector('#dimensions').checked })
   timeline.value = String(time)
   document.querySelector('#time').textContent =
     `${(time / 1000).toFixed(2)} / ${(timelineDuration / 1000).toFixed(2)} s`
@@ -110,10 +109,9 @@ timeline.addEventListener('input', () => {
   renderAt({ milliseconds: Number(timeline.value) })
   stop()
 })
-for (const id of ['dimensions', 'annotation'])
-  document
-    .querySelector(`#${id}`)
-    .addEventListener('change', () => renderAt({ milliseconds: time }))
+document
+  .querySelector('#annotation')
+  .addEventListener('change', () => renderAt({ milliseconds: time }))
 play.addEventListener('click', () => {
   if (animation !== undefined) {
     stop()

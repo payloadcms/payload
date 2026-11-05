@@ -24,7 +24,6 @@ export const presentation = {
     description: 'Browse and manage content on desktop, tablet, and mobile.',
   },
   // Optional canvas override: even dimensions, at least 800×600.
-  showSize: true, // default
   theme: 'light', // 'light' or 'dark', fixed for the take
   accessibility: false,
   showAnnouncements: false,
