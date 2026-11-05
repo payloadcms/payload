@@ -17,6 +17,7 @@ describe('getFileContentRequirement', () => {
   it('requires the full file when local storage is enabled', () => {
     expect(
       getFileContentRequirement({
+        filename: 'clip.mp4',
         mimeType: 'video/mp4',
         uploadConfig: createUploadConfig({ disableLocalStorage: false }),
       }),
@@ -26,6 +27,7 @@ describe('getFileContentRequirement', () => {
   it('requires nothing for a non-image file with no mime type allow list', () => {
     expect(
       getFileContentRequirement({
+        filename: 'clip.mp4',
         mimeType: 'video/mp4',
         uploadConfig: createUploadConfig(),
       }),
@@ -35,6 +37,7 @@ describe('getFileContentRequirement', () => {
   it('requires the full file when a mime type allow list is configured', () => {
     expect(
       getFileContentRequirement({
+        filename: 'clip.mp4',
         mimeType: 'video/mp4',
         uploadConfig: createUploadConfig({ mimeTypes: ['video/*'] }),
       }),
@@ -44,6 +47,7 @@ describe('getFileContentRequirement', () => {
   it('requires the full file when a mime type allow list overrides restricted type checks', () => {
     expect(
       getFileContentRequirement({
+        filename: 'clip.mp4',
         mimeType: 'video/mp4',
         uploadConfig: createUploadConfig({
           allowRestrictedFileTypes: true,
@@ -56,6 +60,7 @@ describe('getFileContentRequirement', () => {
   it('requires only the header for an image with no configured adjustments', () => {
     expect(
       getFileContentRequirement({
+        filename: 'image.png',
         mimeType: 'image/png',
         uploadConfig: createUploadConfig(),
       }),
@@ -65,6 +70,7 @@ describe('getFileContentRequirement', () => {
   it('requires the full file for an image a transformer will adjust', () => {
     expect(
       getFileContentRequirement({
+        filename: 'image.png',
         mimeType: 'image/png',
         uploadConfig: createUploadConfig({ hasImageAdjustments: true }),
       }),
@@ -74,6 +80,7 @@ describe('getFileContentRequirement', () => {
   it('requires the full file for an image with variants configured, even with no other adjustments', () => {
     expect(
       getFileContentRequirement({
+        filename: 'image.png',
         mimeType: 'image/png',
         uploadConfig: createUploadConfig({ variants: [{ name: 'thumbnail', width: 100 }] }),
       }),
@@ -83,6 +90,7 @@ describe('getFileContentRequirement', () => {
   it('requires only the header for an image with an empty variants array', () => {
     expect(
       getFileContentRequirement({
+        filename: 'image.png',
         mimeType: 'image/png',
         uploadConfig: createUploadConfig({ variants: [] }),
       }),
@@ -92,6 +100,7 @@ describe('getFileContentRequirement', () => {
   it('requires the full file for an animated image even with no configured adjustments', () => {
     expect(
       getFileContentRequirement({
+        filename: 'image.gif',
         mimeType: 'image/gif',
         uploadConfig: createUploadConfig(),
       }),
@@ -102,6 +111,7 @@ describe('getFileContentRequirement', () => {
     expect(
       getFileContentRequirement({
         hasSizeEdits: true,
+        filename: 'image.png',
         mimeType: 'image/png',
         uploadConfig: createUploadConfig(),
       }),
@@ -112,6 +122,7 @@ describe('getFileContentRequirement', () => {
     expect(
       getFileContentRequirement({
         hasSizeEdits: false,
+        filename: 'image.png',
         mimeType: 'image/png',
         uploadConfig: createUploadConfig(),
       }),
@@ -121,24 +132,28 @@ describe('getFileContentRequirement', () => {
   it('requires only the header for a non-resizable but recognized image type', () => {
     expect(
       getFileContentRequirement({
+        filename: 'image.jxl',
         mimeType: 'image/jxl',
         uploadConfig: createUploadConfig(),
       }),
     ).toBe('header')
   })
 
-  it('requires the full file for an SVG so its safety check sees the whole document', () => {
-    expect(
-      getFileContentRequirement({
-        mimeType: 'image/svg+xml',
-        uploadConfig: createUploadConfig(),
-      }),
-    ).toBe('full')
+  it.each([
+    ['an SVG MIME type', { filename: 'logo.svg', mimeType: 'image/svg+xml' }],
+    [
+      'an SVG MIME type with parameters',
+      { filename: 'logo', mimeType: 'image/svg+xml; charset=utf-8' },
+    ],
+    ['an .svg filename with another MIME type', { filename: 'logo.svg', mimeType: 'text/plain' }],
+  ])('requires the full file for %s so its safety check sees the whole document', (_name, file) => {
+    expect(getFileContentRequirement({ ...file, uploadConfig: createUploadConfig() })).toBe('full')
   })
 
   it('requires the full file for an image when disableLocalStorage is not set', () => {
     expect(
       getFileContentRequirement({
+        filename: 'image.png',
         mimeType: 'image/png',
         uploadConfig: { staticDir: '/tmp/media' } as SanitizedUploadConfig,
       }),
@@ -148,6 +163,7 @@ describe('getFileContentRequirement', () => {
   it('requires the full file for a non-image type when disableLocalStorage is not set', () => {
     expect(
       getFileContentRequirement({
+        filename: 'clip.mp4',
         mimeType: 'video/mp4',
         uploadConfig: { staticDir: '/tmp/media' } as SanitizedUploadConfig,
       }),

@@ -50,6 +50,21 @@ describe('handleDynamicFileRequest', () => {
     vi.mocked(checkFileAccess).mockResolvedValue(uploadDocument)
   })
 
+  it('should plan and run the pipeline with one frozen copy of the document', async () => {
+    vi.mocked(getSourceFileResponse).mockResolvedValue(new Response('source'))
+    const handleRequest = vi.fn().mockResolvedValue({ status: 'continue' })
+    vi.mocked(planTransformerPipeline).mockResolvedValue([
+      { slug: 'recording', handleRequest, mimeTypes: ['image/*'] },
+    ])
+
+    await handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() })
+
+    const plannedDoc = vi.mocked(planTransformerPipeline).mock.calls[0]![0].args.doc
+
+    expect(Object.isFrozen(plannedDoc)).toBe(true)
+    expect(handleRequest.mock.calls[0]![0].doc).toBe(plannedDoc)
+  })
+
   describe('failed pipeline cleanup', () => {
     const makeTrackedSourceResponse = () => {
       const onCancel = vi.fn()

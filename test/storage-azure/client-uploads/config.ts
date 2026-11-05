@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { azureStorage } from '@payloadcms/storage-azure'
 import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
+import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -103,6 +104,22 @@ export default buildConfigWithDefaults({
           mimeTypes: ['text/plain'],
           transformFile: async ({ file }) => ({
             file: new File([(await file.text()).toUpperCase()], file.name, { type: file.type }),
+            status: 'complete',
+          }),
+        },
+        // Replaces a PNG, for a client upload whose type is found only after the full download.
+        {
+          slug: 'replace-png',
+          canTransform: ({ collectionSlug }) => collectionSlug === mediaHeaderOnlySlug,
+          mimeTypes: ['image/png'],
+          transformFile: async ({ file }) => ({
+            file: new File(
+              [await readFile(path.resolve(dirname, '../../uploads/small.png'))],
+              file.name,
+              {
+                type: 'image/png',
+              },
+            ),
             status: 'complete',
           }),
         },

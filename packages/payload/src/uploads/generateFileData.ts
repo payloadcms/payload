@@ -161,14 +161,21 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     ...editArgs,
     canWaitForFile: operation === 'create' && !req.file,
   })
-  let pipelineDoc: Document = deepCopyObject(edits.applyTransformState(candidateDoc))
+  const hasTransformers = hasUploadTransformers({ req })
+  // Without transformers nothing reads or changes the doc, so a shallow copy is enough.
+  const createPipelineDoc = (): Document => {
+    const doc = edits.applyTransformState(candidateDoc)
+
+    return hasTransformers ? deepCopyObject(doc) : { ...doc }
+  }
+  let pipelineDoc = createPipelineDoc()
   const result = await processUpload({
     ...args,
     pipelineDoc,
     resolveEditsForFile: edits.isWaitingForFile
       ? async (file) => {
           edits = await resolveUploadEdits({ ...editArgs, file })
-          pipelineDoc = deepCopyObject(edits.applyTransformState(candidateDoc))
+          pipelineDoc = createPipelineDoc()
           return { pipelineDoc, uploadEdits: edits.uploadEdits }
         }
       : undefined,
@@ -371,7 +378,13 @@ const processUpload = async <T>({
     ;({ pipelineDoc, uploadEdits } = await resolveEditsForFile(file))
   }
 
-  const pipelineOriginalDoc = deepFreeze(deepCopyObject(pipelineDoc))
+  // Transformers see the incoming file. Core sets the saved file fields from the output file
+  // later, so the saved filename can still change, for example to avoid a name clash.
+  setIncomingFileFields({ doc: pipelineDoc, file })
+  // Only transformers read originalDoc, so it is copied only when there are some.
+  const createOriginalDoc = (): Readonly<Document> =>
+    hasUploadTransformers({ req }) ? deepFreeze(deepCopyObject(pipelineDoc)) : pipelineDoc
+  let pipelineOriginalDoc = createOriginalDoc()
 
   if (!disableLocalStorage) {
     await fs.mkdir(staticPath!, { recursive: true })
@@ -430,13 +443,19 @@ const processUpload = async <T>({
   ) {
     const probedMimeType = file.mimetype
     file = await fetchFullUpload({ collectionSlug: collectionConfig.slug, file, req })
-    // On req.file, the temp file is removed after the operation.
+    // On req.file, the temp file is removed after the operation, also when the check fails.
     req.file = file
     // The first check saw only a probe, so check the whole file before a transformer reads it.
     file = await checkFileAndUseDetectedType({ collection: collectionConfig, file, req })
+    // Hooks and storage plugins read req.file, so it must be the checked file. Later steps
+    // change this same object, for example to drop its upload reference.
+    req.file = file
 
-    // The plan was made for the probe's MIME type. Make it again for the checked type.
+    // The plan was made for the probe's MIME type. Make it again for the checked type. No stage
+    // has run yet, so originalDoc can still be made again.
     if (file.mimetype !== probedMimeType) {
+      setIncomingFileFields({ doc: pipelineDoc, file })
+      pipelineOriginalDoc = createOriginalDoc()
       pipeline = await planUploadPipeline({ mimeType: file.mimetype })
     }
   }
@@ -947,6 +966,24 @@ const checkFileAndUseDetectedType = async ({
   }
 
   return file
+}
+
+const hasUploadTransformers = ({ req }: { req: PayloadRequest }): boolean =>
+  Boolean(req.payload.config.upload?.transformers?.length)
+
+/** Puts the incoming file's name, size and MIME type into the transformer `doc`. */
+function setIncomingFileFields({
+  doc,
+  file,
+}: {
+  doc: Document
+  file: NonNullable<PayloadRequest['file']>
+}): Document {
+  doc.filename = file.name
+  doc.filesize = file.size
+  doc.mimeType = file.mimetype
+
+  return doc
 }
 
 /**

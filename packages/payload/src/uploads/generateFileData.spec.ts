@@ -8,7 +8,14 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { deepCopyObject } from '../utilities/deepCopyObject.js'
 import { generateFileData } from './generateFileData.js'
+
+vi.mock('../utilities/deepCopyObject.js', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../utilities/deepCopyObject.js')>()
+
+  return { ...original, deepCopyObject: vi.fn(original.deepCopyObject) }
+})
 
 // A minimal valid 1x1 transparent PNG, so `file-type` can detect `image/png` from it.
 const PNG_SIGNATURE = Buffer.from(
@@ -93,6 +100,22 @@ describe('generateFileData', () => {
     })
 
     expect(toBufferMock).not.toHaveBeenCalled()
+  })
+
+  it('should not copy the document when no transformers are configured', async () => {
+    const { sharp } = createSharpMock()
+    vi.mocked(deepCopyObject).mockClear()
+
+    await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: { alt: 'photo' },
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req: createReq(sharp),
+    })
+
+    expect(deepCopyObject).not.toHaveBeenCalled()
   })
 
   describe('focal point without a transformer', () => {

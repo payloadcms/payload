@@ -181,6 +181,7 @@ export const getFileFromUploadInstructions = async ({
   }
 
   const contentRequirement = getFileContentRequirement({
+    filename: providerFilename,
     hasSizeEdits: requestHasSizeEdits(req),
     mimeType: file.mimeType,
     uploadConfig,
@@ -285,6 +286,8 @@ export const fetchFullClientUpload = async ({
     req,
   })
 
+  // The storage provider's content type wins over the type the client claimed, on purpose: it
+  // describes the stored object. The check after the download can still change it from the bytes.
   return { ...file, data: Buffer.alloc(0), mimetype: contentType || file.mimetype, tempFilePath }
 }
 

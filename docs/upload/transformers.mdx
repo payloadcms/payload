@@ -125,6 +125,11 @@ transformFile: (args: {
 
 ```ts
 transformFile: async ({ doc, source }) => {
+  // With sharpTransformer, variant runs get a frozen doc. Change doc only in the main-file run.
+  if (Object.isFrozen(doc)) {
+    return { status: 'continue' }
+  }
+
   const header = await source.readFileBytes({
     numberOfBytes: 1024,
     startByte: 0,
@@ -141,7 +146,7 @@ transformFile: async ({ doc, source }) => {
 
 Payload processes the file before the `beforeValidate` and `beforeChange` hooks and field validation, so those run on the final `_transforms` value. If validation fails, the operation fails and the stored document and files stay unchanged.
 
-With `sharpTransformer`, the pipeline runs once for the main file and once for each variant. Only the main-file run can change `doc`. The variant runs get a frozen copy of the result of the main-file run. A variant run that changes its copy throws a `TypeError`, the upload fails, and nothing is saved.
+With `sharpTransformer`, the pipeline runs once for the main file and once for each variant. Only the main-file run can change `doc`. The variant runs get a frozen copy of the result of the main-file run. A variant run that changes its copy throws a `TypeError`, the upload fails, and nothing is saved. To skip the change in a variant run, check `Object.isFrozen(doc)`, as in the example above.
 
 ### The `FileSource` type
 
@@ -165,10 +170,10 @@ type FileSource = {
 }
 ```
 
-- `readFileBytes` loads one small byte range into memory, for example a file header.
+- `readFileBytes` loads one small byte range into memory, for example a file header. Payload does not limit how many bytes one read loads, so keep the range small.
 - `streamFile` streams a byte range, or the whole file when called with no arguments.
 - A range starts at `startByte` (0 or more) and has `numberOfBytes` bytes (1 or more). A range that runs past the end of the file returns only the bytes up to the end, so check the length of what you get back. A `startByte` past `sizeInBytes` rejects with a `TransformerContractError`.
-- When `signal` aborts, the read stops.
+- When `signal` aborts, the stream from `streamFile` stops. `readFileBytes` checks `signal` only before and after it reads, so it does not stop a read that has started.
 
 There is no whole-file read. A transformer that needs the whole file in memory must read `streamFile()` and enforce its own byte limit.
 

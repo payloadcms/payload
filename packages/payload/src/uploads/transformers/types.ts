@@ -9,7 +9,10 @@ import type { Document, PayloadRequest } from '../../types/index.js'
 export type FileSource = {
   filename: string
   mimeType: string
-  /** Loads one small byte range into memory. */
+  /**
+   * Loads one small byte range into memory. There is no limit on how many bytes one read loads
+   * yet; a limit belongs to the Metadata API. `signal` is checked only before and after the read.
+   */
   readFileBytes: (args: {
     numberOfBytes: number
     signal?: AbortSignal

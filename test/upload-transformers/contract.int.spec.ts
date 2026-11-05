@@ -55,14 +55,26 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
   const pipelineRuns = [
     {
       name: 'a create',
-      expected: { alt: 'note', details: { caption: 'A note' } },
+      expected: {
+        alt: 'note',
+        details: { caption: 'A note' },
+        filename: 'note.md',
+        filesize: 5,
+        mimeType: 'text/markdown',
+      },
       run: async ({ payload }: { payload: Payload }) => {
         await createNote({ contractStages: {}, payload })
       },
     },
     {
-      name: 'an update, with the stored fields merged in',
-      expected: { alt: 'changed', details: { caption: 'A note' } },
+      name: 'an update, with the stored fields merged in and the new file',
+      expected: {
+        alt: 'changed',
+        details: { caption: 'A note' },
+        filename: 'note.md',
+        filesize: 11,
+        mimeType: 'text/markdown',
+      },
       run: async ({ payload }: { payload: Payload }) => {
         const created = await createNote({ payload })
         resetContractCalls()

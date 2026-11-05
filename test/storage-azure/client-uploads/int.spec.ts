@@ -497,6 +497,27 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       expect(await stored.text()).toBe('CLIENT TEXT')
     })
 
+    test('keeps req.file in sync with the checked file after the full download', async ({
+      restClient,
+    }) => {
+      // Claims text/plain but holds a PNG, so its type is found only after the full download.
+      const form = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlySlug,
+        file: readFileSync(path.resolve(dirname, '../../uploads/image.png')),
+        filename: 'disguised.txt',
+        mimeType: 'text/plain',
+        restClient,
+      })
+
+      const createRes = await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: form })
+      const { doc, errors } = await createRes.json()
+
+      expect(errors).toBeUndefined()
+      expect(createRes.status).toBe(201)
+      createdIds.push(doc.id)
+      expect(doc.mimeType).toBe('image/png')
+    })
+
     test('downloads a client upload once for a bulk update and removes its temp files', async ({
       payload,
       restClient,

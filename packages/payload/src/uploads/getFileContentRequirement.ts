@@ -1,6 +1,7 @@
 import type { SanitizedUploadConfig } from './types.js'
 
 import { canResizeImage } from './canResizeImage.js'
+import { isSvgUpload } from './getFileTypeIdentity.js'
 import { isAnimatedImage } from './isAnimatedImage.js'
 import { isImage } from './isImage.js'
 
@@ -28,10 +29,13 @@ export type FileContentRequirement = 'full' | 'header' | 'none'
  * - `none`: nothing downstream reads file content at all.
  */
 export function getFileContentRequirement({
+  filename,
   hasSizeEdits,
   mimeType,
   uploadConfig,
 }: {
+  /** Used with `mimeType` to find an SVG, the same way the SVG safety check does. */
+  filename: string
   /**
    * Whether the request's `uploadEdits` (crop, heightInPixels, widthInPixels) will resize the
    * fetched file - if so, the full file is needed even when the collection config alone would
@@ -48,7 +52,7 @@ export function getFileContentRequirement({
   const hasMimeTypeAllowList =
     Array.isArray(uploadConfig.mimeTypes) && uploadConfig.mimeTypes.length > 0
 
-  if (hasMimeTypeAllowList || mimeType === 'image/svg+xml') {
+  if (hasMimeTypeAllowList || isSvgUpload({ filename, mimeType })) {
     return 'full'
   }
 

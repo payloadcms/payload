@@ -84,7 +84,7 @@ export async function handleDynamicFileRequest({
     })
   }
 
-  const { document, pipeline } = await authorizeDocument({
+  const { document, documentSnapshot, pipeline } = await authorizeDocument({
     collection,
     filename,
     prefix,
@@ -93,8 +93,6 @@ export async function handleDynamicFileRequest({
   })
 
   const requestedFile = getRequestedFile({ document, filename })
-  // A request never saves the document, so every stage gets the same read-only snapshot.
-  const documentSnapshot = deepFreeze(deepCopyObject(document))
 
   const source = createLazySourceGetter({
     retrieve: () => getSourceFileResponse({ collection, document, filename, prefix, req }),
@@ -224,16 +222,16 @@ async function cancelUnusedBody(response: Response | undefined): Promise<void> {
 function planRequestPipeline({
   collection,
   document,
+  documentSnapshot,
   filename,
   req,
 }: {
   collection: Collection
   document: ResolvedUploadDocument
+  documentSnapshot: Readonly<ResolvedUploadDocument>
   filename: string
   req: PayloadRequest
 }): Promise<UploadTransformer[]> {
-  const documentSnapshot = deepFreeze(deepCopyObject(document))
-
   return planTransformerPipeline({
     args: {
       collectionSlug: collection.config.slug,
@@ -281,7 +279,12 @@ async function authorizeDocument({
   prefix?: string
   req: PayloadRequest
   resolvedDocument: ResolvedUploadDocument
-}): Promise<{ document: ResolvedUploadDocument; pipeline: UploadTransformer[] }> {
+}): Promise<{
+  document: ResolvedUploadDocument
+  /** A request never saves the document, so planning and every stage share this read-only copy. */
+  documentSnapshot: Readonly<ResolvedUploadDocument>
+  pipeline: UploadTransformer[]
+}> {
   const accessResults = new Map<boolean, Promise<AccessResult>>()
 
   const checkAccess = ({ isTransform }: { isTransform: boolean }): Promise<AccessResult> => {
@@ -335,7 +338,14 @@ async function authorizeDocument({
       ? access.document
       : resolvedDocument
 
-  const pipeline = await planRequestPipeline({ collection, document, filename, req })
+  const documentSnapshot = deepFreeze(deepCopyObject(document))
+  const pipeline = await planRequestPipeline({
+    collection,
+    document,
+    documentSnapshot,
+    filename,
+    req,
+  })
   const isTransform = pipeline.length > 0
 
   if (isTransform !== isTransformAccess) {
@@ -349,5 +359,5 @@ async function authorizeDocument({
     }
   }
 
-  return { document, pipeline }
+  return { document, documentSnapshot, pipeline }
 }
