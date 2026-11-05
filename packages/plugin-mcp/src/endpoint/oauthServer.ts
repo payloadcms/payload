@@ -170,7 +170,10 @@ const authorize: PayloadHandler = (req) => {
   const params = url.searchParams
   const clientID = params.get('client_id')
   const client = unseal<Client>({ type: 'client', req, value: clientID })
-  const redirectURI = params.get('redirect_uri')
+  // Optional when the client registered only one
+  const redirectURI =
+    params.get('redirect_uri') ??
+    (client?.redirectURIs.length === 1 ? client.redirectURIs[0]! : null)
 
   // Never redirect to an address the client didn't register
   if (!client || !redirectURI || !client.redirectURIs.includes(redirectURI)) {
@@ -317,7 +320,9 @@ const redeemCode = async ({
   if (
     form.get('grant_type') === 'authorization_code' &&
     code?.clientID === clientID &&
-    code.redirectURI === form.get('redirect_uri') &&
+    // OAuth 2.1 clients leave it out, since PKCE does its job. OAuth 2.0 clients send it, and it must
+    // match then.
+    (!form.has('redirect_uri') || form.get('redirect_uri') === code.redirectURI) &&
     // PKCE: only the client that started the sign-in knows the verifier
     createHash('sha256')
       .update(form.get('code_verifier') ?? '')
