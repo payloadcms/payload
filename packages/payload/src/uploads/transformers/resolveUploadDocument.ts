@@ -69,7 +69,7 @@ export function getRequestedFile({
 
       return {
         filename,
-        isBuiltAtRequest: size?._stored === false,
+        isBuiltAtRequest: isRequestTimeFile({ entry: size }),
         mimeType: size?.mimeType ?? document.original?.mimeType ?? document.mimeType,
         variantName,
       }

@@ -191,7 +191,11 @@ export const renameFileOperation = async (
       ...Object.values(renamedVariants).map((variant) => variant?.filename),
     ])
     for (const variant of Object.values(renamedVariants)) {
-      if (variant?._stored !== false || typeof variant.filename !== 'string') {
+      if (
+        !variant ||
+        !isRequestTimeFile({ entry: variant }) ||
+        typeof variant.filename !== 'string'
+      ) {
         continue
       }
       const suffix = variant.filename.startsWith(mainStem)
