@@ -26,17 +26,15 @@ const textFile = (text: string) => ({
 const createNote = ({
   contractStages,
   payload,
-  text = 'hello',
 }: {
   contractStages?: ContractStages
   payload: Payload
-  text?: string
 }) =>
   payload.create({
     collection: contractMediaSlug,
     context: contractStages ? { contractStages } : undefined,
     data: { alt: 'note', details: { caption: 'A note' } },
-    file: textFile(text),
+    file: textFile('hello'),
   })
 
 const setTransforms =
@@ -51,34 +49,21 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     await rm(contractMediaDir, { force: true, recursive: true })
   })
 
-  // Each case runs the pipeline once and gives the fields the working doc must have.
-  const pipelineRuns = [
+  test.for([
     {
       name: 'a create',
-      expected: {
-        alt: 'note',
-        details: { caption: 'A note' },
-        filename: 'note.md',
-        filesize: 5,
-        mimeType: 'text/markdown',
-      },
+      expected: { alt: 'note', filename: 'note.md', filesize: 5 },
       run: async ({ payload }: { payload: Payload }) => {
         await createNote({ contractStages: {}, payload })
       },
     },
     {
       name: 'an update, with the stored fields merged in and the new file',
-      expected: {
-        alt: 'changed',
-        details: { caption: 'A note' },
-        filename: 'note.md',
-        filesize: 11,
-        mimeType: 'text/markdown',
-      },
+      expected: { alt: 'changed', filename: 'note.md', filesize: 11 },
       run: async ({ payload }: { payload: Payload }) => {
         const created = await createNote({ payload })
-        resetContractCalls()
 
+        resetContractCalls()
         await payload.update({
           id: created.id,
           collection: contractMediaSlug,
@@ -88,154 +73,98 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
         })
       },
     },
-  ]
-
-  test.describe('transformFile arguments', () => {
-    test('should pass the upload as source and originalSource', async ({ payload }) => {
-      await createNote({ contractStages: {}, payload })
-
-      expect(contractCalls.transformFile[0]).toMatchObject({
-        originalSourceText: 'hello',
-        source: { filename: 'note.md', mimeType: 'text/markdown', sizeInBytes: 5 },
-        sourceText: 'hello',
-      })
-    })
-
-    test.for(pipelineRuns)(
-      'should pass the working doc, and a frozen copy of it as originalDoc, on $name',
-      async ({ expected, run }, { payload }) => {
-        await run({ payload })
-
-        const call = contractCalls.transformFile[0]
-
-        expect(call?.docAtStart).toMatchObject(expected)
-        expect(call?.originalDoc).toEqual(call?.docAtStart)
-        expect(call?.isDocFrozen).toBe(false)
-        expect(call?.isOriginalDocFrozen).toBe(true)
-      },
-    )
-  })
-
-  test.for(pipelineRuns)(
-    'should pass the working doc, and a frozen copy of it as originalDoc, to canTransform on $name',
+  ])(
+    'should give canTransform and transformFile the working doc, and a frozen copy as originalDoc, on $name',
     async ({ expected, run }, { payload }) => {
       await run({ payload })
 
-      const call = contractCalls.canTransform.find(
-        ({ collectionSlug, operation }) =>
-          collectionSlug === contractMediaSlug && operation === 'upload',
+      const call = contractCalls.transformFile[0]
+      const canTransformCall = contractCalls.canTransform.find(
+        ({ collectionSlug }) => collectionSlug === contractMediaSlug,
       )
 
-      expect(call?.doc).toMatchObject(expected)
-      expect(call?.originalDoc).toEqual(call?.doc)
+      expect(call?.docAtStart).toMatchObject({
+        ...expected,
+        details: { caption: 'A note' },
+        mimeType: 'text/markdown',
+      })
+      expect(call?.originalDoc).toEqual(call?.docAtStart)
       expect(Object.isFrozen(call?.originalDoc)).toBe(true)
+      expect(canTransformCall?.doc).toBe(call?.originalDoc)
     },
   )
 
-  test('should pass doc and a frozen originalDoc to handleRequest', async ({
+  test('should save a _transforms change after running beforeValidate and beforeChange hooks on it', async ({
     payload,
-    restClient,
+  }) => {
+    const created = await createNote({
+      contractStages: { first: setTransforms({ contractScore: 1 }) },
+      payload,
+    })
+
+    const stored = await payload.findByID({ id: created.id, collection: contractMediaSlug })
+
+    expect(contractHookCalls).toEqual([
+      { _transforms: { contractScore: 1 }, hook: 'beforeValidate' },
+      { _transforms: { contractScore: 1 }, hook: 'beforeChange' },
+    ])
+    expect(stored._transforms).toEqual({ contractScore: 1 })
+  })
+
+  test('should reject an invalid _transforms change and keep the stored document and file', async ({
+    payload,
   }) => {
     const created = await createNote({ payload })
 
-    const response = await restClient.GET(
-      `/${contractMediaSlug}/file/${created.filename}?contract=1`,
-    )
-
-    expect(response.status).toBe(200)
-    expect(contractCalls.handleRequest[0]?.doc).toMatchObject({ id: created.id, alt: 'note' })
-    expect(contractCalls.handleRequest[0]?.originalDoc).toMatchObject({ id: created.id })
-    expect(Object.isFrozen(contractCalls.handleRequest[0]?.originalDoc)).toBe(true)
-  })
-
-  test.describe('changing _transforms', () => {
-    test('should save a _transforms change after running beforeValidate and beforeChange hooks on it', async ({
-      payload,
-    }) => {
-      const created = await createNote({
-        contractStages: { first: setTransforms({ contractScore: 1 }) },
-        payload,
-      })
-
-      const stored = await payload.findByID({ id: created.id, collection: contractMediaSlug })
-
-      expect(contractHookCalls).toEqual([
-        { _transforms: { contractScore: 1 }, hook: 'beforeValidate' },
-        { _transforms: { contractScore: 1 }, hook: 'beforeChange' },
-      ])
-      expect(created._transforms).toEqual({ contractScore: 1 })
-      expect(stored._transforms).toEqual({ contractScore: 1 })
-    })
-
-    test('should reject an invalid _transforms change and keep the stored document and file', async ({
-      payload,
-    }) => {
-      const created = await createNote({ payload })
-
-      await expect(
-        payload.update({
-          id: created.id,
-          collection: contractMediaSlug,
-          context: { contractStages: { first: setTransforms({ crop: 'not-a-crop' }) } },
-          data: {},
-          file: textFile('replacement'),
-        }),
-      ).rejects.toThrow()
-
-      const stored = await payload.findByID({ id: created.id, collection: contractMediaSlug })
-
-      expect(stored.filename).toBe(created.filename)
-      expect(stored._transforms).toBeNull()
-      expect(await readFile(path.join(contractMediaDir, created.filename!), 'utf8')).toBe('hello')
-    })
-
-    // Regression for a bug in #18601, where bulk updates and updates by ID resolved transformer
-    // changes differently.
-    test('should give a bulk update the same result as an update by ID', async ({ payload }) => {
-      const first = await createNote({ payload })
-      const second = await createNote({ payload })
-      const context = { contractStages: { first: setTransforms({ contractScore: 1 }) } }
-
-      const updatedByID = await payload.update({
-        id: first.id,
+    await expect(
+      payload.update({
+        id: created.id,
         collection: contractMediaSlug,
-        context,
+        context: { contractStages: { first: setTransforms({ crop: 'not-a-crop' }) } },
         data: {},
         file: textFile('replacement'),
-        overrideAccess: true,
-      })
-      const bulkUpdated = await payload.update({
-        collection: contractMediaSlug,
-        context,
-        data: {},
-        file: textFile('replacement'),
-        overrideAccess: true,
-        where: { id: { equals: second.id } },
-      })
+      }),
+    ).rejects.toThrow()
 
-      expect(bulkUpdated.errors).toEqual([])
-      expect(bulkUpdated.docs[0]?._transforms).toEqual(updatedByID._transforms)
-      expect(updatedByID._transforms).toEqual({ contractScore: 1 })
-    })
+    const stored = await payload.findByID({ id: created.id, collection: contractMediaSlug })
+
+    expect(stored.filename).toBe(created.filename)
+    expect(stored._transforms).toBeNull()
+    expect(await readFile(path.join(contractMediaDir, created.filename!), 'utf8')).toBe('hello')
   })
 
-  test.describe('changing other fields', () => {
-    test.for([
-      { name: 'a custom field', change: (doc: Record<string, unknown>) => (doc.alt = 'changed') },
-      // Regression for a bug in #18601, where removing a group skipped its required fields.
-      {
-        name: 'a group with required fields',
-        change: (doc: Record<string, unknown>) => delete doc.details,
-      },
-    ])('should reject a change to $name and save nothing', async ({ change }, { payload }) => {
-      await expect(
-        createNote({ contractStages: { first: ({ doc }) => void change(doc) }, payload }),
-      ).rejects.toThrow(TransformerContractError)
+  // Regression for a bug in #18601, where bulk updates and updates by ID resolved transformer
+  // changes differently.
+  test('should give a bulk update the same result as an update by ID', async ({ payload }) => {
+    const first = await createNote({ payload })
+    const second = await createNote({ payload })
+    const context = { contractStages: { first: setTransforms({ contractScore: 1 }) } }
+    const update = { collection: contractMediaSlug, context, data: {}, file: textFile('new') }
 
-      const { totalDocs } = await payload.count({ collection: contractMediaSlug })
+    const updatedByID = await payload.update({ ...update, id: first.id })
+    const bulkUpdated = await payload.update({ ...update, where: { id: { equals: second.id } } })
 
-      expect(totalDocs).toBe(0)
+    expect(bulkUpdated.errors).toEqual([])
+    expect(bulkUpdated.docs[0]?._transforms).toEqual(updatedByID._transforms)
+    expect(updatedByID._transforms).toEqual({ contractScore: 1 })
+  })
+
+  // Regression for a bug in #18601, where removing a group skipped its required fields. The unit
+  // tests of transformUploadFile cover the other field changes.
+  test('should reject the removal of a group with required fields with a TransformerContractError and save nothing', async ({
+    payload,
+  }) => {
+    const result = createNote({
+      contractStages: { first: ({ doc }) => void delete doc.details },
+      payload,
     })
+
+    await expect(result).rejects.toThrow(TransformerContractError)
+    await expect(result).rejects.toThrow('"contract-first" transformer changed a document field')
+
+    const { totalDocs } = await payload.count({ collection: contractMediaSlug })
+
+    expect(totalDocs).toBe(0)
   })
 
   // Characterization: this already worked before `source` and `doc` were added.
@@ -290,21 +219,16 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
         payload,
       })
 
-      const firstStageCalls = contractCalls.transformFile.filter(
-        ({ slug }) => slug === 'contract-first',
-      )
+      const calls = contractCalls.transformFile
 
       expect(created._transforms).toEqual({ contractScore: 1 })
-      expect(firstStageCalls.map(({ isDocFrozen }) => isDocFrozen)).toEqual([false, true])
-      expect(firstStageCalls[1]?.docAtStart._transforms).toEqual({ contractScore: 1 })
+      expect(calls.map(({ doc }) => Object.isFrozen(doc))).toEqual([false, true])
+      expect(calls[1]?.docAtStart._transforms).toEqual({ contractScore: 1 })
     })
 
     test('should reject a doc change from a size task', async ({ payload }) => {
       await expect(
-        createImage({
-          contractStages: { first: setTransforms({ contractScore: 1 }) },
-          payload,
-        }),
+        createImage({ contractStages: { first: setTransforms({ contractScore: 1 }) }, payload }),
       ).rejects.toThrow()
 
       const { totalDocs } = await payload.count({

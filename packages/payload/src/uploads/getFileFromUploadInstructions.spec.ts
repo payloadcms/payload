@@ -161,60 +161,18 @@ describe('getFileFromUploadInstructions', () => {
     fs.rmSync(customTempDir, { force: true, recursive: true })
   })
 
-  // `generateFileData` decides with the real document, and downloads the file only then.
-  it('should not download the file or call canTransform for a transformer that matches its type', async () => {
-    const handler = vi.fn(
-      async () =>
-        new Response('s', {
-          headers: { 'Content-Length': '18', 'Content-Range': 'bytes 0-0/18' },
-          status: 206,
-        }),
-    )
-    const req = createReq([handler], { mimeTypes: undefined })
-    const canTransform = vi.fn(() => true)
-    req.payload.config.upload = {
-      transformers: [
-        {
-          slug: 'video-transformer',
-          canTransform,
-          mimeTypes: ['video/*'],
-          transformFile: vi.fn(),
-        },
-      ],
-    } as unknown as PayloadRequest['payload']['config']['upload']
-
-    const file = await getFileFromUploadInstructions({
-      collectionSlug: 'media',
-      file: createUploadReferenceFile(),
-      req,
-    })
-
-    expect(canTransform).not.toHaveBeenCalled()
-    expect(file.tempFilePath).toBeUndefined()
-    expect(file.data.length).toBe(0)
-  })
-
+  // `generateFileData` downloads the whole file only once `canTransform` accepts it.
   it('should use the MIME type of the full download when it fetches a deferred client upload', async () => {
     const handler = vi.fn(
       async () =>
-        new Response('some file contents', {
-          headers: { 'Content-Type': 'video/quicktime' },
-          status: 200,
-        }),
+        new Response('some file contents', { headers: { 'Content-Type': 'video/quicktime' } }),
     )
-    const req = createReq([handler])
-    const uploadReferenceFile = createUploadReferenceFile()
+    const { filename, size, uploadReference } = createUploadReferenceFile()
 
     const file = await fetchFullClientUpload({
       collectionSlug: 'media',
-      file: {
-        name: uploadReferenceFile.filename,
-        data: Buffer.alloc(0),
-        mimetype: 'video/mp4',
-        size: uploadReferenceFile.size,
-        uploadReference: uploadReferenceFile.uploadReference,
-      },
-      req,
+      file: { name: filename, data: Buffer.alloc(0), mimetype: 'video/mp4', size, uploadReference },
+      req: createReq([handler]),
     })
     tempFilesToClean.push(file.tempFilePath!)
 

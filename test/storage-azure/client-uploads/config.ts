@@ -22,6 +22,7 @@ import { MediaWithDocPrefix, mediaWithDocPrefixSlug } from './collections/MediaW
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const smallPNGPath = path.resolve(dirname, '../../uploads/small.png')
 
 const enableAzureClientUploads = (collection: CollectionConfig): CollectionConfig => ({
   ...collection,
@@ -113,13 +114,7 @@ export default buildConfigWithDefaults({
           canTransform: ({ collectionSlug }) => collectionSlug === mediaHeaderOnlySlug,
           mimeTypes: ['image/png'],
           transformFile: async ({ file }) => ({
-            file: new File(
-              [await readFile(path.resolve(dirname, '../../uploads/small.png'))],
-              file.name,
-              {
-                type: 'image/png',
-              },
-            ),
+            file: new File([await readFile(smallPNGPath)], file.name, { type: 'image/png' }),
             status: 'complete',
           }),
         },

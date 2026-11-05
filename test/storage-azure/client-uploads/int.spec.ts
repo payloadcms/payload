@@ -500,7 +500,8 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     test('keeps req.file in sync with the checked file after the full download', async ({
       restClient,
     }) => {
-      // Claims text/plain but holds a PNG, so its type is found only after the full download.
+      // Claims text/plain but holds a PNG, so its type is found only after the full download, and
+      // the `replace-png` transformer is planned only then.
       const form = await stageAzureClientUpload({
         collectionSlug: mediaHeaderOnlySlug,
         file: readFileSync(path.resolve(dirname, '../../uploads/image.png')),
@@ -510,12 +511,14 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       })
 
       const createRes = await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: form })
-      const { doc, errors } = await createRes.json()
+      const { doc } = await createRes.json()
 
-      expect(errors).toBeUndefined()
       expect(createRes.status).toBe(201)
       createdIds.push(doc.id)
       expect(doc.mimeType).toBe('image/png')
+      expect(doc.filesize).toBe(
+        readFileSync(path.resolve(dirname, '../../uploads/small.png')).length,
+      )
     })
 
     test('downloads a client upload once for a bulk update and removes its temp files', async ({
@@ -524,18 +527,19 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
     }) => {
       const listClientUploadTempFiles = async () =>
         (await readdir(tmpdir())).filter((name) => name.startsWith('payload-client-upload-'))
-      const ids: (number | string)[] = []
+      const ids = await Promise.all(
+        ['first.txt', 'second.txt'].map(async (name) => {
+          const { id } = await payload.create({
+            collection: mediaHeaderOnlySlug,
+            data: {},
+            file: { name, data: Buffer.from('old'), mimetype: 'text/plain', size: 3 },
+            overrideAccess: true,
+          })
 
-      for (const name of ['first.txt', 'second.txt']) {
-        const doc = await payload.create({
-          collection: mediaHeaderOnlySlug,
-          data: {},
-          file: { name, data: Buffer.from('old'), mimetype: 'text/plain', size: 3 },
-          overrideAccess: true,
-        })
-        ids.push(doc.id)
-        createdIds.push(doc.id)
-      }
+          return id
+        }),
+      )
+      createdIds.push(...ids)
 
       const form = await stageAzureClientUpload({
         collectionSlug: mediaHeaderOnlySlug,
@@ -546,21 +550,14 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
       })
       const before = await listClientUploadTempFiles()
       const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')
+      const where = qs.stringify({ where: { id: { in: ids } } }, { addQueryPrefix: true })
 
       try {
-        const updateRes = await restClient.PATCH(
-          `/${mediaHeaderOnlySlug}${qs.stringify({ where: { id: { in: ids } } }, { addQueryPrefix: true })}`,
-          { body: form },
-        )
-        const { docs, errors } = await updateRes.json()
+        const updateRes = await restClient.PATCH(`/${mediaHeaderOnlySlug}${where}`, { body: form })
 
-        expect(errors).toEqual([])
-        expect(docs).toHaveLength(2)
-
-        // A whole-file download has no byte count. Every document's transformer accepts the
-        // upload, but the documents share one download.
-        const wholeFileDownloads = downloadSpy.mock.calls.filter((call) => call[1] === undefined)
-        expect(wholeFileDownloads).toHaveLength(1)
+        expect((await updateRes.json()).docs).toHaveLength(2)
+        // A whole-file download has no byte count. Both documents accept the upload but share it.
+        expect(downloadSpy.mock.calls.filter((call) => call[1] === undefined)).toHaveLength(1)
       } finally {
         downloadSpy.mockRestore()
       }

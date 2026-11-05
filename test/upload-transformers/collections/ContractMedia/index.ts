@@ -1,7 +1,14 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
 import { contractHookCalls } from '../../contractFixtures.js'
 import { contractMediaDir, contractMediaSlug } from '../../shared.js'
+
+const recordHook =
+  (hook: string): CollectionBeforeChangeHook =>
+  ({ data }) => {
+    contractHookCalls.push({ _transforms: data?._transforms, hook })
+    return data
+  }
 
 export const ContractMedia: CollectionConfig = {
   slug: contractMediaSlug,
@@ -15,18 +22,8 @@ export const ContractMedia: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [
-      ({ data }) => {
-        contractHookCalls.push({ _transforms: data._transforms, hook: 'beforeChange' })
-        return data
-      },
-    ],
-    beforeValidate: [
-      ({ data }) => {
-        contractHookCalls.push({ _transforms: data?._transforms, hook: 'beforeValidate' })
-        return data
-      },
-    ],
+    beforeChange: [recordHook('beforeChange')],
+    beforeValidate: [recordHook('beforeValidate')],
   },
   upload: { staticDir: contractMediaDir },
   versions: false,

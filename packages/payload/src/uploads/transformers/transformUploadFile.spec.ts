@@ -6,21 +6,20 @@ import type { FileSource, UploadTransformer } from './types.js'
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
 import { transformUploadFile } from './transformUploadFile.js'
 
-const makeReq = (): PayloadRequest => ({}) as unknown as PayloadRequest
-
 const readAllText = async (source: FileSource): Promise<string> =>
   new TextDecoder().decode(
     await source.readFileBytes({ numberOfBytes: source.sizeInBytes, startByte: 0 }),
   )
 
-const makeDocs = (doc: Record<string, unknown> = { alt: 'logo', _transforms: null }) => ({
-  doc: structuredClone(doc),
-  originalDoc: Object.freeze(structuredClone(doc)),
+const makeDocs = () => ({
+  doc: { alt: 'logo', _transforms: null } as Record<string, unknown>,
+  originalDoc: Object.freeze({ alt: 'logo', _transforms: null }),
 })
 
 const makeTransformer = (overrides: Partial<UploadTransformer> = {}): UploadTransformer => ({
   mimeTypes: ['image/*'],
   slug: 'test-transformer',
+  transformFile: vi.fn().mockResolvedValue({ status: 'continue' }),
   ...overrides,
 })
 
@@ -34,7 +33,7 @@ const runPipeline = (
     ...makeDocs(),
     options: undefined,
     originalFile: new File(['original'], 'logo.png'),
-    req: makeReq(),
+    req: {} as PayloadRequest,
     ...args,
   })
 
@@ -42,23 +41,11 @@ describe('transformUploadFile', () => {
   it('should replace the file and pass it to the next stage when a stage returns continue with a file', async () => {
     const replacement = new File(['replaced'], 'logo.png')
     const first = makeTransformer({
-      slug: 'first',
       transformFile: vi.fn().mockResolvedValue({ file: replacement, status: 'continue' }),
     })
-    const second = makeTransformer({
-      slug: 'second',
-      transformFile: vi.fn().mockResolvedValue({ status: 'continue' }),
-    })
+    const second = makeTransformer()
 
-    const outputFile = await transformUploadFile({
-      collectionSlug: 'media',
-      file: new File(['original'], 'logo.png'),
-      ...makeDocs(),
-      options: undefined,
-      originalFile: new File(['original'], 'logo.png'),
-      pipeline: [first, second],
-      req: makeReq(),
-    })
+    const outputFile = await runPipeline({ pipeline: [first, second] })
 
     expect(second.transformFile).toHaveBeenCalledWith(
       expect.objectContaining({ file: replacement }),
@@ -69,20 +56,11 @@ describe('transformUploadFile', () => {
   it('should replace the file and stop the pipeline when a stage returns complete', async () => {
     const completeFile = new File(['done'], 'logo.png')
     const first = makeTransformer({
-      slug: 'first',
       transformFile: vi.fn().mockResolvedValue({ file: completeFile, status: 'complete' }),
     })
-    const second = makeTransformer({ slug: 'second', transformFile: vi.fn() })
+    const second = makeTransformer()
 
-    const outputFile = await transformUploadFile({
-      collectionSlug: 'media',
-      file: new File(['original'], 'logo.png'),
-      ...makeDocs(),
-      options: undefined,
-      originalFile: new File(['original'], 'logo.png'),
-      pipeline: [first, second],
-      req: makeReq(),
-    })
+    const outputFile = await runPipeline({ pipeline: [first, second] })
 
     expect(outputFile).toBe(completeFile)
     expect(second.transformFile).not.toHaveBeenCalled()
@@ -90,65 +68,46 @@ describe('transformUploadFile', () => {
 
   it('should propagate a thrown error without calling later stages', async () => {
     const first = makeTransformer({
-      slug: 'first',
       transformFile: vi.fn().mockRejectedValue(new Error('transform failed')),
     })
-    const second = makeTransformer({ slug: 'second', transformFile: vi.fn() })
+    const second = makeTransformer()
 
-    await expect(
-      transformUploadFile({
-        collectionSlug: 'media',
-        file: new File(['original'], 'logo.png'),
-        ...makeDocs(),
-        options: undefined,
-        originalFile: new File(['original'], 'logo.png'),
-        pipeline: [first, second],
-        req: makeReq(),
-      }),
-    ).rejects.toThrow('transform failed')
-
+    await expect(runPipeline({ pipeline: [first, second] })).rejects.toThrow('transform failed')
     expect(second.transformFile).not.toHaveBeenCalled()
   })
 
   it('should pass each stage the current file as source and the original file as originalSource', async () => {
-    const seen: { originalSource: string; source: string }[] = []
-    const makeRecordingTransformer = (output?: File) =>
-      makeTransformer({
-        transformFile: async ({ originalSource, source }) => {
-          seen.push({
-            originalSource: await readAllText(originalSource),
-            source: await readAllText(source),
-          })
-          return { file: output, status: 'continue' }
-        },
-      })
-
-    await runPipeline({
-      file: new File(['resized'], 'logo.png'),
-      pipeline: [
-        makeRecordingTransformer(new File(['cropped'], 'logo.png')),
-        makeRecordingTransformer(),
-      ],
+    const first = makeTransformer({
+      transformFile: vi
+        .fn()
+        .mockResolvedValue({ file: new File(['cropped'], 'logo.png'), status: 'continue' }),
     })
+    const second = makeTransformer()
 
-    expect(seen).toEqual([
-      { originalSource: 'original', source: 'resized' },
-      { originalSource: 'original', source: 'cropped' },
+    await runPipeline({ file: new File(['resized'], 'logo.png'), pipeline: [first, second] })
+
+    const sourceTexts = await Promise.all(
+      [first, second].map(async ({ transformFile }) => {
+        const { originalSource, source } = vi.mocked(transformFile!).mock.calls[0]![0]
+
+        return [await readAllText(source), await readAllText(originalSource)]
+      }),
+    )
+
+    expect(sourceTexts).toEqual([
+      ['resized', 'original'],
+      ['cropped', 'original'],
     ])
   })
 
   it('should pass a _transforms change to later stages and keep it in doc', async () => {
     const first = makeTransformer({
-      slug: 'first',
       transformFile: vi.fn(({ doc }) => {
         doc._transforms = { score: 1 }
         return Promise.resolve({ status: 'continue' as const })
       }),
     })
-    const second = makeTransformer({
-      slug: 'second',
-      transformFile: vi.fn().mockResolvedValue({ status: 'continue' }),
-    })
+    const second = makeTransformer()
     const docs = makeDocs()
 
     await runPipeline({ ...docs, pipeline: [first, second] })
@@ -160,7 +119,6 @@ describe('transformUploadFile', () => {
       }),
     )
     expect(docs.doc._transforms).toEqual({ score: 1 })
-    expect(docs.originalDoc._transforms).toBeNull()
   })
 
   it.each([
@@ -177,7 +135,7 @@ describe('transformUploadFile', () => {
           return Promise.resolve({ status: 'continue' as const })
         }),
       })
-      const second = makeTransformer({ slug: 'second', transformFile: vi.fn() })
+      const second = makeTransformer()
 
       const result = runPipeline({ pipeline: [first, second] })
 

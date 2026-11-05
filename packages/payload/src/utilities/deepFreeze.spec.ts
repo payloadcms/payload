@@ -7,21 +7,16 @@ describe('deepFreeze', () => {
     const value = { group: { tags: [{ name: 'a' }] } }
 
     expect(deepFreeze(value)).toBe(value)
-    expect(Object.isFrozen(value)).toBe(true)
-    expect(Object.isFrozen(value.group)).toBe(true)
-    expect(Object.isFrozen(value.group.tags)).toBe(true)
-    expect(Object.isFrozen(value.group.tags[0])).toBe(true)
+    expect([value, value.group, value.group.tags, value.group.tags[0]].every(Object.isFrozen)).toBe(
+      true,
+    )
   })
 
   it('should skip typed arrays such as a Buffer, which cannot be frozen', () => {
-    const value = { data: Buffer.from('abc') }
-
-    expect(() => deepFreeze(value)).not.toThrow()
-    expect(Object.isFrozen(value)).toBe(true)
+    expect(Object.isFrozen(deepFreeze({ data: Buffer.from('abc') }))).toBe(true)
   })
 
-  it('should return primitives and null unchanged', () => {
-    expect(deepFreeze(null)).toBeNull()
-    expect(deepFreeze('text')).toBe('text')
+  it.for([null, 'text'])('should return %s unchanged', (value) => {
+    expect(deepFreeze(value)).toBe(value)
   })
 })
