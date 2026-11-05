@@ -16,12 +16,10 @@ import type {
   FormFieldsContext as FormFieldsContextType,
   FormProps,
   GetDataByPath,
-  Submit,
 } from './types.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { useQueue } from '../../hooks/useQueue.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -40,7 +38,6 @@ import {
   SuccessfulSubmitCountContext,
 } from './context.js'
 import { initContextState } from './initContextState.js'
-import { requestPriority } from './requestPriority.js'
 import { useFormState } from './useFormState.js'
 import { useFormSubmission } from './useFormSubmission.js'
 
@@ -67,12 +64,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const currentLocale = useLocale()
   const locale = currentLocale?.code
   const { refreshCookie } = useAuth()
-  const formSequenceRef = useRef(0)
   const resetSequenceRef = useRef(0)
   const isMountedRef = useRef(false)
-  const latestExplicitSubmitRef = useRef<Promise<boolean> | undefined>(undefined)
-  const requestQueueOptions = useMemo(() => ({ getSequence: () => formSequenceRef.current }), [])
-  const { queueTask: scheduleRequest, resetQueue } = useQueue(requestQueueOptions)
 
   const { getUploadHandler } = useUploadHandlers()
 
@@ -87,13 +80,16 @@ export const Form: React.FC<FormProps> = (props) => {
     dispatchFields,
     dispatchFieldsWithoutIncrementingFormSequence,
     formState,
+    getFormSequence,
     isInitializing: isFormStateInitializing,
     isModified,
     isValid,
     prevFormStateRef,
+    queueTask,
     refreshFormState,
     refreshFormStateAfterSave,
     resetFormState,
+    resetQueue,
     setIsValid,
     setModified,
     setModifiedWithoutTracking,
@@ -101,7 +97,6 @@ export const Form: React.FC<FormProps> = (props) => {
     validateForm,
   } = useFormState({
     contextRef,
-    formSequenceRef,
     onApplied: (appliedFormState, isSubmitted) => notifyOnChange(appliedFormState, isSubmitted),
     onReset: () => {
       resetSequenceRef.current += 1
@@ -109,33 +104,31 @@ export const Form: React.FC<FormProps> = (props) => {
       restoreRequestState()
     },
     props,
-    queueTask: scheduleRequest,
     resetSequenceRef,
   })
 
   const {
     backgroundProcessing,
     disabled,
-    disabledRef,
-    disableFormForSubmission,
-    executeSubmit,
     processing,
-    releaseFormAfterSubmission,
     restoreRequestState,
     setBackgroundProcessing,
     setDisabled,
     setProcessing,
     setSubmitted,
+    submit,
     submitted,
     successfulSubmitCount,
   } = useFormSubmission({
     contextRef,
     dispatchFieldsWithoutIncrementingFormSequence,
     formRef,
-    formSequenceRef,
+    getFormSequence,
     isMountedRef,
     prevFormStateRef,
     props,
+    queueTask,
+    refreshFormState,
     refreshFormStateAfterSave,
     resetSequenceRef,
     setIsValid,
@@ -147,100 +140,6 @@ export const Form: React.FC<FormProps> = (props) => {
   const fieldsContextValue = useMemo<FormFieldsContextType>(
     () => [formState, dispatchFields],
     [formState, dispatchFields],
-  )
-
-  const submit = useCallback<Submit>(
-    async (options, event) => {
-      event?.stopPropagation()
-      event?.preventDefault()
-      if (disabledRef.current) {
-        return
-      }
-
-      const shouldDisableForm = options?.disableFormWhileProcessing ?? true
-
-      // Disable before queueing, like a direct submit, so the guard above rejects any submission made while this one waits.
-      if (shouldDisableForm) {
-        disableFormForSubmission()
-      }
-
-      const resetSequence = resetSequenceRef.current
-      let didReceiveSuccessfulResponse = false
-      const scheduledRequest = scheduleRequest({
-        priority: requestPriority[options?.submissionType ?? 'submit'],
-        task: (requestContext) =>
-          executeSubmit({
-            onResponse: ({ res }) => {
-              didReceiveSuccessfulResponse = Boolean(res?.ok)
-            },
-            options,
-            requestContext,
-          }),
-      })
-
-      if (options?.submissionType !== 'autosave') {
-        latestExplicitSubmitRef.current = scheduledRequest.then(
-          () => didReceiveSuccessfulResponse,
-          () => didReceiveSuccessfulResponse,
-        )
-      }
-
-      const result = await scheduledRequest
-
-      // A superseded submission never runs, so release the disable it took.
-      // Skip after a reset: it already restored request state, and a newer submission may own the disable.
-      if (
-        result.status === 'superseded' &&
-        shouldDisableForm &&
-        resetSequence === resetSequenceRef.current
-      ) {
-        releaseFormAfterSubmission()
-      }
-
-      // A failed submit may have displaced a refresh without returning replacement form state.
-      if (
-        result.status === 'completed' &&
-        !didReceiveSuccessfulResponse &&
-        isMountedRef.current &&
-        resetSequence === resetSequenceRef.current
-      ) {
-        refreshFormState({ force: true })
-      }
-
-      if (result.status === 'superseded' && options?.submissionType === 'autosave') {
-        let explicitSubmit = latestExplicitSubmitRef.current
-        let didSubmitSucceed = true
-
-        // A successful publish must finish before deciding whether to recover the draft.
-        while (explicitSubmit !== undefined) {
-          didSubmitSucceed = await explicitSubmit
-
-          if (explicitSubmit === latestExplicitSubmitRef.current) {
-            break
-          }
-
-          explicitSubmit = latestExplicitSubmitRef.current
-        }
-
-        if (
-          !didSubmitSucceed &&
-          isMountedRef.current &&
-          resetSequence === resetSequenceRef.current
-        ) {
-          options.onStaleRequest?.()
-        }
-      }
-
-      return result.status === 'completed' ? result.value : undefined
-    },
-    [
-      disabledRef,
-      disableFormForSubmission,
-      executeSubmit,
-      releaseFormAfterSubmission,
-      scheduleRequest,
-      refreshFormState,
-    ],
   )
 
   const getFields = useCallback(() => contextRef.current.fields, [])

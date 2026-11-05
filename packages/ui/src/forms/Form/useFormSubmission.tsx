@@ -11,8 +11,14 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { TaskContext } from '../../hooks/useQueue.js'
-import type { FieldAction, Context as FormContextType, FormProps, SubmitOptions } from './types.js'
+import type { TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
+import type {
+  FieldAction,
+  Context as FormContextType,
+  FormProps,
+  Submit,
+  SubmitOptions,
+} from './types.js'
 import type { UseFormStateResult } from './useFormState.js'
 
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
@@ -25,15 +31,18 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
+import { requestPriority } from './requestPriority.js'
 
 type Args = {
   contextRef: RefObject<FormContextType>
   dispatchFieldsWithoutIncrementingFormSequence: Dispatch<FieldAction>
   formRef: RefObject<HTMLFormElement | null>
-  formSequenceRef: RefObject<number>
+  getFormSequence: UseFormStateResult['getFormSequence']
   isMountedRef: RefObject<boolean>
   prevFormStateRef: RefObject<FormState>
   props: FormProps
+  queueTask: UseQueueResult['queueTask']
+  refreshFormState: UseFormStateResult['refreshFormState']
   refreshFormStateAfterSave: UseFormStateResult['refreshFormStateAfterSave']
   resetSequenceRef: RefObject<number>
   setIsValid: FormContextType['setIsValid']
@@ -46,10 +55,12 @@ export const useFormSubmission = ({
   contextRef,
   dispatchFieldsWithoutIncrementingFormSequence,
   formRef,
-  formSequenceRef,
+  getFormSequence,
   isMountedRef,
   prevFormStateRef,
   props,
+  queueTask,
+  refreshFormState,
   refreshFormStateAfterSave,
   resetSequenceRef,
   setIsValid,
@@ -95,6 +106,7 @@ export const useFormSubmission = ({
   const isDisabledRef = useRef(isDisabled)
   const isDisabledFromPropsRef = useRef(Boolean(isDisabledFromProps))
   const submitFocus = useRef<HTMLElement | null>(null)
+  const latestExplicitSubmitRef = useRef<Promise<boolean> | undefined>(undefined)
   isDisabledFromPropsRef.current = Boolean(isDisabledFromProps)
 
   const method = 'method' in props ? props?.method : undefined
@@ -236,11 +248,11 @@ export const useFormSubmission = ({
           await wait(100)
 
           // Autocomplete updates happen before the data snapshot and belong to this submission.
-          const dispatchedSequence = formSequenceRef.current
+          const dispatchedSequence = getFormSequence()
           const { isQueueReset } = requestContext
 
           requestContext = {
-            isCurrent: () => !isQueueReset() && formSequenceRef.current === dispatchedSequence,
+            isCurrent: () => !isQueueReset() && getFormSequence() === dispatchedSequence,
             isQueueReset,
           }
         }
@@ -404,7 +416,7 @@ export const useFormSubmission = ({
               : undefined
           }
 
-          const successSequence = formSequenceRef.current
+          const successSequence = getFormSequence()
           const successResetSequence = resetSequenceRef.current
 
           if (requestContext.isCurrent() || hasCreatedDocument) {
@@ -442,7 +454,7 @@ export const useFormSubmission = ({
             // A successful drawer callback can unmount the form before its toast resolves.
             if (
               !isMountedRef.current &&
-              formSequenceRef.current === successSequence &&
+              getFormSequence() === successSequence &&
               resetSequenceRef.current === successResetSequence + 1
             ) {
               preservePromiseToast = true
@@ -623,12 +635,107 @@ export const useFormSubmission = ({
       validateForm,
       onNonFieldError,
       contextRef,
-      formSequenceRef,
+      getFormSequence,
       isMountedRef,
       prevFormStateRef,
       resetSequenceRef,
       setIsValid,
       _setModified,
+    ],
+  )
+
+  const submit = useCallback<Submit>(
+    async (options, event) => {
+      event?.stopPropagation()
+      event?.preventDefault()
+      if (isDisabledRef.current) {
+        return
+      }
+
+      const shouldDisableForm = options?.disableFormWhileProcessing ?? true
+
+      // Disable before queueing, like a direct submit, so the guard above rejects any submission made while this one waits.
+      if (shouldDisableForm) {
+        disableFormForSubmission()
+      }
+
+      const resetSequence = resetSequenceRef.current
+      let didReceiveSuccessfulResponse = false
+      const scheduledRequest = queueTask({
+        priority: requestPriority[options?.submissionType ?? 'submit'],
+        task: (requestContext) =>
+          executeSubmit({
+            onResponse: ({ res }) => {
+              didReceiveSuccessfulResponse = Boolean(res?.ok)
+            },
+            options,
+            requestContext,
+          }),
+      })
+
+      if (options?.submissionType !== 'autosave') {
+        latestExplicitSubmitRef.current = scheduledRequest.then(
+          () => didReceiveSuccessfulResponse,
+          () => didReceiveSuccessfulResponse,
+        )
+      }
+
+      const result = await scheduledRequest
+
+      // A superseded submission never runs, so release the disable it took.
+      // Skip after a reset: it already restored request state, and a newer submission may own the disable.
+      if (
+        result.status === 'superseded' &&
+        shouldDisableForm &&
+        resetSequence === resetSequenceRef.current
+      ) {
+        releaseFormAfterSubmission()
+      }
+
+      // A failed submit may have displaced a refresh without returning replacement form state.
+      if (
+        result.status === 'completed' &&
+        !didReceiveSuccessfulResponse &&
+        isMountedRef.current &&
+        resetSequence === resetSequenceRef.current
+      ) {
+        refreshFormState({ force: true })
+      }
+
+      if (result.status === 'superseded' && options?.submissionType === 'autosave') {
+        let explicitSubmit = latestExplicitSubmitRef.current
+        let didSubmitSucceed = true
+
+        // A successful publish must finish before deciding whether to recover the draft.
+        while (explicitSubmit !== undefined) {
+          didSubmitSucceed = await explicitSubmit
+
+          if (explicitSubmit === latestExplicitSubmitRef.current) {
+            break
+          }
+
+          explicitSubmit = latestExplicitSubmitRef.current
+        }
+
+        if (
+          !didSubmitSucceed &&
+          isMountedRef.current &&
+          resetSequence === resetSequenceRef.current
+        ) {
+          options.onStaleRequest?.()
+        }
+      }
+
+      return result.status === 'completed' ? result.value : undefined
+    },
+    [
+      disableFormForSubmission,
+      executeSubmit,
+      isMountedRef,
+      releaseFormAfterSubmission,
+      queueTask,
+      refreshFormState,
+      resetSequenceRef,
     ],
   )
 
@@ -647,19 +754,14 @@ export const useFormSubmission = ({
   return {
     backgroundProcessing: isBackgroundProcessing,
     disabled: isDisabled,
-    disabledRef: isDisabledRef,
-    disableFormForSubmission,
-    executeSubmit,
     processing: isProcessing,
-    releaseFormAfterSubmission,
     restoreRequestState,
     setBackgroundProcessing,
     setDisabled,
     setProcessing,
     setSubmitted,
-    submissionErrorsRef,
+    submit,
     submitted: isSubmitted,
-    submittedRef,
     successfulSubmitCount,
   }
 }

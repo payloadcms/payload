@@ -16,6 +16,7 @@ import type { BuildFormStateSuccessResult } from '../../utilities/buildFormState
 import type { AcceptValues } from './mergeServerFormState.js'
 import type { FieldAction, Context as FormContextType, FormProps } from './types.js'
 
+import { useQueue } from '../../hooks/useQueue.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -67,6 +68,8 @@ export type UseFormStateResult = {
   dispatchFieldsWithoutIncrementingFormSequence: Dispatch<FieldAction>
   /** Current fields, including their values, validation errors, and rendered components. */
   formState: FormState
+  /** Reads the current local-edit revision without subscribing to field changes. */
+  getFormSequence: () => number
   /** True while rebuilding the selected schema. */
   isInitializing: boolean
   /** Whether the form has unsaved field changes. */
@@ -75,12 +78,14 @@ export type UseFormStateResult = {
   isValid: boolean
   /** Baseline used to distinguish local edits from applied server state. */
   prevFormStateRef: RefObject<FormState>
+  queueTask: UseQueueResult['queueTask']
   /** Queues a server refresh after field edits or changes to the selected fields. */
   refreshFormState: (args?: { force?: boolean }) => void
   /** Calls `refreshFormState` with the saved document to refresh permissions and preview URLs. */
   refreshFormStateAfterSave: (args: AfterSaveArgs) => Promise<void>
   /** Rebuilds field state from new data and clears the modified flag. */
   resetFormState: (data: unknown) => Promise<void>
+  resetQueue: UseQueueResult['resetQueue']
   setIsValid: FormContextType['setIsValid']
   setModified: FormContextType['setModified']
   setModifiedWithoutTracking: FormContextType['setModified']
@@ -110,7 +115,6 @@ const LAST_EDITED_INTERVAL_MS = 10_000
 
 type Args = {
   contextRef: RefObject<FormContextType>
-  formSequenceRef: RefObject<number>
   /** Called with the merged form state after a refresh or local validation applies it. */
   onApplied: (formState: FormState, submitted?: boolean) => void
   onReset: () => void
@@ -124,7 +128,6 @@ type Args = {
     | 'select'
     | 'widgetSlug'
   >
-  queueTask: UseQueueResult['queueTask']
   resetSequenceRef: RefObject<number>
 }
 
@@ -141,15 +144,17 @@ type Args = {
  */
 export const useFormState = ({
   contextRef,
-  formSequenceRef,
   onApplied,
   onReset,
   props,
-  queueTask,
   resetSequenceRef,
 }: Args): UseFormStateResult => {
   const [formState, setFormState] = useState<FormState>(() => props.initialState || {})
   const formStateRef = useRef(formState)
+  const formSequenceRef = useRef(0)
+  const getFormSequence = useCallback(() => formSequenceRef.current, [])
+  const requestQueueOptions = useMemo(() => ({ getSequence: getFormSequence }), [getFormSequence])
+  const { queueTask, resetQueue } = useQueue(requestQueueOptions)
 
   const dispatchFieldsWithoutIncrementingFormSequence = useCallback<React.Dispatch<FieldAction>>(
     (action) => {
@@ -763,13 +768,16 @@ export const useFormState = ({
       dispatchFields,
       dispatchFieldsWithoutIncrementingFormSequence,
       formState,
+      getFormSequence,
       isInitializing,
       isModified,
       isValid,
       prevFormStateRef,
+      queueTask,
       refreshFormState: queueFormStateRefresh,
       refreshFormStateAfterSave,
       resetFormState,
+      resetQueue,
       setIsValid,
       setModified,
       setModifiedWithoutTracking,
@@ -780,13 +788,16 @@ export const useFormState = ({
       dispatchFields,
       dispatchFieldsWithoutIncrementingFormSequence,
       formState,
+      getFormSequence,
       prevFormStateRef,
+      queueTask,
       refreshFormStateAfterSave,
       isInitializing,
       isValid,
       isModified,
       queueFormStateRefresh,
       resetFormState,
+      resetQueue,
       setIsValid,
       setModified,
       setModifiedWithoutTracking,
