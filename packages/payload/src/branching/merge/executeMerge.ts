@@ -226,12 +226,9 @@ export const executeMerge = async ({
   result: MergeResult
 }): Promise<MergeResult> => {
   const ledger = await createMergeLedger({ branch, mergeable, payload, req })
-  // A request supplied by an HTTP caller does not yet have a transaction, so it
-  // must start one just as a Local API call would.
-  const shouldCommit = await initTransaction(req)
-  const transactionID = req.transactionID ? await req.transactionID : undefined
-  const hasTransaction = transactionID !== null && transactionID !== undefined
-  const cleanupScope = await beginDeferredCleanupScope({ req })
+  let shouldCommit = false
+  let hasTransaction = false
+  let cleanupScope: Awaited<ReturnType<typeof beginDeferredCleanupScope>> | undefined
 
   const uploadCleanupPlans: UploadCleanupPlan[] = []
   const sourceCleanupPlans: SourceCleanupPlan[] = []
@@ -292,6 +289,14 @@ export const executeMerge = async ({
     recordMergeRollback({ branchDoc, incomingReq, ledger, payload, req })
 
   try {
+    // HTTP requests also need an operation-owned transaction. Keep startup inside
+    // recovery so a failed BEGIN does not leave the merge event in progress.
+    shouldCommit = await initTransaction(req)
+    const transactionID = await req.transactionID
+
+    hasTransaction = transactionID !== null && transactionID !== undefined
+    cleanupScope = await beginDeferredCleanupScope({ req })
+
     const writeTargetReq = createMainBranchRequest({ req })
     const refreshedApplicable = await resolveEffectiveOperations({
       branch,

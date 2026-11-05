@@ -2,6 +2,7 @@ import type { Payload, PayloadRequest } from '../../types/index.js'
 import type { MergeableChange, MergeEventChange } from '../types.js'
 
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { branchMergesCollectionSlug, MAIN_BRANCH } from '../types.js'
 import { getMergeErrorMessage } from './utilities.js'
 
@@ -93,12 +94,20 @@ export const createMergeLedger = async ({
     updateChanges({ changeIDs: [changeID], update })
 
   const persist: MergeLedger['persist'] = async ({ completedAt, error, mergedAt, status }) => {
+    // SQLite permits only one writer. Checkpoints must share the merge's
+    // transaction until it ends; failure and finalization writes then run independently.
+    const persistReq = isolateObjectProperty(mergeEventReq, 'transactionID')
+
+    if (payload.db.name === 'sqlite') {
+      persistReq.transactionID = req.transactionID
+    }
+
     await payload.update({
       id: mergeEvent.id,
       collection: branchMergesCollectionSlug,
       data: { changes, completedAt, error, mergedAt, status },
       overrideAccess: true,
-      req: mergeEventReq,
+      req: persistReq,
     })
   }
 
