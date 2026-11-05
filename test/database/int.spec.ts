@@ -7023,11 +7023,29 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     const res = await payload.create({
       collection: 'blocks-docs',
       data: {
+        dateBlocksArray: [
+          {
+            content: [
+              {
+                blockType: 'arrayDate',
+                date: '2026-06-15T12:00:00.000Z',
+              },
+            ],
+          },
+          {
+            content: [
+              {
+                blockType: 'arrayDate',
+                date: '2026-06-17T12:00:00.000Z',
+              },
+            ],
+          },
+        ],
         dateBlocksGroup: {
           content: [
             {
               blockType: 'groupedDate',
-              date: '2026-06-15T12:00:00.000Z',
+              date: '2026-06-14T23:30:00-07:00',
             },
           ],
         },
@@ -7064,6 +7082,14 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
 
       expect(result.docs.some(({ id }) => id === res.id)).toBe(shouldMatch)
     }
+
+    const repeatedNotEqualsResult = await payload.find({
+      collection: 'blocks-docs',
+      overrideAccess: true,
+      where: { 'dateBlocksArray.content.date': { not_equals: '2026-06-15' } },
+    })
+
+    expect(repeatedNotEqualsResult.docs.map(({ id }) => id)).not.toContain(res.id)
 
     await payload.update({
       id: res.id,

@@ -964,6 +964,12 @@ export interface Alias {
  */
 export interface BlocksDoc {
   id: string;
+  dateBlocksArray?:
+    | {
+        content?: ArrayDate[] | null;
+        id?: string | null;
+      }[]
+    | null;
   dateBlocksGroup?: {
     content?: GroupedDate[] | null;
   };
@@ -980,6 +986,17 @@ export interface BlocksDoc {
   } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ArrayDate".
+ */
+export interface ArrayDate {
+  date?: string | null;
+  date_tz?: SupportedTimezones;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'arrayDate';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1802,6 +1819,23 @@ export interface AliasesSelect<T extends boolean = true> {
  * via the `definition` "blocks-docs_select".
  */
 export interface BlocksDocsSelect<T extends boolean = true> {
+  dateBlocksArray?:
+    | T
+    | {
+        content?:
+          | T
+          | {
+              arrayDate?:
+                | T
+                | {
+                    date?: T;
+                    date_tz?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+        id?: T;
+      };
   dateBlocksGroup?:
     | T
     | {

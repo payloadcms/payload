@@ -382,31 +382,30 @@ describe('date-only JSON constraints', () => {
   })
 
   it('binds both day boundaries to the same JSON array value', () => {
-    expect(
-      createJSONQuery({
-        column: 'content',
-        operator: 'date_equals',
-        pathSegments: ['content', 'publishedOn'],
-        treatRootAsArray: true,
-        value: ['2026-03-29T00:00:00.000Z', '2026-03-29T23:00:00.000Z'],
-      }),
-    ).toBe(
-      `jsonb_path_exists(content, '$[*].publishedOn[*] ? (@ >= "2026-03-29T00:00:00.000Z" && @ < "2026-03-29T23:00:00.000Z")')`,
-    )
+    const query = createJSONQuery({
+      column: 'content',
+      operator: 'date_equals',
+      pathSegments: ['content', 'publishedOn'],
+      treatRootAsArray: true,
+      value: ['2026-03-29T00:00:00.000Z', '2026-03-29T23:00:00.000Z'],
+    })
+
+    expect(query).toContain(`jsonb_path_query(content, '$[*].publishedOn[*]')`)
+    expect(query).toContain(`>= '2026-03-29T00:00:00.000Z'::timestamptz`)
+    expect(query).toContain(`< '2026-03-29T23:00:00.000Z'::timestamptz`)
   })
 
   it('negates the whole JSON day predicate for not_equals', () => {
-    expect(
-      createJSONQuery({
-        column: 'content',
-        operator: 'date_not_equals',
-        pathSegments: ['content', 'publishedOn'],
-        treatRootAsArray: true,
-        value: ['2026-03-29T00:00:00.000Z', '2026-03-29T23:00:00.000Z'],
-      }),
-    ).toBe(
-      `jsonb_path_exists(content, '$[*].publishedOn[*] ? (@ >= "2026-03-29T00:00:00.000Z" && @ < "2026-03-29T23:00:00.000Z")') IS NOT TRUE`,
-    )
+    const query = createJSONQuery({
+      column: 'content',
+      operator: 'date_not_equals',
+      pathSegments: ['content', 'publishedOn'],
+      treatRootAsArray: true,
+      value: ['2026-03-29T00:00:00.000Z', '2026-03-29T23:00:00.000Z'],
+    })
+
+    expect(query).toContain(`jsonb_path_query(content, '$[*].publishedOn[*]')`)
+    expect(query).toMatch(/\) IS NOT TRUE$/)
   })
 
   it('builds paths relative to a JSON blocks column nested in a group', () => {

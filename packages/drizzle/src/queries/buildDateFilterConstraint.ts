@@ -2,7 +2,7 @@ import type { Column, SQL, Table } from 'drizzle-orm'
 import type { FlattenedField } from 'payload'
 import type { ResolvedDateFilterPlan, ResolvedDateFilterTarget } from 'payload/shared'
 
-import { and, exists, notExists, or, sql } from 'drizzle-orm'
+import { aliasedTable, and, exists, notExists, or, sql } from 'drizzle-orm'
 import { APIError } from 'payload'
 import { getDateOnlyComparison } from 'payload/shared'
 
@@ -57,7 +57,7 @@ const resolveDateComparisonConstraint = ({
   plan: ResolvedDateFilterPlan
   target: ResolvedDateFilterTarget
 }): { constraint: SQL; isNegated: boolean } | undefined => {
-  if (plan.input.kind !== 'calendarDay' || !plan.timezone) {
+  if (plan.input.kind !== 'calendarDay') {
     return undefined
   }
 
@@ -199,9 +199,10 @@ const buildDateFilterTargetConstraint = ({
   target: ResolvedDateFilterTarget
 }): SQL => {
   const targetJoins: BuildQueryJoinAliases = []
+  const outerTable = aliasTable ?? aliasedTable(adapter.tables[tableName], tableName)
   const targetPath = getTableColumnFromPath({
     adapter,
-    aliasTable,
+    aliasTable: outerTable,
     collectionPath: path,
     fields,
     joins: targetJoins,
@@ -216,34 +217,30 @@ const buildDateFilterTargetConstraint = ({
   })
   const column =
     targetPath.rawColumn ||
-    (aliasTable && tableName === getNameFromDrizzleTable(targetPath.table)
-      ? aliasTable[targetPath.columnName]
+    (tableName === getNameFromDrizzleTable(targetPath.table)
+      ? outerTable[targetPath.columnName]
       : targetPath.table[targetPath.columnName])
   const pathConstraints = targetPath.constraints.map(({ columnName, table, value }) =>
     adapter.operators.equals(table[columnName], value),
   )
 
   if (adapter.blocksAsJSON && targetPath.field.type === 'blocks') {
-    for (const targetJoin of targetJoins) {
-      addJoinTable({
-        type: targetJoin.type,
-        condition: targetJoin.condition,
-        isOneToMany: targetJoin.isOneToMany,
-        joins,
-        queryPath: targetJoin.queryPath,
-        sourceTableName: targetJoin.sourceTableName,
-        table: targetJoin.table,
-      })
-    }
+    const resolvedPathSegments = targetPath.pathSegments ?? target.lineage.map(({ name }) => name)
+    const isNegatedAcrossRepeatedAncestor =
+      plan.operator === 'not_equals' &&
+      hasRepeatedAncestorOutsideJSONColumn({ resolvedPathSegments, target })
 
-    const comparison = getDateOnlyJSONComparisonFromPlan({ plan })
+    const comparison = getDateOnlyJSONComparisonFromPlan({
+      operator: isNegatedAcrossRepeatedAncestor ? 'equals' : plan.operator,
+      plan,
+    })
 
     if (!comparison) {
       throw new APIError(`Could not build the calendar-day comparison for "${path}".`)
     }
 
     const { pathSegments, repeatedPaths } = getDateOnlyJSONPaths({
-      pathSegments: targetPath.pathSegments ?? target.lineage.map(({ name }) => name),
+      pathSegments: resolvedPathSegments,
       target,
     })
 
@@ -257,6 +254,28 @@ const buildDateFilterTargetConstraint = ({
         value: comparison.value,
       }),
     )
+
+    if (isNegatedAcrossRepeatedAncestor) {
+      return buildJoinedDateOnlySubquery({
+        adapter,
+        dateConstraint: jsonConstraint,
+        isNegated: true,
+        joins: targetJoins,
+        pathConstraints,
+      })
+    }
+
+    for (const targetJoin of targetJoins) {
+      addJoinTable({
+        type: targetJoin.type,
+        condition: targetJoin.condition,
+        isOneToMany: targetJoin.isOneToMany,
+        joins,
+        queryPath: targetJoin.queryPath,
+        sourceTableName: targetJoin.sourceTableName,
+        table: targetJoin.table,
+      })
+    }
 
     return and(...pathConstraints, jsonConstraint)!
   }
@@ -325,8 +344,10 @@ const buildJoinedDateOnlySubquery = ({
 }
 
 const getDateOnlyJSONComparisonFromPlan = ({
+  operator,
   plan,
 }: {
+  operator: ResolvedDateFilterPlan['operator']
   plan: ResolvedDateFilterPlan
 }): { operator: string; value: string | string[] } | undefined => {
   if (plan.input.kind !== 'calendarDay') {
@@ -335,7 +356,7 @@ const getDateOnlyJSONComparisonFromPlan = ({
 
   const comparison = getDateOnlyComparison({
     date: plan.input.serialized,
-    operator: plan.operator,
+    operator,
     timezone: plan.timezone,
   })
 
@@ -343,9 +364,9 @@ const getDateOnlyJSONComparisonFromPlan = ({
     return undefined
   }
 
-  if (plan.operator === 'equals' || plan.operator === 'not_equals') {
+  if (operator === 'equals' || operator === 'not_equals') {
     return {
-      operator: plan.operator === 'equals' ? 'date_equals' : 'date_not_equals',
+      operator: operator === 'equals' ? 'date_equals' : 'date_not_equals',
       value: comparison.constraints.map(({ value }) => value.toISOString()),
     }
   }
@@ -356,3 +377,14 @@ const getDateOnlyJSONComparisonFromPlan = ({
     ? { operator: `date_${constraint.operator}`, value: constraint.value.toISOString() }
     : undefined
 }
+
+const hasRepeatedAncestorOutsideJSONColumn = ({
+  resolvedPathSegments,
+  target,
+}: {
+  resolvedPathSegments: string[]
+  target: ResolvedDateFilterTarget
+}): boolean =>
+  target.lineage
+    .slice(0, target.lineage.length - resolvedPathSegments.length)
+    .some(({ isRepeated }) => isRepeated)

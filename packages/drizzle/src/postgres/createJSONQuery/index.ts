@@ -2,7 +2,7 @@ import { APIError } from 'payload'
 
 import type { CreateJSONQueryArgs } from '../../types.js'
 
-import { SAFE_STRING_REGEX } from '../../utilities/escapeSQLValue.js'
+import { escapeSQLValue, SAFE_STRING_REGEX } from '../../utilities/escapeSQLValue.js'
 import { parseJSONPathSegment } from '../../utilities/parseJSONPathSegment.js'
 
 const operatorMap: Record<string, string> = {
@@ -43,6 +43,57 @@ const sanitizeValue = (value: unknown, operator?: string): string => {
   return `"${prefix}${escaped}"`
 }
 
+const createDateOnlyJSONQuery = ({
+  columnName,
+  fullPath,
+  operator,
+  value,
+}: {
+  columnName: string
+  fullPath: string
+  operator: string
+  value: unknown
+}): string => {
+  const valueAlias = 'date_filter_value'
+  const textValue = `(${valueAlias}.value #>> '{}')`
+  const isoDate = `^[0-9]{4}-[0-9]{2}-[0-9]{2}$`
+  const isoDateTime = `^[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}(:[0-9]{2}([.][0-9]+)?)?`
+  const offsetSuffix = `(Z|[+-][0-9]{2}:?[0-9]{2})$`
+  // Payload serializes date values as UTC, so legacy offset-free ISO values retain that meaning.
+  const instantValue = [
+    'CASE',
+    `WHEN ${textValue} ~ '${isoDateTime}${offsetSuffix}' THEN ${textValue}::timestamptz`,
+    `WHEN ${textValue} ~ '(${isoDate}|${isoDateTime}$)' THEN ${textValue}::timestamp AT TIME ZONE 'UTC'`,
+    'END',
+  ].join(' ')
+  const createExistsQuery = (predicate: string): string =>
+    `EXISTS (SELECT 1 FROM jsonb_path_query(${columnName}, '${fullPath}') AS ${valueAlias}(value) WHERE ${predicate})`
+
+  if (['date_equals', 'date_not_equals'].includes(operator)) {
+    if (!Array.isArray(value) || typeof value[0] !== 'string' || typeof value[1] !== 'string') {
+      throw new Error('Invalid date-only JSON comparison')
+    }
+
+    const start = escapeSQLValue(value[0])
+    const end = escapeSQLValue(value[1])
+    const existsQuery = createExistsQuery(
+      `${instantValue} >= '${start}'::timestamptz AND ${instantValue} < '${end}'::timestamptz`,
+    )
+
+    return operator === 'date_not_equals' ? `${existsQuery} IS NOT TRUE` : existsQuery
+  }
+
+  const comparisonOperator = operatorMap[operator.slice(5)]
+
+  if (!comparisonOperator || typeof value !== 'string') {
+    throw new Error('Invalid date-only JSON comparison')
+  }
+
+  return createExistsQuery(
+    `${instantValue} ${comparisonOperator} '${escapeSQLValue(value)}'::timestamptz`,
+  )
+}
+
 export const createJSONQuery = ({
   column,
   operator,
@@ -64,18 +115,8 @@ export const createJSONQuery = ({
 
   let sql = ''
 
-  if (['date_equals', 'date_not_equals'].includes(operator) && Array.isArray(value)) {
-    const [start, end] = value
-
-    if (typeof start !== 'string' || typeof end !== 'string') {
-      throw new Error('Invalid date-only JSON comparison')
-    }
-
-    const predicate = `@ >= ${sanitizeValue(start)} && @ < ${sanitizeValue(end)}`
-
-    const pathExists = `jsonb_path_exists(${columnName}, '${fullPath} ? (${predicate})')`
-
-    sql = operator === 'date_not_equals' ? `${pathExists} IS NOT TRUE` : pathExists
+  if (operator.startsWith('date_')) {
+    sql = createDateOnlyJSONQuery({ columnName, fullPath, operator, value })
   } else if (['in', 'not_in'].includes(operator) && Array.isArray(value)) {
     sql = '('
     value.forEach((item, i) => {
