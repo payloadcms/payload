@@ -650,6 +650,27 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
     expect(response.status).toBe(429)
   })
 
+  test('should not count sessions saved through a form submit as unfinished', async ({
+    restClient,
+  }) => {
+    for (let i = 0; i < maxActiveSessions; i++) {
+      const session = await createSession({ restClient })
+
+      await uploadAllSegments({ restClient, session })
+
+      const { file } = await completeStorage({ restClient, session })
+      const response = await createWithFileReference({ file, restClient, title: `Saved ${i}` })
+
+      expect(response.status).toBe(201)
+    }
+
+    const response = await restClient.POST(sessionsPath, {
+      body: JSON.stringify(createBody({})),
+    })
+
+    expect(response.status).toBe(201)
+  })
+
   test('should keep generic CRUD closed', async ({ restClient }) => {
     const session = await createSession({ restClient })
 

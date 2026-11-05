@@ -274,6 +274,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
                 percent: Math.floor((loaded / total) * 100),
               }),
             ),
+          retries: collectionConfig.upload.transfer?.retries,
           session: createdSession,
           signal: controller.signal,
           ...requestArgs,
@@ -618,7 +619,7 @@ const useRecoverUploadSessions = ({
   recoveringSessionIDsRef: React.RefObject<Set<string>>
   requestArgs: { apiRoute: string; serverURL: string }
 }) => {
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const { t } = useTranslation()
   const hasCheckedRef = useRef(false)
 
@@ -679,6 +680,8 @@ const useRecoverUploadSessions = ({
                               percent: Math.floor((loaded / total) * 100),
                             }),
                           ),
+                        retries: getEntityConfig({ collectionSlug: session.collectionSlug })?.upload
+                          ?.transfer?.retries,
                         session,
                         ...requestArgs,
                       })
@@ -704,6 +707,7 @@ const useRecoverUploadSessions = ({
       .catch(() => {})
   }, [
     finishInBackground,
+    getEntityConfig,
     getErrorMessage,
     hasSegmentedCollections,
     recoveringSessionIDsRef,

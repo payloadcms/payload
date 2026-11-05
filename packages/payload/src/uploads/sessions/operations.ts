@@ -107,6 +107,26 @@ export const createUploadSession = async ({
 
   await sweepUploadSessions({ req })
 
+  // A session finished through a normal form submit stays active until reconciliation sees the
+  // document that claimed its object, so it must not count as unfinished.
+  const { docs: storageCompleteSessions } = await req.payload.db.find<UploadSessionDoc>({
+    collection: slug,
+    limit: 0,
+    pagination: false,
+    req,
+    where: {
+      and: [
+        ownerWhere(owner),
+        { status: { in: ['pending', 'active'] } },
+        { storageCompletedAt: { exists: true } },
+      ],
+    },
+  })
+
+  for (const storageCompleteSession of storageCompleteSessions) {
+    await reconcileClaimedObject({ req, session: storageCompleteSession })
+  }
+
   const { totalDocs: activeSessionCount } = await req.payload.db.count({
     collection: slug,
     req,
