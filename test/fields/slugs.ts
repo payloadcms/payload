@@ -66,3 +66,6 @@ export const collectionSlugs = [
 ]
 
 export const slugLocalizedRequiredSlug = 'slug-localized-required'
+
+export const slugLocalizedRequiredSiblingSlug = 'slug-localized-required-siblings'
+export const slugLocalizedRequiredGroupSlug = 'slug-localized-required-group'

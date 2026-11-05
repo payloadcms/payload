@@ -1,10 +1,12 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
+import type { FlattenedField } from '../../config/types.js'
 import type { Slugify } from './types.js'
 
 import { getUniqueFieldValue } from '../../../utilities/getUniqueFieldValue.js'
 import { hasDraftsEnabled } from '../../../utilities/getVersionsConfig.js'
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
+import { fieldIsVirtual } from '../../config/types.js'
 import { getSlugFallbackValue } from './getSlugFallbackValue.js'
 import { hasValue } from './hasValue.js'
 
@@ -21,8 +23,8 @@ type Args = {
  * empty slug. Each empty locale derives from its own source value — a non-localized source applies
  * to every locale, so they follow it just like the active locale did — and falls back to a per-locale
  * `<singular>-<N>` only when that locale has no source. Both are deduped within the locale, so one
- * document never claims another's per-locale value. A required localized source must be translated
- * before its locale is seeded; otherwise SQL would insert a locale row without its required source.
+ * document never claims another's per-locale value. Required localized fields must be translated
+ * before their locale is seeded; otherwise SQL would insert an incomplete locale row.
  *
  * Runs after field `beforeChange` (similar to the localized `_status` treatment). The slug field hook
  * only sees the active locale, so the other locales are filled here at the operation level. A slug
@@ -41,6 +43,11 @@ export const fillEmptyLocalizedSlugs = async ({
   }
 
   const draftsEnabled = hasDraftsEnabled(collection)
+  const incompleteLocales = new Set(
+    localization.localeCodes.filter((locale) =>
+      hasMissingRequiredLocalizedField({ data, fields: collection.flattenedFields, locale }),
+    ),
+  )
 
   for (const field of collection.flattenedFields) {
     if (field.type !== 'slug' || !field.localized) {
@@ -64,22 +71,13 @@ export const fillEmptyLocalizedSlugs = async ({
     const localeValues = (data[field.name] ?? {}) as Record<string, unknown>
 
     for (const locale of localization.localeCodes) {
-      if (hasValue(localeValues[locale])) {
+      if (hasValue(localeValues[locale]) || incompleteLocales.has(locale)) {
         continue
       }
 
       const sourceForLocale = sourceField?.localized
         ? (source as Record<string, unknown> | undefined)?.[locale]
         : source
-
-      if (
-        sourceField?.localized &&
-        'required' in sourceField &&
-        sourceField.required &&
-        !hasValue(sourceForLocale)
-      ) {
-        continue
-      }
 
       const derived = sourceForLocale ? await slugify(sourceForLocale) : undefined
 
@@ -108,3 +106,38 @@ export const fillEmptyLocalizedSlugs = async ({
 
   return data
 }
+
+const hasMissingRequiredLocalizedField = ({
+  data,
+  fields,
+  locale,
+  parentIsLocalized = false,
+}: {
+  data: JsonObject | undefined
+  fields: FlattenedField[]
+  locale: string
+  parentIsLocalized?: boolean
+}): boolean =>
+  fields.some((field) => {
+    // Slugs are generated together, so a missing slug must not block the others.
+    if (field.type === 'slug' || fieldIsVirtual(field) || field.admin?.condition) {
+      return false
+    }
+
+    const isLocalized = parentIsLocalized || field.localized
+    const value =
+      field.localized && !parentIsLocalized
+        ? (data?.[field.name] as JsonObject | undefined)?.[locale]
+        : data?.[field.name]
+
+    if (field.type === 'group' || field.type === 'tab') {
+      return hasMissingRequiredLocalizedField({
+        data: value as JsonObject | undefined,
+        fields: field.flattenedFields,
+        locale,
+        parentIsLocalized: isLocalized,
+      })
+    }
+
+    return Boolean(isLocalized && 'required' in field && field.required && !hasValue(value))
+  })

@@ -109,6 +109,8 @@ export type LexicalNodes_FD47D92F =
       | 'slug-field-access'
       | 'slug-autosave'
       | 'slug-localized-required'
+      | 'slug-localized-required-siblings'
+      | 'slug-localized-required-group'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -165,6 +167,8 @@ export type LexicalNodes_DA189A21 =
       | 'slug-field-access'
       | 'slug-autosave'
       | 'slug-localized-required'
+      | 'slug-localized-required-siblings'
+      | 'slug-localized-required-group'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -224,6 +228,8 @@ export interface Config {
     'slug-field-access': SlugFieldAccess;
     'slug-autosave': SlugAutosave;
     'slug-localized-required': SlugLocalizedRequired;
+    'slug-localized-required-siblings': SlugLocalizedRequiredSibling;
+    'slug-localized-required-group': SlugLocalizedRequiredGroup;
     'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
     'text-fields': TextField;
@@ -271,6 +277,8 @@ export interface Config {
     'slug-field-access': SlugFieldAccessSelect<false> | SlugFieldAccessSelect<true>;
     'slug-autosave': SlugAutosaveSelect<false> | SlugAutosaveSelect<true>;
     'slug-localized-required': SlugLocalizedRequiredSelect<false> | SlugLocalizedRequiredSelect<true>;
+    'slug-localized-required-siblings': SlugLocalizedRequiredSiblingsSelect<false> | SlugLocalizedRequiredSiblingsSelect<true>;
+    'slug-localized-required-group': SlugLocalizedRequiredGroupSelect<false> | SlugLocalizedRequiredGroupSelect<true>;
     'tabs-fields-2': TabsFields2Select<false> | TabsFields2Select<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
@@ -2092,6 +2100,51 @@ export interface SlugAutosave {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-siblings".
+ */
+export interface SlugLocalizedRequiredSibling {
+  id: string;
+  title: string;
+  optionalTitle?: string | null;
+  body: string;
+  sharedSlug: string;
+  optionalSlug: string;
+  fallbackSlug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-group".
+ */
+export interface SlugLocalizedRequiredGroup {
+  id: string;
+  title: string;
+  content: {
+    body: string;
+  };
+  slug: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "slug-localized-required".
  */
 export interface SlugLocalizedRequired {
@@ -2618,6 +2671,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'slug-localized-required';
         value: string | SlugLocalizedRequired;
+      } | null)
+    | ({
+        relationTo: 'slug-localized-required-siblings';
+        value: string | SlugLocalizedRequiredSibling;
+      } | null)
+    | ({
+        relationTo: 'slug-localized-required-group';
+        value: string | SlugLocalizedRequiredGroup;
       } | null)
     | ({
         relationTo: 'tabs-fields-2';
@@ -4127,6 +4188,39 @@ export interface SlugAutosaveSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-siblings_select".
+ */
+export interface SlugLocalizedRequiredSiblingsSelect<T extends boolean = true> {
+  title?: T;
+  optionalTitle?: T;
+  body?: T;
+  sharedSlug?: T;
+  optionalSlug?: T;
+  fallbackSlug?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-localized-required-group_select".
+ */
+export interface SlugLocalizedRequiredGroupSelect<T extends boolean = true> {
+  title?: T;
+  content?:
+    | T
+    | {
+        body?: T;
+      };
+  slug?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "slug-localized-required_select".
  */
 export interface SlugLocalizedRequiredSelect<T extends boolean = true> {
@@ -4568,6 +4662,8 @@ export interface CollectionQueryWidget {
       | 'slug-field-access'
       | 'slug-autosave'
       | 'slug-localized-required'
+      | 'slug-localized-required-siblings'
+      | 'slug-localized-required-group'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -4631,6 +4727,8 @@ export interface ActivityWidget {
           | 'slug-field-access'
           | 'slug-autosave'
           | 'slug-localized-required'
+          | 'slug-localized-required-siblings'
+          | 'slug-localized-required-group'
           | 'tabs-fields-2'
           | 'tabs-fields'
           | 'text-fields'
