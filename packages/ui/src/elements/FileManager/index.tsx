@@ -16,6 +16,7 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { useFileFieldUploadSession } from '../../providers/UploadSessions/useFileFieldUploadSession.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -41,6 +42,12 @@ export type FileManagerProps = {
   readonly collectionSlug: string
   readonly initialState?: import('payload').FormState
   /**
+   * Whether large files start a resumable upload as soon as they are picked. Bulk upload turns
+   * this off because it uploads its queue sequentially on save.
+   * @default true
+   */
+  readonly isUploadStartedOnSelect?: boolean
+  /**
    * When provided, upload edits are sourced from these props instead of the `useUploadEdits`
    * context. The bulk upload drawer uses this to drive per-file edits from its FormsManager.
    */
@@ -55,6 +62,7 @@ export type FileManagerProps = {
 export const FileManager: React.FC<FileManagerProps> = ({
   collectionSlug,
   initialState,
+  isUploadStartedOnSelect = true,
   resetUploadEdits: resetUploadEditsFromProps,
   updateUploadEdits: updateUploadEditsFromProps,
   uploadConfig,
@@ -128,6 +136,25 @@ export const FileManager: React.FC<FileManagerProps> = ({
     sidePanelMimeType !== 'image/svg+xml' &&
     sidePanelMimeType !== 'image/jxl'
 
+  const handleAdoptedFile = useCallback(
+    (file: File) => {
+      // An adopted upload replacing a stored file shows like a picked replacement.
+      if (data?.filename) {
+        setRemovedFile(true)
+      }
+
+      setValue(file)
+      setFilename(file.name)
+    },
+    [data?.filename, setValue],
+  )
+
+  const { onFileChange: onSessionFileChange } = useFileFieldUploadSession({
+    collectionSlug,
+    isEnabled: isUploadStartedOnSelect,
+    onAdopt: handleAdoptedFile,
+  })
+
   const renameFile = (fileToChange: File, newName: string): File =>
     new File([fileToChange], newName, {
       type: fileToChange.type,
@@ -150,12 +177,14 @@ export const FileManager: React.FC<FileManagerProps> = ({
           setFileSrc(URL.createObjectURL(file))
         }
       }
+      onSessionFileChange({ file, isNewFile })
       setValue(file)
       setUploadControlFileUrl('')
       setUploadControlFileName(null)
       setUploadControlFile(null)
     },
     [
+      onSessionFileChange,
       setValue,
       setUploadControlFile,
       setUploadControlFileName,
@@ -401,7 +430,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
                   />
                 </Dropzone>
               )}
-              {value && fileSrc && (
+              {value && (
                 <Fragment>
                   <Button
                     aria-label={t('general:cancel')}
@@ -412,7 +441,8 @@ export const FileManager: React.FC<FileManagerProps> = ({
                     round
                     tooltip={t('general:cancel')}
                   />
-                  {renderSelectedFilePreview(fileSrc)}
+                  {/* An adopted upload's bytes are in storage, so it has nothing to preview. */}
+                  {fileSrc && renderSelectedFilePreview(fileSrc)}
                   <div className={`${baseClass}__file-adjustments`}>
                     {/* Custom id so this editor doesn't collide with the hidden auto `filename` field. */}
                     <TextInput

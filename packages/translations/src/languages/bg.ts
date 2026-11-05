@@ -642,6 +642,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     addFile: 'Добавяне на файл',
     addFiles: 'Добави файлове',
     bulkUpload: 'Масово Качване',
+    cancelUpload: 'Отказ на качването',
     copyLinkToFile: 'Копиране на връзка към файла',
     copyURL: 'Копиране на URL',
     crop: 'Изрязване',
@@ -663,6 +664,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     fileSize: 'Големина на файла',
     filesToUpload: 'Файлове за качване',
     fileToUpload: 'Файл за качване',
+    finishSaving: 'Довършване на запазването',
     focalPoint: 'Фокусна точка',
     focalPointDescription:
       'Премести фокусната точка директно върху визуализацията или регулирай стойностите по-долу.',
@@ -677,12 +679,27 @@ export const bgTranslations: DefaultTranslationsObject = {
     previewSizes: 'Преглед на размери',
     renameFile: 'Преименувайте файл',
     replaceFile: 'Заменете файл',
+    resumingFile: 'Възобновяване на {{filename}}',
+    savingInBackground: 'Качването ще завърши във фонов режим и тогава документът ще бъде запазен.',
     selectCollectionToBrowse: 'Избери колекция, която да разгледаш',
     selectFile: 'Избери файл',
     setCropArea: 'Задай област за изрязване',
     setFocalPoint: 'Задай фокусна точка',
     sizes: 'Големини',
     sizesFor: 'Размери за {{label}}',
+    uploadFileMismatch: 'Избраният файл не съвпада с прекъснатото качване.',
+    uploadingFile: 'Качване на {{filename}}',
+    uploadingFileProgress: 'Качване на {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning:
+      'Все още има качване в процес. Ако напуснете сега, то ще бъде прекъснато.',
+    uploadInterrupted: 'Качването на {{filename}} беше прекъснато.',
+    uploadInterruptedWillSave:
+      'Качването на {{filename}} беше прекъснато. Документът ще бъде запазен, когато завърши.',
+    uploadReadyToFinishSaving:
+      '{{filename}} е качен. Отворете формуляра, за да довършите запазването.',
+    uploadSavedInBackground: 'Качването завърши и документът беше запазен.',
+    uploadStorageRejectedSegments:
+      'Хранилището не прие нито една част от качването. Проверете CORS политиката на bucket-а.',
     width: 'Ширина',
   },
   validation: {
