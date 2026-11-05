@@ -1251,16 +1251,16 @@ test.describe('Shared form request queue', () => {
 
     await field.fill('abc')
 
-    // Elapse the saving indicator's minimum duration without firing the last edit's debounce.
-    await page.clock.setSystemTime(new Date(await page.evaluate(() => Date.now() + 2000)))
-    saves[1].released.resolve()
-    await expect(savingIndicator).toBeHidden()
     await expect(field).toHaveValue('abc')
     await expect.poll(() => submittedValues).toEqual(['a', 'ab'])
     await expect.poll(readDraftValue).toBe('ab')
 
-    await page.clock.runFor(100)
+    // The stale response retries the latest revision before its debounce fires.
+    saves[1].released.resolve()
     await saves[2].captured.promise
+    await expect(savingIndicator).toBeVisible()
+    await expect(field).toHaveValue('abc')
+    await expect.poll(() => submittedValues).toEqual(['a', 'ab', 'abc'])
     await page.clock.setSystemTime(new Date(await page.evaluate(() => Date.now() + 2000)))
     saves[2].released.resolve()
     await expect(savingIndicator).toBeHidden()
