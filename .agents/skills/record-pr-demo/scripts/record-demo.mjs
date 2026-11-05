@@ -201,7 +201,7 @@ async function executeDemo({
   const change = scenarioModule.presentation?.change
 
   if (
-    !['Feature', 'Fix'].includes(change?.kind) ||
+    !['Feature', 'Fix', 'Bug'].includes(change?.kind) ||
     typeof change.title !== 'string' ||
     !change.title.trim() ||
     typeof change.description !== 'string' ||

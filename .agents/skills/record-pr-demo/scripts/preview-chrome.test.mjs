@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { chromium } from '@playwright/test'
+import { chromium, expect } from '@playwright/test'
 import { startChromePreview } from './preview-chrome.mjs'
 
 // This tests the same component and controls shipped to the user, not a mock preview.
@@ -10,6 +10,7 @@ test('should scrub real responsive content without changing the title or footer 
   try {
     const page = await browser.newPage({ viewport: { width: 1120, height: 1000 } })
     await page.goto(url)
+    await page.getByLabel('Annotation layout').selectOption('top')
     await page.frameLocator('iframe').getByRole('heading', { name: 'Posts', exact: true }).waitFor()
     const footer = page.locator('#chrome [data-footer]')
     const initial = await footer.boundingBox()
@@ -167,6 +168,49 @@ test('should preview accessibility observations from real keyboard interactions'
     await clickIntroduction()
     await expect(page.locator('[data-announcement]')).toHaveText(
       'Introduction moved to position 2 of 3.',
+    )
+  } finally {
+    await browser.close()
+    await new Promise((resolve) => server.close(resolve))
+  }
+})
+
+test('should keep the sidebar fixed while resizing and reveal current steps in long lists', async () => {
+  const { server, url } = await startChromePreview({ port: 0 })
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const page = await browser.newPage({ viewport: { width: 1120, height: 1000 } })
+    await page.goto(`${url}/?manySteps&kind=bug`)
+    const panel = page.locator('.annotation-sidebar')
+    const list = page.locator('.sidebar-steps')
+    await expect(panel).toBeVisible()
+    await expect(panel.locator('.sidebar-step')).toHaveCount(12)
+    await expect(panel.locator('.sidebar-step [data-kind=Bug]')).toHaveCount(2)
+    const initial = await panel.boundingBox()
+    const header = await panel.locator('.sidebar-intro').boundingBox()
+    await page.getByRole('button', { name: 'Mobile', exact: true }).click()
+    assert.deepEqual(await panel.boundingBox(), initial)
+    await page.getByRole('slider').focus()
+    await page.keyboard.press('End')
+    await expect.poll(() => list.evaluate((e) => e.scrollTop)).toBeGreaterThan(0)
+    await expect
+      .poll(async () => {
+        const current = await panel.locator('[aria-current=step]').boundingBox()
+        const bounds = await list.boundingBox()
+        return current.y >= bounds.y && current.y + current.height <= bounds.y + bounds.height + 1
+      })
+      .toBe(true)
+    assert.deepEqual(await panel.locator('.sidebar-intro').boundingBox(), header)
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.getByRole('slider').focus()
+    await page.keyboard.press('Home')
+    await expect.poll(() => list.evaluate((e) => e.scrollTop)).toBeLessThan(2)
+    await panel.locator('.sidebar-step').nth(1).focus()
+    await page.keyboard.press('Enter')
+    await expect(panel.locator('[aria-current=step]')).toContainText('Update dates hide')
+    await expect(panel.locator('[aria-current=step] [data-kind=Bug]')).toHaveCSS(
+      'background-color',
+      'rgb(96, 51, 42)',
     )
   } finally {
     await browser.close()

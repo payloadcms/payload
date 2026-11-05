@@ -1,4 +1,5 @@
 import { bindDemoHistory, mountDemoChrome } from '../WindowChrome/index.mjs'
+import { mountAnnotationSidebar } from '../WindowChrome/sidebar.mjs'
 import { observeAccessibility } from '../accessibility-demo.mjs'
 
 const isAccessibility = new URLSearchParams(location.search).has('accessibility')
@@ -15,7 +16,10 @@ const chrome = mountDemoChrome({
   showAnnouncements: new URLSearchParams(location.search).has('announcements'),
   theme,
   change: {
-    kind: new URLSearchParams(location.search).get('kind') === 'fix' ? 'Fix' : 'Feature',
+    kind:
+      { feature: 'Feature', fix: 'Fix', bug: 'Bug' }[
+        new URLSearchParams(location.search).get('kind')
+      ] ?? 'Feature',
     title: isAccessibility ? 'Make keyboard interactions visible' : 'Responsive collection lists',
     description: isAccessibility
       ? 'Follow keyboard input and movement announcements.'
@@ -58,6 +62,13 @@ document.querySelectorAll('[data-theme]').forEach((button) => {
   })
 })
 applyTheme()
+const changeKind = document.querySelector('#change-kind')
+changeKind.value = new URLSearchParams(location.search).get('kind') ?? 'feature'
+changeKind.addEventListener('change', () => {
+  const url = new URL(location.href)
+  url.searchParams.set('kind', changeKind.value)
+  location.href = url.href
+})
 root.append(application)
 const timeline = document.querySelector('#timeline')
 const play = document.querySelector('#play')
@@ -69,6 +80,83 @@ let time = 0
 let animation
 let width = 1280
 
+const steps = [
+  {
+    title: 'See the full picture',
+    body: 'View post titles, publishing status, and update dates together.',
+  },
+  {
+    kind: 'Bug',
+    title: 'Keep essential details visible',
+    body: 'Update dates hide as space narrows; titles and status remain.',
+  },
+  {
+    title: 'Make room for content',
+    body: 'The sidebar collapses so the post list can use the full width.',
+  },
+]
+const manySteps = document.querySelector('#many-steps')
+manySteps.checked = new URLSearchParams(location.search).has('manySteps')
+if (manySteps.checked) {
+  steps.push(
+    {
+      title: 'Review field spacing',
+      body: 'Check that labels and values have room at smaller widths.',
+    },
+    {
+      title: 'Inspect the collection navigation',
+      body: 'Keep the collection links available while browsing content.',
+    },
+    {
+      title: 'Compare publishing statuses',
+      body: 'Published and draft items stay easy to distinguish.',
+    },
+    {
+      kind: 'Bug',
+      title: 'Check longer document titles',
+      body: 'Long names should remain readable within the list.',
+    },
+    { title: 'Review row actions', body: 'Keep the actions close to the document they belong to.' },
+    {
+      title: 'Inspect the mobile layout',
+      body: 'Confirm the list makes good use of a narrow window.',
+    },
+    {
+      title: 'Return to the collection overview',
+      body: 'Review the overall layout after checking individual details.',
+    },
+    {
+      title: 'Compare the available themes',
+      body: 'Check text and controls against both light and dark backgrounds.',
+    },
+    {
+      title: 'Finish the walkthrough',
+      body: 'The current step stays visible while earlier steps remain available above.',
+    },
+  )
+}
+manySteps.addEventListener('change', () => {
+  const url = new URL(location.href)
+  if (manySteps.checked) url.searchParams.set('manySteps', '')
+  else url.searchParams.delete('manySteps')
+  location.href = url.href
+})
+const layoutControl = document.querySelector('#annotation-layout')
+layoutControl.hidden = isAccessibility
+const sidebar = mountAnnotationSidebar({
+  root,
+  steps,
+  onSelect: (index) => {
+    renderAt({
+      milliseconds: manySteps.checked
+        ? (index * timelineDuration) / steps.length + 1
+        : [0, tabletArrival, mobileArrival][index],
+    })
+    stop()
+  },
+})
+layoutControl.addEventListener('change', () => renderAt({ milliseconds: time }))
+
 function renderAt({ milliseconds }) {
   time = Math.max(0, Math.min(timelineDuration, milliseconds))
   const isFirstResize = time <= tabletArrival
@@ -76,24 +164,14 @@ function renderAt({ milliseconds }) {
   const eased = progress * progress * (3 - 2 * progress)
   width = Math.round(isFirstResize ? 1280 - 512 * eased : 768 - 378 * eased)
   chrome.setViewport({ width, height: 720 })
-  const step =
-    time < tabletArrival
-      ? {
-          index: 1,
-          title: 'See the full picture',
-          body: 'View post titles, publishing status, and update dates together.',
-        }
+  const stepIndex = manySteps.checked
+    ? Math.min(steps.length - 1, Math.floor((time / timelineDuration) * steps.length))
+    : time < tabletArrival
+      ? 0
       : time < mobileArrival
-        ? {
-            index: 2,
-            title: 'Keep essential details visible',
-            body: 'Update dates hide as space narrows; titles and status remain.',
-          }
-        : {
-            index: 3,
-            title: 'Make room for content',
-            body: 'The sidebar collapses so the post list can use the full width.',
-          }
+        ? 1
+        : 2
+  const step = { ...steps[stepIndex], index: stepIndex + 1 }
   chrome.setAnnotation(
     document.querySelector('#annotation').checked
       ? isAccessibility
@@ -103,9 +181,16 @@ function renderAt({ milliseconds }) {
             title: 'Try it with the keyboard',
             body: 'Click a Move down button, then use Tab and Enter. Commands and announcements appear below this step.',
           }
-        : { ...step, total: 3 }
+        : { ...step, total: steps.length }
       : null,
   )
+  sidebar.update({
+    index: stepIndex,
+    width,
+    height: 720,
+    enabled: !isAccessibility && layoutControl.value !== 'top',
+    visible: document.querySelector('#annotation').checked,
+  })
   timeline.value = String(time)
   document.querySelector('#time').textContent =
     `${(time / 1000).toFixed(2)} / ${(timelineDuration / 1000).toFixed(2)} s`

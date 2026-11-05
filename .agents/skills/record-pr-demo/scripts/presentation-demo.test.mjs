@@ -481,3 +481,55 @@ test('should show the live application URL through navigation and browser histor
     await browser.close()
   }
 })
+
+test('should use the shared sidebar during recorder resizing and reject mismatched step descriptions', async () => {
+  const { chromium, expect } = await import('@playwright/test')
+  const { createPresentation } = await import('./presentation-demo.mjs')
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const stage = await browser.newPage({ viewport: { width: 1600, height: 1000 } })
+    const steps = Array.from({ length: 12 }, (_, index) => ({
+      title: `Step ${index + 1}`,
+      body: `Visible outcome ${index + 1}. This description explains the action shown in the application.`,
+      ...(index === 11 ? { kind: 'Bug' } : {}),
+    }))
+    const presentation = await createPresentation({
+      page: stage,
+      options: {
+        annotationLayout: 'left',
+        annotationSteps: steps,
+        change: { kind: 'Bug', title: 'Before', description: 'Show the visible failure.' },
+      },
+      viewport: { width: 1280, height: 720 },
+      pauseScale: 0,
+    })
+    await presentation.setAnnotation({ ...steps[0], index: 1, total: 12 })
+    await presentation.flush()
+    const sidebar = stage.locator('.annotation-sidebar')
+    const initial = await sidebar.boundingBox()
+    assert.equal(await sidebar.locator('button').count(), 0)
+    await presentation.resizeWindow({ width: 390, height: 720 })
+    await presentation.flush()
+    assert.deepEqual(await sidebar.boundingBox(), initial)
+    const panel = await sidebar.boundingBox()
+    const window = await stage.locator('[data-window]').boundingBox()
+    assert.ok(panel.x + panel.width < window.x)
+    await assert.rejects(
+      () =>
+        presentation.setAnnotation({
+          title: 'Different',
+          body: 'Stale description',
+          index: 12,
+          total: 12,
+        }),
+      /must match/,
+    )
+    await presentation.setAnnotation({ ...steps[11], index: 12, total: 12 })
+    await presentation.flush()
+    await expect(sidebar.locator('[aria-current=step]')).toContainText('Visible outcome 12')
+    assert.ok((await sidebar.locator('.sidebar-steps').evaluate((e) => e.scrollTop)) > 0)
+    await presentation.stop()
+  } finally {
+    await browser.close()
+  }
+})

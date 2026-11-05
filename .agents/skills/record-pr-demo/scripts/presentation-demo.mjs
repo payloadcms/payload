@@ -9,6 +9,12 @@ export async function createPresentation({
   pauseScale,
   startedAt = performance.now(),
 }) {
+  if (
+    options.annotationLayout !== undefined &&
+    !['left', 'top'].includes(options.annotationLayout)
+  ) {
+    throw new Error('annotationLayout must be left or top')
+  }
   const wrapperURL = new URL('/__payload_pr_demo_chrome__', baseURL).href
   const wrapper = (route) =>
     route.fulfill({
@@ -31,8 +37,14 @@ export async function createPresentation({
   try {
     await stage.goto(wrapperURL)
     const source = await readFile(new URL('./WindowChrome/index.mjs', import.meta.url), 'utf8')
+    const sidebarSource =
+      options.annotationLayout === 'left' && !options.accessibility
+        ? Buffer.from(
+            await readFile(new URL('./WindowChrome/sidebar.mjs', import.meta.url)),
+          ).toString('base64')
+        : null
     await stage.evaluate(
-      async ({ source, options, viewport, shouldAnimateAnnotations }) => {
+      async ({ source, sidebarSource, options, viewport, shouldAnimateAnnotations }) => {
         const { mountDemoChrome, bindDemoHistory } = await import(
           `data:text/javascript;base64,${source}`
         )
@@ -63,9 +75,40 @@ export async function createPresentation({
         }
         window.stopDemoHistory = bindDemoHistory({ app, chrome: window.demoChrome })
         root.append(app)
+        if (sidebarSource) {
+          const { mountAnnotationSidebar } = await import(
+            `data:text/javascript;base64,${sidebarSource}`
+          )
+          const sidebar = mountAnnotationSidebar({
+            root,
+            steps: options.annotationSteps,
+            shouldAnimate: shouldAnimateAnnotations,
+          })
+          window.demoSidebar = sidebar
+          const setAnnotation = window.demoChrome.setAnnotation
+          window.demoChrome.setAnnotation = (annotation) => {
+            if (
+              annotation &&
+              (annotation.total !== options.annotationSteps.length ||
+                annotation.body !== options.annotationSteps[annotation.index - 1]?.body)
+            ) {
+              throw new Error('Annotation must match its declared annotationSteps entry and total')
+            }
+            setAnnotation(annotation)
+            const content = root.shadowRoot.querySelector('[data-content]')
+            sidebar.update({
+              index: (annotation?.index ?? 1) - 1,
+              width: parseInt(content.style.width),
+              height: parseInt(content.style.height),
+              enabled: true,
+              visible: annotation !== null,
+            })
+          }
+        }
       },
       {
         source: Buffer.from(source).toString('base64'),
+        sidebarSource,
         options,
         viewport,
         shouldAnimateAnnotations: pauseScale > 0,
@@ -182,7 +225,10 @@ export async function createPresentation({
       stop: async () => {
         stage.off('framenavigated', onAppNavigation)
         await refreshBinding?.dispose()
-        await stage.evaluate(() => window.stopDemoHistory?.())
+        await stage.evaluate(() => {
+          window.stopDemoHistory?.()
+          window.demoSidebar?.destroy()
+        })
         if (options.accessibility) {
           await frame.evaluate(() => window.__stopDemoAccessibility?.()).catch(() => {})
           await stage.evaluate(() => {

@@ -10,7 +10,7 @@ node .agents/skills/record-pr-demo/scripts/preview-chrome.mjs
 
 Open `http://127.0.0.1:4400`. Use `--port 4401` if needed. The server binds to loopback and serves only the preview assets. Edits appear on reload.
 
-The preview contains a sample application, not Payload Admin. Use its viewport controls and timeline to inspect resizing. Light and Dark switch the chrome and sample application together, preserving the current viewport and timeline position. Query options include `?theme=dark`, `?kind=fix`, and `?accessibility&announcements&kind=fix`. Review real application behavior in a scenario against the relevant Payload server.
+The preview contains a sample application, not Payload Admin. Use its viewport controls and timeline to inspect resizing. Light and Dark switch the chrome and sample application together, preserving the current viewport and timeline position. Query options include `?theme=dark`, `?kind=fix`, `?kind=bug` for the red before-state pill, and `?accessibility&announcements&kind=fix`. Review real application behavior in a scenario against the relevant Payload server.
 
 ## Required scenario metadata
 
@@ -19,7 +19,7 @@ Every scenario must export `presentation`; missing metadata or `presentation: fa
 ```js
 export const presentation = {
   change: {
-    kind: 'Feature', // 'Feature' or 'Fix'
+    kind: 'Feature', // 'Feature', 'Fix', or 'Bug' for a before recording
     title: 'Responsive collection lists',
     description: 'Browse and manage content on desktop, tablet, and mobile.',
   },
@@ -33,6 +33,40 @@ export const presentation = {
 `--viewport` sets the initial application's CSS viewport. By default, the canvas fits that viewport at native scale, with room for the chrome and description: 1600×1148 for the default 1440×900 viewport, or 1600×1188 with accessibility feedback. It stays fixed during responsive resizing. An explicit `presentation.canvas` overrides both the composition and encoded video dimensions and may scale the app to fit. See [capture resolution and encoding](recording.md#capture-resolution-and-encoding).
 
 The window header automatically displays the current application viewport dimensions and updates them during resizing.
+
+## Step sidebar
+
+Use `annotationLayout: 'left'` for a persistent list beside the window. Declare the complete ordered `annotationSteps` before recording so viewers can see previous, current, and upcoming steps:
+
+```js
+const steps = [
+  { title: 'Switch locale', body: 'Switch to Spanish, then go Back to the English document.' },
+  {
+    title: 'Locale mismatch',
+    body: 'English content is rendered, but Spanish remains selected.',
+    kind: 'Bug',
+  },
+]
+
+export const presentation = {
+  annotationLayout: 'left',
+  annotationSteps: steps,
+  change: {
+    kind: 'Bug',
+    title: 'Locale mismatch after Back',
+    description: 'After Back, edits can save to the wrong translation.',
+  },
+}
+
+// After asserting the visible failure:
+await showAnnotation({ ...steps[1], index: 2, total: steps.length })
+```
+
+The sidebar renders descriptions only; titles remain required by the annotation API and support the top layout. Reuse the declared entry when calling `showAnnotation`: its body, index, and total must match the list. Add `kind: 'Bug'` only where a failure is visibly demonstrated. Setup and navigation steps should not receive a Bug pill. The main Bug pill identifies a before recording; use Fix for the after recording and Feature for a feature walkthrough.
+
+The shared renderer owns the dark sidebar styling, step pills, current-step dot, and opacity. It aligns with the application's initial rendered height and keeps that height and position during responsive resizing. Long lists scroll independently under the fixed header, automatically revealing the current step with reduced-motion support. Playground steps can also be selected and scrolled manually. Recordings do not expose inert step buttons.
+
+Omitting `annotationLayout` or using `'top'` preserves the compact top panel. Accessibility feedback uses the top panel, including when `--a11y on` is applied to a sidebar scenario. The playground offers Left/Top layouts, a Demo type selector, and a Many steps example. Right-side placement is unsupported.
 
 ## URL bar
 

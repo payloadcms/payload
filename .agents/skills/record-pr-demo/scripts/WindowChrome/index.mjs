@@ -19,11 +19,11 @@ export function mountDemoChrome({
   if (!['light', 'dark'].includes(theme)) throw new Error('Theme must be light or dark')
   if (
     !change ||
-    !['Feature', 'Fix'].includes(change.kind) ||
+    !['Feature', 'Fix', 'Bug'].includes(change.kind) ||
     !change.title?.trim() ||
     !change.description?.trim()
   ) {
-    throw new Error('Presentation requires kind (Feature or Fix), title, and description')
+    throw new Error('Presentation requires kind (Feature, Fix, or Bug), title, and description')
   }
   if (typeof accessibility !== 'boolean')
     throw new Error('Presentation accessibility must be a boolean')
@@ -66,6 +66,9 @@ export function mountDemoChrome({
 
     .kind { align-self:flex-start; padding-inline:6px; border:1px solid var(--kind-border); border-radius:4px; background:var(--kind-bg); color:var(--kind-text); font-size:13px; font-weight:500; line-height:16px; }
     .kind[data-kind="Feature"] { --kind-bg:var(--kind-feature-bg); --kind-border:var(--kind-feature-border); --kind-text:var(--kind-feature-text); }
+    .light { --kind-bug-bg:var(--color-bg-danger-tertiary,#ffe2e0); --kind-bug-border:var(--color-border-danger,#ffc7c2); --kind-bug-text:var(--color-text-danger,#dc3412); }
+    .dark { --kind-bug-bg:var(--color-bg-danger-tertiary,#60332a); --kind-bug-border:var(--color-border-danger,#864537); --kind-bug-text:var(--color-text-danger,#ffafa3); }
+    .kind[data-kind="Bug"] { --kind-bg:var(--kind-bug-bg); --kind-border:var(--kind-bug-border); --kind-text:var(--kind-bug-text); }
     .kind[data-kind="Fix"] { --kind-bg:var(--kind-fix-bg); --kind-border:var(--kind-fix-border); --kind-text:var(--kind-fix-text); }
     .title { flex:none; font-size:13px; font-weight:400; letter-spacing:-.1px; margin:0; overflow-wrap:anywhere; }
     .description { font-size:13px; color:var(--sub); overflow-wrap:anywhere; }

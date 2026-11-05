@@ -85,7 +85,6 @@
       }
       #chrome {
         overflow: hidden;
-        border-radius: 12px;
       }
       @media (pointer: coarse) {
         button,
@@ -107,6 +106,16 @@
         <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
       </div>
       <button type="button" id="simulate-refresh">Simulate refresh</button>
+      <select id="change-kind" aria-label="Demo type">
+        <option value="feature">Feature</option>
+        <option value="fix">Fix</option>
+        <option value="bug">Bug (before)</option>
+      </select>
+      <select id="annotation-layout" aria-label="Annotation layout">
+        <option value="left">Annotations: Left</option>
+        <option value="top">Annotations: Top</option>
+      </select>
+      <label><input type="checkbox" id="many-steps" />Many steps</label>
       <label><input type="checkbox" id="annotation" checked />Annotation</label>
     </div>
     <div id="chrome"></div>
