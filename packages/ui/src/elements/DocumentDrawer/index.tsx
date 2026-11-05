@@ -98,7 +98,7 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
 }) => {
   const editDepth = useEditDepth()
   const uuid = useId()
-  const { closeModal, openModal, toggleModal } = useModal()
+  const { closeModal, modalState, openModal, toggleModal } = useModal()
 
   // Use provided slug or generate one
   const drawerSlug =
@@ -109,6 +109,9 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
       depth: editDepth,
       uuid,
     })
+
+  // Derive a primitive so that the returned state only changes when this drawer opens or closes
+  const isDrawerOpen = Boolean(modalState[drawerSlug]?.isOpen)
 
   // Store modal functions in refs to ensure stable callbacks
   // This prevents re-renders when other modals change state
@@ -160,12 +163,11 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
       closeDrawer,
       drawerDepth: editDepth,
       drawerSlug,
-      // Note: Not tracking isDrawerOpen to prevent re-renders when modals change state
-      isDrawerOpen: false,
+      isDrawerOpen,
       openDrawer,
       toggleDrawer,
     }),
-    [editDepth, drawerSlug, toggleDrawer, closeDrawer, openDrawer],
+    [editDepth, drawerSlug, isDrawerOpen, toggleDrawer, closeDrawer, openDrawer],
   )
 
   return [MemoizedDrawer, MemoizedDrawerToggler, MemoizedDrawerState]
