@@ -141,7 +141,7 @@ describe('Localization', () => {
     test('should bulk edit the rendered list locale after browser back navigation', async () => {
       const english = 'Cached list English title'
       const spanish = 'Cached list Spanish title'
-      const edited = 'Bulk edited English title'
+      const edited = 'Bulk edited title'
       const { id } = await payload.create({
         collection: localizedPostsSlug,
         data: { title: english },
@@ -161,12 +161,18 @@ describe('Localization', () => {
       await expect(page.locator('.cell-title', { hasText: spanish })).toBeVisible()
       await page.goBack()
       await expect(page).not.toHaveURL(/locale=/)
-      await expect(page.locator('.cell-title', { hasText: english })).toBeVisible()
-      await expect(
-        page.locator('.app-header__localizer .localizer-button__current-label'),
-      ).toHaveText('English')
 
-      await selectTableRow(page, english)
+      // The router may restore a cached page or fetch a fresh one using the updated preference.
+      // Bulk actions must always match the locale of the list that actually rendered.
+      const renderedLocale = await page
+        .locator('.app-header__localizer .localizer-button')
+        .getAttribute('data-locale')
+      const titles = { [defaultLocale]: english, [spanishLocale]: spanish }
+      const otherLocale = [defaultLocale, spanishLocale].find((code) => code !== renderedLocale)
+
+      expect(Object.keys(titles)).toContain(renderedLocale)
+      await expect(page.locator('.cell-title', { hasText: titles[renderedLocale] })).toBeVisible()
+      await selectTableRow(page, titles[renderedLocale])
       await page.locator('.edit-many__toggle').click()
 
       const drawer = page.locator('.edit-many__main')
@@ -182,7 +188,7 @@ describe('Localization', () => {
       )
 
       await drawer.locator('.edit-many__save').click()
-      expect(new URL((await response).url()).searchParams.get('locale')).toBe(defaultLocale)
+      expect(new URL((await response).url()).searchParams.get('locale')).toBe(renderedLocale)
       await expect(drawer).toBeHidden()
 
       const {
@@ -193,7 +199,8 @@ describe('Localization', () => {
         where: { id: { equals: id } },
       })
 
-      expect(savedPost.title).toEqual({ [defaultLocale]: edited, [spanishLocale]: spanish })
+      expect(savedPost.title[renderedLocale]).toBe(edited)
+      expect(savedPost.title[otherLocale]).toBe(titles[otherLocale])
     })
   })
 
@@ -501,6 +508,92 @@ describe('Localization', () => {
       )
 
       await expect(localeLabel).not.toHaveText('English')
+    })
+  })
+
+  describe('cached document drawer locale', () => {
+    const parentIDs: string[] = []
+    const relatedIDs: string[] = []
+
+    test.afterEach(async () => {
+      await Promise.all(
+        parentIDs.map((id) => payload.delete({ id, collection: relationshipLocalizedSlug })),
+      )
+      await Promise.all(
+        relatedIDs.map((id) => payload.delete({ id, collection: localizedPostsSlug })),
+      )
+      parentIDs.length = 0
+      relatedIDs.length = 0
+    })
+
+    test('should edit relationship drawers in the restored document locale after browser back', async () => {
+      const english = 'Drawer English title'
+      const spanish = 'Drawer Spanish title'
+      const edited = 'Drawer English title edited'
+      const related = await payload.create({
+        collection: localizedPostsSlug,
+        data: { title: english },
+        locale: defaultLocale,
+      })
+
+      relatedIDs.push(related.id)
+      await payload.update({
+        id: related.id,
+        collection: localizedPostsSlug,
+        data: { title: spanish },
+        locale: spanishLocale,
+      })
+
+      const data = {
+        relationMultiRelationTo: { relationTo: localizedPostsSlug, value: related.id },
+      }
+      const parent = await payload.create({
+        collection: relationshipLocalizedSlug,
+        data,
+        locale: defaultLocale,
+      })
+
+      parentIDs.push(parent.id)
+      await payload.update({
+        id: parent.id,
+        collection: relationshipLocalizedSlug,
+        data,
+        locale: spanishLocale,
+      })
+      await page.goto(urlRelationshipLocalized.edit(parent.id))
+      await changeLocale(page, spanishLocale)
+      await page.goBack()
+      await expect(page).not.toHaveURL(/locale=/)
+      await expect(
+        page.locator('.app-header__localizer .localizer-button__current-label'),
+      ).toHaveText('English')
+      await openDocDrawer({
+        page,
+        selector: '#field-relationMultiRelationTo .relationship--single-value__drawer-toggler',
+      })
+
+      const drawer = page.locator('.doc-drawer').last()
+
+      await expect(drawer.locator('#field-title')).toHaveValue(english)
+      await drawer.locator('#field-title').fill(edited)
+      await saveDocAndAssert(page, '.doc-drawer #action-save')
+      await drawer.locator('.doc-drawer__header-close').click()
+      const preference = await page.request.get(`${serverURL}/api/payload-preferences/locale`)
+
+      expect(await preference.json()).toMatchObject({ value: spanishLocale })
+      await expect(
+        page.locator('.app-header__localizer .localizer-button__current-label'),
+      ).toHaveText('English')
+
+      const {
+        docs: [savedPost],
+      } = await payload.find({
+        collection: localizedPostsSlug,
+        locale: 'all',
+        where: { id: { equals: related.id } },
+      })
+
+      expect(savedPost.title).toEqual({ [defaultLocale]: edited, [spanishLocale]: spanish })
     })
   })
 

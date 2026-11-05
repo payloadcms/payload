@@ -107,7 +107,7 @@ export const initReq = async function ({
 
         let userWithReadAccess = req.user
 
-        const locale = await getRequestLocale({ req })
+        const locale = await getRequestLocale({ locale: optionsOverrides?.locale, req })
         req.locale = locale?.code
 
         if (!hasUserOverride && req.user) {
