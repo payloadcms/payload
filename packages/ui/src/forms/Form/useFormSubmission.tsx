@@ -6,7 +6,6 @@ import type { Dispatch, RefObject } from 'react'
 import {
   deepCopyObjectSimpleWithoutReactComponents,
   hasDraftValidationEnabled,
-  reduceFieldsToValues,
   wait,
 } from 'payload/shared'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -19,7 +18,7 @@ import type {
   Submit,
   SubmitOptions,
 } from './types.js'
-import type { FormStateRequests, SubmissionActivity } from './useFormStateRequest.js'
+import type { FormStateActions, SubmissionActivity } from './useFormState.js'
 
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -34,33 +33,34 @@ import { fieldReducer } from './fieldReducer.js'
 type Args = {
   contextRef: RefObject<FormContextType>
   dispatchFields: Dispatch<FieldAction>
-  fetchFormState: FormStateRequests['fetchFormState']
   formRef: RefObject<HTMLFormElement | null>
   prevFormStateRef: RefObject<FormState>
   props: FormProps
+  refreshFormStateAfterSave: FormStateActions['refreshFormStateAfterSave']
   setIsValid: FormContextType['setIsValid']
   submissionActivityRef: RefObject<SubmissionActivity>
   /** Kept in sync with the submitted state, for requests queued before React renders it. */
   submittedRef: RefObject<boolean>
+  validateForm: FormStateActions['validateForm']
 }
 
 export const useFormSubmission = ({
   contextRef,
   dispatchFields,
-  fetchFormState,
   formRef,
   prevFormStateRef,
   props,
+  refreshFormStateAfterSave,
   setIsValid,
   submissionActivityRef,
   submittedRef,
+  validateForm,
 }: Args) => {
   const {
     action,
     beforeSubmit,
     disabled: isDisabledFromProps,
     disableSuccessStatus,
-    disableValidationOnSubmit,
     handleResponse,
     onSubmit,
     onSuccess,
@@ -224,8 +224,6 @@ export const useFormSubmission = ({
           await wait(100)
         }
 
-        const data = reduceFieldsToValues(contextRef.current.fields, true)
-
         const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
           contextRef.current.fields,
           {
@@ -261,26 +259,21 @@ export const useFormSubmission = ({
           }
         }
 
-        const isValid =
-          skipValidation || disableValidationOnSubmit
-            ? true
-            : await contextRef.current.validateForm()
+        const { data, fields, isValid } = await validateForm({
+          isLocalSubmission: Boolean(onSubmit && !hasFormSubmitAction),
+          skipValidation,
+        })
 
-        setIsValid(isValid)
-
-        // If not valid, prevent submission
         if (!isValid) {
           errorToast(t('error:correctInvalidFields'))
-          setIsProcessing(false)
           setIsSubmitted(true)
-          setIsDisabled(false)
           return
         }
 
         let overrides = {}
 
         if (typeof overridesFromArgs === 'function') {
-          overrides = overridesFromArgs(contextRef.current.fields)
+          overrides = overridesFromArgs(fields)
         } else if (typeof overridesFromArgs === 'object') {
           overrides = overridesFromArgs
         }
@@ -291,12 +284,10 @@ export const useFormSubmission = ({
             data[key] = value
           }
 
-          onSubmit(contextRef.current.fields, data)
+          onSubmit(fields, data)
         }
 
         if (!hasFormSubmitAction) {
-          // No action provided, so we should return. An example where this happens are lexical link drawers. Upon submitting the drawer, we
-          // want to close it without submitting the form. Stuff like validation would be handled by lexical before this, through beforeSubmit
           setIsProcessing(false)
           setIsSubmitted(true)
           setIsDisabled(false)
@@ -328,8 +319,6 @@ export const useFormSubmission = ({
 
           isModifiedWhileProcessing.current = false
 
-          setIsDisabled(false)
-
           if (typeof handleResponse === 'function') {
             await handleResponse(res, successToast, errorToast)
             setIsProcessing(false)
@@ -349,20 +338,27 @@ export const useFormSubmission = ({
           if (res.status < 400) {
             setSuccessfulSubmitCount((count) => count + 1)
 
-            if (typeof onSuccess === 'function') {
-              await onSuccess(json, {
-                context,
-                formState: serializableFormState,
+            try {
+              await refreshFormStateAfterSave({
+                acceptValues,
+                refreshPermissions: context?.getDocPermissions !== false,
+                savedDocument: json?.doc ?? json?.result,
               })
+            } catch (err) {
+              // Persistence succeeded; a refresh failure must not turn this into a failed save.
+              toast.error(err instanceof Error ? err.message : t('error:unknown'))
             }
 
-            // Part of the submission, so the next one can't start before the saved document's state is applied.
-            // Only after a success: a failed submission already applies its errors.
-            await fetchFormState({
-              acceptValues,
-              savedDocument: json?.doc ?? json?.result,
-              submitted: false,
-            })
+            if (typeof onSuccess === 'function') {
+              try {
+                await onSuccess(json, {
+                  context,
+                  formState: serializableFormState,
+                })
+              } catch (err) {
+                toast.error(err instanceof Error ? err.message : t('error:unknown'))
+              }
+            }
 
             setIsSubmitted(false)
             setIsProcessing(false)
@@ -462,7 +458,12 @@ export const useFormSubmission = ({
           setIsDisabled(false)
           errorToast(err.message)
         }
+      } catch (err) {
+        setIsSubmitted(true)
+        errorToast(err instanceof Error ? err.message : t('error:unknown'))
       } finally {
+        setIsDisabled(false)
+        setIsProcessing(false)
         submissionActivityRef.current.running -= 1
       }
     },
@@ -471,14 +472,14 @@ export const useFormSubmission = ({
       startRouteTransition,
       action,
       disableSuccessStatus,
-      disableValidationOnSubmit,
       dispatchFields,
       handleResponse,
       method,
       onSubmit,
       onSuccess,
       redirect,
-      fetchFormState,
+      refreshFormStateAfterSave,
+      validateForm,
       router,
       t,
       i18n,

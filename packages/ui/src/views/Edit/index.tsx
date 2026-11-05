@@ -6,7 +6,7 @@ import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { FormOnSuccess, FormStateArgs } from '../../forms/Form/types.js'
+import type { FormOnSuccess } from '../../forms/Form/types.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
 import { DocumentDrawerHeader } from '../../elements/DocumentDrawer/DrawerHeader/index.js'
@@ -82,7 +82,6 @@ export function DefaultEditView({
     docPermissions,
     documentIsLocked,
     documentLockState: documentLockStateRef,
-    getDocPermissions,
     globalSlug,
     hasPublishPermission,
     hasSavePermission,
@@ -276,7 +275,7 @@ export function DefaultEditView({
   ])
 
   const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
-    async (json, ctx) => {
+    (json, ctx) => {
       const { context } = ctx || {}
 
       const document = json?.doc || json?.result
@@ -331,10 +330,6 @@ export function DefaultEditView({
         resetUploadEdits()
       }
 
-      if (context?.getDocPermissions !== false) {
-        await getDocPermissions(json)
-      }
-
       if (id || globalSlug) {
         // Unlock the document after save
         if (isLockingEnabled) {
@@ -379,18 +374,12 @@ export function DefaultEditView({
       startRouteTransition,
       router,
       resetUploadEdits,
-      getDocPermissions,
       isLockingEnabled,
       reportUpdate,
       drawerSlug,
       entitySlug,
       setDocumentIsLocked,
     ],
-  )
-
-  const formStateArgs = useMemo<FormStateArgs>(
-    () => ({ readOnly: isTrashed || isReadOnlyForIncomingUser }),
-    [isTrashed, isReadOnlyForIncomingUser],
   )
 
   // Clean up when the component unmounts or when the document is unlocked
@@ -522,13 +511,13 @@ export function DefaultEditView({
           disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission || isTrashed}
           disableSuccessStatus={!isEditing && depth < 2 && redirectAfterCreate !== false}
           disableValidationOnSubmit={!validateBeforeSubmit}
-          formStateArgs={formStateArgs}
           initialState={!isInitializing && initialState}
           isDocumentForm={true}
           isInitializing={isInitializing}
           key={`${isLocked}`}
           method={id ? 'PATCH' : 'POST'}
           onSuccess={onSave}
+          readOnly={isTrashed || isReadOnlyForIncomingUser}
         >
           {isInDrawer && (
             <DocumentDrawerHeader

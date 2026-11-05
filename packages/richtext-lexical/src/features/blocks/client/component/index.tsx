@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormProps, FormStateArgs } from '@payloadcms/ui'
+import type { FormProps } from '@payloadcms/ui'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
@@ -14,6 +14,7 @@ import {
   Form,
   formatDrawerSlug,
   MoreIcon,
+  OperationProvider,
   Pill,
   Popup,
   PopupList,
@@ -108,7 +109,6 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   } = useEditorConfigContext()
 
   const { fields: parentDocumentFields } = useDocumentForm()
-  const onChangeAbortControllerRef = useRef(new AbortController())
   const editDepth = useEditDepth()
   const [errorCount, setErrorCount] = React.useState(0)
 
@@ -342,26 +342,6 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
   const { i18n, t } = useTranslation<object, string>()
 
-  const getRequestArgs = useCallback(
-    (prevFormState: FormState) => {
-      const blockData = reduceFormStateToBlockData(prevFormState, formDataRef.current)
-
-      return {
-        data: blockData,
-        docPermissions: {
-          fields: true as const,
-        },
-        documentFormState: parentDocumentFields,
-        initialBlockData: blockData,
-        operation: 'update' as const,
-        readOnly: !isEditable,
-        schemaPath: schemaFieldsPath,
-        skipValidation: false,
-      }
-    },
-    [schemaFieldsPath, parentDocumentFields, isEditable],
-  )
-
   const applyServerState = useCallback(
     (newFormState: FormState, prevFormState: FormState) => {
       if (prevFormState.blockName) {
@@ -392,77 +372,24 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     [blockType, editor, nodeKey],
   )
 
-  const formStateArgs = useCallback(
-    ({ formState }: { formState: FormState }): FormStateArgs => getRequestArgs(formState),
-    [getRequestArgs],
-  )
-
-  // Write the applied form state back to the Lexical node.
   const onChange = useMemo<FormProps['onChange']>(
-    () => [({ formState }) => applyServerState(formState, formState)],
-    [applyServerState],
-  )
+    () => [
+      ({ formState, submitted }) => {
+        applyServerState(formState, formState)
 
-  // Only called when the form is submitted from the drawer, usually only the case if the block has a custom Block component.
-  const onBeforeSubmit = useCallback(
-    async ({ formState: prevFormState }: { formState: FormState }) => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-
-      const controller = new AbortController()
-      onChangeAbortControllerRef.current = controller
-
-      const { state: newFormState } = await getFormState({
-        id,
-        collectionSlug,
-        ...getRequestArgs(prevFormState),
-        docPreferences: await getDocPreferences(),
-        formState: prevFormState,
-        globalSlug,
-        renderAllFields: true,
-        signal: controller.signal,
-      })
-
-      if (!newFormState) {
-        return prevFormState
-      }
-
-      applyServerState(newFormState, prevFormState)
-
-      if (!CustomLabelFromProps) {
-        setCustomLabel(newFormState._components?.customComponents?.BlockLabel ?? undefined)
-      }
-      if (!CustomBlockFromProps) {
-        setCustomBlock(newFormState._components?.customComponents?.Block ?? undefined)
-      }
-
-      let rowErrorCount = 0
-      for (const formField of Object.values(newFormState)) {
-        if (formField?.valid === false) {
-          rowErrorCount++
+        if (submitted) {
+          if (!CustomLabelFromProps) {
+            setCustomLabel(formState._components?.customComponents?.BlockLabel ?? undefined)
+          }
+          if (!CustomBlockFromProps) {
+            setCustomBlock(formState._components?.customComponents?.Block ?? undefined)
+          }
+          setErrorCount(Object.values(formState).filter((field) => field.valid === false).length)
         }
-      }
-      setErrorCount(rowErrorCount)
-
-      return newFormState
-    },
-    [
-      getFormState,
-      id,
-      collectionSlug,
-      getDocPreferences,
-      globalSlug,
-      getRequestArgs,
-      applyServerState,
-      CustomBlockFromProps,
-      CustomLabelFromProps,
+      },
     ],
+    [applyServerState, CustomLabelFromProps, CustomBlockFromProps],
   )
-
-  useEffect(() => {
-    return () => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-    }
-  }, [])
 
   const removeBlock = useCallback(() => {
     editor.update(() => {
@@ -836,50 +763,52 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     }
     return (
       <div data-block-drawer-slug={drawerSlug} style={{ display: 'contents' }}>
-        <Form
-          beforeSubmit={[onBeforeSubmit]}
-          el="div"
-          fields={clientBlock?.fields ?? []}
-          formStateArgs={formStateArgs}
-          initialState={initialState}
-          onChange={onChange}
-          onSubmit={(formState) => {
-            // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-            const newData = reduceFormStateToBlockData(
-              formState,
-              formDataRef.current,
-            ) as BlockFields
-            newData.blockType = blockType
-            editor.update(
-              () => {
-                const node = $getNodeByKey(nodeKey)
-                if (node && $isBlockNode(node)) {
-                  node.setFields(newData, true)
-                }
-              },
-              // Without this, the outer editor's reconciler resets DOM selection
-              // back into its own root, kicking focus out of any nested richText.
-              { tag: SKIP_DOM_SELECTION_TAG },
-            )
-            toggleDrawer()
-          }}
-          submitted={submitted}
-          uuid={formUuid}
-        >
-          <BlockContent
-            baseClass={baseClass}
-            BlockDrawer={BlockDrawer}
-            Collapsible={BlockCollapsible}
-            CustomBlock={resolvedCustomBlock}
-            CustomLabel={resolvedCustomLabel}
-            EditButton={EditButton}
-            errorCount={errorCount}
-            formSchema={clientBlock?.fields ?? []}
+        <OperationProvider operation="update">
+          <Form
+            el="div"
+            fields={clientBlock?.fields ?? []}
             initialState={initialState}
-            nodeKey={nodeKey}
-            RemoveButton={RemoveButton}
-          />
-        </Form>
+            onChange={onChange}
+            onSubmit={(formState) => {
+              // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
+              const newData = reduceFormStateToBlockData(
+                formState,
+                formDataRef.current,
+              ) as BlockFields
+              newData.blockType = blockType
+              editor.update(
+                () => {
+                  const node = $getNodeByKey(nodeKey)
+                  if (node && $isBlockNode(node)) {
+                    node.setFields(newData, true)
+                  }
+                },
+                // Without this, the outer editor's reconciler resets DOM selection
+                // back into its own root, kicking focus out of any nested richText.
+                { tag: SKIP_DOM_SELECTION_TAG },
+              )
+              toggleDrawer()
+            }}
+            readOnly={!isEditable}
+            schemaPath={schemaFieldsPath}
+            submitted={submitted}
+            uuid={formUuid}
+          >
+            <BlockContent
+              baseClass={baseClass}
+              BlockDrawer={BlockDrawer}
+              Collapsible={BlockCollapsible}
+              CustomBlock={resolvedCustomBlock}
+              CustomLabel={resolvedCustomLabel}
+              EditButton={EditButton}
+              errorCount={errorCount}
+              formSchema={clientBlock?.fields ?? []}
+              initialState={initialState}
+              nodeKey={nodeKey}
+              RemoveButton={RemoveButton}
+            />
+          </Form>
+        </OperationProvider>
       </div>
     )
   }, [
@@ -899,8 +828,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     formUuid,
     initialState,
     nodeKey,
-    formStateArgs,
-    onBeforeSubmit,
+    schemaFieldsPath,
+    isEditable,
     onChange,
     submitted,
   ])

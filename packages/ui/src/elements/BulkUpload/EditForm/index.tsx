@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react'
 
-import type { FormStateArgs } from '../../../forms/Form/types.js'
 import type { EditFormProps } from './types.js'
 
 import { Form, useForm } from '../../../forms/Form/index.js'
@@ -71,19 +70,17 @@ export function EditForm({
     [collectionSlug, onSaveFromContext, reportUpdate, resetUploadEdits, drawerSlug],
   )
 
-  const formStateArgs = useMemo<FormStateArgs>(() => ({ schemaPath }), [schemaPath])
-
   return (
     <OperationProvider operation="create">
       <Form
         action={action}
         className={`${baseClass}__form`}
         disabled={isInitializing || !hasSavePermission}
-        formStateArgs={formStateArgs}
         initialState={isInitializing ? undefined : initialState}
         isInitializing={isInitializing}
         method="POST"
         onSuccess={onSave}
+        schemaPath={schemaPath}
         submitted={submitted}
       >
         <div className={`${baseClass}__upload-layout`}>
