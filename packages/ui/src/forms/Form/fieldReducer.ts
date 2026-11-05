@@ -423,18 +423,10 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [action.path]: newField,
       }
 
-      // reset `isModified` in all other fields
-      // Use destructuring instead of delete to avoid mutating field objects
-      // shared with the previous state (shallow copy shares references)
-      if ('value' in action) {
-        for (const [path, field] of Object.entries(newState)) {
-          if (path !== action.path && 'isModified' in field) {
-            const { isModified: _, ...fieldWithoutIsModified } = field
-            newState[path] = fieldWithoutIsModified
-          }
-        }
-      }
-
+      // Note: `isModified` is intentionally kept on other fields. It marks a value
+      // changed after an in-flight request was sent, so a stale response must not
+      // overwrite it. mergeServerFormState clears the flag once a response echoes
+      // the local value back.
       return newState
     }
 

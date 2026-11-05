@@ -145,6 +145,24 @@ export const mergeServerFormState = ({
       ...sanitizedIncomingField,
     }
 
+    /**
+     * The value stayed local because the field was modified after the request was sent.
+     * Once a response echoes that local value back, the server has caught up with the
+     * edit, so the protection is released - otherwise it would stick for the rest of
+     * the session and block legitimate server values (e.g. from hooks) for this field.
+     */
+    if (
+      !shouldAcceptValue &&
+      typeof acceptValues === 'object' &&
+      acceptValues !== null &&
+      acceptValues.overrideLocalChanges === false &&
+      currentState[path]?.isModified &&
+      'value' in incomingField &&
+      dequal(incomingField.value, currentState[path].value)
+    ) {
+      delete newState[path].isModified
+    }
+
     if (
       currentState[path] &&
       'errorPaths' in currentState[path] &&
