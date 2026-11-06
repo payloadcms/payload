@@ -226,6 +226,7 @@ async function executeDemo({
     getDefaultCanvas({
       viewport,
       accessibility: presentationOptions.accessibility,
+      annotationLayout: presentationOptions.annotationLayout,
     })
   const context = await browser.newContext({
     viewport: recordedViewport,

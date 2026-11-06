@@ -19,7 +19,7 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
   const style = document.createElement('style')
   style.textContent = `
     .stage[data-sidebar] .footer { display:none; }
-    .annotation-sidebar { position:absolute; left:8px; width:300px; border:1px solid var(--line); border-radius:18px; background:var(--paper); color:var(--ink); overflow:hidden; display:flex; flex-direction:column; }
+    .annotation-sidebar { position:absolute; left:16px; width:300px; border:1px solid var(--line); border-radius:18px; background:var(--paper); color:var(--ink); overflow:hidden; display:flex; flex-direction:column; }
     .annotation-sidebar[hidden], .sidebar-steps[hidden] { display:none; }
     .sidebar-intro { flex:none; padding:20px 24px; background:color-mix(in srgb,var(--ink) 5%,var(--paper)); }
     .sidebar-intro .kind { display:inline-block; }
@@ -117,8 +117,8 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
     if (!enabled) return
     const windowWidth = width + 22
     const windowHeight = height + 58
-    const left = 324
-    const availableWidth = stage.clientWidth - 340
+    const left = 332
+    const availableWidth = stage.clientWidth - 348
     const scale = Math.min(
       1,
       availableWidth / windowWidth,
@@ -126,8 +126,8 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
     )
     const top = (stage.clientHeight - windowHeight * scale) / 2
     sidebarGeometry ??= {
-      top: `${top}px`,
-      height: `${windowHeight * scale}px`,
+      top: `${top - 32}px`,
+      height: `${windowHeight * scale + 64}px`,
     }
     Object.assign(panel.style, sidebarGeometry)
     Object.assign(shadow.querySelector('[data-window]').style, {

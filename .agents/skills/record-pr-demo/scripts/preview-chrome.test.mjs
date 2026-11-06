@@ -66,7 +66,7 @@ test('should scrub real responsive content without changing the title or footer 
     )
     assert.equal(
       await page.locator('[data-canvas]').evaluate((e) => getComputedStyle(e).backgroundColor),
-      'rgb(35, 35, 33)',
+      'rgb(87, 87, 87)',
     )
     assert.equal(
       await page
@@ -81,7 +81,7 @@ test('should scrub real responsive content without changing the title or footer 
     await page.getByRole('button', { name: 'Light', exact: true }).click()
     assert.equal(
       await page.locator('[data-canvas]').evaluate((e) => getComputedStyle(e).backgroundColor),
-      'rgb(241, 240, 237)',
+      'rgb(151, 151, 151)',
     )
     assert.equal(
       await page

@@ -13,6 +13,7 @@ const chrome = mountDemoChrome({
   onRefresh: refreshApplication,
   root,
   accessibility: isAccessibility,
+  annotationLayout: 'left',
   showAnnouncements: new URLSearchParams(location.search).has('announcements'),
   theme,
   change: {
