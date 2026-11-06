@@ -6,6 +6,7 @@ import {
 } from '@lexical/markdown'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
+import { i18n } from './i18n.js'
 
 export const BoldFeature = createServerFeature({
   dependenciesSoft: ['italic'],
@@ -17,6 +18,7 @@ export const BoldFeature = createServerFeature({
 
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BoldFeatureClient',
+      i18n,
       markdownTransformers,
     }
   },

@@ -21,6 +21,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return false
       },
       key: 'italic',
+      label: ({ i18n }) => {
+        return i18n.t('lexical:italic:label')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')
       },

@@ -20,6 +20,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return false
       },
       key: 'subscript',
+      label: ({ i18n }) => {
+        return i18n.t('lexical:subscript:label')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript')
       },
