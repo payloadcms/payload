@@ -5,10 +5,24 @@ import { cache } from 'react'
 
 import { buildClientFieldSchemaMap } from './buildClientFieldSchemaMap/index.js'
 
-let cachedClientSchemaMap = global._payload_clientSchemaMap
+/**
+ * Client field schema maps are cached per server field schema map they were built from
+ * (which `getSchemaMap` rebuilds when the config changes), then per language and entity.
+ * After a config reload in development, a request that is still rendering with the previous
+ * config must not fill the cache that later requests (with the new config) read from.
+ */
+type CachedClientSchemaMaps = WeakMap<FieldSchemaMap, Map<string, ClientFieldSchemaMap>>
 
-if (!cachedClientSchemaMap) {
-  cachedClientSchemaMap = global._payload_clientSchemaMap = null
+const getCachedClientSchemaMaps = (): CachedClientSchemaMaps => {
+  if (
+    !(global._payload_clientSchemaMap instanceof WeakMap) ||
+    global._payload_doNotCacheClientSchemaMap
+  ) {
+    global._payload_clientSchemaMap = new WeakMap()
+    global._payload_doNotCacheClientSchemaMap = false
+  }
+
+  return global._payload_clientSchemaMap
 }
 
 export const getClientSchemaMap = cache(
@@ -22,20 +36,22 @@ export const getClientSchemaMap = cache(
     widgetSlug?: string
   }): ClientFieldSchemaMap => {
     const { collectionSlug, config, globalSlug, i18n, payload, schemaMap, widgetSlug } = args
+    const cachedClientSchemaMaps = getCachedClientSchemaMaps()
 
-    if (!cachedClientSchemaMap || global._payload_doNotCacheClientSchemaMap) {
-      cachedClientSchemaMap = new Map()
+    let clientSchemaMapsForSchemaMap = cachedClientSchemaMaps.get(schemaMap)
+
+    if (!clientSchemaMapsForSchemaMap) {
+      clientSchemaMapsForSchemaMap = new Map()
+      cachedClientSchemaMaps.set(schemaMap, clientSchemaMapsForSchemaMap)
     }
 
     // Labels are translated while building the map, so it has to be cached per language
     const cacheKey = `${i18n.language}:${collectionSlug || globalSlug || `widget:${widgetSlug}`}`
-    let cachedEntityClientFieldMap = cachedClientSchemaMap.get(cacheKey)
+    const cachedEntityClientFieldMap = clientSchemaMapsForSchemaMap.get(cacheKey)
 
     if (cachedEntityClientFieldMap) {
       return cachedEntityClientFieldMap
     }
-
-    cachedEntityClientFieldMap = new Map()
 
     const { clientFieldSchemaMap: entityClientFieldMap } = buildClientFieldSchemaMap({
       collectionSlug,
@@ -47,11 +63,7 @@ export const getClientSchemaMap = cache(
       widgetSlug,
     })
 
-    cachedClientSchemaMap.set(cacheKey, entityClientFieldMap)
-
-    global._payload_clientSchemaMap = cachedClientSchemaMap
-
-    global._payload_doNotCacheClientSchemaMap = false
+    clientSchemaMapsForSchemaMap.set(cacheKey, entityClientFieldMap)
 
     return entityClientFieldMap
   },
