@@ -198,6 +198,7 @@ export type MERGE_SERVER_STATE = {
   acceptValues?: AcceptValues
   prevStateRef?: React.RefObject<FormState>
   serverState: FormState
+  submittedFormState?: FormState
   type: 'MERGE_SERVER_STATE'
 }
 

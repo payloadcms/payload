@@ -217,7 +217,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'MERGE_SERVER_STATE': {
-      const { acceptValues, prevStateRef, serverState } = action
+      const { acceptValues, prevStateRef, serverState, submittedFormState } = action
 
       const newState = mergeServerFormState({
         acceptValues,
@@ -226,7 +226,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       })
 
       if (prevStateRef) {
-        prevStateRef.current = newState
+        // A response must advance the baseline from its request snapshot, not newer live state.
+        prevStateRef.current = submittedFormState
+          ? mergeServerFormState({
+              acceptValues,
+              currentState: submittedFormState,
+              incomingState: serverState,
+            })
+          : newState
       }
 
       return newState
