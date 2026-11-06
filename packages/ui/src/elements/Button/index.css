@@ -84,7 +84,7 @@
     }
   }
 
-  .btn--style-dashed {
+  .btn.btn--style-dashed {
     color: var(--color-text);
     background-color: transparent;
     border: var(--stroke-width-small) dashed var(--special-border-translucent);
