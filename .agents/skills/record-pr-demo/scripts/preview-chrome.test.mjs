@@ -217,15 +217,6 @@ test('should keep the sidebar fixed while resizing and reveal current steps in l
     await expect(panel).toHaveCSS('border-top-right-radius', '0px')
     await expect(page.locator('[data-window]')).toHaveCSS('border-top-left-radius', '0px')
     await expect(page.locator('[data-window]')).toHaveCSS('border-top-width', '0px')
-    const dividerColor = await page
-      .locator('[data-window]')
-      .evaluate((el) => getComputedStyle(el, '::before').backgroundColor)
-    const cardBorderColor = await panel
-      .locator('.sidebar-step')
-      .first()
-      .evaluate((el) => getComputedStyle(el).borderTopColor)
-    assert.equal(dividerColor, cardBorderColor)
-
     await expect(page.locator('.sidebar-shell')).toHaveCSS('background-color', 'rgb(221, 221, 221)')
     await expect(panel.locator('.sidebar-step').first()).toHaveCSS(
       'background-color',

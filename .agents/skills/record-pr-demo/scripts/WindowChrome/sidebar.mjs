@@ -1,4 +1,4 @@
-/** Shared description-only sidebar for the playground and recordings. */
+/** Shared walkthrough sidebar for the playground and recordings. */
 export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = true }) {
   if (
     !Array.isArray(steps) ||
@@ -17,32 +17,32 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
   }
   const shadow = root.shadowRoot
   const style = document.createElement('style')
+  // Extend the shell 1px beneath the window to prevent seams at fractional preview scales.
   style.textContent = `
     .stage[data-sidebar] .footer { display:none; }
     .stage[data-sidebar] .window { border:0; padding-bottom:12px; border-top-left-radius:0; border-bottom-left-radius:0; }
-    .stage[data-sidebar] .window::before { content:""; position:absolute; inset:0 auto 0 0; width:1px; background:var(--line); pointer-events:none; }
-    .sidebar-shell { position:absolute; left:16px; width:300px; border-radius:18px 0 0 18px; background:var(--sidebar-bg,var(--shell)); overflow:hidden; }
-    .annotation-sidebar { height:100%; color:var(--ink); overflow:hidden; display:flex; flex-direction:column; }
+    .sidebar-shell { position:absolute; left:16px; width:301px; border-radius:18px 0 0 18px; background:var(--sidebar-bg,var(--shell)); overflow:hidden; }
+    .annotation-sidebar { width:300px; height:100%; color:var(--ink); overflow:hidden; display:flex; flex-direction:column; }
     .sidebar-shell[hidden], .annotation-sidebar[hidden], .sidebar-steps[hidden] { display:none; }
     .sidebar-overview-row { flex:none; height:36px; display:flex; align-items:center; padding-bottom:8px; margin:10px 10px 0; }
     .sidebar-overview-row .sidebar-heading { flex:1; margin:0; }
-    .sidebar-heading { flex:none; margin:10px 10px 8px; padding:3px 9px; border:1px solid var(--line); border-radius:7px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; }
-    .sidebar-intro { flex:none; display:flex; align-items:flex-start; gap:10px; margin:0 10px 8px; padding:14px; border:1px solid var(--line); border-radius:8px; background:var(--paper); }
+    .sidebar-heading { flex:none; margin:10px 10px 8px; padding:3px 9px; border:1px solid var(--line); border-radius:7px; background:var(--badge); color:var(--sub); font:12px/1.5 var(--font-mono); }
+    .sidebar-intro { flex:none; display:flex; align-items:flex-start; gap:10px; margin:0 10px 8px; padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:var(--paper); }
     .sidebar-intro + .sidebar-heading { margin-top:0; }
-    .sidebar-intro p { margin:0; min-width:0; color:var(--ink); font-size:14px; line-height:1.6; }
+    .sidebar-intro p { margin:0; min-width:0; color:var(--ink); font-size:14px; line-height:1.4; }
     .sidebar-steps { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:var(--sub) transparent; list-style:none; margin:0; padding:0 10px 10px; }
-    .sidebar-step { width:100%; position:relative; display:block; border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--paper); color:var(--ink); text-align:left; }
+    .sidebar-step { width:100%; position:relative; display:block; border:1px solid var(--line); border-radius:8px; padding:0; overflow:hidden; background:var(--paper); color:var(--ink); text-align:left; }
     button.sidebar-step { cursor:pointer; }
-    .sidebar-step :is(p,.kind) { opacity:.5; transition:opacity 200ms ease; }
-    button.sidebar-step:hover :is(p,.kind) { opacity:.85; }
+    .sidebar-step :is(p,.sidebar-step-title) { opacity:.5; transition:opacity 200ms ease; }
+    button.sidebar-step:hover :is(p,.sidebar-step-title) { opacity:.85; }
     .sidebar-step:focus-visible { outline:2px solid #0d99ff; outline-offset:-2px; }
-    .sidebar-step[aria-current=step] :is(p,.kind) { opacity:1; }
-    .sidebar-dot { position:absolute; right:8px; top:8px; width:8px; height:8px; border-radius:50%; background:transparent; }
+    .sidebar-step[aria-current=step] :is(p,.sidebar-step-title) { opacity:1; }
+    .sidebar-dot { position:absolute; z-index:1; pointer-events:none; right:8px; top:8px; width:8px; height:8px; border-radius:50%; background:transparent; }
     [aria-current=step] .sidebar-dot { background:#0d99ff; }
     .sidebar-steps li + li { margin-top:6px; }
-    .sidebar-step .kind { display:inline-block; margin-bottom:6px; }
-    .sidebar-step p { margin:0; font-size:14px; line-height:1.6; color:var(--ink); }
-    @media(prefers-reduced-motion:reduce) { .sidebar-step :is(p,.kind) { transition:none; } }
+    .sidebar-step-title { display:flex; align-items:center; margin:0; padding:8px 24px 0px 14px; border:0; border-radius:0; background:var(--paper); color:var(--sub); font:12px/1.5 var(--font-mono); }
+    .sidebar-step p { margin:0; padding:12px 14px; font-size:14px; line-height:1.4; color:var(--ink); }
+    @media(prefers-reduced-motion:reduce) { .sidebar-step :is(p,.sidebar-step-title) { transition:none; } }
   `
   shadow.append(style)
   const shell = document.createElement('div')
@@ -78,11 +78,14 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
     dot.setAttribute('aria-hidden', 'true')
     const text = document.createElement('div')
     if (step.kind === 'Bug') {
+      const title = document.createElement('div')
+      title.className = 'sidebar-step-title'
       const pill = document.createElement('span')
       pill.className = 'kind'
       pill.dataset.kind = 'Bug'
       pill.textContent = 'Bug'
-      text.append(pill)
+      title.append(pill)
+      text.append(title)
     }
     const body = document.createElement('p')
     body.textContent = step.body
