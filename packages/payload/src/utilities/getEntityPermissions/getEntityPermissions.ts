@@ -88,16 +88,7 @@ const topLevelGlobalPermissions = ['read', 'readVersions', 'update', 'validate']
 export async function getEntityPermissions<TEntityType extends 'collection' | 'global'>(
   args: Args<TEntityType>,
 ): Promise<ReturnType<TEntityType>> {
-  const {
-    id,
-    blockReferencesPermissions,
-    data: _data,
-    entity,
-    entityType,
-    fetchData,
-    operations,
-    req,
-  } = args
+  const { id, data: _data, entity, entityType, fetchData, operations, req } = args
   const { locale: _locale, user } = req
 
   const locale = _locale ? _locale : undefined
@@ -140,10 +131,13 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
   const isLoggedIn = !!user
 
   const fieldsPermissions: FieldsPermissions = {}
+  // A permission tree is reusable only within this entity calculation. The caller's
+  // cache can be shared across collections and globals with different access rules.
+  const blockPermissionCache = new WeakMap<object, Map<string, BlockPermissions>>()
 
   const entityPermissions: ReturnType<TEntityType> = {
     fields: fieldsPermissions,
-  } as ReturnType<TEntityType>
+  }
 
   const promises: Promise<void>[] = []
 
@@ -177,7 +171,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
                       req,
                     }),
             }),
-          ) as Promise<boolean | Where>,
+          ),
         })
       } else {
         entityPermissions[operation] = {
@@ -223,7 +217,8 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
   await Promise.all(wherePromises)
 
   populateFieldPermissions({
-    blockReferencesPermissions,
+    id,
+    blockPermissionCache,
     collection: entityType === 'collection' ? (entity as SanitizedCollectionConfig) : null,
     data,
     fields: entity.fields,
@@ -308,7 +303,7 @@ const processWhereQuery = ({
         entityPermissions[operation] = {
           permission: hasPermission,
           where: accessResult,
-        } as Permission
+        }
       }),
     )
   } else {
@@ -316,6 +311,6 @@ const processWhereQuery = ({
     // have the document data available. This seems more secure.
     // Alternatively, we could set permission to a third state, like 'unknown'.
     // Even after calling sanitizePermissions, the permissions will still be true if the where query is returned but ignored as we don't have the document data available.
-    entityPermissions[operation] = { permission: true, where: accessResult } as Permission
+    entityPermissions[operation] = { permission: true, where: accessResult }
   }
 }

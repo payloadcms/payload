@@ -32,6 +32,8 @@ export const incrementName = (name: string): string => {
 type Args = {
   collectionSlug: string
   desiredFilename: string
+  /** Ignores this document's own files, for writes that store a new version in its own folder. */
+  excludeDocumentID?: number | string
   prefix?: string
   req: PayloadRequest
   /**
@@ -66,6 +68,7 @@ type Args = {
 export async function getSafeFileName({
   collectionSlug,
   desiredFilename,
+  excludeDocumentID,
   prefix,
   req,
   staticPath,
@@ -75,6 +78,7 @@ export async function getSafeFileName({
   while (
     (await docWithFilenameExists({
       collectionSlug,
+      excludeDocumentID,
       filename: modifiedFilename,
       path: staticPath ?? '',
       prefix,

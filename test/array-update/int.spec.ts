@@ -135,8 +135,16 @@ test.suite('array-update', { config: './config.ts' }, () => {
     expect(errors).toHaveLength(0)
     expect(docs).toHaveLength(2)
 
-    const updatedA = await payload.findByID({ id: docA.id, collection: arraySlug, overrideAccess: true })
-    const updatedB = await payload.findByID({ id: docB.id, collection: arraySlug, overrideAccess: true })
+    const updatedA = await payload.findByID({
+      id: docA.id,
+      collection: arraySlug,
+      overrideAccess: true,
+    })
+    const updatedB = await payload.findByID({
+      id: docB.id,
+      collection: arraySlug,
+      overrideAccess: true,
+    })
 
     expect(updatedA.arrayOfFields?.[0].required).toBe('bulk value')
     expect(updatedB.arrayOfFields?.[0].required).toBe('bulk value')
@@ -184,7 +192,11 @@ test.suite('array-update', { config: './config.ts' }, () => {
       collection: arraySlug,
       overrideAccess: true,
     })
-    const updatedOther = await payload.findByID({ id: otherDoc.id, collection: arraySlug, overrideAccess: true })
+    const updatedOther = await payload.findByID({
+      id: otherDoc.id,
+      collection: arraySlug,
+      overrideAccess: true,
+    })
 
     expect(updatedWithExistingRow.arrayOfFields?.[0].id).toBe(existingRowID)
     expect(updatedWithExistingRow.arrayOfFields?.[0].required).toBe('updated existing row')
@@ -225,8 +237,16 @@ test.suite('array-update', { config: './config.ts' }, () => {
     expect(errors).toHaveLength(0)
     expect(docs).toHaveLength(2)
 
-    const updatedA = await payload.findByID({ id: docA.id, collection: complexSlug, overrideAccess: true })
-    const updatedB = await payload.findByID({ id: docB.id, collection: complexSlug, overrideAccess: true })
+    const updatedA = await payload.findByID({
+      id: docA.id,
+      collection: complexSlug,
+      overrideAccess: true,
+    })
+    const updatedB = await payload.findByID({
+      id: docB.id,
+      collection: complexSlug,
+      overrideAccess: true,
+    })
 
     expect(updatedA.localizedArray?.[0].text).toBe('localized value')
     expect(updatedB.localizedArray?.[0].text).toBe('localized value')

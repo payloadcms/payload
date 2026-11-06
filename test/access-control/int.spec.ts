@@ -7,8 +7,8 @@ import type {
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
-import { AuthenticationError, createPayloadRequest, Forbidden } from 'payload'
-import { getEntityPermissions } from 'payload/internal'
+import { AuthenticationError, createPayloadRequest, docAccessOperation, Forbidden } from 'payload'
+import { getEntityPermissions, sanitizePermissions } from 'payload/internal'
 import { expect, vitest } from 'vitest'
 
 import type { FullyRestricted, Post } from './payload-types.js'
@@ -24,6 +24,7 @@ import {
   accessRelationParentSlug,
   asyncParentSlug,
   authSlug,
+  blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
   docLevelAccessSlug,
   firstArrayText,
@@ -55,7 +56,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
   let restricted: FullyRestricted
   let payload!: Payload
 
-  test.beforeAll(async ({ payloadInstance }) => {
+  test.beforeAll(({ payloadInstance }) => {
     payload = payloadInstance
   })
 
@@ -281,6 +282,83 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         }
         createdAdminUserIDs.length = 0
         createdAuthIDs.length = 0
+      })
+
+      test('should allow a user to update their own password based on the document id', async ({
+        payload,
+      }) => {
+        const originalPassword = 'OriginalPassword123!'
+        const replacementPassword = 'ReplacementPassword123!'
+
+        const account = await payload.create({
+          collection: authSlug,
+          data: {
+            _verified: true,
+            email: 'password-owner@example.com',
+            password: originalPassword,
+            roles: ['user'],
+          },
+          overrideAccess: true,
+        })
+
+        createdAuthIDs.push(account.id)
+
+        await payload.update({
+          id: account.id,
+          collection: authSlug,
+          data: {
+            password: replacementPassword,
+          },
+          overrideAccess: false,
+          user: { ...account, collection: authSlug },
+        })
+
+        await expect(
+          payload.login({
+            collection: authSlug,
+            data: {
+              email: account.email,
+              password: replacementPassword,
+            },
+          }),
+        ).resolves.toMatchObject({ user: { id: account.id } })
+
+        await expect(
+          payload.login({
+            collection: authSlug,
+            data: {
+              email: account.email,
+              password: originalPassword,
+            },
+          }),
+        ).rejects.toThrow(AuthenticationError)
+      })
+
+      test('should pass the document id to password field update access', async ({ payload }) => {
+        const account = await payload.create({
+          collection: authSlug,
+          data: {
+            _verified: true,
+            email: 'password-permissions@example.com',
+            password: 'OriginalPassword123!',
+            roles: ['user'],
+          },
+          overrideAccess: true,
+        })
+
+        createdAuthIDs.push(account.id)
+
+        const req = await createPayloadRequest({
+          payload,
+          user: { ...account, collection: authSlug },
+        })
+        const permissions = await docAccessOperation({
+          id: account.id,
+          collection: payload.collections[authSlug],
+          req,
+        })
+
+        expect(permissions.fields?.password).toBe(true)
       })
 
       test('should preserve credentials when password update access is denied', async ({
@@ -1498,6 +1576,250 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
   })
 
   test.describe('Querying', () => {
+    test('should query readable block children and omit unreadable values', async ({ payload }) => {
+      const doc = await payload.create({
+        collection: blocksFieldAccessSlug,
+        overrideAccess: true,
+        data: {
+          title: 'Block query',
+          queryRestrictedBlocks: [
+            { blockType: 'restrictedBlock', title: 'Visible', content: 'Private' },
+          ],
+          queryRestrictedBlockRefs: [{ blockType: 'titleblock', privateTitle: 'Private' }],
+        } as unknown as RequiredDataFromCollectionSlug<typeof blocksFieldAccessSlug>,
+      })
+
+      const result = await payload.find({
+        collection: blocksFieldAccessSlug,
+        overrideAccess: false,
+        where: { 'queryRestrictedBlocks.title': { equals: 'Visible' } },
+      })
+
+      expect(result.docs.map(({ id }) => id)).toContain(doc.id)
+      const found = result.docs.find(({ id }) => id === doc.id)!
+      expect(found).toMatchObject({ queryRestrictedBlocks: [{ title: 'Visible' }] })
+      expect(found).not.toHaveProperty('queryRestrictedBlocks.0.content')
+      expect(found).not.toHaveProperty('queryRestrictedBlockRefs.0.privateTitle')
+    })
+
+    test('should reject queries on unreadable inline and referenced block children', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.find({
+          collection: blocksFieldAccessSlug,
+          overrideAccess: false,
+          where: { 'queryRestrictedBlocks.content': { equals: 'Private' } },
+        }),
+      ).rejects.toThrow('cannot be queried')
+
+      await expect(
+        payload.count({
+          collection: blocksFieldAccessSlug,
+          overrideAccess: false,
+          where: { 'queryRestrictedBlockRefs.privateTitle': { equals: 'Private' } },
+        }),
+      ).rejects.toThrow('cannot be queried')
+
+      await expect(
+        payload.find({
+          collection: blocksFieldAccessSlug,
+          overrideAccess: false,
+          sort: 'queryRestrictedBlocks.content',
+        }),
+      ).rejects.toThrow('cannot be queried')
+    })
+
+    test('should resolve complete paths and check every matching block', async ({ payload }) => {
+      const doc = await payload.create({
+        collection: blocksFieldAccessSlug,
+        overrideAccess: true,
+        data: {
+          title: 'Nested block query',
+          queryRestrictedBlocks: [
+            { blockType: 'detailedBlock', details: { title: 'Visible' }, shared: 'Private' },
+          ],
+        } as unknown as RequiredDataFromCollectionSlug<typeof blocksFieldAccessSlug>,
+      })
+
+      const result = await payload.find({
+        collection: blocksFieldAccessSlug,
+        overrideAccess: false,
+        where: { 'queryRestrictedBlocks.details.title': { equals: 'Visible' } },
+      })
+
+      expect(result.docs.map(({ id }) => id)).toContain(doc.id)
+      await expect(
+        payload.find({
+          collection: blocksFieldAccessSlug,
+          overrideAccess: false,
+          where: { 'queryRestrictedBlocks.shared': { equals: 'Private' } },
+        }),
+      ).rejects.toThrow('cannot be queried')
+    })
+
+    test('should apply block child permissions to drafts and versions', async ({ payload }) => {
+      await expect(
+        payload.find({
+          collection: blocksFieldAccessSlug,
+          draft: true,
+          overrideAccess: false,
+          where: { 'queryRestrictedBlocks.content': { equals: 'Private' } },
+        }),
+      ).rejects.toThrow('cannot be queried')
+
+      await expect(
+        payload.findVersions({
+          collection: blocksFieldAccessSlug,
+          overrideAccess: false,
+          where: { 'version.queryRestrictedBlockRefs.privateTitle': { equals: 'Private' } },
+        }),
+      ).rejects.toThrow('cannot be queried')
+    })
+
+    test('should keep referenced block permissions local to each field', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload })
+      const permissions = await getEntityPermissions({
+        blockReferencesPermissions: {} as Parameters<
+          typeof getEntityPermissions
+        >[0]['blockReferencesPermissions'],
+        entity: payload.collections[blocksFieldAccessSlug].config,
+        entityType: 'collection',
+        fetchData: false,
+        operations: ['read'],
+        req,
+      })
+
+      expect(
+        permissions.fields.editableBlockRefs!.blocks!.titleblock!.fields!.title!.read!.permission,
+      ).toBe(true)
+      expect(
+        permissions.fields.parentRestrictedBlockRefs!.blocks!.titleblock!.fields!.title!.read!
+          .permission,
+      ).toBe(false)
+    })
+
+    test('should reuse block permissions with matching inherited access', async ({ payload }) => {
+      let evaluations = 0
+      const block = {
+        slug: 'shared',
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            access: {
+              read: () => {
+                evaluations++
+                return true
+              },
+            },
+          },
+          { name: 'private', type: 'text', access: { read: () => false } },
+        ],
+      } as unknown as (typeof payload.config.blocks)[number]
+      const entity = payload.collections[blocksFieldAccessSlug].config
+      const req = await createPayloadRequest({ payload })
+      const permissions = await getEntityPermissions({
+        blockReferencesPermissions: {},
+        entity: {
+          ...entity,
+          fields: [
+            { name: 'first', type: 'blocks', blocks: [block] },
+            { name: 'second', type: 'blocks', blocks: [block] },
+          ] as typeof entity.fields,
+        },
+        entityType: 'collection',
+        fetchData: false,
+        operations: ['read'],
+        req,
+      })
+
+      expect(permissions.fields.first!.blocks!.shared!.fields!.title!.read!.permission).toBe(true)
+      expect(permissions.fields.second!.blocks!.shared!.fields!.title!.read!.permission).toBe(true)
+      expect(evaluations).toBe(1)
+      expect(permissions.fields.first!.blocks!.shared).not.toBe(
+        permissions.fields.second!.blocks!.shared,
+      )
+      const sanitized = sanitizePermissions({ collections: { [entity.slug]: permissions } })
+      expect(sanitized.collections[entity.slug].fields.first).not.toBe(true)
+      expect(sanitized.collections[entity.slug].fields.second).not.toBe(true)
+    })
+
+    test('should keep recursive block permissions finite and scoped', async ({ payload }) => {
+      const self = { slug: 'self', fields: [] } as unknown as (typeof payload.config.blocks)[number]
+      const first = {
+        slug: 'first',
+        fields: [],
+      } as unknown as (typeof payload.config.blocks)[number]
+      const second = {
+        slug: 'second',
+        fields: [],
+      } as unknown as (typeof payload.config.blocks)[number]
+
+      self.fields = [
+        { name: 'title', type: 'text' },
+        { name: 'children', type: 'blocks', blocks: [self] },
+      ] as typeof self.fields
+      first.fields = [
+        { name: 'title', type: 'text' },
+        { name: 'children', type: 'blocks', blocks: [second] },
+      ] as typeof first.fields
+      second.fields = [
+        { name: 'title', type: 'text' },
+        { name: 'children', type: 'blocks', blocks: [first] },
+      ] as typeof second.fields
+      const entity = payload.collections[blocksFieldAccessSlug].config
+      const req = await createPayloadRequest({ payload })
+      const permissions = await getEntityPermissions({
+        blockReferencesPermissions: {},
+        entity: {
+          ...entity,
+          fields: [
+            { name: 'editable', type: 'blocks', blocks: [self, first] },
+            {
+              name: 'restricted',
+              type: 'blocks',
+              blocks: [self],
+              access: { read: () => Promise.resolve(false) },
+            },
+          ] as typeof entity.fields,
+        },
+        entityType: 'collection',
+        fetchData: false,
+        operations: ['read'],
+        req,
+      })
+
+      expect(permissions.fields.editable!.blocks!.self!.fields!.title!.read!.permission).toBe(true)
+      expect(permissions.fields.restricted!.blocks!.self!.fields!.title!.read!.permission).toBe(
+        false,
+      )
+      expect(
+        permissions.fields.editable!.blocks!.self!.fields!.children!.blocks!.self!.read!.permission,
+      ).toBe(false)
+      expect(
+        permissions.fields.editable!.blocks!.first!.fields!.children!.blocks!.second!.fields!
+          .children!.blocks!.first!.read!.permission,
+      ).toBe(false)
+      const sanitized = sanitizePermissions({ collections: { [entity.slug]: permissions } })
+      const json = JSON.stringify(sanitized)
+      expect(json).not.toContain('payload.recursive-block-boundary')
+      const serialized = JSON.parse(json)
+      expect(serialized.collections[entity.slug].fields.editable).not.toBe(true)
+      expect(
+        serialized.collections[entity.slug].fields.editable.blocks.self.fields.children.blocks.self,
+      ).toEqual({ fields: {} })
+      expect(
+        serialized.collections[entity.slug].fields.editable.blocks.first.fields.children.blocks
+          .second.fields.children.blocks.first,
+      ).toEqual({ fields: {} })
+      expect(
+        JSON.stringify(
+          sanitizePermissions(sanitized as unknown as Parameters<typeof sanitizePermissions>[0]),
+        ),
+      ).toBe(json)
+    })
+
     test.describe('findDistinct', () => {
       const createNotUpdateDocumentIDs: (number | string)[] = []
       const parentDocumentIDs: (number | string)[] = []
@@ -2475,7 +2797,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
             slug: inheritedReadVersionsVirtualGlobalSlug,
             overrideAccess: false,
           }),
-        ).resolves.toMatchObject({ version: { related: allowedID } })
+        ).resolves.toMatchObject({ related: { id: allowedID } })
       } finally {
         await payload.db.deleteVersions({
           globalSlug: inheritedReadVersionsVirtualGlobalSlug,

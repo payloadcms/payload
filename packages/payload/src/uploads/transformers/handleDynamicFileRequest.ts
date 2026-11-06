@@ -8,6 +8,7 @@ import { NotFound } from '../../errors/NotFound.js'
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
+import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
@@ -27,11 +28,13 @@ import { withFileTransformAccessContext } from './withFileTransformAccessContext
 export async function handleDynamicFileRequest({
   collection,
   filename,
+  isOriginal: isOriginalParam,
   prefix,
   req,
 }: {
   collection: Collection
   filename: string
+  isOriginal?: boolean
   prefix?: string
   req: PayloadRequest
 }): Promise<Response> {
@@ -51,9 +54,17 @@ export async function handleDynamicFileRequest({
     throw new NotFound(req.t)
   }
 
+  const isOriginalRequest = isOriginalFileRequest({
+    doc: resolvedDocument,
+    filename,
+    isOriginal: isOriginalParam,
+  })
+  // Without transform params, a stored file is served as it is, with no transformer.
+  const hasNoTransformParams = req.searchParams?.size === 0
+
   if (
-    resolvedDocument.original?.filename === filename &&
-    (resolvedDocument.filename !== filename || req.searchParams.size === 0)
+    isOriginalRequest ||
+    (resolvedDocument.original?.filename === filename && hasNoTransformParams)
   ) {
     const permittedDocument = await withFileTransformAccessContext({
       callback: () => checkFileAccess({ collection, filename, prefix, req }),
@@ -63,8 +74,9 @@ export async function handleDynamicFileRequest({
 
     return retrieveFileResponse({
       collection,
-      doc: (permittedDocument ?? resolvedDocument) as ResolvedUploadDocument,
+      doc: permittedDocument ?? resolvedDocument,
       filename,
+      isOriginal: isOriginalRequest,
       prefix,
       req,
     })
@@ -124,7 +136,7 @@ export async function handleDynamicFileRequest({
       if (result.response) {
         if (handedOutResponse && result.response !== handedOutResponse) {
           await discardResponse(handedOutResponse)
-        } else if (previousResponse && result.response !== previousResponse) {
+        } else if (!handedOutResponse && previousResponse && result.response !== previousResponse) {
           await discardResponse(previousResponse)
         }
 
@@ -172,7 +184,15 @@ function withAbortableBody({
     return response
   }
 
-  return new Response(response.body.pipeThrough(new TransformStream(), { signal }), {
+  const stream = new TransformStream({
+    start(controller) {
+      // Pipe abort waits for pending writes, which can stall on an abandoned reader.
+      // Error the transform to unblock those writes before the pipe cancels its source.
+      signal.addEventListener('abort', () => controller.error(signal.reason), { once: true })
+    },
+  })
+
+  return new Response(response.body.pipeThrough(stream, { signal }), {
     headers: response.headers,
     status: response.status,
     statusText: response.statusText,

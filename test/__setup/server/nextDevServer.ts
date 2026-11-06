@@ -31,6 +31,8 @@ export async function startNextDevServer({
     hostname: 'localhost',
     port,
     turbopack: enableTurbo,
+    // Without an explicit `webpack: true`, Next falls back to `TURBOPACK=auto` (Turbopack) even when `turbopack` is false
+    webpack: !enableTurbo,
   })
 
   const handle = app.getRequestHandler()

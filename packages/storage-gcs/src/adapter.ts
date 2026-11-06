@@ -76,7 +76,10 @@ export function createGcsAdapter({
       return data
     },
 
-    staticHandler: (req, { doc, headers, params: { filename, operation, uploadReference } }) =>
+    staticHandler: (
+      req,
+      { doc, headers, params: { filename, isOriginal, operation, uploadReference } },
+    ) =>
       getFile({
         bucket,
         client: getStorageClient(),
@@ -85,6 +88,7 @@ export function createGcsAdapter({
         doc,
         filename,
         incomingHeaders: headers,
+        isOriginal,
         operation,
         req,
         uploadReference,

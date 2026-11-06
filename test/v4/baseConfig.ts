@@ -266,7 +266,10 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     createdPosts.push(created)
   }
 
-  const richTextCount = await payload.count({ collection: richTextFieldsSlug, overrideAccess: true })
+  const richTextCount = await payload.count({
+    collection: richTextFieldsSlug,
+    overrideAccess: true,
+  })
   if (richTextCount.totalDocs === 0) {
     const uploadDoc = await payload.create({
       collection: uploadsSlug,

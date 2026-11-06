@@ -208,7 +208,7 @@ const RowFields: CollectionConfig = {
         },
       ],
     },
-  ]
+  ],
 }
 
 export default RowFields

@@ -12,16 +12,12 @@ export const reservedBaseAuthFieldNames = [
 /**
  * Reserved field names for auth collections with verify: true
  */
-export const reservedVerifyFieldNames = [
-  /* '_verified', '_verificationToken' */
-]
+export const reservedVerifyFieldNames = [/* '_verified', '_verificationToken' */]
 
 /**
  * Reserved field names for auth collections with useApiKey: true
  */
-export const reservedAPIKeyFieldNames = [
-  /* 'apiKeyIndex', 'apiKeyLast4', 'apiKey' */
-]
+export const reservedAPIKeyFieldNames = [/* 'apiKeyIndex', 'apiKeyLast4', 'apiKey' */]
 
 /**
  * Reserved field names for collections with upload config enabled
@@ -43,6 +39,4 @@ export const reservedBaseUploadFieldNames = [
 /**
  * Reserved field names for collections with versions enabled
  */
-export const reservedVersionsFieldNames = [
-  /* '__v', '_status' */
-]
+export const reservedVersionsFieldNames = [/* '__v', '_status' */]

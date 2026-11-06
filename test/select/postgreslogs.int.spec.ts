@@ -234,5 +234,9 @@ async function createPost({ payload }: { payload: Payload }) {
 }
 
 function createPoint({ payload }: { payload: Payload }) {
-  return payload.create({ collection: 'points', data: { text: 'some', point: [10, 20] }, overrideAccess: true })
+  return payload.create({
+    collection: 'points',
+    data: { text: 'some', point: [10, 20] },
+    overrideAccess: true,
+  })
 }

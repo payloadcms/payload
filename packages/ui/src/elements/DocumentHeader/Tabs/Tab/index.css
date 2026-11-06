@@ -18,6 +18,10 @@
 
   .doc-tab--active {
     color: var(--color-text);
+
+    html[data-enhanced-contrast] & {
+      border-color: var(--color-border-control);
+    }
   }
 
   .doc-tab--active .pill-version-count {

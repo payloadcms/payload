@@ -30,8 +30,8 @@
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
     "payload": "workspace:*",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "srvx": "0.11.21",
     "vite": "8.3.0"
   },
@@ -46,7 +46,7 @@
     "@vitejs/plugin-rsc": "^0.5.21",
     "eslint": "^9.16.0",
     "jsdom": "28.0.0",
-    "prettier": "^3.4.2",
+    "oxfmt": "^0.73.0",
     "tsx": "4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.26.1",
@@ -54,7 +54,7 @@
     "vitest": "5.0.1"
   },
   "engines": {
-    "node": ">=24.15.0",
+    "node": ">=24.22.1",
     "pnpm": "^9 || ^10 || ^11"
   },
   "pnpm": {

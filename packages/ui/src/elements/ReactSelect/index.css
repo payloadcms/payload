@@ -18,7 +18,7 @@
       -webkit-appearance: none;
       appearance: none;
       height: auto;
-      padding-block: calc(var(--spacer-1) + 1px);
+      padding-block: calc(var(--spacer-1) - var(--stroke-width-small));
       padding-inline: var(--field-padding-inline) var(--spacer-5);
       flex-wrap: wrap;
       gap: var(--spacer-1);
@@ -59,7 +59,9 @@
 
     .rs__input-container {
       color: var(--color-text);
-      height: var(--text-body-medium-line-height);
+      height: var(--spacer-4);
+      min-width: var(--spacer-4);
+      grid-template-columns: 0 minmax(var(--spacer-4), min-content);
       margin: 0;
       padding: 0;
     }
@@ -157,5 +159,9 @@
     div.rs__control {
       border-color: var(--field-color-border-focus);
     }
+  }
+
+  html[data-enhanced-contrast] :is(.rs__option--is-focused, .rs__option--is-selected) {
+    --color-text-secondary: var(--color-text);
   }
 }

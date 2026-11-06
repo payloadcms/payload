@@ -1444,6 +1444,256 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
     })
 
+    test('should enforce localized text length validation with locale all', async ({ payload }) => {
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale 'all' accepts object values for localized fields
+            localizedRequiredText: {
+              en: 'English text',
+              es: 'no',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('The following field is invalid: Localized Required Text')
+    })
+
+    test('should skip validation for locales omitted from a locale all write', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: {
+            en: 'English text',
+          },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      const allLocales = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      // @ts-expect-error locale 'all' returns locale-keyed object for localized fields
+      expect(allLocales.localizedRequiredText.en).toEqual('English text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
+    })
+
+    test('should enforce maxLength per locale and name the failing locale with locale all', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale 'all' accepts object values for localized fields
+            localizedRequiredText: {
+              en: 'English text',
+              es: 'this value is definitely longer than twenty characters',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Localized Required Text (es)')
+    })
+
+    test('should treat an empty locale map as missing for a required field with locale all', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale 'all' accepts object values for localized fields
+            localizedRequiredText: {},
+          },
+          locale: 'all',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('The following field is invalid: Localized Required Text')
+    })
+
+    test('should enforce localized length validation on update with locale all', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: {
+            en: 'English text',
+            es: 'Spanish text',
+          },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      await expect(
+        // @ts-expect-error locale 'all' accepts object values for localized fields
+        payload.update({
+          id: doc.id,
+          collection: 'text-fields',
+          data: {
+            localizedRequiredText: {
+              en: 'English text',
+              es: 'no',
+            },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('The following field is invalid: Localized Required Text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
+    })
+
+    test('should persist updated values on a locale all update', async ({ payload }) => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: { en: 'English one', es: 'Spanish one' },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      // @ts-expect-error locale 'all' accepts object values for localized fields
+      await payload.update({
+        id: doc.id,
+        collection: 'text-fields',
+        data: {
+          localizedRequiredText: { en: 'English two', es: 'Spanish two' },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      const refetched: any = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(refetched.localizedRequiredText.en).toStrictEqual('English two')
+      expect(refetched.localizedRequiredText.es).toStrictEqual('Spanish two')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
+    })
+
+    test('should only update submitted locales on a partial locale all update', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: { en: 'English one', es: 'Spanish one' },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      // @ts-expect-error locale 'all' accepts object values for localized fields
+      await payload.update({
+        id: doc.id,
+        collection: 'text-fields',
+        data: {
+          localizedRequiredText: { en: 'English two' },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      const refetched: any = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(refetched.localizedRequiredText.en).toStrictEqual('English two')
+      expect(refetched.localizedRequiredText.es).toStrictEqual('Spanish one')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
+    })
+
+    test('should scope req.locale per locale for a custom validator with locale all', async ({
+      payload,
+    }) => {
+      // Same sentinel in both locales; the validator only rejects it for `es`. If `req.locale` leaked as
+      // `'all'` (or `'en'`), neither would reject - so a rejection attributed to `(es)` proves the scoping.
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale all
+            localizedRequiredText: { en: 'English text', es: 'Spanish text' },
+            // @ts-expect-error locale all
+            localizedCustomValidate: { en: 'reject-es', es: 'reject-es' },
+          },
+          locale: 'all',
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Localized Custom Validate (es)')
+    })
+
+    test('should pass the locale previousValue to a custom validator on a locale all update', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale all
+          localizedRequiredText: { en: 'English text', es: 'Spanish text' },
+          // @ts-expect-error locale all
+          localizedCustomValidate: { en: 'prev-en', es: 'prev-es' },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      // The validator asserts the en previousValue is 'prev-en' (the locale's own prior value, not the
+      // whole `{ en, es }` object). A wrong previousValue returns an error naming the received value.
+      // @ts-expect-error locale all
+      const updated: any = await payload.update({
+        id: doc.id,
+        collection: 'text-fields',
+        data: {
+          localizedCustomValidate: { en: 'assert-previous', es: 'prev-es' },
+        },
+        locale: 'all',
+        overrideAccess: true,
+      })
+
+      expect(updated.localizedCustomValidate.en).toStrictEqual('assert-previous')
+      expect(updated.localizedCustomValidate.es).toStrictEqual('prev-es')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id, overrideAccess: true })
+    })
+
     test('should query hasMany in', async ({ payload }) => {
       const hit = await payload.create({
         collection: 'text-fields',
@@ -4691,6 +4941,153 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
   })
 
   test.describe('blocks', () => {
+    test('should use the inline block configuration for matching block types', async ({
+      payload,
+    }) => {
+      const req = await createPayloadRequest({ payload, user: user.user })
+      req.context.globalBlockVisited = false
+      req.context.inlineBlockVisited = false
+      req.context.globalBlockBeforeChange = false
+      req.context.inlineBlockBeforeChange = false
+      req.context.globalBlockAfterChange = false
+      req.context.inlineBlockAfterChange = false
+
+      const doc = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          // @ts-expect-error - Runtime coverage for a fixture absent from generated types.
+          sharedBlocks: [{ blockType: 'sharedBlock', inlineText: 'example' }],
+        },
+        overrideAccess: true,
+        req,
+      })
+
+      expect(req.context.globalBlockVisited).toBe(false)
+      expect(req.context.inlineBlockVisited).toBe(true)
+      expect(req.context.globalBlockBeforeChange).toBe(false)
+      expect(req.context.inlineBlockBeforeChange).toBe(true)
+      expect(req.context.globalBlockAfterChange).toBe(false)
+      expect(req.context.inlineBlockAfterChange).toBe(true)
+      expect(
+        (doc as unknown as { sharedBlocks: { inlineText: string }[] }).sharedBlocks[0]!.inlineText,
+      ).toBe('example')
+
+      req.context.globalBlockRead = false
+      req.context.inlineBlockRead = false
+      const found = await payload.findByID({
+        id: doc.id,
+        collection: blockFieldsSlug,
+        overrideAccess: true,
+        req,
+      })
+
+      expect(req.context.globalBlockRead).toBe(false)
+      expect(req.context.inlineBlockRead).toBe(true)
+      expect(
+        (found as unknown as { sharedBlocks: { inlineText: string }[] }).sharedBlocks[0]!
+          .inlineText,
+      ).toBe('example')
+
+      const matches = await payload.find({
+        collection: blockFieldsSlug,
+        overrideAccess: true,
+        where: { 'sharedBlocks.blockType': { equals: 'sharedBlock' } },
+      })
+      expect(matches.docs.some((match) => match.id === doc.id)).toBe(true)
+    })
+
+    test('should validate block types against the field options on create', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload, user: user.user })
+      req.context.configBlockVisited = false
+
+      await expect(
+        payload.create({
+          collection: blockFieldsSlug,
+          data: {
+            // @ts-expect-error - Runtime validation covers values outside the generated field type.
+            configuration: [{ blockType: 'ConfigBlockTest', deduplicatedText: 'example' }],
+          },
+          overrideAccess: true,
+          req,
+        }),
+      ).rejects.toMatchObject({
+        name: 'ValidationError',
+        data: { errors: [{ path: 'configuration.0.blockType' }] },
+      })
+
+      expect(req.context.configBlockVisited).toBe(false)
+    })
+
+    test('should validate block types against the field options on update', async ({ payload }) => {
+      const { docs } = await payload.find({
+        collection: blockFieldsSlug,
+        limit: 1,
+        overrideAccess: true,
+      })
+      const req = await createPayloadRequest({ payload, user: user.user })
+      req.context.configBlockVisited = false
+
+      await expect(
+        payload.update({
+          id: docs[0]!.id,
+          collection: blockFieldsSlug,
+          data: {
+            // @ts-expect-error - Runtime validation covers values outside the generated field type.
+            configuration: [{ blockType: 'ConfigBlockTest', deduplicatedText: 'example' }],
+          },
+          overrideAccess: true,
+          req,
+        }),
+      ).rejects.toMatchObject({
+        name: 'ValidationError',
+        data: { errors: [{ path: 'configuration.0.blockType' }] },
+      })
+
+      expect(req.context.configBlockVisited).toBe(false)
+    })
+
+    test('should validate block types against the field options over REST', async ({
+      restClient,
+    }) => {
+      const response = await restClient.POST(`/${blockFieldsSlug}`, {
+        body: JSON.stringify({
+          configuration: [{ blockType: 'ConfigBlockTest', deduplicatedText: 'example' }],
+        }),
+      })
+
+      expect(response.status).toBe(400)
+    })
+
+    test('should validate block types in a conditionally hidden field', async ({ payload }) => {
+      const req = await createPayloadRequest({ payload, user: user.user })
+      req.context.configBlockVisited = false
+
+      await expect(
+        payload.create({
+          collection: blockFieldsSlug,
+          data: {
+            conditionalGroup: {
+              conditionalConfiguration: [
+                {
+                  // @ts-expect-error - Runtime validation covers values outside the generated field type.
+                  blockType: 'ConfigBlockTest',
+                  deduplicatedText: 'example',
+                },
+              ],
+            },
+            showConditionalFields: false,
+          },
+          overrideAccess: true,
+          req,
+        }),
+      ).rejects.toMatchObject({
+        name: 'ValidationError',
+        data: { errors: [{ path: 'conditionalGroup.conditionalConfiguration.0.blockType' }] },
+      })
+
+      expect(req.context.configBlockVisited).toBe(false)
+    })
+
     test('should retrieve doc with blocks', async ({ payload }) => {
       const blockFields = await payload.find({
         collection: 'block-fields',

@@ -57,6 +57,7 @@ export function UploadDropzoneContent({
         />
         <span className={`${baseClass}__or-text`}>{t('general:or')}</span>
         <Button
+          aria-label={pasteTooltip}
           buttonStyle="secondary"
           className={[`${baseClass}__pasteFromClipboard`, pasteButtonClassName]
             .filter(Boolean)

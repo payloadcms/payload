@@ -44,7 +44,7 @@ export const VersionDrawerCreatedAtCell: React.FC<CreatedAtCellProps> = ({
         const search = current.toString()
         const query = search ? `?${search}` : ''
 
-        startRouteTransition(() => router.push(`${pathname}${query}`))
+        void startRouteTransition(() => router.push(`${pathname}${query}`))
       }}
       type="button"
     >

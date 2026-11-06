@@ -134,16 +134,7 @@ export const buildJoinAggregation = async ({
           },
         },
         {
-          $match: {
-            $and: [
-              {
-                $expr: {
-                  $eq: [`$${join.field.on}`, '$$root_id_'],
-                },
-              },
-              $match,
-            ],
-          },
+          $match,
         },
       ]
 
@@ -152,10 +143,9 @@ export const buildJoinAggregation = async ({
       aggregate.push({
         $lookup: {
           as: alias,
+          foreignField: join.field.on,
           from: JoinModel.collection.name,
-          let: {
-            root_id_: '$_id',
-          },
+          localField: '_id',
           pipeline: [
             ...basePipeline,
             {
@@ -163,10 +153,14 @@ export const buildJoinAggregation = async ({
                 [sortProperty]: sortDirection,
               },
             },
-            {
-              // Unfortunately, we can't use $skip here because we can lose data, instead we do $slice then
-              $limit: page ? page * limitJoin : limitJoin,
-            },
+            ...(limitJoin > 0
+              ? [
+                  {
+                    // Unfortunately, we can't use $skip here because we can lose data, instead we do $slice then
+                    $limit: page ? page * limitJoin : limitJoin,
+                  },
+                ]
+              : []),
             {
               $project: {
                 value: '$_id',
@@ -184,10 +178,9 @@ export const buildJoinAggregation = async ({
         aggregate.push({
           $lookup: {
             as: `${as}.totalDocs.${alias}`,
+            foreignField: join.field.on,
             from: JoinModel.collection.name,
-            let: {
-              root_id_: '$_id',
-            },
+            localField: '_id',
             pipeline: [
               ...basePipeline,
               {
@@ -247,13 +240,15 @@ export const buildJoinAggregation = async ({
       },
     })
 
-    aggregate.push({
-      $set: {
-        [`${as}.docs`]: {
-          $slice: [`$${as}.docs`, ...sliceValue],
+    if (limitJoin > 0) {
+      aggregate.push({
+        $set: {
+          [`${as}.docs`]: {
+            $slice: [`$${as}.docs`, ...sliceValue],
+          },
         },
-      },
-    })
+      })
+    }
   }
 
   for (const slug of Object.keys(joinConfig)) {

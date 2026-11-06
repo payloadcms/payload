@@ -28,8 +28,8 @@ async function build() {
     minify: true,
     metafile: true,
     tsconfig: path.resolve(dirname, './tsconfig.json'),
-    // 24.15.0 is the lowest version of node supported by Payload
-    target: 'node24.15.0',
+    // 24.22.1 is the lowest version of node supported by Payload
+    target: 'node24.22.1',
     // plugins: [commonjs()],
     sourcemap: true,
   })
@@ -56,8 +56,8 @@ async function build() {
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     // plugins: [commonjs()],
     sourcemap: true,
-    // 24.15.0 is the lowest version of node supported by Payload
-    target: 'node24.15.0',
+    // 24.22.1 is the lowest version of node supported by Payload
+    target: 'node24.22.1',
   })
   console.log('payload shared bundled successfully')
 

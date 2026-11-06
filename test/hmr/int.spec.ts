@@ -49,7 +49,6 @@ test.suite('Dev config reload', { db: (adapter) => adapter === 'mongodb' }, () =
         readyPath: '/api/config-marker',
         suite: suiteName,
         timeout: DEV_SERVER_START_TIMEOUT - 30000,
-        warmupPaths: ['/admin'],
       })
     }, DEV_SERVER_START_TIMEOUT)
 
@@ -62,7 +61,7 @@ test.suite('Dev config reload', { db: (adapter) => adapter === 'mongodb' }, () =
     }, DEV_SERVER_START_TIMEOUT)
 
     test(
-      'should serve the updated config after the config changes',
+      'should serve the updated config before an admin request',
       async () => {
         const nextConfigMarker = `updated-${Date.now()}`
 

@@ -14,7 +14,7 @@ export const withTimestamps: Plugin = (incomingConfig) => {
       ...col,
       // TODO: add the publishedAt date field here
     })),
-  } as Config
+  }
 }
 
 export default buildConfig({

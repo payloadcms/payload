@@ -55,7 +55,7 @@ const encodeJXLCodestream = (width: number, height: number): Buffer => {
   const body = Buffer.alloc(Math.ceil(bits.length / 8))
   bits.forEach((bit, i) => {
     if (bit) {
-      body[Math.floor(i / 8)]! |= 1 << i % 8
+      body[Math.floor(i / 8)]! |= 1 << (i % 8)
     }
   })
 

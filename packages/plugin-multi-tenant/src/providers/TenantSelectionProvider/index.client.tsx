@@ -243,8 +243,7 @@ export const TenantSelectionProviderClient = ({
   }, [initialTenantOptions])
 
   React.useEffect(() => {
-    const hasTenantSelectionMismatch =
-      initialValue && String(initialValue) !== getTenantCookie()
+    const hasTenantSelectionMismatch = initialValue && String(initialValue) !== getTenantCookie()
 
     if (userID && (userChanged || tenantOptions.length === 0 || hasTenantSelectionMismatch)) {
       // Sync on login, and when the provider remounts after login without tenant options.

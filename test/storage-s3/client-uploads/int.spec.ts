@@ -107,7 +107,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
     expect(res.ContentType).toBe('image/png')
   })
 
-  test('should return the new image URL immediately after cropping a client upload', async ({
+  test('should return the current image URL immediately after cropping a client upload', async ({
     payload,
     restClient,
   }) => {
@@ -155,8 +155,12 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
       overrideAccess: true,
     })
 
-    expect(cropped.url).not.toBe(created.url)
+    const servedResponse = await restClient.GET(cropped.url.replace(/^\/api/, ''))
+    const served = Buffer.from(await servedResponse.arrayBuffer())
+
     expect(cropped.url).toBe(reloaded.url)
+    expect(servedResponse.status).toBe(200)
+    expect(served.equals(file)).toBe(false)
   })
 
   test('does not overwrite an existing object through client uploads', async ({ restClient }) => {
@@ -261,7 +265,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
     const { doc } = await safeResponse.json()
 
     expect(safeResponse.status).toBe(201)
-    expect(doc.filename).toBe('reference-original.svg')
+    expect(doc.filename).toBe('reference.svg')
     const stored = await payload.db.findOne({
       collection: 'media',
       where: { id: { equals: doc.id } },
@@ -344,7 +348,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
     } = await response.json()
     expect(url).toBeDefined()
     expect(url).toContain(getTestBucketName())
-    expect(url).toContain('small-file-original.png')
+    expect(url).toContain('small-file.png')
   })
 
   test('should reject file exceeding size limit', async ({ restClient }) => {
@@ -437,7 +441,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('photo-original.png')
+      expect(url).toContain('photo.png')
       expect(url).not.toContain('..')
     })
 
@@ -459,7 +463,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('document-original.png')
+      expect(url).toContain('document.png')
       expect(url).not.toContain('..')
       expect(url).not.toContain('other-prefix')
     })
@@ -477,7 +481,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('photo-original.png')
+      expect(url).toContain('photo.png')
       expect(url).not.toContain('..')
     })
 
@@ -494,7 +498,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('safe-image-original.png')
+      expect(url).toContain('safe-image.png')
     })
 
     // Regression for #16694: trailing dots are stripped from the storage key the same way they
@@ -514,7 +518,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('report-original.png')
+      expect(url).toContain('report.png')
       expect(url).not.toContain('report...png')
     })
   })
@@ -576,7 +580,7 @@ test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, ()
       expect(doc.height).toBe(1600)
       expect(doc.filesize).toBe(file.length)
       expect(doc.mimeType).toBe('image/png')
-      expect(doc.original.filename).toBe('header-only-original.png')
+      expect(doc.original.filename).toBe('header-only.png')
       expect(doc.filename).toBe(doc.original.filename)
 
       const stored = await payload.findByID({

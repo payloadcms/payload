@@ -1059,7 +1059,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       locale?: GraphQLArgumentConfig
       page?: GraphQLArgumentConfig
       where?: GraphQLArgumentConfig
-    } = {} as any
+    } = {}
 
     const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo]).some(
       (relation) => graphqlResult.collections[relation].config.versions?.drafts,

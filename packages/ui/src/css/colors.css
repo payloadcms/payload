@@ -132,7 +132,10 @@
     --color-border-danger-strong: var(--ramp-red-600);
 
     --color-border: var(--ramp-grey-200);
+    --color-border-menu-separator: var(--ramp-white-200);
     --color-border-strong: var(--ramp-grey-800);
+    --color-border-control: var(--special-border-translucent);
+    --color-border-control-strong: var(--special-border-translucent-strong);
 
     --color-border-disabled: var(--ramp-grey-200);
 
@@ -183,6 +186,8 @@
     --color-icon-onsuccess: var(--ramp-white-1000);
     --color-icon-onsuccess-secondary: var(--ramp-white-600);
     --color-icon-success: var(--ramp-green-600);
+
+    --color-icon-favorite: var(--ramp-yellow-500);
 
     --color-icon-warning: var(--ramp-yellow-1000);
     --color-icon-warning-pressed: var(--ramp-yellow-1000);
@@ -366,6 +371,8 @@
 
     --color-border: var(--ramp-grey-600);
     --color-border-strong: var(--ramp-white-800);
+    --color-border-control: var(--special-border-translucent);
+    --color-border-control-strong: var(--special-border-translucent-strong);
 
     --color-border-disabled: var(--ramp-grey-600);
 
@@ -486,5 +493,63 @@
     /* ——————————————————————————————————————————————
        End Field Tokens
        ————————————————————————————————————————————— */
+  }
+  /* Reapply the contrast palette at theme boundaries, including portaled menus.
+     Component-specific mappings live with their component styles. */
+  html[data-enhanced-contrast],
+  html[data-enhanced-contrast] [data-theme] {
+    --color-border: var(--color-border-control);
+    --color-border-control-strong: var(--color-border-control);
+    --color-border-menu-separator: var(--ramp-white-500);
+  }
+
+  html[data-enhanced-contrast],
+  html[data-enhanced-contrast] [data-theme='light'] {
+    --color-bg-brand: var(--ramp-blue-700);
+    --color-bg-brand-hover: var(--ramp-blue-800);
+    --color-bg-brand-pressed: var(--ramp-blue-900);
+    --color-bg-selected-strong: var(--color-bg-brand);
+    --color-bg-selected-strong-hover: var(--color-bg-brand-hover);
+    --color-bg-danger: var(--ramp-red-600);
+    --color-bg-danger-hover: var(--ramp-red-700);
+    --color-bg-danger-pressed: var(--ramp-red-800);
+    --field-color-border: var(--color-border-control);
+    --field-color-border-hover: var(--color-border-control);
+    --color-border-control: var(--ramp-black-500);
+    --color-border-selected: var(--ramp-blue-700);
+    --color-icon-favorite: var(--ramp-yellow-1000);
+    --color-icon-tertiary: var(--ramp-black-500);
+    --color-text-brand: var(--ramp-blue-700);
+    --color-text-danger: var(--ramp-red-700);
+    --color-text-disabled: var(--ramp-grey-600);
+    --color-text-ondisabled: var(--ramp-grey-600);
+    --color-text-secondary: var(--ramp-black-600);
+    --color-text-selected: var(--ramp-blue-800);
+    --color-text-tertiary: var(--ramp-grey-600);
+  }
+
+  html[data-enhanced-contrast][data-theme='dark'],
+  html[data-enhanced-contrast] [data-theme='dark'] {
+    --color-bg-brand: var(--ramp-blue-700);
+    --color-bg-brand-hover: var(--ramp-blue-800);
+    --color-bg-brand-pressed: var(--ramp-blue-900);
+    --color-bg-selected-strong: var(--color-bg-brand);
+    --color-bg-selected-strong-hover: var(--color-bg-brand-hover);
+    --color-bg-danger: var(--ramp-dark-red-600);
+    --color-bg-danger-hover: var(--ramp-dark-red-700);
+    --color-bg-danger-pressed: var(--ramp-red-800);
+    --field-color-border: var(--color-border-control);
+    --field-color-border-hover: var(--color-border-control);
+    --color-border-control: var(--ramp-white-500);
+    --color-border-selected: var(--ramp-blue-400);
+    --color-icon-favorite: var(--ramp-yellow-500);
+    --color-icon-tertiary: var(--ramp-white-400);
+    --color-text-brand: var(--ramp-blue-400);
+    --color-text-danger: var(--ramp-red-400);
+    --color-text-disabled: var(--ramp-white-500);
+    --color-text-ondisabled: var(--ramp-white-1000);
+    --color-text-secondary: var(--ramp-white-500);
+    --color-text-selected: var(--ramp-blue-200);
+    --color-text-tertiary: var(--ramp-white-500);
   }
 }

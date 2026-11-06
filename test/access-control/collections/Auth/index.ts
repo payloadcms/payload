@@ -1,12 +1,14 @@
 import type { CollectionConfig } from 'payload'
 
-import { authSlug } from '../../shared.js'
+import { authSlug, usersSlug } from '../../shared.js'
 
 export const Auth: CollectionConfig = {
   slug: authSlug,
   access: {
     create: () => true,
     read: () => true,
+    update: ({ id, req: { user } }) =>
+      user?.collection === usersSlug || (user?.collection === authSlug && user?.id === id),
   },
   auth: {
     verify: true,
@@ -40,9 +42,10 @@ export const Auth: CollectionConfig = {
       name: 'password',
       type: 'text',
       access: {
-        update: ({ data, req: { user } }) => {
+        update: ({ id, req: { user } }) => {
           const isUserOrSelf =
-            (user && 'roles' in user && user?.roles?.includes('admin')) || user?.id === data?.id
+            (user && 'roles' in user && user?.roles?.includes('admin')) ||
+            (user?.collection === authSlug && user?.id === id)
           return isUserOrSelf
         },
       },

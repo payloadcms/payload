@@ -2,7 +2,9 @@ import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { Table } from 'drizzle-orm'
 import type {
+  CollectionSlug,
   DataFromCollectionSlug,
+  PaginatedDocs,
   Payload,
   PayloadRequest,
   TypeWithID,
@@ -14,6 +16,7 @@ import {
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
 import { randomUUID } from 'crypto'
+import { sql } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
@@ -162,7 +165,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
 
       const versionsQuery = await payload.db.findVersions({
         collection: 'custom-ids',
-        req: {} as PayloadRequest,
+        req: {},
         where: {
           latest: {
             equals: true,
@@ -2639,6 +2642,125 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
   })
 
   test.describe('transactions', () => {
+    test.options.describe('pagination', { db: 'mongo' }, () => {
+      const createdDocs: { collection: CollectionSlug; id: number | string }[] = []
+
+      const trackCreatedDoc = (collection: CollectionSlug, id: number | string) => {
+        createdDocs.push({ collection, id })
+      }
+
+      test.afterEach(async ({ payload }) => {
+        for (const { collection, id } of [...createdDocs].reverse()) {
+          await payload.delete({ collection, id, overrideAccess: true })
+        }
+
+        createdDocs.length = 0
+      })
+
+      test('should run paginated find operations inside a transaction session', async ({
+        payload,
+      }) => {
+        const uniqueTitle = `transaction pagination ${randomUUID()}`
+        const simpleOne = await payload.create({
+          collection: 'simple',
+          data: { text: `${uniqueTitle} simple one` },
+          overrideAccess: true,
+        })
+        trackCreatedDoc('simple', simpleOne.id)
+
+        const simpleTwo = await payload.create({
+          collection: 'simple',
+          data: { text: `${uniqueTitle} simple two` },
+          overrideAccess: true,
+        })
+        trackCreatedDoc('simple', simpleTwo.id)
+
+        const categoryOne = await payload.create({
+          collection: 'categories',
+          data: { title: `${uniqueTitle} category one` },
+          overrideAccess: true,
+        })
+        trackCreatedDoc('categories', categoryOne.id)
+
+        const categoryTwo = await payload.create({
+          collection: 'categories',
+          data: { title: `${uniqueTitle} category two` },
+          overrideAccess: true,
+        })
+        trackCreatedDoc('categories', categoryTwo.id)
+
+        const postOne = await payload.create({
+          collection: postsSlug,
+          data: {
+            category: categoryOne.id,
+            title: `${uniqueTitle} post one`,
+          },
+          overrideAccess: true,
+        })
+        trackCreatedDoc(postsSlug, postOne.id)
+
+        const postTwo = await payload.create({
+          collection: postsSlug,
+          data: {
+            category: categoryTwo.id,
+            title: `${uniqueTitle} post two`,
+          },
+          overrideAccess: true,
+        })
+        trackCreatedDoc(postsSlug, postTwo.id)
+
+        const req = {
+          payload,
+          user,
+        } as unknown as PayloadRequest
+
+        await initTransaction(req)
+
+        let aggregatePaginatedResult!: PaginatedDocs<unknown>
+        let modelPaginatedResult!: PaginatedDocs<unknown>
+
+        try {
+          modelPaginatedResult = await payload.find({
+            collection: 'simple',
+            limit: 1,
+            page: 1,
+            req,
+            where: {
+              text: {
+                contains: uniqueTitle,
+              },
+            },
+          })
+
+          aggregatePaginatedResult = await payload.find({
+            collection: postsSlug,
+            limit: 1,
+            page: 1,
+            req,
+            sort: 'category.title',
+            where: {
+              title: {
+                contains: uniqueTitle,
+              },
+            },
+          })
+
+          await commitTransaction(req)
+        } catch (error) {
+          await killTransaction(req)
+          throw error
+        }
+
+        expect(modelPaginatedResult.totalDocs).toBe(2)
+        expect(modelPaginatedResult.docs).toHaveLength(1)
+        expect(modelPaginatedResult.hasNextPage).toBe(true)
+
+        expect(aggregatePaginatedResult.totalDocs).toBe(2)
+        expect(aggregatePaginatedResult.docs).toHaveLength(1)
+        expect(aggregatePaginatedResult.hasNextPage).toBe(true)
+      })
+    })
+
     test.describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
       if (
@@ -3816,6 +3938,90 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     })
   })
 
+  test.options.describe(
+    'locale table indexes (Postgres)',
+    { db: (adapter) => adapter.startsWith('postgres') || adapter.startsWith('vercel-postgres') },
+    () => {
+      const getUniqueLocaleIndexColumns = async ({
+        payload,
+        tableName,
+      }: {
+        payload: Payload
+        tableName: string
+      }): Promise<string> => {
+        const schemaName = (payload.db as any).schemaName || 'public'
+        const result = await (payload.db as any).drizzle.execute(sql`
+          SELECT indexdef FROM pg_indexes
+          WHERE schemaname = ${schemaName}
+            AND tablename = ${tableName}
+            AND indexdef ILIKE '%unique%'
+            AND indexdef ILIKE '%_parent_id%'
+            AND indexdef ILIKE '%_locale%'
+        `)
+
+        const indexdef = result.rows[0]?.indexdef as string | undefined
+
+        if (!indexdef) {
+          throw new Error(`Expected a unique locale index on ${tableName}`)
+        }
+
+        // Return only the parenthesized column list, e.g. "_parent_id, _locale".
+        return indexdef.slice(indexdef.lastIndexOf('(') + 1, indexdef.lastIndexOf(')'))
+      }
+
+      for (const tableName of ['customs_locales', '_customs_v_locales']) {
+        test(`should lead the ${tableName} unique index with _parent_id`, async ({ payload }) => {
+          const columns = await getUniqueLocaleIndexColumns({ payload, tableName })
+
+          expect(columns).toContain('_parent_id')
+          expect(columns.indexOf('_parent_id')).toBeLessThan(columns.indexOf('_locale'))
+        })
+      }
+    },
+  )
+
+  test.options.describe(
+    'locale table indexes (SQLite)',
+    { db: (adapter) => adapter.startsWith('sqlite') },
+    () => {
+      const getUniqueLocaleIndexColumns = async ({
+        payload,
+        tableName,
+      }: {
+        payload: Payload
+        tableName: string
+      }): Promise<string> => {
+        const rows = (await payload.db.drizzle.all(
+          sql.raw(
+            `SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name='${tableName}'`,
+          ),
+        )) as { name: string; sql: null | string }[]
+
+        const indexdef = rows.find(
+          (row) =>
+            typeof row.sql === 'string' &&
+            row.sql.includes('_parent_id') &&
+            row.sql.includes('_locale'),
+        )?.sql
+
+        if (!indexdef) {
+          throw new Error(`Expected a unique locale index on ${tableName}`)
+        }
+
+        return indexdef.slice(indexdef.lastIndexOf('(') + 1, indexdef.lastIndexOf(')'))
+      }
+
+      for (const tableName of ['customs_locales', '_customs_v_locales']) {
+        test(`should lead the ${tableName} unique index with _parent_id`, async ({ payload }) => {
+          const columns = await getUniqueLocaleIndexColumns({ payload, tableName })
+
+          expect(columns).toContain('_parent_id')
+          expect(columns.indexOf('_parent_id')).toBeLessThan(columns.indexOf('_locale'))
+        })
+      }
+    },
+  )
+
   test.describe('drizzle: schema hooks', () => {
     test.beforeAll(() => {
       process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
@@ -4064,7 +4270,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
 
       const resDb = (await payload.db.findOne({
         collection: 'fields-persistance',
-        req: {} as PayloadRequest,
+        req: {},
         where: { id: { equals: createRes.id } },
       })) as Record<string, unknown>
 
@@ -4110,7 +4316,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
 
       const resDb = (await payload.db.findOne({
         collection: fieldsPersistanceSlug,
-        req: {} as PayloadRequest,
+        req: {},
         where: { id: { equals: created.id } },
       })) as Record<string, unknown>
 
@@ -4856,7 +5062,7 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
         publishDate: unixTimestamp,
         title: 'testing-date-coercion',
       },
-      req: {} as any,
+      req: {},
     })
 
     // Should be converted to ISO string

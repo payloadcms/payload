@@ -62,13 +62,13 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_BEFF7149".
+ * via the `definition` "LexicalNodes_501FFC9E".
  */
-export type LexicalNodes_BEFF7149 =
+export type LexicalNodes_501FFC9E =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_BEFF7149>
+  | SerializedParagraphNode<LexicalNodes_501FFC9E>
   | SerializedHorizontalRuleNode
   | {
       type: 'upload';
@@ -78,7 +78,7 @@ export type LexicalNodes_BEFF7149 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_BEFF7149>
+  | SerializedQuoteNode<LexicalNodes_501FFC9E>
   | SerializedRelationshipNode<
       | 'richText'
       | 'blocks-fields'
@@ -87,6 +87,7 @@ export type LexicalNodes_BEFF7149 =
       | 'localized-drafts'
       | 'localized-date-fields'
       | 'all-fields-localized'
+      | 'locale-validation'
       | 'users'
       | 'localized-posts'
       | 'no-localized-fields'
@@ -113,17 +114,19 @@ export type LexicalNodes_BEFF7149 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_BEFF7149, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_BEFF7149, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_BEFF7149>
-  | SerializedListItemNode<LexicalNodes_BEFF7149>
-  | SerializedHeadingNode<LexicalNodes_BEFF7149>;
+  | SerializedAutoLinkNode<LexicalNodes_501FFC9E, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_501FFC9E, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_501FFC9E>
+  | SerializedListItemNode<LexicalNodes_501FFC9E>
+  | SerializedHeadingNode<LexicalNodes_501FFC9E>;
 
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    'locale-validation-block': LocaleValidationBlock;
+  };
   collections: {
     richText: RichText;
     'blocks-fields': BlocksField;
@@ -132,6 +135,7 @@ export interface Config {
     'localized-drafts': LocalizedDraft;
     'localized-date-fields': LocalizedDateField;
     'all-fields-localized': AllFieldsLocalized;
+    'locale-validation': LocaleValidation;
     users: User;
     'localized-posts': LocalizedPost;
     'no-localized-fields': NoLocalizedField;
@@ -167,6 +171,7 @@ export interface Config {
     'localized-drafts': LocalizedDraftsSelect<false> | LocalizedDraftsSelect<true>;
     'localized-date-fields': LocalizedDateFieldsSelect<false> | LocalizedDateFieldsSelect<true>;
     'all-fields-localized': AllFieldsLocalizedSelect<false> | AllFieldsLocalizedSelect<true>;
+    'locale-validation': LocaleValidationSelect<false> | LocaleValidationSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'no-localized-fields': NoLocalizedFieldsSelect<false> | NoLocalizedFieldsSelect<true>;
@@ -203,6 +208,8 @@ export interface Config {
     | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')
     | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')[];
   globals: {
+    'localized-status-shared-global': LocalizedStatusSharedGlobal;
+    'locale-validation-global': LocaleValidationGlobal;
     'global-array': GlobalArray;
     'global-text': GlobalText;
     'global-drafts': GlobalDraft;
@@ -213,6 +220,8 @@ export interface Config {
     'publication-hook-global': PublicationHookGlobal;
   };
   globalsSelect: {
+    'localized-status-shared-global': LocalizedStatusSharedGlobalSelect<false> | LocalizedStatusSharedGlobalSelect<true>;
+    'locale-validation-global': LocaleValidationGlobalSelect<false> | LocaleValidationGlobalSelect<true>;
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
     'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
     'global-drafts': GlobalDraftsSelect<false> | GlobalDraftsSelect<true>;
@@ -224,6 +233,7 @@ export interface Config {
   };
   locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
   widgets: {
+    welcome: WelcomeWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
@@ -254,11 +264,25 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LocaleValidationBlock".
+ */
+export interface LocaleValidationBlock {
+  confirmation?: string | null;
+  nested?: {
+    confirmation?: string | null;
+    matchingText?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'locale-validation-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "richText".
  */
 export interface RichText {
   id: string;
-  lexical?: LexicalRichText<LexicalNodes_BEFF7149> | null;
+  lexical?: LexicalRichText<LexicalNodes_501FFC9E> | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -647,6 +671,54 @@ export interface NestedBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'nestedBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation".
+ */
+export interface LocaleValidation {
+  id: string;
+  confirmation?: string | null;
+  matchingText?: string | null;
+  sharedJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  localizedJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  jsonText?: string | null;
+  arrayText?: string | null;
+  settings?: {
+    rows?:
+      | {
+          confirmation?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  layout?: LocaleValidationBlock[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1185,6 +1257,7 @@ export interface PublicationAccess {
 export interface PublicationFieldAccess {
   id: string;
   title?: string | null;
+  sharedText?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -1305,6 +1378,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'all-fields-localized';
         value: string | AllFieldsLocalized;
+      } | null)
+    | ({
+        relationTo: 'locale-validation';
+        value: string | LocaleValidation;
       } | null)
     | ({
         relationTo: 'users';
@@ -1711,6 +1788,33 @@ export interface AllFieldsLocalizedSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation_select".
+ */
+export interface LocaleValidationSelect<T extends boolean = true> {
+  confirmation?: T;
+  matchingText?: T;
+  sharedJSON?: T;
+  localizedJSON?: T;
+  jsonText?: T;
+  arrayText?: T;
+  settings?:
+    | T
+    | {
+        rows?:
+          | T
+          | {
+              confirmation?: T;
+              id?: T;
+            };
+      };
+  layout?: T | {};
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2187,6 +2291,7 @@ export interface PublicationAccessSelect<T extends boolean = true> {
  */
 export interface PublicationFieldAccessSelect<T extends boolean = true> {
   title?: T;
+  sharedText?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -2271,6 +2376,94 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-status-shared-global".
+ */
+export interface LocalizedStatusSharedGlobal {
+  id: string;
+  localizedText?: string | null;
+  sharedText?: string | null;
+  hiddenSharedText?: string | null;
+  sharedRows?:
+    | {
+        localizedText?: string | null;
+        sharedText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  sharedBlocks?: SharedTextBlock[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SharedTextBlock".
+ */
+export interface SharedTextBlock {
+  localizedText?: string | null;
+  sharedText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'sharedTextBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation-global".
+ */
+export interface LocaleValidationGlobal {
+  id: string;
+  confirmation?: string | null;
+  matchingText?: string | null;
+  sharedJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  localizedJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  jsonText?: string | null;
+  arrayText?: string | null;
+  settings?: {
+    rows?:
+      | {
+          confirmation?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  layout?: LocaleValidationBlock[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-array".
  */
 export interface GlobalArray {
@@ -2299,6 +2492,7 @@ export interface GlobalArray {
 export interface GlobalText {
   id: string;
   text?: string | null;
+  localizedTextWithLength?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -2393,6 +2587,7 @@ export interface PublicationSanitizeGlobal {
 export interface PublicationFieldAccessGlobal {
   id: string;
   title?: string | null;
+  sharedText?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -2426,6 +2621,68 @@ export interface PublicationHookGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-status-shared-global_select".
+ */
+export interface LocalizedStatusSharedGlobalSelect<T extends boolean = true> {
+  localizedText?: T;
+  sharedText?: T;
+  hiddenSharedText?: T;
+  sharedRows?:
+    | T
+    | {
+        localizedText?: T;
+        sharedText?: T;
+        id?: T;
+      };
+  sharedBlocks?:
+    | T
+    | {
+        sharedTextBlock?:
+          | T
+          | {
+              localizedText?: T;
+              sharedText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-validation-global_select".
+ */
+export interface LocaleValidationGlobalSelect<T extends boolean = true> {
+  confirmation?: T;
+  matchingText?: T;
+  sharedJSON?: T;
+  localizedJSON?: T;
+  jsonText?: T;
+  arrayText?: T;
+  settings?:
+    | T
+    | {
+        rows?:
+          | T
+          | {
+              confirmation?: T;
+              id?: T;
+            };
+      };
+  layout?: T | {};
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-array_select".
  */
 export interface GlobalArraySelect<T extends boolean = true> {
@@ -2447,6 +2704,7 @@ export interface GlobalArraySelect<T extends boolean = true> {
  */
 export interface GlobalTextSelect<T extends boolean = true> {
   text?: T;
+  localizedTextWithLength?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -2511,6 +2769,7 @@ export interface PublicationSanitizeGlobalSelect<T extends boolean = true> {
  */
 export interface PublicationFieldAccessGlobalSelect<T extends boolean = true> {
   title?: T;
+  sharedText?: T;
   createdBy?: T;
   updatedBy?: T;
   _status?: T;
@@ -2530,6 +2789,16 @@ export interface PublicationHookGlobalSelect<T extends boolean = true> {
   createdAt?: T;
   _status?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2556,6 +2825,7 @@ export interface CollectionQueryWidget {
       | 'localized-drafts'
       | 'localized-date-fields'
       | 'all-fields-localized'
+      | 'locale-validation'
       | 'users'
       | 'localized-posts'
       | 'no-localized-fields'
@@ -2607,6 +2877,7 @@ export interface ActivityWidget {
           | 'localized-drafts'
           | 'localized-date-fields'
           | 'all-fields-localized'
+          | 'locale-validation'
           | 'users'
           | 'localized-posts'
           | 'no-localized-fields'

@@ -43,6 +43,12 @@ test.suite('Collections - Plugins', { config: './config.ts' }, () => {
       expect(items).toContain('injected-by-writer')
     })
 
+    test('should let a plugin replace the options of a plugin registered without options', ({
+      payload,
+    }) => {
+      expect(payload.config.custom?.optionalSettingsItems).toEqual(['set-by-writer'])
+    })
+
     test('should expose typed options on plugins found by slug', ({ payload }) => {
       const reader = payload.config.plugins?.find((p) => p.slug === 'priority-reader')
 

@@ -84,10 +84,13 @@ export function initLexicalFeatures(args: Args): {
       featureClientSchemaMap[featureKey] = {}
 
       // Like args.fieldSchemaMap, we only want to include the sub-fields of the current feature
-      for (const [key, entry] of args.clientFieldSchemaMap.entries()) {
-        if (key.startsWith(featureSchemaPath)) {
-          featureClientSchemaMap[featureKey][key] = 'fields' in entry ? entry.fields : [entry]
-        }
+      const featureEntries: ClientFieldSchemaMap =
+        getFeatureEntriesByPath({ clientFieldSchemaMap: args.clientFieldSchemaMap }).get(
+          featureSchemaPath,
+        ) ?? new Map()
+
+      for (const [key, entry] of featureEntries) {
+        featureClientSchemaMap[featureKey][key] = 'fields' in entry ? entry.fields : [entry]
       }
     }
 
@@ -113,4 +116,52 @@ export function initLexicalFeatures(args: Args): {
     featureClientImportMap,
     featureClientSchemaMap,
   }
+}
+
+const FEATURE_PATH_SEGMENT = '.lexical_internal_feature.'
+
+const featureEntriesCache = new WeakMap<ClientFieldSchemaMap, Map<string, ClientFieldSchemaMap>>()
+
+/**
+ * Groups the client field schema map entries by the lexical feature they belong to,
+ * so each rich text field does not have to scan the whole client field schema map.
+ */
+function getFeatureEntriesByPath({
+  clientFieldSchemaMap,
+}: {
+  clientFieldSchemaMap: ClientFieldSchemaMap
+}): Map<string, ClientFieldSchemaMap> {
+  const cachedEntriesByPath = featureEntriesCache.get(clientFieldSchemaMap)
+
+  if (cachedEntriesByPath) {
+    return cachedEntriesByPath
+  }
+
+  const entriesByPath = new Map<string, ClientFieldSchemaMap>()
+
+  for (const [key, entry] of clientFieldSchemaMap) {
+    let segmentIndex = key.indexOf(FEATURE_PATH_SEGMENT)
+
+    // An entry of a rich text field nested in a feature also belongs to each outer feature
+    while (segmentIndex !== -1) {
+      const featureKeyStart = segmentIndex + FEATURE_PATH_SEGMENT.length
+      const featureKeyEnd = key.indexOf('.', featureKeyStart)
+      const featurePath = featureKeyEnd === -1 ? key : key.slice(0, featureKeyEnd)
+
+      let featureEntries = entriesByPath.get(featurePath)
+
+      if (!featureEntries) {
+        featureEntries = new Map()
+        entriesByPath.set(featurePath, featureEntries)
+      }
+
+      featureEntries.set(key, entry)
+
+      segmentIndex = key.indexOf(FEATURE_PATH_SEGMENT, featureKeyStart)
+    }
+  }
+
+  featureEntriesCache.set(clientFieldSchemaMap, entriesByPath)
+
+  return entriesByPath
 }

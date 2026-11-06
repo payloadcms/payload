@@ -12,6 +12,7 @@ import { migrateBlockReferencesToBlocks } from './transforms/migrate-block-refer
 import { migrateBuildScript } from './transforms/migrate-build-script/index.js'
 import { migrateDbTypesSubpath } from './transforms/migrate-db-types-subpath/index.js'
 import { migrateDisabledFields } from './transforms/migrate-disabled-fields/index.js'
+import { migrateDisplayedFieldValueArgs } from './transforms/migrate-displayed-field-value-args/index.js'
 import { migrateDocumentTitleContext } from './transforms/migrate-document-title-context/index.js'
 import { migrateFieldComponentTypes } from './transforms/migrate-field-component-types/index.js'
 import { migrateForceSelect } from './transforms/migrate-force-select/index.js'
@@ -44,6 +45,7 @@ export const transforms: Transform[] = [
   globalsComponentsEdit,
   migrateListViewSelectAPI,
   migrateDisabledFields,
+  migrateDisplayedFieldValueArgs,
   migrateForceSelect,
   migrateFieldComponentTypes,
   renameDiffValueProps,

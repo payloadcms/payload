@@ -1675,7 +1675,7 @@ test.describe('Import Export Plugin', () => {
       await payload.update({
         id: devUsers.docs[0]!.id,
         collection: 'users',
-        data: { limit: null as unknown as number },
+        data: { limit: null },
         overrideAccess: true,
       })
 

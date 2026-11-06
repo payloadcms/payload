@@ -3,7 +3,9 @@
 import type { ComponentProps } from 'react'
 
 import { Modal as FacelessModal, useModal } from '@faceless-ui/modal'
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+
+import { useModalFocus } from '../../providers/ModalFocus/index.js'
 
 export { useModal } from '@faceless-ui/modal'
 
@@ -19,6 +21,15 @@ export const Modal: React.FC<ComponentProps<typeof FacelessModal>> = (props) => 
   const modalID = id || slug
   const { modalState } = useModal()
   const isOpen = Boolean(modalState[slug]?.isOpen)
+  const popupFocusTargetsRef = useRef<readonly HTMLElement[]>([])
+  const { getReturnFocusTargets } = useModalFocus()
+
+  useLayoutEffect(() => {
+    if (isOpen) {
+      // Freeze each modal's targets before focus moves into it or a nested modal.
+      popupFocusTargetsRef.current = getReturnFocusTargets()
+    }
+  }, [getReturnFocusTargets, isOpen])
   const options = useMemo(
     () => ({
       escapeDeactivates: false,
@@ -31,6 +42,17 @@ export const Modal: React.FC<ComponentProps<typeof FacelessModal>> = (props) => 
         }
         return heading ?? modal
       },
+      setReturnFocus: (opener: HTMLElement) =>
+        (popupFocusTargetsRef.current.length ? popupFocusTargetsRef.current : [opener]).find(
+          (element) =>
+            element?.isConnected &&
+            element !== document.body &&
+            element !== document.documentElement &&
+            !element.closest('[inert]') &&
+            !element.matches(':disabled') &&
+            element.getClientRects().length > 0 &&
+            getComputedStyle(element).visibility !== 'hidden',
+        ) ?? false,
       ...focusTrapOptions,
     }),
     [modalID, focusTrapOptions],

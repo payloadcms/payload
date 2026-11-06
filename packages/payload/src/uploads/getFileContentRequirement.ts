@@ -66,7 +66,7 @@ export function getFileContentRequirement({
   // without knowing which transformer is registered or how it is configured.
   const hasConfiguredAdjustments = Boolean(
     uploadConfig.hasImageAdjustments ||
-      (Array.isArray(uploadConfig.variants) && uploadConfig.variants.length > 0),
+    (Array.isArray(uploadConfig.variants) && uploadConfig.variants.length > 0),
   )
 
   if (hasSizeEdits || (isResizableImage && hasConfiguredAdjustments) || isAnimatedImage(mimeType)) {

@@ -102,10 +102,10 @@ export function initSharpCollections({
       focalPoint: sharpConfig.focalPoint ?? authoredUpload.focalPoint,
       hasImageAdjustments: Boolean(
         sharpConfig.resizeOptions ||
-          sharpConfig.formatOptions ||
-          sharpConfig.trimOptions ||
-          sharpConfig.constructorOptions ||
-          sharpConfig.withMetadata,
+        sharpConfig.formatOptions ||
+        sharpConfig.trimOptions ||
+        sharpConfig.constructorOptions ||
+        sharpConfig.withMetadata,
       ),
       variants: sharpConfig.variants?.map(({ name, admin, generateImageName }) => ({
         name,

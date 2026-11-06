@@ -11,23 +11,15 @@ keywords: documentation, getting started, guide, Content Management System, cms,
 Payload requires the following software:
 
 - Any JavaScript package manager (pnpm, npm, or yarn 2+ - pnpm is preferred, yarn 1.x is not supported)
-- Node.js version `24.15.0`+
+- Node.js version `24.22.1`+
 - Next.js `16.4.0`+
 - TypeScript version `6.0.3`+. Types are not guaranteed to work on older versions.
 - Any [compatible database](/docs/database/overview) (MongoDB, Postgres or SQLite)
 
 <Banner type="warning">
   **Important:** Before proceeding any further, please ensure that you have the
-  above requirements met. Not all Next.js 15/16 releases are compatible — make
-  sure you're using one of the supported version ranges listed above.
-</Banner>
-
-<Banner type="info">
-  **Cache Components:** While Next.js `cacheComponents` can be enabled alongside
-  Payload without causing errors in the admin panel, full compatibility is not
-  guaranteed. See this [GitHub pull
-  request](https://github.com/payloadcms/payload/pull/16020) for the latest
-  status.
+  above requirements met. Not all Next.js 16 releases are compatible — make sure
+  you're using one of the supported version ranges listed above.
 </Banner>
 
 ## Quickstart with create-payload-app
@@ -46,12 +38,26 @@ Adding Payload to an existing Next.js app is super straightforward. You can eith
 
 If you don't have a Next.js app already, but you still want to start a project from a blank Next.js app, you can create a new Next.js app using `npx create-next-app` - and then just follow the steps below to install Payload.
 
+<Banner type="info">
+  The steps below target the **Next.js App Router**. Payload's Admin Panel also
+  runs on [TanStack Start](https://tanstack.com/start/latest) via the
+  `@payloadcms/tanstack-start` package — the differences are called out inline
+  where they apply. See [Project Structure](../admin/overview#project-structure)
+  for the TanStack Start file layout.
+</Banner>
+
 #### 1. Install the relevant packages
 
 First, you'll want to add the required Payload packages to your project:
 
 ```bash
 pnpm i payload @payloadcms/next
+```
+
+If you are running the Admin Panel on TanStack Start, install `@payloadcms/tanstack-start` in place of `@payloadcms/next`:
+
+```bash
+pnpm i payload @payloadcms/tanstack-start
 ```
 
 You'll also likely want to install the following optional packages:
@@ -96,9 +102,9 @@ To install a Database Adapter, you can run **one** of the following commands:
   available.
 </Banner>
 
-#### 2. Copy Payload files into your Next.js app folder
+#### 2. Copy Payload files into your app
 
-Payload installs directly in your Next.js `/app` folder, and you'll need to place some files into that folder for Payload to run. You can copy these files from the [Blank Template](https://github.com/payloadcms/payload/tree/main/templates/blank/src/app/%28payload%29) on GitHub. Once you have the required Payload files in place in your `/app` folder, you should have something like this:
+For Next.js, Payload installs directly in your `/app` folder, and you'll need to place some files into that folder for Payload to run. You can copy these files from the [Blank Template](https://github.com/payloadcms/payload/tree/main/templates/blank/src/app/%28payload%29) on GitHub. Once you have the required Payload files in place in your `/app` folder, you should have something like this:
 
 ```plaintext
 app/
@@ -117,7 +123,24 @@ _For an exact reference of the `(payload)` directory, see [Project Structure](..
   i.e. `(my-app)`.
 </Banner>
 
-The files that Payload needs to have in your `/app` folder do not regenerate, and will never change. Once you slot them in, you never have to revisit them. They are not meant to be edited and simply import Payload dependencies from `@payloadcms/next` for the REST / GraphQL API and Admin Panel.
+For TanStack Start, copy the generated routes and supporting files from the [Blank TanStack Start Template](https://github.com/payloadcms/payload/tree/main/templates/blank-tanstack/src/app) into your `src/app` directory. The files are `__root.tsx`, `_payload.tsx`, the `_payload/` route directory, and `router.tsx` at `src/router.tsx`:
+
+```plaintext
+src/
+├─ router.tsx
+└─ app/
+  ├─ __root.tsx
+  ├─ _payload.tsx
+  └─ _payload/
+```
+
+The Next.js files that Payload needs in your `/app` folder do not regenerate and
+will never change. Once you slot them in, you never have to revisit them. They
+are not meant to be edited and simply import Payload dependencies from
+`@payloadcms/next` for the REST / GraphQL API and Admin Panel.
+
+The corresponding TanStack Start files import from `@payloadcms/tanstack-start`
+and `@payloadcms/tanstack-start/client`.
 
 You can name the `(my-app)` folder anything you want. The name does not matter and will just be used to clarify your directory structure for yourself. Common names might be `(frontend)`, `(app)`, or similar. [More details](../admin/overview).
 
@@ -153,6 +176,16 @@ You can do this in one of two ways:
 2. Give your Next.js config the `.mjs` file extension
 
 In either case, all `require`s and `export`s in your `next.config` file will need to be converted to `import` / `export` if they are not set up that way already.
+
+<Banner type="info">
+  **TanStack Start:** there is no `next.config` step. TanStack Start builds with
+  [Vite](https://vite.dev), so use `withPayload` from
+  `@payloadcms/tanstack-start` in your `vite.config`. Pass it a
+  `payloadConfigPath` and provide the `rsc`, `tanstackStart`, and `viteReact`
+  plugins through its `pluginOptions`. See the [Blank TanStack Start
+  Template](https://github.com/payloadcms/payload/blob/main/templates/blank-tanstack/vite.config.ts)
+  for a complete example.
+</Banner>
 
 #### 4. Create a Payload Config and add it to your TypeScript config
 
@@ -201,6 +234,10 @@ Once you have a Payload Config, update your `tsconfig` to include a `path` that 
   }
 }
 ```
+
+When using TanStack Start, the `payloadConfigPath` passed to `withPayload` in
+`vite.config.ts` must point to the same config file as this `@payload-config`
+TypeScript alias.
 
 #### 5. Fire it up!
 

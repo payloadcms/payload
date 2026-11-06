@@ -35,7 +35,7 @@ export const getTabs = ({
           Boolean(
             (collectionConfig?.versions &&
               permissions?.collections?.[collectionConfig?.slug]?.readVersions) ||
-              (globalConfig?.versions && permissions?.globals?.[globalConfig?.slug]?.readVersions),
+            (globalConfig?.versions && permissions?.globals?.[globalConfig?.slug]?.readVersions),
           ),
         href: '/versions',
         label: ({ t }) => t('version:versions'),

@@ -1,3 +1,4 @@
+import { lexicalEditor, LinkFeature, RelationshipFeature } from '@payloadcms/richtext-lexical'
 import { initI18n } from '@payloadcms/translations'
 import { createPayloadRequest, initTransaction, killTransaction } from 'payload'
 import { getLLMInstructions } from 'payload/internal'
@@ -10,6 +11,38 @@ import { additionalInstructions, findInstructions, saveAdditionalInstructions } 
 import { hiddenCollectionSlug, hiddenGlobalSlug } from './slugs.js'
 
 test.suite('LLM instructions', { config: './config.ts' }, () => {
+  test('should exclude instructions from field-level Lexical relationship and link targets', ({
+    config,
+  }) => {
+    const editor = lexicalEditor({ features: [RelationshipFeature(), LinkFeature()] })({
+      config: {
+        ...config,
+        collections: config.collections.map((collection) =>
+          collection.slug === 'pages'
+            ? { ...collection, admin: { ...collection.admin, group: false as const } }
+            : collection,
+        ),
+      },
+      isRoot: false,
+      parentIsLocalized: false,
+    })
+    const features = editor.editorConfig.resolvedFeatureMap
+    const relationships =
+      features.get('relationship')!.sanitizedServerFeatureProps.enabledCollectionSlugs
+    const linkFields = features.get('link')!.nodes!.find((node) => node.getSubFields)!
+      .getSubFields!({})!
+    const documentField = linkFields.find(
+      (field) => field.type === 'relationship' && field.name === 'doc',
+    )
+
+    expect(relationships).toContain('pages')
+    expect(relationships).not.toContain(instructionsCollectionSlug)
+    expect(documentField).toMatchObject({ relationTo: expect.arrayContaining(['pages']) })
+    expect(documentField).toMatchObject({
+      relationTo: expect.not.arrayContaining([instructionsCollectionSlug]),
+    })
+  })
+
   test('should search and sort instructions by slug regardless of the display language', async ({
     payload,
   }) => {

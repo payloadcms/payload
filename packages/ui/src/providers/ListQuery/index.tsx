@@ -1,6 +1,9 @@
 'use client'
-import { type ListQuery, type Where } from 'payload'
+import type { ListQuery, Where } from 'payload'
+
+import { dequal } from 'dequal/lite'
 import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { IListQueryContext, ListQueryProps } from './types.js'
@@ -18,6 +21,7 @@ import { sanitizeQuery } from './sanitizeQuery.js'
 export { useListQuery } from './context.js'
 
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
+  baseFilter,
   children,
   collectionSlug,
   data,
@@ -58,7 +62,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const [searchInput, setSearchInput] = useState(query?.search || '')
 
   const refineListData = useCallback(
-    // eslint-disable-next-line @typescript-eslint/require-await
     async (incomingQuery: ListQuery, modified?: boolean) => {
       setModified(modified ?? true)
 
@@ -69,6 +72,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         },
       })
 
+      let pendingUpdate: Promise<unknown> | void = undefined
+
       if (modifySearchParams) {
         const search = getSearchWithListQuery({
           currentSearch: window.location.search,
@@ -76,13 +81,14 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
           updatedQuery: incomingQuery,
         })
         if (window.location.search !== search) {
-          startRouteTransition(() => router.replace(search, { scroll: false }))
+          pendingUpdate = startRouteTransition(() => router.replace(search, { scroll: false }))
         }
       } else if (typeof onQueryChange === 'function') {
-        onQueryChange(newQuery)
+        pendingUpdate = onQueryChange(newQuery)
       }
 
       setQuery(newQuery)
+      await pendingUpdate
     },
     [
       query,
@@ -138,7 +144,17 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
    * triggering a re-render.
    */
   const syncPropsToURL = useEffectEvent(() => {
-    const newQuery = sanitizeQuery({ ...(query || {}), ...(queryFromProps || {}) })
+    // URL serialization omits empty draft conditions and compacts their array indexes.
+    // Preserve those rows on an equivalent server echo so the focused input stays mounted.
+    const shouldKeepDraftFilters = dequal(
+      qs.parse(qs.stringify({ where: query?.where }), { depth: 10 }),
+      qs.parse(qs.stringify({ where: queryFromProps?.where }), { depth: 10 }),
+    )
+    const newQuery = sanitizeQuery({
+      ...(query || {}),
+      ...(queryFromProps || {}),
+      ...(shouldKeepDraftFilters ? { where: query?.where } : {}),
+    })
 
     const search = getSearchWithListQuery({
       currentSearch: window.location.search,
@@ -197,6 +213,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   return (
     <ListQueryContext
       value={{
+        baseFilter,
         collectionSlug,
         data,
         defaultLimit: data?.limit,

@@ -119,7 +119,7 @@ export const HierarchySidebarTab: React.FC<
           { addQueryPrefix: true },
         )}`,
       })
-      startRouteTransition(() => {
+      void startRouteTransition(() => {
         router.push(url)
         router.refresh()
       })

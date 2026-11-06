@@ -73,6 +73,7 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
+  lexicalFullyFeaturedSlug,
   lexicalHeadingFeatureSlug,
   lexicalListsFeatureSlug,
   lexicalRelationshipFieldsSlug,
@@ -115,7 +116,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
         overrideAccess: true,
         where: {
           filename: {
-            equals: 'payload-original.jpg',
+            equals: 'payload.jpg',
           },
         },
       })
@@ -561,7 +562,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
       const uploadNode: SerializedUploadNode = docs[0].lexicalCustomFields.root.children.find(
         (node) => node.type === 'upload',
       ) as SerializedUploadNode
-      expect((uploadNode.value.media as any).filename).toStrictEqual('payload-original.png')
+      expect((uploadNode.value.media as any).filename).toStrictEqual('payload.png')
     })
   })
 
@@ -717,7 +718,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
       /**
        * Depth 1 population:
        */
-      expect(relationshipBlockNode.fields.rel.filename).toStrictEqual('payload-original.jpg')
+      expect(relationshipBlockNode.fields.rel.filename).toStrictEqual('payload.jpg')
     })
 
     test('should correctly populate polymorphic hasMany relationships in blocks with depth=0', async ({
@@ -790,9 +791,7 @@ test.suite('Lexical', { config: './config.ts' }, () => {
       expect(relationshipBlockNode.fields.rel[1].relationTo).toStrictEqual('uploads')
       expect(relationshipBlockNode.fields.rel[1].value.id).toStrictEqual(createdJPGDocID)
       expect(relationshipBlockNode.fields.rel[1].value.text).toStrictEqual(uploadsDoc.text)
-      expect(relationshipBlockNode.fields.rel[1].value.filename).toStrictEqual(
-        'payload-original.jpg',
-      )
+      expect(relationshipBlockNode.fields.rel[1].value.filename).toStrictEqual('payload.jpg')
     })
 
     test('should not populate relationship nodes inside of a sub-editor from a blocks node with 0 depth', async ({
@@ -1158,9 +1157,8 @@ test.suite('Lexical', { config: './config.ts' }, () => {
     test('should populate previousValue in afterChange hooks for fields inside lexical', async ({
       payload,
     }) => {
-      const { autosaveHookLog, clearAutosaveHookLog } = await import(
-        './collections/LexicalAutosave/index.js'
-      )
+      const { autosaveHookLog, clearAutosaveHookLog } =
+        await import('./collections/LexicalAutosave/index.js')
 
       clearAutosaveHookLog()
 
@@ -1628,6 +1626,22 @@ test.suite('Lexical', { config: './config.ts' }, () => {
           expect(result).toContain('background-color: #336699;')
           expect(result).toContain('colspan="2"')
           expect(result).toContain('Cell content')
+        })
+
+        test('ignores non-numeric colSpan and rowSpan values', async () => {
+          const result = await variant.table.tablecell!({
+            ...converterBaseArgs,
+            node: {
+              children: [],
+              colSpan: '2" onmouseover="alert(1)',
+              headerState: 0,
+              rowSpan: '2" onmouseover="alert(1)',
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('onmouseover')
+          expect(result).not.toContain('colspan=')
+          expect(result).not.toContain('rowspan=')
         })
       })
     })

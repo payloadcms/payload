@@ -129,15 +129,13 @@ export function DefaultMenuPortal<Opt, IsMulti extends boolean, Group extends Gr
       className={['rs__floating-menu-portal', className].filter(Boolean).join(' ')}
       data-theme={menuPortalTheme ?? theme}
       ref={setFloatingElement}
-      style={
-        {
-          ...style,
-          left: 0,
-          position: 'fixed',
-          top: 0,
-          zIndex: 'var(--z-portal-element)',
-        } as FloatingMenuPortalStyle
-      }
+      style={{
+        ...style,
+        left: 0,
+        position: 'fixed',
+        top: 0,
+        zIndex: 'var(--z-portal-element)',
+      }}
     >
       {children}
     </div>

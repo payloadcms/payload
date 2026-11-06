@@ -192,7 +192,7 @@ export const findByIDOperation = async <
     locale: locale!,
     req: {
       transactionID: req.transactionID,
-    } as PayloadRequest,
+    },
     select: dbSelect,
     where: fullWhere,
   }

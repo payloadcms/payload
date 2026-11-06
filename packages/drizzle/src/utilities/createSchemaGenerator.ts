@@ -6,6 +6,8 @@ import path from 'path'
 
 import type { ColumnToCodeConverter, DrizzleAdapter } from '../types.js'
 
+import { formatGeneratedFile } from './formatGeneratedFile.js'
+
 /**
  * @example
  * console.log(sanitizeObjectKey("oneTwo"));   // oneTwo
@@ -315,7 +317,7 @@ declare module '${this.packageName}' {
 
     const importTypes = `import type {} from '${this.packageName}'`
 
-    let code = [
+    const code = [
       warning,
       importTypes,
       ...importDeclarationsSanitized,
@@ -340,18 +342,11 @@ declare module '${this.packageName}' {
       }
     }
 
-    if (prettify) {
-      try {
-        const prettier = await eval('import("prettier")')
-        const configPath = await prettier.resolveConfigFile()
-        const config = configPath ? await prettier.resolveConfig(configPath) : {}
-        code = await prettier.format(code, { ...config, parser: 'typescript' })
-      } catch {
-        /* empty */
-      }
-    }
-
     await writeFile(outputFile, code, 'utf-8')
+
+    if (prettify) {
+      await formatGeneratedFile({ filePath: outputFile, logger: this.payload.logger })
+    }
 
     if (log) {
       this.payload.logger.info(`Written ${outputFile}`)

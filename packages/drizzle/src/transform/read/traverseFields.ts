@@ -245,18 +245,23 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
           Object.entries(result[field.name]).forEach(([locale, localizedBlocks]) => {
             result[field.name][locale] = localizedBlocks.map((row) => {
-              const block =
-                adapter.payload.blocks[row.blockType] ??
-                (field.blocks.find(
-                  (block) => typeof block !== 'string' && block.slug === row.blockType,
-                ) as FlattenedBlock | undefined)
-
-              const tableName = resolveBlockTableName(
-                block,
-                adapter.tableNameMap.get(`${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`),
+              const fieldBlock = field.blocks.find((block) =>
+                typeof block === 'string' ? block === row.blockType : block.slug === row.blockType,
               )
+              const registeredBlocks: Record<string, FlattenedBlock | undefined> =
+                adapter.payload.blocks
+              const block: FlattenedBlock | undefined =
+                typeof fieldBlock === 'string' ? registeredBlocks[fieldBlock] : fieldBlock
 
               if (block) {
+                const originalTableName = adapter.tableNameMap.get(
+                  `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+                )
+                if (!originalTableName) {
+                  return {}
+                }
+                const tableName = resolveBlockTableName(block, originalTableName)
+
                 const blockResult = traverseFields<T>({
                   adapter,
                   blocks,
@@ -312,11 +317,13 @@ export const traverseFields = <T extends Record<string, unknown>>({
               return acc
             }
 
-            const block =
-              adapter.payload.blocks[row.blockType] ??
-              (field.blocks.find(
-                (block) => typeof block !== 'string' && block.slug === row.blockType,
-              ) as FlattenedBlock | undefined)
+            const fieldBlock = field.blocks.find((block) =>
+              typeof block === 'string' ? block === row.blockType : block.slug === row.blockType,
+            )
+            const registeredBlocks: Record<string, FlattenedBlock | undefined> =
+              adapter.payload.blocks
+            const block: FlattenedBlock | undefined =
+              typeof fieldBlock === 'string' ? registeredBlocks[fieldBlock] : fieldBlock
 
             if (block) {
               if (
@@ -650,7 +657,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
             blocks,
             config,
             currentTableName,
-            dataRef: groupData as Record<string, unknown>,
+            dataRef: groupData,
             deletions,
             fieldPrefix: groupFieldPrefix,
             fields: field.flattenedFields,

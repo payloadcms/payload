@@ -14,7 +14,7 @@ type Args = {
   currentDoc: JsonObject | null
   fields: Field[]
   /**
-   * The locale being published (e.g. 'en').
+   * The locale being saved (e.g. 'en').
    */
   locale: string
   /**
@@ -24,10 +24,10 @@ type Args = {
 }
 
 /**
- * Builds the data object to write to the main collection/global doc when publishing
+ * Builds the data object to write to the main collection/global doc when saving
  * a single locale. The version row uses `result` as-is (all locales intact); the
- * main doc must only contain previously-published locale data plus the new locale
- * being published now.
+ * main doc retains other locales from the current main doc. When publishing, only
+ * previously-published locales are retained to avoid exposing stale draft data.
  *
  * Returns the merged object (with `_status` set), ready for the DB write.
  */
@@ -43,6 +43,12 @@ export function buildLocalizedPublishData({
       ? (currentDoc._status as Record<string, unknown>)
       : {}
 
+  const resultStatus =
+    result._status && typeof result._status === 'object' && !Array.isArray(result._status)
+      ? (result._status as Record<string, unknown>)
+      : {}
+  const localeStatus = resultStatus[locale] ?? currentDocStatus[locale] ?? 'draft'
+
   // Only carry forward locales that were previously published. The main doc can contain
   // stale draft-locale data written by the initial create (which always inserts into the
   // main collection, even when draft:true). Restricting to published locales prevents that
@@ -56,18 +62,13 @@ export function buildLocalizedPublishData({
     dataWithLocales: result,
     docWithLocales: currentDoc ?? {},
     fields,
-    localesToPreserve: previouslyPublishedLocales,
+    localesToPreserve: localeStatus === 'published' ? previouslyPublishedLocales : undefined,
     localesToUpdate: [locale],
   })
 
-  // Build the _status map: retain existing per-locale statuses and mark the
-  // published locale as 'published'.
-  const resultStatus =
-    result._status && typeof result._status === 'object' && !Array.isArray(result._status)
-      ? (result._status as Record<string, unknown>)
-      : {}
+  // Retain other locales' statuses and apply the saved locale's requested status.
   const mergedStatus: Record<string, unknown> = { ...currentDocStatus }
-  mergedStatus[locale] = resultStatus[locale] ?? 'published'
+  mergedStatus[locale] = localeStatus
   merged._status = mergedStatus
 
   return merged

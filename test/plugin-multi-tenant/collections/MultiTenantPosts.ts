@@ -5,9 +5,10 @@ import { multiTenantPostsSlug } from '../shared.js'
 export const MultiTenantPosts: CollectionConfig = {
   slug: multiTenantPostsSlug,
   access: {
-    update: ({ req }) => req.context.allowMultiTenantPostUpdate === true,
+    update: ({ req }) => req.context.allowMultiTenantPostUpdate !== false,
   },
   admin: {
+    defaultColumns: ['title', 'category', '_status'],
     useAsTitle: 'title',
   },
   fields: [
@@ -16,11 +17,14 @@ export const MultiTenantPosts: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    { name: 'description', type: 'text' },
+    { name: 'category', type: 'select', options: ['target', 'other'] },
     {
       name: 'parent',
       type: 'relationship',
       relationTo: multiTenantPostsSlug,
     },
   ],
-  versions: false,
+  trash: true,
+  versions: { drafts: true },
 }

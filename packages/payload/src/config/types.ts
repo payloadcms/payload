@@ -1451,6 +1451,15 @@ export type Config = {
      * Defaults to ['JWT', 'Bearer', 'cookie]
      */
     jwtOrder?: ('Bearer' | 'cookie' | 'JWT')[]
+    /**
+     * PBKDF2-SHA256 iterations used when hashing new passwords for the local auth strategy.
+     *
+     * Use `100000` in environments that do not support 600,000 iterations, such as Cloudflare
+     * Workers. Stored hashes that use a different count are rehashed on the next successful login.
+     *
+     * @default 600000
+     */
+    passwordHashIterations?: 100000 | 600000
   }
   /**
    * Define Collection and Global access constraints that are combined with document Access Control using AND semantics.
@@ -1781,7 +1790,8 @@ export type Config = {
 }
 
 interface SanitizedAdminConfig
-  extends Omit<
+  extends
+    Omit<
       RootAdminConfig,
       | 'avatar'
       | 'components'
@@ -1832,7 +1842,8 @@ type SanitizedTypeScriptConfig = Omit<RootTypeScriptConfig, 'autoGenerate' | 'ou
   Required<Pick<RootTypeScriptConfig, 'autoGenerate' | 'outputFile'>>
 
 export interface SanitizedConfig
-  extends Omit<
+  extends
+    Omit<
       Config,
       | 'admin'
       | 'auth'

@@ -15,9 +15,18 @@ type ContextHandlers = {
   handleWhereChange?: (where: Where) => Promise<void>
 }
 
-export type OnListQueryChange = (query: ListQuery) => void
+/**
+ * Returned promises are awaited; return values are otherwise ignored.
+ * The union of callbacks preserves TypeScript's `void` callback rule, allowing handlers such as `query => updates.push(query)`.
+ * A union of return types would reject synchronous handlers that return a value.
+ */
+export type OnListQueryChange =
+  | ((query: ListQuery) => Promise<unknown>)
+  | ((query: ListQuery) => void)
 
 export type ListQueryProps = {
+  /** Server-resolved constraints applied to the collection list, such as the selected tenant. */
+  readonly baseFilter?: Where
   readonly children: React.ReactNode
   readonly collectionSlug?: ClientCollectionConfig['slug']
   readonly data: PaginatedDocs | undefined
@@ -28,6 +37,8 @@ export type ListQueryProps = {
 }
 
 export type IListQueryContext = {
+  /** Server-resolved constraints applied in addition to the user's query. */
+  baseFilter?: Where
   collectionSlug: ClientCollectionConfig['slug']
   data: ListQueryProps['data']
   defaultLimit?: number

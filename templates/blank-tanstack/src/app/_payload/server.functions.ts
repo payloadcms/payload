@@ -33,16 +33,12 @@ const runPayloadServerFn = createServerFn({ method: 'POST' })
   .validator((args: ServerFunctionClientArgs): ServerFunctionClientArgs => args)
   .handler(async ({ data }) => {
     const { handleServerFunctions } = await import('@payloadcms/tanstack-start/server')
-    const result = await handleServerFunctions({
+    return handleServerFunctions({
       args: data.args,
       config: await getConfig(),
       importMap: await getImportMap(),
       name: data.name,
     })
-
-    // TanStack validates the adapter-sanitized result at the server-function boundary.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return result as any
   })
 
 export const serverFunctionHandler = createServerFunctionClient({

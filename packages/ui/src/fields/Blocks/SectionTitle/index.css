@@ -5,7 +5,25 @@
     max-width: 100%;
     pointer-events: all;
     display: flex;
+    align-items: center;
+    min-height: var(--spacer-4);
     overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset-block: 0;
+      inset-inline: 0;
+      margin-block: auto;
+      height: var(--text-body-medium-line-height);
+      border: var(--stroke-width-small) solid transparent;
+      border-radius: var(--radius-medium);
+      pointer-events: none;
+    }
+
+    &:has(.section-title__input:hover:not([readonly]))::before {
+      background-color: var(--color-bg-transparent-hover);
+    }
 
     &:after {
       display: block;
@@ -52,7 +70,7 @@
     left: 0;
 
     &:hover:not([readonly]) {
-      background-color: var(--color-bg-transparent-hover);
+      background-color: transparent;
     }
 
     &:hover,
@@ -68,5 +86,10 @@
 
   .collapsible--collapsed .section-title--empty {
     display: none;
+  }
+
+  html[data-enhanced-contrast]
+    .section-title:has(.section-title__input:not([readonly]):not(:focus))::before {
+    border-color: var(--color-border-control);
   }
 }

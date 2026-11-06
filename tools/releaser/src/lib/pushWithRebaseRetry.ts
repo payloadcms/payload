@@ -1,8 +1,3 @@
-const isNonFastForward = (err: unknown): boolean => {
-  const message = err instanceof Error ? err.message : String(err)
-  return /non-fast-forward|fetch first/i.test(message)
-}
-
 /**
  * Pushes HEAD:main and the release tag atomically. If main moved underneath us
  * (a merge raced the push), rebase onto the new main, recreate the tag at the
@@ -50,4 +45,9 @@ export const pushWithRebaseRetry = async ({
       run(`git tag -f -a ${tag} -m ${tag}`)
     }
   }
+}
+
+const isNonFastForward = (err: unknown): boolean => {
+  const message = err instanceof Error ? err.message : String(err)
+  return /non-fast-forward|fetch first/i.test(message)
 }

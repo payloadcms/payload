@@ -157,7 +157,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           isEditor={true}
           isJSXConverter={false}
           nodeKey={nodeKey}
-          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          // eslint-disable-next-line react-hooks/hooks -- intentionally passed as a prop for custom block components to call
           useInlineBlockComponentContext={useInlineBlockComponentContext}
         />
       )
@@ -174,7 +174,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           isEditor={true}
           isJSXConverter={false}
           nodeKey={nodeKey}
-          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          // eslint-disable-next-line react-hooks/hooks -- intentionally passed as a prop for custom block components to call
           useInlineBlockComponentContext={useInlineBlockComponentContext}
         />
       )
@@ -246,9 +246,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
         data: formData,
         docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
+        documentFormState: parentDocumentFields,
         globalSlug,
         initialBlockData: formData,
         operation: 'update',
@@ -323,10 +321,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
 
       const controller = new AbortController()
       onChangeAbortControllerRef.current = controller
-      const blockData = reduceFormStateToBlockData(
-        deepCopyObjectSimpleWithoutReactComponents(prevFormState, { excludeFiles: true }),
-        formDataRef.current,
-      )
+      const blockData = reduceFormStateToBlockData(prevFormState, formDataRef.current)
 
       const { state } = await getFormState({
         id,
@@ -336,9 +331,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
+        documentFormState: parentDocumentFields,
         formState: prevFormState,
         globalSlug,
         initialBlockData: blockData,

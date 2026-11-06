@@ -14,7 +14,8 @@ const withBundleAnalyzer = bundleAnalyzer({
 const config = withBundleAnalyzer(
   withPayload(
     {
-      cacheComponents: process.env.PAYLOAD_CACHE_COMPONENTS === 'true',
+      cacheComponents: process.env.PAYLOAD_DISABLE_CACHE_COMPONENTS !== 'true',
+      partialPrefetching: process.env.PAYLOAD_DISABLE_CACHE_COMPONENTS !== 'true',
       basePath: process.env?.NEXT_BASE_PATH || undefined,
       typescript: {
         ignoreBuildErrors: true,

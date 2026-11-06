@@ -149,10 +149,10 @@ plugin-<name>/
     "copyfiles": "^2.4.1",
     "cross-env": "10.1.0",
     "eslint": "^9.39.2",
-    "next": "^16.4.0",
+    "next": "^16.4.2",
     "payload": "^3.82.1",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "rimraf": "^6.0.1",
     "typescript": "^6.0.3",
     "vitest": "5.0.1"
@@ -161,7 +161,7 @@ plugin-<name>/
     "payload": "^3.82.1"
   },
   "engines": {
-    "node": ">=24.15.0"
+    "node": ">=24.22.1"
   }
 }
 ```

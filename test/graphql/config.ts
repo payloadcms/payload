@@ -5,6 +5,9 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ContentBlock } from './blocks/ContentBlock.js'
+import { AllHidden, HiddenFields } from './collections/index.js'
+import { hiddenFields } from './fields.js'
+import { allHiddenGlobalSlug, hiddenGlobalSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -19,6 +22,8 @@ export default buildConfigWithDefaults({
       },
     },
     collections: [
+      HiddenFields,
+      AllHidden,
       {
         slug: 'posts',
         fields: [
@@ -83,6 +88,21 @@ export default buildConfigWithDefaults({
       },
     ],
     globals: [
+      {
+        slug: hiddenGlobalSlug,
+        access: { read: () => true, update: () => true },
+        fields: hiddenFields,
+        graphQL: { name: 'HiddenGlobal' },
+        versions: false,
+      },
+      {
+        slug: allHiddenGlobalSlug,
+        authorship: false,
+        access: { read: () => true, update: () => true },
+        fields: [{ name: 'secret', type: 'text', hidden: true, defaultValue: 'internal' }],
+        graphQL: { name: 'AllHiddenGlobal' },
+        versions: false,
+      },
       {
         slug: 'home',
         fields: [

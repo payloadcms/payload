@@ -12,7 +12,7 @@ create-payload-app uses AST (Abstract Syntax Tree) parsing with ts-morph to modi
 
 1. **Detection** - Parse files and locate expected structures
 2. **Transformation** - Pure functions modify AST
-3. **Modification** - Validate, write, format with prettier
+3. **Modification** - Validate, write, format with oxfmt
 
 ### File Structure
 

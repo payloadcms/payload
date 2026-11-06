@@ -109,16 +109,16 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     if (importHooks?.before && parsedData.length > 0) {
       const result = await importHooks.before({
         batchNumber: 1,
-        data: parsedData as unknown as Parameters<typeof importHooks.before>[0]['data'],
+        data: parsedData,
         format: format ?? 'csv',
         importDoc: getSubmittedFormValues({
           formData: formData ?? {},
-        }) as ImportDoc,
+        }),
         originalData: originalDocs,
         req,
         totalBatches: 1,
       })
-      parsedData = result as unknown as Record<string, unknown>[]
+      parsedData = result
     }
 
     // Remove disabled fields from the documents

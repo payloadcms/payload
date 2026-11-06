@@ -268,7 +268,7 @@ export const getFields = ({
             storedPrefixField,
             baseObjectKeyField,
           ],
-        } as Field
+        }
       }),
     }
 
@@ -313,7 +313,7 @@ export const getFields = ({
     fields.splice(existingObjectKeyFieldIndex, 1)
   }
 
-  fields.push({ ...baseObjectKeyField } as TextField)
+  fields.push({ ...baseObjectKeyField })
 
   return fields
 }

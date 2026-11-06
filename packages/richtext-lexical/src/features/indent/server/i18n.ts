@@ -103,8 +103,7 @@ export const i18n: Partial<GenericLanguages> = {
   my: {
     decreaseLabel: 'Kurangkan Inden',
     increaseLabel: 'Tingkatkan Inden',
-    keyboardHint:
-      'အယ်ဒီတာအပြင်သို့ အာရုံစိုက်မှု ရွှေ့ရန် Escape ကိုနှိပ်ပြီး Tab သို့မဟုတ် Shift+Tab ကိုနှိပ်ပါ။',
+    keyboardHint: 'အယ်ဒီတာအပြင်သို့ အာရုံစိုက်မှု ရွှေ့ရန် Escape ကိုနှိပ်ပြီး Tab သို့မဟုတ် Shift+Tab ကိုနှိပ်ပါ။',
   },
   nb: {
     decreaseLabel: 'Reduser innrykk',

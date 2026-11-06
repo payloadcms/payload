@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@payloadcms/ui'
+import { Button, PopupList } from '@payloadcms/ui'
 import React from 'react'
 
 import './styles.css'
@@ -18,6 +18,17 @@ export const FocusIndicatorsView = () => {
           <Button id="payload-button-1">Payload Button 1</Button>
           <Button buttonStyle="secondary" id="payload-button-2">
             Payload Button 2
+          </Button>
+          <Button
+            buttonStyle="secondary"
+            id="payload-split-button"
+            SubMenuPopupContent={() => (
+              <PopupList.ButtonGroup>
+                <PopupList.Button onClick={() => {}}>Additional action</PopupList.Button>
+              </PopupList.ButtonGroup>
+            )}
+          >
+            Split Button
           </Button>
           <Button buttonStyle="ghost" icon="plus" id="payload-button-3">
             Add Item
@@ -67,7 +78,6 @@ export const FocusIndicatorsView = () => {
 
       {/* Section 4: BAD - No focus indicators */}
       <section className="test-section" data-testid="section-bad">
-        {/* eslint-disable-next-line jsx-a11y/accessible-emoji */}
         <h2>⚠️ Bad Focus Indicators (Should Fail)</h2>
         <div className="button-group">
           <button className="no-focus" id="bad-button-1" type="button">

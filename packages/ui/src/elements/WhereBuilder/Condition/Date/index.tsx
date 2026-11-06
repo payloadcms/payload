@@ -29,7 +29,7 @@ export const DateFilter: React.FC<Props> = ({ disabled, field: { admin }, onChan
         onChange={onChange}
         placeholder={getTranslation(admin.placeholder, i18n) || t('general:enterAValue')}
         readOnly={disabled}
-        value={value as Date}
+        value={value}
       />
     </div>
   )

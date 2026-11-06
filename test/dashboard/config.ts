@@ -45,17 +45,14 @@ export default buildConfigWithDefaults({
               widgetSlug: 'collections',
               width: 'full',
             },
-            ...Array.from(
-              { length: 4 },
-              (_value, index): WidgetInstance<'count'> => ({
-                data: {
-                  collection: index % 2 === 0 ? 'tickets' : 'events',
-                  title: index % 2 === 0 ? 'Tickets' : 'Events',
-                },
-                widgetSlug: 'count',
-                width: 'x-small',
-              }),
-            ),
+            ...Array.from({ length: 4 }, (_value, index): WidgetInstance<'count'> => ({
+              data: {
+                collection: index % 2 === 0 ? 'tickets' : 'events',
+                title: index % 2 === 0 ? 'Tickets' : 'Events',
+              },
+              widgetSlug: 'count',
+              width: 'x-small',
+            })),
             {
               data: {
                 timeframe: 'monthly',

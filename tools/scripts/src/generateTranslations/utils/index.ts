@@ -8,11 +8,11 @@ import type {
 
 import { acceptedLanguages } from '@payloadcms/translations'
 import fs from 'fs'
+import { format } from 'oxfmt'
 import path from 'path'
 import { deepMergeSimple } from 'payload/shared'
-import { format } from 'prettier'
 
-import { applyEslintFixes } from './applyEslintFixes.js'
+import { applyOxlintFixes } from './applyOxlintFixes.js'
 import { findMissingKeys } from './findMissingKeys.js'
 import { generateTsObjectLiteral } from './generateTsObjectLiteral.js'
 import { sortKeys } from './sortKeys.js'
@@ -202,17 +202,18 @@ export async function translateObject(props: {
     // suffix
     fileContent += `${tsFileSuffix}\n`
 
-    // eslint
-    fileContent = await applyEslintFixes(fileContent, filePath)
+    // oxlint
+    fileContent = applyOxlintFixes(fileContent, filePath)
 
-    // prettier
-    fileContent = await format(fileContent, {
-      parser: 'typescript',
-      printWidth: 100,
-      semi: false,
-      singleQuote: true,
-      trailingComma: 'all',
-    })
+    // oxfmt
+    fileContent = (
+      await format(filePath, fileContent, {
+        printWidth: 100,
+        semi: false,
+        singleQuote: true,
+        trailingComma: 'all',
+      })
+    ).code
 
     fs.writeFileSync(filePath, fileContent, 'utf8')
   } else {
@@ -237,17 +238,18 @@ export async function translateObject(props: {
       // suffix
       fileContent += `${tsFileSuffix.replaceAll('{{locale}}', sanitizedKey).replaceAll('{{dateFNSKey}}', `'${allTranslatedTranslationsObject[key]?.dateFNSKey}'`)}\n`
 
-      // eslint
-      fileContent = await applyEslintFixes(fileContent, filePath)
+      // oxlint
+      fileContent = applyOxlintFixes(fileContent, filePath)
 
-      // prettier
-      fileContent = await format(fileContent, {
-        parser: 'typescript',
-        printWidth: 100,
-        semi: false,
-        singleQuote: true,
-        trailingComma: 'all',
-      })
+      // oxfmt
+      fileContent = (
+        await format(filePath, fileContent, {
+          printWidth: 100,
+          semi: false,
+          singleQuote: true,
+          trailingComma: 'all',
+        })
+      ).code
 
       fs.writeFileSync(filePath, fileContent, 'utf8')
     }

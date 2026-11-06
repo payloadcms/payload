@@ -58,7 +58,7 @@
   }
 
   .tabs__tab-button:focus-visible {
-    outline-offset: -1px;
+    outline-offset: var(--accessibility-outline-inset);
   }
 
   .tabs__tab-button--hidden {

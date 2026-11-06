@@ -12,6 +12,51 @@ interface RevenueData {
   period: string
 }
 
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('en-US', {
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    style: 'currency',
+  }).format(value)
+}
+
+function CustomTooltip(props: {
+  active?: boolean
+  label?: number | string
+  payload?: { value: number }[]
+}) {
+  const { active, label, payload } = props
+  if (active && payload && payload.length) {
+    return (
+      <div
+        style={{
+          background: 'var(--color-bg-elevated)',
+          border: '1px solid var(--color-border)',
+          borderRadius: '4px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          color: 'var(--color-text)',
+          padding: '8px 12px',
+        }}
+      >
+        <p
+          style={{
+            color: 'var(--color-text)',
+            fontSize: '12px',
+            margin: '0 0 4px 0',
+            opacity: 0.7,
+          }}
+        >
+          {label}
+        </p>
+        <p style={{ color: 'var(--color-text)', fontSize: '14px', fontWeight: 600, margin: 0 }}>
+          {formatCurrency(payload[0]?.value ?? 0)}
+        </p>
+      </div>
+    )
+  }
+  return null
+}
+
 export default function Revenue({ widgetData }: WidgetServerProps<RevenueWidget>) {
   const timeframe = typeof widgetData?.timeframe === 'string' ? widgetData.timeframe : 'monthly'
   const title = typeof widgetData?.title === 'string' ? widgetData.title : 'Revenue Statistics'
@@ -30,51 +75,6 @@ export default function Revenue({ widgetData }: WidgetServerProps<RevenueWidget>
     { amount: 48000, date: '2024-11', period: 'Nov' },
     { amount: 52000, date: '2024-12', period: 'Dec' },
   ]
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      style: 'currency',
-    }).format(value)
-  }
-
-  function CustomTooltip(props: {
-    active?: boolean
-    label?: number | string
-    payload?: { value: number }[]
-  }) {
-    const { active, label, payload } = props
-    if (active && payload && payload.length) {
-      return (
-        <div
-          style={{
-            background: 'var(--color-bg-elevated)',
-            border: '1px solid var(--color-border)',
-            borderRadius: '4px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-            color: 'var(--color-text)',
-            padding: '8px 12px',
-          }}
-        >
-          <p
-            style={{
-              color: 'var(--color-text)',
-              fontSize: '12px',
-              margin: '0 0 4px 0',
-              opacity: 0.7,
-            }}
-          >
-            {label}
-          </p>
-          <p style={{ color: 'var(--color-text)', fontSize: '14px', fontWeight: 600, margin: 0 }}>
-            {formatCurrency(payload[0]?.value ?? 0)}
-          </p>
-        </div>
-      )
-    }
-    return null
-  }
 
   return (
     <div

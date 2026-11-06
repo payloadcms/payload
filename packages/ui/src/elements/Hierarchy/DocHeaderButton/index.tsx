@@ -236,7 +236,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
         onRemove={handleRemove}
         renderTrigger={(triggerProps) => (
           <Button
-            aria-label={triggerProps ? label : undefined}
+            aria-label={`${t('hierarchy:folderLocation')}: ${label}`}
             buttonStyle="secondary"
             className={buttonClassName}
             disabled={readOnly}

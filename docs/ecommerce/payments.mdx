@@ -18,8 +18,8 @@ The plugin will create REST API endpoints for each payment adapter you add to yo
 
 | Action          | Method | Description                                                                                         |
 | --------------- | ------ | --------------------------------------------------------------------------------------------------- |
-| `initiate`      | POST   | Initiate a payment for an order. See [initiatePayment](#initiatePayment) for more details.          |
-| `confirm-order` | POST   | Confirm an order after a payment has been made. See [confirmOrder](#confirmOrder) for more details. |
+| `initiate`      | POST   | Initiate a payment for an order. See [initiatePayment](#initiatepayment) for more details.          |
+| `confirm-order` | POST   | Confirm an order after a payment has been made. See [confirmOrder](#confirmorder) for more details. |
 
 ## Stripe
 
@@ -152,7 +152,7 @@ Ready! Your webhook signing secret is whsec_abc123xyz...
 STRIPE_WEBHOOKS_SIGNING_SECRET=whsec_abc123xyz...
 ```
 
-5. **Restart your Next.js dev server** to pick up the new environment variable.
+5. **Restart your dev server** to pick up the new environment variable.
 
 6. **Trigger a test webhook** to verify your setup:
 
@@ -185,7 +185,7 @@ import { stripeAdapterClient } from '@payloadcms/plugin-ecommerce/payments/strip
 </EcommerceProvider>
 ```
 
-Then you can use the `usePayments` hook to access the `initiatePayment` and `confirmOrder` functions, see the [Frontend docs](./frontend#usePayments) for more details.
+Then you can use the `usePayments` hook to access the `initiatePayment` and `confirmOrder` functions, see the [Frontend docs](./frontend#usepayments) for more details.
 
 ## Making your own Payment Adapter
 
@@ -195,8 +195,8 @@ You can make your own payment adapter by implementing the `PaymentAdapter` inter
 | ----------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`            | `string`                                                        | The name of the payment method. This will be used to identify the payment method in the API and on the frontend.                                                                               |
 | `label`           | `string`                                                        | (Optional) A human-readable label for the payment method. This will be used in the admin panel and on the frontend.                                                                            |
-| `initiatePayment` | `(args: InitiatePaymentArgs) => Promise<InitiatePaymentResult>` | The function that is called via the `/api/payments/{provider_name}/initiate` endpoint to initiate a payment for an order. [More](#initiatePayment)                                             |
-| `confirmOrder`    | `(args: ConfirmOrderArgs) => Promise<void>`                     | The function that is called via the `/api/payments/{provider_name}/confirm-order` endpoint to confirm an order after a payment has been made. [More](#confirmOrder)                            |
+| `initiatePayment` | `(args: InitiatePaymentArgs) => Promise<InitiatePaymentResult>` | The function that is called via the `/api/payments/{provider_name}/initiate` endpoint to initiate a payment for an order. [More](#initiatepayment)                                             |
+| `confirmOrder`    | `(args: ConfirmOrderArgs) => Promise<void>`                     | The function that is called via the `/api/payments/{provider_name}/confirm-order` endpoint to confirm an order after a payment has been made. [More](#confirmorder)                            |
 | `endpoints`       | `Endpoint[]`                                                    | (Optional) An array of endpoints to be bootstrapped to Payload's API in order to support the payment method. All API paths are relative to `/api/payments/{provider_name}`                     |
 | `group`           | `GroupField`                                                    | A group field config to be used in transactions to track the necessary data for the payment processor, eg. PaymentIntentID for Stripe. See [Payment Fields](#payment-fields) for more details. |
 

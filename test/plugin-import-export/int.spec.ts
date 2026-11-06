@@ -907,7 +907,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
       const exportDoc = await payload.findByID({
         id: doc.id,
-        collection: 'exports' as CollectionSlug,
+        collection: 'exports',
         overrideAccess: true,
       })
 
@@ -3081,7 +3081,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           try {
             await payload.delete({
               id,
-              collection: customIdPagesSlug as CollectionSlug,
+              collection: customIdPagesSlug,
               overrideAccess: true,
             })
           } catch {
@@ -4721,7 +4721,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
       })
 
       const { docs: jobs } = await payload.find({
-        collection: 'payload-jobs' as CollectionSlug,
+        collection: 'payload-jobs',
         overrideAccess: true,
         where: {
           taskSlug: { equals: 'createCollectionImport' },
@@ -4750,7 +4750,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
       const importDoc = await payload.findByID({
         id: doc.id,
-        collection: 'imports' as CollectionSlug,
+        collection: 'imports',
         overrideAccess: true,
       })
 
@@ -6503,7 +6503,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           try {
             await payload.delete({
               id,
-              collection: customIdPagesSlug as CollectionSlug,
+              collection: customIdPagesSlug,
               overrideAccess: true,
             })
           } catch {
@@ -6551,7 +6551,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         expect(completedImport.summary?.issues).toBe(0)
 
         const importedPages = await payload.find({
-          collection: customIdPagesSlug as CollectionSlug,
+          collection: customIdPagesSlug,
           overrideAccess: true,
           sort: 'id',
         })
@@ -6597,7 +6597,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         expect(completedImport.summary?.imported).toBe(2)
 
         const importedPages = await payload.find({
-          collection: customIdPagesSlug as CollectionSlug,
+          collection: customIdPagesSlug,
           overrideAccess: true,
           sort: 'id',
           where: {
@@ -6651,7 +6651,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         expect(completedImport.summary?.imported).toBe(2)
 
         const importedPages = await payload.find({
-          collection: customIdPagesSlug as CollectionSlug,
+          collection: customIdPagesSlug,
           overrideAccess: true,
           sort: 'id',
           where: {
@@ -6714,7 +6714,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const updatedPage = await payload.findByID({
           id: 'existing-custom-1',
-          collection: customIdPagesSlug as CollectionSlug,
+          collection: customIdPagesSlug,
           overrideAccess: true,
         })
 
@@ -6769,7 +6769,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         const updatedPage = await payload.findByID({
           id: 'update-mode-custom-1',
-          collection: customIdPagesSlug as CollectionSlug,
+          collection: customIdPagesSlug,
           overrideAccess: true,
         })
 
@@ -9602,7 +9602,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         await payloadInstance.update({
           id: devUserId,
           collection: 'users',
-          data: { limit: null as unknown as number },
+          data: { limit: null },
           overrideAccess: true,
         })
 
@@ -9923,7 +9923,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         try {
           await payload.delete({
             id,
-            collection: postsWithS3Slug as CollectionSlug,
+            collection: postsWithS3Slug,
             overrideAccess: true,
           })
         } catch {
@@ -9959,7 +9959,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
       expect((importDoc as any).summary?.issues).toBe(0)
 
       const posts = await payload.find({
-        collection: postsWithS3Slug as CollectionSlug,
+        collection: postsWithS3Slug,
         overrideAccess: true,
         where: {
           title: { contains: 'S3 Import Test' },
@@ -10066,7 +10066,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
       expect((importDoc as any).summary?.imported).toBe(2)
 
       const posts = await payload.find({
-        collection: postsWithS3Slug as CollectionSlug,
+        collection: postsWithS3Slug,
         overrideAccess: true,
         where: {
           title: { contains: 'S3 JSON Import' },

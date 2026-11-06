@@ -9,7 +9,7 @@ export const getUploadInstructionsTool = defineCollectionTool({
     defaultAccess(args) &&
     Boolean(
       args.permissions?.collections?.[args.slug]?.create ||
-        args.permissions?.collections?.[args.slug]?.update,
+      args.permissions?.collections?.[args.slug]?.update,
     ),
   annotations: {
     destructiveHint: false,

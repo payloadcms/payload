@@ -294,6 +294,7 @@ export const plTranslations: DefaultTranslationsObject = {
     and: 'i',
     anotherUser: 'Inny użytkownik',
     anotherUserTakenOver: 'Inny użytkownik przejął edycję tego dokumentu.',
+    apiResponse: 'Odpowiedź API',
     applyChanges: 'Zastosuj zmiany',
     ascending: 'Rosnąco',
     auto: 'Automatyczny',
@@ -366,6 +367,13 @@ export const plTranslations: DefaultTranslationsObject = {
     documentOutOfDate:
       'Ten dokument został niedawno zaktualizowany przez innego użytkownika. Twoja wersja jest nieaktualna.',
     documents: 'Dokumenty',
+    dragCancelled: 'Przeciąganie {{label}} anulowano.',
+    dragDropped: '{{label}} upuszczono. Pozycja {{position}} z {{count}}.',
+    dragInstructions:
+      'Naciśnij Space lub Enter, aby podnieść wiersz. Użyj strzałek, aby go przenieść. Z VoiceOver wyłącz Quick Nav i użyj Command + strzałek. Naciśnij Space lub Enter, aby upuścić, lub Escape, aby anulować.',
+    dragMoved: '{{label}}: {{direction}}. Pozycja {{position}} z {{count}}.',
+    dragPickedUp: '{{label}} podniesiono. Pozycja {{position}} z {{count}}.',
+    dragToMove: 'Przeciągnij, aby przenieść',
     dragToReorder: 'Przeciągnij, aby zmienić kolejność',
     duplicate: 'Zduplikuj',
     duplicateWithoutSaving: 'Zduplikuj bez zapisywania zmian',
@@ -480,6 +488,7 @@ export const plTranslations: DefaultTranslationsObject = {
     reindexingAll: 'Ponowne indeksowanie wszystkich {{collections}}.',
     reloadDocument: 'Przeładuj dokument',
     remove: 'Usuń',
+    removeFilter: 'Usuń filtr',
     rename: 'Zmień nazwę',
     replaceRow: 'Zastąp wiersz',
     requiredFields: 'Pola oznaczone * są wymagane.',
@@ -571,6 +580,7 @@ export const plTranslations: DefaultTranslationsObject = {
     yes: 'Tak',
   },
   hierarchy: {
+    folderLocation: 'Lokalizacja folderu',
     goTo: 'Przejdź do "{{name}}"',
     itemsMovedTo: '{{title}} został przeniesiony do {{destination}}',
     itemsMovedToRoot: '{{title}} przeniesiony do głównego katalogu',
@@ -707,6 +717,10 @@ export const plTranslations: DefaultTranslationsObject = {
       'Za chwilę opublikujesz wszystkie {{label}} w zaznaczeniu. Jesteś pewny?',
     aboutToRestore:
       'Zamierzasz przywrócić dokument {{label}} do stanu, w jakim znajdował się w dniu {{versionDate}}.',
+    aboutToRestoreAsDraft:
+      'Przywróć treść z {{versionDate}} jako szkic. Opublikowana treść pozostanie bez zmian do momentu opublikowania jej z edytora.',
+    aboutToRestoreAsDraftAllLocales:
+      'Przywróć treść z {{versionDate}} jako szkic we wszystkich wersjach językowych. Opublikowana treść pozostanie bez zmian do momentu opublikowania jej z edytora.',
     aboutToRestoreGlobal:
       'Zamierzasz przywrócić globalny rekord {{label}} do stanu, w którym znajdował się w dniu {{versionDate}}.',
     aboutToRevertToPublished:
