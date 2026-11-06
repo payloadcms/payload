@@ -193,7 +193,7 @@ Candidate mode automatically:
 3. records once with human-readable pacing;
 4. converts to H.264 MP4 and fully decodes it to detect corruption;
 5. writes a six-frame contact sheet, a take-specific `.scenario.mjs` copy, and a JSON manifest containing metadata and hashes;
-6. removes the intermediate WebM after successful packaging.
+6. removes the lossless Matroska intermediate after successful packaging.
 
 It ends at the local review gate and never uploads.
 
@@ -273,3 +273,5 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario
 The default canvas fits the initial application viewport at 1:1 scale, including space for chrome and annotations. With the left sidebar, a 1440×900 viewport produces an 1794×1086 video so the initial app window stays at 1:1 scale. The top layout produces a 1600×1148 video, or 1600×1188 with accessibility feedback. The canvas stays fixed during responsive resizing. An explicit `presentation.canvas` overrides those dimensions and can scale the app to fit. `--viewport` controls the application iframe's CSS dimensions.
 
 The MP4 converter uses H.264 CRF 18 to preserve detail through conversion. The existing 10 MB review/upload budget still applies.
+
+The Chromium recorder streams PNG frames into a temporary FFV1 `.mkv` without writing individual images. Idle frames repeat at 25 fps to preserve presentation timing. The MP4 conversion is the only lossy encode; successful packaging deletes the intermediate. Lossless intermediates use more temporary disk space and CPU than the final MP4.
