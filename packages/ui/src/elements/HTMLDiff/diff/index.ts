@@ -28,6 +28,7 @@ interface HtmlDiffConfig {
     deleteBlock: string
     deleteInline: string
   }
+  deletedLabel?: string
   greedyBoundary: number
   greedyMatch: boolean
   minMatchedSize: number
@@ -44,6 +45,8 @@ export interface HtmlDiffOptions {
     deleteBlock?: string
     deleteInline?: string
   }>
+  /** Escaped, translated label read before deleted content. */
+  deletedLabel?: string
   /**
    * @defaultValue 1000
    */
@@ -96,6 +99,7 @@ export class HtmlDiff {
         deleteBlock: 'html-diff-delete-block-wrapper',
         deleteInline: 'html-diff-delete-inline-wrapper',
       },
+      deletedLabel,
       greedyBoundary = 1000,
       greedyMatch = true,
       minMatchedSize = 2,
@@ -111,6 +115,7 @@ export class HtmlDiff {
         deleteInline: 'html-diff-delete-inline-wrapper',
         ...classNames,
       },
+      deletedLabel,
       greedyBoundary,
       greedyMatch,
       minMatchedSize,
@@ -214,7 +219,7 @@ export class HtmlDiff {
       return `<div class="${this.config.classNames.createBlock}">${token}</div>`
     }
     if (type === 'delete') {
-      return `<div class="${this.config.classNames.deleteBlock}">${token}</div>`
+      return `<div class="${this.config.classNames.deleteBlock}">${this.getDeletionCue()}${token}</div>`
     }
     return ''
   }
@@ -280,7 +285,7 @@ export class HtmlDiff {
       return `<span class="${this.config.classNames.createInline}">${token}</span>`
     }
     if (type === 'delete') {
-      return `<span class="${this.config.classNames.deleteInline}">${token}</span>`
+      return `<span class="${this.config.classNames.deleteInline}">${this.getDeletionCue()}${token}</span>`
     }
     return ''
   }
@@ -309,9 +314,15 @@ export class HtmlDiff {
       return `<span data-match-type="create">${text}</span>`
     }
     if (type === 'delete') {
-      return `<span data-match-type="delete">${text}</span>`
+      return `<del data-match-type="delete">${this.getDeletionCue()}${text}</del>`
     }
     return ''
+  }
+
+  private getDeletionCue(): string {
+    return this.config.deletedLabel
+      ? `<span class="sr-only">${this.config.deletedLabel}: </span>`
+      : ''
   }
 
   /**

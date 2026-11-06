@@ -151,6 +151,40 @@ describe('generateFileData', () => {
     })
   })
 
+  it('should preserve the declared stylesheet type and original contents', async () => {
+    const fileContent = Buffer.from(
+      '<?xml version="1.0"?><document><title>Reference</title></document>',
+    )
+    const req = {
+      file: {
+        data: fileContent,
+        mimetype: 'text/xsl',
+        name: 'reference.xsl',
+        size: fileContent.length,
+      },
+      payload: { config: {}, logger: { error: vi.fn() } },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(result.data).toMatchObject({ mimeType: 'text/xsl' })
+    expect(req.file?.data).toEqual(fileContent)
+    expect(result.files).toEqual([
+      {
+        buffer: fileContent,
+        path: path.join(os.tmpdir(), 'reference.xsl'),
+        role: { type: 'default' },
+      },
+    ])
+  })
+
   it('uses the inspected non-image type for image processing', async () => {
     const { sharp } = createSharpMock()
     const fileContent = Buffer.from(

@@ -97,6 +97,7 @@ export const LexicalDiffComponent: React.FC<RichTextFieldDiffServerProps> = asyn
   })
 
   const { From, To } = getHTMLDiffComponents({
+    deletedLabel: i18n.t('general:deleted'),
     // Ensure empty paragraph is displayed for empty rich text fields - otherwise, toHTML may be displayed in the wrong column
     fromHTML: fromHTML?.length ? fromHTML : '<p></p>',
     toHTML: toHTML?.length ? toHTML : '<p></p>',
