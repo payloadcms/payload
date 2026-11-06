@@ -2,6 +2,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
+import { devUser } from '../credentials.js'
 import {
   applicationEndpoint,
   collectionSlug,
@@ -11,6 +12,7 @@ import {
   noEndpointsCollectionSlug,
   noEndpointsGlobalSlug,
   rootEndpoint,
+  userEndpoint,
 } from './shared.js'
 
 test.suite('Endpoints', { config: './config.ts' }, () => {
@@ -157,6 +159,28 @@ test.suite('Endpoints', { config: './config.ts' }, () => {
       const shortenedImage = Buffer.from(await shortenedResponse.arrayBuffer())
 
       expect(fullImage.equals(shortenedImage)).toBe(false)
+    })
+  })
+
+  test.describe('Authentication', () => {
+    test('should not authenticate requests to endpoints with disableAuth', async ({
+      restClient,
+    }) => {
+      const { token } = await restClient
+        .POST('/users/login', {
+          body: JSON.stringify({ email: devUser.email, password: devUser.password }),
+        })
+        .then((res) => res.json())
+      const headers = { Authorization: `JWT ${token}` }
+
+      const authenticated = await restClient.GET(`/${userEndpoint}`, { auth: false, headers })
+      const withoutAuth = await restClient.GET(`/${userEndpoint}/without-auth`, {
+        auth: false,
+        headers,
+      })
+
+      await expect(authenticated.json()).resolves.toEqual({ email: devUser.email })
+      await expect(withoutAuth.json()).resolves.toEqual({ email: null })
     })
   })
 })

@@ -21,6 +21,12 @@ type Args = {
   }
   payloadInstanceCacheKey?: string
   request: Request
+  /**
+   * Run the auth strategies and set `req.user`.
+   *
+   * @default true
+   */
+  shouldAuthenticate?: boolean
 }
 
 export const createPayloadRequestFromWebRequest = async ({
@@ -29,6 +35,7 @@ export const createPayloadRequestFromWebRequest = async ({
   params,
   payloadInstanceCacheKey,
   request,
+  shouldAuthenticate = true,
 }: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
   const payload = await getPayload({
@@ -123,11 +130,22 @@ export const createPayloadRequestFromWebRequest = async ({
     locale,
   })
 
+  return shouldAuthenticate ? authenticateRequest({ canSetHeaders, req }) : req
+}
+
+/** Runs the auth strategies and sets `req.user` and `req.responseHeaders`. */
+export const authenticateRequest = async ({
+  canSetHeaders,
+  req,
+}: {
+  canSetHeaders?: boolean
+  req: PayloadRequest
+}): Promise<PayloadRequest> => {
   const { responseHeaders, user } = await executeAuthStrategies({
     canSetHeaders,
     headers: req.headers,
-    isGraphQL,
-    payload,
+    isGraphQL: req.payloadAPI === 'GraphQL',
+    payload: req.payload,
     req,
   })
 
