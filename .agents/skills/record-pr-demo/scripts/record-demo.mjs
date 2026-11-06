@@ -201,7 +201,7 @@ async function executeDemo({
   const change = scenarioModule.presentation?.change
 
   if (
-    !['Feature', 'Fix'].includes(change?.kind) ||
+    !['Feature', 'Fix', 'Bug'].includes(change?.kind) ||
     typeof change.title !== 'string' ||
     !change.title.trim() ||
     typeof change.description !== 'string' ||
@@ -226,6 +226,7 @@ async function executeDemo({
     getDefaultCanvas({
       viewport,
       accessibility: presentationOptions.accessibility,
+      annotationLayout: presentationOptions.annotationLayout,
     })
   const context = await browser.newContext({
     viewport: recordedViewport,
@@ -235,7 +236,6 @@ async function executeDemo({
 
   await context.addInitScript(() => {
     window.addEventListener('DOMContentLoaded', () => {
-      if (document.documentElement.hasAttribute('data-pr-demo-stage')) return
       const cursor = document.createElement('div')
       cursor.setAttribute('data-pr-demo-cursor', 'mac-arrow')
       cursor.setAttribute('aria-hidden', 'true')
@@ -300,14 +300,53 @@ async function executeDemo({
         clickPulse.style.left = `${clickPoint.x - pointer.x}px`
         clickPulse.style.top = `${clickPoint.y - pointer.y}px`
       }
-      const positionCursor = ({ clientX, clientY }) => {
+      const cursorActivityType = 'payload-pr-demo-cursor-active'
+      let latestCursorActivity = 0
+      window.addEventListener('message', (event) => {
+        if (event.data?.type !== cursorActivityType) return
+        const isParent = window.parent !== window && event.source === window.parent
+        const isChild = [...document.querySelectorAll('iframe')].some(
+          (frame) => frame.contentWindow === event.source,
+        )
+        if (
+          (isParent || isChild) &&
+          Number.isFinite(event.data.timestamp) &&
+          event.data.timestamp >= latestCursorActivity
+        ) {
+          latestCursorActivity = event.data.timestamp
+          cursor.style.transition = 'none'
+          cursor.style.opacity = '0'
+        }
+      })
+      const positionCursor = ({ clientX, clientY, timeStamp }) => {
+        latestCursorActivity = performance.timeOrigin + timeStamp
+        // Transfer cursor ownership between the recording chrome and its live app frame.
+        if (window.parent !== window) {
+          window.parent.postMessage(
+            { type: cursorActivityType, timestamp: latestCursorActivity },
+            '*',
+          )
+        } else {
+          for (const frame of document.querySelectorAll('iframe')) {
+            frame.contentWindow?.postMessage(
+              { type: cursorActivityType, timestamp: latestCursorActivity },
+              '*',
+            )
+          }
+        }
         pointer = { x: clientX, y: clientY }
+        cursor.style.transition = 'opacity 120ms ease'
         promoteCursor()
         cursor.style.opacity = '1'
         cursor.style.transform = `translate(${clientX}px, ${clientY}px)`
         positionClickPulse()
       }
       document.addEventListener('mousemove', positionCursor, { passive: true })
+      document.addEventListener('mouseout', (event) => {
+        if (!event.relatedTarget || event.relatedTarget instanceof HTMLIFrameElement) {
+          cursor.style.opacity = '0'
+        }
+      })
       document.addEventListener(
         'mousedown',
         (event) => {
@@ -405,6 +444,7 @@ async function executeDemo({
           ? annotationInteractions.hideAnnotation()
           : annotationInteractions.showAnnotation(annotation),
       baseURL: parsedBaseURL.toString().replace(/\/$/, ''),
+      chrome: presentation.chrome,
       click: pointerInteractions.click,
       typeText: async ({ locator, text, clear = false, delay = 80 }) => {
         await pointerInteractions.click(locator)
@@ -537,8 +577,16 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
         const point = points.find(({ x, y }) => {
           if (right <= left || bottom <= top || x < left || x >= right || y < top || y >= bottom)
             return false
-          const hit = document.elementFromPoint(x, y)
-          return hit && element.contains(hit)
+          let hit = document.elementFromPoint(x, y)
+          while (hit?.shadowRoot) {
+            const nested = hit.shadowRoot.elementFromPoint(x, y)
+            if (!nested || nested === hit) break
+            hit = nested
+          }
+          for (let candidate = hit; candidate; candidate = candidate.getRootNode().host) {
+            if (element.contains(candidate)) return true
+          }
+          return false
         })
         if (!point) {
           throw new Error(

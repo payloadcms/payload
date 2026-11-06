@@ -34,7 +34,7 @@ Prefer 10–45 seconds. Avoid long typing sequences, setup screens, loading wait
 
 ## Editorial annotations over the recording
 
-Annotations live in the shared chrome panel above the application. The change title and description stay constant; step titles and bodies update through `showAnnotation` and `hideAnnotation`. Supply content and optional one-based `index`/`total`, which default to 1. If the scenario uses annotations, show the initial note before `ready()` and keep it visible at that marker. Starting annotations after an unannotated opening is rejected. Recordings without annotations remain supported. The shared component controls layout, progress, and transitions; see [window-chrome.md](window-chrome.md).
+For a known step sequence, declare `presentation.annotationSteps` and select the [sidebar API](window-chrome.md#step-sidebar). Call `showAnnotation` when an explanation becomes relevant and `hideAnnotation` when it no longer applies. Keep the scenario’s change metadata constant. For a multi-step sidebar, supply the step’s one-based `index` and the full declared step count as `total` on every call. In the top layout, `index` and `total` are optional and default to 1. If the scenario uses annotations, show the initial note before `ready()` and keep it visible at that marker. Starting annotations after an unannotated opening is rejected. Recordings without annotations remain supported. The shared component controls layout, progress, and transitions; see [window-chrome.md](window-chrome.md).
 
 ```js
 await showAnnotation({
@@ -47,7 +47,7 @@ await pause(1600)
 await hideAnnotation()
 ```
 
-Do not inject annotations into the application. Floating annotations and the old `type`, `position`, and `width` options are rejected with a migration error. Use the fixed panel component without scenario CSS. Check text fit, contrast, and timing in the rendered MP4, and include substantive explanation in the written PR walkthrough as a text alternative.
+Do not inject annotations into the application. Floating annotations and the old `type`, `position`, and `width` options are rejected with a migration error. Use the annotation API without scenario CSS. Check text fit, contrast, and timing in the rendered MP4, and include substantive explanation in the written PR walkthrough as a text alternative.
 
 ## Scenario module
 
@@ -107,6 +107,8 @@ Use semantic locators where practical. Assert each important state before contin
 
 The recorder supplies:
 
+- `chrome.back` / `chrome.forward`: visible recording-window history buttons. Use `await click(chrome.back)` or `await click(chrome.forward)` for paced pointer gestures; unavailable directions are disabled.
+- `chrome.refresh`: reloads the application frame through the persistent toolbar button; use `await click(chrome.refresh)` for a visible refresh gesture.
 - `baseURL`: normalized without a trailing slash;
 - `click(locator, options?)`: smoothly moves to a locator, pauses, clicks, and pauses again;
 - `expect`: Playwright assertions;
@@ -138,7 +140,7 @@ await page.keyboard.type('Halloween Sale', { delay: 80 })
 await click(page.getByRole('button', { name: 'Save', exact: true }))
 ```
 
-If a refresh is part of the story, send the browser reload shortcut through keyboard input and assert the resulting UI. Do not call `page.reload()` to advance the application during the walkthrough. The shared refresh indicator remains available for recorder development and preview controls.
+If a refresh is part of the story, use `await click(chrome.refresh)` and assert the resulting UI. This visibly clicks the persistent toolbar button, reloads only the app frame, and spins the icon while it loads. Do not call `page.reload()` to advance the application during the walkthrough.
 
 The recorder supplies cursor and click feedback automatically. Scenarios do not mount or style it. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.
 
@@ -268,6 +270,6 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario
 
 ### Capture resolution and encoding
 
-The default canvas fits the initial application viewport at 1:1 scale, including space for chrome and annotations. A 1440×900 viewport produces a 1600×1148 video, or 1600×1188 with accessibility feedback. The canvas stays fixed during responsive resizing. An explicit `presentation.canvas` overrides those dimensions and can scale the app to fit. `--viewport` controls the application iframe's CSS dimensions.
+The default canvas fits the initial application viewport at 1:1 scale, including space for chrome and annotations. With the left sidebar, a 1440×900 viewport produces an 1794×1086 video so the initial app window stays at 1:1 scale. The top layout produces a 1600×1148 video, or 1600×1188 with accessibility feedback. The canvas stays fixed during responsive resizing. An explicit `presentation.canvas` overrides those dimensions and can scale the app to fit. `--viewport` controls the application iframe's CSS dimensions.
 
 The MP4 converter uses H.264 CRF 18 to preserve detail through conversion. The existing 10 MB review/upload budget still applies.

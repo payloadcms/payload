@@ -21,15 +21,19 @@ Do not upload previews, rejected takes, raw WebM recordings, or files the user h
 
 Drive the application through browser gestures: paced pointer clicks, keystrokes, and wheel scrolling. Open the starting URL once, then navigate through visible controls. Use existing seeded data when possible. Optional `setup`/`teardown` hooks may seed and clean up recording-only data through the API outside the walkthrough. Within the scenario, use gestures to reach each demonstrated state; avoid API or Local API calls, direct navigation between steps, field filling, DOM mutations, and programmatic scrolling. Assertions and read-only DOM inspection may observe the result. Recording chrome, encoding, and verification remain harness operations. See [recording.md](references/recording.md#gesture-based-interactions) for the interaction contract and examples.
 
+Use `await click(chrome.back)` and `await click(chrome.forward)` for browser-history steps. The shared window chrome provides these real history controls beside the live URL bar, with normal cursor movement and click feedback.
+
 ## Required presentation chrome
 
-Every scenario must export `presentation` with a change kind (`Feature` or `Fix`), title, and description. Read [window-chrome.md](references/window-chrome.md) and use the shared component and live preview; do not invent wrapper CSS. Recordings, screenshot previews, and validation always mount the chrome. Keep the change description constant and use `showAnnotation({ title, body, index, total })` / `hideAnnotation()` for panel notes. Floating annotations and placement options (`type`, `position`, `width`) are unsupported.
+Every scenario must export `presentation` with a change kind, title, and description. For a known sequence of steps, declare `annotationSteps` and `annotationLayout: 'left'`, then call `showAnnotation` to advance through that sequence. Use `hideAnnotation` when the explanation should no longer accompany the action. See [window-chrome.md](references/window-chrome.md) for the API contract and examples. Scripts supply content and intent; the shared renderer owns presentation. Do not inject markup, styles, badges, or layout rules into the application or recording chrome.
 
 Keep the default canvas and desktop viewport for ordinary demos. Use a smaller `--viewport` or `resizeWindow` only when demonstrating responsive reflow or breakpoints, or when the user explicitly requests different dimensions. Keep the canvas fixed while resizing the application. Do not shrink the viewport or canvas merely to crop surrounding content or emphasize a visual change.
 
+For a requested before/after comparison, set `change.kind: 'Bug'` on the real unfixed scenario and `'Fix'` on the corrected scenario. Set `kind: 'Bug'` on an individual step only when its action visibly demonstrates a failure; leave setup and ordinary navigation unmarked. Write a short description of the visible action or outcome, and assert that state in the script.
+
 ## Accessibility demonstrations
 
-Set `presentation.accessibility: true` to show keyboard history and `presentation.showAnnouncements: true` to include observed live-region text. The shared component renders all feedback; Payload retains its native focus styling. Captions are DOM observations, not screen-reader audio. Use `--a11y on` or `--a11y off` to override these options without editing the scenario; omit the flag to preserve its defaults. See [recording.md](references/recording.md#accessibility-observations) for privacy filtering and evidence limits.
+Set `presentation.accessibility: true` when keyboard commands are part of the evidence, and `presentation.showAnnouncements: true` when relevant UI updates should be observed. The harness chooses the compatible presentation and preserves application focus styling. Captions are DOM observations, not screen-reader audio. Use `--a11y on` or `--a11y off` to override these options without editing the scenario; omit the flag to preserve its defaults. See [recording.md](references/recording.md#accessibility-observations) for privacy filtering and evidence limits.
 
 ## Workflow
 
