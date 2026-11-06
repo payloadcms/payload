@@ -6,6 +6,7 @@ import { extractBearerToken } from 'payload/shared'
 import type { AuthorizedMCP, MCPItem } from '../types.js'
 
 import { getPluginConfig } from '../utils/getPluginConfig.js'
+import { authenticateLoginToken } from './oauthLoginToken.js'
 
 export type GetAuthorizedMCPArgs = {
   /**
@@ -54,9 +55,18 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
       req.responseHeaders = responseHeaders
     }
 
-    // Only bearer tokens that no auth strategy accepted reach the hook, e.g. an OAuth access token.
+    // Only bearer tokens that no auth strategy accepted get here, e.g. an OAuth access token.
     // API keys use the `<collection> API-Key <key>` scheme instead of `Bearer`, so they never do.
     const bearerToken = extractBearerToken({ headers })
+    // Sealed Payload login tokens from the built-in OAuth server
+    if (
+      !req.user &&
+      bearerToken &&
+      pluginConfig.oauth?.type === 'builtin' &&
+      !pluginConfig.oauth.issueToken
+    ) {
+      req.user = await authenticateLoginToken({ req, token: bearerToken })
+    }
     if (!req.user && bearerToken && pluginConfig.oauth?.authenticate) {
       req.user = await pluginConfig.oauth.authenticate({ req, token: bearerToken })
     }
