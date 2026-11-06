@@ -214,7 +214,7 @@ describe('Date', () => {
       await expect
         .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
         .toContain(`[${operator}]=${expectedDate}`)
-      await condition.locator('.react-datepicker__close-icon').click()
+      await dateInput.clear()
       await expect
         .poll(() => decodeURIComponent(new URL(timezonePage.url()).search))
         .not.toContain(`[${operator}]=${expectedDate}`)
