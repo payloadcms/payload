@@ -83,6 +83,8 @@ export const MyComponent: React.FC<{
 }
 ```
 
+The Markdown converter needs the same function, but takes it in a different place - see [Converting Markdown](/docs/rich-text/converting-markdown#internal-links).
+
 ### Lexical Blocks
 
 If your rich text includes custom Blocks or Inline Blocks, you must supply custom converters that match each block's slug. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
