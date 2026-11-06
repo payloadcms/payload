@@ -29,7 +29,7 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
     .sidebar-heading { flex:none; margin:10px 10px 8px; padding:3px 9px; border:1px solid var(--line); border-radius:7px; background:var(--badge); color:var(--sub); font:12px/1.5 var(--font-mono); }
     .sidebar-intro { flex:none; display:flex; align-items:flex-start; gap:10px; margin:0 10px 8px; padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:var(--paper); }
     .sidebar-intro + .sidebar-heading { margin-top:0; }
-    .sidebar-intro p { margin:0; min-width:0; color:var(--ink); font-size:14px; line-height:1.4; }
+    .sidebar-intro p { margin:0; min-width:0; color:var(--ink); font-size:12px; line-height:1.4; }
     .sidebar-steps { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:var(--sub) transparent; list-style:none; margin:0; padding:0 10px 10px; }
     .sidebar-step { width:100%; position:relative; display:block; border:1px solid var(--line); border-radius:8px; padding:0; overflow:hidden; background:var(--paper); color:var(--ink); text-align:left; }
     button.sidebar-step { cursor:pointer; }
@@ -41,7 +41,7 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
     [aria-current=step] .sidebar-dot { background:#0d99ff; }
     .sidebar-steps li + li { margin-top:6px; }
     .sidebar-step-title { display:flex; align-items:center; margin:0; padding:10px 24px 0px 14px; border:0; border-radius:0; background:var(--paper); color:var(--sub); font:12px/1.5 var(--font-mono); }
-    .sidebar-step p { margin:0; padding:12px 14px; font-size:14px; line-height:1.4; color:var(--ink); }
+    .sidebar-step p { margin:0; padding:12px 14px; font-size:12px; line-height:1.4; color:var(--ink); }
     .sidebar-step-title + p { padding-top:10px; }
     @media(prefers-reduced-motion:reduce) { .sidebar-step :is(p,.sidebar-step-title) { transition:none; } }
   `
