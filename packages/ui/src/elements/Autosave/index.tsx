@@ -13,12 +13,7 @@ import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
 import type { OnSaveContext } from '../../views/Edit/index.js'
 
-import {
-  useAllFormFields,
-  useForm,
-  useFormModified,
-  useFormSubmitted,
-} from '../../forms/Form/context.js'
+import { useAllFormFields, useForm, useFormModified } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -26,7 +21,6 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
-import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
 import './index.css'
 
@@ -55,11 +49,10 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     setUnpublishedVersionCount,
   } = useDocumentInfo()
 
-  const { isValid, submit } = useForm()
+  const { getFields, isValid, submit } = useForm()
 
   const [formState] = useAllFormFields()
   const modified = useFormModified()
-  const submitted = useFormSubmitted()
 
   const currentLocale = useLocale()
   const locale = currentLocale?.code
@@ -78,8 +71,12 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const outstandingSubmitCountRef = useRef(0)
   const autosaveSequenceRef = useRef(0)
+  const retryAutosaveRef = useRef<(() => Promise<void>) | null>(null)
   const savingStartTimestampRef = useRef(0)
-  const wasSkippedWhileInvalidRef = useRef(false)
+
+  const didMount = useRef(false)
+  const previousDebouncedData = useRef(reduceFieldsToValues(debouncedFormState))
+  const previousUploadEdits = useRef(uploadEdits)
 
   const stopAutoSaveIndicator = useEffectEvent(() => {
     if (autosaveTimeoutRef.current) {
@@ -90,16 +87,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   })
 
   const handleAutosave = useEffectEvent(async () => {
-    const { valid } = reduceFieldsToValuesWithValidation(formState, true)
-
-    wasSkippedWhileInvalidRef.current = false
-
     if (!modified) {
-      return
-    }
-
-    if (submitted && !valid && validateOnDraft) {
-      wasSkippedWhileInvalidRef.current = true
       return
     }
 
@@ -147,13 +135,13 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     }
 
     savingStartTimestampRef.current = Date.now()
-    autosaveSequenceRef.current += 1
+    const autosaveSequence = ++autosaveSequenceRef.current
     outstandingSubmitCountRef.current += 1
     setSaving(true)
 
     try {
       const result = await submit<any, OnSaveContext>({
-        acceptValues: { overrideLocalChanges: false },
+        acceptValues: true,
         action: url,
         context: {
           getDocPermissions: false,
@@ -162,6 +150,13 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
         disableFormWhileProcessing: false,
         disableSuccessStatus: true,
         method,
+        onStaleRequest: () => {
+          if (autosaveSequence === autosaveSequenceRef.current) {
+            previousDebouncedData.current = reduceFieldsToValues(getFields())
+            previousUploadEdits.current = uploadEdits
+            void retryAutosaveRef.current?.()
+          }
+        },
         overrides: { _status: 'draft' },
         skipValidation: !validateOnDraft,
         submissionType: 'autosave',
@@ -198,9 +193,13 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     }
   })
 
-  const didMount = useRef(false)
-  const previousDebouncedData = useRef(reduceFieldsToValues(debouncedFormState))
-  const previousUploadEdits = useRef(uploadEdits)
+  useEffect(() => {
+    retryAutosaveRef.current = handleAutosave
+
+    return () => {
+      retryAutosaveRef.current = null
+    }
+  }, [handleAutosave])
 
   // When debounced fields change, autosave
   useEffect(() => {
@@ -218,13 +217,14 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
      */
     const { updatedAt: _, ...formData } = reduceFieldsToValues(debouncedFormState)
     const { updatedAt: __, ...prevFormData } = previousDebouncedData.current
+    const { updatedAt: ___, ...currentFormData } = reduceFieldsToValues(getFields())
+
+    // Recovery can already be saving a newer revision than the debounced snapshot.
+    if (!dequal(formData, currentFormData)) {
+      return
+    }
 
     if (dequal(formData, prevFormData) && dequal(uploadEdits, previousUploadEdits.current)) {
-      // Validity arrives with the form-state response after the values settle, so retry an autosave skipped while invalid.
-      if (wasSkippedWhileInvalidRef.current) {
-        void handleAutosave()
-      }
-
       return
     }
 

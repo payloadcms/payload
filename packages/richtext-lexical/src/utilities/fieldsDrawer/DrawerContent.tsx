@@ -38,6 +38,7 @@ export const DrawerContent: React.FC<
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
   const { fields: parentDocumentFields } = useDocumentForm()
   const isEditable = useLexicalEditable()
+  const [formUUID] = useState(() => uuid())
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
@@ -113,7 +114,7 @@ export const DrawerContent: React.FC<
         onSubmit={handleDrawerSubmit}
         readOnly={!isEditable}
         schemaPath={schemaFieldsPath}
-        uuid={uuid()}
+        uuid={formUUID}
       >
         <RenderFields
           fields={Array.isArray(fields) ? fields : []}

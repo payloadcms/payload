@@ -76,7 +76,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
       })
     }
 
-    await submit({
+    const result = await submit({
       action,
       method,
       overrides: {
@@ -85,7 +85,9 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
       skipValidation: true,
     })
 
-    setUnpublishedVersionCount((count) => count + 1)
+    if (result && result.res.ok) {
+      setUnpublishedVersionCount((count) => count + 1)
+    }
   }, [
     submit,
     collectionSlug,

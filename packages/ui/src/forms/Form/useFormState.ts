@@ -16,6 +16,7 @@ import type { BuildFormStateSuccessResult } from '../../utilities/buildFormState
 import type { AcceptValues } from './mergeServerFormState.js'
 import type { FieldAction, Context as FormContextType, FormProps } from './types.js'
 
+import { useQueue } from '../../hooks/useQueue.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -25,6 +26,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
 import { reduceFormStateToData } from '../../utilities/reduceFormStateToData.js'
+import { changesFormData } from './changesFormData.js'
 import { useDocumentForm } from './context.js'
 import { fieldReducer } from './fieldReducer.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
@@ -62,8 +64,12 @@ type FormValidationResult = {
 export type UseFormStateResult = {
   /** Applies local field updates through the form reducer. */
   dispatchFields: Dispatch<FieldAction>
+  /** Applies server state without invalidating the request that produced it. */
+  dispatchFieldsWithoutIncrementingFormSequence: Dispatch<FieldAction>
   /** Current fields, including their values, validation errors, and rendered components. */
   formState: FormState
+  /** Reads the current local-edit revision without subscribing to field changes. */
+  getFormSequence: () => number
   /** True while rebuilding the selected schema. */
   isInitializing: boolean
   /** Whether the form has unsaved field changes. */
@@ -72,14 +78,18 @@ export type UseFormStateResult = {
   isValid: boolean
   /** Baseline used to distinguish local edits from applied server state. */
   prevFormStateRef: RefObject<FormState>
+  queueTask: UseQueueResult['queueTask']
   /** Queues a server refresh after field edits or changes to the selected fields. */
-  queueFormStateRefresh: () => void
+  queueFormStateRefresh: (args?: { force?: boolean }) => void
   /** Rebuilds field state within the active request using the current fields or a saved document. */
   refreshFormState: (action: FormStateAction) => Promise<FormState | undefined>
   /** Rebuilds field state from new data and clears the modified flag. */
   resetFormState: (data: unknown) => Promise<void>
+  resetQueue: UseQueueResult['resetQueue']
   setIsValid: FormContextType['setIsValid']
   setModified: FormContextType['setModified']
+  setModifiedWithoutTracking: FormContextType['setModified']
+  submissionErrorsRef: RefObject<{ fields: FormState; isCurrent: () => boolean } | undefined>
   /** Checks the form before submission and returns its fields, data, and whether it's valid. */
   validateForm: (args?: ValidateArgs) => Promise<FormValidationResult>
 }
@@ -118,7 +128,7 @@ type Args = {
     | 'select'
     | 'widgetSlug'
   >
-  queueTask: UseQueueResult['queueTask']
+  resetSequenceRef: RefObject<number>
 }
 
 /**
@@ -137,12 +147,16 @@ export const useFormState = ({
   onApplied,
   onReset,
   props,
-  queueTask,
+  resetSequenceRef,
 }: Args): UseFormStateResult => {
   const [formState, setFormState] = useState<FormState>(() => props.initialState || {})
   const formStateRef = useRef(formState)
+  const formSequenceRef = useRef(0)
+  const getFormSequence = useCallback(() => formSequenceRef.current, [])
+  const requestQueueOptions = useMemo(() => ({ getSequence: getFormSequence }), [getFormSequence])
+  const { queueTask, resetQueue } = useQueue(requestQueueOptions)
 
-  const dispatchFields = useCallback<React.Dispatch<FieldAction>>(
+  const dispatchFieldsWithoutIncrementingFormSequence = useCallback<React.Dispatch<FieldAction>>(
     (action) => {
       const newState = fieldReducer(formStateRef.current, action)
 
@@ -154,12 +168,35 @@ export const useFormState = ({
     [contextRef],
   )
 
+  const dispatchFields = useCallback<React.Dispatch<FieldAction>>(
+    (action) => {
+      if (changesFormData({ action, currentState: formStateRef.current })) {
+        formSequenceRef.current += 1
+      }
+      dispatchFieldsWithoutIncrementingFormSequence(action)
+    },
+    [dispatchFieldsWithoutIncrementingFormSequence, formSequenceRef],
+  )
+
   contextRef.current.fields = formStateRef.current
 
   const prevFormStateRef = useRef(formState)
 
   const [isValid, setIsValid] = useState(true)
-  const [isModified, setModified] = useState(false)
+  const [isModified, setModifiedWithoutTracking] = useState(false)
+  const setModified = useCallback(
+    (isModified: boolean) => {
+      if (isModified) {
+        formSequenceRef.current += 1
+      }
+      setModifiedWithoutTracking(isModified)
+    },
+    [formSequenceRef],
+  )
+  const submissionErrorsRef = useRef<{ fields: FormState; isCurrent: () => boolean } | undefined>(
+    undefined,
+  )
+  const lastRefreshSequenceRef = useRef(-1)
 
   const { user } = useAuth()
   const { config } = useConfig()
@@ -220,7 +257,11 @@ export const useFormState = ({
 
   const refreshFormState = useCallback(
     async (action: FormStateAction) => {
-      const isCurrent = action.isCurrent ?? (() => true)
+      const sequence = formSequenceRef.current
+      const resetSequence = resetSequenceRef.current
+      const isCurrent =
+        action.isCurrent ??
+        (() => formSequenceRef.current === sequence && resetSequenceRef.current === resetSequence)
       const current = latestRef.current
       const isRefresh = action.type === 'refresh'
       const isReset = action.type === 'reset'
@@ -359,7 +400,7 @@ export const useFormState = ({
           action.type === 'afterSave' &&
           action.refreshPermissions !== false
         ) {
-          args.docPermissions = await current.document.getDocPermissions(savedDocument)
+          args.docPermissions = await current.document.getDocPermissions(savedDocument, isCurrent)
         }
 
         // A successful create replaces the form and loads its own initial state.
@@ -413,7 +454,7 @@ export const useFormState = ({
           contextRef.current.fields = fields
           contextRef.current.setModified(false)
           prevFormStateRef.current = fields
-          dispatchFields({ type: 'REPLACE_STATE', state: fields })
+          dispatchFieldsWithoutIncrementingFormSequence({ type: 'REPLACE_STATE', state: fields })
           return fields
         }
 
@@ -501,16 +542,36 @@ export const useFormState = ({
         const merge = () => {
           if (isValidation) {
             prevFormStateRef.current = appliedState
-            dispatchFields({ type: 'REPLACE_STATE', state: appliedState })
+            dispatchFieldsWithoutIncrementingFormSequence({
+              type: 'REPLACE_STATE',
+              state: appliedState,
+            })
             return
           }
 
-          dispatchFields({
+          dispatchFieldsWithoutIncrementingFormSequence({
             type: 'MERGE_SERVER_STATE',
             acceptValues,
             prevStateRef: prevFormStateRef,
             serverState: successResponse.state,
           })
+
+          // Refresh validation cannot reproduce submit-time errors such as uniqueness failures.
+          if (submissionErrorsRef.current?.isCurrent()) {
+            dispatchFieldsWithoutIncrementingFormSequence({
+              type: 'ADD_SERVER_ERRORS',
+              errors: Object.entries(submissionErrorsRef.current.fields).flatMap(([path, field]) =>
+                field.valid === false
+                  ? [
+                      {
+                        message: field.errorMessage || current.t('error:correctInvalidFields'),
+                        path,
+                      },
+                    ]
+                  : [],
+              ),
+            })
+          }
         }
 
         if (isRefresh) {
@@ -531,17 +592,32 @@ export const useFormState = ({
         }
       }
     },
-    [contextRef, dispatchFields, prevFormStateRef],
+    [
+      contextRef,
+      dispatchFieldsWithoutIncrementingFormSequence,
+      formSequenceRef,
+      resetSequenceRef,
+      prevFormStateRef,
+    ],
   )
 
-  const queueFormStateRefresh = useCallback<UseFormStateResult['queueFormStateRefresh']>(() => {
-    void queueTask({
-      priority: requestPriority.formState,
-      task: ({ isCurrent }) => refreshFormState({ type: 'refresh', isCurrent }),
-    }).catch((err) => {
-      console.error('Error refreshing form state', err) // eslint-disable-line no-console
-    })
-  }, [queueTask, refreshFormState])
+  const queueFormStateRefresh = useCallback<UseFormStateResult['queueFormStateRefresh']>(
+    ({ force = false } = {}) => {
+      void queueTask({
+        priority: requestPriority.formState,
+        task: ({ isCurrent }) => {
+          if (!force && lastRefreshSequenceRef.current === formSequenceRef.current) {
+            return Promise.resolve(undefined)
+          }
+          lastRefreshSequenceRef.current = formSequenceRef.current
+          return refreshFormState({ type: 'refresh', isCurrent })
+        },
+      }).catch((err) => {
+        console.error('Error refreshing form state', err) // eslint-disable-line no-console
+      })
+    },
+    [formSequenceRef, queueTask, refreshFormState],
+  )
 
   const validateFields = useCallback(
     async ({ isCurrent = () => true }: { isCurrent?: TaskContext['isCurrent'] } = {}) => {
@@ -614,14 +690,17 @@ export const useFormState = ({
 
       if (!dequal(contextRef.current.fields, validatedFieldState)) {
         contextRef.current.fields = validatedFieldState
-        dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
+        dispatchFieldsWithoutIncrementingFormSequence({
+          type: 'REPLACE_STATE',
+          state: validatedFieldState,
+        })
       }
 
       setIsValid(isValid)
 
       return isValid
     },
-    [contextRef, dispatchFields],
+    [contextRef, dispatchFieldsWithoutIncrementingFormSequence],
   )
 
   const validateForm = useCallback<UseFormStateResult['validateForm']>(
@@ -655,6 +734,9 @@ export const useFormState = ({
 
   const resetFormState = useCallback<UseFormStateResult['resetFormState']>(
     async (data) => {
+      latestRef.current.onReset()
+      abortAndIgnore(abortControllerRef.current)
+      abortAndIgnore(resetAbortControllerRef.current)
       await refreshFormState({ type: 'reset', data })
     },
     [refreshFormState],
@@ -668,7 +750,7 @@ export const useFormState = ({
       abortAndIgnore(abortControllerRef.current)
       abortControllerRef.current = null
       setIsInitializing(true)
-      queueFormStateRefresh()
+      queueFormStateRefresh({ force: true })
     }
   }, [props.select, queueFormStateRefresh])
 
@@ -677,30 +759,42 @@ export const useFormState = ({
   return useMemo(
     () => ({
       dispatchFields,
+      dispatchFieldsWithoutIncrementingFormSequence,
       formState,
+      getFormSequence,
       isInitializing,
       isModified,
       isValid,
       prevFormStateRef,
+      queueTask,
       queueFormStateRefresh,
       refreshFormState,
       resetFormState,
+      resetQueue,
       setIsValid,
       setModified,
+      setModifiedWithoutTracking,
+      submissionErrorsRef,
       validateForm,
     }),
     [
       dispatchFields,
+      dispatchFieldsWithoutIncrementingFormSequence,
       formState,
+      getFormSequence,
       prevFormStateRef,
+      queueTask,
       refreshFormState,
       isInitializing,
       isValid,
       isModified,
       queueFormStateRefresh,
       resetFormState,
+      resetQueue,
       setIsValid,
       setModified,
+      setModifiedWithoutTracking,
+      submissionErrorsRef,
       validateForm,
     ],
   )

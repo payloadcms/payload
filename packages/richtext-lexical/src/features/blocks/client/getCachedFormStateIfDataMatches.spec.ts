@@ -279,7 +279,7 @@ describe('getCachedFormStateIfDataMatches', () => {
       reduceFormStateToData({
         formState: {
           items: {
-            isModified: true,
+            disableFormData: false,
             rows: [],
             value: 0,
           },
@@ -299,7 +299,6 @@ describe('getCachedFormStateIfDataMatches', () => {
             value: 0,
           },
           title: {
-            isModified: true,
             value: 'After',
           },
         },

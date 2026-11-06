@@ -21,7 +21,13 @@ export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 export { FieldPathContext, useFieldPath } from '../../forms/RenderFields/context.js'
 export { useQueue } from '../../hooks/useQueue.js'
-export type { QueueResult, Task, TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
+export type {
+  QueueResult,
+  Task,
+  TaskContext,
+  UseQueueOptions,
+  UseQueueResult,
+} from '../../hooks/useQueue.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 

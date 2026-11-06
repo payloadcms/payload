@@ -2,17 +2,17 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
-import type { UseQueueResult } from './useQueue.js'
+import type { UseQueueOptions, UseQueueResult } from './useQueue.js'
 
 import { useQueue } from './useQueue.js'
 
 const deferred = <T = void>() => Promise.withResolvers<T>()
 
-const renderQueue = (): UseQueueResult => {
+const renderQueue = (options: UseQueueOptions = {}): UseQueueResult => {
   let queue: UseQueueResult | undefined
 
   const Probe = () => {
-    queue = useQueue()
+    queue = useQueue(options)
     return null
   }
 
@@ -55,6 +55,31 @@ describe('useQueue', () => {
     await expect(first).resolves.toEqual({ status: 'completed', value: 'first result' })
     await expect(latest).resolves.toEqual({ status: 'completed', value: 'latest result' })
     expect(calls).toEqual(['first', 'latest'])
+  })
+
+  it('should capture the external version when each task starts', async () => {
+    let version = 1
+    const active = deferred()
+    const currentStates: boolean[] = []
+    const queue = renderQueue({ getSequence: () => version })
+    const first = queue.queueTask({
+      task: async ({ isCurrent }) => {
+        currentStates.push(isCurrent())
+        await active.promise
+        currentStates.push(isCurrent())
+      },
+    })
+    const pending = queue.queueTask({
+      task: async ({ isCurrent }) => {
+        currentStates.push(isCurrent())
+      },
+    })
+
+    version = 2
+    active.resolve()
+    await first
+    await pending
+    expect(currentStates).toEqual([true, false, true])
   })
 
   it('should retain the pending task with the lowest priority number', async () => {
@@ -155,10 +180,12 @@ describe('useQueue', () => {
   it('should supersede pending work on reset and invalidate the active context', async () => {
     const active = deferred()
     let isCurrent: (() => boolean) | undefined
+    let isQueueReset: (() => boolean) | undefined
     const queue = renderQueue()
     const running = queue.queueTask({
       task: async (context) => {
         isCurrent = context.isCurrent
+        isQueueReset = context.isQueueReset
         await active.promise
       },
     })
@@ -168,6 +195,7 @@ describe('useQueue', () => {
 
     await expect(pending).resolves.toEqual({ status: 'superseded' })
     expect(isCurrent?.()).toBe(false)
+    expect(isQueueReset?.()).toBe(true)
     active.resolve()
     await running
   })

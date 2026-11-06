@@ -2,17 +2,26 @@ import { useCallback, useRef } from 'react'
 
 export type TaskContext = {
   /**
-   * Returns `true` if the queue has not been reset since this task started.
+   * Returns `true` if the queue has not been reset and the external sequence still matches the one captured when this task started.
    * Recheck after awaiting work before applying results.
    * Scheduling another task alone does not invalidate this context.
    */
   isCurrent: () => boolean
+  /**
+   * Returns `true` if the queue has been reset since this task started, regardless of external sequence changes.
+   */
+  isQueueReset: () => boolean
 }
 
 /** Runs when this task reaches the active position in the queue. */
 export type Task<T> = (context: TaskContext) => Promise<T>
 
 export type QueueResult<T> = { status: 'completed'; value: T } | { status: 'superseded' }
+
+export type UseQueueOptions = {
+  /** Returns the external sequence used to determine whether an active task is still current. */
+  getSequence?: () => unknown
+}
 
 export type UseQueueResult = {
   /** Adds work to the queue and reports whether it completed or was superseded. */
@@ -43,7 +52,7 @@ type QueueEntry = {
  * Use `queueTask` to await a completed result or a superseded status.
  * Task errors reject the returned promise.
  * `resetQueue` discards pending work and invalidates the active task's context without aborting its work, so new tasks still wait for it to settle.
- * Tasks can check `isCurrent()` before applying results that arrive after a reset.
+ * Tasks can check `isCurrent()` before applying results that arrive after a reset or an external sequence change.
  *
  * @example
  * const { queueTask } = useQueue()
@@ -64,18 +73,24 @@ type QueueEntry = {
  *
  * @internal - this hook may be removed or receive breaking changes in minor releases.
  */
-export function useQueue(): UseQueueResult {
+export function useQueue(options: UseQueueOptions = {}): UseQueueResult {
+  const getSequenceRef = useRef(options.getSequence)
   const resetCount = useRef(0)
   const isTaskRunning = useRef(false)
   const pendingTask = useRef<QueueEntry | undefined>(undefined)
+
+  getSequenceRef.current = options.getSequence
 
   const startTask = useCallback(function runTask(entry: QueueEntry): void {
     isTaskRunning.current = true
 
     const resetCountAtStart = resetCount.current
+    const sequenceAtStart = getSequenceRef.current?.()
+    const isQueueReset = () => resetCount.current !== resetCountAtStart
 
     const context: TaskContext = {
-      isCurrent: () => resetCount.current === resetCountAtStart,
+      isCurrent: () => !isQueueReset() && Object.is(getSequenceRef.current?.(), sequenceAtStart),
+      isQueueReset,
     }
 
     const taskPromise = (async () => entry.task(context))()

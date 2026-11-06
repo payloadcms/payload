@@ -20,7 +20,6 @@ export const reduceFormStateToData = ({
       if (
         fieldState.value === undefined ||
         (fieldState.disableFormData !== false &&
-          fieldState.isModified !== true &&
           fieldState.rows.length === 0 &&
           getValueAtPath(initialData, path) === null)
       ) {

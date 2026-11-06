@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
-export const autosavePostsSlug = 'autosave-posts'
+import { autosavePostsSlug, draftPostsSlug } from '../../slugs.js'
+
+export { autosavePostsSlug, draftPostsSlug } from '../../slugs.js'
 
 export const AutosavePostsCollection: CollectionConfig = {
   slug: autosavePostsSlug,
@@ -15,8 +17,66 @@ export const AutosavePostsCollection: CollectionConfig = {
     {
       name: 'computedTitle',
       type: 'text',
+      admin: {
+        description: 'Edits are replaced by a server-computed value after autosave.',
+        readOnly: true,
+      },
       hooks: {
         beforeChange: [({ data }) => data?.title],
+      },
+    },
+    {
+      name: 'type',
+      type: 'radio',
+      defaultValue: 'internal',
+      options: ['internal', 'custom'],
+    },
+    {
+      name: 'url',
+      type: 'text',
+      admin: {
+        condition: (_, siblingData) => siblingData?.type === 'custom',
+      },
+    },
+    {
+      name: 'programmaticValue',
+      type: 'text',
+    },
+    { name: 'content', type: 'text' },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'text',
+          fields: [{ name: 'text', type: 'text' }],
+        },
+      ],
+      hooks: {
+        beforeChange: [
+          ({ value }) =>
+            Array.isArray(value)
+              ? value.filter((block) => block.text !== 'Remove on server')
+              : value,
+        ],
+      },
+    },
+    {
+      name: 'nonDirtyFieldUpdater',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: './collections/Autosave/NonDirtyFieldUpdater.js#NonDirtyFieldUpdater',
+        },
+      },
+    },
+    {
+      name: 'documentInfoData',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: './collections/Autosave/DocumentInfoData.js#DocumentInfoData',
+        },
       },
     },
     {
@@ -45,4 +105,14 @@ export const AutosavePostsCollection: CollectionConfig = {
       },
     },
   },
+}
+
+export const DraftPostsCollection: CollectionConfig = {
+  ...AutosavePostsCollection,
+  slug: draftPostsSlug,
+  fields: [
+    ...AutosavePostsCollection.fields,
+    { name: 'slug', type: 'slug', required: false, useAsSlug: 'title' },
+  ],
+  versions: { drafts: true },
 }

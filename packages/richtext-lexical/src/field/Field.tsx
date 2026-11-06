@@ -149,6 +149,11 @@ const RichTextComponent: React.FC<
       // Capture `editorState` in the closure so we can safely run later.
       const updateFieldValue = () => {
         const newState = editorState.toJSON()
+
+        if (dequal(prevValueRef.current, newState)) {
+          return
+        }
+
         prevValueRef.current = newState
         setValue(newState)
       }

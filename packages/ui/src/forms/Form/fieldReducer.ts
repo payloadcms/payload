@@ -396,43 +396,33 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'UPDATE': {
-      const newField = Object.entries(action).reduce((field, [key, value]) => {
-        if (
-          [
-            'disableFormData',
-            'errorMessage',
-            'initialValue',
-            'rows',
-            'valid',
-            'validate',
-            'value',
-          ].includes(key)
-        ) {
-          return {
-            ...field,
-            [key]: value,
-            ...(key === 'value' ? { isModified: true } : {}),
+      const newField = Object.entries(action).reduce(
+        (field, [key, value]) => {
+          if (
+            [
+              'disableFormData',
+              'errorMessage',
+              'initialValue',
+              'rows',
+              'valid',
+              'validate',
+              'value',
+            ].includes(key)
+          ) {
+            return {
+              ...field,
+              [key]: value,
+            }
           }
-        }
 
-        return field
-      }, state?.[action.path] || {})
+          return field
+        },
+        state?.[action.path] || ({} as FormField),
+      )
 
       const newState = {
         ...state,
         [action.path]: newField,
-      }
-
-      // reset `isModified` in all other fields
-      // Use destructuring instead of delete to avoid mutating field objects
-      // shared with the previous state (shallow copy shares references)
-      if ('value' in action) {
-        for (const [path, field] of Object.entries(newState)) {
-          if (path !== action.path && 'isModified' in field) {
-            const { isModified: _, ...fieldWithoutIsModified } = field
-            newState[path] = fieldWithoutIsModified
-          }
-        }
       }
 
       return newState

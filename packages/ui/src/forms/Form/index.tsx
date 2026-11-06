@@ -1,7 +1,6 @@
 'use client'
 import type { FormState } from 'payload'
 
-import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { serialize } from 'object-to-formdata'
 import {
   getDataByPath as getDataByPathFunc,
@@ -21,7 +20,6 @@ import type {
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { useQueue } from '../../hooks/useQueue.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -52,7 +50,6 @@ export const Form: React.FC<FormProps> = (props) => {
     action,
     children,
     className,
-    disabled: disabledFromProps = false,
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     el,
     initialState, // fully formed initial field state
@@ -67,7 +64,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const currentLocale = useLocale()
   const locale = currentLocale?.code
   const { refreshCookie } = useAuth()
-  const { queueTask, resetQueue } = useQueue()
+  const resetSequenceRef = useRef(0)
+  const isMountedRef = useRef(false)
 
   const { getUploadHandler } = useUploadHandlers()
 
@@ -77,40 +75,45 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
-  const isFirstRenderRef = useRef(true)
 
   const {
     dispatchFields,
+    dispatchFieldsWithoutIncrementingFormSequence,
     formState,
+    getFormSequence,
     isInitializing: isFormStateInitializing,
     isModified,
     isValid,
     prevFormStateRef,
+    queueTask,
     queueFormStateRefresh,
     refreshFormState,
     resetFormState,
+    resetQueue,
     setIsValid,
-    setModified: setFormStateModified,
+    setModified,
+    setModifiedWithoutTracking,
+    submissionErrorsRef,
     validateForm,
   } = useFormState({
     contextRef,
     onApplied: (appliedFormState, isSubmitted) => notifyOnChange(appliedFormState, isSubmitted),
     onReset: () => {
+      resetSequenceRef.current += 1
       resetQueue()
       restoreRequestState()
     },
     props,
-    queueTask,
+    resetSequenceRef,
   })
 
   const {
     backgroundProcessing,
-    disabledBySubmission,
+    disabled,
     processing,
     restoreRequestState,
     setBackgroundProcessing,
     setDisabled,
-    setModified,
     setProcessing,
     setSubmitted,
     submit,
@@ -118,18 +121,21 @@ export const Form: React.FC<FormProps> = (props) => {
     successfulSubmitCount,
   } = useFormSubmission({
     contextRef,
-    dispatchFields,
+    dispatchFieldsWithoutIncrementingFormSequence,
     formRef,
+    getFormSequence,
+    isMountedRef,
     prevFormStateRef,
     props,
     queueTask,
+    queueFormStateRefresh,
     refreshFormState,
+    resetSequenceRef,
     setIsValid,
-    setModified: setFormStateModified,
+    setModifiedWithoutTracking,
+    submissionErrorsRef,
     validateForm,
   })
-
-  const disabled = disabledFromProps || disabledBySubmission
 
   const fieldsContextValue = useMemo<FormFieldsContextType>(
     () => [formState, dispatchFields],
@@ -215,12 +221,18 @@ export const Form: React.FC<FormProps> = (props) => {
         disabled: contextRef.current.disabled,
         submitted: contextRef.current.submitted,
       }
+      resetSequenceRef.current += 1
       resetQueue()
       restoreRequestState()
-      setModified(false)
-      dispatchFields({ type: 'REPLACE_STATE', state })
+      setModifiedWithoutTracking(false)
+      dispatchFieldsWithoutIncrementingFormSequence({ type: 'REPLACE_STATE', state })
     },
-    [dispatchFields, resetQueue, restoreRequestState, setModified],
+    [
+      dispatchFieldsWithoutIncrementingFormSequence,
+      resetQueue,
+      restoreRequestState,
+      setModifiedWithoutTracking,
+    ],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
@@ -285,7 +297,12 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   useEffect(() => {
-    return () => resetQueue()
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+      resetSequenceRef.current += 1
+      resetQueue()
+    }
   }, [resetQueue])
 
   useEffect(() => {
@@ -334,15 +351,29 @@ export const Form: React.FC<FormProps> = (props) => {
         disabled: contextRef.current.disabled,
         submitted: contextRef.current.submitted,
       }
+      resetSequenceRef.current += 1
       resetQueue()
       restoreRequestState()
-      dispatchFields({
+      setModifiedWithoutTracking(false)
+      dispatchFieldsWithoutIncrementingFormSequence({
         type: 'REPLACE_STATE',
         optimize: false,
         state: initialState,
       })
     }
-  }, [initialState, dispatchFields, resetQueue, restoreRequestState])
+  }, [
+    initialState,
+    dispatchFieldsWithoutIncrementingFormSequence,
+    resetQueue,
+    restoreRequestState,
+    setModifiedWithoutTracking,
+  ])
+
+  useEffect(() => {
+    resetSequenceRef.current += 1
+    resetQueue()
+    restoreRequestState()
+  }, [resetQueue, restoreRequestState, uuid])
 
   useThrottledEffect(
     () => {
@@ -379,15 +410,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
-      if (
-        (isFirstRenderRef.current || !dequal(formState, prevFormStateRef.current)) &&
-        isModified
-      ) {
+      if (isModified) {
         queueFormStateRefresh()
       }
 
       prevFormStateRef.current = formState
-      isFirstRenderRef.current = false
     },
     [isModified, submitted, formState],
     250,

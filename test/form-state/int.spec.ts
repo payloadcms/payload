@@ -3,11 +3,12 @@ import type { FieldState, FormState, User } from 'payload'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { createPayloadRequest, getAccessResults } from 'payload'
 import React from 'react'
-import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
 import { devUser } from '../credentials.js'
+import { DocumentInfoData } from './collections/Autosave/DocumentInfoData.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
+import { NonDirtyFieldUpdater } from './collections/Autosave/NonDirtyFieldUpdater.js'
 import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
@@ -64,23 +65,32 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     const restrictedValue = 'client supplied'
     const title = 'Access filtered autosave'
     vi.stubGlobal('React', React)
+    const previousImportMap = payload.importMap
+    payload.importMap = {
+      './collections/Autosave/DocumentInfoData.js#DocumentInfoData': DocumentInfoData,
+      './collections/Autosave/NonDirtyFieldUpdater.js#NonDirtyFieldUpdater': NonDirtyFieldUpdater,
+    }
 
-    await renderDocumentHandler({
-      collectionSlug: autosavePostsSlug,
-      cookies: new Map(),
-      docID: undefined as never,
-      importMap: payload.importMap,
-      initialData: {
-        restrictedValue,
-        title,
-      },
-      locale: undefined,
-      permissions,
-      redirectAfterCreate: false,
-      redirectAfterDelete: false,
-      redirectAfterDuplicate: false,
-      req,
-    })
+    try {
+      await renderDocumentHandler({
+        collectionSlug: autosavePostsSlug,
+        cookies: new Map(),
+        docID: undefined as never,
+        importMap: payload.importMap,
+        initialData: {
+          restrictedValue,
+          title,
+        },
+        locale: undefined,
+        permissions,
+        redirectAfterCreate: false,
+        redirectAfterDelete: false,
+        redirectAfterDuplicate: false,
+        req,
+      })
+    } finally {
+      payload.importMap = previousImportMap
+    }
 
     const { docs } = await payload.find({
       collection: autosavePostsSlug,
@@ -878,10 +888,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
         valid: true,
         value: 'Test Post (computed on the client)',
       },
-      title: {
-        ...title,
-        isModified: true, // This is critical, this is what we're testing
-      },
+      title,
     }
 
     const incomingStateFromServer: Record<string, FieldState> = {
@@ -934,63 +941,75 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
         ...incomingStateFromServer.array,
         rows: currentState?.array?.rows,
       },
-      title: {
-        ...incomingStateFromServer.title,
-        isModified: true,
-      },
     })
   })
 
-  test('should not accept values from the server if they have been modified locally since the request was made, e.g. `overrideLocalChanges: false` on autosave', () => {
-    const title: FieldState = {
-      initialValue: 'Test Post',
-      passesCondition: true,
-      valid: true,
-      value: 'Test Post (modified on the client 1)',
-    }
-
-    const currentState: Record<string, FieldState> = {
-      computedTitle: {
-        initialValue: 'Test Post',
-        passesCondition: true,
-        valid: true,
-        value: 'Test Post',
+  test('should remove descendants when the server clears an array', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        items: { disableFormData: true, rows: [{ id: 'first' }], value: 1 },
+        'items.0.text': { value: 'Removed on the server' },
       },
-      title: {
-        ...title,
-        isModified: true,
-      },
-    }
-
-    const incomingStateFromServer: Record<string, FieldState> = {
-      computedTitle: {
-        initialValue: 'Test Post',
-        passesCondition: true,
-        valid: true,
-        value: 'Test Post (modified on the server)',
-      },
-      title: {
-        initialValue: 'Test Post',
-        passesCondition: true,
-        valid: true,
-        value: 'Test Post (modified on the server)',
-      },
-    }
-
-    const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false },
-      currentState,
-      incomingState: incomingStateFromServer,
+      incomingState: { items: { rows: [], value: 0 } },
     })
 
-    expect(newState).toStrictEqual({
-      ...currentState,
-      computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
-      title: {
-        ...currentState.title,
-        isModified: true,
+    expect(state.items.rows).toEqual([])
+    expect(state.items.value).toBe(0)
+    expect(state.items.disableFormData).toBeUndefined()
+    expect(state['items.0.text']).toBeUndefined()
+  })
+
+  test('should remove old fields when the server changes a block type', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        blocks: { rows: [{ blockType: 'text', id: 'block' }], value: 1 },
+        'blocks.0.text': { value: 'Old block content' },
+      },
+      incomingState: {
+        blocks: { rows: [{ blockType: 'number', id: 'block' }], value: 1 },
+        'blocks.0.number': { addedByServer: true, value: 42 },
       },
     })
+
+    expect(state.blocks.rows).toEqual([{ blockType: 'number', id: 'block' }])
+    expect(state['blocks.0.text']).toBeUndefined()
+    expect(state['blocks.0.number'].value).toBe(42)
+  })
+
+  test('should keep local fields and collapsed state with surviving nested row IDs', () => {
+    const state = mergeServerFormState({
+      acceptValues: true,
+      currentState: {
+        groups: {
+          rows: [
+            { id: 'removed-group', isCollapsed: true },
+            { id: 'kept-group', isCollapsed: false },
+          ],
+          value: 2,
+        },
+        'groups.0.localState': { disableFormData: true, value: 'Removed' },
+        'groups.1.items': {
+          rows: [
+            { id: 'removed-item', isCollapsed: true },
+            { id: 'kept-item', isCollapsed: false },
+          ],
+          value: 2,
+        },
+        'groups.1.items.1.localState': { disableFormData: true, value: 'Kept' },
+      },
+      incomingState: {
+        groups: { rows: [{ id: 'kept-group' }], value: 1 },
+        'groups.0.items': { addedByServer: true, rows: [{ id: 'kept-item' }], value: 1 },
+      },
+    })
+
+    expect(state.groups.rows).toEqual([{ id: 'kept-group', isCollapsed: false }])
+    expect(state['groups.0.items'].rows).toEqual([{ id: 'kept-item', isCollapsed: false }])
+    expect(state['groups.0.items.0.localState']).toEqual({ disableFormData: true, value: 'Kept' })
+    expect(state['groups.0.localState']).toBeUndefined()
+    expect(Object.keys(state).some((path) => path.startsWith('groups.1.'))).toBe(false)
   })
 
   test('should preserve client row data after reorder and delete during autosave', () => {
