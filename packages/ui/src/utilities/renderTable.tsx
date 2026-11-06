@@ -293,6 +293,7 @@ export const renderTable = ({
                 groupByFieldPath={groupByFieldPath}
                 groupByValue={groupByValue}
                 heading={heading}
+                viewType={viewType}
               />
               <GroupByPageControls data={data} groupByValue={groupByValue} tableId={tableId} />
             </TableSectionHeader>
