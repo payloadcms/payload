@@ -381,7 +381,7 @@ import type { Post, User } from '@/payload-types'
 7. **Types are stale** until you run `generate:types`
 8. **MongoDB transactions** require replica set configuration
 9. **SQLite transactions**: Leave disabled by default. Do not add `transactionOptions: {}` unless enabling transactions is explicitly requested.
-10. **Point fields** are not fully supported in SQLite. Geospacial indexes are not created and the query operator `near`, `within`, and `intersects` will not work.
+10. **Point fields** are not fully supported in SQLite. Geospatial indexes are not created and the query operators `near`, `within`, and `intersects` will not work.
 
 ## Best Practices
 

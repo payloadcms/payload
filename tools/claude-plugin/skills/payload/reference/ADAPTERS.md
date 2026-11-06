@@ -48,7 +48,7 @@ export default buildConfig({
 
 ## Transactions
 
-Depending on the database adapter, Payload handles requests using database transactions. A transaction begins before any database calls that alter data and will either attempt to commit on success; or kill the transaction on error. Pass `req` so that payload operations can use the same transaction when querying the database.
+When transactions are enabled, Payload handles requests using database transactions. A transaction begins before any database calls that alter data and will either attempt to commit on success or roll back on error. Pass `req` so that Payload operations can use the same transaction when querying the database.
 
 ```ts
 import type { CollectionAfterChangeHook } from 'payload'
