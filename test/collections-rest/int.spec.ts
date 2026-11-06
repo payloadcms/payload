@@ -1299,6 +1299,40 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
         )
       })
 
+      test.describe('like and contains - SQL wildcard characters match literally', () => {
+        // Each case has a title that contains the search value and a title that only
+        // matches if the database reads % or _ as a wildcard, or \ as an escape character.
+        const cases = [
+          { match: '50% off', noMatch: '500 off', value: '50%' },
+          { match: 'a_b', noMatch: 'axb', value: 'a_b' },
+          { match: 'a\\b', noMatch: 'ab', value: 'a\\b' },
+        ]
+
+        for (const operator of ['like', 'contains'] as const) {
+          test.for(cases)(
+            `${operator} - $value`,
+            async ({ match, noMatch, value }, { restClient }) => {
+              const post = await createPost({ restClient }, { title: match })
+              await createPost({ restClient }, { title: noMatch })
+
+              const response = await restClient.GET(`/${postsSlug}`, {
+                query: {
+                  where: {
+                    title: {
+                      [operator]: value,
+                    },
+                  },
+                },
+              })
+              const result = await response.json()
+
+              expect(response.status).toEqual(200)
+              expect(result.docs.map((doc: Post) => doc.title)).toEqual([post.title])
+            },
+          )
+        }
+      })
+
       test('like - cyrillic characters', async ({ restClient }) => {
         const post1 = await createPost({ restClient }, { title: 'Тест' })
 
