@@ -23,7 +23,7 @@ import { getImageSize } from './getImageSize.js'
 import { getSafeFileName, incrementName } from './getSafeFilename.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { hasFullFileContents } from './hasFullFileContents.js'
-import { isMediaMimeType } from './isMediaMimeType.js'
+import { getMimeTypeEssence, isMediaMimeType } from './isMediaMimeType.js'
 import { isProcessableImage } from './isProcessableImage.js'
 import { parseFilename } from './parseFilename.js'
 import { planTransformerPipeline } from './transformers/planTransformerPipeline.js'
@@ -291,8 +291,10 @@ export const generateFileData = async <T>({
     (isMediaMimeType(file.mimetype) || isMediaMimeType(detectedFileType.mime)) &&
     // `file-type` detects every WebM container (audio or video) as `video/webm`
     // because it does not read track data. Preserve an explicit `audio/webm`
-    // declaration rather than overwriting it with a wrong `video/webm`.
-    !(file.mimetype === 'audio/webm' && detectedFileType.mime === 'video/webm')
+    // declaration rather than overwriting it with a wrong `video/webm`. Compare
+    // the MIME essence so parameterized declarations (`audio/webm;codecs=opus`)
+    // are preserved too.
+    !(getMimeTypeEssence(file.mimetype) === 'audio/webm' && detectedFileType.mime === 'video/webm')
 
   if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
     file = { ...file, mimetype: detectedFileType.mime }

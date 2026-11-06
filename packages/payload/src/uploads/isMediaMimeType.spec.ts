@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { isMediaMimeType } from './isMediaMimeType.js'
+import { getMimeTypeEssence, isMediaMimeType } from './isMediaMimeType.js'
 
 describe('isMediaMimeType', () => {
   it('returns true for image mime types', () => {
@@ -29,5 +29,20 @@ describe('isMediaMimeType', () => {
     expect(isMediaMimeType('application/json')).toBe(false)
     expect(isMediaMimeType('text/html')).toBe(false)
     expect(isMediaMimeType('application/octet-stream')).toBe(false)
+  })
+
+  it('returns true for parameterized media mime types', () => {
+    expect(isMediaMimeType('audio/webm;codecs=opus')).toBe(true)
+  })
+})
+
+describe('getMimeTypeEssence', () => {
+  it('strips parameters from a mime type', () => {
+    expect(getMimeTypeEssence('audio/webm;codecs=opus')).toBe('audio/webm')
+    expect(getMimeTypeEssence('text/html; charset=utf-8')).toBe('text/html')
+  })
+
+  it('returns the mime type unchanged when it has no parameters', () => {
+    expect(getMimeTypeEssence('audio/webm')).toBe('audio/webm')
   })
 })

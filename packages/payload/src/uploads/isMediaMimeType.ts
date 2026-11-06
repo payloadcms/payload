@@ -16,3 +16,12 @@ export function isMediaMimeType(mimeType: string): boolean {
     mimeType === 'application/pdf'
   )
 }
+
+/**
+ * Returns the essence (type/subtype) of a MIME type, dropping any parameters
+ * such as `codecs` or `charset`. Parameterized declarations like
+ * `audio/webm;codecs=opus` can then be compared against a base type.
+ */
+export function getMimeTypeEssence(mimeType: string): string {
+  return mimeType.split(';')[0]?.trim() ?? ''
+}
