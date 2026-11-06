@@ -11,6 +11,7 @@ import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { isNestedRelationshipQuery } from '../isNestedRelationshipQuery.js'
 import { prefixWherePaths } from '../prefixWherePaths.js'
+import { hasReadAccessToQueryPath } from './hasReadAccessToQueryPath.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
 type Args = {
@@ -276,41 +277,30 @@ export async function validateSearchParam({
           fieldPath = fieldPath.replace('.value', '')
         }
 
-        const entityType: 'collections' | 'globals' = globalConfig ? 'globals' : 'collections'
+        const entityType: 'collections' | 'globals' = collectionSlug ? 'collections' : 'globals'
         const entitySlug = collectionSlug || globalConfig!.slug
         const segments = fieldPath.split('.')
 
-        let fieldAccess: any
-
-        if (versionFields) {
-          fieldAccess = policies[entityType]![entitySlug]!.fields
-
-          if (
-            segments[0] === 'parent' ||
-            segments[0] === 'version' ||
-            segments[0] === 'snapshot' ||
-            segments[0] === 'latest'
-          ) {
-            segments.shift()
-          }
-        } else {
-          fieldAccess = policies[entityType]![entitySlug]!.fields
+        if (versionFields && ['latest', 'parent', 'snapshot', 'version'].includes(segments[0]!)) {
+          segments.shift()
         }
 
-        if (segments.length) {
-          segments.forEach((segment) => {
-            if (fieldAccess[segment]) {
-              if ('fields' in fieldAccess[segment]) {
-                fieldAccess = fieldAccess[segment].fields
-              } else {
-                fieldAccess = fieldAccess[segment]
-              }
-            }
-          })
+        const entity = collectionSlug
+          ? req.payload.collections[collectionSlug]!.config
+          : globalConfig!
 
-          if (!fieldAccess?.read?.permission) {
-            errors.push({ path: fieldPath })
-          }
+        if (
+          segments.length &&
+          hasReadAccessToQueryPath({
+            fields: entity.flattenedFields,
+            permissions: policies[entityType]![entitySlug]!.fields,
+            req,
+            resolvedField: field,
+            segments,
+            shouldShowHiddenFields: showHiddenFields,
+          }) !== true
+        ) {
+          errors.push({ path: fieldPath })
         }
       }
 
