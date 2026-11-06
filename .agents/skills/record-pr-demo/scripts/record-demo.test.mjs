@@ -21,7 +21,7 @@ test('parseArgs applies recording defaults and derives a safe output path', () =
     interactionPauseMs: 300,
     label: 'feature-demo',
     mouseMoveMs: 300,
-    output: '/tmp/payload-pr-demo-feature-demo.webm',
+    output: '/tmp/payload-pr-demo-feature-demo.mkv',
     scenario: '/tmp/demo-scenario.mjs',
     viewport: { height: 900, width: 1440 },
   })

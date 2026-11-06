@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-import { mkdir, mkdtemp, rm } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
+import { mkdir, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 import { getDefaultCanvas } from './WindowChrome/index.mjs'
+import { startLosslessCapture } from './capture-demo.mjs'
 
 import { createAnnotationInteraction } from './annotation-demo.mjs'
 import { createPresentation } from './presentation-demo.mjs'
@@ -68,7 +68,7 @@ export function parseArgs(argv) {
       name: '--mouse-move-ms',
       value: values.get('--mouse-move-ms') ?? DEFAULT_MOUSE_MOVE_MS,
     }),
-    output: values.get('--output') ?? `/tmp/payload-pr-demo-${label}.webm`,
+    output: values.get('--output') ?? `/tmp/payload-pr-demo-${label}.mkv`,
     scenario,
     viewport: parseViewport(values.get('--viewport') ?? '1440x900'),
   }
@@ -213,8 +213,11 @@ async function executeDemo({
   }
 
   const { chromium, expect } = await import('@playwright/test')
-  const rawVideoDirectory = await mkdtemp(path.join(tmpdir(), 'payload-pr-demo-'))
-  const browser = await chromium.launch({ headless: true })
+  const browser = await chromium.launch({
+    headless: true,
+    handleSIGINT: false,
+    handleSIGTERM: false,
+  })
   const presentationOptions = {
     ...scenarioModule.presentation,
     ...(a11y === undefined
@@ -230,7 +233,6 @@ async function executeDemo({
   const context = await browser.newContext({
     viewport: recordedViewport,
     colorScheme: scenarioModule.presentation.theme ?? 'light',
-    ...(output ? { recordVideo: { dir: rawVideoDirectory, size: recordedViewport } } : {}),
   })
 
   await context.addInitScript(() => {
@@ -369,24 +371,35 @@ async function executeDemo({
     })
   })
 
-  // Video capture can start before newPage() resolves. Include page creation in the trim clock.
-  const recordingStartedAt = performance.now()
   const recordedPage = await context.newPage()
-  const video = output ? recordedPage.video() : undefined
+  let capture
   let presentation
   const resolvedOutput = output ? path.resolve(output) : undefined
   const resolvedScreenshotOutput = screenshotOutput ? path.resolve(screenshotOutput) : undefined
   let isOpeningReady = false
   let scenarioError
 
+  const interrupted = () => {
+    void context.close().catch(() => {})
+  }
+  process.once('SIGINT', interrupted)
+  process.once('SIGTERM', interrupted)
   try {
+    if (resolvedOutput) {
+      await mkdir(path.dirname(resolvedOutput), { recursive: true })
+      capture = await startLosslessCapture({
+        page: recordedPage,
+        output: resolvedOutput,
+        size: recordedViewport,
+      })
+    }
     presentation = await createPresentation({
       page: recordedPage,
       options: presentationOptions,
       viewport,
       baseURL,
       pauseScale,
-      startedAt: recordingStartedAt,
+      startedAt: capture?.startedAt ?? performance.now(),
     })
     const page = presentation.appPage
     const pointerInteractions = createPointerInteractions({
@@ -447,19 +460,22 @@ async function executeDemo({
     scenarioError = error
   } finally {
     try {
-      await presentation?.stop()
-      if (video && resolvedOutput) {
-        await mkdir(path.dirname(resolvedOutput), { recursive: true })
-        const saveVideo = video.saveAs(resolvedOutput)
-
-        await context.close()
-        await saveVideo
-      } else {
-        await context.close()
+      try {
+        await capture?.stop()
+      } catch (error) {
+        scenarioError ??= error
       }
+      await presentation?.stop().catch((error) => {
+        scenarioError ??= error
+      })
     } finally {
-      await browser.close()
-      await rm(rawVideoDirectory, { force: true, recursive: true })
+      process.off('SIGINT', interrupted)
+      process.off('SIGTERM', interrupted)
+      try {
+        await browser.close()
+      } finally {
+        if (scenarioError && resolvedOutput) await rm(resolvedOutput, { force: true })
+      }
     }
   }
 
@@ -634,7 +650,7 @@ Options:
                        Dwell before and after clicks (default: ${DEFAULT_INTERACTION_PAUSE_MS})
   --label TEXT         Safe output label (default: ${DEFAULT_LABEL})
   --mouse-move-ms MS   Smooth cursor travel time (default: ${DEFAULT_MOUSE_MOVE_MS})
-  --output PATH        WebM output (default: /tmp/payload-pr-demo-<label>.webm)
+  --output PATH        Lossless Matroska output (default: /tmp/payload-pr-demo-<label>.mkv)
   --viewport WxH       Initial application viewport inside chrome (default: 1440x900)
   --scenario PATH      Module exporting presentation metadata and a default async function
   --help               Show this help`)

@@ -15,7 +15,7 @@ Uploading consumes GitHub storage and changes an external PR. Always stop after 
 
 Before showing the video, record its absolute path and SHA-256 digest. Immediately before an approved upload, recompute the digest. If it changed, show the new video and request approval again.
 
-Do not upload previews, rejected takes, raw WebM recordings, or files the user has not reviewed. Never commit demo media to the repository.
+Do not upload previews, rejected takes, raw intermediate recordings, or files the user has not reviewed. Never commit demo media to the repository.
 
 ## Gesture-based scenarios
 
