@@ -526,6 +526,7 @@ export const azTranslations: DefaultTranslationsObject = {
     selectValue: 'Dəyər seçin',
     settings: 'Ayarlar',
     showAllLabel: 'Bütün {{label}}-ı göstər',
+    showingCurrentOfTotal: '{{total}} nəticədən {{current}} göstərilir',
     shownInTable: 'Cədvəldə göstərilir',
     showSidebar: 'Yan paneli göstər',
     skipToContent: 'Məzmuna keç',

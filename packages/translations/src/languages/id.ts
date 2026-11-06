@@ -525,6 +525,7 @@ export const idTranslations: DefaultTranslationsObject = {
     selectValue: 'Pilih nilai',
     settings: 'Pengaturan',
     showAllLabel: 'Tampilkan semua {{label}}',
+    showingCurrentOfTotal: 'Menampilkan {{current}} dari {{total}}',
     shownInTable: 'Ditampilkan dalam tabel',
     showSidebar: 'Tampilkan bilah samping',
     skipToContent: 'Lewati ke konten',

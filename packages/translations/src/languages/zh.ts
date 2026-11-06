@@ -498,6 +498,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     selectValue: '选择一个值',
     settings: '设置',
     showAllLabel: '显示所有 {{label}}',
+    showingCurrentOfTotal: '已显示 {{current}} 条，共 {{total}} 条',
     shownInTable: '在表格中显示',
     showSidebar: '显示侧边栏',
     skipToContent: '跳转到内容',

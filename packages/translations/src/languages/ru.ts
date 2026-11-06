@@ -526,6 +526,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     selectValue: 'Выбрать значение',
     settings: 'Настройки',
     showAllLabel: 'Показать все {{label}}',
+    showingCurrentOfTotal: 'Показано {{current}} из {{total}}',
     shownInTable: 'Показано в таблице',
     showSidebar: 'Показать боковую панель',
     skipToContent: 'Перейти к содержимому',

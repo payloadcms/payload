@@ -48,12 +48,11 @@ export const LoadMoreRow: React.FC<LoadMoreRowProps> = ({
       <p className={`${baseClass}__text`}>
         {hasMore ? (
           <>
-            Showing {currentCount} of {totalDocs} — {loadMoreButton || defaultButton}
+            {t('general:showingCurrentOfTotal', { current: currentCount, total: totalDocs })} —{' '}
+            {loadMoreButton || defaultButton}
           </>
         ) : (
-          <>
-            Showing {totalDocs} of {totalDocs}
-          </>
+          t('general:showingCurrentOfTotal', { current: totalDocs, total: totalDocs })
         )}
       </p>
     </div>

@@ -535,6 +535,7 @@ export const deTranslations: DefaultTranslationsObject = {
     selectValue: 'Wert auswählen',
     settings: 'Einstellungen',
     showAllLabel: 'Alle {{label}} anzeigen',
+    showingCurrentOfTotal: '{{current}} von {{total}} angezeigt',
     shownInTable: 'In Tabelle angezeigt',
     showSidebar: 'Seitenleiste anzeigen',
     skipToContent: 'Zum Inhalt springen',

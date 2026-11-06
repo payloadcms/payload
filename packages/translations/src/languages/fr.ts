@@ -535,6 +535,7 @@ export const frTranslations: DefaultTranslationsObject = {
     selectValue: 'Sélectionnez une valeur',
     settings: 'Paramètres',
     showAllLabel: 'Afficher tous les {{label}}',
+    showingCurrentOfTotal: 'Affichage de {{current}} sur {{total}}',
     shownInTable: 'Affiché dans un tableau',
     showSidebar: 'Afficher la barre latérale',
     skipToContent: 'Aller au contenu',

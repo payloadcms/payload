@@ -527,6 +527,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     selectValue: 'Pasirinkite reikšmę',
     settings: 'Nustatymai',
     showAllLabel: 'Rodyti visus {{label}}',
+    showingCurrentOfTotal: 'Rodoma {{current}} iš {{total}}',
     shownInTable: 'Rodoma lentelėje',
     showSidebar: 'Rodyti šoninę juostą',
     skipToContent: 'Pereiti prie turinio',

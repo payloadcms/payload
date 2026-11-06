@@ -518,6 +518,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     selectValue: 'Обрати значення',
     settings: 'Налаштування',
     showAllLabel: 'Показати всі {{label}}',
+    showingCurrentOfTotal: 'Показано {{current}} з {{total}}',
     shownInTable: 'Показано у таблиці',
     showSidebar: 'Показати бічну панель',
     skipToContent: 'Перейти до вмісту',
