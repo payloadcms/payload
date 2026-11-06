@@ -1,6 +1,5 @@
 import type { Data, FormState } from 'payload'
 
-import { reduceFormStateToData } from '@payloadcms/ui/shared'
 import { describe, expect, it } from 'vitest'
 
 import { getCachedFormStateIfDataMatches } from './getCachedFormStateIfDataMatches.js'
@@ -217,95 +216,6 @@ describe('getCachedFormStateIfDataMatches', () => {
     }
 
     expect(getCachedFormStateIfDataMatches({ cachedFormState, formData: {} })).toBe(cachedFormState)
-  })
-
-  it('should preserve empty arrays and omit unset values when converting form state to block data', () => {
-    expect(
-      reduceFormStateToData({
-        formState: {
-          items: {
-            initialValue: 0,
-            rows: [],
-            value: 0,
-          },
-          sections: {
-            initialValue: 1,
-            rows: [{ id: 'section-1' }],
-            value: 1,
-          },
-          'sections.0.id': { initialValue: 'section-1', value: 'section-1' },
-          'sections.0.items': {
-            initialValue: 0,
-            rows: [],
-            value: 0,
-          },
-          title: { initialValue: undefined, value: undefined },
-        },
-      }),
-    ).toEqual({
-      items: [],
-      sections: [{ id: 'section-1', items: [] }],
-    })
-  })
-
-  it('should preserve a null array when converting form state to block data', () => {
-    expect(
-      reduceFormStateToData({
-        formState: {
-          items: {
-            rows: [],
-          },
-        },
-      }),
-    ).toEqual({ items: null })
-  })
-
-  it('should preserve a null array after the client records an empty row count', () => {
-    expect(
-      reduceFormStateToData({
-        formState: {
-          items: {
-            rows: [],
-            value: 0,
-          },
-        },
-        initialData: { items: null },
-      }),
-    ).toEqual({ items: null })
-  })
-
-  it('should allow a null array to be changed to an empty array', () => {
-    expect(
-      reduceFormStateToData({
-        formState: {
-          items: {
-            isModified: true,
-            rows: [],
-            value: 0,
-          },
-        },
-        initialData: { items: null },
-      }),
-    ).toEqual({ items: [] })
-  })
-
-  it('should keep a null-to-empty array change after a sibling field changes', () => {
-    expect(
-      reduceFormStateToData({
-        formState: {
-          items: {
-            disableFormData: false,
-            rows: [],
-            value: 0,
-          },
-          title: {
-            isModified: true,
-            value: 'After',
-          },
-        },
-        initialData: { items: null, title: 'Before' },
-      }),
-    ).toEqual({ items: [], title: 'After' })
   })
 
   it.each([

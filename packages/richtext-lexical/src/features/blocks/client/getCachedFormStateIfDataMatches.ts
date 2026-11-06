@@ -1,7 +1,7 @@
 import type { Data, FormState } from 'payload'
 
-import { reduceFormStateToData } from '@payloadcms/ui/shared'
 import { dequal } from 'dequal/lite'
+import { getDataFromFormState } from 'payload/shared'
 
 export const getCachedFormStateIfDataMatches = ({
   cachedFormState,
@@ -20,7 +20,7 @@ export const getCachedFormStateIfDataMatches = ({
 
   const rowFieldPaths = getRowFieldPaths(cachedFormState)
   const cachedData = normalizeData({
-    data: reduceFormStateToData({ formState: cachedFormState }),
+    data: getDataFromFormState(cachedFormState, true),
     rowFieldPaths,
   })
   const currentData = normalizeData({

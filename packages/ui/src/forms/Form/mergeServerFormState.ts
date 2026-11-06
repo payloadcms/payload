@@ -197,14 +197,18 @@ export const mergeServerFormState = ({
             newState[path].rows.push(newRow)
           }
         })
+      }
 
-        /**
-         * Sync the value field to match the actual row count after merging.
-         * Client is source of truth for row count when rows were added/removed during the request.
-         */
-        if ('value' in incomingField && newState[path].rows.length !== incomingField.value) {
-          newState[path].value = newState[path].rows.length
+      if ('value' in incomingField) {
+        const rowCount = newState[path].rows.length
+
+        if (acceptValues !== true) {
+          // Client rows remain authoritative, including the distinction between null and empty.
+          newState[path].value =
+            rowCount === 0 && currentState[path].value === null ? null : rowCount
         }
+
+        newState[path].disableFormData = rowCount > 0
       }
     }
 

@@ -5,8 +5,8 @@ import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { serialize } from 'object-to-formdata'
 import {
   getDataByPath as getDataByPathFunc,
-  getSiblingData as getSiblingDataFunc,
-  reduceFieldsToValues,
+  getDataFromFormState,
+  getSiblingDataFromFormState,
   uploadRequiresServerValidation,
 } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -136,10 +136,10 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const getField = useCallback((path: string) => contextRef.current.fields[path], [])
 
-  const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [])
+  const getData = useCallback(() => getDataFromFormState(contextRef.current.fields, true), [])
 
   const getSiblingData = useCallback(
-    (path: string) => getSiblingDataFunc(contextRef.current.fields, path),
+    (path: string) => getSiblingDataFromFormState(contextRef.current.fields, path),
     [],
   )
 
@@ -150,7 +150,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const createFormData = useCallback<CreateFormData>(
     async (overrides, { data: dataFromArgs, mergeOverrideData = true }) => {
-      let data = dataFromArgs || reduceFieldsToValues(contextRef.current.fields, true)
+      let data = dataFromArgs || getDataFromFormState(contextRef.current.fields, true)
 
       let file = data?.file
 

@@ -6,8 +6,8 @@ import type { Dispatch, RefObject } from 'react'
 import { dequal } from 'dequal/lite'
 import {
   deepCopyObjectSimpleWithoutReactComponents,
+  getDataFromFormState,
   hasAutosaveEnabled,
-  reduceFieldsToValues,
 } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
@@ -24,7 +24,6 @@ import { useOperation } from '../../providers/Operation/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
-import { reduceFormStateToData } from '../../utilities/reduceFormStateToData.js'
 import { useDocumentForm } from './context.js'
 import { fieldReducer } from './fieldReducer.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
@@ -175,16 +174,10 @@ export const useFormState = ({
 
   const [isInitializing, setIsInitializing] = useState(false)
 
-  const initialData = useMemo(
-    () => reduceFormStateToData({ formState: props.initialState }),
-    [props.initialState],
-  )
-
   const latest = {
     config,
     document,
     getFormState,
-    initialData,
     livePreview,
     onApplied,
     operation,
@@ -263,7 +256,7 @@ export const useFormState = ({
       const data = isReset
         ? (action.data as Data)
         : isNested
-          ? reduceFormStateToData({ formState, initialData: current.initialData })
+          ? getDataFromFormState(formState, true)
           : savedDocument
 
       const args: FormStateRequestArgs = {
@@ -609,12 +602,10 @@ export const useFormState = ({
 
   const validateForm = useCallback<UseFormStateResult['validateForm']>(
     async ({ isLocalSubmission = false, skipValidation = false } = {}) => {
-      let isServerValidated = false
       let isValid = true
 
       if (!skipValidation && isLocalSubmission) {
         const fields = await refreshFormState({ type: 'validate' })
-        isServerValidated = fields !== undefined
         isValid = !fields || Object.values(fields).every((field) => field.valid !== false)
       }
 
@@ -623,9 +614,7 @@ export const useFormState = ({
       }
 
       const fields = contextRef.current.fields ?? {}
-      const data = isServerValidated
-        ? reduceFormStateToData({ formState: fields })
-        : reduceFieldsToValues(fields, true)
+      const data = getDataFromFormState(fields, true)
 
       setIsValid(isValid)
       return { data, fields, isValid }
