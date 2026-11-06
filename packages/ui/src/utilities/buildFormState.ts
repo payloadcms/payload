@@ -31,7 +31,7 @@ export type StaleDataState = {
   isStale: boolean
 }
 
-type BuildFormStateSuccessResult = {
+export type BuildFormStateSuccessResult = {
   clientConfig?: ClientConfig
   errors?: never
   indexPath?: string

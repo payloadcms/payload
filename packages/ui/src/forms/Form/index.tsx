@@ -4,13 +4,12 @@ import type { FormState } from 'payload'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { serialize } from 'object-to-formdata'
 import {
-  deepCopyObjectSimpleWithoutReactComponents,
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
   reduceFieldsToValues,
   uploadRequiresServerValidation,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type {
   CreateFormData,
@@ -19,6 +18,7 @@ import type {
   FormProps,
   GetDataByPath,
 } from './types.js'
+import type { SubmissionActivity } from './useFormState.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
@@ -80,18 +80,28 @@ export const Form: React.FC<FormProps> = (props) => {
   const contextRef = useRef({} as FormContextType)
   const isFirstRenderRef = useRef(true)
 
+  const submissionActivityRef = useRef<SubmissionActivity>({ running: 0, started: 0 })
+
   const {
     dispatchFields,
     formState,
+    isInitializing: isFormStateInitializing,
     isModified,
     isValid,
     prevFormStateRef,
+    refreshFormState,
+    refreshFormStateAfterSave,
     resetFormState,
     setIsValid,
     setModified: setFormStateModified,
-  } = useFormState({ contextRef, props })
-
-  const fieldsReducer: FormFieldsContextType = [formState, dispatchFields]
+    validateForm,
+  } = useFormState({
+    contextRef,
+    onApplied: (appliedFormState, isSubmitted) => notifyOnChange(appliedFormState, isSubmitted),
+    props,
+    queueTask,
+    submissionActivityRef,
+  })
 
   const {
     backgroundProcessing,
@@ -111,11 +121,19 @@ export const Form: React.FC<FormProps> = (props) => {
     formRef,
     prevFormStateRef,
     props,
+    refreshFormStateAfterSave,
     setIsValid,
     setModified: setFormStateModified,
+    submissionActivityRef,
+    validateForm,
   })
 
   const disabled = disabledFromProps || disabledBySubmission
+
+  const fieldsContextValue = useMemo<FormFieldsContextType>(
+    () => [formState, dispatchFields],
+    [formState, dispatchFields],
+  )
 
   const getFields = useCallback(() => contextRef.current.fields, [])
 
@@ -191,7 +209,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const replaceState = useCallback(
     (state: FormState) => {
-      contextRef.current = { ...initContextState, disabled: contextRef.current.disabled }
+      contextRef.current = {
+        ...initContextState,
+        disabled: contextRef.current.disabled,
+        submitted: contextRef.current.submitted,
+      }
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
@@ -276,6 +298,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.setProcessing = setProcessing
   contextRef.current.setBackgroundProcessing = setBackgroundProcessing
 
+  contextRef.current.submitted = submitted
   contextRef.current.setSubmitted = setSubmitted
   contextRef.current.setIsValid = setIsValid
   contextRef.current.disabled = disabled
@@ -289,7 +312,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.moveFieldRow = moveFieldRow
   contextRef.current.replaceFieldRow = replaceFieldRow
   contextRef.current.uuid = uuid
-  contextRef.current.initializing = initializing
+  contextRef.current.initializing = initializing || isFormStateInitializing
   contextRef.current.isValid = isValid
 
   useEffect(() => {
@@ -298,7 +321,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useEffect(() => {
     if (initialState) {
-      contextRef.current = { ...initContextState, disabled: contextRef.current.disabled }
+      contextRef.current = {
+        ...initContextState,
+        disabled: contextRef.current.disabled,
+        submitted: contextRef.current.submitted,
+      }
       dispatchFields({
         type: 'REPLACE_STATE',
         optimize: false,
@@ -326,30 +353,18 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  const executeOnChange = useEffectEvent(() => {
-    queueTask(async () => {
-      if (Array.isArray(onChange)) {
-        let serverState: FormState
+  const notifyOnChange = useEffectEvent((changedFormState: FormState, isSubmitted = submitted) => {
+    if (!Array.isArray(onChange)) {
+      return
+    }
 
-        for (const onChangeFn of onChange) {
-          // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-          serverState = await onChangeFn({
-            formState: deepCopyObjectSimpleWithoutReactComponents(formState, {
-              excludeFiles: true,
-            }),
-            submitted,
-          })
-        }
-
-        React.startTransition(() => {
-          dispatchFields({
-            type: 'MERGE_SERVER_STATE',
-            prevStateRef: prevFormStateRef,
-            serverState,
-          })
-        })
-      }
-    })
+    for (const onChangeFn of onChange) {
+      Promise.resolve(onChangeFn({ formState: changedFormState, submitted: isSubmitted })).catch(
+        (err) => {
+          console.error('Error in onChange:', err) // eslint-disable-line no-console
+        },
+      )
+    }
   })
 
   useDebouncedEffect(
@@ -358,7 +373,7 @@ export const Form: React.FC<FormProps> = (props) => {
         (isFirstRenderRef.current || !dequal(formState, prevFormStateRef.current)) &&
         isModified
       ) {
-        executeOnChange()
+        refreshFormState()
       }
 
       prevFormStateRef.current = formState
@@ -389,7 +404,7 @@ export const Form: React.FC<FormProps> = (props) => {
        * to wait for the form to be ready before interacting with it, reducing flakiness if the test is run in
        * slow network conditions.
        */
-      data-form-ready={!processing && isMounted && !initializing}
+      data-form-ready={!processing && isMounted && !initializing && !isFormStateInitializing}
       method={method}
       noValidate
       onSubmit={(e) => void contextRef.current.submit({}, e)}
@@ -404,12 +419,14 @@ export const Form: React.FC<FormProps> = (props) => {
             }}
           >
             <SubmittedContext value={submitted}>
-              <InitializingContext value={!isMounted || (isMounted && initializing)}>
+              <InitializingContext
+                value={!isMounted || (isMounted && (initializing || isFormStateInitializing))}
+              >
                 <ProcessingContext value={processing}>
                   <BackgroundProcessingContext value={backgroundProcessing}>
                     <ModifiedContext value={isModified}>
                       {/* eslint-disable-next-line @eslint-react/no-context-provider */}
-                      <FormFieldsContext.Provider value={fieldsReducer}>
+                      <FormFieldsContext.Provider value={fieldsContextValue}>
                         <SuccessfulSubmitCountContext value={successfulSubmitCount}>
                           {children}
                         </SuccessfulSubmitCountContext>
@@ -435,7 +452,6 @@ export {
   ProcessingContext,
   SubmittedContext,
   useAllFormFields,
-  useDocumentForm,
   useForm,
   useFormFields,
   useFormModified,
