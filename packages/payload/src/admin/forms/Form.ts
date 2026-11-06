@@ -54,8 +54,9 @@ export type FieldState = {
     Label?: React.ReactNode
   }
   /**
-   * Excludes this field's own value from serialized form data.
-   * Does not exclude descendant fields.
+   * Excludes this field's own value when form state is converted to document data, so the value is not submitted with the form.
+   * The value remains available in form state.
+   * Descendant fields are serialized independently.
    */
   disableFormData?: boolean
   errorMessage?: string

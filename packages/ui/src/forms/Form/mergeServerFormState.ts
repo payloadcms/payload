@@ -206,7 +206,7 @@ export const mergeServerFormState = ({
 
         if (acceptValues !== true) {
           newState[path].value =
-            rowCount === 0 && currentState[path].value === null ? null : rowCount
+            rowCount === 0 && currentState[path]?.value === null ? null : rowCount
         }
       }
     }

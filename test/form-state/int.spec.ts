@@ -1017,20 +1017,65 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     })
   })
 
-  test('should preserve client row values in background merges and accept explicit saves', () => {
-    for (const acceptValues of [undefined, { overrideLocalChanges: false }, true] as const) {
-      for (const value of [null, 0]) {
-        for (const incomingValue of [null, 0]) {
-          const state = mergeServerFormState({
-            acceptValues,
-            currentState: { array: { rows: [], value } },
-            incomingState: { array: { rows: [], value: incomingValue } },
-          })
-
-          expect(state.array.value).toBe(acceptValues === true ? incomingValue : value)
-        }
+  test.for([
+    { acceptValues: undefined, mode: 'background' },
+    { acceptValues: { overrideLocalChanges: false } as const, mode: 'autosave' },
+  ])(
+    'should return empty array data for an undefined row field during $mode merges',
+    ({ acceptValues }) => {
+      const currentState: FormState = {
+        // @ts-expect-error - Exercise the undefined runtime entry from the regression.
+        items: undefined,
       }
-    }
+
+      const state = mergeServerFormState({
+        acceptValues,
+        currentState,
+        incomingState: { items: { rows: [], value: 0 } },
+      })
+
+      expect(getDataFromFormState(state, true)).toStrictEqual({ items: [] })
+    },
+  )
+
+  test.describe('empty row values', () => {
+    const rowValueCases = [
+      { currentValue: null, incomingValue: null },
+      { currentValue: null, incomingValue: 0 },
+      { currentValue: 0, incomingValue: null },
+      { currentValue: 0, incomingValue: 0 },
+    ]
+
+    test.for(
+      rowValueCases.flatMap((values) => [
+        { ...values, acceptValues: undefined, mode: 'background' },
+        { ...values, acceptValues: { overrideLocalChanges: false } as const, mode: 'autosave' },
+      ]),
+    )(
+      'should preserve client row value $currentValue during $mode merges receiving $incomingValue',
+      ({ acceptValues, currentValue, incomingValue }) => {
+        const state = mergeServerFormState({
+          acceptValues,
+          currentState: { array: { rows: [], value: currentValue } },
+          incomingState: { array: { rows: [], value: incomingValue } },
+        })
+
+        expect(state.array.value).toBe(currentValue)
+      },
+    )
+
+    test.for(rowValueCases)(
+      'should accept server row value $incomingValue over client value $currentValue on explicit save',
+      ({ currentValue, incomingValue }) => {
+        const state = mergeServerFormState({
+          acceptValues: true,
+          currentState: { array: { rows: [], value: currentValue } },
+          incomingState: { array: { rows: [], value: incomingValue } },
+        })
+
+        expect(state.array.value).toBe(incomingValue)
+      },
+    )
   })
 
   test('should preserve a first client row when autosave returns a null array', () => {
