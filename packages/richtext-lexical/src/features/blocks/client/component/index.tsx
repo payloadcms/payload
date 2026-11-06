@@ -14,7 +14,6 @@ import {
   Form,
   formatDrawerSlug,
   MoreIcon,
-  OperationProvider,
   Pill,
   Popup,
   PopupList,
@@ -25,6 +24,7 @@ import {
   useDocumentInfo,
   useEditDepth,
   useFormSubmitted,
+  useOperation,
   useServerFunctions,
   useTranslation,
   XIcon,
@@ -123,6 +123,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
+  const operation = useOperation()
 
   const blockType = formData.blockType
   const formDataRef = useRef(formData)
@@ -262,7 +263,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         documentFormState: parentDocumentFields,
         globalSlug,
         initialBlockData: formData,
-        operation: 'update',
+        operation,
         readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
@@ -328,6 +329,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     collectionSlug,
     globalSlug,
     getDocPreferences,
+    operation,
     parentDocumentFields,
     blockType,
     clientBlock,
@@ -763,52 +765,50 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     }
     return (
       <div data-block-drawer-slug={drawerSlug} style={{ display: 'contents' }}>
-        <OperationProvider operation="update">
-          <Form
-            el="div"
-            fields={clientBlock?.fields ?? []}
+        <Form
+          el="div"
+          fields={clientBlock?.fields ?? []}
+          initialState={initialState}
+          onChange={onChange}
+          onSubmit={(formState) => {
+            // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
+            const newData = reduceFormStateToData({
+              formState,
+              initialData: formDataRef.current,
+            }) as BlockFields
+            newData.blockType = blockType
+            editor.update(
+              () => {
+                const node = $getNodeByKey(nodeKey)
+                if (node && $isBlockNode(node)) {
+                  node.setFields(newData, true)
+                }
+              },
+              // Without this, the outer editor's reconciler resets DOM selection
+              // back into its own root, kicking focus out of any nested richText.
+              { tag: SKIP_DOM_SELECTION_TAG },
+            )
+            toggleDrawer()
+          }}
+          readOnly={!isEditable}
+          schemaPath={schemaFieldsPath}
+          submitted={submitted}
+          uuid={formUuid}
+        >
+          <BlockContent
+            baseClass={baseClass}
+            BlockDrawer={BlockDrawer}
+            Collapsible={BlockCollapsible}
+            CustomBlock={resolvedCustomBlock}
+            CustomLabel={resolvedCustomLabel}
+            EditButton={EditButton}
+            errorCount={errorCount}
+            formSchema={clientBlock?.fields ?? []}
             initialState={initialState}
-            onChange={onChange}
-            onSubmit={(formState) => {
-              // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-              const newData = reduceFormStateToData({
-                formState,
-                initialData: formDataRef.current,
-              }) as BlockFields
-              newData.blockType = blockType
-              editor.update(
-                () => {
-                  const node = $getNodeByKey(nodeKey)
-                  if (node && $isBlockNode(node)) {
-                    node.setFields(newData, true)
-                  }
-                },
-                // Without this, the outer editor's reconciler resets DOM selection
-                // back into its own root, kicking focus out of any nested richText.
-                { tag: SKIP_DOM_SELECTION_TAG },
-              )
-              toggleDrawer()
-            }}
-            readOnly={!isEditable}
-            schemaPath={schemaFieldsPath}
-            submitted={submitted}
-            uuid={formUuid}
-          >
-            <BlockContent
-              baseClass={baseClass}
-              BlockDrawer={BlockDrawer}
-              Collapsible={BlockCollapsible}
-              CustomBlock={resolvedCustomBlock}
-              CustomLabel={resolvedCustomLabel}
-              EditButton={EditButton}
-              errorCount={errorCount}
-              formSchema={clientBlock?.fields ?? []}
-              initialState={initialState}
-              nodeKey={nodeKey}
-              RemoveButton={RemoveButton}
-            />
-          </Form>
-        </OperationProvider>
+            nodeKey={nodeKey}
+            RemoveButton={RemoveButton}
+          />
+        </Form>
       </div>
     )
   }, [
