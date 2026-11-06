@@ -1,5 +1,6 @@
 import type {
   AdminContext,
+  createPayloadRequest,
   DefaultServerFunctionArgs,
   ImportMap,
   SanitizedConfig,
@@ -12,6 +13,7 @@ import { sharedServerFunctions } from './serverFunctionRegistry.js'
 type InitAdminContextFn = (args: {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
+  overrides?: Omit<Parameters<typeof createPayloadRequest>[0], 'payload'>
 }) => Promise<AdminContext>
 
 type CreateServerFunctionHandlerArgs = {
@@ -48,12 +50,14 @@ export const createServerFunctionHandler = ({
       args: fnArgs,
       config: configPromise,
       importMap,
+      locale: requestLocale,
       serverFunctions: extraServerFunctions,
     } = args
 
     const { cookies, locale, permissions, req, user } = await initAdminContext({
       configPromise,
       importMap,
+      overrides: requestLocale !== undefined ? { locale: requestLocale } : undefined,
     })
 
     const augmentedArgs: DefaultServerFunctionArgs = {

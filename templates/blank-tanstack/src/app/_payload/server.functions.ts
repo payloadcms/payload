@@ -37,6 +37,7 @@ const runPayloadServerFn = createServerFn({ method: 'POST' })
       args: data.args,
       config: await getConfig(),
       importMap: await getImportMap(),
+      locale: data.locale,
       name: data.name,
     })
   })
