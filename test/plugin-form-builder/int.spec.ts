@@ -531,6 +531,17 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
       expect(result).toContain('&quot;')
       expect(result).toContain('&lt;img')
     })
+
+    test('handles numeric and non-string inputs gracefully', () => {
+      const result = replaceDoubleCurlys(123 as any, testVariables)
+      expect(result).toBe('123')
+
+      const nullResult = replaceDoubleCurlys(null as any, testVariables)
+      expect(nullResult).toBe('')
+
+      const undefinedResult = replaceDoubleCurlys(undefined as any, testVariables)
+      expect(undefinedResult).toBe('')
+    })
   })
 
   test.describe('keyValuePairToHtmlTable', () => {
@@ -698,6 +709,67 @@ test.suite('@payloadcms/plugin-form-builder', suiteOptions, () => {
         submissionData: undefined,
       } as any)
       expect(result).toContain('href="/contact"')
+    })
+
+    test('handles internal links with numeric doc id when submissionData is provided', async () => {
+      const result = await FormBuilderLinkConverter.converter({
+        converters: [],
+        node: {
+          children: [],
+          fields: {
+            doc: {
+              relationTo: 'pages',
+              value: {
+                id: 123,
+              },
+            },
+            linkType: 'internal',
+            newTab: false,
+          },
+        },
+        parent: {},
+        submissionData: [{ field: 'name', value: 'John' }],
+      } as any)
+      expect(result).toBe('<a href="123"></a>')
+    })
+
+    test('handles internal links with unpopulated doc id value', async () => {
+      const result = await FormBuilderLinkConverter.converter({
+        converters: [],
+        node: {
+          children: [],
+          fields: {
+            doc: {
+              relationTo: 'pages',
+              value: 456,
+            },
+            linkType: 'internal',
+            newTab: false,
+          },
+        },
+        parent: {},
+        submissionData: [{ field: 'name', value: 'John' }],
+      } as any)
+      expect(result).toBe('<a href="456"></a>')
+    })
+
+    test('replaces double curlies in custom link href', async () => {
+      const result = await FormBuilderLinkConverter.converter({
+        converters: [],
+        node: {
+          children: [],
+          fields: {
+            linkType: 'custom',
+            newTab: true,
+            url: 'https://example.com/user/{{userId}}',
+          },
+        },
+        parent: {},
+        submissionData: [{ field: 'userId', value: '999' }],
+      } as any)
+      expect(result).toBe(
+        '<a href="https://example.com/user/999" rel="noopener noreferrer" target="_blank"></a>',
+      )
     })
   })
 
