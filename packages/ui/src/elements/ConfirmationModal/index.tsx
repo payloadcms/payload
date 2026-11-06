@@ -16,6 +16,7 @@ import './index.css'
 export type OnCancel = () => void
 
 export type ConfirmationModalProps = {
+  'aria-describedby'?: string
   body: React.ReactNode
   cancelLabel?: string
   className?: string
@@ -26,10 +27,12 @@ export type ConfirmationModalProps = {
   modalSlug: string
   onCancel?: OnCancel
   onConfirm: () => Promise<void> | void
+  role?: 'alertdialog' | 'dialog'
 }
 
 export function ConfirmationModal(props: ConfirmationModalProps) {
   const {
+    'aria-describedby': ariaDescribedBy,
     body,
     cancelLabel,
     className,
@@ -40,10 +43,17 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
     modalSlug,
     onCancel,
     onConfirm,
+    role,
   } = props
 
   return (
-    <DialogModal className={className} focusTrapOptions={focusTrapOptions} slug={modalSlug}>
+    <DialogModal
+      aria-describedby={ariaDescribedBy}
+      className={className}
+      focusTrapOptions={focusTrapOptions}
+      role={role}
+      slug={modalSlug}
+    >
       <DialogHeader showClose title={heading} />
       <DialogBody>
         <div className="confirmation-modal__body">
