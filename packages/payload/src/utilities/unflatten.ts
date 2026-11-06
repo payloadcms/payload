@@ -31,6 +31,11 @@ interface Opts {
   delimiter?: string
   object?: any
   overwrite?: boolean
+  /**
+   * Keeps empty array values in the flattened input from being populated by descendant paths.
+   * Ignored when `overwrite` is true.
+   */
+  preserveEmptyArrays?: boolean
   recursive?: boolean
 }
 
@@ -55,6 +60,10 @@ export const unflatten = (target: any, opts?: Opts) => {
   }
 
   const sortedKeys = Object.keys(target).sort((keyA, keyB) => keyA.length - keyB.length)
+  const explicitEmptyArrays =
+    opts.preserveEmptyArrays && !overwrite
+      ? new Set(Object.values(target).filter((value) => Array.isArray(value) && value.length === 0))
+      : undefined
 
   sortedKeys.forEach((key) => {
     const split = key.split(delimiter)
@@ -72,8 +81,11 @@ export const unflatten = (target: any, opts?: Opts) => {
       const type = Object.prototype.toString.call(currentValue)
       const isobject = type === '[object Object]' || type === '[object Array]'
 
-      // do not write over falsey, non-undefined values if overwrite is false
-      if (!overwrite && !isobject && typeof currentValue !== 'undefined') {
+      if (
+        !overwrite &&
+        ((!isobject && typeof currentValue !== 'undefined') ||
+          explicitEmptyArrays?.has(currentValue))
+      ) {
         return
       }
 

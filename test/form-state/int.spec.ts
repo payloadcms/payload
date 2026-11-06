@@ -1444,6 +1444,26 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     })
   })
 
+  test('should ignore stale descendants of empty arrays when converting form state to data', () => {
+    expect(
+      getDataFromFormState(
+        {
+          items: { rows: [], value: 0 },
+          'items.0.title': { value: 'Stale top-level row' },
+          sections: {
+            disableFormData: true,
+            rows: [{ id: 'section-1' }],
+            value: 1,
+          },
+          'sections.0.id': { value: 'section-1' },
+          'sections.0.items': { rows: [], value: 0 },
+          'sections.0.items.0.title': { value: 'Stale nested row' },
+        },
+        true,
+      ),
+    ).toEqual({ items: [], sections: [{ id: 'section-1', items: [] }] })
+  })
+
   test('should preserve a null array when converting form state to data', () => {
     expect(
       getDataFromFormState(
