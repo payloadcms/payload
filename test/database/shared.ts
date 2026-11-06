@@ -1,4 +1,5 @@
 export const postsSlug = 'posts'
+export const bulkOperationsSequentialSlug = 'bulk-operations-sequential'
 export const errorOnUnnamedFieldsSlug = 'error-on-unnamed-fields'
 
 export const defaultValuesSlug = 'default-values'

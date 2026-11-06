@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { BulkOperationsSequential } from './collections/BulkOperationsSequential.js'
 import { seed } from './seed.js'
 import {
   customIDsSlug,
@@ -36,6 +37,7 @@ export const getConfig: () => Partial<Config> = () => ({
     },
   },
   collections: [
+    BulkOperationsSequential,
     {
       slug: 'noTimeStamps',
       timestamps: false,

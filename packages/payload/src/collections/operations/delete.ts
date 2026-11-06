@@ -140,7 +140,7 @@ export const deleteOperation = async <
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
-    const promises = docs.map(async (doc) => {
+    const processDocument = async (doc: (typeof docs)[number]) => {
       let result
 
       const { id } = doc
@@ -311,18 +311,15 @@ export const deleteOperation = async <
         })
       }
       return null
-    })
+    }
 
-    // Process sequentially when using single transaction mode to avoid shared state issues
-    // Process in parallel when using one transaction for better performance
-    let awaitedDocs
-    if (req.payload.db.bulkOperationsSingleTransaction) {
-      awaitedDocs = []
-      for (const promise of promises) {
-        awaitedDocs.push(await promise)
-      }
-    } else {
-      awaitedDocs = await Promise.all(promises)
+    // Every document uses the transaction client attached to this request. Running document
+    // pipelines concurrently interleaves queries on that client, which can silently skip deletes
+    // and is rejected by pg 9.
+    type ProcessedDocument = Awaited<ReturnType<typeof processDocument>>
+    const awaitedDocs: ProcessedDocument[] = []
+    for (const doc of docs) {
+      awaitedDocs.push(await processDocument(doc))
     }
 
     // /////////////////////////////////////
@@ -337,7 +334,7 @@ export const deleteOperation = async <
     })
 
     let result = {
-      docs: awaitedDocs.filter(Boolean),
+      docs: awaitedDocs.filter((doc): doc is NonNullable<ProcessedDocument> => doc !== null),
       errors,
     }
 
