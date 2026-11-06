@@ -11,6 +11,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import type { TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
 import type {
   FieldAction,
   Context as FormContextType,
@@ -18,7 +19,7 @@ import type {
   Submit,
   SubmitOptions,
 } from './types.js'
-import type { SubmissionActivity, UseFormStateResult } from './useFormState.js'
+import type { UseFormStateResult } from './useFormState.js'
 
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -29,6 +30,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
+import { requestPriority } from './requestPriority.js'
 
 type Args = {
   contextRef: RefObject<FormContextType>
@@ -36,16 +38,16 @@ type Args = {
   formRef: RefObject<HTMLFormElement | null>
   prevFormStateRef: RefObject<FormState>
   props: FormProps
-  refreshFormStateAfterSave: UseFormStateResult['refreshFormStateAfterSave']
+  queueTask: UseQueueResult['queueTask']
+  refreshFormState: UseFormStateResult['refreshFormState']
   setIsValid: UseFormStateResult['setIsValid']
   setModified: UseFormStateResult['setModified']
-  submissionActivityRef: RefObject<SubmissionActivity>
   validateForm: UseFormStateResult['validateForm']
 }
 
 /**
  * Supplies Form's `submit` method and tracks submission status, processing, and disabling during a save.
- * Uses `useFormState`'s validation and post-save refresh methods around the submission, then handles callbacks, errors, toasts, and redirects.
+ * Validates and refreshes form state around the submission, then handles callbacks, errors, toasts, and redirects.
  * Forms with an `onSubmit` callback can commit values locally without sending a save request.
  *
  * @example
@@ -60,10 +62,10 @@ export const useFormSubmission = ({
   formRef,
   prevFormStateRef,
   props,
-  refreshFormStateAfterSave,
+  queueTask,
+  refreshFormState,
   setIsValid,
   setModified,
-  submissionActivityRef,
   validateForm,
 }: Args) => {
   const {
@@ -88,14 +90,6 @@ export const useFormSubmission = ({
   const [disabledBySubmission, _setDisabledBySubmission] = useState(false)
 
   const [isSubmitted, _setIsSubmitted] = useState(false)
-
-  const setIsSubmitted = useCallback(
-    (isSubmitted: boolean) => {
-      contextRef.current.submitted = isSubmitted
-      _setIsSubmitted(isSubmitted)
-    },
-    [contextRef],
-  )
 
   const [successfulSubmitCount, setSuccessfulSubmitCount] = useState(0)
 
@@ -126,16 +120,25 @@ export const useFormSubmission = ({
 
   isDisabledFromPropsRef.current = isDisabledFromProps
 
+  const method = 'method' in props ? props?.method : undefined
+  const validateDrafts = hasDraftValidationEnabled(docConfig)
+
+  const setIsSubmitted = useCallback(
+    (isSubmitted: boolean) => {
+      contextRef.current.submitted = isSubmitted
+      _setIsSubmitted(isSubmitted)
+    },
+    [contextRef],
+  )
+
   const setDisabledBySubmission = useCallback(
     (isDisabled: boolean) => {
+      // The submit guard reads this before React renders the updated disabled state.
       contextRef.current.disabled = Boolean(isDisabledFromPropsRef.current || isDisabled)
       _setDisabledBySubmission(isDisabled)
     },
     [contextRef],
   )
-
-  const method = 'method' in props ? props?.method : undefined
-  const validateDrafts = hasDraftValidationEnabled(docConfig)
 
   /**
    * Intercept the `setIsModified` method to track whether the event happened during background processing.
@@ -180,8 +183,20 @@ export const useFormSubmission = ({
     }
   }, [isProcessing])
 
+  const restoreRequestState = useCallback(() => {
+    setIsProcessing(false)
+    setDisabledBySubmission(false)
+    setIsBackgroundProcessing(false)
+  }, [setIsBackgroundProcessing, setDisabledBySubmission])
+
   const executeSubmit = useCallback(
-    async (options?: SubmitOptions) => {
+    async ({
+      options,
+      requestContext,
+    }: {
+      options?: SubmitOptions
+      requestContext: TaskContext
+    }) => {
       const {
         acceptValues = true,
         action: actionArg = action,
@@ -199,6 +214,8 @@ export const useFormSubmission = ({
 
       // create new toast promise which will resolve manually later
       let errorToast, successToast
+      let promiseToastID: number | string | undefined
+      let preservePromiseToast = false
 
       const promise = new Promise((resolve, reject) => {
         successToast = resolve
@@ -214,7 +231,7 @@ export const useFormSubmission = ({
         successToast = (data) => toast.success(data)
         errorToast = (data) => toast.error(data)
       } else {
-        toast.promise(promise, {
+        const promiseToast = toast.promise(promise, {
           error: (data) => {
             return data as string
           },
@@ -223,27 +240,25 @@ export const useFormSubmission = ({
             return data as string
           },
         })
+
+        const toastID = promiseToast.valueOf()
+
+        if (typeof toastID === 'number' || typeof toastID === 'string') {
+          promiseToastID = toastID
+        }
       }
 
-      submissionActivityRef.current.started += 1
-      submissionActivityRef.current.running += 1
-
       try {
-        if (disableFormWhileProcessing) {
-          const activeElement = document.activeElement
-
-          // Disabling the active field drops browser focus to the body.
-          submitFocus.current =
-            activeElement instanceof HTMLElement && formRef.current?.contains(activeElement)
-              ? activeElement
-              : null
-
-          setIsProcessing(true)
-          setDisabledBySubmission(true)
+        if (options?.submissionType === 'autosave') {
+          setIsBackgroundProcessing(true)
         }
 
         if (waitForAutocomplete) {
           await wait(100)
+        }
+
+        if (!requestContext.isCurrent()) {
+          return
         }
 
         const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
@@ -253,72 +268,87 @@ export const useFormSubmission = ({
           },
         )
 
-        // Execute server side validations
-        if (Array.isArray(beforeSubmit)) {
-          let revalidatedFormState: FormState
-
-          await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
-            await priorOnChange
-
-            const result = await beforeSubmitFn({
-              formState: serializableFormState,
-            })
-
-            revalidatedFormState = result
-          }, Promise.resolve())
-
-          const isValid = Object.entries(revalidatedFormState).every(
-            ([, field]) => field.valid !== false,
-          )
-
-          setIsValid(isValid)
-
-          if (!isValid) {
-            setIsSubmitted(true)
-            return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
-          }
-        }
-
-        const { data, fields, isValid } = await validateForm({
-          isLocalSubmission: Boolean(onSubmit && !hasFormSubmitAction),
-          skipValidation,
-        })
-
-        if (!isValid) {
-          errorToast(t('error:correctInvalidFields'))
-          setIsSubmitted(true)
-          return
-        }
-
-        let overrides = {}
-
-        if (typeof overridesFromArgs === 'function') {
-          overrides = overridesFromArgs(fields)
-        } else if (typeof overridesFromArgs === 'object') {
-          overrides = overridesFromArgs
-        }
-
-        // If submit handler comes through via props, run that
-        if (onSubmit) {
-          for (const [key, value] of Object.entries(overrides)) {
-            data[key] = value
-          }
-
-          onSubmit(fields, data)
-        }
-
-        if (!hasFormSubmitAction) {
-          setIsSubmitted(true)
-          return
-        }
+        let res
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let json: Record<string, any> = {}
 
         try {
+          // Execute server side validations
+          if (Array.isArray(beforeSubmit)) {
+            let revalidatedFormState: FormState
+
+            await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
+              await priorOnChange
+
+              const result = await beforeSubmitFn({
+                formState: serializableFormState,
+              })
+
+              revalidatedFormState = result
+            }, Promise.resolve())
+
+            if (!requestContext.isCurrent()) {
+              return
+            }
+
+            const isValid = Object.entries(revalidatedFormState).every(
+              ([, field]) => field.valid !== false,
+            )
+
+            setIsValid(isValid)
+
+            if (!isValid) {
+              setIsSubmitted(true)
+              return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
+            }
+          }
+
+          const { data, fields, isValid } = await validateForm({
+            isCurrent: requestContext.isCurrent,
+            isLocalSubmission: Boolean(onSubmit && !hasFormSubmitAction),
+            skipValidation,
+          })
+
+          if (!requestContext.isCurrent()) {
+            return
+          }
+
+          if (!isValid) {
+            errorToast(t('error:correctInvalidFields'))
+            setIsSubmitted(true)
+            return
+          }
+
+          let overrides = {}
+
+          if (typeof overridesFromArgs === 'function') {
+            overrides = overridesFromArgs(fields)
+          } else if (typeof overridesFromArgs === 'object') {
+            overrides = overridesFromArgs
+          }
+
+          // If submit handler comes through via props, run that
+          if (onSubmit) {
+            for (const [key, value] of Object.entries(overrides)) {
+              data[key] = value
+            }
+
+            onSubmit(fields, data)
+          }
+
+          if (!hasFormSubmitAction) {
+            setIsSubmitted(true)
+            return
+          }
+
           const formData = await contextRef.current.createFormData(overrides, {
             data,
             mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
           })
 
-          let res
+          if (!requestContext.isCurrent()) {
+            return
+          }
 
           if (typeof actionArg === 'string') {
             res = await requests[methodToUse.toLowerCase()](actionArg, {
@@ -331,157 +361,214 @@ export const useFormSubmission = ({
             res = await action(formData)
           }
 
+          if (!requestContext.isCurrent()) {
+            return
+          }
+
           if (res.status < 400 && !isModifiedWhileProcessing.current) {
             setIsModified(false)
           }
 
           isModifiedWhileProcessing.current = false
 
-          if (typeof handleResponse === 'function') {
-            await handleResponse(res, successToast, errorToast)
+          if (typeof handleResponse !== 'function') {
+            const contentType = res.headers.get('content-type')
+            const isJSON = contentType && contentType.indexOf('application/json') !== -1
+
+            if (isJSON) {
+              json = await res.json()
+            }
+          }
+
+          if (!requestContext.isCurrent()) {
+            return
+          }
+        } finally {
+          const isSuccessfulResponse = res?.status < 400
+
+          if (
+            requestContext.isCurrent() &&
+            hasFormSubmitAction &&
+            (isSuccessfulResponse
+              ? typeof handleResponse !== 'function'
+              : options?.submissionType === 'autosave')
+          ) {
+            try {
+              // Refresh before applying save errors so the refresh cannot erase them.
+              await refreshFormState(
+                isSuccessfulResponse
+                  ? {
+                      type: 'afterSave',
+                      acceptValues,
+                      isCurrent: requestContext.isCurrent,
+                      refreshPermissions: context?.getDocPermissions !== false,
+                      savedDocument: json?.doc ?? json?.result,
+                    }
+                  : { type: 'refresh', isCurrent: requestContext.isCurrent },
+              )
+            } catch (err) {
+              if (isSuccessfulResponse) {
+                // Persistence succeeded; a refresh failure must not turn this into a failed save.
+                toast.error(err instanceof Error ? err.message : t('error:unknown'))
+              } else {
+                console.error('Error refreshing form state', err) // eslint-disable-line no-console
+              }
+            }
+          }
+        }
+
+        if (res.status >= 400 && !requestContext.isCurrent()) {
+          return
+        }
+
+        if (typeof handleResponse === 'function') {
+          preservePromiseToast = true
+
+          await handleResponse(res, successToast, errorToast)
+
+          return
+        }
+
+        if (res.status < 400) {
+          setSuccessfulSubmitCount((count) => count + 1)
+
+          if (requestContext.isCurrent() && typeof onSuccess === 'function') {
+            try {
+              await onSuccess(json, {
+                context,
+                formState: serializableFormState,
+              })
+            } catch (err) {
+              toast.error(err instanceof Error ? err.message : t('error:unknown'))
+            }
+          }
+
+          // The save succeeded even if `onSuccess` reset or unmounted the form, so always settle the toast.
+          preservePromiseToast = true
+          setIsSubmitted(false)
+
+          if (redirect) {
+            if (requestContext.isCurrent()) {
+              void startRouteTransition(() => router.push(redirect))
+            }
+          } else if (!disableToast) {
+            successToast(json.message || t('general:submissionSuccessful'))
+          }
+        } else {
+          setIsSubmitted(true)
+
+          // When there was an error submitting a draft,
+          // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
+          // Also keep the form as modified so the save button remains enabled for retry.
+          if (overridesFromArgs['_status'] === 'draft') {
+            setIsModified(true)
+
+            if (!validateDrafts) {
+              setIsSubmitted(false)
+            }
+          }
+
+          contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
+
+          if (json.message) {
+            errorToast(json.message)
             return
           }
 
-          const contentType = res.headers.get('content-type')
-          const isJSON = contentType && contentType.indexOf('application/json') !== -1
+          if (Array.isArray(json.errors)) {
+            const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+              ([fieldErrs, nonFieldErrs], err) => {
+                const newFieldErrs = []
+                const newNonFieldErrs = []
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          let json: Record<string, any> = {}
-
-          if (isJSON) {
-            json = await res.json()
-          }
-
-          if (res.status < 400) {
-            setSuccessfulSubmitCount((count) => count + 1)
-
-            try {
-              await refreshFormStateAfterSave({
-                acceptValues,
-                refreshPermissions: context?.getDocPermissions !== false,
-                savedDocument: json?.doc ?? json?.result,
-              })
-            } catch (err) {
-              // Persistence succeeded; a refresh failure must not turn this into a failed save.
-              toast.error(err instanceof Error ? err.message : t('error:unknown'))
-            }
-
-            if (typeof onSuccess === 'function') {
-              try {
-                await onSuccess(json, {
-                  context,
-                  formState: serializableFormState,
-                })
-              } catch (err) {
-                toast.error(err instanceof Error ? err.message : t('error:unknown'))
-              }
-            }
-
-            setIsSubmitted(false)
-
-            if (redirect) {
-              void startRouteTransition(() => router.push(redirect))
-            } else if (!disableToast) {
-              successToast(json.message || t('general:submissionSuccessful'))
-            }
-          } else {
-            setIsSubmitted(true)
-
-            // When there was an error submitting a draft,
-            // set the form state to unsubmitted, to not trigger visible form validation on changes after the failed submit.
-            // Also keep the form as modified so the save button remains enabled for retry.
-            if (overridesFromArgs['_status'] === 'draft') {
-              setIsModified(true)
-
-              if (!validateDrafts) {
-                setIsSubmitted(false)
-              }
-            }
-
-            contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
-
-            if (json.message) {
-              errorToast(json.message)
-              return
-            }
-
-            if (Array.isArray(json.errors)) {
-              const [fieldErrors, nonFieldErrors] = json.errors.reduce(
-                ([fieldErrs, nonFieldErrs], err) => {
-                  const newFieldErrs = []
-                  const newNonFieldErrs = []
-
-                  if (err?.message) {
-                    newNonFieldErrs.push(err)
-                  }
-
-                  if (Array.isArray(err?.data?.errors)) {
-                    err.data?.errors.forEach((dataError) => {
-                      if (dataError?.path) {
-                        newFieldErrs.push(dataError)
-                      } else {
-                        newNonFieldErrs.push(dataError)
-                      }
-                    })
-                  }
-
-                  return [
-                    [...fieldErrs, ...newFieldErrs],
-                    [...nonFieldErrs, ...newNonFieldErrs],
-                  ]
-                },
-                [[], []],
-              )
-
-              setIsValid(false)
-
-              const serverErrorAction = {
-                type: 'ADD_SERVER_ERRORS' as const,
-                errors: fieldErrors,
-              }
-
-              prevFormStateRef.current = fieldReducer(prevFormStateRef.current, serverErrorAction)
-              dispatchFields(serverErrorAction)
-
-              nonFieldErrors.forEach((err) => {
-                // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
-                if (
-                  onNonFieldError?.(
-                    err,
-                    () => void contextRef.current.submit({ overrides: overridesFromArgs }),
-                  )
-                ) {
-                  return
+                if (err?.message) {
+                  newNonFieldErrs.push(err)
                 }
 
-                errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
-              })
+                if (Array.isArray(err?.data?.errors)) {
+                  err.data?.errors.forEach((dataError) => {
+                    if (dataError?.path) {
+                      newFieldErrs.push(dataError)
+                    } else {
+                      newNonFieldErrs.push(dataError)
+                    }
+                  })
+                }
 
-              return
+                return [
+                  [...fieldErrs, ...newFieldErrs],
+                  [...nonFieldErrs, ...newNonFieldErrs],
+                ]
+              },
+              [[], []],
+            )
+
+            setIsValid(false)
+
+            const serverErrorAction = {
+              type: 'ADD_SERVER_ERRORS' as const,
+              errors: fieldErrors,
             }
 
-            const message = errorMessages?.[res.status] || res?.statusText || t('error:unknown')
+            prevFormStateRef.current = fieldReducer(prevFormStateRef.current, serverErrorAction)
+            dispatchFields(serverErrorAction)
 
-            errorToast(message)
+            nonFieldErrors.forEach((err) => {
+              // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
+              if (
+                onNonFieldError?.(
+                  err,
+                  () => void contextRef.current.submit({ overrides: overridesFromArgs }),
+                )
+              ) {
+                return
+              }
+
+              errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
+            })
+
+            return
           }
 
-          return { formState: contextRef.current.fields, res }
-        } catch (err) {
-          console.error('Error submitting form', err) // eslint-disable-line no-console
-          setIsSubmitted(true)
-          errorToast(err.message)
+          const message = errorMessages?.[res.status] || res?.statusText || t('error:unknown')
+
+          errorToast(message)
         }
+
+        return { formState: contextRef.current.fields, res }
       } catch (err) {
-        setIsSubmitted(true)
+        const isCurrentRequest = requestContext.isCurrent()
+
+        if (!preservePromiseToast && !isCurrentRequest) {
+          return
+        }
+
+        console.error('Error submitting form', err) // eslint-disable-line no-console
+
+        if (isCurrentRequest) {
+          setIsSubmitted(true)
+        }
+
         errorToast(err instanceof Error ? err.message : t('error:unknown'))
       } finally {
-        setDisabledBySubmission(false)
-        setIsProcessing(false)
-        submissionActivityRef.current.running -= 1
+        if (requestContext.isCurrent()) {
+          // Only put back what this submission took: an autosave must not release a queued save's disable.
+          if (disableFormWhileProcessing) {
+            setIsProcessing(false)
+            setDisabledBySubmission(false)
+          }
+
+          if (options?.submissionType === 'autosave') {
+            setIsBackgroundProcessing(false)
+          }
+        } else if (!preservePromiseToast && promiseToastID !== undefined) {
+          toast.dismiss(promiseToastID)
+        }
       }
     },
     [
       beforeSubmit,
+      setIsBackgroundProcessing,
       startRouteTransition,
       action,
       disableSuccessStatus,
@@ -491,37 +578,60 @@ export const useFormSubmission = ({
       onSubmit,
       onSuccess,
       redirect,
-      refreshFormStateAfterSave,
+      refreshFormState,
       validateForm,
       router,
       t,
       i18n,
       validateDrafts,
       waitForAutocomplete,
+      setDisabledBySubmission,
       setIsModified,
+      setIsSubmitted,
       onNonFieldError,
       contextRef,
-      formRef,
       prevFormStateRef,
       setIsValid,
-      setIsSubmitted,
-      submissionActivityRef,
     ],
   )
 
   const submit = useCallback<Submit>(
     async (options, event) => {
-      if (contextRef.current.disabled) {
-        event?.preventDefault()
-        return
-      }
-
       event?.stopPropagation()
       event?.preventDefault()
 
-      return executeSubmit(options)
+      if (contextRef.current.disabled) {
+        return
+      }
+
+      const shouldDisableForm = options?.disableFormWhileProcessing ?? true
+
+      // Disable before queueing, like a direct submit, so the guard above rejects any submission made while this one waits.
+      if (shouldDisableForm) {
+        const activeElement = document.activeElement
+
+        // Disabling the active field drops browser focus to the body.
+        submitFocus.current =
+          activeElement instanceof HTMLElement && formRef.current?.contains(activeElement)
+            ? activeElement
+            : null
+
+        setIsProcessing(true)
+        setDisabledBySubmission(true)
+      }
+
+      // While a disabling submission waits, the guard above rejects every other submit, so only a reset can supersede it.
+      // Every reset restores request state, so a superseded submission has nothing to release.
+      const result = await queueTask({
+        priority: requestPriority[options?.submissionType ?? 'submit'],
+        task: (requestContext) => executeSubmit({ options, requestContext }),
+      })
+
+      if (result.status === 'completed') {
+        return result.value
+      }
     },
-    [contextRef, executeSubmit],
+    [contextRef, executeSubmit, formRef, queueTask, setDisabledBySubmission],
   )
 
   useEffect(() => {
@@ -534,6 +644,7 @@ export const useFormSubmission = ({
     backgroundProcessing: isBackgroundProcessing,
     disabledBySubmission,
     processing: isProcessing,
+    restoreRequestState,
     setBackgroundProcessing: setIsBackgroundProcessing,
     setDisabled: setDisabledBySubmission,
     setModified: setIsModified,

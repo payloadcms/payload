@@ -123,6 +123,12 @@ export type SubmitOptions<C = Record<string, unknown>> = {
    * @default false
    */
   skipValidation?: boolean
+  /**
+   * Ranks this submission in the form's request queue: `submit` before `autosave`.
+   * `autosave` also marks the form as processing in the background.
+   * @default 'submit'
+   */
+  submissionType?: 'autosave' | 'submit'
 }
 
 export type DispatchFields = React.Dispatch<any>
