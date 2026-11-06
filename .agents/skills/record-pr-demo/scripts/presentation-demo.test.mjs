@@ -508,13 +508,17 @@ test('should use the shared sidebar during recorder resizing and reject mismatch
     await presentation.flush()
     const sidebar = stage.locator('.annotation-sidebar')
     const initial = await sidebar.boundingBox()
+    const initialWindow = await stage.locator('[data-window]').boundingBox()
+    assert.ok(Math.abs(initial.y - initialWindow.y) < 0.1)
+    assert.ok(Math.abs(initial.height - initialWindow.height) < 0.1)
+
     assert.equal(await sidebar.locator('button').count(), 0)
     await presentation.resizeWindow({ width: 390, height: 720 })
     await presentation.flush()
     assert.deepEqual(await sidebar.boundingBox(), initial)
     const panel = await sidebar.boundingBox()
     const window = await stage.locator('[data-window]').boundingBox()
-    assert.ok(panel.x + panel.width < window.x)
+    assert.ok(Math.abs(panel.x + panel.width - window.x) < 0.1)
     await assert.rejects(
       () =>
         presentation.setAnnotation({

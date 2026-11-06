@@ -19,34 +19,51 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
   const style = document.createElement('style')
   style.textContent = `
     .stage[data-sidebar] .footer { display:none; }
-    .annotation-sidebar { position:absolute; left:16px; width:300px; border:1px solid var(--line); border-radius:18px; background:var(--paper); color:var(--ink); overflow:hidden; display:flex; flex-direction:column; }
-    .annotation-sidebar[hidden], .sidebar-steps[hidden] { display:none; }
-    .sidebar-intro { flex:none; padding:20px 24px; background:color-mix(in srgb,var(--ink) 5%,var(--paper)); }
-    .sidebar-intro .kind { display:inline-block; }
-    .sidebar-intro p { margin:6px 0 0; color:#fff; font-size:14px; line-height:1.6; }
-    .sidebar-steps { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:var(--sub) transparent; list-style:none; margin:0; padding:4px 12px 12px; }
-    .sidebar-step { width:100%; position:relative; display:block; border:0; border-radius:8px; padding:18px 12px; background:transparent; color:var(--ink); text-align:left; opacity:.42; transition:opacity 200ms ease; }
+    .stage[data-sidebar] .window { border:0; padding-bottom:12px; border-top-left-radius:0; border-bottom-left-radius:0; }
+    .stage[data-sidebar] .window::before { content:""; position:absolute; inset:0 auto 0 0; width:1px; background:var(--line); pointer-events:none; }
+    .sidebar-shell { position:absolute; left:16px; width:300px; border-radius:18px 0 0 18px; background:var(--sidebar-bg,var(--shell)); overflow:hidden; }
+    .annotation-sidebar { height:100%; color:var(--ink); overflow:hidden; display:flex; flex-direction:column; }
+    .sidebar-shell[hidden], .annotation-sidebar[hidden], .sidebar-steps[hidden] { display:none; }
+    .sidebar-overview-row { flex:none; height:36px; display:flex; align-items:center; padding-bottom:8px; margin:10px 10px 0; }
+    .sidebar-overview-row .sidebar-heading { flex:1; margin:0; }
+    .sidebar-heading { flex:none; margin:10px 10px 8px; padding:3px 9px; border:1px solid var(--line); border-radius:7px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; }
+    .sidebar-intro { flex:none; display:flex; align-items:flex-start; gap:10px; margin:0 10px 8px; padding:14px; border:1px solid var(--line); border-radius:8px; background:var(--paper); }
+    .sidebar-intro + .sidebar-heading { margin-top:0; }
+    .sidebar-intro p { margin:0; min-width:0; color:var(--ink); font-size:14px; line-height:1.6; }
+    .sidebar-steps { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:var(--sub) transparent; list-style:none; margin:0; padding:0 10px 10px; }
+    .sidebar-step { width:100%; position:relative; display:block; border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--paper); color:var(--ink); text-align:left; }
     button.sidebar-step { cursor:pointer; }
-    button.sidebar-step:hover { opacity:.75; }
+    .sidebar-step :is(p,.kind) { opacity:.5; transition:opacity 200ms ease; }
+    button.sidebar-step:hover :is(p,.kind) { opacity:.85; }
     .sidebar-step:focus-visible { outline:2px solid #0d99ff; outline-offset:-2px; }
-    .sidebar-step[aria-current=step] { opacity:1; }
-    .sidebar-dot { position:absolute; left:-3.5px; top:26px; width:7px; height:7px; border-radius:50%; background:transparent; }
+    .sidebar-step[aria-current=step] :is(p,.kind) { opacity:1; }
+    .sidebar-dot { position:absolute; right:8px; top:8px; width:8px; height:8px; border-radius:50%; background:transparent; }
     [aria-current=step] .sidebar-dot { background:#0d99ff; }
-    .sidebar-steps li + li::before { content:""; display:block; width:calc(100% + 24px); height:1px; margin:0 -12px; background:var(--line); }
+    .sidebar-steps li + li { margin-top:6px; }
     .sidebar-step .kind { display:inline-block; margin-bottom:6px; }
-    .sidebar-step p { margin:0; font-size:14px; line-height:1.6; color:var(--sub); }
-    @media(prefers-reduced-motion:reduce) { .sidebar-step { transition:none; } }
+    .sidebar-step p { margin:0; font-size:14px; line-height:1.6; color:var(--ink); }
+    @media(prefers-reduced-motion:reduce) { .sidebar-step :is(p,.kind) { transition:none; } }
   `
   shadow.append(style)
+  const shell = document.createElement('div')
+  shell.className = 'sidebar-shell'
   const panel = document.createElement('section')
-  panel.className = 'annotation-sidebar dark'
+  panel.className = 'annotation-sidebar'
   panel.setAttribute('aria-label', 'Walkthrough steps')
+  const heading = document.createElement('div')
+  heading.className = 'sidebar-heading'
+  heading.textContent = 'Overview'
+  const overviewRow = document.createElement('div')
+  overviewRow.className = 'sidebar-overview-row'
+  overviewRow.append(heading)
+  const walkthroughHeading = document.createElement('div')
+  walkthroughHeading.className = 'sidebar-heading'
+  walkthroughHeading.textContent = 'Walkthrough'
   const intro = document.createElement('div')
   intro.className = 'sidebar-intro'
-  const badge = shadow.querySelector('[data-kind]').cloneNode(true)
   const description = document.createElement('p')
   description.textContent = shadow.querySelector('[data-description]').textContent
-  intro.append(badge, description)
+  intro.append(description)
   const list = document.createElement('ol')
   list.className = 'sidebar-steps'
   list.tabIndex = 0
@@ -76,9 +93,10 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
     list.append(item)
     return button
   })
-  panel.append(intro, list)
+  panel.append(overviewRow, intro, walkthroughHeading, list)
   const stage = shadow.querySelector('[data-canvas]')
-  stage.append(panel)
+  shell.append(panel)
+  stage.append(shell)
   let viewport
   let sidebarGeometry
   let currentIndex
@@ -117,8 +135,8 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
     if (!enabled) return
     const windowWidth = width + 22
     const windowHeight = height + 58
-    const left = 332
-    const availableWidth = stage.clientWidth - 348
+    const left = 316
+    const availableWidth = stage.clientWidth - 332
     const scale = Math.min(
       1,
       availableWidth / windowWidth,
@@ -126,12 +144,12 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
     )
     const top = (stage.clientHeight - windowHeight * scale) / 2
     sidebarGeometry ??= {
-      top: `${top - 32}px`,
-      height: `${windowHeight * scale + 64}px`,
+      top: `${top}px`,
+      height: `${windowHeight * scale}px`,
     }
-    Object.assign(panel.style, sidebarGeometry)
+    Object.assign(shell.style, sidebarGeometry)
     Object.assign(shadow.querySelector('[data-window]').style, {
-      left: `${left + (availableWidth - windowWidth * scale) / 2}px`,
+      left: `${left}px`,
       top: `${top}px`,
       transform: `scale(${scale})`,
     })
@@ -160,6 +178,7 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
         index !== currentIndex || ((panel.hidden || list.hidden) && enabled && visible)
       currentIndex = index
       stage.toggleAttribute('data-sidebar', enabled)
+      shell.hidden = !enabled
       panel.hidden = !enabled
       list.hidden = !visible
       buttons.forEach((button, i) => {

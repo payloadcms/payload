@@ -66,7 +66,7 @@ test('should scrub real responsive content without changing the title or footer 
     )
     assert.equal(
       await page.locator('[data-canvas]').evaluate((e) => getComputedStyle(e).backgroundColor),
-      'rgb(87, 87, 87)',
+      'rgb(25, 25, 25)',
     )
     assert.equal(
       await page
@@ -81,7 +81,7 @@ test('should scrub real responsive content without changing the title or footer 
     await page.getByRole('button', { name: 'Light', exact: true }).click()
     assert.equal(
       await page.locator('[data-canvas]').evaluate((e) => getComputedStyle(e).backgroundColor),
-      'rgb(151, 151, 151)',
+      'rgb(255, 255, 255)',
     )
     assert.equal(
       await page
@@ -112,6 +112,10 @@ test('should refresh the real frame from the persistent toolbar button with keyb
     page.on('request', (request) => {
       if (request.url().endsWith('/preview/application.html')) loads++
     })
+    await page.route('**/preview/application.html', async (route) => {
+      if (loads > 1) await new Promise((resolve) => setTimeout(resolve, 200))
+      await route.continue()
+    })
     await page.goto(url)
     await page.frameLocator('iframe').getByRole('heading', { name: 'Posts', exact: true }).waitFor()
     await page.getByRole('button', { name: 'Mobile', exact: true }).click()
@@ -129,12 +133,15 @@ test('should refresh the real frame from the persistent toolbar button with keyb
     await expect(page.locator('[data-size]')).toBeVisible()
     await expect(page.locator('[data-size]')).toHaveText('390 × 720')
     await expect(page.locator('#chrome').getByRole('status')).toHaveText('Refreshed')
-    await page.getByRole('button', { name: 'Simulate refresh', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Simulate refresh', exact: true })).toHaveCount(0)
+    await button.click()
     await expect(page.locator('[data-refresh-button]')).toHaveAttribute('data-state', 'refreshing')
     await expect(page.locator('[data-refresh-icon]')).toHaveCSS('animation-name', 'refresh-spin')
     await expect.poll(() => loads).toBe(4)
     await expect(page.locator('#chrome').getByRole('status')).toHaveText('Refreshed')
     await expect(page.locator('[data-refresh-button]')).toBeVisible()
+    await page.keyboard.press('Tab')
+    await page.mouse.move(0, 0)
     await expect(page.locator('[data-refresh-button]')).toHaveCSS('opacity', '0.35')
   } finally {
     await browser.close()
@@ -192,8 +199,57 @@ test('should keep the sidebar fixed while resizing and reveal current steps in l
     await expect(panel.locator('.sidebar-step [data-kind=Bug]')).toHaveCount(2)
     const initial = await panel.boundingBox()
     const header = await panel.locator('.sidebar-intro').boundingBox()
+    const marker = panel.locator('[aria-current=step] .sidebar-dot')
+    await expect(marker).toHaveCSS('background-color', 'rgb(13, 153, 255)')
+    const markerBounds = await marker.boundingBox()
+    const textBounds = await panel.locator('[aria-current=step] p').boundingBox()
+    const cardBounds = await panel.locator('[aria-current=step]').boundingBox()
+    const introBounds = await panel.locator('.sidebar-intro').boundingBox()
+    assert.ok(markerBounds.x > cardBounds.x + cardBounds.width * 0.8)
+    assert.ok(markerBounds.y >= cardBounds.y)
+    assert.ok(markerBounds.y + markerBounds.height < textBounds.y + textBounds.height)
+    assert.ok(Math.abs(introBounds.x - cardBounds.x) < 0.1)
+
+    const window = await page.locator('[data-window]').boundingBox()
+    assert.ok(Math.abs(initial.y - window.y) < 0.1)
+    assert.ok(Math.abs(initial.height - window.height) < 0.1)
+    assert.ok(Math.abs(initial.x + initial.width - window.x) < 0.1)
+    await expect(panel).toHaveCSS('border-top-right-radius', '0px')
+    await expect(page.locator('[data-window]')).toHaveCSS('border-top-left-radius', '0px')
+    await expect(page.locator('[data-window]')).toHaveCSS('border-top-width', '0px')
+    const dividerColor = await page
+      .locator('[data-window]')
+      .evaluate((el) => getComputedStyle(el, '::before').backgroundColor)
+    const cardBorderColor = await panel
+      .locator('.sidebar-step')
+      .first()
+      .evaluate((el) => getComputedStyle(el).borderTopColor)
+    assert.equal(dividerColor, cardBorderColor)
+
+    await expect(page.locator('.sidebar-shell')).toHaveCSS('background-color', 'rgb(221, 221, 221)')
+    await expect(panel.locator('.sidebar-step').first()).toHaveCSS(
+      'background-color',
+      'rgb(255, 255, 255)',
+    )
+    await expect(panel.locator('.sidebar-intro p')).toHaveCSS('color', 'rgb(37, 36, 34)')
+    await page.getByRole('button', { name: 'Dark', exact: true }).click()
+    await expect(page.locator('.sidebar-shell')).toHaveCSS('background-color', 'rgb(35, 35, 35)')
+    await expect(panel.locator('.sidebar-step').first()).toHaveCSS(
+      'background-color',
+      'rgb(25, 25, 25)',
+    )
+    await expect(panel.locator('.sidebar-intro p')).toHaveCSS('color', 'rgb(237, 237, 235)')
+    await expect(panel.locator('.sidebar-step [data-kind=Bug]').first()).toHaveCSS(
+      'background-color',
+      'rgb(96, 51, 42)',
+    )
+    assert.deepEqual(await panel.boundingBox(), initial)
+    await page.getByRole('button', { name: 'Light', exact: true }).click()
+
     await page.getByRole('button', { name: 'Mobile', exact: true }).click()
     assert.deepEqual(await panel.boundingBox(), initial)
+    const resizedWindow = await page.locator('[data-window]').boundingBox()
+    assert.ok(Math.abs(initial.x + initial.width - resizedWindow.x) < 0.1)
     await page.getByRole('slider').focus()
     await page.keyboard.press('End')
     await expect.poll(() => list.evaluate((e) => e.scrollTop)).toBeGreaterThan(0)
@@ -214,7 +270,7 @@ test('should keep the sidebar fixed while resizing and reveal current steps in l
     await expect(panel.locator('[aria-current=step]')).toContainText('Update dates hide')
     await expect(panel.locator('[aria-current=step] [data-kind=Bug]')).toHaveCSS(
       'background-color',
-      'rgb(96, 51, 42)',
+      'rgb(255, 226, 224)',
     )
   } finally {
     await browser.close()

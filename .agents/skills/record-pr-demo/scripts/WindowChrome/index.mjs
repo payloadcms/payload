@@ -37,8 +37,8 @@ export function mountDemoChrome({
     * { box-sizing:border-box; }
     [hidden] { display:none; }
     .stage { position:absolute; inset:0 auto auto 0; width:${canvas.width}px; height:${canvas.height}px; transform-origin:top left; overflow:hidden; color:var(--ink); background:var(--stage); }
-    .light { --paper:#fff; --ink:#252422; --sub:#66635e; --stage:#979797; --shell:#d6d4cf; --line:#00000016; --rim:#ffffffa6; --badge:#ffffff70; --progress-track:#00000020; }
-    .dark { --paper:#191919; --ink:#ededeb; --sub:#bbb8b0; --stage:#575757; --shell:#333330; --line:#ffffff22; --rim:#ffffff12; --badge:#ffffff0b; --progress-track:#ffffff30; }
+    .light { --paper:#fff; --ink:#252422; --sub:#66635e; --stage:var(--paper); --shell:#dddddd; --line:#c7c7c7; --rim:#ffffffa6; --badge:#ffffff70; --progress-track:#00000020; }
+    .dark { --paper:#191919; --ink:#ededeb; --sub:#ffffff; --stage:var(--paper); --shell:#232323; --line:var(--badge); --rim:#ffffff12; --badge:#2d2d2d; --progress-track:#ffffff30; }
     .light { --kind-feature-bg:var(--color-bg-brand-tertiary,#e5f4ff); --kind-feature-border:var(--color-border-brand,#bde3ff); --kind-feature-text:color-mix(in srgb,var(--color-text-brand,#007be5) 70%,var(--ink)); --kind-fix-bg:var(--color-bg-warning-tertiary,#fff1c2); --kind-fix-border:var(--color-border-warning,#f5dfa8); --kind-fix-text:color-mix(in srgb,var(--color-text-warning,#b86200) 70%,var(--ink)); }
     .dark { --kind-feature-bg:var(--color-bg-brand-tertiary,#394360); --kind-feature-border:var(--color-border-brand,#536383); --kind-feature-text:color-mix(in srgb,var(--color-text-brand,#80caff) 70%,var(--ink)); --kind-fix-bg:var(--color-bg-warning-tertiary,#5c4100); --kind-fix-border:var(--color-border-warning,#7a5800); --kind-fix-text:color-mix(in srgb,var(--color-text-warning,#ffd966) 70%,var(--ink)); }
     .light { --keycap-bg:var(--color-bg-secondary,#f5f5f5); --keycap-border:var(--color-border,#e6e6e6); --keycap-text:var(--color-text,rgba(0,0,0,.9)); }
@@ -65,7 +65,7 @@ export function mountDemoChrome({
     .footer:has(.note:not([hidden]),.accessibility:not([hidden])) .change { border-block-end:1px solid var(--line); }
     .change .kind { align-self:center; flex:none; }
 
-    .kind { align-self:flex-start; padding-inline:6px; border:1px solid var(--kind-border); border-radius:4px; background:var(--kind-bg); color:var(--kind-text); font-size:13px; font-weight:500; line-height:16px; }
+    .kind { font-family:ui-monospace,monospace; align-self:flex-start; padding-inline:6px; border:1px solid var(--kind-border); border-radius:4px; background:var(--kind-bg); color:var(--kind-text); font-size:12px; font-weight:500; line-height:16px; }
     .kind[data-kind="Feature"] { --kind-bg:var(--kind-feature-bg); --kind-border:var(--kind-feature-border); --kind-text:var(--kind-feature-text); }
     .light { --kind-bug-bg:var(--color-bg-danger-tertiary,#ffe2e0); --kind-bug-border:var(--color-border-danger,#ffc7c2); --kind-bug-text:var(--color-text-danger,#dc3412); }
     .dark { --kind-bug-bg:var(--color-bg-danger-tertiary,#60332a); --kind-bug-border:var(--color-border-danger,#864537); --kind-bug-text:var(--color-text-danger,#ffafa3); }
@@ -509,7 +509,7 @@ function validateSize({ width, height, name }) {
 export function getDefaultCanvas({ viewport, accessibility = false, annotationLayout }) {
   if (annotationLayout === 'left' && !accessibility) {
     return {
-      width: Math.ceil((viewport.width + 22 + 348) / 2) * 2,
+      width: Math.ceil((viewport.width + 22 + 332) / 2) * 2,
       height: Math.ceil(Math.max(1000, viewport.height + 58 + 128) / 2) * 2,
     }
   }
