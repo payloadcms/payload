@@ -18,6 +18,7 @@ export async function getFallbackValue({
   let fallbackValue: JsonValue = undefined
   if ('name' in field && field.name) {
     if (isDocumentValueAllowed && typeof siblingDoc[field.name] !== 'undefined') {
+      // Keep nested mutations from hooks and access control from changing the original document.
       fallbackValue = deepCopyObjectSimple(siblingDoc[field.name])
     } else if ('defaultValue' in field && typeof field.defaultValue !== 'undefined') {
       fallbackValue = await getDefaultValue({
