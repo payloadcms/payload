@@ -5,8 +5,8 @@ import type { Dispatch, RefObject } from 'react'
 
 import {
   deepCopyObjectSimpleWithoutReactComponents,
+  getDataFromFormState,
   hasDraftValidationEnabled,
-  reduceFieldsToValues,
   wait,
 } from 'payload/shared'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -229,7 +229,7 @@ export const useFormSubmission = ({
           await wait(100)
         }
 
-        const data = reduceFieldsToValues(contextRef.current.fields, true)
+        const data = getDataFromFormState(contextRef.current.fields, true)
 
         const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
           contextRef.current.fields,

@@ -1,14 +1,15 @@
 import type { Data, FormState } from '../admin/types.js'
 
 import { unflatten as flatleyUnflatten } from './unflatten.js'
+
 /**
- * Reduce flattened form fields (Fields) to just map to the respective values instead of the full FormField object
+ * Returns plain data from flattened form state (`FormState`).
  *
- * @param unflatten This also unflattens the data if `unflatten` is true. The unflattened data should match the original data structure
- * @param ignoreDisableFormData - if true, will include fields that have `disableFormData` set to true, for example, blocks or arrays fields.
+ * @param unflatten Unflattens the field values into nested data when true.
+ * @param ignoreDisableFormData Includes disabled fields and preserves raw row counts when true.
  *
  */
-export const reduceFieldsToValues = (
+export const getDataFromFormState = (
   fields: FormState,
   unflatten?: boolean,
   ignoreDisableFormData?: boolean,
