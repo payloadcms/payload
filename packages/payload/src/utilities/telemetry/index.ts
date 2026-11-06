@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 
 import type { Payload } from '../../types/index.js'
 import type { AdminInitEvent } from './events/adminInit.js'
+import type { DashboardWidgetsEvent } from './events/dashboardWidgets.js'
 import type { ServerInitEvent } from './events/serverInit.js'
 import type { FeatureInfo } from './featureInfo/types.js'
 import type { FigmaProduct, ProjectCohort } from './getProjectContext.js'
@@ -36,6 +37,8 @@ export type BaseEvent = {
   projectCohorts: ProjectCohort[]
   projectID: string
   projectIDSource: 'cwd' | 'git' | 'packageJSON' | 'serverURL'
+  /** Measurement revision; reports without this field use legacy definitions. */
+  telemetryRevision: number
   uploadAdapters: string[]
 } & FeatureInfo
 
@@ -44,7 +47,7 @@ type PackageJSON = {
   name: string
 }
 
-type TelemetryEvent = AdminInitEvent | ServerInitEvent
+type TelemetryEvent = AdminInitEvent | DashboardWidgetsEvent | ServerInitEvent
 
 type Args<TEvent extends { type: string } = TelemetryEvent> = {
   event: TEvent
@@ -72,9 +75,10 @@ export const sendTelemetryEvent = async <TEvent extends { type: string }>({
           isCI: ciInfo.isCI,
           nodeEnv: process.env.NODE_ENV || 'development',
           nodeVersion: process.version,
-          payloadVersion: getPayloadVersion(packageJSON!),
+          payloadVersion: await getPayloadVersion(),
           projectID,
           projectIDSource,
+          telemetryRevision: 1,
           ...getProjectContext({
             packages,
             payload,
@@ -90,16 +94,33 @@ export const sendTelemetryEvent = async <TEvent extends { type: string }>({
         }
       }
 
+      const eventBase =
+        event.type === 'dashboard-widgets'
+          ? {
+              isCI: baseEvent.isCI,
+              nodeEnv: baseEvent.nodeEnv,
+              payloadVersion: baseEvent.payloadVersion,
+              projectCohorts: baseEvent.projectCohorts,
+              projectID: baseEvent.projectID,
+              projectIDSource: baseEvent.projectIDSource,
+              telemetryRevision: baseEvent.telemetryRevision,
+            }
+          : baseEvent
+      const telemetryEvent = { ...eventBase, ...event }
+
       if (process.env.PAYLOAD_TELEMETRY_DEBUG) {
         payload.logger.info({
-          event: { ...baseEvent, ...event, packageJSONPath },
+          event:
+            event.type === 'dashboard-widgets'
+              ? telemetryEvent
+              : { ...telemetryEvent, packageJSONPath },
           msg: 'Telemetry Event',
         })
         return
       }
 
       await fetch('https://telemetry.payloadcms.com/events', {
-        body: JSON.stringify({ ...baseEvent, ...event }),
+        body: JSON.stringify(telemetryEvent),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -190,8 +211,17 @@ const getPackageJSONID = (payload: Payload, packageJSON: PackageJSON): string =>
   return oneWayHash(packageJSON.name, payload.secret)
 }
 
-export const getPayloadVersion = (packageJSON: PackageJSON): string => {
-  return packageJSON?.dependencies?.payload ?? ''
+export const getPayloadVersion = async (): Promise<string> => {
+  try {
+    const { default: packageJSON } = await import('../../../package.json', {
+      with: { type: 'json' },
+    })
+
+    return packageJSON.version
+  } catch (_) {
+    // Keep the remaining measurements when the running version cannot be resolved.
+    return ''
+  }
 }
 
 const getFrameworkAdapter = (packages: string[]): 'next' | 'tanstack-start' | 'unknown' => {

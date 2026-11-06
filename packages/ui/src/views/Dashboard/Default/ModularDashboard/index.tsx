@@ -1,6 +1,7 @@
 import type { TFunction } from '@payloadcms/translations'
-import type { ClientWidget, Field, WidgetServerProps } from 'payload'
+import type { ClientWidget, WidgetServerProps } from 'payload'
 
+import { dashboardWidgets } from 'payload/internal'
 import React from 'react'
 
 import type { DashboardViewServerProps } from '../index.js'
@@ -26,6 +27,12 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
   const layout =
     (await getItemsFromPreferences(props.payload, user)) ??
     (await getItemsFromConfig(defaultLayout, req, widgets))
+
+  dashboardWidgets({
+    layout,
+    payload: props.payload,
+    user,
+  })
 
   const serverLayout: ServerLayout = layout.map((layoutItem) => {
     const widgetSlug = layoutItem.id.slice(0, layoutItem.id.lastIndexOf('-'))

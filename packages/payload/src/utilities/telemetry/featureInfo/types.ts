@@ -21,7 +21,6 @@ type CompleteFeatureInfo = {
   }
   hierarchyCollectionCount: number
   i18n: {
-    hasCustomAdminTranslations: boolean
     supportedAdminLanguageCount: number
   }
   jobsAndQueues: {
@@ -40,6 +39,7 @@ type CompleteFeatureInfo = {
     previewGlobalCount: number
   }
   queryPresetCollectionCount: number
+  richText: { fieldCount: number }
   richTextFeatures: RichTextFeature[]
   trashCollectionCount: number
   uploadAndMedia: {

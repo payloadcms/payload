@@ -53,4 +53,5 @@ export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntit
 export { httpStatus } from '../utilities/httpStatus.js'
 export { isURLAllowed } from '../utilities/isURLAllowed.js'
 export { sanitizePermissions } from '../utilities/sanitizePermissions.js'
+export { dashboardWidgets } from '../utilities/telemetry/events/dashboardWidgets.js'
 export { sendTelemetryEvent } from '../utilities/telemetry/index.js'
