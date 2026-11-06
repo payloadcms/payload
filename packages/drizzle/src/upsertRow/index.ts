@@ -119,7 +119,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       })
 
       const findManyKeysLength = Object.keys(findManyArgs).length
-      const hasOnlyColumns = Object.keys(findManyArgs.columns || {}).length > 0
+      // `returning()` can only return plain columns of this table. Extras (e.g. `point`
+      // fields read through ST_AsGeoJSON) and `with` (e.g. `_locales`) need the findFirst path below.
+      const hasOnlyColumns =
+        findManyKeysLength === 1 && Object.keys(findManyArgs.columns || {}).length > 0
 
       if (!hasDataToUpdate) {
         // Nothing to update => just fetch current row and return
