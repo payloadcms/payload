@@ -6,7 +6,7 @@ const SelectVersionsFields: CollectionConfig = {
   slug: selectVersionsFieldsSlug,
   versions: { drafts: { autosave: true } },
   fields: [
-    { name: 'customJSON', type: 'json' },
+    { name: 'customJSON', type: 'json', label: 'Custom JSON' },
     {
       type: 'select',
       hasMany: true,
