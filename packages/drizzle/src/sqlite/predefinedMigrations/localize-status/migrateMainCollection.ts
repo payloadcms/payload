@@ -28,19 +28,24 @@ export async function migrateMainCollectionStatus({
 
   for (const doc of documents) {
     for (const locale of locales) {
-      const latestVersionRows: any[] = await db.all(
-        sql.raw(
-          `SELECT l.version__status as _status FROM "${versionsTable}" v JOIN "${versionsTable}_locales" l ON l._parent_id = v.id WHERE v.parent_id = ${doc.id} AND l._locale = '${locale}' ORDER BY v.created_at DESC LIMIT 1`,
-        ),
-      )
+      const latestVersionRows: any[] = await db.all(sql`
+        SELECT l.version__status as _status
+        FROM ${sql.identifier(versionsTable)} v
+        JOIN ${sql.identifier(`${versionsTable}_locales`)} l ON l._parent_id = v.id
+        WHERE v.parent_id = ${doc.id} AND l._locale = ${locale}
+        ORDER BY v.created_at DESC LIMIT 1
+      `)
 
-      const status = latestVersionRows[0]?._status || 'draft'
+      const status = latestVersionRows[0]?._status
 
-      await db.run(
-        sql.raw(
-          `UPDATE "${mainLocalesTable}" SET _status = '${status}' WHERE _parent_id = ${doc.id} AND _locale = '${locale}'`,
-        ),
-      )
+      if (!status) {
+        continue
+      }
+
+      await db.run(sql`
+        UPDATE ${sql.identifier(mainLocalesTable)} SET _status = ${status}
+        WHERE _parent_id = ${doc.id} AND _locale = ${locale}
+      `)
     }
   }
 
