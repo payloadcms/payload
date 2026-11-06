@@ -3,6 +3,8 @@ import type { IncomingDrafts } from '../../../versions/types.js'
 import type { FeatureInfo, RichTextFeature } from './types.js'
 
 import { defaultUserCollection } from '../../../auth/defaultUser.js'
+import { traverseFields } from '../../traverseFields.js'
+import { getTelemetryWidgetType } from '../widgetType.js'
 
 export const getFeatureInfo = (config: SanitizedConfig): FeatureInfo => {
   const telemetryConfig = sanitizeTelemetryConfig(config)
@@ -22,6 +24,7 @@ export const getFeatureInfo = (config: SanitizedConfig): FeatureInfo => {
       collectUploadAndMedia,
       collectVersionsAndDrafts,
       collectRichTextFeatures,
+      collectRichTextFieldCount,
     ].map((collect) => safelyCollect(() => collect(telemetryConfig))),
   )
 }
@@ -34,8 +37,6 @@ const safelyCollect = (collect: () => FeatureInfo): FeatureInfo => {
   }
 }
 
-// sanitization adds 3 system widgets that we need to account for
-const SYSTEM_WIDGET_COUNT = 3
 const SYSTEM_COLLECTION_SLUGS = [
   'payload-locked-documents',
   'payload-migrations',
@@ -103,10 +104,9 @@ const collectAdminCustomization = (config: SanitizedConfig): FeatureInfo => ({
   adminCustomization: {
     customAdminComponentCount: countRootAdminComponents(config),
     customAdminViewCount: Object.keys(config.admin?.components?.views ?? {}).length,
-    customDashboardWidgetCount: Math.max(
-      0,
-      (config.admin?.dashboard?.widgets?.length ?? 0) - SYSTEM_WIDGET_COUNT,
-    ),
+    customDashboardWidgetCount: (config.admin?.dashboard?.widgets ?? []).filter(
+      ({ Component }) => getTelemetryWidgetType({ component: Component }) === 'custom',
+    ).length,
   },
 })
 
@@ -149,7 +149,6 @@ const collectBasicDenominators = (config: SanitizedConfig): FeatureInfo => ({
 
 const collectI18n = (config: SanitizedConfig): FeatureInfo => ({
   i18n: {
-    hasCustomAdminTranslations: Object.keys(config.i18n?.translations ?? {}).length > 0,
     supportedAdminLanguageCount: config.i18n?.supportedLanguages
       ? Object.keys(config.i18n.supportedLanguages).length
       : 1,
@@ -222,6 +221,30 @@ const collectRichTextFeatures = (config: SanitizedConfig): FeatureInfo => {
       featureSet.has(f),
     ) as RichTextFeature[],
   }
+}
+
+const collectRichTextFieldCount = (config: SanitizedConfig): FeatureInfo => {
+  const visitedFields = new Set<object>()
+  let fieldCount = 0
+
+  for (const entity of [...(config.collections ?? []), ...(config.globals ?? [])]) {
+    traverseFields({
+      callback: ({ field, next }) => {
+        // Skip shared and recursive block definitions already counted.
+        if (visitedFields.has(field)) {
+          return next?.()
+        }
+        visitedFields.add(field)
+        if (field.type === 'richText') {
+          fieldCount++
+        }
+      },
+      config,
+      fields: entity.fields,
+    })
+  }
+
+  return { richText: { fieldCount } }
 }
 
 const collectTrash = (config: SanitizedConfig): FeatureInfo => ({
