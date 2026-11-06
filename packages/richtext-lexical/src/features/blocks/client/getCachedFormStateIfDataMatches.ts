@@ -1,7 +1,7 @@
 import type { Data, FormState } from 'payload'
 
+import { reduceFormStateToData } from '@payloadcms/ui/shared'
 import { dequal } from 'dequal/lite'
-import { reduceFieldsToValues } from 'payload/shared'
 
 export const getCachedFormStateIfDataMatches = ({
   cachedFormState,
@@ -18,55 +18,20 @@ export const getCachedFormStateIfDataMatches = ({
     return false
   }
 
-  const cachedData = reduceFormStateToBlockData(cachedFormState)
+  const rowFieldPaths = getRowFieldPaths(cachedFormState)
+  const cachedData = normalizeData({
+    data: reduceFormStateToData({ formState: cachedFormState }),
+    rowFieldPaths,
+  })
   const currentData = normalizeData({
     data: formData,
-    rowFieldPaths: getRowFieldPaths(cachedFormState),
+    rowFieldPaths,
   })
 
   return dequal(withoutSystemBlockFields(cachedData), withoutSystemBlockFields(currentData))
     ? cachedFormState
     : false
 }
-
-export const reduceFormStateToBlockData = (formState: FormState, currentData?: Data): Data => {
-  const formStateWithoutRowCounts = Object.fromEntries(
-    Object.entries(formState).map(([path, fieldState]) => {
-      if (!fieldState || !Array.isArray(fieldState.rows)) {
-        return [path, fieldState]
-      }
-
-      if (
-        fieldState.value === undefined ||
-        (fieldState.disableFormData !== false &&
-          fieldState.isModified !== true &&
-          fieldState.rows.length === 0 &&
-          getValueAtPath(currentData, path) === null)
-      ) {
-        return [path, { ...fieldState, value: null }]
-      }
-
-      return [
-        path,
-        fieldState.value === null ? fieldState : { ...fieldState, disableFormData: true },
-      ]
-    }),
-  )
-
-  return normalizeData({
-    data: reduceFieldsToValues(formStateWithoutRowCounts, true),
-    rowFieldPaths: new Set(),
-  })
-}
-
-const getValueAtPath = (data: Data | undefined, path: string): unknown =>
-  path.split('.').reduce<unknown>((value, pathSegment) => {
-    if (!value || typeof value !== 'object') {
-      return undefined
-    }
-
-    return (value as Record<string, unknown>)[pathSegment]
-  }, data)
 
 const getRowFieldPaths = (formState: FormState): Set<string> =>
   new Set(

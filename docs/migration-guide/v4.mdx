@@ -887,6 +887,42 @@ If you only used `useDocumentInfo` for `title` / `setDocumentTitle`, drop the im
 
 Run `npx @payloadcms/codemod --transform migrate-document-title-context` to migrate automatically. The codemod splits mixed destructures, removes the `useDocumentInfo` import when no other properties are still used, and preserves any rename aliases (e.g. `{ title: docTitle }`).
 
+### `Form` makes its own form-state requests
+
+`Form` owns server form-state requests after field changes and successful saves. Document forms derive their request information from the surrounding document and operation providers. Nested forms identify their schema with `schemaPath`; bulk forms restrict their fields with `select`, and widget forms identify their entity with `widgetSlug`.
+
+Remove callbacks that fetch and return server form state:
+
+```diff
+-const onChange = async ({ formState, submitted }) => {
+-  const { state } = await getFormState({
+-    collectionSlug,
+-    docPermissions,
+-    docPreferences: await getDocPreferences(),
+-    formState,
+-    operation: 'update',
+-    schemaPath,
+-    signal: controller.signal,
+-    skipValidation: !submitted,
+-  })
+-  return state
+-}
+-
+-<Form initialState={initialState} onChange={[onChange]}>
++<Form initialState={initialState} schemaPath={schemaPath}>
+```
+
+A document's main form uses `isDocumentForm` and does not need `schemaPath`. It also owns document locking, stale-data detection, permission refreshes and preview URLs. Pass persistent read-only state with `readOnly`; temporary `disabled` or processing state does not make fields read-only on the server.
+
+Plain custom forms without `isDocumentForm`, `schemaPath` or `widgetSlug` remain local, even when they receive `initialState` or are rendered inside a document provider. Initial state continues to be built before rendering the form.
+
+BREAKING CHANGES:
+
+- The return values of `onChange` and `onSuccess` are ignored. Use them for side effects only.
+- `onChange` receives the merged state after an edit refresh or local submit validation, including invalid validation results. Validation notifications have `submitted: true`.
+- Schema-backed forms with a local `onSubmit` validate on the server before committing. Remove `beforeSubmit` callbacks whose only purpose is fetching server form state. Invalid state or a validation request failure prevents the local commit.
+- After a successful save, `Form` refreshes permissions and state before calling `onSuccess`. Creates skip the state refresh because they replace the form. A failed refresh does not change the successful save outcome or suppress `onSuccess`.
+
 ### Locale hooks can now return null
 
 The return type of `useLocale` is now `Locale | null`. It returns `null` when localization is disabled or configured without any locales. In Payload 3, the hook was typed as `Locale` and returned an empty object when localization was unavailable.
