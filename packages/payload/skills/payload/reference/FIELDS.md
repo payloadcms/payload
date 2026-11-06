@@ -366,7 +366,7 @@ const intersecting = await payload.find({
 })
 ```
 
-**Note**: Point fields are not supported in SQLite.
+**Note**: Point fields are not fully supported in SQLite. Geospatial indexes are not created and the query operators `near`, `within`, and `intersects` will not work.
 
 ## Join Fields
 

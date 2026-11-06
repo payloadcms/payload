@@ -466,7 +466,7 @@ import type { Post, User } from '@/payload-types'
 7. **Types regenerate automatically** in dev (`autoGenerate`) and during `payload build` — avoid running `generate:types` manually
 8. **MongoDB transactions** require replica set configuration
 9. **SQLite transactions**: Leave disabled by default. Do not add `transactionOptions: {}` unless enabling transactions is explicitly requested.
-10. **Point fields** are not fully supported in SQLite. Geospacial indexes are not created and the query operator `near`, `within`, and `intersects` will not work.
+10. **Point fields** are not fully supported in SQLite. Geospatial indexes are not created and the query operators `near`, `within`, and `intersects` will not work.
 11. **Computed virtual titles** — fields configured with `virtual: true` cannot be used in `admin.useAsTitle`; use a stored top-level field
 
 ## Best Practices
