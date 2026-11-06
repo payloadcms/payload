@@ -39,6 +39,13 @@ interface Opts {
    *
    * unflatten({ person: 'Ada', 'person.me': true }, { overwrite: true })
    * // { person: { me: true } }
+   *
+   * @example
+   * unflatten({ items: [], 'items.0.name': 'Milk' }, { overwrite: false })
+   * // { items: [] }
+   *
+   * unflatten({ items: [], 'items.0.name': 'Milk' }, { overwrite: true })
+   * // { items: [{ name: 'Milk' }] }
    */
   overwrite?: boolean
   recursive?: boolean
