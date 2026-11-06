@@ -57,54 +57,44 @@ let baseEvent: BaseEvent | null = null
 export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
   try {
     if (payload.config.telemetry !== false) {
-      const { packageJSON, packageJSONPath } = await getPackageJSON()
+      let telemetryEvent = event
+      let packageJSONPath: string | undefined
+      if (event.type !== 'dashboard-widgets') {
+        const packageInfo = await getPackageJSON()
+        const { packageJSON } = packageInfo
+        packageJSONPath = packageInfo.packageJSONPath
 
-      // Only generate the base event once
-      if (!baseEvent) {
-        const { projectID, source: projectIDSource } = getProjectID(payload, packageJSON!)
-        const plugins = getInstalledPluginSlugs(payload)
-        const packages = Object.keys(packageJSON!.dependencies ?? {})
-        baseEvent = {
-          ciName: ciInfo.isCI ? ciInfo.name : null,
-          envID: getEnvID(),
-          isCI: ciInfo.isCI,
-          nodeEnv: process.env.NODE_ENV || 'development',
-          nodeVersion: process.version,
-          payloadVersion: await getPayloadVersion(),
-          projectID,
-          projectIDSource,
-          telemetryRevision: 1,
-          ...getProjectContext({ packages, payload, plugins }),
-          frameworkAdapter: getFrameworkAdapter(packages),
-          ...getFeatureInfo(payload.config),
-          ...getLocalizationInfo(payload),
-          dbAdapter: payload.db.name,
-          emailAdapter: payload.email?.name || null,
-          plugins,
-          uploadAdapters: payload.config.upload.adapters,
+        // Only generate the base event once
+        if (!baseEvent) {
+          const { projectID, source: projectIDSource } = getProjectID(payload, packageJSON!)
+          const plugins = getInstalledPluginSlugs(payload)
+          const packages = Object.keys(packageJSON!.dependencies ?? {})
+          baseEvent = {
+            ciName: ciInfo.isCI ? ciInfo.name : null,
+            envID: getEnvID(),
+            isCI: ciInfo.isCI,
+            nodeEnv: process.env.NODE_ENV || 'development',
+            nodeVersion: process.version,
+            payloadVersion: await getPayloadVersion(),
+            projectID,
+            projectIDSource,
+            telemetryRevision: 1,
+            ...getProjectContext({ packages, payload, plugins }),
+            frameworkAdapter: getFrameworkAdapter(packages),
+            ...getFeatureInfo(payload.config),
+            ...getLocalizationInfo(payload),
+            dbAdapter: payload.db.name,
+            emailAdapter: payload.email?.name || null,
+            plugins,
+            uploadAdapters: payload.config.upload.adapters,
+          }
         }
+        telemetryEvent = { ...baseEvent, ...event }
       }
-
-      const eventBase =
-        event.type === 'dashboard-widgets'
-          ? {
-              isCI: baseEvent.isCI,
-              nodeEnv: baseEvent.nodeEnv,
-              payloadVersion: baseEvent.payloadVersion,
-              projectCohorts: baseEvent.projectCohorts,
-              projectID: baseEvent.projectID,
-              projectIDSource: baseEvent.projectIDSource,
-              telemetryRevision: baseEvent.telemetryRevision,
-            }
-          : baseEvent
-      const telemetryEvent = { ...eventBase, ...event }
 
       if (process.env.PAYLOAD_TELEMETRY_DEBUG) {
         payload.logger.info({
-          event:
-            event.type === 'dashboard-widgets'
-              ? telemetryEvent
-              : { ...telemetryEvent, packageJSONPath },
+          event: packageJSONPath ? { ...telemetryEvent, packageJSONPath } : telemetryEvent,
           msg: 'Telemetry Event',
         })
         return

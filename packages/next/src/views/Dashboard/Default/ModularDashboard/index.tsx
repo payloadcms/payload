@@ -30,7 +30,6 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
   dashboardWidgets({
     layout,
     payload: props.payload,
-    user,
   })
 
   const serverLayout: ServerLayout = layout.map((layoutItem) => {
