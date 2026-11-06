@@ -569,6 +569,7 @@ export { Text as VersionFieldDiffText } from '../../views/Version/RenderFieldsTo
 export { AutosaveCell as VersionsAutosaveCell } from '../../views/Versions/cells/AutosaveCell/index.js'
 export { CreatedAtCell as VersionsCreatedAtCell } from '../../views/Versions/cells/CreatedAt/index.js'
 export { IDCell as VersionsIDCell } from '../../views/Versions/cells/ID/index.js'
+export { UpdatedByCell as VersionsUpdatedByCell } from '../../views/Versions/cells/UpdatedBy/index.js'
 export { VersionDrawerCreatedAtCell } from '../../views/Versions/cells/VersionDrawerCreatedAtCell/index.js'
 
 export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
