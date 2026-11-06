@@ -350,11 +350,7 @@ export const Form: React.FC<FormProps> = (props) => {
     }
 
     for (const onChangeFn of onChange) {
-      Promise.resolve(onChangeFn({ formState: changedFormState, submitted: isSubmitted })).catch(
-        (err) => {
-          console.error('Error in onChange:', err) // eslint-disable-line no-console
-        },
-      )
+      onChangeFn({ formState: changedFormState, submitted: isSubmitted })
     }
   })
 

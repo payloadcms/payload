@@ -69,9 +69,9 @@ export type FormProps = {
   log?: boolean
   /**
    * Called with the updated form state after edits or validation for a local submission.
-   * Its return value is ignored.
+   * Its return value is ignored, and callbacks are not awaited.
    */
-  onChange?: ((args: { formState: FormState; submitted: boolean }) => Promise<void> | void)[]
+  onChange?: ((args: { formState: FormState; submitted: boolean }) => void)[]
   onSubmit?: (fields: FormState, data: Data) => void
   onSuccess?: FormOnSuccess
   /** Persistent read-only state used when rendering fields on the server. */
