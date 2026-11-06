@@ -5,7 +5,7 @@ import { unflatten as flatleyUnflatten } from './unflatten.js'
 /**
  * Returns plain data from flattened form state (`FormState`).
  *
- * @param unflatten Unflattens the field values into nested data when true.
+ * @param unflatten Unflattens the data and converts empty array and blocks row counts to arrays.
  * @param ignoreDisableFormData Includes disabled fields and preserves raw row counts when true.
  *
  */
@@ -21,8 +21,13 @@ export const getDataFromFormState = (
   }
 
   Object.keys(fields).forEach((key) => {
-    if (ignoreDisableFormData === true || !fields[key]?.disableFormData) {
-      data[key] = fields[key]?.value
+    const field = fields[key]
+
+    if (ignoreDisableFormData === true || !field?.disableFormData) {
+      data[key] =
+        unflatten && !ignoreDisableFormData && field?.value === 0 && Array.isArray(field.rows)
+          ? []
+          : field?.value
     }
   })
 

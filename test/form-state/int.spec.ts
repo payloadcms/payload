@@ -2,6 +2,7 @@ import type { FieldState, FormState, User } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { createPayloadRequest, getAccessResults } from 'payload'
+import { getDataFromFormState } from 'payload/shared'
 import React from 'react'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
@@ -993,6 +994,33 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     })
   })
 
+  test('should preserve client row values in background merges and accept explicit saves', () => {
+    for (const acceptValues of [undefined, { overrideLocalChanges: false }, true] as const) {
+      for (const value of [null, 0]) {
+        for (const incomingValue of [null, 0]) {
+          const state = mergeServerFormState({
+            acceptValues,
+            currentState: { array: { rows: [], value } },
+            incomingState: { array: { rows: [], value: incomingValue } },
+          })
+
+          expect(state.array.value).toBe(acceptValues === true ? incomingValue : value)
+        }
+      }
+    }
+  })
+
+  test('should preserve a first client row when autosave returns a null array', () => {
+    const state = mergeServerFormState({
+      acceptValues: { overrideLocalChanges: false },
+      currentState: { array: { disableFormData: true, rows: [{ id: 'A' }], value: 1 } },
+      incomingState: { array: { rows: [], value: null } },
+    })
+
+    expect(state.array.value).toBe(1)
+    expect(state.array.rows).toEqual([{ id: 'A' }])
+  })
+
   test('should preserve client row data after reorder and delete during autosave', () => {
     /**
      * Regression test for the "ghost item" bug.
@@ -1206,6 +1234,18 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     // Server values should be accepted even though row IDs don't match at same indexes
     expect(newState['array.0.text']?.value).toBe('A text from server')
     expect(newState['array.1.text']?.value).toBe('B text from server')
+
+    for (const value of [null, 0]) {
+      const clearedState = mergeServerFormState({
+        acceptValues: true,
+        currentState: { array: { disableFormData: true, rows: [{ id: 'A' }], value: 1 } },
+        incomingState: { array: { rows: [], value } },
+      })
+
+      expect(getDataFromFormState(clearedState, true)).toEqual({
+        array: value === null ? null : [],
+      })
+    }
   })
 
   test('should preserve client-added row during autosave', () => {
@@ -1291,6 +1331,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
      */
     const currentState: FormState = {
       array: {
+        disableFormData: false,
         rows: [],
         value: 0,
       },
@@ -1298,6 +1339,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
 
     const serverState: FormState = {
       array: {
+        disableFormData: true,
         rows: [{ id: 'A' }, { id: 'B' }],
         value: 2,
       },
@@ -1313,6 +1355,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
 
     expect(newState.array?.rows).toHaveLength(0)
     expect(newState.array?.value).toBe(0)
+    expect(getDataFromFormState(newState, true)).toEqual({ array: [] })
     expect(newState['array.0.text']).toBeUndefined()
     expect(newState['array.1.text']).toBeUndefined()
   })
@@ -1369,44 +1412,111 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(newState['blocks.0.items.1.subItems.1.text']?.value).toBe('X text')
   })
 
-  test('should set rows to empty array for empty array fields', async ({ payload }) => {
+  test('should preserve empty arrays and unset values when converting form state to data', () => {
+    expect(
+      getDataFromFormState(
+        {
+          items: {
+            initialValue: 0,
+            rows: [],
+            value: 0,
+          },
+          sections: {
+            disableFormData: true,
+            initialValue: 1,
+            rows: [{ id: 'section-1' }],
+            value: 1,
+          },
+          'sections.0.id': { initialValue: 'section-1', value: 'section-1' },
+          'sections.0.items': {
+            initialValue: 0,
+            rows: [],
+            value: 0,
+          },
+          title: { initialValue: undefined, value: undefined },
+        },
+        true,
+      ),
+    ).toStrictEqual({
+      items: [],
+      sections: [{ id: 'section-1', items: [] }],
+      title: undefined,
+    })
+  })
+
+  test('should preserve a null array when converting form state to data', () => {
+    expect(
+      getDataFromFormState(
+        {
+          items: {
+            initialValue: null,
+            rows: [],
+            value: null,
+          },
+        },
+        true,
+      ),
+    ).toEqual({ items: null })
+  })
+
+  test('should allow a null array to be changed to an empty array', () => {
+    expect(
+      getDataFromFormState(
+        {
+          items: {
+            initialValue: null,
+            isModified: true,
+            rows: [],
+            value: 0,
+          },
+        },
+        true,
+      ),
+    ).toEqual({ items: [] })
+  })
+
+  test('should keep a null-to-empty array change after a sibling field changes', () => {
+    expect(
+      getDataFromFormState(
+        {
+          items: {
+            disableFormData: false,
+            initialValue: null,
+            rows: [],
+            value: 0,
+          },
+          title: {
+            isModified: true,
+            value: 'After',
+          },
+        },
+        true,
+      ),
+    ).toEqual({ items: [], title: 'After' })
+  })
+
+  test('should preserve null and empty arrays when building form state', async ({ payload }) => {
     const req = await createPayloadRequest({ payload, user })
 
-    // Create a document with an empty array
-    const postData = await payload.create({
-      collection: postsSlug,
-      data: {
-        array: [], // Empty array - this should result in rows: [] in form state
-        title: 'Test Post',
-      },
-      overrideAccess: true,
-    })
+    for (const value of [null, []]) {
+      const { state } = await buildFormState({
+        collectionSlug: postsSlug,
+        data: { array: value, blocks: value, title: 'Test Post' },
+        docPermissions: { fields: true },
+        docPreferences: { fields: {} },
+        mockRSCs: true,
+        operation: 'update',
+        renderAllFields: false,
+        req,
+        schemaPath: postsSlug,
+      })
 
-    const { state } = await buildFormState({
-      id: postData.id,
-      collectionSlug: postsSlug,
-      data: postData,
-      docPermissions: {
-        create: true,
-        delete: true,
-        fields: true,
-        read: true,
-        readVersions: true,
-        update: true,
-      },
-      docPreferences: {
-        fields: {},
-      },
-      documentFormState: undefined,
-      mockRSCs: true,
-      operation: 'update',
-      renderAllFields: false,
-      req,
-      schemaPath: postsSlug,
-    })
-
-    expect(state.array).toBeDefined()
-    expect(state?.array?.rows).toEqual([]) // should be [] not undefined
+      for (const path of ['array', 'blocks']) {
+        expect(state[path].rows).toEqual([])
+        expect(state[path].value).toBe(value === null ? null : 0)
+        expect(state[path].initialValue).toBe(value === null ? null : 0)
+      }
+    }
   })
 
   test('should resolve a promise-returning `filterOptions` on a select field into `selectFilterOptions`', async ({

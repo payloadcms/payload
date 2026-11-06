@@ -422,7 +422,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         }
 
         // Add values to field state
-        if (data[field.name] !== null) {
+        if (data[field.name] === null) {
+          fieldState.value = null
+          fieldState.initialValue = null
+        } else {
           fieldState.value = forceFullValue ? arrayValue : arrayValue.length
           fieldState.initialValue = forceFullValue ? arrayValue : arrayValue.length
 

@@ -389,7 +389,7 @@ describe('Lexical Fully Featured - database', () => {
     ) as SerializedInlineBlockNode<MyInlineBlock> | undefined
 
     expect(savedRegularBlock?.fields.items).toBeNull()
-    expect(savedEmptyArrayBlock?.fields.items).toBeUndefined()
+    expect(savedEmptyArrayBlock?.fields.items).toEqual([])
     expect(savedInlineBlock?.fields.items).toBeNull()
   })
 
@@ -449,7 +449,7 @@ describe('Lexical Fully Featured - database', () => {
       (node) => node.type === 'block' && node.fields.id === 'localized-empty-array-block',
     ) as SerializedBlockNode<MyBlock> | undefined
 
-    expect(savedBlock?.fields.items).toBeUndefined()
+    expect(savedBlock?.fields.items).toEqual([])
   })
 
   test('ensure block name can be saved and loaded', async ({ page }) => {
