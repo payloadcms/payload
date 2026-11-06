@@ -257,7 +257,7 @@ const collectRichTextFieldCount = (config: SanitizedConfig): FeatureInfo => {
     })
   }
 
-  return { richText: { fieldCount } }
+  return { richTextFieldCount: fieldCount }
 }
 
 const collectTrash = (config: SanitizedConfig): FeatureInfo => ({
