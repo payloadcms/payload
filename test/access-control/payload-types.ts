@@ -592,6 +592,17 @@ export interface FieldsAndTopAccess {
  */
 export interface BlocksFieldAccess {
   id: string;
+  rows?:
+    | {
+        children?:
+          | {
+              code?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   title: string;
   editableBlocks?:
     | {
@@ -1608,6 +1619,17 @@ export interface FieldsAndTopAccessSelect<T extends boolean = true> {
  * via the `definition` "blocks-field-access_select".
  */
 export interface BlocksFieldAccessSelect<T extends boolean = true> {
+  rows?:
+    | T
+    | {
+        children?:
+          | T
+          | {
+              code?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   title?: T;
   editableBlocks?:
     | T
