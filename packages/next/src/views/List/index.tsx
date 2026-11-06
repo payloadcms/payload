@@ -407,6 +407,9 @@ export const renderListView = async (
       <Fragment>
         <HydrateAuthProvider permissions={permissions} />
         <ListQueryProvider
+          baseFilter={
+            baseFilterConstraint ? JSON.parse(JSON.stringify(baseFilterConstraint)) : undefined
+          }
           collectionSlug={collectionSlug}
           data={data}
           modifySearchParams={!isInDrawer}

@@ -46,6 +46,7 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     configPromise,
     importMap,
     key: 'RootLayout',
+    overrides: typeof args.locale === 'string' ? { locale: args.locale } : undefined,
   })
 
   const augmentedArgs: DefaultServerFunctionArgs = {
