@@ -5,13 +5,16 @@ import { wait } from 'payload/shared'
 
 import type { Config, Post } from '../../payload-types.js'
 
+import { expectScreenshot } from '../../../__helpers/e2e/expectScreenshot.js'
 import {
   checkBreadcrumb,
   checkPageTitle,
   exactText,
   saveDocAndAssert,
+  waitForFormReady,
 } from '../../../__helpers/e2e/helpers.js'
 import { test } from '../../../__helpers/e2e/playwright.js'
+import { visual } from '../../../__helpers/e2e/visual.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
@@ -63,7 +66,7 @@ import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
 import { getSelectMenu, selectInput } from '../../../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
-import { openNav } from '../../../__helpers/e2e/toggleNav.js'
+import { closeNav, openNav } from '../../../__helpers/e2e/toggleNav.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
@@ -110,6 +113,43 @@ describe('Document View', () => {
     })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+  })
+
+  visual('should render the post create view', async () => {
+    await page.goto(postsUrl.create)
+    await closeNav(page)
+    await waitForFormReady(page)
+
+    const titleField = page.locator('#field-title')
+
+    await expect(titleField).toBeVisible()
+    await expect(page.locator('.doc-header__title')).toContainText('Untitled')
+    await expectScreenshot({ name: 'post-create-view.png', page })
+  })
+
+  visual('should render a populated post edit view', async () => {
+    const post = await createPost({
+      description: 'A stable description for the visual regression test.',
+      title: 'Visual Regression Post',
+    })
+
+    await page.goto(postsUrl.edit(post.id))
+    await closeNav(page)
+    await waitForFormReady(page)
+
+    const titleField = page.locator('#field-title')
+    const updatedAtValue = page.getByText(/^Updated /)
+
+    await expect(titleField).toHaveValue('Visual Regression Post')
+    await expect(page.locator('#field-description')).toHaveValue(
+      'A stable description for the visual regression test.',
+    )
+    await expect(updatedAtValue).toBeVisible()
+    await expectScreenshot({
+      name: 'post-edit-view.png',
+      mask: [updatedAtValue],
+      page,
+    })
   })
 
   describe('API view', () => {
