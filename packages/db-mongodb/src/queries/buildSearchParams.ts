@@ -3,7 +3,7 @@ import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
 import { Types } from 'mongoose'
 import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
-import { isNestedRelationshipQuery, validOperatorSet } from 'payload/shared'
+import { getDateOnlyComparison, isNestedRelationshipQuery, validOperatorSet } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 import type { OperatorMapKey } from './operatorMap.js'
@@ -257,6 +257,30 @@ export async function buildSearchParam({
       (Array.isArray(val) && val.some((entry) => isNestedRelationshipQuery(entry))))
   ) {
     throw new APIError(`Invalid value for "${operator}" on path "${path}": expected a string.`, 400)
+  }
+
+  const dateOnlyComparison =
+    paths.length === 1
+      ? getDateOnlyComparison({
+          config: payload.config,
+          field,
+          operator,
+          value: val,
+        })
+      : undefined
+
+  if (dateOnlyComparison && path) {
+    const range = Object.fromEntries(
+      dateOnlyComparison.constraints.map((constraint) => [
+        operatorMap[constraint.operator],
+        constraint.value,
+      ]),
+    )
+
+    return {
+      path,
+      value: dateOnlyComparison.isNegated ? { $not: range } : range,
+    }
   }
 
   if (path) {
