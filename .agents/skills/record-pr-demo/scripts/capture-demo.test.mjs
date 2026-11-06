@@ -182,3 +182,43 @@ test('should clean up capture when interrupted with SIGINT', { timeout: 20000 },
     await rm(directory, { recursive: true, force: true })
   }
 })
+
+for (const stalledOperation of ['Page.stopScreencast', 'detach']) {
+  test(
+    `should finish encoder cleanup when ${stalledOperation} never settles`,
+    { timeout: 10000 },
+    async () => {
+      const directory = await mkdtemp(path.join(tmpdir(), 'demo-lossless-stalled-'))
+      const browser = await chromium.launch({ headless: true })
+      try {
+        const context = await browser.newContext({ viewport: { width: 800, height: 600 } })
+        const page = await context.newPage()
+        const newCDPSession = context.newCDPSession.bind(context)
+        context.newCDPSession = async (target) => {
+          const session = await newCDPSession(target)
+          if (stalledOperation === 'detach') {
+            session.detach = () => new Promise(() => {})
+          } else {
+            const send = session.send.bind(session)
+            session.send = (method, ...args) =>
+              method === stalledOperation ? new Promise(() => {}) : send(method, ...args)
+          }
+          return session
+        }
+        const output = path.join(directory, 'capture.mkv')
+        const capture = await startLosslessCapture({
+          page,
+          output,
+          size: { width: 800, height: 600 },
+          shutdownTimeoutMs: 250,
+        })
+        await page.waitForTimeout(100)
+        await assert.rejects(capture.stop(), /(?:Page.stopScreencast|CDP session detach) timed out/)
+        await assert.rejects(stat(output), { code: 'ENOENT' })
+      } finally {
+        await browser.close()
+        await rm(directory, { recursive: true, force: true })
+      }
+    },
+  )
+}

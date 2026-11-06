@@ -8,7 +8,13 @@ import { rm } from 'node:fs/promises'
  * presentation timing follows wall time. The final converter performs the only
  * lossy encode. No PNG files are written to disk.
  */
-export async function startLosslessCapture({ page, output, size, fps = 25 }) {
+export async function startLosslessCapture({
+  page,
+  output,
+  size,
+  fps = 25,
+  shutdownTimeoutMs = 10000,
+}) {
   const session = await page.context().newCDPSession(page)
   const encoder = spawn(
     'ffmpeg',
@@ -89,7 +95,7 @@ export async function startLosslessCapture({ page, output, size, fps = 25 }) {
     const timeout = setTimeout(() => {
       encoder.stdin.destroy(new Error('Lossless encoder shutdown timed out'))
       encoder.kill('SIGKILL')
-    }, 10000)
+    }, shutdownTimeoutMs)
     timeout.unref()
     try {
       encoder.stdin.end()
@@ -98,17 +104,34 @@ export async function startLosslessCapture({ page, output, size, fps = 25 }) {
       clearTimeout(timeout)
     }
   }
+  const boundShutdown = async ({ operation, run }) => {
+    let timeout
+    try {
+      await Promise.race([
+        Promise.resolve().then(run),
+        new Promise((_, reject) => {
+          timeout = setTimeout(() => reject(new Error(`${operation} timed out`)), shutdownTimeoutMs)
+        }),
+      ])
+    } finally {
+      clearTimeout(timeout)
+    }
+  }
   const stop = () => {
     stopPromise ??= (async () => {
       stoppedAt = performance.now()
       clearTimeout(timer)
-      const timeout = setTimeout(() => {
-        encoder.stdin.destroy(new Error('Lossless capture flush timed out'))
-        encoder.kill('SIGKILL')
-      }, 10000)
-      timeout.unref()
+      let timeout
       try {
-        await session.send('Page.stopScreencast')
+        await boundShutdown({
+          operation: 'Page.stopScreencast',
+          run: () => session.send('Page.stopScreencast'),
+        })
+        timeout = setTimeout(() => {
+          encoder.stdin.destroy(new Error('Lossless capture flush timed out'))
+          encoder.kill('SIGKILL')
+        }, shutdownTimeoutMs)
+        timeout.unref()
         await writing
         await writeThrough(frameCount(stoppedAt))
       } catch (error) {
@@ -116,7 +139,11 @@ export async function startLosslessCapture({ page, output, size, fps = 25 }) {
       } finally {
         clearTimeout(timeout)
         session.off('Page.screencastFrame', frameReceived)
-        await session.detach().catch(() => {})
+        await boundShutdown({ operation: 'CDP session detach', run: () => session.detach() }).catch(
+          (error) => {
+            failure ??= error
+          },
+        )
         await finishEncoder().catch((error) => {
           failure ??= error
         })
