@@ -16,7 +16,7 @@ import {
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
 import { formatAdminURL } from 'payload/shared'
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
 import type { GenerateTitle } from '../../types.js'
@@ -46,6 +46,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   } = props
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
+  const [isGeneratingTitle, setIsGeneratingTitle] = useState(false)
 
   const {
     config: {
@@ -123,6 +124,15 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     setValue,
     title,
   ])
+  const handleRegenerateTitle = useCallback(async () => {
+    setIsGeneratingTitle(true)
+
+    try {
+      await regenerateTitle()
+    } finally {
+      setIsGeneratingTitle(false)
+    }
+  }, [regenerateTitle])
 
   return (
     <div
@@ -144,9 +154,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
-                disabled={readOnly}
+                disabled={readOnly || isGeneratingTitle}
                 onClick={() => {
-                  void regenerateTitle()
+                  void handleRegenerateTitle()
                 }}
                 style={{
                   background: 'none',
@@ -159,7 +169,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
                 }}
                 type="button"
               >
-                {t('plugin-seo:autoGenerate')}
+                {isGeneratingTitle
+                  ? `${t('plugin-seo:autoGenerate')}...`
+                  : t('plugin-seo:autoGenerate')}
               </button>
             </React.Fragment>
           )}
