@@ -12,6 +12,24 @@ export const BlocksFieldAccess: CollectionConfig = {
   },
   fields: [
     {
+      name: 'rows',
+      type: 'array',
+      fields: [
+        {
+          name: 'children',
+          type: 'array',
+          fields: [
+            {
+              name: 'code',
+              type: 'text',
+              access: { update: () => false },
+              defaultValue: 'default',
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'title',
       type: 'text',
       required: true,

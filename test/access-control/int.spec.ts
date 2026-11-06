@@ -79,6 +79,89 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
   })
 
   test.describe('Fields', () => {
+    test.describe('fallback values', () => {
+      const createdIDs: (number | string)[] = []
+
+      test.afterEach(async ({ payload }) => {
+        for (const id of createdIDs) {
+          await payload.delete({ id, collection: blocksFieldAccessSlug, overrideAccess: true })
+        }
+        createdIDs.length = 0
+      })
+
+      for (const draft of [false, true]) {
+        const operation = draft ? 'draft save' : 'published update'
+
+        test(`should preserve omitted protected nested fields after a ${operation}`, async ({
+          payload,
+        }) => {
+          const doc = await payload.create({
+            collection: blocksFieldAccessSlug,
+            data: {
+              _status: draft ? 'draft' : 'published',
+              rows: [{ children: [{ code: 'stored' }] }],
+              title: 'original',
+            },
+            draft,
+          })
+
+          createdIDs.push(doc.id)
+
+          await payload.update({
+            id: doc.id,
+            collection: blocksFieldAccessSlug,
+            data: { title: 'updated' },
+            draft,
+            overrideAccess: false,
+          })
+
+          const stored = await payload.findByID({
+            id: doc.id,
+            collection: blocksFieldAccessSlug,
+            draft,
+          })
+
+          expect(stored.rows?.[0]?.children?.[0]?.code).toBe('stored')
+        })
+
+        test(`should reject changes to protected nested fields during a ${operation}`, async ({
+          payload,
+        }) => {
+          const doc = await payload.create({
+            collection: blocksFieldAccessSlug,
+            data: {
+              _status: draft ? 'draft' : 'published',
+              rows: [{ children: [{ code: 'stored' }] }],
+              title: 'original',
+            },
+            draft,
+          })
+
+          const row = doc.rows![0]!
+
+          createdIDs.push(doc.id)
+
+          await payload.update({
+            id: doc.id,
+            collection: blocksFieldAccessSlug,
+            data: {
+              rows: [{ id: row.id, children: [{ id: row.children![0]!.id, code: 'changed' }] }],
+            },
+            draft,
+            overrideAccess: false,
+          })
+
+          const stored = await payload.findByID({
+            id: doc.id,
+            collection: blocksFieldAccessSlug,
+            draft,
+          })
+
+          expect(stored.rows?.[0]?.children?.[0]?.code).toBe('stored')
+        })
+      }
+    })
+
     test('should not affect hidden fields when patching data', async ({ payload }) => {
       const doc = await payload.create({
         collection: hiddenFieldsSlug,
