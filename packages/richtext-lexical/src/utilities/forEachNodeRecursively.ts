@@ -1,5 +1,7 @@
 import type { SerializedLexicalNode } from 'lexical'
 
+import { getChildNodes } from './getChildNodes.js'
+
 export function recurseNodes({
   callback,
   nodes,
@@ -10,8 +12,9 @@ export function recurseNodes({
   for (const node of nodes) {
     callback(node)
 
-    if ('children' in node && Array.isArray(node?.children) && node?.children?.length) {
-      recurseNodes({ callback, nodes: node.children as SerializedLexicalNode[] })
+    const childNodes = getChildNodes(node)
+    if (childNodes.length) {
+      recurseNodes({ callback, nodes: childNodes })
     }
   }
 }
@@ -26,8 +29,9 @@ export async function recurseNodesAsync({
   for (const node of nodes) {
     await callback(node)
 
-    if ('children' in node && Array.isArray(node?.children) && node?.children?.length) {
-      await recurseNodesAsync({ callback, nodes: node.children as SerializedLexicalNode[] })
+    const childNodes = getChildNodes(node)
+    if (childNodes.length) {
+      await recurseNodesAsync({ callback, nodes: childNodes })
     }
   }
 }
