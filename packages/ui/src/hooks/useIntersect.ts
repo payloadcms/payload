@@ -19,7 +19,7 @@ export const useIntersect = (
 
   const observer = useRef(
     typeof window !== 'undefined' && 'IntersectionObserver' in window && !disable
-      ? new window.IntersectionObserver(([ent]) => updateEntry(ent), {
+      ? new window.IntersectionObserver((entries) => updateEntry(entries[entries.length - 1]), {
           root,
           rootMargin,
           threshold,
