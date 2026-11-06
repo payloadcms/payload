@@ -9,9 +9,9 @@ import {
   hasAutosaveEnabled,
   reduceFieldsToValues,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { useQueue } from '../../hooks/useQueue.js'
+import type { TaskContext, UseQueueResult } from '../../hooks/useQueue.js'
 import type { BuildFormStateSuccessResult } from '../../utilities/buildFormState.js'
 import type { AcceptValues } from './mergeServerFormState.js'
 import type { FieldAction, Context as FormContextType, FormProps } from './types.js'
@@ -28,20 +28,14 @@ import { reduceFormStateToData } from '../../utilities/reduceFormStateToData.js'
 import { useDocumentForm } from './context.js'
 import { fieldReducer } from './fieldReducer.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
-
-/** Counts submissions so a form-state response can tell whether one overlapped it. */
-export type SubmissionActivity = {
-  /** Submissions currently running. */
-  running: number
-  /** Submissions started since the form mounted. */
-  started: number
-}
+import { requestPriority } from './requestPriority.js'
 
 type FormStateRequestArgs = Omit<BuildFormStateArgs, 'req'>
 
 type AfterSaveArgs = {
   /** How saved values merge with edits made during a background save. */
   acceptValues?: AcceptValues
+  isCurrent?: TaskContext['isCurrent']
   /** Refresh document permissions before rebuilding saved state. */
   refreshPermissions?: boolean
   /** The document returned by a successful create or update, used as the source of saved field values. */
@@ -49,6 +43,7 @@ type AfterSaveArgs = {
 }
 
 type ValidateArgs = {
+  isCurrent?: TaskContext['isCurrent']
   /** Local commits need server validation before their onSubmit callback runs. */
   isLocalSubmission?: boolean
   skipValidation?: boolean
@@ -78,9 +73,9 @@ export type UseFormStateResult = {
   /** Baseline used to distinguish local edits from applied server state. */
   prevFormStateRef: RefObject<FormState>
   /** Queues a server refresh after field edits or changes to the selected fields. */
-  refreshFormState: () => void
-  /** Calls `refreshFormState` with the saved document to refresh permissions and preview URLs. */
-  refreshFormStateAfterSave: (args: AfterSaveArgs) => Promise<void>
+  queueFormStateRefresh: () => void
+  /** Rebuilds field state within the active request using the current fields or a saved document. */
+  refreshFormState: (action: FormStateAction) => Promise<FormState | undefined>
   /** Rebuilds field state from new data and clears the modified flag. */
   resetFormState: (data: unknown) => Promise<void>
   setIsValid: FormContextType['setIsValid']
@@ -89,11 +84,12 @@ export type UseFormStateResult = {
   validateForm: (args?: ValidateArgs) => Promise<FormValidationResult>
 }
 
-type FormStateAction =
+type FormStateAction = { isCurrent?: TaskContext['isCurrent'] } & (
   | { data: unknown; type: 'reset' }
   | ({ type: 'afterSave' } & AfterSaveArgs)
   | { type: 'refresh' }
   | { type: 'validate' }
+)
 
 /** Mutable document bookkeeping shared by requests during this editing session. */
 type DocumentSession = {
@@ -111,6 +107,7 @@ type Args = {
   contextRef: RefObject<FormContextType>
   /** Called with the merged form state after a refresh or local validation applies it. */
   onApplied: (formState: FormState, submitted?: boolean) => void
+  onReset: () => void
   props: Pick<
     FormProps,
     | 'disableValidationOnSubmit'
@@ -121,8 +118,7 @@ type Args = {
     | 'select'
     | 'widgetSlug'
   >
-  queueTask: ReturnType<typeof useQueue>['queueTask']
-  submissionActivityRef: RefObject<SubmissionActivity>
+  queueTask: UseQueueResult['queueTask']
 }
 
 /**
@@ -131,21 +127,34 @@ type Args = {
  * Calls `getFormState` when server state needs to be refreshed.
  *
  * @example
- * const { formState, dispatchFields, refreshFormState } = useFormState(args)
+ * const { formState, dispatchFields, queueFormStateRefresh } = useFormState(args)
  *
  * dispatchFields({ type: 'UPDATE', path: 'title', value: 'Updated title' })
- * refreshFormState() // Refresh server state after a local edit.
+ * queueFormStateRefresh() // Refresh server state after a local edit.
  */
 export const useFormState = ({
   contextRef,
   onApplied,
+  onReset,
   props,
   queueTask,
-  submissionActivityRef,
 }: Args): UseFormStateResult => {
-  const [formState, dispatchFields] = useReducer(fieldReducer, {}, () => props.initialState)
+  const [formState, setFormState] = useState<FormState>(() => props.initialState || {})
+  const formStateRef = useRef(formState)
 
-  contextRef.current.fields = formState
+  const dispatchFields = useCallback<React.Dispatch<FieldAction>>(
+    (action) => {
+      const newState = fieldReducer(formStateRef.current, action)
+
+      // A queued task can start before React commits the preceding task's state update.
+      formStateRef.current = newState
+      contextRef.current.fields = newState
+      setFormState(newState)
+    },
+    [contextRef],
+  )
+
+  contextRef.current.fields = formStateRef.current
 
   const prevFormStateRef = useRef(formState)
 
@@ -186,6 +195,7 @@ export const useFormState = ({
     initialData,
     livePreview,
     onApplied,
+    onReset,
     operation,
     parentDocumentForm,
     preview,
@@ -210,6 +220,7 @@ export const useFormState = ({
 
   const refreshFormState = useCallback(
     async (action: FormStateAction) => {
+      const isCurrent = action.isCurrent ?? (() => true)
       const current = latestRef.current
       const isRefresh = action.type === 'refresh'
       const isReset = action.type === 'reset'
@@ -336,8 +347,6 @@ export const useFormState = ({
         }
       }
 
-      const activityAtStart = { ...submissionActivityRef.current }
-
       const controllerRef = isReset ? resetAbortControllerRef : abortControllerRef
       abortAndIgnore(controllerRef.current)
       const controller = new AbortController()
@@ -362,7 +371,7 @@ export const useFormState = ({
           args.docPreferences = await current.document.getDocPreferences?.()
         }
 
-        if (controller.signal.aborted) {
+        if (controller.signal.aborted || !isCurrent()) {
           if (isValidation) {
             throw new Error(current.t('error:unspecific'))
           }
@@ -377,6 +386,7 @@ export const useFormState = ({
 
         if (
           controller.signal.aborted ||
+          !isCurrent() ||
           !dequal(current.props.select, latestRef.current.props.select)
         ) {
           if (isValidation) {
@@ -397,6 +407,8 @@ export const useFormState = ({
         const successResponse = response as BuildFormStateSuccessResult
 
         if (isReset) {
+          current.onReset()
+
           const fields = successResponse.state
           contextRef.current.fields = fields
           contextRef.current.setModified(false)
@@ -404,8 +416,6 @@ export const useFormState = ({
           dispatchFields({ type: 'REPLACE_STATE', state: fields })
           return fields
         }
-
-        const activity = submissionActivityRef.current
 
         if (isDocumentForm) {
           const { livePreview, preview } = current
@@ -453,10 +463,7 @@ export const useFormState = ({
               }
             }
 
-            const overlappedSubmit =
-              activityAtStart.running > 0 || activity.started !== activityAtStart.started
-
-            if (staleDataState?.isStale && !overlappedSubmit) {
+            if (staleDataState?.isStale) {
               document.setIsStale?.(true)
             }
           }
@@ -524,101 +531,112 @@ export const useFormState = ({
         }
       }
     },
-    [contextRef, dispatchFields, prevFormStateRef, submissionActivityRef],
+    [contextRef, dispatchFields, prevFormStateRef],
   )
 
-  const queueFormStateRefresh = useCallback<UseFormStateResult['refreshFormState']>(() => {
-    queueTask(async () => {
-      await refreshFormState({ type: 'refresh' })
+  const queueFormStateRefresh = useCallback<UseFormStateResult['queueFormStateRefresh']>(() => {
+    void queueTask({
+      priority: requestPriority.formState,
+      task: ({ isCurrent }) => refreshFormState({ type: 'refresh', isCurrent }),
+    }).catch((err) => {
+      console.error('Error refreshing form state', err) // eslint-disable-line no-console
     })
   }, [queueTask, refreshFormState])
 
-  const validateFields = useCallback(async () => {
-    const { config, document, operation, parentDocumentForm, t, user } = latestRef.current
-    const { id, collectionSlug } = document
-    const validatedFieldState: FormState = {}
-    let isValid = true
+  const validateFields = useCallback(
+    async ({ isCurrent = () => true }: { isCurrent?: TaskContext['isCurrent'] } = {}) => {
+      const { config, document, operation, parentDocumentForm, t, user } = latestRef.current
+      const { id, collectionSlug } = document
+      const validatedFieldState: FormState = {}
+      let isValid = true
 
-    const data = contextRef.current.getData()
+      const data = contextRef.current.getData()
 
-    const validationPromises = Object.entries(contextRef.current.fields).map(
-      async ([path, field]) => {
-        const validatedField = field
-        const pathSegments = path ? path.split('.') : []
+      const validationPromises = Object.entries(contextRef.current.fields).map(
+        async ([path, field]) => {
+          const validatedField = { ...field }
+          const pathSegments = path ? path.split('.') : []
 
-        if (field.passesCondition !== false) {
-          let validationResult: boolean | string = validatedField.valid
+          if (field.passesCondition !== false) {
+            let validationResult: boolean | string = validatedField.valid
 
-          if ('validate' in field && typeof field.validate === 'function') {
-            let valueToValidate = field.value
+            if ('validate' in field && typeof field.validate === 'function') {
+              let valueToValidate = field.value
 
-            if (field?.rows && Array.isArray(field.rows)) {
-              valueToValidate = contextRef.current.getDataByPath(path)
+              if (field?.rows && Array.isArray(field.rows)) {
+                valueToValidate = contextRef.current.getDataByPath(path)
+              }
+
+              validationResult = await field.validate(valueToValidate, {
+                ...field,
+                id,
+                collectionSlug,
+                // If there is a parent document form, we can get the data from that form
+                blockData: undefined, // Will be expensive to get - not worth to pass to client-side validation, as this can be obtained by the user using `useFormFields()`
+                data: parentDocumentForm?.getData ? parentDocumentForm.getData() : data,
+                event: 'submit',
+                operation,
+                path: pathSegments,
+                preferences: {} as any,
+                req: {
+                  payload: {
+                    config,
+                  },
+                  t,
+                  user,
+                } as unknown as PayloadRequest,
+                siblingData: contextRef.current.getSiblingData(path),
+              })
+
+              if (typeof validationResult === 'string') {
+                validatedField.errorMessage = validationResult
+                validatedField.valid = false
+              } else {
+                validatedField.valid = true
+                validatedField.errorMessage = undefined
+              }
             }
 
-            validationResult = await field.validate(valueToValidate, {
-              ...field,
-              id,
-              collectionSlug,
-              // If there is a parent document form, we can get the data from that form
-              blockData: undefined, // Will be expensive to get - not worth to pass to client-side validation, as this can be obtained by the user using `useFormFields()`
-              data: parentDocumentForm?.getData ? parentDocumentForm.getData() : data,
-              event: 'submit',
-              operation,
-              path: pathSegments,
-              preferences: {} as any,
-              req: {
-                payload: {
-                  config,
-                },
-                t,
-                user,
-              } as unknown as PayloadRequest,
-              siblingData: contextRef.current.getSiblingData(path),
-            })
-
-            if (typeof validationResult === 'string') {
-              validatedField.errorMessage = validationResult
-              validatedField.valid = false
-            } else {
-              validatedField.valid = true
-              validatedField.errorMessage = undefined
+            if (validatedField.valid === false) {
+              isValid = false
             }
           }
 
-          if (validatedField.valid === false) {
-            isValid = false
-          }
-        }
+          validatedFieldState[path] = validatedField
+        },
+      )
 
-        validatedFieldState[path] = validatedField
-      },
-    )
+      await Promise.all(validationPromises)
 
-    await Promise.all(validationPromises)
+      if (!isCurrent()) {
+        return false
+      }
 
-    if (!dequal(contextRef.current.fields, validatedFieldState)) {
-      dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
-    }
+      if (!dequal(contextRef.current.fields, validatedFieldState)) {
+        contextRef.current.fields = validatedFieldState
+        dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
+      }
 
-    setIsValid(isValid)
+      setIsValid(isValid)
 
-    return isValid
-  }, [contextRef, dispatchFields])
+      return isValid
+    },
+    [contextRef, dispatchFields],
+  )
 
   const validateForm = useCallback<UseFormStateResult['validateForm']>(
-    async ({ isLocalSubmission = false, skipValidation = false } = {}) => {
+    async ({ isCurrent = () => true, isLocalSubmission = false, skipValidation = false } = {}) => {
       let isServerValidated = false
       let isValid = true
 
       if (!skipValidation && isLocalSubmission) {
-        const fields = await refreshFormState({ type: 'validate' })
+        const fields = await refreshFormState({ type: 'validate', isCurrent })
         isServerValidated = fields !== undefined
         isValid = !fields || Object.values(fields).every((field) => field.valid !== false)
       }
 
       if (!skipValidation && isValid && !latestRef.current.props.disableValidationOnSubmit) {
-        isValid = await validateFields()
+        isValid = await validateFields({ isCurrent })
       }
 
       const fields = contextRef.current.fields ?? {}
@@ -626,7 +644,10 @@ export const useFormState = ({
         ? reduceFormStateToData({ formState: fields })
         : reduceFieldsToValues(fields, true)
 
-      setIsValid(isValid)
+      if (isCurrent()) {
+        setIsValid(isValid)
+      }
+
       return { data, fields, isValid }
     },
     [contextRef, refreshFormState, validateFields],
@@ -635,13 +656,6 @@ export const useFormState = ({
   const resetFormState = useCallback<UseFormStateResult['resetFormState']>(
     async (data) => {
       await refreshFormState({ type: 'reset', data })
-    },
-    [refreshFormState],
-  )
-
-  const refreshFormStateAfterSave = useCallback<UseFormStateResult['refreshFormStateAfterSave']>(
-    async (args) => {
-      await refreshFormState({ ...args, type: 'afterSave' })
     },
     [refreshFormState],
   )
@@ -668,8 +682,8 @@ export const useFormState = ({
       isModified,
       isValid,
       prevFormStateRef,
-      refreshFormState: queueFormStateRefresh,
-      refreshFormStateAfterSave,
+      queueFormStateRefresh,
+      refreshFormState,
       resetFormState,
       setIsValid,
       setModified,
@@ -679,7 +693,7 @@ export const useFormState = ({
       dispatchFields,
       formState,
       prevFormStateRef,
-      refreshFormStateAfterSave,
+      refreshFormState,
       isInitializing,
       isValid,
       isModified,
