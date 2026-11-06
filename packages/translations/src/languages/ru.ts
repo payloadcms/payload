@@ -476,6 +476,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Перезаписать существующие данные поля',
     pageNotFound: 'Страница не найдена',
     pageNumberRange: 'Введите номер страницы от 1 до {{totalPages}}.',
+    parentDocument: 'Родительский документ',
     password: 'Пароль',
     pasteBelow: 'Вставьте ниже',
     pasteField: 'Вставить поле',

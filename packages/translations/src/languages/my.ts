@@ -462,6 +462,7 @@ export const myTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'ရှိပြီးသား အကွက်ဒေတာကို အစားထိုးပါ',
     pageNotFound: 'ရောက်ရှိနေသော စာမျက်နှာသည် မရှိပါ။',
     pageNumberRange: '1 မှ {{totalPages}} အထိ စာမျက်နှာနံပါတ်တစ်ခု ထည့်ပါ။',
+    parentDocument: 'မိခင်စာရွက်စာတမ်း',
     password: 'စကားဝှက်',
     pasteBelow: 'အောက်တွင်ထည့်ပါ',
     pasteField: 'ကွက်လပ်ကိုတင်ပါ',

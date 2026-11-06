@@ -1553,6 +1553,8 @@ export type {
   TypeWithTimestamps,
 } from './collections/config/types.js'
 
+export type { NestedDocsConfig } from './collections/config/types.js'
+
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
 
 export type { SanitizedCompoundIndex } from './collections/config/types.js'

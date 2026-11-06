@@ -478,6 +478,7 @@ export const roTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Suprascrieți datele existente din câmp',
     pageNotFound: 'Pagina nu a fost găsită',
     pageNumberRange: 'Introduceți un număr de pagină de la 1 la {{totalPages}}.',
+    parentDocument: 'Document părinte',
     password: 'Parola',
     pasteBelow: 'Lipiți mai jos',
     pasteField: 'Lipește câmpul',

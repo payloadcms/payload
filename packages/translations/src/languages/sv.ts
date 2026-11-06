@@ -472,6 +472,7 @@ export const svTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Skriv över befintlig fältdata',
     pageNotFound: 'Sidan hittas inte',
     pageNumberRange: 'Ange ett sidnummer från 1 till {{totalPages}}.',
+    parentDocument: 'Överordnat dokument',
     password: 'Lösenord',
     pasteBelow: 'Klistra in nedan',
     pasteField: 'Klistra in fält',

@@ -397,6 +397,12 @@ export type TagsConfig = {
   allowHasMany?: boolean
 } & FoldersConfig
 
+/** Configure a content collection's own document tree, independently of folder membership. */
+export type NestedDocsConfig = {
+  /** @default '_h_parent' */
+  parentFieldName?: string
+} & Pick<HierarchyConfig, 'slugField' | 'slugify' | 'slugPathFieldName' | 'titlePathFieldName'>
+
 export type BaseFilter = (args: {
   limit: number
   locale?: TypedLocale
@@ -733,6 +739,12 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
       }
     | false
   /**
+   * Enable a document tree with a sidebar parent field and a Tree list layout.
+   * Children inherit the deleted document's parent instead of being deleted.
+   * Folder and tag relationship fields remain independent of this tree.
+   */
+  nestedDocs?: boolean | NestedDocsConfig
+  /**
    * If true, enables custom ordering for the collection, and documents in the listView can be reordered via drag and drop.
    * New documents are inserted at the end of the list according to this parameter.
    *
@@ -843,6 +855,7 @@ export interface SanitizedCollectionConfig
       | 'hooks'
       | 'indexes'
       | 'labels'
+      | 'nestedDocs'
       | 'slug'
       | 'tags'
       | 'timestamps'
@@ -876,6 +889,7 @@ export interface SanitizedCollectionConfig
    */
   joins: SanitizedJoins
   labels: Required<NonNullable<CollectionConfig['labels']>>
+  nestedDocs?: boolean
   /**
    * List of all polymorphic join fields
    */

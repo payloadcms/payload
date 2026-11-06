@@ -473,6 +473,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Վերագրել գոյություն ունեցող դաշտի տվյալները',
     pageNotFound: 'Էջը չի գտնվել',
     pageNumberRange: 'Մուտքագրեք էջի համարը՝ 1-ից {{totalPages}}։',
+    parentDocument: 'Ծնող փաստաթուղթ',
     password: 'Գաղտնաբառ',
     pasteBelow: 'Տեղադրեք ստորև',
     pasteField: 'Տեղադրել դաշտը',

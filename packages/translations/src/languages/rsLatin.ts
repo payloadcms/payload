@@ -471,6 +471,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepiši postojeće podatke iz polja',
     pageNotFound: 'Stranica nije pronađena',
     pageNumberRange: 'Unesite broj stranice od 1 do {{totalPages}}.',
+    parentDocument: 'Nadređeni dokument',
     password: 'Lozinka',
     pasteBelow: 'Nalepite ispod',
     pasteField: 'Zalepi polje',

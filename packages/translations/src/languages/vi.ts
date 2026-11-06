@@ -473,6 +473,7 @@ export const viTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Ghi đè dữ liệu trường hiện tại',
     pageNotFound: 'Không tìm thấy trang',
     pageNumberRange: 'Nhập số trang từ 1 đến {{totalPages}}.',
+    parentDocument: 'Tài liệu cha',
     password: 'Mật khẩu',
     pasteBelow: 'Dán bên dưới',
     pasteField: 'Dán trường',

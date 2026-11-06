@@ -479,6 +479,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Overschrijf bestaande veldgegevens',
     pageNotFound: 'Pagina niet gevonden',
     pageNumberRange: 'Voer een paginanummer van 1 tot {{totalPages}} in.',
+    parentDocument: 'Bovenliggend document',
     password: 'Wachtwoord',
     pasteBelow: 'Plak hieronder',
     pasteField: 'Veld plakken',
