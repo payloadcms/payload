@@ -113,7 +113,7 @@ export async function createImageSizes({
       imageResizeConfig = sanitizeResizeConfig(imageResizeConfig)
 
       const resizeAction = getImageResizeAction({
-        dimensions,
+        dimensions: adjustedDimensions,
         hasFocalPoint: Boolean(focalPoint),
         imageResizeConfig,
       })
