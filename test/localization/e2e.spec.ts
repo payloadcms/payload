@@ -25,6 +25,7 @@ import {
 import { isFormStateRequest } from '../__helpers/e2e/isFormStateRequest.js'
 import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { currentFramework } from '../__helpers/e2e/playwright.js'
 import { upsertPreferences } from '../__helpers/e2e/preferences.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
@@ -463,6 +464,11 @@ describe('Localization', () => {
       'should save to the rendered locale after navigating back to a URL without a locale param',
       { tag: '@also-without-cache-components' },
       async () => {
+        // TanStack revalidates history entries; Next restores the cached English render.
+        const restoredLocale = currentFramework === 'tanstack-start' ? spanishLocale : defaultLocale
+        const restoredTitle = restoredLocale === defaultLocale ? englishTitle : spanishTitle
+        const restoredLabel = restoredLocale === defaultLocale ? 'English' : 'Spanish'
+
         const { id } = await payload.create({
           collection: localizedPostsSlug,
           data: { title: englishTitle },
@@ -484,20 +490,20 @@ describe('Localization', () => {
         await changeLocale(page, spanishLocale)
         await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
 
-        // Restores the English render of the URL without a locale param from the router cache
+        // Each router must keep the rendered content, selection, and save locale aligned.
         await page.goBack()
         await expect(page).not.toHaveURL(/locale=/)
-        await expect(page.locator('#field-title')).toHaveValue(englishTitle)
+        await expect(page.locator('#field-title')).toHaveValue(restoredTitle)
         await expect(
           page.locator('.localizer.app-header__localizer .localizer__button-content'),
-        ).toHaveText('English')
+        ).toHaveText(restoredLabel)
 
         await expect
           .poll(async () => {
             const preference = await page.request.get(`${serverURL}/api/payload-preferences/locale`)
             return (await preference.json()).value
           })
-          .toBe(defaultLocale)
+          .toBe(restoredLocale)
 
         await page.goForward()
         await expect(page).toHaveURL(/locale=es/)
@@ -514,20 +520,23 @@ describe('Localization', () => {
 
         await page.goBack()
         await expect(page).not.toHaveURL(/locale=/)
-        await expect(page.locator('#field-title')).toHaveValue(englishTitle)
+        await expect(page.locator('#field-title')).toHaveValue(restoredTitle)
         await expect(page.locator('.app-header__localizer .localizer__button-content')).toHaveText(
-          'English',
+          restoredLabel,
         )
         await expect
           .poll(async () => {
             const preference = await page.request.get(`${serverURL}/api/payload-preferences/locale`)
             return (await preference.json()).value
           })
-          .toBe(defaultLocale)
+          .toBe(restoredLocale)
 
-        const editedEnglishTitle = `${englishTitle} edited`
+        const editedTitle = `${restoredTitle} edited`
 
-        await page.locator('#field-title').fill(editedEnglishTitle)
+        await waitForFormReady(page)
+        await page.locator('#field-title').fill('')
+        await page.locator('#field-title').pressSequentially(editedTitle)
+        await expect(page.locator('#field-title')).toHaveValue(editedTitle)
         await saveDocAndAssert(page)
 
         const {
@@ -539,15 +548,15 @@ describe('Localization', () => {
         })
 
         expect(savedPost?.title).toEqual({
-          [defaultLocale]: editedEnglishTitle,
-          [spanishLocale]: spanishTitle,
+          [defaultLocale]: restoredLocale === defaultLocale ? editedTitle : englishTitle,
+          [spanishLocale]: restoredLocale === spanishLocale ? editedTitle : spanishTitle,
         })
 
         await page.getByRole('link', { name: 'Localized Posts', exact: true }).last().click()
         await expect(page.locator('.app-header__localizer .localizer__button-content')).toHaveText(
-          'English',
+          restoredLabel,
         )
-        await expect(page.locator('.cell-title', { hasText: editedEnglishTitle })).toBeVisible()
+        await expect(page.locator('.cell-title', { hasText: editedTitle })).toBeVisible()
       },
     )
 
@@ -643,9 +652,13 @@ describe('Localization', () => {
       'should edit relationship drawers in the restored document locale after browser back',
       { tag: '@also-without-cache-components' },
       async () => {
+        const restoredLocale = currentFramework === 'tanstack-start' ? spanishLocale : defaultLocale
+        const otherLocale = restoredLocale === defaultLocale ? spanishLocale : defaultLocale
+        const restoredLabel = restoredLocale === defaultLocale ? 'English' : 'Spanish'
+
         const english = 'Drawer English title'
         const spanish = 'Drawer Spanish title'
-        const edited = 'Drawer English title edited'
+        const edited = 'Drawer title edited'
         const related = await payload.create({
           collection: localizedPostsSlug,
           data: { title: english },
@@ -681,17 +694,17 @@ describe('Localization', () => {
         await page.goBack()
         await expect(page).not.toHaveURL(/locale=/)
         await expect(page.locator('.app-header__localizer .localizer__button-content')).toHaveText(
-          'English',
+          restoredLabel,
         )
         await expect
           .poll(async () => {
             const preference = await page.request.get(`${serverURL}/api/payload-preferences/locale`)
             return (await preference.json()).value
           })
-          .toBe(defaultLocale)
+          .toBe(restoredLocale)
         // Simulate another tab changing the shared preference after this page was restored.
         await page.request.post(`${serverURL}/api/payload-preferences/locale`, {
-          data: { value: spanishLocale },
+          data: { value: otherLocale },
         })
         await openDocDrawer({
           page,
@@ -701,17 +714,19 @@ describe('Localization', () => {
         const drawer = page.getByRole('dialog', { name: 'Editing Localized Post', exact: true })
 
         await expect(
-          drawer.getByRole('textbox', { name: 'Full title — en', exact: true }),
-        ).toHaveValue(english)
-        await drawer.getByRole('textbox', { name: 'Full title — en', exact: true }).fill(edited)
+          drawer.getByRole('textbox', { name: `Full title — ${restoredLocale}`, exact: true }),
+        ).toHaveValue(restoredLocale === defaultLocale ? english : spanish)
+        await drawer
+          .getByRole('textbox', { name: `Full title — ${restoredLocale}`, exact: true })
+          .fill(edited)
         await drawer.getByRole('button', { name: 'Save', exact: true }).click()
         await expect(page.locator('.payload-toast-container')).toContainText('successfully')
         await drawer.getByRole('button', { name: 'Close', exact: true }).click()
         const preference = await page.request.get(`${serverURL}/api/payload-preferences/locale`)
 
-        expect(await preference.json()).toMatchObject({ value: spanishLocale })
+        expect(await preference.json()).toMatchObject({ value: otherLocale })
         await expect(page.locator('.app-header__localizer .localizer__button-content')).toHaveText(
-          'English',
+          restoredLabel,
         )
 
         const {
@@ -722,7 +737,10 @@ describe('Localization', () => {
           where: { id: { equals: related.id } },
         })
 
-        expect(savedPost?.title).toEqual({ [defaultLocale]: edited, [spanishLocale]: spanish })
+        expect(savedPost?.title).toEqual({
+          [defaultLocale]: restoredLocale === defaultLocale ? edited : english,
+          [spanishLocale]: restoredLocale === spanishLocale ? edited : spanish,
+        })
       },
     )
   })
