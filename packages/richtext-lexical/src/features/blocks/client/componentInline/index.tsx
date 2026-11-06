@@ -311,19 +311,17 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     clientBlock,
   ])
 
-  const onChange = useMemo<FormProps['onChange']>(
-    () => [
-      ({ formState, submitted }) => {
-        if (submitted) {
-          if (!CustomLabelFromProps) {
-            setCustomLabel(formState._components?.customComponents?.BlockLabel)
-          }
-          if (!CustomBlockFromProps) {
-            setCustomBlock(formState._components?.customComponents?.Block)
-          }
+  const onChange = useCallback<NonNullable<FormProps['onChange']>[number]>(
+    ({ formState, submitted }) => {
+      if (submitted) {
+        if (!CustomLabelFromProps) {
+          setCustomLabel(formState._components?.customComponents?.BlockLabel)
         }
-      },
-    ],
+        if (!CustomBlockFromProps) {
+          setCustomBlock(formState._components?.customComponents?.Block)
+        }
+      }
+    },
     [CustomLabelFromProps, CustomBlockFromProps],
   )
 
@@ -469,7 +467,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       el="div"
       fields={clientBlock?.fields}
       initialState={initialState || {}}
-      onChange={onChange}
+      onChange={[onChange]}
       onSubmit={(formState) => {
         onFormSubmit(formState)
         toggleDrawer()

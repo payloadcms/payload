@@ -374,22 +374,20 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     [blockType, editor, nodeKey],
   )
 
-  const onChange = useMemo<FormProps['onChange']>(
-    () => [
-      ({ formState, submitted }) => {
-        applyServerState(formState, formState)
+  const onChange = useCallback<NonNullable<FormProps['onChange']>[number]>(
+    ({ formState, submitted }) => {
+      applyServerState(formState, formState)
 
-        if (submitted) {
-          if (!CustomLabelFromProps) {
-            setCustomLabel(formState._components?.customComponents?.BlockLabel ?? undefined)
-          }
-          if (!CustomBlockFromProps) {
-            setCustomBlock(formState._components?.customComponents?.Block ?? undefined)
-          }
-          setErrorCount(Object.values(formState).filter((field) => field.valid === false).length)
+      if (submitted) {
+        if (!CustomLabelFromProps) {
+          setCustomLabel(formState._components?.customComponents?.BlockLabel ?? undefined)
         }
-      },
-    ],
+        if (!CustomBlockFromProps) {
+          setCustomBlock(formState._components?.customComponents?.Block ?? undefined)
+        }
+        setErrorCount(Object.values(formState).filter((field) => field.valid === false).length)
+      }
+    },
     [applyServerState, CustomLabelFromProps, CustomBlockFromProps],
   )
 
@@ -769,7 +767,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           el="div"
           fields={clientBlock?.fields ?? []}
           initialState={initialState}
-          onChange={onChange}
+          onChange={[onChange]}
           onSubmit={(formState) => {
             // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
             const newData = reduceFormStateToData({
