@@ -30,12 +30,10 @@ function isBuffer(obj: any) {
 interface Opts {
   delimiter?: string
   object?: any
-  overwrite?: boolean
   /**
-   * Keeps empty array values in the flattened input from being populated by descendant paths.
-   * Ignored when `overwrite` is true.
+   * Allows descendant paths to replace scalar values or populate explicit empty arrays.
    */
-  preserveEmptyArrays?: boolean
+  overwrite?: boolean
   recursive?: boolean
 }
 
@@ -60,10 +58,7 @@ export const unflatten = (target: any, opts?: Opts) => {
   }
 
   const sortedKeys = Object.keys(target).sort((keyA, keyB) => keyA.length - keyB.length)
-  const explicitEmptyArrays =
-    opts.preserveEmptyArrays && !overwrite
-      ? new Set(Object.values(target).filter((value) => Array.isArray(value) && value.length === 0))
-      : undefined
+  const explicitEmptyArrays = overwrite ? undefined : new Set<unknown>()
 
   sortedKeys.forEach((key) => {
     const split = key.split(delimiter)
@@ -105,11 +100,16 @@ export const unflatten = (target: any, opts?: Opts) => {
       }
     }
 
-    // unflatten again for 'messy objects'
+    const value = recursive ? unflatten(target[key], opts) : target[key]
+
+    if (explicitEmptyArrays && Array.isArray(value) && value.length === 0) {
+      explicitEmptyArrays.add(value)
+    }
+
     setOwnProperty({
       key: key1,
       target: recipient,
-      value: recursive ? unflatten(target[key], opts) : target[key],
+      value,
     })
   })
 

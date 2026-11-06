@@ -32,7 +32,7 @@ export const getDataFromFormState = (
   })
 
   if (unflatten) {
-    data = flatleyUnflatten(data, { preserveEmptyArrays: !ignoreDisableFormData })
+    data = flatleyUnflatten(data)
   }
 
   return data
