@@ -4,6 +4,10 @@ import { unflatten } from './unflatten.js'
 import { unflattenData } from './unflattenData.js'
 
 describe('unflatten', () => {
+  it('should continue merging descendant paths into explicit empty objects', () => {
+    expect(unflatten({ person: {}, 'person.me': true })).toEqual({ person: { me: true } })
+  })
+
   it.each([undefined, false])(
     'should preserve an explicit empty array when overwrite is %s',
     (overwrite) => {

@@ -32,6 +32,13 @@ interface Opts {
   object?: any
   /**
    * Allows descendant paths to replace scalar values or populate explicit empty arrays.
+   *
+   * @example
+   * unflatten({ person: 'Ada', 'person.me': true }, { overwrite: false })
+   * // { person: 'Ada' }
+   *
+   * unflatten({ person: 'Ada', 'person.me': true }, { overwrite: true })
+   * // { person: { me: true } }
    */
   overwrite?: boolean
   recursive?: boolean
@@ -76,6 +83,9 @@ export const unflatten = (target: any, opts?: Opts) => {
       const type = Object.prototype.toString.call(currentValue)
       const isobject = type === '[object Object]' || type === '[object Array]'
 
+      // Preserve scalar values and explicit empty arrays unless overwriting is enabled.
+      // An explicit empty array can represent a cleared list, so stale descendants must not repopulate it.
+      // Objects and nonempty arrays remain mergeable.
       if (
         !overwrite &&
         ((!isobject && typeof currentValue !== 'undefined') ||
