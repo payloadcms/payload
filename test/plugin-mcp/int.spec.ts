@@ -459,6 +459,19 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           resource: `${restClient.serverURL}/cms/api/mcp`,
         })
       })
+      it('should challenge signed-out GET requests, which some clients use to find the sign-in', async ({
+        payload,
+        restClient,
+      }) => {
+        enableOAuth(payload)
+
+        const response = await restClient.GET('/mcp')
+
+        expect(response.status).toBe(401)
+        expect(response.headers.get('WWW-Authenticate')).toContain(
+          `resource_metadata="${restClient.serverURL}/api/mcp/oauth-protected-resource"`,
+        )
+      })
       it('should serve authorization servers returned by a function of the request', async ({
         payload,
         restClient,

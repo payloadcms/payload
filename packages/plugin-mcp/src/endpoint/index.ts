@@ -38,8 +38,16 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
 
   const authorizedMCP = await getAuthorizedMCP({ isHTTP: true, overrideAccess, req })
 
+  // Clients like Codex send a GET first to find out where to sign in, so this comes before the
+  // GET check
   if (pluginConfig.oauth && !req.user) {
     return oauthChallenge({ req })
+  }
+
+  // Streamable HTTP's optional server-to-client stream. We don't offer one, so answer 405 per
+  // spec, and clients skip it
+  if (req.method === 'GET') {
+    return new Response(null, { headers: { Allow: 'POST' }, status: 405 })
   }
 
   const maxRequestBodySize = pluginConfig.mcp?.maxRequestBodySize
