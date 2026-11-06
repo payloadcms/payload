@@ -9,7 +9,7 @@ import {
   type Where,
 } from 'payload'
 import { hoistQueryParamsToAnd, transformColumnsToPreferences } from 'payload/shared'
-import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import React, { Fragment, startTransition, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
@@ -169,10 +169,12 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         tableAppearance: 'condensed',
       })
 
-      setData(newData)
-      setTable(NewTable)
-      setColumnState(newColumnState)
-      setIsLoadingTable(false)
+      startTransition(() => {
+        setData(newData)
+        setTable(NewTable)
+        setColumnState(newColumnState)
+        setIsLoadingTable(false)
+      })
     },
     [
       field.defaultLimit,
