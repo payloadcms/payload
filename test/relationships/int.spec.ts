@@ -2356,6 +2356,76 @@ test.suite('Relationships', { config: './config.ts' }, () => {
       expect(queryTwo.docs).toHaveLength(1)
     })
 
+    test('should match no documents when querying polymorphic relationship value with an empty in array', async ({
+      payload,
+    }) => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: polymorphicRelationshipsSlug,
+        data: {
+          polymorphic: {
+            relationTo: 'movies',
+            value: movie.id,
+          },
+        },
+        overrideAccess: true,
+      })
+
+      const { docs } = await payload.find({
+        collection: polymorphicRelationshipsSlug,
+        overrideAccess: true,
+        where: {
+          'polymorphic.value': {
+            in: [],
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(0)
+    })
+
+    test('should match all documents when querying polymorphic relationship value with an empty not_in array', async ({
+      payload,
+    }) => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: polymorphicRelationshipsSlug,
+        data: {
+          polymorphic: {
+            relationTo: 'movies',
+            value: movie.id,
+          },
+        },
+        overrideAccess: true,
+      })
+
+      const { docs } = await payload.find({
+        collection: polymorphicRelationshipsSlug,
+        overrideAccess: true,
+        where: {
+          'polymorphic.value': {
+            not_in: [],
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(1)
+    })
+
     // all operator is not supported in Postgres yet for any fields
     test.options(
       'should allow REST all querying on polymorphic relationships',
