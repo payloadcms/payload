@@ -119,6 +119,7 @@ export const frTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Redimensionner {{label}}, taille actuelle : {{size}}',
     searchWidgets: 'Rechercher des widgets...',
     widgetAddPin: 'Épingler le document',
+    widgetCollectionPreview: 'Aperçu de la collection',
     widgetCollectionRequired: 'La Collection est requise.',
     widgetConfigurationError: 'Erreur de configuration du widget',
     widgetDropFilesToUpload: 'Glisser-déposer un fichier',

@@ -115,6 +115,7 @@ export const myTranslations: DefaultTranslationsObject = {
     resizeWidget: '{{label}} ၏ အရွယ်အစားကို ပြောင်းရန်၊ လက်ရှိအရွယ်အစား: {{size}}',
     searchWidgets: 'ဝစ်ဂျက်များ ရှာဖွေပါ...',
     widgetAddPin: 'စာရွက်စာတမ်းကို ပင်ထည့်ပါ',
+    widgetCollectionPreview: 'စုစည်းမှု အကြိုကြည့်ရှုခြင်း',
     widgetCollectionRequired: 'Collection သည် မဖြစ်မနေလိုအပ်ပါသည်။',
     widgetConfigurationError: 'Widget အတည်ပြုခြင်းအမှား',
     widgetDropFilesToUpload: 'ဖိုင်တစ်ဖိုင်ကို ဆွဲချလိုက်ပါ။',

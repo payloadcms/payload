@@ -117,6 +117,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Endre størrelsen på {{label}}, gjeldende størrelse: {{size}}',
     searchWidgets: 'Søk widgets...',
     widgetAddPin: 'Fest dokument',
+    widgetCollectionPreview: 'Forhåndsvisning av samling',
     widgetCollectionRequired: 'Collectie er påkrevd.',
     widgetConfigurationError: 'Feil i widget-konfigurasjon',
     widgetDropFilesToUpload: 'Dra og slipp en fil',

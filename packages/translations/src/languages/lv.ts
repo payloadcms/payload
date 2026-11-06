@@ -117,6 +117,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Mainīt {{label}} izmēru, pašreizējais izmērs: {{size}}',
     searchWidgets: 'Meklēt logrīkus...',
     widgetAddPin: 'Piespraust dokumentu',
+    widgetCollectionPreview: 'Kolekcijas priekšskatījums',
     widgetCollectionRequired: 'Kolekcija ir obligāta.',
     widgetConfigurationError: 'Sīkrīka konfigurācijas kļūda',
     widgetDropFilesToUpload: 'Ievelciet un nometiet failu',

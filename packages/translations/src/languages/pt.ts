@@ -118,6 +118,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Redimensionar {{label}}, tamanho atual: {{size}}',
     searchWidgets: 'Pesquisar widgets...',
     widgetAddPin: 'Fixar documento',
+    widgetCollectionPreview: 'Prévia da coleção',
     widgetCollectionRequired: 'Coleção é obrigatória.',
     widgetConfigurationError: 'Erro de configuração do widget',
     widgetDropFilesToUpload: 'Arraste e solte um arquivo',

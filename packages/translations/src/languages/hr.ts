@@ -118,6 +118,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Promijeni veličinu {{label}}, trenutna veličina: {{size}}',
     searchWidgets: 'Pretraži widgete...',
     widgetAddPin: 'Prikvači dokument',
+    widgetCollectionPreview: 'Pretpregled zbirke',
     widgetCollectionRequired: 'Collection je obvezan.',
     widgetConfigurationError: 'Pogreška u konfiguraciji widgeta',
     widgetDropFilesToUpload: 'Povucite i ispustite datoteku',

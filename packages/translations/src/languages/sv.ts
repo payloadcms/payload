@@ -117,6 +117,7 @@ export const svTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Ändra storlek på {{label}}, nuvarande storlek: {{size}}',
     searchWidgets: 'Sök efter widget...',
     widgetAddPin: 'Fäst dokument',
+    widgetCollectionPreview: 'Förhandsvisning av samling',
     widgetCollectionRequired: 'Collection är obligatorisk.',
     widgetConfigurationError: 'Fel i widgetkonfiguration',
     widgetDropFilesToUpload: 'Dra och släpp en fil',

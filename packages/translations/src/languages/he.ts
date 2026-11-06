@@ -114,6 +114,7 @@ export const heTranslations: DefaultTranslationsObject = {
     resizeWidget: 'שינוי הגודל של {{label}}, גודל נוכחי: {{size}}',
     searchWidgets: "חפש ווידג'טים...",
     widgetAddPin: 'הצמד מסמך',
+    widgetCollectionPreview: 'תצוגה מקדימה של אוסף',
     widgetCollectionRequired: 'Collection נדרשת.',
     widgetConfigurationError: "שגיאת תצורת ווידג'ט",
     widgetDropFilesToUpload: 'גרור ושחרר קובץ',

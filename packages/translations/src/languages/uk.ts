@@ -118,6 +118,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Змінити розмір {{label}}, поточний розмір: {{size}}',
     searchWidgets: 'Пошук віджетів...',
     widgetAddPin: 'Закріпити документ',
+    widgetCollectionPreview: 'Попередній перегляд колекції',
     widgetCollectionRequired: 'Collection є обов’язковим.',
     widgetConfigurationError: 'Помилка конфігурації віджета',
     widgetDropFilesToUpload: 'Перемістіть файл',

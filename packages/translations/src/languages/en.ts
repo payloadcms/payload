@@ -118,6 +118,7 @@ export const enTranslations = {
     resizeWidget: 'Resize {{label}}, current size: {{size}}',
     searchWidgets: 'Search widgets...',
     widgetAddPin: 'Pin document',
+    widgetCollectionPreview: 'Collection Preview',
     widgetCollectionRequired: 'Collection is required.',
     widgetConfigurationError: 'Widget configuration error',
     widgetDropFilesToUpload: 'Drop files to upload',

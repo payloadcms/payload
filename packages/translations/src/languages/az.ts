@@ -117,6 +117,7 @@ export const azTranslations: DefaultTranslationsObject = {
     resizeWidget: '{{label}} ölçüsünü dəyişin, cari ölçü: {{size}}',
     searchWidgets: 'Widgetləri axtarın...',
     widgetAddPin: 'Sənədi sabitləyin',
+    widgetCollectionPreview: 'Kolleksiyaya önbaxış',
     widgetCollectionRequired: 'Collection tələb olunur.',
     widgetConfigurationError: 'Vidjet konfiqurasiyası xətası',
     widgetDropFilesToUpload: 'Faylı buraya sürükləyin və buraxın',

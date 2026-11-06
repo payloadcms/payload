@@ -119,6 +119,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Formaat van {{label}} wijzigen, huidig formaat: {{size}}',
     searchWidgets: 'Zoek widgets...',
     widgetAddPin: 'Document vastmaken',
+    widgetCollectionPreview: 'Collectievoorbeeld',
     widgetCollectionRequired: 'Collectie is vereist.',
     widgetConfigurationError: 'Fout in de configuratie van de widget',
     widgetDropFilesToUpload: 'Sleep een bestand',
