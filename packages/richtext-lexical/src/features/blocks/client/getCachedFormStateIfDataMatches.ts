@@ -1,7 +1,7 @@
 import type { Data, FormState } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import { reduceFieldsToValues } from 'payload/shared'
+import { getDataFromFormState } from 'payload/shared'
 
 export const getCachedFormStateIfDataMatches = ({
   cachedFormState,
@@ -54,7 +54,7 @@ export const reduceFormStateToBlockData = (formState: FormState, currentData?: D
   )
 
   return normalizeData({
-    data: reduceFieldsToValues(formStateWithoutRowCounts, true),
+    data: getDataFromFormState(formStateWithoutRowCounts, true),
     rowFieldPaths: new Set(),
   })
 }

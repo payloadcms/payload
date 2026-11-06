@@ -1,6 +1,6 @@
 'use client'
 
-import { getDataByPath, getSiblingData } from 'payload/shared'
+import { getDataByPath, getSiblingDataFromFormState } from 'payload/shared'
 import React from 'react'
 
 import { useWatchForm } from '../../Form/context.js'
@@ -25,7 +25,7 @@ export const RowLabelProvider: React.FC<Props<unknown>> = ({ children, path, row
   // Reads the form state itself, not the form's getters: they never change, so React Compiler
   // would keep returning the data from the first render
   const { fields } = useWatchForm()
-  const collapsibleData = getSiblingData(fields, path)
+  const collapsibleData = getSiblingDataFromFormState(fields, path)
   const arrayData = getDataByPath(fields, path)
 
   const data = arrayData || collapsibleData
