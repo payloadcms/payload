@@ -58,7 +58,6 @@ export const Form: React.FC<FormProps> = (props) => {
     el,
     initialState, // fully formed initial field state
     isDocumentForm,
-    isInitializing: initializingFromProps,
     onChange,
     uuid,
   } = props
@@ -74,8 +73,6 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const [isMounted, setIsMounted] = useState(false)
 
-  const [initializing, setInitializing] = useState(initializingFromProps)
-
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
   const isFirstRenderRef = useRef(true)
@@ -85,7 +82,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const {
     dispatchFields,
     formState,
-    isInitializing: isFormStateInitializing,
+    isInitializing,
     isModified,
     isValid,
     prevFormStateRef,
@@ -281,12 +278,6 @@ export const Form: React.FC<FormProps> = (props) => {
     [dispatchFields, getDataByPath, setModified],
   )
 
-  useEffect(() => {
-    if (initializingFromProps !== undefined) {
-      setInitializing(initializingFromProps)
-    }
-  }, [initializingFromProps])
-
   contextRef.current.submit = submit
   contextRef.current.getFields = getFields
   contextRef.current.getField = getField
@@ -312,7 +303,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.moveFieldRow = moveFieldRow
   contextRef.current.replaceFieldRow = replaceFieldRow
   contextRef.current.uuid = uuid
-  contextRef.current.initializing = initializing || isFormStateInitializing
+  contextRef.current.initializing = isInitializing
   contextRef.current.isValid = isValid
 
   useEffect(() => {
@@ -404,7 +395,7 @@ export const Form: React.FC<FormProps> = (props) => {
        * to wait for the form to be ready before interacting with it, reducing flakiness if the test is run in
        * slow network conditions.
        */
-      data-form-ready={!processing && isMounted && !initializing && !isFormStateInitializing}
+      data-form-ready={!processing && isMounted && !isInitializing}
       method={method}
       noValidate
       onSubmit={(e) => void contextRef.current.submit({}, e)}
@@ -419,9 +410,7 @@ export const Form: React.FC<FormProps> = (props) => {
             }}
           >
             <SubmittedContext value={submitted}>
-              <InitializingContext
-                value={!isMounted || (isMounted && (initializing || isFormStateInitializing))}
-              >
+              <InitializingContext value={!isMounted || isInitializing}>
                 <ProcessingContext value={processing}>
                   <BackgroundProcessingContext value={backgroundProcessing}>
                     <ModifiedContext value={isModified}>

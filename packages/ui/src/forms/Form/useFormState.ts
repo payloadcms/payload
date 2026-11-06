@@ -69,7 +69,7 @@ export type UseFormStateResult = {
   dispatchFields: Dispatch<FieldAction>
   /** Current fields, including their values, validation errors, and rendered components. */
   formState: FormState
-  /** True while rebuilding the selected schema. */
+  /** True while the caller initializes the form or the selected schema is being rebuilt. */
   isInitializing: boolean
   /** Whether the form has unsaved field changes. */
   isModified: boolean
@@ -116,6 +116,7 @@ type Args = {
     | 'disableValidationOnSubmit'
     | 'initialState'
     | 'isDocumentForm'
+    | 'isInitializing'
     | 'readOnly'
     | 'schemaPath'
     | 'select'
@@ -664,7 +665,7 @@ export const useFormState = ({
     () => ({
       dispatchFields,
       formState,
-      isInitializing,
+      isInitializing: props.isInitializing || isInitializing,
       isModified,
       isValid,
       prevFormStateRef,
@@ -681,6 +682,7 @@ export const useFormState = ({
       prevFormStateRef,
       refreshFormStateAfterSave,
       isInitializing,
+      props.isInitializing,
       isValid,
       isModified,
       queueFormStateRefresh,
