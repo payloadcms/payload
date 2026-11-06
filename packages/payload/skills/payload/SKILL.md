@@ -331,7 +331,7 @@ See [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control
 
 ### 2. Transaction Failures in Hooks
 
-**Nested operations in hooks without `req` break transaction atomicity.**
+**When transactions are enabled, nested operations in hooks without `req` break transaction atomicity.**
 
 ```ts
 // ❌ DATA CORRUPTION RISK: Separate transaction
@@ -458,15 +458,15 @@ import type { Post, User } from '@/payload-types'
 ## Common Gotchas
 
 1. **Local API operations with optional `overrideAccess` respect access control by default** — set it to `true` only for trusted server-side work
-2. **Missing `req` in nested operations** breaks transaction atomicity
+2. **Missing `req` in nested operations** breaks transaction atomicity when transactions are enabled
 3. **Hook loops** — operations in hooks can re-trigger the same hooks; use `req.context` flags
 4. **Field-level access** returns boolean only, no query constraints
 5. **Relationship depth** defaults to 2; set `depth: 0` for IDs only
 6. **Draft status** — `_status` field is auto-injected when drafts are enabled
 7. **Types regenerate automatically** in dev (`autoGenerate`) and during `payload build` — avoid running `generate:types` manually
 8. **MongoDB transactions** require replica set configuration
-9. **SQLite transactions** are disabled by default; enable with `transactionOptions: {}`
-10. **Point fields** are not supported in SQLite
+9. **SQLite transactions**: Leave disabled by default. Do not add `transactionOptions: {}` unless enabling transactions is explicitly requested.
+10. **Point fields** are not fully supported in SQLite. Geospacial indexes are not created and the query operator `near`, `within`, and `intersects` will not work.
 11. **Computed virtual titles** — fields configured with `virtual: true` cannot be used in `admin.useAsTitle`; use a stored top-level field
 
 ## Best Practices
