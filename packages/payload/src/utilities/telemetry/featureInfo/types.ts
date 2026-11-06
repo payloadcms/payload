@@ -42,8 +42,8 @@ type CompleteFeatureInfo = {
     previewGlobalCount: number
   }
   queryPresetCollectionCount: number
-  richText: { fieldCount: number }
   richTextFeatures: RichTextFeature[]
+  richTextFieldCount: number
   trashCollectionCount: number
   uploadAndMedia: {
     cropDisabledCollectionCount: number
