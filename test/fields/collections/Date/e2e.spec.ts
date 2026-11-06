@@ -176,7 +176,6 @@ describe('Date', () => {
 
       if (operator === 'equals') {
         await selectInput({
-          page: timezonePage,
           selectLocator: condition.locator('.condition__operator'),
           multiSelect: false,
           option: 'is greater than or equal to',
@@ -186,7 +185,6 @@ describe('Date', () => {
           .toContain(`[greater_than_equal]=${expectedDate}`)
 
         await selectInput({
-          page: timezonePage,
           selectLocator: condition.locator('.condition__operator'),
           multiSelect: false,
           option: 'is not equal to',
@@ -196,7 +194,6 @@ describe('Date', () => {
           .toContain(`[not_equals]=${expectedDate}`)
 
         await selectInput({
-          page: timezonePage,
           selectLocator: condition.locator('.condition__operator'),
           multiSelect: false,
           option: 'is in',
@@ -230,7 +227,6 @@ describe('Date', () => {
     const valueInput = condition.locator('.condition__value input')
 
     await selectInput({
-      page,
       selectLocator: condition.locator('.condition__operator'),
       multiSelect: false,
       option: 'is not equal to',
