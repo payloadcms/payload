@@ -100,15 +100,20 @@ const sanitizeTelemetryConfig = (config: SanitizedConfig): SanitizedConfig => {
   }
 }
 
-const collectAdminCustomization = (config: SanitizedConfig): FeatureInfo => ({
-  adminCustomization: {
-    customAdminComponentCount: countRootAdminComponents(config),
-    customAdminViewCount: Object.keys(config.admin?.components?.views ?? {}).length,
-    customDashboardWidgetCount: (config.admin?.dashboard?.widgets ?? []).filter(
-      ({ Component }) => getTelemetryWidgetType({ component: Component }) === 'custom',
-    ).length,
-  },
-})
+const collectAdminCustomization = (config: SanitizedConfig): FeatureInfo => {
+  const widgetTypes = (config.admin?.dashboard?.widgets ?? [])
+    .map(({ Component }) => getTelemetryWidgetType({ component: Component }))
+    .filter((type) => type !== null)
+
+  return {
+    adminCustomization: {
+      customAdminComponentCount: countRootAdminComponents(config),
+      customAdminViewCount: Object.keys(config.admin?.components?.views ?? {}).length,
+      customDashboardWidgetCount: widgetTypes.filter((type) => type === 'custom').length,
+      widgetTypes: [...new Set(widgetTypes)].sort(),
+    },
+  }
+}
 
 const collectAuthentication = (config: SanitizedConfig): FeatureInfo => {
   const authCollections = (config.collections ?? []).filter(({ auth }) => Boolean(auth))

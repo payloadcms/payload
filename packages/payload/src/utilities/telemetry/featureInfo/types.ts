@@ -1,3 +1,5 @@
+import type { TelemetryWidgetType } from '../widgetType.js'
+
 export type RichTextFeature = 'blocks' | 'relationship' | 'table' | 'upload'
 
 type CompleteFeatureInfo = {
@@ -5,6 +7,8 @@ type CompleteFeatureInfo = {
     customAdminComponentCount: number
     customAdminViewCount: number
     customDashboardWidgetCount: number
+    /** Registered widget categories; does not describe individual saved dashboard layouts. */
+    widgetTypes: TelemetryWidgetType[]
   }
   authentication: {
     apiKeyCollectionCount: number
