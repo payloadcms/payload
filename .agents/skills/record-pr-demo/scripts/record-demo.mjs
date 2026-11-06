@@ -301,24 +301,37 @@ async function executeDemo({
         clickPulse.style.top = `${clickPoint.y - pointer.y}px`
       }
       const cursorActivityType = 'payload-pr-demo-cursor-active'
+      let latestCursorActivity = 0
       window.addEventListener('message', (event) => {
         if (event.data?.type !== cursorActivityType) return
         const isParent = window.parent !== window && event.source === window.parent
         const isChild = [...document.querySelectorAll('iframe')].some(
           (frame) => frame.contentWindow === event.source,
         )
-        if (isParent || isChild) {
+        if (
+          (isParent || isChild) &&
+          Number.isFinite(event.data.timestamp) &&
+          event.data.timestamp >= latestCursorActivity
+        ) {
+          latestCursorActivity = event.data.timestamp
           cursor.style.transition = 'none'
           cursor.style.opacity = '0'
         }
       })
-      const positionCursor = ({ clientX, clientY }) => {
+      const positionCursor = ({ clientX, clientY, timeStamp }) => {
+        latestCursorActivity = performance.timeOrigin + timeStamp
         // Transfer cursor ownership between the recording chrome and its live app frame.
         if (window.parent !== window) {
-          window.parent.postMessage({ type: cursorActivityType }, '*')
+          window.parent.postMessage(
+            { type: cursorActivityType, timestamp: latestCursorActivity },
+            '*',
+          )
         } else {
           for (const frame of document.querySelectorAll('iframe')) {
-            frame.contentWindow?.postMessage({ type: cursorActivityType }, '*')
+            frame.contentWindow?.postMessage(
+              { type: cursorActivityType, timestamp: latestCursorActivity },
+              '*',
+            )
           }
         }
         pointer = { x: clientX, y: clientY }
@@ -570,7 +583,10 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
             if (!nested || nested === hit) break
             hit = nested
           }
-          return hit && element.contains(hit)
+          for (let candidate = hit; candidate; candidate = candidate.getRootNode().host) {
+            if (element.contains(candidate)) return true
+          }
+          return false
         })
         if (!point) {
           throw new Error(

@@ -150,6 +150,10 @@ test('should preview accessibility observations from real keyboard interactions'
     const page = await browser.newPage({ viewport: { width: 1600, height: 1200 } })
     await page.goto(`${url}/?accessibility&announcements&kind=fix`)
     const app = page.frameLocator('iframe')
+    await page.getByRole('button', { name: 'Dark', exact: true }).click()
+    await expect(app.locator('html')).toHaveCSS('background-color', 'rgb(25, 25, 25)')
+    await page.getByRole('button', { name: 'Light', exact: true }).click()
+    await expect(app.locator('html')).toHaveCSS('background-color', 'rgb(250, 249, 246)')
     const clickIntroduction = async () => {
       const box = await app.getByRole('button', { name: 'Move Introduction down' }).boundingBox()
       await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)

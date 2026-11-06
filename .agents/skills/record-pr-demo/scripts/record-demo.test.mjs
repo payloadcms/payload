@@ -938,10 +938,15 @@ test('should show only one cursor when moving between chrome and the app frame',
         await expect(stageCursor).toHaveCSS('opacity', '0')
         await expect(appCursor).toHaveCSS('opacity', '1')
         await click(chrome.back)
+        await page.evaluate(() => window.parent.postMessage({ type: 'payload-pr-demo-cursor-active', timestamp: 0 }, '*'))
+        await stage.evaluate(() => new Promise(resolve => setTimeout(resolve, 50)))
         await expect(stageCursor).toHaveCSS('opacity', '1')
         await expect(appCursor).toHaveCSS('opacity', '0')
         await click(page.getByRole('button', {name:'Open drawer', exact:true}))
         await expect(stageCursor).toHaveCSS('opacity', '0')
+        await expect(appCursor).toHaveCSS('opacity', '1')
+        await stage.evaluate(() => document.querySelector('iframe').contentWindow.postMessage({ type: 'payload-pr-demo-cursor-active', timestamp: 0 }, '*'))
+        await stage.evaluate(() => new Promise(resolve => setTimeout(resolve, 50)))
         await expect(appCursor).toHaveCSS('opacity', '1')
       }
     `,
@@ -949,6 +954,38 @@ test('should show only one cursor when moving between chrome and the app frame',
     await recorder.validateDemo({
       baseURL: 'http://cursor.test',
       label: 'cursor-ownership',
+      scenario,
+      viewport: { width: 1280, height: 720 },
+    })
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+test('should click both shadow hosts and controls inside nested shadow roots', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'record-pr-demo-shadow-click-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+  try {
+    await writeFile(
+      scenario,
+      `${presentationExport}
+      export default async function ({page, click, ready, expect}) {
+        await page.context().route('http://shadow.test/app', route => route.fulfill({
+          contentType: 'text/html',
+          body: '<div id="target"><template shadowrootmode="open"><div><template shadowrootmode="open"><button>Nested action</button></template></div></template></div><output>0</output><script>let count=0;document.querySelector("#target").addEventListener("click",()=>document.querySelector("output").textContent=String(++count))</script>',
+        }))
+        await page.goto('http://shadow.test/app')
+        await ready()
+        await click(page.locator('#target'))
+        await expect(page.locator('output')).toHaveText('1')
+        await click(page.getByRole('button', {name:'Nested action'}))
+        await expect(page.locator('output')).toHaveText('2')
+      }
+    `,
+    )
+    await recorder.validateDemo({
+      baseURL: 'http://shadow.test',
+      label: 'shadow-click',
       scenario,
       viewport: { width: 1280, height: 720 },
     })

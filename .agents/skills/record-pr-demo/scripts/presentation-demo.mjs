@@ -84,6 +84,7 @@ export async function createPresentation({
             steps: options.annotationSteps,
             shouldAnimate: shouldAnimateAnnotations,
           })
+          sidebar.update({ index: 0, ...viewport, enabled: true, visible: false })
           window.demoSidebar = sidebar
           const setAnnotation = window.demoChrome.setAnnotation
           window.demoChrome.setAnnotation = (annotation) => {
@@ -128,8 +129,8 @@ export async function createPresentation({
       )
     const onAppNavigation = (navigatedFrame) => {
       if (navigatedFrame === frame) {
-        void call({ method: 'setURL', value: frame.url() }).catch((error) => {
-          if (!stage.isClosed()) throw error
+        void call({ method: 'setURL', value: frame.url() }).catch(() => {
+          // Navigation can invalidate a cosmetic URL update; the frame binding also syncs it.
         })
       }
     }

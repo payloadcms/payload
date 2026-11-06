@@ -46,6 +46,7 @@ function applyTheme() {
   chrome.setTheme(theme)
   document.documentElement.style.colorScheme = theme
   if (application.contentDocument?.body) {
+    application.contentDocument.documentElement.style.colorScheme = theme
     application.contentDocument.body.style.colorScheme = theme
   }
   document.querySelectorAll('[data-theme]').forEach((button) => {

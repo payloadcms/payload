@@ -493,6 +493,7 @@ test('should use the shared sidebar during recorder resizing and reject mismatch
       body: `Visible outcome ${index + 1}. This description explains the action shown in the application.`,
       ...(index === 11 ? { kind: 'Bug' } : {}),
     }))
+    steps[0].body = 'A long opening description that fits in the scrollable sidebar. '.repeat(8)
     const presentation = await createPresentation({
       page: stage,
       options: {
@@ -528,6 +529,43 @@ test('should use the shared sidebar during recorder resizing and reject mismatch
     await presentation.flush()
     await expect(sidebar.locator('[aria-current=step]')).toContainText('Visible outcome 12')
     assert.ok((await sidebar.locator('.sidebar-steps').evaluate((e) => e.scrollTop)) > 0)
+    await presentation.stop()
+  } finally {
+    await browser.close()
+  }
+})
+
+test('should keep navigation URL update failures non-fatal', async () => {
+  const { chromium } = await import('@playwright/test')
+  const { createPresentation } = await import('./presentation-demo.mjs')
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const stage = await browser.newPage({ viewport: { width: 1600, height: 1000 } })
+    const presentation = await createPresentation({
+      page: stage,
+      options: { change: { kind: 'Fix', title: 'Navigation', description: 'Keep recording.' } },
+      viewport: { width: 1280, height: 720 },
+      pauseScale: 0,
+    })
+    const originalEvaluate = stage.evaluate
+    let failedUpdates = 0
+    stage.evaluate = async () => {
+      failedUpdates++
+      throw new Error('Execution context was destroyed during navigation')
+    }
+    stage.emit(
+      'framenavigated',
+      stage.frames().find((frame) => frame.parentFrame()),
+    )
+    await new Promise((resolve) => setImmediate(resolve))
+    stage.evaluate = originalEvaluate
+    assert.equal(failedUpdates, 1)
+    await presentation.setAnnotation({
+      index: 1,
+      total: 1,
+      title: 'Still recording',
+      body: 'Navigation continues.',
+    })
     await presentation.stop()
   } finally {
     await browser.close()
