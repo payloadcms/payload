@@ -1,7 +1,8 @@
 'use client'
+import type { FormState } from 'payload'
+
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { serialize } from 'object-to-formdata'
-import { type FormState, type PayloadRequest } from 'payload'
 import {
   deepCopyObjectSimpleWithoutReactComponents,
   getDataByPath as getDataByPathFunc,
@@ -9,11 +10,12 @@ import {
   reduceFieldsToValues,
   uploadRequiresServerValidation,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type {
   CreateFormData,
   Context as FormContextType,
+  FormFieldsContext as FormFieldsContextType,
   FormProps,
   GetDataByPath,
 } from './types.js'
@@ -23,14 +25,9 @@ import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useQueue } from '../../hooks/useQueue.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
-import { useOperation } from '../../providers/Operation/index.js'
-import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadHandlers } from '../../providers/UploadHandlers/index.js'
-import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import {
   BackgroundProcessingContext,
   DocumentFormContext,
@@ -42,17 +39,15 @@ import {
   ProcessingContext,
   SubmittedContext,
   SuccessfulSubmitCountContext,
-  useDocumentForm,
 } from './context.js'
-import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
+import { useFormState } from './useFormState.js'
 import { useFormSubmission } from './useFormSubmission.js'
 
 const baseClass = 'form'
 
 export const Form: React.FC<FormProps> = (props) => {
-  const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
-    useDocumentInfo()
+  const { collectionSlug, docConfig } = useDocumentInfo()
 
   const {
     action,
@@ -70,112 +65,33 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const method = 'method' in props ? props?.method : undefined
 
-  const documentForm = useDocumentForm()
-
   const currentLocale = useLocale()
   const locale = currentLocale?.code
-  const { t } = useTranslation()
-  const { refreshCookie, user } = useAuth()
-  const operation = useOperation()
+  const { refreshCookie } = useAuth()
   const { queueTask } = useQueue()
 
-  const { getFormState } = useServerFunctions()
   const { getUploadHandler } = useUploadHandlers()
 
-  const { config } = useConfig()
   const [isMounted, setIsMounted] = useState(false)
 
-  /**
-   * Tracks wether the form state passes validation.
-   * For example the state could be submitted but invalid as field errors have been returned.
-   */
-  const [isValid, setIsValid] = useState(true)
-  const [isModified, setFormStateModified] = useState(false)
   const [initializing, setInitializing] = useState(initializingFromProps)
 
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
-  const abortResetFormRef = useRef<AbortController>(null)
   const isFirstRenderRef = useRef(true)
 
-  const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
+  const {
+    dispatchFields,
+    formState,
+    isModified,
+    isValid,
+    prevFormStateRef,
+    resetFormState,
+    setIsValid,
+    setModified: setFormStateModified,
+  } = useFormState({ contextRef, props })
 
-  const [formState, dispatchFields] = fieldsReducer
-
-  contextRef.current.fields = formState
-
-  const prevFormState = useRef(formState)
-
-  const validateForm = useCallback(async () => {
-    const validatedFieldState = {}
-    let isValid = true
-
-    const data = contextRef.current.getData()
-
-    const validationPromises = Object.entries(contextRef.current.fields).map(
-      async ([path, field]) => {
-        const validatedField = field
-        const pathSegments = path ? path.split('.') : []
-
-        if (field.passesCondition !== false) {
-          let validationResult: boolean | string = validatedField.valid
-
-          if ('validate' in field && typeof field.validate === 'function') {
-            let valueToValidate = field.value
-
-            if (field?.rows && Array.isArray(field.rows)) {
-              valueToValidate = contextRef.current.getDataByPath(path)
-            }
-
-            validationResult = await field.validate(valueToValidate, {
-              ...field,
-              id,
-              collectionSlug,
-              // If there is a parent document form, we can get the data from that form
-              blockData: undefined, // Will be expensive to get - not worth to pass to client-side validation, as this can be obtained by the user using `useFormFields()`
-              data: documentForm?.getData ? documentForm.getData() : data,
-              event: 'submit',
-              operation,
-              path: pathSegments,
-              preferences: {} as any,
-              req: {
-                payload: {
-                  config,
-                },
-                t,
-                user,
-              } as unknown as PayloadRequest,
-              siblingData: contextRef.current.getSiblingData(path),
-            })
-
-            if (typeof validationResult === 'string') {
-              validatedField.errorMessage = validationResult
-              validatedField.valid = false
-            } else {
-              validatedField.valid = true
-              validatedField.errorMessage = undefined
-            }
-          }
-
-          if (validatedField.valid === false) {
-            isValid = false
-          }
-        }
-
-        validatedFieldState[path] = validatedField
-      },
-    )
-
-    await Promise.all(validationPromises)
-
-    if (!dequal(contextRef.current.fields, validatedFieldState)) {
-      dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
-    }
-
-    setIsValid(isValid)
-
-    return isValid
-  }, [collectionSlug, config, dispatchFields, id, operation, t, user, documentForm])
+  const fieldsReducer: FormFieldsContextType = [formState, dispatchFields]
 
   const {
     backgroundProcessing,
@@ -193,7 +109,7 @@ export const Form: React.FC<FormProps> = (props) => {
     contextRef,
     dispatchFields,
     formRef,
-    prevFormStateRef: prevFormState,
+    prevFormStateRef,
     props,
     setIsValid,
     setModified: setFormStateModified,
@@ -273,47 +189,6 @@ export const Form: React.FC<FormProps> = (props) => {
     [collectionSlug, docConfig, getUploadHandler],
   )
 
-  const reset = useCallback(
-    async (data: unknown) => {
-      const controller = handleAbortRef(abortResetFormRef)
-
-      const docPreferences = await getDocPreferences()
-
-      const { state: newState } = await getFormState({
-        id,
-        collectionSlug,
-        data,
-        docPermissions,
-        docPreferences,
-        globalSlug,
-        locale,
-        operation,
-        renderAllFields: true,
-        schemaPath: collectionSlug ? collectionSlug : globalSlug,
-        signal: controller.signal,
-        skipValidation: true,
-      })
-
-      contextRef.current = { ...initContextState, disabled: contextRef.current.disabled }
-      setModified(false)
-      dispatchFields({ type: 'REPLACE_STATE', state: newState })
-
-      abortResetFormRef.current = null
-    },
-    [
-      collectionSlug,
-      dispatchFields,
-      globalSlug,
-      id,
-      operation,
-      getFormState,
-      docPermissions,
-      getDocPreferences,
-      locale,
-      setModified,
-    ],
-  )
-
   const replaceState = useCallback(
     (state: FormState) => {
       contextRef.current = { ...initContextState, disabled: contextRef.current.disabled }
@@ -385,14 +260,6 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   useEffect(() => {
-    const abortOnChange = abortResetFormRef.current
-
-    return () => {
-      abortAndIgnore(abortOnChange)
-    }
-  }, [])
-
-  useEffect(() => {
     if (initializingFromProps !== undefined) {
       setInitializing(initializingFromProps)
     }
@@ -404,7 +271,6 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.getData = getData
   contextRef.current.getSiblingData = getSiblingData
   contextRef.current.getDataByPath = getDataByPath
-  contextRef.current.validateForm = validateForm
   contextRef.current.createFormData = createFormData
   contextRef.current.setModified = setModified
   contextRef.current.setProcessing = setProcessing
@@ -415,7 +281,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.disabled = disabled
   contextRef.current.setDisabled = setDisabled
   contextRef.current.formRef = formRef
-  contextRef.current.reset = reset
+  contextRef.current.reset = resetFormState
   contextRef.current.replaceState = replaceState
   contextRef.current.dispatchFields = dispatchFields
   contextRef.current.addFieldRow = addFieldRow
@@ -478,7 +344,7 @@ export const Form: React.FC<FormProps> = (props) => {
         React.startTransition(() => {
           dispatchFields({
             type: 'MERGE_SERVER_STATE',
-            prevStateRef: prevFormState,
+            prevStateRef: prevFormStateRef,
             serverState,
           })
         })
@@ -488,11 +354,14 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
-      if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && isModified) {
+      if (
+        (isFirstRenderRef.current || !dequal(formState, prevFormStateRef.current)) &&
+        isModified
+      ) {
         executeOnChange()
       }
 
-      prevFormState.current = formState
+      prevFormStateRef.current = formState
       isFirstRenderRef.current = false
     },
     [isModified, submitted, formState],
