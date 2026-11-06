@@ -113,6 +113,7 @@ export const thTranslations: DefaultTranslationsObject = {
     resizeWidget: 'ปรับขนาด {{label}} ขนาดปัจจุบัน: {{size}}',
     searchWidgets: 'ค้นหาวิดเจ็ต...',
     widgetAddPin: 'ปักหมุดเอกสาร',
+    widgetCollectionPreview: 'ตัวอย่างคอลเลกชัน',
     widgetCollectionRequired: 'Collection เป็นข้อมูลที่จำเป็น',
     widgetConfigurationError: 'เกิดข้อผิดพลาดในการกำหนดค่าของวิดเจ็ต',
     widgetDropFilesToUpload: 'ลากและวางไฟล์',

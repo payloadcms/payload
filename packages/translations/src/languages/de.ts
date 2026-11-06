@@ -120,6 +120,7 @@ export const deTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Größe von {{label}} ändern, aktuelle Größe: {{size}}',
     searchWidgets: 'Suche Widgets...',
     widgetAddPin: 'Dokument anheften',
+    widgetCollectionPreview: 'Sammlungsvorschau',
     widgetCollectionRequired: 'Collection ist erforderlich.',
     widgetConfigurationError: 'Widget-Konfigurationsfehler',
     widgetDropFilesToUpload: 'Datei per Drag & Drop verschieben',

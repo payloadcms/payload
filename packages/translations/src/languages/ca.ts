@@ -118,6 +118,7 @@ export const caTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Canvia la mida de {{label}}, mida actual: {{size}}',
     searchWidgets: 'Cerca de ginys...',
     widgetAddPin: 'Fixa el document',
+    widgetCollectionPreview: 'Previsualització de la col·lecció',
     widgetCollectionRequired: 'Cal especificar una Collection.',
     widgetConfigurationError: 'Error de configuració del widget',
     widgetDropFilesToUpload: 'Arrossega i deixa anar un fitxer',

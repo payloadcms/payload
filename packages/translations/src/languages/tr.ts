@@ -119,6 +119,7 @@ export const trTranslations: DefaultTranslationsObject = {
     resizeWidget: '{{label}} boyutunu değiştir, mevcut boyut: {{size}}',
     searchWidgets: "Arama widget'ları...",
     widgetAddPin: 'Belgeyi sabitle',
+    widgetCollectionPreview: 'Koleksiyon Önizlemesi',
     widgetCollectionRequired: 'Collection gereklidir.',
     widgetConfigurationError: 'Widget yapılandırma hatası',
     widgetDropFilesToUpload: 'Bir dosya sürükleyip bırakabilirsiniz',

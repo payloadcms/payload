@@ -119,6 +119,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Изменить размер {{label}}, текущий размер: {{size}}',
     searchWidgets: 'Поиск виджетов...',
     widgetAddPin: 'Закрепить документ',
+    widgetCollectionPreview: 'Предпросмотр коллекции',
     widgetCollectionRequired: 'Collection является обязательным.',
     widgetConfigurationError: 'Ошибка конфигурации виджета',
     widgetDropFilesToUpload: 'Перетащите файл',

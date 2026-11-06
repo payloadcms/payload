@@ -9,6 +9,8 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useMemo, useState } from 'react'
 
+import type { RelationshipCellValue } from './getRelationshipCellValues.js'
+
 import { useIntersect } from '../../../../../hooks/useIntersect.js'
 import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
@@ -16,8 +18,8 @@ import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
 import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
 import { FileCell } from '../File/index.js'
+import { getRelationshipCellValues } from './getRelationshipCellValues.js'
 
-type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
@@ -33,7 +35,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
 }) => {
   // conditionally extract relationTo both both relationship and join fields
   const relationTo =
-    ('relationTo' in field && field.relationTo) || ('collection' in field && field.collection)
+    'relationTo' in field ? field.relationTo : 'collection' in field ? field.collection : undefined
 
   // conditionally extract docs from join fields
   const cellData = useMemo(() => {
@@ -43,7 +45,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   const { config, getEntityConfig } = useConfig()
   const { collections } = config
   const [intersectionRef, entry] = useIntersect()
-  const [values, setValues] = useState<Value[]>([])
+  const [values, setValues] = useState<RelationshipCellValue[]>([])
   const { documents, getRelationships } = useListRelationships()
   const [hasRequested, setHasRequested] = useState(false)
   const { i18n, t } = useTranslation()
@@ -52,24 +54,11 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
 
   useEffect(() => {
     if ((cellData || typeof cellData === 'number') && isAboveViewport && !hasRequested) {
-      const formattedValues: Value[] = []
-      const arrayCellData = Array.isArray(cellData) ? cellData : [cellData]
-      arrayCellData
-        .slice(0, arrayCellData.length < totalToShow ? arrayCellData.length : totalToShow)
-        .forEach((cell) => {
-          if (typeof cell === 'object' && 'relationTo' in cell && 'value' in cell) {
-            formattedValues.push(cell)
-          }
-          if (
-            (typeof cell === 'number' || typeof cell === 'string') &&
-            typeof relationTo === 'string'
-          ) {
-            formattedValues.push({
-              relationTo,
-              value: cell,
-            })
-          }
-        })
+      const formattedValues = getRelationshipCellValues({
+        cellData,
+        limit: totalToShow,
+        relationTo,
+      })
       getRelationships(formattedValues)
       setHasRequested(true)
       setValues(formattedValues)
@@ -85,7 +74,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   return (
     <div className={baseClass} ref={intersectionRef}>
       {values.map(({ relationTo, value }, i) => {
-        const document = documents[relationTo][value]
+        const document = documents[relationTo]?.[value]
         const relatedCollection = getEntityConfig({
           collectionSlug: relationTo,
         })

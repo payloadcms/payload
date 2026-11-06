@@ -116,6 +116,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Փոխել {{label}}-ի չափը, ընթացիկ չափը՝ {{size}}',
     searchWidgets: 'Որոնել վիջեթներ...',
     widgetAddPin: 'Ամրագրել փաստաթուղթը',
+    widgetCollectionPreview: 'Հավաքածուի նախադիտում',
     widgetCollectionRequired: 'Collection-ը պարտադիր է։',
     widgetConfigurationError: 'Վիջեթի կազմաձևման սխալ',
     widgetDropFilesToUpload: 'Քաշեք և գցեք ֆայլը',

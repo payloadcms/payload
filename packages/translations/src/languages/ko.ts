@@ -116,6 +116,7 @@ export const koTranslations: DefaultTranslationsObject = {
     resizeWidget: '{{label}} 크기 조정, 현재 크기: {{size}}',
     searchWidgets: '위젯 검색...',
     widgetAddPin: '문서 고정',
+    widgetCollectionPreview: '컬렉션 미리보기',
     widgetCollectionRequired: 'Collection이 필요합니다.',
     widgetConfigurationError: '위젯 구성 오류',
     widgetDropFilesToUpload: '파일을 끌어다 놓으세요',

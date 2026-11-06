@@ -118,6 +118,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     resizeWidget: '{{label}}-এর আকার পরিবর্তন করুন, বর্তমান আকার: {{size}}',
     searchWidgets: 'উইজেটগুলি অনুসন্ধান করুন...',
     widgetAddPin: 'ডকুমেন্ট পিন করুন',
+    widgetCollectionPreview: 'কালেকশনের প্রিভিউ',
     widgetCollectionRequired: 'Collection প্রয়োজনীয়।',
     widgetConfigurationError: 'উইজেট কনফিগারেশন ত্রুটি',
     widgetDropFilesToUpload: 'একটি ফাইল টেনে এনে ছেড়ে দিন',

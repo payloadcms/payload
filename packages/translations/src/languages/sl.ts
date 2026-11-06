@@ -117,6 +117,7 @@ export const slTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Spremeni velikost {{label}}, trenutna velikost: {{size}}',
     searchWidgets: 'Išči gradnike...',
     widgetAddPin: 'Pripni dokument',
+    widgetCollectionPreview: 'Predogled zbirke',
     widgetCollectionRequired: 'Zbirka je obvezna.',
     widgetConfigurationError: 'Napaka pri konfiguraciji gradnika',
     widgetDropFilesToUpload: 'Povlecite in spustite datoteko',

@@ -118,6 +118,7 @@ export const esTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Cambiar el tamaño de {{label}}, tamaño actual: {{size}}',
     searchWidgets: 'Buscar widgets...',
     widgetAddPin: 'Fijar documento',
+    widgetCollectionPreview: 'Vista previa de la colección',
     widgetCollectionRequired: 'La Colección es requerida.',
     widgetConfigurationError: 'Error de configuración del widget',
     widgetDropFilesToUpload: 'Suelta archivos para subirlos',

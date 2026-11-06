@@ -120,6 +120,7 @@ export const roTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Redimensionează {{label}}, dimensiunea actuală: {{size}}',
     searchWidgets: 'Caută widgeturi...',
     widgetAddPin: 'Fixează documentul',
+    widgetCollectionPreview: 'Previzualizarea colecției',
     widgetCollectionRequired: 'Colecția este obligatorie.',
     widgetConfigurationError: 'Eroare de configurare a widgetului',
     widgetDropFilesToUpload: 'Trageți și plasați un fișier',

@@ -4,6 +4,9 @@
  */
 
 export const PREFERENCE_KEYS = {
+  /** Stores each collection preview's display preference on the dashboard. */
+  DASHBOARD_COLLECTION_LAYOUT: 'dashboard-collection-layout',
+
   /**
    * Stores dashboard layout configuration
    */

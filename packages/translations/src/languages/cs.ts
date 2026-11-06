@@ -117,6 +117,7 @@ export const csTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Změnit velikost {{label}}, aktuální velikost: {{size}}',
     searchWidgets: 'Hledat widgety...',
     widgetAddPin: 'Připnout dokument',
+    widgetCollectionPreview: 'Náhled kolekce',
     widgetCollectionRequired: 'Collection je povinná.',
     widgetConfigurationError: 'Chyba v konfiguraci widgetu',
     widgetDropFilesToUpload: 'Přetáhněte soubor',

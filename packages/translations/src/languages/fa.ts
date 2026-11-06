@@ -116,6 +116,7 @@ export const faTranslations: DefaultTranslationsObject = {
     resizeWidget: 'تغییر اندازهٔ {{label}}، اندازهٔ فعلی: {{size}}',
     searchWidgets: 'جستجوی ابزارک‌ها...',
     widgetAddPin: 'سنجاق کردن سند',
+    widgetCollectionPreview: 'پیش‌نمایش مجموعه',
     widgetCollectionRequired: 'Collection الزامی است.',
     widgetConfigurationError: 'خطای پیکربندی ابزارک',
     widgetDropFilesToUpload: 'یک فایل را اینجا بکشید و رها کنید',

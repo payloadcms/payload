@@ -111,6 +111,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     resizeWidget: '調整{{label}}的大小，目前大小：{{size}}',
     searchWidgets: '搜尋小工具…',
     widgetAddPin: '釘選文件',
+    widgetCollectionPreview: '集合預覽',
     widgetCollectionRequired: 'Collection 為必填項目。',
     widgetConfigurationError: '小工具設定錯誤',
     widgetDropFilesToUpload: '拖放檔案',

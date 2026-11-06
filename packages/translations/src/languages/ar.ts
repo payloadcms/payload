@@ -118,6 +118,7 @@ export const arTranslations: DefaultTranslationsObject = {
     resizeWidget: 'تغيير حجم {{label}}، الحجم الحالي: {{size}}',
     searchWidgets: 'ابحث عن الأدوات...',
     widgetAddPin: 'تثبيت المستند',
+    widgetCollectionPreview: 'معاينة المجموعة',
     widgetCollectionRequired: 'المجموعة مطلوبة.',
     widgetConfigurationError: 'خطأ في تكوين الودجة',
     widgetDropFilesToUpload: 'قم بسحب وإسقاط ملفّ',

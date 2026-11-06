@@ -118,6 +118,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Promeni veličinu {{label}}, trenutna veličina: {{size}}',
     searchWidgets: 'Pretraži dodatke...',
     widgetAddPin: 'Prikvači dokument',
+    widgetCollectionPreview: 'Pregled kolekcije',
     widgetCollectionRequired: 'Kolekcija je obavezna.',
     widgetConfigurationError: 'Greška u konfiguraciji vidžeta',
     widgetDropFilesToUpload: 'Prevucite i ispustite datoteku',

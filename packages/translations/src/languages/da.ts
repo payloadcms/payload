@@ -116,6 +116,7 @@ export const daTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Tilpas størrelsen på {{label}}, nuværende størrelse: {{size}}',
     searchWidgets: 'Søg widgets...',
     widgetAddPin: 'Fastgør dokument',
+    widgetCollectionPreview: 'Forhåndsvisning af samling',
     widgetCollectionRequired: 'Collection er påkrævet.',
     widgetConfigurationError: 'Konfigurationsfejl for widget',
     widgetDropFilesToUpload: 'Træk og slip en fil',

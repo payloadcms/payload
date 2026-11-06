@@ -117,6 +117,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Преоразмеряване на {{label}}, текущ размер: {{size}}',
     searchWidgets: 'Търсене на джаджи...',
     widgetAddPin: 'Закачи документ',
+    widgetCollectionPreview: 'Преглед на колекция',
     widgetCollectionRequired: 'Collection е задължително.',
     widgetConfigurationError: 'Грешка при конфигуриране на уиджета',
     widgetDropFilesToUpload: 'Дръпни и пусни файл',

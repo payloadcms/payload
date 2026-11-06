@@ -11,11 +11,14 @@ import type { GetDefaultLayoutServerFnReturnType } from './renderWidget/getDefau
 
 import { ConfirmationModal } from '../../../../elements/ConfirmationModal/index.js'
 import { useModal } from '../../../../elements/Modal/index.js'
+import { useAuth } from '../../../../providers/Auth/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useEmbed } from '../../../../providers/Embed/index.js'
+import { useEntityVisibility } from '../../../../providers/EntityVisibility/index.js'
 import { usePreferences } from '../../../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
+import { isNavEntityVisible } from '../../../../utilities/isNavEntityVisible.js'
 import { RenderWidget } from './renderWidget/RenderWidget.js'
 
 export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
@@ -27,7 +30,10 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     (shouldEdit: boolean) => setIsEditingState(shouldEdit && !isEmbedded),
     [isEmbedded],
   )
-  const { widgets = [] } = useConfig().config.admin.dashboard ?? {}
+  const { config } = useConfig()
+  const { widgets = [] } = config.admin.dashboard ?? {}
+  const { permissions } = useAuth()
+  const { visibleEntities } = useEntityVisibility()
   const [currentLayout, setCurrentLayout] = useState<WidgetInstanceClient[]>(initialLayout)
   const { openModal } = useModal()
   const cancelModalSlug = 'cancel-dashboard-changes'
@@ -126,18 +132,31 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       const widgetId = `${widgetSlug}-${uuid().replaceAll('-', '')}`
       const widget = widgets.find((widget) => widget.slug === widgetSlug)
 
+      const defaultCollection =
+        widgetSlug === 'collection-preview'
+          ? config.collections.find(
+              ({ slug, admin }) =>
+                visibleEntities?.collections.includes(slug) &&
+                isNavEntityVisible({
+                  adminGroup: admin?.group,
+                  entityPermissions: permissions?.collections?.[slug],
+                }),
+            )
+          : undefined
+      const widgetData = defaultCollection ? { relatedCollection: defaultCollection.slug } : {}
+
       // Create a new widget instance using RenderWidget
       const newWidgetInstance: WidgetInstanceClient = {
         component: React.createElement(RenderWidget, {
-          widgetData: {},
+          widgetData,
           widgetId,
         }),
         item: {
           id: widgetId,
-          data: {},
+          data: widgetData,
           maxWidth: widget?.maxWidth ?? 'full',
           minWidth: widget?.minWidth ?? 'x-small',
-          width: widget?.minWidth ?? 'x-small',
+          width: widgetSlug === 'collection-preview' ? 'full' : (widget?.minWidth ?? 'x-small'),
         },
       }
 
@@ -165,7 +184,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
         }
       }, 100)
     },
-    [isEditing, widgets],
+    [config.collections, isEditing, permissions, visibleEntities, widgets],
   )
 
   const deleteWidget = useCallback(

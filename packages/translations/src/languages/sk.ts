@@ -118,6 +118,7 @@ export const skTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Zmeniť veľkosť {{label}}, aktuálna veľkosť: {{size}}',
     searchWidgets: 'Hľadať doplnky...',
     widgetAddPin: 'Pripnúť dokument',
+    widgetCollectionPreview: 'Náhľad kolekcie',
     widgetCollectionRequired: 'Collection je povinná.',
     widgetConfigurationError: 'Chyba v konfigurácii widgetu',
     widgetDropFilesToUpload: 'Potiahnite a pusťte súbor',
