@@ -89,7 +89,6 @@ export const Form: React.FC<FormProps> = (props) => {
     resetFormState,
     setIsValid,
     setModified: setFormStateModified,
-    validateForm,
   } = useFormState({ contextRef, props })
 
   const fieldsReducer: FormFieldsContextType = [formState, dispatchFields]
@@ -272,7 +271,6 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.getData = getData
   contextRef.current.getSiblingData = getSiblingData
   contextRef.current.getDataByPath = getDataByPath
-  contextRef.current.validateForm = validateForm
   contextRef.current.createFormData = createFormData
   contextRef.current.setModified = setModified
   contextRef.current.setProcessing = setProcessing

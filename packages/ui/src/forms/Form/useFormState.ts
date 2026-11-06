@@ -68,7 +68,7 @@ export const useFormState = ({ contextRef, props }: Args): UseFormStateResult =>
 
   const prevFormStateRef = useRef(formState)
 
-  const validateForm = useCallback(async () => {
+  const validateFields = useCallback(async () => {
     const validatedFieldState: FormState = {}
     let isValid = true
 
@@ -190,6 +190,8 @@ export const useFormState = ({ contextRef, props }: Args): UseFormStateResult =>
     }
   }, [])
 
+  contextRef.current.validateForm = validateFields
+
   return {
     dispatchFields,
     formState,
@@ -199,6 +201,6 @@ export const useFormState = ({ contextRef, props }: Args): UseFormStateResult =>
     resetFormState,
     setIsValid,
     setModified,
-    validateForm,
+    validateForm: validateFields,
   }
 }
