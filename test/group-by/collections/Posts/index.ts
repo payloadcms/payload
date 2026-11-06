@@ -49,6 +49,16 @@ export const PostsCollection: CollectionConfig = {
       type: 'date',
     },
     {
+      name: 'links',
+      type: 'array',
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+        },
+      ],
+    },
+    {
       type: 'tabs',
       tabs: [
         {

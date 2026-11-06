@@ -67,6 +67,8 @@ export const GroupByButton: React.FC<GroupByButtonProps> = ({
       reducedFields.filter(
         (field) =>
           !isFieldDisabled(field.field, 'groupBy') &&
+          // A document holds many values of a field inside an array, so it has no single group.
+          !field.insideArray &&
           field.fieldPath !== 'id' &&
           supportedFieldTypes.includes(field.field.type),
       ),

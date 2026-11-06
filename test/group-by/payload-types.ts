@@ -197,6 +197,12 @@ export interface Post {
   virtualTitleFromPage?: string | null;
   checkbox?: boolean | null;
   date?: string | null;
+  links?:
+    | {
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   tab1Field?: string | null;
   meta?: {
     metaTitle?: string | null;
@@ -508,6 +514,12 @@ export interface PostsSelect<T extends boolean = true> {
   virtualTitleFromPage?: T;
   checkbox?: T;
   date?: T;
+  links?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
   tab1Field?: T;
   meta?:
     | T

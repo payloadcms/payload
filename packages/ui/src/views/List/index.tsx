@@ -44,6 +44,7 @@ import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbna
 import { getDocumentThumbnailSelect } from '../../utilities/getDocumentThumbnailSelect.js'
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
 import { upsertPreferences } from '../../utilities/upsertPreferences.js'
+import { canGroupByFieldPath } from './canGroupByFieldPath.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { handleHierarchy } from './handleHierarchy.js'
@@ -197,6 +198,17 @@ export const renderListView = async (
     query.where = queryPreset.where
   }
   query.groupBy = query.groupBy ?? queryPreset?.groupBy ?? collectionPreferences?.groupBy
+
+  if (
+    query.groupBy &&
+    !canGroupByFieldPath({
+      fields: collectionConfig.flattenedFields,
+      getRelatedFields: (slug) => req.payload.collections[slug]?.config.flattenedFields,
+      path: query.groupBy,
+    })
+  ) {
+    query.groupBy = undefined
+  }
 
   const columnPreference = query.columns
     ? transformColumnsToPreferences(query.columns)

@@ -210,7 +210,7 @@ export const reduceFieldsToOptions = ({
           i18n,
           labelPrefix: labelWithPrefix,
           pathPrefix: pathWithPrefix,
-        }),
+        }).map((option) => ({ ...option, insideArray: true })),
       )
 
       return reduced
