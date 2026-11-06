@@ -40,8 +40,9 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
     .sidebar-dot { position:absolute; z-index:1; pointer-events:none; right:8px; top:8px; width:8px; height:8px; border-radius:50%; background:transparent; }
     [aria-current=step] .sidebar-dot { background:#0d99ff; }
     .sidebar-steps li + li { margin-top:6px; }
-    .sidebar-step-title { display:flex; align-items:center; margin:0; padding:8px 24px 0px 14px; border:0; border-radius:0; background:var(--paper); color:var(--sub); font:12px/1.5 var(--font-mono); }
+    .sidebar-step-title { display:flex; align-items:center; margin:0; padding:10px 24px 0px 14px; border:0; border-radius:0; background:var(--paper); color:var(--sub); font:12px/1.5 var(--font-mono); }
     .sidebar-step p { margin:0; padding:12px 14px; font-size:14px; line-height:1.4; color:var(--ink); }
+    .sidebar-step-title + p { padding-top:10px; }
     @media(prefers-reduced-motion:reduce) { .sidebar-step :is(p,.sidebar-step-title) { transition:none; } }
   `
   shadow.append(style)
