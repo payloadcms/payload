@@ -146,6 +146,7 @@ export const LinkFeature = createServerFeature<
 
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#LinkFeatureClient',
+      clientSchemaMapKeys: ['fields'],
       clientFeatureProps: {
         defaultLinkType,
         defaultLinkURL,

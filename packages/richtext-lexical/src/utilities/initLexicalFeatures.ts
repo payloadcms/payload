@@ -83,10 +83,19 @@ export function initLexicalFeatures(args: Args): {
 
       featureClientSchemaMap[featureKey] = {}
 
-      // Like args.fieldSchemaMap, we only want to include the sub-fields of the current feature
-      for (const [key, entry] of args.clientFieldSchemaMap.entries()) {
-        if (key.startsWith(featureSchemaPath)) {
-          featureClientSchemaMap[featureKey][key] = 'fields' in entry ? entry.fields : [entry]
+      if (resolvedFeature.clientSchemaMapKeys) {
+        for (const key of resolvedFeature.clientSchemaMapKeys) {
+          const path = `${featureSchemaPath}.${key}`
+          const entry = args.clientFieldSchemaMap.get(path)
+          if (entry)
+            featureClientSchemaMap[featureKey][path] = 'fields' in entry ? entry.fields : [entry]
+        }
+      } else {
+        // Like args.fieldSchemaMap, we only want to include the sub-fields of the current feature
+        for (const [key, entry] of args.clientFieldSchemaMap.entries()) {
+          if (key.startsWith(featureSchemaPath)) {
+            featureClientSchemaMap[featureKey][key] = 'fields' in entry ? entry.fields : [entry]
+          }
         }
       }
     }
