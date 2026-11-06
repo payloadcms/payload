@@ -79,10 +79,17 @@ export async function recordingJobStatus({ id } = {}) {
       if (error.code === 'ENOENT') return []
       throw error
     })
-    const jobs = await Promise.all(
-      names.filter((name) => /^[0-9a-f-]{36}$/.test(name)).map((id) => recordingJobStatus({ id })),
-    )
-    return { jobs: jobs.filter((job) => activeStates.has(job.status)) }
+    const ids = names.filter((name) => /^[0-9a-f-]{36}$/.test(name))
+    const results = await Promise.allSettled(ids.map((id) => recordingJobStatus({ id })))
+    return {
+      jobs: results
+        .filter((result) => result.status === 'fulfilled')
+        .map((result) => result.value)
+        .filter((job) => activeStates.has(job.status)),
+      unreadableJobs: results.flatMap((result, index) =>
+        result.status === 'rejected' ? [{ id: ids[index], error: result.reason.message }] : [],
+      ),
+    }
   }
   const directory = jobPath({ id })
   const state = await readJSON({ file: path.join(directory, 'state.json') })
@@ -178,7 +185,10 @@ export async function superviseRecordingJob({
     if (reason || isFinished) return
     reason = why
     state = { ...state, status: 'stopping', reason }
-    statusWrite = saveJSON({ file: stateFile, value: state })
+    statusWrite = saveJSON({ file: stateFile, value: state }).catch((error) => {
+      // Status persistence must never disable the cancellation watchdog.
+      state = { ...state, statusWriteError: error.message }
+    })
     ownedProcesses = processTree({ pid: child.pid })
     signal('SIGINT')
     hardStop = setTimeout(() => {

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
+import { randomUUID } from 'node:crypto'
 import { mkdtemp, mkdir, readFile, rename, rm, writeFile, stat } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -252,3 +253,57 @@ test(
     }
   },
 )
+
+test('should keep cancelling when writing stopping status fails', { timeout: 5000 }, async () => {
+  await fixture({
+    leaseMs: 5000,
+    run: async ({ directory, start, output }) => {
+      const pidFile = path.join(directory, 'recorder.pid')
+      const code = `process.on('SIGINT',()=>{});require('node:fs').writeFileSync(${JSON.stringify(pidFile)},String(process.pid));setInterval(()=>{},1000)`
+      const running = start({ code })
+      let pid
+      for (let i = 0; i < 100; i++) {
+        try {
+          pid = Number(await readFile(pidFile, 'utf8'))
+          break
+        } catch {
+          await wait(10)
+        }
+      }
+      assert.ok(pid)
+      const stateFile = path.join(directory, 'state.json')
+      await rm(stateFile)
+      await mkdir(stateFile)
+      await writeFile(path.join(directory, 'stop'), '')
+      // Final persistence also fails, but only after the child and artifacts are gone.
+      await assert.rejects(running, (error) =>
+        ['EISDIR', 'ENOTEMPTY', 'EEXIST'].includes(error.code),
+      )
+      assert.throws(() => process.kill(pid, 0), { code: 'ESRCH' })
+      await assert.rejects(stat(output), { code: 'ENOENT' })
+    },
+  })
+})
+
+test('should discover healthy jobs alongside incomplete and corrupt entries', async () => {
+  const root = path.join(tmpdir(), `payload-demo-jobs-${process.getuid?.() ?? 'local'}`)
+  const ids = [randomUUID(), randomUUID(), randomUUID()]
+  try {
+    for (const id of ids) await mkdir(path.join(root, id), { recursive: true, mode: 0o700 })
+    await writeFile(
+      path.join(root, ids[0], 'state.json'),
+      JSON.stringify({ id: ids[0], status: 'running' }),
+    )
+    await writeFile(
+      path.join(root, ids[0], 'lease.json'),
+      JSON.stringify({ expiresAt: Date.now() + 60000 }),
+    )
+    await writeFile(path.join(root, ids[2], 'state.json'), '{invalid json')
+    const status = await recordingJobStatus()
+    assert.ok(status.jobs.some((job) => job.id === ids[0]))
+    assert.ok(status.unreadableJobs.some((job) => job.id === ids[1]))
+    assert.ok(status.unreadableJobs.some((job) => job.id === ids[2]))
+  } finally {
+    await Promise.all(ids.map((id) => rm(path.join(root, id), { recursive: true, force: true })))
+  }
+})

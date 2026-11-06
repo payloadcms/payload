@@ -17,7 +17,7 @@ node .agents/skills/record-pr-demo/scripts/recording-job.mjs status JOB_ID
 node .agents/skills/record-pr-demo/scripts/recording-job.mjs stop JOB_ID
 ```
 
-`status` never renews the lease. Omit the ID to list active jobs, including jobs whose start response was interrupted. After `stop`, poll status until it reports `cancelled`, `failed`, or `completed` before reporting the outcome.
+`status` never renews the lease. Omit the ID to list active jobs, including jobs whose start response was interrupted. Incomplete or corrupt metadata is reported separately in `unreadableJobs` and does not prevent other jobs from being listed. After `stop`, poll status until it reports `cancelled`, `failed`, or `completed` before reporting the outcome.
 
 If the prompt is canceled, renewals cease and the supervisor interrupts the job after the lease expires. It allows up to 10 seconds for graceful shutdown, then kills remaining recording processes. Explicit stop requests and the default 10-minute maximum job duration use the same cleanup path. `start` accepts `--lease-seconds` and `--max-seconds` to change these limits.
 
