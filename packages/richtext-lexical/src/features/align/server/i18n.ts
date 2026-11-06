@@ -129,7 +129,7 @@ export const i18n: Partial<GenericLanguages> = {
   },
   pl: {
     alignCenterLabel: 'Wyśrodkuj',
-    alignJustifyLabel: 'Wyjustuj wyrównanie',
+    alignJustifyLabel: 'Wyjustuj',
     alignLeftLabel: 'Wyrównaj do lewej',
     alignRightLabel: 'Wyrównaj do prawej',
   },
