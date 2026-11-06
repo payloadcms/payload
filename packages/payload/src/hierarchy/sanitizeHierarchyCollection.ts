@@ -58,7 +58,7 @@ export const sanitizeHierarchyCollection = (
       )
     }
 
-    if (existingParentField.hasMany !== false) {
+    if (existingParentField.hasMany === true) {
       throw new Error(
         `Hierarchy parent field "${parentFieldName}" in collection "${collectionConfig.slug}" must have hasMany set to false`,
       )

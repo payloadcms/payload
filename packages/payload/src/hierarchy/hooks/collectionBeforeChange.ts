@@ -1,19 +1,12 @@
-/**
- * beforeChange Hook Responsibilities:
- * - Validate circular references when parent changes
- * - Prevent moving a folder into its own subfolder
- *
- * Does NOT handle:
- * - Tree structure (no stored tree anymore)
- * - Path computation (done in afterRead)
- */
-
 import type {
   CollectionBeforeChangeHook,
   CollectionConfig,
   JsonObject,
   PayloadRequest,
 } from '../../index.js'
+
+import { NotFound } from '../../errors/NotFound.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 
 type Args = {
   /**
@@ -28,29 +21,30 @@ export const hierarchyCollectionBeforeChange =
     // Determine the new parent ID
     const newParentID =
       data[parentFieldName] !== undefined ? data[parentFieldName] : originalDoc?.[parentFieldName]
-    const parentChanged =
-      (operation === 'update' || operation === 'validate') &&
+    const hasParentChanged =
+      (operation === 'create' || operation === 'update' || operation === 'validate') &&
       data[parentFieldName] !== undefined &&
       data[parentFieldName] !== originalDoc?.[parentFieldName]
+    const isPublishing =
+      hasDraftsEnabled(collection) && data._status !== undefined && data._status !== 'draft'
 
     // Validate circular references when parent is changing
-    if (parentChanged && newParentID) {
+    if ((hasParentChanged || isPublishing) && newParentID !== null && newParentID !== undefined) {
       // Extract parent ID (could be plain ID or populated object with id)
       const parentId =
         typeof newParentID === 'object' && 'id' in newParentID ? newParentID.id : newParentID
 
       // Prevent self-referential parent
-      if (parentId === (originalDoc?.id || data.id)) {
+      if (parentId === (originalDoc?.id ?? data.id)) {
         throw new Error('Document cannot be its own parent')
       }
 
-      // Check for true circular references (loops in the chain), but allow
-      // moving into a child - that will be handled by afterChange reparenting
       await validateNoCircularReference({
         collection,
-        currentDocId: originalDoc?.id,
+        currentDocId: originalDoc?.id ?? data.id,
         parentId,
         req,
+        shouldValidatePublished: data._status !== 'draft',
       })
     }
 
@@ -58,20 +52,20 @@ export const hierarchyCollectionBeforeChange =
   }
 
 /**
- * Walks up the parent chain to detect true circular references (loops).
- * Does NOT throw when moving into a child - that case is handled by afterChange
- * which will automatically reparent the child.
+ * Walks the latest parent chain, including drafts, to reject cycles and descendant parenting.
  */
 async function validateNoCircularReference({
   collection,
   currentDocId,
   parentId,
   req,
+  shouldValidatePublished,
 }: {
   collection: CollectionConfig
   currentDocId: number | string
   parentId: number | string
   req: PayloadRequest
+  shouldValidatePublished: boolean
 }) {
   const parentFieldName =
     collection.hierarchy && collection.hierarchy !== true
@@ -84,10 +78,15 @@ async function validateNoCircularReference({
 
   const fieldName = parentFieldName
 
-  async function checkAncestor(
-    ancestorId: number | string,
-    visitedNodes: Set<string> = new Set(),
-  ): Promise<void> {
+  async function checkAncestor({
+    ancestorId,
+    draft,
+    visitedNodes = new Set(),
+  }: {
+    ancestorId: number | string
+    draft: boolean
+    visitedNodes?: Set<string>
+  }): Promise<void> {
     // Create unique key for this node
     const nodeKey = `${collection.slug}:${ancestorId}`
 
@@ -109,16 +108,18 @@ async function validateNoCircularReference({
         id: ancestorId,
         collection: collection.slug,
         depth: 0,
+        draft,
         overrideAccess: true,
         req,
         select: {
           [fieldName]: true,
         },
+        showHiddenFields: true,
       })) as JsonObject
 
       const nextParent = ancestor?.[fieldName]
 
-      if (!nextParent) {
+      if (nextParent === null || nextParent === undefined) {
         return // No parent, end of chain
       }
 
@@ -134,17 +135,20 @@ async function validateNoCircularReference({
         nextParentId !== undefined &&
         (typeof nextParentId === 'string' || typeof nextParentId === 'number')
       ) {
-        return checkAncestor(nextParentId, visitedNodes)
+        return checkAncestor({ ancestorId: nextParentId, draft, visitedNodes })
       }
     } catch (error) {
-      // If it's our validation error, re-throw it
-      if (error instanceof Error && error.message?.includes('Circular reference detected')) {
-        throw error
+      if (error instanceof NotFound) {
+        return
       }
-      // Non-existent parent can't create a circular reference
-      return
+      throw error
     }
   }
 
-  await checkAncestor(parentId)
+  if (shouldValidatePublished || !hasDraftsEnabled(collection)) {
+    await checkAncestor({ ancestorId: parentId, draft: false })
+  }
+  if (hasDraftsEnabled(collection)) {
+    await checkAncestor({ ancestorId: parentId, draft: true })
+  }
 }
