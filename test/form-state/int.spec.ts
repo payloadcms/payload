@@ -1,8 +1,8 @@
-import type { FieldState, FormState, User } from 'payload'
+import type { Data, FieldState, FormState, PayloadRequest, User } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { createPayloadRequest, getAccessResults } from 'payload'
-import { getDataFromFormState } from 'payload/shared'
+import { getDataByPath, getDataFromFormState } from 'payload/shared'
 import React from 'react'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
@@ -16,6 +16,12 @@ import { postsSlug } from './collections/Posts/index.js'
 import { renderDocumentHandler } from '../../packages/ui/src/views/Document/handleServerFunction.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { fieldReducer } from '../../packages/ui/src/forms/Form/fieldReducer.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { buildNullifyLocaleFieldUpdate } from '../../packages/ui/src/forms/NullifyField/index.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { reduceFieldsToValuesWithValidation } from '../../packages/ui/src/utilities/reduceFieldsToValuesWithValidation.js'
 import { test } from '../__helpers/int/vitest.js'
 
 let user: User
@@ -29,6 +35,23 @@ const DummyReactComponent: React.ReactNode = {
   key: null,
   props: {},
 }
+
+const rowFieldCases: { path: 'array' | 'blocks'; rows: Data[] }[] = [
+  {
+    path: 'array',
+    rows: [
+      { id: 'row-1', customTextField: 'First', defaultTextField: 'First' },
+      { id: 'row-2', customTextField: 'Second', defaultTextField: 'Second' },
+    ],
+  },
+  {
+    path: 'blocks',
+    rows: [
+      { id: 'row-1', blockType: 'text', text: 'First' },
+      { id: 'row-2', blockType: 'text', text: 'Second' },
+    ],
+  },
+]
 
 test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ restClientInstance: restClient }) => {
@@ -1234,18 +1257,6 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     // Server values should be accepted even though row IDs don't match at same indexes
     expect(newState['array.0.text']?.value).toBe('A text from server')
     expect(newState['array.1.text']?.value).toBe('B text from server')
-
-    for (const value of [null, 0]) {
-      const clearedState = mergeServerFormState({
-        acceptValues: true,
-        currentState: { array: { disableFormData: true, rows: [{ id: 'A' }], value: 1 } },
-        incomingState: { array: { rows: [], value } },
-      })
-
-      expect(getDataFromFormState(clearedState, true)).toEqual({
-        array: value === null ? null : [],
-      })
-    }
   })
 
   test('should preserve client-added row during autosave', () => {
@@ -1339,7 +1350,6 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
 
     const serverState: FormState = {
       array: {
-        disableFormData: true,
         rows: [{ id: 'A' }, { id: 'B' }],
         value: 2,
       },
@@ -1422,7 +1432,6 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
             value: 0,
           },
           sections: {
-            disableFormData: true,
             initialValue: 1,
             rows: [{ id: 'section-1' }],
             value: 1,
@@ -1442,6 +1451,70 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
       sections: [{ id: 'section-1', items: [] }],
       title: undefined,
     })
+  })
+
+  test('should reconstruct populated row fields without including their counts', () => {
+    expect(
+      getDataFromFormState(
+        {
+          items: { rows: [{ id: 'row-1' }], value: 1 },
+          'items.0.id': { value: 'row-1' },
+          'items.0.label': { value: 'First' },
+          count: { value: 42 },
+        },
+        true,
+      ),
+    ).toEqual({ items: [{ id: 'row-1', label: 'First' }], count: 42 })
+  })
+
+  test('should preserve raw row counts when requested', () => {
+    const fields: FormState = {
+      items: { rows: [{ id: 'row-1' }], value: 1 },
+      'items.0.id': { value: 'row-1' },
+    }
+
+    expect(getDataFromFormState(fields)).toEqual({ items: 1, 'items.0.id': 'row-1' })
+    expect(getDataFromFormState(fields, true, true)).toEqual({ items: 1 })
+  })
+
+  test('should use shared row serialization when reading data by path', () => {
+    const fields: FormState = {
+      'group.items': { rows: [{ id: 'row-1' }], value: 1 },
+      'group.items.0.id': { value: 'row-1' },
+      'group.empty': { rows: [], value: 0 },
+      'group.fallback': { rows: [], value: null },
+    }
+
+    expect(getDataByPath(fields, 'group.items')).toEqual([{ id: 'row-1' }])
+    expect(getDataByPath(fields, 'group.empty')).toEqual([])
+    expect(getDataByPath(fields, 'group.fallback')).toBeNull()
+  })
+
+  test('should use shared row serialization when reducing values with validation', () => {
+    expect(
+      reduceFieldsToValuesWithValidation(
+        {
+          items: { rows: [{ id: 'row-1' }], valid: true, value: 1 },
+          'items.0.id': { valid: true, value: 'row-1' },
+          hidden: { disableFormData: true, valid: false, value: 'Hidden' },
+        },
+        true,
+      ),
+    ).toEqual({ data: { items: [{ id: 'row-1' }] }, valid: true })
+  })
+
+  test('should respect explicit form-data exclusions', () => {
+    expect(
+      getDataFromFormState(
+        {
+          hidden: { disableFormData: true, value: 'Hidden' },
+          items: { disableFormData: true, rows: [], value: 0 },
+          group: { disableFormData: true },
+          'group.label': { value: 'Keep' },
+        },
+        true,
+      ),
+    ).toEqual({ group: { label: 'Keep' } })
   })
 
   test('should ignore stale descendants of empty arrays when converting form state to data', () => {
@@ -1515,28 +1588,218 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     ).toEqual({ items: [], title: 'After' })
   })
 
-  test('should preserve null and empty arrays when building form state', async ({ payload }) => {
-    const req = await createPayloadRequest({ payload, user })
+  test.describe('row data round trips', () => {
+    test.for(
+      rowFieldCases.flatMap((testCase) =>
+        [
+          { kind: 'null', value: null },
+          { kind: 'empty', value: [] },
+          { kind: 'populated', value: testCase.rows },
+        ].map((input) => ({ ...testCase, ...input })),
+      ),
+    )('should round-trip $kind $path data', async ({ path, value }, { payload }) => {
+      const req = await createPayloadRequest({ payload, user })
+      const data = { [path]: value }
+      const currentState = await buildRowFormState({ data, path, req })
+      const incomingState = await buildRowFormState({ data, formState: currentState, path, req })
+      const state = mergeServerFormState({ acceptValues: true, currentState, incomingState })
 
-    for (const value of [null, []]) {
-      const { state } = await buildFormState({
-        collectionSlug: postsSlug,
-        data: { array: value, blocks: value, title: 'Test Post' },
-        docPermissions: { fields: true },
-        docPreferences: { fields: {} },
-        mockRSCs: true,
-        operation: 'update',
-        renderAllFields: false,
-        req,
-        schemaPath: postsSlug,
-      })
+      expect(getDataFromFormState(state, true)).toEqual(data)
+    })
 
-      for (const path of ['array', 'blocks']) {
-        expect(state[path].rows).toEqual([])
-        expect(state[path].value).toBe(value === null ? null : 0)
-        expect(state[path].initialValue).toBe(value === null ? null : 0)
-      }
-    }
+    test.for(
+      rowFieldCases.flatMap((testCase) =>
+        [
+          { acceptValues: undefined, mode: 'background' },
+          { acceptValues: { overrideLocalChanges: false } as const, mode: 'autosave' },
+        ].map((mode) => ({ ...testCase, ...mode })),
+      ),
+    )(
+      'should retain client-cleared $path data after a stale $mode response',
+      async ({ acceptValues, path, rows }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const data = { [path]: [rows[0]] }
+        const initialState = await buildRowFormState({ data, path, req })
+        const incomingState = await buildRowFormState({ data, formState: initialState, path, req })
+        const currentState = fieldReducer(initialState, { type: 'REMOVE_ROW', path, rowIndex: 0 })
+        const state = mergeServerFormState({ acceptValues, currentState, incomingState })
+
+        expect(getDataFromFormState(state, true)).toEqual({ [path]: [] })
+      },
+    )
+
+    test.for(rowFieldCases)(
+      'should retain a client-added $path row after a stale autosave response',
+      async ({ path, rows }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const initialState = await buildRowFormState({ data: { [path]: null }, path, req })
+        const incomingState = await buildRowFormState({
+          data: { [path]: null },
+          formState: initialState,
+          path,
+          req,
+        })
+        const addedRowState = await buildRowFormState({ data: { [path]: [rows[0]] }, path, req })
+        const prefix = `${path}.0.`
+        const subFieldState = Object.fromEntries(
+          Object.entries(addedRowState)
+            .filter(([fieldPath]) => fieldPath.startsWith(prefix))
+            .map(([fieldPath, field]) => [fieldPath.slice(prefix.length), field]),
+        )
+        const currentState = fieldReducer(initialState, {
+          type: 'ADD_ROW',
+          blockType: rows[0].blockType,
+          path,
+          subFieldState,
+        })
+        const state = mergeServerFormState({
+          acceptValues: { overrideLocalChanges: false },
+          currentState,
+          incomingState,
+        })
+
+        expect(getDataFromFormState(state, true)).toEqual({ [path]: [rows[0]] })
+      },
+    )
+
+    test.for(rowFieldCases)(
+      'should retain client-reordered $path data after a stale autosave response',
+      async ({ path, rows }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const data = { [path]: rows }
+        const initialState = await buildRowFormState({ data, path, req })
+        const incomingState = await buildRowFormState({ data, formState: initialState, path, req })
+        const currentState = fieldReducer(initialState, {
+          type: 'MOVE_ROW',
+          moveFromIndex: 0,
+          moveToIndex: 1,
+          path,
+        })
+        const state = mergeServerFormState({
+          acceptValues: { overrideLocalChanges: false },
+          currentState,
+          incomingState,
+        })
+
+        expect(getDataFromFormState(state, true)).toEqual({ [path]: [rows[1], rows[0]] })
+      },
+    )
+
+    test.for(
+      rowFieldCases.flatMap((testCase) =>
+        [
+          { kind: 'null', value: null },
+          { kind: 'empty', value: [] },
+        ].map((input) => ({ ...testCase, ...input })),
+      ),
+    )(
+      'should accept server-cleared $kind $path data on explicit save',
+      async ({ path, rows, value }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const currentState = await buildRowFormState({ data: { [path]: rows }, path, req })
+        const data = { [path]: value }
+        const incomingState = await buildRowFormState({ data, formState: currentState, path, req })
+        const state = mergeServerFormState({ acceptValues: true, currentState, incomingState })
+
+        expect(getDataFromFormState(state, true)).toEqual(data)
+      },
+    )
+
+    test.for(rowFieldCases)(
+      'should retain a null-to-empty $path change after a sibling edit and stale response',
+      async ({ path }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const data = { [path]: null, title: 'Before' }
+        const initialState = await buildRowFormState({ data, path, req })
+        const incomingState = await buildRowFormState({ data, formState: initialState, path, req })
+        const withoutFallback = fieldReducer(
+          initialState,
+          buildNullifyLocaleFieldUpdate({ fieldValue: null, path, useFallback: false }),
+        )
+        const currentState = fieldReducer(withoutFallback, {
+          type: 'UPDATE',
+          path: 'title',
+          value: 'After',
+        })
+        const state = mergeServerFormState({
+          acceptValues: { overrideLocalChanges: false },
+          currentState,
+          incomingState,
+        })
+
+        expect(getDataFromFormState(state, true)).toEqual({ [path]: [], title: 'After' })
+      },
+    )
+
+    test.for(rowFieldCases)(
+      'should retain an empty-to-null $path change after a stale response',
+      async ({ path }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const data = { [path]: [] }
+        const initialState = await buildRowFormState({ data, path, req })
+        const incomingState = await buildRowFormState({ data, formState: initialState, path, req })
+        const currentState = fieldReducer(
+          initialState,
+          buildNullifyLocaleFieldUpdate({ fieldValue: 0, path, useFallback: true }),
+        )
+        const state = mergeServerFormState({
+          acceptValues: { overrideLocalChanges: false },
+          currentState,
+          incomingState,
+        })
+
+        expect(getDataFromFormState(state, true)).toEqual({ [path]: null })
+      },
+    )
+
+    test.for(rowFieldCases)(
+      'should retain an explicit $path submission opt-out after a merge',
+      async ({ path }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const data = { [path]: [] }
+        const initialState = await buildRowFormState({ data, path, req })
+        const incomingState = await buildRowFormState({ data, formState: initialState, path, req })
+        const currentState = fieldReducer(initialState, {
+          type: 'UPDATE',
+          disableFormData: true,
+          path,
+          value: 0,
+        })
+        const state = mergeServerFormState({ acceptValues: true, currentState, incomingState })
+
+        expect(getDataFromFormState(state, true)).toEqual({})
+      },
+    )
+
+    test.for(
+      rowFieldCases.flatMap((testCase) =>
+        [
+          { kind: 'null', value: null },
+          { kind: 'empty', value: [] },
+        ].map((input) => ({ ...testCase, ...input })),
+      ),
+    )(
+      'should omit stale children when an opted-out $path is cleared to $kind',
+      async ({ path, rows, value }, { payload }) => {
+        const req = await createPayloadRequest({ payload, user })
+        const initialState = await buildRowFormState({ data: { [path]: rows }, path, req })
+        const currentState = fieldReducer(initialState, {
+          type: 'UPDATE',
+          disableFormData: true,
+          path,
+          value: rows.length,
+        })
+        const incomingState = await buildRowFormState({
+          data: { [path]: value },
+          formState: initialState,
+          path,
+          req,
+        })
+        const state = mergeServerFormState({ acceptValues: true, currentState, incomingState })
+
+        expect(getDataFromFormState(state, true)).toEqual({})
+      },
+    )
   })
 
   test('should resolve a promise-returning `filterOptions` on a select field into `selectFilterOptions`', async ({
@@ -1573,3 +1836,31 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     await payload.delete({ id: postData.id, collection: postsSlug, overrideAccess: true })
   })
 })
+
+async function buildRowFormState({
+  data,
+  formState,
+  path,
+  req,
+}: {
+  data: Data
+  formState?: FormState
+  path: 'array' | 'blocks'
+  req: PayloadRequest
+}): Promise<FormState> {
+  const { state } = await buildFormState({
+    collectionSlug: postsSlug,
+    data: structuredClone(data),
+    docPermissions: { fields: true },
+    docPreferences: { fields: {} },
+    formState,
+    mockRSCs: true,
+    operation: 'update',
+    renderAllFields: false,
+    req,
+    schemaPath: postsSlug,
+    select: { [path]: true, title: true },
+  })
+
+  return state
+}

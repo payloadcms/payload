@@ -208,8 +208,6 @@ export const mergeServerFormState = ({
           newState[path].value =
             rowCount === 0 && currentState[path].value === null ? null : rowCount
         }
-
-        newState[path].disableFormData = rowCount > 0
       }
     }
 

@@ -429,7 +429,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           fieldState.value = forceFullValue ? arrayValue : arrayValue.length
           fieldState.initialValue = forceFullValue ? arrayValue : arrayValue.length
 
-          if (arrayValue.length > 0) {
+          if (forceFullValue && arrayValue.length > 0) {
             fieldState.disableFormData = true
           }
         }
@@ -659,7 +659,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           fieldState.value = forceFullValue ? blocksValue : blocksValue.length
           fieldState.initialValue = forceFullValue ? blocksValue : blocksValue.length
 
-          if (blocksValue.length > 0) {
+          if (forceFullValue && blocksValue.length > 0) {
             fieldState.disableFormData = true
           }
         }

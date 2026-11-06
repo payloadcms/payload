@@ -53,6 +53,10 @@ export type FieldState = {
     Field?: React.ReactNode
     Label?: React.ReactNode
   }
+  /**
+   * Excludes this field's own value from serialized form data.
+   * Does not exclude descendant fields.
+   */
   disableFormData?: boolean
   errorMessage?: string
   errorPaths?: string[]
