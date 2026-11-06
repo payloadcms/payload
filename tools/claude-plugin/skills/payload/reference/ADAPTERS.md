@@ -42,14 +42,13 @@ export default buildConfig({
     client: {
       url: 'file:./payload.db',
     },
-    transactionOptions: {}, // Enable transactions (disabled by default)
   }),
 })
 ```
 
 ## Transactions
 
-Payload automatically uses transactions for all-or-nothing database operations. Pass `req` to include operations in the same transaction.
+When transactions are enabled, Payload groups database changes into a single transaction. If the operation succeeds, the changes are committed; if it fails, they are rolled back. Pass req to nested Payload operations so they share the same transaction.
 
 ```ts
 import type { CollectionAfterChangeHook } from 'payload'
@@ -84,11 +83,11 @@ try {
 }
 ```
 
-**Note**: MongoDB requires replicaset for transactions. SQLite requires `transactionOptions: {}` to enable.
+**Note**: MongoDB requires a replica set for transactions.
 
 ### Threading req Through Operations
 
-**Critical**: When performing nested operations in hooks, always pass `req` to maintain transaction context. Failing to do so breaks atomicity and can cause partial updates.
+**Critical**: When performing nested operations in hooks, always pass `req` to preserve request context. When transactions are enabled, this also maintains transaction context; failing to do so breaks atomicity and can cause partial updates.
 
 ```ts
 import type { CollectionAfterChangeHook } from 'payload'
@@ -134,10 +133,8 @@ const brokenHook: CollectionAfterChangeHook = async ({ collection, doc, req }) =
 
 **Why This Matters:**
 
-- **MongoDB (with replica sets)**: Creates atomic session across operations
-- **PostgreSQL**: All operations use same Drizzle transaction
-- **SQLite (with transactions enabled)**: Ensures rollback on errors
-- **Without req**: Each operation runs independently, breaking atomicity
+- **With `req`**: For databases that support transactions: MongoDB and Postgres unless configured otherwise, Payload will use transactions making each request atomic; ending in a full commit or rollback per request.
+- **Without `req`**: Each operation runs independently, breaking atomicity
 
 **When req is Required:**
 
@@ -150,7 +147,6 @@ const brokenHook: CollectionAfterChangeHook = async ({ collection, doc, req }) =
 
 - Read-only lookups independent of current transaction
 - Operations with `disableTransaction: true`
-- Administrative operations with `overrideAccess: true`
 
 ## Storage Adapters
 
