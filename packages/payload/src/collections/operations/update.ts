@@ -470,6 +470,14 @@ export const updateOperation = async <
 
         return updatedDoc
       } catch (error) {
+        if (
+          collectionConfig.hierarchy &&
+          isTrashAttempt &&
+          !req.payload.db.bulkOperationsSingleTransaction
+        ) {
+          throw error
+        }
+
         const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
 
         if (req.payload.db.bulkOperationsSingleTransaction) {
@@ -493,9 +501,12 @@ export const updateOperation = async <
     // Upload processing may mutate its temp file while cropping, so each document must finish
     // before the next document starts. This only applies when an actual file is being written
     // (`req.file`); metadata-only bulk updates use isolated per-document request state and can
-    // stay parallel. Other bulk updates retain their existing parallel behavior.
+    // stay parallel. Hierarchy trash updates are also sequential because selected nodes can
+    // share parent links. Other bulk updates retain their existing parallel behavior.
     const processSequentially =
-      req.payload.db.bulkOperationsSingleTransaction || Boolean(collectionConfig.upload && req.file)
+      req.payload.db.bulkOperationsSingleTransaction ||
+      Boolean(collectionConfig.upload && req.file) ||
+      Boolean(collectionConfig.hierarchy && isTrashAttempt)
     let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
     if (processSequentially) {
       awaitedDocs = []
