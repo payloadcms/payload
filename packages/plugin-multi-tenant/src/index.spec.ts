@@ -16,7 +16,7 @@ describe('multiTenantPlugin', () => {
         { slug: 'users', auth: true, fields: [] },
         { slug: 'tenants', fields: [] },
       ],
-    } as Config)
+    } as unknown as Config)
     const usersCollection = config.collections?.find(({ slug }) => slug === 'users')
     const tenantsField = usersCollection?.fields.find(
       (field): field is ArrayField => 'name' in field && field.name === 'tenants',
@@ -49,7 +49,7 @@ describe('multiTenantPlugin', () => {
         { slug: 'users', auth: true, fields: [] },
         { slug: 'tenants', fields: [] },
       ],
-    } as Config)
+    } as unknown as Config)
     const usersCollection = config.collections?.find(({ slug }) => slug === 'users')
     const tenantsField = usersCollection?.fields.find(
       (field): field is ArrayField => 'name' in field && field.name === 'tenants',
@@ -57,5 +57,36 @@ describe('multiTenantPlugin', () => {
 
     expect(tenantsField?.access?.create).toBe(createAccess)
     expect(tenantsField?.access?.update).toBe(updateAccess)
+  })
+
+  it('keeps required tenant schema when enabled is false', async () => {
+    const plugin = multiTenantPlugin({
+      collections: {},
+      enabled: false,
+    })
+    const config = await plugin({
+      admin: {
+        components: {
+          actions: [],
+          beforeNav: [],
+          providers: [],
+        },
+      },
+      collections: [
+        { slug: 'users', auth: true, fields: [] },
+        { slug: 'tenants', fields: [] },
+      ],
+    } as Config)
+
+    const usersCollection = config.collections?.find(({ slug }) => slug === 'users')
+    const tenantsCollection = config.collections?.find(({ slug }) => slug === 'tenants')
+    const tenantsField = usersCollection?.fields.find(
+      (field): field is ArrayField => 'name' in field && field.name === 'tenants',
+    )
+
+    expect(tenantsCollection).toBeDefined()
+    expect(tenantsField).toBeDefined()
+    expect(usersCollection?.admin?.baseFilter).toBeUndefined()
+    expect(config.admin?.components?.providers).toEqual([])
   })
 })
