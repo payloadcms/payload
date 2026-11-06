@@ -103,6 +103,7 @@ export const sanitizeMCPConfig = ({
     hooks: pluginConfig.hooks,
     items,
     mcp: pluginConfig.mcp,
+    oauth: pluginConfig.oauth,
     overrideGetAuthorizedMCP: pluginConfig.overrideGetAuthorizedMCP,
   }
 }

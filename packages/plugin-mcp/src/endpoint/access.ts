@@ -7,6 +7,11 @@ import type { AuthorizedMCP, MCPItem } from '../types.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 
 export type GetAuthorizedMCPArgs = {
+  /**
+   * Whether the request came through the HTTP endpoint, whose response can carry the OAuth
+   * challenge and headers from auth strategies. stdio has no response to carry them.
+   */
+  isHTTP?: boolean
   overrideAccess: boolean
   req: PayloadRequest
 }
@@ -16,10 +21,12 @@ export type GetAuthorizedMCPArgs = {
  * `overrideAccess` skips Payload and MCP item access checks.
  */
 export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<AuthorizedMCP> = async ({
+  isHTTP = false,
   overrideAccess,
   req,
 }) => {
   const pluginConfig = getPluginConfig({ config: req.payload.config })
+  const isChallengedWhenSignedOut = isHTTP && Boolean(pluginConfig.oauth)
 
   if (pluginConfig.overrideGetAuthorizedMCP) {
     return await pluginConfig.overrideGetAuthorizedMCP({
@@ -36,9 +43,16 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
     headers.set('DisableAutologin', 'true')
     req.user = (await req.payload.auth({ headers, req })).user
 
-    if (hasAuthorization && !req.user) {
+    // With OAuth, the endpoint answers with a challenge that starts the client's sign-in
+    if (hasAuthorization && !req.user && !isChallengedWhenSignedOut) {
       throw new UnauthorizedError(req.t)
     }
+  }
+
+  // Signed-out users only get the challenge, so they can't use any MCP items. Skipping the access
+  // checks saves work, and access callbacks only see signed-in users.
+  if (isChallengedWhenSignedOut && !req.user) {
+    return { items: [], overrideAccess }
   }
 
   return {
