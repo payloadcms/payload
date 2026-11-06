@@ -33,6 +33,20 @@ export const sanitizeCompoundIndexes = ({
       sanitized.fields.push({ field, localizedPath, path, pathHasLocalized })
     }
 
+    if (index.requireExists) {
+      sanitized.requireExists = index.requireExists.map((path) => {
+        const result = getFieldByPath({ fields, path })
+
+        if (!result) {
+          throw new InvalidConfiguration(`Field ${path} in requireExists was not found`)
+        }
+
+        const { localizedPath, pathHasLocalized } = result
+
+        return { localizedPath, path, pathHasLocalized }
+      })
+    }
+
     sanitizedCompoundIndexes.push(sanitized)
   }
 
