@@ -538,6 +538,34 @@ test.suite('Lexical', { config: './config.ts' }, () => {
       })
     }
 
+    test('should coerce string upload node IDs to the ID type of the target collection', async ({
+      payload,
+    }) => {
+      // Upload nodes created from pasted HTML read their ID from a DOM attribute, which is always a string
+      const node = {
+        id: 'test-upload-node-string-id',
+        type: 'upload',
+        fields: {},
+        format: '',
+        relationTo: uploadsSlug,
+        value: String(createdJPGDocID),
+        version: 2,
+      }
+
+      const doc = await payload.create({
+        collection: lexicalRelationshipFieldsSlug,
+        data: {
+          richText: buildEditorState<SerializedLexicalNode>({ nodes: [node] }),
+        },
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      const storedNode = doc.richText.root.children[0] as SerializedUploadNode
+
+      expect(storedNode.value).toBe(createdJPGDocID)
+    })
+
     test('should respect GraphQL rich text depth parameter and populate upload node', async ({
       restClient,
     }) => {
