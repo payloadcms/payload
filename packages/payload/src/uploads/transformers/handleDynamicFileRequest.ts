@@ -219,7 +219,7 @@ async function cancelUnusedBody(response: Response | undefined): Promise<void> {
   }
 }
 
-function planRequestPipeline({
+async function planRequestPipeline({
   collection,
   document,
   documentSnapshot,
@@ -232,7 +232,7 @@ function planRequestPipeline({
   filename: string
   req: PayloadRequest
 }): Promise<UploadTransformer[]> {
-  return planTransformerPipeline({
+  const { pipeline } = await planTransformerPipeline({
     args: {
       collectionSlug: collection.config.slug,
       doc: documentSnapshot,
@@ -245,6 +245,8 @@ function planRequestPipeline({
     capability: 'handleRequest',
     transformers: req.payload.config.upload.transformers,
   })
+
+  return pipeline
 }
 
 type AccessResult = { document?: ResolvedUploadDocument; isAllowed: true } | { isAllowed: false }

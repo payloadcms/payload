@@ -605,6 +605,29 @@ test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' },
         downloadSpy.mockRestore()
       }
     })
+
+    test('should fetch the whole client-uploaded image when Sharp applies a saved crop', async ({
+      restClient,
+    }) => {
+      const crop = { height: 100, width: 100, x: 0, y: 0 }
+      const file = readFileSync(path.resolve(dirname, '../../uploads/2mb.jpg'))
+
+      const form = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlySlug,
+        file,
+        filename: 'cropped.jpg',
+        mimeType: 'image/jpeg',
+        restClient,
+      })
+      form.append('_payload', JSON.stringify({ _transforms: { crop } }))
+
+      const { doc } = await (
+        await restClient.POST(`/${mediaHeaderOnlySlug}`, { body: form })
+      ).json()
+      createdIds.push(doc.id)
+
+      expect(doc).toMatchObject({ _transforms: { crop }, height: 100, width: 100 })
+    })
   })
 
   /**

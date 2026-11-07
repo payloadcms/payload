@@ -16,6 +16,15 @@ describe('sharpTransformer', () => {
     ])
   })
 
+  it('should claim crop and focalPoint at upload time', async () => {
+    const args = { collectionSlug: 'media', mimeType: 'image/png', operation: 'upload' } as const
+
+    expect(await sharpTransformer().canTransform!(args as never)).toEqual({
+      canTransform: true,
+      handledTransformKeys: ['crop', 'focalPoint'],
+    })
+  })
+
   it('should reject dynamic.collections that are unknown or not upload-enabled on init', () => {
     const config = {
       collections: [

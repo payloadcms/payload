@@ -24,18 +24,33 @@ const textFile = (text: string) => ({
 })
 
 const createNote = ({
+  _transforms,
   contractStages,
   payload,
 }: {
+  _transforms?: Record<string, unknown>
   contractStages?: ContractStages
   payload: Payload
 }) =>
   payload.create({
     collection: contractMediaSlug,
     context: contractStages ? { contractStages } : undefined,
-    data: { alt: 'note', details: { caption: 'A note' } },
+    data: { _transforms, alt: 'note', details: { caption: 'A note' } },
     file: textFile('hello'),
   })
+
+/** Applies `_transforms.contractSuffix` to the original, so a test can see what a rebuild started from. */
+const appendSuffixToOriginal = async ({ doc, originalSource }: TransformFileArgs) => {
+  const original = new TextDecoder().decode(
+    await originalSource.readFileBytes({ numberOfBytes: originalSource.sizeInBytes, startByte: 0 }),
+  )
+  const suffix = (doc._transforms as { contractSuffix?: string } | null)?.contractSuffix ?? ''
+
+  return {
+    file: new File([`${original}${suffix}`], 'note.md', { type: 'text/markdown' }),
+    status: 'continue' as const,
+  }
+}
 
 const setTransforms =
   (value: Record<string, unknown>) =>
@@ -205,6 +220,48 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     })
 
     expect(await readFile(path.join(contractMediaDir, created.filename!), 'utf8')).toBe('HELLO')
+  })
+
+  test('should rebuild from the original when a claimed key changes, with the stored MIME type', async ({
+    payload,
+  }) => {
+    const contractStages = {
+      first: appendSuffixToOriginal,
+      handledTransformKeys: ['contractSuffix'],
+    }
+    const created = await createNote({
+      _transforms: { contractSuffix: '!' },
+      contractStages,
+      payload,
+    })
+
+    resetContractCalls()
+
+    // Markdown has no file signature, so a rebuild cannot read the type from the stored bytes.
+    const updated = await payload.update({
+      id: created.id,
+      collection: contractMediaSlug,
+      context: { contractStages },
+      data: { _transforms: { contractSuffix: '?' } },
+    })
+
+    expect(contractCalls.transformFile[0]?.source.mimeType).toBe('text/markdown')
+    expect(updated.mimeType).toBe('text/markdown')
+    expect(await readFile(path.join(contractMediaDir, updated.filename!), 'utf8')).toBe('hello?')
+  })
+
+  test('should reject a built-in key that a stage adds and no transformer claims, and save nothing', async ({
+    payload,
+  }) => {
+    const crop = { height: 1, width: 1, x: 0, y: 0 }
+
+    await expect(
+      createNote({ contractStages: { first: setTransforms({ crop }) }, payload }),
+    ).rejects.toMatchObject({ data: { errors: [{ path: '_transforms.crop' }] } })
+
+    const { totalDocs } = await payload.count({ collection: contractMediaSlug })
+
+    expect(totalDocs).toBe(0)
   })
 
   test.describe('Sharp bridge tasks', () => {

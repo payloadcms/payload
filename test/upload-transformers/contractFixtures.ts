@@ -13,6 +13,8 @@ export type ContractStages = {
   first?: (
     args: TransformFileArgs,
   ) => Promise<TransformFileResult | void> | TransformFileResult | void
+  /** The `_transforms` keys the transformer claims. Without them, `canTransform` returns `true`. */
+  handledTransformKeys?: string[]
 }
 
 /** The arguments the contract transformer received, in the order the calls ran. */
@@ -37,7 +39,12 @@ export const contractTransformers: UploadTransformer[] = [
     canTransform: (args) => {
       contractCalls.canTransform.push(args)
 
-      return Boolean(args.req.context?.contractStages)
+      const contractStages = args.req.context?.contractStages as ContractStages | undefined
+      const handledTransformKeys = contractStages?.handledTransformKeys
+
+      return handledTransformKeys
+        ? { canTransform: true, handledTransformKeys }
+        : Boolean(contractStages)
     },
     mimeTypes: ['text/markdown', 'image/*'],
     transformFile: async (args) => {

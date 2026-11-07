@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest'
 
 import type { PayloadRequest } from '../../types/index.js'
 
-import { resolveNextState, resolveUploadEdits, toPipelineEdits } from './resolveUploadEdits.js'
+import {
+  resolveNextState,
+  resolveUploadEdits,
+  toPipelineEdits,
+  withSavedEdits,
+} from './resolveUploadEdits.js'
 
 const original = { height: 1000, width: 2000 }
 const center = { x: 50, y: 50 }
@@ -225,5 +230,31 @@ describe('resolveUploadEdits', () => {
 
     // An unrounded value differs from the sent focalX, which makes the pipeline reprocess the file.
     expect(uploadEdits.focalPoint).toEqual({ x: 33, y: 50 })
+  })
+})
+
+describe('withSavedEdits', () => {
+  // A rebuild that another key starts must apply the saved crop and focal point again, so the
+  // sizes match the saved state.
+  it.each([
+    ['the saved focal point when the edits have none', {}, { x: 20, y: 80 }],
+    [
+      'the focal point of the edits over the saved one',
+      { focalPoint: { x: 5, y: 5 } },
+      { x: 5, y: 5 },
+    ],
+  ])('should use %s', (_name, edits, expectedFocalPoint) => {
+    const savedEdits = withSavedEdits({
+      edits,
+      original,
+      transforms: { crop, focalPoint: { x: 20, y: 80 } },
+    })
+
+    expect(savedEdits).toEqual({
+      crop: { height: 50, unit: '%', width: 50, x: 10, y: 10 },
+      focalPoint: expectedFocalPoint,
+      heightInPixels: crop.height,
+      widthInPixels: crop.width,
+    })
   })
 })
