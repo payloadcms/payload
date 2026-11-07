@@ -755,6 +755,526 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.input.amountRetried).toBe(4)
   })
 
+  describe.each([
+    { depth: 0, label: 'without hooks', runHooks: false },
+    { depth: 0, label: 'with runHooks enabled', runHooks: true },
+    { depth: 1, label: 'with nonzero depth', runHooks: false },
+  ])('multiple workers on the same queue ($label)', ({ depth, runHooks }) => {
+    const queue = 'multi-worker'
+    let originalDepth: number | undefined
+    let originalRunHooks: boolean | undefined
+
+    beforeEach(() => {
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      originalDepth = payload.config.jobs.depth
+      originalRunHooks = payload.config.jobs.runHooks
+      payload.config.jobs.depth = depth
+      payload.config.jobs.runHooks = runHooks
+    })
+
+    afterEach(() => {
+      payload.config.jobs.depth = originalDepth
+      payload.config.jobs.runHooks = originalRunHooks
+    })
+
+    const queueJobs = async ({ count, message }: { count: number; message: string }) => {
+      const jobs = []
+
+      for (let i = 0; i < count; i++) {
+        jobs.push(
+          await payload.jobs.queue({
+            input: { message: `${message} ${i}` },
+            queue,
+            task: 'CreateSimple',
+          }),
+        )
+      }
+
+      return jobs
+    }
+
+    const countSimplesByMessage = async ({ message }: { message: string }) => {
+      const { docs } = await payload.find({
+        collection: 'simple',
+        limit: 0,
+        where: { title: { like: message } },
+      })
+
+      const counts: Record<string, number> = {}
+
+      for (const doc of docs) {
+        counts[doc.title as string] = (counts[doc.title as string] ?? 0) + 1
+      }
+
+      return counts
+    }
+
+    it('should run every job of a batch claimed by a single runner with the default limit', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      const message = 'single runner batch'
+      const jobs = await queueJobs({ count: 3, message })
+
+      const result = await payload.jobs.run({ queue, silent: true })
+
+      expect(Object.keys(result.jobStatus ?? {})).toHaveLength(jobs.length)
+
+      const counts = await countSimplesByMessage({ message })
+
+      expect(Object.values(counts)).toEqual([1, 1, 1])
+
+      const { docs: jobsAfterRun } = await payload.find({
+        collection: 'payload-jobs',
+        limit: 0,
+        where: { queue: { equals: queue } },
+      })
+
+      expect(jobsAfterRun).toHaveLength(jobs.length)
+
+      for (const job of jobsAfterRun) {
+        expect(job.processing).toBe(false)
+        expect(job.completedAt).toBeTruthy()
+      }
+    })
+
+    it('should run a job only once when multiple workers poll the same queue with limit 1', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      const message = 'limit 1 workers'
+      const [job] = await queueJobs({ count: 1, message })
+
+      const results = await Promise.all(
+        Array.from({ length: 10 }, () => payload.jobs.run({ limit: 1, queue, silent: true })),
+      )
+
+      const counts = await countSimplesByMessage({ message })
+
+      expect(Object.values(counts)).toEqual([1])
+
+      const workersThatRanTheJob = results.filter((result) => result.jobStatus?.[job!.id])
+
+      expect(workersThatRanTheJob).toHaveLength(1)
+    })
+
+    it('should run each job only once when multiple workers claim batches from the same queue', async () => {
+      payload.config.jobs.deleteJobOnComplete = true
+      const message = 'batch workers'
+      const jobs = await queueJobs({ count: 6, message })
+
+      const results = await Promise.all(
+        Array.from({ length: 5 }, () => payload.jobs.run({ queue, silent: true })),
+      )
+
+      const counts = await countSimplesByMessage({ message })
+
+      expect(Object.keys(counts)).toHaveLength(jobs.length)
+      expect(Object.values(counts).every((count) => count === 1)).toBe(true)
+
+      const timesEachJobRan = jobs.map(
+        (job) => results.filter((result) => result.jobStatus?.[job.id]).length,
+      )
+
+      expect(timesEachJobRan).toEqual(jobs.map(() => 1))
+
+      // With deleteJobOnComplete, every job is cleaned up once it completes
+      const remainingJobs = await payload.count({
+        collection: 'payload-jobs',
+        where: { queue: { equals: queue } },
+      })
+
+      expect(remainingJobs.totalDocs).toBe(0)
+    })
+
+    it('should run a job only once when multiple workers run the same job by ID', async () => {
+      payload.config.jobs.deleteJobOnComplete = true
+      const message = 'run by ID workers'
+      const [job] = await queueJobs({ count: 1, message })
+
+      const results = await Promise.all(
+        Array.from({ length: 10 }, () => payload.jobs.runByID({ id: job!.id, silent: true })),
+      )
+
+      const counts = await countSimplesByMessage({ message })
+
+      expect(Object.values(counts)).toEqual([1])
+
+      const workersThatRanTheJob = results.filter((result) => result.jobStatus?.[job!.id])
+
+      expect(workersThatRanTheJob).toHaveLength(1)
+
+      const remainingJobs = await payload.count({
+        collection: 'payload-jobs',
+        where: { id: { equals: job!.id } },
+      })
+
+      expect(remainingJobs.totalDocs).toBe(0)
+    })
+
+    it('should not run a job by ID that another runner is already processing', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      const message = 'run by ID while processing'
+      const [job] = await queueJobs({ count: 1, message })
+
+      await payload.update({
+        id: job!.id,
+        collection: 'payload-jobs',
+        data: { processing: true },
+      })
+
+      const result = await payload.jobs.runByID({ id: job!.id, silent: true })
+
+      expect(result.noJobsRemaining).toBe(true)
+      expect(await countSimplesByMessage({ message })).toEqual({})
+    })
+  })
+
+  describe('job claim hooks and depth population', () => {
+    const queue = 'claim-hooks-depth'
+    let originalDepth: number | undefined
+    let originalFields: typeof payload.collections['payload-jobs']['config']['fields']
+    let originalHooks: typeof payload.collections['payload-jobs']['config']['hooks']
+    let originalRunHooks: boolean | undefined
+
+    beforeEach(() => {
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      originalDepth = payload.config.jobs.depth
+      originalRunHooks = payload.config.jobs.runHooks
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      originalFields = [...jobsCollectionConfig.fields]
+      originalHooks = {
+        ...jobsCollectionConfig.hooks,
+        afterChange: [...(jobsCollectionConfig.hooks?.afterChange ?? [])],
+        afterOperation: [...(jobsCollectionConfig.hooks?.afterOperation ?? [])],
+        afterRead: [...(jobsCollectionConfig.hooks?.afterRead ?? [])],
+        beforeChange: [...(jobsCollectionConfig.hooks?.beforeChange ?? [])],
+        beforeOperation: [...(jobsCollectionConfig.hooks?.beforeOperation ?? [])],
+        beforeValidate: [...(jobsCollectionConfig.hooks?.beforeValidate ?? [])],
+      }
+    })
+
+    afterEach(() => {
+      payload.config.jobs.depth = originalDepth
+      payload.config.jobs.runHooks = originalRunHooks
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.fields = originalFields
+      jobsCollectionConfig.hooks = originalHooks
+    })
+
+    it('should preserve pending-to-processing transition semantics in custom job hooks under concurrent workers', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      payload.config.jobs.runHooks = true
+
+      const claimBeforeChanges: Array<{
+        id: number | string
+        nextProcessing: boolean | null | undefined
+        originalProcessing: boolean | null | undefined
+      }> = []
+      const claimAfterChanges: Array<{
+        currentProcessing: boolean | null | undefined
+        id: number | string
+        previousProcessing: boolean | null | undefined
+      }> = []
+
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.hooks = {
+        ...jobsCollectionConfig.hooks,
+        afterChange: [
+          ...(jobsCollectionConfig.hooks?.afterChange ?? []),
+          ({ doc, operation, previousDoc }) => {
+            if (operation === 'update' && doc?.processing === true && !doc?.log?.length) {
+              claimAfterChanges.push({
+                id: doc.id,
+                currentProcessing: doc.processing,
+                previousProcessing: previousDoc?.processing,
+              })
+            }
+            return doc
+          },
+        ],
+        beforeChange: [
+          ...(jobsCollectionConfig.hooks?.beforeChange ?? []),
+          ({ data, operation, originalDoc }) => {
+            if (
+              operation === 'update' &&
+              data?.processing === true &&
+              !data?.log?.length &&
+              originalDoc
+            ) {
+              claimBeforeChanges.push({
+                id: originalDoc.id,
+                nextProcessing: data.processing,
+                originalProcessing: originalDoc.processing,
+              })
+            }
+            return data
+          },
+        ],
+      }
+
+      const batchJobs = await Promise.all(
+        Array.from({ length: 3 }, (_, i) =>
+          payload.jobs.queue({
+            input: { message: `hook transition batch ${i}` },
+            queue,
+            task: 'CreateSimple',
+          }),
+        ),
+      )
+
+      await Promise.all(
+        Array.from({ length: 5 }, () => payload.jobs.run({ queue, silent: true })),
+      )
+
+      const byIDJob = await payload.jobs.queue({
+        input: { message: 'hook transition runByID' },
+        queue,
+        task: 'CreateSimple',
+      })
+
+      await Promise.all(
+        Array.from({ length: 5 }, () => payload.jobs.runByID({ id: byIDJob.id, silent: true })),
+      )
+
+      const allJobIDs = [...batchJobs.map((job) => job.id), byIDJob.id]
+
+      expect(claimBeforeChanges).toHaveLength(allJobIDs.length)
+      expect(claimAfterChanges).toHaveLength(allJobIDs.length)
+
+      for (const jobID of allJobIDs) {
+        expect(claimBeforeChanges.filter((entry) => entry.id === jobID)).toEqual([
+          {
+            id: jobID,
+            nextProcessing: true,
+            originalProcessing: false,
+          },
+        ])
+        expect(claimAfterChanges.filter((entry) => entry.id === jobID)).toEqual([
+          {
+            id: jobID,
+            currentProcessing: true,
+            previousProcessing: false,
+          },
+        ])
+      }
+    })
+
+    it('should release the claim when a document-level hook throws so failed jobs are not stranded as processing', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      payload.config.jobs.runHooks = true
+
+      const job1 = await payload.jobs.queue({
+        input: { message: 'doc hook failure job 1' },
+        queue,
+        task: 'CreateSimple',
+      })
+      const job2 = await payload.jobs.queue({
+        input: { message: 'doc hook failure job 2' },
+        queue,
+        task: 'CreateSimple',
+      })
+
+      let shouldRejectJob1Claim = true
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.hooks = {
+        ...jobsCollectionConfig.hooks,
+        beforeChange: [
+          ...(jobsCollectionConfig.hooks?.beforeChange ?? []),
+          ({ data, operation, originalDoc }) => {
+            if (
+              shouldRejectJob1Claim &&
+              operation === 'update' &&
+              data?.processing === true &&
+              originalDoc?.id === job1.id
+            ) {
+              throw new Error('Claim rejected by beforeChange hook')
+            }
+            return data
+          },
+        ],
+      }
+
+      const firstRun = await payload.jobs.run({ queue, silent: true })
+
+      expect(firstRun.jobStatus?.[job1.id]).toBeUndefined()
+      expect(firstRun.jobStatus?.[job2.id]?.status).toBe('success')
+
+      const job1AfterFirstRun = await payload.findByID({
+        id: job1.id,
+        collection: 'payload-jobs',
+      })
+      const job2AfterFirstRun = await payload.findByID({
+        id: job2.id,
+        collection: 'payload-jobs',
+      })
+
+      expect(job1AfterFirstRun.processing).toBe(false)
+      expect(job1AfterFirstRun.completedAt).toBeFalsy()
+      expect(job2AfterFirstRun.processing).toBe(false)
+      expect(job2AfterFirstRun.completedAt).toBeTruthy()
+
+      shouldRejectJob1Claim = false
+      const secondRun = await payload.jobs.run({ queue, silent: true })
+
+      expect(secondRun.jobStatus?.[job1.id]?.status).toBe('success')
+
+      const job1AfterSecondRun = await payload.findByID({
+        id: job1.id,
+        collection: 'payload-jobs',
+      })
+
+      expect(job1AfterSecondRun.processing).toBe(false)
+      expect(job1AfterSecondRun.completedAt).toBeTruthy()
+    })
+
+    it('should release all claimed jobs when an operation-level hook throws during claiming', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      payload.config.jobs.runHooks = true
+
+      const job1 = await payload.jobs.queue({
+        input: { message: 'op hook failure job 1' },
+        queue,
+        task: 'CreateSimple',
+      })
+      const job2 = await payload.jobs.queue({
+        input: { message: 'op hook failure job 2' },
+        queue,
+        task: 'CreateSimple',
+      })
+
+      let shouldThrowInBeforeOperation = true
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.hooks = {
+        ...jobsCollectionConfig.hooks,
+        beforeOperation: [
+          ...(jobsCollectionConfig.hooks?.beforeOperation ?? []),
+          ({ args, operation }) => {
+            if (
+              shouldThrowInBeforeOperation &&
+              operation === 'update' &&
+              (args.data as { processing?: boolean } | undefined)?.processing === true
+            ) {
+              throw new Error('Operation-level claim hook failure')
+            }
+            return args
+          },
+        ],
+      }
+
+      await expect(payload.jobs.run({ queue, silent: true })).rejects.toThrow(
+        'Operation-level claim hook failure',
+      )
+
+      const [job1AfterFailedRun, job2AfterFailedRun] = await Promise.all([
+        payload.findByID({ id: job1.id, collection: 'payload-jobs' }),
+        payload.findByID({ id: job2.id, collection: 'payload-jobs' }),
+      ])
+
+      expect(job1AfterFailedRun.processing).toBe(false)
+      expect(job1AfterFailedRun.completedAt).toBeFalsy()
+      expect(job2AfterFailedRun.processing).toBe(false)
+      expect(job2AfterFailedRun.completedAt).toBeFalsy()
+
+      shouldThrowInBeforeOperation = false
+      const recoveryRun = await payload.jobs.run({ queue, silent: true })
+
+      expect(recoveryRun.jobStatus?.[job1.id]?.status).toBe('success')
+      expect(recoveryRun.jobStatus?.[job2.id]?.status).toBe('success')
+    })
+
+    it('should populate relationships on claimed jobs when jobs.depth is greater than 0 alongside concurrent workers', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const targetSimple = await payload.create({
+        collection: 'simple',
+        data: { title: 'depth-populated-target' },
+      })
+
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.fields = [
+        ...jobsCollectionConfig.fields,
+        {
+          name: 'relatedSimple',
+          type: 'relationship',
+          hooks: {
+            afterRead: [
+              ({ siblingData }) =>
+                (siblingData?.input as { simpleID?: number | string } | undefined)?.simpleID,
+            ],
+            beforeChange: [
+              ({ siblingData }) => {
+                delete siblingData.relatedSimple
+              },
+            ],
+          },
+          relationTo: 'simple',
+          virtual: true,
+        },
+      ]
+
+      const inlineWorkflow = payload.config.jobs.workflows?.find(
+        (workflow) => workflow.slug === 'inlineTaskTest',
+      )
+      const originalHandler = inlineWorkflow?.handler
+      const observedRelatedSimples: unknown[] = []
+
+      if (!inlineWorkflow || typeof originalHandler !== 'function') {
+        throw new Error('Expected inlineTaskTest workflow handler to be registered')
+      }
+
+      inlineWorkflow.handler = async (handlerArgs) => {
+        observedRelatedSimples.push(
+          (handlerArgs.job as unknown as { relatedSimple?: unknown }).relatedSimple,
+        )
+        return originalHandler(handlerArgs)
+      }
+
+      try {
+        payload.config.jobs.depth = 1
+        payload.config.jobs.runHooks = false
+
+        const depth1Job = await payload.jobs.queue({
+          input: {
+            message: 'depth-1-workflow-run',
+            // @ts-expect-error extra input property for relationship population test
+            simpleID: targetSimple.id,
+          },
+          queue,
+          workflow: 'inlineTaskTest',
+        })
+
+        const results = await Promise.all(
+          Array.from({ length: 5 }, () => payload.jobs.run({ queue, silent: true })),
+        )
+
+        const workersThatRanJob = results.filter((result) => result.jobStatus?.[depth1Job.id])
+        expect(workersThatRanJob).toHaveLength(1)
+        expect(observedRelatedSimples).toHaveLength(1)
+        expect(observedRelatedSimples[0]).toMatchObject({
+          id: targetSimple.id,
+          title: 'depth-populated-target',
+        })
+
+        observedRelatedSimples.length = 0
+        payload.config.jobs.depth = 0
+        payload.config.jobs.runHooks = true
+
+        await payload.jobs.queue({
+          input: {
+            message: 'depth-0-workflow-run',
+            // @ts-expect-error extra input property for relationship population test
+            simpleID: targetSimple.id,
+          },
+          queue,
+          workflow: 'inlineTaskTest',
+        })
+
+        await payload.jobs.run({ queue, silent: true })
+
+        expect(observedRelatedSimples).toEqual([targetSimple.id])
+      } finally {
+        inlineWorkflow.handler = originalHandler
+      }
+    })
+  })
+
   it('ensure backoff strategy of task is respected', async () => {
     payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({

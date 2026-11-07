@@ -36,7 +36,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
     timestamps: true,
   })
 
-  let query = await buildQuery({
+  const query = await buildQuery({
     adapter: this,
     collectionSlug: collectionConfig.slug,
     fields: collectionConfig.flattenedFields,
@@ -105,27 +105,62 @@ export const updateJobs: UpdateJobs = async function updateMany(
         const doc = await Model.findOneAndUpdate(query, updateData, findOptions)
         result = doc ? [doc] : []
       }
-    } else {
-      if (typeof limit === 'number' && limit > 0) {
-        const documentsToUpdate = await Model.find(
-          query,
-          {},
-          { ...findOptions, limit, projection: { _id: 1 }, sort },
-        )
-        if (documentsToUpdate.length === 0) {
-          return null
-        }
-
-        query = { _id: { $in: documentsToUpdate.map((doc) => doc._id) } }
-      }
-
-      await Model.updateMany(query, updateData, baseOptions)
+    } else if (limit === 1) {
+      /**
+       * Select, update, and return one job atomically in a single database call.
+       * We can only do this with limit === 1, which can be expressed as findOne.
+       */
+      const doc = await Model.findOneAndUpdate(query, updateData, {
+        ...findOptions,
+        projection: returning === false ? { _id: 1 } : undefined,
+        sort,
+      })
 
       if (returning === false) {
         return null
       }
 
-      result = await Model.find(query, {}, { ...findOptions, sort })
+      result = doc ? [doc] : []
+    } else {
+      const hasLimit = typeof limit === 'number' && limit > 0
+
+      if (!hasLimit && returning === false) {
+        await Model.updateMany(query, updateData, baseOptions)
+
+        return null
+      }
+
+      const candidates = await Model.find(
+        query,
+        {},
+        { ...findOptions, limit: hasLimit ? limit : undefined, projection: { _id: 1 }, sort },
+      )
+
+      /**
+       * Update each candidate with a conditional findOneAndUpdate that re-checks the original query.
+       * A job that another runner modified since it was selected (e.g. claimed it by setting
+       * `processing: true`) no longer matches and is skipped, so only the documents this call
+       * actually updated are returned. Reading back by the candidate IDs would return jobs claimed
+       * by other runners, and reading back by the original query would miss the jobs this call claimed.
+       */
+      for (const candidate of candidates) {
+        const doc = await Model.findOneAndUpdate(
+          { $and: [query, { _id: candidate._id }] },
+          updateData,
+          {
+            ...findOptions,
+            projection: returning === false ? { _id: 1 } : undefined,
+          },
+        )
+
+        if (doc) {
+          result.push(doc)
+        }
+      }
+
+      if (returning === false) {
+        return null
+      }
     }
   } catch (error) {
     handleError({ collection: collectionConfig.slug, error, req })
