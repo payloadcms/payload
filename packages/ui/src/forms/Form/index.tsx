@@ -156,6 +156,7 @@ export const Form: React.FC<FormProps> = (props) => {
             await handler({
               docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
               file,
+              targetID: id,
             }),
           )
         }
@@ -186,7 +187,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       return formData
     },
-    [collectionSlug, docConfig, getUploadHandler],
+    [collectionSlug, docConfig, getUploadHandler, id],
   )
 
   const replaceState = useCallback(

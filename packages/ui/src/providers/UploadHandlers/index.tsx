@@ -4,11 +4,14 @@ import type { UploadCollectionSlug, UploadInstructions } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+import { shouldUseUploadSession, uploadWithSession } from '../../utilities/uploadWithSession.js'
 import { useConfig } from '../Config/index.js'
 
 type UploadHandler = (args: {
   docPrefix?: string
   file: File
+  /** The document whose file is replaced. Omitted when creating a document. */
+  targetID?: number | string
 }) => Promise<UploadInstructions['file']>
 
 export type UploadHandlersContext = {
@@ -25,11 +28,25 @@ export const UploadHandlersProvider = ({ children }) => {
     serverURL: config.serverURL,
   })
   const getUploadHandler: UploadHandlersContext['getUploadHandler'] = ({ collectionSlug }) => {
-    if (!getEntityConfig({ collectionSlug })?.upload?.uploadInstructions.useInAdmin) {
+    const collectionConfig = getEntityConfig({ collectionSlug })
+
+    if (!collectionConfig?.upload?.uploadInstructions.useInAdmin) {
       return null
     }
 
-    return async ({ docPrefix, file }) => {
+    return async ({ docPrefix, file, targetID }) => {
+      if (shouldUseUploadSession({ collectionConfig, file })) {
+        return uploadWithSession({
+          apiRoute: config.routes.api,
+          collectionSlug,
+          docPrefix,
+          file,
+          retries: collectionConfig.upload.transfer?.retries,
+          serverURL: config.serverURL,
+          targetID,
+        })
+      }
+
       const response = await fetch(uploadInstructionsURL, {
         body: JSON.stringify({
           collectionSlug,
