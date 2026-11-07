@@ -51,7 +51,7 @@
     "clean": "rimraf -g {dist,*.tsbuildinfo}"
   },
   "dependencies": {
-    "@google-cloud/storage": "7.19.0",
+    "@google-cloud/storage": "8.3.0",
     "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
