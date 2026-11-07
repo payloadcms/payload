@@ -69,7 +69,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const schemaPath = schemaPathFromProps ?? name
 
-  const minRows = (minRowsProp ?? required) ? 1 : 0
+  const minRows = minRowsProp ?? (required ? 1 : 0)
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const {
