@@ -1,7 +1,7 @@
 'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useTranslation } from '@payloadcms/ui'
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
@@ -15,6 +15,7 @@ import type {
 import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
 import './index.css'
 import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin/index.js'
+import { resolveSlashMenuGroups } from './mergeDynamicGroups.js'
 import { useMenuTriggerMatch } from './useMenuTriggerMatch.js'
 
 const baseClass = 'slash-menu-popup'
@@ -93,105 +94,55 @@ export function SlashMenuPlugin({
     minLength: 0,
   })
 
-  const getDynamicItems = useCallback(() => {
-    let groupWithItems: Array<SlashMenuGroup> = []
-
-    for (const dynamicItem of editorConfig.features.slashMenu.dynamicGroups) {
-      if (queryString) {
-        const dynamicGroupWithItems = dynamicItem({
-          editor,
-          queryString,
-        })
-        groupWithItems = groupWithItems.concat(dynamicGroupWithItems)
-      }
-    }
-
-    return groupWithItems
-  }, [editor, queryString, editorConfig?.features])
-
   const groups: SlashMenuGroup[] = useMemo(() => {
-    let groupsWithItems: SlashMenuGroup[] = []
-    for (const groupWithItem of editorConfig?.features.slashMenu.groups ?? []) {
-      groupsWithItems.push(groupWithItem)
-    }
+    const groupsWithItems: SlashMenuGroup[] = [...(editorConfig?.features.slashMenu.groups ?? [])]
 
-    if (queryString) {
-      // Normalize query string for flexible matching (remove spaces, hyphens, underscores)
-      const normalizedQuery = queryString.toLowerCase().replace(/[\s\-_]/g, '')
+    // Normalize query string for flexible matching (remove spaces, hyphens, underscores)
+    const normalizedQuery = queryString ? queryString.toLowerCase().replace(/[\s\-_]/g, '') : ''
 
-      // Filter current groups first
-      // @ts-expect-error - TODO: fix this
-      groupsWithItems = groupsWithItems.map((group) => {
-        const filteredItems = group.items.filter((item) => {
-          let itemTitle = item.key
-          if (item.label) {
-            itemTitle =
-              typeof item.label === 'function'
-                ? item.label({ featureClientSchemaMap, i18n, schemaPath })
-                : item.label
+    return resolveSlashMenuGroups({
+      dynamicGroupFns: editorConfig?.features.slashMenu.dynamicGroups ?? [],
+      editor,
+      filterItem: queryString
+        ? (item) => {
+            let itemTitle = item.key
+            if (item.label) {
+              itemTitle =
+                typeof item.label === 'function'
+                  ? item.label({ featureClientSchemaMap, i18n, schemaPath })
+                  : item.label
+            }
+
+            if (new RegExp(queryString, 'gi').exec(itemTitle)) {
+              return true
+            }
+
+            // Try normalized match (allows "nestedcontent" to match "Nested Content")
+            const normalizedTitle = itemTitle.toLowerCase().replace(/[\s\-_]/g, '')
+            if (normalizedTitle.includes(normalizedQuery)) {
+              return true
+            }
+
+            if (item.keywords != null) {
+              return item.keywords.some((keyword) => {
+                if (new RegExp(queryString, 'gi').exec(keyword)) {
+                  return true
+                }
+                const normalizedKeyword = keyword.toLowerCase().replace(/[\s\-_]/g, '')
+                return normalizedKeyword.includes(normalizedQuery)
+              })
+            }
+            return false
           }
-
-          if (new RegExp(queryString, 'gi').exec(itemTitle)) {
-            return true
-          }
-
-          // Try normalized match (allows "nestedcontent" to match "Nested Content")
-          const normalizedTitle = itemTitle.toLowerCase().replace(/[\s\-_]/g, '')
-          if (normalizedTitle.includes(normalizedQuery)) {
-            return true
-          }
-
-          if (item.keywords != null) {
-            return item.keywords.some((keyword) => {
-              if (new RegExp(queryString, 'gi').exec(keyword)) {
-                return true
-              }
-              const normalizedKeyword = keyword.toLowerCase().replace(/[\s\-_]/g, '')
-              return normalizedKeyword.includes(normalizedQuery)
-            })
-          }
-          return false
-        })
-        if (filteredItems.length) {
-          return {
-            ...group,
-            items: filteredItems,
-          }
-        }
-        return null
-      })
-
-      groupsWithItems = groupsWithItems.filter((group) => group != null)
-
-      // Now add dynamic groups
-      const dynamicItemGroups = getDynamicItems()
-
-      // merge dynamic items into groups
-      for (const dynamicGroup of dynamicItemGroups) {
-        // 1. find the group with the same name or create new one
-        let group = groupsWithItems.find((group) => group.key === dynamicGroup.key)
-        if (!group) {
-          group = {
-            ...dynamicGroup,
-            items: [],
-          }
-        } else {
-          groupsWithItems = groupsWithItems.filter((group) => group.key !== dynamicGroup.key)
-        }
-
-        // 2. Add items to group items array and add to sanitized.slashMenu.groupsWithItems
-        if (group?.items?.length) {
-          group.items = group.items.concat(group.items)
-        }
-        groupsWithItems.push(group)
-      }
-    }
-
-    return groupsWithItems
+        : undefined,
+      groups: groupsWithItems,
+      queryString,
+    })
   }, [
+    editor,
     queryString,
+    editorConfig?.features.slashMenu.dynamicGroups,
     editorConfig?.features.slashMenu.groups,
-    getDynamicItems,
     featureClientSchemaMap,
     i18n,
     schemaPath,
