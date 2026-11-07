@@ -1,6 +1,6 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types.js'
 
@@ -88,6 +88,10 @@ export const useListDrawer: UseListDrawer = ({
   const { closeModal, modalState, openModal, toggleModal } = useModal()
   const [isOpen, setIsOpen] = useState(false)
   const [collectionSlugs, setCollectionSlugs] = useState(collectionSlugsFromProps)
+  // A new object identity must not recreate MemoizedDrawer. React treats that as a
+  // new component type and remounts the open drawer, replaying its enter animation.
+  const filterOptionsRef = useRef(filterOptions)
+  filterOptionsRef.current = filterOptions
 
   const drawerSlug = formatListDrawerSlug({
     depth: drawerDepth,
@@ -130,13 +134,13 @@ export const useListDrawer: UseListDrawer = ({
         closeDrawer={closeDrawer}
         collectionSlugs={collectionSlugs}
         drawerSlug={drawerSlug}
-        filterOptions={filterOptions}
+        filterOptions={filterOptionsRef.current}
         key={drawerSlug}
         selectedCollection={selectedCollection}
         uploads={uploads}
       />
     )
-  }, [drawerSlug, collectionSlugs, uploads, closeDrawer, selectedCollection, filterOptions])
+  }, [drawerSlug, collectionSlugs, uploads, closeDrawer, selectedCollection])
 
   const MemoizedDrawerToggler = useMemo(() => {
     return (props) => <ListDrawerToggler {...props} drawerSlug={drawerSlug} />
