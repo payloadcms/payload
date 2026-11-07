@@ -494,4 +494,63 @@ describe('generateFileData', () => {
     expect(result.data).toMatchObject({ mimeType: 'video/mp4;codecs=avc1' })
     expect(req.file?.mimetype).toBe('video/mp4;codecs=avc1')
   })
+
+  it('probes dimensions for a parameterized image declaration', async () => {
+    // A declaration such as `image/png;charset=utf-8` shares its essence with
+    // `image/png`, so dimension probing must still run when the declaration is
+    // preserved.
+    const req = {
+      file: {
+        data: PNG_SIGNATURE,
+        mimetype: 'image/png;charset=utf-8',
+        name: 'photo.png',
+        size: PNG_SIGNATURE.length,
+      },
+      payload: {
+        config: { sharp: undefined },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(result.data).toMatchObject({
+      height: 1,
+      mimeType: 'image/png;charset=utf-8',
+      width: 1,
+    })
+  })
+
+  it('probes dimensions for a mixed-case image declaration', async () => {
+    const req = {
+      file: {
+        data: PNG_SIGNATURE,
+        mimetype: 'IMAGE/PNG',
+        name: 'photo.png',
+        size: PNG_SIGNATURE.length,
+      },
+      payload: {
+        config: { sharp: undefined },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(result.data).toMatchObject({ height: 1, mimeType: 'IMAGE/PNG', width: 1 })
+  })
 })
