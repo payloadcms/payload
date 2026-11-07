@@ -106,6 +106,7 @@ const DocumentInfo: React.FC<
     currentEditorFromProps,
   )
   const [lastUpdateTime, setLastUpdateTime] = useControllableState<number>(lastUpdateTimeFromProps)
+  const [isStale, setIsStale] = useState(false)
 
   const [data, setData] = useControllableState(initialData)
 
@@ -382,6 +383,7 @@ const DocumentInfo: React.FC<
     initialData,
     initialState,
     isInitializing,
+    isStale,
     lastUpdateTime,
     mostRecentVersionIsAutosaved,
     preferencesKey,
@@ -391,6 +393,7 @@ const DocumentInfo: React.FC<
     setDocumentIsLocked,
     setHasPublishedDoc,
     setHasScheduledPublish,
+    setIsStale,
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
