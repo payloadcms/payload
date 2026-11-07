@@ -31,6 +31,8 @@ import {
   getUploadTransformerInternal,
   setUploadFilePath,
 } from './transformers/uploadTransformerBridge.js'
+import { isFullCrop } from './transformState/cropUnits.js'
+import { resolveUploadEdits } from './transformState/resolveUploadEdits.js'
 import { validateUploadURL } from './validateUploadURL.js'
 type Args<T> = {
   collection: Collection
@@ -116,7 +118,50 @@ export const resolveTempFileHandling = ({
  * unless the full bytes are available, this skips reading a temp file entirely when local
  * storage is disabled, and copies it straight to its destination when local storage is enabled.
  */
-export const generateFileData = async <T>({
+export const generateFileData = async <T>(args: Args<T>): Result<T> => {
+  const { collection, data, isDuplicating, operation, originalDoc, req } = args
+
+  if (!collection.config.upload) {
+    return {
+      data,
+      files: [],
+    }
+  }
+
+  const editArgs = {
+    collectionSlug: collection.config.slug,
+    data,
+    focalPointEnabled: collection.config.upload.focalPoint !== false,
+    isDuplicating,
+    operation,
+    originalDoc,
+    req,
+  }
+  // A create from a URL reads its file later, so a saved crop is checked once the file is read.
+  let edits = await resolveUploadEdits({
+    ...editArgs,
+    canWaitForFile: operation === 'create' && !req.file,
+  })
+  const result = await processUpload({
+    ...args,
+    resolveEditsForFile: edits.isWaitingForFile
+      ? async (file) => {
+          edits = await resolveUploadEdits({ ...editArgs, file })
+          return edits.uploadEdits
+        }
+      : undefined,
+    uploadEdits: edits.uploadEdits,
+  })
+
+  if (edits.isWaitingForFile) {
+    // No file was read, so the crop cannot be checked. This throws its validation error.
+    edits = await resolveUploadEdits(editArgs)
+  }
+
+  return { ...result, data: edits.applyTransformState(result.data) }
+}
+
+const processUpload = async <T>({
   collection: { config: collectionConfig },
   data,
   draft,
@@ -126,8 +171,15 @@ export const generateFileData = async <T>({
   originalDoc,
   overwriteExistingFiles,
   req,
+  resolveEditsForFile,
   throwOnMissingFile,
-}: Args<T>): Result<T> => {
+  uploadEdits: initialUploadEdits,
+}: {
+  /** Resolves the edits again for a file read during the operation, before any transformer runs. */
+  resolveEditsForFile?: (file: NonNullable<PayloadRequest['file']>) => Promise<UploadEdits>
+  uploadEdits: UploadEdits
+} & Args<T>): Result<T> => {
+  let uploadEdits = initialUploadEdits
   if (!collectionConfig.upload) {
     return {
       data,
@@ -138,16 +190,6 @@ export const generateFileData = async <T>({
   const { serverURL } = req.payload.config
 
   let file = isDuplicating ? undefined : req.file
-
-  const uploadEdits = parseUploadEditsFromReqOrIncomingData({
-    data,
-    isDuplicating,
-    operation,
-    // Only a duplication source informs edit parsing. Updates now also pass `originalDoc` so the
-    // stored file can be reprocessed, and that must not change which edits are applied.
-    originalDoc: isDuplicating ? originalDoc : undefined,
-    req,
-  })
 
   const {
     disableLocalStorage,
@@ -300,6 +342,10 @@ export const generateFileData = async <T>({
     file = { ...file, mimetype: detectedFileType.mime }
   }
 
+  if (resolveEditsForFile) {
+    uploadEdits = await resolveEditsForFile(file)
+  }
+
   if (!disableLocalStorage) {
     await fs.mkdir(staticPath!, { recursive: true })
   }
@@ -310,11 +356,8 @@ export const generateFileData = async <T>({
   const crop = uploadEdits?.crop
   const isResettingCrop =
     retainedOriginal &&
-    crop?.unit === '%' &&
-    Number(crop.width) === 100 &&
-    Number(crop.height) === 100 &&
-    Number(crop.x) === 0 &&
-    Number(crop.y) === 0 &&
+    crop &&
+    isFullCrop(crop) &&
     (uploadEdits.widthInPixels === undefined ||
       Number(uploadEdits.widthInPixels) === retainedOriginal.width) &&
     (uploadEdits.heightInPixels === undefined ||
@@ -355,6 +398,13 @@ export const generateFileData = async <T>({
           collectionSlug: collectionConfig.slug,
         }),
       ) ?? bridgeTransformers[0]
+
+    // Only the Sharp transformer applies crops for now; others receive `_transforms` later.
+    if (!bridgeTransformer && editsForTransformer?.crop) {
+      req.payload.logger.warn(
+        `No configured transformer applies crops for "${collectionConfig.slug}". The crop is saved in _transforms but not applied to the file.`,
+      )
+    }
 
     // The chosen bridge's task options are private to it, so other bridges must not see them.
     const bridgeTaskPipeline = pipeline.filter(
@@ -796,63 +846,4 @@ async function getUnplannedSafeFileName({
     }
     filename = incrementName(filename)
   }
-}
-
-/**
- * Parse upload edits from req or incoming data
- */
-function parseUploadEditsFromReqOrIncomingData(args: {
-  data: unknown
-  isDuplicating?: boolean
-  operation: 'create' | 'update'
-  originalDoc: unknown
-  req: PayloadRequest
-}): UploadEdits {
-  const { data, isDuplicating, operation, originalDoc, req } = args
-
-  // Get intended focal point change from query string or incoming data
-  const uploadEdits =
-    req.query?.uploadEdits && typeof req.query.uploadEdits === 'object'
-      ? (req.query.uploadEdits as UploadEdits)
-      : {}
-
-  if (uploadEdits.focalPoint) {
-    return uploadEdits
-  }
-
-  const incomingData = data as FileData
-  const origDoc = originalDoc as FileData
-
-  if (origDoc && 'focalX' in origDoc && 'focalY' in origDoc) {
-    // Admin always resends the current focal point, so treat an unchanged value as no edit.
-    if (incomingData?.focalX === origDoc.focalX && incomingData?.focalY === origDoc.focalY) {
-      return undefined!
-    }
-
-    if (isDuplicating) {
-      uploadEdits.focalPoint = {
-        x: incomingData?.focalX || origDoc.focalX!,
-        y: incomingData?.focalY || origDoc.focalY!,
-      }
-      return uploadEdits
-    }
-  }
-
-  if (incomingData?.focalX && incomingData?.focalY) {
-    uploadEdits.focalPoint = {
-      x: incomingData.focalX,
-      y: incomingData.focalY,
-    }
-    return uploadEdits
-  }
-
-  // If no focal point is set, default to center
-  if (operation === 'create') {
-    uploadEdits.focalPoint = {
-      x: 50,
-      y: 50,
-    }
-  }
-
-  return uploadEdits
 }

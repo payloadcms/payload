@@ -490,7 +490,7 @@ export type FileToSave = {
     }
 )
 
-type Crop = {
+export type Crop = {
   height: number
   unit: '%' | 'px'
   width: number
