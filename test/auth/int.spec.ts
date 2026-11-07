@@ -22,6 +22,7 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { transformForWrite } from '../../packages/drizzle/src/transform/write/index.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
 import {
   apiKeysSlug,
@@ -3455,6 +3456,200 @@ describe('Auth', () => {
         .GET(`/${slug}/me`, { headers: { Authorization: `JWT ${actingSession.token}` } })
         .then((res) => res.json())
       expect(meWithActingToken.user?.id).toStrictEqual(actingUser.id)
+    })
+  })
+
+  describe('session writes do not overwrite concurrent user changes', () => {
+    const concurrentValue = 'changed-between-read-and-session-write'
+    const createdUserIDs: Array<number | string> = []
+    const restoreFns: Array<() => void> = []
+
+    type UpdateOneArgs = Parameters<Payload['db']['updateOne']>[0]
+
+    /**
+     * Runs `beforeWrite` once, right before the first `payload.db.updateOne` call that matches
+     * `isMatch`. This commits a change in the gap between the request reading the user and the
+     * request writing it back, which is where a write built from the earlier read loses it.
+     */
+    const runBeforeWrite = (
+      isMatch: (args: UpdateOneArgs) => boolean,
+      beforeWrite: () => Promise<unknown>,
+    ) => {
+      const db = payload.db
+      const originalUpdateOne = db.updateOne.bind(db)
+      let isArmed = true
+
+      db.updateOne = (async (args: UpdateOneArgs) => {
+        if (isArmed && isMatch(args)) {
+          isArmed = false
+          await beforeWrite()
+        }
+        return originalUpdateOne(args)
+      }) as Payload['db']['updateOne']
+
+      restoreFns.push(() => {
+        db.updateOne = originalUpdateOne
+      })
+    }
+
+    // MongoDB aborts a transaction that writes a document changed after the transaction began
+    // (WriteConflict) instead of overwriting it, so the transactional paths cannot lose the update there
+    const skipOnMongoTransactions = (skip: (condition: boolean, note?: string) => void) =>
+      skip(isMongoose(payload), 'MongoDB raises WriteConflict inside the request transaction')
+
+    const writesSessions = (args: UpdateOneArgs) =>
+      args.collection === slug && Array.isArray((args.data as { sessions?: unknown }).sessions)
+
+    const createUser = async () => {
+      const email = `session-race-${crypto.randomUUID()}@example.com`
+      const user = await payload.create({
+        collection: slug,
+        data: { email, password, restrictedField: 'initial' },
+      })
+      createdUserIDs.push(user.id)
+
+      return { id: user.id, email }
+    }
+
+    const readStoredUser = async (id: number | string) =>
+      payload.db.findOne<{ restrictedField?: string } & User>({
+        collection: slug,
+        where: { id: { equals: id } },
+      })
+
+    const changeRestrictedField = (id: number | string) => () =>
+      payload.db.updateOne({
+        id,
+        collection: slug,
+        data: { restrictedField: concurrentValue },
+        returning: false,
+      })
+
+    afterEach(async () => {
+      while (restoreFns.length) {
+        restoreFns.pop()?.()
+      }
+
+      for (const id of createdUserIDs) {
+        await payload.delete({ id, collection: slug }).catch(() => null)
+      }
+      createdUserIDs.length = 0
+    })
+
+    it('should keep a field changed between reading the user and adding a session on login', async ({
+      skip,
+    }) => {
+      skipOnMongoTransactions(skip)
+
+      const { id, email } = await createUser()
+      runBeforeWrite(writesSessions, changeRestrictedField(id))
+
+      const result = await payload.login({ collection: slug, data: { email, password } })
+
+      const stored = await readStoredUser(id)
+      expect(result.token).toBeDefined()
+      expect(stored?.sessions).toHaveLength(1)
+      expect(stored?.restrictedField).toBe(concurrentValue)
+    })
+
+    it('should keep a password changed between reading the user and adding a session on login', async ({
+      skip,
+    }) => {
+      skipOnMongoTransactions(skip)
+
+      const { id, email } = await createUser()
+      const newPassword = 'changed-between-read-and-write'
+      runBeforeWrite(writesSessions, () =>
+        payload.update({ id, collection: slug, data: { password: newPassword } }),
+      )
+
+      await payload.login({ collection: slug, data: { email, password } })
+
+      await expect(payload.login({ collection: slug, data: { email, password } })).rejects.toThrow()
+      await expect(
+        payload.login({ collection: slug, data: { email, password: newPassword } }),
+      ).resolves.toMatchObject({ token: expect.any(String) })
+    })
+
+    it('should keep a field changed between reading the user and refreshing the session', async ({
+      skip,
+    }) => {
+      skipOnMongoTransactions(skip)
+
+      const { id, email } = await createUser()
+      const { token } = await payload.login({ collection: slug, data: { email, password } })
+      runBeforeWrite(writesSessions, changeRestrictedField(id))
+
+      const response = await restClient.POST(`/${slug}/refresh-token`, {
+        headers: { Authorization: `JWT ${token}` },
+      })
+
+      const stored = await readStoredUser(id)
+      expect(response.status).toBe(200)
+      expect(stored?.sessions).toHaveLength(1)
+      expect(stored?.restrictedField).toBe(concurrentValue)
+    })
+
+    it('should keep a field changed between reading the user and removing the session on logout', async ({
+      skip,
+    }) => {
+      skipOnMongoTransactions(skip)
+
+      const { id, email } = await createUser()
+      const { token } = await payload.login({ collection: slug, data: { email, password } })
+      runBeforeWrite(writesSessions, changeRestrictedField(id))
+
+      const response = await restClient.POST(`/${slug}/logout`, {
+        headers: { Authorization: `JWT ${token}` },
+      })
+
+      const stored = await readStoredUser(id)
+      expect(response.status).toBe(200)
+      expect(stored?.sessions ?? []).toHaveLength(0)
+      expect(stored?.restrictedField).toBe(concurrentValue)
+    })
+
+    it('should keep a field changed between reading the user and revoking the session after a failed login', async () => {
+      const { id, email } = await createUser()
+      await payload.login({ collection: slug, data: { email, password } })
+
+      // Make the stored session old enough to be removed by the parallel-attempt lockout
+      const [session] = (await readStoredUser(id))?.sessions ?? []
+      await payload.db.updateOne({
+        id,
+        collection: slug,
+        data: {
+          sessions: [
+            {
+              ...session,
+              createdAt: new Date(Date.now() - 60_000).toISOString(),
+            },
+          ],
+        },
+        returning: false,
+      })
+
+      // A parallel failed attempt has already counted up to the limit when this one increments
+      runBeforeWrite(
+        (args) =>
+          args.collection === slug &&
+          typeof (args.data as { loginAttempts?: unknown }).loginAttempts === 'object',
+        () =>
+          payload.db.updateOne({
+            id,
+            collection: slug,
+            data: { loginAttempts: 1 },
+            returning: false,
+          }),
+      )
+      runBeforeWrite(writesSessions, changeRestrictedField(id))
+
+      await expect(
+        payload.login({ collection: slug, data: { email, password: 'wrong-password' } }),
+      ).rejects.toThrow()
+
+      const stored = await readStoredUser(id)
+      expect(stored?.restrictedField).toBe(concurrentValue)
     })
   })
 })
