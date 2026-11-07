@@ -19,6 +19,11 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
     let transactionReady: () => void
     let transactionFailed: (err: unknown) => void
 
+    // Set once `resolve` is called, so that an error thrown by the COMMIT can be
+    // told apart from a connection error that happened before the callback ran.
+    let committing = false
+    let commitError: { error: unknown } | undefined
+
     // Await initialization here
     // Prevent race conditions where the adapter may be
     // re-initializing, and `this.drizzle` is potentially undefined
@@ -33,9 +38,13 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
       .transaction(async (tx) => {
         transaction = tx
         await new Promise<void>((res, rej) => {
-          resolve = () => {
+          resolve = async () => {
+            committing = true
             res()
-            return done
+            await done
+            if (commitError) {
+              throw commitError.error
+            }
           }
           reject = () => {
             // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
@@ -46,6 +55,14 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
         })
       }, options || this.transactionOptions)
       .catch((err) => {
+        // The database refused the COMMIT (e.g. a deferred constraint, a
+        // serialization failure or a dropped connection). Drizzle has already
+        // rolled back, so keep the error and surface it from `resolve`.
+        if (committing) {
+          commitError = { error: err ?? new Error('The transaction could not be committed') }
+          return
+        }
+
         // Connection failed before callback ran - reject instead of hanging forever
         transactionFailed(err)
       })

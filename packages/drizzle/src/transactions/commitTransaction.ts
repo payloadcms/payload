@@ -18,7 +18,8 @@ export const commitTransaction: CommitTransaction = async function commitTransac
 
   try {
     await session.resolve()
-  } catch (_) {
+  } catch (err) {
     await session.reject()
+    throw err
   }
 }
