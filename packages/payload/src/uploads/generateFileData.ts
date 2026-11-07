@@ -3,7 +3,11 @@ import fs from 'fs/promises'
 import { randomUUID } from 'node:crypto'
 import { openAsBlob } from 'node:fs'
 
-import type { Collection, TypeWithID } from '../collections/config/types.js'
+import type {
+  Collection,
+  SanitizedCollectionConfig,
+  TypeWithID,
+} from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
 import type { ExternalUploadSource } from './sanitizeUploadData.js'
@@ -11,6 +15,9 @@ import type { PreparedUploadTransformation } from './transformers/uploadTransfor
 import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
+import { TransformerContractError } from '../errors/TransformerContractError.js'
+import { deepCopyObject } from '../utilities/deepCopyObject.js'
+import { deepFreeze } from '../utilities/deepFreeze.js'
 import { formatAdminURL } from '../utilities/formatAdminURL.js'
 import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
@@ -18,6 +25,7 @@ import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { downloadFileToBuffer, resolveExternalFileURL } from './downloadFileToBuffer.js'
 import { generateImageSizeFilename } from './generateImageSizeFilename.js'
 import { getFileByPath } from './getFileByPath.js'
+import { fetchFullClientUpload as downloadFullClientUpload } from './getFileFromUploadInstructions.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName, incrementName } from './getSafeFilename.js'
@@ -40,6 +48,12 @@ type Args<T> = {
   data: T
   draft?: boolean
   externalUploadSource?: ExternalUploadSource
+  /**
+   * Downloads a client upload that arrived without its whole contents. Defaults to
+   * `fetchFullClientUpload`. A bulk update passes a shared download, so its documents download
+   * the file once.
+   */
+  fetchFullClientUpload?: typeof downloadFullClientUpload
   isDuplicating?: boolean
   operation: 'create' | 'update'
   originalDoc?: T
@@ -51,6 +65,13 @@ type Args<T> = {
 type Result<T> = Promise<{
   data: T
   files: FileToSave[]
+}>
+
+type ProcessUploadResult<T> = Promise<{
+  data: T
+  files: FileToSave[]
+  /** The final `_transforms` of the transformer `doc`, after every stage ran. */
+  transforms: Document['_transforms']
 }>
 
 const shouldReupload = (
@@ -137,17 +158,31 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     originalDoc,
     req,
   }
+  // Transformers get the document as the operation would save it, and may change only its
+  // `_transforms`. File processing runs before the hooks and validation, so those then run on
+  // the transformers' changes.
+  const docToSave =
+    operation === 'update' ? { ...originalDoc, ...data } : isDuplicating ? originalDoc : data
   // A create from a URL reads its file later, so a saved crop is checked once the file is read.
   let edits = await resolveUploadEdits({
     ...editArgs,
     canWaitForFile: operation === 'create' && !req.file,
   })
-  const result = await processUpload({
+  const hasTransformers = hasUploadTransformers({ req })
+  // Without transformers nothing reads or changes the doc, so a shallow copy is enough.
+  const createPipelineDoc = (): Document => {
+    const doc = edits.applyTransformState(docToSave)
+
+    return hasTransformers ? deepCopyObject(doc) : { ...doc }
+  }
+  const { transforms, ...result } = await processUpload({
     ...args,
+    hasTransformers,
+    pipelineDoc: createPipelineDoc(),
     resolveEditsForFile: edits.isWaitingForFile
       ? async (file) => {
           edits = await resolveUploadEdits({ ...editArgs, file })
-          return edits.uploadEdits
+          return { pipelineDoc: createPipelineDoc(), uploadEdits: edits.uploadEdits }
         }
       : undefined,
     uploadEdits: edits.uploadEdits,
@@ -158,7 +193,23 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     edits = await resolveUploadEdits(editArgs)
   }
 
-  return { ...result, data: edits.applyTransformState(result.data) }
+  // A stage can change the focal point, so focalX and focalY follow the final value, rounded as
+  // `resolveUploadEdits` rounds them.
+  const finalFocalPoint = (transforms as { focalPoint?: { x: number; y: number } } | null)
+    ?.focalPoint
+  const focalFields =
+    editArgs.focalPointEnabled && finalFocalPoint
+      ? { focalX: Math.round(finalFocalPoint.x), focalY: Math.round(finalFocalPoint.y) }
+      : {}
+
+  return {
+    ...result,
+    data: {
+      ...edits.applyTransformState(result.data),
+      ...focalFields,
+      _transforms: transforms ?? null,
+    },
+  }
 }
 
 const processUpload = async <T>({
@@ -166,24 +217,37 @@ const processUpload = async <T>({
   data,
   draft,
   externalUploadSource,
+  fetchFullClientUpload = downloadFullClientUpload,
+  hasTransformers,
   isDuplicating,
   operation,
   originalDoc,
   overwriteExistingFiles,
+  pipelineDoc: initialPipelineDoc,
   req,
   resolveEditsForFile,
   throwOnMissingFile,
   uploadEdits: initialUploadEdits,
 }: {
-  /** Resolves the edits again for a file read during the operation, before any transformer runs. */
-  resolveEditsForFile?: (file: NonNullable<PayloadRequest['file']>) => Promise<UploadEdits>
+  /** Whether any transformer is configured. Without one, the document is not copied. */
+  hasTransformers: boolean
+  pipelineDoc: Document
+  /**
+   * Resolves the edits again for a file read during the operation, before any transformer runs.
+   * The transformer `doc` holds the resolved `_transforms`, so it is built again too.
+   */
+  resolveEditsForFile?: (
+    file: NonNullable<PayloadRequest['file']>,
+  ) => Promise<{ pipelineDoc: Document; uploadEdits: UploadEdits }>
   uploadEdits: UploadEdits
-} & Args<T>): Result<T> => {
+} & Args<T>): ProcessUploadResult<T> => {
+  let pipelineDoc = initialPipelineDoc
   let uploadEdits = initialUploadEdits
   if (!collectionConfig.upload) {
     return {
       data,
       files: [],
+      transforms: pipelineDoc._transforms,
     }
   }
 
@@ -325,26 +389,23 @@ const processUpload = async <T>({
     return {
       data: incomingFileData!,
       files: [],
+      transforms: pipelineDoc._transforms,
     }
   }
 
-  const detectedFileType = await checkFileRestrictions({
-    collection: collectionConfig,
-    file,
-    req,
-  })
-
-  const shouldUseDetectedFileType =
-    detectedFileType &&
-    (isProcessableImage(file.mimetype) || isProcessableImage(detectedFileType.mime))
-
-  if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
-    file = { ...file, mimetype: detectedFileType.mime }
-  }
+  file = await checkFileAndUseDetectedType({ collection: collectionConfig, file, req })
 
   if (resolveEditsForFile) {
-    uploadEdits = await resolveEditsForFile(file)
+    ;({ pipelineDoc, uploadEdits } = await resolveEditsForFile(file))
   }
+
+  // Transformers see the incoming file. Core sets the saved file fields from the output file
+  // later, so the saved filename can still change, for example to avoid a name clash.
+  setIncomingFileFields({ doc: pipelineDoc, file })
+  // Only transformers read originalDoc, so it is copied only when there are some.
+  const createOriginalDoc = (): Readonly<Document> =>
+    hasTransformers ? deepFreeze(deepCopyObject(pipelineDoc)) : pipelineDoc
+  let pipelineOriginalDoc = createOriginalDoc()
 
   if (!disableLocalStorage) {
     await fs.mkdir(staticPath!, { recursive: true })
@@ -370,18 +431,55 @@ const processUpload = async <T>({
     ? { ...uploadEdits, crop: undefined, heightInPixels: undefined, widthInPixels: undefined }
     : uploadEdits
 
-  try {
-    const pipeline = await planTransformerPipeline({
-      args: {
-        collectionSlug: collectionConfig.slug,
-        mimeType: file.mimetype,
-        operation: 'upload',
-        req,
-      },
-      capability: 'transformFile',
-      transformers: req.payload.config.upload?.transformers ?? [],
-    })
+  const planUploadPipeline = async ({ mimeType }: { mimeType: string }) => {
+    try {
+      return await planTransformerPipeline({
+        args: {
+          collectionSlug: collectionConfig.slug,
+          doc: pipelineOriginalDoc,
+          mimeType,
+          operation: 'upload',
+          originalDoc: pipelineOriginalDoc,
+          req,
+        },
+        capability: 'transformFile',
+        transformers: req.payload.config.upload?.transformers ?? [],
+      })
+    } catch (err) {
+      throw toFileUploadError({ err, req })
+    }
+  }
 
+  let pipeline = await planUploadPipeline({ mimeType: file.mimetype })
+
+  // A client upload can arrive with only a header probe or no contents (see
+  // getFileContentRequirement.ts). Download it only when a stage needs its bytes, which
+  // `canTransform` decides here with the real document. Sharp's bridge is excluded: the
+  // content requirement already covers what it needs. Errors from the download and its checks
+  // keep their own message and status.
+  if (
+    !hasFullFileContents(file) &&
+    file.uploadReference &&
+    pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
+  ) {
+    const download = await downloadClientUpload({
+      collection: collectionConfig,
+      fetchFullClientUpload,
+      file,
+      req,
+    })
+    file = download.file
+
+    // The plan was made for the probe's MIME type. Make it again for the checked type. No stage
+    // has run yet, so originalDoc can still be made again.
+    if (download.hasTypeChanged) {
+      setIncomingFileFields({ doc: pipelineDoc, file })
+      pipelineOriginalDoc = createOriginalDoc()
+      pipeline = await planUploadPipeline({ mimeType: file.mimetype })
+    }
+  }
+
+  try {
     // A large client upload can arrive as a bounded probe alongside a temp file. Transformers
     // need the whole file, so leave such an upload untouched rather than buffering it.
     const canRunTransformers = pipeline.length > 0 && hasFullFileContents(file)
@@ -426,19 +524,33 @@ const processUpload = async <T>({
 
       if (bridgeTransformer) {
         const bridge = getUploadTransformerInternal(bridgeTransformer)!
+        let sizeTaskDoc: Readonly<Document> | undefined
 
         const results = await bridge.prepareUpload!({
           collectionSlug: collectionConfig.slug,
           file: originalWebFile,
           req,
-          transform: (task) =>
-            transformUploadFile({
+          transform: async (task) => {
+            // Size tasks run after the main task, maybe in parallel, so only the main task's
+            // changes are kept and the size tasks share a read-only copy of its result.
+            const taskDoc =
+              task.fieldPath === 'filename'
+                ? pipelineDoc
+                : (sizeTaskDoc ??= deepFreeze(deepCopyObject(pipelineDoc)))
+
+            const taskFile = await transformUploadFile({
               collectionSlug: collectionConfig.slug,
+              doc: taskDoc,
               file: task.file ?? originalWebFile!,
               options: task.options,
+              originalDoc: pipelineOriginalDoc,
+              originalFile: originalWebFile!,
               pipeline: bridgeTaskPipeline,
               req,
-            }),
+            })
+
+            return taskFile
+          },
           uploadEdits: editsForTransformer,
         })
 
@@ -450,13 +562,18 @@ const processUpload = async <T>({
         hasDimensionsFromBridge = true
         sizeResults = results.filter((result) => result.fieldPath !== 'filename')
       } else {
-        mainWebFile = await transformUploadFile({
+        const transformedFile = await transformUploadFile({
           collectionSlug: collectionConfig.slug,
+          doc: pipelineDoc,
           file: originalWebFile,
           options: undefined,
+          originalDoc: pipelineOriginalDoc,
+          originalFile: originalWebFile,
           pipeline,
           req,
         })
+
+        mainWebFile = transformedFile
       }
     }
 
@@ -496,6 +613,7 @@ const processUpload = async <T>({
           ...(draft ? { _status: 'draft' } : {}),
         } as T,
         files: [],
+        transforms: pipelineDoc._transforms,
       }
     }
     const mainBuffer = fileWasTransformed
@@ -813,8 +931,7 @@ const processUpload = async <T>({
       fileData.variants = sizes
     }
   } catch (err) {
-    req.payload.logger.error(err)
-    throw new FileUploadError(req.t)
+    throw toFileUploadError({ err, req })
   }
 
   newData = {
@@ -826,6 +943,7 @@ const processUpload = async <T>({
   return {
     data: newData,
     files: filesToSave,
+    transforms: pipelineDoc._transforms,
   }
 }
 
@@ -846,4 +964,84 @@ async function getUnplannedSafeFileName({
     }
     filename = incrementName(filename)
   }
+}
+
+/** Checks the file, and uses the detected MIME type when the file is a processable image. */
+const checkFileAndUseDetectedType = async ({
+  collection,
+  file,
+  req,
+}: {
+  collection: SanitizedCollectionConfig
+  file: NonNullable<PayloadRequest['file']>
+  req: PayloadRequest
+}): Promise<NonNullable<PayloadRequest['file']>> => {
+  const detectedFileType = await checkFileRestrictions({ collection, file, req })
+
+  const shouldUseDetectedFileType =
+    detectedFileType &&
+    (isProcessableImage(file.mimetype) || isProcessableImage(detectedFileType.mime))
+
+  if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
+    return { ...file, mimetype: detectedFileType.mime }
+  }
+
+  return file
+}
+
+/**
+ * Downloads the whole client upload and checks it again, because the first check saw only a
+ * probe. Sets `req.file` to the result, so hooks, storage plugins and temp file cleanup see it.
+ */
+async function downloadClientUpload({
+  collection,
+  fetchFullClientUpload,
+  file: probedFile,
+  req,
+}: {
+  collection: SanitizedCollectionConfig
+  fetchFullClientUpload: typeof downloadFullClientUpload
+  file: NonNullable<PayloadRequest['file']>
+  req: PayloadRequest
+}): Promise<{ file: NonNullable<PayloadRequest['file']>; hasTypeChanged: boolean }> {
+  const downloadedFile = await fetchFullClientUpload({
+    collectionSlug: collection.slug,
+    file: probedFile,
+    req,
+  })
+  // On req.file, the temp file is removed after the operation, also when the check fails.
+  req.file = downloadedFile
+  const checkedFile = await checkFileAndUseDetectedType({ collection, file: downloadedFile, req })
+  // Later steps change this same object, for example to drop its upload reference.
+  req.file = checkedFile
+
+  return { file: checkedFile, hasTypeChanged: checkedFile.mimetype !== probedFile.mimetype }
+}
+
+const hasUploadTransformers = ({ req }: { req: PayloadRequest }): boolean =>
+  Boolean(req.payload.config.upload?.transformers?.length)
+
+/** Puts the incoming file's name, size and MIME type into the transformer `doc`. */
+function setIncomingFileFields({
+  doc,
+  file,
+}: {
+  doc: Document
+  file: NonNullable<PayloadRequest['file']>
+}): Document {
+  doc.filename = file.name
+  doc.filesize = file.size
+  doc.mimeType = file.mimetype
+
+  return doc
+}
+
+/**
+ * Logs a transformer or file processing error and hides its details behind a `FileUploadError`.
+ * A broken transformer contract is a bug in the transformer, so it keeps its own message.
+ */
+function toFileUploadError({ err, req }: { err: unknown; req: PayloadRequest }): Error {
+  req.payload.logger.error(err)
+
+  return err instanceof TransformerContractError ? err : new FileUploadError(req.t)
 }

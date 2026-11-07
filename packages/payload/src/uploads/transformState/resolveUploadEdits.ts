@@ -421,7 +421,7 @@ function parseUploadEditsFromReqOrIncomingData(args: {
  * An error for the first value that JSON cannot store exactly, such as `NaN`, `Infinity` or a
  * `BigInt`. Without this check, the JSON copy would save `null` in its place or throw.
  */
-function getNonJSONValueError({
+export function getNonJSONValueError({
   path = [],
   value,
 }: {
