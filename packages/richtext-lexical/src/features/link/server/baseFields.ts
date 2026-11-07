@@ -128,6 +128,7 @@ export const getBaseFields = (
               const baseFilter = admin?.baseFilter ?? admin?.baseListFilter
               return (
                 (await baseFilter?.({
+                  context: 'relationship',
                   limit: 0,
                   page: 1,
                   req,

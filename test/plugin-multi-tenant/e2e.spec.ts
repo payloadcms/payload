@@ -534,7 +534,52 @@ test.describe('Multi Tenant', () => {
   })
 
   test.describe('Documents', () => {
-    test('should set tenant upon entering document', async () => {
+    test('should inherit the document tenant when creating a related document', async () => {
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await setTenantFilter({ page, tenant: 'Steel Cat', urlUtil: tenantsURL })
+      const browsingCookie = (await page.context().cookies()).find(
+        ({ name }) => name === 'payload-tenant-filter',
+      )?.value
+      const { docs } = await payload.find({
+        collection: 'relationships',
+        overrideAccess: true,
+        where: { title: { equals: 'Owned by blue dog' } },
+      })
+
+      await page.goto(`${usersURL.admin}/collections/relationships/${docs[0]!.id}`)
+      await expect.poll(() => getSelectedTenantFilterName({ page, payload })).toBe('Blue Dog')
+      await page.locator('#relationship-add-new button').click()
+      const drawer = page.locator('.doc-drawer')
+
+      await expect(drawer).toBeVisible()
+      await expect(drawer.locator('#assign-tenant-field-modal')).toBeHidden()
+      await drawer
+        .getByRole('textbox', { name: 'Title', exact: true })
+        .fill('Related Blue Dog document')
+      await drawer.getByRole('button', { name: 'Save', exact: true }).click()
+      await expect(
+        drawer.getByRole('heading', { name: 'Editing Relationship', exact: true }),
+      ).toBeVisible()
+      await drawer.getByRole('button', { name: 'Close', exact: true }).click()
+      await expect(drawer).toBeHidden()
+      await expect.poll(() => getSelectedTenantFilterName({ page, payload })).toBe('Blue Dog')
+      const related = await payload.find({
+        collection: 'relationships',
+        overrideAccess: true,
+        depth: 0,
+        where: { title: { equals: 'Related Blue Dog document' } },
+      })
+
+      expect(related.docs[0]?.tenant).toBe(
+        typeof docs[0]!.tenant === 'object' ? docs[0]!.tenant.id : docs[0]!.tenant,
+      )
+      expect(
+        (await page.context().cookies()).find(({ name }) => name === 'payload-tenant-filter')
+          ?.value,
+      ).toBe(browsingCookie)
+    })
+
+    test('should preserve All tenants after viewing a document', async () => {
       await loginClientSide({
         data: credentials.admin,
         page,
@@ -561,6 +606,14 @@ test.describe('Multi Tenant', () => {
           })
         })
         .toBe('Blue Dog')
+      expect(
+        (await page.context().cookies()).find(({ name }) => name === 'payload-tenant-filter')
+          ?.value,
+      ).toBe('')
+
+      await page.goBack()
+      await expect(page.locator('.collection-list')).toBeVisible()
+      await expect.poll(() => getSelectedTenantFilterName({ page, payload })).toBeUndefined()
     })
 
     test('should allow tenant switching cancellation', async () => {
@@ -620,7 +673,7 @@ test.describe('Multi Tenant', () => {
         .poll(async () => {
           return await getSelectedTenantFilterName({ page, payload })
         })
-        .toBe('Blue Dog')
+        .toBeUndefined()
     })
 
     test('should allow tenant switching confirmation', async () => {
@@ -807,12 +860,92 @@ test.describe('Multi Tenant', () => {
   })
 
   test.describe('Globals', () => {
-    test('should redirect list view to edit view', async () => {
+    test('should show the document tenant on a direct version link without changing the filter', async () => {
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await page.goto(tenantsURL.list)
+      await clearTenantFilter({ page })
+      const { docs: tenants } = await payload.find({
+        collection: tenantsSlug,
+        overrideAccess: true,
+        where: { name: { equals: 'Blue Dog' } },
+      })
+      const doc = await payload.create({
+        collection: autosaveGlobalSlug,
+        overrideAccess: true,
+        data: { tenant: tenants[0]!.id, title: 'Versioned global' },
+      })
+      const { docs: versions } = await payload.findVersions({
+        collection: autosaveGlobalSlug,
+        overrideAccess: true,
+        where: { parent: { equals: doc.id } },
+      })
+
+      await page.goto(`${autosaveGlobalURL.list}/${doc.id}/versions/${versions[0]!.id}`)
+      await expect.poll(() => getSelectedTenantFilterName({ page, payload })).toBe('Blue Dog')
+      expect(
+        (await page.context().cookies()).find(({ name }) => name === 'payload-tenant-filter')
+          ?.value,
+      ).toBe('')
+
+      await page.goto(menuItemsURL.list)
+      await expect.poll(() => getSelectedTenantFilterName({ page, payload })).toBeUndefined()
+    })
+
+    test('should browse global documents across all tenants without changing the filter', async () => {
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await page.goto(tenantsURL.list)
+      await clearTenantFilter({ page })
+      await page.goto(globalMenuURL.list)
+
+      await expect(page.locator('.collection-list')).toBeVisible()
+      const documentLink = page.getByRole('link', { name: 'Blue Dog Menu', exact: true })
+
+      await documentLink.focus()
+      await expect(documentLink).toBeFocused()
+      await page.keyboard.press('Enter')
+      await expect(page.locator('#field-title')).toHaveValue('Blue Dog Menu')
+      await expect.poll(() => getSelectedTenantFilterName({ page, payload })).toBe('Blue Dog')
+      expect(
+        (await page.context().cookies()).find(({ name }) => name === 'payload-tenant-filter')
+          ?.value,
+      ).toBe('')
+
+      await page.goBack()
+      await expect(page.locator('.collection-list')).toBeVisible()
+      await expect.poll(() => getSelectedTenantFilterName({ page, payload })).toBeUndefined()
+    })
+
+    test('should preserve the browsing tenant when opening a different global directly', async () => {
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await setTenantFilter({ page, tenant: 'Steel Cat', urlUtil: tenantsURL })
+      const browsingCookie = (await page.context().cookies()).find(
+        ({ name }) => name === 'payload-tenant-filter',
+      )?.value
+      const { docs } = await payload.find({
+        collection: menuSlug,
+        overrideAccess: true,
+        where: { title: { equals: 'Blue Dog Menu' } },
+      })
+
+      await page.goto(`${globalMenuURL.list}/${docs[0]!.id}`)
+      await expect(page.locator('#field-title')).toHaveValue('Blue Dog Menu')
+      await expect.poll(() => getSelectedTenantFilterName({ page, payload })).toBe('Blue Dog')
+      expect(
+        (await page.context().cookies()).find(({ name }) => name === 'payload-tenant-filter')
+          ?.value,
+      ).toBe(browsingCookie)
+
+      await page.goto(menuItemsURL.list)
+      await expect.poll(() => getSelectedTenantFilterName({ page, payload })).toBe('Steel Cat')
+    })
+
+    test('should redirect a selected tenant list view to edit view', async () => {
       await loginClientSide({
         data: credentials.admin,
         page,
         serverURL,
       })
+      await setTenantFilter({ page, tenant: 'Blue Dog', urlUtil: tenantsURL })
       await page.goto(globalMenuURL.list)
       await expect(page.locator('.collection-edit')).toBeVisible()
     })
@@ -883,7 +1016,7 @@ test.describe('Multi Tenant', () => {
         serverURL,
       })
       await page.goto(tenantsURL.list)
-      await clearTenantFilter({ page })
+      await setTenantFilter({ page, tenant: 'Blue Dog' })
       await page.goto(autosaveGlobalURL.list)
       await expect(page.locator('.doc-header__title')).toBeVisible()
       const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
@@ -1410,28 +1543,17 @@ test.describe('Multi Tenant', () => {
       // Switch to By Folder tab
       await page.locator('#hierarchy-view-pill').click()
 
-      // Navigate into a Blue Dog folder by clicking the navigation link
-      await page
-        .locator('.hierarchy-list .slot-table .hierarchy-tables__col-name a', {
-          hasText: 'Blue Dog Documents',
-        })
-        .first()
-        .click()
+      const hierarchyList = page.locator('.hierarchy-list')
 
-      // Wait for the child folder to appear
+      await hierarchyList.getByRole('link', { name: 'Blue Dog Documents', exact: true }).click()
       await expect(
-        page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {
-          hasText: 'Blue Dog Recipes',
-        }),
+        hierarchyList.getByRole('link', { name: 'Blue Dog Recipes', exact: true }),
       ).toBeVisible()
-
-      // Select the child folder for moving
-      const checkbox = page
-        .locator('.hierarchy-list .slot-table tr', {
-          hasText: 'Blue Dog Recipes',
-        })
-        .locator('input[type="checkbox"]')
-      await checkbox.click()
+      await hierarchyList
+        .getByRole('row')
+        .filter({ hasText: 'Blue Dog Recipes' })
+        .getByRole('checkbox')
+        .check()
 
       // Open the move drawer
       const moveButton = page.getByRole('button', { name: 'Move', exact: true })
@@ -1698,8 +1820,11 @@ async function getSelectedTenantFilterName({
   page: Page
   payload: PayloadTestSDK<Config>
 }): Promise<string | undefined> {
-  const cookies = await page.context().cookies()
-  const tenantIDFromCookie = cookies.find((c) => c.name === 'payload-tenant')?.value
+  const selectedTenant = page.locator('[data-selected-tenant-id]').first()
+  const tenantIDFromCookie =
+    (await selectedTenant.count()) > 0
+      ? await selectedTenant.getAttribute('data-selected-tenant-id')
+      : undefined
   if (tenantIDFromCookie) {
     const tenant = await payload.find({
       collection: 'tenants',

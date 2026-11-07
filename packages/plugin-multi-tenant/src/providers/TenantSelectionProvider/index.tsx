@@ -44,7 +44,8 @@ export const TenantSelectionProvider = async ({
   })
 
   const cookies = await server.getCookies()
-  const tenantCookie = cookies.get('payload-tenant')?.value
+  const tenantCookie =
+    cookies.get('payload-tenant-filter')?.value ?? cookies.get('payload-tenant')?.value
   let initialValue = undefined
 
   /**
