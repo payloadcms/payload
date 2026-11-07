@@ -478,7 +478,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                     count: minRows,
                     label:
                       getTranslation(minRows > 1 ? labels.plural : labels.singular, i18n) ||
-                      t(minRows > 1 ? 'general:row' : 'general:rows'),
+                      t(minRows > 1 ? 'general:rows' : 'general:row'),
                   })}
                 </Banner>
               )}
