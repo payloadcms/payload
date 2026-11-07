@@ -1,7 +1,6 @@
 import type { Data, FormState } from '../admin/types.js'
 
 import { getDataFromFormState } from './getDataFromFormState.js'
-import { unflatten } from './unflatten.js'
 
 /**
  * Returns sibling field values from flattened form state (`FormState`).
@@ -17,7 +16,7 @@ export const getSiblingDataFromFormState = (fields: FormState, path: string): Da
     return getDataFromFormState(fields, true)
   }
 
-  const siblingFields: Record<string, any> = {}
+  const siblingFields: FormState = {}
 
   // Determine if the last segment of the path is an array-based row
   const pathSegments = path.split('.')
@@ -39,10 +38,10 @@ export const getSiblingDataFromFormState = (fields: FormState, path: string): Da
   }
 
   Object.keys(fields).forEach((fieldKey) => {
-    if (!fields[fieldKey]?.disableFormData && fieldKey.indexOf(parentFieldPath) === 0) {
-      siblingFields[fieldKey.replace(parentFieldPath, '')] = fields[fieldKey]?.value
+    if (fields[fieldKey] && fieldKey.indexOf(parentFieldPath) === 0) {
+      siblingFields[fieldKey.replace(parentFieldPath, '')] = fields[fieldKey]
     }
   })
 
-  return unflatten(siblingFields)
+  return getDataFromFormState(siblingFields, true)
 }
