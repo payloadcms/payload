@@ -55,6 +55,11 @@ export type RowToInsert = {
   arraysToPush: {
     [tableName: string]: ArrayRowToInsert[]
   }
+  /**
+   * The placements of blocks this write rewrites, for clearing rows of theirs left in another numbered table of the
+   * same block
+   */
+  blockPlacements: BlockPlacement[]
   blocks: {
     [tableName: string]: BlockRowToInsert[]
   }
@@ -73,4 +78,17 @@ export type RowToInsert = {
   }
   texts: Record<string, unknown>[]
   textsToDelete: TextToDelete[]
+}
+
+/**
+ * A `blocks` field offering a block, which stores the block's rows in one of the block's tables: the first placement
+ * of a block that differs between placements gets the plain table name and later ones a numbered variant of it
+ */
+export type BlockPlacement = {
+  /** The block's table name without a number, which every variant of it starts with */
+  baseBlockTableName: string
+  /** The `_path` of the field's rows with the row indexes left out */
+  path: string
+  /** The table the placement's rows are written to */
+  tableName: string
 }
