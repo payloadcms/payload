@@ -5,6 +5,12 @@ inputs:
   database:
     description: 'Database type: mongodb, mongodb-atlas, cosmosdb, documentdb, firestore, postgres, postgres-custom-schema, postgres-uuid, postgres-uuidv7, postgres-read-replica, postgres-read-replicas, vercel-postgres-read-replica, sqlite, sqlite-uuid, sqlite-uuidv7, supabase, d1'
     required: true
+  storage:
+    description: 'Start storage emulators (LocalStack, Azurite, fake-gcs, Vercel Blob)'
+    default: 'true'
+  redis:
+    description: 'Start Redis'
+    default: 'true'
 
 outputs:
   POSTGRES_URL:
@@ -21,6 +27,7 @@ runs:
   using: composite
   steps:
     - name: Start storage services
+      if: inputs.storage == 'true'
       shell: bash
       run: |
         # Every job pulls at once, so back off with jitter to get out of sync under registry rate limits
@@ -33,6 +40,7 @@ runs:
         docker compose -f test/docker-compose.yml --profile storage up -d --wait
 
     - name: Start Redis
+      if: inputs.redis == 'true'
       shell: bash
       run: |
         # Every job pulls at once, so back off with jitter to get out of sync under registry rate limits
