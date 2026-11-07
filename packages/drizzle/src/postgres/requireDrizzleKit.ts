@@ -21,7 +21,18 @@ export const createRequireDrizzleKit =
 
     return {
       generateDrizzleJson,
-      generateMigration,
+      generateMigration: async (before, after, options) => {
+        const statements = await generateMigration(
+          before as Parameters<typeof generateMigration>[0],
+          after as Parameters<typeof generateMigration>[1],
+          options as Parameters<typeof generateMigration>[2],
+        )
+
+        // Payload can connect to a pre-created schema, including after dropDatabase recreates it.
+        return statements.map((statement) =>
+          statement.replace(/^CREATE SCHEMA (?!IF NOT EXISTS )/, 'CREATE SCHEMA IF NOT EXISTS '),
+        )
+      },
       // Drizzle Kit bundles separate ORM types; the owning adapter selects the matching dialect.
       pushSchema: pushSchema as unknown as Awaited<ReturnType<RequireDrizzleKit>>['pushSchema'],
       upSnapshot: (snapshot) => up(snapshot).snapshot,
