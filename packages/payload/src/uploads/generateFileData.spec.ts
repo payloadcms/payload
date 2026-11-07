@@ -216,6 +216,67 @@ describe('generateFileData', () => {
     expect(result.data).toMatchObject({ mimeType: 'application/xml' })
   })
 
+  it('corrects a declared video mimetype to the sniffed type', async () => {
+    // Minimal MP4 ftyp box, so `file-type` detects `video/mp4` from it.
+    const fileContent = Buffer.from(
+      '000000186674797069736f6d0000000069736f6d69736f6d0000000866726565',
+      'hex',
+    )
+    const req = {
+      file: {
+        data: fileContent,
+        mimetype: 'video/webm',
+        name: 'clip.webm',
+        size: fileContent.length,
+      },
+      payload: {
+        config: {},
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection({ mimeTypes: ['video/mp4', 'video/webm'] }),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(result.data).toMatchObject({ mimeType: 'video/mp4' })
+  })
+
+  it('corrects a mixed-case declared video mimetype to the sniffed type', async () => {
+    const fileContent = Buffer.from(
+      '000000186674797069736f6d0000000069736f6d69736f6d0000000866726565',
+      'hex',
+    )
+    const req = {
+      file: {
+        data: fileContent,
+        mimetype: 'VIDEO/WEBM',
+        name: 'clip.webm',
+        size: fileContent.length,
+      },
+      payload: {
+        config: {},
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection({ mimeTypes: ['video/mp4', 'video/webm'] }),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(result.data).toMatchObject({ mimeType: 'video/mp4' })
+  })
+
   it('handles inspected SVG dimensions and crop edits without image processing', async () => {
     const { sharp } = createSharpMock()
     const fileContent = Buffer.from(
