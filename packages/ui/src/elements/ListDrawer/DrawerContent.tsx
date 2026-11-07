@@ -3,7 +3,7 @@ import type { CollectionSlug, ListQuery } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { hoistQueryParamsToAnd } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { startTransition, useCallback, useEffect, useState } from 'react'
 
 import type { ListDrawerContextProps, ListDrawerContextType } from '../ListDrawer/Provider.js'
 import type {
@@ -110,11 +110,18 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             } satisfies RenderListServerFnArgs,
           })) as RenderListServerFnReturnType
 
-          setListView(result?.List || null)
+          // Commit with the previous list still showing. A synchronous update suspends
+          // into the fallback and unmounts `.drawer__fade-in`, so the open animation runs again.
+          startTransition(() => {
+            setListView(result?.List || null)
+            setIsLoading(false)
+          })
         } else {
-          setListView(null)
+          startTransition(() => {
+            setListView(null)
+            setIsLoading(false)
+          })
         }
-        setIsLoading(false)
       } catch (_err) {
         console.error('Error rendering List View: ', _err) // eslint-disable-line no-console
 
