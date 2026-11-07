@@ -45,4 +45,13 @@ describe('getMimeTypeEssence', () => {
   it('returns the mime type unchanged when it has no parameters', () => {
     expect(getMimeTypeEssence('audio/webm')).toBe('audio/webm')
   })
+
+  it('lowercases the essence so comparisons stay case-insensitive', () => {
+    expect(getMimeTypeEssence('Audio/WebM;codecs=opus')).toBe('audio/webm')
+    expect(getMimeTypeEssence('  VIDEO/MP4  ')).toBe('video/mp4')
+  })
+
+  it('returns an empty string for an empty input', () => {
+    expect(getMimeTypeEssence('')).toBe('')
+  })
 })

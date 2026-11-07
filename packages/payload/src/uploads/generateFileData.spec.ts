@@ -463,4 +463,35 @@ describe('generateFileData', () => {
 
     expect(result.data).toMatchObject({ mimeType: 'audio/webm;codecs=opus' })
   })
+
+  it('preserves caller media parameters when the detected mime essence matches', async () => {
+    // A declaration like `video/mp4;codecs=avc1` shares its essence with the
+    // detected `video/mp4`. The correction must not fire, so the `codecs`
+    // parameter is retained in stored metadata and `req.file.mimetype`.
+    const fileContent = readFileSync(MP4_FILE_PATH)
+    const req = {
+      file: {
+        data: fileContent,
+        mimetype: 'video/mp4;codecs=avc1',
+        name: 'video.mp4',
+        size: fileContent.length,
+      },
+      payload: {
+        config: { sharp: undefined },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection({ disableLocalStorage: true, mimeTypes: ['video/*'] }),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(result.data).toMatchObject({ mimeType: 'video/mp4;codecs=avc1' })
+    expect(req.file?.mimetype).toBe('video/mp4;codecs=avc1')
+  })
 })

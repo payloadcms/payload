@@ -20,8 +20,9 @@ export function isMediaMimeType(mimeType: string): boolean {
 /**
  * Returns the essence (type/subtype) of a MIME type, dropping any parameters
  * such as `codecs` or `charset`. Parameterized declarations like
- * `audio/webm;codecs=opus` can then be compared against a base type.
+ * `audio/webm;codecs=opus` can then be compared against a base type. The result
+ * is lowercased so comparisons stay case-insensitive (e.g. `Audio/WebM`).
  */
 export function getMimeTypeEssence(mimeType: string): string {
-  return mimeType.split(';')[0]?.trim() ?? ''
+  return mimeType.split(';')[0]?.trim().toLowerCase() ?? ''
 }

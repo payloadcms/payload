@@ -296,7 +296,14 @@ export const generateFileData = async <T>({
     // are preserved too.
     !(getMimeTypeEssence(file.mimetype) === 'audio/webm' && detectedFileType.mime === 'video/webm')
 
-  if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
+  // Compare MIME essences (type/subtype) rather than full strings so a
+  // caller-supplied declaration that only differs by parameters (e.g.
+  // `video/mp4;codecs=avc1` vs a detected `video/mp4`) is left untouched,
+  // keeping those parameters in stored metadata and `req.file.mimetype`.
+  if (
+    shouldUseDetectedFileType &&
+    getMimeTypeEssence(detectedFileType.mime) !== getMimeTypeEssence(file.mimetype)
+  ) {
     file = { ...file, mimetype: detectedFileType.mime }
 
     // Keep `req.file` metadata in sync so hooks/plugins reading `req.file.mimetype`
