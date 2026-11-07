@@ -274,6 +274,15 @@ export interface User {
  */
 export interface SelectVersionsField {
   id: string;
+  customJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   hasMany?: ('a' | 'b' | 'c' | 'd')[] | null;
   array?:
     | {
@@ -2228,6 +2237,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "select-versions-fields_select".
  */
 export interface SelectVersionsFieldsSelect<T extends boolean = true> {
+  customJSON?: T;
   hasMany?: T;
   array?:
     | T

@@ -18,11 +18,21 @@ import {
 import { getEntityPermissions, sanitizePermissions } from 'payload/internal'
 import { getFieldPermissions } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  vitest,
+  it as vitestIt,
+} from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { FullyRestricted, Post } from './payload-types.js'
 
+import { it } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { requestHeaders } from './getConfig.js'
 import {
@@ -81,6 +91,120 @@ describe('Access Control', () => {
   })
 
   describe('Fields', () => {
+    describe('fallback values', () => {
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          await payload.delete({ id, collection: blocksFieldAccessSlug, overrideAccess: true })
+        }
+        createdIDs.length = 0
+      })
+
+      it('should allow nested field updates when sibling access permits them', async () => {
+        const doc = await payload.create({
+          collection: blocksFieldAccessSlug,
+          data: {
+            rows: [{ children: [{ allowCodeChanges: true, code: 'stored' }] }],
+            title: 'original',
+          },
+        })
+
+        const row = doc.rows![0]!
+
+        createdIDs.push(doc.id)
+
+        await payload.update({
+          id: doc.id,
+          collection: blocksFieldAccessSlug,
+          data: {
+            rows: [
+              {
+                id: row.id,
+                children: [{ id: row.children![0]!.id, allowCodeChanges: true, code: 'changed' }],
+              },
+            ],
+          },
+          overrideAccess: false,
+        })
+
+        const stored = await payload.findByID({
+          id: doc.id,
+          collection: blocksFieldAccessSlug,
+        })
+
+        expect(stored.rows?.[0]?.children?.[0]?.code).toBe('changed')
+      })
+
+      for (const draft of [false, true]) {
+        const operation = draft ? 'draft save' : 'published update'
+
+        it(`should preserve omitted protected nested fields after a ${operation}`, async () => {
+          const doc = await payload.create({
+            collection: blocksFieldAccessSlug,
+            data: {
+              _status: draft ? 'draft' : 'published',
+              rows: [{ children: [{ code: 'stored' }] }],
+              title: 'original',
+            },
+            draft,
+          })
+
+          createdIDs.push(doc.id)
+
+          await payload.update({
+            id: doc.id,
+            collection: blocksFieldAccessSlug,
+            data: { title: 'updated' },
+            draft,
+            overrideAccess: false,
+          })
+
+          const stored = await payload.findByID({
+            id: doc.id,
+            collection: blocksFieldAccessSlug,
+            draft,
+          })
+
+          expect(stored.rows?.[0]?.children?.[0]?.code).toBe('stored')
+        })
+
+        it(`should reject changes to protected nested fields during a ${operation}`, async () => {
+          const doc = await payload.create({
+            collection: blocksFieldAccessSlug,
+            data: {
+              _status: draft ? 'draft' : 'published',
+              rows: [{ children: [{ code: 'stored' }] }],
+              title: 'original',
+            },
+            draft,
+          })
+
+          const row = doc.rows![0]!
+
+          createdIDs.push(doc.id)
+
+          await payload.update({
+            id: doc.id,
+            collection: blocksFieldAccessSlug,
+            data: {
+              rows: [{ id: row.id, children: [{ id: row.children![0]!.id, code: 'changed' }] }],
+            },
+            draft,
+            overrideAccess: false,
+          })
+
+          const stored = await payload.findByID({
+            id: doc.id,
+            collection: blocksFieldAccessSlug,
+            draft,
+          })
+
+          expect(stored.rows?.[0]?.children?.[0]?.code).toBe('stored')
+        })
+      }
+    })
+
     describe('block query access', () => {
       it('should reuse block permissions with matching inherited access', async () => {
         let evaluations = 0
@@ -1305,7 +1429,7 @@ describe('Access Control', () => {
         expect(retrievedDoc.restrictedField).toBeUndefined()
       })
 
-      it.each(['AND', 'OR', 'AnD', 'oR'])(
+      vitestIt.each(['AND', 'OR', 'AnD', 'oR'])(
         'should validate field read access inside case-insensitive %s conditions',
         async (logicalOperator) => {
           const { id } = await createDoc({ restrictedField: 'restricted' })
