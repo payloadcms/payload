@@ -1147,7 +1147,8 @@ export type JSONField = {
 
   jsonSchema?: {
     fileMatch: string[]
-    schema: JSONSchema4
+    /** Inline schema. When omitted, the schema is fetched from `uri`. */
+    schema?: JSONSchema4
     uri: string
   }
   type: 'json'
