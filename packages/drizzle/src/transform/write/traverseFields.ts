@@ -13,7 +13,7 @@ import type {
 } from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
-import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
+import { addBlockTablesToDelete } from './addBlockTablesToDelete.js'
 import { transformArray } from './array.js'
 import { transformBlocks } from './blocks.js'
 import { transformNumbers } from './numbers.js'
@@ -240,19 +240,7 @@ export const traverseFields = ({
     }
 
     if (field.type === 'blocks' && !adapter.blocksAsJSON) {
-      field.blocks.forEach((block) => {
-        const matchedBlock =
-          typeof block === 'string'
-            ? adapter.payload.config.blocks.find((each) => each.slug === block)
-            : block
-
-        blocksToDelete.add(
-          resolveBlockTableName(
-            matchedBlock,
-            adapter.tableNameMap.get(`${baseTableName}_blocks_${toSnakeCase(matchedBlock.slug)}`),
-          ),
-        )
-      })
+      addBlockTablesToDelete({ adapter, baseTableName, blocksToDelete, field })
 
       if (isLocalized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
