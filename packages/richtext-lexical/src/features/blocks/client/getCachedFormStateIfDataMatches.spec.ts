@@ -219,34 +219,45 @@ describe('getCachedFormStateIfDataMatches', () => {
   })
 
   it.each([
+    { name: 'array row', row: { id: 'row-1' } },
+    { name: 'block row', row: { blockType: 'callout', id: 'row-1' } },
+  ])('should reuse cached form state for an unchanged $name', ({ row }) => {
+    const cachedFormState = buildCachedRowFormState({ row })
+
+    expect(
+      getCachedFormStateIfDataMatches({
+        cachedFormState,
+        formData: { items: [{ ...row, label: 'Unchanged' }] },
+      }),
+    ).toBe(cachedFormState)
+  })
+
+  it.each([
     {
       cachedRow: { id: 'row-1' },
-      currentRow: { id: 'row-2', label: 'After save' },
+      currentRow: { id: 'row-2' },
       name: 'row identity changed',
     },
     {
       cachedRow: { blockType: 'callout', id: 'row-1' },
-      currentRow: { blockType: 'quote', id: 'row-1', label: 'After save' },
+      currentRow: { blockType: 'quote', id: 'row-1' },
       name: 'block type changed',
     },
     {
       cachedRow: { id: 'row-1' },
-      currentRow: { label: 'After save' },
+      currentRow: {},
       name: 'row identity disappeared',
     },
     {
       cachedRow: { blockType: 'callout', id: 'row-1' },
-      currentRow: { id: 'row-1', label: 'After save' },
+      currentRow: { id: 'row-1' },
       name: 'block type disappeared',
     },
   ])('should rebuild form state when the $name', ({ cachedRow, currentRow }) => {
     expect(
       getCachedFormStateIfDataMatches({
-        cachedFormState: {
-          items: { initialValue: 1, rows: [cachedRow], value: 1 },
-          'items.0.label': { initialValue: 'Before save', value: 'Before save' },
-        },
-        formData: { items: [currentRow] },
+        cachedFormState: buildCachedRowFormState({ row: cachedRow }),
+        formData: { items: [{ ...currentRow, label: 'Unchanged' }] },
       }),
     ).toBe(false)
   })
@@ -312,3 +323,15 @@ describe('getCachedFormStateIfDataMatches', () => {
     ).toBe(false)
   })
 })
+
+function buildCachedRowFormState({ row }: { row: { blockType?: string; id: string } }): FormState {
+  return {
+    items: { initialValue: 1, rows: [row], value: 1 },
+    ...Object.fromEntries(
+      Object.entries({ ...row, label: 'Unchanged' }).map(([key, value]) => [
+        `items.0.${key}`,
+        { initialValue: value, value },
+      ]),
+    ),
+  }
+}

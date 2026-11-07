@@ -199,16 +199,15 @@ export const mergeServerFormState = ({
         })
       }
 
+      // Client rows may have changed while the request was pending.
+      // Background merges preserve their row count and null/empty distinction; explicit saves accept server values.
       if ('value' in incomingField) {
         const rowCount = newState[path].rows.length
 
         if (acceptValues !== true) {
-          // Client rows remain authoritative, including the distinction between null and empty.
           newState[path].value =
-            rowCount === 0 && currentState[path].value === null ? null : rowCount
+            rowCount === 0 && currentState[path]?.value === null ? null : rowCount
         }
-
-        newState[path].disableFormData = rowCount > 0
       }
     }
 
