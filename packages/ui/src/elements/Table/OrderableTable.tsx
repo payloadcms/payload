@@ -15,6 +15,7 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
+import { getReorderErrorMessage } from './getReorderErrorMessage.js'
 import { OrderableRow } from './OrderableRow.js'
 import { OrderableRowDragPreview } from './OrderableRowDragPreview.js'
 import { useTableID } from './TableIdentity.js'
@@ -154,9 +155,7 @@ export const OrderableTable: React.FC<Props> = ({
       }
 
       if (!response.ok) {
-        throw new Error(
-          'Failed to reorder. This can happen if you reorder several rows too quickly. Please try again.',
-        )
+        throw new Error(await getReorderErrorMessage({ response }))
       }
 
       if (response.status === 200 && (await response.json())['message'] === 'initial migration') {

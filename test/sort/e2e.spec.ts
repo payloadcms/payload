@@ -16,6 +16,10 @@ import { RESTClient } from '../__helpers/shared/rest.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { orderableSlug } from './collections/Orderable/index.js'
+import {
+  orderableHookErrorMessage,
+  orderableHookErrorSlug,
+} from './collections/OrderableHookError/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -212,6 +216,26 @@ describe('Sort functionality', () => {
     await assertRows(['B', 'C', 'D', 'A'], {
       scope: page.locator('#field-orderableJoinField2'),
     })
+  })
+
+  test('should show the error thrown by a hook when reordering fails', async () => {
+    const url = new AdminUrlUtil(serverURL, orderableHookErrorSlug)
+
+    await page.goto(`${url.list}?sort=_order`)
+
+    await assertRows(['A', 'B'])
+
+    await moveRow(page, {
+      fromIndex: 0,
+      toIndex: 1,
+    })
+
+    await expect(page.locator('.payload-toast-item.toast-error')).toContainText(
+      orderableHookErrorMessage,
+    )
+
+    // The rows are rolled back because the reorder was not saved
+    await assertRows(['A', 'B'])
   })
 })
 
