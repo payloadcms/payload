@@ -23,6 +23,7 @@ import { getImageSize } from './getImageSize.js'
 import { getSafeFileName, incrementName } from './getSafeFilename.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { hasFullFileContents } from './hasFullFileContents.js'
+import { getMimeTypeEssence, isMediaMimeType } from './isMediaMimeType.js'
 import { isProcessableImage } from './isProcessableImage.js'
 import { parseFilename } from './parseFilename.js'
 import { planTransformerPipeline } from './transformers/planTransformerPipeline.js'
@@ -292,12 +293,28 @@ export const generateFileData = async <T>({
     req,
   })
 
+  // Correct a wrongly-declared `file.mimetype` with the type actually detected
+  // from the buffer when that type is a reliably-detectable media type. Videos
+  // and audio are included alongside images, since `isProcessableImage` only
+  // covers image types and would otherwise leave a mislabelled video untouched.
   const shouldUseDetectedFileType =
     detectedFileType &&
-    (isProcessableImage(file.mimetype) || isProcessableImage(detectedFileType.mime))
+    (isMediaMimeType(file.mimetype) || isMediaMimeType(detectedFileType.mime)) &&
+    // `file-type` detects every WebM container (audio or video) as `video/webm`
+    // because it does not read track data. Preserve an explicit `audio/webm`
+    // declaration rather than overwriting it with a wrong `video/webm`. Compare
+    // the MIME essence so parameterized declarations (`audio/webm;codecs=opus`)
+    // are preserved too.
+    !(getMimeTypeEssence(file.mimetype) === 'audio/webm' && detectedFileType.mime === 'video/webm')
 
   if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
     file = { ...file, mimetype: detectedFileType.mime }
+
+    // Keep `req.file` metadata in sync so hooks/plugins reading `req.file.mimetype`
+    // observe the corrected type. The buffer contents do not change.
+    if (!isDuplicating && req.file) {
+      req.file = { ...req.file, mimetype: detectedFileType.mime }
+    }
   }
 
   if (!disableLocalStorage) {

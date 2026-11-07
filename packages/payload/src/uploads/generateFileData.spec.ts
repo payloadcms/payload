@@ -3,10 +3,14 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { randomUUID } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 import { generateFileData } from './generateFileData.js'
 
@@ -17,6 +21,29 @@ const PNG_SIGNATURE = Buffer.from(
 )
 
 const GIF_SIGNATURE = Buffer.from('R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==', 'base64')
+
+// A real MP4, sniffed as `video/mp4` by `file-type`. Used to prove that a
+// wrongly-declared `file.mimetype` on a video is corrected to the type that was
+// actually detected from the buffer.
+const MP4_FILE_PATH = path.resolve(
+  dirname,
+  '../../../../test/uploads/christmas-mariachi-in-guadalajara.mp4',
+)
+
+// A minimal WebM container. `file-type` sniffs any WebM (audio or video) as
+// `video/webm` because it does not read track data. Used to prove that an
+// explicit `audio/webm` declaration is preserved and not overwritten.
+// prettier-ignore
+const WEBM_SIGNATURE = Buffer.from([
+  0x1a, 0x45, 0xdf, 0xa3, 0x9f, // EBML header
+  0x42, 0x86, 0x81, 0x01, // EBMLVersion = 1
+  0x42, 0xf7, 0x81, 0x01, // EBMLReadVersion = 1
+  0x42, 0xf2, 0x81, 0x04, // EBMLMaxIDLength = 4
+  0x42, 0xf3, 0x81, 0x08, // EBMLMaxSizeLength = 8
+  0x42, 0x82, 0x84, 0x77, 0x65, 0x62, 0x6d, // DocType = "webm"
+  0x42, 0x87, 0x81, 0x04, // DocTypeVersion = 4
+  0x42, 0x85, 0x81, 0x02, // DocTypeReadVersion = 2
+])
 
 const createSharpMock = () => {
   const toBufferMock = vi.fn().mockResolvedValue({
@@ -379,5 +406,95 @@ describe('generateFileData', () => {
     })
 
     expect(files).toEqual([])
+  })
+
+  it('corrects a wrongly-declared mimetype on a video to the detected type', async () => {
+    // The video is shipped with an incorrect `application/octet-stream`
+    // Content-Type, but its bytes are a real MP4.
+    const fileContent = readFileSync(MP4_FILE_PATH)
+    const req = {
+      file: {
+        data: fileContent,
+        mimetype: 'application/octet-stream',
+        name: 'video.mp4',
+        size: fileContent.length,
+      },
+      payload: {
+        config: { sharp: undefined },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection({ disableLocalStorage: true, mimeTypes: ['video/*'] }),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(result.data).toMatchObject({ mimeType: 'video/mp4' })
+    // `file.mimetype` correction must be reflected on `req.file.mimetype` too, so
+    // hooks/plugins reading it observe the corrected type.
+    expect(req.file?.mimetype).toBe('video/mp4')
+  })
+
+  it('does not replace a declared audio/webm with video/webm', async () => {
+    // `file-type` identifies any WebM container (audio or video) as `video/webm`
+    // because it does not read track data. An explicit `audio/webm` declaration
+    // must be preserved rather than overwritten with a wrong `video/webm`.
+    const req = {
+      file: {
+        data: WEBM_SIGNATURE,
+        mimetype: 'audio/webm',
+        name: 'audio.webm',
+        size: WEBM_SIGNATURE.length,
+      },
+      payload: {
+        config: { sharp: undefined },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection({ disableLocalStorage: true }),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(result.data).toMatchObject({ mimeType: 'audio/webm' })
+  })
+
+  it('does not replace a parameterized audio/webm declaration with video/webm', async () => {
+    // A parameterized declaration such as `audio/webm;codecs=opus` must be
+    // treated like `audio/webm` (compared on the MIME essence) and preserved
+    // rather than overwritten with a wrong `video/webm`.
+    const req = {
+      file: {
+        data: WEBM_SIGNATURE,
+        mimetype: 'audio/webm;codecs=opus',
+        name: 'audio.webm',
+        size: WEBM_SIGNATURE.length,
+      },
+      payload: {
+        config: { sharp: undefined },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection({ disableLocalStorage: true }),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(result.data).toMatchObject({ mimeType: 'audio/webm;codecs=opus' })
   })
 })
