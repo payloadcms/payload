@@ -710,6 +710,7 @@ const validateFilterOptions: Validate<
             overrideAccess: overrideAccess ?? false,
             pagination: false,
             req,
+            select: { id: true },
             where: findWhere,
           })
 
