@@ -596,6 +596,7 @@ export interface BlocksFieldAccess {
     | {
         children?:
           | {
+              allowCodeChanges?: boolean | null;
               code?: string | null;
               id?: string | null;
             }[]
@@ -1625,6 +1626,7 @@ export interface BlocksFieldAccessSelect<T extends boolean = true> {
         children?:
           | T
           | {
+              allowCodeChanges?: T;
               code?: T;
               id?: T;
             };

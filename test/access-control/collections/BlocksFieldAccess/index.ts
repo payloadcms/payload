@@ -20,9 +20,14 @@ export const BlocksFieldAccess: CollectionConfig = {
           type: 'array',
           fields: [
             {
+              name: 'allowCodeChanges',
+              type: 'checkbox',
+              defaultValue: false,
+            },
+            {
               name: 'code',
               type: 'text',
-              access: { update: () => false },
+              access: { update: ({ siblingData }) => siblingData?.allowCodeChanges === true },
               defaultValue: 'default',
             },
           ],
