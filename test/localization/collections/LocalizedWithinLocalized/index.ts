@@ -59,6 +59,26 @@ export const LocalizedWithinLocalized: CollectionConfig = {
           type: 'text',
           localized: true,
         },
+        {
+          name: 'rows',
+          type: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+            {
+              name: 'children',
+              type: 'array',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
   ],
