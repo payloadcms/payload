@@ -168,4 +168,5 @@ export const BlocksFieldAccess: CollectionConfig = {
       ],
     },
   ],
+  versions: { drafts: true },
 }
