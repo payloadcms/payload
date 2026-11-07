@@ -33,7 +33,8 @@ type Props = {
 } & RelationshipFieldClientProps
 
 export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
-  const { entityType, options, selectedTenantID, setEntityType, setTenant } = useTenantSelection()
+  const { entityType, hasAccessToAllTenants, options, selectedTenantID, setEntityType, setTenant } =
+    useTenantSelection()
   const tenantField = useField<TenantValue>()
   const { setValue, showError, value } = tenantField
   const { isValid: isFormValid } = useForm()
@@ -55,7 +56,10 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
     [modalValue, tenantField],
   )
   const showField =
-    (options.length > 1 && !fieldArgs.field.admin?.hidden && !fieldArgs.field.hidden) || debug
+    ((options.length > 1 || (options.length === 1 && hasAccessToAllTenants)) &&
+      !fieldArgs.field.admin?.hidden &&
+      !fieldArgs.field.hidden) ||
+    debug
 
   function getTenantIDToSelect({
     selectedTenantID,
@@ -126,13 +130,17 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
     if (unique || debug || isEditManyModalOpen) {
       return
     }
-    if (showField && ((!isFormValid && showError) || (!value && !selectedTenantID))) {
+    if (
+      showField &&
+      ((!isFormValid && showError) || (!value && (!selectedTenantID || hasAccessToAllTenants)))
+    ) {
       openModal(assignTenantModalSlug)
     }
   }, [
     debug,
     isEditManyModalOpen,
     isFormValid,
+    hasAccessToAllTenants,
     showError,
     showField,
     openModal,
