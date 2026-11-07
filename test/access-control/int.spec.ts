@@ -89,6 +89,43 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         createdIDs.length = 0
       })
 
+      test('should allow nested field updates when sibling access permits them', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: blocksFieldAccessSlug,
+          data: {
+            rows: [{ children: [{ allowCodeChanges: true, code: 'stored' }] }],
+            title: 'original',
+          },
+        })
+
+        const row = doc.rows![0]!
+
+        createdIDs.push(doc.id)
+
+        await payload.update({
+          id: doc.id,
+          collection: blocksFieldAccessSlug,
+          data: {
+            rows: [
+              {
+                id: row.id,
+                children: [{ id: row.children![0]!.id, allowCodeChanges: true, code: 'changed' }],
+              },
+            ],
+          },
+          overrideAccess: false,
+        })
+
+        const stored = await payload.findByID({
+          id: doc.id,
+          collection: blocksFieldAccessSlug,
+        })
+
+        expect(stored.rows?.[0]?.children?.[0]?.code).toBe('changed')
+      })
+
       for (const draft of [false, true]) {
         const operation = draft ? 'draft save' : 'published update'
 

@@ -1444,6 +1444,7 @@ export interface BlocksFieldAccess {
     | {
         children?:
           | {
+              allowCodeChanges?: boolean | null;
               code?: string | null;
               id?: string | null;
             }[]
@@ -1488,6 +1489,7 @@ export interface BlocksFieldAccess {
       } | null);
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2828,6 +2830,7 @@ export interface BlocksFieldAccessSelect<T extends boolean = true> {
         children?:
           | T
           | {
+              allowCodeChanges?: T;
               code?: T;
               id?: T;
             };
@@ -2881,6 +2884,7 @@ export interface BlocksFieldAccessSelect<T extends boolean = true> {
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
