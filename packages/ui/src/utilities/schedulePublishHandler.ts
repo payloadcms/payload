@@ -1,4 +1,4 @@
-import type { SchedulePublishTaskInput, ServerFunction } from 'payload'
+import type { PayloadRequest, SchedulePublishTaskInput, ServerFunction } from 'payload'
 
 import { canAccessAdmin, Forbidden } from 'payload'
 import { hasScheduledPublishEnabled } from 'payload/shared'
@@ -32,32 +32,7 @@ export const getUpcomingScheduledPublishHandler: ServerFunction<
 
   await canAccessAdmin({ req })
 
-  const collectionConfig = collectionSlug ? payload.collections[collectionSlug]?.config : undefined
-  const globalConfig = globalSlug
-    ? payload.config.globals.find(({ slug }) => slug === globalSlug)
-    : undefined
-  const entityConfig = collectionConfig || globalConfig
-  const hasValidTarget = Boolean(
-    entityConfig &&
-    hasScheduledPublishEnabled(entityConfig) &&
-    ((collectionConfig && id !== undefined && !globalSlug) || (globalConfig && !collectionSlug)),
-  )
-
-  if (!hasValidTarget) {
-    throw new Forbidden(req.t)
-  }
-
-  const { hasPublishPermission } = await getDocumentPermissions({
-    id,
-    collectionConfig,
-    data: {},
-    globalConfig,
-    req,
-  })
-
-  if (!hasPublishPermission) {
-    throw new Forbidden(req.t)
-  }
+  await assertCanSchedulePublish({ id, collectionSlug, globalSlug, req })
 
   const { docs } = await payload.db.find<UpcomingEvent>({
     collection: 'payload-jobs',
@@ -90,6 +65,28 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
   const { i18n, payload, user } = req
 
   await canAccessAdmin({ req })
+
+  if (deleteID) {
+    const scheduledJob = await findScheduledPublishJob({ id: deleteID, req })
+
+    if (!scheduledJob) {
+      return { error: `Scheduled publish event with ID ${deleteID} not found` }
+    }
+
+    await assertCanSchedulePublish({
+      id: scheduledJob.input?.doc?.value,
+      collectionSlug: scheduledJob.input?.doc?.relationTo,
+      globalSlug: scheduledJob.input?.global,
+      req,
+    })
+  } else {
+    await assertCanSchedulePublish({
+      id: doc?.value,
+      collectionSlug: doc?.relationTo,
+      globalSlug: global,
+      req,
+    })
+  }
 
   try {
     if (deleteID) {
@@ -144,4 +141,70 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
   }
 
   return { message: i18n.t('general:success') }
+}
+
+/**
+ * Throws `Forbidden` unless the target is a single collection document or a global with
+ * scheduled publish enabled, and the requesting user is allowed to publish it.
+ */
+const assertCanSchedulePublish = async ({
+  id,
+  collectionSlug,
+  globalSlug,
+  req,
+}: {
+  collectionSlug?: string
+  globalSlug?: string
+  id?: number | string
+  req: PayloadRequest
+}): Promise<void> => {
+  const { payload } = req
+
+  const collectionConfig = collectionSlug ? payload.collections[collectionSlug]?.config : undefined
+  const globalConfig = globalSlug
+    ? payload.config.globals.find(({ slug }) => slug === globalSlug)
+    : undefined
+  const entityConfig = collectionConfig || globalConfig
+  const hasValidTarget = Boolean(
+    entityConfig &&
+    hasScheduledPublishEnabled(entityConfig) &&
+    ((collectionConfig && id !== undefined && id !== null && !globalSlug) ||
+      (globalConfig && !collectionSlug)),
+  )
+
+  if (!hasValidTarget) {
+    throw new Forbidden(req.t)
+  }
+
+  const { hasPublishPermission } = await getDocumentPermissions({
+    id,
+    collectionConfig,
+    data: {},
+    globalConfig,
+    req,
+  })
+
+  if (!hasPublishPermission) {
+    throw new Forbidden(req.t)
+  }
+}
+
+const findScheduledPublishJob = async ({
+  id,
+  req,
+}: {
+  id: number | string
+  req: PayloadRequest
+}): Promise<{ input?: SchedulePublishTaskInput } | undefined> => {
+  const { docs } = await req.payload.db.find<{ input?: SchedulePublishTaskInput }>({
+    collection: 'payload-jobs',
+    limit: 1,
+    pagination: false,
+    req,
+    where: {
+      and: [{ id: { equals: id } }, { taskSlug: { equals: 'schedulePublish' } }],
+    },
+  })
+
+  return docs[0]
 }
