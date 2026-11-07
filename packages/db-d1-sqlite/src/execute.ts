@@ -1,5 +1,4 @@
 import type { Execute } from '@payloadcms/drizzle'
-import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 
 import { sql } from 'drizzle-orm'
 
@@ -39,29 +38,24 @@ type D1Result<T = unknown> = {
 
 export const execute: Execute<any> = function execute({ db, drizzle, raw, sql: statement }) {
   const executeFrom: any = (db ?? drizzle)!
-  const mapToLibSql = (query: SQLiteRaw<D1Result<unknown>>): any => {
-    const execute = query.execute
-    query.execute = async () => {
-      const result: D1Result = await execute()
-      const resultLibSQL = {
-        columns: undefined,
-        columnTypes: undefined,
-        lastInsertRowid: BigInt(result.meta.last_row_id),
-        rows: result.results as any[],
-        rowsAffected: result.meta.rows_written,
-      }
 
-      return Object.assign(result, resultLibSQL)
-    }
+  // In drizzle v1 the raw query is an awaitable QueryPromise (no `.execute` method), so we
+  // await it and remap D1's result shape onto the libSQL ResultSet shape callers expect.
+  const mapToLibSql = async (query: any): Promise<any> => {
+    const result: D1Result = await query
 
-    return query
+    return Object.assign(result, {
+      columns: undefined,
+      columnTypes: undefined,
+      lastInsertRowid: BigInt(result.meta.last_row_id),
+      rows: result.results as any[],
+      rowsAffected: result.meta.rows_written,
+    })
   }
 
   if (raw) {
-    const result = mapToLibSql(executeFrom.run(sql.raw(raw)))
-    return result
+    return mapToLibSql(executeFrom.run(sql.raw(raw)))
   } else {
-    const result = mapToLibSql(executeFrom.run(statement))
-    return result
+    return mapToLibSql(executeFrom.run(statement))
   }
 }

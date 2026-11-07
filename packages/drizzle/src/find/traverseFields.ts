@@ -1,7 +1,7 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
-import { count, sql } from 'drizzle-orm'
+import { count, getColumnTable, getTableName, sql } from 'drizzle-orm'
 import {
   appendVersionToQueryKey,
   buildVersionCollectionFields,
@@ -16,13 +16,12 @@ import {
 import { fieldIsVirtual, fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
-import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
+import type { BuildQueryJoinAliases, DrizzleAdapter, GenericTable } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
 import { getTableAlias } from '../queries/getTableAlias.js'
 import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
-import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
 import {
@@ -408,25 +407,29 @@ export const traverseFields = ({
         }
 
         if (Array.isArray(field.collection)) {
-          const polymorphicJoinQuery = buildPolymorphicJoinQuery({
-            adapter,
-            currentTableName,
-            field,
-            limit,
-            locale,
-            page,
-            pageSize: limitArg,
-            path,
-            shouldCount,
-            sort,
-            where,
-          })
+          const buildJoinQuery = (parentTable: GenericTable) =>
+            buildPolymorphicJoinQuery({
+              adapter,
+              currentTableName,
+              field,
+              limit,
+              locale,
+              page,
+              pageSize: limitArg,
+              parentTable,
+              path,
+              shouldCount,
+              sort,
+              where,
+            })
 
-          currentArgs.extras[polymorphicJoinQuery.columnName] = polymorphicJoinQuery.documents
+          const columnName = `${path.replaceAll('.', '_')}${field.name}`
 
-          if (polymorphicJoinQuery.count) {
-            currentArgs.extras[`${polymorphicJoinQuery.columnName}_count`] =
-              polymorphicJoinQuery.count
+          currentArgs.extras[columnName] = (parentTable) => buildJoinQuery(parentTable).documents
+
+          if (shouldCount) {
+            currentArgs.extras[`${columnName}_count`] = (parentTable) =>
+              buildJoinQuery(parentTable).count
           }
         } else {
           const db = adapter.drizzle as LibSQLDatabase
@@ -448,147 +451,163 @@ export const traverseFields = ({
               : toSnakeCase(field.collection),
           )
 
-          const joins: BuildQueryJoinAliases = []
-
-          const currentIDColumn = versions
-            ? adapter.tables[currentTableName].parent
-            : adapter.tables[currentTableName].id
-
-          let joinQueryWhere: Where
-
-          const currentIDRaw = sql.raw(
-            `"${getNameFromDrizzleTable(currentIDColumn.table)}"."${currentIDColumn.name}"`,
-          )
-
-          if (Array.isArray(field.targetField.relationTo)) {
-            joinQueryWhere = {
-              [field.on]: {
-                equals: {
-                  relationTo: collectionSlug,
-                  value: rawConstraint(currentIDRaw),
-                },
-              },
-            }
-          } else {
-            joinQueryWhere = {
-              [field.on]: {
-                equals: rawConstraint(currentIDRaw),
-              },
-            }
-          }
-
-          if (where && Object.keys(where).length) {
-            joinQueryWhere = {
-              and: [joinQueryWhere, where],
-            }
-          }
-
-          if (useDrafts) {
-            joinQueryWhere = combineQueries(appendVersionToQueryKey(joinQueryWhere), {
-              latest: { equals: true },
-            })
-          }
-
           const columnName = `${path.replaceAll('.', '_')}${field.name}`
 
           const subQueryAlias = `${columnName}_alias`
 
-          const { newAliasTable } = getTableAlias({
-            adapter,
-            tableName: joinCollectionTableName,
-          })
+          const idKey = versions ? 'parent' : 'id'
 
-          const {
-            orderBy,
-            selectFields,
-            where: subQueryWhere,
-          } = buildQuery({
-            adapter,
-            aliasTable: newAliasTable,
-            fields,
-            joins,
-            locale,
-            parentIsLocalized,
-            selectLocale: true,
-            sort: useDrafts
-              ? getQueryDraftsSort({
-                  collectionConfig: adapter.payload.collections[field.collection].config,
-                  sort,
-                })
-              : sort,
-            tableName: joinCollectionTableName,
-            where: joinQueryWhere,
-          })
+          // Captured outside the closure below so `field.collection`'s narrowing is preserved.
+          const joinCollectionConfig = adapter.payload.collections[field.collection].config
 
-          for (let key in selectFields) {
-            const val = selectFields[key]
+          // RQB v2 aliases the base table, so the correlated join subquery must reference the
+          // aliased parent column that the `extras` callback provides, not the real table name.
+          const buildJoinAggregate = (parentTable: Record<string, any>) => {
+            const currentIDColumn = parentTable[idKey]
 
-            if (val.table && getNameFromDrizzleTable(val.table) === joinCollectionTableName) {
-              delete selectFields[key]
-              key = key.split('.').pop()
-              selectFields[key] = newAliasTable[key]
+            let joinQueryWhere: Where
+
+            if (Array.isArray(field.targetField.relationTo)) {
+              joinQueryWhere = {
+                [field.on]: {
+                  equals: {
+                    relationTo: collectionSlug,
+                    value: rawConstraint(currentIDColumn),
+                  },
+                },
+              }
+            } else {
+              joinQueryWhere = {
+                [field.on]: {
+                  equals: rawConstraint(currentIDColumn),
+                },
+              }
             }
-          }
 
-          if (useDrafts) {
-            selectFields.parent = newAliasTable.parent
-          }
-
-          let query: SQLiteSelect = db
-            .select(selectFields as any)
-            .from(newAliasTable)
-            .where(subQueryWhere)
-            .orderBy(() => orderBy.map(({ column, order }) => order(column)))
-            .$dynamic()
-
-          joins.forEach(({ type, condition, table }) => {
-            query = query[type ?? 'leftJoin'](table, condition)
-          })
-
-          if (page && limit !== 0) {
-            const offset = (page - 1) * limit - 1
-            if (offset > 0) {
-              query = query.offset(offset)
+            if (where && Object.keys(where).length) {
+              joinQueryWhere = {
+                and: [joinQueryWhere, where],
+              }
             }
-          }
 
-          if (limit !== 0) {
-            query = query.limit(limit)
-          }
+            if (useDrafts) {
+              joinQueryWhere = combineQueries(appendVersionToQueryKey(joinQueryWhere), {
+                latest: { equals: true },
+              })
+            }
 
-          const subQuery = query.as(subQueryAlias)
+            const joins: BuildQueryJoinAliases = []
 
-          if (shouldCount) {
-            let countSubquery: SQLiteSelect = db
+            const { newAliasTable } = getTableAlias({
+              adapter,
+              tableName: joinCollectionTableName,
+            })
+
+            const {
+              orderBy,
+              selectFields,
+              where: subQueryWhere,
+            } = buildQuery({
+              adapter,
+              aliasTable: newAliasTable,
+              fields,
+              joins,
+              locale,
+              parentIsLocalized,
+              selectLocale: true,
+              sort: useDrafts
+                ? getQueryDraftsSort({
+                    collectionConfig: joinCollectionConfig,
+                    sort,
+                  })
+                : sort,
+              tableName: joinCollectionTableName,
+              where: joinQueryWhere,
+            })
+
+            for (let key in selectFields) {
+              const val = selectFields[key]
+              const valTable = val ? getColumnTable(val) : undefined
+
+              if (valTable && getTableName(valTable) === joinCollectionTableName) {
+                delete selectFields[key]
+                key = key.split('.').pop()
+                selectFields[key] = newAliasTable[key]
+              }
+            }
+
+            if (useDrafts) {
+              selectFields.parent = newAliasTable.parent
+            }
+
+            let query: SQLiteSelect = db
               .select(selectFields as any)
-
               .from(newAliasTable)
               .where(subQueryWhere)
+              .orderBy(() => orderBy.map(({ column, order }) => order(column)))
               .$dynamic()
 
             joins.forEach(({ type, condition, table }) => {
-              countSubquery = countSubquery[type ?? 'leftJoin'](table, condition)
+              query = query[type ?? 'leftJoin'](table, condition)
             })
 
-            currentArgs.extras[`${columnName}_count`] = sql`${db
-              .select({
-                count: count(),
+            if (page && limit !== 0) {
+              const offset = (page - 1) * limit - 1
+              if (offset > 0) {
+                query = query.offset(offset)
+              }
+            }
+
+            if (limit !== 0) {
+              query = query.limit(limit)
+            }
+
+            const subQuery = query.as(subQueryAlias)
+
+            let countExtra
+
+            if (shouldCount) {
+              let countSubquery: SQLiteSelect = db
+                .select(selectFields as any)
+
+                .from(newAliasTable)
+                .where(subQueryWhere)
+                .$dynamic()
+
+              joins.forEach(({ type, condition, table }) => {
+                countSubquery = countSubquery[type ?? 'leftJoin'](table, condition)
               })
-              .from(sql`${countSubquery.as(`${subQueryAlias}_count_subquery`)}`)}`.as(
-              `${subQueryAlias}_count`,
-            )
+
+              countExtra = sql`${db
+                .select({
+                  count: count(),
+                })
+                .from(sql`${countSubquery.as(`${subQueryAlias}_count_subquery`)}`)}`.as(
+                `${subQueryAlias}_count`,
+              )
+            }
+
+            const resultExtra = sql`${db
+              .select({
+                result: jsonAggBuildObject(adapter, {
+                  id: sql.raw(`"${subQueryAlias}".${useDrafts ? 'parent_id' : 'id'}`),
+                  ...(selectFields._locale && {
+                    locale: sql.raw(`"${subQueryAlias}".${selectFields._locale.name}`),
+                  }),
+                }),
+              })
+              .from(sql`${subQuery}`)}`.as(subQueryAlias)
+
+            return { countExtra, resultExtra }
           }
 
-          currentArgs.extras[columnName] = sql`${db
-            .select({
-              result: jsonAggBuildObject(adapter, {
-                id: sql.raw(`"${subQueryAlias}".${useDrafts ? 'parent_id' : 'id'}`),
-                ...(selectFields._locale && {
-                  locale: sql.raw(`"${subQueryAlias}".${selectFields._locale.name}`),
-                }),
-              }),
-            })
-            .from(sql`${subQuery}`)}`.as(subQueryAlias)
+          if (shouldCount) {
+            currentArgs.extras[`${columnName}_count`] = (parentTable: Record<string, any>) =>
+              buildJoinAggregate(parentTable).countExtra
+          }
+
+          currentArgs.extras[columnName] = (parentTable: Record<string, any>) =>
+            buildJoinAggregate(parentTable).resultExtra
         }
 
         break

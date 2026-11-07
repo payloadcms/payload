@@ -1,5 +1,5 @@
-import { is, sql } from 'drizzle-orm'
-import { PgUUID } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
+import { PgDialect, PgUUID } from 'drizzle-orm/pg-core'
 import { describe, expect, it } from 'vitest'
 
 import { postgresUnaccent } from './postgresUnaccent.js'
@@ -39,12 +39,16 @@ describe('postgresUnaccent', () => {
       value: '%acido%',
     })
 
-    expect(is(result.column, Object)).toBe(true)
-    expect((result.column as any).queryChunks[0].value[0]).toBe('unaccent(')
-    expect((result.column as any).queryChunks[1]).toBe(column)
+    const dialect = new PgDialect()
 
-    expect((result.value as any).queryChunks[0].value[0]).toBe('unaccent(')
-    expect((result.value as any).queryChunks[1]).toBe('%acido%')
+    expect(dialect.sqlToQuery(result.column as ReturnType<typeof sql>)).toMatchObject({
+      sql: 'unaccent("title")',
+      params: [],
+    })
+    expect(dialect.sqlToQuery(result.value as ReturnType<typeof sql>)).toMatchObject({
+      sql: 'unaccent($1)',
+      params: ['%acido%'],
+    })
   })
 
   it('returns the operands unchanged when the column is a native PgUUID column', () => {
