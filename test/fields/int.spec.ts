@@ -35,8 +35,10 @@ import {
   dateFieldsSlug,
   duplicateFieldsSlug,
   groupFieldsSlug,
+  jsonFieldsSlug,
   numberFieldsSlug,
   relationshipFieldsSlug,
+  selectVersionsFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
 } from './slugs.js'
@@ -5468,6 +5470,60 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
   })
 
   test.describe('json', () => {
+    test.describe('fallback values', () => {
+      const createdDocs: {
+        collection: typeof jsonFieldsSlug | typeof selectVersionsFieldsSlug
+        id: number | string
+      }[] = []
+
+      test.afterEach(async ({ payload }) => {
+        for (const doc of createdDocs) {
+          await payload.delete({ ...doc, overrideAccess: true })
+        }
+        createdDocs.length = 0
+      })
+
+      for (const draft of [false, true]) {
+        const operation = draft ? 'draft save' : 'partial update'
+        const collection = draft ? selectVersionsFieldsSlug : jsonFieldsSlug
+
+        test(`should preserve omitted JSON tuples after a ${operation}`, async ({ payload }) => {
+          const doc = await payload.create({
+            collection,
+            data: {
+              customJSON: [
+                [100, 200],
+                [300, 400],
+              ],
+            },
+            draft,
+            overrideAccess: true,
+          })
+          createdDocs.push({ collection, id: doc.id })
+
+          await payload.update({
+            id: doc.id,
+            collection,
+            data: draft ? { hasMany: ['a'] } : { json: { foo: 'bar' } },
+            draft,
+            overrideAccess: true,
+          })
+
+          const stored = await payload.findByID({
+            id: doc.id,
+            collection,
+            draft,
+            overrideAccess: true,
+          })
+
+          expect(stored.customJSON).toStrictEqual([
+            [100, 200],
+            [300, 400],
+          ])
+        })
+      }
+    })
+
     test('should save json data', async ({ payload }) => {
       const json = { foo: 'bar' }
       const doc = await payload.create({
