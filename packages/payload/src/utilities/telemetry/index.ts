@@ -36,6 +36,8 @@ export type BaseEvent = {
   projectCohorts: ProjectCohort[]
   projectID: string
   projectIDSource: 'cwd' | 'git' | 'packageJSON' | 'serverURL'
+  /** Measurement revision; reports without this field use legacy definitions. */
+  telemetryRevision: number
   uploadAdapters: string[]
 } & FeatureInfo
 
@@ -72,9 +74,10 @@ export const sendTelemetryEvent = async <TEvent extends { type: string }>({
           isCI: ciInfo.isCI,
           nodeEnv: process.env.NODE_ENV || 'development',
           nodeVersion: process.version,
-          payloadVersion: getPayloadVersion(packageJSON!),
+          payloadVersion: await getPayloadVersion(),
           projectID,
           projectIDSource,
+          telemetryRevision: 1,
           ...getProjectContext({
             packages,
             payload,
@@ -190,8 +193,17 @@ const getPackageJSONID = (payload: Payload, packageJSON: PackageJSON): string =>
   return oneWayHash(packageJSON.name, payload.secret)
 }
 
-export const getPayloadVersion = (packageJSON: PackageJSON): string => {
-  return packageJSON?.dependencies?.payload ?? ''
+export const getPayloadVersion = async (): Promise<string> => {
+  try {
+    const { default: packageJSON } = await import('../../../package.json', {
+      with: { type: 'json' },
+    })
+
+    return packageJSON.version
+  } catch (_) {
+    // Keep the remaining measurements when the running version cannot be resolved.
+    return ''
+  }
 }
 
 const getFrameworkAdapter = (packages: string[]): 'next' | 'tanstack-start' | 'unknown' => {
