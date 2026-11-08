@@ -1,0 +1,13 @@
+# pnpm v11+ reads build approvals only from this file: the `pnpm` field in package.json is
+# ignored, and under the default strictDepBuilds an unapproved dependency build fails the install
+# with ERR_PNPM_IGNORED_BUILDS. Keep in sync with TEMPLATE_ALLOW_BUILDS in
+# tools/scripts/src/template-allow-builds.ts.
+allowBuilds:
+  '@swc/core': true
+  bufferutil: true
+  esbuild: true
+  mongodb-memory-server: true
+  sharp: true
+  unrs-resolver: true
+  utf-8-validate: true
+  workerd: true

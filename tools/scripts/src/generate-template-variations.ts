@@ -20,6 +20,8 @@ import minimist from 'minimist'
 import * as fs from 'node:fs/promises'
 import path from 'path'
 
+import { TEMPLATE_ALLOW_BUILDS } from './template-allow-builds.js'
+
 type TemplateVariation = {
   /** Base template to copy from */
   base?: 'none' | ({} & string)
@@ -325,13 +327,12 @@ async function main() {
     /*
      * Non-workspace variants must install in isolation from the monorepo. `--ignore-workspace`
      * can't do this under pnpm v11 (it reads the flag as "skip pnpm-workspace.yaml entirely",
-     * dropping build approvals -> ERR_PNPM_IGNORED_BUILDS). Instead drop a transient standalone
-     * workspace root; it's removed before commit so the generated template ships unchanged.
-     * dangerouslyAllowAllBuilds runs every dependency's build script: this is throwaway generation
-     * tooling, not a shipped config, so there's no allowlist to drift out of sync with the templates'
-     * deps (e.g. the d1 variant's `workerd`). The install always runs under v11 here — the vercel
-     * variants' pnpm@10 packageManager pin is added after install — so package.json#pnpm is ignored
-     * and dangerouslyAllowAllBuilds can't conflict with its onlyBuiltDependencies. verifyDepsBeforeRun
+     * dropping build approvals -> ERR_PNPM_IGNORED_BUILDS). Instead drop a standalone workspace
+     * root. During generation it allows every build: this is throwaway tooling, not a shipped
+     * config, so generation cannot be blocked by a dependency whose build script is not on the
+     * templates' allowlist. It is replaced with the explicit allowlist below before the template
+     * is committed. The Vercel variants' packageManager pin is added after install, so
+     * package.json#pnpm is ignored by the pnpm version that runs the install; verifyDepsBeforeRun
      * stops v11 re-installing before the later `pnpm generate:*`/`build` runs.
      */
     if (!workspace) {
@@ -406,9 +407,15 @@ async function main() {
       execSyncSafe(`pnpm build`, { cwd: destDir })
     }
 
-    // Remove the transient workspace root so it isn't committed into the generated template.
+    // Replace the transient allow-all workspace root with the explicit build approvals the
+    // template ships. pnpm v11+ ignores package.json#pnpm and reads approvals only from this
+    // file, so without it a standalone install of the generated template fails with
+    // ERR_PNPM_IGNORED_BUILDS on the first dependency build script it has not approved.
     if (!workspace) {
-      await fs.rm(path.join(destDir, 'pnpm-workspace.yaml'), { force: true })
+      await fs.writeFile(
+        path.join(destDir, 'pnpm-workspace.yaml'),
+        toAllowBuildsWorkspaceYaml(TEMPLATE_ALLOW_BUILDS),
+      )
     }
 
     // TODO: Email?
@@ -426,6 +433,15 @@ async function main() {
   execSyncSafe(`pnpm oxfmt templates`, { cwd: PROJECT_ROOT })
 
   log('Template generation complete!')
+}
+
+/**
+ * Serializes a generated template's pnpm-workspace.yaml. pnpm v11+ reads build approvals only
+ * from `allowBuilds` here, never from package.json#pnpm, and its default strictDepBuilds makes
+ * any unapproved dependency build abort the install.
+ */
+function toAllowBuildsWorkspaceYaml(allowBuilds: string[]): string {
+  return `allowBuilds:\n${allowBuilds.map((name) => `  '${name}': true`).join('\n')}\n`
 }
 
 async function generateReadme({
