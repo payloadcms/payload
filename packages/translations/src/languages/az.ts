@@ -515,10 +515,15 @@ export const azTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Fayl əlavə et',
     addFiles: 'Faylları Əlavə Edin',
+    aspectRatio: 'Tərəflərin nisbəti',
+    aspectRatioCustom: 'Fərdi',
+    aspectRatioFreeform: 'Sərbəst',
+    aspectRatioOriginal: 'Orijinal şəkil',
     bulkUpload: 'Kütləvi Yükləmə',
     crop: 'Məhsul',
     cropToolDescription:
       'Seçilmiş sahənin köşələrini sürükləyin, yeni bir sahə çəkin və ya aşağıdakı dəyərləri düzəltin.',
+    customAspectRatio: 'Fərdi nisbət',
     download: 'Yükləyin',
     dragAndDrop: 'Faylı buraya sürükləyin və buraxın',
     dragAndDropHere: 'və ya faylı buraya sürükləyin və buraxın',
@@ -531,6 +536,7 @@ export const azTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Fokus nöqtəsini birbaşa önizləməyə sürükləyin və ya aşağıdakı dəyərləri düzəltin.',
     height: 'Hündürlük',
+    invalidAspectRatio: 'Nisbəti en:hündürlük formatında daxil edin, məsələn 16:9.',
     lessInfo: 'Daha az məlumat',
     moreInfo: 'Daha çox məlumat',
     noFile: 'Heç bir fayl',

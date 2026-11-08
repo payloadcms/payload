@@ -509,10 +509,15 @@ export const skTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Pridať súbor',
     addFiles: 'Pridať súbory',
+    aspectRatio: 'Pomer strán',
+    aspectRatioCustom: 'Vlastný',
+    aspectRatioFreeform: 'Voľný',
+    aspectRatioOriginal: 'Pôvodný obrázok',
     bulkUpload: 'Hromadné nahranie',
     crop: 'Orezať',
     cropToolDescription:
       'Potiahnite rohy vybranej oblasti, nakreslite novú oblasť alebo upravte hodnoty nižšie.',
+    customAspectRatio: 'Vlastný pomer',
     download: 'Stiahnuť',
     dragAndDrop: 'Potiahnite a pusťte súbor',
     dragAndDropHere: 'alebo sem potiahnite a pusťte súbor',
@@ -525,6 +530,7 @@ export const skTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Potiahnite bod stredobodu priamo na náhľad alebo upravte hodnoty nižšie.',
     height: 'Výška',
+    invalidAspectRatio: 'Zadajte pomer v tvare šírka:výška, napríklad 16:9.',
     lessInfo: 'Menej informácií',
     moreInfo: 'Viac informácií',
     noFile: 'Žiadny súbor',

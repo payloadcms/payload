@@ -510,10 +510,15 @@ export const taTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'கோப்பை சேர்க்கவும்',
     addFiles: 'கோப்புகளை சேர்க்கவும்',
+    aspectRatio: 'தோற்ற விகிதம்',
+    aspectRatioCustom: 'தனிப்பயன்',
+    aspectRatioFreeform: 'கட்டுப்பாடற்ற',
+    aspectRatioOriginal: 'அசல் படம்',
     bulkUpload: 'மொத்தமாக பதிவேற்றம்',
     crop: 'வெட்டுக',
     cropToolDescription:
       'தேர்ந்த பகுதியின் மூலைகளை இழுத்து, புதிய பகுதியை வரையுங்கள் அல்லது கீழே உள்ள மதிப்புகளைச் சரிசெய்யவும்.',
+    customAspectRatio: 'தனிப்பயன் விகிதம்',
     download: 'பதிவிறக்கம்',
     dragAndDrop: 'கோப்பை இழுத்து விடுக',
     dragAndDropHere: 'அல்லது கோப்பை இங்கே இழுத்து விடுக',
@@ -526,6 +531,7 @@ export const taTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'முன்னோட்டத்தில் புள்ளியை நேரடியாக இழுத்து விடவும் அல்லது கீழே உள்ள மதிப்புகளை மாற்றவும்.',
     height: 'உயரம்',
+    invalidAspectRatio: 'விகிதத்தை அகலம்:உயரம் என உள்ளிடவும், எடுத்துக்காட்டாக 16:9.',
     lessInfo: 'குறைந்த தகவல்',
     moreInfo: 'மேலும் தகவல்',
     noFile: 'கோப்பு இல்லை',

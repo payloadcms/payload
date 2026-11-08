@@ -511,10 +511,15 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Dodaj datoteku',
     addFiles: 'Dodaj Datoteke',
+    aspectRatio: 'Odnos stranica',
+    aspectRatioCustom: 'Prilagođeno',
+    aspectRatioFreeform: 'Slobodno',
+    aspectRatioOriginal: 'Originalna slika',
     bulkUpload: 'Masovno otpremanje',
     crop: 'Isecite sliku',
     cropToolDescription:
       'Prevucite uglove izabranog područja, nacrtajte novo područje ili prilagodite vrednosti ispod.',
+    customAspectRatio: 'Prilagođeni odnos',
     download: 'Preuzmi',
     dragAndDrop: 'Prevucite i ispustite datoteku',
     dragAndDropHere: 'ili povucite i ispustite datoteku ovde',
@@ -527,6 +532,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Prevucite središnju tačku direktno na pregled ili prilagodite vrednosti ispod.',
     height: 'Visina',
+    invalidAspectRatio: 'Unesite odnos kao širina:visina, na primer 16:9.',
     lessInfo: 'Manje informacija',
     moreInfo: 'Više informacija',
     noFile: 'Nema datoteke',

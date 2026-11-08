@@ -509,10 +509,15 @@ export const viTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Thêm tập tin',
     addFiles: 'Thêm tệp',
+    aspectRatio: 'Tỷ lệ khung hình',
+    aspectRatioCustom: 'Tùy chỉnh',
+    aspectRatioFreeform: 'Tự do',
+    aspectRatioOriginal: 'Ảnh gốc',
     bulkUpload: 'Tải lên số lượng lớn',
     crop: 'Cắt xén',
     cropToolDescription:
       'Kéo các góc của khu vực đã chọn, vẽ một khu vực mới hoặc điều chỉnh các giá trị dưới đây.',
+    customAspectRatio: 'Tỷ lệ tùy chỉnh',
     download: 'Tải xuống',
     dragAndDrop: 'Kéo và thả một tập tin',
     dragAndDropHere: 'hoặc kéo và thả file vào đây',
@@ -525,6 +530,7 @@ export const viTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Kéo điểm tiêu điểm trực tiếp trên ảnh xem trước hoặc điều chỉnh giá trị bên dưới.',
     height: 'Chiều cao',
+    invalidAspectRatio: 'Nhập tỷ lệ theo dạng rộng:cao, ví dụ 16:9.',
     lessInfo: 'Hiển thị ít hơn',
     moreInfo: 'Xem thêm',
     noFile: 'Không có tệp',

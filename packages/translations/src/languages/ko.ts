@@ -507,10 +507,15 @@ export const koTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: '파일 추가',
     addFiles: '파일 추가',
+    aspectRatio: '가로세로 비율',
+    aspectRatioCustom: '사용자 지정',
+    aspectRatioFreeform: '자유',
+    aspectRatioOriginal: '원본 이미지',
     bulkUpload: '일괄 업로드',
     crop: '자르기',
     cropToolDescription:
       '선택한 영역의 모퉁이를 드래그하거나 새로운 영역을 그리거나 아래의 값을 조정하세요.',
+    customAspectRatio: '사용자 지정 비율',
     download: '다운로드',
     dragAndDrop: '파일을 끌어다 놓으세요',
     dragAndDropHere: '또는 여기로 파일을 끌어다 놓으세요',
@@ -522,6 +527,7 @@ export const koTranslations: DefaultTranslationsObject = {
     focalPoint: '초점',
     focalPointDescription: '미리보기에서 초점을 직접 드래그하거나 아래의 값을 조정하세요.',
     height: '높이',
+    invalidAspectRatio: '너비:높이 형식으로 비율을 입력하세요(예: 16:9).',
     lessInfo: '정보 숨기기',
     moreInfo: '정보 더보기',
     noFile: '파일 없음',

@@ -510,10 +510,15 @@ export const bgTranslations: DefaultTranslationsObject = {
   upload: {
     addFile: 'Добавяне на файл',
     addFiles: 'Добави файлове',
+    aspectRatio: 'Съотношение на страните',
+    aspectRatioCustom: 'Персонализирано',
+    aspectRatioFreeform: 'Свободно',
+    aspectRatioOriginal: 'Оригинално изображение',
     bulkUpload: 'Масово Качване',
     crop: 'Изрязване',
     cropToolDescription:
       'Плъзни ъглите на избраната област, избери нова област или коригирай стойностите по-долу.',
+    customAspectRatio: 'Персонализирано съотношение',
     download: 'Изтегляне',
     dragAndDrop: 'Дръпни и пусни файл',
     dragAndDropHere: 'или дръпни и пусни файла тук',
@@ -526,6 +531,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     focalPointDescription:
       'Премести фокусната точка директно върху визуализацията или регулирай стойностите по-долу.',
     height: 'Височина',
+    invalidAspectRatio: 'Въведете съотношение във формат ширина:височина, например 16:9.',
     lessInfo: 'По-малко информация',
     moreInfo: 'Повече информация',
     noFile: 'Няма файл',
