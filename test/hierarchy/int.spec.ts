@@ -1,11 +1,10 @@
-import { getInitialTreeData } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import type { Organization } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import { devUser } from '../credentials.js'
+import { folderTagDocumentsSlug, foldersSlug, organizationsSlug } from './shared.js'
 
 test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () => {
   test.describe('Collection Config Property', () => {
@@ -1667,70 +1666,186 @@ test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () 
     })
   })
 
-  test.describe('Initial Tree Data', () => {
-    test.beforeEach(async ({ payload }) => {
-      // Clear existing data before each test
-      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
-    })
+  test.describe('Deleting a hierarchy item referenced by multi-value fields', () => {
+    const createdFolderIds: Array<number | string> = []
+    const createdDocIds: Array<number | string> = []
+    const createdOrgIds: Array<number | string> = []
 
     test.afterEach(async ({ payload }) => {
-      // Clean up data after each test
-      await payload.delete({ collection: 'organizations', overrideAccess: true, where: {} })
+      if (createdDocIds.length) {
+        await payload.delete({
+          collection: folderTagDocumentsSlug,
+          overrideAccess: true,
+          where: { id: { in: createdDocIds } },
+        })
+        createdDocIds.length = 0
+      }
+
+      if (createdOrgIds.length) {
+        await payload.delete({
+          collection: organizationsSlug,
+          overrideAccess: true,
+          where: { id: { in: createdOrgIds } },
+        })
+        createdOrgIds.length = 0
+      }
+
+      if (createdFolderIds.length) {
+        await payload.delete({
+          collection: foldersSlug,
+          overrideAccess: true,
+          where: { id: { in: createdFolderIds } },
+        })
+        createdFolderIds.length = 0
+      }
     })
 
-    test('should fetch children of an expanded parent only once when its ID arrives as string and number', async ({
+    const createFolder = async (payload, name: string) => {
+      const folder = await payload.create({
+        collection: foldersSlug,
+        data: { name },
+        overrideAccess: true,
+      })
+      createdFolderIds.push(folder.id)
+      return folder
+    }
+
+    test('should remove only the deleted id from a multi-value tag field', async ({ payload }) => {
+      const news = await createFolder(payload, 'News')
+      const sport = await createFolder(payload, 'Sport')
+
+      const doc = await payload.create({
+        collection: folderTagDocumentsSlug,
+        data: {
+          parentFolder: [news.id, sport.id],
+          title: 'Hello',
+        },
+        overrideAccess: true,
+      })
+      createdDocIds.push(doc.id)
+
+      await payload.delete({
+        collection: foldersSlug,
+        id: sport.id,
+        overrideAccess: true,
+      })
+      createdFolderIds.splice(createdFolderIds.indexOf(sport.id), 1)
+
+      const updated = await payload.findByID({
+        collection: folderTagDocumentsSlug,
+        depth: 0,
+        id: doc.id,
+        overrideAccess: true,
+      })
+
+      expect(updated.parentFolder).toEqual([news.id])
+    })
+
+    test('should leave a multi-value tag field empty when the deleted id was the only value', async ({
       payload,
     }) => {
-      const rootPage = await payload.create({
-        collection: 'organizations',
-        data: { parent: null, title: 'Tree Root' },
+      const sport = await createFolder(payload, 'Only Tag')
+
+      const doc = await payload.create({
+        collection: folderTagDocumentsSlug,
+        data: {
+          parentFolder: [sport.id],
+          title: 'Solo',
+        },
+        overrideAccess: true,
+      })
+      createdDocIds.push(doc.id)
+
+      await payload.delete({
+        collection: foldersSlug,
+        id: sport.id,
+        overrideAccess: true,
+      })
+      createdFolderIds.splice(createdFolderIds.indexOf(sport.id), 1)
+
+      const updated = await payload.findByID({
+        collection: folderTagDocumentsSlug,
+        depth: 0,
+        id: doc.id,
         overrideAccess: true,
       })
 
-      const childA = await payload.create({
-        collection: 'organizations',
-        data: { parent: rootPage.id, title: 'Child A' },
-        overrideAccess: true,
-      })
+      expect(updated.parentFolder ?? []).toEqual([])
+    })
 
-      const childB = await payload.create({
-        collection: 'organizations',
-        data: { parent: rootPage.id, title: 'Child B' },
-        overrideAccess: true,
-      })
+    test('should remove the deleted id from every referencing document across pages', async ({
+      payload,
+    }) => {
+      const news = await createFolder(payload, 'Paged News')
+      const sport = await createFolder(payload, 'Paged Sport')
 
-      const users = await payload.find({
-        collection: 'users',
-        overrideAccess: true,
-        where: { email: { equals: devUser.email } },
-      })
-
-      // The mixed string/number ID case requires a numeric-ID adapter: with
-      // string IDs, both entries would be identical strings and the test
-      // could not distinguish string-based from exact-value deduplication.
-      if (payload.db.defaultIDType !== 'number') {
-        return
+      // The afterDelete hook reads matches in pages of 100, so create more
+      // referencing documents than one page holds.
+      const totalDocs = 101
+      for (let i = 0; i < totalDocs; i++) {
+        const doc = await payload.create({
+          collection: folderTagDocumentsSlug,
+          data: {
+            parentFolder: [news.id, sport.id],
+            title: `Paged doc ${i}`,
+          },
+          overrideAccess: true,
+        })
+        createdDocIds.push(doc.id)
       }
-      expect(typeof rootPage.id).toBe('number')
 
-      // Saved expanded-node preferences store the ID as a string while resolved
-      // ancestors add the same ID as a number (e.g. "1" and 1). The parent's
-      // children must be fetched and returned only once.
-      const tree = await getInitialTreeData({
-        collectionSlug: 'organizations',
-        expandedNodeIds: [String(rootPage.id), rootPage.id],
-        payload,
-        user: users.docs[0],
+      await payload.delete({
+        collection: foldersSlug,
+        id: sport.id,
+        overrideAccess: true,
+      })
+      createdFolderIds.splice(createdFolderIds.indexOf(sport.id), 1)
+
+      const stillTaggedWithDeleted = await payload.count({
+        collection: folderTagDocumentsSlug,
+        overrideAccess: true,
+        where: { parentFolder: { equals: sport.id } },
+      })
+      const stillTaggedWithKept = await payload.count({
+        collection: folderTagDocumentsSlug,
+        overrideAccess: true,
+        where: { parentFolder: { equals: news.id } },
       })
 
-      const ids = tree.docs.map((doc) => String(doc.id))
-      expect(new Set(ids).size).toBe(ids.length)
+      expect(stillTaggedWithDeleted.totalDocs).toBe(0)
+      expect(stillTaggedWithKept.totalDocs).toBe(totalDocs)
+    })
 
-      expect(ids).toContain(String(rootPage.id))
-      expect(ids).toContain(String(childA.id))
-      expect(ids).toContain(String(childB.id))
+    test('should clear a single-value folder reference when the folder is deleted', async ({
+      payload,
+    }) => {
+      const folder = await createFolder(payload, 'Single Value Folder')
 
-      expect(tree.loadedParents[String(rootPage.id)].loadedCount).toBe(2)
+      const org = await payload.create({
+        collection: organizationsSlug,
+        data: {
+          parentFolder: folder.id,
+          title: 'Org In Folder',
+        },
+        overrideAccess: true,
+      })
+      createdOrgIds.push(org.id)
+
+      await payload.delete({
+        collection: foldersSlug,
+        id: folder.id,
+        overrideAccess: true,
+      })
+      createdFolderIds.splice(createdFolderIds.indexOf(folder.id), 1)
+
+      const updated = await payload.findByID({
+        collection: organizationsSlug,
+        depth: 0,
+        id: org.id,
+        overrideAccess: true,
+      })
+
+      expect(updated.parentFolder).toBeNull()
     })
   })
 })
