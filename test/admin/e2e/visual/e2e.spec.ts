@@ -5,7 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { expectScreenshot } from '../../../__helpers/e2e/expectScreenshot.js'
-import { closeNav } from '../../../__helpers/e2e/toggleNav.js'
+import { closeNav, openNav } from '../../../__helpers/e2e/toggleNav.js'
 import { visual } from '../../../__helpers/e2e/visual.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -46,6 +46,42 @@ test.describe('Visual', () => {
     await expect(listTable).toHaveCSS('table-layout', 'fixed')
 
     await expectScreenshot({ name: 'posts-list-view.png', mask: [page.locator('.cell-id')], page })
+  })
+
+  visual('renders the dashboard with navigation', async () => {
+    await page.goto(url.admin)
+    await openNav(page)
+
+    await expect(page.locator('.dashboard-status__badge')).toBeVisible()
+    await expect(page.locator('nav.nav__wrap')).toBeVisible()
+
+    await expectScreenshot({ name: 'admin-dashboard-navigation.png', page })
+  })
+
+  visual('renders the account menu', async () => {
+    await page.goto(url.admin)
+    await openNav(page)
+
+    await page.locator('.user-menu__trigger').click()
+
+    const accountMenu = page.locator('.user-menu > .popup__content')
+    await expect(accountMenu).toBeVisible()
+    await expect(accountMenu.locator('.user-menu__identifier')).toContainText('dev@payloadcms.com')
+
+    await expectScreenshot({ name: 'admin-account-menu.png', page })
+  })
+
+  visual('renders the navigation settings menu', async () => {
+    await page.goto(url.admin)
+    await openNav(page)
+
+    await page.locator('.nav__controls .popup#settings-menu .popup-button').click()
+
+    const settingsMenu = page.locator('.popup__content[data-popup-id="settings-menu"]')
+    await expect(settingsMenu).toBeVisible()
+    await expect(settingsMenu).toContainText('System Settings')
+
+    await expectScreenshot({ name: 'admin-navigation-settings-menu.png', page })
   })
 
   visual('renders the dashboard status badge', async () => {
