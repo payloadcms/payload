@@ -29,6 +29,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
   const {
     field,
     field: { admin: { className, description, hideGutter } = {}, fields, label },
+    forceRender,
     indexPath,
     parentPath,
     parentSchemaPath,
@@ -111,11 +112,18 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           {groupHasName(field) ? (
             <RenderFields
               fields={fields}
+              forceRender={forceRender}
               margins="small"
               parentIndexPath=""
               parentPath={path}
               parentSchemaPath={schemaPath}
-              permissions={permissions === true ? permissions : permissions?.fields}
+              permissions={
+                permissions === true
+                  ? permissions
+                  : Object.keys(permissions?.fields ?? {}).length > 0
+                    ? permissions.fields
+                    : permissions
+              }
               readOnly={readOnly}
             />
           ) : (
