@@ -96,7 +96,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
       ListActions={[
         count > 0 && (
           <ListSelectionButton key="clear-all" onClick={() => clearSelections()}>
-            {t('general:clearAll')}
+            {t('general:deselectAll')}
           </ListSelectionButton>
         ),
       ].filter(Boolean)}

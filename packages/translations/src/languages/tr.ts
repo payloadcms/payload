@@ -208,6 +208,7 @@ export const trTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Klasöre Göre Gözat',
     byFolder: 'Klasör Bazında',
     deleteFolder: 'Klasörü Sil',
+    folder: 'Klasör',
     folderName: 'Klasör Adı',
     folders: 'Klasörler',
     folderTypeDescription:
@@ -267,7 +268,6 @@ export const trTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'Değişiklikleriniz henüz kaydedilmedi. Eğer bu sayfayı terk ederseniz değişiklikleri kaybedeceksiniz.',
     clear: 'Temiz',
-    clearAll: 'Hepsini Temizle',
     close: 'Kapat',
     collapse: 'Daralt',
     collections: 'Koleksiyonlar',
@@ -314,6 +314,7 @@ export const trTranslations: DefaultTranslationsObject = {
     deleting: 'Siliniyor...',
     depth: 'Derinlik',
     descending: 'Azalan',
+    deselectAll: 'Tüm seçimleri kaldır',
     deselectAllRows: 'Tüm satırların seçimini kaldır',
     document: 'Belge',
     documentIsTrashed: 'Bu {{label}} çöpe atıldı ve sadece okuma modunda.',
@@ -441,6 +442,7 @@ export const trTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Tüm {{label}} göster',
     sorryNotFound: 'Üzgünüz, isteğinizle eşleşen bir sonuç bulunamadı.',
     sort: 'Sırala',
+    sortBy: 'Sırala göre',
     sortByLabelDirection: '{{label}} göre sırala {{direction}}',
     stayOnThisPage: 'Bu sayfada kal',
     submissionSuccessful: 'Gönderme başarılı',
