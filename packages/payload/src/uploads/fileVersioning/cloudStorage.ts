@@ -1,4 +1,5 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type { RequestContext } from '../../index.js'
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { FileToSave } from '../types.js'
 import type { StagedObject } from './fileOperationManager.js'
@@ -15,6 +16,28 @@ import {
   getStoredFileIdentity,
   withLegacyCloudUploadFileData,
 } from './storedFiles.js'
+
+/** Request context keys that carry one upload's cloud storage state. */
+const cloudStorageStateKeys = [
+  '_payloadCloudStorage',
+  '_payloadManagedCloudMetadata',
+  '_payloadManagedCloudStorage',
+  '_payloadVerifiedProviderOriginal',
+  'skipCloudStorage',
+]
+
+/** A copy of `context` without one upload's cloud storage state, for a nested file operation. */
+export const withoutCloudStorageState = (context: RequestContext): RequestContext => {
+  const copy = { ...context }
+  for (const key of cloudStorageStateKeys) {
+    delete copy[key]
+  }
+  return copy
+}
+
+/** Whether the storage adapter's afterChange hook saves the metadata of this operation's files. */
+export const hasManagedCloudMetadata = ({ req }: { req: PayloadRequest }): boolean =>
+  Boolean(req.context?._payloadManagedCloudStorage)
 
 /** Preserve the caller's cloud flags; nested Local API calls can replace req.context. */
 export const captureCloudHookState = ({ req }: { req: PayloadRequest }): (() => void) => {

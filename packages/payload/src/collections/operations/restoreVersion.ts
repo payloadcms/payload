@@ -17,13 +17,14 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { hasManagedCloudMetadata } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
   beginFileOperationScope,
   completeFileOperationScope,
   shareFileOperationScope,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
-import { runFileRestore } from '../../uploads/fileVersioning/restore.js'
+import { isolateRestoreRequest, runFileRestore } from '../../uploads/fileVersioning/restore.js'
 import { restoreUploadDataFromDocument } from '../../uploads/sanitizeUploadData.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -74,27 +75,9 @@ export const restoreVersionOperation = async <
     showHiddenFields,
   } = args
   const hasFileOperationScope = Boolean(collectionConfig.upload)
-  const req = hasFileOperationScope
-    ? isolateObjectProperty(incomingReq, ['context', 'file', 'payloadUploadSizes', 'query'])
-    : incomingReq
+  const req = hasFileOperationScope ? isolateRestoreRequest({ req: incomingReq }) : incomingReq
 
   if (hasFileOperationScope) {
-    // A nested restore must not consume the enclosing upload's bytes or storage receipts.
-    req.file = undefined
-    req.payloadUploadSizes = undefined
-    req.query = { ...incomingReq.query }
-    delete req.query.uploadEdits
-    req.context = { ...incomingReq.context }
-    for (const key of [
-      '_payloadCloudStorage',
-      '_payloadManagedCloudMetadata',
-      '_payloadManagedCloudStorage',
-      '_payloadVerifiedProviderOriginal',
-      'skipCloudStorage',
-    ]) {
-      delete req.context[key]
-    }
-    shareFileOperationScope({ owner: incomingReq, req })
     args = { ...args, req }
   }
 
@@ -360,7 +343,7 @@ export const restoreVersionOperation = async <
     const writeRestoredVersion = async (restored: JsonObject) => {
       if (collectionConfig.upload) {
         result = restoreUploadDataFromDocument(result, restored, { clearMissing: true })
-        if (req.context._payloadManagedCloudStorage) {
+        if (hasManagedCloudMetadata({ req })) {
           data = restoreUploadDataFromDocument(data, restored, { clearMissing: true })
         }
       }
@@ -442,7 +425,7 @@ export const restoreVersionOperation = async <
 
     // Adapter metadata is saved by its normal afterChange hook. It needs the full upload data
     // and draft status even when the caller's response selection omits those fields.
-    const managedAfterChangeData = req.context._payloadManagedCloudStorage
+    const managedAfterChangeData = hasManagedCloudMetadata({ req })
       ? { ...data, _status: draftArg ? 'draft' : data._status }
       : undefined
 

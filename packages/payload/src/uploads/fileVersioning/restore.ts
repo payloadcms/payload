@@ -7,10 +7,12 @@ import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { StoredFileList } from './types.js'
 
 import { APIError } from '../../errors/APIError.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { archiveOutgoingLocalFiles, replaceStoredFileReferences } from './archive.js'
 import { removeUnreferencedStagedObjects, scheduleUnreferencedFileCleanup } from './cleanup.js'
-import { runFileOperationPlan } from './fileOperationManager.js'
+import { withoutCloudStorageState } from './cloudStorage.js'
+import { runFileOperationPlan, shareFileOperationScope } from './fileOperationManager.js'
 import { copyLocalFile } from './localStorage.js'
 import { getArchivedFilename } from './naming.js'
 import { runRequestTimeFileRestore } from './restoreRequestTime.js'
@@ -27,6 +29,21 @@ export type FileRestoreArgs<T> = {
   req: PayloadRequest
   selected: JsonObject
   write: (restored: JsonObject) => Promise<T>
+}
+
+/**
+ * The request for a restore of an upload document. A restore can run inside another upload
+ * operation, so it must not use that upload's file, sizes, edits or storage state.
+ */
+export const isolateRestoreRequest = ({ req }: { req: PayloadRequest }): PayloadRequest => {
+  const isolated = isolateObjectProperty(req, ['context', 'file', 'payloadUploadSizes', 'query'])
+  isolated.file = undefined
+  isolated.payloadUploadSizes = undefined
+  isolated.query = { ...req.query }
+  delete isolated.query.uploadEdits
+  isolated.context = withoutCloudStorageState(req.context)
+  shareFileOperationScope({ owner: req, req: isolated })
+  return isolated
 }
 
 /** Replay virtual outputs with today's pipeline; saved stored outputs remain reusable. */
