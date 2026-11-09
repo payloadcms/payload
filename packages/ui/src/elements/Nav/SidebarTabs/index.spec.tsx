@@ -33,17 +33,19 @@ test('should keep the active tab loading when an earlier tab request completes',
   )
 
   const screen = await render(
-    <SidebarTabsClient
-      baseClass="sidebar-tabs"
-      initialActiveTabID="initial"
-      initialTabContents={{ initial: <div>Initial content</div> }}
-      loadingDelay={0}
-      tabs={[
-        { icon: null, label: 'Initial', slug: 'initial' },
-        { icon: null, label: 'First', slug: 'first' },
-        { icon: null, label: 'Second', slug: 'second' },
-      ]}
-    />,
+    <div data-payload-tokens>
+      <SidebarTabsClient
+        baseClass="sidebar-tabs"
+        initialActiveTabID="initial"
+        initialTabContents={{ initial: <div>Initial content</div> }}
+        loadingDelay={0}
+        tabs={[
+          { icon: null, label: 'Initial', slug: 'initial' },
+          { icon: null, label: 'First', slug: 'first' },
+          { icon: null, label: 'Second', slug: 'second' },
+        ]}
+      />
+    </div>,
   )
   const panel = screen.getByRole('tabpanel', { name: 'Second' })
 
