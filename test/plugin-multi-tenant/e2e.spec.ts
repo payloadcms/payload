@@ -832,6 +832,17 @@ test.describe('Multi Tenant', () => {
       await expect(page.locator('#field-title')).toHaveValue('Blue Dog Menu')
     })
 
+    test('should redirect list view to edit view for a user without access to all tenants', async () => {
+      await loginClientSide({
+        data: credentials.blueDog,
+        page,
+        serverURL,
+      })
+      await page.goto(globalMenuURL.list)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+      await expect(page.locator('#field-title')).toHaveValue('Blue Dog Menu')
+    })
+
     test('should prompt leave without saving changes modal when switching tenants', async () => {
       await loginClientSide({
         data: credentials.admin,
