@@ -25,6 +25,14 @@ const imageFixture = path.resolve(
   '../uploads/image.png',
 )
 const savedCrop = { height: 600, width: 800, x: 100, y: 200 }
+// These adapters cannot roll back a document write, so a failed restore keeps the files it saved.
+const adaptersWithoutTransactions = [
+  'cosmosdb',
+  'firestore',
+  'sqlite',
+  'sqlite-uuid',
+  'sqlite-uuidv7',
+]
 const laterCrop = { height: 200, width: 300, x: 0, y: 0 }
 
 const getVersions = async ({
@@ -510,7 +518,7 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
 
   test.options(
     'should validate adapter metadata and roll back the restored files and document if it fails',
-    { db: (adapter) => !adapter.startsWith('sqlite') },
+    { db: (adapter) => !adaptersWithoutTransactions.includes(adapter) },
     async ({ payload }) => {
       const { created, selected } = await prepareHistory({
         payload,
@@ -559,7 +567,7 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
 
   test.options(
     'should retain a referenced restored file when adapter metadata fails without a transaction',
-    { db: (adapter) => adapter.startsWith('sqlite') },
+    { db: (adapter) => adaptersWithoutTransactions.includes(adapter) },
     async ({ payload }) => {
       const { created, selected } = await prepareHistory({
         payload,
