@@ -175,6 +175,64 @@ export async function validateSearchParam({
         return
       }
 
+      if (
+        (field.type === 'select' || field.type === 'radio') &&
+        'options' in field &&
+        Array.isArray(field.options) &&
+        operator !== 'exists' &&
+        operator !== 'like' &&
+        operator !== 'not_like' &&
+        !(operator === 'contains' && !('hasMany' in field && field.hasMany))
+      ) {
+        const validValues = new Set<string>()
+        for (const opt of field.options) {
+          if (typeof opt === 'string' || typeof opt === 'number') {
+            validValues.add(String(opt))
+          } else if (
+            opt &&
+            typeof opt === 'object' &&
+            'value' in opt &&
+            (typeof opt.value === 'string' || typeof opt.value === 'number')
+          ) {
+            validValues.add(String(opt.value))
+          }
+        }
+
+        const isValueValid = (v: unknown): boolean => {
+          if (v === null) {
+            return true
+          }
+          if (typeof v === 'string' || typeof v === 'number') {
+            return validValues.has(String(v))
+          }
+          return false
+        }
+
+        let isInvalid = false
+        if (
+          ['in', 'not_in', 'all'].includes(operator) ||
+          (operator === 'contains' && Array.isArray(val))
+        ) {
+          const list = Array.isArray(val)
+            ? val
+            : typeof val === 'string'
+              ? val.split(',')
+              : [val]
+          if (list.some((item) => !isValueValid(item))) {
+            isInvalid = true
+          }
+        } else {
+          if (!isValueValid(val)) {
+            isInvalid = true
+          }
+        }
+
+        if (isInvalid) {
+          errors.push({ path })
+          return
+        }
+      }
+
       if (!overrideAccess && fieldAffectsData(field)) {
         if (collectionSlug) {
           if (!policies.collections![collectionSlug]) {

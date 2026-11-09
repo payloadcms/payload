@@ -158,6 +158,11 @@ export default buildConfigWithDefaults({
             type: 'text',
           },
           {
+            name: 'mode',
+            type: 'select',
+            options: ['online', 'inPerson'],
+          },
+          {
             name: 'description',
             type: 'text',
           },
