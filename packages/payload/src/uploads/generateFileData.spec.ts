@@ -1,6 +1,7 @@
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { UploadTransformer } from './transformers/types.js'
 
 import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
@@ -8,7 +9,15 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { APIError } from '../errors/APIError.js'
+import { deepCopyObject } from '../utilities/deepCopyObject.js'
 import { generateFileData } from './generateFileData.js'
+
+vi.mock('../utilities/deepCopyObject.js', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../utilities/deepCopyObject.js')>()
+
+  return { ...original, deepCopyObject: vi.fn(original.deepCopyObject) }
+})
 
 // A minimal valid 1x1 transparent PNG, so `file-type` can detect `image/png` from it.
 const PNG_SIGNATURE = Buffer.from(
@@ -93,6 +102,22 @@ describe('generateFileData', () => {
     })
 
     expect(toBufferMock).not.toHaveBeenCalled()
+  })
+
+  it('should not copy the document when no transformers are configured', async () => {
+    const { sharp } = createSharpMock()
+    vi.mocked(deepCopyObject).mockClear()
+
+    await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: { alt: 'photo' },
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req: createReq(sharp),
+    })
+
+    expect(deepCopyObject).not.toHaveBeenCalled()
   })
 
   describe('focal point without a transformer', () => {
@@ -405,5 +430,78 @@ describe('generateFileData', () => {
     })
 
     expect(files).toEqual([])
+  })
+})
+
+// `test/storage-azure/client-uploads` covers the download counts against real storage.
+describe('generateFileData - client uploads without full contents', () => {
+  /** Starts from the file that `getFileFromUploadInstructions` returns for a 'none' requirement. */
+  const runClientUpload = ({
+    fetchFullClientUpload,
+    size,
+    transformFile,
+  }: Pick<UploadTransformer, 'transformFile'> &
+    Required<Pick<Parameters<typeof generateFileData>[0], 'fetchFullClientUpload'>> & {
+      size: number
+    }) =>
+    generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: {},
+      fetchFullClientUpload,
+      operation: 'create',
+      req: {
+        context: {},
+        file: {
+          data: Buffer.alloc(0),
+          mimetype: 'video/mp4',
+          name: 'clip.mp4',
+          size,
+          uploadReference: { prefix: '' },
+        },
+        payload: {
+          collections: { media: { config: { fields: [], upload: {} } } },
+          config: {
+            routes: { api: '/api' },
+            upload: {
+              transformers: [{ slug: 'accepting', mimeTypes: ['video/*'], transformFile }],
+            },
+          },
+          db: { findOne: vi.fn(async () => null) },
+          logger: { error: vi.fn(), warn: vi.fn() },
+        },
+      } as unknown as PayloadRequest,
+    })
+
+  it('should run the content checks on the downloaded file before transformers get it', async () => {
+    const malformedMedia = Buffer.concat([
+      Buffer.alloc(4),
+      Buffer.from('ftypavif'),
+      Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>'),
+    ])
+    const transformFile = vi.fn()
+
+    await expect(
+      runClientUpload({
+        fetchFullClientUpload: async ({ file }) => ({ ...file, data: malformedMedia }),
+        size: malformedMedia.length,
+        transformFile,
+      }),
+    ).rejects.toMatchObject({
+      data: { errors: [{ message: 'Invalid or corrupted ISO base media file.' }] },
+    })
+    expect(transformFile).not.toHaveBeenCalled()
+  })
+
+  it('should keep the message and status of an error from the download', async () => {
+    const error = new APIError('Uploaded source size does not match the declared size.', 400)
+
+    await expect(
+      runClientUpload({
+        fetchFullClientUpload: () => Promise.reject(error),
+        size: 1,
+        transformFile: vi.fn(),
+      }),
+    ).rejects.toMatchObject({ message: error.message, status: 400 })
   })
 })

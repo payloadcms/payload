@@ -24,6 +24,12 @@ export const MediaHeaderOnly: CollectionConfig = {
           }
         }
 
+        if (file?.name === 'disguised.txt') {
+          if (file.mimetype !== 'image/png' || file.uploadReference) {
+            throw new Error('req.file does not match the processed file')
+          }
+        }
+
         if (file?.name === 'header-only-tripwire.jpg') {
           if (file.data.length > HEADER_PROBE_BYTE_LENGTH || file.tempFilePath) {
             throw new Error('Header-only upload exceeded its memory boundary')
