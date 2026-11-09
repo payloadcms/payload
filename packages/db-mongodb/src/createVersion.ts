@@ -82,11 +82,6 @@ export const createVersion: CreateVersion = async function createVersion(
             $eq: true,
           },
         },
-        {
-          updatedAt: {
-            $lt: new Date(doc.updatedAt),
-          },
-        },
       ],
     },
     { $unset: { latest: 1 } },
