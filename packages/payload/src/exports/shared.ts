@@ -106,6 +106,14 @@ export { formatAdminURL, stripTrailingSlash } from '../utilities/formatAdminURL.
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
+export {
+  type DateOnlyComparison,
+  type DateOnlyConstraint,
+  getDateOnlyComparison,
+  isDateOnlyFilter,
+  isDateOnlyFilterValue,
+} from '../utilities/getDateOnlyComparison.js'
+
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
 
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
