@@ -26,4 +26,5 @@ export type CollectionPreviewProps = {
   loadError?: string
   mimeTypes?: string[]
   table?: React.ReactNode
+  widgetId?: string
 }

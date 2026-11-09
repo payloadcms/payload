@@ -42,6 +42,7 @@ export function CollectionPreviewClient({
   loadError,
   mimeTypes,
   table,
+  widgetId,
 }: CollectionPreviewProps) {
   const {
     modalSlug,
@@ -55,7 +56,7 @@ export function CollectionPreviewClient({
   const { openModal } = useModal()
   const router = useRouter()
   const { setPreference } = usePreferences()
-  const preferenceKey = getCollectionPreviewPreferenceKey({ collectionSlug })
+  const preferenceKey = getCollectionPreviewPreferenceKey({ collectionSlug, widgetId })
   const { t } = useTranslation()
   const dragDepth = useRef(0)
   const [isDraggingFiles, setIsDraggingFiles] = useState(false)

@@ -8,9 +8,15 @@ export type CollectionPreviewPreferences = {
 
 export function getCollectionPreviewPreferenceKey({
   collectionSlug,
+  widgetId,
 }: {
   collectionSlug: string
+  widgetId?: string
 }): string {
+  if (widgetId) {
+    return `${PREFERENCE_KEYS.DASHBOARD_COLLECTION_LAYOUT}-widget-${widgetId}`
+  }
+
   return `${PREFERENCE_KEYS.DASHBOARD_COLLECTION_LAYOUT}-${collectionSlug}`
 }
 

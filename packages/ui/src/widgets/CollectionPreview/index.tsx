@@ -24,6 +24,7 @@ export async function CollectionPreviewWidget({
   permissions,
   req,
   widgetData,
+  widgetId,
 }: WidgetServerProps<{ data?: CollectionPreviewData }>) {
   const { i18n, payload, user } = req
   const collectionSlug = widgetData?.relatedCollection
@@ -114,7 +115,7 @@ export async function CollectionPreviewWidget({
       req,
       select: { value: true },
       user,
-      where: { key: { equals: getCollectionPreviewPreferenceKey({ collectionSlug }) } },
+      where: { key: { equals: getCollectionPreviewPreferenceKey({ collectionSlug, widgetId }) } },
     })
     initialLayout = getCollectionPreviewLayout({ value: preferences.docs[0]?.value })
   } catch (err) {
@@ -148,6 +149,7 @@ export async function CollectionPreviewWidget({
       loadError={loadError}
       mimeTypes={collection.upload ? collection.upload.mimeTypes : undefined}
       table={table}
+      widgetId={widgetId}
     />
   )
 }

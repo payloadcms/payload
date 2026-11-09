@@ -43,6 +43,35 @@ function createProps({ canCreate = true, canRead = true, isHidden = false } = {}
 }
 
 describe('collection preview widget', () => {
+  it('should restore independent layouts for two widgets previewing the same collection', async () => {
+    const { find, props } = createProps()
+
+    find.mockImplementation(({ collection, where }) =>
+      Promise.resolve({
+        docs:
+          collection === 'pages'
+            ? [{ id: '1', title: 'Page' }]
+            : where.key.equals === 'dashboard-collection-layout-widget-collection-preview-first'
+              ? [{ value: { documentLayout: 'table' } }]
+              : [],
+      }),
+    )
+
+    const firstWidget = await CollectionPreviewWidget({
+      ...props,
+      widgetId: 'collection-preview-first',
+    })
+    const secondWidget = await CollectionPreviewWidget({
+      ...props,
+      widgetId: 'collection-preview-second',
+    })
+
+    expect(firstWidget?.props.initialLayout).toBe('table')
+    expect(firstWidget?.props.widgetId).toBe('collection-preview-first')
+    expect(secondWidget?.props.initialLayout).toBe('grid')
+    expect(secondWidget?.props.widgetId).toBe('collection-preview-second')
+  })
+
   it('should fetch eight documents with the current user and access control enabled', async () => {
     const { find, props } = createProps()
     const result = await CollectionPreviewWidget(props)
