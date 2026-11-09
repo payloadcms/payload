@@ -325,6 +325,28 @@ const processUpload = async <T>({
     typeof currentFileData.original.url === 'string'
       ? currentFileData.original
       : undefined
+  // A legacy stored main can become the retained source after its bytes are verified below.
+  const legacyOriginal =
+    operation === 'update' &&
+    !file &&
+    !externalUploadSource &&
+    !retainedOriginal &&
+    !isRequestTimeFile({ entry: currentFileData }) &&
+    currentFileData?.filename &&
+    currentFileData.url &&
+    currentFileData.mimeType &&
+    typeof currentFileData.filesize === 'number'
+      ? {
+          _objectKey: currentFileData._objectKey,
+          filename: currentFileData.filename,
+          filesize: currentFileData.filesize,
+          height: currentFileData.height,
+          mimeType: currentFileData.mimeType,
+          prefix: currentFileData.prefix,
+          url: currentFileData.url,
+          width: currentFileData.width,
+        }
+      : undefined
   // A copy of a dynamic upload starts from the source's original, because its default file has no
   // object.
   const duplicatedOriginal =
@@ -356,7 +378,8 @@ const processUpload = async <T>({
           // A rebuild keeps the stored original. A duplicate gets its own copy, which is written
           // only where an original can be stored.
           canApplyAtRequest:
-            Boolean(retainedOriginal) || (Boolean(duplicatedOriginal) && canStoreOriginal),
+            Boolean(retainedOriginal || legacyOriginal) ||
+            (Boolean(duplicatedOriginal) && canStoreOriginal),
           collectionSlug: collectionConfig.slug,
           documentID,
           // Not `uploadEdits`: a focal point change copies the saved crop into it, so the crop is
@@ -388,15 +411,56 @@ const processUpload = async <T>({
   const isRebuildAppliedAtRequest =
     rebuildOutcome === 'applyAtRequest' || rebuildOutcome === 'copyForRequest'
 
-  // The retained original stays, and request-time stages build the default file from it. Only an
-  // update keeps an original, so `retainedOriginal` is always set here; the check narrows its type.
-  if (rebuildOutcome === 'applyAtRequest' && retainedOriginal) {
+  const requestOriginal = retainedOriginal ?? legacyOriginal
+  if (rebuildOutcome === 'applyAtRequest' && requestOriginal) {
+    // Legacy compatibility can synthesize an original from the main file. Verify that source
+    // on the transition to request-time edits, using storage handlers and its object identity.
+    if (
+      legacyOriginal ||
+      (!isRequestTimeFile({ entry: currentFileData }) &&
+        currentFileData?.filename === requestOriginal.filename &&
+        currentFileData._objectKey === requestOriginal._objectKey &&
+        currentFileData.prefix === requestOriginal.prefix)
+    ) {
+      try {
+        const { retrieveFileResponse } = await import('./endpoints/getFile.js')
+        const response = await retrieveFileResponse({
+          collection: { config: collectionConfig },
+          doc: originalDoc as TypeWithID,
+          filename: requestOriginal.filename,
+          isOriginal: Boolean(retainedOriginal),
+          operation: 'transform',
+          prefix: requestOriginal.prefix,
+          req,
+        })
+        if (!response.ok) {
+          await response.body?.cancel()
+          throw new Error(`Unable to read legacy source ${requestOriginal.filename}`)
+        }
+        if (!response.body && requestOriginal.filesize > 0) {
+          throw new Error(`Unable to read legacy source ${requestOriginal.filename}`)
+        }
+        await response.body?.pipeTo(new WritableStream())
+      } catch (err) {
+        throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
+      }
+    }
     return {
       data: {
         ...incomingFileData,
         ...getRequestTimeDefaultFileData({
-          original: retainedOriginal,
+          original: requestOriginal,
           transforms: pipelineDoc._transforms,
+        }),
+        original: requestOriginal,
+        variants: await getRequestTimeVariants({
+          collection: collectionConfig,
+          documentID,
+          filename: requestOriginal.filename,
+          original: requestOriginal,
+          prefix: requestOriginal.prefix,
+          req,
+          staticPath: disableLocalStorage ? undefined : staticPath,
         }),
         ...(draft ? { _status: 'draft' } : {}),
       } as T,
@@ -795,7 +859,14 @@ const processUpload = async <T>({
     const hasReusableOriginalMain = Boolean(
       isResettingCrop && !fileWasTransformed && retainedOriginal,
     )
-    if (hasReusableOriginalMain && !hasFocalPointChange && retainedOriginal) {
+    const shouldPreserveExistingVariants = hasReusableOriginalMain && !hasFocalPointChange
+    if (
+      shouldPreserveExistingVariants &&
+      retainedOriginal &&
+      !(collectionConfig.upload.variants ?? []).some(
+        ({ name }) => !currentFileData?.variants?.[name]?.filename,
+      )
+    ) {
       return {
         data: {
           ...incomingFileData,
@@ -1049,6 +1120,11 @@ const processUpload = async <T>({
 
       for (const result of sizeResults) {
         const sizeName = result.fieldPath.slice('variants.'.length)
+        const existingSize = currentFileData?.variants?.[sizeName]
+        if (shouldPreserveExistingVariants && existingSize?.filename) {
+          sizes[sizeName] = existingSize
+          continue
+        }
 
         if (!result.file) {
           sizes[sizeName] = {
@@ -1184,6 +1260,14 @@ const processUpload = async <T>({
         req,
         staticPath: disableLocalStorage ? undefined : staticPath!,
       })
+      if (shouldPreserveExistingVariants) {
+        for (const name of Object.keys(fileData.variants)) {
+          const existingSize = currentFileData?.variants?.[name]
+          if (existingSize?.filename) {
+            fileData.variants[name] = existingSize
+          }
+        }
+      }
     }
   } catch (err) {
     throw toFileUploadError({ err, req })

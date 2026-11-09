@@ -145,7 +145,7 @@ A key that breaks these rules fails the operation with a validation error for `_
 
 An update that does not process the file, such as a change to another field, keeps the saved `_transforms` value without this check. A key whose transformer was removed stays readable and survives such updates. For a built-in key, changing `_transforms` on that document fails until a configured transformer claims the key again, or until the key is removed. A custom key is then saved and does nothing.
 
-An older upload with no retained `original` is processed from its current main file the first time. Payload then keeps that file as its `original`, and later changes start from it.
+An older upload with no retained `original` uses its current stored main as the source for its first edit. Before switching that file to request-time edits, Payload verifies that the source is readable through its storage handler or local storage. A missing source fails the save. Payload retains the source’s storage identity and bytes as its `original`, and later edits start from it. Edits made before that adoption cannot be recovered.
 
 ## The `transformFile` capability (uploads)
 
@@ -349,6 +349,8 @@ When upload processing does not store the sizes, their owner must participate in
 - The size's URL uses Payload's file route and runs phase 1 from the original, even when the main file is stored or the storage adapter normally returns direct URLs. `handleRequest` gets the size's name as `variantName`.
 
 Each save of a new file writes these entries again. A client upload (`clientUploads`) is not downloaded in full only because such sizes are declared.
+
+New uploads, saved-transform processing, and version restores populate entries for currently registered sizes. Reads and unrelated metadata updates do not add newly registered sizes.
 
 Serving a request-time size requires its declaration and owner to remain registered, and its owner must participate in the saved-state plan. Removing the owner fails the request rather than serving the original in its place. Stored sizes continue to serve their saved bytes.
 
