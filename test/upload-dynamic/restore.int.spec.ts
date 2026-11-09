@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 
+import { existsSync } from 'node:fs'
 import { readdir, readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -17,6 +18,7 @@ import {
   versionedDynamicMediaDir,
   versionedDynamicMediaSlug,
 } from './shared.js'
+import { uploadCropSources } from './transformers.js'
 
 const imageFixture = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -88,6 +90,23 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     sourceReadCalls.length = 0
     versionedCloudFiles.clear()
     await rm(versionedDynamicMediaDir, { force: true, recursive: true })
+  })
+
+  test('should read the retained original from a temp file when restoring through the upload pipeline, and remove it', async ({
+    payload,
+  }) => {
+    const { selected } = await prepareHistory({ payload, replaceOriginal: true })
+    uploadCropSources.length = 0
+
+    await payload.restoreVersion({
+      id: String(selected.id),
+      collection: versionedDynamicMediaSlug,
+      context: { isUploadCropEnabled: true },
+      overrideAccess: true,
+    })
+
+    expect(uploadCropSources).toEqual([{ tempFilePath: expect.any(String) }])
+    expect(existsSync(uploadCropSources[0]!.tempFilePath!)).toBe(false)
   })
 
   test('should replay saved transforms through the current upload pipeline when restoring a dynamic file', async ({

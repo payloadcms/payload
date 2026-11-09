@@ -571,7 +571,7 @@ const readBoundedPrefix = async (response: Response, maxBytes: number): Promise<
  * (e.g. Azure's chunkLargeFiles) can be far larger than the server's available memory, so this
  * avoids re-downloading the whole file into a single in-memory buffer just to read it back out.
  */
-const streamResponseToTempFile = async ({
+export const streamResponseToTempFile = async ({
   req,
   response,
 }: {

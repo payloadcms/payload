@@ -1,3 +1,5 @@
+import { rm, stat } from 'node:fs/promises'
+
 import type { TypeWithID } from '../../collections/config/types.js'
 import type { Document, JsonObject } from '../../types/index.js'
 import type { OriginalFileData } from '../types.js'
@@ -11,6 +13,7 @@ import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
 import { generateFileData } from '../generateFileData.js'
 import { generateFilePathOrURL } from '../generateFilePathOrURL.js'
+import { streamResponseToTempFile } from '../getFileFromUploadInstructions.js'
 import { shouldRequestOriginal } from '../isOriginalFileRequest.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { getRequestTimeDefaultFileData, getRequestTimeVariants } from '../requestTimeFileData.js'
@@ -209,64 +212,71 @@ export async function runRequestTimeFileRestore<T>({
   if (!response.ok) {
     throw new APIError('Unable to read the retained original for restore.', 400)
   }
-  const buffer = Buffer.from(await response.arrayBuffer())
-  replayReq.file = {
-    name: original.filename,
-    data: buffer,
-    mimetype: original.mimeType,
-    size: buffer.length,
-  }
-  const { data, files } = await generateFileData<JsonObject>({
-    collection: { config: collection },
-    config: req.payload.config,
-    data: pipelineDoc,
-    operation: 'create',
-    overwriteExistingFiles: false,
-    req: replayReq,
-  })
-  const finalTransformError = await getTransformStateError({ original, value: data._transforms })
-  if (finalTransformError) {
-    throw new ValidationError(
-      {
-        collection: collection.slug,
-        errors: [{ message: finalTransformError, path: '_transforms' }],
-        req,
-      },
-      req.t,
-    )
-  }
+  // Stream the retained original to a temp file, so core never holds the whole source in memory.
+  const tempFilePath = await streamResponseToTempFile({ req: replayReq, response })
 
-  // The retained original is immutable. Reuse it instead of storing another copy or archiving
-  // its selected historical reference when only the generated outputs change.
-  data.original = { ...original }
-  const outputFiles = files.filter(({ role }) => role?.type !== 'original')
-  const restored = normalizeURLs({ restored: clearRemovedVariants({ restored: data }) })
-  const writeRestored = () => {
-    if (collection.upload.fileOperations) {
-      // Keep the existing adapter metadata hook active through the outer restore's afterChange.
-      req.context._payloadManagedCloudStorage = true
-      req.context._payloadManagedCloudMetadata = replayReq.context._payloadManagedCloudMetadata
+  try {
+    replayReq.file = {
+      name: original.filename,
+      data: Buffer.alloc(0),
+      mimetype: original.mimeType,
+      size: (await stat(tempFilePath)).size,
+      tempFilePath,
     }
-    return write(restored)
-  }
+    const { data, files } = await generateFileData<JsonObject>({
+      collection: { config: collection },
+      config: req.payload.config,
+      data: pipelineDoc,
+      operation: 'create',
+      overwriteExistingFiles: false,
+      req: replayReq,
+    })
+    const finalTransformError = await getTransformStateError({ original, value: data._transforms })
+    if (finalTransformError) {
+      throw new ValidationError(
+        {
+          collection: collection.slug,
+          errors: [{ message: finalTransformError, path: '_transforms' }],
+          req,
+        },
+        req.t,
+      )
+    }
 
-  return collection.upload.fileOperations
-    ? runCloudFileUpdate({
-        id,
-        collection,
-        current,
-        data: restored,
-        files: outputFiles,
-        req: replayReq,
-        write: writeRestored,
-      })
-    : runLocalFileUpdate({
-        id,
-        collection,
-        current,
-        files: outputFiles,
-        next: restored,
-        req: replayReq,
-        write: writeRestored,
-      })
+    // The retained original is immutable. Reuse it instead of storing another copy or archiving
+    // its selected historical reference when only the generated outputs change.
+    data.original = { ...original }
+    const outputFiles = files.filter(({ role }) => role?.type !== 'original')
+    const restored = normalizeURLs({ restored: clearRemovedVariants({ restored: data }) })
+    const writeRestored = () => {
+      if (collection.upload.fileOperations) {
+        // Keep the existing adapter metadata hook active through the outer restore's afterChange.
+        req.context._payloadManagedCloudStorage = true
+        req.context._payloadManagedCloudMetadata = replayReq.context._payloadManagedCloudMetadata
+      }
+      return write(restored)
+    }
+
+    return await (collection.upload.fileOperations
+      ? runCloudFileUpdate({
+          id,
+          collection,
+          current,
+          data: restored,
+          files: outputFiles,
+          req: replayReq,
+          write: writeRestored,
+        })
+      : runLocalFileUpdate({
+          id,
+          collection,
+          current,
+          files: outputFiles,
+          next: restored,
+          req: replayReq,
+          write: writeRestored,
+        }))
+  } finally {
+    await rm(tempFilePath, { force: true })
+  }
 }
