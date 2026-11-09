@@ -15,7 +15,7 @@ import { validateQueryPaths } from '../../database/queryValidation/validateQuery
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError, Locked } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
+import { deleteUserPreferences, findUserPreferenceIDs } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import {
   collectStoredFiles,
@@ -331,6 +331,13 @@ export const deleteOperation = async <
           })
         }
 
+        const preferenceIDs = await findUserPreferenceIDs({
+          collectionConfig,
+          ids: [doc.id],
+          payload,
+          req,
+        })
+
         await payload.db.deleteOne({
           collection: collectionConfig.slug,
           req,
@@ -349,6 +356,14 @@ export const deleteOperation = async <
             req,
           })
         }
+
+        await deleteUserPreferences({
+          collectionConfig,
+          ids: [doc.id],
+          payload,
+          preferenceIDs,
+          req,
+        })
 
         const result = await runAfterDeleteWork(doc)
 
@@ -456,6 +471,13 @@ export const deleteOperation = async <
         })
       }
 
+      const preferenceIDs = await findUserPreferenceIDs({
+        collectionConfig,
+        ids,
+        payload,
+        req,
+      })
+
       // /////////////////////////////////////
       // Delete documents
       // /////////////////////////////////////
@@ -499,6 +521,14 @@ export const deleteOperation = async <
         })
       }
 
+      await deleteUserPreferences({
+        collectionConfig,
+        ids,
+        payload,
+        preferenceIDs,
+        req,
+      })
+
       await Promise.all(
         deletable.map(async (entry) => {
           try {
@@ -523,19 +553,6 @@ export const deleteOperation = async <
       }
     } else {
       awaitedDocs = await deleteDocumentsInBulk()
-    }
-
-    // /////////////////////////////////////
-    // Delete Preferences
-    // /////////////////////////////////////
-
-    if (!didBatchDeleteFail) {
-      await deleteUserPreferences({
-        collectionConfig,
-        ids: docs.map(({ id }) => id),
-        payload,
-        req,
-      })
     }
 
     let result = {
