@@ -12,14 +12,15 @@ Payload requires the following software:
 
 - Any JavaScript package manager (pnpm, npm, or yarn 2+ - pnpm is preferred, yarn 1.x is not supported)
 - Node.js version `24.22.1`+
-- Next.js `16.4.0`+
+- Next.js `16.4.1`+ (below `17.0.0`)
+- React and React DOM `^19.3.1`
 - TypeScript version `6.0.3`+. Types are not guaranteed to work on older versions.
 - Any [compatible database](/docs/database/overview) (MongoDB, Postgres or SQLite)
 
 <Banner type="warning">
-  **Important:** Before proceeding any further, please ensure that you have the
-  above requirements met. Not all Next.js 16 releases are compatible — make sure
-  you're using one of the supported version ranges listed above.
+  **Important:** Before proceeding any further, please ensure that you have the above requirements
+  met. Not all Next.js 16 releases are compatible — make sure you're using one of the supported
+  version ranges listed above.
 </Banner>
 
 ## Quickstart with create-payload-app
@@ -39,11 +40,10 @@ Adding Payload to an existing Next.js app is super straightforward. You can eith
 If you don't have a Next.js app already, but you still want to start a project from a blank Next.js app, you can create a new Next.js app using `npx create-next-app` - and then just follow the steps below to install Payload.
 
 <Banner type="info">
-  The steps below target the **Next.js App Router**. Payload's Admin Panel also
-  runs on [TanStack Start](https://tanstack.com/start/latest) via the
-  `@payloadcms/tanstack-start` package — the differences are called out inline
-  where they apply. See [Project Structure](../admin/overview#project-structure)
-  for the TanStack Start file layout.
+  The steps below target the **Next.js App Router**. Payload's Admin Panel also runs on [TanStack
+  Start](https://tanstack.com/start/latest) via the `@payloadcms/tanstack-start` package — the
+  differences are called out inline where they apply. See [Project
+  Structure](../admin/overview#project-structure) for the TanStack Start file layout.
 </Banner>
 
 #### 1. Install the relevant packages
@@ -60,6 +60,8 @@ If you are running the Admin Panel on TanStack Start, install `@payloadcms/tanst
 pnpm i payload @payloadcms/tanstack-start
 ```
 
+TanStack Start applications require `@vitejs/plugin-rsc` `0.5.38` or newer within the `0.5.x` release line. Earlier versions bundle an affected React Server Components implementation.
+
 You'll also likely want to install the following optional packages:
 
 - `@payloadcms/richtext-lexical` - Rich text editor (not needed if you don't use Rich Text)
@@ -71,8 +73,10 @@ pnpm i @payloadcms/richtext-lexical sharp graphql
 ```
 
 <Banner type="warning">
-  **Note:** Swap out `pnpm` for your package manager. If you are using npm, you
-  might need to install using legacy peer deps: `npm i --legacy-peer-deps`.
+  Use versions that satisfy all peer dependency requirements. For pnpm, enable
+  `strict-peer-dependencies=true` to reject incompatible versions during installation. Do not bypass
+  peer checks with `--legacy-peer-deps` or `--force`; doing so can leave vulnerable framework
+  versions installed.
 </Banner>
 
 Next, install a [Database Adapter](/docs/database/overview). Payload requires a Database Adapter to establish a database connection. Payload works with all types of databases, but the most common are MongoDB and Postgres.
@@ -97,9 +101,8 @@ To install a Database Adapter, you can run **one** of the following commands:
   ```
 
 <Banner type="success">
-  **Note:** New [Database Adapters](/docs/database/overview) are becoming
-  available every day. Check the docs for the most up-to-date list of what's
-  available.
+  **Note:** New [Database Adapters](/docs/database/overview) are becoming available every day. Check
+  the docs for the most up-to-date list of what's available.
 </Banner>
 
 #### 2. Copy Payload files into your app
@@ -117,10 +120,10 @@ app/
 _For an exact reference of the `(payload)` directory, see [Project Structure](../admin/overview#project-structure)._
 
 <Banner type="warning">
-  You may need to copy all of your existing frontend files, including your
-  existing root layout, into its own newly created [Route
-  Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups),
-  i.e. `(my-app)`.
+  You may need to copy all of your existing frontend files, including your existing root layout,
+  into its own newly created [Route
+  Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups), i.e.
+  `(my-app)`.
 </Banner>
 
 For TanStack Start, copy the generated routes and supporting files from the [Blank TanStack Start Template](https://github.com/payloadcms/payload/tree/main/templates/blank-tanstack/src/app) into your `src/app` directory. The files are `__root.tsx`, `_payload.tsx`, the `_payload/` route directory, and `router.tsx` at `src/router.tsx`:
@@ -164,8 +167,8 @@ export default withPayload(nextConfig) // highlight-line
 ```
 
 <Banner type="warning">
-  **Important:** Payload is a fully ESM project, and that means the
-  `withPayload` function is an ECMAScript module.
+  **Important:** Payload is a fully ESM project, and that means the `withPayload` function is an
+  ECMAScript module.
 </Banner>
 
 To import the Payload Plugin, you need to make sure your `next.config` file is set up to use ESM.
@@ -179,10 +182,9 @@ In either case, all `require`s and `export`s in your `next.config` file will nee
 
 <Banner type="info">
   **TanStack Start:** there is no `next.config` step. TanStack Start builds with
-  [Vite](https://vite.dev), so use `withPayload` from
-  `@payloadcms/tanstack-start` in your `vite.config`. Pass it a
-  `payloadConfigPath` and provide the `rsc`, `tanstackStart`, and `viteReact`
-  plugins through its `pluginOptions`. See the [Blank TanStack Start
+  [Vite](https://vite.dev), so use `withPayload` from `@payloadcms/tanstack-start` in your
+  `vite.config`. Pass it a `payloadConfigPath` and provide the `rsc`, `tanstackStart`, and
+  `viteReact` plugins through its `pluginOptions`. See the [Blank TanStack Start
   Template](https://github.com/payloadcms/payload/blob/main/templates/blank-tanstack/vite.config.ts)
   for a complete example.
 </Banner>
