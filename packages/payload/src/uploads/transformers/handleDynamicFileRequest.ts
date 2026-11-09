@@ -324,9 +324,12 @@ async function planRequestPipeline({
   req: PayloadRequest
 }): Promise<RequestStage[]> {
   const requestedFile = getRequestedFile({ document, filename })
-  const purposes = requestedFile.isBuiltAtRequest
-    ? (['persisted-default', 'request-override'] as const)
-    : (['request-override'] as const)
+  // A historical file shows a saved state, so request parameters never change it.
+  const purposes = isHistorical
+    ? (['persisted-default'] as const)
+    : requestedFile.isBuiltAtRequest
+      ? (['persisted-default', 'request-override'] as const)
+      : (['request-override'] as const)
   const pipeline: RequestStage[] = []
 
   for (const purpose of purposes) {

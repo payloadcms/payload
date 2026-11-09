@@ -104,33 +104,24 @@ test.suite('Historical request-time files', { config: './config.ts' }, () => {
     expect(requestCropCalls).toHaveLength(1)
   })
 
-  test('should check transform access before signing a historical override and keep the selected snapshot', async ({
+  test('should ignore request parameters on a historical file and serve its saved state', async ({
     payload,
     restClient,
   }) => {
     const { selected } = await replaceImage({ payload })
-    const url =
-      `/${versionedDynamicMediaSlug}/file/${selected.version.variants!.card!.filename}?version=${selected.id}&w=200&q=70` as const
-    const headers = { 'x-test-sign-image': 'true' }
+    const response = await restClient.GET(
+      `/${versionedDynamicMediaSlug}/file/${selected.version.variants!.card!.filename}?version=${selected.id}&w=200&q=70`,
+      { auth: false },
+    )
 
-    expect((await restClient.GET(url, { auth: false, headers })).status).toBe(403)
-    expect(signedImagePlans).toHaveLength(0)
-    expect(sourceReadCalls).toHaveLength(0)
-
-    const response = await restClient.GET(url, { headers, redirect: 'manual' })
-
-    expect(response.status).toBe(302)
-    expect(signedImagePlans).toHaveLength(1)
-    expect(signedImagePlans[0]).toMatchObject({
-      document: { alt: selected.version.alt, id: selected.parent },
-      crop: savedCrop,
-      original: selected.version.original,
-      overrides: { quality: 70, width: 200 },
-      variantName: 'card',
+    expect(response.status).toBe(200)
+    expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject({
+      height: 300,
+      width: 400,
     })
-    expect(sourceReadCalls).toHaveLength(0)
-    expect(Object.isFrozen(signedImagePlans[0]!.document)).toBe(true)
-    expect(Object.isFrozen(signedImagePlans[0]!.document._transforms)).toBe(true)
+    expect(requestCropCalls).toEqual([
+      { crop: savedCrop, purpose: 'persisted-default', variantName: 'card' },
+    ])
   })
 
   for (const policy of ['read', 'readVersions'] as const) {
@@ -235,40 +226,25 @@ test.suite('Historical request-time files', { config: './config.ts' }, () => {
     expect(sourceReadCalls).toHaveLength(0)
   })
 
-  test('should support transform-only access without applying that access context to version reads', async ({
+  test('should not let transform-only access read a historical file, with or without request parameters', async ({
     payload,
     restClient,
   }) => {
     const { selected } = await replaceImage({ payload })
     const collection = payload.collections[versionedDynamicMediaSlug].config
     const originalRead = collection.access.read
-    const originalReadVersions = collection.access.readVersions
-    const versionAccessModes: (boolean | undefined)[] = []
     const url =
       `/${versionedDynamicMediaSlug}/file/${selected.version.variants!.card!.filename}?version=${selected.id}` as const
 
     try {
       collection.access.read = ({ req }) => Boolean(req.fileTransform)
-      collection.access.readVersions = ({ req }) => {
-        versionAccessModes.push(req.fileTransform)
-        return !req.fileTransform
-      }
 
       expect((await restClient.GET(url)).status).toBe(403)
+      expect((await restClient.GET(`${url}&w=200`)).status).toBe(403)
       expect(requestCropCalls).toHaveLength(0)
       expect(sourceReadCalls).toHaveLength(0)
-
-      const response = await restClient.GET(`${url}&w=200`)
-
-      expect(response.status).toBe(200)
-      expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject({
-        height: 150,
-        width: 200,
-      })
-      expect(versionAccessModes.every((value) => !value)).toBe(true)
     } finally {
       collection.access.read = originalRead
-      collection.access.readVersions = originalReadVersions
     }
   })
 
