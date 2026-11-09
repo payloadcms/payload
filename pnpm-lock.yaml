@@ -196,6 +196,12 @@ importers:
       postcss:
         specifier: ^8.4.49
         version: 8.5.32
+      postcss-resolve-nested-selector:
+        specifier: ^0.1.7
+        version: 0.1.7
+      postcss-selector-parser:
+        specifier: ^7.1.7
+        version: 7.1.7
       react:
         specifier: 19.3.1
         version: 19.3.1
