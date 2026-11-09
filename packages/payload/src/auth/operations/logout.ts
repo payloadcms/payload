@@ -84,7 +84,6 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
         collection: collectionConfig.slug,
         data: {
           sessions: userWithSessions.sessions,
-          // Prevent updatedAt from being updated when only removing a session
           updatedAt: null,
         },
         req,

@@ -98,7 +98,6 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         collection: collectionConfig.slug,
         data: {
           sessions: removeExpiredSessions(user.sessions),
-          // Prevent updatedAt from being updated when only refreshing a session
           updatedAt: null,
         },
         req,
