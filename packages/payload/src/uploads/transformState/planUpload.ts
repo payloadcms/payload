@@ -238,20 +238,27 @@ export async function resolveTransformKeyCoverage({
   const hasOnlyUnclaimedKeys = errors.every(
     ({ path }) => !uploadClaimedKeys.has(path.slice('_transforms.'.length)),
   )
+  // Every output must apply the saved keys. Sizes are stored at upload unless their owner builds
+  // them at request time, so with sizes the owner must be a request-time stage too.
+  const upload = req.payload.collections?.[collectionSlug]?.config.upload
+  const hasVariants = Boolean(upload?.variants?.length)
+  const canBuildVariantsAtRequest = !hasVariants || Boolean(upload?.variantsTransformerSlug)
 
-  if (canApplyAtRequest && hasOnlyUnclaimedKeys) {
-    const { coverageErrors } = await planPersistedDefaultStages({
+  if (
+    canApplyAtRequest &&
+    hasOnlyUnclaimedKeys &&
+    canBuildVariantsAtRequest &&
+    (await canBuildAtRequest({
       collectionSlug,
-      doc: pipelineOriginalDoc,
       documentID,
       mimeType,
+      pipelineDoc,
+      pipelineOriginalDoc,
       req,
-      transforms: pipelineDoc._transforms,
-    })
-
-    if (coverageErrors.length === 0) {
-      return { isAppliedAtRequest: true }
-    }
+      requiredTransformerSlug: hasVariants ? upload?.variantsTransformerSlug : undefined,
+    }))
+  ) {
+    return { isAppliedAtRequest: true }
   }
 
   throw new ValidationError({ collection: collectionSlug, errors, req }, req.t)
@@ -275,4 +282,38 @@ export function assertTransformKeysCovered({
   if (errors.length > 0) {
     throw new ValidationError({ collection: collectionSlug, errors, req }, req.t)
   }
+}
+
+/**
+ * Whether request-time stages can build a file of this MIME type from the original, applying every
+ * saved key. With `requiredTransformerSlug`, that transformer must also be one of the stages.
+ */
+export async function canBuildAtRequest({
+  collectionSlug,
+  documentID,
+  mimeType,
+  pipelineDoc,
+  pipelineOriginalDoc,
+  req,
+  requiredTransformerSlug,
+}: {
+  documentID?: number | string
+  mimeType: string
+  requiredTransformerSlug?: string
+} & PlanArgs): Promise<boolean> {
+  const { coverageErrors, plan: requestPlan } = await planPersistedDefaultStages({
+    collectionSlug,
+    doc: pipelineOriginalDoc,
+    documentID,
+    mimeType,
+    req,
+    transforms: pipelineDoc._transforms,
+  })
+
+  return (
+    requestPlan.pipeline.length > 0 &&
+    (requiredTransformerSlug === undefined ||
+      requestPlan.pipeline.some((transformer) => transformer.slug === requiredTransformerSlug)) &&
+    coverageErrors.length === 0
+  )
 }

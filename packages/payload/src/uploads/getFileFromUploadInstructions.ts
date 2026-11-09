@@ -21,6 +21,7 @@ import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileCo
 import { getImageSize } from './getImageSize.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { getStagedFile } from './stagedUpload.js'
+import { getUploadTransformerInternal } from './transformers/uploadTransformerBridge.js'
 
 export const getFileFromUploadInstructions = async ({
   collectionSlug,
@@ -183,6 +184,17 @@ export const getFileFromUploadInstructions = async ({
   const contentRequirement = getFileContentRequirement({
     filename: providerFilename,
     hasSizeEdits: requestHasSizeEdits(req),
+    // Only Sharp's bridge stores sizes.
+    hasVariantsBuiltOnRequest: !(req.payload.config.upload?.transformers ?? []).some(
+      (transformer) => {
+        const bridge = getUploadTransformerInternal(transformer)
+
+        return (
+          Boolean(bridge?.prepareUpload) &&
+          bridge?.handlesCollection?.({ collectionSlug }) !== false
+        )
+      },
+    ),
     mimeType: file.mimeType,
     uploadConfig,
   })

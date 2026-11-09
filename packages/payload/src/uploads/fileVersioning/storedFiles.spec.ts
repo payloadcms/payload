@@ -19,8 +19,8 @@ const original = { _objectKey: 'original-key', filename: 'photo.png' }
 
 it.for([
   {
-    name: 'leave out a main file that has no stored object, and keep its original',
-    marker: { _stored: false },
+    name: 'leave out a main file and a size that have no stored object, and keep their original',
+    marker: { _stored: false, variants: { card: { _stored: false, filename: 'photo-card.png' } } },
     expected: [{ key: 'original-key/photo.png', roles: [{ type: 'original' }] }],
   },
   {

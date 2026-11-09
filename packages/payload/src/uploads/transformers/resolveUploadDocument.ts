@@ -12,7 +12,10 @@ export type ResolvedUploadDocument = {
   filename: string
   mimeType: string
   original?: { filename?: null | string; mimeType?: null | string } | null
-  variants?: Record<string, { filename?: null | string; mimeType?: null | string } | null>
+  variants?: Record<
+    string,
+    { _stored?: boolean | null; filename?: null | string; mimeType?: null | string } | null
+  >
 } & TypeWithID
 
 /**
@@ -40,9 +43,10 @@ export function buildFilenameWhere({
 }
 
 /**
- * The `filename` and `mimeType` of the file a request actually targets: the
- * primary file, or the legacy image size whose filename matched (a size can be
- * stored in a different format than the primary file via `formatOptions`).
+ * The file a request actually targets: the primary file, the original, or the image size whose
+ * filename matched (a size can be stored in a different format than the primary file via
+ * `formatOptions`). A file that is not stored is built from the original when it is requested, so
+ * a size with no known MIME type uses the original's.
  */
 export function getRequestedFile({
   document,
@@ -50,22 +54,30 @@ export function getRequestedFile({
 }: {
   document: ResolvedUploadDocument
   filename: string
-}): { filename: string; isBuiltAtRequest: boolean; mimeType: string } {
+}): { filename: string; isBuiltAtRequest: boolean; mimeType: string; variantName?: string } {
   if (document.filename !== filename) {
     if (document.original?.filename === filename && document.original.mimeType) {
       return { filename, isBuiltAtRequest: false, mimeType: document.original.mimeType }
     }
 
-    const size = Object.values(document.variants ?? {}).find((size) => size?.filename === filename)
+    const variant = Object.entries(document.variants ?? {}).find(
+      ([, size]) => size?.filename === filename,
+    )
 
-    if (size?.filename && size.mimeType) {
-      return { filename: size.filename, isBuiltAtRequest: false, mimeType: size.mimeType }
+    if (variant) {
+      const [variantName, size] = variant
+
+      return {
+        filename,
+        isBuiltAtRequest: isRequestTimeFile({ entry: size }),
+        mimeType: size?.mimeType ?? document.original?.mimeType ?? document.mimeType,
+        variantName,
+      }
     }
   }
 
   return {
     filename: document.filename,
-    // Only the default file of a document with no stored default is built at request time.
     isBuiltAtRequest: isRequestTimeFile({ entry: document }),
     mimeType: document.mimeType,
   }

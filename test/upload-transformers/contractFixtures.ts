@@ -16,6 +16,8 @@ export type ContractStages = {
   ) => Promise<TransformFileResult | void> | TransformFileResult | void
   /** The `_transforms` keys the transformer claims. Without them, `canTransform` returns `true`. */
   handledTransformKeys?: string[]
+  /** The `_transforms` keys the transformer claims in the saved-state phase of a request. */
+  requestClaims?: string[]
 }
 
 /** The arguments the contract transformer received, in the order the calls ran. */
@@ -43,6 +45,13 @@ export const contractTransformers: UploadTransformer[] = [
       contractCalls.canTransform.push(args)
 
       if (args.operation === 'request') {
+        const requestClaims = (args.req.context?.contractStages as ContractStages | undefined)
+          ?.requestClaims
+
+        if (requestClaims && args.purpose === 'persisted-default') {
+          return { canTransform: true, handledTransformKeys: requestClaims, options: {} }
+        }
+
         return args.req.searchParams?.has('contract')
           ? { canTransform: true, options: { purpose: args.purpose } }
           : false

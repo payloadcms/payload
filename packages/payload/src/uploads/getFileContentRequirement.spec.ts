@@ -39,6 +39,11 @@ describe('getFileContentRequirement', () => {
       png({ variants: [{ name: 'thumbnail', width: 100 }] }),
       'full',
     ],
+    [
+      'only the header for an image whose variants are built on request',
+      { ...png({ variants: [{ name: 'card' }] }), hasVariantsBuiltOnRequest: true },
+      'header',
+    ],
     ['only the header for an image with an empty variants array', png({ variants: [] }), 'header'],
     ['the full file for an animated image', file('image.gif', 'image/gif'), 'full'],
     [

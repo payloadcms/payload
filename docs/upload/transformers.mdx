@@ -262,6 +262,7 @@ handleRequest: (args: {
   options: TOptions
   originalDoc: Readonly<Document>
   req: PayloadRequest
+  variantName?: string
 }) =>
   Promise<
     | { response?: Response; status: 'continue' }
@@ -274,6 +275,8 @@ handleRequest: (args: {
 - A transformer that only redirects, or that answers from a source it already has, never has to pay the cost of reading the stored file.
 - The `getSourceFile` chain reads the stored source at most once per request, and each stage reads the output of the one before it. Calls to `getOriginalFile` read the original separately.
 - A stage that calls `getSourceFile` must return a `response` — returning `continue` without one throws a `TransformerContractError` (a `500`), because the source it consumed would otherwise be lost.
+
+`variantName` is the name of the requested size in `variants`, or `undefined` for the main file and the original.
 
 `getOriginalFile` returns the retained original file (or the main file, for an older upload with no `original`). Like `getSourceFile`, each stage gets its own getter, which can be called only once. Payload closes the original's response when the stage does not return it, or when the pipeline fails.
 
@@ -291,7 +294,7 @@ GET /api/<collection>/file/<filename>?width=500
 
 Inside each phase, transformers run in the order of `upload.transformers`. A `complete` result in phase 1 ends the entire pipeline: no handler in phase 2 runs.
 
-Phase 1 runs only when the requested main file has no stored object (`_stored: false`). Requests for stored files, including stored variants on the same document, run only phase 2.
+Phase 1 runs only when the requested main file or size has no stored object (`_stored: false`). Requests for stored files, including stored variants on the same document, run only phase 2.
 
 #### Files with no stored default
 
@@ -306,6 +309,42 @@ For such a document:
 - A duplicate keeps the saved keys and copies the original. When the saved keys no longer need a request-time stage, for example after the crop is removed, Payload stores the default file again.
 
 In phase 1, the [rules for saved keys](#applying-saved-_transforms-keys) apply to the stages that return `handledTransformKeys`. If a built-in key has no stage, or a key has two, the request fails with a `500`, and Payload logs an error that names the key. This happens before Payload reads a file or runs a stage. Phase 1 must produce a response; if no stage builds the file, Payload returns a `500` instead of serving the untransformed original.
+
+#### Sizes with no stored file
+
+Register sizes from the transformer's `init` with `registerUploadVariants`. Each collection must have uploads enabled, and each size needs a unique name that does not conflict with a built-in upload field or contain path separators. Only one transformer can register sizes on a collection. Pass its configured `slug` as `transformerSlug`; Payload uses this to identify the owner when planning request-time sizes.
+
+```ts
+import type { UploadTransformer } from 'payload'
+
+import { registerUploadVariants } from 'payload'
+
+const cdnTransformer: UploadTransformer = {
+  slug: 'cdn',
+  mimeTypes: ['image/*'],
+  init: (config) =>
+    registerUploadVariants({
+      collections: {
+        media: { variants: [{ name: 'card' }, { name: 'thumbnail' }] },
+      },
+      config,
+      transformerSlug: 'cdn',
+    }),
+  // Add canTransform and handleRequest to build these sizes.
+}
+```
+
+Registration adds the size names and admin options to the sanitized collection config. Keep image-service presets, such as dimensions and output formats, in your transformer configuration. In `handleRequest`, use `variantName` to select the preset and combine it with the saved edits and request parameters.
+
+When upload processing does not store the sizes, their owner must participate in the `persisted-default` plan. Payload then writes an entry for each registered size with no stored file:
+
+- `filename` is the main file's name with the size name added and the original's extension, for example `photo-card.png`, changed when another file already uses that name. `generateImageName` is not used, because the size's dimensions are not known.
+- `_stored` is `false`. `width`, `height`, `filesize`, and `mimeType` are `null`.
+- The size's URL uses Payload's file route and runs phase 1 from the original, even when the main file is stored or the storage adapter normally returns direct URLs. `handleRequest` gets the size's name as `variantName`.
+
+Each save of a new file writes these entries again. A client upload (`clientUploads`) is not downloaded in full only because such sizes are declared.
+
+Request-time sizes follow the same [saved-key rules](#applying-saved-_transforms-keys) as the main file, including the exception for unclaimed focal points and custom keys. When the saved keys can be applied only at request time, the owner of the sizes must also build them at request time. Otherwise the save fails before any file changes, and the error names each key that no stage can apply. For example, a `rotate` that only a request-time transformer applies cannot be saved on a collection whose sizes `sharpTransformer` stores.
 
 Request parameters never change `_transforms`. To save a change, update the document.
 
