@@ -1,5 +1,4 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
-
 import type { Payload } from 'payload'
 
 import { expect } from 'vitest'
@@ -7,13 +6,9 @@ import { expect } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { migrateBranching } from '../../packages/db-mongodb/src/predefinedMigrations/migrateBranching.js'
-
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { branchChangesSlug, homepageGlobalSlug, pagesSlug, uniqueSlug } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -106,7 +101,8 @@ test.suite(
 
         expect(indexes.some((index) => index.name === 'legacy_slug_unique')).toBe(false)
 
-        const onBranch = await payload.create({
+        const onBranch = await payload.update({
+          id: unique.id,
           branch: 'cow',
           collection: uniqueSlug,
           data: { slug: 'legacy-unique' },
@@ -114,7 +110,7 @@ test.suite(
 
         expect(onBranch.slug).toBe('legacy-unique')
 
-        await payload.delete({ id: onBranch.id, branch: false, collection: uniqueSlug })
+        await payload.delete({ id: onBranch.id, branch: 'cow', collection: uniqueSlug })
         await payload.delete({ id: unique.id, branch: false, collection: uniqueSlug })
         await payload.delete({ id: page.id, branch: false, collection: pagesSlug })
 

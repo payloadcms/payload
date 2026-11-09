@@ -2,6 +2,8 @@ import type { ValidationFieldError } from '../../../errors/ValidationError.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { SanitizedCollectionConfig } from '../../config/types.js'
 
+import { resolveBranch } from '../../../branching/resolveBranch.js'
+import { branchDocIDField, branchField, MAIN_BRANCH } from '../../../branching/types.js'
 import { ValidationError } from '../../../errors/index.js'
 import { fieldAffectsData } from '../../../fields/config/types.js'
 import { documentMatchingWhereExists } from '../../../utilities/documentMatchingWhereExists.js'
@@ -22,12 +24,31 @@ type UniqueFieldValue = {
   value: unknown
 } & Pick<ValidationFieldError, 'label' | 'path'>
 
+/** Check inherited content without preventing copies of the same canonical document. */
+export const validateBranchUniqueConstraints = async (args: Args): Promise<void> => {
+  const branching = args.req.payload.config.branching
+
+  if (
+    branching?.enabled &&
+    branching.branchableCollections.has(args.collection.slug) &&
+    resolveBranch({ req: args.req }) !== MAIN_BRANCH
+  ) {
+    await validateUniqueConstraints(args)
+  }
+}
+
 export const validateUniqueConstraints = async ({
   id,
   collection,
   data,
   req,
 }: Args): Promise<void> => {
+  const branching = req.payload.config.branching
+  const shouldCheckInherited = Boolean(
+    branching?.enabled &&
+    branching.branchableCollections.has(collection.slug) &&
+    resolveBranch({ req }) !== MAIN_BRANCH,
+  )
   const uniqueFieldValues: UniqueFieldValue[] = []
 
   traverseFields({
@@ -61,6 +82,7 @@ export const validateUniqueConstraints = async ({
       exists: await fieldValueExists({
         id,
         collection: collection.slug,
+        draftsEnabled: shouldCheckInherited && Boolean(collection.versions?.drafts),
         field: uniqueFieldValue.field,
         locale: req.locale ?? undefined,
         overrideAccess: true,
@@ -77,7 +99,22 @@ export const validateUniqueConstraints = async ({
       path,
     }))
 
-  const uniqueCompoundIndexes = collection.sanitizedIndexes.filter(({ unique }) => unique)
+  // Branch reads already include inherited documents and return canonical IDs. The storage
+  // discriminator must not hide inherited matches or appear in user-facing field errors.
+  const uniqueCompoundIndexes = collection.sanitizedIndexes
+    .filter(
+      ({ fields, unique }) =>
+        unique && (!shouldCheckInherited || !fields.some(({ path }) => path === branchDocIDField)),
+    )
+    .map((index) =>
+      shouldCheckInherited
+        ? {
+            ...index,
+            fields: index.fields.filter(({ path }) => path !== branchField),
+            requireExists: index.requireExists?.filter(({ path }) => path !== branchField),
+          }
+        : index,
+    )
   const compoundIndexConflicts = await Promise.all(
     uniqueCompoundIndexes.map(async (index) => {
       const requiredFields = req.payload.db.name === 'mongoose' ? (index.requireExists ?? []) : []
@@ -140,6 +177,7 @@ export const validateUniqueConstraints = async ({
         exists = await documentMatchingWhereExists({
           id,
           collection: collection.slug,
+          draftsEnabled: shouldCheckInherited && Boolean(collection.versions?.drafts),
           locale: req.locale ?? undefined,
           overrideAccess: true,
           req,

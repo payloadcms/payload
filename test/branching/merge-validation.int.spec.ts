@@ -299,12 +299,12 @@ test.suite(
       })
 
       test('should let the database reject a conflict after preview succeeds', async () => {
-        const mainUnique = await payload.create({
+        const branchUnique = await payload.create({
+          branch,
           collection: uniqueSlug,
           data: { slug: 'merge-conflict' },
         })
-        const branchUnique = await payload.create({
-          branch,
+        const mainUnique = await payload.create({
           collection: uniqueSlug,
           data: { slug: 'merge-conflict' },
         })

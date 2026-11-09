@@ -763,13 +763,7 @@ test.suite('Branching: writes', { config: './config.ts', resetBetweenTests: fals
     })
 
     test('should allow the same unique value on two different branches', async () => {
-      const onMain = await payload.create({
-        collection: uniqueSlug,
-        data: { slug: 'shared' },
-      })
-
-      // The unique index is rewritten to `(slug, _branch)`, so each branch may hold
-      // its own document claiming the value while main still holds one too.
+      // Unrelated branches can claim the value when main does not reserve it.
       const onCow = await payload.create({
         branch: 'cow',
         collection: uniqueSlug,
@@ -781,15 +775,14 @@ test.suite('Branching: writes', { config: './config.ts', resetBetweenTests: fals
         data: { slug: 'shared' },
       })
 
-      expect(String(onCow.id)).not.toBe(String(onMain.id))
-      expect(String(onQ4.id)).not.toBe(String(onMain.id))
+      expect(String(onCow.id)).not.toBe(String(onQ4.id))
 
       // Still enforced within a single branch.
       await expect(
         payload.create({ branch: 'cow', collection: uniqueSlug, data: { slug: 'shared' } }),
       ).rejects.toThrow()
 
-      for (const id of [onMain.id, onCow.id, onQ4.id]) {
+      for (const id of [onCow.id, onQ4.id]) {
         await payload.delete({ id, branch: false, collection: uniqueSlug })
       }
 
@@ -818,7 +811,8 @@ test.suite('Branching: writes', { config: './config.ts', resetBetweenTests: fals
         locale: 'es',
       })
 
-      const onCow = await payload.create({
+      const onCow = await payload.update({
+        id: onMain.id,
         branch: 'cow',
         collection: uniqueSlug,
         data: { localizedSlug: 'localized-shared' },
@@ -841,9 +835,9 @@ test.suite('Branching: writes', { config: './config.ts', resetBetweenTests: fals
         }),
       ).rejects.toThrow()
 
-      for (const id of [onMain.id, onCow.id]) {
-        await payload.delete({ id, branch: false, collection: uniqueSlug })
-      }
+      await payload.delete({ id: onCow.id, branch: 'cow', collection: uniqueSlug })
+
+      await payload.delete({ id: onMain.id, branch: false, collection: uniqueSlug })
 
       const changes = await payload.find({
         collection: branchChangesSlug,
@@ -856,22 +850,23 @@ test.suite('Branching: writes', { config: './config.ts', resetBetweenTests: fals
       }
     })
 
-    test('should allow a nested unique value on main and a branch', async () => {
+    test('should retain a nested unique value when forking the same document', async () => {
       const onMain = await payload.create({
         collection: uniqueSlug,
         data: { metadata: { code: 'nested-shared' } },
       })
-      const onBranch = await payload.create({
+      const onBranch = await payload.update({
+        id: onMain.id,
         branch: 'cow',
         collection: uniqueSlug,
         data: { metadata: { code: 'nested-shared' } },
       })
 
-      expect(String(onBranch.id)).not.toBe(String(onMain.id))
+      expect(String(onBranch.id)).toBe(String(onMain.id))
 
-      for (const id of [onMain.id, onBranch.id]) {
-        await payload.delete({ id, branch: false, collection: uniqueSlug })
-      }
+      await payload.delete({ id: onBranch.id, branch: 'cow', collection: uniqueSlug })
+
+      await payload.delete({ id: onMain.id, branch: false, collection: uniqueSlug })
     })
 
     test('should reject a duplicate nested unique value within one branch', async () => {
@@ -892,22 +887,23 @@ test.suite('Branching: writes', { config: './config.ts', resetBetweenTests: fals
       await payload.delete({ id: first.id, branch: false, collection: uniqueSlug })
     })
 
-    test('should allow a custom compound value on main and a branch', async () => {
+    test('should retain a compound unique value when forking the same document', async () => {
       const onMain = await payload.create({
         collection: uniqueSlug,
         data: { customSlug: 'shared', site: 'example' },
       })
-      const onBranch = await payload.create({
+      const onBranch = await payload.update({
+        id: onMain.id,
         branch: 'cow',
         collection: uniqueSlug,
         data: { customSlug: 'shared', site: 'example' },
       })
 
-      expect(String(onBranch.id)).not.toBe(String(onMain.id))
+      expect(String(onBranch.id)).toBe(String(onMain.id))
 
-      for (const id of [onMain.id, onBranch.id]) {
-        await payload.delete({ id, branch: false, collection: uniqueSlug })
-      }
+      await payload.delete({ id: onBranch.id, branch: 'cow', collection: uniqueSlug })
+
+      await payload.delete({ id: onMain.id, branch: false, collection: uniqueSlug })
     })
 
     test('should reject a duplicate custom compound value within one branch', async () => {

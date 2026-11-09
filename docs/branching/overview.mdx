@@ -332,7 +332,7 @@ Do not undo a successful target write only because source cleanup failed.
 
 ## Database indexes and migrations
 
-Branching adds branch identity to branchable content, global, and version storage. Unique fields and developer-defined unique indexes include the branch identity so separate branches can use the same value. The normal `main` constraint still applies during merge, so a collision on `main` fails the real write.
+Branching adds branch identity to branchable content, global, and version storage. Unique fields and developer-defined unique indexes include the branch identity so a branch copy of a document can retain its unique values. Creating or updating a different document on a branch checks inherited content as well as branch content and rejects conflicting values. Separate branches can still use the same value when neither inherits a conflicting document. The normal `main` constraint also applies during merge, so a collision introduced on `main` after the branch write fails the real merge write.
 
 Review generated migrations before deployment. For Postgres and SQLite, enable branching in the config and generate the normal schema migration:
 

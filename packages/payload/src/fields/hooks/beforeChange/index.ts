@@ -4,8 +4,10 @@ import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { FieldOperation, JsonObject, PayloadRequest } from '../../../types/index.js'
 
+import { validateBranchUniqueConstraints } from '../../../collections/operations/utilities/validateUniqueConstraints.js'
 import { ValidationError } from '../../../errors/index.js'
 import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
+import { deepMergeWithSourceArraysIgnoringUndefined } from '../../../utilities/deepMerge.js'
 import { recordNewDoc } from '../../baseFields/authorship/index.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -104,6 +106,15 @@ export const beforeChange = async <T extends JsonObject>({
       },
       req.t,
     )
+  }
+
+  if (collection && !isValidationOperation) {
+    await validateBranchUniqueConstraints({
+      id,
+      collection,
+      data: deepMergeWithSourceArraysIgnoringUndefined<JsonObject>(doc, data),
+      req,
+    })
   }
 
   onDataProcessed?.(data)
