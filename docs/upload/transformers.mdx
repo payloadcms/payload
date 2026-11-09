@@ -292,6 +292,8 @@ GET /api/<collection>/file/<filename>?width=500
   ──► phase 2, purpose: 'request-override'   apply the request parameters
 ```
 
+Each request stage receives the MIME type from the previous response’s `Content-Type`, falling back to the preceding MIME type when that header is absent. A stage that converts the file must return its new `Content-Type`.
+
 Inside each phase, transformers run in the order of `upload.transformers`. A `complete` result in phase 1 ends the entire pipeline: no handler in phase 2 runs.
 
 Phase 1 runs only when the requested main file or size has no stored object (`_stored: false`). Requests for stored files, including stored variants on the same document, run only phase 2.
@@ -343,6 +345,8 @@ When upload processing does not store the sizes, their owner must participate in
 - The size's URL uses Payload's file route and runs phase 1 from the original, even when the main file is stored or the storage adapter normally returns direct URLs. `handleRequest` gets the size's name as `variantName`.
 
 Each save of a new file writes these entries again. A client upload (`clientUploads`) is not downloaded in full only because such sizes are declared.
+
+Serving a request-time size requires its declaration and owner to remain registered, and its owner must participate in the saved-state plan. Removing the owner fails the request rather than serving the original in its place. Stored sizes continue to serve their saved bytes.
 
 Request-time sizes follow the same [saved-key rules](#applying-saved-_transforms-keys) as the main file, including the exception for unclaimed focal points and custom keys. When the saved keys can be applied only at request time, the owner of the sizes must also build them at request time. Otherwise the save fails before any file changes, and the error names each key that no stage can apply. For example, a `rotate` that only a request-time transformer applies cannot be saved on a collection whose sizes `sharpTransformer` stores.
 

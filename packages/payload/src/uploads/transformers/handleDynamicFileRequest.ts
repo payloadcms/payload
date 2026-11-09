@@ -120,6 +120,7 @@ export async function handleDynamicFileRequest({
   })
 
   let currentResponse: Response | undefined
+  let currentMimeType = requestedFile.mimeType
   // Each stage has its own controller so a discarded body can be closed even when the
   // transformer locked it with a reader. Every remaining controller is aborted on failure.
   const handedOutBodyControllers = new Map<Response, AbortController>()
@@ -169,7 +170,7 @@ export async function handleDynamicFileRequest({
         filename: requestedFile.filename,
         getOriginalFile: stageOriginal.get,
         getSourceFile: stageSource.get,
-        mimeType: requestedFile.mimeType,
+        mimeType: currentMimeType,
         options,
         originalDoc: documentSnapshot,
         req,
@@ -182,6 +183,8 @@ export async function handleDynamicFileRequest({
         }
 
         currentResponse = result.response
+        currentMimeType =
+          result.response.headers.get('Content-Type')?.split(';')[0]?.trim() || currentMimeType
       } else if (stageSource.wasCalled()) {
         throw new TransformerContractError(
           'A transformer that consumes its source must return a response.',
@@ -355,7 +358,6 @@ async function planRequestPipeline({
       plan = persistedDefaultPlan
 
       if (
-        isHistorical &&
         requestedFile.variantName &&
         (!collection.config.upload.variants?.some(
           ({ name }) => name === requestedFile.variantName,
@@ -365,7 +367,7 @@ async function planRequestPipeline({
           ))
       ) {
         throw new APIError(
-          `No configured transformer can build historical size "${requestedFile.variantName}".`,
+          `No configured transformer can build ${isHistorical ? 'historical ' : ''}size "${requestedFile.variantName}".`,
           httpStatus.INTERNAL_SERVER_ERROR,
         )
       }
