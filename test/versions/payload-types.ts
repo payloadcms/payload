@@ -87,10 +87,12 @@ export interface Config {
     'custom-ids': CustomId;
     diff: Diff;
     text: Text;
+    'point-versions': PointVersion;
     'draft-with-upload': DraftWithUpload;
     'draft-with-upload-cloud-storage': DraftWithUploadCloudStorage;
     media: Media;
     media2: Media2;
+    'versions-disabled-collection': VersionsDisabledCollection;
     'restore-access': RestoreAccess;
     'restore-access-localized': RestoreAccessLocalized;
     users: User;
@@ -122,10 +124,12 @@ export interface Config {
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     diff: DiffSelect<false> | DiffSelect<true>;
     text: TextSelect<false> | TextSelect<true>;
+    'point-versions': PointVersionsSelect<false> | PointVersionsSelect<true>;
     'draft-with-upload': DraftWithUploadSelect<false> | DraftWithUploadSelect<true>;
     'draft-with-upload-cloud-storage': DraftWithUploadCloudStorageSelect<false> | DraftWithUploadCloudStorageSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     media2: Media2Select<false> | Media2Select<true>;
+    'versions-disabled-collection': VersionsDisabledCollectionSelect<false> | VersionsDisabledCollectionSelect<true>;
     'restore-access': RestoreAccessSelect<false> | RestoreAccessSelect<true>;
     'restore-access-localized': RestoreAccessLocalizedSelect<false> | RestoreAccessLocalizedSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -150,6 +154,7 @@ export interface Config {
     'max-versions': MaxVersion;
     'draft-unlimited-global': DraftUnlimitedGlobal;
     'simple-draft-global': SimpleDraftGlobal;
+    'versions-disabled-global': VersionsDisabledGlobal;
     'restore-access-global': RestoreAccessGlobal;
     'restore-access-no-versions-global': RestoreAccessNoVersionsGlobal;
   };
@@ -163,6 +168,7 @@ export interface Config {
     'max-versions': MaxVersionsSelect<false> | MaxVersionsSelect<true>;
     'draft-unlimited-global': DraftUnlimitedGlobalSelect<false> | DraftUnlimitedGlobalSelect<true>;
     'simple-draft-global': SimpleDraftGlobalSelect<false> | SimpleDraftGlobalSelect<true>;
+    'versions-disabled-global': VersionsDisabledGlobalSelect<false> | VersionsDisabledGlobalSelect<true>;
     'restore-access-global': RestoreAccessGlobalSelect<false> | RestoreAccessGlobalSelect<true>;
     'restore-access-no-versions-global': RestoreAccessNoVersionsGlobalSelect<false> | RestoreAccessNoVersionsGlobalSelect<true>;
   };
@@ -753,6 +759,22 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "point-versions".
+ */
+export interface PointVersion {
+  id: string;
+  title?: string | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-with-upload".
  */
 export interface DraftWithUpload {
@@ -809,6 +831,16 @@ export interface Media2 {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions-disabled-collection".
+ */
+export interface VersionsDisabledCollection {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1051,6 +1083,10 @@ export interface PayloadLockedDocument {
         value: string | Text;
       } | null)
     | ({
+        relationTo: 'point-versions';
+        value: string | PointVersion;
+      } | null)
+    | ({
         relationTo: 'draft-with-upload';
         value: string | DraftWithUpload;
       } | null)
@@ -1065,6 +1101,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media2';
         value: string | Media2;
+      } | null)
+    | ({
+        relationTo: 'versions-disabled-collection';
+        value: string | VersionsDisabledCollection;
       } | null)
     | ({
         relationTo: 'restore-access';
@@ -1514,6 +1554,17 @@ export interface TextSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "point-versions_select".
+ */
+export interface PointVersionsSelect<T extends boolean = true> {
+  title?: T;
+  point?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-with-upload_select".
  */
 export interface DraftWithUploadSelect<T extends boolean = true> {
@@ -1584,6 +1635,15 @@ export interface Media2Select<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions-disabled-collection_select".
+ */
+export interface VersionsDisabledCollectionSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1824,6 +1884,16 @@ export interface SimpleDraftGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions-disabled-global".
+ */
+export interface VersionsDisabledGlobal {
+  id: string;
+  title?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "restore-access-global".
  */
 export interface RestoreAccessGlobal {
@@ -1939,6 +2009,16 @@ export interface DraftUnlimitedGlobalSelect<T extends boolean = true> {
 export interface SimpleDraftGlobalSelect<T extends boolean = true> {
   title?: T;
   _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions-disabled-global_select".
+ */
+export interface VersionsDisabledGlobalSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -1,8 +1,9 @@
+import type { SQL, Table } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SelectedFields } from 'drizzle-orm/sqlite-core'
 import type { TypeWithID } from 'payload'
 
-import { and, desc, eq, isNull, or } from 'drizzle-orm'
+import { and, desc, eq, getTableColumns, isNull, or } from 'drizzle-orm'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
 import type { Args } from './types.js'
@@ -145,20 +146,16 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         // Optimization - No need for joins => can simply use returning(). This is optimal for very simple collections
         // without complex fields that live in separate tables like blocks, arrays, relationships, etc.
 
-        const selectedFields: SelectedFields = {}
-        if (hasOnlyColumns) {
-          for (const [column, enabled] of Object.entries(findManyArgs.columns)) {
-            if (enabled) {
-              selectedFields[column] = adapter.tables[tableName][column]
-            }
-          }
-        }
+        const returningFields = buildReturningFields({
+          findManyArgs,
+          table: adapter.tables[tableName],
+        })
 
         const docs = await drizzle
           .update(adapter.tables[tableName])
           .set(row)
           .where(updateWhere)
-          .returning(Object.keys(selectedFields).length ? selectedFields : undefined)
+          .returning(returningFields)
 
         if (!docs[0]) {
           return null
@@ -797,4 +794,39 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   })
 
   return result
+}
+
+/**
+ * Builds the `RETURNING` selection for the single-query update path so it yields the same shape as
+ * `findFirst(findManyArgs)`: columns excluded by `findManyArgs.columns` are skipped and
+ * `findManyArgs.extras` are included. Point columns rely on this - they are excluded as raw
+ * columns and selected through an `ST_AsGeoJSON` extra instead.
+ */
+function buildReturningFields({
+  findManyArgs,
+  table,
+}: {
+  findManyArgs: ReturnType<typeof buildFindManyArgs>
+  table: Table
+}): SelectedFields {
+  const columns = findManyArgs.columns ?? {}
+  const extras = (findManyArgs.extras ?? {}) as Record<string, SQL.Aliased>
+  const hasIncludedColumns = Object.values(columns).some(Boolean)
+  const returningFields: SelectedFields = {}
+
+  if (hasIncludedColumns) {
+    for (const [columnName, isIncluded] of Object.entries(columns)) {
+      if (isIncluded) {
+        returningFields[columnName] = table[columnName]
+      }
+    }
+  } else {
+    for (const [columnName, column] of Object.entries(getTableColumns(table))) {
+      if (columns[columnName] !== false) {
+        returningFields[columnName] = column
+      }
+    }
+  }
+
+  return Object.assign(returningFields, extras)
 }

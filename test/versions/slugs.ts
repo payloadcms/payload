@@ -35,6 +35,7 @@ export const errorOnUnpublishSlug = 'error-on-unpublish'
 export const disablePublishGlobalSlug = 'disable-publish-global'
 
 export const textCollectionSlug = 'text'
+export const pointVersionsCollectionSlug = 'point-versions'
 
 export const versionsDisabledCollectionSlug = 'versions-disabled-collection'
 
