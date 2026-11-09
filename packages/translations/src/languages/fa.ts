@@ -514,6 +514,7 @@ export const faTranslations: DefaultTranslationsObject = {
     selectValue: 'یک مقدار انتخاب کنید',
     settings: 'تنظیمات',
     showAllLabel: 'نمایش همه {{label}}',
+    showingCurrentOfTotal: 'نمایش {{current}} از {{total}}',
     shownInTable: 'نمایش داده شده در جدول',
     showSidebar: 'نمایش نوار کناری',
     skipToContent: 'رفتن به محتوا',

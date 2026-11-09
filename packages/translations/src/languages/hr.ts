@@ -522,6 +522,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     selectValue: 'Odaberi vrijednost',
     settings: 'Postavke',
     showAllLabel: 'Prikaži sve {{label}}',
+    showingCurrentOfTotal: 'Prikazano {{current}} od {{total}}',
     shownInTable: 'Prikazano u tablici',
     showSidebar: 'Prikaži bočnu traku',
     skipToContent: 'Prijeđi na sadržaj',

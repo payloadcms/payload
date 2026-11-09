@@ -512,6 +512,7 @@ export const myTranslations: DefaultTranslationsObject = {
     selectValue: 'တစ်ခုခုကို ရွေးချယ်ပါ။',
     settings: 'ဆက်တင်များ',
     showAllLabel: '{{label}} အားလုံး ပြပါ',
+    showingCurrentOfTotal: '{{total}} ခုအနက် {{current}} ခုကို ပြသနေသည်',
     shownInTable: 'ဇယားတွင် ပြသထားသည်။',
     showSidebar: 'ဘေးဘက်လမ်းညွှန်ပြရန်',
     skipToContent: 'အကြောင်းအရာသို့ ကျော်သွားရန်',

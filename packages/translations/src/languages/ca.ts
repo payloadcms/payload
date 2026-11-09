@@ -527,6 +527,7 @@ export const caTranslations: DefaultTranslationsObject = {
     selectValue: 'Selecciona un valor',
     settings: 'Configuració',
     showAllLabel: 'Mostra totes {{label}}',
+    showingCurrentOfTotal: 'Mostrant {{current}} de {{total}}',
     shownInTable: 'Mostrat en taula',
     showSidebar: 'Mostra la barra lateral',
     skipToContent: 'Salta al contingut',

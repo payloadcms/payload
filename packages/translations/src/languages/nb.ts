@@ -525,6 +525,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     selectValue: 'Velg en verdi',
     settings: 'Innstillinger',
     showAllLabel: 'Vis alle {{label}}',
+    showingCurrentOfTotal: 'Viser {{current}} av {{total}}',
     shownInTable: 'Vist i tabell',
     showSidebar: 'Vis sidepanel',
     skipToContent: 'Hopp til innhold',
