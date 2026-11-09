@@ -1,7 +1,12 @@
 import type { PaginateOptions, PipelineStage, QueryOptions } from 'mongoose'
 import type { QueryDrafts } from 'payload'
 
-import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators } from 'payload'
+import {
+  buildVersionCollectionFields,
+  combineQueries,
+  flattenWhereToOperators,
+  getQueryDraftsSort,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -53,7 +58,9 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
       config: this.payload.config,
       fields,
       locale,
-      sort: sortArg || collectionConfig.defaultSort,
+      sort:
+        sortArg ||
+        (collectionConfig.defaultSort ? getQueryDraftsSort({ collectionConfig }) : undefined),
       sortAggregation,
       timestamps: true,
       versions: true,

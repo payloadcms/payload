@@ -7,6 +7,7 @@ import { expect } from 'vitest'
 import type { Draft, Orderable, OrderableJoin } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
+import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { draftsSlug } from './collections/Drafts/index.js'
 import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'
@@ -418,6 +419,22 @@ test.suite('Sort', { config: './config.ts', resetBetweenTests: false }, () => {
           'Post 3 draft', // 3
           'Post 1 published', // 15
           'Post 2 newdraft', // 100
+        ])
+      })
+
+      test('should sort queryDrafts by default sort', async ({ payload }) => {
+        if (!isMongoose(payload)) {
+          return
+        }
+
+        const posts = await payload.db.queryDrafts<Draft>({
+          collection: 'drafts',
+        })
+
+        expect(posts.docs.map((post) => post.text)).toEqual([
+          'Post 1 published',
+          'Post 2 newdraft',
+          'Post 3 draft',
         ])
       })
 
