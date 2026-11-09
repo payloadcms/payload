@@ -491,7 +491,7 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
 
   test.options(
     'should validate adapter metadata and roll back the restored files and document if it fails',
-    { db: (adapter) => adapter !== 'sqlite' },
+    { db: (adapter) => !adapter.startsWith('sqlite') },
     async ({ payload }) => {
       const { created, selected } = await prepareHistory({
         payload,
@@ -540,7 +540,7 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
 
   test.options(
     'should retain a referenced restored file when adapter metadata fails without a transaction',
-    { db: (adapter) => adapter === 'sqlite' },
+    { db: (adapter) => adapter.startsWith('sqlite') },
     async ({ payload }) => {
       const { created, selected } = await prepareHistory({
         payload,
