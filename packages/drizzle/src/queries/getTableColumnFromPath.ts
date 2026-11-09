@@ -767,8 +767,11 @@ export const getTableColumnFromPath = ({
                   return null
                 }
 
+                // An empty array has no type to rule a column out by. Pruning every column would drop
+                // the whole constraint, so `in: []` would match all documents instead of none.
                 if (
                   Array.isArray(value) &&
+                  value.length > 0 &&
                   value.every((val) => typeof val === 'number') &&
                   idTypeTextOrUuid
                 ) {
