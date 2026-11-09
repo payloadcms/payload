@@ -137,6 +137,10 @@ Whenever Payload processes a file (a new upload, a duplicate, or a change to `_t
 - A `focalPoint` or a custom key that no stage claims is allowed. It is saved and does nothing, so something outside Payload can apply a custom key. Changing only such keys processes the file again only when a stage that runs claims one of them.
 - No key can be claimed by more than one stage.
 
+A fileless create or update cannot add built-in keys that require processing: without a source file, no stage can apply them. Unclaimed focal points and custom metadata remain allowed.
+
+A transformer-produced crop must fit within the source dimensions before it can be saved, including on draft writes.
+
 A key that breaks these rules fails the operation with a validation error for `_transforms.<key>`, and nothing is saved.
 
 An update that does not process the file, such as a change to another field, keeps the saved `_transforms` value without this check. A key whose transformer was removed stays readable and survives such updates. For a built-in key, changing `_transforms` on that document fails until a configured transformer claims the key again, or until the key is removed. A custom key is then saved and does nothing.

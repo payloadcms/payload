@@ -47,6 +47,8 @@ import {
   setUploadFilePath,
 } from './transformers/uploadTransformerBridge.js'
 import { isFullCrop } from './transformState/cropUnits.js'
+import { getChangedTransformKeys } from './transformState/getChangedTransformKeys.js'
+import { getTransformKeyCoverageErrors } from './transformState/getTransformKeyCoverageErrors.js'
 import {
   assertTransformKeysCovered,
   canBuildAtRequest,
@@ -57,6 +59,7 @@ import {
 } from './transformState/planUpload.js'
 import { resolveUploadEdits, withSavedEdits } from './transformState/resolveUploadEdits.js'
 import { isClaimRequired, isFocalPointKey } from './transformState/transformKeyClaims.js'
+import { getTransformStateError } from './transformState/validateTransformState.js'
 import { validateUploadURL } from './validateUploadURL.js'
 type Args<T> = {
   collection: Collection
@@ -487,6 +490,20 @@ const processUpload = async <T>({
   }
 
   if (!file) {
+    const changedKeys = getChangedTransformKeys({
+      next: pipelineDoc._transforms,
+      previous: operation === 'update' ? (originalDoc as Document)?._transforms : null,
+    })
+    if (changedKeys.some(isClaimRequired)) {
+      // With no file, no upload or request stage can apply newly saved built-in keys.
+      const errors = getTransformKeyCoverageErrors({
+        claims: new Map(),
+        transforms: pipelineDoc._transforms,
+      })
+      if (errors.length > 0) {
+        throw new ValidationError({ collection: collectionConfig.slug, errors, req }, req.t)
+      }
+    }
     if (throwOnMissingFile) {
       throw new MissingFile(req.t)
     }
@@ -733,6 +750,30 @@ const processUpload = async <T>({
       // Planning checked `_transforms` before the stages ran. A stage can add or change a key, so
       // check the final value too, or a key nobody applies would be saved.
       assertTransformKeysCovered({ collectionSlug: collectionConfig.slug, pipelineDoc, plan, req })
+      if (
+        getChangedTransformKeys({
+          next: pipelineDoc._transforms,
+          previous: pipelineOriginalDoc._transforms,
+        }).includes('crop')
+      ) {
+        const original =
+          existingOriginal ??
+          (isProcessableImage(file.mimetype) ? await getImageSize({ file }) : undefined)
+        const transformError = await getTransformStateError({
+          original,
+          value: pipelineDoc._transforms,
+        })
+        if (transformError) {
+          throw new ValidationError(
+            {
+              collection: collectionConfig.slug,
+              errors: [{ message: transformError, path: '_transforms' }],
+              req,
+            },
+            req.t,
+          )
+        }
+      }
     }
 
     // Saved for any resizable image, not just one a transformer processed, so it's kept with no

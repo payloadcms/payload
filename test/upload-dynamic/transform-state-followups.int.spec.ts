@@ -1,7 +1,7 @@
 /* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.for"] }] -- Tests use the shared fixture wrapper. */
 import type { Document, Payload } from 'payload'
 
-import { readFile, rm } from 'node:fs/promises'
+import { readdir, readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 import sharp from 'sharp'
 import { expect } from 'vitest'
@@ -34,6 +34,8 @@ const createImage = async ({
     file: { data: bytes, mimetype: 'image/png', name: 'gap.png', size: bytes.length },
   })
 }
+
+const crop = { x: 0, y: 0, width: 800, height: 600 }
 
 test.suite('Transform state follow-ups', { config: './config.ts' }, () => {
   let saved: {
@@ -129,5 +131,112 @@ test.suite('Transform state follow-ups', { config: './config.ts' }, () => {
     const metadata = await sharp(Buffer.from(await response.arrayBuffer())).metadata()
     expect(metadata).toMatchObject({ format: 'webp', width: 50 })
     expect(response.headers.get('Content-Type')).toBe('image/webp')
+  })
+  test('should reject unclaimed built-in keys on a fileless create', async ({ payload }) => {
+    payload.collections[dynamicMediaSlug].config.upload.filesRequiredOnCreate = false
+    await expect(
+      payload.create({
+        collection: dynamicMediaSlug,
+        data: { _transforms: { rotate: { angle: 90 } } },
+      }),
+    ).rejects.toMatchObject({
+      name: 'ValidationError',
+      data: {
+        errors: [
+          { path: '_transforms.rotate', message: 'No configured transformer applies this key.' },
+        ],
+      },
+    })
+  })
+
+  test('should reject unclaimed built-in keys on an update without stored MIME', async ({
+    payload,
+  }) => {
+    payload.collections[dynamicMediaSlug].config.upload.filesRequiredOnCreate = false
+    const created = await payload.create({ collection: dynamicMediaSlug, data: {} })
+    await expect(
+      payload.update({
+        collection: dynamicMediaSlug,
+        id: created.id,
+        data: { _transforms: { rotate: { angle: 90 } } },
+      }),
+    ).rejects.toMatchObject({
+      name: 'ValidationError',
+      data: {
+        errors: [
+          { path: '_transforms.rotate', message: 'No configured transformer applies this key.' },
+        ],
+      },
+    })
+  })
+
+  test('should validate malformed submitted state on a draft', async ({ payload }) => {
+    const created = await createImage({ payload, collection: versionedDynamicMediaSlug })
+    await expect(
+      payload.update({
+        collection: versionedDynamicMediaSlug,
+        id: created.id,
+        draft: true,
+        data: { _transforms: { crop: { ...crop, width: -1 } } },
+      }),
+    ).rejects.toThrow()
+  })
+
+  test.for([false, true])(
+    'should reject a transformer crop outside source bounds (draft=%s)',
+    async (draft, { payload }) => {
+      const collection = versionedDynamicMediaSlug
+      payload.collections[collection].config.upload.variants = []
+      const created = await createImage({ payload, collection })
+      const filesBefore = await readdir(versionedDynamicMediaDir)
+      payload.config.upload.transformers = [
+        {
+          slug: 'invalid-crop',
+          mimeTypes: ['image/*'],
+          canTransform: ({ operation }) =>
+            operation === 'upload' ? { canTransform: true, handledTransformKeys: ['crop'] } : false,
+          transformFile: ({ doc }) => {
+            doc._transforms = { crop: { x: 0, y: 0, width: 9999, height: 9999 } }
+            return Promise.resolve({ status: 'continue' as const })
+          },
+        },
+      ]
+      await expect(
+        payload.update({ collection, id: created.id, draft, data: { _transforms: { crop } } }),
+      ).rejects.toMatchObject({
+        name: 'ValidationError',
+        data: {
+          errors: [
+            { path: '_transforms', message: 'crop: must fit inside the original (1600 x 1600)' },
+          ],
+        },
+      })
+      expect(
+        (await payload.findByID({ collection, id: created.id, draft: true }))._transforms,
+      ).toBeNull()
+      expect(await readdir(versionedDynamicMediaDir)).toEqual(filesBefore)
+    },
+  )
+
+  test('should preserve fileless metadata and unrelated legacy updates', async ({ payload }) => {
+    payload.collections[dynamicMediaSlug].config.upload.filesRequiredOnCreate = false
+    const created = await payload.create({
+      collection: dynamicMediaSlug,
+      data: { _transforms: { focalPoint: { x: 20, y: 30 }, custom: { quality: 80 } } },
+    })
+    await payload.db.updateOne({
+      collection: dynamicMediaSlug,
+      id: created.id,
+      data: { _transforms: { rotate: { angle: 90 } } },
+    })
+    const updated = await payload.update({
+      collection: dynamicMediaSlug,
+      id: created.id,
+      data: { alt: 'legacy metadata' },
+    })
+    expect(updated._transforms).toEqual({ rotate: { angle: 90 } })
+    await expect(
+      payload.update({ collection: dynamicMediaSlug, id: created.id, data: { _transforms: null } }),
+    ).resolves.toMatchObject({ _transforms: null })
   })
 })
