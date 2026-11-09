@@ -461,7 +461,7 @@ async function executeDemo({
       chrome: presentation.chrome,
       click: pointerInteractions.click,
       circleCursor: pointerInteractions.circleCursor,
-      typeText: async ({ locator, text, clear = false, delay = 80 }) => {
+      typeText: async ({ locator, text, clear = false, delay = 50 }) => {
         await pointerInteractions.click(locator)
         if (clear) await page.keyboard.press('ControlOrMeta+A')
         await page.keyboard.type(text, { delay })

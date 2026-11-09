@@ -117,7 +117,7 @@ The recorder supplies:
 - `page`: the application iframe facade; navigation, locators, and evaluation target the app, while input devices and page events use the recording page;
 - `pause(milliseconds = 700)`: a short presentation pause;
 - `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
-- `typeText({ locator, text, clear = false, delay = 80 })`: click to focus, optionally select all with `ControlOrMeta+A`, then type character by character;
+- `typeText({ locator, text, clear = false, delay = 50 })`: click to focus, optionally select all with `ControlOrMeta+A`, then type character by character;
 - `scroll(locator, options?)`: defaults to wheel input with the cursor inside the visible target; use `{ input: 'wheel', cursorPlacement: 'inside' }` for paced wheel scrolling with position verification;
 - `showAnnotation(options)` / `hideAnnotation()`: updates or clears the step note in the shared chrome panel;
 - `label`: the normalized recording label.
@@ -137,7 +137,7 @@ For example, edit a focused field through keyboard input:
 ```js
 await click(page.getByRole('textbox', { name: 'Title', exact: true }))
 await page.keyboard.press('ControlOrMeta+A')
-await page.keyboard.type('Halloween Sale', { delay: 80 })
+await page.keyboard.type('Halloween Sale', { delay: 50 })
 await click(page.getByRole('button', { name: 'Save', exact: true }))
 ```
 
