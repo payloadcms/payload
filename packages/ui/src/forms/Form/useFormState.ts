@@ -9,7 +9,7 @@ import {
   getDataFromFormState,
   hasAutosaveEnabled,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import React, { use, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import type { useQueue } from '../../hooks/useQueue.js'
 import type { BuildFormStateSuccessResult } from '../../utilities/buildFormState.js'
@@ -19,7 +19,7 @@ import type { FieldAction, Context as FormContextType, FormProps } from './types
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useLivePreviewContext, usePreviewURL } from '../../providers/LivePreview/context.js'
+import { LivePreviewContext } from '../../providers/LivePreview/context.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -143,6 +143,8 @@ export const useFormState = ({
   queueTask,
   submissionActivityRef,
 }: Args): UseFormStateResult => {
+  const { isDocumentForm } = props
+
   const [formState, dispatchFields] = useReducer(fieldReducer, {}, () => props.initialState)
 
   contextRef.current.fields = formState
@@ -156,8 +158,7 @@ export const useFormState = ({
   const { config } = useConfig()
   const document = useDocumentInfo()
   const operation = useOperation()
-  const livePreview = useLivePreviewContext()
-  const preview = usePreviewURL()
+  const livePreview = isDocumentForm ? use(LivePreviewContext) : null
   const { t } = useTranslation()
   const { getFormState } = useServerFunctions()
   const parentDocumentForm = useDocumentForm()
@@ -182,7 +183,6 @@ export const useFormState = ({
     onApplied,
     operation,
     parentDocumentForm,
-    preview,
     props,
     t,
     user,
@@ -217,7 +217,7 @@ export const useFormState = ({
           ? action.acceptValues
           : undefined
 
-      const { document, props } = current
+      const { document, livePreview, props } = current
 
       const {
         isDocumentForm,
@@ -284,14 +284,13 @@ export const useFormState = ({
 
       if (isDocumentForm && !isReset) {
         const session = documentSessionRef.current
-        const { livePreview, preview } = current
 
         if (savedDocument) {
           session.originalUpdatedAt = savedDocument.updatedAt
           session.hasCheckedForStaleData = false
           args.returnLivePreviewURL =
-            livePreview.isLivePreviewEnabled && livePreview.typeofLivePreviewURL === 'function'
-          args.returnPreviewURL = preview.isPreviewEnabled
+            livePreview?.isLivePreviewEnabled && livePreview.typeofLivePreviewURL === 'function'
+          args.returnPreviewURL = livePreview?.isPreviewEnabled
         } else {
           // A router refresh can supply a newer baseline for stale-data detection.
           if (
@@ -402,7 +401,6 @@ export const useFormState = ({
         const activity = submissionActivityRef.current
 
         if (isDocumentForm) {
-          const { livePreview, preview } = current
           const { livePreviewURL, lockedState, previewURL, staleDataState, state } = successResponse
 
           if (savedDocument) {
@@ -411,14 +409,14 @@ export const useFormState = ({
             }
 
             if (
-              livePreview.isLivePreviewEnabled &&
+              livePreview?.isLivePreviewEnabled &&
               livePreview.typeofLivePreviewURL === 'function'
             ) {
               livePreview.setURL(livePreviewURL)
             }
 
-            if (preview.isPreviewEnabled) {
-              preview.setPreviewURL(previewURL)
+            if (livePreview?.isPreviewEnabled) {
+              livePreview.setPreviewURL(previewURL)
             }
           } else {
             if (document.docConfig?.lockDocuments !== false) {
