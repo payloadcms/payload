@@ -28,13 +28,20 @@ test('should circle a target without clicking or changing focus, then click norm
           document.addEventListener('mousemove', event => window.moves.push({ x: event.clientX, y: event.clientY }))
         })
         if (typeof circleCursor !== 'function') throw new Error('circleCursor helper is missing')
-        await circleCursor(target)
+        await circleCursor(target, {position:{x:35,y:20}})
         await expect(page.locator('input')).toBeFocused()
         await expect(target).not.toHaveAttribute('data-clicked')
         const moves = await page.evaluate(() => window.moves)
         const orbit = moves.slice(-76)
         if (orbit.length < 30) throw new Error('Circle has too few points')
-        if (!orbit.some(p => p.x < 220) || !orbit.some(p => p.x > 320) || !orbit.some(p => p.y < 180) || !orbit.some(p => p.y > 220)) throw new Error('Pointer did not surround the target')
+        if (orbit.some(p => Math.hypot(p.x-257,p.y-202)>18)) throw new Error('Circle should stay tight around the focus point')
+        let turns = 0
+        for (let i=1;i<orbit.length;i++) {
+          const previous = Math.atan2(orbit[i-1].y-202,orbit[i-1].x-257)
+          const current = Math.atan2(orbit[i].y-202,orbit[i].x-257)
+          turns += Math.atan2(Math.sin(current-previous),Math.cos(current-previous))
+        }
+        if (Math.abs(turns-Math.PI*4)>0.5) throw new Error('Circle should make two loops')
         const distance = (a,b) => Math.hypot(a.x-b.x,a.y-b.y)
         const early = orbit.slice(20,30).reduce((n,p,i,a) => i ? n+distance(p,a[i-1]) : n,0)
         const late = orbit.slice(-10).reduce((n,p,i,a) => i ? n+distance(p,a[i-1]) : n,0)

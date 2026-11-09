@@ -663,7 +663,7 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page, paus
 
   const circleCursor = async (
     locator,
-    { duration = 1200, pauseAfter = interactionPauseMs, radius } = {},
+    { duration = 1200, pauseAfter = interactionPauseMs, position, radius = 16 } = {},
   ) => {
     for (const [name, value] of Object.entries({ duration, pauseAfter })) {
       if (!Number.isFinite(value) || value < 0) {
@@ -674,7 +674,7 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page, paus
       throw new Error('Circle radius must be a finite positive number')
     }
 
-    const target = await getTargetPoint({ locator })
+    const target = await getTargetPoint({ locator, position })
     const box = await locator.boundingBox()
     const frame = await locator.evaluate((element) => {
       const rect = element.getBoundingClientRect()
@@ -694,14 +694,8 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page, paus
     const width = frame.viewportWidth * scaleX
     const height = frame.viewportHeight * scaleY
     // Leave room for the slight asymmetry, even beside viewport edges.
-    const radiusX = Math.min(
-      (radius ?? Math.min(112, Math.max(24, frame.width / 2 + 12))) * scaleX,
-      (width - 4) / 2.08,
-    )
-    const radiusY = Math.min(
-      (radius ?? Math.min(64, Math.max(18, frame.height / 2 + 12))) * scaleY,
-      (height - 4) / 2.08,
-    )
+    const radiusX = Math.min(radius * scaleX, (width - 4) / 2.08)
+    const radiusY = Math.min(radius * scaleY, (height - 4) / 2.08)
     const center = {
       x: Math.max(left + radiusX * 1.04 + 2, Math.min(left + width - radiusX * 1.04 - 2, target.x)),
       y: Math.max(top + radiusY * 1.04 + 2, Math.min(top + height - radiusY * 1.04 - 2, target.y)),
@@ -725,7 +719,7 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page, paus
     for (let step = 1; step <= steps; step += 1) {
       const progress = step / steps
       const easedProgress = progress * progress * (3 - 2 * progress)
-      const point = pointAt(startAngle + Math.PI * 2 * easedProgress)
+      const point = pointAt(startAngle + Math.PI * 4 * easedProgress)
       await page.mouse.move(point.x, point.y)
       pointerPosition = point
       const remaining = startedAt + step * stepDelay - performance.now()

@@ -113,7 +113,7 @@ The recorder supplies:
 - `click(locator, options?)`: smoothly moves to a locator, pauses, clicks, and pauses again;
 - `expect`: Playwright assertions;
 - `moveCursor(locator, options?)`: smoothly points at a locator and pauses without clicking;
-- `circleCursor(locator, options?)`: approaches a visible target, traces one loose ellipse around it, and eases to rest without clicking;
+- `circleCursor(locator, options?)`: approaches a visible target, makes two tight loops near its center, and eases to rest without clicking;
 - `page`: the application iframe facade; navigation, locators, and evaluation target the app, while input devices and page events use the recording page;
 - `pause(milliseconds = 700)`: a short presentation pause;
 - `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
@@ -156,7 +156,7 @@ Change the recording-wide defaults with `--mouse-move-ms` and `--interaction-pau
 
 ## Circle a result for emphasis
 
-Use `circleCursor` selectively when the viewer should inspect a value or changed state. It moves to the area, makes one slightly asymmetric loop, and slows smoothly at the end. Ordinary navigation still uses `click` and `moveCursor`.
+Use `circleCursor` selectively when the viewer should inspect a value or changed state. It moves to the area, makes two tight, slightly asymmetric loops near the focus point, and slows smoothly at the end. Ordinary navigation still uses `click` and `moveCursor`.
 
 ```js
 await circleCursor(page.locator('.tenant-selector'), {
@@ -165,7 +165,7 @@ await circleCursor(page.locator('.tenant-selector'), {
 })
 ```
 
-The default ellipse follows the target's size, capped at 112 CSS pixels horizontally and 64 vertically. An optional positive `radius` sets both radii in application CSS pixels for a smaller area of interest. Near a viewport edge the loop shifts inward to stay visible. It preserves focus and never clicks or draws on the application. Use the smallest meaningful visible locator; reveal offscreen targets with wheel scrolling first. Validation and screenshot preview retain the path but skip its presentation timing.
+The default radius is 16 application CSS pixels, independent of the target's size. The gesture draws attention near a value rather than outlining the whole control. An optional positive `radius` adjusts the loop size. Use `position: { x, y }`, measured from the target padding box, to focus on a specific value within a larger control. Near a viewport edge the loop shifts inward to stay visible. It preserves focus and never clicks or draws on the application. Use the smallest meaningful visible locator; reveal offscreen targets with wheel scrolling first. Validation and screenshot preview retain the path but skip its presentation timing.
 
 ## Scroll with wheel gestures
 
