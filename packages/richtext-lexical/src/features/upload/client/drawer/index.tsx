@@ -13,7 +13,7 @@ import { $createUploadNode } from '../nodes/UploadNode.js'
 import { INSERT_UPLOAD_COMMAND } from '../plugin/index.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './commands.js'
 
-const insertUpload = ({
+export const insertUpload = ({
   editor,
   relationTo,
   replaceNodeKey,
@@ -26,8 +26,7 @@ const insertUpload = ({
 }) => {
   if (!replaceNodeKey) {
     editor.dispatchCommand(INSERT_UPLOAD_COMMAND, {
-      // @ts-expect-error - TODO: fix this
-      fields: null,
+      fields: {},
       relationTo,
       value,
     })
@@ -38,8 +37,7 @@ const insertUpload = ({
         node.replace(
           $createUploadNode({
             data: {
-              // @ts-expect-error - TODO: fix this
-              fields: null,
+              fields: {},
               relationTo,
               value,
             },
