@@ -406,6 +406,8 @@ Stylelint enforces the rules below on `.css` files (SCSS is no longer linted and
 **Never use `!important`** (`plugin/no-important`). Refactor selector specificity instead.
 Exceptions to this rule are when it's not possible to do so when dealing with external libraries.
 
+**Never put `:has()` above a universal subject** (`plugin/no-has-above-universal-subject`). With `X:has(…) *`, Chrome restyles every element under `X` whenever the `:has()` may have changed. Move the condition onto the subject or give the subject a class, e.g. `.row__fields > *:not(:only-child)` instead of `.row__fields:has(> *:nth-child(2)) > *`.
+
 **Prefer logical properties over physical properties** for RTL support:
 
 ```css
