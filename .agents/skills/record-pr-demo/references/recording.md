@@ -145,7 +145,7 @@ If a refresh is part of the story, use `await click(chrome.refresh)` and assert 
 
 The recorder supplies cursor and click feedback automatically. Scenarios do not mount or style it. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.
 
-Use `click` for visible interactions instead of calling `locator.click()` directly. Its defaults are a 300 ms eased cursor movement plus a 300 ms dwell before and after the click. `moveCursor` uses the same travel time and pauses for 300 ms after arriving. Override an individual action when the story needs more time:
+Use `click` for visible interactions instead of calling `locator.click()` directly. Its defaults are a 450 ms eased cursor movement plus a 300 ms dwell before and after the click. `moveCursor` uses the same travel time and pauses for 300 ms after arriving. Override an individual action when the story needs more time:
 
 ```js
 await click(saveButton, { after: 900 })
@@ -235,7 +235,7 @@ Useful options:
 - `--base-url http://localhost:4000`
 - `--viewport 1280x720`
 - `--output /tmp/custom-demo.mp4`
-- `--mouse-move-ms 300`
+- `--mouse-move-ms 450`
 - `--interaction-pause-ms 300`
 - `--contact-sheet /tmp/custom-demo-contact-sheet.png`
 - `--manifest /tmp/custom-demo.json`

@@ -20,7 +20,7 @@ test('parseArgs applies recording defaults and derives a safe output path', () =
     baseURL: 'http://localhost:3000',
     interactionPauseMs: 300,
     label: 'feature-demo',
-    mouseMoveMs: 300,
+    mouseMoveMs: 450,
     output: '/tmp/payload-pr-demo-feature-demo.mkv',
     scenario: '/tmp/demo-scenario.mjs',
     viewport: { height: 900, width: 1440 },
