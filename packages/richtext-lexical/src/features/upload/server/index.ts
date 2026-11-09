@@ -8,6 +8,7 @@ import { populate } from '../../../populateGraphQL/populate.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { filterEnabledRelationshipCollections } from '../../relationship/shared/filterEnabledRelationshipCollections.js'
 import { createNode } from '../../typeUtilities.js'
+import { coerceUploadIDs } from './coerceUploadIDs.js'
 import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { PAYLOAD_UPLOAD } from './markdownTransformer.js'
@@ -122,6 +123,9 @@ export const UploadFeature = createServerFeature<
         }
 
         return schemaMap
+      },
+      hooks: {
+        beforeValidate: [coerceUploadIDs(props)],
       },
       i18n,
       markdownTransformers: [PAYLOAD_UPLOAD],
