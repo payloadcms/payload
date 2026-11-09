@@ -191,13 +191,47 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
     expect(updated.filesize).toBeGreaterThan(0)
   })
 
-  test('should give a dynamic default file the Payload file route, even when files are served directly', async ({
+  test('should switch a stored cloud default to the Payload route and retain it on metadata updates', async ({
     payload,
+    restClient,
   }) => {
-    const created = await createImage({ collection: publicCloudMediaSlug, payload })
+    const created = await createImage({
+      _transforms: {},
+      collection: publicCloudMediaSlug,
+      payload,
+      prefix: 'tenant',
+    })
 
-    expect(created.url).toMatch(new RegExp(`/api/${publicCloudMediaSlug}/file/photo\\.png$`))
-    expect(created.original?.url).toMatch(/^https:\/\/files\.example\.test\//)
+    expect(created.url).toMatch(/^https:\/\/files\.example\.test\//)
+
+    const updated = await payload.update({
+      id: created.id,
+      collection: publicCloudMediaSlug,
+      data: { _transforms: { crop: savedCrop } },
+    })
+
+    expect(updated.original?.url).toBe(created.original?.url)
+    expect(updated.url).toContain(`/api/${publicCloudMediaSlug}/file/photo.png?prefix=tenant`)
+
+    const metadataUpdated = await payload.update({
+      id: created.id,
+      collection: publicCloudMediaSlug,
+      data: {},
+    })
+    const read = await payload.findByID({ id: created.id, collection: publicCloudMediaSlug })
+
+    expect(metadataUpdated.url).toBe(updated.url)
+    expect(read.url).toBe(updated.url)
+
+    const { pathname, search } = new URL(read.url!, 'http://payload.local')
+    const response = await restClient.GET(
+      `${pathname.replace(/^\/api/, '')}${search}` as `/${string}`,
+    )
+
+    expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject({
+      height: 600,
+      width: 800,
+    })
   })
 
   test('should keep the folder in the URL of a file built at request time, so a file with the same name in another folder is not served', async ({

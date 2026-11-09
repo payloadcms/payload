@@ -1146,6 +1146,7 @@ function getRequestTimeDefaultFileData({
     height: crop?.height ?? original.height ?? null,
     mimeType: original.mimeType,
     prefix: original.prefix,
+    url: null,
     width: crop?.width ?? original.width ?? null,
   }
 }
