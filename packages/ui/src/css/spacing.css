@@ -1,5 +1,5 @@
 @layer payload-default {
-  :root {
+  [data-payload-tokens] {
     --spacer-0: 0;
     --spacer-1: 0.25rem; /** 4px */
     --spacer-1-5: 0.375rem; /** 6px */
@@ -24,21 +24,21 @@
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1440px) {
-    :root {
+    [data-payload-tokens] {
       --gutter-h: var(--spacer-4);
     }
   }
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
-    :root {
+    [data-payload-tokens] {
       --gutter-h: var(--spacer-3);
     }
   }
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
-    :root {
+    [data-payload-tokens] {
       --spacing-field: var(--spacer-2-5);
       --spacing-view-bottom: var(--spacer-6);
     }

@@ -51,7 +51,7 @@ To override existing styles in a way that the previous rules of specificity woul
 
 ## Re-using Payload CSS variables
 
-Payload exposes its design tokens as global [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties). These are defined globally on `:root`, so you can consume them in your own stylesheets without importing anything.
+Payload defines its design tokens as [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) on `[data-payload-tokens]` containers. The Admin Panel adds this attribute to its `<html>` element automatically, so custom admin components inherit the tokens without importing anything.
 
 ```css
 @layer payload-default {
@@ -61,6 +61,65 @@ Payload exposes its design tokens as global [CSS Variables](https://developer.mo
   }
 }
 ```
+
+### Using tokens outside the Admin Panel
+
+Import `@payloadcms/ui/css/tokens` to use Payload's design tokens outside the Admin Panel without loading its resets, component styles, fonts, or global element styles:
+
+```ts
+import '@payloadcms/ui/css/tokens'
+```
+
+The stylesheet imports the canonical color ramps, semantic colors, spacing, typography, radii, elevations, component, stroke width, z-index, and accessibility tokens. It defines variables only on `[data-payload-tokens]` containers. Importing it alone does not define variables on `:root` or apply colors, typography, layout, or `color-scheme` to the page. Theme and contrast overrides also require a token container.
+
+Applications loading `@payloadcms/ui/css` or `@payloadcms/ui/css/app.css` outside the Admin Panel also need a token container.
+
+Add `data-payload-tokens` to initialize a complete token set on a container:
+
+```tsx
+<div className="my-component" data-payload-tokens data-theme="light">
+  Custom UI
+</div>
+```
+
+```css
+.my-component {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: var(--stroke-width-small) solid var(--color-border);
+  border-radius: var(--button-radius);
+  padding: var(--spacer-3);
+}
+```
+
+Set `data-theme="light"` or `data-theme="dark"` on the **same element** as `data-payload-tokens`. Each token container defaults to light and initializes its own complete token set, including aliases. The container's theme is independent of the document's theme. To create a nested theme boundary, add both `data-payload-tokens` and `data-theme` to the nested container.
+
+Add `data-enhanced-contrast` to the same token container to opt into Payload's enhanced contrast palette:
+
+```tsx
+<div
+  className="my-component"
+  data-payload-tokens
+  data-theme="dark"
+  data-enhanced-contrast
+>
+  Custom UI
+</div>
+```
+
+Theme and contrast changes can be made by updating these attributes; no JavaScript theme provider is required. Enhanced contrast also applies to nested token containers when a marked ancestor has `data-enhanced-contrast`. Theme and contrast attributes on an unmarked host element have no effect. Portals must render inside a token container or mark their portal container with the same attributes.
+
+The tokens remain in `@layer payload-default`. Override them on the token container in your own unlayered CSS:
+
+```css
+.my-component {
+  --button-radius: var(--radius-small);
+}
+```
+
+To override tokens across all containers, including popup and portal theme boundaries, target `[data-payload-tokens]` in your unlayered CSS rather than only `:root`. Every marked container initializes its own defaults.
+
+Spacing, radius, and typography tokens retain their original units. Values in `rem` follow the host document's root font size. Typography tokens do not load or apply fonts; supply the fonts and explicitly apply any font properties your UI needs. This export supplies variables for your own UI; components from `@payloadcms/ui` still need their component styles.
 
 ## CSS Library
 
@@ -90,4 +149,4 @@ For an up-to-date, comprehensive list of all available variables, please refer t
 
 #### Dark Mode
 
-Colors are designed to automatically adapt to the theme of the [Admin Panel](./overview). All `--color-*` tokens are redefined under `[data-theme='dark']`, so semantic tokens like `--color-bg` and `--color-text`, along with the success / warning / danger colors, adjust automatically for dark mode.
+Colors are designed to automatically adapt to the theme of the [Admin Panel](./overview). The dark palette is selected by `[data-payload-tokens][data-theme='dark']`, so semantic tokens like `--color-bg` and `--color-text`, along with the success / warning / danger colors, adjust automatically for dark mode.

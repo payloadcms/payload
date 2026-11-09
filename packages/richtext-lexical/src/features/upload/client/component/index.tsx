@@ -199,7 +199,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
           />
 
           {isEditable && (
-            <div className={`${baseClass}__floater`} data-theme="dark">
+            <div className={`${baseClass}__floater`} data-payload-tokens data-theme="dark">
               <Pill className={`${baseClass}__collectionLabel`} pillStyle="dark" size="small">
                 {getTranslation(relatedCollection.labels.singular, i18n)}
               </Pill>

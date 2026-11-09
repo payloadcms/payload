@@ -1,5 +1,5 @@
 @layer payload-default {
-  :root {
+  [data-payload-tokens] {
     /* --z-popup needs to be higher than --z-modal to ensure the popup is displayed when modal is open */
     --z-popup: 60;
     --z-nav: 20;

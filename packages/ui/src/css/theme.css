@@ -1,14 +1,7 @@
-/**
- * Component-level theme tokens.
- *
- * Override any of these in your own :root block to restyle
- * all matching components at once — no !important needed.
- * User overrides win automatically since plain :root rules
- * beat @layer rules without needing !important.
- */
+/* Override component tokens on [data-payload-tokens] with unlayered CSS. */
 
 @layer payload-default {
-  :root {
+  [data-payload-tokens] {
     /* Fields — controls text inputs, selects, date pickers, code editors, etc. */
     --field-min-height-large: var(--spacer-5);
     --field-min-height-medium: var(--spacer-4);

@@ -1,4 +1,4 @@
-import { expect, test, vi } from 'vitest'
+import { afterAll, beforeAll, expect, test, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
 
@@ -8,6 +8,21 @@ import '../../css/app.css'
 vi.mock('../../providers/Translation/index.js', () => ({
   useTranslation: () => ({ t: () => 'No matches found' }),
 }))
+
+let originalTokenScope: null | string = null
+
+beforeAll(() => {
+  originalTokenScope = document.documentElement.getAttribute('data-payload-tokens')
+  document.documentElement.setAttribute('data-payload-tokens', '')
+})
+
+afterAll(() => {
+  if (originalTokenScope === null) {
+    document.documentElement.removeAttribute('data-payload-tokens')
+  } else {
+    document.documentElement.setAttribute('data-payload-tokens', originalTokenScope)
+  }
+})
 
 const entries = ['Alpha', 'Beta', 'Gamma'].map((name) => ({ name, Component: <span>{name}</span> }))
 

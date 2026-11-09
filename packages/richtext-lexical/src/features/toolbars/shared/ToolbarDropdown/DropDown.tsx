@@ -194,6 +194,7 @@ function DropDownItems({
       <div
         className={(itemsContainerClassNames ?? ['toolbar-popup__dropdown-items']).join(' ')}
         data-dropdown-key={dropdownKey}
+        data-payload-tokens
         data-theme="dark"
         id={id}
         onKeyDown={handleKeyDown}

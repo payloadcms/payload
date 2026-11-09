@@ -1,5 +1,5 @@
 @layer payload-default {
-  :root {
+  [data-payload-tokens] {
     /* Black (opacity-based) */
     --ramp-black-100: rgba(0, 0, 0, 0.05);
     --ramp-black-200: rgba(0, 0, 0, 0.1);
