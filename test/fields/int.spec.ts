@@ -41,8 +41,10 @@ import {
   dateFieldsSlug,
   duplicateFieldsSlug,
   groupFieldsSlug,
+  jsonFieldsSlug,
   numberFieldsSlug,
   relationshipFieldsSlug,
+  selectVersionsFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
 } from './slugs.js'
@@ -4015,6 +4017,60 @@ describe('Fields', () => {
   })
 
   describe('json', () => {
+    describe('fallback values', () => {
+      const createdDocs: {
+        collection: typeof jsonFieldsSlug | typeof selectVersionsFieldsSlug
+        id: number | string
+      }[] = []
+
+      afterEach(async () => {
+        for (const doc of createdDocs) {
+          await payload.delete({ ...doc, overrideAccess: true })
+        }
+        createdDocs.length = 0
+      })
+
+      for (const draft of [false, true]) {
+        const operation = draft ? 'draft save' : 'partial update'
+        const collection = draft ? selectVersionsFieldsSlug : jsonFieldsSlug
+
+        it(`should preserve omitted JSON tuples after a ${operation}`, async () => {
+          const doc = await payload.create({
+            collection,
+            data: {
+              customJSON: [
+                [100, 200],
+                [300, 400],
+              ],
+            },
+            draft,
+            overrideAccess: true,
+          })
+          createdDocs.push({ collection, id: doc.id })
+
+          await payload.update({
+            id: doc.id,
+            collection,
+            data: draft ? { hasMany: ['a'] } : { json: { foo: 'bar' } },
+            draft,
+            overrideAccess: true,
+          })
+
+          const stored = await payload.findByID({
+            id: doc.id,
+            collection,
+            draft,
+            overrideAccess: true,
+          })
+
+          expect(stored.customJSON).toStrictEqual([
+            [100, 200],
+            [300, 400],
+          ])
+        })
+      }
+    })
+
     it('should save json data', async () => {
       const json = { foo: 'bar' }
       const doc = await payload.create({
