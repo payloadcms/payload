@@ -5235,6 +5235,96 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
   })
 
   test.describe('Scheduled Publish', () => {
+    test.describe('deleting documents with scheduled publish jobs', () => {
+      // The admin UI stores `input.doc.value` as a string, the Local API can store a raw id
+      const queuePublish = (payload: Payload, value: number | string) =>
+        payload.jobs.queue({
+          input: { type: 'publish', doc: { relationTo: draftCollectionSlug, value } },
+          overrideAccess: true,
+          task: 'schedulePublish',
+          waitUntil: new Date(Date.now() + 60_000),
+        })
+
+      const countJobs = async (payload: Payload, id: number | string) => {
+        const { totalDocs } = await payload.find({
+          collection: 'payload-jobs',
+          limit: 1,
+          overrideAccess: true,
+          where: {
+            and: [
+              { taskSlug: { equals: 'schedulePublish' } },
+              { 'input.doc.value': { in: [id, String(id)] } },
+            ],
+          },
+        })
+        return totalDocs
+      }
+
+      const createDraft = (payload: Payload, title: string) =>
+        payload.create({
+          collection: draftCollectionSlug,
+          data: { description: 'hello', title },
+          draft: true,
+          overrideAccess: true,
+        })
+
+      test('should delete a job queued with a string id when its document is deleted', async ({
+        payload,
+      }) => {
+        const draft = await createDraft(payload, 'deleted with a string job id')
+        await queuePublish(payload, String(draft.id))
+        expect(await countJobs(payload, draft.id)).toBe(1)
+
+        await payload.delete({
+          id: draft.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+
+        expect(await countJobs(payload, draft.id)).toBe(0)
+        await cleanupDocuments({ collectionSlugs: [draftCollectionSlug, 'payload-jobs'], payload })
+      })
+
+      test('should delete a job when its document is deleted by a string id', async ({
+        payload,
+      }) => {
+        const draft = await createDraft(payload, 'deleted by a string id')
+        await queuePublish(payload, draft.id)
+        expect(await countJobs(payload, draft.id)).toBe(1)
+
+        await payload.delete({
+          id: String(draft.id),
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+
+        expect(await countJobs(payload, draft.id)).toBe(0)
+        await cleanupDocuments({ collectionSlugs: [draftCollectionSlug, 'payload-jobs'], payload })
+      })
+
+      test('should delete the jobs of many documents and keep the jobs of the others', async ({
+        payload,
+      }) => {
+        const first = await createDraft(payload, 'bulk deleted one')
+        const second = await createDraft(payload, 'bulk deleted two')
+        const kept = await createDraft(payload, 'not deleted')
+        await queuePublish(payload, String(first.id))
+        await queuePublish(payload, String(second.id))
+        await queuePublish(payload, String(kept.id))
+
+        await payload.delete({
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          where: { id: { in: [first.id, second.id] } },
+        })
+
+        expect(await countJobs(payload, first.id)).toBe(0)
+        expect(await countJobs(payload, second.id)).toBe(0)
+        expect(await countJobs(payload, kept.id)).toBe(1)
+        await cleanupDocuments({ collectionSlugs: [draftCollectionSlug, 'payload-jobs'], payload })
+      })
+    })
+
     test('should allow collection scheduled publish', async ({ payload }) => {
       const draft = await payload.create({
         collection: draftCollectionSlug,

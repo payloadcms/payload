@@ -14,6 +14,13 @@ type Args = {
   slug: string
 }
 
+/**
+ * A scheduled publish job stores the document id in `input.doc.value`. The admin UI stores it as a string (#10481),
+ * while a Local API caller can store the raw id, which is a number on SQL adapters. Match both spellings.
+ */
+const matchableIDs = (id: number | string | undefined): (number | string)[] =>
+  id === undefined ? [] : [id, String(id)]
+
 export const deleteScheduledPublishJobs = async ({
   id,
   slug,
@@ -38,19 +45,11 @@ export const deleteScheduledPublishJobs = async ({
               exists: false,
             },
           },
-          ids
-            ? {
-                or: ids.map((id) => ({
-                  'input.doc.value': {
-                    equals: id,
-                  },
-                })),
-              }
-            : {
-                'input.doc.value': {
-                  equals: id,
-                },
-              },
+          {
+            'input.doc.value': {
+              in: (ids ?? [id]).flatMap(matchableIDs),
+            },
+          },
           {
             'input.doc.relationTo': {
               equals: slug,
