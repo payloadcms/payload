@@ -3,13 +3,14 @@ import { render } from 'vitest-browser-react'
 
 import { DocumentControls } from './index.js'
 
-const { collectionConfig, livePreview } = vi.hoisted(() => ({
+const { collectionConfig, livePreview, togglerMock } = vi.hoisted(() => ({
   collectionConfig: {
     slug: 'posts',
     admin: {},
     labels: { plural: 'Posts', singular: 'Post' },
   },
   livePreview: { isLivePreviewEnabled: false },
+  togglerMock: { rendersNull: false },
 }))
 
 vi.mock('../../providers/Config/index.js', async (importOriginal) => ({
@@ -31,7 +32,8 @@ vi.mock('../../providers/LivePreview/context.js', async (importOriginal) => ({
 }))
 
 vi.mock('../LivePreview/Toggler/index.js', () => ({
-  LivePreviewToggler: () => <button type="button">Toggle live preview</button>,
+  LivePreviewToggler: () =>
+    togglerMock.rendersNull ? null : <button type="button">Toggle live preview</button>,
 }))
 
 const renderControls = () =>
@@ -57,10 +59,23 @@ test('should not render the icon buttons wrapper when no icon button is shown', 
 
 test('should render the icon buttons wrapper when an icon button is shown', async () => {
   livePreview.isLivePreviewEnabled = true
+  togglerMock.rendersNull = false
 
   const screen = await renderControls()
   const toggler = screen.getByRole('button', { name: 'Toggle live preview' })
 
   await expect.element(toggler).toBeVisible()
   expect(toggler.element().closest('.doc-controls__icon-buttons')).not.toBeNull()
+})
+
+test('should hide the icon buttons wrapper when its enabled icon buttons render nothing', async () => {
+  livePreview.isLivePreviewEnabled = true
+  togglerMock.rendersNull = true
+
+  const screen = await renderControls()
+
+  await expect.element(screen.getByRole('button', { name: 'Custom control' })).toBeVisible()
+  const wrapper = document.querySelector('.doc-controls__icon-buttons')
+  expect(wrapper).not.toBeNull()
+  expect(getComputedStyle(wrapper!).display).toBe('none')
 })
