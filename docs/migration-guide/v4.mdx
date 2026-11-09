@@ -2205,6 +2205,8 @@ Upload collections now have a `_transforms` JSON field that saves the crop and f
 
 Upload collections also have a core-controlled `_stored` field on the main file, on `original`, and on each entry under `variants`. A value of `false` marks an entry with no stored object. A missing or `null` value means stored, so existing documents need no data backfill. Payload ignores client writes to this field. It is hidden in the Admin Panel, but can appear in API responses; it is not a field-level hidden value. See [Files with no stored default](../upload/transformers#files-with-no-stored-default).
 
+`_stored` is now reserved for these file entries. If an upload collection already defines a custom `_stored` field, rename it and move its data, including data in saved versions, before upgrading. Remove the old custom values from `_stored`: existing `false` values would otherwise be treated as files with no stored object, and writes to the custom field would be ignored.
+
 **Postgres and SQLite:** run `payload migrate:create`, check that it adds the `_stored` columns for file entries in each upload collection and its versions, then run `payload migrate`. Existing rows keep `null`.
 
 ### File size types have been consolidated ([#16593](https://github.com/payloadcms/payload/pull/16593))
