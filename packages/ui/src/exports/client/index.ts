@@ -388,6 +388,7 @@ export {
   AlignJustifiedIcon as DragHandleIcon,
 } from '../../icons/AlignJustified/index.js'
 export { EditIcon } from '../../icons/Edit/index.js'
+export { HomeIcon } from '../../icons/Home/index.js'
 export { LineIcon } from '../../icons/Line/index.js'
 export { LinkIcon } from '../../icons/Link/index.js'
 export { LogOutIcon } from '../../icons/LogOut/index.js'
