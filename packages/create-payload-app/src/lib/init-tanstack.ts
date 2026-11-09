@@ -153,7 +153,7 @@ function getRequiredDependencies({
     '@payloadcms/richtext-lexical': payloadVersion,
     '@payloadcms/tanstack-start': payloadVersion,
     '@payloadcms/ui': payloadVersion,
-    '@vitejs/plugin-rsc': '^0.5.21',
+    '@vitejs/plugin-rsc': '^0.5.38',
     [getDbPackageName(dbType)]: payloadVersion,
     graphql: '^16.8.1',
     payload: payloadVersion,
