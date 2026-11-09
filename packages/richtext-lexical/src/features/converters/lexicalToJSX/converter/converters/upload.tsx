@@ -7,7 +7,7 @@ import type { JSXConverters } from '../types.js'
 export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
   upload: ({ node }) => {
     const uploadNode = node as UploadData
-    if (typeof uploadNode.value !== 'object') {
+    if (!uploadNode.value || typeof uploadNode.value !== 'object') {
       return null
     }
 
@@ -20,7 +20,7 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
     /**
      * If the upload is not an image, return a link to the upload
      */
-    if (!uploadDoc.mimeType.startsWith('image')) {
+    if (!uploadDoc.mimeType?.startsWith('image')) {
       return (
         <a href={url} rel="noopener noreferrer">
           {uploadDoc.filename}

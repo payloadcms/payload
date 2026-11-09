@@ -30,7 +30,7 @@ export const UploadHTMLConverter: HTMLConverters<SerializedUploadNode> = {
     const url = escapeHTML(uploadDoc.url ?? '')
 
     // 1) If upload is NOT an image, return a link
-    if (!uploadDoc.mimeType.startsWith('image')) {
+    if (!uploadDoc.mimeType?.startsWith('image')) {
       return `<a${providedStyleTag} href="${url}" rel="noopener noreferrer">${escapeHTML(uploadDoc.filename ?? '')}</a>`
     }
 
