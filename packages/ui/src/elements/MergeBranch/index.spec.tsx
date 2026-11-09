@@ -66,8 +66,10 @@ vi.mock('../../providers/Translation/index.js', () => ({
           'branching:mergedCount': `${values?.count} change(s) merged.`,
           'branching:scheduleMerge': 'Schedule merge',
           'error:correctInvalidFields': 'Please correct invalid fields.',
+          'error:unknown': 'An unknown error has occurred.',
           'general:cancel': 'Cancel',
           'general:close': 'Close',
+          'general:error': 'Error',
         }[key] ?? key
       )
     },
@@ -346,5 +348,80 @@ test.each([true, false])(
     await expect.element(screen.getByText('Please correct invalid fields.')).toBeVisible()
     expect(toast.info).not.toHaveBeenCalled()
     expect(toast.error).not.toHaveBeenCalledWith('error:unknown')
+  },
+)
+
+test.each([true, false])(
+  'should keep write-time field errors in the dialog without claiming completion (stream: %s)',
+  async (isStream) => {
+    const failure = {
+      type: 'error',
+      message: 'Please correct invalid fields.',
+      validationErrors: [
+        {
+          changeID: 'change',
+          collectionSlug: 'posts',
+          docID: 12,
+          locale: 'fr',
+          label: 'Slug',
+          path: 'slug',
+          message: 'Value must be unique',
+        },
+      ],
+    }
+
+    if (!isStream) {
+      vi.mocked(fetch).mockResolvedValueOnce({ ok: false, json: async () => failure } as Response)
+    }
+
+    const screen = await render(<MergeBranchModal />)
+
+    await screen.getByRole('button', { name: 'Merge', exact: true }).click()
+
+    if (isStream) {
+      mergeStreamController.enqueue(new TextEncoder().encode(`${JSON.stringify(failure)}\n`))
+      mergeStreamController.close()
+    }
+
+    await expect.element(screen.getByRole('heading', { name: 'Merge blocked' })).toBeVisible()
+    await expect
+      .element(screen.getByRole('alert'))
+      .toHaveTextContent(
+        'Please correct invalid fields.Post / #12 / fr / Slug: Value must be unique',
+      )
+    await expect.element(screen.getByRole('progressbar')).not.toBeInTheDocument()
+    expect(toast.error).not.toHaveBeenCalled()
+    expect(toast.success).not.toHaveBeenCalled()
+    expect(toast.info).not.toHaveBeenCalled()
+
+    await screen.getByRole('button', { name: 'Close', exact: true }).click()
+
+    expect(closeMerge).toHaveBeenCalledOnce()
+  },
+)
+
+test.each([true, false])(
+  'should keep a generic write failure visible and dismissible (stream: %s)',
+  async (isStream) => {
+    const failure = { type: 'error', message: 'An unknown error has occurred.' }
+
+    if (!isStream) {
+      vi.mocked(fetch).mockResolvedValueOnce({ ok: false, json: async () => failure } as Response)
+    }
+
+    const screen = await render(<MergeBranchModal />)
+
+    await screen.getByRole('button', { name: 'Merge', exact: true }).click()
+
+    if (isStream) {
+      mergeStreamController.enqueue(new TextEncoder().encode(`${JSON.stringify(failure)}\n`))
+      mergeStreamController.close()
+    }
+
+    await expect.element(screen.getByRole('alert')).toHaveTextContent(failure.message)
+    await expect.element(screen.getByRole('progressbar')).not.toBeInTheDocument()
+    await expect.element(screen.getByRole('button', { name: 'Close', exact: true })).toBeEnabled()
+    expect(toast.success).not.toHaveBeenCalled()
+    expect(refresh).not.toHaveBeenCalled()
   },
 )

@@ -83,7 +83,7 @@ export const MergeBranchModal: React.FC = () => {
     () => ({ canCloseBranch, closeBranch, target }),
     [canCloseBranch, closeBranch, target],
   )
-  const { isMerging, mergeNow, outcome, progress, resetMerge } =
+  const { failure, isMerging, mergeNow, outcome, progress, resetMerge } =
     useMergeBranchAction(mergeActionArgs)
 
   const reset = useCallback(() => {
@@ -139,16 +139,21 @@ export const MergeBranchModal: React.FC = () => {
     isScheduling,
     outcome,
   })
-  const hasOutcome = phase === 'blocked' || phase === 'complete' || phase === 'partial'
+  const hasOutcome =
+    Boolean(failure) || phase === 'blocked' || phase === 'complete' || phase === 'partial'
   const isBusy = phase === 'merging' || phase === 'scheduling'
-  const problems = outcome ? [...outcome.blocked, ...outcome.validationErrors] : []
+  const problems = outcome
+    ? [...outcome.blocked, ...outcome.validationErrors]
+    : (failure?.validationErrors ?? [])
   let title = t('branching:mergeBranchInto', {
     branch: target.branchName,
     target: MAIN_BRANCH,
   })
   let submitLabel = t('branching:merge')
 
-  if (phase === 'complete') {
+  if (failure) {
+    title = t(problems.length ? 'branching:mergeBlocked' : 'general:error')
+  } else if (phase === 'complete') {
     title = t('branching:mergeComplete')
   } else if (phase === 'partial') {
     title = t('branching:mergePartial')
@@ -202,41 +207,49 @@ export const MergeBranchModal: React.FC = () => {
           />
         )}
 
-        {(isMerging || hasOutcome) && (
+        {!failure && (isMerging || hasOutcome) && (
           <MergeProgress outcome={outcome} phase={phase} progress={progress} />
         )}
 
-        {problems.length > 0 && (
+        {(failure || problems.length > 0) && (
           <div role="alert">
-            {Boolean(outcome?.validationErrors.length) && <p>{t('error:correctInvalidFields')}</p>}
-            <ul className={`${baseClass}__blocked`}>
-              {problems.map((problem, index) => {
-                const entity = getEntityConfig({
-                  collectionSlug: problem.collectionSlug,
-                  globalSlug: problem.globalSlug,
-                })
-                const label = entity
-                  ? getTranslation('labels' in entity ? entity.labels.singular : entity.label, i18n)
-                  : problem.collectionSlug || problem.globalSlug
-                const context = [
-                  label,
-                  problem.docID !== undefined && `#${problem.docID}`,
-                  'locale' in problem && problem.locale,
-                  'label' in problem && problem.label
-                    ? problem.label
-                    : 'path' in problem && problem.path,
-                ]
-                  .filter(Boolean)
-                  .join(' / ')
+            {failure && <p>{failure.message}</p>}
+            {!failure && Boolean(outcome?.validationErrors.length) && (
+              <p>{t('error:correctInvalidFields')}</p>
+            )}
+            {problems.length > 0 && (
+              <ul className={`${baseClass}__blocked`}>
+                {problems.map((problem, index) => {
+                  const entity = getEntityConfig({
+                    collectionSlug: problem.collectionSlug,
+                    globalSlug: problem.globalSlug,
+                  })
+                  const label = entity
+                    ? getTranslation(
+                        'labels' in entity ? entity.labels.singular : entity.label,
+                        i18n,
+                      )
+                    : problem.collectionSlug || problem.globalSlug
+                  const context = [
+                    label,
+                    problem.docID !== undefined && `#${problem.docID}`,
+                    'locale' in problem && problem.locale,
+                    'label' in problem && problem.label
+                      ? problem.label
+                      : 'path' in problem && problem.path,
+                  ]
+                    .filter(Boolean)
+                    .join(' / ')
 
-                return (
-                  <li key={`${String(problem.changeID)}-${index}`}>
-                    {context && <strong>{context}: </strong>}
-                    {problem.message}
-                  </li>
-                )
-              })}
-            </ul>
+                  return (
+                    <li key={`${String(problem.changeID)}-${index}`}>
+                      {context && <strong>{context}: </strong>}
+                      {problem.message}
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
           </div>
         )}
       </DialogBody>

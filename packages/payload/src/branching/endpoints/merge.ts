@@ -1,12 +1,15 @@
 import type { PayloadHandler } from '../../config/types.js'
 import type { MergeResult } from '../merge.js'
+import type { MergeWriteValidationError } from '../merge/validationErrors.js'
 import type { MergeProgress } from '../types.js'
 
-import { Forbidden, NotFound } from '../../errors/index.js'
+import { APIError, Forbidden, NotFound, ValidationError } from '../../errors/index.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
+import { routeError } from '../../utilities/routeError.js'
 import { mergeBranch } from '../merge.js'
+import { getMergeValidationErrors } from '../merge/validationErrors.js'
 import { isolateBranchState } from '../resolveBranch.js'
 import { branchesCollectionSlug } from '../types.js'
 
@@ -18,9 +21,14 @@ import { branchesCollectionSlug } from '../types.js'
  * and one JSON object per line is trivially parseable from a reader loop.
  */
 export type MergeStreamEvent =
-  | { message: string; type: 'error' }
   | { result: MergeResult; type: 'complete' }
+  | ({ type: 'error' } & MergeFailure)
   | ({ type: 'progress' } & MergeProgress)
+
+export type MergeFailure = {
+  message: string
+  validationErrors?: MergeWriteValidationError[]
+}
 
 /**
  * `POST /<branches>/:id/merge`
@@ -73,14 +81,29 @@ export const mergeBranchHandler: PayloadHandler = async (req) => {
     })
   }
 
-  const result = await mergeBranch(payload, {
-    branch,
-    changes: body.changes,
-    closeBranch: Boolean(body.closeBranch),
-    dryRun: Boolean(body.dryRun),
-    overrideAccess: false,
-    req,
-  })
+  let result: MergeResult
+
+  try {
+    result = await mergeBranch(payload, {
+      branch,
+      changes: body.changes,
+      closeBranch: Boolean(body.closeBranch),
+      dryRun: Boolean(body.dryRun),
+      overrideAccess: false,
+      req,
+    })
+  } catch (error) {
+    const response = await routeError({ config: payload.config, err: error as APIError, req })
+    const body = (await response.json()) as Record<string, unknown>
+    const failure = formatMergeFailure({ error, req })
+
+    if (!(error instanceof APIError && error.isPublic)) {
+      body.errors = [{ message: failure.message }]
+      delete body.stack
+    }
+
+    return Response.json({ ...body, type: 'error', ...failure }, response)
+  }
 
   // Nothing could be applied and something was refused: report it as a refusal
   // rather than an empty success, so a programmatic caller sees the same
@@ -153,14 +176,14 @@ const streamMerge = ({
 
         send({ type: 'complete', result })
       } catch (err) {
+        payload.logger.error({ err, msg: `Streamed merge of branch "${branch}" failed` })
+
         // The status line is long gone, so a failure has to be reported inside the
         // body. Clients treat a stream that ends without `complete` as failed too,
         // which covers a connection dropped mid-merge.
-        payload.logger.error({ err, msg: `Streamed merge of branch "${branch}" failed` })
-
         send({
           type: 'error',
-          message: err instanceof Error ? err.message : 'Unknown error',
+          ...formatMergeFailure({ error: err, req }),
         })
       } finally {
         close(controller)
@@ -178,4 +201,25 @@ const streamMerge = ({
     }),
     status: httpStatus.OK,
   })
+}
+
+const formatMergeFailure = ({
+  error,
+  req,
+}: {
+  error: unknown
+  req: Parameters<PayloadHandler>[0]
+}): MergeFailure => {
+  if (error instanceof ValidationError) {
+    return {
+      message: req.t('error:correctInvalidFields'),
+      validationErrors: getMergeValidationErrors({ error, req }),
+    }
+  }
+
+  if (error instanceof APIError && error.isPublic) {
+    return { message: error.message }
+  }
+
+  return { message: req.t('error:unknown') }
 }

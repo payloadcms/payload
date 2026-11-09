@@ -1,6 +1,6 @@
 'use client'
 
-import type { MergeProgress, MergeResult } from 'payload'
+import type { MergeFailure, MergeProgress, MergeResult } from 'payload'
 
 import { branchesCollectionSlug, formatAdminURL } from 'payload/shared'
 import { useCallback, useState } from 'react'
@@ -23,6 +23,7 @@ export const useMergeBranchAction = ({
   closeBranch: boolean
   target: MergeTarget | null
 }): {
+  failure: MergeFailure | null
   isMerging: boolean
   mergeNow: () => Promise<void>
   outcome: MergeResult | null
@@ -41,6 +42,7 @@ export const useMergeBranchAction = ({
   const [isMerging, setIsMerging] = useState(false)
   const [progress, setProgress] = useState<MergeProgress | null>(null)
   const [outcome, setOutcome] = useState<MergeResult | null>(null)
+  const [failure, setFailure] = useState<MergeFailure | null>(null)
 
   const reportResult = useCallback(
     (result: MergeResult) => {
@@ -64,6 +66,8 @@ export const useMergeBranchAction = ({
 
     setIsMerging(true)
     setProgress(null)
+    setOutcome(null)
+    setFailure(null)
 
     try {
       const response = await fetch(
@@ -85,9 +89,18 @@ export const useMergeBranchAction = ({
       )
 
       if (!response.ok || !response.body) {
-        const result = (await response.json().catch(() => null)) as MergeResult | null
+        const result = (await response.json().catch(() => null)) as
+          | ({ type: 'error' } & MergeFailure)
+          | MergeResult
+          | null
 
-        if (result && (result.blocked?.length || result.validationErrors?.length)) {
+        if (result && 'type' in result && result.type === 'error') {
+          setFailure(result)
+        } else if (
+          result &&
+          !('type' in result) &&
+          (result.blocked?.length || result.validationErrors?.length)
+        ) {
           reportResult(result)
           setOutcome(result)
         } else {
@@ -106,7 +119,7 @@ export const useMergeBranchAction = ({
       }
 
       if (result.type === 'error') {
-        toast.error(result.message)
+        setFailure(result)
 
         return
       }
@@ -135,7 +148,8 @@ export const useMergeBranchAction = ({
   const resetMerge = useCallback(() => {
     setProgress(null)
     setOutcome(null)
+    setFailure(null)
   }, [])
 
-  return { isMerging, mergeNow, outcome, progress, resetMerge }
+  return { failure, isMerging, mergeNow, outcome, progress, resetMerge }
 }
