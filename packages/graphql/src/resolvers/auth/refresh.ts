@@ -5,10 +5,11 @@ import { generatePayloadCookie, isolateObjectProperty, refreshOperation } from '
 import type { Context } from '../types.js'
 
 export function refresh(collection: Collection): any {
-  async function resolver(_, __, context: Context) {
+  async function resolver(_, args, context: Context) {
     const options = {
       collection,
       depth: 0,
+      refreshToken: args.refreshToken,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
@@ -22,6 +23,7 @@ export function refresh(collection: Collection): any {
 
     if (collection.config.auth.removeTokenFromResponses) {
       delete result.refreshedToken
+      delete result.refreshToken
     }
 
     return result

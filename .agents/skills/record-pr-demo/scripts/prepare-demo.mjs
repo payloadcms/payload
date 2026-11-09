@@ -89,7 +89,7 @@ export function parseArgs(argv) {
       value: values.get('--mouse-move-ms') ?? DEFAULT_MOUSE_MOVE_MS,
     }),
     output,
-    rawOutput: values.get('--raw-output') ?? `${outputBase}.webm`,
+    rawOutput: values.get('--raw-output') ?? `${outputBase}.mkv`,
     scenario,
     viewport: parseViewport(values.get('--viewport') ?? '1440x900'),
   }
