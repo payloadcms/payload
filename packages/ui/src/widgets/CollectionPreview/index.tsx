@@ -10,11 +10,10 @@ import type { CollectionPreviewDocument } from './types.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference client exports for the production boundary
 import { CollectionPreviewClient } from '../../exports/client/index.js'
 import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
-import { getDocumentThumbnail } from '../../utilities/getDocumentThumbnail.js'
-import { getDocumentThumbnailPopulate } from '../../utilities/getDocumentThumbnailPopulate.js'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 import { isNavEntityVisible } from '../../utilities/isNavEntityVisible.js'
 import { getValueByPath } from '../Activity/utils/documents.js'
+import { getPreviewThumbnailURLs } from './getPreviewThumbnailURLs.js'
 import { getCollectionPreviewLayout, getCollectionPreviewPreferenceKey } from './preferences.js'
 import { renderCollectionPreviewTable } from './renderTable.js'
 
@@ -42,7 +41,7 @@ export async function CollectionPreviewWidget({
     return null
   }
 
-  const { useAsThumbnail: thumbnailField, useAsTitle: titleField = 'id' } = collection.admin
+  const { useAsTitle: titleField = 'id' } = collection.admin
   const { admin } = payload.config.routes
   const href = formatAdminURL({ adminRoute: admin, path: `/collections/${collectionSlug}` })
   const label = getTranslation(collection.labels.plural, i18n)
@@ -62,6 +61,7 @@ export async function CollectionPreviewWidget({
 
   try {
     const result = await getPreviewDocuments({ collection, req })
+    const thumbnailURLs = await getPreviewThumbnailURLs({ collection, docs: result.docs, req })
 
     table = renderCollectionPreviewTable({
       collection,
@@ -69,6 +69,7 @@ export async function CollectionPreviewWidget({
       fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
       label,
       req,
+      thumbnailURLs,
     })
 
     documents = result.docs.map((doc) => {
@@ -85,10 +86,7 @@ export async function CollectionPreviewWidget({
           adminRoute: admin,
           path: `/collections/${collectionSlug}/${encodeURIComponent(String(doc.id))}`,
         }),
-        thumbnailURL: getDocumentThumbnail({
-          doc,
-          useAsThumbnail: thumbnailField,
-        }),
+        thumbnailURL: thumbnailURLs.get(doc.id),
         title:
           typeof rawTitle === 'string' || typeof rawTitle === 'number'
             ? String(rawTitle)
@@ -168,15 +166,11 @@ async function getPreviewDocuments({
 
   return req.payload.find({
     collection: collection.slug,
-    depth: 1,
+    depth: 0,
     draft: true,
     limit,
     overrideAccess: false,
     pagination: false,
-    populate: getDocumentThumbnailPopulate({
-      collectionConfig: collection,
-      collections: req.payload.config.collections,
-    }),
     req,
     sort,
     user: req.user,

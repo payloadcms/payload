@@ -137,13 +137,46 @@
       text-decoration: none;
     }
 
+    td.cell--linked > :is(a, button, .drawer-link),
     td.cell--linked:first-child > :is(a, button, .drawer-link) {
-      padding-inline-start: var(--spacer-3);
+      padding-inline-start: calc(var(--spacer-3) + var(--spacer-4) + var(--spacer-2));
+    }
+
+    td.cell--linked .file__thumbnail {
+      display: none;
     }
 
     td.cell--linked > :is(a, button, .drawer-link):is(:hover, :focus-visible) {
       text-decoration: underline;
     }
+  }
+
+  .collection-preview__table-thumbnail {
+    position: absolute;
+    inset-block-start: var(--spacer-2-5);
+    inset-inline-start: var(--spacer-3);
+    inline-size: var(--spacer-4);
+    block-size: var(--spacer-4);
+    overflow: hidden;
+    border-radius: var(--radius-medium);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    pointer-events: none;
+  }
+
+  .collection-preview__table-thumbnail > .thumbnail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .collection-preview__table-thumbnail > .thumbnail > img {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
   }
 
   .collection-preview__heading {

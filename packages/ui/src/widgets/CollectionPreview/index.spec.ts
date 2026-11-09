@@ -3,6 +3,7 @@ import type { SanitizedCollectionConfig, WidgetServerProps } from 'payload'
 import { describe, expect, it, vi } from 'vitest'
 
 import { CollectionPreviewWidget } from './index.js'
+import { renderCollectionPreviewTable } from './renderTable.js'
 
 vi.mock('../../exports/client/index.js', () => ({ CollectionPreviewClient: () => null }))
 vi.mock('./renderTable.js', () => ({
@@ -79,6 +80,7 @@ describe('collection preview widget', () => {
     expect(find).toHaveBeenCalledWith(
       expect.objectContaining({
         collection: 'pages',
+        depth: 0,
         limit: 8,
         overrideAccess: false,
         req: props.req,
@@ -92,6 +94,49 @@ describe('collection preview widget', () => {
         title: 'Hello',
       }),
     ])
+  })
+
+  it('should resolve card thumbnails without populating table relationships', async () => {
+    const { find, props } = createProps()
+    const collection = props.req.payload.collections.pages.config
+    const docs = [{ id: 'page-1', title: 'Hello', cover: 'image-1', author: 'user-1' }]
+
+    collection.admin.useAsThumbnail = 'cover'
+    collection.flattenedFields = [{ name: 'cover', type: 'upload', relationTo: 'media' }]
+    props.req.payload.collections.media = {
+      config: {
+        slug: 'media',
+        upload: {},
+        flattenedFields: [],
+      } as unknown as SanitizedCollectionConfig,
+    }
+    find
+      .mockResolvedValueOnce({ docs })
+      .mockResolvedValueOnce({
+        docs: [{ id: 'image-1', mimeType: 'image/png', url: '/image.png' }],
+      })
+      .mockResolvedValueOnce({ docs: [] })
+
+    const result = await CollectionPreviewWidget(props)
+
+    expect(renderCollectionPreviewTable).toHaveBeenLastCalledWith(
+      expect.objectContaining({ docs, thumbnailURLs: new Map([['page-1', '/image.png']]) }),
+    )
+    expect(docs[0]).toEqual({ id: 'page-1', title: 'Hello', cover: 'image-1', author: 'user-1' })
+    expect(result?.props.documents[0]).toEqual(
+      expect.objectContaining({ title: 'Hello', thumbnailURL: '/image.png' }),
+    )
+    expect(find).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        collection: 'media',
+        depth: 0,
+        overrideAccess: false,
+        req: props.req,
+        user: props.req.user,
+        where: { id: { in: ['image-1'] } },
+      }),
+    )
   })
 
   it.each(['baseFilter', 'baseListFilter'] as const)(
