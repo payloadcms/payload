@@ -113,6 +113,7 @@ The recorder supplies:
 - `click(locator, options?)`: smoothly moves to a locator, pauses, clicks, and pauses again;
 - `expect`: Playwright assertions;
 - `moveCursor(locator, options?)`: smoothly points at a locator and pauses without clicking;
+- `circleCursor(locator, options?)`: approaches a visible target, traces one loose ellipse around it, and eases to rest without clicking;
 - `page`: the application iframe facade; navigation, locators, and evaluation target the app, while input devices and page events use the recording page;
 - `pause(milliseconds = 700)`: a short presentation pause;
 - `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
@@ -152,6 +153,19 @@ await moveCursor(disabledDestination, { duration: 900, pauseAfter: 1200 })
 ```
 
 Change the recording-wide defaults with `--mouse-move-ms` and `--interaction-pause-ms`. Keep a nonzero dwell for review recordings; faster values are mainly useful for recorder tests.
+
+## Circle a result for emphasis
+
+Use `circleCursor` selectively when the viewer should inspect a value or changed state. It moves to the area, makes one slightly asymmetric loop, and slows smoothly at the end. Ordinary navigation still uses `click` and `moveCursor`.
+
+```js
+await circleCursor(page.locator('.tenant-selector'), {
+  duration: 1200,
+  pauseAfter: 700,
+})
+```
+
+The default ellipse follows the target's size, capped at 112 CSS pixels horizontally and 64 vertically. An optional positive `radius` sets both radii in application CSS pixels for a smaller area of interest. Near a viewport edge the loop shifts inward to stay visible. It preserves focus and never clicks or draws on the application. Use the smallest meaningful visible locator; reveal offscreen targets with wheel scrolling first. Validation and screenshot preview retain the path but skip its presentation timing.
 
 ## Scroll with wheel gestures
 
