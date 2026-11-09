@@ -1,4 +1,5 @@
 import type { BasePayload } from '../index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 import { describe, expect, it } from 'vitest'
 
@@ -64,6 +65,71 @@ describe('extractJWT', () => {
       const payload = makePayload(['https://myapp.com'])
 
       expect(extractJWT({ headers, payload: payload as BasePayload })).toBeNull()
+    })
+
+    describe('cross-site top-level navigation', () => {
+      const navigationHeaders = {
+        Cookie: 'payload-token=abc',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'cross-site',
+      }
+      const payload = makePayload(['https://myapp.com']) as BasePayload
+
+      it.each(['GET', 'HEAD'])('accepts a %s navigation', (method) => {
+        const headers = makeHeaders(navigationHeaders)
+
+        expect(extractJWT({ headers, payload, req: { method } as PayloadRequest })).toBe('abc')
+      })
+
+      it('accepts a navigation when the method is unknown', () => {
+        const headers = makeHeaders(navigationHeaders)
+
+        expect(extractJWT({ headers, payload })).toBe('abc')
+      })
+
+      it('rejects a navigation with an unsafe method', () => {
+        const headers = makeHeaders(navigationHeaders)
+
+        expect(
+          extractJWT({
+            headers,
+            payload,
+            req: { method: 'POST' } as PayloadRequest,
+          }),
+        ).toBeNull()
+      })
+
+      it('rejects a navigation into a frame', () => {
+        const headers = makeHeaders({
+          ...navigationHeaders,
+          'Sec-Fetch-Dest': 'iframe',
+        })
+
+        expect(
+          extractJWT({
+            headers,
+            payload,
+            req: { method: 'GET' } as PayloadRequest,
+          }),
+        ).toBeNull()
+      })
+
+      it('rejects a cross-site fetch', () => {
+        const headers = makeHeaders({
+          ...navigationHeaders,
+          'Sec-Fetch-Dest': 'empty',
+          'Sec-Fetch-Mode': 'cors',
+        })
+
+        expect(
+          extractJWT({
+            headers,
+            payload,
+            req: { method: 'GET' } as PayloadRequest,
+          }),
+        ).toBeNull()
+      })
     })
 
     it('falls back to a matching Referer origin when both Origin and Sec-Fetch-Site are absent (regression #17565)', () => {
