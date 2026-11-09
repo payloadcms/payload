@@ -21,8 +21,6 @@ import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileCo
 import { getImageSize } from './getImageSize.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { getStagedFile } from './stagedUpload.js'
-import { planTransformerPipeline } from './transformers/planTransformerPipeline.js'
-import { getUploadTransformerInternal } from './transformers/uploadTransformerBridge.js'
 
 export const getFileFromUploadInstructions = async ({
   collectionSlug,
@@ -183,12 +181,8 @@ export const getFileFromUploadInstructions = async ({
   }
 
   const contentRequirement = getFileContentRequirement({
+    filename: providerFilename,
     hasSizeEdits: requestHasSizeEdits(req),
-    hasTransformFileStages: await hasTransformFileStages({
-      collectionSlug,
-      mimeType: file.mimeType,
-      req,
-    }),
     mimeType: file.mimeType,
     uploadConfig,
   })
@@ -241,11 +235,77 @@ export const getFileFromUploadInstructions = async ({
     // The header wasn't enough to determine the image's dimensions - fall through to a full fetch.
   }
 
-  const response = await fetchUploadResponse({
+  const { contentType, tempFilePath } = await downloadToTempFile({
     collectionSlug,
     file: providerFile,
     req,
-    uploadConfig,
+  })
+  rememberVerifiedOriginal()
+
+  return {
+    name: file.filename,
+    data: Buffer.alloc(0),
+    mimetype: contentType || file.mimeType,
+    size: file.size,
+    tempFilePath,
+    uploadReference: file.uploadReference,
+  }
+}
+
+/**
+ * Downloads the whole file of a client upload that `getFileFromUploadInstructions` returned
+ * without its full contents. `generateFileData` calls this when a transformer accepts the upload,
+ * because only then is the document available to `canTransform`.
+ */
+export const fetchFullClientUpload = async ({
+  collectionSlug,
+  file,
+  req,
+}: {
+  collectionSlug: string
+  file: NonNullable<PayloadRequest['file']>
+  req: PayloadRequest
+}): Promise<NonNullable<PayloadRequest['file']>> => {
+  if (!file.uploadReference) {
+    throw new APIError('Upload has no complete file or upload reference.', 400)
+  }
+
+  // Download by the name the object was stored under. Something earlier in the operation, such
+  // as a hook, can rename the request file, so a verified receipt's filename comes first.
+  const verifiedOriginal = req.context?._payloadVerifiedProviderOriginal as
+    | { filename?: string }
+    | undefined
+
+  const { contentType, tempFilePath } = await downloadToTempFile({
+    collectionSlug,
+    file: {
+      filename: verifiedOriginal?.filename ?? file.name,
+      mimeType: file.mimetype,
+      size: file.size,
+      uploadReference: file.uploadReference as UploadInstructions['file']['uploadReference'],
+    },
+    req,
+  })
+
+  // The storage provider's content type wins over the type the client claimed, on purpose: it
+  // describes the stored object. The check after the download can still change it from the bytes.
+  return { ...file, data: Buffer.alloc(0), mimetype: contentType || file.mimetype, tempFilePath }
+}
+
+const downloadToTempFile = async ({
+  collectionSlug,
+  file,
+  req,
+}: {
+  collectionSlug: string
+  file: UploadInstructions['file']
+  req: PayloadRequest
+}): Promise<{ contentType: null | string; tempFilePath: string }> => {
+  const response = await fetchUploadResponse({
+    collectionSlug,
+    file,
+    req,
+    uploadConfig: req.payload.collections[collectionSlug]!.config.upload,
   })
 
   const tempFilePath = await streamResponseToTempFile({ req, response })
@@ -255,16 +315,8 @@ export const getFileFromUploadInstructions = async ({
   }
   req.context ??= {}
   req.context._payloadClientUploadTempFile = true
-  rememberVerifiedOriginal()
 
-  return {
-    name: file.filename,
-    data: Buffer.alloc(0),
-    mimetype: response.headers.get('Content-Type') || file.mimeType,
-    size: file.size,
-    tempFilePath,
-    uploadReference: file.uploadReference,
-  }
+  return { contentType: response.headers.get('Content-Type'), tempFilePath }
 }
 
 const reservedUploadReferenceKeys = new Set([
@@ -295,7 +347,8 @@ const getClientData = ({
  * Whether the request's `uploadEdits` query param carries a crop or resize edit - reads the raw
  * `req.query.uploadEdits`, since a full parse (with its `data`/`originalDoc` focal-point
  * fallback, done in generateFileData.ts) isn't available yet at this point in the request
- * lifecycle.
+ * lifecycle. Saved `_transforms` keys are not checked here: whether a stage applies them is known
+ * only after planning, so generateFileData decides that download.
  */
 const requestHasSizeEdits = (req: PayloadRequest): boolean => {
   const uploadEdits = req.query?.uploadEdits
@@ -304,35 +357,6 @@ const requestHasSizeEdits = (req: PayloadRequest): boolean => {
   }
 
   return hasCropOrResizeEdit(uploadEdits)
-}
-
-/**
- * Whether a transformer that reads the whole file will run `transformFile` on this upload. A
- * bridge transformer (e.g. `sharpTransformer`) is excluded: it projects what it needs onto the
- * sanitized upload config (`hasImageAdjustments`, `variants`) at startup instead.
- */
-const hasTransformFileStages = async ({
-  collectionSlug,
-  mimeType,
-  req,
-}: {
-  collectionSlug: string
-  mimeType: string
-  req: PayloadRequest
-}): Promise<boolean> => {
-  const transformers = req.payload.config.upload?.transformers ?? []
-
-  if (transformers.length === 0) {
-    return false
-  }
-
-  const pipeline = await planTransformerPipeline({
-    args: { collectionSlug, mimeType, operation: 'upload', req },
-    capability: 'transformFile',
-    transformers,
-  })
-
-  return pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
 }
 
 /**

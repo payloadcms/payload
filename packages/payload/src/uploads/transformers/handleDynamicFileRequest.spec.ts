@@ -35,6 +35,9 @@ const collection = {
   config: { slug: 'media', access: { read: vi.fn() }, upload: {} },
 } as unknown as Collection
 
+const mockPipeline = (pipeline: UploadTransformer[]) =>
+  vi.mocked(planTransformerPipeline).mockResolvedValue({ claims: new Map(), pipeline })
+
 const makeReq = (): PayloadRequest =>
   ({
     payload: {
@@ -48,6 +51,19 @@ describe('handleDynamicFileRequest', () => {
     vi.clearAllMocks()
     vi.mocked(resolveUploadDocument).mockResolvedValue(uploadDocument)
     vi.mocked(checkFileAccess).mockResolvedValue(uploadDocument)
+  })
+
+  it('should plan and run the pipeline with one frozen copy of the document', async () => {
+    vi.mocked(getSourceFileResponse).mockResolvedValue(new Response('source'))
+    const handleRequest = vi.fn().mockResolvedValue({ status: 'continue' })
+    mockPipeline([{ slug: 'recording', handleRequest, mimeTypes: ['image/*'] }])
+
+    await handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() })
+
+    const plannedDoc = vi.mocked(planTransformerPipeline).mock.calls[0]![0].args.doc
+
+    expect(Object.isFrozen(plannedDoc)).toBe(true)
+    expect(handleRequest.mock.calls[0]![0].doc).toBe(plannedDoc)
   })
 
   describe('failed pipeline cleanup', () => {
@@ -78,7 +94,7 @@ describe('handleDynamicFileRequest', () => {
         }),
         mimeTypes: ['image/*'],
       }
-      vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+      mockPipeline([transformer])
 
       await expect(
         handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() }),
@@ -105,7 +121,7 @@ describe('handleDynamicFileRequest', () => {
           mimeTypes: ['image/*'],
         },
       ]
-      vi.mocked(planTransformerPipeline).mockResolvedValue(transformers)
+      mockPipeline(transformers)
 
       await expect(
         handleDynamicFileRequest({ collection, filename: 'logo.png', req: makeReq() }),
@@ -141,7 +157,7 @@ describe('handleDynamicFileRequest', () => {
         }),
         mimeTypes: ['image/*'],
       }
-      vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+      mockPipeline([transformer])
 
       const result = await handleDynamicFileRequest({
         collection,
@@ -168,7 +184,7 @@ describe('handleDynamicFileRequest', () => {
         }),
         mimeTypes: ['image/*'],
       }
-      vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+      mockPipeline([transformer])
 
       const result = await handleDynamicFileRequest({
         collection,
@@ -200,7 +216,7 @@ describe('handleDynamicFileRequest', () => {
           mimeTypes: ['image/*'],
         },
       ]
-      vi.mocked(planTransformerPipeline).mockResolvedValue(transformers)
+      mockPipeline(transformers)
 
       const result = await handleDynamicFileRequest({
         collection,
@@ -237,7 +253,7 @@ describe('handleDynamicFileRequest', () => {
           mimeTypes: ['image/*'],
         },
       ]
-      vi.mocked(planTransformerPipeline).mockResolvedValue(transformers)
+      mockPipeline(transformers)
 
       const result = await handleDynamicFileRequest({
         collection,

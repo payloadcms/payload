@@ -6,6 +6,8 @@ import type { UploadTransformer } from './types.js'
 import { Forbidden } from '../../errors/Forbidden.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
+import { deepCopyObject } from '../../utilities/deepCopyObject.js'
+import { deepFreeze } from '../../utilities/deepFreeze.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
@@ -82,7 +84,7 @@ export async function handleDynamicFileRequest({
     })
   }
 
-  const { document, pipeline } = await authorizeDocument({
+  const { document, documentSnapshot, pipeline } = await authorizeDocument({
     collection,
     filename,
     prefix,
@@ -126,10 +128,12 @@ export async function handleDynamicFileRequest({
 
       const result = await transformer.handleRequest!({
         collectionSlug: collection.config.slug,
+        doc: documentSnapshot,
         documentID: document.id,
         filename: requestedFile.filename,
         getSourceFile: stageSource.get,
         mimeType: requestedFile.mimeType,
+        originalDoc: documentSnapshot,
         req,
       })
 
@@ -215,28 +219,34 @@ async function cancelUnusedBody(response: Response | undefined): Promise<void> {
   }
 }
 
-function planRequestPipeline({
+async function planRequestPipeline({
   collection,
   document,
+  documentSnapshot,
   filename,
   req,
 }: {
   collection: Collection
   document: ResolvedUploadDocument
+  documentSnapshot: Readonly<ResolvedUploadDocument>
   filename: string
   req: PayloadRequest
 }): Promise<UploadTransformer[]> {
-  return planTransformerPipeline({
+  const { pipeline } = await planTransformerPipeline({
     args: {
       collectionSlug: collection.config.slug,
+      doc: documentSnapshot,
       documentID: document.id,
       mimeType: getRequestedFile({ document, filename }).mimeType,
       operation: 'request',
+      originalDoc: documentSnapshot,
       req,
     },
     capability: 'handleRequest',
     transformers: req.payload.config.upload.transformers,
   })
+
+  return pipeline
 }
 
 type AccessResult = { document?: ResolvedUploadDocument; isAllowed: true } | { isAllowed: false }
@@ -271,7 +281,12 @@ async function authorizeDocument({
   prefix?: string
   req: PayloadRequest
   resolvedDocument: ResolvedUploadDocument
-}): Promise<{ document: ResolvedUploadDocument; pipeline: UploadTransformer[] }> {
+}): Promise<{
+  document: ResolvedUploadDocument
+  /** A request never saves the document, so planning and every stage share this read-only copy. */
+  documentSnapshot: Readonly<ResolvedUploadDocument>
+  pipeline: UploadTransformer[]
+}> {
   const accessResults = new Map<boolean, Promise<AccessResult>>()
 
   const checkAccess = ({ isTransform }: { isTransform: boolean }): Promise<AccessResult> => {
@@ -325,7 +340,14 @@ async function authorizeDocument({
       ? access.document
       : resolvedDocument
 
-  const pipeline = await planRequestPipeline({ collection, document, filename, req })
+  const documentSnapshot = deepFreeze(deepCopyObject(document))
+  const pipeline = await planRequestPipeline({
+    collection,
+    document,
+    documentSnapshot,
+    filename,
+    req,
+  })
   const isTransform = pipeline.length > 0
 
   if (isTransform !== isTransformAccess) {
@@ -339,5 +361,5 @@ async function authorizeDocument({
     }
   }
 
-  return { document, pipeline }
+  return { document, documentSnapshot, pipeline }
 }

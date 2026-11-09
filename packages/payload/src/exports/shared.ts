@@ -120,6 +120,7 @@ export {
 } from '../uploads/getFileTypeIdentity.js'
 export { isImage } from '../uploads/isImage.js'
 export { matchMimeType } from '../uploads/matchMimeType.js'
+export { cropToPercent } from '../uploads/transformState/cropUnits.js'
 export { appendDateTimezoneSelectFields } from '../utilities/appendDateTimezoneSelectFields.js'
 export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
 
@@ -161,6 +162,7 @@ export { formatLabels, toWords } from '../utilities/formatLabels.js'
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
 export { getBlockSelect } from '../utilities/getBlockSelect.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
+export { getDataFromFormState } from '../utilities/getDataFromFormState.js'
 export {
   type DateOnlyComparison,
   type DateOnlyConstraint,
@@ -173,7 +175,7 @@ export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
 export { getSafeRedirect } from '../utilities/getSafeRedirect.js'
 export { getSelectMode } from '../utilities/getSelectMode.js'
-export { getSiblingData } from '../utilities/getSiblingData.js'
+export { getSiblingDataFromFormState } from '../utilities/getSiblingDataFromFormState.js'
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
 
 export {
@@ -208,8 +210,6 @@ export {
 } from '../utilities/mergeListSearchAndWhere.js'
 
 export { parseDocumentID } from '../utilities/parseDocumentID.js'
-
-export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 
 export { sanitizeFilename } from '../utilities/sanitizeFilename.js'
 
