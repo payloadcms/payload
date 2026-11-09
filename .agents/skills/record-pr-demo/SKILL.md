@@ -21,6 +21,8 @@ Do not upload previews, rejected takes, raw intermediate recordings, or files th
 
 Drive the application through browser gestures: paced pointer clicks, keystrokes, and wheel scrolling. Open the starting URL once, then navigate through visible controls. Use existing seeded data when possible. Optional `setup`/`teardown` hooks may seed and clean up recording-only data through the API outside the walkthrough. Within the scenario, use gestures to reach each demonstrated state; avoid API or Local API calls, direct navigation between steps, field filling, DOM mutations, and programmatic scrolling. Assertions and read-only DOM inspection may observe the result. Recording chrome, encoding, and verification remain harness operations. See [recording.md](references/recording.md#gesture-based-interactions) for the interaction contract and examples.
 
+Use `circleCursor(locator)` selectively to emphasize a value or result with two tight loops near the focus point and an eased finish. See [recording.md](references/recording.md#circle-a-result-for-emphasis) for timing and radius options.
+
 Use `await click(chrome.back)` and `await click(chrome.forward)` for browser-history steps. The shared window chrome provides these real history controls beside the live URL bar, with normal cursor movement and click feedback.
 
 ## Required presentation chrome
