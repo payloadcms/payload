@@ -4729,6 +4729,52 @@ describe('Versions', () => {
       })
     })
 
+    it('should delete scheduled jobs after a document is deleted by a string ID', async () => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'hello',
+          title: 'my doc to publish in the future',
+        },
+        draft: true,
+      })
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        input: {
+          type: 'publish',
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+        },
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+      })
+
+      await payload.delete({
+        id: String(draft.id),
+        collection: draftCollectionSlug,
+      })
+
+      const { docs } = await payload.find({
+        collection: 'payload-jobs',
+        where: {
+          'input.doc.value': {
+            equals: draft.id,
+          },
+        },
+      })
+
+      expect(docs[0]).toBeUndefined()
+
+      await cleanupDocuments({
+        collectionSlugs: [draftCollectionSlug, 'payload-jobs'],
+        payload,
+      })
+    })
+
     it('should allow global scheduled publish', async () => {
       const draft = await payload.updateGlobal({
         slug: draftGlobalSlug,
