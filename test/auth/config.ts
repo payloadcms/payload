@@ -330,7 +330,22 @@ export default buildConfigWithDefaults({
         useSessions: false,
         verify: true,
       },
-      fields: [],
+      fields: [
+        {
+          name: 'note',
+          type: 'text',
+        },
+      ],
+      hooks: {
+        beforeValidate: [
+          ({ context, data }) => {
+            if (data && typeof context.noteFromHook === 'string') {
+              data.note = context.noteFromHook
+            }
+            return data
+          },
+        ],
+      },
     },
     {
       slug: 'relationsCollection',

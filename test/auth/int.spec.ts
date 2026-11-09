@@ -3651,5 +3651,117 @@ describe('Auth', () => {
       const stored = await readStoredUser(id)
       expect(stored?.restrictedField).toBe(concurrentValue)
     })
+
+    it('should keep the other array fields of the user after a successful login', async () => {
+      const { id, email } = await createUser()
+      const loginMetadata = [{ info: 'first' }, { info: 'second' }]
+      await payload.update({ id, collection: slug, data: { loginMetadata } })
+
+      await payload.login({ collection: slug, data: { email, password } })
+
+      const stored = await payload.findByID({ id, collection: slug })
+      expect(stored.sessions).toHaveLength(1)
+      expect(stored.loginMetadata).toMatchObject(loginMetadata)
+    })
+
+    describe('verify email and reset password', () => {
+      const createdPublicUserIDs: Array<number | string> = []
+
+      const createPublicUser = async () => {
+        const email = `public-race-${crypto.randomUUID()}@example.com`
+        const user = await payload.create({
+          collection: publicUsersSlug,
+          data: { email, note: 'initial', password },
+          showHiddenFields: true,
+        })
+        createdPublicUserIDs.push(user.id)
+
+        return { id: user.id, email, verificationToken: user._verificationToken as string }
+      }
+
+      const readPublicUser = async (id: number | string) =>
+        payload.findByID({ id, collection: publicUsersSlug, showHiddenFields: true })
+
+      const writesPublicUser = (key: string) => (args: UpdateOneArgs) =>
+        args.collection === publicUsersSlug && key in args.data
+
+      const changeNote = (id: number | string) => () =>
+        payload.db.updateOne({
+          id,
+          collection: publicUsersSlug,
+          data: { note: concurrentValue },
+          returning: false,
+        })
+
+      afterEach(async () => {
+        for (const id of createdPublicUserIDs) {
+          await payload.delete({ id, collection: publicUsersSlug }).catch(() => null)
+        }
+        createdPublicUserIDs.length = 0
+      })
+
+      it('should keep a field changed between reading the user and verifying the email', async ({
+        skip,
+      }) => {
+        skipOnMongoTransactions(skip)
+
+        const { id, verificationToken } = await createPublicUser()
+        runBeforeWrite(writesPublicUser('_verified'), changeNote(id))
+
+        await payload.verifyEmail({ collection: publicUsersSlug, token: verificationToken })
+
+        const stored = await readPublicUser(id)
+        expect(stored._verified).toBe(true)
+        expect(stored.note).toBe(concurrentValue)
+      })
+
+      it('should keep a field changed between reading the user and resetting the password', async ({
+        skip,
+      }) => {
+        skipOnMongoTransactions(skip)
+
+        const { id, email, verificationToken } = await createPublicUser()
+        const newPassword = 'password-after-reset'
+        const token = await payload.forgotPassword({
+          collection: publicUsersSlug,
+          data: { email },
+          disableEmail: true,
+        })
+        runBeforeWrite(writesPublicUser('hash'), changeNote(id))
+
+        await payload.resetPassword({
+          collection: publicUsersSlug,
+          data: { password: newPassword, token },
+          overrideAccess: true,
+        })
+
+        const stored = await readPublicUser(id)
+        expect(stored.note).toBe(concurrentValue)
+
+        await payload.verifyEmail({ collection: publicUsersSlug, token: verificationToken })
+        await expect(
+          payload.login({ collection: publicUsersSlug, data: { email, password: newPassword } }),
+        ).resolves.toMatchObject({ token: expect.any(String) })
+      })
+
+      it('should save changes made by a beforeValidate hook while resetting the password', async () => {
+        const { id, email } = await createPublicUser()
+        const token = await payload.forgotPassword({
+          collection: publicUsersSlug,
+          data: { email },
+          disableEmail: true,
+        })
+
+        await payload.resetPassword({
+          collection: publicUsersSlug,
+          context: { noteFromHook: 'set-by-hook' },
+          data: { password: 'password-after-reset', token },
+          overrideAccess: true,
+        })
+
+        const stored = await readPublicUser(id)
+        expect(stored.note).toBe('set-by-hook')
+      })
+    })
   })
 })
