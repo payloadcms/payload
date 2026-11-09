@@ -212,7 +212,10 @@ test('should resize the live application iframe in the recorded page without ima
     assert.equal(await stage.locator('iframe').count(), 1)
     assert.equal(await presentation.appPage.getByRole('button').textContent(), 'Real button')
     for (const method of ['goBack', 'goForward']) {
-      await assert.rejects(() => presentation.appPage[method](), /not supported.*presentation/)
+      await assert.rejects(
+        () => presentation.appPage[method](),
+        new RegExp(`use await click\\(chrome\\.${method === 'goBack' ? 'back' : 'forward'}\\)`),
+      )
     }
     await presentation.resizeWindow({ width: 390, height: 720, duration: 500 })
     const widths = await presentation.appPage.evaluate(() => window.widths)
@@ -430,3 +433,145 @@ for (const accessibility of [false, true]) {
     })
   })
 }
+
+test('should show the live application URL through navigation and browser history', async () => {
+  const { chromium, expect } = await import('@playwright/test')
+  const { createPresentation } = await import('./presentation-demo.mjs')
+  const browser = await chromium.launch({ headless: true })
+  let presentation
+  try {
+    const context = await browser.newContext()
+    await context.route('http://app.test/**', (route) =>
+      route.fulfill({
+        contentType: 'text/html',
+        body: '<h1>Application</h1>',
+      }),
+    )
+    const stage = await context.newPage()
+    presentation = await createPresentation({
+      page: stage,
+      baseURL: 'http://app.test',
+      viewport: { width: 1280, height: 720 },
+      pauseScale: 0,
+      options: {
+        change: { kind: 'Fix', title: 'URL bar', description: 'Follow the real application URL.' },
+      },
+    })
+    const address = stage.getByRole('textbox', { name: 'Application URL' })
+    await presentation.appPage.goto('http://app.test/editor')
+    await expect(address).toHaveText('http://app.test/editor')
+    await presentation.appPage.evaluate(() => history.pushState({}, '', '?locale=es'))
+    await expect(address).toHaveText('http://app.test/editor?locale=es')
+    await expect(presentation.chrome.back).toBeEnabled()
+    await expect(presentation.chrome.forward).toBeDisabled()
+    await presentation.chrome.back.click()
+    await expect(address).toHaveText('http://app.test/editor')
+    await expect(presentation.chrome.back).toBeDisabled()
+    await expect(presentation.chrome.forward).toBeEnabled()
+    await presentation.chrome.forward.click()
+    await expect(address).toHaveText('http://app.test/editor?locale=es')
+    await presentation.chrome.back.click()
+    await expect(address).toHaveText('http://app.test/editor')
+    await presentation.appPage.evaluate(() => history.replaceState({}, '', '?locale=en#title'))
+    await expect(address).toHaveText('http://app.test/editor?locale=en#title')
+    await presentation.appPage.goto('http://app.test/list?locale=en')
+    await expect(address).toHaveText('http://app.test/list?locale=en')
+  } finally {
+    await presentation?.stop()
+    await browser.close()
+  }
+})
+
+test('should use the shared sidebar during recorder resizing and reject mismatched step descriptions', async () => {
+  const { chromium, expect } = await import('@playwright/test')
+  const { createPresentation } = await import('./presentation-demo.mjs')
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const stage = await browser.newPage({ viewport: { width: 1600, height: 1000 } })
+    const steps = Array.from({ length: 12 }, (_, index) => ({
+      title: `Step ${index + 1}`,
+      body: `Visible outcome ${index + 1}. This description explains the action shown in the application.`,
+      ...(index === 11 ? { kind: 'Bug' } : {}),
+    }))
+    steps[0].body = 'A long opening description that fits in the scrollable sidebar. '.repeat(8)
+    const presentation = await createPresentation({
+      page: stage,
+      options: {
+        annotationLayout: 'left',
+        annotationSteps: steps,
+        change: { kind: 'Bug', title: 'Before', description: 'Show the visible failure.' },
+      },
+      viewport: { width: 1280, height: 720 },
+      pauseScale: 0,
+    })
+    await presentation.setAnnotation({ ...steps[0], index: 1, total: 12 })
+    await presentation.flush()
+    const sidebar = stage.locator('.annotation-sidebar')
+    const initial = await sidebar.boundingBox()
+    const initialWindow = await stage.locator('[data-window]').boundingBox()
+    assert.ok(Math.abs(initial.y - initialWindow.y) < 0.1)
+    assert.ok(Math.abs(initial.height - initialWindow.height) < 0.1)
+
+    assert.equal(await sidebar.locator('button').count(), 0)
+    await presentation.resizeWindow({ width: 390, height: 720 })
+    await presentation.flush()
+    assert.deepEqual(await sidebar.boundingBox(), initial)
+    const panel = await sidebar.boundingBox()
+    const window = await stage.locator('[data-window]').boundingBox()
+    assert.ok(Math.abs(panel.x + panel.width - window.x) < 0.1)
+    await assert.rejects(
+      () =>
+        presentation.setAnnotation({
+          title: 'Different',
+          body: 'Stale description',
+          index: 12,
+          total: 12,
+        }),
+      /must match/,
+    )
+    await presentation.setAnnotation({ ...steps[11], index: 12, total: 12 })
+    await presentation.flush()
+    await expect(sidebar.locator('[aria-current=step]')).toContainText('Visible outcome 12')
+    assert.ok((await sidebar.locator('.sidebar-steps').evaluate((e) => e.scrollTop)) > 0)
+    await presentation.stop()
+  } finally {
+    await browser.close()
+  }
+})
+
+test('should keep navigation URL update failures non-fatal', async () => {
+  const { chromium } = await import('@playwright/test')
+  const { createPresentation } = await import('./presentation-demo.mjs')
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const stage = await browser.newPage({ viewport: { width: 1600, height: 1000 } })
+    const presentation = await createPresentation({
+      page: stage,
+      options: { change: { kind: 'Fix', title: 'Navigation', description: 'Keep recording.' } },
+      viewport: { width: 1280, height: 720 },
+      pauseScale: 0,
+    })
+    const originalEvaluate = stage.evaluate
+    let failedUpdates = 0
+    stage.evaluate = async () => {
+      failedUpdates++
+      throw new Error('Execution context was destroyed during navigation')
+    }
+    stage.emit(
+      'framenavigated',
+      stage.frames().find((frame) => frame.parentFrame()),
+    )
+    await new Promise((resolve) => setImmediate(resolve))
+    stage.evaluate = originalEvaluate
+    assert.equal(failedUpdates, 1)
+    await presentation.setAnnotation({
+      index: 1,
+      total: 1,
+      title: 'Still recording',
+      body: 'Navigation continues.',
+    })
+    await presentation.stop()
+  } finally {
+    await browser.close()
+  }
+})

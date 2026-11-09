@@ -233,6 +233,36 @@ describe('configToJSONSchema', () => {
     })
   })
 
+  it('should share one definition, titled after it, for json fields with the same interfaceName', () => {
+    const jsonField = {
+      name: 'settings',
+      type: 'json',
+      interfaceName: 'SharedSettings',
+      jsonSchema: {
+        fileMatch: ['a://b'],
+        schema: { type: 'object', title: 'Settings' },
+        uri: 'a://b',
+      },
+    } as const
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [
+        { slug: 'posts', fields: [jsonField] },
+        { slug: 'pages', fields: [jsonField] },
+      ],
+    }
+
+    const { jsonSchema: schema } = configToJSONSchema(sanitizeConfig(config), 'text')
+
+    // json-schema-to-typescript names a type after its `title`, ahead of its $defs key.
+    expect(schema?.$defs?.SharedSettings).toStrictEqual({ type: 'object', title: 'SharedSettings' })
+    for (const slug of ['posts', 'pages']) {
+      expect((schema?.$defs?.[slug] as JSONSchema4).properties!.settings).toStrictEqual({
+        $ref: '#/$defs/SharedSettings',
+      })
+    }
+  })
+
   it('passes the variant to field-level jsonSchema transforms', () => {
     // @ts-expect-error partial config
     const config: Config = {

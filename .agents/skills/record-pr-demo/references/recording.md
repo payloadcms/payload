@@ -34,7 +34,7 @@ Prefer 10–45 seconds. Avoid long typing sequences, setup screens, loading wait
 
 ## Editorial annotations over the recording
 
-Annotations live in the shared chrome panel above the application. The change title and description stay constant; step titles and bodies update through `showAnnotation` and `hideAnnotation`. Supply content and optional one-based `index`/`total`, which default to 1. If the scenario uses annotations, show the initial note before `ready()` and keep it visible at that marker. Starting annotations after an unannotated opening is rejected. Recordings without annotations remain supported. The shared component controls layout, progress, and transitions; see [window-chrome.md](window-chrome.md).
+For a known step sequence, declare `presentation.annotationSteps` and select the [sidebar API](window-chrome.md#step-sidebar). Call `showAnnotation` when an explanation becomes relevant and `hideAnnotation` when it no longer applies. Keep the scenario’s change metadata constant. For a multi-step sidebar, supply the step’s one-based `index` and the full declared step count as `total` on every call. In the top layout, `index` and `total` are optional and default to 1. If the scenario uses annotations, show the initial note before `ready()` and keep it visible at that marker. Starting annotations after an unannotated opening is rejected. Recordings without annotations remain supported. The shared component controls layout, progress, and transitions; see [window-chrome.md](window-chrome.md).
 
 ```js
 await showAnnotation({
@@ -47,7 +47,7 @@ await pause(1600)
 await hideAnnotation()
 ```
 
-Do not inject annotations into the application. Floating annotations and the old `type`, `position`, and `width` options are rejected with a migration error. Use the fixed panel component without scenario CSS. Check text fit, contrast, and timing in the rendered MP4, and include substantive explanation in the written PR walkthrough as a text alternative.
+Do not inject annotations into the application. Floating annotations and the old `type`, `position`, and `width` options are rejected with a migration error. Use the annotation API without scenario CSS. Check text fit, contrast, and timing in the rendered MP4, and include substantive explanation in the written PR walkthrough as a text alternative.
 
 ## Scenario module
 
@@ -107,14 +107,17 @@ Use semantic locators where practical. Assert each important state before contin
 
 The recorder supplies:
 
+- `chrome.back` / `chrome.forward`: visible recording-window history buttons. Use `await click(chrome.back)` or `await click(chrome.forward)` for paced pointer gestures; unavailable directions are disabled.
+- `chrome.refresh`: reloads the application frame through the persistent toolbar button; use `await click(chrome.refresh)` for a visible refresh gesture.
 - `baseURL`: normalized without a trailing slash;
 - `click(locator, options?)`: smoothly moves to a locator, pauses, clicks, and pauses again;
 - `expect`: Playwright assertions;
 - `moveCursor(locator, options?)`: smoothly points at a locator and pauses without clicking;
+- `circleCursor(locator, options?)`: approaches a visible target, makes two tight loops near its center, and eases to rest without clicking;
 - `page`: the application iframe facade; navigation, locators, and evaluation target the app, while input devices and page events use the recording page;
 - `pause(milliseconds = 700)`: a short presentation pause;
 - `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
-- `typeText({ locator, text, clear = false, delay = 80 })`: click to focus, optionally select all with `ControlOrMeta+A`, then type character by character;
+- `typeText({ locator, text, clear = false, delay = 50 })`: click to focus, optionally select all with `ControlOrMeta+A`, then type character by character;
 - `scroll(locator, options?)`: defaults to wheel input with the cursor inside the visible target; use `{ input: 'wheel', cursorPlacement: 'inside' }` for paced wheel scrolling with position verification;
 - `showAnnotation(options)` / `hideAnnotation()`: updates or clears the step note in the shared chrome panel;
 - `label`: the normalized recording label.
@@ -134,22 +137,37 @@ For example, edit a focused field through keyboard input:
 ```js
 await click(page.getByRole('textbox', { name: 'Title', exact: true }))
 await page.keyboard.press('ControlOrMeta+A')
-await page.keyboard.type('Halloween Sale', { delay: 80 })
+await page.keyboard.type('Halloween Sale', { delay: 50 })
 await click(page.getByRole('button', { name: 'Save', exact: true }))
 ```
 
-If a refresh is part of the story, send the browser reload shortcut through keyboard input and assert the resulting UI. Do not call `page.reload()` to advance the application during the walkthrough. The shared refresh indicator remains available for recorder development and preview controls.
+If a refresh is part of the story, use `await click(chrome.refresh)` and assert the resulting UI. This visibly clicks the persistent toolbar button, reloads only the app frame, and spins the icon while it loads. Do not call `page.reload()` to advance the application during the walkthrough.
 
 The recorder supplies cursor and click feedback automatically. Scenarios do not mount or style it. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.
 
-Use `click` for visible interactions instead of calling `locator.click()` directly. Its defaults are a 300 ms eased cursor movement plus a 300 ms dwell before and after the click. `moveCursor` uses the same travel time and pauses for 300 ms after arriving. Override an individual action when the story needs more time:
+Use `click` for visible interactions instead of calling `locator.click()` directly. Its defaults are a 450 ms eased cursor movement plus a 300 ms dwell before and after the click. `moveCursor` uses the same travel time and pauses for 300 ms after arriving. Override an individual action when the story needs more time:
 
 ```js
 await click(saveButton, { after: 900 })
 await moveCursor(disabledDestination, { duration: 900, pauseAfter: 1200 })
 ```
 
+Cursor travel duration includes browser input processing time. Use the gesture’s `pauseAfter` (or `click`’s `after`) for a single reading hold before continuing. A following `pause()` adds to that hold; reserve it for a separate reading moment.
+
 Change the recording-wide defaults with `--mouse-move-ms` and `--interaction-pause-ms`. Keep a nonzero dwell for review recordings; faster values are mainly useful for recorder tests.
+
+## Circle a result for emphasis
+
+Use `circleCursor` selectively when the viewer should inspect a value or changed state. It moves to the area, makes two tight, slightly asymmetric loops near the focus point, and slows smoothly at the end. Ordinary navigation still uses `click` and `moveCursor`.
+
+```js
+await circleCursor(page.locator('.tenant-selector'), {
+  duration: 1200,
+  pauseAfter: 700,
+})
+```
+
+The default radius is 16 application CSS pixels, independent of the target's size. The gesture draws attention near a value rather than outlining the whole control. An optional positive `radius` adjusts the loop size. Use `position: { x, y }`, measured from the target padding box, to focus on a specific value within a larger control. Near a viewport edge the loop shifts inward to stay visible. It preserves focus and never clicks or draws on the application. Use the smallest meaningful visible locator; reveal offscreen targets with wheel scrolling first. Validation and screenshot preview retain the path but skip its presentation timing.
 
 ## Scroll with wheel gestures
 
@@ -191,7 +209,7 @@ Candidate mode automatically:
 3. records once with human-readable pacing;
 4. converts to H.264 MP4 and fully decodes it to detect corruption;
 5. writes a six-frame contact sheet, a take-specific `.scenario.mjs` copy, and a JSON manifest containing metadata and hashes;
-6. removes the intermediate WebM after successful packaging.
+6. removes the lossless Matroska intermediate after successful packaging.
 
 It ends at the local review gate and never uploads.
 
@@ -217,7 +235,7 @@ Useful options:
 - `--base-url http://localhost:4000`
 - `--viewport 1280x720`
 - `--output /tmp/custom-demo.mp4`
-- `--mouse-move-ms 300`
+- `--mouse-move-ms 450`
 - `--interaction-pause-ms 300`
 - `--contact-sheet /tmp/custom-demo-contact-sheet.png`
 - `--manifest /tmp/custom-demo.json`
@@ -268,6 +286,8 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario
 
 ### Capture resolution and encoding
 
-The default canvas fits the initial application viewport at 1:1 scale, including space for chrome and annotations. A 1440×900 viewport produces a 1600×1148 video, or 1600×1188 with accessibility feedback. The canvas stays fixed during responsive resizing. An explicit `presentation.canvas` overrides those dimensions and can scale the app to fit. `--viewport` controls the application iframe's CSS dimensions.
+The default canvas fits the initial application viewport at 1:1 scale, including space for chrome and annotations. With the left sidebar, a 1440×900 viewport produces an 1794×1086 video so the initial app window stays at 1:1 scale. The top layout produces a 1600×1148 video, or 1600×1188 with accessibility feedback. The canvas stays fixed during responsive resizing. An explicit `presentation.canvas` overrides those dimensions and can scale the app to fit. `--viewport` controls the application iframe's CSS dimensions.
 
 The MP4 converter uses H.264 CRF 18 to preserve detail through conversion. The existing 10 MB review/upload budget still applies.
+
+The Chromium recorder streams PNG frames into a temporary FFV1 `.mkv` without writing individual images. Idle frames repeat at 25 fps to preserve presentation timing. The MP4 conversion is the only lossy encode; successful packaging deletes the intermediate. Lossless intermediates use more temporary disk space and CPU than the final MP4.

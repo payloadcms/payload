@@ -67,8 +67,25 @@ test.describe('Form State', () => {
   // already-initialized in the RSC payload, so there is no disabled phase — the
   // tanstack-start variant below asserts the form is immediately editable instead.
   test('should disable fields during initialization', { framework: 'next' }, async () => {
-    await page.goto(postsUrl.create, { waitUntil: 'commit' })
-    await expect(page.locator('#field-title')).toBeDisabled()
+    const hydration = Promise.withResolvers<void>()
+    const scriptURL = '**/_next/static/**/*.js*'
+    const holdHydration = async (route: Route) => {
+      await hydration.promise
+      await route.fallback()
+    }
+
+    // Keep hydration from finishing before the disabled state can be observed.
+    await page.route(scriptURL, holdHydration)
+
+    try {
+      await page.goto(postsUrl.create, { waitUntil: 'commit' })
+      await expect(page.locator('#field-title')).toBeDisabled()
+    } finally {
+      hydration.resolve()
+      await page.unroute(scriptURL, holdHydration)
+    }
+
+    await expect(page.locator('#field-title')).toBeEnabled()
   })
 
   test('should render the create form ready to edit', { framework: 'tanstack-start' }, async () => {

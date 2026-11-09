@@ -20,6 +20,30 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Form-state data utilities are renamed
+
+The shared form-state utilities exported from `payload/shared` now explicitly name their source:
+
+| Old name               | New name                      |
+| ---------------------- | ----------------------------- |
+| `reduceFieldsToValues` | `getDataFromFormState`        |
+| `getSiblingData`       | `getSiblingDataFromFormState` |
+
+Update imports and calls. Their arguments are unchanged:
+
+```diff
+-import { reduceFieldsToValues, getSiblingData } from 'payload/shared'
++import { getDataFromFormState, getSiblingDataFromFormState } from 'payload/shared'
+
+-const data = reduceFieldsToValues(fields, true)
++const data = getDataFromFormState(fields, true)
+
+-const siblingData = getSiblingData(fields, 'items.0.title')
++const siblingData = getSiblingDataFromFormState(fields, 'items.0.title')
+```
+
+The form-context methods `useForm().getData()` and `useForm().getSiblingData()` keep their names.
+
 ### Payload request creation is consolidated
 
 Payload request creation now uses `createPayloadRequest` for local contexts and `createPayloadRequestFromWebRequest` to convert a Web `Request`. Admin context setup is exposed as `initAdminContext`.
@@ -1190,9 +1214,11 @@ The deprecated `findMigrationDir` re-export has been removed from `@payloadcms/d
 
 The minimum supported Node.js version is now **24.22.1** (previously 18.20.2). Upgrade your runtime — along with any CI, Docker images, and deployment targets — to the latest node LTS version or newer before upgrading to 4.0.
 
-### Minimum supported Next.js version is now 16.4.0 ([#16537](https://github.com/payloadcms/payload/pull/16537))
+### Minimum supported Next.js version is now 16.4.1 ([#16537](https://github.com/payloadcms/payload/pull/16537))
 
-Older versions of Next.js are no longer supported. Update Next.js to **16.4.0** or newer.
+Older versions of Next.js are no longer supported. Update Next.js to **16.4.1** or newer within the `16.x` release line.
+
+React and React DOM must satisfy `^19.3.1`. TanStack Start applications also require `@vitejs/plugin-rsc` `^0.5.38`. These minimums include the fixes for [GHSA-xqc2-xf4c-x3h3](https://github.com/react/react/security/advisories/GHSA-xqc2-xf4c-x3h3) and its [Next.js advisory](https://github.com/vercel/next.js/security/advisories/GHSA-673q-mjm6-r5xr).
 
 ### Minimum supported TypeScript version is now 6.0.3 ([#16692](https://github.com/payloadcms/payload/pull/16692))
 
@@ -2168,6 +2194,22 @@ The `alwaysInsertFields` option (on `cloudStoragePlugin` and every `storage-*` a
 Upload collections now store `original` metadata and a `prefix` and `_objectKey` for each stored file (the main file, `original`, and each variant), so saved versions can find their files. New uploads keep their uploaded filename. With a storage adapter, each new file is stored under its own `_objectKey` folder, so update any code or infrastructure that relies on the old object key. When a processed main file and its original share a filename, request the original with `?original=true`; `original.url` already includes it. With local storage, the original gets a counter name instead (for example `photo-1.png`). Files saved by earlier v4 beta releases with an `-original` filename keep that name and are still served. Custom storage adapters should handle the new `params.isOriginal` in `staticHandler`; see [Custom Storage Adapters](../upload/storage-adapters#custom-storage-adapters).
 
 **Postgres and SQLite:** after updating, run `payload migrate:create`, check that it adds these columns to each upload collection table and its versions table, then run `payload migrate`. Existing rows keep `null` values until their next write.
+
+### Upload collections save crop and focal point edits in `_transforms`
+
+Upload collections now have a `_transforms` JSON field that saves the crop and focal point, so an edit can start again from the retained original. See [Saved crop and focal point](../upload/overview#saved-crop-and-focal-point).
+
+- `_transforms` is a reserved field name on upload collections. If an upload collection defines its own field named `_transforms`, rename it and move its data before you update.
+- `focalX` and `focalY` stay available and match `_transforms.focalPoint` when it is set. For a document saved before `_transforms` existed, the first write that saves `_transforms` copies its focal point into `_transforms`.
+- Replacing the file now sets `focalX` and `focalY` to the center, unless the request sends a new focal point. Before, the old values stayed on the document, but the new image sizes did not use them.
+
+**Postgres and SQLite:** run `payload migrate:create`, check that it adds a `_transforms` column to each upload collection table and its versions table, then run `payload migrate`. Existing rows keep `null` until their next write.
+
+Upload collections also have a core-controlled `_stored` field on the main file, on `original`, and on each entry under `variants`. A value of `false` marks an entry with no stored object. A missing or `null` value means stored, so existing documents need no data backfill. Payload ignores client writes to this field. It is hidden in the Admin Panel, but can appear in API responses; it is not a field-level hidden value. See [Files with no stored default](../upload/transformers#files-with-no-stored-default).
+
+`_stored` is now reserved for these file entries. If an upload collection already defines a custom `_stored` field, rename it and move its data, including data in saved versions, before upgrading. Remove the old custom values from `_stored`: existing `false` values would otherwise be treated as files with no stored object, and writes to the custom field would be ignored.
+
+**Postgres and SQLite:** run `payload migrate:create`, check that it adds the `_stored` columns for file entries in each upload collection and its versions, then run `payload migrate`. Existing rows keep `null`.
 
 ### File size types have been consolidated ([#16593](https://github.com/payloadcms/payload/pull/16593))
 

@@ -5,6 +5,8 @@ import { applyLocaleFiltering } from 'payload/shared'
 
 import type { RenderDocumentServerFunction } from '../../providers/ServerFunctions/index.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server rendering must reference the client bundle for production boundaries.
+import { PageLocaleProvider } from '../../exports/client/index.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { renderDocument } from './index.js'
 
@@ -127,7 +129,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
 
   return {
     data,
-    Document,
+    Document: <PageLocaleProvider locale={locale?.code}>{Document}</PageLocaleProvider>,
     preferences,
   }
 }

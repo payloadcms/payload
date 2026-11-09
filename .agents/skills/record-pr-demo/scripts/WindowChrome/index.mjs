@@ -4,11 +4,13 @@ export function mountDemoChrome({
   change,
   viewport = { width: 1280, height: 720 },
   theme = 'light',
-  showSize = true,
+  onNavigate,
+  onRefresh,
   shouldAnimateAnnotations = true,
   accessibility = false,
   showAnnouncements = false,
-  canvas = getDefaultCanvas({ viewport, accessibility }),
+  annotationLayout,
+  canvas = getDefaultCanvas({ viewport, accessibility, annotationLayout }),
 }) {
   validateSize({ ...canvas, name: 'Canvas' })
   validateSize({ ...viewport, name: 'Viewport' })
@@ -18,11 +20,11 @@ export function mountDemoChrome({
   if (!['light', 'dark'].includes(theme)) throw new Error('Theme must be light or dark')
   if (
     !change ||
-    !['Feature', 'Fix'].includes(change.kind) ||
+    !['Feature', 'Fix', 'Bug'].includes(change.kind) ||
     !change.title?.trim() ||
     !change.description?.trim()
   ) {
-    throw new Error('Presentation requires kind (Feature or Fix), title, and description')
+    throw new Error('Presentation requires kind (Feature, Fix, or Bug), title, and description')
   }
   if (typeof accessibility !== 'boolean')
     throw new Error('Presentation accessibility must be a boolean')
@@ -31,28 +33,31 @@ export function mountDemoChrome({
   const hasAnnouncements = accessibility && showAnnouncements
   const shadow = root.attachShadow({ mode: 'open' })
   shadow.innerHTML = `<style>
-    :host { display:block; position:relative; width:100%; aspect-ratio:${canvas.width}/${canvas.height}; font:16px/1.5 system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+    :host { --font-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace; display:block; position:relative; width:100%; aspect-ratio:${canvas.width}/${canvas.height}; font:16px/1.5 system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
     * { box-sizing:border-box; }
     [hidden] { display:none; }
     .stage { position:absolute; inset:0 auto auto 0; width:${canvas.width}px; height:${canvas.height}px; transform-origin:top left; overflow:hidden; color:var(--ink); background:var(--stage); }
-    .light { --paper:#fff; --ink:#252422; --sub:#66635e; --stage:#f1f0ed; --shell:#e7e5e0; --line:#00000016; --rim:#ffffffa6; --badge:#ffffff70; --progress-track:#00000020; }
-    .dark { --paper:#191919; --ink:#ededeb; --sub:#bbb8b0; --stage:#232321; --shell:#333330; --line:#ffffff22; --rim:#ffffff12; --badge:#ffffff0b; --progress-track:#ffffff30; }
+    .light { --paper:#fff; --ink:#252422; --sub:#66635e; --stage:var(--paper); --shell:#dddddd; --line:#c7c7c7; --rim:#ffffffa6; --badge:#ffffff70; --progress-track:#00000020; }
+    .dark { --paper:#191919; --ink:#ededeb; --sub:#ffffff; --stage:var(--paper); --shell:#232323; --line:var(--badge); --rim:#ffffff12; --badge:#2d2d2d; --progress-track:#ffffff30; }
     .light { --kind-feature-bg:var(--color-bg-brand-tertiary,#e5f4ff); --kind-feature-border:var(--color-border-brand,#bde3ff); --kind-feature-text:color-mix(in srgb,var(--color-text-brand,#007be5) 70%,var(--ink)); --kind-fix-bg:var(--color-bg-warning-tertiary,#fff1c2); --kind-fix-border:var(--color-border-warning,#f5dfa8); --kind-fix-text:color-mix(in srgb,var(--color-text-warning,#b86200) 70%,var(--ink)); }
     .dark { --kind-feature-bg:var(--color-bg-brand-tertiary,#394360); --kind-feature-border:var(--color-border-brand,#536383); --kind-feature-text:color-mix(in srgb,var(--color-text-brand,#80caff) 70%,var(--ink)); --kind-fix-bg:var(--color-bg-warning-tertiary,#5c4100); --kind-fix-border:var(--color-border-warning,#7a5800); --kind-fix-text:color-mix(in srgb,var(--color-text-warning,#ffd966) 70%,var(--ink)); }
     .light { --keycap-bg:var(--color-bg-secondary,#f5f5f5); --keycap-border:var(--color-border,#e6e6e6); --keycap-text:var(--color-text,rgba(0,0,0,.9)); }
     .dark { --keycap-bg:var(--color-bg-secondary,#383838); --keycap-border:var(--color-border,#444444); --keycap-text:var(--color-text,#fff); }
     .window { position:absolute; padding:10px; border:1px solid var(--rim); border-radius:18px; background:var(--shell); transform-origin:top left; }
-    .header { height:36px; display:flex; align-items:center; justify-content:space-between; padding:0 12px 8px; gap:18px; }
-    .dots { display:flex; gap:8px; }
-    .dots span { width:10px; height:10px; border-radius:100%; background:var(--sub); opacity:.6; }
-    .header-info { display:flex; align-items:center; justify-content:flex-end; gap:12px; min-width:0; }
-    .refresh { display:flex; align-items:center; gap:0; color:var(--sub); font:12px/1.5 system-ui,sans-serif; white-space:nowrap; }
-    .refresh[hidden] { display:none; }
-    .refresh svg { width:14px; height:14px; flex:none; }
-    .refresh[data-state=refreshing] svg { animation:refresh-spin 650ms linear infinite; }
+    .header { height:36px; display:flex; align-items:center; justify-content:flex-start; padding:0 0 8px; gap:8px; }
+    .history { display:flex; align-items:center; gap:3px; }
+    .history button { display:grid; place-items:center; width:28px; height:28px; padding:0; border:0; border-radius:6px; background:transparent; color:var(--ink); cursor:pointer; }
+    .history button:hover:not(:disabled) { background:var(--badge); }
+    .history button:disabled, .history .refresh { color:var(--sub); opacity:.35; }
+    .history button:disabled { cursor:default; }
+    .history button:focus-visible { outline:2px solid #0d99ff; outline-offset:1px; }
+    .history svg { width:17px; height:17px; pointer-events:none; }
+    .address { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:1px solid var(--line); border-radius:7px; padding:3px 9px; background:var(--badge); color:var(--sub); font:12px/1.5 var(--font-mono); }
+    .history .refresh:hover, .history .refresh:focus-visible, .history .refresh[data-spinning] { opacity:1; }
+    .refresh[data-spinning] svg { animation:refresh-spin 650ms linear infinite; }
     @keyframes refresh-spin { to { transform:rotate(360deg); } }
-    @media (prefers-reduced-motion:reduce) { .refresh[data-state=refreshing] svg { animation:none; } }
-    .size { padding:5px 9px; border-radius:8px; background:var(--badge); color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+    @media (prefers-reduced-motion:reduce) { .refresh[data-spinning] svg { animation:none; } }
+    .size { flex:none; padding:3px 9px; border:1px solid var(--line); border-radius:7px; background:var(--badge); color:var(--sub); font:12px/1.5 var(--font-mono); font-variant-numeric:tabular-nums; }
     .content { position:relative; overflow:hidden; border-radius:8px; background:var(--paper); }
     ::slotted([slot=content]) { display:block; width:100%; height:100%; border:0; }
     .footer { position:absolute; top:32px; left:50%; transform:translateX(-50%); width:min(1302px,calc(100% - 64px)); height:${accessibility ? 144 : 104}px; display:grid; grid-template-rows:${accessibility ? '32px minmax(0,1fr) 36px' : '32px minmax(0,1fr)'}; row-gap:4px; grid-template-columns:minmax(0,1fr); align-items:center; padding:12px 24px; border:1px solid var(--line); border-radius:12px; color:var(--ink); background:var(--paper); }
@@ -60,8 +65,11 @@ export function mountDemoChrome({
     .footer:has(.note:not([hidden]),.accessibility:not([hidden])) .change { border-block-end:1px solid var(--line); }
     .change .kind { align-self:center; flex:none; }
 
-    .kind { align-self:flex-start; padding-inline:6px; border:1px solid var(--kind-border); border-radius:4px; background:var(--kind-bg); color:var(--kind-text); font-size:13px; font-weight:500; line-height:16px; }
+    .kind { font-family:var(--font-mono); align-self:flex-start; padding-inline:6px; border:1px solid var(--kind-border); border-radius:4px; background:var(--kind-bg); color:var(--kind-text); font-size:12px; font-weight:500; line-height:16px; }
     .kind[data-kind="Feature"] { --kind-bg:var(--kind-feature-bg); --kind-border:var(--kind-feature-border); --kind-text:var(--kind-feature-text); }
+    .light { --kind-bug-bg:var(--color-bg-danger-tertiary,#ffe2e0); --kind-bug-border:var(--color-border-danger,#ffc7c2); --kind-bug-text:var(--color-text-danger,#dc3412); }
+    .dark { --kind-bug-bg:var(--color-bg-danger-tertiary,#60332a); --kind-bug-border:var(--color-border-danger,#864537); --kind-bug-text:var(--color-text-danger,#ffafa3); }
+    .kind[data-kind="Bug"] { --kind-bg:var(--kind-bug-bg); --kind-border:var(--kind-bug-border); --kind-text:var(--kind-bug-text); }
     .kind[data-kind="Fix"] { --kind-bg:var(--kind-fix-bg); --kind-border:var(--kind-fix-border); --kind-text:var(--kind-fix-text); }
     .title { flex:none; font-size:13px; font-weight:400; letter-spacing:-.1px; margin:0; overflow-wrap:anywhere; }
     .description { font-size:13px; color:var(--sub); overflow-wrap:anywhere; }
@@ -73,14 +81,14 @@ export function mountDemoChrome({
     .note[hidden] { display:none; }
     .heading { display:contents; }
     .pagination:has(.step-progress[hidden]) { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
-    .pagination { grid-column:1; grid-row:1 / 3; align-self:center; display:inline-flex; align-items:center; gap:8px; color:var(--sub); font:12px/1.5 ui-monospace,monospace; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .pagination { grid-column:1; grid-row:1 / 3; align-self:center; display:inline-flex; align-items:center; gap:8px; color:var(--sub); font:12px/1.5 var(--font-mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
     .step-progress { display:block; flex:none; width:20px; height:20px; transform:rotate(-90deg); }
     .step-progress circle { fill:none; stroke-width:3.5; }
     .progress-track { stroke:var(--progress-track); }
     .progress-fill { stroke:var(--color-bg-brand, #0d99ff); stroke-dasharray:100; stroke-dashoffset:100; transition-property:stroke-dashoffset; transition-timing-function:cubic-bezier(.4,0,.2,1); }
     @media (prefers-reduced-motion:reduce) { .progress-fill { transition-property:none; } }
     .step-progress[hidden] { display:none; }
-    [data-step-count], [data-refresh-text] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+    [data-step-count], [data-refresh] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
     .note-title { font-size:13px; font-weight:500; overflow-wrap:anywhere; }
     .body { min-width:0; font-size:13px; color:var(--sub); overflow-wrap:anywhere; }
     .accessibility { --history-fade-bg:var(--paper); grid-row:3; grid-column:1 / -1; min-height:0; align-self:stretch; display:flex; align-items:center; gap:12px; margin-inline:-24px; margin-block-end:-12px; padding:12px 24px; border-block-start:1px solid var(--line); border-radius:0 0 11px 11px; background:var(--history-fade-bg); pointer-events:none; }
@@ -93,7 +101,7 @@ export function mountDemoChrome({
     .key-slot { flex:1; height:24px; min-width:0; padding-inline-start:12px; border-inline-start:1px solid var(--line); }
     .keystroke-overlay { position:relative; display:flex; align-items:center; gap:14px; width:100%; overflow:hidden; pointer-events:none; color:var(--ink); }
     .keystroke-overlay::after { content:""; position:absolute; inset-block:0; inset-inline-start:var(--history-fade-start,100%); width:var(--history-fade-width,0px); background:linear-gradient(to right,color-mix(in srgb,var(--history-fade-bg,var(--paper)) 18%,transparent),color-mix(in srgb,var(--history-fade-bg,var(--paper)) 78%,transparent)); pointer-events:none; }
-    .keystroke { display:flex; flex:none; align-items:center; gap:6px; font:13px/1.5 ui-monospace,monospace; }
+    .keystroke { display:flex; flex:none; align-items:center; gap:6px; font:13px/1.5 var(--font-mono); }
     .keystroke[data-key-history-entry] kbd { color:var(--sub); background:var(--paper); box-shadow:none; }
     .keystroke[data-keystroke] { font-weight:600; }
     .keystroke kbd { display:inline-block; padding:1px 7px; border:1px solid var(--keycap-border); border-radius:var(--radius-medium,5px); background:var(--keycap-bg); color:var(--keycap-text); font:inherit; white-space:nowrap; }
@@ -107,7 +115,7 @@ export function mountDemoChrome({
       ${accessibility ? `<div class="accessibility" data-accessibility aria-hidden="true"><div class="announcement-line"><span class="kind a11y-badge" data-a11y-badge>a11y</span>${hasAnnouncements ? '<svg class="speaking-icon" data-speaking-icon aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v-3.5A5.5 5.5 0 1 1 12 8l1.5 2.5H12v2a1.5 1.5 0 0 1-1.5 1.5H8v3M15.5 8a3.5 3.5 0 0 1 0 5M17.5 5.5a7 7 0 0 1 0 10"/><circle cx="9.5" cy="7.5" r=".7" fill="currentColor" stroke="none"/></svg><span class="announcement" data-announcement>Waiting for an update…</span>' : ''}</div><div class="key-slot"><div class="keystroke-overlay" data-keystroke-overlay aria-hidden="true" hidden><span class="keystroke" data-keystroke></span></div></div></div>` : ''}
     </section>
     <div class="window" data-window>
-      <div class="header"><div class="dots" aria-hidden="true"><span></span><span></span><span></span></div><div class="header-info" data-header-info><span class="refresh" data-refresh role="status" aria-live="polite" aria-atomic="true" hidden><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path data-refresh-path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-refresh-text></span></span><span class="size" data-size></span></div></div>
+      <div class="header"><div class="history" aria-label="Browser history"><button type="button" data-back aria-label="Back" title="Back" disabled><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 6 10l6 6M6 10h11"/></svg></button><button type="button" data-forward aria-label="Forward" title="Forward" disabled><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4 6 6-6 6M14 10H3"/></svg></button><button type="button" class="refresh" data-refresh-button data-state="idle" aria-label="Refresh frame" title="Refresh frame"><svg data-refresh-icon aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><span data-refresh role="status" aria-live="polite" aria-atomic="true" hidden></span><div class="address" data-url role="textbox" aria-label="Application URL" aria-readonly="true">about:blank</div><span class="size" data-size></span></div>
       <div class="content" data-content><slot name="content"></slot></div>
     </div>
 
@@ -117,13 +125,22 @@ export function mountDemoChrome({
   find('[data-kind]').dataset.kind = change.kind
   find('[data-title]').textContent = change.title
   find('[data-description]').textContent = change.description
-  find('[data-size]').hidden = !showSize
+  find('[data-back]').onclick = () => onNavigate?.(-1)
+  find('[data-forward]').onclick = () => onNavigate?.(1)
+  find('[data-refresh-button]').onclick = () => {
+    if (find('[data-refresh-button]').dataset.state !== 'refreshing') {
+      void Promise.resolve(onRefresh?.()).catch(() => {})
+    }
+  }
   const keyAnimations = new Set()
   const cancelKeyAnimations = () => {
     for (const animation of keyAnimations) animation.cancel()
     keyAnimations.clear()
   }
   let refreshTimer
+  const finishRefreshSpin = () => {
+    find('[data-refresh-button]').removeAttribute('data-spinning')
+  }
   let currentViewport = viewport
   let isDestroyed = false
 
@@ -133,15 +150,20 @@ export function mountDemoChrome({
     const { width, height } = currentViewport
     const windowWidth = width + 22
     const windowHeight = height + 58
+    const hasSidebar = find('[data-canvas]').hasAttribute('data-sidebar')
     const panelHeight = find('[data-footer]').offsetHeight
     const windowTop = 32 + panelHeight + 22
     const availableHeight = canvas.height - windowTop - 32
-    const scale = Math.min(1, (canvas.width - 64) / windowWidth, availableHeight / windowHeight)
+    const scale = hasSidebar
+      ? Math.min(1, (canvas.width - 332) / windowWidth, (canvas.height - 64) / windowHeight)
+      : Math.min(1, (canvas.width - 64) / windowWidth, availableHeight / windowHeight)
     if (scale <= 0) throw new Error('Presentation text leaves no room for the application')
-    const windowY = windowTop + (availableHeight - windowHeight * scale) / 2
+    const windowY = hasSidebar
+      ? (canvas.height - windowHeight * scale) / 2
+      : windowTop + (availableHeight - windowHeight * scale) / 2
     Object.assign(find('[data-window]').style, {
       width: `${windowWidth}px`,
-      left: `${(canvas.width - windowWidth * scale) / 2}px`,
+      left: `${hasSidebar ? 316 : (canvas.width - windowWidth * scale) / 2}px`,
       top: `${windowY}px`,
       transform: `scale(${scale})`,
     })
@@ -242,6 +264,11 @@ export function mountDemoChrome({
   const observer = new ResizeObserver(layout)
   observer.observe(root)
   observer.observe(find('[data-footer]'))
+  const layoutObserver = new MutationObserver(layout)
+  layoutObserver.observe(find('[data-canvas]'), {
+    attributes: true,
+    attributeFilter: ['data-sidebar'],
+  })
   layout()
 
   let activeAnimation
@@ -253,6 +280,27 @@ export function mountDemoChrome({
   }
 
   return {
+    setTheme(value) {
+      if (!['light', 'dark'].includes(value)) throw new Error('Theme must be light or dark')
+      if (isDestroyed) return
+      find('[data-canvas]').className = `stage ${value}`
+    },
+    setHistoryState({ canGoBack, canGoForward }) {
+      if (isDestroyed) return
+      find('[data-back]').disabled = !canGoBack || !onNavigate
+      find('[data-forward]').disabled = !canGoForward || !onNavigate
+    },
+    setURL(value) {
+      if (isDestroyed) return
+      const url = new URL(value)
+      url.username = ''
+      url.password = ''
+      const displayURL = ['http:', 'https:', 'about:'].includes(url.protocol)
+        ? url.href
+        : url.protocol
+      find('[data-url]').textContent = displayURL
+      find('[data-url]').title = displayURL
+    },
     setAccessibilityState({ key, announcement, reset = false }) {
       if (!accessibility || isDestroyed) return
       if (reset) {
@@ -373,18 +421,20 @@ export function mountDemoChrome({
       clearTimeout(refreshTimer)
       if (isDestroyed) return
       const status = find('[data-refresh]')
+      const button = find('[data-refresh-button]')
+      const icon = find('[data-refresh-icon]')
+      icon.removeEventListener('animationiteration', finishRefreshSpin)
+      if (state === 'refreshing') {
+        button.setAttribute('data-spinning', '')
+      } else if (icon.getAnimations().length) {
+        icon.addEventListener('animationiteration', finishRefreshSpin, { once: true })
+      } else {
+        finishRefreshSpin()
+      }
       status.hidden = state === 'idle'
-      status.dataset.state = state
-      find('[data-refresh-path]').setAttribute(
-        'd',
-        {
-          idle: '',
-          refreshing: 'M13 6a5.2 5.2 0 1 0 .1 4M13 2v4H9',
-          refreshed: 'M3 8l3.2 3.2L13 4.5',
-          failed: 'M4 4l8 8M12 4l-8 8',
-        }[state],
-      )
-      find('[data-refresh-text]').textContent = {
+      button.dataset.state = state
+      button.setAttribute('aria-disabled', String(state === 'refreshing'))
+      status.textContent = {
         idle: '',
         refreshing: 'Refreshing…',
         refreshed: 'Refreshed',
@@ -393,11 +443,9 @@ export function mountDemoChrome({
       if (state === 'refreshed')
         refreshTimer = setTimeout(() => {
           status.hidden = true
-          find('[data-refresh-text]').textContent = ''
+          button.dataset.state = 'idle'
+          status.textContent = ''
         }, 650)
-    },
-    setSizeVisible({ isVisible }) {
-      find('[data-size]').hidden = !isVisible
     },
     setAnnotation(annotation) {
       if (annotation === null) {
@@ -443,11 +491,13 @@ export function mountDemoChrome({
     },
     destroy() {
       cancelKeyAnimations()
+      find('[data-refresh-icon]').removeEventListener('animationiteration', finishRefreshSpin)
       clearTimeout(refreshTimer)
       cancelAnnotationAnimations()
       cancelAnimation()
       isDestroyed = true
       observer.disconnect()
+      layoutObserver.disconnect()
       shadow.replaceChildren()
     },
   }
@@ -467,10 +517,46 @@ function validateSize({ width, height, name }) {
 }
 
 /** Reserve room for the initial viewport, window chrome, description, and outer margins. */
-export function getDefaultCanvas({ viewport, accessibility = false }) {
+export function getDefaultCanvas({ viewport, accessibility = false, annotationLayout }) {
+  if (annotationLayout === 'left' && !accessibility) {
+    return {
+      width: Math.ceil((viewport.width + 22 + 332) / 2) * 2,
+      height: Math.ceil(Math.max(1000, viewport.height + 58 + 128) / 2) * 2,
+    }
+  }
   const panelHeight = accessibility ? 144 : 104
   return {
     width: Math.ceil(Math.max(1600, viewport.width + 22 + 64) / 2) * 2,
     height: Math.ceil(Math.max(1000, viewport.height + 58 + 32 + panelHeight + 22 + 32) / 2) * 2,
+  }
+}
+
+/** Follows the iframe's own history without navigating the recording wrapper. */
+export function bindDemoHistory({ app, chrome }) {
+  let navigation
+  const sync = () => {
+    chrome.setURL(app.contentWindow.location.href)
+    chrome.setHistoryState({
+      canGoBack: navigation?.canGoBack ?? false,
+      canGoForward: navigation?.canGoForward ?? false,
+    })
+  }
+  const attach = () => {
+    navigation?.removeEventListener('currententrychange', sync)
+    // Opaque or external frames cannot expose their history to the recording wrapper.
+    try {
+      navigation = app.contentWindow.navigation
+      sync()
+    } catch {
+      navigation = undefined
+      chrome.setHistoryState({ canGoBack: false, canGoForward: false })
+      return
+    }
+    navigation?.addEventListener('currententrychange', sync)
+  }
+  app.addEventListener('load', attach)
+  return () => {
+    app.removeEventListener('load', attach)
+    navigation?.removeEventListener('currententrychange', sync)
   }
 }

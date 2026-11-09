@@ -68,11 +68,13 @@ export function sharpTransformer(
       // Upload-time eligibility is already decided by the MIME match that ran
       // before `canTransform`; only dynamic request routing needs the query.
       if (args.operation === 'upload') {
-        return true
+        return { canTransform: true, handledTransformKeys: ['crop', 'focalPoint'] }
       }
 
+      // Sharp applies saved transforms at upload time, so it resizes only for the request phase.
       if (
         !dynamicOptions ||
+        args.purpose === 'persisted-default' ||
         (dynamicOptions.collections && !dynamicOptions.collections.includes(args.collectionSlug))
       ) {
         return false
@@ -90,7 +92,7 @@ export function sharpTransformer(
       assertDynamicCollectionsExist({ config, dynamicOptions })
       assertCollectionsOwnedOnce({ collections, config, transformer })
 
-      return initSharpCollections({ collections, config })
+      return initSharpCollections({ collections, config, transformerSlug: transformer.slug })
     },
     mimeTypes: DEFAULT_MIME_TYPES,
     [uploadTransformerInternal]: {
