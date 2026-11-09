@@ -83,9 +83,23 @@ export const createVersion: CreateVersion = async function createVersion(
           },
         },
         {
-          updatedAt: {
-            $lt: new Date(doc.updatedAt),
-          },
+          // A version with the same updatedAt is only demoted when it is older by id, so that
+          // two versions written in the same millisecond never leave two (or zero) latest versions
+          $or: [
+            {
+              updatedAt: {
+                $lt: new Date(doc.updatedAt),
+              },
+            },
+            {
+              _id: {
+                $lt: doc._id,
+              },
+              updatedAt: {
+                $eq: new Date(doc.updatedAt),
+              },
+            },
+          ],
         },
       ],
     },
