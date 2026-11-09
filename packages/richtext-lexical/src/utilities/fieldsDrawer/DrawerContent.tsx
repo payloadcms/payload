@@ -4,11 +4,11 @@ import type { FormState } from 'payload'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
   Form,
-  OperationProvider,
   RenderFields,
   useDocumentForm,
   useDocumentInfo,
   useEffectEvent,
+  useOperation,
   useServerFunctions,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
@@ -38,6 +38,7 @@ export const DrawerContent: React.FC<
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
   const { fields: parentDocumentFields } = useDocumentForm()
   const isEditable = useLexicalEditable()
+  const operation = useOperation()
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
@@ -71,7 +72,7 @@ export const DrawerContent: React.FC<
         documentFormState: getParentDocumentFields(),
         globalSlug,
         initialBlockData: data,
-        operation: 'update',
+        operation,
         readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
@@ -97,6 +98,7 @@ export const DrawerContent: React.FC<
     isEditable,
     globalSlug,
     getDocPreferences,
+    operation,
   ])
 
   if (initialState === false) {
@@ -104,28 +106,26 @@ export const DrawerContent: React.FC<
   }
 
   return (
-    <OperationProvider operation="update">
-      <Form
-        className="fields-drawer"
-        disableValidationOnSubmit
+    <Form
+      className="fields-drawer"
+      disableValidationOnSubmit
+      fields={Array.isArray(fields) ? fields : []}
+      initialState={initialState}
+      onSubmit={handleDrawerSubmit}
+      readOnly={!isEditable}
+      schemaPath={schemaFieldsPath}
+      uuid={uuid()}
+    >
+      <RenderFields
         fields={Array.isArray(fields) ? fields : []}
-        initialState={initialState}
-        onSubmit={handleDrawerSubmit}
+        forceRender
+        parentIndexPath=""
+        parentPath="" // See Blocks feature path for details as for why this is empty
+        parentSchemaPath={schemaFieldsPath}
+        permissions={true}
         readOnly={!isEditable}
-        schemaPath={schemaFieldsPath}
-        uuid={uuid()}
-      >
-        <RenderFields
-          fields={Array.isArray(fields) ? fields : []}
-          forceRender
-          parentIndexPath=""
-          parentPath="" // See Blocks feature path for details as for why this is empty
-          parentSchemaPath={schemaFieldsPath}
-          permissions={true}
-          readOnly={!isEditable}
-        />
-        <RegisterFormSubmit submitRef={submitRef} />
-      </Form>
-    </OperationProvider>
+      />
+      <RegisterFormSubmit submitRef={submitRef} />
+    </Form>
   )
 }

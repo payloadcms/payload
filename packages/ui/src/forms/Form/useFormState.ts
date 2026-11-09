@@ -6,8 +6,8 @@ import type { Dispatch, RefObject } from 'react'
 import { dequal } from 'dequal/lite'
 import {
   deepCopyObjectSimpleWithoutReactComponents,
+  getDataFromFormState,
   hasAutosaveEnabled,
-  reduceFieldsToValues,
 } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -24,7 +24,6 @@ import { useOperation } from '../../providers/Operation/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
-import { reduceFormStateToData } from '../../utilities/reduceFormStateToData.js'
 import { useDocumentForm } from './context.js'
 import { fieldReducer } from './fieldReducer.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
@@ -64,7 +63,7 @@ export type UseFormStateResult = {
   dispatchFields: Dispatch<FieldAction>
   /** Current fields, including their values, validation errors, and rendered components. */
   formState: FormState
-  /** True while rebuilding the selected schema. */
+  /** True while the caller initializes the form or the selected schema is being rebuilt. */
   isInitializing: boolean
   /** Whether the form has unsaved field changes. */
   isModified: boolean
@@ -113,6 +112,7 @@ type Args = {
     | 'disableValidationOnSubmit'
     | 'initialState'
     | 'isDocumentForm'
+    | 'isInitializing'
     | 'readOnly'
     | 'schemaPath'
     | 'select'
@@ -183,16 +183,10 @@ export const useFormState = ({
 
   const [isInitializing, setIsInitializing] = useState(false)
 
-  const initialData = useMemo(
-    () => reduceFormStateToData({ formState: props.initialState }),
-    [props.initialState],
-  )
-
   const latest = {
     config,
     document,
     getFormState,
-    initialData,
     livePreview,
     onApplied,
     onReset,
@@ -273,7 +267,7 @@ export const useFormState = ({
       const data = isReset
         ? (action.data as Data)
         : isNested
-          ? reduceFormStateToData({ formState, initialData: current.initialData })
+          ? getDataFromFormState(formState, true)
           : savedDocument
 
       const args: FormStateRequestArgs = {
@@ -626,12 +620,10 @@ export const useFormState = ({
 
   const validateForm = useCallback<UseFormStateResult['validateForm']>(
     async ({ isCurrent = () => true, isLocalSubmission = false, skipValidation = false } = {}) => {
-      let isServerValidated = false
       let isValid = true
 
       if (!skipValidation && isLocalSubmission) {
         const fields = await refreshFormState({ type: 'validate', isCurrent })
-        isServerValidated = fields !== undefined
         isValid = !fields || Object.values(fields).every((field) => field.valid !== false)
       }
 
@@ -640,9 +632,7 @@ export const useFormState = ({
       }
 
       const fields = contextRef.current.fields ?? {}
-      const data = isServerValidated
-        ? reduceFormStateToData({ formState: fields })
-        : reduceFieldsToValues(fields, true)
+      const data = getDataFromFormState(fields, true)
 
       if (isCurrent()) {
         setIsValid(isValid)
@@ -678,7 +668,7 @@ export const useFormState = ({
     () => ({
       dispatchFields,
       formState,
-      isInitializing,
+      isInitializing: props.isInitializing || isInitializing,
       isModified,
       isValid,
       prevFormStateRef,
@@ -695,6 +685,7 @@ export const useFormState = ({
       prevFormStateRef,
       refreshFormState,
       isInitializing,
+      props.isInitializing,
       isValid,
       isModified,
       queueFormStateRefresh,

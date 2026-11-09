@@ -5,8 +5,8 @@ import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { serialize } from 'object-to-formdata'
 import {
   getDataByPath as getDataByPathFunc,
-  getSiblingData as getSiblingDataFunc,
-  reduceFieldsToValues,
+  getDataFromFormState,
+  getSiblingDataFromFormState,
   uploadRequiresServerValidation,
 } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -57,7 +57,6 @@ export const Form: React.FC<FormProps> = (props) => {
     el,
     initialState, // fully formed initial field state
     isDocumentForm,
-    isInitializing: initializingFromProps,
     onChange,
     uuid,
   } = props
@@ -73,8 +72,6 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const [isMounted, setIsMounted] = useState(false)
 
-  const [initializing, setInitializing] = useState(initializingFromProps)
-
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
   const isFirstRenderRef = useRef(true)
@@ -82,7 +79,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const {
     dispatchFields,
     formState,
-    isInitializing: isFormStateInitializing,
+    isInitializing,
     isModified,
     isValid,
     prevFormStateRef,
@@ -140,10 +137,10 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const getField = useCallback((path: string) => contextRef.current.fields[path], [])
 
-  const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [])
+  const getData = useCallback(() => getDataFromFormState(contextRef.current.fields, true), [])
 
   const getSiblingData = useCallback(
-    (path: string) => getSiblingDataFunc(contextRef.current.fields, path),
+    (path: string) => getSiblingDataFromFormState(contextRef.current.fields, path),
     [],
   )
 
@@ -154,7 +151,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const createFormData = useCallback<CreateFormData>(
     async (overrides, { data: dataFromArgs, mergeOverrideData = true }) => {
-      let data = dataFromArgs || reduceFieldsToValues(contextRef.current.fields, true)
+      let data = dataFromArgs || getDataFromFormState(contextRef.current.fields, true)
 
       let file = data?.file
 
@@ -288,12 +285,6 @@ export const Form: React.FC<FormProps> = (props) => {
     return () => resetQueue()
   }, [resetQueue])
 
-  useEffect(() => {
-    if (initializingFromProps !== undefined) {
-      setInitializing(initializingFromProps)
-    }
-  }, [initializingFromProps])
-
   contextRef.current.submit = submit
   contextRef.current.getFields = getFields
   contextRef.current.getField = getField
@@ -319,7 +310,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.moveFieldRow = moveFieldRow
   contextRef.current.replaceFieldRow = replaceFieldRow
   contextRef.current.uuid = uuid
-  contextRef.current.initializing = initializing || isFormStateInitializing
+  contextRef.current.initializing = isInitializing
   contextRef.current.isValid = isValid
 
   useEffect(() => {
@@ -369,11 +360,7 @@ export const Form: React.FC<FormProps> = (props) => {
     }
 
     for (const onChangeFn of onChange) {
-      Promise.resolve(onChangeFn({ formState: changedFormState, submitted: isSubmitted })).catch(
-        (err) => {
-          console.error('Error in onChange:', err) // eslint-disable-line no-console
-        },
-      )
+      onChangeFn({ formState: changedFormState, submitted: isSubmitted })
     }
   })
 
@@ -414,7 +401,7 @@ export const Form: React.FC<FormProps> = (props) => {
        * to wait for the form to be ready before interacting with it, reducing flakiness if the test is run in
        * slow network conditions.
        */
-      data-form-ready={!processing && isMounted && !initializing && !isFormStateInitializing}
+      data-form-ready={!processing && isMounted && !isInitializing}
       method={method}
       noValidate
       onSubmit={(e) => void contextRef.current.submit({}, e)}
@@ -429,9 +416,7 @@ export const Form: React.FC<FormProps> = (props) => {
             }}
           >
             <SubmittedContext value={submitted}>
-              <InitializingContext
-                value={!isMounted || (isMounted && (initializing || isFormStateInitializing))}
-              >
+              <InitializingContext value={!isMounted || isInitializing}>
                 <ProcessingContext value={processing}>
                   <BackgroundProcessingContext value={backgroundProcessing}>
                     <ModifiedContext value={isModified}>

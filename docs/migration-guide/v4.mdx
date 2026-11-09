@@ -20,6 +20,30 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Form-state data utilities are renamed
+
+The shared form-state utilities exported from `payload/shared` now explicitly name their source:
+
+| Old name               | New name                      |
+| ---------------------- | ----------------------------- |
+| `reduceFieldsToValues` | `getDataFromFormState`        |
+| `getSiblingData`       | `getSiblingDataFromFormState` |
+
+Update imports and calls. Their arguments are unchanged:
+
+```diff
+-import { reduceFieldsToValues, getSiblingData } from 'payload/shared'
++import { getDataFromFormState, getSiblingDataFromFormState } from 'payload/shared'
+
+-const data = reduceFieldsToValues(fields, true)
++const data = getDataFromFormState(fields, true)
+
+-const siblingData = getSiblingData(fields, 'items.0.title')
++const siblingData = getSiblingDataFromFormState(fields, 'items.0.title')
+```
+
+The form-context methods `useForm().getData()` and `useForm().getSiblingData()` keep their names.
+
 ### Payload request creation is consolidated
 
 Payload request creation now uses `createPayloadRequest` for local contexts and `createPayloadRequestFromWebRequest` to convert a Web `Request`. Admin context setup is exposed as `initAdminContext`.

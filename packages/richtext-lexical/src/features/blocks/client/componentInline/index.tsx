@@ -12,23 +12,23 @@ import {
   EditDepthProvider,
   Form,
   formatDrawerSlug,
-  OperationProvider,
   RenderFields,
   ShimmerEffect,
   useConfig,
   useDocumentForm,
   useDocumentInfo,
   useEditDepth,
+  useOperation,
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { abortAndIgnore, reduceFormStateToData } from '@payloadcms/ui/shared'
+import { abortAndIgnore } from '@payloadcms/ui/shared'
 import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
 
 import './index.css'
 import '../../../../utilities/fieldsDrawer/index.css'
 
-import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
+import { deepCopyObjectSimpleWithoutReactComponents, getDataFromFormState } from 'payload/shared'
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
@@ -81,6 +81,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
 
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
+  const operation = useOperation()
   const { i18n, t } = useTranslation<object, string>()
   const {
     createdInlineBlock,
@@ -94,8 +95,6 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
   const editDepth = useEditDepth()
   const firstTimeDrawer = useRef(false)
   const blockType = formData.blockType
-  const formDataRef = useRef(formData)
-  formDataRef.current = formData
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${blockType}.fields`
 
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(() => {
@@ -246,7 +245,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
         documentFormState: parentDocumentFields,
         globalSlug,
         initialBlockData: formData,
-        operation: 'update',
+        operation,
         readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
@@ -254,9 +253,10 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       })
 
       if (state) {
-        const newFormStateData = reduceFormStateToData({
-          formState: deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
-        }) as InlineBlockFields
+        const newFormStateData = getDataFromFormState(
+          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
+          true,
+        ) as InlineBlockFields
 
         // Things like default values may come back from the server => update the node with the new data
         editor.update(
@@ -305,23 +305,22 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     collectionSlug,
     globalSlug,
     getDocPreferences,
+    operation,
     parentDocumentFields,
     clientBlock,
   ])
 
-  const onChange = useMemo<FormProps['onChange']>(
-    () => [
-      ({ formState, submitted }) => {
-        if (submitted) {
-          if (!CustomLabelFromProps) {
-            setCustomLabel(formState._components?.customComponents?.BlockLabel)
-          }
-          if (!CustomBlockFromProps) {
-            setCustomBlock(formState._components?.customComponents?.Block)
-          }
+  const onChange = useCallback<NonNullable<FormProps['onChange']>[number]>(
+    ({ formState, submitted }) => {
+      if (submitted) {
+        if (!CustomLabelFromProps) {
+          setCustomLabel(formState._components?.customComponents?.BlockLabel)
         }
-      },
-    ],
+        if (!CustomBlockFromProps) {
+          setCustomBlock(formState._components?.customComponents?.Block)
+        }
+      }
+    },
     [CustomLabelFromProps, CustomBlockFromProps],
   )
 
@@ -348,10 +347,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
    */
   const onFormSubmit = useCallback(
     (formState: FormState) => {
-      const newData = reduceFormStateToData({
-        formState,
-        initialData: formDataRef.current,
-      })
+      const newData = getDataFromFormState(formState, true)
       newData.blockType = blockType
 
       editor.update(
@@ -462,70 +458,68 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
   }
 
   return (
-    <OperationProvider operation="update">
-      <Form
-        disableValidationOnSubmit
-        el="div"
-        fields={clientBlock?.fields}
-        initialState={initialState || {}}
-        onChange={onChange}
-        onSubmit={(formState) => {
-          onFormSubmit(formState)
-          toggleDrawer()
-        }}
-        readOnly={!isEditable}
-        schemaPath={schemaFieldsPath}
-        uuid={formUuid}
-      >
-        <EditDepthProvider>
-          <Drawer
-            className={''}
-            headerActions={headerActions}
-            slug={drawerSlug}
-            title={t(`lexical:blocks:inlineBlocks:${formData?.id ? 'edit' : 'create'}`, {
-              label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
-            })}
-          >
-            {initialState ? (
-              <div className="fields-drawer">
-                <RenderFields
-                  fields={clientBlock?.fields}
-                  forceRender
-                  parentIndexPath=""
-                  parentPath="" // See Blocks feature path for details as for why this is empty
-                  parentSchemaPath={schemaFieldsPath}
-                  permissions={true}
-                  readOnly={!isEditable}
-                />
-                <RegisterFormSubmit submitRef={submitRef} />
-              </div>
-            ) : null}
-          </Drawer>
-        </EditDepthProvider>
-        {resolvedCustomBlock ? (
-          <InlineBlockComponentContext
-            value={{
-              EditButton,
-              initialState,
-              InlineBlockContainer,
-              Label,
-              nodeKey,
-              RemoveButton,
-            }}
-          >
-            {resolvedCustomBlock}
-          </InlineBlockComponentContext>
-        ) : (
-          <InlineBlockContainer>
-            {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}
-            {isEditable ? (
-              <div className={`${baseClass}__actions`}>
-                <RemoveButton />
-              </div>
-            ) : null}
-          </InlineBlockContainer>
-        )}
-      </Form>
-    </OperationProvider>
+    <Form
+      disableValidationOnSubmit
+      el="div"
+      fields={clientBlock?.fields}
+      initialState={initialState || {}}
+      onChange={[onChange]}
+      onSubmit={(formState) => {
+        onFormSubmit(formState)
+        toggleDrawer()
+      }}
+      readOnly={!isEditable}
+      schemaPath={schemaFieldsPath}
+      uuid={formUuid}
+    >
+      <EditDepthProvider>
+        <Drawer
+          className={''}
+          headerActions={headerActions}
+          slug={drawerSlug}
+          title={t(`lexical:blocks:inlineBlocks:${formData?.id ? 'edit' : 'create'}`, {
+            label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
+          })}
+        >
+          {initialState ? (
+            <div className="fields-drawer">
+              <RenderFields
+                fields={clientBlock?.fields}
+                forceRender
+                parentIndexPath=""
+                parentPath="" // See Blocks feature path for details as for why this is empty
+                parentSchemaPath={schemaFieldsPath}
+                permissions={true}
+                readOnly={!isEditable}
+              />
+              <RegisterFormSubmit submitRef={submitRef} />
+            </div>
+          ) : null}
+        </Drawer>
+      </EditDepthProvider>
+      {resolvedCustomBlock ? (
+        <InlineBlockComponentContext
+          value={{
+            EditButton,
+            initialState,
+            InlineBlockContainer,
+            Label,
+            nodeKey,
+            RemoveButton,
+          }}
+        >
+          {resolvedCustomBlock}
+        </InlineBlockComponentContext>
+      ) : (
+        <InlineBlockContainer>
+          {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}
+          {isEditable ? (
+            <div className={`${baseClass}__actions`}>
+              <RemoveButton />
+            </div>
+          ) : null}
+        </InlineBlockContainer>
+      )}
+    </Form>
   )
 }

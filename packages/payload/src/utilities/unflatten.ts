@@ -30,6 +30,23 @@ function isBuffer(obj: any) {
 interface Opts {
   delimiter?: string
   object?: any
+  /**
+   * Allows descendant paths to replace scalar values or populate explicit empty arrays.
+   *
+   * @example
+   * unflatten({ person: 'Ada', 'person.me': true }, { overwrite: false })
+   * // { person: 'Ada' }
+   *
+   * unflatten({ person: 'Ada', 'person.me': true }, { overwrite: true })
+   * // { person: { me: true } }
+   *
+   * @example
+   * unflatten({ items: [], 'items.0.name': 'Milk' }, { overwrite: false })
+   * // { items: [] }
+   *
+   * unflatten({ items: [], 'items.0.name': 'Milk' }, { overwrite: true })
+   * // { items: [{ name: 'Milk' }] }
+   */
   overwrite?: boolean
   recursive?: boolean
 }
@@ -55,6 +72,7 @@ export const unflatten = (target: any, opts?: Opts) => {
   }
 
   const sortedKeys = Object.keys(target).sort((keyA, keyB) => keyA.length - keyB.length)
+  const explicitEmptyArrays = overwrite ? undefined : new Set<unknown>()
 
   sortedKeys.forEach((key) => {
     const split = key.split(delimiter)
@@ -72,8 +90,14 @@ export const unflatten = (target: any, opts?: Opts) => {
       const type = Object.prototype.toString.call(currentValue)
       const isobject = type === '[object Object]' || type === '[object Array]'
 
-      // do not write over falsey, non-undefined values if overwrite is false
-      if (!overwrite && !isobject && typeof currentValue !== 'undefined') {
+      // Preserve scalar values and explicit empty arrays unless overwriting is enabled.
+      // An explicit empty array can represent a cleared list, so stale descendants must not repopulate it.
+      // Objects and nonempty arrays remain mergeable.
+      if (
+        !overwrite &&
+        ((!isobject && typeof currentValue !== 'undefined') ||
+          explicitEmptyArrays?.has(currentValue))
+      ) {
         return
       }
 
@@ -93,11 +117,16 @@ export const unflatten = (target: any, opts?: Opts) => {
       }
     }
 
-    // unflatten again for 'messy objects'
+    const value = recursive ? unflatten(target[key], opts) : target[key]
+
+    if (explicitEmptyArrays && Array.isArray(value) && value.length === 0) {
+      explicitEmptyArrays.add(value)
+    }
+
     setOwnProperty({
       key: key1,
       target: recipient,
-      value: recursive ? unflatten(target[key], opts) : target[key],
+      value,
     })
   })
 

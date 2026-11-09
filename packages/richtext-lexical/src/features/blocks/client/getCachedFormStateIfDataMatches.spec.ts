@@ -1,6 +1,5 @@
 import type { Data, FormState } from 'payload'
 
-import { reduceFormStateToData } from '@payloadcms/ui/shared'
 import { describe, expect, it } from 'vitest'
 
 import { getCachedFormStateIfDataMatches } from './getCachedFormStateIfDataMatches.js'
@@ -219,124 +218,46 @@ describe('getCachedFormStateIfDataMatches', () => {
     expect(getCachedFormStateIfDataMatches({ cachedFormState, formData: {} })).toBe(cachedFormState)
   })
 
-  it('should preserve empty arrays and omit unset values when converting form state to block data', () => {
-    expect(
-      reduceFormStateToData({
-        formState: {
-          items: {
-            initialValue: 0,
-            rows: [],
-            value: 0,
-          },
-          sections: {
-            initialValue: 1,
-            rows: [{ id: 'section-1' }],
-            value: 1,
-          },
-          'sections.0.id': { initialValue: 'section-1', value: 'section-1' },
-          'sections.0.items': {
-            initialValue: 0,
-            rows: [],
-            value: 0,
-          },
-          title: { initialValue: undefined, value: undefined },
-        },
-      }),
-    ).toEqual({
-      items: [],
-      sections: [{ id: 'section-1', items: [] }],
-    })
-  })
+  it.each([
+    { name: 'array row', row: { id: 'row-1' } },
+    { name: 'block row', row: { blockType: 'callout', id: 'row-1' } },
+  ])('should reuse cached form state for an unchanged $name', ({ row }) => {
+    const cachedFormState = buildCachedRowFormState({ row })
 
-  it('should preserve a null array when converting form state to block data', () => {
     expect(
-      reduceFormStateToData({
-        formState: {
-          items: {
-            rows: [],
-          },
-        },
+      getCachedFormStateIfDataMatches({
+        cachedFormState,
+        formData: { items: [{ ...row, label: 'Unchanged' }] },
       }),
-    ).toEqual({ items: null })
-  })
-
-  it('should preserve a null array after the client records an empty row count', () => {
-    expect(
-      reduceFormStateToData({
-        formState: {
-          items: {
-            rows: [],
-            value: 0,
-          },
-        },
-        initialData: { items: null },
-      }),
-    ).toEqual({ items: null })
-  })
-
-  it('should allow a null array to be changed to an empty array', () => {
-    expect(
-      reduceFormStateToData({
-        formState: {
-          items: {
-            isModified: true,
-            rows: [],
-            value: 0,
-          },
-        },
-        initialData: { items: null },
-      }),
-    ).toEqual({ items: [] })
-  })
-
-  it('should keep a null-to-empty array change after a sibling field changes', () => {
-    expect(
-      reduceFormStateToData({
-        formState: {
-          items: {
-            disableFormData: false,
-            rows: [],
-            value: 0,
-          },
-          title: {
-            isModified: true,
-            value: 'After',
-          },
-        },
-        initialData: { items: null, title: 'Before' },
-      }),
-    ).toEqual({ items: [], title: 'After' })
+    ).toBe(cachedFormState)
   })
 
   it.each([
     {
       cachedRow: { id: 'row-1' },
-      currentRow: { id: 'row-2', label: 'After save' },
+      currentRow: { id: 'row-2' },
       name: 'row identity changed',
     },
     {
       cachedRow: { blockType: 'callout', id: 'row-1' },
-      currentRow: { blockType: 'quote', id: 'row-1', label: 'After save' },
+      currentRow: { blockType: 'quote', id: 'row-1' },
       name: 'block type changed',
     },
     {
       cachedRow: { id: 'row-1' },
-      currentRow: { label: 'After save' },
+      currentRow: {},
       name: 'row identity disappeared',
     },
     {
       cachedRow: { blockType: 'callout', id: 'row-1' },
-      currentRow: { id: 'row-1', label: 'After save' },
+      currentRow: { id: 'row-1' },
       name: 'block type disappeared',
     },
   ])('should rebuild form state when the $name', ({ cachedRow, currentRow }) => {
     expect(
       getCachedFormStateIfDataMatches({
-        cachedFormState: {
-          items: { initialValue: 1, rows: [cachedRow], value: 1 },
-          'items.0.label': { initialValue: 'Before save', value: 'Before save' },
-        },
-        formData: { items: [currentRow] },
+        cachedFormState: buildCachedRowFormState({ row: cachedRow }),
+        formData: { items: [{ ...currentRow, label: 'Unchanged' }] },
       }),
     ).toBe(false)
   })
@@ -402,3 +323,15 @@ describe('getCachedFormStateIfDataMatches', () => {
     ).toBe(false)
   })
 })
+
+function buildCachedRowFormState({ row }: { row: { blockType?: string; id: string } }): FormState {
+  return {
+    items: { initialValue: 1, rows: [row], value: 1 },
+    ...Object.fromEntries(
+      Object.entries({ ...row, label: 'Unchanged' }).map(([key, value]) => [
+        `items.0.${key}`,
+        { initialValue: value, value },
+      ]),
+    ),
+  }
+}

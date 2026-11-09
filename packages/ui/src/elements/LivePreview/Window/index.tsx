@@ -2,7 +2,7 @@
 
 import type { EditViewProps } from 'payload'
 
-import { reduceFieldsToValues } from 'payload/shared'
+import { getDataFromFormState } from 'payload/shared'
 import React, { useCallback, useEffect } from 'react'
 
 import { useAllFormFields } from '../../../forms/Form/context.js'
@@ -68,7 +68,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
       return
     }
 
-    const values = reduceFieldsToValues(formState, true)
+    const values = getDataFromFormState(formState, true)
 
     if (!values.id) {
       values.id = id
