@@ -107,6 +107,29 @@ export const createVersion: CreateVersion = async function createVersion(
     options,
   )
 
+  // The new version loses the tie when a version with the same updatedAt and a higher id already exists.
+  // ObjectIds written by different processes do not always increase, so the new version can be the lower one.
+  const higherTiedVersion = await Model.exists({
+    $and: [
+      {
+        _id: {
+          $gt: doc._id,
+        },
+      },
+      parentQuery,
+      {
+        updatedAt: {
+          $eq: new Date(doc.updatedAt),
+        },
+      },
+    ],
+  }).session(options.session ?? null)
+
+  if (higherTiedVersion) {
+    await Model.updateOne({ _id: doc._id }, { $unset: { latest: 1 } }, options)
+    doc.set('latest', undefined)
+  }
+
   if (returning === false) {
     return null
   }
