@@ -140,7 +140,7 @@ export async function CollectionPreviewWidget({
       }
       description={getTranslation(description, i18n)}
       documents={documents}
-      emptyLabel={i18n.t('general:noResultsFound')}
+      emptyLabel={i18n.t('version:noRowsFound', { label })}
       href={href}
       initialLayout={initialLayout}
       isAuth={Boolean(collection.auth)}

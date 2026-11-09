@@ -63,29 +63,29 @@ export function CollectionPreviewClient({
   const canDropFiles = isBulkUploadEnabled && Boolean(createHref)
   const headingID = useId()
   const [layout, setLayout] = useState<DocumentLayout>(initialLayout)
-  const rowRef = useRef<HTMLUListElement>(null)
+  const previewRef = useRef<HTMLElement>(null)
   const [columns, setColumns] = useState(1)
 
   useEffect(() => {
-    const row = rowRef.current
-    if (!row) {
+    const preview = previewRef.current
+    if (!preview) {
       return
     }
 
     const updateColumns = () => {
-      const styles = getComputedStyle(row)
+      const styles = getComputedStyle(preview)
       setColumns(
         getColumnCount({
           gap: parseFloat(styles.columnGap) || 0,
-          width: row.clientWidth,
+          width: preview.clientWidth,
         }),
       )
     }
     updateColumns()
     const observer = new ResizeObserver(updateColumns)
-    observer.observe(row)
+    observer.observe(preview)
     return () => observer.disconnect()
-  }, [layout, loadError])
+  }, [])
 
   useEffect(() => {
     const resetDrag = () => {
@@ -187,6 +187,23 @@ export function CollectionPreviewClient({
     handleBulkUpload({ files: transfer.files })
   }
 
+  const createButton = createHref ? (
+    <Button
+      aria-haspopup={isBulkUploadEnabled ? 'dialog' : undefined}
+      aria-label={`${createLabel}: ${label}`}
+      buttonStyle="secondary"
+      className="collection-preview__create"
+      el={isBulkUploadEnabled ? 'button' : 'link'}
+      icon={isBulkUploadEnabled ? <UploadIcon /> : 'plus'}
+      iconPosition="left"
+      margin={false}
+      onClick={isBulkUploadEnabled ? () => handleBulkUpload() : undefined}
+      to={isBulkUploadEnabled ? undefined : createHref}
+    >
+      {createLabel}
+    </Button>
+  ) : null
+
   return (
     <section
       aria-labelledby={headingID}
@@ -197,6 +214,8 @@ export function CollectionPreviewClient({
       onDragLeaveCapture={handleDragLeave}
       onDragOverCapture={handleDragOver}
       onDropCapture={handleDrop}
+      ref={previewRef}
+      style={{ '--collection-preview-columns': columns } as React.CSSProperties}
     >
       <div className="collection-preview__header">
         <h2 className="collection-preview__heading" id={headingID}>
@@ -212,40 +231,37 @@ export function CollectionPreviewClient({
             <Button
               aria-haspopup={isBulkUploadEnabled ? 'dialog' : undefined}
               aria-label={`${createLabel}: ${label}`}
-              buttonStyle="secondary"
+              buttonStyle="ghost"
               el={isBulkUploadEnabled ? 'button' : 'link'}
               icon={isBulkUploadEnabled ? <UploadIcon /> : 'plus'}
               iconPosition="left"
               margin={false}
               onClick={isBulkUploadEnabled ? () => handleBulkUpload() : undefined}
               to={isBulkUploadEnabled ? undefined : createHref}
-            >
-              {createLabel}
-            </Button>
+              tooltip={createLabel}
+            />
           ) : null}
           <LayoutToggle layout={layout} onChange={handleLayoutChange} />
         </div>
       </div>
       {loadError ? <p role="status">{loadError}</p> : null}
-      {!loadError && layout === 'table' ? (
-        <div className="collection-preview__table">
+      {!loadError && !documents.length ? (
+        <div className="collection-preview__empty-card collection-preview__empty-card--full">
+          <p>{emptyLabel}</p>
+          {createButton}
+        </div>
+      ) : null}
+      {!loadError && documents.length > 0 && layout === 'table' ? (
+        <div className="collection-preview__table" data-row-count={columns}>
           <TableIdentityProvider collectionSlug={collectionSlug}>
             <RelationshipProvider>{table}</RelationshipProvider>
           </TableIdentityProvider>
-          {!documents.length ? (
-            <p className="collection-preview__table-empty">{emptyLabel}</p>
-          ) : null}
         </div>
       ) : null}
-      {!loadError && layout === 'grid' ? (
-        <ul
-          className="collection-preview__row"
-          ref={rowRef}
-          style={{ '--collection-preview-columns': columns } as React.CSSProperties}
-        >
+      {!loadError && documents.length > 0 && layout === 'grid' ? (
+        <ul className="collection-preview__row">
           {Array.from({ length: columns }, (_, index) => {
             const doc = documents[index]
-            const isEmpty = !documents.length && index === 0
             return (
               <li key={doc?.id ?? `empty-${index}`}>
                 {doc ? (
@@ -266,38 +282,11 @@ export function CollectionPreviewClient({
                     </div>
                   </DocumentCard>
                 ) : (
-                  <div
-                    className={[
-                      'collection-preview__empty-card',
-                      isEmpty && 'collection-preview__empty-card--first',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                  >
+                  <div className="collection-preview__empty-card">
                     <div aria-hidden="true" className="collection-preview__thumbnail-sizing" />
                     <div aria-hidden="true" className="collection-preview__content-sizing" />
                     <div className="collection-preview__empty-content">
-                      {createHref && index === documents.length ? (
-                        <>
-                          <Button
-                            aria-haspopup={isBulkUploadEnabled ? 'dialog' : undefined}
-                            aria-label={`${createLabel}: ${label}`}
-                            buttonStyle="secondary"
-                            className="collection-preview__create"
-                            el={isBulkUploadEnabled ? 'button' : 'link'}
-                            icon={
-                              isBulkUploadEnabled ? <UploadIcon /> : isEmpty ? undefined : 'plus'
-                            }
-                            iconPosition="left"
-                            margin={false}
-                            onClick={isBulkUploadEnabled ? () => handleBulkUpload() : undefined}
-                            to={isBulkUploadEnabled ? undefined : createHref}
-                          >
-                            {createLabel}
-                          </Button>
-                          {isBulkUploadEnabled ? <p>{t('upload:dragAndDropHere')}</p> : null}
-                        </>
-                      ) : null}
+                      {createHref && index === documents.length ? createButton : null}
                     </div>
                   </div>
                 )}
