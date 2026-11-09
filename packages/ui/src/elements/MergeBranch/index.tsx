@@ -222,7 +222,9 @@ export const MergeBranchModal: React.FC = () => {
                   label,
                   problem.docID !== undefined && `#${problem.docID}`,
                   'locale' in problem && problem.locale,
-                  'path' in problem && problem.path,
+                  'label' in problem && problem.label
+                    ? problem.label
+                    : 'path' in problem && problem.path,
                 ]
                   .filter(Boolean)
                   .join(' / ')

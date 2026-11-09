@@ -218,7 +218,8 @@ test('should report a blocked merge without a completed progress bar', async () 
               docID: 12,
               locale: 'fr',
               path: 'data.title',
-              message: 'Invalid input: expected string, received null',
+              label: 'Headline',
+              message: 'This field is required.',
             },
           ],
           warnings: [],
@@ -236,9 +237,7 @@ test('should report a blocked merge without a completed progress bar', async () 
   await expect.element(screen.getByText('A dependency is unavailable')).toBeVisible()
   await expect
     .element(screen.getByRole('listitem').nth(1))
-    .toHaveTextContent(
-      'Post / #12 / fr / data.title: Invalid input: expected string, received null',
-    )
+    .toHaveTextContent('Post / #12 / fr / Headline: This field is required.')
 })
 
 test('should report a partial merge with the actual merged count and problems', async () => {

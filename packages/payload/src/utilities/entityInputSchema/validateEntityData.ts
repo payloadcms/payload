@@ -1,8 +1,9 @@
 import type { core } from 'zod'
 
+import { getTranslation } from '@payloadcms/translations'
 import { fromJSONSchema } from 'zod'
 
-import type { CollectionSlug, GlobalSlug, PayloadRequest } from '../../index.js'
+import type { CollectionSlug, FlattenedField, GlobalSlug, PayloadRequest } from '../../index.js'
 import type { EntityInputSchema } from './types.js'
 
 import { ValidationError } from '../../errors/ValidationError.js'
@@ -78,13 +79,118 @@ const validateEntityData = ({
 
   throw new ValidationError({
     [entity]: slug,
-    errors: getUsefulIssues(result.error.issues).map(({ message, path }) => ({
-      message,
-      path: formatDataPath(path),
+    errors: getUsefulIssues(result.error.issues).map((issue) => ({
+      label: getFieldLabel({ slug, data, entity, path: issue.path, req }),
+      message: getValidationMessage({ data, issue, req }),
+      path: formatDataPath(issue.path),
     })),
     req,
   })
 }
+
+const getValidationMessage = ({
+  data,
+  issue,
+  req,
+}: {
+  data: Record<string, unknown>
+  issue: core.$ZodIssue
+  req: PayloadRequest
+}): string => {
+  const value = issue.path.reduce<unknown>((value, segment) => readValue({ segment, value }), data)
+
+  if (issue.code === 'invalid_type') {
+    if (value === null || value === undefined) {
+      return req.t('validation:required')
+    }
+
+    if (issue.expected === 'number' || issue.expected === 'int') {
+      return req.t('validation:enterNumber')
+    }
+
+    if (issue.expected === 'boolean') {
+      return req.t('validation:trueOrFalse')
+    }
+  }
+
+  if (issue.code === 'invalid_value') {
+    return req.t('validation:invalidSelection')
+  }
+
+  return req.t('validation:invalidInput')
+}
+
+/** Resolve configured labels while retaining row numbers and the original machine-readable path. */
+const getFieldLabel = ({
+  slug,
+  data,
+  entity,
+  path,
+  req,
+}: {
+  data: Record<string, unknown>
+  entity: 'collection' | 'global'
+  path: PropertyKey[]
+  req: PayloadRequest
+  slug: string
+}): string | undefined => {
+  const config =
+    entity === 'collection'
+      ? req.payload.collections[slug]?.config
+      : req.payload.config.globals.find((global) => global.slug === slug)
+  let fields: FlattenedField[] = config?.flattenedFields ?? []
+  let value: unknown = data
+  const labels: string[] = []
+
+  for (let index = 0; index < path.length; index++) {
+    const segment = path[index]
+
+    if (typeof segment !== 'string') {
+      break
+    }
+
+    const field = fields.find((field) => field.name === segment)
+
+    if (!field) {
+      break
+    }
+
+    labels.push(getTranslation(field.label || field.name, req.i18n))
+    value = readValue({ segment, value })
+
+    if (field.type === 'array' || field.type === 'blocks') {
+      const rowIndex = path[index + 1]
+
+      if (typeof rowIndex !== 'number') {
+        break
+      }
+
+      index++
+      labels[labels.length - 1] += ` ${rowIndex + 1}`
+      value = readValue({ segment: rowIndex, value })
+
+      if (field.type === 'array') {
+        fields = field.flattenedFields
+      } else {
+        const blockType = readValue({ segment: 'blockType', value })
+        const block =
+          req.payload.config.blocks?.find((block) => block.slug === blockType) ??
+          field.blocks.find((block) => typeof block !== 'string' && block.slug === blockType)
+
+        fields = block && typeof block !== 'string' ? block.flattenedFields : []
+      }
+    } else if ('flattenedFields' in field) {
+      fields = field.flattenedFields
+    } else {
+      fields = []
+    }
+  }
+
+  return labels.length ? labels.join(' > ') : undefined
+}
+
+const readValue = ({ segment, value }: { segment: PropertyKey; value: unknown }): unknown =>
+  value && typeof value === 'object' ? (value as Record<PropertyKey, unknown>)[segment] : undefined
 
 /** Updates and drafts accept partial data, including partial nested objects and array rows. */
 const withoutRequired = (schema: EntityInputSchema): EntityInputSchema => {
