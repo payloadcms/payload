@@ -312,7 +312,7 @@ In phase 1, the [rules for saved keys](#applying-saved-_transforms-keys) apply t
 
 #### Sizes with no stored file
 
-A transformer registers sizes in its `init` with `registerUploadVariants`. It checks that each collection exists and has uploads, and that each size name is unique and is not a built-in upload field name. Then it writes the sizes to the collection's sanitized `upload.variants`. Only one transformer can register sizes on a collection: a second one fails the build. `transformerSlug` must be the slug of a transformer in `upload.transformers`. It saves that transformer as the owner of the sizes and names it in error messages.
+Register sizes from the transformer's `init` with `registerUploadVariants`. Each collection must have uploads enabled, and each size needs a unique name that does not conflict with a built-in upload field or contain path separators. Only one transformer can register sizes on a collection. Pass its configured `slug` as `transformerSlug`; Payload uses this to identify the owner when planning request-time sizes.
 
 ```ts
 import type { UploadTransformer } from 'payload'
@@ -321,6 +321,7 @@ import { registerUploadVariants } from 'payload'
 
 const cdnTransformer: UploadTransformer = {
   slug: 'cdn',
+  mimeTypes: ['image/*'],
   init: (config) =>
     registerUploadVariants({
       collections: {
@@ -329,19 +330,21 @@ const cdnTransformer: UploadTransformer = {
       config,
       transformerSlug: 'cdn',
     }),
-  // ...
+  // Add canTransform and handleRequest to build these sizes.
 }
 ```
 
-Only `sharpTransformer` stores size files, and only the sizes it registered. When the owner of the sizes does not store them at upload, and the owner is one of the request-time stages that build the file in phase 1, Payload writes an entry for each declared size, with no stored file:
+Registration adds the size names and admin options to the sanitized collection config. Keep image-service presets, such as dimensions and output formats, in your transformer configuration. In `handleRequest`, use `variantName` to select the preset and combine it with the saved edits and request parameters.
+
+When upload processing does not store the sizes, their owner must participate in the `persisted-default` plan. Payload then writes an entry for each registered size with no stored file:
 
 - `filename` is the main file's name with the size name added and the original's extension, for example `photo-card.png`, changed when another file already uses that name. `generateImageName` is not used, because the size's dimensions are not known.
 - `_stored` is `false`. `width`, `height`, `filesize`, and `mimeType` are `null`.
-- The size's URL runs phase 1 from the original, also when the main file is stored. `handleRequest` gets the size's name as `variantName`.
+- The size's URL uses Payload's file route and runs phase 1 from the original, even when the main file is stored or the storage adapter normally returns direct URLs. `handleRequest` gets the size's name as `variantName`.
 
 Each save of a new file writes these entries again. A client upload (`clientUploads`) is not downloaded in full only because such sizes are declared.
 
-Every size must apply the saved keys, the same as the main file. When the saved keys can be applied only at request time, the owner of the sizes must also build them at request time. Otherwise the save fails before any file changes, and the error names each key that no stage can apply. For example, a `rotate` that only a request-time transformer applies cannot be saved on a collection whose sizes `sharpTransformer` stores.
+Request-time sizes follow the same [saved-key rules](#applying-saved-_transforms-keys) as the main file, including the exception for unclaimed focal points and custom keys. When the saved keys can be applied only at request time, the owner of the sizes must also build them at request time. Otherwise the save fails before any file changes, and the error names each key that no stage can apply. For example, a `rotate` that only a request-time transformer applies cannot be saved on a collection whose sizes `sharpTransformer` stores.
 
 Request parameters never change `_transforms`. To save a change, update the document.
 
