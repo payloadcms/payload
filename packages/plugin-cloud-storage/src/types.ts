@@ -106,6 +106,8 @@ export type StaticHandler = (
     params: {
       collection: string
       filename: string
+      /** True when the request asks for the original with `?original=true`. */
+      isOriginal?: boolean
       operation?: FileHandlerOperation
       prefix?: string
       uploadReference?: unknown

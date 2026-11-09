@@ -450,7 +450,7 @@ test.suite('Upload transformers', { config: './config.ts' }, () => {
         variants: { thumbnail: { filename: null | string; width: null | number } }
       }
 
-      expect(doc.variants.thumbnail.filename).toBe('image-original-100x100.png')
+      expect(doc.variants.thumbnail.filename).toBe('image-100x100.png')
       expect(doc.variants.thumbnail.width).toBe(100)
     })
 

@@ -28,5 +28,13 @@ export const sessionsFieldConfig: ArrayField = {
       type: 'date',
       required: true,
     },
+    {
+      name: 'refreshCount',
+      type: 'number',
+    },
+    {
+      name: 'refreshedAt',
+      type: 'date',
+    },
   ],
 }

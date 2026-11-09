@@ -22,41 +22,37 @@ on:
       audit-level:
         description: The level of audit to run (low, moderate, high, critical)
         required: false
-        default: high
-      debug:
-        description: Enable debug logging
-        required: false
-        default: false
+        default: moderate
 
-env:
-  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
-  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+# Real runs share one queue, so two of them never push to the PR branches at the same time. A
+# group keeps only its newest pending run, so each dry run gets its own group and cannot replace a
+# pending real run. The real-run test matches `is-default-inputs` below.
+concurrency:
+  group: ${{ github.ref == 'refs/heads/main' && (inputs.ref || 'both') == 'both' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'moderate') == 'moderate' && 'audit-dependencies-real' || format('audit-dependencies-dry-run-{0}', github.run_id) }}
+  cancel-in-progress: false
 
 jobs:
   audit:
     name: audit (${{ matrix.ref }})
-    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
         # inputs.ref is empty on `schedule`; audit both main and 3.x.
         ref: ${{ fromJSON(inputs.ref && inputs.ref != 'both' && format('["{0}"]', inputs.ref) || '["main","3.x"]') }}
-    steps:
-      - name: Checkout ${{ matrix.ref }}
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ matrix.ref }}
-      - name: Setup
-        uses: ./.github/actions/setup
-        with:
-          # The audit resolves each package's dependencies fresh; a full
-          # workspace install is not needed.
-          pnpm-run-install: false
-
-      - name: Run audit dependencies action
-        id: audit_dependencies
-        uses: ./.github/actions/audit-dependencies
-        with:
-          # inputs.* are empty on `schedule`; fall back to the action defaults.
-          scope: ${{ inputs.scope || 'consumer-facing' }}
-          severity: ${{ inputs.audit-level || 'high' }}
+    # A called workflow gets only the permissions that its caller grants. Its Decide PR steps step
+    # reads PRs, so it needs pull-requests: read.
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: ./.github/workflows/audit-dependencies-branch.yml
+    with:
+      ref: ${{ matrix.ref }}
+      # inputs.* are empty on `schedule`, so the defaults apply.
+      scope: ${{ inputs.scope || 'consumer-facing' }}
+      severity: ${{ inputs.audit-level || 'moderate' }}
+      # Only a run from main with the default ref, scope and severity may change PRs. All other
+      # runs are dry runs.
+      is-default-inputs: ${{ github.ref == 'refs/heads/main' && (inputs.ref || 'both') == 'both' && (inputs.scope || 'consumer-facing') == 'consumer-facing' && (inputs.audit-level || 'moderate') == 'moderate' }}
+    secrets:
+      AUDIT_DEPS_APP_CLIENT_ID: ${{ secrets.AUDIT_DEPS_APP_CLIENT_ID }}
+      AUDIT_DEPS_APP_PRIVATE_KEY: ${{ secrets.AUDIT_DEPS_APP_PRIVATE_KEY }}
