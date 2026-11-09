@@ -193,7 +193,10 @@ On-demand validation runs these hooks without saving the candidate. Update exhau
 ```ts
 import type { CollectionBeforeChangeHook } from 'payload'
 
-const syncCustomer: CollectionBeforeChangeHook = async ({ data, operation }) => {
+const syncCustomer: CollectionBeforeChangeHook = async ({
+  data,
+  operation,
+}) => {
   if (operation === 'validate') {
     return data
   }
@@ -253,7 +256,9 @@ import { defineCLICommand } from 'payload/cli'
 export const seedCommand = defineCLICommand({
   description: 'Seed the database.',
   input: strictObject({
-    clear: z._default(z.boolean(), false).check(z.describe('Delete existing documents first.')),
+    clear: z
+      ._default(z.boolean(), false)
+      .check(z.describe('Delete existing documents first.')),
   }),
   handler: async ({ args, getPayload }) => {
     const payload = await getPayload()
@@ -2129,13 +2134,15 @@ GraphQL queries select `variants { thumbnail { url } }` instead of `sizes { thum
 Existing documents must be migrated. Create the predefined migration for your database adapter and run it:
 
 <Banner type="warning">
-  Payload 4 uses `variants` as the top-level field for generated upload variants. If an upload
-  collection already defines a custom field named `variants`, rename that field before you run the
-  predefined migration. Choose a new name, update your config, and write a custom migration that
-  moves the existing custom data from `variants` to the new field. Then run the predefined
-  `sizes-to-variants` migration. If legacy `sizes` data or columns and custom `variants` data or
-  columns are both present, the predefined migration stops before it changes data or indexes. It
-  cannot choose a new name or merge this custom data for you.
+  Payload 4 uses `variants` as the top-level field for generated upload
+  variants. If an upload collection already defines a custom field named
+  `variants`, rename that field before you run the predefined migration. Choose
+  a new name, update your config, and write a custom migration that moves the
+  existing custom data from `variants` to the new field. Then run the predefined
+  `sizes-to-variants` migration. If legacy `sizes` data or columns and custom
+  `variants` data or columns are both present, the predefined migration stops
+  before it changes data or indexes. It cannot choose a new name or merge this
+  custom data for you.
 </Banner>
 
 ```sh
