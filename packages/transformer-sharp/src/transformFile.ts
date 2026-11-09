@@ -8,7 +8,8 @@ import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
 const ANIMATED_MIME_TYPES = ['image/avif', 'image/gif', 'image/webp']
 
-const percentToPixel = (value: number, dimension: number) => Math.floor((value / 100) * dimension)
+// Rounds, as core does when it saves the crop in pixels. Flooring loses 1px to float error.
+const percentToPixel = (value: number, dimension: number) => Math.round((value / 100) * dimension)
 
 /**
  * The Sharp package's public one-file-in/one-file-out upload primitive.
@@ -127,8 +128,15 @@ async function transformCrop({
   if (dimensionsChanged) {
     const formattedCropData = {
       height: newHeight,
-      left: percentToPixel(cropData.x, originalDimensions.width),
-      top: percentToPixel(cropData.y, originalDimensions.height),
+      // Rounding up can push the crop 1px past the far edge.
+      left: Math.min(
+        percentToPixel(cropData.x, originalDimensions.width),
+        originalDimensions.width - newWidth,
+      ),
+      top: Math.min(
+        percentToPixel(cropData.y, originalDimensions.height),
+        originalDimensions.height - newHeight,
+      ),
       width: newWidth,
     }
 
