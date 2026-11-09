@@ -192,18 +192,39 @@ export const useFormState = ({
 
   latestRef.current = latest
 
-  const abortControllerRef = useRef<AbortController>(null)
+  const refreshAbortControllerRef = useRef<AbortController>(null)
   const resetAbortControllerRef = useRef<AbortController>(null)
+  const hasPendingRefreshRef = useRef(false)
+  const isMountedRef = useRef(true)
 
   useEffect(() => {
+    isMountedRef.current = true
+
     return () => {
-      abortAndIgnore(abortControllerRef.current)
+      isMountedRef.current = false
+      hasPendingRefreshRef.current = false
+      abortAndIgnore(refreshAbortControllerRef.current)
       abortAndIgnore(resetAbortControllerRef.current)
     }
   }, [])
 
   const refreshFormState = useCallback(
-    async (action: FormStateAction) => {
+    async function requestFormState(action: FormStateAction) {
+      if (action.type === 'refresh') {
+        if (!isMountedRef.current) {
+          return
+        }
+
+        // Queued refreshes run serially, so an active request here belongs to validation or a save.
+        if (
+          refreshAbortControllerRef.current &&
+          !refreshAbortControllerRef.current.signal.aborted
+        ) {
+          hasPendingRefreshRef.current = true
+          return
+        }
+      }
+
       const current = latestRef.current
       const isRefresh = action.type === 'refresh'
       const isReset = action.type === 'reset'
@@ -331,7 +352,7 @@ export const useFormState = ({
 
       const activityAtStart = { ...submissionActivityRef.current }
 
-      const controllerRef = isReset ? resetAbortControllerRef : abortControllerRef
+      const controllerRef = isReset ? resetAbortControllerRef : refreshAbortControllerRef
       abortAndIgnore(controllerRef.current)
       const controller = new AbortController()
       controllerRef.current = controller
@@ -479,7 +500,8 @@ export const useFormState = ({
           incomingState: successResponse.state,
         })
 
-        if (isValidation) {
+        // Deferred refreshes can resume before React commits the reducer update.
+        if (isValidation || action.type === 'afterSave') {
           contextRef.current.fields = appliedState
         }
 
@@ -513,10 +535,20 @@ export const useFormState = ({
         if (controllerRef.current === controller) {
           controllerRef.current = null
           setIsInitializing(false)
+
+          if (!isReset && hasPendingRefreshRef.current) {
+            hasPendingRefreshRef.current = false
+
+            if (!controller.signal.aborted) {
+              queueTask(async () => {
+                await requestFormState({ type: 'refresh' })
+              })
+            }
+          }
         }
       }
     },
-    [contextRef, dispatchFields, prevFormStateRef, submissionActivityRef],
+    [contextRef, dispatchFields, prevFormStateRef, queueTask, submissionActivityRef],
   )
 
   const queueFormStateRefresh = useCallback<UseFormStateResult['refreshFormState']>(() => {
@@ -639,8 +671,9 @@ export const useFormState = ({
   useEffect(() => {
     if (!dequal(previousSelectRef.current, props.select)) {
       previousSelectRef.current = props.select
-      abortAndIgnore(abortControllerRef.current)
-      abortControllerRef.current = null
+      hasPendingRefreshRef.current = false
+      abortAndIgnore(refreshAbortControllerRef.current)
+      refreshAbortControllerRef.current = null
       setIsInitializing(true)
       queueFormStateRefresh()
     }
