@@ -4,6 +4,7 @@ import { asc, desc, inArray, max, min } from 'drizzle-orm'
 
 import type { DrizzleAdapter } from '../types.js'
 
+import { descNullsLast } from '../queries/buildOrderBy.js'
 import { buildQuery } from '../queries/buildQuery.js'
 import { selectDistinct } from '../queries/selectDistinct.js'
 import { transform } from '../transform/read/index.js'
@@ -126,7 +127,11 @@ export const findMany = async function find({
     groupQuery = groupQuery.orderBy(() =>
       orderBy.map(({ column, order }) => {
         if (oneToManyJoinedTableNames.has(getNameFromDrizzleTable(column.table))) {
-          return order === asc ? asc(min(column)) : desc(max(column))
+          if (order === asc) {
+            return asc(min(column))
+          }
+
+          return adapter.name === 'postgres' ? descNullsLast(max(column)) : desc(max(column))
         }
         return order(column)
       }),
