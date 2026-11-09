@@ -1,7 +1,10 @@
 'use client'
 import type { ClientUploadContext } from '@payloadcms/plugin-cloud-storage/types'
 
-import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
+import {
+  createClientUploadHandler,
+  getClientUploadErrorMessage,
+} from '@payloadcms/plugin-cloud-storage/client'
 import { upload } from '@vercel/blob/client'
 import { formatAdminURL } from 'payload/shared'
 
@@ -38,7 +41,12 @@ export const VercelBlobClientUploadHandler =
         method: 'POST',
       })
       if (!issued.ok) {
-        throw new Error('Failed to initialize Vercel Blob client upload')
+        throw new Error(
+          await getClientUploadErrorMessage(
+            issued,
+            'Failed to initialize Vercel Blob client upload',
+          ),
+        )
       }
 
       const { clientUploadContext, filename, pathname } = (await issued.json()) as {

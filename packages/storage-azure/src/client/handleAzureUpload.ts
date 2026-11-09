@@ -1,6 +1,7 @@
 'use client'
 import type { ClientUploadContext } from '@payloadcms/plugin-cloud-storage/types'
 
+import { getClientUploadErrorMessage } from '@payloadcms/plugin-cloud-storage/client'
 import { formatAdminURL } from 'payload/shared'
 
 // Balances upload parallelism against browser memory: `blockSize * concurrency`
@@ -52,7 +53,12 @@ export const handleAzureUpload = async ({
   })
 
   if (!response.ok) {
-    throw new Error('Failed to retrieve signed URL for Azure client upload')
+    throw new Error(
+      await getClientUploadErrorMessage(
+        response,
+        'Failed to retrieve signed URL for Azure client upload',
+      ),
+    )
   }
 
   const {
