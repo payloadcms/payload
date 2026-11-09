@@ -113,10 +113,11 @@ The recorder supplies:
 - `click(locator, options?)`: smoothly moves to a locator, pauses, clicks, and pauses again;
 - `expect`: Playwright assertions;
 - `moveCursor(locator, options?)`: smoothly points at a locator and pauses without clicking;
+- `circleCursor(locator, options?)`: approaches a visible target, makes two tight loops near its center, and eases to rest without clicking;
 - `page`: the application iframe facade; navigation, locators, and evaluation target the app, while input devices and page events use the recording page;
 - `pause(milliseconds = 700)`: a short presentation pause;
 - `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
-- `typeText({ locator, text, clear = false, delay = 80 })`: click to focus, optionally select all with `ControlOrMeta+A`, then type character by character;
+- `typeText({ locator, text, clear = false, delay = 50 })`: click to focus, optionally select all with `ControlOrMeta+A`, then type character by character;
 - `scroll(locator, options?)`: defaults to wheel input with the cursor inside the visible target; use `{ input: 'wheel', cursorPlacement: 'inside' }` for paced wheel scrolling with position verification;
 - `showAnnotation(options)` / `hideAnnotation()`: updates or clears the step note in the shared chrome panel;
 - `label`: the normalized recording label.
@@ -136,7 +137,7 @@ For example, edit a focused field through keyboard input:
 ```js
 await click(page.getByRole('textbox', { name: 'Title', exact: true }))
 await page.keyboard.press('ControlOrMeta+A')
-await page.keyboard.type('Halloween Sale', { delay: 80 })
+await page.keyboard.type('Halloween Sale', { delay: 50 })
 await click(page.getByRole('button', { name: 'Save', exact: true }))
 ```
 
@@ -144,14 +145,29 @@ If a refresh is part of the story, use `await click(chrome.refresh)` and assert 
 
 The recorder supplies cursor and click feedback automatically. Scenarios do not mount or style it. Keep the scenario on one page; separate browser-window stitching is outside this skill's current scope.
 
-Use `click` for visible interactions instead of calling `locator.click()` directly. Its defaults are a 300 ms eased cursor movement plus a 300 ms dwell before and after the click. `moveCursor` uses the same travel time and pauses for 300 ms after arriving. Override an individual action when the story needs more time:
+Use `click` for visible interactions instead of calling `locator.click()` directly. Its defaults are a 450 ms eased cursor movement plus a 300 ms dwell before and after the click. `moveCursor` uses the same travel time and pauses for 300 ms after arriving. Override an individual action when the story needs more time:
 
 ```js
 await click(saveButton, { after: 900 })
 await moveCursor(disabledDestination, { duration: 900, pauseAfter: 1200 })
 ```
 
+Cursor travel duration includes browser input processing time. Use the gesture’s `pauseAfter` (or `click`’s `after`) for a single reading hold before continuing. A following `pause()` adds to that hold; reserve it for a separate reading moment.
+
 Change the recording-wide defaults with `--mouse-move-ms` and `--interaction-pause-ms`. Keep a nonzero dwell for review recordings; faster values are mainly useful for recorder tests.
+
+## Circle a result for emphasis
+
+Use `circleCursor` selectively when the viewer should inspect a value or changed state. It moves to the area, makes two tight, slightly asymmetric loops near the focus point, and slows smoothly at the end. Ordinary navigation still uses `click` and `moveCursor`.
+
+```js
+await circleCursor(page.locator('.tenant-selector'), {
+  duration: 1200,
+  pauseAfter: 700,
+})
+```
+
+The default radius is 16 application CSS pixels, independent of the target's size. The gesture draws attention near a value rather than outlining the whole control. An optional positive `radius` adjusts the loop size. Use `position: { x, y }`, measured from the target padding box, to focus on a specific value within a larger control. Near a viewport edge the loop shifts inward to stay visible. It preserves focus and never clicks or draws on the application. Use the smallest meaningful visible locator; reveal offscreen targets with wheel scrolling first. Validation and screenshot preview retain the path but skip its presentation timing.
 
 ## Scroll with wheel gestures
 
@@ -219,7 +235,7 @@ Useful options:
 - `--base-url http://localhost:4000`
 - `--viewport 1280x720`
 - `--output /tmp/custom-demo.mp4`
-- `--mouse-move-ms 300`
+- `--mouse-move-ms 450`
 - `--interaction-pause-ms 300`
 - `--contact-sheet /tmp/custom-demo-contact-sheet.png`
 - `--manifest /tmp/custom-demo.json`

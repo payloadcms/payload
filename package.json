@@ -208,6 +208,8 @@
     "p-limit": "^5.0.0",
     "pg": "8.20.0",
     "postcss": "^8.4.49",
+    "postcss-resolve-nested-selector": "^0.1.7",
+    "postcss-selector-parser": "^7.1.7",
     "react": "catalog:",
     "react-dom": "catalog:",
     "rimraf": "6.0.1",

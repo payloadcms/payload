@@ -150,15 +150,20 @@ export function mountDemoChrome({
     const { width, height } = currentViewport
     const windowWidth = width + 22
     const windowHeight = height + 58
+    const hasSidebar = find('[data-canvas]').hasAttribute('data-sidebar')
     const panelHeight = find('[data-footer]').offsetHeight
     const windowTop = 32 + panelHeight + 22
     const availableHeight = canvas.height - windowTop - 32
-    const scale = Math.min(1, (canvas.width - 64) / windowWidth, availableHeight / windowHeight)
+    const scale = hasSidebar
+      ? Math.min(1, (canvas.width - 332) / windowWidth, (canvas.height - 64) / windowHeight)
+      : Math.min(1, (canvas.width - 64) / windowWidth, availableHeight / windowHeight)
     if (scale <= 0) throw new Error('Presentation text leaves no room for the application')
-    const windowY = windowTop + (availableHeight - windowHeight * scale) / 2
+    const windowY = hasSidebar
+      ? (canvas.height - windowHeight * scale) / 2
+      : windowTop + (availableHeight - windowHeight * scale) / 2
     Object.assign(find('[data-window]').style, {
       width: `${windowWidth}px`,
-      left: `${(canvas.width - windowWidth * scale) / 2}px`,
+      left: `${hasSidebar ? 316 : (canvas.width - windowWidth * scale) / 2}px`,
       top: `${windowY}px`,
       transform: `scale(${scale})`,
     })
@@ -259,6 +264,11 @@ export function mountDemoChrome({
   const observer = new ResizeObserver(layout)
   observer.observe(root)
   observer.observe(find('[data-footer]'))
+  const layoutObserver = new MutationObserver(layout)
+  layoutObserver.observe(find('[data-canvas]'), {
+    attributes: true,
+    attributeFilter: ['data-sidebar'],
+  })
   layout()
 
   let activeAnimation
@@ -487,6 +497,7 @@ export function mountDemoChrome({
       cancelAnimation()
       isDestroyed = true
       observer.disconnect()
+      layoutObserver.disconnect()
       shadow.replaceChildren()
     },
   }

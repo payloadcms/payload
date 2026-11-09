@@ -2088,6 +2088,41 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           '"content":"Content for test post to delete."',
         )
       })
+      it('should pass trash to deleteDocuments', async ({ mcp, getApiKey, payload }) => {
+        const post = await payload.create({
+          collection: 'posts',
+          data: {
+            content: 'Content for trash delete.',
+            title: 'Trash Delete Post',
+          },
+          overrideAccess: true,
+        })
+        const apiKey = await getApiKey()
+        const client = await mcp.connect(apiKey)
+        const deleteSpy = vi.spyOn(payload, 'delete')
+        try {
+          const callResponse = await client.callTool({
+            arguments: {
+              slug: 'posts',
+              id: post.id,
+              trash: true,
+            },
+            name: 'deleteDocuments',
+          })
+          expect(callResponse.content[0].text).toContain(
+            'Document deleted successfully from collection "posts"!',
+          )
+          expect(deleteSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: post.id,
+              collection: 'posts',
+              trash: true,
+            }),
+          )
+        } finally {
+          deleteSpy.mockRestore()
+        }
+      })
       it('should call updateDocument with object where clause', async ({
         mcp,
         getApiKey,
