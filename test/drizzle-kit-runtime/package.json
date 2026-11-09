@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "@opennextjs/cloudflare": "1.19.4",
-    "next": "16.2.4",
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "next": "16.4.1",
+    "react": "19.2.9",
+    "react-dom": "19.2.9"
   },
   "devDependencies": {
     "wrangler": "4.87.0"

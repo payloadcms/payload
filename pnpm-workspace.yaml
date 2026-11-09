@@ -10,8 +10,8 @@ catalog:
   copyfiles: '2.4.1'
   cross-env: '7.0.3'
   dotenv: '16.4.7'
-  react: '19.2.6'
-  react-dom: '19.2.6'
+  react: '19.2.9'
+  react-dom: '19.2.9'
   typescript: '5.7.3'
 
 updateNotifier: false
@@ -55,16 +55,16 @@ allowBuilds:
   workerd: true
 
 minimumReleaseAgeExclude:
-  - '@next/bundle-analyzer@16.3.3'
-  - '@next/env@16.3.3'
-  - '@next/eslint-plugin-next@16.3.3'
-  - '@next/swc-darwin-arm64@16.3.3'
-  - '@next/swc-darwin-x64@16.3.3'
-  - '@next/swc-linux-arm64-gnu@16.3.3'
-  - '@next/swc-linux-arm64-musl@16.3.3'
-  - '@next/swc-linux-x64-gnu@16.3.3'
-  - '@next/swc-linux-x64-musl@16.3.3'
-  - '@next/swc-win32-arm64-msvc@16.3.3'
-  - '@next/swc-win32-x64-msvc@16.3.3'
-  - eslint-config-next@16.3.3
-  - next@16.3.3
+  - '@next/bundle-analyzer@16.4.1'
+  - '@next/env@16.4.1'
+  - '@next/eslint-plugin-next@16.4.1'
+  - '@next/swc-darwin-arm64@16.4.1'
+  - '@next/swc-darwin-x64@16.4.1'
+  - '@next/swc-linux-arm64-gnu@16.4.1'
+  - '@next/swc-linux-arm64-musl@16.4.1'
+  - '@next/swc-linux-x64-gnu@16.4.1'
+  - '@next/swc-linux-x64-musl@16.4.1'
+  - '@next/swc-win32-arm64-msvc@16.4.1'
+  - '@next/swc-win32-x64-msvc@16.4.1'
+  - eslint-config-next@16.4.1
+  - next@16.4.1
