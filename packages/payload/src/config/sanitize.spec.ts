@@ -1,3 +1,4 @@
+import type { Block } from '../fields/config/types.js'
 import type { Config } from './types.js'
 
 import { describe, expect, it } from 'vitest'
@@ -118,5 +119,19 @@ describe('sanitizeConfig', () => {
       localeCodes: [],
       locales: [],
     })
+  })
+
+  it('should keep already sanitized blocks when the config is sanitized again', () => {
+    const block: Block = {
+      slug: 'text',
+      fields: [{ name: 'content', type: 'textarea' }],
+    }
+
+    sanitizeConfig({ ...configDefaults, blocks: [block] })
+
+    const sanitizedConfig = sanitizeConfig({ ...configDefaults, blocks: [block] })
+
+    expect(sanitizedConfig.blocks).toHaveLength(1)
+    expect(sanitizedConfig.blocks?.[0]?.slug).toBe('text')
   })
 })
