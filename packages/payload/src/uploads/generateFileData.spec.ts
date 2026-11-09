@@ -580,4 +580,35 @@ describe('generateFileData - _transforms claims', () => {
     ).rejects.toThrow(FileUploadError)
     expect(logError).toHaveBeenCalledWith(failure)
   })
+
+  it('should reject a key that only a request-time stage claims when no original is stored', async () => {
+    const requestOnlyStage = {
+      slug: 'request-crop',
+      canTransform: () => ({ canTransform: true, handledTransformKeys: ['crop'] }),
+      handleRequest: vi.fn(),
+      mimeTypes: ['image/*'],
+    }
+
+    await expect(
+      generateFileData({
+        collection: createCollection(),
+        config: {} as SanitizedConfig,
+        data: { _transforms: { crop: { height: 1, width: 1, x: 0, y: 0 } } },
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: {
+          file: {
+            data: PNG_SIGNATURE,
+            mimetype: 'image/png',
+            name: 'photo.png',
+            size: PNG_SIGNATURE.length,
+          },
+          payload: {
+            config: { upload: { transformers: [requestOnlyStage] } },
+            logger: { error: vi.fn(), warn: vi.fn() },
+          },
+        } as unknown as PayloadRequest,
+      }),
+    ).rejects.toMatchObject({ data: { errors: [{ path: '_transforms.crop' }] } })
+  })
 })

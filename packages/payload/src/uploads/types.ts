@@ -33,6 +33,8 @@ export type FileSizes = {
 
 export type FileData = {
   _objectKey?: string
+  /** `false` when no default file is stored, because it is built when it is requested. */
+  _stored?: false | null
   filename: string
   filesize: number
   focalX?: number

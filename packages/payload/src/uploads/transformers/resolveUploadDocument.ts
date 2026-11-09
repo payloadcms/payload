@@ -3,8 +3,12 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { Forbidden } from '../../errors/Forbidden.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
+import { isRequestTimeFile } from '../isRequestTimeFile.js'
 
 export type ResolvedUploadDocument = {
+  /** `false` when no default file is stored, so a request applies the saved `_transforms`. */
+  _stored?: boolean | null
+  _transforms?: null | Record<string, unknown>
   filename: string
   mimeType: string
   original?: { filename?: null | string; mimeType?: null | string } | null
@@ -46,20 +50,25 @@ export function getRequestedFile({
 }: {
   document: ResolvedUploadDocument
   filename: string
-}): { filename: string; mimeType: string } {
+}): { filename: string; isBuiltAtRequest: boolean; mimeType: string } {
   if (document.filename !== filename) {
     if (document.original?.filename === filename && document.original.mimeType) {
-      return { filename, mimeType: document.original.mimeType }
+      return { filename, isBuiltAtRequest: false, mimeType: document.original.mimeType }
     }
 
     const size = Object.values(document.variants ?? {}).find((size) => size?.filename === filename)
 
     if (size?.filename && size.mimeType) {
-      return { filename: size.filename, mimeType: size.mimeType }
+      return { filename: size.filename, isBuiltAtRequest: false, mimeType: size.mimeType }
     }
   }
 
-  return { filename: document.filename, mimeType: document.mimeType }
+  return {
+    filename: document.filename,
+    // Only the default file of a document with no stored default is built at request time.
+    isBuiltAtRequest: isRequestTimeFile({ entry: document }),
+    mimeType: document.mimeType,
+  }
 }
 
 /**

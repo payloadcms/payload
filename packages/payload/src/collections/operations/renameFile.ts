@@ -27,6 +27,7 @@ import {
   getStoredFileIdentity,
   withLegacyCloudUploadFileData,
 } from '../../uploads/fileVersioning/storedFiles.js'
+import { isRequestTimeFile } from '../../uploads/isRequestTimeFile.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -172,6 +173,12 @@ export const renameFileOperation = async (
     })
     if (!renamed) {
       throw new APIError('The upload has no files to rename.', 400)
+    }
+
+    // A dynamic main file has no file of its own. It is built from the original and shares its name.
+    const renamedOriginal = renamed.original as { filename?: string } | undefined
+    if (isRequestTimeFile({ entry: stored }) && renamedOriginal?.filename) {
+      renamed.filename = renamedOriginal.filename
     }
 
     const staticDir = collection.config.upload.staticDir

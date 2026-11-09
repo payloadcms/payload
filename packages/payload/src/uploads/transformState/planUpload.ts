@@ -7,9 +7,20 @@ import { planTransformerPipeline } from '../transformers/planTransformerPipeline
 import { getUploadTransformerInternal } from '../transformers/uploadTransformerBridge.js'
 import { getChangedTransformKeys } from './getChangedTransformKeys.js'
 import { getTransformKeyCoverageErrors } from './getTransformKeyCoverageErrors.js'
+import { planPersistedDefaultStages } from './planPersistedDefaultStages.js'
 import { isClaimRequired, isFocalPointKey } from './transformKeyClaims.js'
 
 export type UploadPlan = { mimeType: string } & PlannedTransformerPipeline
+
+/**
+ * What an upload with no new file does with its stored file.
+ * - `keep`: nothing changes the file, so the stored files stay.
+ * - `rebuild`: upload stages build new files from the stored file.
+ * - `applyAtRequest`: request-time stages apply the saved keys, so no file is read or written.
+ * - `copyForRequest`: a copy reads the source's original to store its own, and request-time stages
+ *   apply the saved keys. No upload stage runs.
+ */
+export type UploadRebuildOutcome = 'applyAtRequest' | 'copyForRequest' | 'keep' | 'rebuild'
 
 type PlanArgs = {
   collectionSlug: string
@@ -21,8 +32,12 @@ type PlanArgs = {
 /**
  * Decides whether an upload without a new file rebuilds from the stored file. A rebuild is planned
  * with the stored MIME type, so a key that cannot be applied fails before the stored file is read.
+ * When request-time stages apply the saved keys, an update writes no file, and only a copy reads
+ * the stored original.
  */
 export async function planUploadRebuild({
+  canApplyAtRequest,
+  documentID,
   hasCropOrFocalPointEdit,
   hasCropOrResizeEdit,
   isDuplicating,
@@ -31,6 +46,9 @@ export async function planUploadRebuild({
   storedMimeType,
   ...planArgs
 }: {
+  /** False when no original would be stored for request-time stages to start from. */
+  canApplyAtRequest: boolean
+  documentID?: number | string
   /**
    * A crop or resize in `uploadEdits`, or a focal point that differs from the stored one
    * (`shouldReupload`). These triggers rebuilt the file before claims existed.
@@ -43,9 +61,9 @@ export async function planUploadRebuild({
   /** The stored `_transforms` on an update; `undefined` when there is nothing to compare. */
   previousTransforms: Document['_transforms'] | undefined
   storedMimeType: string | undefined
-} & PlanArgs): Promise<{ rebuildPlan?: UploadPlan; shouldRebuild: boolean }> {
+} & PlanArgs): Promise<{ outcome: UploadRebuildOutcome; rebuildPlan?: UploadPlan }> {
   if (isExternalSource) {
-    return { shouldRebuild: true }
+    return { outcome: 'rebuild' }
   }
 
   const changedKeys =
@@ -58,11 +76,11 @@ export async function planUploadRebuild({
   const hasNonFocalPointChange = changedKeys.some((key) => !isFocalPointKey(key))
 
   if (!isDuplicating && !hasNonFocalPointChange && !hasCropOrFocalPointEdit) {
-    return { shouldRebuild: false }
+    return { outcome: 'keep' }
   }
 
   if (!storedMimeType) {
-    return { shouldRebuild: true }
+    return { outcome: 'rebuild' }
   }
 
   const rebuildPlan = await planUploadPipeline({ ...planArgs, mimeType: storedMimeType })
@@ -77,11 +95,23 @@ export async function planUploadRebuild({
       plan: rebuildPlan,
     })
 
-  if (shouldRebuild) {
-    assertTransformKeysCovered({ ...planArgs, plan: rebuildPlan })
+  if (!shouldRebuild) {
+    return { outcome: 'keep', rebuildPlan }
   }
 
-  return { rebuildPlan, shouldRebuild }
+  const { isAppliedAtRequest } = await resolveTransformKeyCoverage({
+    ...planArgs,
+    canApplyAtRequest,
+    documentID,
+    mimeType: storedMimeType,
+    plan: rebuildPlan,
+  })
+
+  if (!isAppliedAtRequest) {
+    return { outcome: 'rebuild', rebuildPlan }
+  }
+
+  return { outcome: isDuplicating ? 'copyForRequest' : 'applyAtRequest', rebuildPlan }
 }
 
 /**
@@ -170,6 +200,61 @@ export function getStagesThatRun({
     ),
     stagesThatRun,
   }
+}
+
+/**
+ * Decides where the saved keys are applied. Upload stages that run apply them into a stored file.
+ * When those leave a key with no claim, request-time stages can apply every saved key instead: the
+ * default file is then built when it is requested, and only the original is stored. When both kinds
+ * claim a key, the upload stage wins. Fails before any file work when neither covers the keys.
+ */
+export async function resolveTransformKeyCoverage({
+  canApplyAtRequest,
+  collectionSlug,
+  documentID,
+  mimeType,
+  pipelineDoc,
+  pipelineOriginalDoc,
+  plan,
+  req,
+}: {
+  /** False when no original would be stored for request-time stages to start from. */
+  canApplyAtRequest: boolean
+  documentID?: number | string
+  mimeType: string
+  plan: PlannedTransformerPipeline
+} & PlanArgs): Promise<{ isAppliedAtRequest: boolean }> {
+  const { claimsOfStagesThatRun } = getStagesThatRun({ collectionSlug, plan })
+  const errors = getTransformKeyCoverageErrors({
+    claims: claimsOfStagesThatRun,
+    transforms: pipelineDoc._transforms,
+  })
+
+  if (errors.length === 0) {
+    return { isAppliedAtRequest: false }
+  }
+
+  const uploadClaimedKeys = new Set([...claimsOfStagesThatRun.values()].flat())
+  const hasOnlyUnclaimedKeys = errors.every(
+    ({ path }) => !uploadClaimedKeys.has(path.slice('_transforms.'.length)),
+  )
+
+  if (canApplyAtRequest && hasOnlyUnclaimedKeys) {
+    const { coverageErrors } = await planPersistedDefaultStages({
+      collectionSlug,
+      doc: pipelineOriginalDoc,
+      documentID,
+      mimeType,
+      req,
+      transforms: pipelineDoc._transforms,
+    })
+
+    if (coverageErrors.length === 0) {
+      return { isAppliedAtRequest: true }
+    }
+  }
+
+  throw new ValidationError({ collection: collectionSlug, errors, req }, req.t)
 }
 
 /** Fails before any file work when a saved key has no claiming stage, or more than one. */

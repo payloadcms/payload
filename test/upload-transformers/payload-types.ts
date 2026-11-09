@@ -244,6 +244,7 @@ export interface TransformerMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
   _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
@@ -254,6 +255,7 @@ export interface TransformerMedia {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -315,6 +317,7 @@ export interface ResizePreviewMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
   _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
@@ -325,6 +328,7 @@ export interface ResizePreviewMedia {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -352,6 +356,7 @@ export interface OutsideFitMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
   _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
@@ -362,6 +367,7 @@ export interface OutsideFitMedia {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -389,6 +395,7 @@ export interface VariantMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
   _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
@@ -399,6 +406,7 @@ export interface VariantMedia {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -412,6 +420,7 @@ export interface VariantMedia {
       filename?: string | null;
       prefix?: string | null;
       _objectKey?: string | null;
+      _stored?: boolean | null;
     };
   };
 }
@@ -443,6 +452,7 @@ export interface ContractMedia {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
   _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
@@ -453,6 +463,7 @@ export interface ContractMedia {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -586,6 +597,7 @@ export interface TransformerMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
   _transforms?: T;
   original?:
     | T
@@ -598,6 +610,7 @@ export interface TransformerMediaSelect<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;
@@ -618,6 +631,7 @@ export interface ResizePreviewMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
   _transforms?: T;
   original?:
     | T
@@ -630,6 +644,7 @@ export interface ResizePreviewMediaSelect<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;
@@ -650,6 +665,7 @@ export interface OutsideFitMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
   _transforms?: T;
   original?:
     | T
@@ -662,6 +678,7 @@ export interface OutsideFitMediaSelect<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;
@@ -682,6 +699,7 @@ export interface VariantMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
   _transforms?: T;
   original?:
     | T
@@ -694,6 +712,7 @@ export interface VariantMediaSelect<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;
@@ -711,6 +730,7 @@ export interface VariantMediaSelect<T extends boolean = true> {
               filename?: T;
               prefix?: T;
               _objectKey?: T;
+              _stored?: T;
             };
       };
 }
@@ -737,6 +757,7 @@ export interface ContractMediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
   _transforms?: T;
   original?:
     | T
@@ -749,6 +770,7 @@ export interface ContractMediaSelect<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;

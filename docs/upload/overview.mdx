@@ -299,7 +299,7 @@ This feature is only available for image file types.
 
 Setting `crop: false` and `focalPoint: false` on `sharpTransformer({ collections })` for this collection will disable the respective selector in the [Admin Panel](../admin/overview).
 
-Cropping changes the main image. Configured image sizes are generated from the retained original, so cropping the main image does not also crop those sizes. The focal point controls how configured sizes are framed.
+With `sharpTransformer`, cropping changes the main image. Configured image sizes are generated from the retained original, so cropping the main image does not also crop those sizes. The focal point controls how configured sizes are framed. Custom request-time transformers decide how saved edits apply to their output; see [Request phases](./transformers#request-phases).
 
 The focal point selector is only displayed when the collection has image sizes (`variants`) or image adjustments (`resizeOptions`, `formatOptions`, `trimOptions`, `constructorOptions`, or `withMetadata`), or when `focalPoint` is explicitly `true`.
 
@@ -323,7 +323,7 @@ await payload.update({
 ```
 
 - Omit `_transforms` (or pass `undefined` in the Local API) to keep the saved value. Send `null` to remove all edits. An object replaces the whole value, so a key that you leave out is removed.
-- Saved crops and focal points are applied by the Sharp transformer (`@payloadcms/transformer-sharp`). Other transformers can apply saved keys too; see [Applying saved `_transforms` keys](/docs/upload/transformers#applying-saved-_transforms-keys).
+- The Sharp transformer (`@payloadcms/transformer-sharp`) applies saved crops and focal points at upload time. A custom transformer can apply them at request time while Payload retains the original; see [Applying saved `_transforms` keys](/docs/upload/transformers#applying-saved-_transforms-keys).
 - When Payload processes the file, every saved built-in key must be applied by a transformer, and no key can be applied by two. Otherwise the operation fails with a validation error for `_transforms.<key>`, for example for a crop with no transformer that applies it. A focal point or custom key that no transformer applies is saved without processing the file.
 - Uploading a new file clears `_transforms` and sets the focal point to the center, unless the same request sends new values. A `focalX` or `focalY` equal to the replaced file's value is not a new value.
 - `focalX` and `focalY` stay available and match `_transforms.focalPoint` when it is set. Writing either one updates both. When the two disagree in one request, `_transforms` is used. For a document saved before `_transforms` existed, the first write that saves `_transforms` copies its focal point into `_transforms.focalPoint`, unless it is the center.
@@ -342,7 +342,7 @@ Existing uploads are upgraded as they are edited; no bulk file migration is requ
 
 SQL projects need a schema migration; see the [v4 migration guide](../migration-guide/v4).
 
-To read a stored historical file through Payload's file endpoint, include `?version=<version-id>`. Version reads generate these URLs for the main file, original, stored variants, and thumbnail. The requested filename and storage prefix must belong to that version, and both parent-document read access and version read access are enforced. Without `version`, the endpoint resolves current published files and the latest draft, subject to collection read access; filenames found only in history return 404. Historical requests serve the saved bytes without rerunning transformations. Public URLs supplied directly by a storage provider remain direct.
+To read a stored historical file through Payload's file endpoint, include `?version=<version-id>`. Version reads generate these URLs for the main file, original, stored variants, and thumbnail. The requested filename and storage prefix must belong to that version, and both parent-document read access and version read access are enforced. Without `version`, the endpoint resolves current published files and the latest draft, subject to collection read access; filenames found only in history return 404. Historical requests serve the saved bytes without rerunning transformations. Files built only at request time are not available through historical URLs; their retained originals remain stored files. Replaying saved transforms for those files on restore is not supported yet. Public URLs supplied directly by a storage provider remain direct.
 
 ## Disabling Local Upload Storage
 
