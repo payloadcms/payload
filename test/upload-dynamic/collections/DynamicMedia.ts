@@ -2,6 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import { dynamicMediaDir, dynamicMediaSlug } from '../shared.js'
 
+export const sourceReadCalls: string[] = []
+
 export const DynamicMedia: CollectionConfig = {
   slug: dynamicMediaSlug,
   access: {
@@ -12,5 +14,12 @@ export const DynamicMedia: CollectionConfig = {
     update: () => true,
   },
   fields: [{ name: 'alt', type: 'text' }],
-  upload: { staticDir: dynamicMediaDir },
+  upload: {
+    handlers: [
+      (_req, { params }) => {
+        sourceReadCalls.push(params.filename)
+      },
+    ],
+    staticDir: dynamicMediaDir,
+  },
 }

@@ -1,4 +1,4 @@
-import type { UploadTransformer } from 'payload'
+import type { FileData, UploadTransformer } from 'payload'
 import type { TransformerWithInternalBridge } from 'payload/internal'
 import type { Sharp } from 'sharp'
 
@@ -14,6 +14,16 @@ type Crop = { height: number; width: number; x: number; y: number }
 
 /** Each `handleRequest` call of `requestCropTransformer`, so a test can check what it was given. */
 export const requestCropCalls: { crop: Crop | null; purpose: string; variantName?: string }[] = []
+
+/** Inputs handed to a signing-only provider; no image bytes are needed to build its redirect. */
+export const signedImagePlans: {
+  crop: Crop | null
+  focalPoint: { x: number; y: number } | null
+  original: FileData['original']
+  overrides: { quality: number; width: number }
+  preset: { width: number } | null
+  variantName?: string
+}[] = []
 
 const toImageResponse = async ({ image, mimeType }: { image: Sharp; mimeType: string }) =>
   new Response(new Uint8Array(await image.toBuffer()), { headers: { 'Content-Type': mimeType } })
@@ -34,7 +44,10 @@ export const requestCropTransformer: UploadTransformer = {
       return { canTransform: true, handledTransformKeys: ['crop'], options: { purpose } }
     }
 
-    return req.searchParams?.has('w') ? { canTransform: true, options: { purpose } } : false
+    return req.searchParams?.has('w') ||
+      (req.headers.get('x-test-sign-image') === 'true' && req.searchParams?.has('q'))
+      ? { canTransform: true, options: { purpose } }
+      : false
   },
   handleRequest: async ({
     doc,
@@ -49,6 +62,31 @@ export const requestCropTransformer: UploadTransformer = {
     const crop = (doc._transforms as { crop?: Crop } | null)?.crop ?? null
 
     requestCropCalls.push({ crop, purpose, variantName })
+
+    if (req.headers.get('x-test-sign-image') === 'true') {
+      const overrides = {
+        quality: Number(req.searchParams.get('q')),
+        width: Number(req.searchParams.get('w')),
+      }
+
+      signedImagePlans.push({
+        crop,
+        focalPoint:
+          (doc._transforms as { focalPoint?: { x: number; y: number } } | null)?.focalPoint ?? null,
+        original: doc.original as FileData['original'],
+        overrides,
+        preset: variantName === 'card' ? { width: 400 } : null,
+        variantName,
+      })
+
+      const location = new URL(`https://images.example.test/signed/${variantName ?? 'default'}`)
+
+      location.searchParams.set('w', String(overrides.width))
+      location.searchParams.set('q', String(overrides.quality))
+      location.searchParams.set('signature', 'fixture-signature')
+
+      return { response: Response.redirect(location, 302), status: 'complete' }
+    }
 
     if (purpose === 'persisted-default') {
       const original = sharp(Buffer.from(await (await getOriginalFile()).arrayBuffer()))

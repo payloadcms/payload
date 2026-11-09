@@ -12,8 +12,9 @@ import { expect } from 'vitest'
 import { renameFileOperation } from '../../packages/payload/src/collections/operations/renameFile.js'
 import { test } from '../__helpers/int/vitest.js'
 import { versionedCloudFiles } from '../plugin-cloud-storage/versionedCloudStorage.js'
+import { sourceReadCalls } from './collections/DynamicMedia.js'
 import { dynamicMediaDir, dynamicMediaSlug, publicCloudMediaSlug } from './shared.js'
-import { requestCropCalls } from './transformers.js'
+import { requestCropCalls, signedImagePlans } from './transformers.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 // 1600 x 1600 PNG
@@ -23,6 +24,8 @@ const savedCrop = { height: 600, width: 800, x: 100, y: 200 }
 test.suite('Dynamic default file', { config: './config.ts' }, () => {
   test.afterEach(async () => {
     requestCropCalls.length = 0
+    signedImagePlans.length = 0
+    sourceReadCalls.length = 0
     // The cloud collection keeps its files in this shared in-memory store.
     versionedCloudFiles.clear()
     await rm(dynamicMediaDir, { force: true, recursive: true })
@@ -314,6 +317,73 @@ test.suite('Dynamic default file', { config: './config.ts' }, () => {
       ])
     },
   )
+
+  test('should sign a variant with saved edits and request overrides without reading or rewriting its original', async ({
+    payload,
+    restClient,
+  }) => {
+    const focalPoint = { x: 75, y: 25 }
+    const created = await createImage({
+      _transforms: { crop: savedCrop, focalPoint },
+      payload,
+    })
+    const filePath =
+      `/${dynamicMediaSlug}/file/${created.variants?.card?.filename}?w=200&q=70` as const
+    const headers = { 'x-test-sign-image': 'true' }
+
+    expect((await restClient.GET(filePath, { auth: false, headers })).status).toBe(403)
+    expect(signedImagePlans).toHaveLength(0)
+    expect(sourceReadCalls).toHaveLength(0)
+
+    const response = await restClient.GET(filePath, { headers, redirect: 'manual' })
+
+    expect(response.status).toBe(302)
+    expect(response.headers.get('Location')).toBe(
+      'https://images.example.test/signed/card?w=200&q=70&signature=fixture-signature',
+    )
+    expect(signedImagePlans).toHaveLength(1)
+    expect(signedImagePlans[0]).toMatchObject({
+      crop: savedCrop,
+      focalPoint,
+      original: {
+        filename: created.original?.filename,
+        height: 1600,
+        width: 1600,
+      },
+      overrides: { quality: 70, width: 200 },
+      preset: { width: 400 },
+      variantName: 'card',
+    })
+    expect(requestCropCalls).toEqual([
+      { crop: savedCrop, purpose: 'persisted-default', variantName: 'card' },
+    ])
+    expect(sourceReadCalls).toHaveLength(0)
+
+    const nextFocalPoint = { x: 25, y: 75 }
+    const updated = await payload.update({
+      id: created.id,
+      collection: dynamicMediaSlug,
+      data: { _transforms: { crop: savedCrop, focalPoint: nextFocalPoint } },
+    })
+    const nextResponse = await restClient.GET(filePath, { headers, redirect: 'manual' })
+
+    expect(nextResponse.status).toBe(302)
+    expect(signedImagePlans).toHaveLength(2)
+    expect(signedImagePlans[1]).toMatchObject({
+      crop: savedCrop,
+      focalPoint: nextFocalPoint,
+      original: signedImagePlans[0]!.original,
+      overrides: { quality: 70, width: 200 },
+      preset: { width: 400 },
+      variantName: 'card',
+    })
+    expect(sourceReadCalls).toHaveLength(0)
+    expect(updated.original).toEqual(created.original)
+    expect(await readdir(dynamicMediaDir)).toEqual([created.original?.filename])
+    expect(await readFile(path.join(dynamicMediaDir, created.original!.filename!))).toEqual(
+      await readFile(imageFixture),
+    )
+  })
 
   test('should write a size entry with no stored file when an upload bridge is planned but does not run', async ({
     payload,
