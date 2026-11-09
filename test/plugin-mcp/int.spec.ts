@@ -3924,6 +3924,63 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           expect(doc.arrayField[0].item).toBe('Updated item A')
           expect(doc.arrayField[2].itemNumber).toBe(30)
         })
+        it('should keep table rows as arrays when an agent adds a row to a json field', async ({
+          getApiKey,
+          mcp,
+          payload,
+        }) => {
+          const created = await payload.create({
+            collection: 'field-types',
+            data: {
+              jsonField: {
+                columns: ['Plan', 'Monthly price'],
+                rows: [
+                  ['Starter', 9],
+                  ['Pro', 29],
+                ],
+              },
+              textField: 'Pricing table',
+            },
+            overrideAccess: true,
+          })
+
+          onTestFinished(async () => {
+            await payload.delete({
+              id: created.id,
+              collection: 'field-types',
+              overrideAccess: true,
+            })
+          })
+
+          const pricingTable = {
+            columns: ['Plan', 'Monthly price'],
+            rows: [
+              ['Starter', 9],
+              ['Pro', 29],
+              ['Team', 79],
+            ],
+          }
+          const apiKey = await getApiKey()
+          const client = await mcp.connect(apiKey)
+          const callResponse = await client.callTool({
+            arguments: {
+              slug: 'field-types',
+              id: created.id,
+              data: { jsonField: pricingTable },
+            },
+            name: 'updateDocument',
+          })
+
+          expect(callResponse.isError).toBeFalsy()
+
+          const stored = await payload.findByID({
+            id: created.id,
+            collection: 'field-types',
+            overrideAccess: true,
+          })
+
+          expect(stored.jsonField).toEqual(pricingTable)
+        })
       })
       test.describe('Display field safety', () => {
         it('should create document with ui field present without errors and ui field absent from response', async ({
