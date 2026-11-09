@@ -2,21 +2,10 @@ import type { Collection } from '../../collections/config/types.js'
 import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { ResolvedUploadDocument } from '../transformers/resolveUploadDocument.js'
 
-import { executeAccess } from '../../auth/executeAccess.js'
-import { combineQueries } from '../../database/combineQueries.js'
-import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
-import { Forbidden } from '../../errors/Forbidden.js'
 import { NotFound } from '../../errors/NotFound.js'
-import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
-import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
-import {
-  isInheritedReadVersionsAccess,
-  withInheritedReadVersionsParentID,
-} from '../../versions/isInheritedReadVersionsAccess.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
-import { withFileTransformAccessContext } from '../transformers/withFileTransformAccessContext.js'
 import { collectStoredFiles, withLegacyCloudUploadFileData } from './storedFiles.js'
 
 type StoredVersion = {
@@ -49,59 +38,17 @@ export const resolveHistoricalFile = async ({
   })
   const matched = docs[0]
 
-  // Check both policies before exposing a missing version or a filename mismatch.
-  const entry = matched && getHistoricalEntry({ doc: matched.version, filename, isOriginal })
-  const checkParent = ({ isTransform }: { isTransform: boolean }) =>
-    withFileTransformAccessContext({
-      callback: () => checkFileAccess({ collection, documentID: matched?.parent, filename, req }),
-      isTransform,
-      req,
-    })
-
-  try {
-    await checkParent({ isTransform: false })
-  } catch (error) {
-    if (!(error instanceof Forbidden) || !isRequestTimeFile({ entry: entry?.value })) {
-      throw error
-    }
-    // The request pipeline will check its final access mode before executing any stage.
-    await checkParent({ isTransform: true })
-  }
-  const versionAccess = await executeAccess(
-    { id: versionID, slug: collection.config.slug, req },
-    isInheritedReadVersionsAccess(collection.config.access.readVersions)
-      ? (accessArgs) =>
-          collection.config.access.readVersions(
-            withInheritedReadVersionsParentID(accessArgs, matched?.parent),
-          )
-      : collection.config.access.readVersions,
-  )
-  const where = appendNonTrashedFilter({
-    deletedAtPath: 'version.deletedAt',
-    enableTrash: collection.config.trash,
-    where: combineQueries({ id: { equals: versionID } }, versionAccess),
-  })
-
-  sanitizeWhereQuery({
-    fields: buildVersionCollectionFields(req.payload.config, collection.config, true),
-    payload: req.payload,
-    where,
-  })
-
-  const { docs: authorizedVersions } = await req.payload.db.findVersions<JsonObject>({
+  // Check both policies before exposing a missing version or a filename mismatch. A historical
+  // request ignores request parameters, so it is always an ordinary read.
+  await checkFileAccess({ collection, documentID: matched?.parent, filename, req })
+  await req.payload.findVersionByID({
+    id: versionID,
     collection: collection.config.slug,
-    limit: 1,
-    locale: req.locale ?? undefined,
+    depth: 0,
+    overrideAccess: false,
     req,
-    where,
+    showHiddenFields: true,
   })
-
-  if (!authorizedVersions[0]) {
-    if (typeof versionAccess === 'object') {
-      throw new Forbidden(req.t)
-    }
-    throw new NotFound(req.t)
-  }
 
   if (!matched) {
     throw new NotFound(req.t)
