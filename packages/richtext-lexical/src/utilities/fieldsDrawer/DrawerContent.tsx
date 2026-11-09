@@ -39,6 +39,11 @@ export const DrawerContent: React.FC<
   const isEditable = useLexicalEditable()
 
   const onChangeAbortControllerRef = useRef(new AbortController())
+  // A submit's beforeSubmit form-state request uses its own controller so the
+  // debounced onChange (which fires ~250ms after the last keystroke) cannot
+  // abort it. Sharing one controller made Save silently no-op when a change
+  // landed mid-submit (#19385).
+  const beforeSubmitAbortControllerRef = useRef(new AbortController())
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
 
@@ -99,11 +104,14 @@ export const DrawerContent: React.FC<
   ])
 
   const onChange = useCallback(
-    async ({ formState: prevFormState }: { formState: FormState }) => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
+    async (
+      { formState: prevFormState }: { formState: FormState },
+      abortControllerRef: typeof onChangeAbortControllerRef = onChangeAbortControllerRef,
+    ) => {
+      abortAndIgnore(abortControllerRef.current)
 
       const controller = new AbortController()
-      onChangeAbortControllerRef.current = controller
+      abortControllerRef.current = controller
 
       const { state } = await getFormState({
         id,
@@ -140,10 +148,16 @@ export const DrawerContent: React.FC<
     ],
   )
 
+  const beforeSubmit = useCallback(
+    (args: { formState: FormState }) => onChange(args, beforeSubmitAbortControllerRef),
+    [onChange],
+  )
+
   // cleanup effect
   useEffect(() => {
     return () => {
       abortAndIgnore(onChangeAbortControllerRef.current)
+      abortAndIgnore(beforeSubmitAbortControllerRef.current)
     }
   }, [])
 
@@ -153,7 +167,7 @@ export const DrawerContent: React.FC<
 
   return (
     <Form
-      beforeSubmit={[onChange]}
+      beforeSubmit={[beforeSubmit]}
       className="fields-drawer"
       disableValidationOnSubmit
       fields={Array.isArray(fields) ? fields : []}
