@@ -19,9 +19,10 @@ import { streamFile } from '../fetchAPI-stream-file/index.js'
 import { resolveHistoricalFile } from '../fileVersioning/resolveHistoricalFile.js'
 import { getFileTypeFallback } from '../getFileTypeFallback.js'
 import { getFileExtension, isXmlMimeType } from '../getFileTypeIdentity.js'
+import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
 import { parseRangeHeader } from '../parseRangeHeader.js'
 import { handleDynamicFileRequest } from '../transformers/handleDynamicFileRequest.js'
-import { resolveUploadDocument } from '../transformers/resolveUploadDocument.js'
+import { getRequestedFile, resolveUploadDocument } from '../transformers/resolveUploadDocument.js'
 import { uploadContentSecurityPolicy } from '../uploadContentSecurityPolicy.js'
 
 export const getFileHandler: PayloadHandler = async (req) => {
@@ -44,10 +45,25 @@ export const getFileHandler: PayloadHandler = async (req) => {
     const historical = await resolveHistoricalFile({
       collection,
       filename,
+      isOriginal,
       prefix,
       req,
       versionID,
     })
+
+    if (
+      !isOriginalFileRequest({ doc: historical, filename, isOriginal }) &&
+      getRequestedFile({ document: historical, filename }).isBuiltAtRequest
+    ) {
+      return handleDynamicFileRequest({
+        collection,
+        filename,
+        historicalDocument: historical,
+        isOriginal,
+        prefix,
+        req,
+      })
+    }
 
     return retrieveFileResponse({
       collection,

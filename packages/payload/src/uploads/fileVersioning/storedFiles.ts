@@ -85,7 +85,18 @@ export const collectStoredFiles = ({
           isOriginal: role.type === 'original' && shouldRequestOriginal({ doc }),
           relative: true,
           urlOrPath: undefined,
-        })
+        }) &&
+      // Archiving can rename the original away from the main file while retaining its role query.
+      (role.type !== 'original' ||
+        representation.url !==
+          generateFilePathOrURL({
+            collectionSlug: collection.slug,
+            config: req.payload.config,
+            filename,
+            isOriginal: true,
+            relative: true,
+            urlOrPath: undefined,
+          }))
     ) {
       return
     }

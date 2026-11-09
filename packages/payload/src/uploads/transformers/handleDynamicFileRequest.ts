@@ -37,17 +37,21 @@ import { withFileTransformAccessContext } from './withFileTransformAccessContext
 export async function handleDynamicFileRequest({
   collection,
   filename,
+  historicalDocument,
   isOriginal: isOriginalParam,
   prefix,
   req,
 }: {
   collection: Collection
   filename: string
+  /** An authorized version snapshot; source retrieval and planning must never use current data. */
+  historicalDocument?: ResolvedUploadDocument
   isOriginal?: boolean
   prefix?: string
   req: PayloadRequest
 }): Promise<Response> {
-  const resolvedDocument = await resolveUploadDocument({ collection, filename, prefix, req })
+  const resolvedDocument =
+    historicalDocument ?? (await resolveUploadDocument({ collection, filename, prefix, req }))
 
   if (!resolvedDocument) {
     // There's no mimeType to plan a pipeline from, so both access modes must pass
@@ -95,6 +99,7 @@ export async function handleDynamicFileRequest({
   const { document, documentSnapshot, pipeline } = await authorizeDocument({
     collection,
     filename,
+    isHistorical: Boolean(historicalDocument),
     prefix,
     req,
     resolvedDocument,
@@ -308,12 +313,14 @@ async function planRequestPipeline({
   document,
   documentSnapshot,
   filename,
+  isHistorical,
   req,
 }: {
   collection: Collection
   document: ResolvedUploadDocument
   documentSnapshot: Readonly<ResolvedUploadDocument>
   filename: string
+  isHistorical: boolean
   req: PayloadRequest
 }): Promise<RequestStage[]> {
   const requestedFile = getRequestedFile({ document, filename })
@@ -346,6 +353,22 @@ async function planRequestPipeline({
       }
 
       plan = persistedDefaultPlan
+
+      if (
+        isHistorical &&
+        requestedFile.variantName &&
+        (!collection.config.upload.variants?.some(
+          ({ name }) => name === requestedFile.variantName,
+        ) ||
+          !plan.pipeline.some(
+            ({ slug }) => slug === collection.config.upload.variantsTransformerSlug,
+          ))
+      ) {
+        throw new APIError(
+          `No configured transformer can build historical size "${requestedFile.variantName}".`,
+          httpStatus.INTERNAL_SERVER_ERROR,
+        )
+      }
     } else {
       plan = await planTransformerPipeline({
         args: { ...planArgs, operation: 'request', originalDoc: documentSnapshot, purpose },
@@ -389,12 +412,14 @@ type AccessResult = { document?: ResolvedUploadDocument; isAllowed: true } | { i
 async function authorizeDocument({
   collection,
   filename,
+  isHistorical,
   prefix,
   req,
   resolvedDocument,
 }: {
   collection: Collection
   filename: string
+  isHistorical: boolean
   prefix?: string
   req: PayloadRequest
   resolvedDocument: ResolvedUploadDocument
@@ -411,7 +436,13 @@ async function authorizeDocument({
       accessResults.set(
         isTransform,
         withFileTransformAccessContext({
-          callback: () => checkFileAccess({ collection, filename, prefix, req }),
+          callback: () =>
+            checkFileAccess({
+              collection,
+              filename,
+              ...(isHistorical ? { documentID: resolvedDocument.id } : { prefix }),
+              req,
+            }),
           isTransform,
           req,
         }).then(
@@ -453,7 +484,7 @@ async function authorizeDocument({
   }
 
   const document =
-    access.document && access.document.id !== resolvedDocument.id
+    !isHistorical && access.document && access.document.id !== resolvedDocument.id
       ? access.document
       : resolvedDocument
 
@@ -463,6 +494,7 @@ async function authorizeDocument({
     document,
     documentSnapshot,
     filename,
+    isHistorical,
     req,
   })
   // Only the request's own parameters make it a transform. Applying the saved state is an ordinary

@@ -49,3 +49,20 @@ it.for([
   expect(files).toEqual(expect.arrayContaining(expected))
   expect(files).toHaveLength(expected.length)
 })
+
+it('should retain an archived original whose saved URL still asks for the original role', () => {
+  const files = collectStoredFiles({
+    collection: { slug: 'media', upload: {} } as SanitizedCollectionConfig,
+    doc: {
+      _stored: false,
+      filename: 'photo.png',
+      original: {
+        filename: 'photo-version.png',
+        url: '/api/media/file/photo-version.png?original=true',
+      },
+    },
+    req: { payload: { config: { routes: { api: '/api' } } } } as PayloadRequest,
+  })
+
+  expect(files).toEqual([{ key: 'photo-version.png', roles: [{ type: 'original' }] }])
+})

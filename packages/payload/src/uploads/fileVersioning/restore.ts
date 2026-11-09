@@ -7,16 +7,35 @@ import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { StoredFileList } from './types.js'
 
 import { APIError } from '../../errors/APIError.js'
+import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { archiveOutgoingLocalFiles, replaceStoredFileReferences } from './archive.js'
 import { removeUnreferencedStagedObjects, scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileOperationPlan } from './fileOperationManager.js'
 import { copyLocalFile } from './localStorage.js'
 import { getArchivedFilename } from './naming.js'
+import { runRequestTimeFileRestore } from './restoreRequestTime.js'
 import {
   collectStoredFiles,
   getStoredFileIdentity,
   withLegacyCloudUploadFileData,
 } from './storedFiles.js'
+
+export type FileRestoreArgs<T> = {
+  collection: SanitizedCollectionConfig
+  current: JsonObject
+  id: number | string
+  req: PayloadRequest
+  selected: JsonObject
+  write: (restored: JsonObject) => Promise<T>
+}
+
+/** Replay virtual outputs with today's pipeline; saved stored outputs remain reusable. */
+export const runFileRestore = async <T>(args: FileRestoreArgs<T>): Promise<T> => {
+  const entries = [args.selected, ...Object.values(args.selected.variants ?? {})]
+  return entries.some((entry) => isRequestTimeFile({ entry: entry as JsonObject }))
+    ? runRequestTimeFileRestore({ ...args, copyStoredFiles: runStoredFileRestore })
+    : runStoredFileRestore(args)
+}
 
 /** Copies the selected stored files before making that version current. */
 export const runStoredFileRestore = async <T>({
@@ -26,14 +45,7 @@ export const runStoredFileRestore = async <T>({
   req,
   selected,
   write,
-}: {
-  collection: SanitizedCollectionConfig
-  current: JsonObject
-  id: number | string
-  req: PayloadRequest
-  selected: JsonObject
-  write: (restored: JsonObject) => Promise<T>
-}): Promise<T> => {
+}: FileRestoreArgs<T>): Promise<T> => {
   const stored = await withLegacyCloudUploadFileData({
     collection,
     doc: selected,
@@ -65,6 +77,7 @@ export const runStoredFileRestore = async <T>({
           ? selectedVariants[sizeKey]
           : {
               _objectKey: null,
+              _stored: null,
               filename: null,
               filesize: null,
               height: null,

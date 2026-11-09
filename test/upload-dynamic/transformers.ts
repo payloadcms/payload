@@ -6,9 +6,19 @@ import { registerUploadVariants } from 'payload'
 import { uploadTransformerInternal } from 'payload/internal'
 import sharp from 'sharp'
 
-import { dynamicMediaSlug, publicCloudMediaSlug } from './shared.js'
+import {
+  dynamicMediaSlug,
+  publicCloudMediaSlug,
+  versionedCloudMediaSlug,
+  versionedDynamicMediaSlug,
+} from './shared.js'
 
-const dynamicCollectionSlugs = [dynamicMediaSlug, publicCloudMediaSlug]
+const dynamicCollectionSlugs = [
+  dynamicMediaSlug,
+  publicCloudMediaSlug,
+  versionedCloudMediaSlug,
+  versionedDynamicMediaSlug,
+]
 
 type Crop = { height: number; width: number; x: number; y: number }
 
@@ -18,6 +28,7 @@ export const requestCropCalls: { crop: Crop | null; purpose: string; variantName
 /** Inputs handed to a signing-only provider; no image bytes are needed to build its redirect. */
 export const signedImagePlans: {
   crop: Crop | null
+  document: Readonly<Record<string, unknown>>
   focalPoint: { x: number; y: number } | null
   original: FileData['original']
   overrides: { quality: number; width: number }
@@ -70,6 +81,7 @@ export const requestCropTransformer: UploadTransformer = {
       }
 
       signedImagePlans.push({
+        document: doc,
         crop,
         focalPoint:
           (doc._transforms as { focalPoint?: { x: number; y: number } } | null)?.focalPoint ?? null,
@@ -117,7 +129,11 @@ export const requestCropTransformer: UploadTransformer = {
   // presets would be.
   init: (config) =>
     registerUploadVariants({
-      collections: { [dynamicMediaSlug]: { variants: [{ name: 'card' }] } },
+      collections: {
+        [dynamicMediaSlug]: { variants: [{ name: 'card' }] },
+        [versionedDynamicMediaSlug]: { variants: [{ name: 'card' }] },
+        [versionedCloudMediaSlug]: { variants: [{ name: 'card' }] },
+      },
       config,
       transformerSlug: 'request-crop',
     }),
@@ -128,7 +144,9 @@ export const requestCropTransformer: UploadTransformer = {
 export const uploadCropTransformer: UploadTransformer = {
   slug: 'upload-crop',
   canTransform: ({ collectionSlug, operation, req }) =>
-    collectionSlug === dynamicMediaSlug &&
+    [dynamicMediaSlug, versionedCloudMediaSlug, versionedDynamicMediaSlug].includes(
+      collectionSlug,
+    ) &&
     operation === 'upload' &&
     req.context?.isUploadCropEnabled === true
       ? { canTransform: true, handledTransformKeys: ['crop'] }
