@@ -636,11 +636,14 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page, paus
   }
 
   const moveToPoint = async ({ targetPosition, duration, pauseAfter = 0 }) => {
-    const steps = duration === 0 ? 1 : Math.max(2, Math.round(duration / 16))
-    const stepDelay = steps === 1 ? 0 : duration / steps
+    if (!Number.isFinite(duration) || duration < 0) {
+      throw new Error('Cursor duration must be a finite non-negative number')
+    }
+    const startedAt = performance.now()
+    let progress = 0
 
-    for (let step = 1; step <= steps; step += 1) {
-      const progress = step / steps
+    do {
+      progress = duration === 0 ? 1 : Math.min(1, (performance.now() - startedAt) / duration)
       const easedProgress =
         progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2
 
@@ -649,10 +652,13 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page, paus
         pointerPosition.y + (targetPosition.y - pointerPosition.y) * easedProgress,
       )
 
-      if (step < steps && stepDelay > 0) {
-        await page.waitForTimeout(stepDelay)
+      if (progress < 1) {
+        const elapsed = performance.now() - startedAt
+        const nextFrame = Math.min(duration, (Math.floor(elapsed / 16) + 1) * 16)
+        const remaining = nextFrame - elapsed
+        if (remaining > 0) await page.waitForTimeout(remaining)
       }
-    }
+    } while (progress < 1)
 
     pointerPosition = targetPosition
 

@@ -152,6 +152,8 @@ await click(saveButton, { after: 900 })
 await moveCursor(disabledDestination, { duration: 900, pauseAfter: 1200 })
 ```
 
+Cursor travel duration includes browser input processing time. Use the gesture’s `pauseAfter` (or `click`’s `after`) for a single reading hold before continuing. A following `pause()` adds to that hold; reserve it for a separate reading moment.
+
 Change the recording-wide defaults with `--mouse-move-ms` and `--interaction-pause-ms`. Keep a nonzero dwell for review recordings; faster values are mainly useful for recorder tests.
 
 ## Circle a result for emphasis

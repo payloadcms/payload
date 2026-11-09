@@ -75,7 +75,7 @@ test('should keep circles inside the frame and reject invalid options before mov
       scenario,
       `
       export const presentation = { change: { kind: 'Feature', title: 'Edge target', description: 'Keep the circle visible.' } }
-      export default async function({ circleCursor, page }) {
+      export default async function({ circleCursor, moveCursor, page }) {
         await page.goto('data:text/html,' + encodeURIComponent('<style>body{margin:0}button{position:fixed;right:0;bottom:0;width:80px;height:40px}</style><button>Edge</button>'))
         const target = page.getByRole('button',{name:'Edge'})
         await page.evaluate(() => {
@@ -83,6 +83,11 @@ test('should keep circles inside the frame and reject invalid options before mov
           document.addEventListener('mousemove', e => window.moves.push({x:e.clientX,y:e.clientY}))
         })
         if (typeof circleCursor !== 'function') throw new Error('circleCursor helper is missing')
+        for (const duration of [-1, Infinity, NaN]) {
+          let rejected=false
+          try { await moveCursor(target,{duration}) } catch(e) { rejected=/finite non-negative/.test(e.message) }
+          if(!rejected) throw new Error('Invalid cursor duration accepted')
+        }
         for (const options of [{duration:-1},{duration:NaN},{radius:0},{radius:Infinity},{pauseAfter:-1}]) {
           let rejected = false
           try { await circleCursor(target, options) } catch (e) { rejected=/non-negative|positive|finite/.test(e.message) }
@@ -99,6 +104,47 @@ test('should keep circles inside the frame and reject invalid options before mov
     await validateDemo({
       baseURL: 'http://localhost:3000',
       label: 'circle-edge',
+      scenario,
+      viewport: { width: 800, height: 600 },
+    })
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+test('should include browser input time in the requested cursor travel duration', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'demo-cursor-timing-'))
+  const scenario = path.join(directory, 'scenario.mjs')
+
+  try {
+    await writeFile(
+      scenario,
+      `
+      export const presentation = { change: { kind: 'Feature', title: 'Cursor timing', description: 'Keep travel responsive.' } }
+      export default async function({ moveCursor, page }) {
+        await page.goto('data:text/html,' + encodeURIComponent('<style>button{position:absolute;left:500px;top:300px}</style><button>Target</button>'))
+        const target=page.getByRole('button',{name:'Target'})
+        await target.waitFor()
+        await page.evaluate(() => {
+          window.moveTimes=[]
+          document.addEventListener('mousemove', () => {
+            window.moveTimes.push(performance.now())
+            const until=performance.now()+25
+            while(performance.now()<until) {}
+          })
+        })
+        const startedAt=Date.now()
+        await moveCursor(target,{duration:1200,pauseAfter:0})
+        const elapsed=Date.now()-startedAt
+        const times=await page.evaluate(()=>window.moveTimes)
+        if(times.length<15) throw new Error('Movement lost its smooth samples')
+        if(elapsed<1000 || elapsed>1800) throw new Error('Cursor travel drifted from 1200ms: '+elapsed)
+      }
+    `,
+    )
+    await validateDemo({
+      baseURL: 'http://localhost:3000',
+      label: 'cursor-timing',
       scenario,
       viewport: { width: 800, height: 600 },
     })
