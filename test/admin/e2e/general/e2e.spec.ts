@@ -32,6 +32,7 @@ import {
   customViewTitle,
   protectedCustomNestedViewPath,
   publicCustomViewPath,
+  searchParamsViewPath,
   slugPluralLabel,
 } from '../../shared.js'
 import {
@@ -1124,6 +1125,39 @@ describe('General', () => {
   })
 
   describe('custom root views', () => {
+    const readViewSearchParams = async (): Promise<unknown> =>
+      JSON.parse((await page.locator('#search-params-view-output').textContent()) ?? '{}')
+
+    const goToSearchParamsView = async ({ query }: { query: string }) => {
+      await page.goto(
+        formatAdminURL({ adminRoute, path: `${searchParamsViewPath}${query}`, serverURL }),
+      )
+    }
+
+    test('should pass a repeated query key to a custom view as an array', async () => {
+      await goToSearchParamsView({ query: '?operation=update&operation=delete' })
+
+      await expect
+        .poll(readViewSearchParams, { timeout: POLL_TOPASS_TIMEOUT })
+        .toEqual({ operation: ['update', 'delete'] })
+    })
+
+    test('should pass a single query value to a custom view as a string', async () => {
+      await goToSearchParamsView({ query: '?operation=delete' })
+
+      await expect
+        .poll(readViewSearchParams, { timeout: POLL_TOPASS_TIMEOUT })
+        .toEqual({ operation: 'delete' })
+    })
+
+    test('should pass bracketed query keys to a custom view as flat keys', async () => {
+      await goToSearchParamsView({ query: '?filter[op]=update&filter[user]=x' })
+
+      await expect
+        .poll(readViewSearchParams, { timeout: POLL_TOPASS_TIMEOUT })
+        .toEqual({ 'filter[op]': 'update', 'filter[user]': 'x' })
+    })
+
     test('should render custom view', { framework: 'rsc' }, async () => {
       await page.goto(formatAdminURL({ adminRoute, path: customViewPath, serverURL }))
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)

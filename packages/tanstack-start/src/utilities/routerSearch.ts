@@ -43,3 +43,67 @@ export const payloadStringifySearch = (search: Record<string, unknown>) => {
   const searchStr = qs.stringify(search)
   return searchStr ? `?${searchStr}` : ''
 }
+
+type SearchParamsRecord = Record<string, string | string[]>
+
+/**
+ * Converts the router's parsed search (see {@link payloadParseSearch}) into the
+ * `searchParams` record admin views receive, matching the shape Next.js passes:
+ * nested keys are flattened back to bracket notation (`filter[op]`), and a key
+ * holding a list of plain values becomes a `string[]` under that key, as a
+ * repeated query key does on Next.
+ *
+ * The admin loader can't read the raw query string: TanStack Router rebuilds
+ * `location.searchStr` with `payloadStringifySearch`, which writes arrays with
+ * indices (`operation[0]=update`), so `URLSearchParams` would expose
+ * `operation[0]` instead of `operation`.
+ */
+export const searchToSearchParams = ({
+  search,
+}: {
+  search: Record<string, unknown>
+}): SearchParamsRecord =>
+  Object.entries(search).reduce<SearchParamsRecord>(
+    (searchParams, [key, value]) => appendSearchParam({ key, searchParams, value }),
+    {},
+  )
+
+const appendSearchParam = ({
+  key,
+  searchParams,
+  value,
+}: {
+  key: string
+  searchParams: SearchParamsRecord
+  value: unknown
+}): SearchParamsRecord => {
+  if (value === undefined) {
+    return searchParams
+  }
+
+  if (Array.isArray(value)) {
+    const hasOnlyPlainValues = value.every((item) => item === null || typeof item !== 'object')
+
+    if (hasOnlyPlainValues) {
+      searchParams[key] = value.map((item) => String(item ?? ''))
+      return searchParams
+    }
+
+    return value.reduce<SearchParamsRecord>(
+      (acc, item, index) =>
+        appendSearchParam({ key: `${key}[${index}]`, searchParams: acc, value: item }),
+      searchParams,
+    )
+  }
+
+  if (value !== null && typeof value === 'object') {
+    return Object.entries(value).reduce<SearchParamsRecord>(
+      (acc, [childKey, childValue]) =>
+        appendSearchParam({ key: `${key}[${childKey}]`, searchParams: acc, value: childValue }),
+      searchParams,
+    )
+  }
+
+  searchParams[key] = value === null ? '' : String(value as boolean | number | string)
+  return searchParams
+}

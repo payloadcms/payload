@@ -2,6 +2,7 @@
 
 import { lazyRouteComponent, notFound, redirect } from '@tanstack/react-router'
 
+import { searchToSearchParams } from '../../utilities/routerSearch.js'
 import { getAdminMeta } from '../metadata.js'
 
 /**
@@ -14,17 +15,14 @@ export type AdminLoad = (opts: {
   signal?: AbortSignal
 }) => Promise<any>
 
-const searchToRecord = (searchStr: string): Record<string, string | string[]> =>
-  Object.fromEntries(new URLSearchParams(searchStr))
-
 const runLoader = async ({
   load,
-  searchStr,
+  search,
   signal,
   splat,
 }: {
   load: AdminLoad
-  searchStr: string
+  search: Record<string, unknown>
   signal: AbortSignal
   splat: string
 }) => {
@@ -41,7 +39,7 @@ const runLoader = async ({
 
   try {
     data = await load({
-      data: { _splat: splat, search: searchToRecord(searchStr) },
+      data: { _splat: splat, search: searchToSearchParams({ search }) },
       signal: loadController.signal,
     })
   } finally {
@@ -98,7 +96,7 @@ const adminRouteOptions = ({
     }) => {
       const data = await runLoader({
         load,
-        searchStr: location.searchStr,
+        search: location.search ?? {},
         signal: abortController.signal,
         splat: resolveSplat(params),
       })
