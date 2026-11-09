@@ -25,6 +25,25 @@ describe('registerUploadVariants', () => {
     })
   })
 
+  it('should preserve registered sizes and their owner when another transformer has no sizes', () => {
+    const config = registerUploadVariants({
+      collections: { media: { variants: [{ name: 'card' }] } },
+      config: makeConfig(),
+      transformerSlug: 'cdn',
+    })
+
+    const result = registerUploadVariants({
+      collections: { media: { variants: [] } },
+      config,
+      transformerSlug: 'sharp',
+    })
+
+    expect(result.collections?.[0]?.upload).toMatchObject({
+      variants: [{ name: 'card' }],
+      variantsTransformerSlug: 'cdn',
+    })
+  })
+
   it('should throw when another transformer already registered sizes on the collection', () => {
     const config = registerUploadVariants({
       collections: { media: { variants: [{ name: 'thumbnail' }] } },

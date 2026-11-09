@@ -112,7 +112,7 @@ export function registerUploadVariants({
     collections: config.collections?.map((collection) => {
       const variants = collections[collection.slug]?.variants
 
-      if (!variants || !collection.upload) {
+      if (!variants?.length || !collection.upload) {
         return collection
       }
 
