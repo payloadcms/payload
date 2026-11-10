@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { NextAppDetails, TanStackAppDetails } from '../types.js'
 
+import { resolveImportMapFilePath } from '../../../payload/src/cli/commands/generateImportMap/utilities/resolveImportMapFilePath.js'
 import {
   updatePayloadInNextProject,
   updatePayloadInTanStackProject,
@@ -204,6 +205,7 @@ describe('Payload project updates', () => {
     })
 
     expect(result.success).toBe(true)
+    expect(await resolveImportMapFilePath({ adminRoute, rootDir: projectDir })).toBe(importMapPath)
     expect(fse.readFileSync(pagePath, 'utf8')).toBe(
       fse.readFileSync(path.join(sourceDir, 'admin/[[...segments]]/page.tsx'), 'utf8'),
     )
@@ -314,6 +316,9 @@ describe('Payload project updates', () => {
       )
       expect(fse.readFileSync(path.join(payloadDir, 'layout.tsx'), 'utf8')).toContain(
         `from './${adminFolder}/importMap.js'`,
+      )
+      expect(await resolveImportMapFilePath({ adminRoute, rootDir: projectDir })).toBe(
+        path.join(adminDir, 'importMap.js'),
       )
       expect(fse.existsSync(path.join(payloadDir, adminRoute.slice(1)))).toBe(false)
       expect(fse.existsSync(path.join(payloadDir, 'admin'))).toBe(false)
