@@ -385,6 +385,13 @@ const docs = await payload.find({
 
 ### Writing CSS
 
+**Support document and Shadow DOM contexts when writing or reviewing shared CSS:**
+
+- Define shared token defaults on both `:root` and `:host`, including defaults inside media queries.
+- Include equivalent shadow-host selectors for theme and enhanced-contrast rules, e.g. `html[data-enhanced-contrast] .control` and `:host([data-enhanced-contrast]) .control`. Apply this to component-specific adjustments as well as shared palettes.
+- Preserve existing document selector specificity. Adding `:host` to a parent selector list can raise the specificity of nested rules. Flatten those nested rules when necessary to preserve application overrides.
+- Keep document-only resets and Admin Panel layout styles scoped to the document. For shared token or theme changes, verify the affected states in both contexts, loading the stylesheet inside the shadow root for that case.
+
 Stylelint enforces the rules below on `.css` files (SCSS is no longer linted and is being phased out). Run `pnpm run lint:css` to check, or `pnpm run lint` to run all linters.
 
 **Mobile-first media queries only - never `max-width`:**

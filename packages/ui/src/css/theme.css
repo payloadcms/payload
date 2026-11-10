@@ -21,5 +21,15 @@
     /* Stroke widths */
     --stroke-width-small: 1px;
     --stroke-width-medium: 2px;
+
+    /* Focus outlines */
+    --accessibility-outline-offset: 1px;
+    --accessibility-outline-inset: calc(-1 * var(--stroke-width-small));
+  }
+
+  :root,
+  :host,
+  [data-theme] {
+    --accessibility-outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
   }
 }

@@ -8,7 +8,6 @@
 @import './css/elevations.css';
 @import './css/theme.css';
 @import './css/forms.css';
-@import './css/accessibility.css';
 
 @layer payload-default {
   /* Screen reader only */

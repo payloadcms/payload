@@ -564,4 +564,10 @@
     --color-text-selected: var(--ramp-blue-200);
     --color-text-tertiary: var(--ramp-white-500);
   }
+
+  :root,
+  :host,
+  [data-theme] {
+    --accessibility-focus-color: var(--color-border-selected);
+  }
 }
