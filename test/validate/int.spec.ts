@@ -195,6 +195,50 @@ test.suite('validate Local API', { config: './config.ts' }, () => {
       })
     })
 
+    test.options(
+      'should report an uncommitted unique field conflict in the caller transaction',
+      {
+        db: (adapter) =>
+          adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+      },
+      async ({ payload }) => {
+        const transactionID = await payload.db.beginTransaction()
+
+        expect(transactionID).toBeTruthy()
+
+        const req = await createPayloadRequest({ payload, req: { transactionID } })
+        const data = { uniqueValue: 'uncommitted' }
+
+        try {
+          await payload.create({
+            collection: validationUniqueCollectionSlug,
+            data,
+            overrideAccess: true,
+            req,
+          })
+
+          expect(
+            await payload.validate({
+              collection: validationUniqueCollectionSlug,
+              data,
+              overrideAccess: true,
+            }),
+          ).toMatchObject({ valid: true })
+          expect(
+            await payload.validate({
+              collection: validationUniqueCollectionSlug,
+              data,
+              overrideAccess: true,
+              req,
+            }),
+          ).toMatchObject({ errors: [{ path: 'uniqueValue' }], valid: false })
+          expect(req.transactionID).toBe(transactionID)
+        } finally {
+          await payload.db.rollbackTransaction(transactionID!)
+        }
+      },
+    )
+
     test('should report a localized unique field conflict', async ({ payload }) => {
       await payload.create({
         collection: validationUniqueCollectionSlug,

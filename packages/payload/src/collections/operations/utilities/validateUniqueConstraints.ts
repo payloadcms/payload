@@ -68,6 +68,7 @@ export const validateUniqueConstraints = async ({
         locale: req.locale ?? undefined,
         overrideAccess: true,
         req,
+        shouldUseTransaction: true,
         value: uniqueFieldValue.value,
       }),
     })),
@@ -178,6 +179,7 @@ export const validateUniqueConstraints = async ({
             locale,
             overrideAccess: true,
             req,
+            shouldUseTransaction: true,
             where,
           })
         }

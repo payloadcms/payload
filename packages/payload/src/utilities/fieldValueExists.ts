@@ -11,9 +11,9 @@ type Args = {
  * Whether another document in `collection` already uses `value` for `field`.
  *
  * Runs the `find` operation outside the caller's transaction while preserving the rest of the
- * request. A committed read is what a uniqueness check wants, and isolating the transaction avoids
- * the "cursor on a session with a transaction in progress" error from a hook. `draft` includes
- * slugs that only exist in a draft version.
+ * request by default. This avoids concurrent session operations during slug generation in field
+ * hooks. On-demand validation can opt into the caller's transaction to see uncommitted writes.
+ * `draft` includes slugs that only exist in a draft version.
  */
 export const fieldValueExists = async ({
   id,
@@ -23,6 +23,7 @@ export const fieldValueExists = async ({
   locale,
   overrideAccess = false,
   req,
+  shouldUseTransaction,
   value,
 }: Args): Promise<boolean> => {
   return documentMatchingWhereExists({
@@ -32,6 +33,7 @@ export const fieldValueExists = async ({
     locale,
     overrideAccess,
     req,
+    shouldUseTransaction,
     where: { [field]: { equals: value } },
   })
 }
