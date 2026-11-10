@@ -42,6 +42,8 @@ type Args = {
   disableRelsTableUnique?: boolean
   disableUnique: boolean
   fields: FlattenedField[]
+  /** Branch copies may submit the same logical array and block IDs as main. */
+  isBranchable?: boolean
   parentIsLocalized: boolean
   rootRelationships?: Set<string>
   rootRelationsToBuild?: RelationMap
@@ -79,6 +81,7 @@ export const buildTable = ({
   disableRelsTableUnique = false,
   disableUnique = false,
   fields,
+  isBranchable = false,
   parentIsLocalized,
   rootRelationships,
   rootRelationsToBuild,
@@ -131,6 +134,7 @@ export const buildTable = ({
     disableUnique,
     fields,
     indexes,
+    isBranchable,
     localesColumns,
     localesIndexes,
     newTableName: tableName,
