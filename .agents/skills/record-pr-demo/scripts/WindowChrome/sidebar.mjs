@@ -41,7 +41,7 @@ export function mountAnnotationSidebar({ root, change, steps, onSelect, shouldAn
     .sidebar-overview-row { flex:none; height:36px; display:flex; align-items:center; padding-bottom:8px; margin:10px 10px 0; }
     .sidebar-overview-row .sidebar-heading { flex:1; margin:0; }
     .sidebar-heading { flex:none; margin:10px 10px 8px; padding:3px 9px; border:1px solid var(--line); border-radius:7px; background:var(--badge); color:var(--sub); font:12px/1.5 var(--font-mono); }
-    .sidebar-intro { flex:none; display:flex; align-items:flex-start; gap:10px; margin:0 10px 8px; padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:var(--paper); }
+    .sidebar-intro { flex:none; display:flex; align-items:flex-start; gap:10px; margin:0 10px 8px; padding:9px; border:1px solid var(--line); border-radius:8px; background:var(--paper); }
     .sidebar-intro + .sidebar-heading { margin-top:0; }
     .sidebar-intro p { margin:0; min-width:0; color:var(--ink); font-size:12px; line-height:1.4; }
     .sidebar-steps-viewport { position:relative; flex:1; min-height:0; }
@@ -60,9 +60,9 @@ export function mountAnnotationSidebar({ root, change, steps, onSelect, shouldAn
     .sidebar-dot { position:absolute; z-index:1; pointer-events:none; right:8px; top:8px; width:8px; height:8px; border-radius:50%; background:transparent; }
     [aria-current=step] .sidebar-dot { background:#0d99ff; }
     .sidebar-steps li + li { margin-top:6px; }
-    .sidebar-step-title { display:flex; align-items:center; margin:0; padding:10px 24px 0px 14px; border:0; border-radius:0; background:var(--paper); color:var(--sub); font:12px/1.5 var(--font-mono); }
-    .sidebar-step p { margin:0; padding:12px 14px; font-size:12px; line-height:1.4; color:var(--ink); }
-    .sidebar-step-title + p { padding-top:10px; }
+    .sidebar-step-title { display:flex; align-items:center; margin:0; padding:9px 9px 0; border:0; border-radius:0; background:var(--paper); color:var(--sub); font:12px/1.5 var(--font-mono); }
+    .sidebar-step p { margin:0; padding:9px; font-size:12px; line-height:1.4; color:var(--ink); }
+    .sidebar-step-title + p { padding-top:9px; }
     @media(prefers-reduced-motion:reduce) { .sidebar-step :is(p,.sidebar-step-title), .sidebar-steps-viewport::before, .sidebar-steps-viewport::after { transition:none; } }
   `
   shadow.append(style)
@@ -130,7 +130,7 @@ export function mountAnnotationSidebar({ root, change, steps, onSelect, shouldAn
     const feedbackHeading = document.createElement('div')
     feedbackHeading.className = 'sidebar-heading'
     feedbackHeading.textContent = feedback.querySelector('[data-caption]')
-      ? 'Keyboard & updates'
+      ? 'Activity & Keyboard'
       : 'Keyboard'
     feedbackSection.append(feedbackHeading, feedback)
     panel.append(feedbackSection)

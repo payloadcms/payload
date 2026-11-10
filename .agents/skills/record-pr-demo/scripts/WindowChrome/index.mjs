@@ -54,7 +54,7 @@ export function mountDemoChrome({
     .dark { --kind-bug-bg:var(--color-bg-danger-tertiary,#60332a); --kind-bug-border:var(--color-border-danger,#864537); --kind-bug-text:var(--color-text-danger,#ffafa3); }
     .kind[data-kind="Bug"] { --kind-bg:var(--kind-bug-bg); --kind-border:var(--kind-bug-border); --kind-text:var(--kind-bug-text); }
     [data-refresh] { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
-    .accessibility { flex:none; min-height:0; display:flex; flex-direction:column; align-items:stretch; gap:10px; margin:10px; padding:12px; border:1px solid var(--line); border-radius:8px; background:var(--paper); pointer-events:none; }
+    .accessibility { flex:none; min-height:0; display:flex; flex-direction:column; align-items:stretch; gap:10px; margin:10px; padding:9px; border:1px solid var(--line); border-radius:8px; background:var(--paper); pointer-events:none; }
     .accessibility:not(:has([data-caption]:not([hidden]),[data-keystroke-overlay]:not([hidden]))) { display:none; }
 
     .accessibility[hidden], .announcement-line[hidden], .keystroke-overlay[hidden] { display:none; }

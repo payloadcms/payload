@@ -285,7 +285,7 @@ test('should keep captions and key history below the sidebar steps at every view
       })
       await expect(stage.locator('[data-caption]')).toBeVisible()
       await expect(stage.locator('.sidebar-feedback > .sidebar-heading')).toHaveText(
-        'Keyboard & updates',
+        'Activity & Keyboard',
       )
       await expect(stage.locator('[data-announcement]')).toHaveCSS('white-space', 'normal')
       for (const viewport of [
