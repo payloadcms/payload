@@ -1,7 +1,9 @@
 import type { Column, SQL } from 'drizzle-orm'
 import type { FlattenedField, Operator } from 'payload'
 
+import { and, not } from 'drizzle-orm'
 import { APIError } from 'payload'
+import { getDateOnlyComparison } from 'payload/shared'
 
 import type {
   DrizzleAdapter,
@@ -50,6 +52,30 @@ const handlerMatches = (handler: DrizzleOperatorHandler, args: Args): boolean =>
  */
 export const buildOperatorConstraint = (args: Args): SQL => {
   const { adapter, field, locale, originalOperator, path, resolvedOperator } = args
+
+  const dateOnlyComparison =
+    field.type === 'date' && adapter.payload
+      ? getDateOnlyComparison({
+          config: adapter.payload.config,
+          field,
+          operator: originalOperator,
+          value: args.value,
+        })
+      : undefined
+
+  if (dateOnlyComparison) {
+    const range = and(
+      ...dateOnlyComparison.constraints.map((constraint) =>
+        buildOperatorConstraint({
+          ...args,
+          resolvedOperator: constraint.operator,
+          value: constraint.value.toISOString(),
+        }),
+      ),
+    )!
+
+    return dateOnlyComparison.isNegated ? not(range) : range
+  }
 
   const matchingHandlers = (adapter.operatorHandlers ?? []).filter((handler) =>
     handlerMatches(handler, args),

@@ -461,6 +461,7 @@ export {
   useRouteTransition,
 } from '../../providers/RouteTransition/index.js'
 export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/Config/index.js'
+export { PageLocaleProvider } from '../../providers/PageLocale/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export {
   FormErrorHandlerContext,

@@ -102,7 +102,6 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
   shell.append(panel)
   stage.append(shell)
   let viewport
-  let sidebarGeometry
   let currentIndex
   let scrollFrame
   const revealCurrentStep = () => {
@@ -131,47 +130,27 @@ export function mountAnnotationSidebar({ root, steps, onSelect, shouldAnimate = 
     }
   }
   const layout = () => {
-    if (!viewport) return
-    const { enabled } = viewport
-    const content = shadow.querySelector('[data-content]')
-    const width = parseFloat(content.style.width)
-    const height = parseFloat(content.style.height)
-    if (!enabled) return
-    const windowWidth = width + 22
-    const windowHeight = height + 58
-    const left = 316
-    const availableWidth = stage.clientWidth - 332
-    const scale = Math.min(
-      1,
-      availableWidth / windowWidth,
-      (stage.clientHeight - 64) / windowHeight,
-    )
-    const top = (stage.clientHeight - windowHeight * scale) / 2
-    sidebarGeometry ??= {
-      top: `${top}px`,
-      height: `${windowHeight * scale}px`,
+    if (!viewport?.enabled) return
+    const window = shadow.querySelector('[data-window]')
+    const scale = new DOMMatrixReadOnly(window.style.transform).a
+    const top = window.style.top
+    const height = `${window.offsetHeight * scale}px`
+    const hasChanged = shell.style.top !== top || shell.style.height !== height
+    Object.assign(shell.style, { top, height })
+    if (hasChanged) {
+      cancelAnimationFrame(scrollFrame)
+      scrollFrame = requestAnimationFrame(revealCurrentStep)
     }
-    Object.assign(shell.style, sidebarGeometry)
-    Object.assign(shadow.querySelector('[data-window]').style, {
-      left: `${left}px`,
-      top: `${top}px`,
-      transform: `scale(${scale})`,
-    })
   }
-  // The shared chrome lays out again after the host resizes, including initial load.
-  // Reapply the sidebar placement after its observer has run.
-  const observer = new ResizeObserver(layout)
-  observer.observe(root)
-  observer.observe(shadow.querySelector('[data-footer]'))
-  const contentObserver = new MutationObserver(layout)
-  contentObserver.observe(shadow.querySelector('[data-content]'), {
+  // WindowChrome owns placement; the sidebar only follows its rendered geometry.
+  const observer = new MutationObserver(layout)
+  observer.observe(shadow.querySelector('[data-window]'), {
     attributes: true,
     attributeFilter: ['style'],
   })
   return {
     destroy: () => {
       observer.disconnect()
-      contentObserver.disconnect()
       cancelAnimationFrame(scrollFrame)
     },
     update({ index, width, height, enabled, visible }) {

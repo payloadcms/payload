@@ -1,10 +1,10 @@
 'use client'
-import { formatFilesize } from 'payload/shared'
+import { formatFileMeta } from 'payload/shared'
 import React from 'react'
 
 export type FileMetaProps = {
   filename: string
-  filesize: number
+  filesize: null | number
   height?: number
   mimeType: string
   url: string
@@ -32,19 +32,7 @@ export const FileMeta: React.FC<FileMetaProps> = (props) => {
         <CopyToClipboard defaultMessage={t('upload:copyURL')} value={fileURL} />
       </div>
       <div className={`${baseClass}__size-type`}>
-        {formatFilesize(filesize)}
-        {typeof width === 'number' && typeof height === 'number' && (
-          <React.Fragment>
-            &nbsp;-&nbsp;
-            {width}x{height}
-          </React.Fragment>
-        )}
-        {mimeType && (
-          <React.Fragment>
-            &nbsp;-&nbsp;
-            {mimeType}
-          </React.Fragment>
-        )}
+        {formatFileMeta({ filesize, height, mimeType, width })}
       </div>
     </div>
   )
