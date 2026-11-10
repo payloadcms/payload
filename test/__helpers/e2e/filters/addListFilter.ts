@@ -78,11 +78,9 @@ export const addListFilter = async ({
       .catch(() => null)
 
     const valueLocator = condition.locator('.condition__value')
-    const valueInput = valueLocator.locator('input')
 
-    await expect(valueInput).toBeVisible()
-
-    const isReactSelect = (await valueInput.getAttribute('role')) === 'combobox'
+    // Check if this is a react-select input
+    const isReactSelect = (await valueLocator.locator('input.rs__input').count()) > 0
 
     if (isReactSelect) {
       if (Array.isArray(value)) {
@@ -95,6 +93,7 @@ export const addListFilter = async ({
         })
       } else {
         // For single select - fill input first to trigger search, then select option
+        const valueInput = valueLocator.locator('input')
         await valueInput.fill(value)
 
         const menu = getSelectMenu({ page })
@@ -112,6 +111,7 @@ export const addListFilter = async ({
       }
     } else {
       // For regular input fields (non react-select)
+      const valueInput = valueLocator.locator('input')
       const stringValue = Array.isArray(value) ? value.join(',') : value
       await valueInput.fill(stringValue)
       await expect(valueInput).toHaveValue(stringValue)
