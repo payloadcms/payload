@@ -1,10 +1,49 @@
-import type { ArrayField, Config } from 'payload'
+import type { ArrayField, Config, CustomComponent } from 'payload'
 
 import { describe, expect, it } from 'vitest'
 
 import { multiTenantPlugin } from './index.js'
 
 describe('multiTenantPlugin', () => {
+  describe('tenant selector', () => {
+    const customSelector: CustomComponent = {
+      path: '/components/CustomTenantSelector/index.js#CustomTenantSelector',
+      serverProps: { description: 'Custom selector' },
+    }
+    const existingComponent = '/components/BeforeNav/index.js#BeforeNav'
+
+    it.each([
+      {
+        mode: 'default',
+        tenantSelectorComponent: undefined,
+        expectedSelector: {
+          clientProps: { enabledSlugs: ['users', 'tenants'], label: undefined },
+          path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelector',
+        },
+      },
+      { mode: 'custom', tenantSelectorComponent: customSelector, expectedSelector: customSelector },
+      { mode: 'hidden', tenantSelectorComponent: null, expectedSelector: undefined },
+    ])(
+      'should preserve existing navigation with the $mode selector',
+      async ({ expectedSelector, tenantSelectorComponent }) => {
+        const config = await multiTenantPlugin({
+          collections: {},
+          tenantSelectorComponent,
+        })({
+          admin: { components: { beforeNav: [existingComponent] } },
+          collections: [
+            { slug: 'users', auth: true, fields: [] },
+            { slug: 'tenants', fields: [] },
+          ],
+        } as Config)
+
+        expect(config.admin?.components?.beforeNav).toEqual(
+          expectedSelector ? [existingComponent, expectedSelector] : [existingComponent],
+        )
+      },
+    )
+  })
+
   it('should preserve custom menu items and add one tenant action on each rebuild', async () => {
     const customMenuItem = { path: '/components/CustomMenuItem.js#CustomMenuItem' }
     const plugin = multiTenantPlugin({ collections: { posts: {} } })

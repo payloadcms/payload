@@ -78,6 +78,31 @@ test.describe('Multi Tenant', () => {
     await page.goto(usersURL.admin)
   })
 
+  test('should render a custom wrapper around the exported tenant selector and filter documents', async () => {
+    await loginClientSide({ data: credentials.admin, page, serverURL })
+    await page.goto(menuItemsURL.list)
+    await openNav(page)
+
+    await expect(page.getByText('Custom selector', { exact: true })).toBeVisible()
+    await expect(page.locator('.tenant-selector')).toHaveCount(1)
+
+    await setTenantFilter({ page, tenant: 'Blue Dog' })
+
+    await expect(
+      page.locator('.collection-list .cell-name', { hasText: 'Spicy Mac' }),
+    ).toBeVisible()
+    await expect(
+      page.locator('.collection-list .cell-name', { hasText: 'Pretzel Bites' }),
+    ).toBeHidden()
+
+    await setTenantFilter({ page, tenant: 'Steel Cat' })
+
+    await expect(
+      page.locator('.collection-list .cell-name', { hasText: 'Pretzel Bites' }),
+    ).toBeVisible()
+    await expect(page.locator('.collection-list .cell-name', { hasText: 'Spicy Mac' })).toBeHidden()
+  })
+
   test('should preserve other tenants when deleting all selected-tenant documents', async () => {
     await loginClientSide({ data: credentials.admin, page, serverURL })
     await setTenantFilter({ page, tenant: 'Blue Dog', urlUtil: menuItemsURL })

@@ -484,18 +484,22 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
           ],
           beforeNav: [
             ...(incomingConfig.admin?.components?.beforeNav || []),
-            {
-              clientProps: {
-                enabledSlugs: [
-                  ...collectionSlugs,
-                  ...globalCollectionSlugs,
-                  adminUsersCollection.slug,
-                  tenantCollection.slug,
-                ],
-                label: pluginConfig.tenantSelectorLabel || undefined,
-              },
-              path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelector',
-            },
+            ...(pluginConfig.tenantSelectorComponent === null
+              ? []
+              : [
+                  pluginConfig.tenantSelectorComponent ?? {
+                    clientProps: {
+                      enabledSlugs: [
+                        ...collectionSlugs,
+                        ...globalCollectionSlugs,
+                        adminUsersCollection.slug,
+                        tenantCollection.slug,
+                      ],
+                      label: pluginConfig.tenantSelectorLabel || undefined,
+                    },
+                    path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelector',
+                  },
+                ]),
           ],
           providers: [
             ...(incomingConfig.admin?.components?.providers || []),

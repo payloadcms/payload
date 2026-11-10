@@ -83,6 +83,7 @@ export const baseConfig: Partial<Config> = {
   },
   plugins: [
     multiTenantPlugin<ConfigType>({
+      tenantSelectorComponent: '/components/CustomTenantSelector/index.js#CustomTenantSelector',
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
       useTenantsCollectionAccess: false,
       tenantField: {

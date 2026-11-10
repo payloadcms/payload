@@ -5,6 +5,7 @@ import type {
   ArrayField,
   CollectionConfig,
   CollectionSlug,
+  CustomComponent,
   Field,
   RelationshipField,
   SingleRelationshipField,
@@ -176,6 +177,11 @@ export type MultiTenantPluginConfig = {
         rowFields?: never
         tenantFieldAccess?: never
       }
+  /**
+   * Replace the tenant selector with a custom component, or hide it with `null`.
+   * Omit this option to render the default selector.
+   */
+  tenantSelectorComponent?: CustomComponent | null
   /**
    * Customize tenant selector label
    *

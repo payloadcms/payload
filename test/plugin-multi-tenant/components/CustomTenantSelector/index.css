@@ -1,0 +1,14 @@
+.custom-tenant-selector__label {
+  padding-inline-start: var(--spacer-3);
+  margin-block-end: var(--spacer-2);
+}
+
+.custom-tenant-selector__pill {
+  display: inline-flex;
+  padding-block: var(--spacer-1);
+  padding-inline: var(--spacer-2);
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-selected);
+  color: var(--color-text);
+  font-size: var(--text-body-small-font-size);
+}
