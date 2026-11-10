@@ -26,6 +26,8 @@ import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { transformForWrite } from '../../packages/drizzle/src/transform/write/index.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { traverseFields as traverseDrizzleFields } from '../../packages/drizzle/src/transform/write/traverseFields.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import {
@@ -677,11 +679,27 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
       try {
         traverseFields({ fields: [], fillEmpty: false, ref: sharedData })
-        transformForWrite({
+        const rowToInsert = transformForWrite({
           adapter: payload.db,
           data: drizzleData,
           fields: [],
           tableName: 'session_users',
+        })
+
+        expect(drizzleData).toEqual(createConstrainedData())
+
+        // Inspect dotted-key expansion directly because transformForWrite preserves its input.
+        traverseDrizzleFields({
+          ...rowToInsert,
+          adapter: payload.db as DrizzleAdapter,
+          baseTableName: 'session_users',
+          columnPrefix: '',
+          data: drizzleData,
+          fieldPrefix: '',
+          fields: [],
+          parentIsLocalized: false,
+          parentTableName: 'session_users',
+          path: '',
         })
         processStateChanged =
           Object.hasOwn(Object.prototype, marker) || Object.hasOwn(inheritedTarget, inheritedMarker)
