@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { PayloadRequest } from '../../types/index.js'
 
-import { withoutRequestParams } from './withoutRequestParams.js'
+import { createHistoricalTransformRequest } from './createHistoricalTransformRequest.js'
 
 const requestURL = 'https://example.test/api/media/file/photo.png?version=1&w=200&q=70'
 
@@ -20,9 +20,9 @@ const createRESTRequest = (): PayloadRequest => {
   }) as unknown as PayloadRequest
 }
 
-describe('withoutRequestParams', () => {
+describe('createHistoricalTransformRequest', () => {
   it('should remove the query string from every form of the URL', () => {
-    const view = withoutRequestParams({ req: createRESTRequest() })
+    const view = createHistoricalTransformRequest({ req: createRESTRequest() })
 
     expect(view.url).toBe('https://example.test/api/media/file/photo.png')
     expect(view.href).toBe('https://example.test/api/media/file/photo.png')
@@ -33,16 +33,16 @@ describe('withoutRequestParams', () => {
 
   it('should keep the headers and the Payload fields of the caller', () => {
     const req = createRESTRequest()
-    const view = withoutRequestParams({ req })
+    const view = createHistoricalTransformRequest({ req })
 
     expect(view.headers.get('x-test')).toBe('kept')
     expect(view.context).toBe(req.context)
     expect(view.user).toBeNull()
   })
 
-  it('should not write to the caller when the view is changed', () => {
+  it('should not write top-level assignments to the caller', () => {
     const req = createRESTRequest()
-    const view = withoutRequestParams({ req })
+    const view = createHistoricalTransformRequest({ req })
 
     view.query = view.query || {}
     view.query.depth = 1
@@ -54,8 +54,19 @@ describe('withoutRequestParams', () => {
     expect(req.fileTransform).toBeUndefined()
   })
 
+  it('should share Payload context with the caller', () => {
+    const req = createRESTRequest()
+    const historicalReq = createHistoricalTransformRequest({ req })
+
+    historicalReq.context.fromTransformer = true
+
+    expect(req.context.fromTransformer).toBe(true)
+  })
+
   it('should support native Request operations without the query string', () => {
-    const view = withoutRequestParams({ req: createRESTRequest() }) as unknown as Request
+    const view = createHistoricalTransformRequest({
+      req: createRESTRequest(),
+    }) as unknown as Request
 
     expect(view.clone().url).toBe('https://example.test/api/media/file/photo.png')
     expect(new Request(view).url).toBe('https://example.test/api/media/file/photo.png')
@@ -67,7 +78,7 @@ describe('withoutRequestParams', () => {
       searchParams: new URLSearchParams('w=200'),
       url: 'http://localhost/api?w=200',
     } as unknown as PayloadRequest
-    const view = withoutRequestParams({ req })
+    const view = createHistoricalTransformRequest({ req })
 
     expect(view.url).toBe('http://localhost/api')
     expect(view.searchParams.size).toBe(0)

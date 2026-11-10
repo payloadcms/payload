@@ -17,13 +17,13 @@ import { retrieveFileResponse } from '../endpoints/getFile.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { planPersistedDefaultStages } from '../transformState/planPersistedDefaultStages.js'
+import { createHistoricalTransformRequest } from './createHistoricalTransformRequest.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
 import { getCandidateTransformers, planTransformerPipeline } from './planTransformerPipeline.js'
 import { getRequestedFile, resolveUploadDocument } from './resolveUploadDocument.js'
 import { withFileTransformAccessContext } from './withFileTransformAccessContext.js'
-import { withoutRequestParams } from './withoutRequestParams.js'
 
 /**
  * Orchestrates a dynamic file request end to end: resolve the document, plan the
@@ -98,7 +98,7 @@ export async function handleDynamicFileRequest({
   }
 
   // A historical file shows a saved state, so its transformers never see the request parameters.
-  const transformerReq = historicalDocument ? withoutRequestParams({ req }) : req
+  const transformerReq = historicalDocument ? createHistoricalTransformRequest({ req }) : req
   const { document, documentSnapshot, pipeline } = await authorizeDocument({
     collection,
     filename,
