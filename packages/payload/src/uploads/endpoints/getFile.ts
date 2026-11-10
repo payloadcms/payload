@@ -19,10 +19,9 @@ import { streamFile } from '../fetchAPI-stream-file/index.js'
 import { resolveHistoricalFile } from '../fileVersioning/resolveHistoricalFile.js'
 import { getFileTypeFallback } from '../getFileTypeFallback.js'
 import { getFileExtension, isXmlMimeType } from '../getFileTypeIdentity.js'
-import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
 import { parseRangeHeader } from '../parseRangeHeader.js'
 import { handleDynamicFileRequest } from '../transformers/handleDynamicFileRequest.js'
-import { getRequestedFile, resolveUploadDocument } from '../transformers/resolveUploadDocument.js'
+import { resolveUploadDocument } from '../transformers/resolveUploadDocument.js'
 import { uploadContentSecurityPolicy } from '../uploadContentSecurityPolicy.js'
 
 export const getFileHandler: PayloadHandler = async (req) => {
@@ -42,7 +41,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
   const versionID = req.searchParams?.get('version')
 
   if (collection.config.versions && versionID) {
-    const historical = await resolveHistoricalFile({
+    const { document, isBuiltAtRequest } = await resolveHistoricalFile({
       collection,
       filename,
       isOriginal,
@@ -51,14 +50,11 @@ export const getFileHandler: PayloadHandler = async (req) => {
       versionID,
     })
 
-    if (
-      !isOriginalFileRequest({ doc: historical, filename, isOriginal }) &&
-      getRequestedFile({ document: historical, filename }).isBuiltAtRequest
-    ) {
+    if (isBuiltAtRequest) {
       return handleDynamicFileRequest({
         collection,
         filename,
-        historicalDocument: historical,
+        historicalDocument: document,
         isOriginal,
         prefix,
         req,
@@ -67,7 +63,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
 
     return retrieveFileResponse({
       collection,
-      doc: historical,
+      doc: document,
       filename,
       isOriginal,
       prefix,

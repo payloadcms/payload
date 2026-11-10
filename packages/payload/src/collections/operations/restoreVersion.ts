@@ -17,7 +17,6 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
-import { hasManagedCloudMetadata } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
   beginFileOperationScope,
@@ -343,9 +342,6 @@ export const restoreVersionOperation = async <
     const writeRestoredVersion = async (restored: JsonObject) => {
       if (collectionConfig.upload) {
         result = restoreUploadDataFromDocument(result, restored, { clearMissing: true })
-        if (hasManagedCloudMetadata({ req })) {
-          data = restoreUploadDataFromDocument(data, restored, { clearMissing: true })
-        }
       }
       if (!draftArg) {
         result = await req.payload.db.updateOne({
@@ -423,16 +419,10 @@ export const restoreVersionOperation = async <
     // afterChange - Fields
     // /////////////////////////////////////
 
-    // Adapter metadata is saved by its normal afterChange hook. It needs the full upload data
-    // and draft status even when the caller's response selection omits those fields.
-    const managedAfterChangeData = hasManagedCloudMetadata({ req })
-      ? { ...data, _status: draftArg ? 'draft' : data._status }
-      : undefined
-
     result = await afterChange({
       collection: collectionConfig,
       context: req.context,
-      data: managedAfterChangeData ?? result,
+      data: result,
       doc: result,
       global: null,
       operation: 'update',
@@ -450,7 +440,7 @@ export const restoreVersionOperation = async <
           (await hook({
             collection: collectionConfig,
             context: req.context,
-            data: managedAfterChangeData ?? result,
+            data: result,
             doc: result,
             operation: 'update',
             overrideAccess,

@@ -1,6 +1,5 @@
 import type { Payload } from 'payload'
 
-import { existsSync } from 'node:fs'
 import { readdir, readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -8,31 +7,19 @@ import sharp from 'sharp'
 import { expect, vi } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import {
-  getStoredCloudFiles,
-  versionedCloudFiles,
-} from '../plugin-cloud-storage/versionedCloudStorage.js'
-import { sourceReadCalls, sourceReadDocumentIDs } from './collections/DynamicMedia.js'
+import { versionedCloudFiles } from '../plugin-cloud-storage/versionedCloudStorage.js'
+import { sourceReadCalls } from './collections/DynamicMedia.js'
 import {
   versionedCloudMediaSlug,
   versionedDynamicMediaDir,
   versionedDynamicMediaSlug,
 } from './shared.js'
-import { uploadCropSources } from './transformers.js'
 
 const imageFixture = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '../uploads/image.png',
 )
 const savedCrop = { height: 600, width: 800, x: 100, y: 200 }
-// These adapters cannot roll back a document write, so a failed restore keeps the files it saved.
-const adaptersWithoutTransactions = [
-  'cosmosdb',
-  'firestore',
-  'sqlite',
-  'sqlite-uuid',
-  'sqlite-uuidv7',
-]
 const laterCrop = { height: 200, width: 300, x: 0, y: 0 }
 
 const getVersions = async ({
@@ -100,26 +87,27 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     await rm(versionedDynamicMediaDir, { force: true, recursive: true })
   })
 
-  test('should read the retained original from a temp file when restoring through the upload pipeline, and remove it', async ({
+  test('should keep a request-time version request-time on restore, with no new stored files', async ({
     payload,
   }) => {
-    const { created, selected } = await prepareHistory({ payload, replaceOriginal: true })
-    uploadCropSources.length = 0
-    sourceReadDocumentIDs.length = 0
-
-    await payload.restoreVersion({
+    const { selected } = await prepareHistory({ payload })
+    const filesBefore = (await readdir(versionedDynamicMediaDir)).sort()
+    const restored = await payload.restoreVersion({
       id: String(selected.id),
       collection: versionedDynamicMediaSlug,
+      // An upload stage that could apply the saved crop must not turn the restore into a rebuild.
       context: { isUploadCropEnabled: true },
       overrideAccess: true,
     })
 
-    expect(new Set(sourceReadDocumentIDs)).toEqual(new Set([created.id]))
-    expect(uploadCropSources).toEqual([{ tempFilePath: expect.any(String) }])
-    expect(existsSync(uploadCropSources[0]!.tempFilePath!)).toBe(false)
+    expect(restored._stored).toBe(false)
+    expect(restored.variants?.card?._stored).toBe(false)
+    expect(restored._transforms).toEqual({ crop: savedCrop })
+    expect((await readdir(versionedDynamicMediaDir)).sort()).toEqual(filesBefore)
+    expect(sourceReadCalls).toHaveLength(0)
   })
 
-  test('should replay saved transforms through the current upload pipeline when restoring a dynamic file', async ({
+  test('should copy a replaced original on restore and build the version at request time', async ({
     payload,
     restClient,
   }) => {
@@ -129,42 +117,44 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     const restored = await payload.restoreVersion({
       id: String(selected.id),
       collection: versionedDynamicMediaSlug,
-      context: { isUploadCropEnabled: true },
       overrideAccess: true,
     })
 
-    expect(restored._stored).not.toBe(false)
+    expect(restored._stored).toBe(false)
     expect(restored._transforms).toEqual({ crop: savedCrop })
-    expect(restored).toMatchObject({ height: 600, width: 800 })
     expect(
       await readFile(path.join(versionedDynamicMediaDir, restored.original!.filename!)),
     ).toEqual(await readFile(imageFixture))
 
     const versions = await getVersions({ payload, id: created.id })
+
     expect(versions.find(({ id }) => id === selected.id)!.version).toEqual(before)
     expect(restored.id).toBe(created.id)
+
     const latest = versions.find(({ latest }) => latest)!
-    expect(latest.version.url).toBe(`/api/${versionedDynamicMediaSlug}/file/${restored.filename}`)
     const response = await restClient.GET(
       `/${versionedDynamicMediaSlug}/file/${restored.filename}?version=${latest.id}`,
     )
+
     expect(response.status).toBe(200)
-    const selectedOutput = await sharp(await readFile(imageFixture))
-      .extract({
-        left: savedCrop.x,
-        top: savedCrop.y,
-        width: savedCrop.width,
-        height: savedCrop.height,
-      })
-      .toBuffer()
-    expect(Buffer.from(await response.arrayBuffer())).toEqual(selectedOutput)
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(
+      await sharp(await readFile(imageFixture))
+        .extract({
+          left: savedCrop.x,
+          top: savedCrop.y,
+          width: savedCrop.width,
+          height: savedCrop.height,
+        })
+        .toBuffer(),
+    )
+
     await payload.delete({ id: restored.id, collection: versionedDynamicMediaSlug, trash: false })
     const remainingFiles = await readdir(versionedDynamicMediaDir)
-    expect(remainingFiles).not.toContain(restored.filename)
+
     expect(remainingFiles.filter((filename) => !filesBeforeRestore.has(filename))).toEqual([])
   })
 
-  test('should reject unsupported restored transforms before changing stored files or the current document', async ({
+  test('should fail with 400 and write nothing when the current config cannot build an entry and it has no stored output', async ({
     payload,
   }) => {
     const { created, selected } = await prepareHistory({ payload })
@@ -185,7 +175,7 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
         collection: versionedDynamicMediaSlug,
         overrideAccess: true,
       }),
-    ).rejects.toThrow()
+    ).rejects.toMatchObject({ status: 400 })
     expect(await readdir(versionedDynamicMediaDir)).toEqual(beforeFiles)
     expect(
       await payload.db.findOne({
@@ -193,6 +183,7 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
         where: { id: { equals: created.id } },
       }),
     ).toEqual(before)
+    expect(await getVersions({ payload, id: created.id })).toHaveLength(2)
     expect(sourceReadCalls).toHaveLength(0)
   })
 
@@ -339,36 +330,6 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     expect(latest.original.filename).toBeTruthy()
   })
 
-  test('should persist transform state changed by the upload pipeline', async ({ payload }) => {
-    const { selected } = await prepareHistory({ payload })
-    const selectedSnapshot = structuredClone(selected.version)
-    const transformer = payload.config.upload.transformers.find(
-      ({ slug }) => slug === 'upload-crop',
-    )!
-    const transformFile = transformer.transformFile!
-    vi.spyOn(transformer, 'transformFile').mockImplementation(async (args) => {
-      expect(args.doc.alt).toEqual({ en: 'selected' })
-      expect(args.originalDoc.alt).toEqual({ en: 'selected' })
-      expect(Object.isFrozen(args.originalDoc)).toBe(true)
-      const result = await transformFile(args)
-      args.doc._transforms = { ...args.doc._transforms, replayed: true }
-      return result
-    })
-    const restored = await payload.restoreVersion({
-      id: String(selected.id),
-      collection: versionedDynamicMediaSlug,
-      context: { isUploadCropEnabled: true },
-      overrideAccess: true,
-    })
-    expect(restored._transforms).toEqual({ crop: savedCrop, replayed: true })
-    const versions = await getVersions({ payload, id: restored.id })
-    expect(versions.find(({ id }) => id === selected.id)!.version).toEqual(selectedSnapshot)
-    expect(versions.find(({ latest }) => latest)!.version._transforms).toEqual({
-      crop: savedCrop,
-      replayed: true,
-    })
-  })
-
   test('should keep caller upload bytes out of cloud restore hooks', async ({ payload }) => {
     const { selected } = await prepareHistory({ payload, collection: versionedCloudMediaSlug })
     const callerBytes = Buffer.from('not the retained original')
@@ -396,113 +357,84 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
         query: { uploadEdits: { crop: { height: 10, width: 10, x: 0, y: 0 } } },
       },
     })
+
+    expect(restored._stored).toBe(false)
     expect(restored._transforms).toEqual({ crop: savedCrop })
-    const storedDefault = getStoredCloudFiles(restored).find(({ roles }) =>
-      roles.some(({ type }) => type === 'default'),
-    )!
-    expect(await sharp(versionedCloudFiles.get(storedDefault.key)!).metadata()).toMatchObject({
-      height: 600,
-      width: 800,
-    })
+    expect(restored.filename).not.toBe('unrelated.png')
+    expect([...versionedCloudFiles.values()]).not.toContainEqual(callerBytes)
     expect(callerContext._payloadCloudStorage.file).toBe(callerFile)
     expect(callerContext.skipCloudStorage).toBe(true)
     expect(callerContext._payloadManagedCloudStorage).toBe(true)
     expect(callerContext._payloadVerifiedProviderOriginal.key).toBe('unrelated-original')
   })
 
-  test('should not store a copy of the retained original when an upload stage leaves the file unchanged', async ({
-    payload,
-  }) => {
-    const { selected } = await prepareHistory({ payload })
-    const filesBefore = new Set(await readdir(versionedDynamicMediaDir))
-    const transformer = payload.config.upload.transformers.find(
-      ({ slug }) => slug === 'upload-crop',
-    )!
-    vi.spyOn(transformer, 'transformFile').mockResolvedValue({ status: 'continue' })
-
-    const restored = await payload.restoreVersion({
-      id: String(selected.id),
-      collection: versionedDynamicMediaSlug,
-      context: { isUploadCropEnabled: true },
-      overrideAccess: true,
-    })
-
-    expect(restored.filename).toBe(restored.original!.filename)
-    expect(
-      [...(await readdir(versionedDynamicMediaDir))].filter((name) => !filesBefore.has(name)),
-    ).toEqual([])
-  })
-
-  test('should reject an upload stage crop that exceeds the retained original before storing output', async ({
-    payload,
-  }) => {
-    const { selected } = await prepareHistory({ payload })
-    const beforeFiles = (await readdir(versionedDynamicMediaDir)).sort()
-    uploadCropSources.length = 0
-    const transformer = payload.config.upload.transformers.find(
-      ({ slug }) => slug === 'upload-crop',
-    )!
-    const transformFile = transformer.transformFile!
-    vi.spyOn(transformer, 'transformFile').mockImplementation(async (args) => {
-      const result = await transformFile(args)
-      args.doc._transforms = { crop: { ...savedCrop, width: 9999 } }
-      return result
-    })
-    await expect(
-      payload.restoreVersion({
-        id: String(selected.id),
-        collection: versionedDynamicMediaSlug,
-        context: { isUploadCropEnabled: true },
-        overrideAccess: true,
-      }),
-    ).rejects.toThrow()
-    expect((await readdir(versionedDynamicMediaDir)).sort()).toEqual(beforeFiles)
-    expect(uploadCropSources).toEqual([{ tempFilePath: expect.any(String) }])
-    expect(existsSync(uploadCropSources[0]!.tempFilePath!)).toBe(false)
-  })
-
-  test('should preserve the selected stored main and original when replaying its virtual variants', async ({
+  test('should keep stored entries stored and request-time entries request-time when restoring a mixed version', async ({
     payload,
     restClient,
   }) => {
-    const created = await payload.create({
-      collection: versionedDynamicMediaSlug,
-      data: { _transforms: { crop: savedCrop }, alt: 'selected stored' },
-      context: { isUploadCropEnabled: true },
-      filePath: imageFixture,
-    })
-    const docs = await getVersions({ payload, id: created.id })
-    const selected = docs[0]!
-    const selectedMain = await readFile(
-      path.join(versionedDynamicMediaDir, selected.version.filename),
-    )
-    const selectedOriginal = structuredClone(selected.version.original)
-    await payload.update({
-      id: created.id,
-      collection: versionedDynamicMediaSlug,
-      data: { alt: 'current' },
-    })
-    await payload.restoreVersion({
+    const { created, selected, selectedMain } = await prepareMixedHistory({ payload })
+    const restored = await payload.restoreVersion({
       id: String(selected.id),
       collection: versionedDynamicMediaSlug,
-      context: { isUploadCropEnabled: true },
       overrideAccess: true,
     })
+
+    expect(restored._stored).not.toBe(false)
+    expect(restored).toMatchObject({ height: 600, width: 800 })
+    expect(await readFile(path.join(versionedDynamicMediaDir, restored.filename!))).toEqual(
+      selectedMain,
+    )
+    expect(restored.variants?.card?._stored).toBe(false)
+
     const after = await getVersions({ payload, id: created.id })
     const retained = after.find(({ id }) => id === selected.id)!.version
+
     expect(retained).toMatchObject({
       _transforms: { crop: savedCrop },
       alt: { en: 'selected stored' },
-      original: selectedOriginal,
+      original: selected.version.original,
     })
+
     const response = await restClient.GET(
       `/${versionedDynamicMediaSlug}/file/${retained.filename}?version=${selected.id}`,
     )
+
     expect(response.status).toBe(200)
     expect(Buffer.from(await response.arrayBuffer())).toEqual(selectedMain)
   })
 
-  test('should persist current adapter metadata when restoring a selected draft response', async ({
+  test('should keep the old stored output on restore when the current config cannot build that entry at request time', async ({
+    payload,
+  }) => {
+    const { selected, selectedMain } = await prepareMixedHistory({ payload })
+    const transformer = payload.config.upload.transformers.find(
+      ({ slug }) => slug === 'request-crop',
+    )!
+    const upload = payload.collections[versionedDynamicMediaSlug].config.upload
+    const variants = upload.variants
+
+    vi.spyOn(transformer, 'canTransform').mockReturnValue(false)
+
+    try {
+      upload.variants = []
+
+      const restored = await payload.restoreVersion({
+        id: String(selected.id),
+        collection: versionedDynamicMediaSlug,
+        overrideAccess: true,
+      })
+
+      expect(restored._stored).not.toBe(false)
+      expect(await readFile(path.join(versionedDynamicMediaDir, restored.filename!))).toEqual(
+        selectedMain,
+      )
+      expect(restored.variants?.card?.filename).toBeFalsy()
+    } finally {
+      upload.variants = variants
+    }
+  })
+
+  test('should save the full upload data as a new draft when a draft restore selects one field', async ({
     payload,
   }) => {
     const { created, selected } = await prepareHistory({
@@ -516,144 +448,59 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     const restored = await payload.restoreVersion({
       id: String(selected.id),
       collection: versionedCloudMediaSlug,
-      context: { isUploadCropEnabled: true },
       draft: true,
       select: { storageMarker: true },
       overrideAccess: true,
     })
-    expect(restored.storageMarker).toBeTruthy()
-    expect(restored.storageMarker).not.toBe(selected.version.storageMarker)
+
     expect(restored.filename).toBeUndefined()
     expect(restored._status).toBeUndefined()
-    const currentAfter = await payload.db.findOne({
-      collection: versionedCloudMediaSlug,
-      where: { id: { equals: created.id } },
-    })
-    expect(currentAfter).toEqual(currentBefore)
+    expect(
+      await payload.db.findOne({
+        collection: versionedCloudMediaSlug,
+        where: { id: { equals: created.id } },
+      }),
+    ).toEqual(currentBefore)
+
     const versions = await getVersions({
       payload,
       id: created.id,
       collection: versionedCloudMediaSlug,
     })
     const latest = versions.find(({ latest }) => latest)!.version
+
     expect(latest).toMatchObject({
-      storageMarker: restored.storageMarker,
-      _transforms: { crop: savedCrop },
       _status: { en: 'draft' },
+      _stored: false,
+      _transforms: { crop: savedCrop },
     })
     expect(latest.filename).toBeTruthy()
   })
-
-  test.options(
-    'should validate adapter metadata and roll back the restored files and document if it fails',
-    { db: (adapter) => !adaptersWithoutTransactions.includes(adapter) },
-    async ({ payload }) => {
-      const { created, selected } = await prepareHistory({
-        payload,
-        collection: versionedCloudMediaSlug,
-      })
-      const currentBefore = await payload.db.findOne({
-        collection: versionedCloudMediaSlug,
-        where: { id: { equals: created.id } },
-      })
-      const filesBefore = new Map(versionedCloudFiles)
-      const collection = payload.collections[versionedCloudMediaSlug].config
-      const operations = collection.upload.fileOperations!
-      const stage = operations.stage
-      vi.spyOn(operations, 'stage').mockImplementation(async (args) => {
-        const result = await stage(args)
-        return { metadata: { ...result.metadata, storageMarker: 'invalid' } }
-      })
-      const field = collection.fields.find(
-        (field) => 'name' in field && field.name === 'storageMarker',
-      )!
-      const validate = 'validate' in field ? field.validate : undefined
-      try {
-        Object.assign(field, {
-          validate: (value: string) => (value === 'invalid' ? 'Invalid adapter metadata' : true),
-        })
-        await expect(
-          payload.restoreVersion({
-            id: String(selected.id),
-            collection: versionedCloudMediaSlug,
-            context: { isUploadCropEnabled: true },
-            overrideAccess: true,
-          }),
-        ).rejects.toThrow()
-        expect(versionedCloudFiles).toEqual(filesBefore)
-        expect(
-          await payload.db.findOne({
-            collection: versionedCloudMediaSlug,
-            where: { id: { equals: created.id } },
-          }),
-        ).toEqual(currentBefore)
-      } finally {
-        Object.assign(field, { validate })
-      }
-    },
-  )
-
-  test.options(
-    'should retain a referenced restored file when adapter metadata fails without a transaction',
-    { db: (adapter) => adaptersWithoutTransactions.includes(adapter) },
-    async ({ payload }) => {
-      const { created, selected } = await prepareHistory({
-        payload,
-        collection: versionedCloudMediaSlug,
-      })
-      const filesBefore = new Map(versionedCloudFiles)
-      const collection = payload.collections[versionedCloudMediaSlug].config
-      const operations = collection.upload.fileOperations!
-      const stage = operations.stage
-      vi.spyOn(operations, 'stage').mockImplementation(async (args) => {
-        const result = await stage(args)
-        return { metadata: { ...result.metadata, storageMarker: 'invalid' } }
-      })
-      const field = collection.fields.find(
-        (field) => 'name' in field && field.name === 'storageMarker',
-      )!
-      const validate = 'validate' in field ? field.validate : undefined
-      try {
-        Object.assign(field, {
-          validate: (value: string) => (value === 'invalid' ? 'Invalid adapter metadata' : true),
-        })
-        await expect(
-          payload.restoreVersion({
-            id: String(selected.id),
-            collection: versionedCloudMediaSlug,
-            context: { isUploadCropEnabled: true },
-            overrideAccess: true,
-          }),
-        ).rejects.toThrow()
-        const currentAfter = await payload.findByID({
-          id: created.id,
-          collection: versionedCloudMediaSlug,
-          showHiddenFields: true,
-        })
-        expect(currentAfter._transforms).toEqual({ crop: savedCrop })
-        expect(currentAfter.storageMarker).toBe(selected.version.storageMarker)
-        const storedDefault = getStoredCloudFiles(currentAfter).find(({ roles }) =>
-          roles.some(({ type }) => type === 'default'),
-        )!
-        expect(await sharp(versionedCloudFiles.get(storedDefault.key)!).metadata()).toMatchObject({
-          height: 600,
-          width: 800,
-        })
-        expect([...versionedCloudFiles.keys()].sort()).toEqual(
-          [...filesBefore.keys(), storedDefault.key].sort(),
-        )
-        for (const [key, bytes] of filesBefore) {
-          expect(versionedCloudFiles.get(key)).toEqual(bytes)
-        }
-        const versions = await getVersions({
-          payload,
-          id: created.id,
-          collection: versionedCloudMediaSlug,
-        })
-        expect(versions.find(({ id }) => id === selected.id)!.version).toEqual(selected.version)
-      } finally {
-        Object.assign(field, { validate })
-      }
-    },
-  )
 })
+
+/** A version whose main file was stored by an upload stage and whose `card` size is request-time. */
+async function prepareMixedHistory({ payload }: { payload: Payload }) {
+  const created = await payload.create({
+    collection: versionedDynamicMediaSlug,
+    data: { _transforms: { crop: savedCrop }, alt: 'selected stored' },
+    context: { isUploadCropEnabled: true },
+    filePath: imageFixture,
+  })
+  const [selected] = await getVersions({ payload, id: created.id })
+
+  expect(selected!.version._stored).not.toBe(false)
+  expect(selected!.version.variants.card._stored).toBe(false)
+
+  const selectedMain = await readFile(
+    path.join(versionedDynamicMediaDir, selected!.version.filename),
+  )
+
+  await payload.update({
+    id: created.id,
+    collection: versionedDynamicMediaSlug,
+    data: { _transforms: { crop: laterCrop }, alt: 'current' },
+  })
+  sourceReadCalls.length = 0
+
+  return { created, selected: selected!, selectedMain }
+}

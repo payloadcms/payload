@@ -147,9 +147,6 @@ export const requestCropTransformer: UploadTransformer = {
 }
 
 /** Applies the saved crop at upload time when a test sets `context.isUploadCropEnabled`. */
-/** The temp file path of each `uploadCropTransformer` upload, so a test can check the source. */
-export const uploadCropSources: { tempFilePath?: string }[] = []
-
 export const uploadCropTransformer: UploadTransformer = {
   slug: 'upload-crop',
   canTransform: ({ collectionSlug, operation, req }) =>
@@ -161,10 +158,8 @@ export const uploadCropTransformer: UploadTransformer = {
       ? { canTransform: true, handledTransformKeys: ['crop'] }
       : false,
   mimeTypes: ['image/*'],
-  transformFile: async ({ doc, file, req }) => {
+  transformFile: async ({ doc, file }) => {
     const crop = (doc._transforms as { crop?: Crop } | null)?.crop
-
-    uploadCropSources.push({ tempFilePath: req.file?.tempFilePath })
 
     if (!crop) {
       return { status: 'continue' }

@@ -39,27 +39,6 @@ export const withoutCloudStorageState = ({
   return copy
 }
 
-/** Whether the storage adapter's afterChange hook saves the metadata of this operation's files. */
-export const hasManagedCloudMetadata = ({ req }: { req: PayloadRequest }): boolean =>
-  Boolean(req.context?._payloadManagedCloudStorage)
-
-/**
- * Keeps the storage adapter's metadata hook active for `to`, when `from` saved the files. A restore
- * saves its files with a separate request but runs the adapter's afterChange hook with its own.
- */
-export const shareManagedCloudMetadata = ({
-  from,
-  to,
-}: {
-  from: PayloadRequest
-  to: PayloadRequest
-}): PayloadRequest => {
-  to.context._payloadManagedCloudStorage = true
-  to.context._payloadManagedCloudMetadata = from.context._payloadManagedCloudMetadata
-
-  return to
-}
-
 /** Preserve the caller's cloud flags; nested Local API calls can replace req.context. */
 export const captureCloudHookState = ({ req }: { req: PayloadRequest }): (() => void) => {
   const previousState = ['_payloadManagedCloudStorage', '_payloadManagedCloudMetadata'].map(

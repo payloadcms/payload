@@ -348,7 +348,7 @@ Request-time sizes follow the same [saved-key rules](#applying-saved-_transforms
 
 Request parameters never change `_transforms`. To save a change, update the document.
 
-Historical requests (`?version=<version-id>`) build request-time files from the selected version's original and saved `_transforms`. The handler receives that version's document snapshot, and the current compatible pipeline applies its saved state. Request parameters are ignored, so only phase 1 runs, and `canTransform` and `handleRequest` receive a `req` without the query string. Stored historical files and originals continue to serve saved bytes without transformations. Restoring a version with request-time entries resolves the saved original and edits through the current configuration; stored-only versions reuse saved output. See [Historical file URLs](./overview#historical-file-urls) and [Restoring files](./overview#restoring-files).
+Historical requests (`?version=<version-id>`) build request-time files from the selected version's original and saved `_transforms`. The handler receives that version's document snapshot, and the current compatible pipeline runs both phases, as for the current file: phase 1 applies the saved state, and phase 2 applies the request parameters. Stored historical files and originals continue to serve saved bytes without transformations. Restoring a version keeps its request-time entries request-time and its stored entries stored; a restore never builds new stored files. See [Historical file URLs](./overview#historical-file-urls) and [Restoring files](./overview#restoring-files).
 
 #### Handing off to an image service
 

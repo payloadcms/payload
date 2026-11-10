@@ -14,7 +14,20 @@ type StoredVersion = {
   version: JsonObject
 }
 
-/** Resolves a version's exact file entry after checking parent and version read access. */
+export type HistoricalFile = {
+  document: ResolvedUploadDocument
+  /**
+   * The requested entry is built at request time. `handleDynamicFileRequest` checks its file
+   * access, so request parameters decide between an ordinary read and a transform check.
+   */
+  isBuiltAtRequest: boolean
+}
+
+/**
+ * Resolves a version's exact file entry after checking version read access. A stored entry also
+ * gets an ordinary read check of the parent here. An entry built at request time gets its file
+ * access check where it is built.
+ */
 export const resolveHistoricalFile = async ({
   collection,
   filename,
@@ -29,7 +42,7 @@ export const resolveHistoricalFile = async ({
   prefix?: string
   req: PayloadRequest
   versionID: string
-}): Promise<ResolvedUploadDocument> => {
+}): Promise<HistoricalFile> => {
   const { docs } = await req.payload.db.findVersions<JsonObject>({
     collection: collection.config.slug,
     limit: 1,
@@ -37,10 +50,14 @@ export const resolveHistoricalFile = async ({
     where: { id: { equals: versionID } },
   })
   const matched = docs[0]
+  const historical = matched
+    ? await resolveVersionFile({ collection, filename, isOriginal, prefix, req, row: matched })
+    : undefined
 
-  // Check both policies before exposing a missing version or a filename mismatch. A historical
-  // request ignores request parameters, so it is always an ordinary read.
-  await checkFileAccess({ collection, documentID: matched?.parent, filename, req })
+  // Check both policies before exposing a missing version or a filename mismatch.
+  if (!historical?.isBuiltAtRequest) {
+    await checkFileAccess({ collection, documentID: matched?.parent, filename, req })
+  }
   await req.payload.findVersionByID({
     id: versionID,
     collection: collection.config.slug,
@@ -48,19 +65,6 @@ export const resolveHistoricalFile = async ({
     overrideAccess: false,
     req,
     showHiddenFields: true,
-  })
-
-  if (!matched) {
-    throw new NotFound(req.t)
-  }
-
-  const historical = await resolveVersionFile({
-    collection,
-    filename,
-    isOriginal,
-    prefix,
-    req,
-    row: matched,
   })
 
   if (!historical) {
@@ -84,7 +88,7 @@ const resolveVersionFile = async ({
   prefix?: string
   req: PayloadRequest
   row: StoredVersion
-}): Promise<ResolvedUploadDocument | undefined> => {
+}): Promise<HistoricalFile | undefined> => {
   const saved = await withLegacyCloudUploadFileData({
     collection: collection.config,
     doc: row.version,
@@ -97,7 +101,8 @@ const resolveVersionFile = async ({
   }
 
   const storedFiles = collectStoredFiles({ collection: collection.config, doc: saved, req })
-  const hasFile = isRequestTimeFile({ entry: entry.value })
+  const isBuiltAtRequest = entry.type !== 'original' && isRequestTimeFile({ entry: entry.value })
+  const hasFile = isBuiltAtRequest
     ? storedFiles.some((file) => file.roles.some((role) => role.type === 'original'))
     : storedFiles.some((file) =>
         file.roles.some((role) =>
@@ -111,7 +116,7 @@ const resolveVersionFile = async ({
     return
   }
 
-  return { ...saved, id: row.parent } as ResolvedUploadDocument
+  return { document: { ...saved, id: row.parent } as ResolvedUploadDocument, isBuiltAtRequest }
 }
 
 function getHistoricalEntry({

@@ -77,10 +77,7 @@ export const getAfterChangeHook =
         return withProxyPrefix(doc)
       }
 
-      const originalContext = req.context
-      req.context = { ...originalContext, skipCloudStorage: true }
-      // Metadata is a partial update, even when the enclosing operation restores a full version.
-      delete req.context.isRestoringVersion
+      req.context.skipCloudStorage = true
       req.file = undefined
       req.payloadUploadSizes = undefined
       const originalQuery = req.query
@@ -102,7 +99,7 @@ export const getAfterChangeHook =
         return withProxyPrefix({ ...doc, ...updatedDoc })
       } finally {
         req.query = originalQuery
-        req.context = originalContext
+        delete req.context.skipCloudStorage
       }
     }
 

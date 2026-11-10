@@ -46,7 +46,10 @@ export const isolateRestoreRequest = ({ req }: { req: PayloadRequest }): Payload
   return isolated
 }
 
-/** Replay virtual outputs with today's pipeline; saved stored outputs remain reusable. */
+/**
+ * Restores the selected version's files. Stored files are copied. A version with a file built at
+ * request time keeps that file request-time, and never gets new stored files.
+ */
 export const runFileRestore = async <T>(args: FileRestoreArgs<T>): Promise<T> => {
   const entries = [args.selected, ...Object.values(args.selected.variants ?? {})]
   return entries.some((entry) => isRequestTimeFile({ entry: entry as JsonObject }))
