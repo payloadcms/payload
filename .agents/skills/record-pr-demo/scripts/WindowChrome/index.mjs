@@ -214,12 +214,21 @@ export function mountDemoChrome({
         }
         if (canAnimateFeedback() && history.offsetWidth > 0) {
           const scale = root.clientWidth / canvas.width
+          const gap = parseFloat(getComputedStyle(history).columnGap) || 0
+          const chordBounds = chord.getBoundingClientRect()
+          // Enter behind the prior group, including when its slide is interrupted.
+          const entryOffset = previousPositions.size
+            ? (Math.min(...[...previousPositions.values()].map(({ left }) => left)) -
+                chordBounds.right) /
+                scale -
+              gap
+            : -chordBounds.width / scale - gap
           for (const el of history.children) {
             const previous = previousPositions.get(el)
             const opacity = Number(getComputedStyle(el).opacity)
             const offset =
               previous === undefined
-                ? -8
+                ? entryOffset
                 : (previous.left - el.getBoundingClientRect().left) / scale
             const animation = el.animate(
               [

@@ -8,6 +8,7 @@ import { getDefaultCanvas } from './WindowChrome/index.mjs'
 import { startLosslessCapture } from './capture-demo.mjs'
 
 import { createAnnotationInteraction } from './annotation-demo.mjs'
+import { createKeyInteraction } from './keyboard-demo.mjs'
 import { createPresentation } from './presentation-demo.mjs'
 import { createScrollInteraction } from './scroll-demo.mjs'
 
@@ -445,6 +446,7 @@ async function executeDemo({
       page,
       pauseScale,
     })
+    const pressKey = createKeyInteraction({ page, pauseScale })
     const annotationInteractions = createAnnotationInteraction({
       presentation,
     })
@@ -459,9 +461,10 @@ async function executeDemo({
       chrome: presentation.chrome,
       click: pointerInteractions.click,
       circleCursor: pointerInteractions.circleCursor,
+      pressKey,
       typeText: async ({ locator, text, clear = false, delay = 50 }) => {
         await pointerInteractions.click(locator)
-        if (clear) await page.keyboard.press('ControlOrMeta+A')
+        if (clear) await pressKey({ key: 'ControlOrMeta+A' })
         await page.keyboard.type(text, { delay })
       },
       expect,

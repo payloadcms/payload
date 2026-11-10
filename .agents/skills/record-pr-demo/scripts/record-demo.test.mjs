@@ -659,7 +659,7 @@ test('should click scaled targets, type with keys, and require wheel input to re
     await writeFile(
       scenario,
       `${presentationExport}
-      export default async function({page,click,typeText,expect,scroll}) {
+      export default async function({page,click,typeText,pressKey,expect,scroll}) {
         await page.goto('data:text/html,'+encodeURIComponent('<style>body{margin:0}button,input{display:block;margin:30px}#scroller{height:180px;overflow:auto}#spacer{height:800px}</style><input aria-label="Title" value="Old title" onkeydown="this.dataset.key=event.key" oninput="this.dataset.trusted=event.isTrusted"><button onclick="this.textContent=String.fromCharCode(67,108,105,99,107,101,100)">Click target</button><div id="scroller"><div id="spacer"></div><button>Offscreen</button></div>'))
         await click(page.getByRole('button',{name:'Click target',exact:true}))
         await expect(page.getByRole('button',{name:'Clicked',exact:true})).toBeVisible()
@@ -667,6 +667,8 @@ test('should click scaled targets, type with keys, and require wheel input to re
         await expect(page.getByRole('textbox',{name:'Title'})).toHaveValue('New title')
         await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-key','e')
         await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-trusted','true')
+        await pressKey({key:'Home',settleMs:0})
+        await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-key','Home')
         let rejected=false
         try { await click(page.getByRole('button',{name:'Offscreen',exact:true})) } catch(error) { rejected=/wheel|visible/.test(error.message) }
         if(!rejected)throw new Error('Offscreen click silently scrolled')
@@ -711,7 +713,9 @@ for (const mode of ['disabled', 'moving', 'covered', 'partial', 'explicit']) {
             },30),{once:true})
           },mode)
           if(mode==='moving'||mode==='covered'||mode==='explicit') {
-            let rejected=false
+            await pressKey({key:'Home',settleMs:0})
+        await expect(page.getByRole('textbox',{name:'Title'})).toHaveAttribute('data-key','Home')
+        let rejected=false
             try { await click(target,{duration:0,before:250,after:0,...(mode==='explicit'?{position:{x:120,y:40}}:{})}) }
             catch(error) { rejected=/visible|unobstructed/.test(error.message) }
             if(!rejected)throw new Error('Unsafe click returned success')

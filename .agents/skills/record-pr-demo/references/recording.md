@@ -115,6 +115,7 @@ The recorder supplies:
 - `moveCursor(locator, options?)`: smoothly points at a locator and pauses without clicking;
 - `circleCursor(locator, options?)`: approaches a visible target, makes two tight loops near its center, and eases to rest without clicking;
 - `page`: the application iframe facade; navigation, locators, and evaluation target the app, while input devices and page events use the recording page;
+- `pressKey({ key, settleMs = 800 })`: press a key or shortcut with an 80ms hold, then let its result settle; validation skips the hold and settling time. The key logger observes the real key event immediately. Override `settleMs` when an action needs more or less time;
 - `pause(milliseconds = 700)`: a short presentation pause;
 - `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
 - `typeText({ locator, text, clear = false, delay = 50 })`: click to focus, optionally select all with `ControlOrMeta+A`, then type character by character;
@@ -127,7 +128,7 @@ The recorder supplies:
 The scenario drives the same controls a person uses:
 
 - Open the starting route with one `page.goto()` before UI preparation and `ready()`. Reach subsequent routes by clicking visible links, navigation items, breadcrumbs, or buttons. Do not jump to known document URLs between steps.
-- Use the recorder's `click` helper for pointer actions. Use `page.keyboard.press()` and `page.keyboard.type()` for shortcuts and paced typing after focusing the control with a click. Do not use `fill()`, `selectOption()`, synthetic event dispatch, or DOM value assignments.
+- Use the recorder's `click` helper for pointer actions. Use `pressKey({ key })` for shortcuts and navigation keys, and `typeText` or `page.keyboard.type()` for paced typing after focusing the control with a click. Do not use `fill()`, `selectOption()`, synthetic event dispatch, or DOM value assignments.
 - Use `scroll` with `input: 'wheel'` and `cursorPlacement: 'inside'` for visible scrolling. Reveal offscreen controls with a wheel gesture before clicking them; do not rely on locator auto-scrolling.
 - In the scenario function, create and reset content through these same gestures, including UI preparation before `ready()`. Put optional API seeding and cleanup in `setup`/`teardown`, outside the walkthrough. Do not call REST endpoints, the Local API, application functions, or mutate browser storage to advance the demonstrated interaction.
 - Locators, assertions, network observation, and read-only DOM measurements may verify state. Presentation annotations, window framing, recording, encoding, and verification are harness operations.
@@ -136,7 +137,7 @@ For example, edit a focused field through keyboard input:
 
 ```js
 await click(page.getByRole('textbox', { name: 'Title', exact: true }))
-await page.keyboard.press('ControlOrMeta+A')
+await pressKey({ key: 'ControlOrMeta+A' })
 await page.keyboard.type('Halloween Sale', { delay: 50 })
 await click(page.getByRole('button', { name: 'Save', exact: true }))
 ```
@@ -273,7 +274,7 @@ Set `presentation.accessibility: true` to show navigation keys and shortcuts. Or
 
 Also set `presentation.showAnnouncements: true` to display observed live-region text. This captures DOM text, not actual screen-reader audio. Feedback remains available when the step note is hidden. The recorder preserves application focus and native focus styling; it adds no focus outline.
 
-Use real keyboard events such as `page.keyboard.press('Tab')` and `page.keyboard.press('Enter')`, with pauses around important commands. Long announcements and older history may truncate, so verify the relevant evidence in the finished take. Preview with `?accessibility&announcements&kind=fix`; layout and styling come from the shared component.
+Use `pressKey({ key: 'Tab' })` and `pressKey({ key: 'Enter', settleMs: 800 })` for real keyboard events with readable pacing. Long announcements and older history may truncate, so verify the relevant evidence in the finished take. Preview with `?accessibility&announcements&kind=fix`; layout and styling come from the shared component.
 
 ### Reuse a scenario with or without a11y feedback
 

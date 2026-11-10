@@ -400,3 +400,28 @@ test('should keep complete commands visible when keyboard history fills the side
     },
   })
 })
+
+test('should keep shortcut groups separate throughout their slide', async () => {
+  await withPresentation({
+    run: async ({ stage }) => {
+      await stage.setViewportSize({ width: 1000, height: 800 })
+      const samples = await stage.evaluate(() => {
+        const root = document.querySelector('#demo-stage').shadowRoot
+        window.demoChrome.setAccessibilityState({ key: '⌘ + A' })
+        for (const animation of root.getAnimations({ subtree: true })) animation.finish()
+        window.demoChrome.setAccessibilityState({ key: 'Shift + Tab' })
+        const row = root.querySelector('[data-keystroke-overlay]')
+        const animations = [...row.children].flatMap((el) => el.getAnimations())
+        for (const animation of animations) animation.pause()
+        return [0, 55, 110, 165, 220].map((time) => {
+          for (const animation of animations) animation.currentTime = time
+          const [current, previous] = [...row.children].map((el) => el.getBoundingClientRect())
+          return { time, gap: previous.left - current.right }
+        })
+      })
+      for (const sample of samples) {
+        assert.ok(sample.gap >= 0, `Shortcut groups overlap at ${sample.time}ms`)
+      }
+    },
+  })
+})
