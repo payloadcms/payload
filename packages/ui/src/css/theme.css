@@ -1,7 +1,6 @@
-/* Override component tokens on [data-payload-tokens] with unlayered CSS. */
-
 @layer payload-default {
-  [data-payload-tokens] {
+  :root,
+  :host {
     /* Fields — controls text inputs, selects, date pickers, code editors, etc. */
     --field-min-height-large: var(--spacer-5);
     --field-min-height-medium: var(--spacer-4);

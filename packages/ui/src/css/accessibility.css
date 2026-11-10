@@ -1,8 +1,14 @@
 @layer payload-default {
-  [data-payload-tokens] {
-    --accessibility-focus-color: var(--color-border-selected);
-    --accessibility-outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
+  :root,
+  :host {
     --accessibility-outline-offset: 1px;
     --accessibility-outline-inset: calc(-1 * var(--stroke-width-small));
+  }
+
+  :root,
+  :host,
+  [data-theme] {
+    --accessibility-focus-color: var(--color-border-selected);
+    --accessibility-outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
   }
 }

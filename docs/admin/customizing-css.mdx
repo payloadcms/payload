@@ -2,23 +2,15 @@
 title: Customizing CSS
 label: Customizing CSS
 order: 50
-desc: Customize the Payload Admin Panel further by adding your own CSS style sheet to the configuration, powerful theme and design options are waiting for you.
+desc: Customize the Payload Admin Panel with your own stylesheets, design tokens, and theme overrides.
 keywords: admin, css, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Customizing the Payload [Admin Panel](./overview) through CSS alone is one of the easiest and most powerful ways to customize the look and feel of the dashboard. To allow for this level of customization, Payload:
-
-1. Exposes a [root-level stylesheet](#global-css) for you to inject custom selectors
-1. Provides a [CSS library](#css-library) that can be easily overridden or extended
-1. Uses [BEM naming conventions](http://getbem.com) so that class names are globally accessible
-
-To customize the CSS within the Admin UI, determine scope and change you'd like to make, and then add your own CSS to the configuration as needed.
+Customize the look and feel of the Payload [Admin Panel](./overview) with your own stylesheets and design token overrides.
 
 ## Global CSS
 
-Global CSS refers to the CSS that is applied to the entire [Admin Panel](./overview). This is where you can have a significant impact to the look and feel of the Admin UI through just a few lines of code.
-
-You can add your own global CSS through the root `custom.css` file of your app. This file is loaded into the root of the Admin Panel and can be used to inject custom selectors or styles however needed.
+Add global styles to the Admin Panel's `custom.css` file, which is loaded by its layout or route.
 
 Here is an example of how you might target the Dashboard View and change the background color:
 
@@ -37,21 +29,15 @@ Here is an example of how you might target the Dashboard View and change the bac
 
 ### Specificity rules
 
-All Payload CSS is encapsulated inside CSS layers under `@layer payload-default`. Any custom css will now have the highest possible specificity.
+Payload's default styles and design tokens are declared in `@layer payload-default`. Unlayered custom CSS takes precedence over these normal declarations, regardless of selector specificity or stylesheet load order.
 
-We have also provided a layer `@layer payload` if you want to use layers and ensure that your styles are applied after payload.
+For layered overrides, the Admin Panel declares a `payload` layer after `payload-default`.
 
-To override existing styles in a way that the previous rules of specificity would be respected you can use the default layer like so
-
-```css
-@layer payload-default {
-  // my styles within the Payload specificity
-}
-```
+Place custom rules in `@layer payload-default` when you want them to follow normal selector specificity and source order alongside Payload's defaults.
 
 ## Re-using Payload CSS variables
 
-Payload defines its design tokens as [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) on `[data-payload-tokens]` containers. The Admin Panel adds this attribute to its `<html>` element automatically, so custom admin components inherit the tokens without importing anything.
+Payload defines its design tokens as [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) on both `:root` and `:host`. Custom admin components inherit these tokens without importing anything.
 
 ```css
 @layer payload-default {
@@ -62,6 +48,29 @@ Payload defines its design tokens as [CSS Variables](https://developer.mozilla.o
 }
 ```
 
+### Dark Mode
+
+Tokens default to light mode. Set `data-theme="dark"` or `data-theme="light"` on the document's `<html>` element or on the shadow host to select its palette. Add `data-enhanced-contrast` to that same element to enable enhanced contrast, including nested themed controls.
+
+A nested `data-theme` changes colors and elevations while inheriting shared spacing, typography, radii, and component customizations.
+
+<Banner type="warning">
+  When overriding colors, check contrast in both themes and with enhanced
+  contrast enabled.
+</Banner>
+
+### Overriding tokens
+
+Override token values on `:root` in your own unlayered CSS:
+
+```css
+:root {
+  --button-radius: 19px;
+}
+```
+
+<Banner type="info">Inside Shadow DOM, override tokens on `:host`.</Banner>
+
 ### Using tokens outside the Admin Panel
 
 Import `@payloadcms/ui/css/tokens` to use Payload's design tokens outside the Admin Panel without loading its resets, component styles, fonts, or global element styles:
@@ -70,83 +79,24 @@ Import `@payloadcms/ui/css/tokens` to use Payload's design tokens outside the Ad
 import '@payloadcms/ui/css/tokens'
 ```
 
-The stylesheet imports the canonical color ramps, semantic colors, spacing, typography, radii, elevations, component, stroke width, z-index, and accessibility tokens. It defines variables only on `[data-payload-tokens]` containers. Importing it alone does not define variables on `:root` or apply colors, typography, layout, or `color-scheme` to the page. Theme and contrast overrides also require a token container.
+For Shadow DOM, load the stylesheet into the shadow root itself. A normal CSS import may place it in the outer document instead.
 
-Applications loading `@payloadcms/ui/css` or `@payloadcms/ui/css/app.css` outside the Admin Panel also need a token container.
-
-Add `data-payload-tokens` to initialize a complete token set on a container:
-
-```tsx
-<div className="my-component" data-payload-tokens data-theme="light">
-  Custom UI
-</div>
-```
-
-```css
-.my-component {
-  background: var(--color-bg);
-  color: var(--color-text);
-  border: var(--stroke-width-small) solid var(--color-border);
-  border-radius: var(--button-radius);
-  padding: var(--spacer-3);
-}
-```
-
-Set `data-theme="light"` or `data-theme="dark"` on the **same element** as `data-payload-tokens`. Each token container defaults to light and initializes its own complete token set, including aliases. The container's theme is independent of the document's theme. To create a nested theme boundary, add both `data-payload-tokens` and `data-theme` to the nested container.
-
-Add `data-enhanced-contrast` to the same token container to opt into Payload's enhanced contrast palette:
-
-```tsx
-<div
-  className="my-component"
-  data-payload-tokens
-  data-theme="dark"
-  data-enhanced-contrast
->
-  Custom UI
-</div>
-```
-
-Theme and contrast changes can be made by updating these attributes; no JavaScript theme provider is required. Enhanced contrast also applies to nested token containers when a marked ancestor has `data-enhanced-contrast`. Theme and contrast attributes on an unmarked host element have no effect. Portals must render inside a token container or mark their portal container with the same attributes.
-
-The tokens remain in `@layer payload-default`. Override them on the token container in your own unlayered CSS:
-
-```css
-.my-component {
-  --button-radius: var(--radius-small);
-}
-```
-
-To override tokens across all containers, including popup and portal theme boundaries, target `[data-payload-tokens]` in your unlayered CSS rather than only `:root`. Every marked container initializes its own defaults.
-
-Spacing, radius, and typography tokens retain their original units. Values in `rem` follow the host document's root font size. Typography tokens do not load or apply fonts; supply the fonts and explicitly apply any font properties your UI needs. This export supplies variables for your own UI; components from `@payloadcms/ui` still need their component styles.
+Values in `rem` use the document's root font size, including inside Shadow DOM. Load the fonts you want and apply typography tokens in your own styles.
 
 ## CSS Library
 
-To make it as easy as possible for you to override default styles, Payload uses [BEM naming conventions](http://getbem.com/) for all CSS within the Admin UI. If you provide your own CSS, you can override any built-in styles easily, including targeting nested components and their various component states.
+Payload uses [BEM naming conventions](http://getbem.com/) for Admin UI class names so you can target components and their states in your own stylesheets.
 
-You can also override Payload's built-in [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties). These variables are widely consumed by the Admin Panel, so modifying them has a significant impact on the look and feel of the Admin UI.
+The main token definitions are available in these source files:
 
-The following variables are defined and can be overridden:
+- [Color ramps](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/design-tokens.css): raw `--ramp-*` palette values.
+- [Semantic colors](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/colors.css): theme-aware colors for backgrounds, text, borders, icons, and fields.
+- [Spacing](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/spacing.css): spacers, gutters, field spacing, and breakpoint values.
+- [Typography](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/typography.css): font families, sizes, weights, line heights, and letter spacing.
+- [Radii](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/radius.css): border radii.
+- [Elevations](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/elevations.css): shadows for canvases, tooltips, menus, and modals.
+- [Component tokens](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/theme.css): dimensions, radii, and stroke widths for shared controls.
+- [Z-index](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/z-index.css): stacking order for navigation, modals, popups, and portals.
+- [Accessibility](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/accessibility.css): focus outline colors, widths, and offsets.
 
-- [Breakpoints](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/spacing.css)
-- [Colors](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/colors.css)
-  - Semantic tokens for background, text, border, and icon colors (e.g. `--color-bg`, `--color-text`, `--color-border`, `--color-icon`)
-  - Success / warning / danger color tokens
-  - The raw `--ramp-*` color palette
-- [Sizing](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/app.css)
-  - Horizontal gutter
-  - Transition speeds
-  - Font sizes
-  - Etc.
-
-For an up-to-date, comprehensive list of all available variables, please refer to the [Source Code](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css).
-
-<Banner type="warning">
-  **Warning:** If you're overriding colors, make sure to consider how [your
-  changes will affect dark mode](#dark-mode).
-</Banner>
-
-#### Dark Mode
-
-Colors are designed to automatically adapt to the theme of the [Admin Panel](./overview). The dark palette is selected by `[data-payload-tokens][data-theme='dark']`, so semantic tokens like `--color-bg` and `--color-text`, along with the success / warning / danger colors, adjust automatically for dark mode.
+Admin-specific layout variables, such as navigation width and header heights, are defined separately in [app.css](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/app.css). They are not included in the token export.

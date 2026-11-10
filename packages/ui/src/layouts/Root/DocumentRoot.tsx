@@ -50,7 +50,6 @@ export function DocumentRoot({
       {...htmlProps}
       className={[...fontClassNames, htmlProps.className].filter(Boolean).join(' ')}
       data-enhanced-contrast={highContrastMode ? '' : undefined}
-      data-payload-tokens
       data-theme={theme}
       dir={dir}
       lang={languageCode}

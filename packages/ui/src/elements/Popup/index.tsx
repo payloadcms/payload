@@ -807,7 +807,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
                 // tests do not accidentally target inactive popups.
                 `${baseClass}__hidden-content`
           }
-          data-payload-tokens={theme === 'auto' ? undefined : ''}
           data-popup-id={id || undefined}
           data-theme={theme === 'auto' ? undefined : theme}
           id={contentId}

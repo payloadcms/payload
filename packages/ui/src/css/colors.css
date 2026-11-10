@@ -3,7 +3,9 @@
      Non-themed Tokens
      ————————————————————————————————————————————— */
 
-  [data-payload-tokens] {
+  :root,
+  :host,
+  [data-theme='light'] {
     /* Special */
     --special-bg-hover-on-light-canvas: var(--ramp-black-300);
     --special-text-highlight: var(--ramp-blue-300);
@@ -310,7 +312,10 @@
      Only overrides where the palette reference changes.
      ————————————————————————————————————————————— */
 
-  [data-payload-tokens][data-theme='dark'] {
+  :host([data-theme='dark']),
+  [data-theme='dark'] {
+    --scrollbar-color: var(--color-bg-secondary-pressed);
+
     /* Background */
     --color-bg-assistive: var(--ramp-pink-500);
     --color-bg-assistive-hover: var(--ramp-pink-600);
@@ -497,15 +502,19 @@
   }
   /* Reapply the contrast palette at theme boundaries, including portaled menus.
      Component-specific mappings live with their component styles. */
-  [data-payload-tokens][data-enhanced-contrast],
-  [data-payload-tokens][data-enhanced-contrast] [data-payload-tokens] {
+  html[data-enhanced-contrast],
+  html[data-enhanced-contrast] [data-theme],
+  :host([data-enhanced-contrast]),
+  :host([data-enhanced-contrast]) [data-theme] {
     --color-border: var(--color-border-control);
     --color-border-control-strong: var(--color-border-control);
     --color-border-menu-separator: var(--ramp-white-500);
   }
 
-  [data-payload-tokens][data-enhanced-contrast],
-  [data-payload-tokens][data-enhanced-contrast] [data-payload-tokens] {
+  html[data-enhanced-contrast],
+  html[data-enhanced-contrast] [data-theme='light'],
+  :host([data-enhanced-contrast]),
+  :host([data-enhanced-contrast]) [data-theme='light'] {
     --color-bg-brand: var(--ramp-blue-700);
     --color-bg-brand-hover: var(--ramp-blue-800);
     --color-bg-brand-pressed: var(--ramp-blue-900);
@@ -529,8 +538,10 @@
     --color-text-tertiary: var(--ramp-grey-600);
   }
 
-  [data-payload-tokens][data-enhanced-contrast][data-theme='dark'],
-  [data-payload-tokens][data-enhanced-contrast] [data-payload-tokens][data-theme='dark'] {
+  html[data-enhanced-contrast][data-theme='dark'],
+  html[data-enhanced-contrast] [data-theme='dark'],
+  :host([data-enhanced-contrast][data-theme='dark']),
+  :host([data-enhanced-contrast]) [data-theme='dark'] {
     --color-bg-brand: var(--ramp-blue-700);
     --color-bg-brand-hover: var(--ramp-blue-800);
     --color-bg-brand-pressed: var(--ramp-blue-900);

@@ -18,8 +18,6 @@ type FloatingMenuPortalStyle = {
 } & CSSProperties
 
 type ThemedMenuPortalInnerProps = {
-  'data-enhanced-contrast'?: string
-  'data-payload-tokens'?: string
   'data-theme'?: string
 } & React.JSX.IntrinsicElements['div']
 
@@ -33,7 +31,7 @@ export function DefaultMenuPortal<Opt, IsMulti extends boolean, Group extends Gr
   props: DefaultMenuPortalProps<Opt, IsMulti, Group>,
 ) {
   const { appendTo, children, controlElement, innerProps = {}, menuPlacement } = props
-  const { highContrastMode, theme } = useTheme()
+  const { theme } = useTheme()
   const floatingRef = useRef<HTMLDivElement | null>(null)
   const rafRef = useRef<null | number>(null)
   const selectProps = props.selectProps as {
@@ -118,8 +116,6 @@ export function DefaultMenuPortal<Opt, IsMulti extends boolean, Group extends Gr
   if (!appendTo || !controlElement) {
     const themedInnerProps: ThemedMenuPortalInnerProps = {
       ...innerProps,
-      'data-enhanced-contrast': highContrastMode ? '' : undefined,
-      'data-payload-tokens': '',
       'data-theme': menuPortalTheme ?? theme,
     }
 
@@ -131,8 +127,6 @@ export function DefaultMenuPortal<Opt, IsMulti extends boolean, Group extends Gr
     <div
       {...restInnerProps}
       className={['rs__floating-menu-portal', className].filter(Boolean).join(' ')}
-      data-enhanced-contrast={highContrastMode ? '' : undefined}
-      data-payload-tokens
       data-theme={menuPortalTheme ?? theme}
       ref={setFloatingElement}
       style={{

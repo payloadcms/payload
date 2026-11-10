@@ -1,5 +1,6 @@
 @layer payload-default {
-  [data-payload-tokens] {
+  :root,
+  :host {
     --text-body-family: 'Inter';
     --text-heading-family: 'Inter';
     --text-mono-family: 'Roboto Mono';

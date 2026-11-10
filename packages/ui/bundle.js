@@ -83,8 +83,9 @@ async function build() {
   })
 
   try {
-    // Retain the entry's global rules while inlining its canonical CSS imports.
-    // Reading source files also supports alternative output directories.
+    // Writing esbuild's component styles alone would overwrite the base stylesheet copied by copyfiles.
+    // Include the entry's imports and global rules so published styles retain the tokens that prevent controls from collapsing.
+    // Read from source because copyfiles does not populate alternative output directories such as esbuild.
     const stylesEntry = fs.readFileSync('src/styles.css', 'utf8')
 
     const baseCss = stylesEntry.replace(
