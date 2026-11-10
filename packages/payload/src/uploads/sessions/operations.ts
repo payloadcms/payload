@@ -979,10 +979,16 @@ const findDocumentByObjectKey = async ({
 
   const { _objectKey } = session.storage.object
 
+  // A transformed main file gets a new key, so the uploaded object is then the retained original.
   const document = await req.payload.db.findOne<{ id: number | string }>({
     collection: session.collectionSlug,
     req,
-    where: { _objectKey: { equals: _objectKey } },
+    where: {
+      or: [
+        { _objectKey: { equals: _objectKey } },
+        { 'original._objectKey': { equals: _objectKey } },
+      ],
+    },
   })
 
   if (document || !req.payload.collections[session.collectionSlug]?.config.versions) {
@@ -996,7 +1002,12 @@ const findDocumentByObjectKey = async ({
     limit: 1,
     pagination: false,
     req,
-    where: { 'version._objectKey': { equals: _objectKey } },
+    where: {
+      or: [
+        { 'version._objectKey': { equals: _objectKey } },
+        { 'version.original._objectKey': { equals: _objectKey } },
+      ],
+    },
   })
 
   return version ? { id: version.parent } : null
