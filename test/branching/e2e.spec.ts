@@ -25,6 +25,7 @@ import {
   pagesSlug,
   postsSlug,
   slugDraftsSlug,
+  uniqueSlug,
   versionedMediaSlug,
 } from './shared.js'
 
@@ -136,6 +137,7 @@ test.describe('Branching', () => {
       autosaveSlug,
       localizedSlug,
       slugDraftsSlug,
+      uniqueSlug,
       mediaSlug,
       nestedSlug,
       pagesSlug,
@@ -1057,6 +1059,45 @@ test.describe('Branching', () => {
     /** Clicked by label rather than id, which the radio derives from edit depth. */
     const mergeMode = (label: string) =>
       page.locator('.merge-branch-modal__modes label').filter({ hasText: label })
+
+    test('should identify the document and field path when a merge write fails', async () => {
+      await payload.create({
+        branch: false,
+        collection: uniqueSlug,
+        data: { slug: 'merge-conflict' },
+      })
+
+      const doc = await payload.create({
+        branch: branchName,
+        collection: uniqueSlug,
+        data: { slug: 'merge-conflict' },
+      })
+
+      await gotoBranchView()
+      await openMergeModal()
+
+      const modal = page.locator('.merge-branch-modal')
+
+      await modal.getByRole('button', { name: 'Merge', exact: true }).click()
+
+      const errors = modal.getByRole('alert')
+
+      await expect(modal.getByRole('heading', { name: 'Merge blocked', exact: true })).toBeVisible()
+      await expect(errors).toContainText('Please correct invalid fields.')
+      await expect(errors.getByRole('listitem')).toHaveText(
+        `Unique Doc / #${doc.id} / slug: Value must be unique`,
+      )
+      await expect(page.getByText('No changes on this branch yet.', { exact: true })).toHaveCount(0)
+      await expect(modal.getByRole('progressbar')).toHaveCount(0)
+
+      await modal
+        .locator('.dialog__footer')
+        .getByRole('button', { name: 'Close', exact: true })
+        .click()
+
+      await expect(modal).toBeHidden()
+      await expect(page.locator('.changed-docs__row')).toHaveCount(1)
+    })
 
     test('should require a date before a merge can be scheduled', async () => {
       await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Treat' } })

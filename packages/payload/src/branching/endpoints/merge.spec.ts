@@ -5,7 +5,7 @@ import { expect, test, vi } from 'vitest'
 import { mergeBranch } from '../merge.js'
 import { mergeBranchHandler } from './merge.js'
 
-vi.mock('../merge.js', () => ({ mergeBranch: vi.fn() }))
+vi.mock('../merge.js', () => ({ getBranchesLocalAPI: vi.fn(), mergeBranch: vi.fn() }))
 vi.mock('../resolveBranch.js', () => ({
   isolateBranchState: ({ req }: { req: PayloadRequest }) => req,
 }))

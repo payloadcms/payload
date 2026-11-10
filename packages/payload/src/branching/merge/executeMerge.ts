@@ -42,6 +42,7 @@ import { finalizeMergeAfterCommit, recordMergeRollback } from './finalizeMerge.j
 import { createMergeLedger } from './mergeLedger.js'
 import { recoverMergeFailure } from './recoverMerge.js'
 import { changeDocID } from './utilities.js'
+import { setMergeValidationErrorContext } from './validationErrors.js'
 
 const mergeEventCheckpointBatchSize = 1_000
 export const unknownMergeCommitResultContextKey = Symbol('unknownMergeCommitResult')
@@ -652,6 +653,12 @@ export const executeMerge = async ({
       isFinalCommitInProgress = false
     }
   } catch (error) {
+    setMergeValidationErrorContext({
+      change:
+        activeChangeID === undefined ? undefined : ledger.findChange({ changeID: activeChangeID }),
+      error,
+    })
+
     const isCommitResultUnknown = isFinalCommitInProgress && isUnknownTransactionCommitResult(error)
 
     if (isCommitResultUnknown) {
