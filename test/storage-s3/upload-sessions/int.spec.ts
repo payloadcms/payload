@@ -745,9 +745,10 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
         data: {},
         options: {
           uploadEdits: {
-            crop: { height: 25, unit: '%', width: 50, x: 0, y: 0 },
-            heightInPixels: 500,
-            widthInPixels: 1000,
+            // Strings, as the Admin sends them in its query string.
+            crop: { height: '25', unit: '%', width: '50', x: '0', y: '0' },
+            heightInPixels: '500',
+            widthInPixels: '1000',
           },
         },
       }),
@@ -759,6 +760,25 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
 
     // A quarter of the height and half the width of the 2000×2000 original.
     expect(doc).toMatchObject({ height: 500, width: 1000 })
+  })
+
+  test('should offer a cleared intent for saving instead of saving it in the background', async ({
+    restClient,
+  }) => {
+    const session = await createSession({ restClient })
+
+    await setIntent({ data: { title: 'Abandoned' }, restClient, session })
+
+    const response = await restClient.DELETE(`${sessionsPath}/${session.id}/intent`)
+
+    expect(response.status).toBe(200)
+    expect((await getSession({ restClient, session })).hasIntent).toBe(false)
+
+    await uploadAllSegments({ restClient, session })
+
+    const completion = await restClient.POST(`${sessionsPath}/${session.id}/complete`)
+
+    expect(completion.status).toBe(400)
   })
 
   test('should reject invalid save options', async ({ restClient }) => {

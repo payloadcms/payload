@@ -374,6 +374,27 @@ export const setUploadSessionIntent = async ({
 }
 
 /**
+ * Drops stored document data that is no longer needed, e.g. once the form that stored it saves
+ * the document itself. A later recovery then offers to finish saving instead of saving on its own.
+ */
+export const clearUploadSessionIntent = async ({
+  id,
+  req,
+}: {
+  id: string
+  req: PayloadRequest
+}): Promise<ClientUploadSession> => {
+  const session = await findOwnedSession({ id, req })
+
+  assertResumable({ session })
+  await assertSessionAccess({ req, session })
+
+  return toClientSession({
+    session: await updateResumableSession({ data: { intent: null }, req, session }),
+  })
+}
+
+/**
  * Commits storage and creates or updates the target document in one call. Used by bulk upload
  * and by recovery after a reload, where there is no form submit to carry the file reference.
  * Without `data`, the intent stored by `setUploadSessionIntent` is used.
