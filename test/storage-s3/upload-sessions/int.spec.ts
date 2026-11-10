@@ -620,7 +620,8 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
           cancelReason: 'user',
           collectionSlug: videosMissingBucketSlug,
           createdAt: now,
-          expiresAt: now,
+          // Earlier than the overdue session, so an expiry-ordered single batch would pick these first.
+          expiresAt: new Date(Date.now() - 60_000).toISOString(),
           file: { filename: `stuck-${i}.mp4`, mimeType: 'video/mp4', size: fileBytes.length },
           lastActivityAt: now,
           operation: 'create',
@@ -661,6 +662,39 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
 
     // Failed attempts are recorded, which moves those sessions to the back of the next batch.
     expect(stuckSessions.filter(({ error }) => error?.attempts).length).toBeGreaterThan(0)
+  })
+
+  test('should complete a session whose object was kept as the original of a transformed file', async ({
+    payload,
+    restClient,
+  }) => {
+    const session = await createSession({ restClient })
+
+    await uploadAllSegments({ restClient, session })
+    await completeStorage({ restClient, session })
+
+    const { _objectKey } = (await payload.db.findOne<{
+      storage: { object: { _objectKey: string } }
+    }>({
+      collection: uploadSessionsCollectionSlug,
+      where: { id: { equals: session.id } },
+    }))!.storage.object
+
+    // Transforming the main file gives it a new key and keeps the uploaded object as the original.
+    const doc = await payload.db.create({
+      collection: videosSlug,
+      data: {
+        _objectKey: 'transformed-main',
+        filename: 'transformed.mp4',
+        original: { _objectKey, filename: session.file.filename },
+        title: 'Transformed',
+      },
+    })
+
+    const reconciled = await getSession({ restClient, session })
+
+    expect(reconciled.status).toBe('completed')
+    expect(reconciled.documentID).toBe(String(doc.id))
   })
 
   test('should abort the provider upload when cancelled', async ({ restClient }) => {

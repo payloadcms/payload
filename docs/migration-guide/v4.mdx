@@ -2037,11 +2037,11 @@ Both are optional. Custom handler props are now passed as `props`, and the suppo
 
 ### S3 client uploads use resumable upload sessions for large files
 
-With `clientUploads` enabled, `@payloadcms/storage-s3` now sends files of 64MB or more through resumable upload sessions backed by S3 multipart uploads. Smaller files, and SVG and XML files, keep using a single upload request.
+With `clientUploads` enabled, `@payloadcms/storage-s3` now sends files of 64 MiB or more through resumable upload sessions backed by S3 multipart uploads. Change the threshold with `upload.transfer.multipartThreshold` (in bytes) in your Payload config, or per collection on the collection's `upload` config. Smaller files, and SVG and XML files, keep using a single upload request.
 
 Payload tracks each session in a new hidden `payload-upload-sessions` collection. It is only added when at least one collection uses an adapter with segmented uploads, which today means S3 with `clientUploads` enabled. On SQL adapters this adds a `payload_upload_sessions` table, so existing projects need a database migration. In development the schema is pushed automatically; in production, generate a migration with `payload migrate:create` and run `payload migrate`. MongoDB needs no migration.
 
-The multipart upload uses more S3 permissions than a single `PutObject`. Allow `s3:AbortMultipartUpload` and `s3:ListMultipartUploadParts` in addition to `s3:PutObject`. CORS needs no change: the browser still only sends `PUT` requests, and Payload reads uploaded parts from S3 instead of from `ETag` response headers.
+The multipart upload uses more S3 permissions than a single `PutObject`. Allow `s3:AbortMultipartUpload` and `s3:ListMultipartUploadParts` in addition to `s3:PutObject`. Payload also checks the finished object (`s3:GetObject`) and deletes abandoned ones (`s3:DeleteObject`); existing S3 setups usually grant both already. CORS needs no change: the browser still only sends `PUT` requests, and Payload reads uploaded parts from S3 instead of from `ETag` response headers.
 
 Payload cleans up abandoned sessions when sessions are created or listed. As a safety net, add a bucket lifecycle rule that aborts incomplete multipart uploads, for example after 7 days.
 
