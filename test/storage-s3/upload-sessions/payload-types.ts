@@ -7,6 +7,83 @@
  */
 
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UploadTransforms".
+ */
+export type UploadTransforms = {
+  /**
+   * Time range on the original, in milliseconds. Start inclusive, end exclusive.
+   */
+  clip?: {
+    endMs: number;
+    startMs: number;
+  };
+  /**
+   * Rectangle in original-file pixels, applied before resize and encoding.
+   */
+  crop?: {
+    height: number;
+    width: number;
+    x: number;
+    y: number;
+  };
+  /**
+   * Encoding settings for the output format. Does not select the format.
+   */
+  encoding?: {
+    [k: string]: unknown;
+  };
+  /**
+   * Mirror the image on one or both axes.
+   */
+  flip?: {
+    horizontal?: boolean;
+    vertical?: boolean;
+  };
+  /**
+   * Preferred point as percentages of the original, from 0 to 100.
+   */
+  focalPoint?: {
+    x: number;
+    y: number;
+  };
+  /**
+   * Keep or remove metadata embedded in the output file.
+   */
+  metadataPolicy?: {
+    mode: 'preserve' | 'strip';
+  };
+  /**
+   * One-based, inclusive page range on the original document.
+   */
+  pageRange?: {
+    endPage: number;
+    startPage: number;
+  };
+  /**
+   * Video frame to use as the poster, in milliseconds on the original.
+   */
+  posterFrame?: {
+    timestampMs: number;
+  };
+  /**
+   * Target size for visual media.
+   */
+  resize?: {
+    fit?: 'contain' | 'cover' | 'fill' | 'inside' | 'outside';
+    height?: number;
+    width?: number;
+    withoutEnlargement?: boolean;
+  };
+  /**
+   * Clockwise rotation in degrees.
+   */
+  rotate?: {
+    angle: number;
+  };
+  [k: string]: unknown;
+} | null;
+/**
  * Supported timezones in IANA format.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -82,6 +159,7 @@ export interface Config {
     videos: Video;
     'videos-with-drafts': VideosWithDraft;
     'videos-missing-bucket': VideosMissingBucket;
+    'images-transformed': ImagesTransformed;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -95,6 +173,7 @@ export interface Config {
     videos: VideosSelect<false> | VideosSelect<true>;
     'videos-with-drafts': VideosWithDraftsSelect<false> | VideosWithDraftsSelect<true>;
     'videos-missing-bucket': VideosMissingBucketSelect<false> | VideosMissingBucketSelect<true>;
+    'images-transformed': ImagesTransformedSelect<false> | ImagesTransformedSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -167,6 +246,8 @@ export interface Video {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -176,6 +257,7 @@ export interface Video {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -243,6 +325,8 @@ export interface VideosWithDraft {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -252,6 +336,7 @@ export interface VideosWithDraft {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -282,6 +367,8 @@ export interface VideosMissingBucket {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
   original?: {
     filename?: string | null;
     url?: string | null;
@@ -291,6 +378,49 @@ export interface VideosMissingBucket {
     height?: number | null;
     prefix?: string | null;
     _objectKey?: string | null;
+    _stored?: boolean | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "images-transformed".
+ */
+export interface ImagesTransformed {
+  id: string;
+  title?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+    _stored?: boolean | null;
   };
   focalX?: number | null;
   focalY?: number | null;
@@ -330,6 +460,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'videos-missing-bucket';
         value: string | VideosMissingBucket;
+      } | null)
+    | ({
+        relationTo: 'images-transformed';
+        value: string | ImagesTransformed;
       } | null)
     | ({
         relationTo: 'users';
@@ -489,6 +623,8 @@ export interface VideosSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -500,6 +636,7 @@ export interface VideosSelect<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;
@@ -524,6 +661,8 @@ export interface VideosWithDraftsSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -535,6 +674,7 @@ export interface VideosWithDraftsSelect<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;
@@ -558,6 +698,8 @@ export interface VideosMissingBucketSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  _stored?: T;
+  _transforms?: T;
   original?:
     | T
     | {
@@ -569,6 +711,44 @@ export interface VideosMissingBucketSelect<T extends boolean = true> {
         height?: T;
         prefix?: T;
         _objectKey?: T;
+        _stored?: T;
+      };
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "images-transformed_select".
+ */
+export interface ImagesTransformedSelect<T extends boolean = true> {
+  title?: T;
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  _stored?: T;
+  _transforms?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+        _stored?: T;
       };
   focalX?: T;
   focalY?: T;
@@ -713,7 +893,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'videos' | 'videos-with-drafts' | 'videos-missing-bucket' | 'users';
+    relatedCollection: 'videos' | 'videos-with-drafts' | 'videos-missing-bucket' | 'images-transformed' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -735,7 +915,8 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('videos' | 'videos-with-drafts' | 'videos-missing-bucket' | 'users')[] | null;
+    excludedCollections?:
+      ('videos' | 'videos-with-drafts' | 'videos-missing-bucket' | 'images-transformed' | 'users')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
@@ -745,7 +926,7 @@ export interface ActivityWidget {
  */
 export interface UploadDropzoneWidget {
   data?: {
-    excludedCollections?: ('videos' | 'videos-with-drafts' | 'videos-missing-bucket')[] | null;
+    excludedCollections?: ('videos' | 'videos-with-drafts' | 'videos-missing-bucket' | 'images-transformed')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

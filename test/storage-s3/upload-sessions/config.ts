@@ -1,15 +1,23 @@
 import type { StorageAdapter } from 'payload'
 
 import { s3Storage } from '@payloadcms/storage-s3'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { APIError } from 'payload'
+import sharp from 'sharp'
 
 import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
 import { devUser, regularUser } from '../../credentials.js'
 import { Users } from '../collections/Users.js'
-import { videosMissingBucketSlug, videosSlug, videosWithDraftsSlug } from '../shared.js'
+import {
+  imagesTransformedSlug,
+  videosMissingBucketSlug,
+  videosSlug,
+  videosWithDraftsSlug,
+} from '../shared.js'
+import { ImagesTransformed } from './collections/ImagesTransformed.js'
 import { Videos } from './collections/Videos.js'
 import { VideosMissingBucket } from './collections/VideosMissingBucket.js'
 import { VideosWithDrafts } from './collections/VideosWithDrafts.js'
@@ -64,7 +72,7 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname, '..'),
       },
     },
-    collections: [Videos, VideosWithDrafts, VideosMissingBucket, Users],
+    collections: [Videos, VideosWithDrafts, VideosMissingBucket, ImagesTransformed, Users],
     storage: [
       s3Storage({
         bucket: process.env.S3_BUCKET!,
@@ -72,6 +80,7 @@ export default buildConfigWithDefaults({
           access: ({ req }) => !req.headers.get('x-disallow-access'),
         },
         collections: {
+          [imagesTransformedSlug]: true,
           [videosSlug]: true,
           [videosWithDraftsSlug]: true,
         },
@@ -110,6 +119,12 @@ export default buildConfigWithDefaults({
       sessions: {
         maxActive: maxActiveSessions,
       },
+      transformers: [
+        sharpTransformer({
+          collections: { [imagesTransformedSlug]: { formatOptions: { format: 'webp' } } },
+          sharp,
+        }),
+      ],
     },
   },
   seed: async (payload) => {

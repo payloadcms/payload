@@ -13,6 +13,7 @@ import {
 } from '@aws-sdk/client-s3'
 import { randomBytes } from 'node:crypto'
 import { uploadSessionsCollectionSlug } from 'payload/internal'
+import sharp from 'sharp'
 import { expect } from 'vitest'
 
 import type { RESTClient } from '../../__helpers/shared/RESTClient.js'
@@ -26,7 +27,12 @@ import {
 import { test } from '../../__helpers/int/vitest.js'
 import { RESTClient as RESTClientClass } from '../../__helpers/shared/RESTClient.js'
 import { regularUser } from '../../credentials.js'
-import { videosMissingBucketSlug, videosSlug, videosWithDraftsSlug } from '../shared.js'
+import {
+  imagesTransformedSlug,
+  videosMissingBucketSlug,
+  videosSlug,
+  videosWithDraftsSlug,
+} from '../shared.js'
 import {
   clearTestBucket,
   createTestBucket,
@@ -662,6 +668,68 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
 
     // Failed attempts are recorded, which moves those sessions to the back of the next batch.
     expect(stuckSessions.filter(({ error }) => error?.attempts).length).toBeGreaterThan(0)
+  })
+
+  test('should complete a session when a normal save transforms the main file', async ({
+    payload,
+    restClient,
+  }) => {
+    // Noise does not compress, so this PNG is well above the 6 MiB session threshold.
+    const png = await sharp({
+      create: {
+        background: '#000',
+        channels: 3,
+        height: 2000,
+        noise: { type: 'gaussian', mean: 128, sigma: 60 },
+        width: 2000,
+      },
+    })
+      .png({ compressionLevel: 0 })
+      .toBuffer()
+    const file = new File([png], 'noise.png', { type: 'image/png' })
+    let sessionID: number | string | undefined
+
+    const uploadedFile = await withBrowserFetch({
+      onStoragePut: () => undefined,
+      restClient,
+      run: () =>
+        uploadWithSession({
+          apiRoute: '/api',
+          collectionSlug: imagesTransformedSlug,
+          file,
+          onSession: (session) => {
+            sessionID = session.id
+          },
+          serverURL: '',
+        }),
+    })
+
+    const formData = new FormData()
+
+    formData.append('_payload', JSON.stringify({ title: 'Transformed' }))
+    formData.append('file', JSON.stringify(uploadedFile))
+
+    const response = await restClient.POST(`/${imagesTransformedSlug}`, { body: formData })
+
+    expect(response.status).toBe(201)
+
+    const { doc } = await response.json()
+    const sessionDoc = await payload.db.findOne<{ storage: { object: { _objectKey: string } } }>({
+      collection: uploadSessionsCollectionSlug,
+      where: { id: { equals: sessionID } },
+    })
+    const sessionObjectKey = sessionDoc!.storage.object._objectKey
+
+    expect(doc.mimeType).toBe('image/webp')
+    expect(doc._objectKey).not.toBe(sessionObjectKey)
+    expect(doc.original._objectKey).toBe(sessionObjectKey)
+
+    const reconciled = await restClient
+      .GET(`${sessionsPath}/${sessionID}`)
+      .then((res) => res.json<ClientUploadSession>())
+
+    expect(reconciled.status).toBe('completed')
+    expect(reconciled.documentID).toBe(String(doc.id))
   })
 
   test('should complete a session whose object was kept as the original of a transformed file', async ({
