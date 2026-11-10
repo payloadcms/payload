@@ -12,7 +12,7 @@ import {
   getStoredCloudFiles,
   versionedCloudFiles,
 } from '../plugin-cloud-storage/versionedCloudStorage.js'
-import { sourceReadCalls } from './collections/DynamicMedia.js'
+import { sourceReadCalls, sourceReadDocumentIDs } from './collections/DynamicMedia.js'
 import {
   versionedCloudMediaSlug,
   versionedDynamicMediaDir,
@@ -103,8 +103,9 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
   test('should read the retained original from a temp file when restoring through the upload pipeline, and remove it', async ({
     payload,
   }) => {
-    const { selected } = await prepareHistory({ payload, replaceOriginal: true })
+    const { created, selected } = await prepareHistory({ payload, replaceOriginal: true })
     uploadCropSources.length = 0
+    sourceReadDocumentIDs.length = 0
 
     await payload.restoreVersion({
       id: String(selected.id),
@@ -113,6 +114,7 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
 
+    expect(new Set(sourceReadDocumentIDs)).toEqual(new Set([created.id]))
     expect(uploadCropSources).toEqual([{ tempFilePath: expect.any(String) }])
     expect(existsSync(uploadCropSources[0]!.tempFilePath!)).toBe(false)
   })

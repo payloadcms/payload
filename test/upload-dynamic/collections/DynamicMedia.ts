@@ -3,6 +3,8 @@ import type { CollectionConfig } from 'payload'
 import { dynamicMediaDir, dynamicMediaSlug } from '../shared.js'
 
 export const sourceReadCalls: string[] = []
+/** The `doc.id` each storage handler call gets, so a test can check the document it reads for. */
+export const sourceReadDocumentIDs: (number | string | undefined)[] = []
 
 export const DynamicMedia: CollectionConfig = {
   slug: dynamicMediaSlug,
@@ -16,8 +18,9 @@ export const DynamicMedia: CollectionConfig = {
   fields: [{ name: 'alt', type: 'text' }],
   upload: {
     handlers: [
-      (_req, { params }) => {
+      (_req, { doc, params }) => {
         sourceReadCalls.push(params.filename)
+        sourceReadDocumentIDs.push(doc?.id)
       },
     ],
     staticDir: dynamicMediaDir,

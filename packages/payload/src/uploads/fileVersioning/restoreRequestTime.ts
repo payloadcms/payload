@@ -203,7 +203,8 @@ export async function runRequestTimeFileRestore<T>({
 
   const response = await retrieveFileResponse({
     collection: { config: collection },
-    doc: selected as TypeWithID,
+    // Version data has no `id`; storage handlers get the parent document's.
+    doc: { ...selected, id } as TypeWithID,
     filename: original.filename,
     isOriginal: true,
     operation: 'transform',
