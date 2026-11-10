@@ -15,6 +15,10 @@ import { getAdminRoute } from './get-admin-route.js'
 import { getPackageManager } from './get-package-manager.js'
 import { installPackages } from './install-packages.js'
 
+/**
+ * Upgrade Payload packages and refresh Next.js wrappers at the configured admin route.
+ * Validate the route only when an upgrade is needed, before installing packages.
+ */
 export async function updatePayloadInProject(
   appDetails: NextAppDetails,
 ): Promise<{ message: string; success: boolean }> {
@@ -23,7 +27,6 @@ export async function updatePayloadInProject(
   }
 
   const projectDir = path.dirname(appDetails.nextConfigPath)
-  const adminRoute = getAdminRoute({ projectDir })
 
   const packageObj = (await fse.readJson(path.resolve(projectDir, 'package.json'))) as {
     dependencies?: Record<string, string>
@@ -45,6 +48,8 @@ export async function updatePayloadInProject(
   if (payloadVersion === latestPayloadVersion) {
     return { message: `Payload v${payloadVersion} is already up to date.`, success: true }
   }
+
+  const adminRoute = getAdminRoute({ projectDir })
 
   // Update all existing Payload packages
   const payloadPackages = Object.keys(packageObj.dependencies).filter((dep) =>

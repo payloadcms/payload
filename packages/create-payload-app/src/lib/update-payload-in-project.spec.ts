@@ -34,6 +34,7 @@ describe('Payload project updates', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.stubEnv('JEST_WORKER_ID', '1')
     projectDir = fse.mkdtempSync(path.join(os.tmpdir(), 'cpa-update-project-'))
     mocks.getPackageManager.mockResolvedValue('pnpm')
     mocks.installPackages.mockResolvedValue({ success: true })
@@ -43,6 +44,22 @@ describe('Payload project updates', () => {
   afterEach(() => {
     vi.unstubAllEnvs()
     fse.removeSync(projectDir)
+  })
+
+  it('should skip config analysis when Payload is already up to date', async () => {
+    fse.writeJsonSync(path.join(projectDir, 'package.json'), {
+      dependencies: { payload: '3.99.0', '@payloadcms/ui': '3.99.0' },
+    })
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.ts'),
+      "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: process.env.ADMIN_ROUTE } })",
+    )
+
+    const result = await updatePayloadInProject(nextDetails({ projectDir, appDir: 'src/app' }))
+
+    expect(result).toEqual({ message: 'Payload v3.99.0 is already up to date.', success: true })
+    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(fse.existsSync(path.join(projectDir, 'src/app'))).toBe(false)
   })
 
   it('should refresh Next Payload routes without overwriting custom CSS', async () => {
