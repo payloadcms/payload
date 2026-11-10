@@ -211,6 +211,13 @@ export const setUploadSessionIntent = ({
 } & SessionRequestArgs): Promise<ClientUploadSession> =>
   requestSession({ ...args, body: intent, path: `${SESSIONS_PATH}/${id}/intent` })
 
+/** Drops stored document data, e.g. once the form saves the document itself. */
+export const clearUploadSessionIntent = ({
+  id,
+  ...args
+}: { id: number | string } & SessionRequestArgs): Promise<ClientUploadSession> =>
+  requestSession({ ...args, method: 'DELETE', path: `${SESSIONS_PATH}/${id}/intent` })
+
 export const getUploadSession = ({
   id,
   ...args

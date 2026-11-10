@@ -6,6 +6,7 @@ import type { UploadSessionSaveOptions } from './types.js'
 import { APIError } from '../../errors/index.js'
 import {
   cancelUploadSession,
+  clearUploadSessionIntent,
   completeUploadSession,
   completeUploadSessionStorage,
   createUploadSession,
@@ -95,6 +96,12 @@ export const uploadSessionEndpoints: Endpoint[] = [
     },
     // POST, not PUT: older generated Next.js route files do not export a PUT handler.
     method: 'post',
+    path: '/:id/intent',
+  },
+  {
+    handler: async (req) =>
+      Response.json(await clearUploadSessionIntent({ id: getSessionID({ req }), req })),
+    method: 'delete',
     path: '/:id/intent',
   },
   {
