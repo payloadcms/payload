@@ -177,6 +177,35 @@ describe('getSafeFileName', () => {
     vi.clearAllMocks()
   })
 
+  it.each([undefined, '/uploads'])(
+    'should reject an overlong input extension before checking collisions with staticPath %s',
+    async (staticPath) => {
+      await expect(
+        getSafeFileName({
+          collectionSlug: 'media',
+          desiredFilename: `a.${'é'.repeat(128)}`,
+          req: mockReq,
+          staticPath,
+        }),
+      ).rejects.toMatchObject({ status: 400 })
+      expect(mockDocWithFilenameExists).not.toHaveBeenCalled()
+      expect(mockFileExists).not.toHaveBeenCalled()
+    },
+  )
+
+  it('should report a conflict when a generated suffix exceeds the byte limit', async () => {
+    mockDocWithFilenameExists.mockResolvedValueOnce(true)
+
+    await expect(
+      getSafeFileName({
+        collectionSlug: 'media',
+        desiredFilename: `a.${'x'.repeat(253)}`,
+        req: mockReq,
+      }),
+    ).rejects.toMatchObject({ status: 409 })
+    expect(mockDocWithFilenameExists).toHaveBeenCalledTimes(1)
+  })
+
   it.each(['', '.jpg'])(
     'should resolve near-limit filename collisions with extension %s',
     async (extension) => {
@@ -456,6 +485,21 @@ describe('getSafeFileName', () => {
 })
 
 describe('getUnplannedSafeFileName', () => {
+  it('should report a conflict when avoiding a planned name needs an overlong suffix', async () => {
+    mockDocWithFilenameExists.mockReset()
+    mockDocWithFilenameExists.mockResolvedValue(false)
+
+    await expect(
+      getUnplannedSafeFileName({
+        canUseName: () => false,
+        collectionSlug: 'media',
+        desiredFilename: `a.${'x'.repeat(253)}`,
+        req: {} as Parameters<typeof getUnplannedSafeFileName>[0]['req'],
+      }),
+    ).rejects.toMatchObject({ status: 409 })
+    expect(mockDocWithFilenameExists).toHaveBeenCalledTimes(1)
+  })
+
   it('should stop retrying when every available filename is already planned', async () => {
     mockDocWithFilenameExists.mockReset()
     mockDocWithFilenameExists.mockResolvedValue(false)
