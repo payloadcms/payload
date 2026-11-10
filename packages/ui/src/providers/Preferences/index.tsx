@@ -201,10 +201,10 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         }
 
         // add the requested changes to a pendingUpdate batch for the key
-        pendingUpdate.current[key] = {
-          ...pendingUpdate.current[key],
-          ...(newValue as Record<string, unknown>),
-        }
+        pendingUpdate.current[key] = mergePreferenceValues({
+          current: pendingUpdate.current[key],
+          value,
+        })
       } else {
         if (newValue === currentPreference) {
           await latestWrites.current[key]
@@ -221,22 +221,33 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         }
 
         // Take this batch before awaiting persistence so later changes form a new batch.
-        const nextValue = pendingUpdate.current[key]
+        const changes = pendingUpdate.current[key]
 
         delete pendingUpdate.current[key]
-        preferencesRef.current[key] = nextValue
+        preferencesRef.current[key] = mergePreferenceValues({
+          current: preferencesRef.current[key],
+          value: changes,
+        })
         pendingWrites.current[key] = (pendingWrites.current[key] ?? 0) + 1
 
         const previousUpdate = updateQueues.current[key] ?? Promise.resolve()
-        const update = previousUpdate.then(() =>
-          requests.post(
+        const update = previousUpdate.then(async () => {
+          // Rebase only this batch's changes after earlier updater writes have finished.
+          const nextValue = mergePreferenceValues({
+            current: await getPreference(key),
+            value: changes,
+          })
+
+          preferencesRef.current[key] = nextValue
+
+          await requests.post(
             formatAdminURL({
               apiRoute: api,
               path: `/payload-preferences/${key}`,
             }),
             requestOptions(nextValue, i18n.language),
-          ),
-        )
+          )
+        })
 
         const latestWrite = update.then(() => undefined)
 
@@ -271,3 +282,11 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
 }
 
 export const usePreferences = (): PreferencesContext => use(Context)
+
+function mergePreferenceValues({ current, value }: { current: unknown; value: unknown }): unknown {
+  if (current && value && typeof current === 'object' && typeof value === 'object') {
+    return deepMergeSimple(current, value)
+  }
+
+  return value
+}

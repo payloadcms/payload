@@ -282,3 +282,60 @@ test('should ignore stale hydration until all queued merged writes finish', asyn
   preferences!.syncPreference('view', { refreshed: true })
   expect(await preferences!.getPreference('view')).toEqual({ refreshed: true })
 })
+
+test.each([false, true])(
+  'should preserve an earlier queued updater when a merged batch is rebased (nested: %j)',
+  async (isNested) => {
+    let preferences: ReturnType<typeof usePreferences>
+    let finishFirstWrite: () => void
+    const firstWrite = new Promise<void>((resolve) => {
+      finishFirstWrite = resolve
+    })
+
+    mocks.post.mockReset().mockReturnValueOnce(firstWrite).mockResolvedValue(undefined)
+
+    function Consumer() {
+      preferences = usePreferences()
+      return null
+    }
+
+    await render(
+      <PreferencesProvider>
+        <Consumer />
+      </PreferencesProvider>,
+    )
+
+    const initial = { view: 'list', layout: 'A', other: false }
+    const wrap = (value: Partial<typeof initial>) => (isNested ? { settings: value } : value)
+    const key = 'collection-posts'
+
+    preferences!.syncPreference(key, wrap(initial))
+
+    const first = preferences!.setPreference(key, (current) => current)
+
+    await vi.waitFor(() => expect(mocks.post).toHaveBeenCalledOnce())
+
+    const updater = preferences!.setPreference<
+      Partial<typeof initial> & { settings?: Partial<typeof initial> }
+    >(key, (current) => wrap({ ...(isNested ? current!.settings : current), layout: 'B' }))
+    const merged = preferences!.setPreference(key, wrap({ view: 'grid' }), true)
+    const coalesced = preferences!.setPreference(key, wrap({ view: 'grid', other: true }), true)
+
+    // Wait until the batch is queued behind the blocked updater.
+    await vi.waitFor(async () =>
+      expect(await preferences!.getPreference(key)).toEqual(
+        wrap({ view: 'grid', layout: 'A', other: true }),
+      ),
+    )
+    expect(mocks.post).toHaveBeenCalledOnce()
+
+    finishFirstWrite!()
+    await Promise.all([first, updater, merged, coalesced])
+
+    const expected = wrap({ view: 'grid', layout: 'B', other: true })
+
+    expect(mocks.post).toHaveBeenCalledTimes(3)
+    expect(JSON.parse(mocks.post.mock.calls[2][1].body).value).toEqual(expected)
+    expect(await preferences!.getPreference(key)).toEqual(expected)
+  },
+)
