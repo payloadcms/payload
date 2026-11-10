@@ -410,6 +410,29 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     expect(callerContext._payloadVerifiedProviderOriginal.key).toBe('unrelated-original')
   })
 
+  test('should not store a copy of the retained original when an upload stage leaves the file unchanged', async ({
+    payload,
+  }) => {
+    const { selected } = await prepareHistory({ payload })
+    const filesBefore = new Set(await readdir(versionedDynamicMediaDir))
+    const transformer = payload.config.upload.transformers.find(
+      ({ slug }) => slug === 'upload-crop',
+    )!
+    vi.spyOn(transformer, 'transformFile').mockResolvedValue({ status: 'continue' })
+
+    const restored = await payload.restoreVersion({
+      id: String(selected.id),
+      collection: versionedDynamicMediaSlug,
+      context: { isUploadCropEnabled: true },
+      overrideAccess: true,
+    })
+
+    expect(restored.filename).toBe(restored.original!.filename)
+    expect(
+      [...(await readdir(versionedDynamicMediaDir))].filter((name) => !filesBefore.has(name)),
+    ).toEqual([])
+  })
+
   test('should reject an upload stage crop that exceeds the retained original before storing output', async ({
     payload,
   }) => {

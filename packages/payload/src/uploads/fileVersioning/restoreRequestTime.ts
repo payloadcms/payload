@@ -246,10 +246,32 @@ export async function runRequestTimeFileRestore<T>({
       )
     }
 
+    // When no stage changed the file, generateFileData points the main entry at the same new object
+    // as its original. The retained original is already stored, so the main entry uses it instead.
+    // Cloud storage can give two objects one filename, so the object key is compared too.
+    const newOriginal = data.original as OriginalFileData | undefined
+    const isMainUnchanged =
+      newOriginal?.filename === data.filename &&
+      newOriginal?._objectKey === data._objectKey &&
+      newOriginal?.prefix === data.prefix
+
     // The retained original is immutable. Reuse it instead of storing another copy or archiving
     // its selected historical reference when only the generated outputs change.
     data.original = { ...original }
-    const outputFiles = files.filter(({ role }) => role?.type !== 'original')
+    if (isMainUnchanged) {
+      Object.assign(data, {
+        _objectKey: original._objectKey,
+        filename: original.filename,
+        filesize: original.filesize,
+        height: original.height,
+        mimeType: original.mimeType,
+        prefix: original.prefix,
+        width: original.width,
+      })
+    }
+    const outputFiles = files.filter(
+      ({ role }) => role?.type !== 'original' && !(isMainUnchanged && role?.type === 'default'),
+    )
     const restored = normalizeURLs({ restored: clearRemovedVariants({ restored: data }) })
     const writeRestored = () => {
       if (collection.upload.fileOperations) {
