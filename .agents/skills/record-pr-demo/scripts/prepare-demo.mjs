@@ -18,7 +18,7 @@ import {
 const DEFAULT_BASE_URL = 'http://localhost:3000'
 const DEFAULT_INTERACTION_PAUSE_MS = 300
 const DEFAULT_LABEL = 'feature-demo'
-const DEFAULT_MOUSE_MOVE_MS = 300
+const DEFAULT_MOUSE_MOVE_MS = 450
 const DEFAULT_VIEWPORT = { height: 900, width: 1440 }
 const MODES = new Set(['candidate', 'preflight', 'preview', 'validate', 'verify'])
 
@@ -89,7 +89,7 @@ export function parseArgs(argv) {
       value: values.get('--mouse-move-ms') ?? DEFAULT_MOUSE_MOVE_MS,
     }),
     output,
-    rawOutput: values.get('--raw-output') ?? `${outputBase}.webm`,
+    rawOutput: values.get('--raw-output') ?? `${outputBase}.mkv`,
     scenario,
     viewport: parseViewport(values.get('--viewport') ?? '1440x900'),
   }

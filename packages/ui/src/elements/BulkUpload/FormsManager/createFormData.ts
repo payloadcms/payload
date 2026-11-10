@@ -1,7 +1,7 @@
 import type { FormState } from 'payload'
 
 import { serialize } from 'object-to-formdata'
-import { reduceFieldsToValues, uploadRequiresServerValidation } from 'payload/shared'
+import { getDataFromFormState, uploadRequiresServerValidation } from 'payload/shared'
 
 import type { UploadHandlersContext } from '../../../providers/UploadHandlers/index.js'
 
@@ -11,7 +11,7 @@ export async function createFormData(
   uploadHandler: ReturnType<UploadHandlersContext['getUploadHandler']>,
   allowRestrictedFileTypes?: boolean,
 ) {
-  const data = reduceFieldsToValues(formState, true)
+  const data = getDataFromFormState(formState, true)
   let file = data?.file
 
   if (file) {

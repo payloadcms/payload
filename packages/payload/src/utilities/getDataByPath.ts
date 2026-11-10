@@ -1,23 +1,20 @@
 import type { FormState } from '../admin/types.js'
 
-import { unflatten } from './unflatten.js'
+import { getDataFromFormState } from './getDataFromFormState.js'
 
 export const getDataByPath = <T = unknown>(fields: FormState, path: string): T => {
   const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1)
   const name = path.split('.').pop()
 
-  const data: Record<string, any> = {}
-  Object.keys(fields).forEach((key) => {
-    if (!fields[key]?.disableFormData && (key.indexOf(`${path}.`) === 0 || key === path)) {
-      data[key.replace(pathPrefixToRemove, '')] = fields[key]?.value
+  const fieldsAtPath: FormState = {}
 
-      if (fields[key]?.rows && fields[key].rows.length === 0) {
-        data[key.replace(pathPrefixToRemove, '')] = []
-      }
+  Object.entries(fields).forEach(([key, field]) => {
+    if (key.indexOf(`${path}.`) === 0 || key === path) {
+      fieldsAtPath[key.replace(pathPrefixToRemove, '')] = field
     }
   })
 
-  const unflattenedData = unflatten(data)
+  const unflattenedData = getDataFromFormState(fieldsAtPath, true)
 
   return unflattenedData?.[name!]
 }

@@ -16,7 +16,7 @@ export const runMonorepoAudit = async ({
   run?: RunPnpm
 }): Promise<AdvisoryHit[]> => {
   const result = await run({
-    args: ['audit', '--prod', '--json', '--ignore-registry-errors'],
+    args: ['audit', '--prod', '--json'],
     cwd,
   })
   const report = assertAuditCompleted({
