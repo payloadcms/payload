@@ -53,6 +53,7 @@ export const GroupedDocumentGrid: React.FC<GroupedDocumentGridProps> = ({
             groupByFieldPath={groupByFieldPath}
             groupByValue={value}
             heading={heading}
+            viewType={viewType}
           />
           <GroupByPageControls
             data={data}
@@ -69,6 +70,7 @@ export const GroupedDocumentGrid: React.FC<GroupedDocumentGridProps> = ({
             documentURLs={documentURLs}
             enableRowSelections={enableRowSelections}
             hierarchyParentFieldName={hierarchyParentFieldName}
+            id={`payload-table-${collectionSlug}-${encodeURIComponent(value)}`}
             useAsThumbnail={collectionConfig.admin.useAsThumbnail}
             useAsTitle={collectionConfig.admin.useAsTitle}
             viewType={viewType}

@@ -2,20 +2,18 @@
 export const truncateFilename = ({
   filename,
   maxBytes = 255,
-  suffix = '',
 }: {
   filename: string
   maxBytes?: number
-  suffix?: string
 }): string => {
   const extensionIndex = filename.lastIndexOf('.')
   const hasExtension = extensionIndex > 0
   const extension = hasExtension ? filename.slice(extensionIndex) : ''
   const stem = hasExtension ? filename.slice(0, extensionIndex) : filename
-  // Keep generated original markers and collision numbering intact when shortening the stem.
-  const existingSuffix = stem.match(/(?:-original)?(?:-\d+)?$/)?.[0] ?? ''
+  // Keep collision numbering intact when shortening the stem.
+  const existingSuffix = stem.match(/-\d+$/)?.[0] ?? ''
   const basename = existingSuffix ? stem.slice(0, -existingSuffix.length) : stem
-  const tail = `${existingSuffix}${suffix}${extension}`
+  const tail = `${existingSuffix}${extension}`
   const availableBytes = maxBytes - Buffer.byteLength(tail)
 
   if (availableBytes < 0) {

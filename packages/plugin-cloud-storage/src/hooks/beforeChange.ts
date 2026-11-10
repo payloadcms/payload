@@ -1,5 +1,7 @@
 import type { CollectionConfig, FieldHook, ImageSize } from 'payload'
 
+import { isRequestTimeFile } from 'payload/internal'
+
 import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { sanitizePrefix } from '../utilities/sanitizePrefix.js'
@@ -54,6 +56,11 @@ export const getBeforeChangeHook =
     const representation = newRepresentation ?? originalRepresentation
     const prefix = getObjectFolder(representation, data ?? originalDoc)
     let url = value
+
+    // An entry with no stored object is built when it is requested, so it keeps the Payload route.
+    if (isRequestTimeFile({ entry: representation })) {
+      return url
+    }
 
     if (generateFileURL && filename) {
       url = await generateFileURL({

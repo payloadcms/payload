@@ -9,6 +9,7 @@ export async function startChromePreview({ port = 4400 } = {}) {
   const assets = new Map([
     ['/', ['preview/index.html', 'text/html']],
     ['/preview/index.mjs', ['preview/index.mjs', 'text/javascript']],
+    ['/WindowChrome/sidebar.mjs', ['WindowChrome/sidebar.mjs', 'text/javascript']],
     ['/preview/application.html', ['preview/application.html', 'text/html']],
     ['/accessibility-demo.mjs', ['accessibility-demo.mjs', 'text/javascript']],
     [

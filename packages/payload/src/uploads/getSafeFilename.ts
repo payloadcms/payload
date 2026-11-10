@@ -40,6 +40,8 @@ export const incrementName = (name: string): string => {
 type Args = {
   collectionSlug: string
   desiredFilename: string
+  /** Ignores this document's own files, for writes that store a new version in its own folder. */
+  excludeDocumentID?: number | string
   prefix?: string
   req: PayloadRequest
   /**
@@ -74,6 +76,7 @@ type Args = {
 export async function getSafeFileName({
   collectionSlug,
   desiredFilename,
+  excludeDocumentID,
   prefix,
   req,
   staticPath,
@@ -84,6 +87,7 @@ export async function getSafeFileName({
   while (
     (await docWithFilenameExists({
       collectionSlug,
+      excludeDocumentID,
       filename: modifiedFilename,
       path: staticPath ?? '',
       prefix,
@@ -101,4 +105,30 @@ export async function getSafeFileName({
   }
 
   return modifiedFilename
+}
+
+/** Finds a name that is free in storage and that `canUseName` accepts for this save. */
+export async function getUnplannedSafeFileName({
+  canUseName,
+  desiredFilename,
+  ...args
+}: {
+  canUseName: (filename: string) => boolean
+} & Parameters<typeof getSafeFileName>[0]): Promise<string> {
+  let filename = truncateFilename({ filename: desiredFilename })
+  let attempts = 0
+
+  while (true) {
+    filename = await getSafeFileName({ ...args, desiredFilename: filename })
+    if (canUseName(filename)) {
+      return filename
+    }
+    const nextFilename = incrementName(filename)
+
+    if (++attempts >= 1000 || nextFilename === filename) {
+      throw new APIError('Unable to find an available upload filename', 409)
+    }
+
+    filename = nextFilename
+  }
 }

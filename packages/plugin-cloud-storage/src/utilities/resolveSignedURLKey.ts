@@ -1,13 +1,7 @@
 import type { PayloadRequest } from 'payload'
 
 import { randomUUID } from 'node:crypto'
-import {
-  createClientUploadReceipt,
-  getOriginalFilename,
-  getSafeFileName,
-  incrementName,
-  truncateFilename,
-} from 'payload/internal'
+import { createClientUploadReceipt, getSafeFileName } from 'payload/internal'
 import { getSanitizedUploadFilename } from 'payload/shared'
 
 import type { UploadReference } from '../types.js'
@@ -56,30 +50,11 @@ export async function resolveSignedURLKey({
   storageFilePath: string
   uploadReference: UploadReference
 }> {
-  // The document stores the -original name, so check collisions against that name.
-  let sanitizedFilename = truncateFilename({
-    filename: getSanitizedUploadFilename(filename),
-    maxBytes: 255 - Buffer.byteLength('-original'),
+  const sanitizedFilename = await getSafeFileName({
+    collectionSlug,
+    desiredFilename: getSanitizedUploadFilename(filename),
+    req,
   })
-  let attempts = 0
-  let originalFilename = getOriginalFilename({ filename: sanitizedFilename })
-
-  while (
-    (await getSafeFileName({ collectionSlug, desiredFilename: originalFilename, req })) !==
-    originalFilename
-  ) {
-    const nextFilename = truncateFilename({
-      filename: incrementName(sanitizedFilename),
-      maxBytes: 255 - Buffer.byteLength('-original'),
-    })
-
-    if (++attempts >= 1000 || nextFilename === sanitizedFilename) {
-      throw new Error('Unable to find an available upload filename')
-    }
-
-    sanitizedFilename = nextFilename
-    originalFilename = getOriginalFilename({ filename: sanitizedFilename })
-  }
 
   const rawBaseDocPrefix = useCompositePrefixes ? docPrefix : docPrefix || collectionPrefix
   const { sanitizedDocPrefix } = buildUploadPrefix({
@@ -95,7 +70,7 @@ export async function resolveSignedURLKey({
   const { storageFilePath } = buildUploadStoragePathData({
     collectionPrefix,
     docPrefix: keyedDocPrefix,
-    filename: originalFilename,
+    filename: sanitizedFilename,
     useCompositePrefixes,
   })
 

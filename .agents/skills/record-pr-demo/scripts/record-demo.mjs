@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-import { mkdir, mkdtemp, rm } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
+import { mkdir, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 import { getDefaultCanvas } from './WindowChrome/index.mjs'
+import { startLosslessCapture } from './capture-demo.mjs'
 
 import { createAnnotationInteraction } from './annotation-demo.mjs'
 import { createPresentation } from './presentation-demo.mjs'
@@ -14,7 +14,7 @@ import { createScrollInteraction } from './scroll-demo.mjs'
 const DEFAULT_BASE_URL = 'http://localhost:3000'
 const DEFAULT_INTERACTION_PAUSE_MS = 300
 const DEFAULT_LABEL = 'feature-demo'
-const DEFAULT_MOUSE_MOVE_MS = 300
+const DEFAULT_MOUSE_MOVE_MS = 450
 const DEFAULT_VIEWPORT = { height: 900, width: 1440 }
 
 export function parseArgs(argv) {
@@ -68,7 +68,7 @@ export function parseArgs(argv) {
       name: '--mouse-move-ms',
       value: values.get('--mouse-move-ms') ?? DEFAULT_MOUSE_MOVE_MS,
     }),
-    output: values.get('--output') ?? `/tmp/payload-pr-demo-${label}.webm`,
+    output: values.get('--output') ?? `/tmp/payload-pr-demo-${label}.mkv`,
     scenario,
     viewport: parseViewport(values.get('--viewport') ?? '1440x900'),
   }
@@ -201,7 +201,7 @@ async function executeDemo({
   const change = scenarioModule.presentation?.change
 
   if (
-    !['Feature', 'Fix'].includes(change?.kind) ||
+    !['Feature', 'Fix', 'Bug'].includes(change?.kind) ||
     typeof change.title !== 'string' ||
     !change.title.trim() ||
     typeof change.description !== 'string' ||
@@ -213,8 +213,11 @@ async function executeDemo({
   }
 
   const { chromium, expect } = await import('@playwright/test')
-  const rawVideoDirectory = await mkdtemp(path.join(tmpdir(), 'payload-pr-demo-'))
-  const browser = await chromium.launch({ headless: true })
+  const browser = await chromium.launch({
+    headless: true,
+    handleSIGINT: false,
+    handleSIGTERM: false,
+  })
   const presentationOptions = {
     ...scenarioModule.presentation,
     ...(a11y === undefined
@@ -226,16 +229,15 @@ async function executeDemo({
     getDefaultCanvas({
       viewport,
       accessibility: presentationOptions.accessibility,
+      annotationLayout: presentationOptions.annotationLayout,
     })
   const context = await browser.newContext({
     viewport: recordedViewport,
     colorScheme: scenarioModule.presentation.theme ?? 'light',
-    ...(output ? { recordVideo: { dir: rawVideoDirectory, size: recordedViewport } } : {}),
   })
 
   await context.addInitScript(() => {
     window.addEventListener('DOMContentLoaded', () => {
-      if (document.documentElement.hasAttribute('data-pr-demo-stage')) return
       const cursor = document.createElement('div')
       cursor.setAttribute('data-pr-demo-cursor', 'mac-arrow')
       cursor.setAttribute('aria-hidden', 'true')
@@ -300,14 +302,53 @@ async function executeDemo({
         clickPulse.style.left = `${clickPoint.x - pointer.x}px`
         clickPulse.style.top = `${clickPoint.y - pointer.y}px`
       }
-      const positionCursor = ({ clientX, clientY }) => {
+      const cursorActivityType = 'payload-pr-demo-cursor-active'
+      let latestCursorActivity = 0
+      window.addEventListener('message', (event) => {
+        if (event.data?.type !== cursorActivityType) return
+        const isParent = window.parent !== window && event.source === window.parent
+        const isChild = [...document.querySelectorAll('iframe')].some(
+          (frame) => frame.contentWindow === event.source,
+        )
+        if (
+          (isParent || isChild) &&
+          Number.isFinite(event.data.timestamp) &&
+          event.data.timestamp >= latestCursorActivity
+        ) {
+          latestCursorActivity = event.data.timestamp
+          cursor.style.transition = 'none'
+          cursor.style.opacity = '0'
+        }
+      })
+      const positionCursor = ({ clientX, clientY, timeStamp }) => {
+        latestCursorActivity = performance.timeOrigin + timeStamp
+        // Transfer cursor ownership between the recording chrome and its live app frame.
+        if (window.parent !== window) {
+          window.parent.postMessage(
+            { type: cursorActivityType, timestamp: latestCursorActivity },
+            '*',
+          )
+        } else {
+          for (const frame of document.querySelectorAll('iframe')) {
+            frame.contentWindow?.postMessage(
+              { type: cursorActivityType, timestamp: latestCursorActivity },
+              '*',
+            )
+          }
+        }
         pointer = { x: clientX, y: clientY }
+        cursor.style.transition = 'opacity 120ms ease'
         promoteCursor()
         cursor.style.opacity = '1'
         cursor.style.transform = `translate(${clientX}px, ${clientY}px)`
         positionClickPulse()
       }
       document.addEventListener('mousemove', positionCursor, { passive: true })
+      document.addEventListener('mouseout', (event) => {
+        if (!event.relatedTarget || event.relatedTarget instanceof HTMLIFrameElement) {
+          cursor.style.opacity = '0'
+        }
+      })
       document.addEventListener(
         'mousedown',
         (event) => {
@@ -369,30 +410,42 @@ async function executeDemo({
     })
   })
 
-  // Video capture can start before newPage() resolves. Include page creation in the trim clock.
-  const recordingStartedAt = performance.now()
   const recordedPage = await context.newPage()
-  const video = output ? recordedPage.video() : undefined
+  let capture
   let presentation
   const resolvedOutput = output ? path.resolve(output) : undefined
   const resolvedScreenshotOutput = screenshotOutput ? path.resolve(screenshotOutput) : undefined
   let isOpeningReady = false
   let scenarioError
 
+  const interrupted = () => {
+    void context.close().catch(() => {})
+  }
+  process.once('SIGINT', interrupted)
+  process.once('SIGTERM', interrupted)
   try {
+    if (resolvedOutput) {
+      await mkdir(path.dirname(resolvedOutput), { recursive: true })
+      capture = await startLosslessCapture({
+        page: recordedPage,
+        output: resolvedOutput,
+        size: recordedViewport,
+      })
+    }
     presentation = await createPresentation({
       page: recordedPage,
       options: presentationOptions,
       viewport,
       baseURL,
       pauseScale,
-      startedAt: recordingStartedAt,
+      startedAt: capture?.startedAt ?? performance.now(),
     })
     const page = presentation.appPage
     const pointerInteractions = createPointerInteractions({
       interactionPauseMs,
       mouseMoveMs,
       page,
+      pauseScale,
     })
     const annotationInteractions = createAnnotationInteraction({
       presentation,
@@ -405,8 +458,10 @@ async function executeDemo({
           ? annotationInteractions.hideAnnotation()
           : annotationInteractions.showAnnotation(annotation),
       baseURL: parsedBaseURL.toString().replace(/\/$/, ''),
+      chrome: presentation.chrome,
       click: pointerInteractions.click,
-      typeText: async ({ locator, text, clear = false, delay = 80 }) => {
+      circleCursor: pointerInteractions.circleCursor,
+      typeText: async ({ locator, text, clear = false, delay = 50 }) => {
         await pointerInteractions.click(locator)
         if (clear) await page.keyboard.press('ControlOrMeta+A')
         await page.keyboard.type(text, { delay })
@@ -447,19 +502,22 @@ async function executeDemo({
     scenarioError = error
   } finally {
     try {
-      await presentation?.stop()
-      if (video && resolvedOutput) {
-        await mkdir(path.dirname(resolvedOutput), { recursive: true })
-        const saveVideo = video.saveAs(resolvedOutput)
-
-        await context.close()
-        await saveVideo
-      } else {
-        await context.close()
+      try {
+        await capture?.stop()
+      } catch (error) {
+        scenarioError ??= error
       }
+      await presentation?.stop().catch((error) => {
+        scenarioError ??= error
+      })
     } finally {
-      await browser.close()
-      await rm(rawVideoDirectory, { force: true, recursive: true })
+      process.off('SIGINT', interrupted)
+      process.off('SIGTERM', interrupted)
+      try {
+        await browser.close()
+      } finally {
+        if (scenarioError && resolvedOutput) await rm(resolvedOutput, { force: true })
+      }
     }
   }
 
@@ -470,7 +528,7 @@ async function executeDemo({
   return resolvedOutput ?? resolvedScreenshotOutput
 }
 
-function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
+function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page, pauseScale }) {
   let pointerPosition = { x: 0, y: 0 }
 
   const getTargetPoint = async ({ locator, position, pagePoint }) => {
@@ -537,8 +595,16 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
         const point = points.find(({ x, y }) => {
           if (right <= left || bottom <= top || x < left || x >= right || y < top || y >= bottom)
             return false
-          const hit = document.elementFromPoint(x, y)
-          return hit && element.contains(hit)
+          let hit = document.elementFromPoint(x, y)
+          while (hit?.shadowRoot) {
+            const nested = hit.shadowRoot.elementFromPoint(x, y)
+            if (!nested || nested === hit) break
+            hit = nested
+          }
+          for (let candidate = hit; candidate; candidate = candidate.getRootNode().host) {
+            if (element.contains(candidate)) return true
+          }
+          return false
         })
         if (!point) {
           throw new Error(
@@ -566,11 +632,18 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
     { duration = mouseMoveMs, pauseAfter = interactionPauseMs, position } = {},
   ) => {
     const targetPosition = await getTargetPoint({ locator, position })
-    const steps = duration === 0 ? 1 : Math.max(2, Math.round(duration / 16))
-    const stepDelay = steps === 1 ? 0 : duration / steps
+    await moveToPoint({ targetPosition, duration, pauseAfter })
+  }
 
-    for (let step = 1; step <= steps; step += 1) {
-      const progress = step / steps
+  const moveToPoint = async ({ targetPosition, duration, pauseAfter = 0 }) => {
+    if (!Number.isFinite(duration) || duration < 0) {
+      throw new Error('Cursor duration must be a finite non-negative number')
+    }
+    const startedAt = performance.now()
+    let progress = 0
+
+    do {
+      progress = duration === 0 ? 1 : Math.min(1, (performance.now() - startedAt) / duration)
       const easedProgress =
         progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2
 
@@ -579,16 +652,86 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
         pointerPosition.y + (targetPosition.y - pointerPosition.y) * easedProgress,
       )
 
-      if (step < steps && stepDelay > 0) {
-        await page.waitForTimeout(stepDelay)
+      if (progress < 1) {
+        const elapsed = performance.now() - startedAt
+        const nextFrame = Math.min(duration, (Math.floor(elapsed / 16) + 1) * 16)
+        const remaining = nextFrame - elapsed
+        if (remaining > 0) await page.waitForTimeout(remaining)
       }
-    }
+    } while (progress < 1)
 
     pointerPosition = targetPosition
 
     if (pauseAfter > 0) {
       await page.waitForTimeout(pauseAfter)
     }
+  }
+
+  const circleCursor = async (
+    locator,
+    { duration = 1200, pauseAfter = interactionPauseMs, position, radius = 16 } = {},
+  ) => {
+    for (const [name, value] of Object.entries({ duration, pauseAfter })) {
+      if (!Number.isFinite(value) || value < 0) {
+        throw new Error(`Circle ${name} must be a finite non-negative number`)
+      }
+    }
+    if (radius !== undefined && (!Number.isFinite(radius) || radius <= 0)) {
+      throw new Error('Circle radius must be a finite positive number')
+    }
+
+    const target = await getTargetPoint({ locator, position })
+    const box = await locator.boundingBox()
+    const frame = await locator.evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      return {
+        x: rect.x,
+        y: rect.y,
+        width: rect.width,
+        height: rect.height,
+        viewportWidth: innerWidth,
+        viewportHeight: innerHeight,
+      }
+    })
+    const scaleX = box.width / frame.width
+    const scaleY = box.height / frame.height
+    const left = box.x - frame.x * scaleX
+    const top = box.y - frame.y * scaleY
+    const width = frame.viewportWidth * scaleX
+    const height = frame.viewportHeight * scaleY
+    // Leave room for the slight asymmetry, even beside viewport edges.
+    const radiusX = Math.min(radius * scaleX, (width - 4) / 2.08)
+    const radiusY = Math.min(radius * scaleY, (height - 4) / 2.08)
+    const center = {
+      x: Math.max(left + radiusX * 1.04 + 2, Math.min(left + width - radiusX * 1.04 - 2, target.x)),
+      y: Math.max(top + radiusY * 1.04 + 2, Math.min(top + height - radiusY * 1.04 - 2, target.y)),
+    }
+    const startAngle = Math.atan2(
+      (pointerPosition.y - center.y) / radiusY,
+      (pointerPosition.x - center.x) / radiusX,
+    )
+    const pointAt = (angle) => {
+      const looseness = 1 + 0.03 * Math.sin(3 * angle)
+      return {
+        x: center.x + Math.cos(angle) * radiusX * looseness,
+        y: center.y + Math.sin(angle) * radiusY * looseness,
+      }
+    }
+    await moveToPoint({ targetPosition: pointAt(startAngle), duration: mouseMoveMs })
+
+    const steps = Math.max(75, Math.ceil(duration / 16))
+    const stepDelay = (duration * pauseScale) / steps
+    const startedAt = performance.now()
+    for (let step = 1; step <= steps; step += 1) {
+      const progress = step / steps
+      const easedProgress = progress * progress * (3 - 2 * progress)
+      const point = pointAt(startAngle + Math.PI * 4 * easedProgress)
+      await page.mouse.move(point.x, point.y)
+      pointerPosition = point
+      const remaining = startedAt + step * stepDelay - performance.now()
+      if (step < steps && remaining > 0) await page.waitForTimeout(remaining)
+    }
+    if (pauseAfter * pauseScale > 0) await page.waitForTimeout(pauseAfter * pauseScale)
   }
 
   const click = async (
@@ -621,7 +764,7 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
     }
   }
 
-  return { click, moveCursor }
+  return { circleCursor, click, moveCursor }
 }
 
 function printHelp() {
@@ -634,7 +777,7 @@ Options:
                        Dwell before and after clicks (default: ${DEFAULT_INTERACTION_PAUSE_MS})
   --label TEXT         Safe output label (default: ${DEFAULT_LABEL})
   --mouse-move-ms MS   Smooth cursor travel time (default: ${DEFAULT_MOUSE_MOVE_MS})
-  --output PATH        WebM output (default: /tmp/payload-pr-demo-<label>.webm)
+  --output PATH        Lossless Matroska output (default: /tmp/payload-pr-demo-<label>.mkv)
   --viewport WxH       Initial application viewport inside chrome (default: 1440x900)
   --scenario PATH      Module exporting presentation metadata and a default async function
   --help               Show this help`)

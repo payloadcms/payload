@@ -4,7 +4,8 @@ import { getSelectMode } from 'payload/shared'
 
 type SelectRecord = Record<string, unknown>
 
-const locationFieldNames = ['filename', 'prefix', '_objectKey'] as const
+// `_stored` tells a URL hook that an entry has no object, so its URL keeps the Payload route.
+const locationFieldNames = ['filename', 'prefix', '_objectKey', '_stored'] as const
 
 /**
  * URL hooks rebuild direct URLs from each representation's stored location, so a positive
@@ -30,7 +31,15 @@ const withLocationFields = ({ select }: { select: SelectType }): SelectType => {
   const result = addLocationFields({ representation: { ...select } })
 
   if (isSelectRecord(result.original)) {
-    result.original = addLocationFields({ representation: { ...result.original } })
+    const original = addLocationFields({ representation: { ...result.original } })
+    result.original = original
+
+    // The original URL compares the original's location with the main file's location.
+    if (original.url === true) {
+      result.filename = true
+      result._objectKey = true
+      result._stored = true
+    }
   }
 
   if (isSelectRecord(result.variants)) {

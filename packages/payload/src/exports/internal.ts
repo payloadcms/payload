@@ -23,11 +23,12 @@ export {
 } from '../uploads/clientUploadReceipt.js'
 export { downloadFileToBuffer } from '../uploads/downloadFileToBuffer.js'
 export { getUploadInstructions } from '../uploads/endpoints/uploadInstructions.js'
-export { getOriginalFilename } from '../uploads/fileVersioning/naming.js'
 export { getFileFromUploadInstructions } from '../uploads/getFileFromUploadInstructions.js'
 export { isXmlMimeType } from '../uploads/getFileTypeIdentity.js'
 export { getRangeRequestInfo } from '../uploads/getRangeRequestInfo.js'
 export { getSafeFileName, incrementName } from '../uploads/getSafeFilename.js'
+export { isOriginalFileRequest } from '../uploads/isOriginalFileRequest.js'
+export { isRequestTimeFile } from '../uploads/isRequestTimeFile.js'
 export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
 export { externalURLInputSchema, resolveURLUploadInput } from '../uploads/resolveURLUploadInput.js'
 export type { ExternalURLInput } from '../uploads/resolveURLUploadInput.js'
@@ -43,7 +44,6 @@ export type {
   UploadTransformerInternal,
   UploadTransformTask,
 } from '../uploads/transformers/uploadTransformerBridge.js'
-export { truncateFilename } from '../uploads/truncateFilename.js'
 export { uploadContentSecurityPolicy } from '../uploads/uploadContentSecurityPolicy.js'
 export {
   batchProcessing,

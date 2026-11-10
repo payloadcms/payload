@@ -1131,13 +1131,13 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(result.errors).toEqual([])
         expect(storedPNG).toMatchObject({
           alt: 'First bulk upload',
-          filename: 'mcp-bulk-first-original.png',
+          filename: 'mcp-bulk-first.png',
           filesize: png.length,
           mimeType: 'image/png',
         })
         expect(storedJPEG).toMatchObject({
           alt: 'Second bulk upload',
-          filename: 'mcp-bulk-second-original.jpg',
+          filename: 'mcp-bulk-second.jpg',
           filesize: jpeg.length,
           mimeType: 'image/jpeg',
         })
@@ -1175,7 +1175,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           overrideAccess: true,
         })
         expect(storedMedia.alt).toBe('Uploaded from a URL through MCP')
-        expect(storedMedia.filename).toBe('mcp-url-original.png')
+        expect(storedMedia.filename).toBe('mcp-url.png')
         expect(storedMedia.mimeType).toBe('image/png')
         expect(storedMedia.filesize).toBe(image.length)
       })
@@ -1215,7 +1215,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           overrideAccess: true,
         })
         expect(storedMedia.alt).toBe('Replaced from base64 through MCP')
-        expect(storedMedia.filename).toBe('mcp-replacement-original.png')
+        expect(storedMedia.filename).toBe('mcp-replacement.png')
         expect(storedMedia.mimeType).toBe('image/png')
         expect(storedMedia.filesize).toBe(image.length)
       })
@@ -1271,7 +1271,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           }>(createResponse)
           id = created.id
           expect(created.alt).toBe('Created through MCP')
-          expect(created.filename).toBe('mcp-created-original.png')
+          expect(created.filename).toBe('mcp-created.png')
           expect(created.width).toBeGreaterThan(0)
           const updateResponse = await client.callTool({
             arguments: {
@@ -1288,7 +1288,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             filename: string
           }>(updateResponse)
           expect(updated.alt).toBe('Updated through MCP')
-          expect(updated.filename).toBe('mcp-updated-original.png')
+          expect(updated.filename).toBe('mcp-updated.png')
         } finally {
           if (id !== undefined) {
             await payload.delete({ id, collection: 'media', overrideAccess: true })
@@ -1438,7 +1438,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           overrideAccess: true,
         })
         expect(storedMedia.alt).toBe('Uploaded from base64 through MCP')
-        expect(storedMedia.filename).toBe('mcp-base64-original.png')
+        expect(storedMedia.filename).toBe('mcp-base64.png')
         expect(storedMedia.mimeType).toBe('image/png')
         expect(storedMedia.filesize).toBe(image.length)
       })
@@ -2087,6 +2087,41 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(callResponse.content[0].text).toContain(
           '"content":"Content for test post to delete."',
         )
+      })
+      it('should pass trash to deleteDocuments', async ({ mcp, getApiKey, payload }) => {
+        const post = await payload.create({
+          collection: 'posts',
+          data: {
+            content: 'Content for trash delete.',
+            title: 'Trash Delete Post',
+          },
+          overrideAccess: true,
+        })
+        const apiKey = await getApiKey()
+        const client = await mcp.connect(apiKey)
+        const deleteSpy = vi.spyOn(payload, 'delete')
+        try {
+          const callResponse = await client.callTool({
+            arguments: {
+              slug: 'posts',
+              id: post.id,
+              trash: true,
+            },
+            name: 'deleteDocuments',
+          })
+          expect(callResponse.content[0].text).toContain(
+            'Document deleted successfully from collection "posts"!',
+          )
+          expect(deleteSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: post.id,
+              collection: 'posts',
+              trash: true,
+            }),
+          )
+        } finally {
+          deleteSpy.mockRestore()
+        }
       })
       it('should call updateDocument with object where clause', async ({
         mcp,
@@ -3888,6 +3923,63 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           expect(doc.arrayField).toHaveLength(3)
           expect(doc.arrayField[0].item).toBe('Updated item A')
           expect(doc.arrayField[2].itemNumber).toBe(30)
+        })
+        it('should keep table rows as arrays when an agent adds a row to a json field', async ({
+          getApiKey,
+          mcp,
+          payload,
+        }) => {
+          const created = await payload.create({
+            collection: 'field-types',
+            data: {
+              jsonField: {
+                columns: ['Plan', 'Monthly price'],
+                rows: [
+                  ['Starter', 9],
+                  ['Pro', 29],
+                ],
+              },
+              textField: 'Pricing table',
+            },
+            overrideAccess: true,
+          })
+
+          onTestFinished(async () => {
+            await payload.delete({
+              id: created.id,
+              collection: 'field-types',
+              overrideAccess: true,
+            })
+          })
+
+          const pricingTable = {
+            columns: ['Plan', 'Monthly price'],
+            rows: [
+              ['Starter', 9],
+              ['Pro', 29],
+              ['Team', 79],
+            ],
+          }
+          const apiKey = await getApiKey()
+          const client = await mcp.connect(apiKey)
+          const callResponse = await client.callTool({
+            arguments: {
+              slug: 'field-types',
+              id: created.id,
+              data: { jsonField: pricingTable },
+            },
+            name: 'updateDocument',
+          })
+
+          expect(callResponse.isError).toBeFalsy()
+
+          const stored = await payload.findByID({
+            id: created.id,
+            collection: 'field-types',
+            overrideAccess: true,
+          })
+
+          expect(stored.jsonField).toEqual(pricingTable)
         })
       })
       test.describe('Display field safety', () => {

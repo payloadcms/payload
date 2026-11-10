@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getSafeFileName, incrementName } from './getSafeFilename.js'
+import { getSafeFileName, getUnplannedSafeFileName, incrementName } from './getSafeFilename.js'
 
 vi.mock('./docWithFilenameExists.js', () => ({
   docWithFilenameExists: vi.fn(),
@@ -78,6 +78,8 @@ describe('incrementName', () => {
 
   it('should handle filename with no extension', () => {
     expect(incrementName('filename')).toBe('filename-1')
+    expect(incrementName('hero-card')).toBe('hero-card-1')
+    expect(incrementName('hero-card-1')).toBe('hero-card-2')
   })
 
   it('should handle filename that is just an extension', () => {
@@ -176,19 +178,19 @@ describe('getSafeFileName', () => {
   })
 
   it.each(['', '.jpg'])(
-    'should resolve near-limit original filename collisions with extension %s',
+    'should resolve near-limit filename collisions with extension %s',
     async (extension) => {
       mockDocWithFilenameExists.mockResolvedValueOnce(true).mockResolvedValueOnce(false)
       mockFileExists.mockResolvedValue(false)
 
       const result = await getSafeFileName({
         collectionSlug: 'media',
-        desiredFilename: `${'a'.repeat(245 - extension.length)}-original${extension}`,
+        desiredFilename: `${'a'.repeat(254 - extension.length)}${extension}`,
         req: mockReq,
         staticPath: '/uploads',
       })
 
-      expect(result).toBe(`${'a'.repeat(244 - extension.length)}-original-1${extension}`)
+      expect(result).toBe(`${'a'.repeat(253 - extension.length)}-1${extension}`)
       expect(Buffer.byteLength(result)).toBe(255)
       expect(mockFileExists).toHaveBeenCalledWith(`/uploads/${result}`)
     },
@@ -350,6 +352,7 @@ describe('getSafeFileName', () => {
       path: '/uploads',
       prefix: 'images/',
       req: mockReq,
+      excludeDocumentID: undefined,
     })
   })
 
@@ -449,5 +452,36 @@ describe('getSafeFileName', () => {
     })
 
     expect(result).toBe('video-1.mp4')
+  })
+})
+
+describe('getUnplannedSafeFileName', () => {
+  it('should stop retrying when every available filename is already planned', async () => {
+    mockDocWithFilenameExists.mockReset()
+    mockDocWithFilenameExists.mockResolvedValue(false)
+
+    await expect(
+      getUnplannedSafeFileName({
+        canUseName: () => false,
+        collectionSlug: 'media',
+        desiredFilename: 'photo.jpg',
+        req: {} as Parameters<typeof getUnplannedSafeFileName>[0]['req'],
+      }),
+    ).rejects.toThrow('Unable to find an available upload filename')
+    expect(mockDocWithFilenameExists).toHaveBeenCalledTimes(1000)
+  })
+
+  it('should keep extensionless names when avoiding stored and planned filenames', async () => {
+    mockDocWithFilenameExists.mockReset()
+    mockDocWithFilenameExists.mockResolvedValueOnce(true).mockResolvedValue(false)
+
+    const filename = await getUnplannedSafeFileName({
+      canUseName: (name) => name !== 'hero-card-1',
+      collectionSlug: 'media',
+      desiredFilename: 'hero-card',
+      req: {} as Parameters<typeof getUnplannedSafeFileName>[0]['req'],
+    })
+
+    expect(filename).toBe('hero-card-2')
   })
 })

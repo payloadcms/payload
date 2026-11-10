@@ -214,7 +214,7 @@ describe('Uploads', () => {
   test('should show upload filename in upload collection list', async () => {
     await page.goto(mediaURL.list)
     const audioUpload = page.locator('tbody .cell-filename', {
-      hasText: exactText('audio-original.mp3'),
+      hasText: exactText('audio.mp3'),
     })
     await expect(audioUpload).toBeVisible()
 
@@ -242,7 +242,7 @@ describe('Uploads', () => {
       shouldCloseListColumns: true,
     })
 
-    const row = page.locator('tbody tr', { hasText: 'size-test-original.txt' })
+    const row = page.locator('tbody tr', { hasText: 'size-test.txt' })
 
     await expect(row.locator('.cell-filesize')).toHaveText('1.5KB')
   })
@@ -1378,7 +1378,7 @@ describe('Uploads', () => {
     // Ensure the URL ends correctly
     await expect
       .poll(() => href)
-      .toMatch(/\/api\/admin-thumbnail-size\/file\/test-image-original(-\d+)?\.png$/i)
+      .toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
 
     // Ensure no "-100x100" or any similar suffix
     await expect.poll(() => !/-\d+x\d+\.png$/.test(href!)).toBe(true)
@@ -1420,7 +1420,7 @@ describe('Uploads', () => {
       .locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem a')
       .getAttribute('href')
 
-    expect(href).toMatch(/\/api\/admin-thumbnail-size\/file\/test-image-original(-\d+)?\.png$/i)
+    expect(href).toMatch(/\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
     expect(href).not.toMatch(/-\d+x\d+\.png$/)
   })
 
@@ -2536,6 +2536,38 @@ describe('Uploads', () => {
       await heightInput.press('ArrowUp')
       await expect(heightInput).toHaveValue('800')
     })
+
+    test('should save the admin crop and clear it when the file is replaced', async () => {
+      await gotoAndWaitForForm(page, mediaURL.create)
+      await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+      await saveDocAndAssert(page)
+
+      await page.locator('button[aria-label="Edit Image"]').click()
+      await page.locator('input[name="cropWidth"]').fill('400')
+      await page.locator('input[name="cropHeight"]').fill('600')
+      await page.locator('button:has-text("Apply Changes")').click()
+      await saveDocAndAssert(page)
+
+      const id = page.url().split('/').pop()!
+      const { doc: cropped } = await client.findByID({ id, slug: mediaSlug, auth: true })
+
+      expect(cropped._transforms?.crop).toMatchObject({ height: 600, width: 400 })
+
+      await page.locator('.file-toolbar__filename-btn').click()
+      await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
+      await page.setInputFiles('.file-manager input[type="file"]', path.join(dirname, 'small.png'))
+      await saveDocAndAssert(page)
+
+      const { doc: replaced } = await client.findByID({ id, slug: mediaSlug, auth: true })
+
+      expect(replaced._transforms).toBeNull()
+
+      // The editor stays open in the page across the replace, so it must not keep the old crop.
+      await page.locator('button[aria-label="Edit Image"]').click()
+
+      await expect(page.locator('input[name="cropWidth"]')).toHaveValue('320')
+      await expect(page.locator('input[name="cropHeight"]')).toHaveValue('80')
+    })
   })
 
   test('should see upload previews in relation list if allowed in config', async () => {
@@ -2633,7 +2665,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-withinRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        /\/api\/enlarge\/file\/test-image-original-180x50\.jpg(\?.*)?$/,
+        /\/api\/enlarge\/file\/test-image-180x50\.jpg(\?.*)?$/,
       )
     })
 
@@ -2645,7 +2677,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-nextSmallestOutOfRange div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        /\/api\/focal-only\/file\/test-image-original-400x300\.jpg(\?.*)?$/,
+        /\/api\/focal-only\/file\/test-image-400x300\.jpg(\?.*)?$/,
       )
     })
 
@@ -2655,10 +2687,7 @@ describe('Uploads', () => {
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'small.png'))
       await page.locator('dialog button#action-save').click()
       const thumbnail = page.locator('#field-original div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute(
-        'src',
-        /\/api\/focal-only\/file\/small-original\.png(\?.*)?$/,
-      )
+      await expect(thumbnail).toHaveAttribute('src', /\/api\/focal-only\/file\/small\.png(\?.*)?$/)
     })
   })
 
@@ -2679,7 +2708,7 @@ describe('Uploads', () => {
 
     const imageUploadImg = imageUploadCell.locator('.thumbnail')
     await expect(imageUploadImg).toBeVisible()
-    await expect(imageRelationshipCell).toHaveText('image-original.png')
+    await expect(imageRelationshipCell).toHaveText('image.png')
 
     // Navigate back to page 1 using the left arrow
     const prevPageButton = page.locator('.clickable-arrow--left')
@@ -2758,7 +2787,7 @@ describe('Uploads', () => {
         overrideAccess: true,
       })
     ).docs[0]?.filename
-    expect(filenameFromAPI).toBe('test-image-original.jpg')
+    expect(filenameFromAPI).toBe('test-image.jpg')
   })
 
   test('should not show image sizes in column selector in list view if imageSize has admin.disableListColumn true', async () => {

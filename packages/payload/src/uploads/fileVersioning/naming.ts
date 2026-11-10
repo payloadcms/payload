@@ -1,5 +1,3 @@
-import { truncateFilename } from '../truncateFilename.js'
-
 /** Validates and returns a complete, canonical key supplied by the storage path builder or provider. */
 export const normalizeStorageKey = ({ key }: { key: string }): string => {
   if (
@@ -13,12 +11,6 @@ export const normalizeStorageKey = ({ key }: { key: string }): string => {
   }
 
   return key
-}
-
-export const getOriginalFilename = ({ filename }: { filename: string }): string => {
-  assertSafeFilename({ filename })
-
-  return truncateFilename({ filename, suffix: '-original' })
 }
 
 export const getArchivedFilename = ({
