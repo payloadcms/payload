@@ -22,6 +22,9 @@ const Context = React.createContext<null | UploadHandlersContext>(null)
 
 export const UploadHandlersProvider = ({ children }) => {
   const { config, getEntityConfig } = useConfig()
+  // A failed save submits the same File again, which then resumes its session instead of
+  // starting another one that would hold a filename and a quota slot until it expires.
+  const sessionIDsByFile = React.useRef(new WeakMap<File, number | string>())
   const uploadInstructionsURL = formatAdminURL({
     apiRoute: config.routes.api,
     path: '/upload-instructions',
@@ -41,7 +44,9 @@ export const UploadHandlersProvider = ({ children }) => {
           collectionSlug,
           docPrefix,
           file,
+          onSession: (session) => sessionIDsByFile.current.set(file, session.id),
           retries: collectionConfig.upload.transfer?.retries,
+          reusableSessionID: sessionIDsByFile.current.get(file),
           serverURL: config.serverURL,
           targetID,
         })
