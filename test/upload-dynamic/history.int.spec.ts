@@ -226,6 +226,32 @@ test.suite('Historical request-time files', { config: './config.ts' }, () => {
     expect(sourceReadCalls).toHaveLength(0)
   })
 
+  test('should check only ordinary read access for a historical request-time file', async ({
+    payload,
+    restClient,
+  }) => {
+    const { selected } = await replaceImage({ payload })
+    const collection = payload.collections[versionedDynamicMediaSlug].config
+    const originalRead = collection.access.read
+    const accessModes: boolean[] = []
+
+    try {
+      collection.access.read = ({ req }) => {
+        accessModes.push(Boolean(req.fileTransform))
+        return true
+      }
+
+      const response = await restClient.GET(
+        `/${versionedDynamicMediaSlug}/file/${selected.version.variants!.card!.filename}?version=${selected.id}`,
+      )
+
+      expect(response.status).toBe(200)
+      expect(accessModes).not.toContain(true)
+    } finally {
+      collection.access.read = originalRead
+    }
+  })
+
   test('should not let transform-only access read a historical file, with or without request parameters', async ({
     payload,
     restClient,

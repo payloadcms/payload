@@ -474,7 +474,8 @@ async function authorizeDocument({
       transformers: req.payload.config.upload.transformers,
     }).length > 0
 
-  let isTransformAccess = hasCandidateTransformers
+  // A historical request ignores request parameters, so it is always an ordinary read.
+  let isTransformAccess = !isHistorical && hasCandidateTransformers
   let access = await checkAccess({ isTransform: isTransformAccess })
 
   if (!access.isAllowed && isTransformAccess) {
