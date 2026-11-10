@@ -20,7 +20,6 @@ import {
   localizedSlug,
   maxVersionsSlug,
   mediaSlug,
-  mergeApprovalRequiredTitle,
   nestedSlug,
   numericIDSlug,
   pagesSlug,
@@ -110,29 +109,10 @@ export default buildConfigWithDefaults({
       hooks: {
         beforeMerge: (args) => hookSpy.beforeMerge?.(args),
       },
-      validate: (args) => {
-        if (hookSpy.branchValidation) {
-          return hookSpy.branchValidation(args)
-        }
-
-        const approvalErrors = args.candidates
-          .filter(
-            ({ collectionSlug, data }) =>
-              collectionSlug === localizedSlug && data?.title === mergeApprovalRequiredTitle,
-          )
-          .map(({ changeID, collectionSlug, docID, locale }) => ({
-            changeID,
-            collectionSlug,
-            docID,
-            locale,
-            message: 'Editorial approval is required before merging.',
-            path: 'data.title',
-          }))
-
-        return approvalErrors.length
-          ? { errors: approvalErrors, valid: false }
-          : defaultBranchMergeValidation(args)
-      },
+      validate: (args) =>
+        hookSpy.branchValidation
+          ? hookSpy.branchValidation(args)
+          : defaultBranchMergeValidation(args),
     },
     collections: [
       Folders,

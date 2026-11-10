@@ -28,7 +28,11 @@ vi.mock('../../providers/Config/index.js', () => ({
   useConfig: () => ({
     config: { routes: { api: '/api' }, serverURL: 'http://localhost:3000' },
     getEntityConfig: ({ collectionSlug }: { collectionSlug?: string }) =>
-      collectionSlug === 'posts' ? { labels: { singular: { en: 'Post', fr: 'Article' } } } : null,
+      collectionSlug === 'posts'
+        ? { labels: { singular: { en: 'Post', fr: 'Article' } } }
+        : collectionSlug === 'unique-docs'
+          ? { labels: { singular: 'Unique Doc' } }
+          : null,
   }),
 }))
 vi.mock('../../providers/RouterAdapter/index.js', () => ({
@@ -220,7 +224,6 @@ test('should report a blocked merge without a completed progress bar', async () 
               docID: 12,
               locale: 'fr',
               path: 'data.title',
-              label: 'Headline',
               message: 'This field is required.',
             },
           ],
@@ -239,7 +242,7 @@ test('should report a blocked merge without a completed progress bar', async () 
   await expect.element(screen.getByText('A dependency is unavailable')).toBeVisible()
   await expect
     .element(screen.getByRole('listitem').nth(1))
-    .toHaveTextContent('Post / #12 / fr / Headline: This field is required.')
+    .toHaveTextContent('Post / #12 / fr / data.title: This field is required.')
 })
 
 test('should report a partial merge with the actual merged count and problems', async () => {
@@ -360,10 +363,8 @@ test.each([true, false])(
       validationErrors: [
         {
           changeID: 'change',
-          collectionSlug: 'posts',
-          docID: 12,
-          locale: 'fr',
-          label: 'Slug',
+          collectionSlug: 'unique-docs',
+          docID: 4,
           path: 'slug',
           message: 'Value must be unique',
         },
@@ -387,7 +388,7 @@ test.each([true, false])(
     await expect
       .element(screen.getByRole('alert'))
       .toHaveTextContent(
-        'Please correct invalid fields.Post / #12 / fr / Slug: Value must be unique',
+        'Please correct invalid fields.Unique Doc / #4 / slug: Value must be unique',
       )
     await expect.element(screen.getByRole('progressbar')).not.toBeInTheDocument()
     expect(toast.error).not.toHaveBeenCalled()

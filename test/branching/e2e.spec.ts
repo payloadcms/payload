@@ -21,11 +21,11 @@ import {
   homepageGlobalSlug,
   localizedSlug,
   mediaSlug,
-  mergeApprovalRequiredTitle,
   nestedSlug,
   pagesSlug,
   postsSlug,
   slugDraftsSlug,
+  uniqueSlug,
   versionedMediaSlug,
 } from './shared.js'
 
@@ -137,6 +137,7 @@ test.describe('Branching', () => {
       autosaveSlug,
       localizedSlug,
       slugDraftsSlug,
+      uniqueSlug,
       mediaSlug,
       nestedSlug,
       pagesSlug,
@@ -1059,20 +1060,17 @@ test.describe('Branching', () => {
     const mergeMode = (label: string) =>
       page.locator('.merge-branch-modal__modes label').filter({ hasText: label })
 
-    test('should identify each document, locale, and field when merge validation fails', async () => {
-      const english = await payload.create({
-        branch: branchName,
-        collection: localizedSlug,
-        data: { title: mergeApprovalRequiredTitle },
-        draft: true,
-        locale: 'en',
+    test('should identify the document and field path when a merge write fails', async () => {
+      await payload.create({
+        branch: false,
+        collection: uniqueSlug,
+        data: { slug: 'merge-conflict' },
       })
-      const spanish = await payload.create({
+
+      const doc = await payload.create({
         branch: branchName,
-        collection: localizedSlug,
-        data: { title: mergeApprovalRequiredTitle },
-        draft: true,
-        locale: 'es',
+        collection: uniqueSlug,
+        data: { slug: 'merge-conflict' },
       })
 
       await gotoBranchView()
@@ -1085,12 +1083,10 @@ test.describe('Branching', () => {
       const errors = modal.getByRole('alert')
 
       await expect(modal.getByRole('heading', { name: 'Merge blocked', exact: true })).toBeVisible()
-      await expect(modal.getByRole('status')).toHaveText('Merge blocked')
       await expect(errors).toContainText('Please correct invalid fields.')
-      await expect(errors.getByRole('listitem')).toHaveText([
-        `Localized Doc / #${english.id} / en / data.title: Editorial approval is required before merging.`,
-        `Localized Doc / #${spanish.id} / es / data.title: Editorial approval is required before merging.`,
-      ])
+      await expect(errors.getByRole('listitem')).toHaveText(
+        `Unique Doc / #${doc.id} / slug: Value must be unique`,
+      )
       await expect(page.getByText('No changes on this branch yet.', { exact: true })).toHaveCount(0)
       await expect(modal.getByRole('progressbar')).toHaveCount(0)
 
@@ -1100,7 +1096,7 @@ test.describe('Branching', () => {
         .click()
 
       await expect(modal).toBeHidden()
-      await expect(page.locator('.changed-docs__row')).toHaveCount(2)
+      await expect(page.locator('.changed-docs__row')).toHaveCount(1)
     })
 
     test('should require a date before a merge can be scheduled', async () => {

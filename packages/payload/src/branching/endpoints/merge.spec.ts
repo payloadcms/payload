@@ -133,7 +133,6 @@ test.each([true, false])(
           changeID: 'change',
           collectionSlug: 'posts',
           docID: 12,
-          label: 'Identifiant',
           locale: 'de',
           message: 'Value must be unique',
           path: 'slug',

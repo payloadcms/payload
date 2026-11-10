@@ -213,7 +213,7 @@ const formatMergeFailure = ({
   if (error instanceof ValidationError) {
     return {
       message: req.t('error:correctInvalidFields'),
-      validationErrors: getMergeValidationErrors({ error, req }),
+      validationErrors: getMergeValidationErrors({ error }),
     }
   }
 

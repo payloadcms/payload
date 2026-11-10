@@ -1,6 +1,3 @@
-import { getTranslation } from '@payloadcms/translations'
-
-import type { PayloadRequest } from '../../types/index.js'
 import type { BranchMergeValidationError } from '../validation.js'
 
 import { ValidationError } from '../../errors/ValidationError.js'
@@ -33,10 +30,8 @@ export const setMergeValidationErrorContext = ({
 
 export const getMergeValidationErrors = ({
   error,
-  req,
 }: {
   error: ValidationError
-  req: PayloadRequest
 }): MergeWriteValidationError[] => {
   const change = validationContexts.get(error)
   const hasErrorEntity = Boolean(error.data.collection || error.data.global)
@@ -58,7 +53,6 @@ export const getMergeValidationErrors = ({
       ? (errorDocID ?? (isSourceEntity ? change?.docID : undefined))
       : undefined,
     globalSlug,
-    label: fieldError.label ? getTranslation(fieldError.label, req.i18n) : undefined,
     locale: fieldError.locale,
     message: fieldError.message,
     path: fieldError.path,

@@ -38,8 +38,6 @@ export type BranchMergeValidationError = {
   collectionSlug?: string
   docID?: number | string
   globalSlug?: string
-  /** Translated field label, including parent fields and row numbers when available. */
-  label?: string
   locale?: string
   message: string
   path?: string
@@ -256,7 +254,6 @@ export const defaultBranchMergeValidation: BranchMergeValidate = ({ candidates, 
           collectionSlug: candidate.collectionSlug,
           docID: candidate.docID,
           globalSlug: candidate.globalSlug,
-          label: typeof fieldError.label === 'string' ? fieldError.label : undefined,
           locale: candidate.locale,
           message: fieldError.message,
           path: fieldError.path,

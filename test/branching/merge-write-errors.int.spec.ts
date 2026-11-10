@@ -5,7 +5,7 @@ import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { branchChangesSlug, branchesSlug, uniqueSlug } from './shared.js'
 
-test.suite('Branching: write-time merge errors', { config: './config.ts' }, () => {
+test.suite('Branching: write-time merge errors', { config: './config.ts', db: 'all' }, () => {
   for (const isStream of [true, false]) {
     test(`should hide unexpected database failures (stream: ${isStream})`, async ({
       payload,
