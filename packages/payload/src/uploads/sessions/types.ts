@@ -1,4 +1,5 @@
 import type { PayloadRequest } from '../../types/index.js'
+import type { UploadEdits } from '../types.js'
 
 export type UploadSessionStatus = 'active' | 'cancelled' | 'completed' | 'failed' | 'pending'
 
@@ -175,9 +176,22 @@ export type UploadSessionDoc = {
   updatedAt: string
 }
 
+/**
+ * Request options of the original save that are not part of the document data. A normal save
+ * sends them in the query string; a save finished from the session applies them the same way.
+ */
+export type UploadSessionSaveOptions = {
+  fallbackLocale?: string
+  locale?: string
+  publishAllLocales?: boolean
+  /** Crop, focal point and resize edits made in the Admin before saving. */
+  uploadEdits?: UploadEdits
+}
+
 export type UploadSessionIntent = {
   data: Record<string, unknown>
   draft?: boolean
+  options?: UploadSessionSaveOptions
   submittedAt: string
 }
 

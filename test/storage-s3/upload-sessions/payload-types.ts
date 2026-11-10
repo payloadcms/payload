@@ -185,10 +185,10 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'de') | ('en' | 'de')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'de';
   widgets: {
     welcome: WelcomeWidget;
     collections: CollectionsWidget;
@@ -390,6 +390,7 @@ export interface VideosMissingBucket {
 export interface ImagesTransformed {
   id: string;
   title?: string | null;
+  caption?: string | null;
   prefix?: string | null;
   _objectKey?: string | null;
   createdBy?: {
@@ -722,6 +723,7 @@ export interface VideosMissingBucketSelect<T extends boolean = true> {
  */
 export interface ImagesTransformedSelect<T extends boolean = true> {
   title?: T;
+  caption?: T;
   prefix?: T;
   _objectKey?: T;
   createdBy?: T;

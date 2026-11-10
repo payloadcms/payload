@@ -674,34 +674,13 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
     payload,
     restClient,
   }) => {
-    // Noise does not compress, so this PNG is well above the 6 MiB session threshold.
-    const png = await sharp({
-      create: {
-        background: '#000',
-        channels: 3,
-        height: 2000,
-        noise: { type: 'gaussian', mean: 128, sigma: 60 },
-        width: 2000,
-      },
-    })
-      .png({ compressionLevel: 0 })
-      .toBuffer()
-    const file = new File([png], 'noise.png', { type: 'image/png' })
     let sessionID: number | string | undefined
 
-    const uploadedFile = await withBrowserFetch({
-      onStoragePut: () => undefined,
+    const uploadedFile = await uploadImage({
+      onSession: (session) => {
+        sessionID = session.id
+      },
       restClient,
-      run: () =>
-        uploadWithSession({
-          apiRoute: '/api',
-          collectionSlug: imagesTransformedSlug,
-          file,
-          onSession: (session) => {
-            sessionID = session.id
-          },
-          serverURL: '',
-        }),
     })
 
     const formData = new FormData()
@@ -730,6 +709,66 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
 
     expect(reconciled.status).toBe('completed')
     expect(reconciled.documentID).toBe(String(doc.id))
+  })
+
+  test('should save a background-finished upload in the locale of the original save', async ({
+    restClient,
+  }) => {
+    const session = await uploadImageSession({ restClient })
+
+    await restClient.POST(`${sessionsPath}/${session.id}/intent`, {
+      body: JSON.stringify({ data: { caption: 'Hallo' }, options: { locale: 'de' } }),
+    })
+
+    const { doc } = await restClient
+      .POST(`${sessionsPath}/${session.id}/complete`)
+      .then((res) => res.json<{ doc: { id: string } }>())
+
+    const inGerman = await restClient
+      .GET(`/${imagesTransformedSlug}/${doc.id}?locale=de`)
+      .then((res) => res.json<{ caption?: string }>())
+    const inEnglish = await restClient
+      .GET(`/${imagesTransformedSlug}/${doc.id}?locale=en&fallback-locale=null`)
+      .then((res) => res.json<{ caption?: string }>())
+
+    expect(inGerman.caption).toBe('Hallo')
+    expect(inEnglish.caption).toBeUndefined()
+  })
+
+  test('should apply the upload edits of the original save to a background-finished upload', async ({
+    restClient,
+  }) => {
+    const session = await uploadImageSession({ restClient })
+
+    await restClient.POST(`${sessionsPath}/${session.id}/intent`, {
+      body: JSON.stringify({
+        data: {},
+        options: {
+          uploadEdits: {
+            crop: { height: 25, unit: '%', width: 50, x: 0, y: 0 },
+            heightInPixels: 500,
+            widthInPixels: 1000,
+          },
+        },
+      }),
+    })
+
+    const { doc } = await restClient
+      .POST(`${sessionsPath}/${session.id}/complete`)
+      .then((res) => res.json<{ doc: { height: number; width: number } }>())
+
+    // A quarter of the height and half the width of the 2000×2000 original.
+    expect(doc).toMatchObject({ height: 500, width: 1000 })
+  })
+
+  test('should reject invalid save options', async ({ restClient }) => {
+    const session = await createSession({ restClient })
+
+    const response = await restClient.POST(`${sessionsPath}/${session.id}/intent`, {
+      body: JSON.stringify({ data: {}, options: { locale: 1 } }),
+    })
+
+    expect(response.status).toBe(400)
   })
 
   test('should complete a session whose object was kept as the original of a transformed file', async ({
@@ -1258,4 +1297,60 @@ const createWithFileReference = ({
   formData.append('file', JSON.stringify(file))
 
   return restClient.POST(`/${videosSlug}`, { body: formData })
+}
+
+/** A PNG of noise, which does not compress, so it is well above the 6 MiB session threshold. */
+const createLargePNG = (): Promise<Buffer> =>
+  sharp({
+    create: {
+      background: '#000',
+      channels: 3,
+      height: 2000,
+      noise: { type: 'gaussian', mean: 128, sigma: 60 },
+      width: 2000,
+    },
+  })
+    .png({ compressionLevel: 0 })
+    .toBuffer()
+
+/** Uploads a large PNG to the transforming image collection through the browser uploader. */
+const uploadImage = async ({
+  onSession,
+  restClient,
+}: {
+  onSession?: (session: ClientUploadSession) => void
+  restClient: RESTClient
+}): Promise<UploadInstructions['file']> => {
+  const file = new File([await createLargePNG()], 'noise.png', { type: 'image/png' })
+
+  return withBrowserFetch({
+    onStoragePut: () => undefined,
+    restClient,
+    run: () =>
+      uploadWithSession({
+        apiRoute: '/api',
+        collectionSlug: imagesTransformedSlug,
+        file,
+        onSession,
+        serverURL: '',
+      }),
+  })
+}
+
+/** Uploads a large PNG and returns its session, with storage complete and no document yet. */
+const uploadImageSession = async ({
+  restClient,
+}: {
+  restClient: RESTClient
+}): Promise<ClientUploadSession> => {
+  let uploadSession: ClientUploadSession | undefined
+
+  await uploadImage({
+    onSession: (session) => {
+      uploadSession = session
+    },
+    restClient,
+  })
+
+  return uploadSession!
 }

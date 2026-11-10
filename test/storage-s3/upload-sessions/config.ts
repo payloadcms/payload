@@ -73,6 +73,10 @@ export default buildConfigWithDefaults({
       },
     },
     collections: [Videos, VideosWithDrafts, VideosMissingBucket, ImagesTransformed, Users],
+    localization: {
+      defaultLocale: 'en',
+      locales: ['en', 'de'],
+    },
     storage: [
       s3Storage({
         bucket: process.env.S3_BUCKET!,

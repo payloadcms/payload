@@ -12,6 +12,7 @@ import type {
   UploadSessionDoc,
   UploadSessionError,
   UploadSessionOperation,
+  UploadSessionSaveOptions,
 } from './types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
@@ -19,6 +20,7 @@ import { createOperation } from '../../collections/operations/create.js'
 import { updateByIDOperation } from '../../collections/operations/updateByID.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound, ValidationError } from '../../errors/index.js'
+import { sanitizeLocales } from '../../utilities/addLocalesToRequest.js'
 import { assertClientUploadAllowed } from '../assertClientUploadAllowed.js'
 import { checkFileMetadataRestrictions } from '../checkFileRestrictions.js'
 import { createClientUploadReceipt } from '../clientUploadReceipt.js'
@@ -344,11 +346,13 @@ export const setUploadSessionIntent = async ({
   id,
   data,
   draft,
+  options,
   req,
 }: {
   data: Record<string, unknown>
   draft?: boolean
   id: string
+  options?: UploadSessionSaveOptions
   req: PayloadRequest
 }): Promise<ClientUploadSession> => {
   const session = await findOwnedSession({ id, req })
@@ -356,13 +360,13 @@ export const setUploadSessionIntent = async ({
   assertResumable({ session })
   await assertSessionAccess({ req, session })
 
-  if (new TextEncoder().encode(JSON.stringify(data)).byteLength > MAX_INTENT_BYTES) {
+  if (new TextEncoder().encode(JSON.stringify({ data, options })).byteLength > MAX_INTENT_BYTES) {
     throw new APIError('Document data is too large to keep with the upload.', 413)
   }
 
   return toClientSession({
     session: await updateSession({
-      data: { intent: { data, draft, submittedAt: new Date().toISOString() } },
+      data: { intent: { data, draft, options, submittedAt: new Date().toISOString() } },
       req,
       session,
     }),
@@ -378,11 +382,13 @@ export const completeUploadSession = async ({
   id,
   data: dataArg,
   draft: draftArg,
+  options: optionsArg,
   req,
 }: {
   data?: Record<string, unknown>
   draft?: boolean
   id: string
+  options?: UploadSessionSaveOptions
   req: PayloadRequest
 }): Promise<{ doc: Record<string, unknown>; session: ClientUploadSession }> => {
   let session = await findOwnedSession({ id, req })
@@ -397,7 +403,9 @@ export const completeUploadSession = async ({
   assertResumable({ session })
   await assertSessionAccess({ req, session })
 
-  const { data, draft } = dataArg ? { data: dataArg, draft: draftArg } : (session.intent ?? {})
+  const { data, draft, options } = dataArg
+    ? { data: dataArg, draft: draftArg, options: optionsArg }
+    : (session.intent ?? {})
 
   if (!data) {
     throw new APIError('Document data is required to finish this upload.', 400)
@@ -422,6 +430,8 @@ export const completeUploadSession = async ({
 
     const collection = req.payload.collections[session.collectionSlug]!
 
+    applySaveOptions({ options, req })
+
     req.file = await getFileFromUploadInstructions({
       collectionSlug: session.collectionSlug,
       file: createFileReference({ req, session }),
@@ -430,12 +440,19 @@ export const completeUploadSession = async ({
 
     const doc =
       session.operation === 'create'
-        ? await createOperation({ collection, data: data as never, draft, req })
+        ? await createOperation({
+            collection,
+            data: data as never,
+            draft,
+            publishAllLocales: options?.publishAllLocales,
+            req,
+          })
         : await updateByIDOperation({
             id: session.targetID!,
             collection,
             data: data as never,
             draft,
+            publishAllLocales: options?.publishAllLocales,
             req,
           })
 
@@ -548,6 +565,35 @@ export const sweepUploadSessions = async ({
   for (const doc of uncleanedSessions) {
     await sweepSession({ now, req, session: doc })
   }
+}
+
+/**
+ * Applies the original save's request options the way the create and update endpoints read them
+ * from the query string, so a save finished from the session targets the same locale and edits.
+ */
+const applySaveOptions = ({
+  options,
+  req,
+}: {
+  options?: UploadSessionSaveOptions
+  req: PayloadRequest
+}): PayloadRequest => {
+  if (options?.locale) {
+    const { fallbackLocale, locale } = sanitizeLocales({
+      fallbackLocale: options.fallbackLocale as never,
+      locale: options.locale,
+      localization: req.payload.config.localization,
+    })
+
+    req.locale = locale
+    req.fallbackLocale = fallbackLocale
+  }
+
+  if (options?.uploadEdits) {
+    req.query = { ...req.query, uploadEdits: options.uploadEdits }
+  }
+
+  return req
 }
 
 const getOwner = (req: PayloadRequest) => {

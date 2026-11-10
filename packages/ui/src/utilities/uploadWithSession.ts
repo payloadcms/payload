@@ -3,6 +3,7 @@ import type {
   ClientUploadSession,
   UploadInstructions,
   UploadSegmentRequest,
+  UploadSessionSaveOptions,
 } from 'payload'
 
 import {
@@ -44,6 +45,8 @@ class UploadSessionRequestError extends Error {
 export type UploadSessionIntentData = {
   data: Record<string, unknown>
   draft?: boolean
+  /** Locale and upload edits of the save, which a normal save sends in its query string. */
+  options?: UploadSessionSaveOptions
 }
 
 export type UploadSessionProgress = {
