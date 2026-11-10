@@ -118,6 +118,7 @@ export const viTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Đổi kích thước {{label}}, kích thước hiện tại: {{size}}',
     searchWidgets: 'Tìm kiếm các widget...',
     widgetAddPin: 'Ghim tài liệu',
+    widgetCollectionPreview: 'Xem trước bộ sưu tập',
     widgetCollectionRequired: 'Collection là bắt buộc.',
     widgetConfigurationError: 'Lỗi cấu hình Widget',
     widgetDropFilesToUpload: 'Kéo và thả một tập tin',

@@ -118,6 +118,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Keisti {{label}} dydį, dabartinis dydis: {{size}}',
     searchWidgets: 'Ieškokite valdiklių...',
     widgetAddPin: 'Prisegti dokumentą',
+    widgetCollectionPreview: 'Kolekcijos peržiūra',
     widgetCollectionRequired: 'Collection yra privaloma.',
     widgetConfigurationError: 'Valdiklio konfigūracijos klaida',
     widgetDropFilesToUpload: 'Temkite ir numeskite failą',

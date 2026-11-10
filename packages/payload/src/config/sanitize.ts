@@ -227,6 +227,30 @@ const addDefaultDashboardWidgets = ({
     minWidth: 'full',
   })
   dashboard.widgets.push({
+    slug: 'collection-preview',
+    Component: '@payloadcms/ui/rsc#CollectionPreviewWidget',
+    fields: sanitizeFields({
+      config: config as unknown as Config,
+      existingFieldNames: new Set(),
+      fields: [
+        {
+          name: 'relatedCollection',
+          type: 'select',
+          label: ({ t }) => t('general:collection'),
+          options: (config.collections ?? [])
+            .filter(({ admin }) => admin?.hidden !== true)
+            .map(({ slug, labels }) => ({ label: labels?.plural || slug, value: slug })),
+          required: true,
+        },
+      ],
+      parentIsLocalized: false,
+      richTextSanitizers,
+      validRelationships,
+    }),
+    label: ({ t }) => t('dashboard:widgetCollectionPreview'),
+    minWidth: 'x-small',
+  })
+  dashboard.widgets.push({
     slug: 'collection-query',
     Component: '@payloadcms/ui/rsc#CollectionQueryWidget',
     fields: sanitizeFields({

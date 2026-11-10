@@ -20,6 +20,8 @@ export type Props = {
   readonly data: Record<string, unknown>[]
   readonly id?: string
   readonly navigationLabel?: string
+  /** Scope heading IDs when multiple table instances share column names. */
+  readonly shouldScopeHeadingIDs?: boolean
 }
 
 export const Table: React.FC<Props> = ({
@@ -30,6 +32,7 @@ export const Table: React.FC<Props> = ({
   columns,
   data,
   navigationLabel: navigationLabelFromProps,
+  shouldScopeHeadingIDs = false,
 }) => {
   const tableID = useTableID(id)
   const navigationLabelFromContext = useTableNavigationLabel()
@@ -70,7 +73,7 @@ export const Table: React.FC<Props> = ({
               {activeColumns.map((col) => (
                 <th
                   data-column={col.accessor}
-                  id={`heading-${col.accessor.replace(/\./g, '__')}`}
+                  id={`${shouldScopeHeadingIDs ? `${tableID}-` : ''}heading-${col.accessor.replace(/\./g, '__')}`}
                   key={col.accessor}
                   role={isGrid ? 'columnheader' : undefined}
                   scope="col"

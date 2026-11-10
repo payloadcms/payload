@@ -39,6 +39,7 @@ export const RenderWidget: React.FC<{
           name: 'render-widget',
           args: {
             widgetData,
+            widgetId,
             widgetSlug,
           },
         })) as RenderWidgetServerFnReturnType

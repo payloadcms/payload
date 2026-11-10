@@ -45,6 +45,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
           req,
           user,
           widgetData,
+          widgetId: layoutItem.id,
           widgetSlug,
         } satisfies WidgetServerProps,
       }),

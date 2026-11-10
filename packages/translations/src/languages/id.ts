@@ -118,6 +118,7 @@ export const idTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Ubah ukuran {{label}}, ukuran saat ini: {{size}}',
     searchWidgets: 'Cari widget...',
     widgetAddPin: 'Sematkan dokumen',
+    widgetCollectionPreview: 'Pratinjau Koleksi',
     widgetCollectionRequired: 'Collection wajib diisi.',
     widgetConfigurationError: 'Kesalahan konfigurasi widget',
     widgetDropFilesToUpload: 'Seret dan lepas file',

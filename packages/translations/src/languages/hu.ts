@@ -120,6 +120,7 @@ export const huTranslations: DefaultTranslationsObject = {
     resizeWidget: '{{label}} átméretezése, jelenlegi méret: {{size}}',
     searchWidgets: 'Keresés widgetek...',
     widgetAddPin: 'Dokumentum rögzítése',
+    widgetCollectionPreview: 'Gyűjtemény előnézete',
     widgetCollectionRequired: 'A Collection megadása kötelező.',
     widgetConfigurationError: 'Widget konfigurációs hiba',
     widgetDropFilesToUpload: 'Húzzon ide egy fájlt',

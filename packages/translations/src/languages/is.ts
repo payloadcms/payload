@@ -119,6 +119,7 @@ export const isTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Breyta stærð {{label}}, núverandi stærð: {{size}}',
     searchWidgets: 'Leita að græjum...',
     widgetAddPin: 'Festu skjal',
+    widgetCollectionPreview: 'Forskoðun safns',
     widgetCollectionRequired: 'Safn er skylt.',
     widgetConfigurationError: 'Villa við stillingu búnaðar',
     widgetDropFilesToUpload: 'Dragðu og slepptu skrá',

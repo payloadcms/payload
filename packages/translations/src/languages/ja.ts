@@ -118,6 +118,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     resizeWidget: '{{label}}のサイズを変更、現在のサイズ：{{size}}',
     searchWidgets: 'ウィジェットを検索...',
     widgetAddPin: 'ドキュメントをピン留め',
+    widgetCollectionPreview: 'コレクションのプレビュー',
     widgetCollectionRequired: 'Collectionは必須です。',
     widgetConfigurationError: 'ウィジェット設定エラー',
     widgetDropFilesToUpload: 'ファイルをドラッグ & ドロップする',

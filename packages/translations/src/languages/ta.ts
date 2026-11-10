@@ -116,6 +116,7 @@ export const taTranslations: DefaultTranslationsObject = {
     resizeWidget: '{{label}} அளவை மாற்று, தற்போதைய அளவு: {{size}}',
     searchWidgets: 'தேடல் கருவிகள்...',
     widgetAddPin: 'ஆவணத்தை பின் செய்யவும்',
+    widgetCollectionPreview: 'தொகுப்பின் முன்னோட்டம்',
     widgetCollectionRequired: 'Collection அவசியமாக 필요.',
     widgetConfigurationError: 'விட்ஜெட் உள்ளமைவு பிழை',
     widgetDropFilesToUpload: 'கோப்பை இழுத்து விடுக',

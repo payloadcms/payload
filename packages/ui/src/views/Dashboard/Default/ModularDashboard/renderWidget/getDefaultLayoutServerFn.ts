@@ -46,6 +46,7 @@ export const getDefaultLayoutHandler: ServerFunction<
           req,
           user,
           widgetData: layoutItem.data || {},
+          widgetId: layoutItem.id,
           widgetSlug,
         } satisfies WidgetServerProps,
       }),

@@ -116,6 +116,7 @@ export const etTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Muuda {{label}} suurust, praegune suurus: {{size}}',
     searchWidgets: 'Otsi vidinaid...',
     widgetAddPin: 'Kinnita dokument',
+    widgetCollectionPreview: 'Kollektsiooni eelvaade',
     widgetCollectionRequired: 'Kogu on nõutav.',
     widgetConfigurationError: 'Vidina konfiguratsiooni viga',
     widgetDropFilesToUpload: 'Lohista ja aseta fail',

@@ -22,7 +22,7 @@
     align-items: center;
     justify-content: center;
 
-    svg {
+    svg:not(.document-placeholder) {
       width: var(--spacer-6);
       height: var(--spacer-6);
     }

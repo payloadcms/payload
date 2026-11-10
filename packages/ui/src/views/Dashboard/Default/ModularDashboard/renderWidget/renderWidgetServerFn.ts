@@ -10,6 +10,8 @@ export type RenderWidgetServerFnArgs = {
    * Instance-specific data for this widget
    */
   widgetData?: Record<string, unknown>
+  /** Stable ID of the widget instance being rendered. */
+  widgetId?: string
   /**
    * The slug of the widget to render
    */
@@ -27,7 +29,7 @@ export type RenderWidgetServerFnReturnType = {
 export const renderWidgetHandler: ServerFunction<
   RenderWidgetServerFnArgs,
   RenderWidgetServerFnReturnType
-> = ({ cookies, locale, permissions, req, user, widgetData, widgetSlug }) => {
+> = ({ cookies, locale, permissions, req, user, widgetData, widgetId, widgetSlug }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -69,6 +71,7 @@ export const renderWidgetHandler: ServerFunction<
       req,
       user,
       widgetData: localeFilteredData,
+      widgetId,
       widgetSlug,
     }
 

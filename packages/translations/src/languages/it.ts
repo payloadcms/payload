@@ -118,6 +118,7 @@ export const itTranslations: DefaultTranslationsObject = {
     resizeWidget: 'Ridimensiona {{label}}, dimensione attuale: {{size}}',
     searchWidgets: 'Cerca widget...',
     widgetAddPin: 'Fissa documento',
+    widgetCollectionPreview: 'Anteprima della raccolta',
     widgetCollectionRequired: 'Collection è obbligatoria.',
     widgetConfigurationError: 'Errore di configurazione del widget',
     widgetDropFilesToUpload: 'Trascina e rilascia un file',
