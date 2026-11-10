@@ -70,6 +70,8 @@ export const checkDocumentLockStatus = async ({
       collection: lockedDocumentsCollectionSlug,
       limit: 1,
       pagination: false,
+      // SQL reads reuse the transaction; MongoDB reads must see locks outside its snapshot.
+      req: payload.db.name === 'mongoose' ? undefined : req,
       sort: '-updatedAt',
       where: lockedDocumentQuery,
     })
