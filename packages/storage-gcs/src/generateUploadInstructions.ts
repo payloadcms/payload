@@ -57,7 +57,7 @@ export const generateUploadInstructions = ({
       .getSignedUrl({
         action: 'write',
         contentType: mimeType,
-        expires: Date.now() + 60 * 60 * 5,
+        expires: Date.now() + 60 * 60 * 5 * 1000,
         extensionHeaders: createOnlyHeaders,
         version: 'v4',
       })

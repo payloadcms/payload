@@ -21,11 +21,11 @@
          container pulls back with negative margin to maintain alignment */
       &:has(> *:nth-child(2)) {
         margin-inline: calc(var(--row-gap) / -2);
+      }
 
-        > * {
-          flex: 0 1 calc(var(--field-width) - var(--row-gap));
-          margin-inline: calc(var(--row-gap) / 2);
-        }
+      > *:not(:only-child) {
+        flex: 0 1 calc(var(--field-width) - var(--row-gap));
+        margin-inline: calc(var(--row-gap) / 2);
       }
     }
 

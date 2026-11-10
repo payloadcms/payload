@@ -93,9 +93,12 @@ test('should fit application viewports without stretching content or moving the 
         assert.ok(Math.abs(bounds.width / bounds.height - viewport.width / viewport.height) < 0.002)
         assert.deepEqual(await page.locator('#root [data-footer]').boundingBox(), initial)
         assert.ok(initial.y + initial.height < bounds.y)
+        assert.equal(await page.locator('#root [data-size]').isVisible(), true)
+        assert.equal(
+          await page.locator('#root [data-size]').textContent(),
+          `${viewport.width} × ${viewport.height}`,
+        )
       }
-      await page.evaluate(() => window.chromeDemo.setSizeVisible({ isVisible: false }))
-      assert.equal(await page.locator('#root [data-size]').isVisible(), false)
       await page.evaluate(() => window.chromeDemo.destroy())
       assert.equal(await page.locator('#root [data-footer]').count(), 0)
     },
@@ -310,30 +313,50 @@ test('should crossfade changed annotation text without restarting unchanged note
   })
 })
 
-test('should show refresh status beside dimensions without moving content, including reduced motion', async () => {
+test('should spin the persistent refresh control without moving content, including reduced motion', async () => {
   await withChrome({
     run: async ({ page }) => {
       const root = page.locator('#root')
       const content = await root.locator('[data-content]').boundingBox()
+      const refresh = root.getByRole('button', { name: 'Refresh frame', exact: true })
+      assert.equal(await refresh.isVisible(), true)
       await page.getByLabel('Keep focus').focus()
       await page.evaluate(() => window.chromeDemo.setRefreshState({ state: 'refreshing' }))
       const status = root.getByRole('status')
       assert.equal(await status.textContent(), 'Refreshing…')
       assert.equal(
-        await root.locator('[data-refresh-text]').evaluate((e) => getComputedStyle(e).position),
+        await root.locator('[data-refresh]').evaluate((e) => getComputedStyle(e).position),
         'absolute',
       )
-      assert.equal(await root.locator('[data-refresh-text]').evaluate((e) => e.clientWidth), 1)
+      assert.equal(await root.locator('[data-refresh]').evaluate((e) => e.clientWidth), 1)
       assert.equal(await root.locator('[data-size]').textContent(), '1280 × 720')
       assert.deepEqual(await root.locator('[data-content]').boundingBox(), content)
       for (const width of [768, 390]) {
         await page.evaluate((width) => window.chromeDemo.setViewport({ width, height: 720 }), width)
         const boxes = await root
-          .locator('[data-header-info]')
+          .locator('[data-size]')
           .evaluate((e) => ({ width: e.clientWidth, scroll: e.scrollWidth }))
         assert.ok(boxes.scroll <= boxes.width)
         assert.equal(await status.isVisible(), true)
       }
+      const completion = await page.evaluate(async () => {
+        const root = document.querySelector('#root').shadowRoot
+        const icon = root.querySelector('[data-refresh-icon]')
+        const animation = icon.getAnimations()[0]
+        animation.currentTime = 200
+        window.chromeDemo.setRefreshState({ state: 'refreshed' })
+        const continued = icon.getAnimations()[0] === animation
+        await new Promise((resolve) =>
+          icon.addEventListener('animationiteration', resolve, { once: true }),
+        )
+        return {
+          continued,
+          spinning: root.querySelector('[data-refresh-button]').hasAttribute('data-spinning'),
+        }
+      })
+      assert.equal(completion.continued, true)
+      assert.equal(completion.spinning, false)
+      await page.evaluate(() => window.chromeDemo.setRefreshState({ state: 'refreshing' }))
       await page.emulateMedia({ reducedMotion: 'reduce' })
       assert.equal(
         await root
@@ -347,6 +370,8 @@ test('should show refresh status beside dimensions without moving content, inclu
       )
       await page.evaluate(() => window.chromeDemo.setRefreshState({ state: 'refreshed' }))
       assert.equal(await status.textContent(), 'Refreshed')
+      assert.equal(await refresh.isVisible(), true)
+      assert.equal(await refresh.evaluate((e) => getComputedStyle(e).opacity), '0.35')
       await page.waitForTimeout(1100)
       assert.equal(await status.isVisible(), false)
       await page.evaluate(() => window.chromeDemo.setRefreshState({ state: 'failed' }))

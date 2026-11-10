@@ -60,7 +60,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         },
         [path]: {
           ...state[path],
-          disableFormData: true,
           rows: withNewRow,
           value: siblingRows.length,
         },
@@ -207,7 +206,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         ...flattenRows(path, rows),
         [path]: {
           ...state[path],
-          disableFormData: true,
           rows: newRows,
           value: rows.length,
         },
@@ -279,7 +277,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         ...remainingFields,
         [path]: {
           ...state[path],
-          disableFormData: rows.length > 0,
           rows: rowsMetadata,
           value: rows.length,
         },
@@ -318,7 +315,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         ...flattenRows(path, siblingRows),
         [path]: {
           ...state[path],
-          disableFormData: true,
           rows: rowsMetadata,
           value: siblingRows.length,
         },
