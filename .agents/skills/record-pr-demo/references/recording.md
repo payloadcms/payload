@@ -34,7 +34,7 @@ Prefer 10–45 seconds. Avoid long typing sequences, setup screens, loading wait
 
 ## Editorial annotations over the recording
 
-For a known step sequence, declare `presentation.annotationSteps` and select the [sidebar API](window-chrome.md#step-sidebar). Call `showAnnotation` when an explanation becomes relevant and `hideAnnotation` when it no longer applies. Keep the scenario’s change metadata constant. For a multi-step sidebar, supply the step’s one-based `index` and the full declared step count as `total` on every call. In the top layout, `index` and `total` are optional and default to 1. If the scenario uses annotations, show the initial note before `ready()` and keep it visible at that marker. Starting annotations after an unannotated opening is rejected. Recordings without annotations remain supported. The shared component controls layout, progress, and transitions; see [window-chrome.md](window-chrome.md).
+For a known step sequence, declare `presentation.annotationSteps` and select the [sidebar API](window-chrome.md#step-sidebar). Call `showAnnotation` when an explanation becomes relevant and `hideAnnotation` when it no longer applies. Keep the scenario’s change metadata constant. For a multi-step sidebar, supply the step’s one-based `index` and the full declared step count as `total` on every call. For a single current sidebar note without declared steps, `index` and `total` default to 1. If the scenario uses annotations, show the initial note before `ready()` and keep it visible at that marker. Starting annotations after an unannotated opening is rejected. Recordings without annotations remain supported. The shared component controls layout, progress, and transitions; see [window-chrome.md](window-chrome.md).
 
 ```js
 await showAnnotation({
@@ -286,7 +286,7 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario
 
 ### Capture resolution and encoding
 
-The default canvas fits the initial application viewport at 1:1 scale, including space for chrome and annotations. With the left sidebar, a 1440×900 viewport produces an 1794×1086 video so the initial app window stays at 1:1 scale. The top layout produces a 1600×1148 video, or 1600×1188 with accessibility feedback. The canvas stays fixed during responsive resizing. An explicit `presentation.canvas` overrides those dimensions and can scale the app to fit. `--viewport` controls the application iframe's CSS dimensions.
+The default canvas fits the initial application viewport at 1:1 scale, including space for chrome and annotations. With the left sidebar, a 1440×900 viewport produces an 1794×1086 video so the initial app window stays at 1:1 scale. Accessibility feedback appears at the bottom of the sidebar and uses the same canvas dimensions. The canvas stays fixed during responsive resizing. An explicit `presentation.canvas` overrides those dimensions and can scale the app to fit. `--viewport` controls the application iframe's CSS dimensions.
 
 The MP4 converter uses H.264 CRF 18 to preserve detail through conversion. The existing 10 MB review/upload budget still applies.
 

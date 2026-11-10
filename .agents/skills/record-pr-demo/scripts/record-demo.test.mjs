@@ -130,13 +130,13 @@ test('should expose annotation helpers to recording scenarios', async () => {
         await page.goto('data:text/html,<main>Annotation demo</main>')
         const stage = page.context().pages()[0]
         await showAnnotation({title:'What changed',body:'The feature works.'})
-        await expect(stage.locator('[data-note-body]')).toHaveText('The feature works.')
+        await expect(stage.locator('.sidebar-step p')).toHaveText('The feature works.')
         await showAnnotation({title:'Result',body:'The second note replaces the first.'})
-        await expect(stage.locator('[data-note]')).toHaveCount(1)
-        await expect(stage.locator('[data-note-body]')).toHaveText('The second note replaces the first.')
+        await expect(stage.locator('.sidebar-steps')).toHaveCount(1)
+        await expect(stage.locator('.sidebar-step p')).toHaveText('The second note replaces the first.')
         await expect(page.locator('[data-pr-demo-annotation]')).toHaveCount(0)
         await hideAnnotation()
-        await expect(stage.locator('[data-note]')).toBeHidden()
+        await expect(stage.locator('.sidebar-steps')).toBeHidden()
       }`,
     )
 
@@ -278,6 +278,7 @@ test('should trim startup frames to the ready opening state', async ({ mock }) =
   const rawVideo = path.join(directory, 'demo.webm')
   const convertedVideo = path.join(directory, 'demo.mp4')
   let trimStart
+  let annotationBounds
   const { chromium } = await import('@playwright/test')
   const launch = chromium.launch.bind(chromium)
   mock.method(chromium, 'launch', async (options) => {
@@ -300,10 +301,11 @@ test('should trim startup frames to the ready opening state', async ({ mock }) =
   try {
     await writeFile(
       scenario,
-      `${presentationExport}export default async function scenario({ page, ready, showAnnotation }) {
+      `${presentationExport}export default async function scenario({ page, ready, showAnnotation, fixture }) {
         await page.goto('data:text/html,<body style="margin:0;background:white"><script>setTimeout(() => { document.body.style.background = "rgb(0, 200, 0)"; document.body.id = "ready" }, 1400)</script></body>')
         await page.locator('#ready').waitFor()
         await showAnnotation({title:'Opening annotation', body:'Visible from the first frame.'})
+        fixture.recordBounds(await page.context().pages()[0].locator('.sidebar-step').boundingBox())
         await ready()
       }`,
     )
@@ -311,6 +313,11 @@ test('should trim startup frames to the ready opening state', async ({ mock }) =
     await recorder.recordDemo({
       baseURL: 'http://localhost:3000',
       label: 'opening-test',
+      fixture: {
+        recordBounds: (bounds) => {
+          annotationBounds = bounds
+        },
+      },
       onOpeningReady: (seconds) => {
         trimStart = seconds
       },
@@ -356,7 +363,7 @@ test('should trim startup frames to the ready opening state', async ({ mock }) =
       '-i',
       convertedVideo,
       '-vf',
-      'crop=900:44:174:80',
+      `crop=${Math.floor(annotationBounds.width)}:${Math.floor(annotationBounds.height)}:${Math.round(annotationBounds.x)}:${Math.round(annotationBounds.y)}`,
       '-frames:v',
       '1',
       '-f',
