@@ -1,6 +1,7 @@
 import fse from 'fs-extra'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { Project } from 'ts-morph'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -10,6 +11,7 @@ import type { NextAppDetails } from '../types.js'
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
 import { getLatestPackageVersion } from '../utils/getLatestPackageVersion.js'
 import { info } from '../utils/log.js'
+import { getAdminRoute } from './get-admin-route.js'
 import { getPackageManager } from './get-package-manager.js'
 import { installPackages } from './install-packages.js'
 
@@ -21,6 +23,7 @@ export async function updatePayloadInProject(
   }
 
   const projectDir = path.dirname(appDetails.nextConfigPath)
+  const adminRoute = getAdminRoute({ projectDir })
 
   const packageObj = (await fse.readJson(path.resolve(projectDir, 'package.json'))) as {
     dependencies?: Record<string, string>
@@ -77,11 +80,31 @@ export async function updatePayloadInProject(
 
   const templateSrcDir = path.resolve(templateFilesPath, 'src/app/(payload)')
 
-  copyRecursiveSync(
-    templateSrcDir,
-    path.resolve(projectDir, appDetails.isSrcDir ? 'src/app' : 'app', '(payload)'),
-    ['custom.scss$'], // Do not overwrite user's custom.scss
+  const payloadDirPath = path.resolve(
+    projectDir,
+    appDetails.isSrcDir ? 'src/app' : 'app',
+    '(payload)',
   )
+
+  if (adminRoute === '/admin') {
+    copyRecursiveSync(templateSrcDir, payloadDirPath, ['custom.scss$'])
+  } else {
+    // Next.js uses %5F for routable segments that begin with an underscore.
+    const adminFolder = adminRoute
+      .slice(1)
+      .split('/')
+      .map((segment) => segment.replace(/^_/, '%5F'))
+      .join('/')
+
+    copyRecursiveSync(templateSrcDir, payloadDirPath, ['custom.scss$', '^admin$'])
+    copyRecursiveSync(path.join(templateSrcDir, 'admin'), path.join(payloadDirPath, adminFolder))
+
+    const layout = new Project().addSourceFileAtPath(path.join(payloadDirPath, 'layout.tsx'))
+    const importMapPath = adminFolder ? `./${adminFolder}/importMap.js` : './importMap.js'
+
+    layout.getImportDeclaration('./admin/importMap.js')?.setModuleSpecifier(importMapPath)
+    layout.saveSync()
+  }
 
   return { message: 'Payload updated successfully.', success: true }
 }
