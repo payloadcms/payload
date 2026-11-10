@@ -47,7 +47,7 @@ import { useFormSubmission } from './useFormSubmission.js'
 const baseClass = 'form'
 
 export const Form: React.FC<FormProps> = (props) => {
-  const { collectionSlug, docConfig } = useDocumentInfo()
+  const { id, collectionSlug, docConfig } = useDocumentInfo()
 
   const {
     action,
