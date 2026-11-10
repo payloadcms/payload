@@ -45,6 +45,7 @@ import {
   numberFieldsSlug,
   relationshipFieldsSlug,
   selectVersionsFieldsSlug,
+  slugFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
 } from './slugs.js'
@@ -5876,6 +5877,20 @@ describe('Fields', () => {
       })
 
       expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
+    })
+  })
+
+  describe('slug', () => {
+    it('should generate a required slug on create when none is provided', async () => {
+      const doc = await payload.create({
+        collection: slugFieldsSlug,
+        data: { title: 'Generated Slug Title' },
+      })
+
+      expect(doc.slug).toBe('generated-slug-title')
+      expect(doc.customSlugify).toBe('GENERATED SLUG TITLE')
+
+      await payload.delete({ collection: slugFieldsSlug, id: doc.id })
     })
   })
 })
