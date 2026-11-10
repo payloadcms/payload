@@ -1128,6 +1128,12 @@ Remove `diffMethod` from your props. If you passed it on to a diffing utility, p
   }) => {
 ```
 
+### `root` removed from the `Endpoint` type
+
+The deprecated `root` property has been removed from the `Endpoint` type. It has been typed as `never` since 3.0, so it couldn't be set, and Payload ignored it.
+
+To serve a route outside of `routes.api`, add it to your app directly, e.g. as a [Next.js route handler](https://nextjs.org/docs/app/api-reference/file-conventions/route).
+
 ### Collection after-operation hooks no longer report read operations
 
 The deprecated `'read'` value for the `operation` argument of collection `afterOperation` hooks has been removed. Payload has not dispatched `afterOperation` with `operation: 'read'` for some time — the `find` and `findByID` operations report their own names (`'find'` and `'findByID'`) instead.
