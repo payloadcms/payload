@@ -6,6 +6,7 @@ import { randomBytes } from 'node:crypto'
 import { rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import * as path from 'path'
+import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import { gotoAndWaitForForm } from '../../__helpers/e2e/helpers.js'
@@ -13,7 +14,7 @@ import { AdminUrlUtil } from '../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../../playwright.config.js'
-import { videosSlug } from '../shared.js'
+import { imagesTransformedSlug, videosSlug } from '../shared.js'
 import { createTestBucket } from '../test-utils.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -26,8 +27,10 @@ const s3Host = new URL(process.env.S3_ENDPOINT!).host
 // Above the 6 MiB test threshold, so it uses a session: three S3 parts of 5 + 5 + 1 MiB.
 const FILE_SIZE = 11 * 1024 * 1024
 const filePath = path.join(os.tmpdir(), `upload-sessions-e2e-${process.pid}.mp4`)
+const imagePath = path.join(os.tmpdir(), `upload-sessions-e2e-${process.pid}.png`)
 
 type UploadLog = {
+  intentBodies: Record<string, unknown>[]
   partPuts: number
   sessionBodies: Record<string, unknown>[]
   sessionCalls: string[]
@@ -36,14 +39,31 @@ type UploadLog = {
 test.describe('storage-s3 upload sessions E2E', () => {
   let serverURL: string
   let videosURL: AdminUrlUtil
+  let imagesURL: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
     videosURL = new AdminUrlUtil(serverURL, videosSlug)
+    imagesURL = new AdminUrlUtil(serverURL, imagesTransformedSlug)
 
     await createTestBucket()
     await writeFile(filePath, randomBytes(FILE_SIZE))
+    // Noise does not compress, so this PNG is above the 6 MiB session threshold.
+    await writeFile(
+      imagePath,
+      await sharp({
+        create: {
+          background: '#000',
+          channels: 3,
+          height: 2000,
+          noise: { type: 'gaussian', mean: 128, sigma: 60 },
+          width: 2000,
+        },
+      })
+        .png({ compressionLevel: 0 })
+        .toBuffer(),
+    )
 
     const page = await browser.newPage()
     await ensureCompilationIsDone({ page, serverURL })
@@ -52,6 +72,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
 
   test.afterAll(async () => {
     await rm(filePath, { force: true })
+    await rm(imagePath, { force: true })
   })
 
   // Several tests slow S3 part uploads on purpose so they can act mid-upload.
@@ -66,13 +87,15 @@ test.describe('storage-s3 upload sessions E2E', () => {
   const openCreateForm = async ({
     browser,
     partDelay = 0,
+    url = videosURL.create,
   }: {
     browser: import('@playwright/test').Browser
     partDelay?: number
+    url?: string
   }): Promise<{ context: BrowserContext; log: UploadLog; page: Page }> => {
     const context = await browser.newContext()
     const page = await context.newPage()
-    const log: UploadLog = { partPuts: 0, sessionBodies: [], sessionCalls: [] }
+    const log: UploadLog = { intentBodies: [], partPuts: 0, sessionBodies: [], sessionCalls: [] }
 
     page.on('dialog', (dialog) => dialog.accept())
     page.on('request', (request) => {
@@ -83,6 +106,10 @@ test.describe('storage-s3 upload sessions E2E', () => {
 
         if (request.method() === 'POST' && url.pathname === '/api/payload-upload-sessions') {
           log.sessionBodies.push(request.postDataJSON() as Record<string, unknown>)
+        }
+
+        if (request.method() === 'POST' && url.pathname.endsWith('/intent')) {
+          log.intentBodies.push(request.postDataJSON() as Record<string, unknown>)
         }
       }
     })
@@ -112,7 +139,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
         ),
       )
     })
-    await gotoAndWaitForForm(page, videosURL.create)
+    await gotoAndWaitForForm(page, url)
 
     return { context, log, page }
   }
@@ -496,6 +523,119 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await expect
       .poll(async () => (await findVideo(title))?.updatedAt, { timeout: 60_000 })
       .not.toBe(created.updatedAt)
+
+    await context.close()
+  })
+
+  test('should save a background-finished upload in the locale it was edited in', async ({
+    browser,
+  }) => {
+    const { context, log, page } = await openCreateForm({
+      browser,
+      partDelay: 3000,
+      url: `${imagesURL.create}?locale=de`,
+    })
+    const caption = `Hallo ${Date.now()}`
+
+    await page.locator('input[type="file"]').first().setInputFiles(imagePath)
+    await page.getByLabel('Caption').fill(caption)
+    await expect.poll(() => log.partPuts).toBeGreaterThan(0)
+    await page.locator('#action-save').click()
+    await expect.poll(() => log.sessionCalls.some((call) => call.endsWith('/intent'))).toBe(true)
+    await page.getByRole('link', { name: 'Users' }).first().click()
+
+    await expect(page.getByText('Upload finished and the document was saved.')).toBeVisible({
+      timeout: 60_000,
+    })
+    expect(log.intentBodies.at(-1)).toMatchObject({ options: { locale: 'de' } })
+
+    const findImage = async (locale: string) => {
+      const response = await fetch(
+        `${serverURL}/api/${imagesTransformedSlug}?locale=${locale}&fallback-locale=null&sort=-createdAt&limit=1`,
+      )
+
+      return ((await response.json()) as { docs: { caption?: string }[] }).docs[0]
+    }
+
+    expect((await findImage('de'))?.caption).toBe(caption)
+    expect((await findImage('en'))?.caption).toBeUndefined()
+
+    await context.close()
+  })
+
+  test('should resume a failed upload on Save instead of starting another session', async ({
+    browser,
+  }) => {
+    const { context, log, page } = await openCreateForm({ browser })
+    const title = `Resumed after failure ${Date.now()}`
+    let isStorageDown = true
+
+    // Registered after the logging route, so it runs first and can fail part uploads.
+    await page.route(
+      (url) => url.host === s3Host,
+      (route) =>
+        isStorageDown && route.request().method() === 'PUT'
+          ? route.abort('internetdisconnected')
+          : route.fallback(),
+    )
+
+    await pickFile(page)
+    await expect(page.getByText('was interrupted')).toBeVisible({ timeout: 90_000 })
+
+    isStorageDown = false
+    await page.getByLabel('Title').fill(title)
+    await page.locator('#action-save').click()
+
+    expect((await expectVideo(title)).filesize).toBe(FILE_SIZE)
+    expect(
+      log.sessionCalls.filter((call) => call === 'POST /api/payload-upload-sessions'),
+    ).toHaveLength(1)
+
+    const unfinished = await page.evaluate(async () =>
+      fetch('/api/payload-upload-sessions')
+        .then((res) => res.json())
+        .then(({ docs }) => docs.length),
+    )
+
+    expect(unfinished).toBe(0)
+
+    await context.close()
+  })
+
+  test('should offer to finish saving after a failed save instead of saving it on its own later', async ({
+    browser,
+  }) => {
+    const { context, log, page } = await openCreateForm({ browser, partDelay: 2000 })
+    const title = `Failed save ${Date.now()}`
+
+    await page.route(
+      (url) => url.pathname === `/api/${videosSlug}`,
+      (route) =>
+        route.request().method() === 'POST'
+          ? route.fulfill({ json: { errors: [{ message: 'Server unavailable' }] }, status: 500 })
+          : route.fallback(),
+    )
+
+    await pickFile(page)
+    await page.getByLabel('Title').fill(title)
+    await expect.poll(() => log.partPuts).toBeGreaterThan(0)
+    await page.locator('#action-save').click()
+
+    // The upload finishes while the form is open, so the form saves and that save fails.
+    await expect(page.getByText('Server unavailable')).toBeVisible({ timeout: 60_000 })
+    expect(
+      log.sessionCalls.some((call) => call.startsWith('DELETE ') && call.endsWith('/intent')),
+    ).toBe(true)
+
+    await page.unroute((url) => url.pathname === `/api/${videosSlug}`)
+    await page.getByRole('link', { name: 'Users' }).first().click()
+    await page.getByRole('button', { name: 'Leave anyway' }).click()
+    await expect(page.getByRole('button', { name: 'Finish saving' })).toBeVisible()
+
+    // A new Admin load offers the same instead of saving the abandoned data.
+    await page.goto(`${serverURL}/admin`)
+    await expect(page.getByRole('button', { name: 'Finish saving' })).toBeVisible()
+    expect(await findVideo(title)).toBeUndefined()
 
     await context.close()
   })

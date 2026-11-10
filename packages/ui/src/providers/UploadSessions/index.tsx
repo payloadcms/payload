@@ -10,6 +10,7 @@ import type { UploadSessionIntentData } from '../../utilities/uploadWithSession.
 import { useBeforeUnload } from '../../elements/LeaveWithoutSaving/usePreventLeave.js'
 import {
   cancelUploadSession,
+  clearUploadSessionIntent,
   completeUploadSession,
   createUploadSession,
   getUploadSession,
@@ -50,6 +51,8 @@ type UploadEntry = {
   isAttached: boolean
   /** Counted in `isSaveWaitingOnUpload` until the upload settles. */
   isCountedAsWaitingSave?: boolean
+  /** The upload stopped with an error. The next save resumes the same session. */
+  isFailed?: boolean
   isSettled: boolean
   /** Whether a save has consumed or is waiting on this upload. */
   isWaitedOn: boolean
@@ -90,6 +93,8 @@ export type UploadSessionsContext = {
   start: (args: {
     collectionSlug: UploadCollectionSlug
     file: File
+    /** A session this file already started, resumed instead of creating another one. */
+    resumeSessionID?: string
     targetID?: number | string
   }) => boolean
 }
@@ -188,6 +193,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       })}?uploadSession=${session.id}`
 
       toast.info(t('upload:uploadReadyToFinishSaving', { filename: session.file.filename }), {
+        id: `upload-session-ready-${session.id}`,
         action: { label: t('upload:finishSaving'), onClick: () => router.push(url) },
         closeButton: true,
         duration: Infinity,
@@ -236,7 +242,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
   )
 
   const start = useCallback<UploadSessionsContext['start']>(
-    ({ collectionSlug, file, targetID }) => {
+    ({ collectionSlug, file, resumeSessionID, targetID }) => {
       const collectionConfig = getEntityConfig({ collectionSlug })
 
       if (!collectionConfig || !shouldUseUploadSession({ collectionConfig, file })) {
@@ -255,12 +261,25 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
 
       // Not aborted with the upload: the server may already have created the session, and
       // `cancel` needs its ID to release it.
-      const session = createUploadSession({
-        collectionSlug,
-        file,
-        targetID,
-        ...requestArgs,
-      })
+      const createSession = () =>
+        createUploadSession({
+          collectionSlug,
+          file,
+          targetID,
+          ...requestArgs,
+        })
+
+      // A retry after a failed upload continues its session, so only missing parts are sent and
+      // the session does not linger next to a new one.
+      const session = resumeSessionID
+        ? getUploadSession({ id: resumeSessionID, ...requestArgs })
+            .then((existing) =>
+              existing.status === 'pending' || existing.status === 'active'
+                ? existing
+                : createSession(),
+            )
+            .catch(createSession)
+        : createSession()
 
       const progress = createProgressToast({ id: toastID })
 
@@ -319,17 +338,31 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
               intentRequest: entry.intentRequest,
               session: { ...(await session), hasIntent: entry.hasIntent },
             })
+            return
+          }
+
+          // The form is still open and saves the document itself, so the stored data must not
+          // be saved again later, e.g. by a recovery after that save failed.
+          if (entry.hasIntent) {
+            entry.hasIntent = false
+            void Promise.resolve(entry.intentRequest)
+              .then(() => session)
+              .then(({ id }) => clearUploadSessionIntent({ id, ...requestArgs }))
+              .catch(() => {})
           }
         },
         (err: unknown) => {
           entry.isSettled = true
           releaseWaitingSave(entry)
-          removeEntry(entry)
 
           if (controller.signal.aborted) {
+            removeEntry(entry)
             toast.dismiss(toastID)
             return
           }
+
+          // Kept, so the next save resumes this session instead of starting another one.
+          entry.isFailed = true
 
           toast.error(
             `${t('upload:uploadInterrupted', { filename: file.name })} ${getErrorMessage(err)}`,
@@ -401,12 +434,29 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
 
       removeEntry(entry)
 
+      // A failed upload stays recoverable: the next Admin load offers to resume it.
+      if (entry.isFailed) {
+        return
+      }
+
       // Uploaded but never saved: offer a way back to the form without re-uploading.
       if (!entry.isWaitedOn) {
         void entry.session.then((session) => showReadyToFinish({ session }))
+        return
       }
+
+      // A save used this upload. If it failed, offer the same; one that succeeded has completed
+      // the session.
+      void entry.session
+        .then(({ id }) => getUploadSession({ id, ...requestArgs }))
+        .then((session) => {
+          if (session.status !== 'completed' && session.isStorageComplete) {
+            showReadyToFinish({ session })
+          }
+        })
+        .catch(() => {})
     },
-    [removeEntry, showReadyToFinish],
+    [removeEntry, requestArgs, showReadyToFinish],
   )
 
   const getUploadedFile = useCallback<UploadSessionsContext['getUploadedFile']>(
@@ -425,6 +475,17 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         cancel({ file })
 
         if (!start({ collectionSlug, file, targetID })) {
+          return null
+        }
+
+        entry = entriesRef.current.get(file)!
+      } else if (entry.isFailed) {
+        const { collectionSlug, sessionID, targetID } = entry
+
+        removeEntry(entry)
+        toast.dismiss(entry.toastID)
+
+        if (!start({ collectionSlug, file, resumeSessionID: sessionID, targetID })) {
           return null
         }
 
@@ -454,7 +515,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
 
       return Promise.race([entry.file, entry.detached])
     },
-    [cancel, requestArgs, start],
+    [cancel, removeEntry, requestArgs, start],
   )
 
   const adoptSession = useCallback(

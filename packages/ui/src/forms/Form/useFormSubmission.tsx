@@ -385,6 +385,7 @@ export const useFormSubmission = ({
 
         try {
           const formData = await contextRef.current.createFormData(overrides, {
+            action: typeof actionArg === 'string' ? actionArg : undefined,
             data,
             mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
           })
