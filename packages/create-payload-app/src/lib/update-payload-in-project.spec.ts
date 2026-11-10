@@ -39,6 +39,7 @@ describe('Payload project updates', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.stubEnv('JEST_WORKER_ID', '1')
     projectDir = fse.mkdtempSync(path.join(os.tmpdir(), 'cpa-update-project-'))
     templateRoot = fse.mkdtempSync(path.join(os.tmpdir(), 'cpa-update-template-'))
     mocks.getPackageManager.mockResolvedValue('pnpm')
@@ -50,6 +51,24 @@ describe('Payload project updates', () => {
     vi.unstubAllEnvs()
     fse.removeSync(projectDir)
     fse.removeSync(templateRoot)
+  })
+
+  it('should skip config analysis when Payload is already up to date', async () => {
+    fse.writeJsonSync(path.join(projectDir, 'package.json'), {
+      dependencies: { payload: '4.2.0', '@payloadcms/ui': '4.2.0' },
+    })
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.ts'),
+      "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: process.env.ADMIN_ROUTE } })",
+    )
+
+    const result = await updatePayloadInNextProject({
+      appDetails: nextDetails({ projectDir, appDir: 'src/app' }),
+    })
+
+    expect(result).toEqual({ message: 'Payload v4.2.0 is already up to date.', success: true })
+    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(fse.existsSync(path.join(projectDir, 'src/app'))).toBe(false)
   })
 
   it('should update every installed Payload dependency to one version without a Next config', async () => {
@@ -639,6 +658,7 @@ describe('Payload project updates', () => {
   })
 })
 
+/** Create nested template fixtures used by the project updater tests. */
 function writeFiles({ files, root }: { files: Record<string, string>; root: string }): void {
   for (const [relativePath, content] of Object.entries(files)) {
     fse.outputFileSync(path.join(root, relativePath), content)

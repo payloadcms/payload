@@ -32,6 +32,10 @@ export async function updatePayloadPackages({
   return { message: result.message, success: result.success }
 }
 
+/**
+ * Upgrade Payload packages and refresh Next.js wrappers at the configured admin route.
+ * Validate the route only when an upgrade is needed, before installing packages.
+ */
 export async function updatePayloadInNextProject({
   appDetails,
   versionOrTag,
@@ -44,8 +48,14 @@ export async function updatePayloadInNextProject({
   }
 
   const projectDir = path.dirname(appDetails.nextConfigPath)
-  const adminRoute = getAdminRoute({ projectDir })
-  const packageUpdate = await performPayloadPackageUpdate({ projectDir, versionOrTag })
+  let adminRoute = '/admin'
+  const packageUpdate = await performPayloadPackageUpdate({
+    beforeInstall: () => {
+      adminRoute = getAdminRoute({ projectDir })
+    },
+    projectDir,
+    versionOrTag,
+  })
 
   if (!packageUpdate.isUpdated) {
     return { message: packageUpdate.message, success: packageUpdate.success }
@@ -152,10 +162,13 @@ export async function updatePayloadInProject(
   return updatePayloadInNextProject({ appDetails, versionOrTag })
 }
 
+/** Resolve package versions, run any required preflight, then install only if needed. */
 async function performPayloadPackageUpdate({
+  beforeInstall,
   projectDir,
   versionOrTag,
 }: {
+  beforeInstall?: () => void
   projectDir: string
   versionOrTag?: string
 }): Promise<PackageUpdateResult> {
@@ -192,6 +205,8 @@ async function performPayloadPackageUpdate({
       success: true,
     }
   }
+
+  beforeInstall?.()
 
   const payloadPackages = payloadPackageEntries
     .map(([packageName]) => packageName)

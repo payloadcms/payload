@@ -126,6 +126,7 @@ export function getAdminRoute({ projectDir }: { projectDir: string }): string {
   return route.replace(/\/+$/, '') || '/'
 }
 
+/** Match quoted or unquoted config keys and reject ambiguous duplicate properties. */
 function findConfigProperty({ name, config }: { config: ObjectLiteralExpression; name: string }) {
   const matches = config.getProperties().filter((property) => {
     if (Node.isSpreadAssignment(property)) {
