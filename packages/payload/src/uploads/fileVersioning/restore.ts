@@ -41,7 +41,7 @@ export const isolateRestoreRequest = ({ req }: { req: PayloadRequest }): Payload
   isolated.payloadUploadSizes = undefined
   isolated.query = { ...req.query }
   delete isolated.query.uploadEdits
-  isolated.context = withoutCloudStorageState(req.context)
+  isolated.context = withoutCloudStorageState({ context: req.context })
   shareFileOperationScope({ owner: req, req: isolated })
   return isolated
 }

@@ -27,7 +27,11 @@ const cloudStorageStateKeys = [
 ]
 
 /** A copy of `context` without one upload's cloud storage state, for a nested file operation. */
-export const withoutCloudStorageState = (context: RequestContext): RequestContext => {
+export const withoutCloudStorageState = ({
+  context,
+}: {
+  context: RequestContext
+}): RequestContext => {
   const copy = { ...context }
   for (const key of cloudStorageStateKeys) {
     delete copy[key]
@@ -49,9 +53,11 @@ export const shareManagedCloudMetadata = ({
 }: {
   from: PayloadRequest
   to: PayloadRequest
-}): void => {
+}): PayloadRequest => {
   to.context._payloadManagedCloudStorage = true
   to.context._payloadManagedCloudMetadata = from.context._payloadManagedCloudMetadata
+
+  return to
 }
 
 /** Preserve the caller's cloud flags; nested Local API calls can replace req.context. */
