@@ -1,12 +1,14 @@
 import fse from 'fs-extra'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { Project } from 'ts-morph'
 
 import type { NextAppDetails, TanStackAppDetails } from '../types.js'
 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
 import { info } from '../utils/log.js'
 import { resolvePackageVersion } from '../utils/resolvePackageVersion.js'
+import { getAdminRoute } from './get-admin-route.js'
 import { getPackageManager } from './get-package-manager.js'
 import { installPackages } from './install-packages.js'
 import { TANSTACK_TEMPLATE_FILES } from './tanstack/template-files.js'
@@ -42,6 +44,7 @@ export async function updatePayloadInNextProject({
   }
 
   const projectDir = path.dirname(appDetails.nextConfigPath)
+  const adminRoute = getAdminRoute({ projectDir })
   const packageUpdate = await performPayloadPackageUpdate({ projectDir, versionOrTag })
 
   if (!packageUpdate.isUpdated) {
@@ -72,7 +75,25 @@ export async function updatePayloadInNextProject({
     )
   }
 
-  copyRecursiveSync(templateSrcDir, payloadDirPath, ['custom.css$'])
+  if (adminRoute === '/admin') {
+    copyRecursiveSync(templateSrcDir, payloadDirPath, ['custom.css$'])
+  } else {
+    // Next.js uses %5F for routable segments that begin with an underscore.
+    const adminFolder = adminRoute
+      .slice(1)
+      .split('/')
+      .map((segment) => segment.replace(/^_/, '%5F'))
+      .join('/')
+
+    copyRecursiveSync(templateSrcDir, payloadDirPath, ['custom.css$', '^admin$'])
+    copyRecursiveSync(path.join(templateSrcDir, 'admin'), path.join(payloadDirPath, adminFolder))
+
+    const layout = new Project().addSourceFileAtPath(path.join(payloadDirPath, 'layout.tsx'))
+    const importMapPath = adminFolder ? `./${adminFolder}/importMap.js` : './importMap.js'
+
+    layout.getImportDeclaration('./admin/importMap.js')?.setModuleSpecifier(importMapPath)
+    layout.saveSync()
+  }
 
   return { message: packageUpdate.message, success: packageUpdate.success }
 }

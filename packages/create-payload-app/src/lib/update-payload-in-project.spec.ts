@@ -47,6 +47,7 @@ describe('Payload project updates', () => {
   })
 
   afterEach(() => {
+    vi.unstubAllEnvs()
     fse.removeSync(projectDir)
     fse.removeSync(templateRoot)
   })
@@ -149,6 +150,381 @@ describe('Payload project updates', () => {
       fse.readFileSync(sourceImportMapPath, 'utf8'),
     )
     expect(fse.readFileSync(customCssPath, 'utf8')).toBe('.custom { color: rebeccapurple; }\n')
+  })
+
+  it.each([
+    { appDir: 'app', adminRoute: '/cms' },
+    { appDir: 'app', adminRoute: '/admin/content' },
+    { appDir: 'app', adminRoute: '/' },
+    { appDir: 'src/app', adminRoute: '/cms' },
+    { appDir: 'src/app', adminRoute: '/admin/content' },
+    { appDir: 'src/app', adminRoute: '/' },
+  ])('should upgrade $adminRoute from config in $appDir', async ({ appDir, adminRoute }) => {
+    writeProjectPackage(projectDir)
+    const payloadDir = path.join(projectDir, appDir, '(payload)')
+    const adminDir = path.join(payloadDir, adminRoute.slice(1))
+    const sourceDir = path.resolve(dirname, '../../../../templates/blank/src/app/(payload)')
+    const pagePath = path.join(adminDir, '[[...segments]]/page.tsx')
+    const importMapPath = path.join(adminDir, 'importMap.js')
+
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.ts'),
+      `
+      import { buildConfig } from 'payload'
+      throw new Error('Config must not be executed')
+      export default buildConfig({ routes: { admin: ${JSON.stringify(adminRoute)} } })
+    `,
+    )
+    fse.outputFileSync(pagePath, 'stale page')
+    fse.outputFileSync(importMapPath, 'stale import map')
+    fse.outputFileSync(path.join(payloadDir, 'custom.css'), '.custom { color: red; }')
+
+    const result = await updatePayloadInNextProject({
+      appDetails: nextDetails({ projectDir, appDir }),
+      versionOrTag: 'beta',
+    })
+
+    expect(result.success).toBe(true)
+    expect(fse.readFileSync(pagePath, 'utf8')).toBe(
+      fse.readFileSync(path.join(sourceDir, 'admin/[[...segments]]/page.tsx'), 'utf8'),
+    )
+    expect(fse.readFileSync(importMapPath, 'utf8')).toBe(
+      fse.readFileSync(path.join(sourceDir, 'admin/importMap.js'), 'utf8'),
+    )
+    expect(fse.readFileSync(path.join(payloadDir, 'custom.css'), 'utf8')).toBe(
+      '.custom { color: red; }',
+    )
+    expect(fse.existsSync(path.join(payloadDir, 'admin/[[...segments]]'))).toBe(false)
+    const layout = fse.readFileSync(path.join(payloadDir, 'layout.tsx'), 'utf8')
+    const relativeMap = adminRoute === '/' ? './importMap.js' : `.${adminRoute}/importMap.js`
+    expect(layout).toContain(`from '${relativeMap}'`)
+    expect(fse.readFileSync(path.join(payloadDir, 'api/[...slug]/route.ts'), 'utf8')).toBe(
+      fse.readFileSync(path.join(sourceDir, 'api/[...slug]/route.ts'), 'utf8'),
+    )
+  })
+
+  it.each(['src/payload.config.ts', 'cms/config.ts'])(
+    'should resolve the admin route from the @payload-config alias to %s',
+    async (configPath) => {
+      writeProjectPackage(projectDir)
+      fse.outputJsonSync(path.join(projectDir, 'tsconfig.json'), {
+        compilerOptions: { baseUrl: '.', paths: { '@payload-config': [`./${configPath}`] } },
+      })
+      fse.outputFileSync(
+        path.join(projectDir, configPath),
+        "import { buildConfig as configure } from 'payload'; export default configure({ routes: { admin: '/cms' } })",
+      )
+
+      await updatePayloadInNextProject({
+        appDetails: nextDetails({ projectDir, appDir: 'src/app' }),
+        versionOrTag: 'beta',
+      })
+
+      expect(
+        fse.existsSync(path.join(projectDir, 'src/app/(payload)/cms/[[...segments]]/page.tsx')),
+      ).toBe(true)
+      expect(fse.existsSync(path.join(projectDir, 'src/app/(payload)/admin'))).toBe(false)
+    },
+  )
+
+  it.each([false, true])(
+    'should resolve an inherited alias from its declaring tsconfig (child config: %s)',
+    async (hasChildConfig) => {
+      const childDir = path.join(projectDir, 'site')
+      fse.ensureDirSync(childDir)
+      writeProjectPackage(childDir)
+      fse.outputJsonSync(path.join(projectDir, 'tsconfig.base.json'), {
+        compilerOptions: { paths: { '@payload-config': ['./payload.config.ts'] } },
+      })
+      fse.outputJsonSync(path.join(childDir, 'tsconfig.json'), { extends: '../tsconfig.base.json' })
+      fse.outputFileSync(
+        path.join(projectDir, 'payload.config.ts'),
+        "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: '/cms' } })",
+      )
+      if (hasChildConfig) {
+        fse.outputFileSync(
+          path.join(childDir, 'payload.config.ts'),
+          "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: '/wrong' } })",
+        )
+      }
+
+      await updatePayloadInNextProject({
+        appDetails: nextDetails({ projectDir: childDir, appDir: 'app' }),
+        versionOrTag: 'beta',
+      })
+
+      const payloadDir = path.join(childDir, 'app/(payload)')
+      expect(fse.existsSync(path.join(payloadDir, 'cms/[[...segments]]/page.tsx'))).toBe(true)
+      expect(fse.existsSync(path.join(payloadDir, 'wrong'))).toBe(false)
+      expect(fse.existsSync(path.join(payloadDir, 'admin'))).toBe(false)
+      expect(fse.readFileSync(path.join(payloadDir, 'layout.tsx'), 'utf8')).toContain(
+        "from './cms/importMap.js'",
+      )
+    },
+  )
+
+  it.each([
+    { appDir: 'app', adminRoute: '/_cms', adminFolder: '%5Fcms' },
+    { appDir: 'src/app', adminRoute: '/cms/_content', adminFolder: 'cms/%5Fcontent' },
+    { appDir: 'app', adminRoute: '/__cms/_content', adminFolder: '%5F_cms/%5Fcontent' },
+  ])(
+    'should refresh the routable folder for $adminRoute',
+    async ({ appDir, adminRoute, adminFolder }) => {
+      writeProjectPackage(projectDir)
+      const payloadDir = path.join(projectDir, appDir, '(payload)')
+      const adminDir = path.join(payloadDir, adminFolder)
+      const sourceDir = path.resolve(dirname, '../../../../templates/blank/src/app/(payload)')
+      const pagePath = path.join(adminDir, '[[...segments]]/page.tsx')
+      fse.outputFileSync(
+        path.join(projectDir, 'payload.config.ts'),
+        `import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: ${JSON.stringify(adminRoute)} } })`,
+      )
+      fse.outputFileSync(pagePath, 'stale reachable wrapper')
+      fse.outputFileSync(path.join(adminDir, 'importMap.js'), 'stale import map')
+
+      await updatePayloadInNextProject({
+        appDetails: nextDetails({ projectDir, appDir }),
+        versionOrTag: 'beta',
+      })
+
+      expect(fse.readFileSync(pagePath, 'utf8')).toBe(
+        fse.readFileSync(path.join(sourceDir, 'admin/[[...segments]]/page.tsx'), 'utf8'),
+      )
+      expect(fse.readFileSync(path.join(adminDir, 'importMap.js'), 'utf8')).toBe(
+        fse.readFileSync(path.join(sourceDir, 'admin/importMap.js'), 'utf8'),
+      )
+      expect(fse.readFileSync(path.join(payloadDir, 'layout.tsx'), 'utf8')).toContain(
+        `from './${adminFolder}/importMap.js'`,
+      )
+      expect(fse.existsSync(path.join(payloadDir, adminRoute.slice(1)))).toBe(false)
+      expect(fse.existsSync(path.join(payloadDir, 'admin'))).toBe(false)
+    },
+  )
+
+  it.each([
+    "{ routes: { admin: '/first', 'admin': '/second' } }",
+    "{ routes: { admin: '/first' }, 'routes': { admin: '/second' } }",
+  ])('should reject duplicate route properties before updating: %s', async (config) => {
+    writeProjectPackage(projectDir)
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.js'),
+      `import { buildConfig } from 'payload'; export default buildConfig(${config})`,
+    )
+
+    await expect(
+      updatePayloadInNextProject({
+        appDetails: nextDetails({ projectDir, appDir: 'app' }),
+        versionOrTag: 'beta',
+      }),
+    ).rejects.toThrow(/routes.admin.*duplicate/)
+
+    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(fse.existsSync(path.join(projectDir, 'app/(payload)'))).toBe(false)
+  })
+
+  it.each([
+    "{ 'routes': { admin: '/cms' } }",
+    "{ routes: { 'admin': '/cms' } }",
+    '{ "routes": { "admin": "/cms" } }',
+  ])('should honor quoted literal property names: %s', async (config) => {
+    writeProjectPackage(projectDir)
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.ts'),
+      `import { buildConfig } from 'payload'; export default buildConfig(${config})`,
+    )
+
+    await updatePayloadInNextProject({
+      appDetails: nextDetails({ projectDir, appDir: 'app' }),
+      versionOrTag: 'beta',
+    })
+
+    expect(
+      fse.existsSync(path.join(projectDir, 'app/(payload)/cms/[[...segments]]/page.tsx')),
+    ).toBe(true)
+    expect(fse.existsSync(path.join(projectDir, 'app/(payload)/admin'))).toBe(false)
+    expect(fse.readFileSync(path.join(projectDir, 'app/(payload)/layout.tsx'), 'utf8')).toContain(
+      "from './cms/importMap.js'",
+    )
+  })
+
+  it.each(['ts', 'js'])(
+    'should resolve an extensionless alias to payload.config.%s',
+    async (extension) => {
+      writeProjectPackage(projectDir)
+      fse.outputJsonSync(path.join(projectDir, 'tsconfig.json'), {
+        compilerOptions: { baseUrl: '.', paths: { '@payload-config': ['./cms/payload.config'] } },
+      })
+      fse.outputFileSync(
+        path.join(projectDir, `cms/payload.config.${extension}`),
+        "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: '/cms' } })",
+      )
+
+      await updatePayloadInNextProject({
+        appDetails: nextDetails({ projectDir, appDir: 'app' }),
+        versionOrTag: 'beta',
+      })
+
+      expect(
+        fse.existsSync(path.join(projectDir, 'app/(payload)/cms/[[...segments]]/page.tsx')),
+      ).toBe(true)
+      expect(fse.existsSync(path.join(projectDir, 'app/(payload)/admin'))).toBe(false)
+    },
+  )
+
+  it('should retain an explicit existing JS config path when a TS sibling exists', async () => {
+    writeProjectPackage(projectDir)
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.ts'),
+      "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: '/wrong' } })",
+    )
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.js'),
+      "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: '/cms' } })",
+    )
+    vi.stubEnv('PAYLOAD_CONFIG_PATH', path.join(projectDir, 'payload.config.js'))
+
+    await updatePayloadInNextProject({
+      appDetails: nextDetails({ projectDir, appDir: 'app' }),
+      versionOrTag: 'beta',
+    })
+
+    expect(
+      fse.existsSync(path.join(projectDir, 'app/(payload)/cms/[[...segments]]/page.tsx')),
+    ).toBe(true)
+    expect(fse.existsSync(path.join(projectDir, 'app/(payload)/wrong'))).toBe(false)
+  })
+
+  it.each([
+    "export default buildConfig({ routes: { admin: '/before' } }).then(config => ({ ...config, routes: { admin: '/live' } }))",
+    "function unused() { return buildConfig({ routes: { admin: '/unused' } }) }; export default externalConfig",
+    "let config = buildConfig({ routes: { admin: '/before' } }); config = externalConfig; export default config",
+  ])('should reject a buildConfig call that is not exported unchanged: %s', async (body) => {
+    writeProjectPackage(projectDir)
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.ts'),
+      `import { buildConfig } from 'payload'; ${body}`,
+    )
+
+    await expect(
+      updatePayloadInNextProject({
+        appDetails: nextDetails({ projectDir, appDir: 'app' }),
+        versionOrTag: 'beta',
+      }),
+    ).rejects.toThrow('routes.admin')
+
+    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(fse.existsSync(path.join(projectDir, 'app/(payload)'))).toBe(false)
+  })
+
+  it('should accept an unchanged buildConfig result exported through a const', async () => {
+    writeProjectPackage(projectDir)
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.ts'),
+      "import { buildConfig } from 'payload'; const config = buildConfig({ routes: { admin: '/cms' } }); export default config",
+    )
+
+    await updatePayloadInNextProject({
+      appDetails: nextDetails({ projectDir, appDir: 'app' }),
+      versionOrTag: 'beta',
+    })
+
+    expect(
+      fse.existsSync(path.join(projectDir, 'app/(payload)/cms/[[...segments]]/page.tsx')),
+    ).toBe(true)
+    expect(fse.existsSync(path.join(projectDir, 'app/(payload)/admin'))).toBe(false)
+  })
+
+  it.each([
+    "process.env.ADMIN_ROUTE || '/cms'",
+    "process.env.ADMIN_ROUTE as '/cms'",
+    "'/../outside'",
+    JSON.stringify('/..' + String.fromCharCode(92) + 'outside'),
+  ])('should reject an unresolved or unsafe admin route before updating: %s', async (admin) => {
+    writeProjectPackage(projectDir)
+    const payloadDir = path.join(projectDir, 'app/(payload)')
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.ts'),
+      `import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: ${admin} } })`,
+    )
+    fse.outputFileSync(path.join(payloadDir, 'layout.tsx'), 'existing layout')
+
+    await expect(
+      updatePayloadInNextProject({
+        appDetails: nextDetails({ projectDir, appDir: 'app' }),
+        versionOrTag: 'beta',
+      }),
+    ).rejects.toThrow('routes.admin')
+
+    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(fse.readFileSync(path.join(payloadDir, 'layout.tsx'), 'utf8')).toBe('existing layout')
+    expect(fse.existsSync(path.join(payloadDir, 'admin'))).toBe(false)
+  })
+
+  it.each(["{ routes: { ['admin']: '/cms' } }", "{ ['routes']: { admin: '/cms' } }"])(
+    'should reject computed config keys instead of defaulting to /admin: %s',
+    async (config) => {
+      writeProjectPackage(projectDir)
+      fse.outputFileSync(
+        path.join(projectDir, 'payload.config.ts'),
+        `import { buildConfig } from 'payload'; export default buildConfig(${config})`,
+      )
+
+      await expect(
+        updatePayloadInNextProject({
+          appDetails: nextDetails({ projectDir, appDir: 'app' }),
+          versionOrTag: 'beta',
+        }),
+      ).rejects.toThrow('routes.admin')
+
+      expect(mocks.installPackages).not.toHaveBeenCalled()
+      expect(fse.existsSync(path.join(projectDir, 'app/(payload)'))).toBe(false)
+    },
+  )
+
+  it('should retain the default route when the config does not customize it', async () => {
+    writeProjectPackage(projectDir)
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.ts'),
+      "import { buildConfig } from 'payload'; export default buildConfig({})",
+    )
+
+    await updatePayloadInNextProject({
+      appDetails: nextDetails({ projectDir, appDir: 'app' }),
+      versionOrTag: 'beta',
+    })
+
+    expect(
+      fse.existsSync(path.join(projectDir, 'app/(payload)/admin/[[...segments]]/page.tsx')),
+    ).toBe(true)
+    expect(fse.readFileSync(path.join(projectDir, 'app/(payload)/layout.tsx'), 'utf8')).toContain(
+      "from './admin/importMap.js'",
+    )
+  })
+
+  it('should retain the existing stylesheet migration and preserve custom.css when both files exist', async () => {
+    writeProjectPackage(projectDir)
+    const payloadDir = path.join(projectDir, 'app/(payload)')
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.ts'),
+      "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: '/cms' } })",
+    )
+    fse.outputFileSync(path.join(payloadDir, 'custom.scss'), '.legacy { color: red; }')
+    fse.outputFileSync(path.join(payloadDir, 'custom.css'), '.current { color: blue; }')
+
+    await updatePayloadInNextProject({
+      appDetails: nextDetails({ projectDir, appDir: 'app' }),
+      versionOrTag: 'beta',
+    })
+
+    expect(fse.readFileSync(path.join(payloadDir, 'custom.css'), 'utf8')).toBe(
+      '.current { color: blue; }',
+    )
+    expect(fse.readFileSync(path.join(payloadDir, 'custom.scss'), 'utf8')).toBe(
+      '.legacy { color: red; }',
+    )
+    expect(fse.readFileSync(path.join(payloadDir, 'layout.tsx'), 'utf8')).toContain(
+      "import './custom.css'",
+    )
   })
 
   it('should refresh Payload-owned TanStack files without overwriting custom styles', async () => {
@@ -276,4 +652,21 @@ function writeProjectPackage(projectDir: string): void {
       payload: '^3.0.0',
     },
   })
+}
+
+function nextDetails({
+  appDir,
+  projectDir,
+}: {
+  appDir: string
+  projectDir: string
+}): NextAppDetails {
+  return {
+    hasTopLevelLayout: false,
+    isPayloadInstalled: true,
+    isSrcDir: appDir === 'src/app',
+    isSupportedNextVersion: true,
+    nextConfigPath: path.join(projectDir, 'next.config.ts'),
+    nextVersion: '16.4.0',
+  }
 }
