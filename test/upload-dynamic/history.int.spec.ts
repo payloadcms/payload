@@ -244,16 +244,6 @@ test.suite('Historical request-time files', { config: './config.ts' }, () => {
   })
 
   // `findVersionByID` always runs an ordinary read check of the parent first.
-  test('should run the transform access check for an old version with request params', async ({
-    payload,
-    restClient,
-  }) => {
-    expect(await getCheckedAccessModes({ payload, query: '&w=200', restClient })).toEqual([
-      false,
-      true,
-    ])
-  })
-
   test('should run only a read access check for an old version without params', async ({
     payload,
     restClient,

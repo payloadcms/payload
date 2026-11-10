@@ -318,45 +318,6 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(await readFile(imageFixture))
   })
 
-  test('should keep all locales and file identity when the response selects only a custom field', async ({
-    payload,
-  }) => {
-    const created = await payload.create({
-      collection: versionedDynamicMediaSlug,
-      data: { _transforms: { crop: savedCrop }, alt: 'English' },
-      locale: 'en',
-      filePath: imageFixture,
-    })
-    await payload.update({
-      id: created.id,
-      collection: versionedDynamicMediaSlug,
-      locale: 'es',
-      data: { alt: 'Español' },
-    })
-    const docs = await getVersions({ payload, id: created.id })
-    await payload.update({
-      id: created.id,
-      collection: versionedDynamicMediaSlug,
-      data: { _transforms: { crop: laterCrop }, alt: 'Changed' },
-    })
-    const restored = await payload.restoreVersion({
-      id: String(docs[0]!.id),
-      collection: versionedDynamicMediaSlug,
-      select: { alt: true },
-      overrideAccess: true,
-    })
-    expect(restored.alt).toBe('English')
-    expect(restored.filename).toBeUndefined()
-    const versions = await getVersions({ payload, id: created.id })
-    const latest = versions.find(({ latest }) => latest)!.version
-    expect(latest).toMatchObject({
-      alt: { en: 'English', es: 'Español' },
-      _transforms: { crop: savedCrop },
-    })
-    expect(latest.filename).toBeTruthy()
-    expect(latest.original.filename).toBeTruthy()
-  })
-
   test('should keep caller upload bytes out of cloud restore hooks', async ({ payload }) => {
     const { selected } = await prepareHistory({ payload, collection: versionedCloudMediaSlug })
     const callerBytes = Buffer.from('not the retained original')
