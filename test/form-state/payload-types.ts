@@ -65,7 +65,9 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    conditionalTabs: ConditionalTabs;
+  };
   collections: {
     posts: Post;
     'autosave-posts': AutosavePost;
@@ -120,6 +122,19 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditionalTabs".
+ */
+export interface ConditionalTabs {
+  showExtra?: boolean | null;
+  extra?: {
+    extraText?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'conditionalTabs';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -200,6 +215,11 @@ export interface Condition {
   conditionalCustomField?: string | null;
   conditionalRowField?: string | null;
   conditionalCollapsibleField?: string | null;
+  showExtra?: boolean | null;
+  extra?: {
+    extraText?: string | null;
+  };
+  layout?: ConditionalTabs[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -384,6 +404,13 @@ export interface ConditionsSelect<T extends boolean = true> {
   conditionalCustomField?: T;
   conditionalRowField?: T;
   conditionalCollapsibleField?: T;
+  showExtra?: T;
+  extra?:
+    | T
+    | {
+        extraText?: T;
+      };
+  layout?: T | {};
   updatedAt?: T;
   createdAt?: T;
 }
