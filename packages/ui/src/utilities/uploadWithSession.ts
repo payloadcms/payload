@@ -89,6 +89,10 @@ export const shouldUseUploadSession = ({
 /**
  * Uploads a file through a durable session and returns the same file reference a single-request
  * client upload returns, so the document is still saved through the normal create or update.
+ *
+ * Pass `reusableSessionID` from an earlier attempt with the same file, e.g. a save that failed
+ * after or during the upload. While that session is still unfinished it is resumed, so a retry
+ * sends only missing segments and does not take another session from the user's quota.
  */
 export const uploadWithSession = async ({
   apiRoute,
@@ -96,7 +100,9 @@ export const uploadWithSession = async ({
   docPrefix,
   file,
   onProgress,
+  onSession,
   retries = defaultUploadTransferConfig.retries,
+  reusableSessionID,
   serverURL,
   signal,
   targetID,
@@ -105,19 +111,40 @@ export const uploadWithSession = async ({
   docPrefix?: string
   file: File
   onProgress?: (progress: UploadSessionProgress) => void
+  /** Called with the session the upload uses, before any bytes are sent. */
+  onSession?: (session: ClientUploadSession) => void
   retries?: number
+  reusableSessionID?: number | string
   signal?: AbortSignal
   targetID?: number | string
 } & SessionRequestArgs): Promise<UploadInstructions['file']> => {
-  const session = await createUploadSession({
-    apiRoute,
-    collectionSlug,
-    docPrefix,
-    file,
-    serverURL,
-    signal,
-    targetID,
-  })
+  const reusableSession =
+    reusableSessionID === undefined
+      ? undefined
+      : await getUploadSession({ id: reusableSessionID, apiRoute, serverURL, signal }).catch(
+          () => undefined,
+        )
+
+  const isReusable =
+    reusableSession !== undefined &&
+    (reusableSession.status === 'pending' || reusableSession.status === 'active') &&
+    reusableSession.collectionSlug === collectionSlug &&
+    (reusableSession.targetID ?? undefined) ===
+      (targetID === undefined ? undefined : String(targetID))
+
+  const session = isReusable
+    ? reusableSession
+    : await createUploadSession({
+        apiRoute,
+        collectionSlug,
+        docPrefix,
+        file,
+        serverURL,
+        signal,
+        targetID,
+      })
+
+  onSession?.(session)
 
   return resumeUploadSession({ apiRoute, file, onProgress, retries, serverURL, session, signal })
 }
@@ -184,7 +211,10 @@ export const setUploadSessionIntent = ({
 export const getUploadSession = ({
   id,
   ...args
-}: { id: number | string } & SessionRequestArgs): Promise<ClientUploadSession> =>
+}: {
+  id: number | string
+  signal?: AbortSignal
+} & SessionRequestArgs): Promise<ClientUploadSession> =>
   requestSession({ ...args, method: 'GET', path: `${SESSIONS_PATH}/${id}` })
 
 /** Returns a fresh file reference for a session whose storage is complete. */

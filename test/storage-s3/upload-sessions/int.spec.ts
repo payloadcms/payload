@@ -350,6 +350,77 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
     expect(response.status).toBe(201)
   })
 
+  test('should resume the same session when a failed save is retried', async ({
+    payload,
+    restClient,
+  }) => {
+    const file = new File([fileBytes], 'retry.mp4', { type: 'video/mp4' })
+    const sessionIDs: (number | string)[] = []
+    const retryPuts: string[] = []
+
+    const upload = ({ onStoragePut }: { onStoragePut: (url: string) => void }) =>
+      withBrowserFetch({
+        onStoragePut,
+        restClient,
+        run: () =>
+          uploadWithSession({
+            apiRoute: '/api',
+            collectionSlug: videosSlug,
+            file,
+            onSession: (session) => sessionIDs.push(session.id),
+            reusableSessionID: sessionIDs.at(-1),
+            serverURL: '',
+          }),
+      })
+
+    // The document save after this upload is treated as failed, so the form submits the file again.
+    await upload({ onStoragePut: () => undefined })
+
+    const uploadedFile = await upload({ onStoragePut: (url) => retryPuts.push(url) })
+
+    expect(sessionIDs[1]).toBe(sessionIDs[0])
+    expect(retryPuts).toHaveLength(0)
+    expect((await payload.db.count({ collection: uploadSessionsCollectionSlug })).totalDocs).toBe(1)
+
+    const response = await createWithFileReference({
+      file: uploadedFile,
+      restClient,
+      title: 'Saved on retry',
+    })
+
+    expect(response.status).toBe(201)
+  })
+
+  test('should start a new session when the reusable one is no longer unfinished', async ({
+    restClient,
+  }) => {
+    const cancelled = await createSession({ restClient })
+
+    await restClient.DELETE(`${sessionsPath}/${cancelled.id}`)
+
+    const file = new File([fileBytes], 'video.mp4', { type: 'video/mp4' })
+    let sessionID: number | string | undefined
+
+    await withBrowserFetch({
+      onStoragePut: () => undefined,
+      restClient,
+      run: () =>
+        uploadWithSession({
+          apiRoute: '/api',
+          collectionSlug: videosSlug,
+          file,
+          onSession: (session) => {
+            sessionID = session.id
+          },
+          reusableSessionID: cancelled.id,
+          serverURL: '',
+        }),
+    })
+
+    expect(sessionID).toBeDefined()
+    expect(sessionID).not.toBe(cancelled.id)
+  })
+
   test('should reserve the filename for the whole session', async ({ payload, restClient }) => {
     const first = await createSession({ restClient })
     const second = await createSession({ restClient })
@@ -524,6 +595,72 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
     )
 
     expect(Uploads ?? []).toHaveLength(0)
+  })
+
+  test('should expire overdue sessions while other sessions keep failing cleanup', async ({
+    payload,
+    restClient,
+  }) => {
+    const session = await createSession({ restClient })
+
+    await payload.db.updateOne({
+      id: session.id,
+      collection: uploadSessionsCollectionSlug,
+      data: { expiresAt: new Date(Date.now() - 1000).toISOString() },
+    })
+
+    const now = new Date().toISOString()
+
+    // Cleanup of these always fails: their bucket does not exist. More than one sweep batch.
+    for (let i = 0; i < 12; i++) {
+      await payload.db.create({
+        collection: uploadSessionsCollectionSlug,
+        data: {
+          cancelledAt: now,
+          cancelReason: 'user',
+          collectionSlug: videosMissingBucketSlug,
+          createdAt: now,
+          expiresAt: now,
+          file: { filename: `stuck-${i}.mp4`, mimeType: 'video/mp4', size: fileBytes.length },
+          lastActivityAt: now,
+          operation: 'create',
+          ownerCollection: 'users',
+          ownerID: 'someone-else',
+          reservationKey: `stuck-${i}`,
+          status: 'cancelled',
+          storage: {
+            object: {
+              _objectKey: `stuck-${i}`,
+              filename: `stuck-${i}.mp4`,
+              prefix: '',
+              storageFilePath: `stuck-${i}.mp4`,
+            },
+            providerState: { uploadId: `stuck-${i}` },
+          },
+          transfer: { concurrency: 1, segments: [], strategy: 'segmented' },
+          updatedAt: now,
+        },
+      })
+    }
+
+    // Listing runs the cleanup sweep.
+    await restClient.GET(sessionsPath)
+
+    const expired = await payload.db.findOne<{ status: string }>({
+      collection: uploadSessionsCollectionSlug,
+      where: { id: { equals: session.id } },
+    })
+
+    expect(expired?.status).toBe('cancelled')
+
+    const { docs: stuckSessions } = await payload.db.find<{ error?: { attempts: number } }>({
+      collection: uploadSessionsCollectionSlug,
+      limit: 0,
+      where: { ownerID: { equals: 'someone-else' } },
+    })
+
+    // Failed attempts are recorded, which moves those sessions to the back of the next batch.
+    expect(stuckSessions.filter(({ error }) => error?.attempts).length).toBeGreaterThan(0)
   })
 
   test('should abort the provider upload when cancelled', async ({ restClient }) => {

@@ -504,7 +504,7 @@ export const cancelUploadSession = async ({
 }
 
 /**
- * Expires overdue sessions and retries unfinished provider cleanup in a bounded batch. Runs
+ * Expires overdue sessions and retries unfinished provider cleanup in bounded batches. Runs
  * opportunistically on session create and list so cleanup works without a jobs runner.
  */
 export const sweepUploadSessions = async ({
@@ -516,61 +516,37 @@ export const sweepUploadSessions = async ({
 }): Promise<void> => {
   const now = new Date().toISOString()
 
-  const { docs } = await req.payload.db.find<UploadSessionDoc>({
+  // Separate batches, so sessions whose cleanup keeps failing can never crowd out expiry.
+  const { docs: expiredSessions } = await req.payload.db.find<UploadSessionDoc>({
     collection: slug,
     limit,
     pagination: false,
     req,
+    sort: 'expiresAt',
     where: {
-      or: [
-        {
-          and: [{ status: { in: ['pending', 'active'] } }, { expiresAt: { less_than: now } }],
-        },
-        {
-          // Failed sessions may hold provider state, e.g. a multipart upload whose size did not match.
-          and: [
-            { status: { in: ['cancelled', 'failed'] } },
-            { cleanupCompletedAt: { exists: false } },
-          ],
-        },
-      ],
+      and: [{ status: { in: ['pending', 'active'] } }, { expiresAt: { less_than: now } }],
     },
   })
 
-  for (const doc of docs) {
-    try {
-      let session = await reconcileClaimedObject({ req, session: doc })
+  // Failed sessions may hold provider state, e.g. a multipart upload whose size did not match.
+  // A failed cleanup attempt bumps `updatedAt`, so oldest-first rotates stuck sessions to the back.
+  const { docs: uncleanedSessions } = await req.payload.db.find<UploadSessionDoc>({
+    collection: slug,
+    limit,
+    pagination: false,
+    req,
+    sort: 'updatedAt',
+    where: {
+      and: [{ status: { in: ['cancelled', 'failed'] } }, { cleanupCompletedAt: { exists: false } }],
+    },
+  })
 
-      if (session.status === 'completed') {
-        continue
-      }
+  for (const doc of expiredSessions) {
+    await sweepSession({ now, req, session: doc })
+  }
 
-      if (session.status === 'pending' || session.status === 'active') {
-        // A completion running past expiry finishes first; a later sweep picks the session up.
-        const leasedSession = await tryClaimLease({ req, session })
-
-        if (!leasedSession) {
-          continue
-        }
-
-        session = await updateSession({
-          data: {
-            cancelledAt: now,
-            cancelReason: 'expired',
-            finalizingUntil: null,
-            intent: null,
-            reservationKey: getReservationKey(),
-            status: 'cancelled',
-          },
-          req,
-          session: leasedSession,
-        })
-      }
-
-      await cleanupSessionStorage({ req, session })
-    } catch (err) {
-      req.payload.logger.error({ err, msg: `Failed to clean up upload session ${doc.id}` })
-    }
+  for (const doc of uncleanedSessions) {
+    await sweepSession({ now, req, session: doc })
   }
 }
 
@@ -1091,6 +1067,60 @@ const markCompleted = ({
     req,
     session,
   })
+
+const sweepSession = async ({
+  now,
+  req,
+  session: doc,
+}: {
+  now: string
+  req: PayloadRequest
+  session: UploadSessionDoc
+}): Promise<void> => {
+  let session = doc
+
+  try {
+    session = await reconcileClaimedObject({ req, session })
+
+    if (session.status === 'completed') {
+      return
+    }
+
+    if (session.status === 'pending' || session.status === 'active') {
+      // A completion running past expiry finishes first; a later sweep picks the session up.
+      const leasedSession = await tryClaimLease({ req, session })
+
+      if (!leasedSession) {
+        return
+      }
+
+      session = await updateSession({
+        data: {
+          cancelledAt: now,
+          cancelReason: 'expired',
+          finalizingUntil: null,
+          intent: null,
+          reservationKey: getReservationKey(),
+          status: 'cancelled',
+        },
+        req,
+        session: leasedSession,
+      })
+    }
+
+    await cleanupSessionStorage({ req, session })
+  } catch (err) {
+    req.payload.logger.error({ err, msg: `Failed to clean up upload session ${doc.id}` })
+
+    if (session.status === 'cancelled' || session.status === 'failed') {
+      await recordError({
+        error: toSessionError({ err, source: 'adapter' }),
+        req,
+        session,
+      }).catch(() => undefined)
+    }
+  }
+}
 
 const cleanupSessionStorage = async ({
   req,
