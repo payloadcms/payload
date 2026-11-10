@@ -1,0 +1,19 @@
+@layer payload-default {
+  .mcp-authorize {
+    overflow-wrap: anywhere;
+  }
+
+  .mcp-authorize__brand {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-block-end: var(--spacer-5);
+  }
+
+  .mcp-authorize__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacer-2);
+  }
+}
