@@ -14,6 +14,7 @@ import { deepFreeze } from '../../utilities/deepFreeze.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
+import { fileSelectionParams } from '../fileSelectionParams.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { planPersistedDefaultStages } from '../transformState/planPersistedDefaultStages.js'
@@ -521,10 +522,13 @@ async function authorizeDocument({
   return { document, documentSnapshot, pipeline }
 }
 
-/** Query parameters that pick a historical file. They do not change the file. */
-const historicalFileParams = new Set(['original', 'prefix', 'version'])
+const fileSelectionParamNames = new Set<string>(Object.values(fileSelectionParams))
 
-/** Whether a historical request has query parameters that a transformer could apply. */
+/**
+ * Whether a historical request has query parameters other than the ones that pick the file. This
+ * only picks which access check runs first: other parameters, such as `locale` or a cache-buster,
+ * also count. The planned pipeline then decides which access the request needs.
+ */
 function hasRequestParams({ req }: { req: PayloadRequest }): boolean {
-  return [...(req.searchParams?.keys() ?? [])].some((key) => !historicalFileParams.has(key))
+  return [...(req.searchParams?.keys() ?? [])].some((key) => !fileSelectionParamNames.has(key))
 }

@@ -16,6 +16,7 @@ import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { streamFile } from '../fetchAPI-stream-file/index.js'
+import { fileSelectionParams } from '../fileSelectionParams.js'
 import { resolveHistoricalFile } from '../fileVersioning/resolveHistoricalFile.js'
 import { getFileTypeFallback } from '../getFileTypeFallback.js'
 import { getFileExtension, isXmlMimeType } from '../getFileTypeIdentity.js'
@@ -28,8 +29,8 @@ export const getFileHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
   const filename = req.routeParams?.filename as string
-  const prefix = req.searchParams?.get('prefix') ?? undefined
-  const isOriginal = req.searchParams?.get('original') === 'true'
+  const prefix = req.searchParams?.get(fileSelectionParams.prefix) ?? undefined
+  const isOriginal = req.searchParams?.get(fileSelectionParams.original) === 'true'
 
   if (!collection.config.upload) {
     throw new APIError(
@@ -38,7 +39,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
     )
   }
 
-  const versionID = req.searchParams?.get('version')
+  const versionID = req.searchParams?.get(fileSelectionParams.version)
 
   if (collection.config.versions && versionID) {
     const { document, isBuiltAtRequest } = await resolveHistoricalFile({

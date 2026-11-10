@@ -1,4 +1,5 @@
 import type { Document, JsonObject } from '../../types/index.js'
+import type { RequestTimeBuildPlan } from '../transformState/planUpload.js'
 import type { OriginalFileData } from '../types.js'
 import type { FileRestoreArgs } from './restore.js'
 
@@ -10,7 +11,7 @@ import { generateFilePathOrURL } from '../generateFilePathOrURL.js'
 import { shouldRequestOriginal } from '../isOriginalFileRequest.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { getRequestTimeDefaultFileData, getRequestTimeVariants } from '../requestTimeFileData.js'
-import { canBuildAtRequest } from '../transformState/planUpload.js'
+import { isBuildableAtRequest, planRequestTimeBuild } from '../transformState/planUpload.js'
 import { getTransformStateError } from '../transformState/validateTransformState.js'
 import { collectStoredFiles } from './storedFiles.js'
 
@@ -84,14 +85,24 @@ export async function runRequestTimeFileRestore<T>({
     .filter((name) => !storedVariantNames.has(name))
   const { variantsTransformerSlug } = collection.upload
 
-  if (isMainBuiltAtRequest && !(await canBuildAtRequest(planArgs))) {
+  // Both checks below use one plan, so the stages are planned at most once.
+  let requestTimeBuild: Promise<RequestTimeBuildPlan> | undefined
+  const getRequestTimeBuild = () => (requestTimeBuild ??= planRequestTimeBuild(planArgs))
+
+  if (
+    isMainBuiltAtRequest &&
+    !isBuildableAtRequest({ requestTimeBuild: await getRequestTimeBuild() })
+  ) {
     throw new APIError('No compatible transformer can restore the file at request time.', 400)
   }
 
   if (
     requestTimeVariantNames.length > 0 &&
     (!variantsTransformerSlug ||
-      !(await canBuildAtRequest({ ...planArgs, requiredTransformerSlug: variantsTransformerSlug })))
+      !isBuildableAtRequest({
+        requestTimeBuild: await getRequestTimeBuild(),
+        requiredTransformerSlug: variantsTransformerSlug,
+      }))
   ) {
     throw new APIError('No compatible transformer can restore the configured file variants.', 400)
   }

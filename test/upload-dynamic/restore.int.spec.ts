@@ -99,6 +99,7 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
 
   test('should keep a request-time version request-time on restore, with no new stored files', async ({
     payload,
+    restClient,
   }) => {
     const { selected } = await prepareHistory({ payload })
     const filesBefore = (await readdir(versionedDynamicMediaDir)).sort()
@@ -111,10 +112,19 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     })
 
     expect(restored._stored).toBe(false)
+    expect(restored.filename).toBe(restored.original?.filename)
     expect(restored.variants?.card?._stored).toBe(false)
     expect(restored._transforms).toEqual({ crop: savedCrop })
     expect((await readdir(versionedDynamicMediaDir)).sort()).toEqual(filesBefore)
     expect(sourceReadCalls).toHaveLength(0)
+
+    const response = await restClient.GET(`/${versionedDynamicMediaSlug}/file/${restored.filename}`)
+
+    expect(response.status).toBe(200)
+    expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject({
+      height: savedCrop.height,
+      width: savedCrop.width,
+    })
   })
 
   test('should copy a replaced original on restore and build the version at request time', async ({
@@ -197,31 +207,6 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     expect(sourceReadCalls).toHaveLength(0)
   })
 
-  test('should restore a request-time file without reading source bytes and serve the restored crop', async ({
-    payload,
-    restClient,
-  }) => {
-    const { selected } = await prepareHistory({ payload })
-    const restored = await payload.restoreVersion({
-      id: String(selected.id),
-      collection: versionedDynamicMediaSlug,
-      overrideAccess: true,
-    })
-
-    expect(sourceReadCalls).toHaveLength(0)
-    expect(restored._stored).toBe(false)
-    expect(restored.filename).toBe(restored.original?.filename)
-    expect(restored._transforms).toEqual({ crop: savedCrop })
-
-    const response = await restClient.GET(`/${versionedDynamicMediaSlug}/file/${restored.filename}`)
-
-    expect(response.status).toBe(200)
-    expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject({
-      height: 600,
-      width: 800,
-    })
-  })
-
   test('should reconcile virtual variants with the current size declarations', async ({
     payload,
   }) => {
@@ -259,7 +244,7 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     }
   })
 
-  test('should replay virtual variants with a stored main and focal-only transforms', async ({
+  test('should keep a stored main stored and its variants request-time on restore, with focal-only transforms', async ({
     payload,
     restClient,
   }) => {
@@ -615,6 +600,43 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     } finally {
       upload.variants = variants
     }
+  })
+
+  test('should fail with 400 and write nothing when the current config cannot build a request-time variant of a stored main', async ({
+    payload,
+  }) => {
+    const { created, selected } = await prepareMixedHistory({ payload })
+    const transformer = payload.config.upload.transformers.find(
+      ({ slug }) => slug === 'request-crop',
+    )!
+    const filesBefore = (await readdir(versionedDynamicMediaDir)).sort()
+    const docBefore = await payload.db.findOne({
+      collection: versionedDynamicMediaSlug,
+      where: { id: { equals: created.id } },
+    })
+    const versionsBefore = await getVersions({ payload, id: created.id })
+
+    vi.spyOn(transformer, 'canTransform').mockReturnValue(false)
+
+    await expect(
+      payload.restoreVersion({
+        id: String(selected.id),
+        collection: versionedDynamicMediaSlug,
+        overrideAccess: true,
+      }),
+    ).rejects.toMatchObject({
+      message: 'No compatible transformer can restore the configured file variants.',
+      status: 400,
+    })
+    expect((await readdir(versionedDynamicMediaDir)).sort()).toEqual(filesBefore)
+    expect(
+      await payload.db.findOne({
+        collection: versionedDynamicMediaSlug,
+        where: { id: { equals: created.id } },
+      }),
+    ).toEqual(docBefore)
+    expect(await getVersions({ payload, id: created.id })).toEqual(versionsBefore)
+    expect(sourceReadCalls).toHaveLength(0)
   })
 
   test('should save the full upload data as a new draft when a draft restore selects one field', async ({
