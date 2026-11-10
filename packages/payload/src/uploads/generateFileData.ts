@@ -71,6 +71,11 @@ type Args<T> = {
    */
   fetchFullClientUpload?: typeof downloadFullClientUpload
   isDuplicating?: boolean
+  /**
+   * The original is already stored, for example when a restore replays a version from its
+   * retained original. A changed file then does not get a copy of the original to store.
+   */
+  isOriginalStored?: boolean
   operation: 'create' | 'update'
   originalDoc?: T
   overwriteExistingFiles?: boolean
@@ -236,6 +241,7 @@ const processUpload = async <T>({
   fetchFullClientUpload = downloadFullClientUpload,
   hasTransformers,
   isDuplicating,
+  isOriginalStored,
   operation,
   originalDoc,
   overwriteExistingFiles,
@@ -925,7 +931,7 @@ const processUpload = async <T>({
         }
       }
 
-      if (fileWasTransformed && !retainedOriginal && !providerOriginal) {
+      if (fileWasTransformed && !retainedOriginal && !providerOriginal && !isOriginalStored) {
         filesToSave.push({
           buffer: Buffer.from(await originalWebFile!.arrayBuffer()),
           path: `${staticPath}/${originalFilename}`,

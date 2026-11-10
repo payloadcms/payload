@@ -377,6 +377,53 @@ describe('generateFileData', () => {
     ])
   })
 
+  it.for([
+    { isOriginalStored: undefined, roles: ['original', 'default'] },
+    { isOriginalStored: true, roles: ['default'] },
+  ])(
+    'prepares a copy of the original after a transformer changes the file only when it is not stored ($isOriginalStored)',
+    async ({ isOriginalStored, roles }) => {
+      const pdfBytes = Buffer.from('%PDF-1.4\n%original\n')
+      const changeFile: UploadTransformer = {
+        slug: 'change-file',
+        canTransform: () => true,
+        mimeTypes: ['application/pdf'],
+        transformFile: () =>
+          Promise.resolve({
+            file: new File([Buffer.from('changed')], 'document.pdf', { type: 'application/pdf' }),
+            status: 'continue',
+          }),
+      }
+      const req = {
+        file: {
+          data: pdfBytes,
+          mimetype: 'application/pdf',
+          name: 'document.pdf',
+          size: pdfBytes.length,
+        },
+        payload: {
+          collections: { media: { config: { fields: [], upload: {} } } },
+          config: { routes: { api: '/api' }, upload: { transformers: [changeFile] } },
+          db: { findOne: vi.fn(async () => null) },
+          logger: { error: vi.fn() },
+        },
+        query: {},
+      } as unknown as PayloadRequest
+
+      const { files } = await generateFileData({
+        collection: createCollection({ disableLocalStorage: false }),
+        config: {} as SanitizedConfig,
+        data: {},
+        isOriginalStored,
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req,
+      })
+
+      expect(files.map(({ role }) => role?.type)).toEqual(roles)
+    },
+  )
+
   it('does not save anything when local storage is disabled and no processing is needed', async () => {
     const req = {
       file: {

@@ -227,6 +227,8 @@ export async function runRequestTimeFileRestore<T>({
       collection: { config: collection },
       config: req.payload.config,
       data: pipelineDoc,
+      // The retained original stays as it is, so no copy of it is prepared.
+      isOriginalStored: true,
       operation: 'create',
       overwriteExistingFiles: false,
       req: replayReq,
