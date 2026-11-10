@@ -1,8 +1,9 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
+import type { SQLiteAdapter } from '@payloadcms/db-sqlite'
 import type { PostgresDB } from '@payloadcms/drizzle'
 
 import { eq, sql } from '@payloadcms/db-postgres/drizzle'
-import { expect } from 'vitest'
+import { expect, vi } from 'vitest'
 
 import type { Post } from './payload-types.js'
 
@@ -177,6 +178,97 @@ test.suite('Conditional database updates', { config: './config.ts' }, () => {
         (await payload.findByID({ collection: postsSlug, id: post.id, overrideAccess: true }))
           .title,
       ).toBe('pending')
+    },
+  )
+
+  test.options(
+    'should keep an atomic non-ID predicate within the D1 bound-parameter limit',
+    { db: (adapter) => adapter.startsWith('sqlite') },
+    async ({ payload }) => {
+      const post = await payload.create({
+        collection: postsSlug,
+        data: { title: 'pending' },
+        overrideAccess: true,
+      })
+      const db = payload.db as unknown as SQLiteAdapter
+      const executeSpy = vi.spyOn(db.client, 'execute')
+
+      try {
+        const result = await payload.db.updateOne({
+          collection: postsSlug,
+          data: { title: 'processing' },
+          options: { atomic: true },
+          where: {
+            title: {
+              in: ['pending', ...Array.from({ length: 49 }, (_, index) => `other-${index}`)],
+            },
+          },
+        })
+
+        expect(result).toMatchObject({ id: post.id, title: 'processing' })
+        expect(executeSpy).toHaveBeenCalled()
+
+        for (const [statement] of executeSpy.mock.calls) {
+          const parameters = typeof statement === 'string' ? undefined : statement.args
+
+          expect(Object.keys(parameters ?? {}).length).toBeLessThanOrEqual(100)
+        }
+      } finally {
+        executeSpy.mockRestore()
+      }
+    },
+  )
+
+  test.options(
+    'should allow an atomic update while another transaction inserts a referencing document',
+    { db: (adapter) => adapter.startsWith('postgres') },
+    async ({ payload }) => {
+      const category = await payload.create({
+        collection: 'categories',
+        data: { title: 'pending' },
+        overrideAccess: true,
+      })
+      const db = payload.db as unknown as PostgresAdapter
+      const referencingTransactionID = await db.beginTransaction()
+
+      if (referencingTransactionID === null) {
+        throw new Error('Expected PostgreSQL to start a transaction')
+      }
+
+      try {
+        await payload.create({
+          collection: postsSlug,
+          data: { category: category.id, title: 'referencing' },
+          overrideAccess: true,
+          req: { transactionID: referencingTransactionID },
+        })
+
+        const updatingTransactionID = await db.beginTransaction()
+
+        if (updatingTransactionID === null) {
+          throw new Error('Expected PostgreSQL to start a transaction')
+        }
+
+        try {
+          const transaction = db.sessions[updatingTransactionID]!.db as PostgresDB
+
+          await transaction.execute(sql`SET LOCAL statement_timeout = '2s'`)
+
+          const result = await payload.db.updateOne({
+            collection: 'categories',
+            data: { title: 'processing' },
+            options: { atomic: true },
+            req: { transactionID: updatingTransactionID },
+            where: { and: [{ id: { equals: category.id } }, { title: { equals: 'pending' } }] },
+          })
+
+          expect(result).toMatchObject({ id: category.id, title: 'processing' })
+        } finally {
+          await db.rollbackTransaction(updatingTransactionID)
+        }
+      } finally {
+        await db.rollbackTransaction(referencingTransactionID)
+      }
     },
   )
 
