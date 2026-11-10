@@ -25,7 +25,7 @@ import {
 } from '../transformState/planUpload.js'
 import { getTransformStateError } from '../transformState/validateTransformState.js'
 import { runLocalFileUpdate } from './archive.js'
-import { runCloudFileUpdate } from './cloudStorage.js'
+import { runCloudFileUpdate, shareManagedCloudMetadata } from './cloudStorage.js'
 import { shareFileOperationScope } from './fileOperationManager.js'
 import { collectStoredFiles } from './storedFiles.js'
 
@@ -254,8 +254,7 @@ export async function runRequestTimeFileRestore<T>({
     const writeRestored = () => {
       if (collection.upload.fileOperations) {
         // Keep the existing adapter metadata hook active through the outer restore's afterChange.
-        req.context._payloadManagedCloudStorage = true
-        req.context._payloadManagedCloudMetadata = replayReq.context._payloadManagedCloudMetadata
+        shareManagedCloudMetadata({ from: replayReq, to: req })
       }
       return write(restored)
     }
