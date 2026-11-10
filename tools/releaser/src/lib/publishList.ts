@@ -2,13 +2,15 @@
  * Packages that should be published to NPM
  *
  * Note that this does not include all packages in the monorepo
+ *
+ * Every package is listed after its dependencies (verified by publishList.spec.ts)
  */
 export const packagePublishList = [
-  'payload',
   'translations',
+  'payload',
   'ui',
-  'next',
   'graphql',
+  'next',
   'admin-bar',
   'live-preview',
   'live-preview-react',
@@ -34,6 +36,7 @@ export const packagePublishList = [
   'sdk',
 
   // Storage
+  'plugin-cloud-storage',
   'storage-s3',
   'storage-r2',
   'storage-azure',
@@ -46,7 +49,6 @@ export const packagePublishList = [
 
   // Plugins
   'payload-cloud',
-  'plugin-cloud-storage',
   'plugin-ecommerce',
   'plugin-form-builder',
   'plugin-import-export',
@@ -60,10 +62,4 @@ export const packagePublishList = [
   'plugin-stripe',
 
   'typescript-plugin',
-
-  // Unpublished
-  // 'storage-uploadthing',
-  // 'eslint-config',
-  // 'eslint-plugin',
-  // 'live-preview-vue',
 ]

@@ -26,6 +26,7 @@ export const defaultESLintIgnores = [
   'next-env.d.ts',
   '**/app',
   'src/**/*.spec.ts',
+  'tools/**/*.spec.ts',
   'packages/payload/rollup.dts.config.mjs',
   'scripts/**/*.js',
 ]

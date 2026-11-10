@@ -39,6 +39,8 @@ export type ServerFunctionArgs = {
 
 export type ServerFunctionClientArgs = {
   args: Record<string, unknown>
+  /** Locale of the rendered page or drawer initiating this request. */
+  locale?: Locale['code']
   name: string
 }
 

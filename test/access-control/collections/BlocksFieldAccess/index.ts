@@ -12,6 +12,29 @@ export const BlocksFieldAccess: CollectionConfig = {
   },
   fields: [
     {
+      name: 'rows',
+      type: 'array',
+      fields: [
+        {
+          name: 'children',
+          type: 'array',
+          fields: [
+            {
+              name: 'allowCodeChanges',
+              type: 'checkbox',
+              defaultValue: false,
+            },
+            {
+              name: 'code',
+              type: 'text',
+              access: { update: ({ siblingData }) => siblingData?.allowCodeChanges === true },
+              defaultValue: 'default',
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'title',
       type: 'text',
       required: true,
@@ -31,6 +54,21 @@ export const BlocksFieldAccess: CollectionConfig = {
             {
               name: 'content',
               type: 'textarea',
+            },
+            {
+              name: 'privateTitle',
+              type: 'text',
+              access: { read: () => false },
+            },
+          ],
+        },
+        {
+          slug: 'restrictedBlock',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              access: { read: () => false },
             },
           ],
         },
@@ -130,4 +168,5 @@ export const BlocksFieldAccess: CollectionConfig = {
       ],
     },
   ],
+  versions: { drafts: true },
 }

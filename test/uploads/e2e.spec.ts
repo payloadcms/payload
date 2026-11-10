@@ -1046,6 +1046,32 @@ describe('Uploads', () => {
     expect(href).not.toMatch(/-\d+x\d+\.png$/)
   })
 
+  test('should add uploads to a hasMany field after the bulk upload drawer was closed without uploading', async () => {
+    await page.goto(uploadsOne.create)
+
+    const createNewButton = page.locator('#field-hasManyThumbnailUpload button', {
+      hasText: exactText('Create New'),
+    })
+    const bulkUploadModal = page.locator('#hasManyThumbnailUpload-bulk-upload-drawer-slug-1')
+
+    await createNewButton.click()
+    await expect(bulkUploadModal).toBeVisible()
+    await bulkUploadModal.locator('.drawer-close-button').click()
+    await expect(bulkUploadModal).toBeHidden()
+
+    await createNewButton.click()
+    await expect(bulkUploadModal).toBeVisible()
+    await bulkUploadModal
+      .locator('.dropzone input[type="file"]')
+      .setInputFiles([path.resolve(dirname, './test-image.png')])
+    await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+    await closeAllToasts(page)
+
+    await expect(
+      page.locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem'),
+    ).toHaveCount(1)
+  })
+
   test('should show preview button if image sizes are defined but crop and focal point are not', async () => {
     await page.goto(imageSizesOnlyURL.create)
 

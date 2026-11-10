@@ -1,9 +1,10 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Block, Field, FieldHookArgs, TabAsField } from '../../config/types.js'
+import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, fieldShouldBeLocalized } from '../../config/types.js'
+import { getBlockFromField } from '../../getBlockFromField.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -193,30 +194,27 @@ export const promise = async <T>({
                 rows.forEach((row, rowIndex) => {
                   const blockTypeToMatch = row.blockType
 
-                  const block: Block | undefined =
-                    req.payload.blocks[blockTypeToMatch] ??
-                    ((field.blockReferences ?? field.blocks).find(
-                      (curBlock) =>
-                        typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-                    ) as Block | undefined)
+                  const block = getBlockFromField({ blockType: blockTypeToMatch, field, req })
 
-                  promises.push(
-                    traverseFields({
-                      id,
-                      blockData: row,
-                      collection,
-                      context,
-                      doc,
-                      fields: block!.fields,
-                      overrideAccess,
-                      parentIndexPath: '',
-                      parentIsLocalized: parentIsLocalized || field.localized!,
-                      parentPath: path + '.' + rowIndex,
-                      parentSchemaPath: schemaPath + '.' + block!.slug,
-                      req,
-                      siblingDoc: row,
-                    }),
-                  )
+                  if (block) {
+                    promises.push(
+                      traverseFields({
+                        id,
+                        blockData: row,
+                        collection,
+                        context,
+                        doc,
+                        fields: block.fields,
+                        overrideAccess,
+                        parentIndexPath: '',
+                        parentIsLocalized: parentIsLocalized || field.localized!,
+                        parentPath: path + '.' + rowIndex,
+                        parentSchemaPath: schemaPath + '.' + block.slug,
+                        req,
+                        siblingDoc: row,
+                      }),
+                    )
+                  }
                 })
               }
               break
@@ -295,11 +293,7 @@ export const promise = async <T>({
             rows.forEach((row, rowIndex) => {
               const blockTypeToMatch = row.blockType
 
-              const block: Block | undefined =
-                req.payload.blocks[blockTypeToMatch] ??
-                ((field.blockReferences ?? field.blocks).find(
-                  (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-                ) as Block | undefined)
+              const block = getBlockFromField({ blockType: blockTypeToMatch, field, req })
 
               if (block) {
                 ;(row as JsonObject).blockType = blockTypeToMatch

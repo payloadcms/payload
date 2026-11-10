@@ -13,6 +13,11 @@ import { ArrayCollection } from './collections/Array/index.js'
 import { ArrayWithFallbackCollection } from './collections/ArrayWithFallback/index.js'
 import { BlocksCollection } from './collections/Blocks/index.js'
 import { Group } from './collections/Group/index.js'
+import {
+  getLocaleValidationFields,
+  LocaleValidation,
+  LocaleValidationBlock,
+} from './collections/LocaleValidation/index.js'
 import { LocalizedDateFields } from './collections/LocalizedDateFields/index.js'
 import { LocalizedDrafts } from './collections/LocalizedDrafts/index.js'
 import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
@@ -30,9 +35,11 @@ import {
   globalWithDraftsSlug,
   hungarianLocale,
   localeRestrictedSlug,
+  localeValidationGlobalSlug,
   localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
+  localizedStatusSharedGlobalSlug,
   portugueseLocale,
   publicationAccessGlobalSlug,
   publicationAccessSlug,
@@ -89,6 +96,7 @@ export default buildConfigWithDefaults({
   experimental: {
     localizeStatus: true,
   },
+  blocks: [LocaleValidationBlock],
   collections: [
     RichTextCollection,
     BlocksCollection,
@@ -97,6 +105,7 @@ export default buildConfigWithDefaults({
     LocalizedDrafts,
     LocalizedDateFields,
     AllFieldsLocalized,
+    LocaleValidation,
     {
       admin: {
         listSearchableFields: 'name',
@@ -471,6 +480,7 @@ export default buildConfigWithDefaults({
       access: openAccess,
       fields: [
         ...localizedPublicationFields,
+        { name: 'sharedText', type: 'text' },
         {
           name: '_status',
           access: {
@@ -586,6 +596,7 @@ export default buildConfigWithDefaults({
     },
   ],
   globals: [
+    { slug: localeValidationGlobalSlug, fields: getLocaleValidationFields(), versions: false },
     {
       fields: [
         {
@@ -609,8 +620,60 @@ export default buildConfigWithDefaults({
           localized: true,
           type: 'text',
         },
+        {
+          name: 'localizedTextWithLength',
+          type: 'text',
+          localized: true,
+          maxLength: 20,
+          minLength: 5,
+        },
       ],
       slug: 'global-text',
+    },
+    {
+      fields: [
+        {
+          name: 'localizedText',
+          localized: true,
+          type: 'text',
+        },
+        {
+          name: 'sharedText',
+          type: 'text',
+        },
+        {
+          name: 'hiddenSharedText',
+          type: 'text',
+          hidden: true,
+        },
+        {
+          name: 'sharedArray',
+          type: 'array',
+          fields: [
+            { name: 'sharedText', type: 'text' },
+            { name: 'localizedText', type: 'text', localized: true },
+          ],
+        },
+        {
+          name: 'sharedBlocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'shared-content',
+              fields: [
+                { name: 'sharedText', type: 'text' },
+                { name: 'localizedText', type: 'text', localized: true },
+              ],
+            },
+          ],
+        },
+      ],
+      slug: localizedStatusSharedGlobalSlug,
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
     },
     {
       fields: [
@@ -693,6 +756,7 @@ export default buildConfigWithDefaults({
       },
       fields: [
         ...localizedPublicationFields,
+        { name: 'sharedText', type: 'text' },
         {
           name: '_status',
           access: {

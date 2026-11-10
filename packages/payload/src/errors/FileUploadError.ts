@@ -11,5 +11,6 @@ export class FileUploadError extends APIError {
       t ? t('error:problemUploadingFile') : en.translations.error.problemUploadingFile,
       httpStatus.BAD_REQUEST,
     )
+    this.name = 'FileUploadError'
   }
 }

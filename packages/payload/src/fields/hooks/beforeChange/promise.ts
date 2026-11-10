@@ -9,8 +9,11 @@ import { MissingEditorProp } from '../../../errors/index.js'
 import { type RequestContext, validateBlocksFilterOptions } from '../../../index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
+import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
+import { getBlockFromField } from '../../getBlockFromField.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
+import { flattenValidationData } from './flattenValidationData.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -29,6 +32,7 @@ type Args = {
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
    */
   blockData?: JsonObject
+  blockFields?: Field[]
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -72,6 +76,7 @@ type Args = {
 export const promise = async ({
   id,
   blockData,
+  blockFields,
   collection,
   context,
   data,
@@ -179,9 +184,51 @@ export const promise = async ({
       return
     }
 
+    if (field.type === 'blocks' && Array.isArray(siblingData[field.name])) {
+      for (const row of siblingData[field.name] as JsonObject[]) {
+        const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
+        const blockType = (row.blockType || rowSiblingDoc.blockType) as string
+
+        if (!getBlockFromField({ blockType, field, req })) {
+          errors.push({
+            label: buildFieldLabel(
+              fieldLabelPath,
+              getTranslatedLabel(field?.label || field?.name, req.i18n),
+            ),
+            message: req.t('validation:invalidBlock', { block: blockType }),
+            path,
+          })
+          return
+        }
+      }
+    }
+
     // Validate
     if (!skipValidationFromHere && 'validate' in field && field.validate) {
       const valueToValidate = siblingData[field.name]
+
+      // With `locale: 'all'` a localized scalar is a locale-keyed object; validate each locale, not the
+      // wrapper. Containers (`group`/`array`/`blocks`) are excluded - per-locale child validation is a follow-up.
+      const isLocaleKeyedValue =
+        operationLocale === 'all' &&
+        localization &&
+        fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+        field.type !== 'group' &&
+        valueToValidate !== null &&
+        typeof valueToValidate === 'object' &&
+        !Array.isArray(valueToValidate)
+
+      const localizedValuesToValidate: { locale?: string; value: unknown }[] = isLocaleKeyedValue
+        ? localization.localeCodes
+            .filter((locale) => locale in (valueToValidate as JsonObject))
+            .map((locale) => ({ locale, value: (valueToValidate as JsonObject)[locale] }))
+        : [{ value: valueToValidate }]
+
+      // No recognized locales (e.g. `{}`): validate `undefined` once so required/optional still apply.
+      if (localizedValuesToValidate.length === 0) {
+        localizedValuesToValidate.push({ value: undefined })
+      }
+
       let jsonError: object
 
       if (field.type === 'json' && typeof siblingData[field.name] === 'string') {
@@ -199,23 +246,72 @@ export const promise = async ({
         object
       >
 
-      const validationResult = await validateFn(valueToValidate as never, {
-        ...field,
-        id,
-        blockData: blockData!,
-        collectionSlug: collection?.slug,
-        data: deepMergeWithSourceArrays(doc, data),
-        event: 'submit',
-        // @ts-expect-error
-        jsonError,
-        operation,
-        overrideAccess,
-        path: pathSegments,
-        preferences: { fields: {} },
-        previousValue: siblingDoc[field.name],
-        req,
-        siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-      })
+      let validationResult: string | true = true
+      let failedLocale: string | undefined
+
+      const validationData = deepMergeWithSourceArrays<JsonObject>(doc, data)
+      const validationSiblingData = deepMergeWithSourceArrays<JsonObject>(siblingDoc, siblingData)
+
+      for (const { locale, value } of localizedValuesToValidate) {
+        // Scope `req.locale` to the current locale via a proxy, without mutating the shared request.
+        const validationReq = locale ? isolateObjectProperty(req, 'locale') : req
+        if (locale) {
+          validationReq.locale = locale
+        }
+
+        const localeContext = locale
+          ? {
+              blockData:
+                blockData && blockFields
+                  ? flattenValidationData({
+                      config: req.payload.config,
+                      data: blockData,
+                      fields: blockFields,
+                      locale,
+                      parentIsLocalized,
+                    })
+                  : blockData,
+              data: flattenValidationData({
+                config: req.payload.config,
+                data: validationData,
+                fields: (collection?.fields || global?.fields)!,
+                locale,
+              }),
+              siblingData: flattenValidationData({
+                config: req.payload.config,
+                data: validationSiblingData,
+                fields: siblingFields!,
+                locale,
+                parentIsLocalized,
+              }),
+            }
+          : { blockData, data: validationData, siblingData: validationSiblingData }
+
+        validationResult = await validateFn(value as never, {
+          ...field,
+          id,
+          blockData: localeContext.blockData!,
+          collectionSlug: collection?.slug,
+          data: localeContext.data,
+          event: 'submit',
+          // @ts-expect-error generic validation options cannot infer JSON fields
+          jsonError,
+          operation,
+          overrideAccess,
+          path: pathSegments,
+          preferences: { fields: {} },
+          previousValue: locale
+            ? (siblingDoc[field.name] as JsonObject)?.[locale]
+            : siblingDoc[field.name],
+          req: validationReq,
+          siblingData: localeContext.siblingData,
+        })
+
+        if (typeof validationResult === 'string') {
+          failedLocale = locale
+          break
+        }
+      }
 
       if (typeof validationResult === 'string') {
         let filterOptionsError = false
@@ -275,7 +371,7 @@ export const promise = async ({
           )
 
           errors.push({
-            label: fieldLabel,
+            label: failedLocale ? `${fieldLabel} (${failedLocale})` : fieldLabel,
             message: validationResult,
             path,
           })
@@ -288,11 +384,25 @@ export const promise = async ({
       mergeLocaleActions.push(() => {
         const localeData: Record<string, unknown> = {}
 
+        // With `locale: 'all'`, siblingData holds a locale-keyed object (`{ en, es }`) rather than a single
+        // locale's value - take each submitted locale, falling back to the existing doc for ones not sent.
+        const submittedValue = siblingData[field.name!]
+        const isAllLocales =
+          req.locale === 'all' &&
+          submittedValue !== null &&
+          typeof submittedValue === 'object' &&
+          !Array.isArray(submittedValue)
+
         for (const locale of localization.localeCodes) {
-          const fieldValue =
-            locale === req.locale
-              ? siblingData[field.name!]
-              : siblingDocWithLocales?.[field.name!]?.[locale]
+          const existingValue = siblingDocWithLocales?.[field.name!]?.[locale]
+
+          const fieldValue = isAllLocales
+            ? locale in (submittedValue as Record<string, unknown>)
+              ? (submittedValue as Record<string, unknown>)[locale]
+              : existingValue
+            : locale === req.locale
+              ? submittedValue
+              : existingValue
 
           // update locale value if it's not undefined
           if (typeof fieldValue !== 'undefined') {
@@ -320,6 +430,7 @@ export const promise = async ({
             traverseFields({
               id,
               blockData,
+              blockFields,
               collection,
               context,
               data,
@@ -376,11 +487,7 @@ export const promise = async ({
 
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
 
-          const block: Block | undefined =
-            req.payload.blocks[blockTypeToMatch] ??
-            ((field.blockReferences ?? field.blocks).find(
-              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-            ) as Block | undefined)
+          const block = getBlockFromField({ blockType: blockTypeToMatch, field, req })
 
           const blockLabelPath =
             field?.label === false
@@ -395,6 +502,7 @@ export const promise = async ({
               traverseFields({
                 id,
                 blockData: row,
+                blockFields: block.fields,
                 collection,
                 context,
                 data,
@@ -433,6 +541,7 @@ export const promise = async ({
       await traverseFields({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,
@@ -507,6 +616,7 @@ export const promise = async ({
       await traverseFields({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,
@@ -638,6 +748,7 @@ export const promise = async ({
       await traverseFields({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,
@@ -675,6 +786,7 @@ export const promise = async ({
       await traverseFields({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,

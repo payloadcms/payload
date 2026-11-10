@@ -1,6 +1,7 @@
 'use client'
 import type { StaticLabel } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -22,9 +23,11 @@ const baseClass = 'sort-column'
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const { name, appearance, disable = false, Label, label } = props
   const { handleSortChange, query } = useListQuery()
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const { sort } = query
+
+  const resolvedLabel = getTranslation(label || (typeof Label === 'string' ? Label : name), i18n)
 
   const desc = `-${name}`
   const asc = name
@@ -53,7 +56,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
           <button
             aria-label={t('general:sortByLabelDirection', {
               direction: t('general:ascending'),
-              label,
+              label: resolvedLabel,
             })}
             className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => void handleSortChange(asc)}
@@ -64,7 +67,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
           <button
             aria-label={t('general:sortByLabelDirection', {
               direction: t('general:descending'),
-              label,
+              label: resolvedLabel,
             })}
             className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => void handleSortChange(desc)}

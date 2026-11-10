@@ -11,6 +11,7 @@ import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { isNestedRelationshipQuery } from '../isNestedRelationshipQuery.js'
 import { prefixWherePaths } from '../prefixWherePaths.js'
+import { hasReadAccessToQueryPath } from './hasReadAccessToQueryPath.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
 type Args = {
@@ -109,6 +110,14 @@ export async function validateSearchParam({
     typeof relationshipField.collection === 'string' &&
     hasNestedWhere
 
+  const nestedCollectionSlug = isNestedHasManyQuery
+    ? relatedCollectionSlug
+    : isJoinContainsQuery &&
+        relationshipField?.type === 'join' &&
+        typeof relationshipField.collection === 'string'
+      ? relationshipField.collection
+      : undefined
+
   // Plain-object values would be merged as raw query fragments.
   if (operator === 'like' || operator === 'not_like' || operator === 'contains') {
     const isValidNestedContains =
@@ -124,11 +133,11 @@ export async function validateSearchParam({
     }
   }
 
-  if (isNestedHasManyQuery && relatedCollectionSlug) {
+  if ((isNestedHasManyQuery || isJoinContainsQuery) && nestedCollectionSlug) {
     // Validate the nested query against the related collection.
     promises.push(
       validateQueryPaths({
-        collectionConfig: req.payload.collections[relatedCollectionSlug]!.config,
+        collectionConfig: req.payload.collections[nestedCollectionSlug]!.config,
         errors,
         overrideAccess,
         policies,
@@ -269,54 +278,41 @@ export async function validateSearchParam({
             }
           }
         }
-        let fieldPath = path
-        // remove locale from end of path
-        if (path.endsWith(`.${req.locale}`)) {
-          fieldPath = path.slice(0, -(req.locale!.length + 1))
-        }
-        // remove ".value" from ends of polymorphic relationship paths
-        if (
-          (field.type === 'relationship' || field.type === 'upload') &&
-          Array.isArray(field.relationTo)
-        ) {
-          fieldPath = fieldPath.replace('.value', '')
-        }
-
-        const entityType: 'collections' | 'globals' = globalConfig ? 'globals' : 'collections'
+        const entityType = collectionSlug ? 'collections' : 'globals'
         const entitySlug = collectionSlug || globalConfig!.slug
-        const segments = fieldPath.split('.')
+        const entity = collectionSlug
+          ? req.payload.collections[collectionSlug]!.config
+          : globalConfig!
+        let fieldPath = path
 
-        let fieldAccess: any
-
-        if (versionFields) {
-          fieldAccess = policies[entityType]![entitySlug]!.fields
-
-          if (
-            segments[0] === 'parent' ||
-            segments[0] === 'version' ||
-            segments[0] === 'snapshot' ||
-            segments[0] === 'latest'
-          ) {
-            segments.shift()
-          }
-        } else {
-          fieldAccess = policies[entityType]![entitySlug]!.fields
+        if (
+          versionFields &&
+          !i &&
+          ['latest', 'parent', 'snapshot', 'version'].includes(fieldPath)
+        ) {
+          return
         }
 
-        if (segments.length) {
-          segments.forEach((segment) => {
-            if (fieldAccess[segment]) {
-              if ('fields' in fieldAccess[segment]) {
-                fieldAccess = fieldAccess[segment].fields
-              } else {
-                fieldAccess = fieldAccess[segment]
-              }
-            }
-          })
+        if (versionFields && !i) {
+          fieldPath = fieldPath.replace(/^(?:parent|version|snapshot|latest)\./, '')
+        }
 
-          if (!fieldAccess?.read?.permission) {
-            errors.push({ path: fieldPath })
-          }
+        if (
+          !hasReadAccessToQueryPath({
+            fields: entity.flattenedFields,
+            isParentLocalized: parentIsLocalized,
+            isRelatedToMany:
+              field.type === 'join' ||
+              ((field.type === 'relationship' || field.type === 'upload') &&
+                Boolean(field.hasMany)),
+            path: fieldPath.split('.'),
+            permissions: policies[entityType]![entitySlug]!.fields,
+            relatedCollectionSlug: paths[i + 1]?.collectionSlug || nestedCollectionSlug,
+            req,
+            shouldShowHiddenFields: showHiddenFields,
+          })
+        ) {
+          errors.push({ path: fieldPath })
         }
       }
 

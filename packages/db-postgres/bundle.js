@@ -29,8 +29,8 @@ async function build() {
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [commonjs()],
     sourcemap: true,
-    // 20.18.1 is the lowest version of node supported by Payload
-    target: 'node20.18.1',
+    // 22.23.4 is the lowest version of node supported by Payload
+    target: 'node22.23.4',
   })
   console.log('db-postgres bundled successfully')
 

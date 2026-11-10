@@ -43,10 +43,11 @@ import {
 import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
 import {
   buildAllLocalesPublicationHookDoc,
+  canApplyAllLocalesStatusChange,
   getAllLocalesPublicationStatus,
-  hasAuthorizedAllLocalesPublicationStatus,
   validateAllLocalesPublicationFlags,
 } from '../../../versions/allLocalesPublicationStatus.js'
+import { resolveLocalizedStatus } from '../../../versions/resolveLocalizedStatus.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -328,53 +329,60 @@ export const updateDocument = async <
     },
   })
 
-  const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
-    data: publicationData,
-    fieldAccessDenied: !statusFieldAccess,
-    fieldValue: statusFieldValue,
-    status: allLocalesPublicationStatus,
+  const shouldApplyAllLocalesStatusChange = canApplyAllLocalesStatusChange({
+    canUpdateStatus: statusFieldAccess,
+    requestedStatus: allLocalesPublicationStatus,
+    statusAfterDocumentHooks: publicationData._status,
+    statusAfterFieldHooks: statusFieldValue,
   })
+  const shouldUnpublishAllLocales =
+    unpublishAllLocales &&
+    (!hasLocalizeStatusEnabled(collectionConfig) || shouldApplyAllLocalesStatusChange)
+
   if (
     allLocalesPublicationStatus &&
-    !hasAuthorizedPublicationStatus &&
+    !shouldApplyAllLocalesStatusChange &&
     typeof statusFieldValue === 'undefined' &&
     typeof docWithLocales._status === 'object' &&
     docWithLocales._status !== null
   ) {
+    // Keep the current locale statuses when the all-locale change cannot be applied.
     result._status = { ...docWithLocales._status }
   }
 
   let snapshotToSave: JsonObject | undefined
+
+  const localization =
+    config.localization && hasLocalizeStatusEnabled(collectionConfig)
+      ? config.localization
+      : undefined
+
+  if (localization) {
+    result._status = await resolveLocalizedStatus({
+      configBlockReferences: config.blocks,
+      existingDoc: docWithLocales,
+      fields: collectionConfig.fields,
+      isSavingDraft,
+      locale,
+      localization,
+      req,
+      result,
+      shouldApplyAllLocalesStatusChange,
+      statusFieldAccess,
+      unpublishAllLocales,
+    })
+  }
 
   if (config.localization && collectionConfig.versions) {
     let snapshotData: JsonObject | undefined
     let currentDoc
 
     if (hasLocalizeStatusEnabled(collectionConfig)) {
-      if (hasAuthorizedPublicationStatus) {
-        let accessibleLocaleCodes = config.localization.localeCodes
-
-        if (config.localization.filterAvailableLocales) {
-          const filteredLocales = await config.localization.filterAvailableLocales({
-            locales: config.localization.locales,
-            req,
-          })
-          accessibleLocaleCodes = filteredLocales.map((locale) =>
-            typeof locale === 'string' ? locale : locale.code,
-          )
-        }
-
-        if (typeof result._status !== 'object' || result._status === null) {
-          result._status = {}
-        }
-
-        for (const localeCode of accessibleLocaleCodes) {
-          result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
-        }
-      } else if (!isSavingDraft) {
-        // publishing a single locale
+      if (!shouldApplyAllLocalesStatusChange && !isSavingDraft && locale !== 'all') {
+        // Fetch every locale so publishing one does not overwrite the others.
         currentDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
           collection: collectionConfig.slug,
+          locale: 'all',
           req,
           where: { id: { equals: id } },
         })
@@ -409,7 +417,7 @@ export const updateDocument = async <
         dataWithLocales: result || {},
         docWithLocales: currentDoc || {},
         fields: collectionConfig.fields,
-        selectedLocales: [locale],
+        localesToUpdate: [locale],
       })
     }
   }
@@ -478,7 +486,7 @@ export const updateDocument = async <
       publishSpecificLocale,
       req,
       snapshot: snapshotToSave,
-      unpublish: unpublishAllLocales,
+      unpublish: shouldUnpublishAllLocales,
     })
   }
 

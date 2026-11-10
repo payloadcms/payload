@@ -12,9 +12,11 @@ import { sanitizeFields } from 'payload'
 import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
+import { isSafeCssColor } from '../../converters/lexicalToHtml/shared/cssColors.js'
 import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
 import { TableMarkdownTransformer } from '../markdownTransformer.js'
+import { tableCellValidation } from './validate.js'
 
 const fields: Field[] = [
   {
@@ -127,13 +129,22 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
                   showHiddenFields,
                 })
 
-                const tagName = node.headerState > 0 ? 'th' : 'td'
-                const headerStateClass = `lexical-table-cell-header-${node.headerState}`
-                const backgroundColor = node.backgroundColor
-                  ? `background-color: ${node.backgroundColor};`
-                  : ''
-                const colSpan = node.colSpan && node.colSpan > 1 ? `colspan="${node.colSpan}"` : ''
-                const rowSpan = node.rowSpan && node.rowSpan > 1 ? `rowspan="${node.rowSpan}"` : ''
+                // Stored JSON is not type-checked, so only numbers may be interpolated into attributes
+                const headerState = typeof node.headerState === 'number' ? node.headerState : 0
+                const tagName = headerState > 0 ? 'th' : 'td'
+                const headerStateClass = `lexical-table-cell-header-${headerState}`
+                const backgroundColor =
+                  node.backgroundColor && isSafeCssColor(node.backgroundColor)
+                    ? `background-color: ${node.backgroundColor};`
+                    : ''
+                const colSpan =
+                  typeof node.colSpan === 'number' && node.colSpan > 1
+                    ? `colspan="${node.colSpan}"`
+                    : ''
+                const rowSpan =
+                  typeof node.rowSpan === 'number' && node.rowSpan > 1
+                    ? `rowspan="${node.rowSpan}"`
+                    : ''
 
                 return `<${tagName} class="lexical-table-cell ${headerStateClass}" style="border: 1px solid #ccc; padding: 8px; ${backgroundColor}" ${colSpan} ${rowSpan}>${childrenText}</${tagName}>`
               },
@@ -141,6 +152,7 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
             },
           },
           node: TableCellNode,
+          validations: [tableCellValidation],
         }),
         createNode({
           converters: {

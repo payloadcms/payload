@@ -191,6 +191,66 @@ const createPlan = (where: Where, collections = ['articles', 'notes']) =>
   createPolymorphicJoinWherePlan({ adapter, collections, where })
 
 describe('createPolymorphicJoinWherePlan', () => {
+  it('should resolve scalar fields stored in a localized group through the locale table', () => {
+    const localizedAdapter = createAdapter({
+      articles: {
+        fields: [
+          {
+            name: 'details',
+            type: 'group',
+            localized: true,
+            fields: [{ name: 'status', type: 'text' }],
+          },
+        ],
+        table: articlesTable,
+      },
+    })
+
+    localizedAdapter.localesSuffix = '_locales'
+    localizedAdapter.tables.join_articles_locales = sqliteTable('join_articles_locales', {
+      details_status: text('details_status'),
+    })
+
+    const plan = createPolymorphicJoinWherePlan({
+      adapter: localizedAdapter,
+      collections: ['articles'],
+      where: { 'details.status': { equals: 'published' } },
+    })
+
+    expect(plan.get('details.status')).toMatchObject({
+      columnPath: 'details_status',
+      type: 'scalar',
+    })
+    expect(plan.get('details.status')?.fieldsByCollection.get('articles')).toMatchObject({
+      type: 'scalar',
+      isLocalized: true,
+    })
+  })
+
+  it('should continue rejecting localized has-many selects', () => {
+    const localizedAdapter = createAdapter({
+      articles: {
+        fields: [
+          {
+            name: 'tags',
+            type: 'select',
+            hasMany: true,
+            localized: true,
+            options: ['available'],
+          },
+        ],
+        table: articlesTable,
+      },
+    })
+    const plan = createPolymorphicJoinWherePlan({
+      adapter: localizedAdapter,
+      collections: ['articles'],
+      where: { tags: { equals: 'available' } },
+    })
+
+    expect(plan.get('tags')).toMatchObject({ type: 'invalid' })
+  })
+
   it('creates one scalar plan per unique field in nested boolean clauses', () => {
     const plan = createPlan({
       AND: [
@@ -374,7 +434,11 @@ describe('createPolymorphicJoinWherePlan', () => {
       { variantTags: { contains: 'available' } },
       'variantTags',
     ],
-    ['a localized field', { localizedTitle: { equals: 'value' } }, 'localizedTitle'],
+    [
+      'a localized field without a locale table',
+      { localizedTitle: { equals: 'value' } },
+      'localizedTitle',
+    ],
     ['a field stored in array rows', { 'entries.tags': { equals: 'value' } }, 'entries.tags'],
     [
       'a field stored in block rows',

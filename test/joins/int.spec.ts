@@ -1898,6 +1898,52 @@ describe('Joins Field', () => {
 
       expect(parent.children?.totalDocs).toBe(1)
     })
+
+    it('should return all docs across multiple collections with limit 0', async () => {
+      const parent = await payload.create({
+        collection: 'multiple-collections-parents',
+        data: {},
+        depth: 0,
+      })
+
+      const child1 = await payload.create({
+        collection: 'multiple-collections-1',
+        data: {
+          parent: parent.id,
+          title: 'doc-1',
+        },
+        depth: 0,
+      })
+
+      const child2 = await payload.create({
+        collection: 'multiple-collections-2',
+        data: {
+          parent: parent.id,
+          title: 'doc-2',
+        },
+        depth: 0,
+      })
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: 'multiple-collections-parents',
+        depth: 0,
+        joins: {
+          children: {
+            limit: 0,
+          },
+        },
+      })
+
+      expect(result.children.docs).toHaveLength(2)
+      expect(result.children.docs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ relationTo: 'multiple-collections-1', value: child1.id }),
+          expect.objectContaining({ relationTo: 'multiple-collections-2', value: child2.id }),
+        ]),
+      )
+      expect(result.children.hasNextPage).toBe(false)
+    })
   })
 
   describeDatabase('Constrained joins', { db: 'drizzle' }, () => {

@@ -1140,7 +1140,16 @@ export type Config = {
      * Define which JWT identification methods you'd like to support for Payload's local auth strategy, as well as the order that they're retrieved in.
      * Defaults to ['JWT', 'Bearer', 'cookie]
      */
-    jwtOrder: ('Bearer' | 'cookie' | 'JWT')[]
+    jwtOrder?: ('Bearer' | 'cookie' | 'JWT')[]
+    /**
+     * PBKDF2-SHA256 iterations used when hashing new passwords for the local auth strategy.
+     *
+     * Use `100000` in environments that do not support 600,000 iterations, such as Cloudflare
+     * Workers. Stored hashes that use a different count are rehashed on the next successful login.
+     *
+     * @default 600000
+     */
+    passwordHashIterations?: 100000 | 600000
   }
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]

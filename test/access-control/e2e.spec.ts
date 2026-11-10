@@ -1834,6 +1834,7 @@ describe('Access Control', () => {
       ).toBeDisabled()
 
       // Tab read-only block references - fields should not be editable
+      await page.locator('#field-tabReadOnlyTest__tabReadOnlyBlockRefs').scrollIntoViewIfNeeded()
       await expect(
         page.locator('#field-tabReadOnlyTest__tabReadOnlyBlockRefs__0__title'),
       ).toBeDisabled()

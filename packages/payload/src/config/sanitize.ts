@@ -18,6 +18,7 @@ import type {
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
+import { supportedPasswordHashIterations } from '../auth/strategies/local/generatePasswordSaltHash.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
@@ -116,6 +117,12 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
+
+  if (!supportedPasswordHashIterations.includes(configWithDefaults.auth!.passwordHashIterations!)) {
+    throw new InvalidConfiguration(
+      `\`auth.passwordHashIterations\` must be one of ${supportedPasswordHashIterations.join(', ')}.`,
+    )
+  }
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
 

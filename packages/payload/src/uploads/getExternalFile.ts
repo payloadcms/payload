@@ -49,28 +49,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
   const { filename, url } = data
 
   if (typeof url === 'string') {
-    let baseOrigin: string | undefined
-    let parsedFileURL: URL
-
-    if (hasProtocol(url)) {
-      parsedFileURL = parseFileURL(url)
-    } else {
-      const requestOrigin = getRequestOrigin({ config: req.payload.config, req })
-      let requestBaseURL: undefined | URL
-
-      if (requestOrigin) {
-        requestBaseURL = parseFileURL(requestOrigin)
-        baseOrigin = requestBaseURL.origin
-      } else {
-        requestBaseURL = getRequestBaseURL(req)
-      }
-
-      if (!requestBaseURL) {
-        throw new APIError('Unable to determine an HTTP(S) base URL for the external file.', 400)
-      }
-
-      parsedFileURL = parseFileURL(url, requestBaseURL)
-    }
+    const { baseOrigin, url: parsedFileURL } = resolveExternalFileURL({ req, url })
 
     let fileURL = parsedFileURL.toString()
     const requestHeaders = Object.fromEntries(new Headers(req.headers))
@@ -160,4 +139,36 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
   }
 
   throw new APIError('Invalid file url', 400)
+}
+
+/**
+ * Resolves a file URL to an absolute HTTP(S) URL. Relative URLs resolve against the configured
+ * request origin (returned as `baseOrigin`), falling back to the incoming request's host.
+ */
+export const resolveExternalFileURL = ({
+  req,
+  url,
+}: {
+  req: PayloadRequest
+  url: string
+}): { baseOrigin?: string; url: URL } => {
+  if (hasProtocol(url)) {
+    return { url: parseFileURL(url) }
+  }
+
+  const requestOrigin = getRequestOrigin({ config: req.payload.config, req })
+
+  if (requestOrigin) {
+    const requestBaseURL = parseFileURL(requestOrigin)
+
+    return { baseOrigin: requestBaseURL.origin, url: parseFileURL(url, requestBaseURL) }
+  }
+
+  const requestBaseURL = getRequestBaseURL(req)
+
+  if (!requestBaseURL) {
+    throw new APIError('Unable to determine an HTTP(S) base URL for the external file.', 400)
+  }
+
+  return { url: parseFileURL(url, requestBaseURL) }
 }

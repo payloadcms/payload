@@ -7,6 +7,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 import ArrayFields from './collections/Array/index.js'
+import { blockFieldHookCalls } from './collections/Blocks/hookCalls.js'
 import { BlockFields } from './collections/Blocks/index.js'
 import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
@@ -106,6 +107,30 @@ export const baseConfig: Partial<Config> = {
         {
           name: 'deduplicatedText',
           type: 'text',
+          hooks: {
+            beforeValidate: [
+              ({ value }) => {
+                if (value === 'observe') {
+                  blockFieldHookCalls.push('beforeValidate')
+                }
+                return value
+              },
+            ],
+            beforeChange: [
+              ({ value }) => {
+                if (value === 'observe') {
+                  blockFieldHookCalls.push('beforeChange')
+                }
+                return value
+              },
+            ],
+            afterRead: [
+              ({ value }) => {
+                blockFieldHookCalls.push('globalAfterRead')
+                return value
+              },
+            ],
+          },
         },
       ],
     },

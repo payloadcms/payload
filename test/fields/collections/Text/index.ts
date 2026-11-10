@@ -56,8 +56,29 @@ const TextFields: CollectionConfig = {
       name: 'localizedRequiredText',
       type: 'text',
       localized: true,
+      maxLength: 20,
+      minLength: 5,
       required: true,
       defaultValue: 'default',
+    },
+    {
+      name: 'localizedCustomValidate',
+      type: 'text',
+      localized: true,
+      validate: (value, { previousValue, req }) => {
+        // Only rejects the sentinel, and only for `es` - proves `req.locale` is scoped to the locale being
+        // validated (not `'all'`) and that the error is attributed to the right translation.
+        if (req.locale === 'es' && value === 'reject-es') {
+          return 'rejected for the es locale'
+        }
+
+        // Proves `previousValue` is the locale's own prior value, not the whole locale-keyed object.
+        if (req.locale === 'en' && value === 'assert-previous' && previousValue !== 'prev-en') {
+          return `previousValue was ${JSON.stringify(previousValue)}`
+        }
+
+        return true
+      },
     },
     {
       name: 'i18nText',

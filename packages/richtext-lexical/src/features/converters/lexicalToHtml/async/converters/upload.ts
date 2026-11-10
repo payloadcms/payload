@@ -1,6 +1,7 @@
 import type { FileData, FileSizeImproved, TypeWithID } from 'payload'
 
 import escapeHTML from 'escape-html'
+import { sanitizeUrl } from 'payload/shared'
 
 import type { SerializedUploadNode } from '../../../../../nodeTypes.js'
 import type { UploadDataImproved } from '../../../../upload/server/nodes/UploadNode.js'
@@ -33,7 +34,7 @@ export const UploadHTMLConverterAsync: HTMLConvertersAsync<SerializedUploadNode>
       (node.fields?.alt as string) || (uploadDoc as { alt?: string })?.alt || '',
     )
 
-    const url = escapeHTML(uploadDoc.url ?? '')
+    const url = escapeHTML(sanitizeUrl(uploadDoc.url ?? ''))
 
     // 1) If upload is NOT an image, return a link
     if (!uploadDoc.mimeType.startsWith('image')) {

@@ -147,8 +147,8 @@ function require(m) {
         }),*/
     ],
     sourcemap: true,
-    // 20.18.1 is the lowest version of node supported by Payload
-    target: 'node20.18.1',
+    // 22.23.4 is the lowest version of node supported by Payload
+    target: 'node22.23.4',
   })
   console.log('client.ts bundled successfully')
 
@@ -186,8 +186,8 @@ function require(m) {
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [removeCSSImports, commonjs()],
     sourcemap: true,
-    // 20.18.1 is the lowest version of node supported by Payload
-    target: 'node20.18.1',
+    // 22.23.4 is the lowest version of node supported by Payload
+    target: 'node22.23.4',
   })
   console.log('shared.ts bundled successfully')
 

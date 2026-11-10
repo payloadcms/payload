@@ -13,5 +13,6 @@ export class AuthenticationError extends APIError {
         : en.translations.error.emailOrPasswordIncorrect,
       httpStatus.UNAUTHORIZED,
     )
+    this.name = 'AuthenticationError'
   }
 }

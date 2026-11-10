@@ -10,7 +10,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { PageConfigProvider } from '@payloadcms/ui'
+import { PageConfigProvider, PageLocaleProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getVisibleEntities } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
@@ -340,36 +340,38 @@ export const RootPage = async ({
 
   return (
     <PageConfigProvider config={clientConfig}>
-      {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
-      {templateType === 'minimal' && (
-        <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
-      )}
-      {templateType === 'default' && (
-        <DefaultTemplate
-          collectionSlug={collectionConfig?.slug}
-          docID={routeParams.id}
-          documentSubViewType={documentSubViewType}
-          globalSlug={globalConfig?.slug}
-          i18n={req.i18n}
-          locale={locale}
-          params={params}
-          payload={req.payload}
-          permissions={permissions}
-          req={req}
-          searchParams={searchParams}
-          user={userWithReadAccess}
-          viewActions={viewActions}
-          viewType={viewType}
-          visibleEntities={{
-            // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
-            // which this caused as soon as initPageResult.visibleEntities is passed in
-            collections: visibleEntities?.collections,
-            globals: visibleEntities?.globals,
-          }}
-        >
-          {RenderedView}
-        </DefaultTemplate>
-      )}
+      <PageLocaleProvider locale={locale?.code}>
+        {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
+        {templateType === 'minimal' && (
+          <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
+        )}
+        {templateType === 'default' && (
+          <DefaultTemplate
+            collectionSlug={collectionConfig?.slug}
+            docID={routeParams.id}
+            documentSubViewType={documentSubViewType}
+            globalSlug={globalConfig?.slug}
+            i18n={req.i18n}
+            locale={locale}
+            params={params}
+            payload={req.payload}
+            permissions={permissions}
+            req={req}
+            searchParams={searchParams}
+            user={userWithReadAccess}
+            viewActions={viewActions}
+            viewType={viewType}
+            visibleEntities={{
+              // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
+              // which this caused as soon as initPageResult.visibleEntities is passed in
+              collections: visibleEntities?.collections,
+              globals: visibleEntities?.globals,
+            }}
+          >
+            {RenderedView}
+          </DefaultTemplate>
+        )}
+      </PageLocaleProvider>
     </PageConfigProvider>
   )
 }

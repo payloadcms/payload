@@ -64,6 +64,7 @@ import {
   autosaveWithDraftButtonGlobal,
   autosaveWithDraftButtonSlug,
   autosaveWithDraftValidateSlug,
+  autosaveWithVirtualSlug,
   customIDSlug,
   diffCollectionSlug,
   disablePublishGlobalSlug,
@@ -110,6 +111,7 @@ describe('Versions', () => {
   let autosaveURL: AdminUrlUtil
   let autosaveWithDraftButtonURL: AdminUrlUtil
   let autosaveWithDraftValidateURL: AdminUrlUtil
+  let autosaveWithVirtualURL: AdminUrlUtil
   let draftWithValidateURL: AdminUrlUtil
   let draftWithChangeHookURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
@@ -158,6 +160,7 @@ describe('Versions', () => {
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       autosaveWithDraftButtonURL = new AdminUrlUtil(serverURL, autosaveWithDraftButtonSlug)
       autosaveWithDraftValidateURL = new AdminUrlUtil(serverURL, autosaveWithDraftValidateSlug)
+      autosaveWithVirtualURL = new AdminUrlUtil(serverURL, autosaveWithVirtualSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
@@ -540,6 +543,116 @@ describe('Versions', () => {
       await expect(page.locator('#custom-field-label')).toHaveText(
         `Value in DocumentInfoContext: ${postID}`,
       )
+    })
+
+    describe('virtual field autosave', () => {
+      const createdDocIDs: string[] = []
+
+      test.afterEach(async () => {
+        for (const id of createdDocIDs) {
+          await payload.delete({ collection: autosaveWithVirtualSlug, id })
+        }
+
+        createdDocIDs.length = 0
+      })
+
+      test('should not re-autosave when virtual fields change in the response', async () => {
+        const { id: docID } = await payload.create({
+          collection: autosaveWithVirtualSlug,
+          data: {
+            array: [{ title: 'array title' }],
+            title: 'title',
+          },
+        })
+
+        createdDocIDs.push(docID)
+
+        await page.goto(autosaveWithVirtualURL.edit(docID))
+
+        await expect(page.locator('#field-titleDerived')).toHaveValue('derived:title')
+
+        const autosaveRequestURL = formatAdminURL({
+          apiRoute: '/api',
+          path: `/${autosaveWithVirtualSlug}/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
+          serverURL,
+        })
+
+        // A second edit exercises the modification flag left behind by the first autosave.
+        await assertNetworkRequests(
+          page,
+          autosaveRequestURL,
+          async () => {
+            await page.locator('#field-title').fill('first change')
+          },
+          {
+            allowedNumberOfRequests: 1,
+          },
+        )
+
+        await expect(page.locator('#field-titleDerived')).toHaveValue('derived:first change')
+
+        await assertNetworkRequests(
+          page,
+          autosaveRequestURL,
+          async () => {
+            await page.locator('#field-title').fill('second change')
+          },
+          {
+            allowedNumberOfRequests: 1,
+          },
+        )
+
+        await expect(page.locator('#field-titleDerived')).toHaveValue('derived:second change')
+      })
+
+      test('should not re-autosave when nested virtual fields change in the response', async () => {
+        const { id: docID } = await payload.create({
+          collection: autosaveWithVirtualSlug,
+          data: {
+            array: [{ title: 'array title' }],
+            title: 'title',
+          },
+        })
+
+        createdDocIDs.push(docID)
+
+        await page.goto(autosaveWithVirtualURL.edit(docID))
+
+        const nestedTitle = page.locator('#field-array__0__title')
+        await expect(nestedTitle).toHaveValue('array title')
+
+        const autosaveRequestURL = formatAdminURL({
+          apiRoute: '/api',
+          path: `/${autosaveWithVirtualSlug}/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
+          serverURL,
+        })
+
+        await assertNetworkRequests(
+          page,
+          autosaveRequestURL,
+          async () => {
+            await nestedTitle.fill('first change')
+          },
+          {
+            allowedNumberOfRequests: 1,
+          },
+        )
+
+        await assertNetworkRequests(
+          page,
+          autosaveRequestURL,
+          async () => {
+            await nestedTitle.fill('second change')
+          },
+          {
+            allowedNumberOfRequests: 1,
+          },
+        )
+
+        await expect(page.locator('#field-array__0__titleDerived')).toHaveValue(
+          'derived:second change',
+        )
+      })
     })
 
     test('collection - should show "save as draft" button when showSaveDraftButton is true', async () => {

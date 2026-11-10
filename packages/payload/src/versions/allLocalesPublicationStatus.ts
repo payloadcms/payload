@@ -55,18 +55,23 @@ export const getAllLocalesPublicationStatus = ({
   return undefined
 }
 
-export const hasAuthorizedAllLocalesPublicationStatus = ({
-  data,
-  fieldAccessDenied,
-  fieldValue,
-  status,
+export const canApplyAllLocalesStatusChange = ({
+  canUpdateStatus,
+  requestedStatus,
+  statusAfterDocumentHooks,
+  statusAfterFieldHooks,
 }: {
-  data: JsonObject
-  fieldAccessDenied: boolean
-  fieldValue: unknown
-  status: AllLocalesPublicationStatus | undefined
+  canUpdateStatus: boolean
+  requestedStatus: AllLocalesPublicationStatus | undefined
+  statusAfterDocumentHooks: unknown
+  statusAfterFieldHooks: unknown
 }): boolean => {
-  return Boolean(status && !fieldAccessDenied && data._status === status && fieldValue === status)
+  return Boolean(
+    requestedStatus &&
+      canUpdateStatus &&
+      statusAfterDocumentHooks === requestedStatus &&
+      statusAfterFieldHooks === requestedStatus,
+  )
 }
 
 export const normalizeAllLocalesPublicationStatus = ({

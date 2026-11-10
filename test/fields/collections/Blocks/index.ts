@@ -3,6 +3,7 @@ import type { BlocksField, CollectionConfig } from 'payload'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { blockFieldsSlug, textFieldsSlug } from '../../slugs.js'
+import { blockFieldHookCalls } from './hookCalls.js'
 import { getBlocksFieldSeedData } from './shared.js'
 
 export const getBlocksField = (prefix?: string): BlocksField => ({
@@ -401,6 +402,40 @@ export const BlockFields: CollectionConfig = {
               name: 'relationship',
               type: 'relationship',
               relationTo: textFieldsSlug,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'blocksWithCustomValidation',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'customContent',
+          fields: [{ name: 'text', type: 'text' }],
+        },
+      ],
+      validate: () => true,
+    },
+    {
+      name: 'inlineCollisionBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'ConfigBlockTest',
+          fields: [
+            {
+              name: 'inlineText',
+              type: 'text',
+              hooks: {
+                afterRead: [
+                  ({ value }) => {
+                    blockFieldHookCalls.push('inlineAfterRead')
+                    return value
+                  },
+                ],
+              },
             },
           ],
         },

@@ -33,19 +33,19 @@ function collectFlattenedFieldNames(fields: Field[]): Set<string> {
   return names
 }
 
-type MergeDataToSelectedLocalesArgs = {
+type MergeLocalizedDataArgs = {
   configBlockReferences: SanitizedConfig['blocks']
   dataWithLocales: JsonObject
   docWithLocales: JsonObject
   fields: Field[]
+  localesToUpdate: string[]
   parentIsLocalized?: boolean
-  selectedLocales: string[]
 }
 
 /**
  * Merges data from dataWithLocales onto docWithLocales for specified locales.
  * For localized fields, merges only the specified locales while preserving others.
- * For non-localized fields, keeps existing values from docWithLocales unchanged.
+ * For non-localized fields, uses incoming values while preserving existing values when omitted.
  * Returns a new object without mutating the original.
  */
 export function mergeLocalizedData({
@@ -53,9 +53,9 @@ export function mergeLocalizedData({
   dataWithLocales,
   docWithLocales,
   fields,
+  localesToUpdate,
   parentIsLocalized = false,
-  selectedLocales,
-}: MergeDataToSelectedLocalesArgs): JsonObject {
+}: MergeLocalizedDataArgs): JsonObject {
   if (!docWithLocales || typeof docWithLocales !== 'object') {
     return dataWithLocales || docWithLocales
   }
@@ -83,7 +83,7 @@ export function mergeLocalizedData({
               if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
                 const updatedArray: Record<string, unknown> = { ...(existingValue || {}) }
 
-                for (const locale of selectedLocales) {
+                for (const locale of localesToUpdate) {
                   if (locale in newValue) {
                     updatedArray[locale] = newValue[locale]
                   }
@@ -94,6 +94,8 @@ export function mergeLocalizedData({
                 // Preserve existing value if new value is not a valid object
                 result[field.name] = existingValue
               }
+            } else if (newValue === null) {
+              result[field.name] = null
             } else if (Array.isArray(newValue)) {
               // Non-localized array - still process children for any localized fields
               result[field.name] = newValue.map((newItem: JsonObject, index: number) => {
@@ -104,8 +106,8 @@ export function mergeLocalizedData({
                   dataWithLocales: newItem,
                   docWithLocales: existingItem,
                   fields: field.fields,
+                  localesToUpdate,
                   parentIsLocalized,
-                  selectedLocales,
                 })
               })
             }
@@ -123,7 +125,7 @@ export function mergeLocalizedData({
               if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
                 const updatedData: Record<string, unknown> = { ...(existingValue || {}) }
 
-                for (const locale of selectedLocales) {
+                for (const locale of localesToUpdate) {
                   if (locale in newValue) {
                     updatedData[locale] = newValue[locale]
                   }
@@ -134,6 +136,8 @@ export function mergeLocalizedData({
                 // Preserve existing value if new value is not a valid object
                 result[field.name] = existingValue
               }
+            } else if (newValue === null) {
+              result[field.name] = null
             } else if (Array.isArray(newValue)) {
               // Non-localized blocks - still process children for any localized fields
               result[field.name] = newValue.map((newBlockData: JsonObject, index: number) => {
@@ -161,8 +165,8 @@ export function mergeLocalizedData({
                     dataWithLocales: newBlockData,
                     docWithLocales: blockData,
                     fields: block?.fields || [],
+                    localesToUpdate,
                     parentIsLocalized,
-                    selectedLocales,
                   })
 
                   // blockType, id, blockName are set by Payload internally
@@ -192,7 +196,7 @@ export function mergeLocalizedData({
                 if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
                   const groupData: Record<string, unknown> = { ...(existingValue || {}) }
 
-                  for (const locale of selectedLocales) {
+                  for (const locale of localesToUpdate) {
                     if (locale in newValue && typeof newValue[locale] === 'object') {
                       groupData[locale] = newValue[locale]
                     }
@@ -210,8 +214,8 @@ export function mergeLocalizedData({
                   dataWithLocales: newValue,
                   docWithLocales: existingValue || {},
                   fields: field.fields,
+                  localesToUpdate,
                   parentIsLocalized,
-                  selectedLocales,
                 })
               }
             }
@@ -230,7 +234,7 @@ export function mergeLocalizedData({
               if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
                 const merged: Record<string, unknown> = { ...existingValue }
 
-                for (const locale of selectedLocales) {
+                for (const locale of localesToUpdate) {
                   if (locale in newValue) {
                     merged[locale] = newValue[locale]
                   }
@@ -249,7 +253,7 @@ export function mergeLocalizedData({
             result[field.name] = dataWithLocales[field.name]
           } else {
             result[field.name] =
-              field.name in dataWithLocales
+              typeof dataWithLocales[field.name] !== 'undefined'
                 ? dataWithLocales[field.name]
                 : docWithLocales[field.name]
           }
@@ -268,8 +272,8 @@ export function mergeLocalizedData({
             dataWithLocales,
             docWithLocales,
             fields: field.fields,
+            localesToUpdate,
             parentIsLocalized,
-            selectedLocales,
           })
           // Only copy fields that belong to this layout field to avoid overwriting already-processed fields
           const fieldNames = collectFlattenedFieldNames(field.fields)
@@ -295,7 +299,7 @@ export function mergeLocalizedData({
                   if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
                     const merged: Record<string, unknown> = { ...(existingValue || {}) }
 
-                    for (const locale of selectedLocales) {
+                    for (const locale of localesToUpdate) {
                       if (locale in newValue && typeof newValue[locale] === 'object') {
                         merged[locale] = newValue[locale]
                       }
@@ -313,8 +317,8 @@ export function mergeLocalizedData({
                     dataWithLocales: newValue as JsonObject,
                     docWithLocales: existingValue || {},
                     fields: tab.fields,
+                    localesToUpdate,
                     parentIsLocalized,
-                    selectedLocales,
                   })
                 }
               }
@@ -325,8 +329,8 @@ export function mergeLocalizedData({
                 dataWithLocales,
                 docWithLocales,
                 fields: tab.fields,
+                localesToUpdate,
                 parentIsLocalized,
-                selectedLocales,
               })
               // Only copy fields that belong to this tab to avoid overwriting already-processed fields
               const tabFieldNames = collectFlattenedFieldNames(tab.fields)

@@ -1,9 +1,10 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
-import type { Payload, ValidationError } from 'payload'
+import type { FlattenedField, Payload, ValidationError } from 'payload'
 
 import path from 'path'
 import { reload } from 'payload'
+import { getDateOnlyComparison } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
@@ -15,6 +16,7 @@ import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
 import { arrayDefaultValue } from './collections/Array/index.js'
+import { blockFieldHookCalls } from './collections/Blocks/hookCalls.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
 import { groupDefaultChild, groupDefaultValue } from './collections/Group/index.js'
@@ -39,8 +41,10 @@ import {
   dateFieldsSlug,
   duplicateFieldsSlug,
   groupFieldsSlug,
+  jsonFieldsSlug,
   numberFieldsSlug,
   relationshipFieldsSlug,
+  selectVersionsFieldsSlug,
   slugFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
@@ -364,6 +368,226 @@ describe('Fields', () => {
       expect(allLocales.localizedRequiredText.en).toEqual('English text')
       // @ts-expect-error
       expect(allLocales.localizedRequiredText.es).toEqual('Spanish text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
+    it('should enforce localized text length validation with locale all', async () => {
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale 'all' accepts object values for localized fields
+            localizedRequiredText: {
+              en: 'English text',
+              es: 'no',
+            },
+          },
+          locale: 'all',
+        }),
+      ).rejects.toThrow('The following field is invalid: Localized Required Text')
+    })
+
+    it('should skip validation for locales omitted from a locale all write', async () => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: {
+            en: 'English text',
+          },
+        },
+        locale: 'all',
+      })
+
+      const allLocales = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+      })
+
+      // @ts-expect-error
+      expect(allLocales.localizedRequiredText.en).toEqual('English text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
+    it('should enforce maxLength per locale and name the failing locale with locale all', async () => {
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale 'all' accepts object values for localized fields
+            localizedRequiredText: {
+              en: 'English text',
+              es: 'this value is definitely longer than twenty characters',
+            },
+          },
+          locale: 'all',
+        }),
+      ).rejects.toThrow('Localized Required Text (es)')
+    })
+
+    it('should treat an empty locale map as missing for a required field with locale all', async () => {
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale 'all' accepts object values for localized fields
+            localizedRequiredText: {},
+          },
+          locale: 'all',
+        }),
+      ).rejects.toThrow('The following field is invalid: Localized Required Text')
+    })
+
+    it('should enforce localized length validation on update with locale all', async () => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: {
+            en: 'English text',
+            es: 'Spanish text',
+          },
+        },
+        locale: 'all',
+      })
+
+      await expect(
+        // @ts-expect-error locale 'all' accepts object values for localized fields
+        payload.update({
+          id: doc.id,
+          collection: 'text-fields',
+          data: {
+            localizedRequiredText: {
+              en: 'English text',
+              es: 'no',
+            },
+          },
+          locale: 'all',
+        }),
+      ).rejects.toThrow('The following field is invalid: Localized Required Text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
+    it('should persist updated values on a locale all update', async () => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale all
+          localizedRequiredText: { en: 'English one', es: 'Spanish one' },
+        },
+        locale: 'all',
+      })
+
+      // @ts-expect-error locale all
+      await payload.update({
+        id: doc.id,
+        collection: 'text-fields',
+        data: {
+          localizedRequiredText: { en: 'English two', es: 'Spanish two' },
+        },
+        locale: 'all',
+      })
+
+      const refetched: any = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+      })
+
+      expect(refetched.localizedRequiredText.en).toStrictEqual('English two')
+      expect(refetched.localizedRequiredText.es).toStrictEqual('Spanish two')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
+    it('should only update submitted locales on a partial locale all update', async () => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale all
+          localizedRequiredText: { en: 'English one', es: 'Spanish one' },
+        },
+        locale: 'all',
+      })
+
+      // @ts-expect-error locale all
+      await payload.update({
+        id: doc.id,
+        collection: 'text-fields',
+        data: {
+          localizedRequiredText: { en: 'English two' },
+        },
+        locale: 'all',
+      })
+
+      const refetched: any = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+      })
+
+      expect(refetched.localizedRequiredText.en).toStrictEqual('English two')
+      expect(refetched.localizedRequiredText.es).toStrictEqual('Spanish one')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
+    it('should scope req.locale per locale for a custom validator with locale all', async () => {
+      // Same sentinel in both locales; the validator only rejects it for `es`. If `req.locale` leaked as
+      // `'all'` (or `'en'`), neither would reject - so a rejection attributed to `(es)` proves the scoping.
+      await expect(
+        payload.create({
+          collection: 'text-fields',
+          data: {
+            text: 'required',
+            // @ts-expect-error locale all
+            localizedRequiredText: { en: 'English text', es: 'Spanish text' },
+            // @ts-expect-error locale all
+            localizedCustomValidate: { en: 'reject-es', es: 'reject-es' },
+          },
+          locale: 'all',
+        }),
+      ).rejects.toThrow('Localized Custom Validate (es)')
+    })
+
+    it('should pass the locale previousValue to a custom validator on a locale all update', async () => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale all
+          localizedRequiredText: { en: 'English text', es: 'Spanish text' },
+          // @ts-expect-error locale all
+          localizedCustomValidate: { en: 'prev-en', es: 'prev-es' },
+        },
+        locale: 'all',
+      })
+
+      // The validator asserts the en previousValue is 'prev-en' (the locale's own prior value, not the
+      // whole `{ en, es }` object). A wrong previousValue returns an error naming the received value.
+      // @ts-expect-error locale all
+      const updated: any = await payload.update({
+        id: doc.id,
+        collection: 'text-fields',
+        data: {
+          localizedCustomValidate: { en: 'assert-previous', es: 'prev-es' },
+        },
+        locale: 'all',
+      })
+
+      expect(updated.localizedCustomValidate.en).toStrictEqual('assert-previous')
+      expect(updated.localizedCustomValidate.es).toStrictEqual('prev-es')
 
       await payload.delete({ collection: 'text-fields', id: doc.id })
     })
@@ -3324,6 +3548,117 @@ describe('Fields', () => {
   })
 
   describe('blocks', () => {
+    const createdBlockIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdBlockIDs) {
+        await payload.delete({ collection: blockFieldsSlug, id })
+      }
+      createdBlockIDs.length = 0
+    })
+
+    it('should keep block rows within the field configuration', async () => {
+      const doc = await payload.create({
+        collection: blockFieldsSlug,
+        data: { blocks: [{ blockType: 'content', text: 'initial' }] },
+      })
+      createdBlockIDs.push(doc.id)
+
+      await expect(
+        payload.update({
+          collection: blockFieldsSlug,
+          id: doc.id,
+          data: { blocks: [{ blockType: 'relationships' }] } as any,
+        }),
+      ).rejects.toThrow('The following field is invalid: Blocks')
+
+      const updated = await payload.findByID({ collection: blockFieldsSlug, id: doc.id })
+      expect(updated.blocks[0].blockType).toBe('content')
+    })
+
+    it('should keep referenced blocks within the field configuration', async () => {
+      const doc = await payload.create({ collection: blockFieldsSlug, data: {} })
+      createdBlockIDs.push(doc.id)
+
+      await expect(
+        payload.update({
+          collection: blockFieldsSlug,
+          id: doc.id,
+          data: { deduplicatedBlocks: [{ blockType: 'conditionalReference' }] } as any,
+        }),
+      ).rejects.toThrow('The following field is invalid: Deduplicated Blocks')
+
+      const updated = await payload.findByID({ collection: blockFieldsSlug, id: doc.id })
+      expect(updated.deduplicatedBlocks).toHaveLength(0)
+    })
+
+    it('should apply block configuration with custom validation', async () => {
+      const doc = await payload.create({ collection: blockFieldsSlug, data: {} })
+      createdBlockIDs.push(doc.id)
+
+      await expect(
+        payload.update({
+          collection: blockFieldsSlug,
+          id: doc.id,
+          data: { blocksWithCustomValidation: [{ blockType: 'relationships' }] } as any,
+        }),
+      ).rejects.toThrow('The following field is invalid: Blocks With Custom Validation')
+    })
+
+    it('should apply block configuration when a condition is false', async () => {
+      const doc = await payload.create({ collection: blockFieldsSlug, data: {} })
+      createdBlockIDs.push(doc.id)
+
+      await expect(
+        payload.update({
+          collection: blockFieldsSlug,
+          id: doc.id,
+          data: {
+            conditionalGroup: {
+              conditionalConfiguration: [{ blockType: 'ConfigBlockTest' }],
+            },
+            showConditionalFields: false,
+          } as any,
+        }),
+      ).rejects.toThrow(
+        'The following field is invalid: Conditional Group > Conditional Configuration',
+      )
+    })
+
+    it('should only run hooks for configured block types', async () => {
+      const doc = await payload.create({ collection: blockFieldsSlug, data: {} })
+      createdBlockIDs.push(doc.id)
+      blockFieldHookCalls.length = 0
+
+      await payload
+        .update({
+          collection: blockFieldsSlug,
+          id: doc.id,
+          data: {
+            configuration: [{ blockType: 'ConfigBlockTest', deduplicatedText: 'observe' }],
+          } as any,
+        })
+        .catch(() => undefined)
+
+      expect(blockFieldHookCalls).toStrictEqual([])
+    })
+
+    it('should use the inline block schema for reading', async () => {
+      const doc = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          inlineCollisionBlocks: [{ blockType: 'ConfigBlockTest', inlineText: 'read-inline' }],
+        } as any,
+      })
+      createdBlockIDs.push(doc.id)
+      blockFieldHookCalls.length = 0
+
+      const readDoc = await payload.findByID({ collection: blockFieldsSlug, id: doc.id })
+
+      expect(blockFieldHookCalls).toStrictEqual(['inlineAfterRead'])
+      expect(readDoc.inlineCollisionBlocks[0].inlineText).toBe('read-inline')
+    })
+
     it('should retrieve doc with blocks', async () => {
       const blockFields = await payload.find({
         collection: 'block-fields',
@@ -3561,6 +3896,29 @@ describe('Fields', () => {
       expect(inMissResult).toBeUndefined()
     })
 
+    it('should query block types from their configured fields', async () => {
+      const doc = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          deduplicatedBlocks: [{ blockType: 'ConfigBlockTest', deduplicatedText: 'reference' }],
+          inlineCollisionBlocks: [{ blockType: 'ConfigBlockTest', inlineText: 'inline' }],
+        } as any,
+      })
+      createdBlockIDs.push(doc.id)
+
+      const inlineResult = await payload.find({
+        collection: blockFieldsSlug,
+        where: { 'inlineCollisionBlocks.blockType': { equals: 'ConfigBlockTest' } },
+      })
+      const referenceResult = await payload.find({
+        collection: blockFieldsSlug,
+        where: { 'deduplicatedBlocks.blockType': { equals: 'ConfigBlockTest' } },
+      })
+
+      expect(inlineResult.docs.map(({ id }) => id)).toContain(doc.id)
+      expect(referenceResult.docs.map(({ id }) => id)).toContain(doc.id)
+    })
+
     it('should allow localized array of blocks', async () => {
       const result = await payload.create({
         collection: blockFieldsSlug,
@@ -3660,6 +4018,60 @@ describe('Fields', () => {
   })
 
   describe('json', () => {
+    describe('fallback values', () => {
+      const createdDocs: {
+        collection: typeof jsonFieldsSlug | typeof selectVersionsFieldsSlug
+        id: number | string
+      }[] = []
+
+      afterEach(async () => {
+        for (const doc of createdDocs) {
+          await payload.delete({ ...doc, overrideAccess: true })
+        }
+        createdDocs.length = 0
+      })
+
+      for (const draft of [false, true]) {
+        const operation = draft ? 'draft save' : 'partial update'
+        const collection = draft ? selectVersionsFieldsSlug : jsonFieldsSlug
+
+        it(`should preserve omitted JSON tuples after a ${operation}`, async () => {
+          const doc = await payload.create({
+            collection,
+            data: {
+              customJSON: [
+                [100, 200],
+                [300, 400],
+              ],
+            },
+            draft,
+            overrideAccess: true,
+          })
+          createdDocs.push({ collection, id: doc.id })
+
+          await payload.update({
+            id: doc.id,
+            collection,
+            data: draft ? { hasMany: ['a'] } : { json: { foo: 'bar' } },
+            draft,
+            overrideAccess: true,
+          })
+
+          const stored = await payload.findByID({
+            id: doc.id,
+            collection,
+            draft,
+            overrideAccess: true,
+          })
+
+          expect(stored.customJSON).toStrictEqual([
+            [100, 200],
+            [300, 400],
+          ])
+        })
+      }
+    })
+
     it('should save json data', async () => {
       const json = { foo: 'bar' }
       const doc = await payload.create({
@@ -4796,6 +5208,122 @@ describe('Fields', () => {
   })
 
   describe('date fields with timezones', () => {
+    it('should filter configured calendar-day boundaries across databases', async () => {
+      const documents = await Promise.all(
+        [
+          '2026-03-28T23:59:59.999Z',
+          '2026-03-29T00:00:00.000Z',
+          '2026-03-29T22:59:59.999Z',
+          '2026-03-29T23:00:00.000Z',
+          null,
+        ].map((defaultWithTimezone) =>
+          payload.create({
+            collection: dateFieldsSlug,
+            data: { ...dateDoc, defaultWithTimezone },
+          }),
+        ),
+      )
+
+      try {
+        const documentIDs = new Set(documents.map(({ id }) => id))
+        const findTestIDs = async ({
+          operator,
+          value,
+        }: {
+          operator:
+            | 'equals'
+            | 'greater_than'
+            | 'greater_than_equal'
+            | 'less_than'
+            | 'less_than_equal'
+            | 'not_equals'
+          value: string
+        }) => {
+          const result = await payload.find({
+            collection: dateFieldsSlug,
+            where: { defaultWithTimezone: { [operator]: value } },
+          })
+
+          return result.docs.map(({ id }) => id).filter((id) => documentIDs.has(id))
+        }
+
+        const equalsIDs = await findTestIDs({ operator: 'equals', value: '2026-03-29' })
+
+        expect(equalsIDs).toHaveLength(2)
+        expect(equalsIDs).toEqual(expect.arrayContaining([documents[1]!.id, documents[2]!.id]))
+        const notEqualsIDs = await findTestIDs({ operator: 'not_equals', value: '2026-03-29' })
+
+        expect(notEqualsIDs).toHaveLength(3)
+        expect(notEqualsIDs).toEqual(
+          expect.arrayContaining([documents[0]!.id, documents[3]!.id, documents[4]!.id]),
+        )
+        const greaterThanEqualIDs = await findTestIDs({
+          operator: 'greater_than_equal',
+          value: '2026-03-29',
+        })
+
+        expect(greaterThanEqualIDs).toHaveLength(3)
+        expect(greaterThanEqualIDs).toEqual(
+          expect.arrayContaining(documents.slice(1, 4).map(({ id }) => id)),
+        )
+        expect(await findTestIDs({ operator: 'greater_than', value: '2026-03-29' })).toEqual([
+          documents[3]!.id,
+        ])
+        expect(await findTestIDs({ operator: 'less_than', value: '2026-03-29' })).toEqual([
+          documents[0]!.id,
+        ])
+        const lessThanEqualIDs = await findTestIDs({
+          operator: 'less_than_equal',
+          value: '2026-03-29',
+        })
+
+        expect(lessThanEqualIDs).toHaveLength(3)
+        expect(lessThanEqualIDs).toEqual(
+          expect.arrayContaining(documents.slice(0, 3).map(({ id }) => id)),
+        )
+        expect(
+          await findTestIDs({ operator: 'equals', value: '2026-03-29T00:00:00.000Z' }),
+        ).toEqual([documents[1]!.id])
+      } finally {
+        await Promise.all(
+          documents.map(({ id }) => payload.delete({ collection: dateFieldsSlug, id })),
+        )
+      }
+    })
+
+    it('should use the sole supported timezone for calendar-day boundaries', () => {
+      const comparison = getDateOnlyComparison({
+        config: payload.config,
+        field: {
+          name: 'singletonTimezone',
+          type: 'date',
+          timezone: {
+            defaultTimezone: 'America/New_York',
+            supportedTimezones: [{ label: 'London', value: 'Europe/London' }],
+          },
+        } as FlattenedField,
+        operator: 'equals',
+        value: '2026-03-29',
+      })
+
+      expect(comparison?.constraints.map(({ value }) => value.toISOString())).toEqual([
+        '2026-03-29T00:00:00.000Z',
+        '2026-03-29T23:00:00.000Z',
+      ])
+
+      const earlyDateComparison = getDateOnlyComparison({
+        config: payload.config,
+        field: { name: 'earlyDate', type: 'date' } as FlattenedField,
+        operator: 'equals',
+        value: '0001-01-01',
+      })
+
+      expect(earlyDateComparison?.constraints.map(({ value }) => value.toISOString())).toEqual([
+        '0001-01-01T00:00:00.000Z',
+        '0001-01-02T00:00:00.000Z',
+      ])
+    })
+
     it('should create document with UTC offset timezone', async () => {
       const doc = await payload.create({
         collection: dateFieldsSlug,

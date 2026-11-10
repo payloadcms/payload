@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-sentry",
-  "version": "3.90.2",
+  "version": "3.93.0",
   "description": "Sentry plugin for Payload",
   "keywords": [
     "payload",
@@ -65,8 +65,8 @@
   },
   "peerDependencies": {
     "payload": "workspace:*",
-    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
-    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
+    "react": "~19.0.9 || ~19.1.10 || ~19.2.9 || ^19.3.1",
+    "react-dom": "~19.0.9 || ~19.1.10 || ~19.2.9 || ^19.3.1"
   },
   "publishConfig": {
     "exports": {

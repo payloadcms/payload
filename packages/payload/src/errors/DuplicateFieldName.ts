@@ -5,5 +5,6 @@ export class DuplicateFieldName extends APIError {
     super(
       `A field with the name '${fieldName}' was found multiple times on the same level. Field names must be unique.`,
     )
+    this.name = 'DuplicateFieldName'
   }
 }

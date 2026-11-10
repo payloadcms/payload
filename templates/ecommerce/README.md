@@ -209,7 +209,7 @@ By default we ship with the Stripe adapter configured, so you'll need to setup t
 
 We provide automated tests out of the box for both E2E and Int tests along with this template. They are being run in our CI to ensure the stability of this template over time. You can integrate them into your CI or run them locally as well via:
 
-To run Int tests wtih Vitest:
+To run Int tests with Vitest:
 
 ```bash
 pnpm test:int
