@@ -2450,11 +2450,13 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         expect(callResponse.isError).toBe(true)
         expect((callResponse as any).structuredContent.errors).toEqual([
           {
-            message: 'Invalid input: expected string, received number',
+            label: 'Layout 1 > Heading',
+            message: 'This field has an invalid input.',
             path: 'data.layout[0].heading',
           },
           {
-            message: 'Invalid input: expected string, received number',
+            label: 'Layout 1 > Subheading',
+            message: 'This field has an invalid input.',
             path: 'data.layout[0].subheading',
           },
         ])
@@ -3531,9 +3533,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
             errors: [
               {
                 index: 0,
-                message: expect.stringContaining(
-                  'data.numberField: Invalid input: expected number, received string',
-                ),
+                message: expect.stringContaining('data.numberField: Please enter a valid number.'),
               },
             ],
             schema: {
@@ -3849,7 +3849,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           expect((callResponse as any).structuredContent).toMatchObject({
             errors: [
               {
-                message: 'Invalid input: expected number, received string',
+                message: 'Please enter a valid number.',
                 path: 'data.numberField',
               },
             ],
