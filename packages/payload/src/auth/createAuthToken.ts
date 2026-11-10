@@ -1,5 +1,5 @@
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
-import type { AuthenticatedUser } from '../index.js'
+import type { AuthenticatedUser, UserSession } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { getFieldsToSign } from './getFieldsToSign.js'
@@ -12,8 +12,11 @@ import { addSessionToUser } from './sessions.js'
  * returns. Payload's JWT strategy accepts it. The session is saved on the user right away.
  */
 export const createAuthToken = async ({
+  type,
   collectionConfig,
+  details,
   email,
+  label,
   req,
   shouldCreateRefreshToken = false,
   user,
@@ -29,7 +32,7 @@ export const createAuthToken = async ({
    */
   shouldCreateRefreshToken?: boolean
   user: AuthenticatedUser
-}): Promise<{
+} & Pick<UserSession, 'details' | 'label' | 'type'>): Promise<{
   exp: number
   refreshToken?: string
   /**
@@ -40,7 +43,10 @@ export const createAuthToken = async ({
   token: string
 }> => {
   const { session, sid } = await addSessionToUser({
+    type,
     collectionConfig,
+    details,
+    label,
     payload: req.payload,
     req,
     sessionExpiration: shouldCreateRefreshToken

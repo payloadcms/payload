@@ -150,6 +150,12 @@ Auth collections with `useSessions` (the default) now store two more fields on e
 
 On SQL adapters this adds two columns to each `<collection>_sessions` table, so existing projects need a database migration. In development the schema is pushed automatically; in production, generate a migration with `payload migrate:create` and run `payload migrate`. Existing sessions keep working, since an empty `refreshCount` counts as `0`. MongoDB needs no migration.
 
+### Sessions say what they are
+
+Auth collections with `useSessions` (the default) now store three more fields on each session: `label`, `type` and `details`. A login fills in `type: 'login'` and a `label` like "Chrome on macOS" from the browser's User-Agent. See [Sessions](../authentication/overview#sessions).
+
+On SQL adapters this adds three columns to each `<collection>_sessions` table, so existing projects need a database migration. In development the schema is pushed automatically; in production, generate a migration with `payload migrate:create` and run `payload migrate`. Existing sessions keep working with the new fields empty. MongoDB needs no migration.
+
 ### Local API access is now enforced by default #overrideaccess-now-defaults-to-false-on-local-api-operations
 
 `overrideAccess` now defaults to `false` on Local API operations, so omitting it respects Access Control instead. Operations that do not expose `overrideAccess`, and operations such as `resetPassword` where it was already required or did not default to `true`, are unaffected by this change.

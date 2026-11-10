@@ -283,6 +283,30 @@ Refresh tokens don't expire on their own. They work as long as their session, wh
 
 Each refresh token is meant to be used once, so store the new one after every refresh. For 30 seconds after a refresh, the refresh token from right before it still works, so clients that refresh twice at once stay logged in. If a used refresh token comes back otherwise, Payload treats it as copied and logs out its session. Logging out ends refresh tokens too. They require `useSessions`, and aren't returned with `removeTokenFromResponses`.
 
+## Sessions
+
+With `useSessions`, Payload saves each login as a session on the user, and logging out ends it. Besides when it was created and when it expires, each session can say what it is:
+
+- `label`: for people to read, e.g. "Chrome on macOS".
+- `type`: how the session was created. Logins use `'login'`. Plugins can use their own values, e.g. `'mcp'`.
+- `details`: anything else to show next to the label, as JSON.
+
+A login sets `type` to `'login'`, and `label` to the browser and operating system from its User-Agent. Code that starts a session itself with `createAuthToken` can pass its own:
+
+```ts
+import { createAuthToken } from 'payload'
+
+const { token } = await createAuthToken({
+  collectionConfig: req.payload.collections.users.config,
+  details: { redirectHost: 'localhost' },
+  email: user.email,
+  label: 'Claude Code',
+  req,
+  type: 'mcp',
+  user,
+})
+```
+
 ## Operations
 
 All auth-related operations are available via Payload's REST, Local, and GraphQL APIs. These operations are automatically added to your Collection when you enable Authentication. [More details](./operations).
