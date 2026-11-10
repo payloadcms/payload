@@ -1,4 +1,4 @@
-import { APIError } from '../errors/APIError.js'
+import { UploadFilenameError } from '../errors/UploadFilenameError.js'
 
 /** Keeps upload filenames within the filesystem component limit without splitting UTF-8 characters. */
 export const truncateFilename = ({
@@ -13,7 +13,10 @@ export const truncateFilename = ({
   const extension = hasExtension ? filename.slice(extensionIndex) : ''
 
   if (Buffer.byteLength(extension) > maxBytes) {
-    throw new APIError('Upload filename extension exceeds the filename byte limit', 400)
+    throw new UploadFilenameError({
+      message: 'Upload filename extension exceeds the filename byte limit',
+      status: 400,
+    })
   }
 
   const stem = hasExtension ? filename.slice(0, extensionIndex) : filename
@@ -24,7 +27,10 @@ export const truncateFilename = ({
   const availableBytes = maxBytes - Buffer.byteLength(tail)
 
   if (availableBytes < 0) {
-    throw new APIError('Unable to find an available upload filename', 409)
+    throw new UploadFilenameError({
+      message: 'Unable to find an available upload filename',
+      status: 409,
+    })
   }
 
   let truncatedStem = ''

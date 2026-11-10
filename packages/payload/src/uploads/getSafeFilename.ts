@@ -2,7 +2,7 @@ import sanitize from 'sanitize-filename'
 
 import type { PayloadRequest } from '../types/index.js'
 
-import { APIError } from '../errors/APIError.js'
+import { UploadFilenameError } from '../errors/UploadFilenameError.js'
 import { docWithFilenameExists } from './docWithFilenameExists.js'
 import { fileExists } from './fileExists.js'
 import { truncateFilename } from './truncateFilename.js'
@@ -98,7 +98,10 @@ export async function getSafeFileName({
     const nextFilename = incrementName(modifiedFilename)
 
     if (++attempts >= 1000 || nextFilename === modifiedFilename) {
-      throw new APIError('Unable to find an available upload filename', 409)
+      throw new UploadFilenameError({
+        message: 'Unable to find an available upload filename',
+        status: 409,
+      })
     }
 
     modifiedFilename = nextFilename
@@ -126,7 +129,10 @@ export async function getUnplannedSafeFileName({
     const nextFilename = incrementName(filename)
 
     if (++attempts >= 1000 || nextFilename === filename) {
-      throw new APIError('Unable to find an available upload filename', 409)
+      throw new UploadFilenameError({
+        message: 'Unable to find an available upload filename',
+        status: 409,
+      })
     }
 
     filename = nextFilename
