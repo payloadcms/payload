@@ -36,8 +36,8 @@ const safelyCollect = (collect: () => FeatureInfo): FeatureInfo => {
   }
 }
 
-// sanitization adds 4 system widgets that we need to account for
-const SYSTEM_WIDGET_COUNT = 4
+// sanitization adds 5 system widgets that we need to account for
+const SYSTEM_WIDGET_COUNT = 5
 const SYSTEM_COLLECTION_SLUGS = [
   'payload-llm-instructions',
   'payload-locked-documents',
