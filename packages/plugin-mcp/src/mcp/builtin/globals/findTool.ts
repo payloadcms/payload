@@ -17,7 +17,7 @@ export const findGlobalTool = defineGlobalTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: findGlobalInputSchema,
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
 
@@ -29,7 +29,7 @@ export const findGlobalTool = defineGlobalTool({
     const findOptions: Parameters<typeof payload.findGlobal>[0] = {
       slug,
       depth,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       req,
     }
 

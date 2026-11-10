@@ -19,7 +19,7 @@ export const findGlobalVersionByIDTool = defineGlobalTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: findGlobalVersionByIDInputSchema,
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
   const { id, depth, fallbackLocale, locale, populate, select } = input
@@ -31,7 +31,7 @@ export const findGlobalVersionByIDTool = defineGlobalTool({
       id,
       slug,
       depth,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       req,
       ...(fallbackLocale !== undefined ? { fallbackLocale } : {}),
       ...(locale ? { locale } : {}),

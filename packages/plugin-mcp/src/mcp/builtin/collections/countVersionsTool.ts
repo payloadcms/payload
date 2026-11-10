@@ -19,7 +19,7 @@ export const countVersionsTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: countVersionsInputSchema,
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
   const { locale, where } = input
@@ -29,7 +29,7 @@ export const countVersionsTool = defineCollectionTool({
   try {
     const result = await payload.countVersions({
       collection: slug,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       req,
       ...(locale ? { locale } : {}),
       ...(where ? { where } : {}),

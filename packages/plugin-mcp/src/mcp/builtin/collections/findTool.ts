@@ -19,7 +19,7 @@ export const findDocumentsTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: findDocumentsInputSchema,
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
 
@@ -51,7 +51,7 @@ export const findDocumentsTool = defineCollectionTool({
           id: parseDocumentID({ id, collectionSlug: slug, payload }),
           collection: slug,
           depth,
-          overrideAccess: authorizedMCP.overrideAccess,
+          overrideAccess: false,
           req,
           ...(select && { select }),
           ...(populate && { populate }),
@@ -88,7 +88,7 @@ export const findDocumentsTool = defineCollectionTool({
       collection: slug,
       depth,
       limit,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       page,
       req,
       ...(select && { select }),

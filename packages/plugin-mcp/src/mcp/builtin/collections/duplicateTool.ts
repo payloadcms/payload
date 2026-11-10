@@ -27,7 +27,7 @@ export const duplicateDocumentTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: duplicateDocumentInputSchema,
-}).handler(async ({ slug, authorizedMCP, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
   const { id, data, depth, draft, fallbackLocale, locale, populate, select, selectedLocales } =
@@ -55,7 +55,7 @@ export const duplicateDocumentTool = defineCollectionTool({
       collection: slug,
       depth,
       draft,
-      overrideAccess: authorizedMCP.overrideAccess,
+      overrideAccess: false,
       req,
       ...(parsedData ? { data: parsedData } : {}),
       ...(locale ? { locale } : {}),

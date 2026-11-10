@@ -140,13 +140,13 @@ export default buildConfigWithDefaults({
                 input: z.object({
                   id: z.string().describe('The post ID to publish.'),
                 }),
-              }).handler(async ({ slug, input, authorizedMCP, req }) => {
+              }).handler(async ({ slug, input, req }) => {
                 const result = await req.payload.update({
                   id: input.id,
                   collection: slug,
                   data: { _status: 'published' },
                   req,
-                  overrideAccess: authorizedMCP.overrideAccess,
+                  overrideAccess: false,
                 })
                 return {
                   content: [
@@ -218,7 +218,7 @@ export default buildConfigWithDefaults({
                 .default(6)
                 .describe('Number of sides on the dice (default: 6)'),
             }),
-          }).handler(async ({ input, authorizedMCP, req }) => {
+          }).handler(async ({ input, req }) => {
             const sides = input.sides
             const result = Math.floor(Math.random() * sides) + 1
 
@@ -235,7 +235,7 @@ export default buildConfigWithDefaults({
               },
               req,
               draft: true,
-              overrideAccess: authorizedMCP.overrideAccess,
+              overrideAccess: false,
             })
 
             return {

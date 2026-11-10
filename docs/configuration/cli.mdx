@@ -8,6 +8,10 @@ keywords: cli, command line, commands
 
 The Payload CLI lets you work with your project from a terminal. You can use it to generate types, run migrations, inspect your setup, run jobs, and more.
 
+Use the CLI as the default interface for local development and coding agents.
+It works without a running web server or the MCP plugin. For clients connecting
+to a stable running server, use [authenticated MCP](../plugins/mcp).
+
 The CLI loads the Payload Config from your project. Run commands from your project directory, or use [`PAYLOAD_CONFIG_PATH`](./overview#customizing-the-config-location) if your config is somewhere else.
 
 The examples on this page use pnpm, but you can also use `npx payload` or the equivalent command for your package manager.
