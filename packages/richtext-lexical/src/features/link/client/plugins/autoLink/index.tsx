@@ -214,7 +214,13 @@ function $createAutoLinkNode_(
     }
     const linkNodes: LexicalNode[] = []
     let remainingTextNode
-    nodes.forEach((currentNode) => {
+    // `firstTextNode` (nodes[0]) is already accounted for via `firstLinkTextNode` above and
+    // `offset` is pre-seeded with its length, so only the remaining nodes need to be walked here.
+    // Iterating over the full `nodes` array double-processes `firstTextNode` at the wrong offset,
+    // which can push it into `linkNodes` a second time and later get appended into `linkNode`
+    // right as it's replaced by that same `linkNode` — corrupting the tree into a cycle that makes
+    // later traversals (e.g. `isAttached`) loop forever, freezing the editor.
+    nodes.slice(1).forEach((currentNode) => {
       const currentNodeText = currentNode.getTextContent()
       const currentNodeLength = currentNodeText.length
       const currentNodeStart = offset
@@ -405,42 +411,56 @@ function getTextNodesToMatch(textNode: TextNode): TextNode[] {
   return textNodesToMatch
 }
 
+/**
+ * Registers the auto-link text node transform on `editor`. Extracted as a plain function
+ * (rather than inlined in the `useEffect` below) so it can be exercised directly in unit
+ * tests via `@lexical/headless`, without needing to mount a React tree.
+ */
+export function registerAutoLinkTransform(
+  editor: LexicalEditor,
+  matchers: LinkMatcher[],
+  onChange?: ChangeHandler,
+): () => void {
+  if (!editor.hasNodes([AutoLinkNode])) {
+    throw new Error('LexicalAutoLinkPlugin: AutoLinkNode not registered on editor')
+  }
+
+  const onChangeWrapped = (url: null | string, prevUrl: null | string): void => {
+    if (onChange != null) {
+      onChange(url, prevUrl)
+    }
+  }
+
+  return mergeRegister(
+    editor.registerNodeTransform(TextNodeValue, (textNode: TextNode) => {
+      const parent = textNode.getParentOrThrow()
+      const previous = textNode.getPreviousSibling()
+      if ($isAutoLinkNode(parent)) {
+        handleLinkEdit(parent, matchers, onChangeWrapped)
+      } else if (!$isLinkNode(parent)) {
+        if (
+          textNode.isSimpleText() &&
+          (startsWithSeparator(textNode.getTextContent()) || !$isAutoLinkNode(previous))
+        ) {
+          const textNodesToMatch = getTextNodesToMatch(textNode)
+          $handleLinkCreation(textNodesToMatch, matchers, onChangeWrapped)
+        }
+
+        handleBadNeighbors(textNode, matchers, onChangeWrapped)
+      }
+    }),
+  )
+}
+
 function useAutoLink(
   editor: LexicalEditor,
   matchers: LinkMatcher[],
   onChange?: ChangeHandler,
 ): void {
-  useEffect(() => {
-    if (!editor.hasNodes([AutoLinkNode])) {
-      throw new Error('LexicalAutoLinkPlugin: AutoLinkNode not registered on editor')
-    }
-
-    const onChangeWrapped = (url: null | string, prevUrl: null | string): void => {
-      if (onChange != null) {
-        onChange(url, prevUrl)
-      }
-    }
-
-    return mergeRegister(
-      editor.registerNodeTransform(TextNodeValue, (textNode: TextNode) => {
-        const parent = textNode.getParentOrThrow()
-        const previous = textNode.getPreviousSibling()
-        if ($isAutoLinkNode(parent)) {
-          handleLinkEdit(parent, matchers, onChangeWrapped)
-        } else if (!$isLinkNode(parent)) {
-          if (
-            textNode.isSimpleText() &&
-            (startsWithSeparator(textNode.getTextContent()) || !$isAutoLinkNode(previous))
-          ) {
-            const textNodesToMatch = getTextNodesToMatch(textNode)
-            $handleLinkCreation(textNodesToMatch, matchers, onChangeWrapped)
-          }
-
-          handleBadNeighbors(textNode, matchers, onChangeWrapped)
-        }
-      }),
-    )
-  }, [editor, matchers, onChange])
+  useEffect(
+    () => registerAutoLinkTransform(editor, matchers, onChange),
+    [editor, matchers, onChange],
+  )
 }
 
 const URL_REGEX =
@@ -449,7 +469,7 @@ const URL_REGEX =
 const EMAIL_REGEX =
   /(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])|(([a-z\-\d]+\.)+[a-z]{2,}))/i
 
-const MATCHERS = [
+export const MATCHERS = [
   createLinkMatcherWithRegExp(URL_REGEX, (text) => {
     return text.startsWith('http') ? text : `https://${text}`
   }),
