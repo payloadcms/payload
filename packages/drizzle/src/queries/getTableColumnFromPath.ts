@@ -321,11 +321,19 @@ export const getTableColumnFromPath = ({
           selectFields = { ...selectFields, ...blockSelectFields }
 
           const previousLength = joins.length
-          joins.push(blockJoin)
+          // Dedupe by table name so OR/AND across multiple fields in the same block
+          // (e.g. layout.heading OR layout.caption) do not push a duplicate join alias.
+          addJoinTable({
+            ...blockJoin,
+            joins,
+          })
           // Append new joins AFTER the block join to prevent errors with missing FROM clause.
           if (newJoins.length > previousLength) {
             for (let i = previousLength; i < newJoins.length; i++) {
-              joins.push(newJoins[i])
+              addJoinTable({
+                ...newJoins[i],
+                joins,
+              })
             }
           }
           return true
