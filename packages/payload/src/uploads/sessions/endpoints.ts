@@ -1,6 +1,7 @@
 import type { Endpoint } from '../../config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { CreateUploadSessionArgs } from './operations.js'
+import type { UploadSessionSaveOptions } from './types.js'
 
 import { APIError } from '../../errors/index.js'
 import {
@@ -87,6 +88,7 @@ export const uploadSessionEndpoints: Endpoint[] = [
           id: getSessionID({ req }),
           data: body.data,
           draft: body.draft,
+          options: body.options,
           req,
         }),
       )
@@ -112,6 +114,7 @@ export const uploadSessionEndpoints: Endpoint[] = [
           id: getSessionID({ req }),
           data: body.data,
           draft: body.draft,
+          options: body.options,
           req,
         }),
       )
@@ -216,12 +219,16 @@ const parseDocumentDataBody = ({
 }: {
   body: unknown
   isDataRequired: boolean
-}): { data?: Record<string, unknown>; draft?: boolean } | null => {
+}): {
+  data?: Record<string, unknown>
+  draft?: boolean
+  options?: UploadSessionSaveOptions
+} | null => {
   if (typeof body !== 'object' || body === null) {
     return null
   }
 
-  const { data, draft } = body as Record<string, unknown>
+  const { data, draft, options } = body as Record<string, unknown>
   const isDataValid =
     data === undefined
       ? !isDataRequired
@@ -231,5 +238,42 @@ const parseDocumentDataBody = ({
     return null
   }
 
-  return { data: data as Record<string, unknown> | undefined, draft }
+  if (options === undefined) {
+    return { data: data as Record<string, unknown> | undefined, draft }
+  }
+
+  const parsedOptions = parseSaveOptions({ options })
+
+  return parsedOptions
+    ? { data: data as Record<string, unknown> | undefined, draft, options: parsedOptions }
+    : null
+}
+
+/** Returns the validated save options, or null when the shape is invalid. */
+const parseSaveOptions = ({ options }: { options: unknown }): null | UploadSessionSaveOptions => {
+  if (typeof options !== 'object' || options === null || Array.isArray(options)) {
+    return null
+  }
+
+  const { fallbackLocale, locale, publishAllLocales, uploadEdits } = options as Record<
+    string,
+    unknown
+  >
+
+  if (
+    (locale !== undefined && typeof locale !== 'string') ||
+    (fallbackLocale !== undefined && typeof fallbackLocale !== 'string') ||
+    (publishAllLocales !== undefined && typeof publishAllLocales !== 'boolean') ||
+    (uploadEdits !== undefined &&
+      (typeof uploadEdits !== 'object' || uploadEdits === null || Array.isArray(uploadEdits)))
+  ) {
+    return null
+  }
+
+  return {
+    fallbackLocale,
+    locale,
+    publishAllLocales,
+    uploadEdits: uploadEdits as UploadSessionSaveOptions['uploadEdits'],
+  }
 }
