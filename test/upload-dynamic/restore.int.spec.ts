@@ -415,6 +415,7 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
   }) => {
     const { selected } = await prepareHistory({ payload })
     const beforeFiles = (await readdir(versionedDynamicMediaDir)).sort()
+    uploadCropSources.length = 0
     const transformer = payload.config.upload.transformers.find(
       ({ slug }) => slug === 'upload-crop',
     )!
@@ -433,6 +434,8 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
       }),
     ).rejects.toThrow()
     expect((await readdir(versionedDynamicMediaDir)).sort()).toEqual(beforeFiles)
+    expect(uploadCropSources).toEqual([{ tempFilePath: expect.any(String) }])
+    expect(existsSync(uploadCropSources[0]!.tempFilePath!)).toBe(false)
   })
 
   test('should preserve the selected stored main and original when replaying its virtual variants', async ({
