@@ -15,6 +15,14 @@ export default buildConfigWithDefaults({
   suite: 'form-state',
   config: {
     admin: {
+      components: {
+        views: {
+          ClientValidation: {
+            Component: './components/ClientValidationView/index.js#ClientValidationView',
+            path: '/client-validation',
+          },
+        },
+      },
       importMap: {
         baseDir: path.resolve(dirname),
       },

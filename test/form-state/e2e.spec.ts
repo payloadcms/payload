@@ -27,6 +27,7 @@ import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConf
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
+import { conditionsSlug } from './collections/Conditions/index.js'
 import { draftPostsSlug } from './collections/DraftPosts/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
@@ -933,7 +934,7 @@ test.describe('Shared form request queue', () => {
   let serverURL: string
 
   const createdDocs: {
-    collection: 'autosave-posts' | 'draft-posts' | 'posts'
+    collection: 'autosave-posts' | 'conditions' | 'draft-posts' | 'posts'
     id: Post['id']
   }[] = []
 
@@ -960,6 +961,210 @@ test.describe('Shared form request queue', () => {
 
     createdDocs.length = 0
   })
+
+  for (const failure of ['HTTP error', 'network error'] as const) {
+    test(`should refresh conditional fields after an explicit save ${failure}`, async ({
+      page,
+    }) => {
+      const doc = await payload.create({
+        collection: conditionsSlug,
+        data: { showField: true, conditionalRowField: 'Initial value' },
+        overrideAccess: true,
+      })
+      const captured = Promise.withResolvers<void>()
+      const released = Promise.withResolvers<void>()
+      const failed = Promise.withResolvers<void>()
+      const editURL = new AdminUrlUtil(serverURL, conditionsSlug).edit(doc.id)
+      let didHoldRefresh = false
+
+      createdDocs.push({ collection: conditionsSlug, id: doc.id })
+      releases.add(released.resolve)
+
+      await page.goto(editURL)
+      await waitForFormReady(page)
+      await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+      const checkbox = page.locator('#field-showField')
+      const conditionalField = page.locator('#field-conditionalRowField')
+      const save = page.locator('#action-save')
+      const prepared = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'PATCH' &&
+          response.url().includes(`/api/${conditionsSlug}/${doc.id}`) &&
+          response.ok(),
+      )
+
+      await conditionalField.fill('Prepared value')
+      await save.click()
+      await prepared
+      await waitForFormReady(page)
+
+      await page.route(
+        (url) => url.href === editURL || url.pathname.startsWith('/_serverFn/'),
+        async (route) => {
+          if (
+            didHoldRefresh ||
+            route.request().method() !== 'POST' ||
+            !route.request().postData()?.includes('form-state')
+          ) {
+            return route.continue()
+          }
+
+          didHoldRefresh = true
+          const response = await route.fetch()
+
+          captured.resolve()
+          await released.promise
+          await route.fulfill({ response })
+        },
+      )
+      await page.route(`**/api/${conditionsSlug}/${doc.id}**`, async (route) => {
+        if (route.request().method() !== 'PATCH') {
+          return route.continue()
+        }
+
+        if (failure === 'network error') {
+          await route.abort('failed')
+        } else {
+          await route.fulfill({ status: 500, json: { message: 'Save failed' } })
+        }
+
+        failed.resolve()
+      })
+
+      await checkbox.uncheck()
+      await page.clock.runFor(300)
+      await captured.promise
+      await checkbox.check()
+      await page.clock.runFor(300)
+      await save.click()
+
+      released.resolve()
+
+      await failed.promise
+      await expect(save).toBeEnabled()
+      await page.clock.runFor(1000)
+      await expect(checkbox).toBeChecked()
+      await expect(conditionalField).toBeVisible()
+    })
+  }
+
+  for (const submissionType of ['submit', 'autosave'] as const) {
+    test(`should retain client validation errors after a rejected ${submissionType}`, async ({
+      page,
+    }) => {
+      const captured = Promise.withResolvers<void>()
+      const released = Promise.withResolvers<void>()
+      const viewURL = formatAdminURL({
+        adminRoute: '/admin',
+        path: '/client-validation',
+        serverURL,
+      })
+      let didHoldRefresh = false
+      let saveCount = 0
+
+      releases.add(released.resolve)
+
+      await page.goto(viewURL)
+
+      const form = page.locator(`.client-validation-form--${submissionType}`)
+      const field = form.getByRole('textbox', { name: 'Client validated value', exact: true })
+      const error = form
+        .getByRole('alert')
+        .filter({ hasText: 'This value is rejected by client validation.' })
+      const submit = form.getByRole('button', { name: 'Submit', exact: true })
+
+      await expect(form).toHaveAttribute('data-form-ready', 'true')
+      await expect(field).toBeVisible()
+      await page.clock.runFor(200)
+      await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+      await page.route(
+        (url) => url.href === viewURL || url.pathname.startsWith('/_serverFn/'),
+        async (route) => {
+          if (
+            didHoldRefresh ||
+            route.request().method() !== 'POST' ||
+            !route.request().postData()?.includes('form-state')
+          ) {
+            return route.continue()
+          }
+
+          didHoldRefresh = true
+          const response = await route.fetch()
+
+          expect(await response.text()).toContain('clientValidatedValue')
+
+          captured.resolve()
+          await released.promise
+          await route.fulfill({ response })
+        },
+      )
+      await page.route(
+        (url) => url.pathname === `/api/${conditionsSlug}`,
+        async (route) => {
+          if (route.request().method() !== 'POST') {
+            return route.continue()
+          }
+
+          saveCount += 1
+
+          const response = await route.fetch()
+          const json = await response.json()
+
+          if (response.ok() && json.doc?.id) {
+            createdDocs.push({ collection: conditionsSlug, id: json.doc.id })
+          }
+
+          await route.fulfill({ response })
+        },
+      )
+
+      await submit.click()
+      await captured.promise
+      await expect(submit).toBeDisabled()
+
+      // Exercise the onChange debounce before the submission refresh can finish.
+      await page.clock.runFor(300)
+      await page.clock.setSystemTime(new Date(await page.evaluate(() => Date.now() + 2000)))
+
+      released.resolve()
+
+      await expect(submit).toBeEnabled()
+      await expect.poll(() => saveCount).toBe(0)
+      await expect(field).toHaveAttribute('aria-invalid', 'true')
+      await expect(error).toContainText('This value is rejected by client validation.')
+      await expect(error).toBeVisible()
+
+      const saved = page.waitForResponse(
+        (response) =>
+          response.request().method() === 'POST' &&
+          new URL(response.url()).pathname === `/api/${conditionsSlug}` &&
+          response.status() === 201,
+      )
+
+      await field.fill('Allowed value')
+      await submit.click()
+
+      const response = await saved
+      const { doc } = await response.json()
+
+      await expect(submit).toBeEnabled()
+      await expect(field).not.toHaveAttribute('aria-invalid', 'true')
+      await expect(error).toBeHidden()
+      await expect
+        .poll(async () => {
+          const { docs } = await payload.find({
+            collection: conditionsSlug,
+            overrideAccess: true,
+            where: { id: { equals: doc.id } },
+          })
+
+          return docs[0]?.clientValidatedValue
+        })
+        .toBe('Allowed value')
+    })
+  }
 
   test('should preserve edits made during a queued autosave', async ({ page }) => {
     const doc = await payload.create({

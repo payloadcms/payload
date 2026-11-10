@@ -1,10 +1,12 @@
 'use client'
 
-import type { FormState } from 'payload'
+import type { FormState, ValidationFieldError } from 'payload'
 import type { Dispatch, RefObject } from 'react'
 
+import { dequal } from 'dequal/lite'
 import {
   deepCopyObjectSimpleWithoutReactComponents,
+  getDataByPath,
   hasDraftValidationEnabled,
   wait,
 } from 'payload/shared'
@@ -189,6 +191,20 @@ export const useFormSubmission = ({
     setIsBackgroundProcessing(false)
   }, [setIsBackgroundProcessing, setDisabledBySubmission])
 
+  const applyFieldErrors = useCallback(
+    ({ errors }: { errors: ValidationFieldError[] }) => {
+      if (errors.length === 0) {
+        return
+      }
+
+      const action: FieldAction = { type: 'ADD_SERVER_ERRORS', errors }
+
+      prevFormStateRef.current = fieldReducer(prevFormStateRef.current, action)
+      dispatchFields(action)
+    },
+    [dispatchFields, prevFormStateRef],
+  )
+
   const executeSubmit = useCallback(
     async ({
       options,
@@ -269,6 +285,7 @@ export const useFormSubmission = ({
         )
 
         let res
+        let rejectedFields: FormState | undefined
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let json: Record<string, any> = {}
 
@@ -298,6 +315,12 @@ export const useFormSubmission = ({
             setIsValid(isValid)
 
             if (!isValid) {
+              rejectedFields = revalidatedFormState
+
+              if (hasFormSubmitAction) {
+                prevFormStateRef.current = revalidatedFormState
+              }
+
               setIsSubmitted(true)
               return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
             }
@@ -313,7 +336,13 @@ export const useFormSubmission = ({
             return
           }
 
+          if (hasFormSubmitAction) {
+            // Submission completion refreshes this state; validation updates must not queue another refresh.
+            prevFormStateRef.current = fields
+          }
+
           if (!isValid) {
+            rejectedFields = fields
             errorToast(t('error:correctInvalidFields'))
             setIsSubmitted(true)
             return
@@ -389,9 +418,7 @@ export const useFormSubmission = ({
           if (
             requestContext.isCurrent() &&
             hasFormSubmitAction &&
-            (isSuccessfulResponse
-              ? typeof handleResponse !== 'function'
-              : options?.submissionType === 'autosave')
+            (!isSuccessfulResponse || typeof handleResponse !== 'function')
           ) {
             try {
               // Refresh before applying save errors so the refresh cannot erase them.
@@ -414,6 +441,35 @@ export const useFormSubmission = ({
                 console.error('Error refreshing form state', err) // eslint-disable-line no-console
               }
             }
+          }
+
+          if (rejectedFields && requestContext.isCurrent()) {
+            const rejectedState = rejectedFields
+
+            applyFieldErrors({
+              errors: Object.entries(rejectedState).flatMap(([path, field]) => {
+                const currentField = contextRef.current.fields[path]
+
+                if (
+                  field.valid !== false ||
+                  !currentField ||
+                  currentField.passesCondition === false
+                ) {
+                  return []
+                }
+
+                const rejectedValue = Array.isArray(field.rows)
+                  ? getDataByPath(rejectedState, path)
+                  : field.value
+                const currentValue = Array.isArray(currentField.rows)
+                  ? contextRef.current.getDataByPath(path)
+                  : currentField.value
+
+                return dequal(rejectedValue, currentValue)
+                  ? [{ message: field.errorMessage ?? '', path }]
+                  : []
+              }),
+            })
           }
         }
 
@@ -505,13 +561,7 @@ export const useFormSubmission = ({
 
             setIsValid(false)
 
-            const serverErrorAction = {
-              type: 'ADD_SERVER_ERRORS' as const,
-              errors: fieldErrors,
-            }
-
-            prevFormStateRef.current = fieldReducer(prevFormStateRef.current, serverErrorAction)
-            dispatchFields(serverErrorAction)
+            applyFieldErrors({ errors: fieldErrors })
 
             nonFieldErrors.forEach((err) => {
               // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
@@ -567,6 +617,7 @@ export const useFormSubmission = ({
       }
     },
     [
+      applyFieldErrors,
       beforeSubmit,
       setIsBackgroundProcessing,
       startRouteTransition,
