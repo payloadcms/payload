@@ -12,8 +12,10 @@ import { seal, unseal } from '../utils/seal.js'
  * panel login. When the collection uses sessions, the client also gets a refresh token.
  */
 export const issueLoginToken = async ({
+  client,
   req,
 }: {
+  client: { name: string; redirectURI: string }
   req: PayloadRequest
 }): Promise<MCPOAuthTokens> => {
   const collectionConfig = req.payload.collections[req.user!.collection]!.config
@@ -32,8 +34,12 @@ export const issueLoginToken = async ({
   }))!
 
   const { refreshToken, token } = await createAuthToken({
+    type: 'mcp',
     collectionConfig,
+    // App schemes like `com.example.app:/callback` have no host
+    details: { redirectHost: new URL(client.redirectURI).host || client.redirectURI },
     email: user.email!,
+    label: client.name,
     req,
     shouldCreateRefreshToken: true,
     user,

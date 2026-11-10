@@ -246,10 +246,16 @@ const approve = async ({
 
   const form = new URLSearchParams(await req.text!())
   const consent = unseal<Consent>({ type: 'consent', req, value: form.get('consent') })
+  const client = consent && unseal<Client>({ type: 'client', req, value: consent.clientID })
   const user = getBrowserUser(req)
 
   // The form is only valid for the user it was shown to
-  if (!consent || user?.id !== consent.userID || user.collection !== consent.collection) {
+  if (
+    !consent ||
+    !client ||
+    user?.id !== consent.userID ||
+    user.collection !== consent.collection
+  ) {
     return redirectToAuthorizeView({ params: { error: 'expired' }, req })
   }
 
@@ -268,7 +274,10 @@ const approve = async ({
     clientID,
     codeChallenge,
     redirectURI,
-    tokens: await getTokenHooks(req).issueToken({ req }),
+    tokens: await getTokenHooks(req).issueToken({
+      client: { name: client.name, redirectURI },
+      req,
+    }),
   }
 
   return redirect({
