@@ -990,7 +990,8 @@ test.suite('Lexical', { config: './config.ts' }, () => {
       expect(validationError).toBeInstanceOf(ValidationError)
       expect((validationError as ValidationError).data.errors).toEqual([
         {
-          message: 'Unrecognized key: "bold"',
+          label: 'Lexical With Blocks',
+          message: req.t('validation:invalidInput'),
           path: 'data.lexicalWithBlocks.root.children[0].children[0]',
         },
       ])
