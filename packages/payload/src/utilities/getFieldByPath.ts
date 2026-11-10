@@ -11,12 +11,14 @@ export const getFieldByPath = ({
   fields,
   includeRelationships = false,
   localizedPath = '',
+  parentIsLocalized = false,
   path,
 }: {
   config?: SanitizedConfig
   fields: FlattenedField[]
   includeRelationships?: boolean
   localizedPath?: string
+  parentIsLocalized?: boolean
   /**
    * The schema path, e.g. `array.group.title`
    */
@@ -32,7 +34,7 @@ export const getFieldByPath = ({
 
   const segments = path.split('.')
 
-  let pathHasLocalized = false
+  let pathHasLocalized = parentIsLocalized
 
   while (segments.length > 0) {
     const segment = segments.shift()
@@ -46,7 +48,14 @@ export const getFieldByPath = ({
 
     if (field.localized) {
       pathHasLocalized = true
-      localizedPath = `${localizedPath}.<locale>`
+
+      // Fields nested under a localized parent are not localized in storage
+      // (see fieldShouldBeLocalized), so only the outermost localized field
+      // adds a <locale> segment to the path.
+      if (!parentIsLocalized) {
+        localizedPath = `${localizedPath}.<locale>`
+        parentIsLocalized = true
+      }
     }
 
     if ('flattenedFields' in field) {
@@ -64,6 +73,9 @@ export const getFieldByPath = ({
       )?.flattenedFields
       if (flattenedFields) {
         currentFields = flattenedFields
+        // The path crosses into another collection's documents, where locale
+        // nesting starts fresh.
+        parentIsLocalized = false
       }
 
       if (segments.length === 1 && segments[0] === 'id') {
@@ -90,6 +102,7 @@ export const getFieldByPath = ({
           fields: block.flattenedFields,
           includeRelationships,
           localizedPath,
+          parentIsLocalized,
           path: segments.join('.'),
         })
       }
