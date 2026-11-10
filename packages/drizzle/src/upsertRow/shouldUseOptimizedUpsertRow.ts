@@ -2,7 +2,7 @@ import type { FlattenedField } from 'payload'
 
 /**
  * Checks whether we should use the upsertRow function for the passed data and otherwise use a simple SQL SET call.
- * We need to use upsertRow only when the data has arrays, blocks, hasMany select/text/number, localized fields, complex relationships.
+ * We need to use upsertRow only when the data has arrays, blocks, hasMany select/text/number, localized groups, complex relationships.
  */
 export const shouldUseOptimizedUpsertRow = ({
   data,
@@ -33,7 +33,8 @@ export const shouldUseOptimizedUpsertRow = ({
         field.hasMany) ||
       ((field.type === 'relationship' || field.type === 'upload') &&
         Array.isArray(field.relationTo)) ||
-      field.localized
+      // localized groups are keyed by locale, so their sub fields can't be checked below
+      (field.localized && (field.type === 'group' || field.type === 'tab'))
     ) {
       return false
     }
