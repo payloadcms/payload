@@ -31,7 +31,7 @@ export const signedImagePlans: {
   document: Readonly<Record<string, unknown>>
   focalPoint: { x: number; y: number } | null
   original: FileData['original']
-  overrides: { quality: number; width: number }
+  overrides: { quality?: number; width?: number }
   preset: { width: number } | null
   variantName?: string
 }[] = []
@@ -76,8 +76,8 @@ export const requestCropTransformer: UploadTransformer = {
 
     if (req.headers.get('x-test-sign-image') === 'true') {
       const overrides = {
-        quality: Number(req.searchParams.get('q')),
-        width: Number(req.searchParams.get('w')),
+        ...(req.searchParams.has('q') && { quality: Number(req.searchParams.get('q')) }),
+        ...(req.searchParams.has('w') && { width: Number(req.searchParams.get('w')) }),
       }
 
       signedImagePlans.push({
@@ -93,8 +93,14 @@ export const requestCropTransformer: UploadTransformer = {
 
       const location = new URL(`https://images.example.test/signed/${variantName ?? 'default'}`)
 
-      location.searchParams.set('w', String(overrides.width))
-      location.searchParams.set('q', String(overrides.quality))
+      if (overrides.width !== undefined) {
+        location.searchParams.set('w', String(overrides.width))
+      }
+
+      if (overrides.quality !== undefined) {
+        location.searchParams.set('q', String(overrides.quality))
+      }
+
       location.searchParams.set('signature', 'fixture-signature')
 
       return { response: Response.redirect(location, 302), status: 'complete' }

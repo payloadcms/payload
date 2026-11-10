@@ -124,6 +124,25 @@ test.suite('Historical request-time files', { config: './config.ts' }, () => {
     ])
   })
 
+  test('should not apply request overrides to a historical signed redirect without transform access', async ({
+    payload,
+    restClient,
+  }) => {
+    const { selected } = await replaceImage({ payload })
+    const response = await restClient.GET(
+      `/${versionedDynamicMediaSlug}/file/${selected.version.variants!.card!.filename}?version=${selected.id}&w=200&q=70`,
+      { auth: false, headers: { 'x-test-sign-image': 'true' }, redirect: 'manual' },
+    )
+
+    expect(response.status).toBe(302)
+    expect(response.headers.get('Location')).toBe(
+      'https://images.example.test/signed/card?signature=fixture-signature',
+    )
+    expect(signedImagePlans).toHaveLength(1)
+    expect(signedImagePlans[0]).toMatchObject({ crop: savedCrop, variantName: 'card' })
+    expect(signedImagePlans[0]!.overrides).toEqual({})
+  })
+
   for (const policy of ['read', 'readVersions'] as const) {
     test(`should apply ${policy} constraints in the requested locale before transforming a historical file`, async ({
       payload,

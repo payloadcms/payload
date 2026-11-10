@@ -23,6 +23,7 @@ import { getSourceFileResponse } from './getSourceFileResponse.js'
 import { getCandidateTransformers, planTransformerPipeline } from './planTransformerPipeline.js'
 import { getRequestedFile, resolveUploadDocument } from './resolveUploadDocument.js'
 import { withFileTransformAccessContext } from './withFileTransformAccessContext.js'
+import { withoutRequestParams } from './withoutRequestParams.js'
 
 /**
  * Orchestrates a dynamic file request end to end: resolve the document, plan the
@@ -96,6 +97,8 @@ export async function handleDynamicFileRequest({
     })
   }
 
+  // A historical file shows a saved state, so its transformers never see the request parameters.
+  const transformerReq = historicalDocument ? withoutRequestParams({ req }) : req
   const { document, documentSnapshot, pipeline } = await authorizeDocument({
     collection,
     filename,
@@ -103,6 +106,7 @@ export async function handleDynamicFileRequest({
     prefix,
     req,
     resolvedDocument,
+    transformerReq,
   })
 
   const requestedFile = getRequestedFile({ document, filename })
@@ -172,7 +176,7 @@ export async function handleDynamicFileRequest({
         mimeType: requestedFile.mimeType,
         options,
         originalDoc: documentSnapshot,
-        req,
+        req: transformerReq,
         variantName: requestedFile.variantName,
       })
 
@@ -419,13 +423,17 @@ async function authorizeDocument({
   prefix,
   req,
   resolvedDocument,
+  transformerReq,
 }: {
   collection: Collection
   filename: string
   isHistorical: boolean
   prefix?: string
+  /** The caller's request, for access checks. */
   req: PayloadRequest
   resolvedDocument: ResolvedUploadDocument
+  /** The request that transformers see while the pipeline is planned. */
+  transformerReq: PayloadRequest
 }): Promise<{
   document: ResolvedUploadDocument
   /** A request never saves the document, so planning and every stage share this read-only copy. */
@@ -499,7 +507,7 @@ async function authorizeDocument({
     documentSnapshot,
     filename,
     isHistorical,
-    req,
+    req: transformerReq,
   })
   // Only the request's own parameters make it a transform. Applying the saved state is an ordinary
   // read of the saved file.
