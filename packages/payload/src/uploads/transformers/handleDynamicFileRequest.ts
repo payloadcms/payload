@@ -18,6 +18,7 @@ import { fileSelectionParams } from '../fileSelectionParams.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { planPersistedDefaultStages } from '../transformState/planPersistedDefaultStages.js'
+import { areVariantsBuildableAtRequest } from '../transformState/planUpload.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
@@ -344,10 +345,11 @@ async function planRequestPipeline({
     let plan: PlannedTransformerPipeline
 
     if (purpose === 'persisted-default') {
-      const { coverageErrors, plan: persistedDefaultPlan } = await planPersistedDefaultStages({
+      const persistedDefaultBuild = await planPersistedDefaultStages({
         ...planArgs,
         transforms: document._transforms,
       })
+      const { coverageErrors } = persistedDefaultBuild
 
       if (coverageErrors.length > 0) {
         throw new APIError(
@@ -356,7 +358,7 @@ async function planRequestPipeline({
         )
       }
 
-      plan = persistedDefaultPlan
+      plan = persistedDefaultBuild.plan
 
       if (
         isHistorical &&
@@ -364,9 +366,10 @@ async function planRequestPipeline({
         (!collection.config.upload.variants?.some(
           ({ name }) => name === requestedFile.variantName,
         ) ||
-          !plan.pipeline.some(
-            ({ slug }) => slug === collection.config.upload.variantsTransformerSlug,
-          ))
+          !areVariantsBuildableAtRequest({
+            requestTimeBuild: persistedDefaultBuild,
+            variantsTransformerSlug: collection.config.upload.variantsTransformerSlug,
+          }))
       ) {
         throw new APIError(
           `No configured transformer can build historical size "${requestedFile.variantName}".`,
@@ -478,7 +481,8 @@ async function authorizeDocument({
 
   // A historical request without request parameters only applies the saved state, so it starts as
   // an ordinary read. The planned pipeline below still decides which access it needs.
-  let isTransformAccess = hasCandidateTransformers && (!isHistorical || hasRequestParams({ req }))
+  let isTransformAccess =
+    hasCandidateTransformers && (!isHistorical || hasNonSelectionParams({ req }))
   let access = await checkAccess({ isTransform: isTransformAccess })
 
   if (!access.isAllowed && isTransformAccess) {
@@ -529,6 +533,6 @@ const fileSelectionParamNames = new Set<string>(Object.values(fileSelectionParam
  * only picks which access check runs first: other parameters, such as `locale` or a cache-buster,
  * also count. The planned pipeline then decides which access the request needs.
  */
-function hasRequestParams({ req }: { req: PayloadRequest }): boolean {
+function hasNonSelectionParams({ req }: { req: PayloadRequest }): boolean {
   return [...(req.searchParams?.keys() ?? [])].some((key) => !fileSelectionParamNames.has(key))
 }

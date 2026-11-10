@@ -6,7 +6,11 @@ import { NotFound } from '../../errors/NotFound.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
-import { collectStoredFiles, withLegacyCloudUploadFileData } from './storedFiles.js'
+import {
+  collectStoredFiles,
+  hasStoredOriginal,
+  withLegacyCloudUploadFileData,
+} from './storedFiles.js'
 
 type StoredVersion = {
   id: number | string
@@ -103,7 +107,7 @@ const resolveVersionFile = async ({
   const storedFiles = collectStoredFiles({ collection: collection.config, doc: saved, req })
   const isBuiltAtRequest = entry.type !== 'original' && isRequestTimeFile({ entry: entry.value })
   const hasFile = isBuiltAtRequest
-    ? storedFiles.some((file) => file.roles.some((role) => role.type === 'original'))
+    ? hasStoredOriginal({ storedFiles })
     : storedFiles.some((file) =>
         file.roles.some((role) =>
           entry.type === 'size'

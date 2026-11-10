@@ -75,20 +75,16 @@ export const restoreVersionOperation = async <
     showHiddenFields,
   } = args
   const hasFileOperationScope = Boolean(collectionConfig.upload)
-  const req = hasFileOperationScope ? isolateRestoreRequest({ req: incomingReq }) : incomingReq
+  let req = incomingReq
+  let putBackCallerCloudStorageState: (() => void) | undefined
 
   if (hasFileOperationScope) {
+    req = isolateRestoreRequest({ req: incomingReq })
     args = { ...args, req }
-  }
-
-  if (hasFileOperationScope) {
     beginFileOperationScope({ req })
+    // The restore shares the caller's context, but must not use the caller's cloud storage state.
+    putBackCallerCloudStorageState = hideCloudStorageState({ req })
   }
-
-  // The restore shares the caller's context, but must not use the caller's cloud storage state.
-  const restoreCallerCloudStorageState = hasFileOperationScope
-    ? hideCloudStorageState({ req })
-    : undefined
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -485,6 +481,6 @@ export const restoreVersionOperation = async <
     }
     throw error
   } finally {
-    restoreCallerCloudStorageState?.()
+    putBackCallerCloudStorageState?.()
   }
 }

@@ -207,6 +207,38 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     expect(sourceReadCalls).toHaveLength(0)
   })
 
+  test('should leave out a size the version never had when the current config cannot build it at request time', async ({
+    payload,
+  }) => {
+    const upload = payload.collections[versionedDynamicMediaSlug].config.upload
+    const { variants, variantsTransformerSlug } = upload
+
+    removedVariants.set(versionedDynamicMediaSlug, variants)
+    upload.variants = []
+
+    const { selected } = await prepareHistory({ payload })
+
+    expect(selected.version.variants?.card?.filename).toBeFalsy()
+
+    upload.variants = variants
+    upload.variantsTransformerSlug = 'unavailable-variants'
+
+    try {
+      const restored = await payload.restoreVersion({
+        id: String(selected.id),
+        collection: versionedDynamicMediaSlug,
+        overrideAccess: true,
+      })
+
+      expect(restored._stored).toBe(false)
+      expect(restored._transforms).toEqual({ crop: savedCrop })
+      expect(restored.variants?.card?.filename).toBeFalsy()
+      expect(sourceReadCalls).toHaveLength(0)
+    } finally {
+      upload.variantsTransformerSlug = variantsTransformerSlug
+    }
+  })
+
   test('should reconcile virtual variants with the current size declarations', async ({
     payload,
   }) => {

@@ -11,9 +11,13 @@ import { generateFilePathOrURL } from '../generateFilePathOrURL.js'
 import { shouldRequestOriginal } from '../isOriginalFileRequest.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { getRequestTimeDefaultFileData, getRequestTimeVariants } from '../requestTimeFileData.js'
-import { isBuildableAtRequest, planRequestTimeBuild } from '../transformState/planUpload.js'
+import {
+  areVariantsBuildableAtRequest,
+  isBuildableAtRequest,
+  planRequestTimeBuild,
+} from '../transformState/planUpload.js'
 import { getTransformStateError } from '../transformState/validateTransformState.js'
-import { collectStoredFiles } from './storedFiles.js'
+import { collectStoredFiles, hasStoredOriginal } from './storedFiles.js'
 
 /**
  * Restores a version that has a file built at request time, from its retained original. A restore
@@ -21,6 +25,8 @@ import { collectStoredFiles } from './storedFiles.js'
  * - A stored entry keeps its saved bytes.
  * - An entry with no stored output stays request-time, when the current configuration can build it
  *   at request time. Otherwise the restore fails before any file work.
+ * - A configured size that the version did not have is added as request-time when the current
+ *   configuration can build it, and is left out when it cannot.
  */
 export async function runRequestTimeFileRestore<T>({
   id,
@@ -36,11 +42,7 @@ export async function runRequestTimeFileRestore<T>({
 } & FileRestoreArgs<T>): Promise<T> {
   const original = selected.original as OriginalFileData | undefined
   const storedFiles = collectStoredFiles({ collection, doc: selected, req })
-  const hasStoredOriginal = storedFiles.some(({ roles }) =>
-    roles.some(({ type }) => type === 'original'),
-  )
-
-  if (!original?.filename || !original.mimeType || !hasStoredOriginal) {
+  if (!original?.filename || !original.mimeType || !hasStoredOriginal({ storedFiles })) {
     throw new APIError('Restoring request-time files requires a retained original.', 400)
   }
 
@@ -80,12 +82,15 @@ export async function runRequestTimeFileRestore<T>({
       roles.flatMap((role) => (role.type === 'size' ? [role.sizeKey] : [])),
     ),
   )
-  const requestTimeVariantNames = (collection.upload.variants ?? [])
+  const unstoredVariantNames = (collection.upload.variants ?? [])
     .map(({ name }) => name)
     .filter((name) => !storedVariantNames.has(name))
-  const { variantsTransformerSlug } = collection.upload
+  const selectedVariants = (selected.variants ?? {}) as Record<string, JsonObject | null>
+  const hasRequestTimeVariant = unstoredVariantNames.some((name) =>
+    isRequestTimeFile({ entry: selectedVariants[name] }),
+  )
 
-  // Both checks below use one plan, so the stages are planned at most once.
+  // The checks below use one plan, so the stages are planned at most once.
   let requestTimeBuild: Promise<RequestTimeBuildPlan> | undefined
   const getRequestTimeBuild = () => (requestTimeBuild ??= planRequestTimeBuild(planArgs))
 
@@ -96,16 +101,20 @@ export async function runRequestTimeFileRestore<T>({
     throw new APIError('No compatible transformer can restore the file at request time.', 400)
   }
 
-  if (
-    requestTimeVariantNames.length > 0 &&
-    (!variantsTransformerSlug ||
-      !isBuildableAtRequest({
-        requestTimeBuild: await getRequestTimeBuild(),
-        requiredTransformerSlug: variantsTransformerSlug,
-      }))
-  ) {
+  const canBuildVariants =
+    unstoredVariantNames.length > 0 &&
+    areVariantsBuildableAtRequest({
+      requestTimeBuild: await getRequestTimeBuild(),
+      variantsTransformerSlug: collection.upload.variantsTransformerSlug,
+    })
+
+  // A size that this version built at request time must still be buildable. A size that the version
+  // did not have is left out when it cannot be built, as an upload leaves it out.
+  if (hasRequestTimeVariant && !canBuildVariants) {
     throw new APIError('No compatible transformer can restore the configured file variants.', 400)
   }
+
+  const requestTimeVariantNames = canBuildVariants ? unstoredVariantNames : []
 
   // Copy the stored files with storage operations. Entries built at request time read no bytes.
   return runStoredRestore({
@@ -147,13 +156,13 @@ export async function runRequestTimeFileRestore<T>({
         },
       }
 
-      return write(normalizeURLs({ collection, req, restored }))
+      return write(setFileEndpointURLs({ collection, req, restored }))
     },
   })
 }
 
 /** Points request-time entries, and every entry with local storage, at Payload's file endpoint. */
-function normalizeURLs({
+function setFileEndpointURLs({
   collection,
   req,
   restored,

@@ -347,3 +347,20 @@ export function isBuildableAtRequest({
     coverageErrors.length === 0
   )
 }
+
+/**
+ * Whether a planned request-time build can build the collection's sizes. The transformer that
+ * registered the sizes (`variantsTransformerSlug`) must be one of the stages.
+ */
+export function areVariantsBuildableAtRequest({
+  requestTimeBuild,
+  variantsTransformerSlug,
+}: {
+  requestTimeBuild: RequestTimeBuildPlan
+  variantsTransformerSlug?: string
+}): boolean {
+  return (
+    Boolean(variantsTransformerSlug) &&
+    isBuildableAtRequest({ requestTimeBuild, requiredTransformerSlug: variantsTransformerSlug })
+  )
+}

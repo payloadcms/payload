@@ -127,6 +127,10 @@ export const collectStoredFiles = ({
   return createStoredFileList({ references })
 }
 
+/** Whether the original is one of the stored files, so a request-time file can be built from it. */
+export const hasStoredOriginal = ({ storedFiles }: { storedFiles: StoredFileList }): boolean =>
+  storedFiles.some(({ roles }) => roles.some(({ type }) => type === 'original'))
+
 export const withLegacyUploadFileData = ({
   collection,
   config,
