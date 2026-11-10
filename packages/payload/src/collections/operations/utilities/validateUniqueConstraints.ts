@@ -8,7 +8,6 @@ import { documentMatchingWhereExists } from '../../../utilities/documentMatching
 import { fieldValueExists } from '../../../utilities/fieldValueExists.js'
 import { flattenDataByLocale } from '../../../utilities/flattenDataByLocale.js'
 import { getObjectDotNotation } from '../../../utilities/getObjectDotNotation.js'
-import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { traverseFields } from '../../../utilities/traverseFields.js'
 import { unflatten } from '../../../utilities/unflatten.js'
 
@@ -145,10 +144,6 @@ export const validateUniqueConstraints = async ({
         if (shouldReadRawCandidates) {
           // Payload's `exists` operator excludes null, while MongoDB partial indexes include it.
           // Raw candidates preserve the distinction between a stored null and an absent field.
-          const queryReq = isolateObjectProperty(req, ['transactionID'])
-
-          delete queryReq.transactionID
-
           const requiredPaths = requiredFields.map((field) =>
             field.pathHasLocalized && localization && locale
               ? field.localizedPath.replaceAll('<locale>', locale)
@@ -164,7 +159,7 @@ export const validateUniqueConstraints = async ({
             limit: 0,
             locale,
             pagination: false,
-            req: queryReq,
+            req,
             select,
             where,
           })

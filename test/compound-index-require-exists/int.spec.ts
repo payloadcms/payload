@@ -1,12 +1,43 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 
-import { ValidationError } from 'payload'
+import { createPayloadRequest, ValidationError } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { arrayFilteredPostsSlug, localizedPostsSlug, postsSlug } from './shared.js'
 
 test.suite('Compound index existence filters', { config: './config.ts', db: 'mongo' }, () => {
+  for (const { data, name } of [
+    { data: { slug: null, tenant: 'same' }, name: 'an explicit null index key' },
+    {
+      data: { code: 'shared', gate: 'present', tenant: 'same' },
+      name: 'an existence filter outside the index keys',
+    },
+    { data: { slug: 'shared', tenant: 'same' }, name: 'a present index key' },
+  ]) {
+    test(`should detect uncommitted unique conflicts with ${name}`, async ({ payload }) => {
+      const transactionID = await payload.db.beginTransaction()
+
+      expect(transactionID).toBeTruthy()
+
+      const req = await createPayloadRequest({ payload, req: { transactionID } })
+
+      try {
+        await payload.create({ collection: postsSlug, data, overrideAccess: true, req })
+
+        expect(
+          await payload.validate({ collection: postsSlug, data, overrideAccess: true }),
+        ).toMatchObject({ valid: true })
+        expect(
+          await payload.validate({ collection: postsSlug, data, overrideAccess: true, req }),
+        ).toMatchObject({ valid: false })
+        expect(req.transactionID).toBe(transactionID)
+      } finally {
+        await payload.db.rollbackTransaction(transactionID!)
+      }
+    })
+  }
+
   test('should validate shared key updates against indexes in other locales', async ({
     payload,
   }) => {

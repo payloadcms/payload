@@ -29,9 +29,8 @@ export const documentMatchingWhereExists = async ({
   req,
   where,
 }: DocumentMatchingWhereExistsArgs): Promise<boolean> => {
-  const queryReq = isolateObjectProperty(req, ['query', 'transactionID'])
+  const queryReq = isolateObjectProperty(req, ['query'])
   queryReq.query = { ...req.query }
-  delete queryReq.transactionID
   const includeTrashed = Boolean(req.payload.collections[collection]?.config.trash)
 
   const { docs } = await req.payload.find({
