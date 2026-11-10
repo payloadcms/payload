@@ -4370,7 +4370,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(current.title).toBe('current')
       })
 
-      test('should reject updates when the latest draft does not match access but the live global does', async ({
+      test('should reject updates when the latest draft does not match access but the main document does', async ({
         payload,
       }) => {
         await payload.updateGlobal({
@@ -4404,7 +4404,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(current.title).toBe('locked draft')
       })
 
-      test('should publish when both the latest draft and live global match update access', async ({
+      test('should publish when both the latest draft and main document match update access', async ({
         payload,
       }) => {
         await payload.updateGlobal({
@@ -4431,12 +4431,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(published._status).toBe('published')
       })
 
-      test('should reject publishing an accessible draft when the live global fails update access', async ({
+      test('should reject publishing an accessible draft when the main document fails update access', async ({
         payload,
       }) => {
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
-          data: { _status: 'published', title: 'locked live' },
+          data: { _status: 'published', title: 'locked main document' },
           overrideAccess: true,
         })
 
@@ -4447,7 +4447,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           overrideAccess: true,
         })
 
-        // Editing the accessible draft is allowed even though the live global is locked.
+        // Editing the accessible draft is allowed even though the main document is locked.
         const draft = await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
           data: { title: 'unlocked' },
@@ -4472,7 +4472,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           }),
         ).rejects.toThrow(Forbidden)
 
-        const liveGlobal = await payload.findGlobal({
+        const mainDocument = await payload.findGlobal({
           slug: restoreAccessGlobalSlug,
           overrideAccess: true,
         })
@@ -4486,8 +4486,8 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           overrideAccess: true,
         })
 
-        expect(liveGlobal.title).toBe('locked live')
-        expect(liveGlobal._status).toBe('published')
+        expect(mainDocument.title).toBe('locked main document')
+        expect(mainDocument._status).toBe('published')
         expect(latestDraft.title).toBe('unlocked')
         expect(latestDraft._status).toBe('draft')
         expect(versionsAfter.totalDocs).toBe(versionsBefore.totalDocs)
@@ -4498,13 +4498,13 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       }) => {
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
-          data: { _status: 'published', title: 'id access live' },
+          data: { _status: 'published', title: 'id access main document' },
           overrideAccess: true,
         })
 
-        const liveGlobal = await payload.db.findGlobal({ slug: restoreAccessGlobalSlug })
+        const mainDocument = await payload.db.findGlobal({ slug: restoreAccessGlobalSlug })
 
-        expect(liveGlobal.id).toBeDefined()
+        expect(mainDocument.id).toBeDefined()
 
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
@@ -4520,12 +4520,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           where: { latest: { equals: true } },
         })
 
-        // Global drafts have no stable document ID. Neither the live row's ID
+        // Global drafts have no stable document ID. Neither the main document's ID
         // nor the version row's ID may grant access to the draft.
         const nonmatchingID =
-          typeof liveGlobal.id === 'number' ? liveGlobal.id + 1 : '000000000000000000000000'
+          typeof mainDocument.id === 'number' ? mainDocument.id + 1 : '000000000000000000000000'
 
-        for (const id of [liveGlobal.id, versions[0]!.id, nonmatchingID]) {
+        for (const id of [mainDocument.id, versions[0]!.id, nonmatchingID]) {
           await expect(
             payload.updateGlobal({
               slug: restoreAccessGlobalSlug,
@@ -4551,14 +4551,16 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           overrideAccess: true,
         })
 
-        const liveGlobal = await payload.db.findGlobal({ slug: restoreAccessNoVersionsGlobalSlug })
+        const mainDocument = await payload.db.findGlobal({
+          slug: restoreAccessNoVersionsGlobalSlug,
+        })
 
-        expect(liveGlobal.id).toBeDefined()
+        expect(mainDocument.id).toBeDefined()
 
         const updated = await payload.updateGlobal({
           slug: restoreAccessNoVersionsGlobalSlug,
           context: {
-            restoreAccessGlobalID: liveGlobal.id,
+            restoreAccessGlobalID: mainDocument.id,
             restoreAccessMode: 'idConstraint',
           },
           data: { title: 'updated by id' },

@@ -20,7 +20,7 @@ type Args = {
 type Result = {
   global: Document
   globalExists: boolean
-  hasLiveGlobal: boolean
+  hasMainDocument: boolean
 }
 
 export const getLatestGlobalVersion = async ({
@@ -51,13 +51,13 @@ export const getLatestGlobalVersion = async ({
     ).docs[0]
   }
 
-  const scopedLiveGlobal = await payload.db.findGlobal({
+  const mainDocument = await payload.db.findGlobal({
     slug,
     locale,
     req,
   })
-  const hasLiveGlobal = Boolean(scopedLiveGlobal && Object.keys(scopedLiveGlobal).length > 0)
-  const globalExists = Boolean(latestVersion) || hasLiveGlobal
+  const hasMainDocument = Boolean(mainDocument && Object.keys(mainDocument).length > 0)
+  const globalExists = Boolean(latestVersion) || hasMainDocument
 
   if (latestVersion) {
     let accessibleLatestVersion: TypeWithVersion<Document> | undefined = latestVersion
@@ -83,7 +83,7 @@ export const getLatestGlobalVersion = async ({
       return {
         global: {},
         globalExists,
-        hasLiveGlobal,
+        hasMainDocument,
       }
     }
 
@@ -98,19 +98,19 @@ export const getLatestGlobalVersion = async ({
     return {
       global: accessibleLatestVersion.version,
       globalExists,
-      hasLiveGlobal,
+      hasMainDocument,
     }
   }
 
-  if (!hasWhereAccessResult(where) || !hasLiveGlobal) {
+  if (!hasWhereAccessResult(where) || !hasMainDocument) {
     return {
-      global: scopedLiveGlobal,
+      global: mainDocument,
       globalExists,
-      hasLiveGlobal,
+      hasMainDocument,
     }
   }
 
-  const accessibleLiveGlobal = await payload.db.findGlobal({
+  const accessibleMainDocument = await payload.db.findGlobal({
     slug,
     locale,
     req,
@@ -118,8 +118,8 @@ export const getLatestGlobalVersion = async ({
   })
 
   return {
-    global: accessibleLiveGlobal,
+    global: accessibleMainDocument,
     globalExists,
-    hasLiveGlobal,
+    hasMainDocument,
   }
 }
