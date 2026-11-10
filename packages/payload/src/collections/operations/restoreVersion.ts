@@ -17,6 +17,7 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { hideCloudStorageState } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
   beginFileOperationScope,
@@ -83,6 +84,11 @@ export const restoreVersionOperation = async <
   if (hasFileOperationScope) {
     beginFileOperationScope({ req })
   }
+
+  // The restore shares the caller's context, but must not use the caller's cloud storage state.
+  const restoreCallerCloudStorageState = hasFileOperationScope
+    ? hideCloudStorageState({ req })
+    : undefined
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -478,5 +484,7 @@ export const restoreVersionOperation = async <
       await abortFileOperationScope({ req })
     }
     throw error
+  } finally {
+    restoreCallerCloudStorageState?.()
   }
 }

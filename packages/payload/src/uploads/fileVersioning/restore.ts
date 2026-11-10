@@ -11,7 +11,6 @@ import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { archiveOutgoingLocalFiles, replaceStoredFileReferences } from './archive.js'
 import { removeUnreferencedStagedObjects, scheduleUnreferencedFileCleanup } from './cleanup.js'
-import { withoutCloudStorageState } from './cloudStorage.js'
 import { runFileOperationPlan, shareFileOperationScope } from './fileOperationManager.js'
 import { copyLocalFile } from './localStorage.js'
 import { getArchivedFilename } from './naming.js'
@@ -33,15 +32,15 @@ export type FileRestoreArgs<T> = {
 
 /**
  * The request for a restore of an upload document. A restore can run inside another upload
- * operation, so it must not use that upload's file, sizes, edits or storage state.
+ * operation, so it must not use that upload's file, sizes or edits. It shares `req.context` with
+ * the caller; use `hideCloudStorageState` to keep the caller's cloud storage state out of it.
  */
 export const isolateRestoreRequest = ({ req }: { req: PayloadRequest }): PayloadRequest => {
-  const isolated = isolateObjectProperty(req, ['context', 'file', 'payloadUploadSizes', 'query'])
+  const isolated = isolateObjectProperty(req, ['file', 'payloadUploadSizes', 'query'])
   isolated.file = undefined
   isolated.payloadUploadSizes = undefined
   isolated.query = { ...req.query }
   delete isolated.query.uploadEdits
-  isolated.context = withoutCloudStorageState({ context: req.context })
   shareFileOperationScope({ owner: req, req: isolated })
   return isolated
 }
@@ -53,7 +52,7 @@ export const isolateRestoreRequest = ({ req }: { req: PayloadRequest }): Payload
 export const runFileRestore = async <T>(args: FileRestoreArgs<T>): Promise<T> => {
   const entries = [args.selected, ...Object.values(args.selected.variants ?? {})]
   return entries.some((entry) => isRequestTimeFile({ entry: entry as JsonObject }))
-    ? runRequestTimeFileRestore({ ...args, copyStoredFiles: runStoredFileRestore })
+    ? runRequestTimeFileRestore({ ...args, runStoredRestore: runStoredFileRestore })
     : runStoredFileRestore(args)
 }
 

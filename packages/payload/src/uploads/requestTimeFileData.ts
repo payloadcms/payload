@@ -30,7 +30,11 @@ export function getRequestTimeDefaultFileData({
   }
 }
 
-/** Generate names from the current size declarations, without retaining old virtual metadata. */
+/**
+ * Generate names from the current size declarations, without retaining old virtual metadata.
+ * Names are based on the main file's `filename`, and never reuse the main file's, the original's
+ * or a `reservedFilenames` name.
+ */
 export async function getRequestTimeVariants({
   collection,
   documentID,
@@ -38,19 +42,23 @@ export async function getRequestTimeVariants({
   original,
   prefix,
   req,
+  reservedFilenames = [],
   staticPath,
 }: {
   collection: SanitizedCollectionConfig
   documentID?: number | string
+  /** The main file's name. */
   filename: string
   original: OriginalFileData
   prefix?: string
   req: PayloadRequest
+  /** Other names this document keeps, such as its stored variants. */
+  reservedFilenames?: string[]
   staticPath?: string
 }): Promise<FileSizes> {
   const { name: baseName } = parseFilename(filename)
   const baseExt = getFileExtension(original.filename)
-  const plannedNames = new Set([filename, original.filename])
+  const plannedNames = new Set([filename, original.filename, ...reservedFilenames])
   const variants: FileSizes = {}
 
   for (const { name: variantName } of collection.upload.variants ?? []) {

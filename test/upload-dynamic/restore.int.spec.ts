@@ -1,4 +1,10 @@
-import type { Payload } from 'payload'
+import type {
+  CollectionAfterChangeHook,
+  CollectionBeforeChangeHook,
+  Payload,
+  PayloadRequest,
+  SanitizedCollectionConfig,
+} from 'payload'
 
 import { readdir, readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
@@ -80,7 +86,11 @@ const prepareHistory = async ({
 }
 
 test.suite('Restore request-time files', { config: './config.ts' }, () => {
-  test.afterEach(async () => {
+  test.afterEach(async ({ payload }) => {
+    for (const [slug, variants] of removedVariants) {
+      payload.collections[slug].config.upload.variants = variants
+    }
+    removedVariants.clear()
     vi.restoreAllMocks()
     sourceReadCalls.length = 0
     versionedCloudFiles.clear()
@@ -368,6 +378,179 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     expect(callerContext._payloadVerifiedProviderOriginal.key).toBe('unrelated-original')
   })
 
+  test('should name a restored request-time variant apart from the stored main file', async ({
+    payload,
+    restClient,
+  }) => {
+    const transformer = payload.config.upload.transformers.find(
+      ({ slug }) => slug === 'upload-crop',
+    )!
+    const transformFile = transformer.transformFile!.bind(transformer)
+
+    // The stored main is named `<original>-card`, the name a `card` variant built from the
+    // original would take.
+    vi.spyOn(transformer, 'transformFile').mockImplementation(async (args) => {
+      const result = await transformFile(args)
+
+      return result.file
+        ? {
+            ...result,
+            file: new File([await result.file.arrayBuffer()], 'image-card.png', {
+              type: result.file.type,
+            }),
+          }
+        : result
+    })
+
+    const created = await payload.create({
+      collection: versionedCloudMediaSlug,
+      context: { isUploadCropEnabled: true },
+      data: { _transforms: { crop: savedCrop }, alt: 'selected' },
+      filePath: imageFixture,
+      overrideAccess: true,
+    })
+
+    expect(created.filename).toBe('image-card.png')
+    expect(created.original?.filename).toBe('image.png')
+    expect(created.variants?.card?._stored).toBe(false)
+
+    const [selected] = await getVersions({
+      payload,
+      id: created.id,
+      collection: versionedCloudMediaSlug,
+    })
+
+    await payload.update({
+      id: created.id,
+      collection: versionedCloudMediaSlug,
+      data: { alt: 'current' },
+    })
+
+    const restored = await payload.restoreVersion({
+      id: String(selected!.id),
+      collection: versionedCloudMediaSlug,
+      overrideAccess: true,
+    })
+
+    expect(restored.filename).toBe('image-card.png')
+    expect(restored.variants?.card?._stored).toBe(false)
+    expect(restored.variants?.card?.filename).not.toBe(restored.filename)
+    expect(restored.variants?.card?.filename).not.toBe(restored.original?.filename)
+
+    const response = await restClient.GET(
+      `/${versionedCloudMediaSlug}/file/${restored.variants!.card!.filename}`,
+    )
+
+    expect(response.status).toBe(200)
+    expect(await sharp(Buffer.from(await response.arrayBuffer())).metadata()).toMatchObject({
+      width: 400,
+    })
+  })
+
+  test('should share hook context with the caller on a stored-only restore', async ({
+    payload,
+  }) => {
+    const { selected } = await prepareStoredOnlyHistory({ payload })
+    const hooks = payload.collections[versionedDynamicMediaSlug].config.hooks
+    const afterChange: CollectionAfterChangeHook = ({ req }) => {
+      req.context.restoreHookMarker = 'set by afterChange'
+    }
+    const req: Partial<PayloadRequest> = {}
+
+    hooks.afterChange.push(afterChange)
+
+    try {
+      await payload.restoreVersion({
+        id: String(selected.id),
+        collection: versionedDynamicMediaSlug,
+        overrideAccess: true,
+        req,
+      })
+    } finally {
+      hooks.afterChange.splice(hooks.afterChange.indexOf(afterChange), 1)
+    }
+
+    expect(req.context?.restoreHookMarker).toBe('set by afterChange')
+  })
+
+  test('should not let a caller cloud storage context reach the restore and should keep the caller cloud keys after it', async ({
+    payload,
+  }) => {
+    const { selected } = await prepareStoredOnlyHistory({
+      payload,
+      collection: versionedCloudMediaSlug,
+    })
+    const hooks = payload.collections[versionedCloudMediaSlug].config.hooks
+    const seenKeys: string[][] = []
+    const beforeChange: CollectionBeforeChangeHook = ({ data, req }) => {
+      seenKeys.push(Object.keys(req.context).filter((key) => key in callerCloudContext))
+      return data
+    }
+    const afterChange: CollectionAfterChangeHook = ({ req }) => {
+      seenKeys.push(Object.keys(req.context).filter((key) => key in callerCloudContext))
+    }
+    const callerCloudContext = {
+      _payloadManagedCloudMetadata: { filename: 'unrelated.png' },
+      _payloadManagedCloudStorage: true,
+      _payloadVerifiedProviderOriginal: { key: 'unrelated-original' },
+      skipCloudStorage: true,
+    }
+    const req: Partial<PayloadRequest> = { context: { ...callerCloudContext } }
+
+    hooks.beforeChange.push(beforeChange)
+    hooks.afterChange.push(afterChange)
+
+    try {
+      await payload.restoreVersion({
+        id: String(selected.id),
+        collection: versionedCloudMediaSlug,
+        overrideAccess: true,
+        req,
+      })
+    } finally {
+      hooks.beforeChange.splice(hooks.beforeChange.indexOf(beforeChange), 1)
+      hooks.afterChange.splice(hooks.afterChange.indexOf(afterChange), 1)
+    }
+
+    expect(seenKeys).toEqual([[], []])
+    expect(req.context).toMatchObject(callerCloudContext)
+  })
+
+  test('should put back the caller cloud storage context when the restore fails', async ({
+    payload,
+  }) => {
+    const { selected } = await prepareStoredOnlyHistory({
+      payload,
+      collection: versionedCloudMediaSlug,
+    })
+    const hooks = payload.collections[versionedCloudMediaSlug].config.hooks
+    const afterChange: CollectionAfterChangeHook = () => {
+      throw new Error('afterChange failed')
+    }
+    const callerCloudContext = {
+      _payloadManagedCloudMetadata: { filename: 'unrelated.png' },
+      _payloadManagedCloudStorage: true,
+    }
+    const req: Partial<PayloadRequest> = { context: { ...callerCloudContext } }
+
+    hooks.afterChange.push(afterChange)
+
+    try {
+      await expect(
+        payload.restoreVersion({
+          id: String(selected.id),
+          collection: versionedCloudMediaSlug,
+          overrideAccess: true,
+          req,
+        }),
+      ).rejects.toThrow('afterChange failed')
+    } finally {
+      hooks.afterChange.splice(hooks.afterChange.indexOf(afterChange), 1)
+    }
+
+    expect(req.context).toMatchObject(callerCloudContext)
+  })
+
   test('should keep stored entries stored and request-time entries request-time when restoring a mixed version', async ({
     payload,
     restClient,
@@ -477,6 +660,41 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     expect(latest.filename).toBeTruthy()
   })
 })
+
+type VersionedSlug = typeof versionedCloudMediaSlug | typeof versionedDynamicMediaSlug
+
+/** Variants a test removed from a collection, put back after each test. */
+const removedVariants = new Map<VersionedSlug, SanitizedCollectionConfig['upload']['variants']>()
+
+/**
+ * A version with only stored files. The collection declares no variants until the test ends, so
+ * the restore copies stored files and builds nothing at request time.
+ */
+async function prepareStoredOnlyHistory({
+  payload,
+  collection = versionedDynamicMediaSlug,
+}: {
+  collection?: VersionedSlug
+  payload: Payload
+}) {
+  const upload = payload.collections[collection].config.upload
+
+  removedVariants.set(collection, upload.variants)
+  upload.variants = []
+
+  const created = await payload.create({
+    collection,
+    data: { alt: 'selected' },
+    filePath: imageFixture,
+  })
+  const [selected] = await getVersions({ payload, id: created.id, collection })
+
+  expect(selected!.version._stored).not.toBe(false)
+
+  await payload.update({ id: created.id, collection, data: { alt: 'current' } })
+
+  return { created, selected: selected! }
+}
 
 /** A version whose main file was stored by an upload stage and whose `card` size is request-time. */
 async function prepareMixedHistory({ payload }: { payload: Payload }) {

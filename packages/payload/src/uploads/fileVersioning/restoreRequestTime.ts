@@ -24,13 +24,14 @@ import { collectStoredFiles } from './storedFiles.js'
 export async function runRequestTimeFileRestore<T>({
   id,
   collection,
-  copyStoredFiles,
   current,
   req,
+  runStoredRestore,
   selected,
   write,
 }: {
-  copyStoredFiles: (args: FileRestoreArgs<T>) => Promise<T>
+  /** Copies the stored files, writes the restored document and cleans up the replaced files. */
+  runStoredRestore: (args: FileRestoreArgs<T>) => Promise<T>
 } & FileRestoreArgs<T>): Promise<T> {
   const original = selected.original as OriginalFileData | undefined
   const storedFiles = collectStoredFiles({ collection, doc: selected, req })
@@ -96,7 +97,7 @@ export async function runRequestTimeFileRestore<T>({
   }
 
   // Copy the stored files with storage operations. Entries built at request time read no bytes.
-  return copyStoredFiles({
+  return runStoredRestore({
     id,
     collection,
     current,
@@ -104,15 +105,20 @@ export async function runRequestTimeFileRestore<T>({
     selected,
     write: async (copied) => {
       const copiedOriginal = copied.original as OriginalFileData
+      const copiedVariants = (copied.variants ?? {}) as Record<string, JsonObject | null>
       const requestTimeVariants =
         requestTimeVariantNames.length > 0
           ? await getRequestTimeVariants({
               collection,
               documentID: id,
-              filename: copiedOriginal.filename,
+              filename: isMainBuiltAtRequest ? copiedOriginal.filename : copied.filename,
               original: copiedOriginal,
               prefix: copiedOriginal.prefix,
               req,
+              reservedFilenames: [...storedVariantNames].flatMap((name) => {
+                const storedFilename = copiedVariants[name]?.filename
+                return typeof storedFilename === 'string' ? [storedFilename] : []
+              }),
               staticPath: collection.upload.disableLocalStorage
                 ? undefined
                 : collection.upload.staticDir,
@@ -123,7 +129,7 @@ export async function runRequestTimeFileRestore<T>({
         ...(isMainBuiltAtRequest &&
           getRequestTimeDefaultFileData({ original: copiedOriginal, transforms })),
         variants: {
-          ...copied.variants,
+          ...copiedVariants,
           ...Object.fromEntries(
             requestTimeVariantNames.map((name) => [name, requestTimeVariants[name]]),
           ),
