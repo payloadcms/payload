@@ -36,8 +36,10 @@ export async function resolveImportMapFilePath({
     }
     importMapFilePath = importMapFile
   } else {
-    const appLocation = path.resolve(rootDir, `app/(payload)${adminRoute}/`)
-    const srcAppLocation = path.resolve(rootDir, `src/app/(payload)${adminRoute}/`)
+    // Next.js uses %5F for routable segments that begin with an underscore.
+    const adminFolder = adminRoute.replace(/(^|\/)_/g, '$1%5F')
+    const appLocation = path.resolve(rootDir, `app/(payload)${adminFolder}/`)
+    const srcAppLocation = path.resolve(rootDir, `src/app/(payload)${adminFolder}/`)
 
     if (appLocation && (await pathOrFileExists(appLocation))) {
       importMapFilePath = path.resolve(appLocation, 'importMap.js')
