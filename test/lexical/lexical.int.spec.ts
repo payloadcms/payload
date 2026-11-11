@@ -13,6 +13,7 @@ import {
   lexicalEditor,
   type LexicalRichTextAdapter,
   LinkFeature,
+  RelationshipFeature,
   type SerializedBlockNode,
   type SerializedLinkNode,
   type SerializedListItemNode,
@@ -1960,6 +1961,40 @@ test.describe('Lexical upload node type generation', () => {
     // The configured `caption` upload field must survive into the generated upload node type,
     // not be erased to `{ [k: string]: unknown }`.
     expect(generatedTypes).toContain('caption')
+  })
+
+  test('keeps version required on fallback upload and relationship node types when no collections are enabled', async () => {
+    const config = {
+      collections: [
+        {
+          slug: 'articles',
+          enableRichTextRelationship: false,
+          fields: [
+            {
+              name: 'content',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: [UploadFeature(), RelationshipFeature()],
+              }),
+            },
+          ],
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = sanitizeConfig(config)
+    ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
+      defaultIDType: 'text',
+    }
+
+    const { types: generatedTypes } = await generateTypes(sanitizedConfig, {
+      log: false,
+      returnString: true,
+    })
+
+    expect(generatedTypes).not.toContain('version?: number')
+    expect(generatedTypes).toContain("type: 'upload'")
+    expect(generatedTypes).toContain("type: 'relationship'")
   })
 })
 
