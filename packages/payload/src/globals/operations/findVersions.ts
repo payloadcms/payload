@@ -5,6 +5,7 @@ import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { assertBranchReadable } from '../../branching/assertBranchReadable.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
@@ -52,6 +53,10 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
 
   if (!hasVersionsEnabled(globalConfig)) {
     throw new NotFound(req.t)
+  }
+
+  if (!overrideAccess) {
+    await assertBranchReadable({ globalSlug: globalConfig.slug, req })
   }
 
   const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)
