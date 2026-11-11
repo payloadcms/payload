@@ -1,3 +1,6 @@
+import type { DiscardOptions } from './branching/discard.js'
+
+import { discardBranchChanges } from './branching/discard.js'
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
@@ -513,6 +516,8 @@ export class BasePayload {
   authStrategies!: AuthStrategy[]
 
   blocks: Record<BlockSlug, FlattenedBlock> = {}
+
+  branches = { discard: (options: DiscardOptions) => discardBranchChanges(this, options) }
 
   collections: Record<CollectionSlug, Collection> = {}
 
@@ -1513,6 +1518,10 @@ export { withBranchIDSelect } from './branching/branchSelect.js'
 export { withBranchGlobalSelect } from './branching/branchSelect.js'
 export { withBranchVersionSelect } from './branching/branchSelect.js'
 export { isBranchProjectionActive } from './branching/branchSelect.js'
+export type { DiscardedChange } from './branching/discard.js'
+export type { DiscardOptions } from './branching/discard.js'
+export type { DiscardResult } from './branching/discard.js'
+export { discardBranchChanges } from './branching/discard.js'
 export type { EffectiveOperation } from './branching/effectiveOperations.js'
 export type { MergeStreamEvent } from './branching/endpoints/merge.js'
 export { resolveBranchGlobalQuery } from './branching/globals.js'
@@ -1524,15 +1533,15 @@ export { recordBranchGlobalChange } from './branching/globals.js'
 export type { MergeResult } from './branching/merge.js'
 export type { BlockedChange } from './branching/preflight.js'
 export { resolveBranch } from './branching/resolveBranch.js'
+
 export { isolateBranchState } from './branching/resolveBranch.js'
 export { loadBranchDeletions } from './branching/resolveBranch.js'
 export { loadBranchManifest } from './branching/resolveBranch.js'
-export { resetBranchState } from './branching/resolveBranch.js'
 
+export { resetBranchState } from './branching/resolveBranch.js'
 export { resolveBranchReadState } from './branching/resolveBranchQuery.js'
 export { resolveBranchQuery } from './branching/resolveBranchQuery.js'
 export { getBranchPredicateSync } from './branching/resolveBranchQuery.js'
-
 export type { BranchReadState } from './branching/resolveBranchQuery.js'
 export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
 export { resolveBranchDelete } from './branching/tombstone.js'
@@ -1554,21 +1563,17 @@ export type { SanitizedBranchingConfig } from './branching/types.js'
 export { branchDocIDField } from './branching/types.js'
 export { branchesCollectionSlug } from './branching/types.js'
 export { branchParentField } from './branching/types.js'
+
 export { mergeApplicationOutcomes } from './branching/types.js'
 export { mergeCleanupOutcomes } from './branching/types.js'
+
 export { mergeRecoveryOutcomes } from './branching/types.js'
 export { defaultBranchMergeValidation } from './branching/validation.js'
-
 export type { BranchMergeValidate } from './branching/validation.js'
 export type { BranchMergeValidationCandidate } from './branching/validation.js'
-
 export type { BranchMergeValidationError } from './branching/validation.js'
-export type { BranchMergeValidationResult } from './branching/validation.js'
-export { resolveBranchVersionHistoryQuery } from './branching/versions.js'
-export { resolveBranchVersionParent } from './branching/versions.js'
-export { projectBranchVersionParents } from './branching/versions.js'
 
-export { resolveBranchVersionQuery } from './branching/versions.js'
+export type { BranchMergeValidationResult } from './branching/validation.js'
 
 export interface FieldCustom extends Record<string, any> {}
 
@@ -1580,9 +1585,15 @@ export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
 
-export { projectBranchVersionParent } from './branching/versions.js'
-export { resolveBranchVersionQuerySync } from './branching/versions.js'
+export { resolveBranchVersionHistoryQuery } from './branching/versions.js'
+export { resolveBranchVersionParent } from './branching/versions.js'
 
+export { projectBranchVersionParents } from './branching/versions.js'
+
+export { resolveBranchVersionQuery } from './branching/versions.js'
+export { projectBranchVersionParent } from './branching/versions.js'
+
+export { resolveBranchVersionQuerySync } from './branching/versions.js'
 export { resolveBranchOwnVersions } from './branching/versions.js'
 
 export { generateImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
@@ -1693,6 +1704,7 @@ export {
 export { addDefaultsToConfig } from './config/defaults.js'
 export { definePlugin } from './config/definePlugin.js'
 export { type OrderableEndpointBody } from './config/orderable/index.js'
+
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
@@ -2106,6 +2118,7 @@ export type {
   WorkflowHandler,
   WorkflowSlug,
 } from './queues/config/types/workflowTypes.js'
+
 export { JobCancelledError } from './queues/errors/index.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
@@ -2131,7 +2144,6 @@ export {
   type BatchProcessorResult,
 } from './utilities/batchProcessing.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'
-
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
