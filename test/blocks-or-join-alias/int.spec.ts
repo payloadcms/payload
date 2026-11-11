@@ -69,4 +69,138 @@ test.suite('Blocks OR join alias (#19459)', { config: './config.ts', db: 'drizzl
     expect(andResult.totalDocs).toBe(1)
     expect(andResult.docs[0]?.id).toBe(doc.id)
   })
+
+  test('should keep distinct joins when OR/AND spans block fields in different locales', async ({
+    payload,
+  }) => {
+    const enNeedle = 'blocks-or-join-alias-en-needle'
+    const deNeedle = 'blocks-or-join-alias-de-needle'
+
+    // en caption matches the de needle — a false positive if the de join is dropped
+    // and the query reuses the en-joined row.
+    const falsePositive = await payload.create({
+      collection: 'articles',
+      locale: 'en',
+      data: {
+        localizedLayout: [
+          {
+            blockType: 'card',
+            heading: 'en-heading-false-positive',
+            caption: deNeedle,
+          },
+        ],
+      },
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      collection: 'articles',
+      id: falsePositive.id,
+      locale: 'de',
+      data: {
+        localizedLayout: [
+          {
+            blockType: 'card',
+            heading: 'de-heading-false-positive',
+            caption: 'de-caption-other',
+          },
+        ],
+      },
+      overrideAccess: true,
+    })
+
+    const match = await payload.create({
+      collection: 'articles',
+      locale: 'en',
+      data: {
+        localizedLayout: [
+          {
+            blockType: 'card',
+            heading: enNeedle,
+            caption: 'en-caption-other',
+          },
+        ],
+      },
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      collection: 'articles',
+      id: match.id,
+      locale: 'de',
+      data: {
+        localizedLayout: [
+          {
+            blockType: 'card',
+            heading: 'de-heading-other',
+            caption: deNeedle,
+          },
+        ],
+      },
+      overrideAccess: true,
+    })
+
+    const enHeadingEquals = {
+      'localizedLayout.en.heading': {
+        equals: enNeedle,
+      },
+    }
+    const deCaptionEquals = {
+      'localizedLayout.de.caption': {
+        equals: deNeedle,
+      },
+    }
+
+    // Force the en join first; if the de join is discarded, de.caption reads the en row.
+    const orResult = await payload.find({
+      collection: 'articles',
+      depth: 0,
+      locale: 'all',
+      where: {
+        or: [
+          {
+            'localizedLayout.en.heading': {
+              equals: 'no-match-forces-en-join',
+            },
+          },
+          deCaptionEquals,
+        ],
+      },
+      overrideAccess: true,
+    })
+
+    const andResult = await payload.find({
+      collection: 'articles',
+      depth: 0,
+      locale: 'all',
+      where: {
+        and: [enHeadingEquals, deCaptionEquals],
+      },
+      overrideAccess: true,
+    })
+
+    const sameLocaleOrResult = await payload.find({
+      collection: 'articles',
+      depth: 0,
+      locale: 'all',
+      where: {
+        or: [
+          {
+            'localizedLayout.de.heading': {
+              equals: 'de-heading-other',
+            },
+          },
+          deCaptionEquals,
+        ],
+      },
+      overrideAccess: true,
+    })
+
+    expect(orResult.docs.map((doc) => doc.id)).toEqual([match.id])
+    expect(orResult.totalDocs).toBe(1)
+    expect(andResult.docs.map((doc) => doc.id)).toEqual([match.id])
+    expect(andResult.totalDocs).toBe(1)
+    expect(sameLocaleOrResult.docs.map((doc) => doc.id).sort()).toEqual([match.id].sort())
+    expect(sameLocaleOrResult.totalDocs).toBe(1)
+  })
 })

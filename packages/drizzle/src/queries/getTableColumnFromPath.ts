@@ -264,22 +264,42 @@ export const getTableColumnFromPath = ({
           const blockSelectFields = {}
 
           let blockJoin: BuildQueryJoinAliases[0]
+          let blockAliasTable: BuildQueryJoinAliases[0]['table'] | undefined
+
           if (isFieldLocalized && adapter.payload.config.localization) {
+            // Include locale in the query path so same-locale fields reuse one join while
+            // different locales (e.g. layout.en.heading OR layout.de.caption) keep distinct aliases.
+            const blockQueryPath =
+              locale && locale !== 'all'
+                ? `${constraintPath}${field.name}.${locale}`
+                : `${constraintPath}${field.name}`
+
+            const existingBlockJoin = joins.find(
+              (eachJoin) => eachJoin.queryPath === blockQueryPath,
+            )
+
+            // Alias when the locale comes from the path so multiple locales can appear in one query.
+            // Request-locale queries keep the base table and still dedupe via addJoinTable (#19459).
+            const blockTable =
+              existingBlockJoin?.table ??
+              (localizedPathQuery
+                ? getTableAlias({ adapter, tableName: newTableName }).newAliasTable
+                : adapter.tables[newTableName])
+
             const conditions = [
-              eq(
-                (aliasTable || adapter.tables[tableName]).id,
-                adapter.tables[newTableName]._parentID,
-              ),
+              eq((aliasTable || adapter.tables[tableName]).id, blockTable._parentID),
             ]
 
             if (locale !== 'all') {
-              conditions.push(eq(adapter.tables[newTableName]._locale, locale))
+              conditions.push(eq(blockTable._locale, locale))
             }
 
             blockJoin = {
               condition: and(...conditions),
-              table: adapter.tables[newTableName],
+              queryPath: blockQueryPath,
+              table: blockTable,
             }
+            blockAliasTable = blockTable
           } else {
             blockJoin = {
               condition: eq(
@@ -296,6 +316,7 @@ export const getTableColumnFromPath = ({
           try {
             result = getTableColumnFromPath({
               adapter,
+              aliasTable: blockAliasTable,
               collectionPath,
               constraintPath: `${fieldStoragePath}.`,
               constraints: blockConstraints,
@@ -321,7 +342,7 @@ export const getTableColumnFromPath = ({
           selectFields = { ...selectFields, ...blockSelectFields }
 
           const previousLength = joins.length
-          // Dedupe by table name so OR/AND across multiple fields in the same block
+          // Dedupe by table name / queryPath so OR/AND across multiple fields in the same block
           // (e.g. layout.heading OR layout.caption) do not push a duplicate join alias.
           addJoinTable({
             ...blockJoin,
