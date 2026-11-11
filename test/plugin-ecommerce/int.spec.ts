@@ -424,6 +424,123 @@ test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () 
     })
   })
 
+  test.describe('variant titles', () => {
+    let sizeTypeID: number | string
+    let smallID: number | string
+    let mediumID: number | string
+
+    test.beforeAll(async ({ payloadInstance: payload }) => {
+      const sizeType = await payload.create({
+        collection: 'variantTypes',
+        data: { name: 'titletestsize', label: 'Title Test Size' },
+        overrideAccess: true,
+      })
+      sizeTypeID = sizeType.id
+
+      const small = await payload.create({
+        collection: 'variantOptions',
+        data: { label: 'Small', value: 'titletest-small', variantType: sizeType.id },
+        overrideAccess: true,
+      })
+      smallID = small.id
+
+      const medium = await payload.create({
+        collection: 'variantOptions',
+        data: { label: 'Medium', value: 'titletest-medium', variantType: sizeType.id },
+        overrideAccess: true,
+      })
+      mediumID = medium.id
+    })
+
+    const createProduct = (payload: any, title: string) =>
+      payload.create({
+        collection: 'products',
+        data: {
+          name: title,
+          title,
+          enableVariants: true,
+          variantTypes: [sizeTypeID],
+          _status: 'published',
+        },
+        overrideAccess: true,
+      })
+
+    test('new variant uses the latest draft product title', async ({ payload }) => {
+      const product = await createProduct(payload, 'Shirt')
+
+      await payload.update({
+        collection: 'products',
+        id: product.id,
+        data: { title: 'T-Shirt' },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      const variant = await payload.create({
+        collection: 'variants',
+        data: { product: product.id, options: [smallID] },
+        overrideAccess: true,
+      })
+
+      expect(variant.title).toBe('T-Shirt — Small')
+    })
+
+    test('renaming a product updates its existing variants', async ({ payload }) => {
+      const product = await createProduct(payload, 'Jacket')
+
+      const small = await payload.create({
+        collection: 'variants',
+        data: { product: product.id, options: [smallID] },
+        overrideAccess: true,
+      })
+      const medium = await payload.create({
+        collection: 'variants',
+        data: { product: product.id, options: [mediumID] },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: product.id,
+        data: { title: 'Rain Jacket' },
+        overrideAccess: true,
+      })
+
+      const smallAfter = await payload.findByID({
+        collection: 'variants',
+        id: small.id,
+        overrideAccess: true,
+      })
+      const mediumAfter = await payload.findByID({
+        collection: 'variants',
+        id: medium.id,
+        overrideAccess: true,
+      })
+
+      expect(smallAfter.title).toBe('Rain Jacket — Small')
+      expect(mediumAfter.title).toBe('Rain Jacket — Medium')
+    })
+
+    test('variant title field is read-only and API titles are replaced', async ({ payload }) => {
+      const titleField = payload.collections['variants'].config.fields.find(
+        (field) => 'name' in field && field.name === 'title',
+      )
+
+      expect(titleField && 'admin' in titleField ? titleField.admin?.readOnly : undefined).toBe(
+        true,
+      )
+
+      const product = await createProduct(payload, 'Cap')
+      const variant = await payload.create({
+        collection: 'variants',
+        data: { product: product.id, options: [smallID], title: 'My custom title' },
+        overrideAccess: true,
+      })
+
+      expect(variant.title).toBe('Cap — Small')
+    })
+  })
+
   test.describe('cart item endpoints', () => {
     let productId: string
     let variantId: string

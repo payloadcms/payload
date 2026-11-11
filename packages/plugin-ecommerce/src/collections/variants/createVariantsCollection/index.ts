@@ -46,6 +46,7 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
       admin: {
         description:
           'Used for administrative purposes, not shown to customers. This is populated by default.',
+        readOnly: true,
       },
     },
     {
