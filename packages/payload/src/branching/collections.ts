@@ -1,11 +1,14 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
-import type { CollectionAfterChangeHook, Where } from '../index.js'
+import type { CollectionAfterChangeHook, CollectionBeforeDeleteHook, Where } from '../index.js'
 import type { SanitizedBranchingConfig } from './types.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
+import { APIError } from '../errors/index.js'
 import { text } from '../fields/validations.js'
+import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
 import { combineBranchAccess } from './combineBranchAccess.js'
+import { discardBranchChangesBeforeBranchDeletion } from './discard.js'
 import { loadBranchRow, setBranchRow } from './resolveBranch.js'
 import {
   branchChangesCollectionSlug,
@@ -114,6 +117,9 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
       admin: { hidden: true, readOnly: true },
     },
   ],
+  hooks: {
+    beforeDelete: [deleteBranchStateBeforeDelete],
+  },
   // `name` is immutable after creation: `_branch` stores the name rather than
   // a foreign key, so renaming it would orphan every shadow row.
   lockDocuments: false,
@@ -401,4 +407,106 @@ const reopenBranchOnChange: CollectionAfterChangeHook = async ({ doc, operation,
   }
 
   return doc
+}
+
+const deleteBranchStateBeforeDelete: CollectionBeforeDeleteHook = async ({ id, req }) => {
+  const branch = await req.payload.findByID({
+    id,
+    collection: branchesCollectionSlug,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  })
+
+  if (typeof branch.name !== 'string') {
+    return
+  }
+
+  const branchCreatedChanges = await req.payload.find({
+    collection: branchChangesCollectionSlug,
+    depth: 0,
+    overrideAccess: true,
+    pagination: false,
+    req,
+    where: {
+      and: [{ branch: { equals: branch.name } }, { operation: { equals: 'create' } }],
+    },
+  })
+  const branchCreatedTargets = branchCreatedChanges.docs.flatMap((change) => {
+    if (change.entityType !== 'collection' || typeof change.collectionSlug !== 'string') {
+      return []
+    }
+
+    const docID = (change.doc as { value?: number | string } | undefined)?.value ?? change.doc
+
+    return typeof docID === 'number' || typeof docID === 'string'
+      ? [{ collectionSlug: change.collectionSlug, docID }]
+      : []
+  })
+
+  await assertBranchCreatedDocumentsUnreferenced({
+    ignoredOwnerBranch: branch.name,
+    req,
+    targets: branchCreatedTargets,
+  })
+
+  if (req.payload.collections['payload-jobs']) {
+    const scheduledMergeConditions: Where[] = [
+      { taskSlug: { equals: 'scheduleMerge' } },
+      { 'input.branch': { equals: branch.name } },
+    ]
+    const now = new Date().toISOString()
+    const activeScheduledMergeWhere: Where = {
+      and: [
+        ...scheduledMergeConditions,
+        { completedAt: { exists: false } },
+        { processingUntil: { greater_than: now } },
+      ],
+    }
+    const assertNoActiveScheduledMerges = async (): Promise<void> => {
+      const activeScheduledMerges = await req.payload.count({
+        collection: 'payload-jobs',
+        overrideAccess: true,
+        req,
+        where: activeScheduledMergeWhere,
+      })
+
+      if (activeScheduledMerges.totalDocs > 0) {
+        throw new APIError('This branch cannot be deleted while a scheduled merge is running.', 409)
+      }
+    }
+
+    // Check first so a rejected deletion leaves every queued job unchanged.
+    await assertNoActiveScheduledMerges()
+
+    await req.payload.delete({
+      collection: 'payload-jobs',
+      overrideAccess: true,
+      req,
+      where: {
+        and: [
+          ...scheduledMergeConditions,
+          {
+            or: [
+              { completedAt: { exists: true } },
+              { processingUntil: { exists: false } },
+              { processingUntil: { less_than_equal: now } },
+            ],
+          },
+        ],
+      },
+    })
+
+    // A worker can acquire or queue work while inactive jobs are being removed.
+    await assertNoActiveScheduledMerges()
+  }
+
+  await discardBranchChangesBeforeBranchDeletion(req.payload, { branch: branch.name, req })
+
+  await req.payload.delete({
+    collection: branchMergesCollectionSlug,
+    overrideAccess: true,
+    req,
+    where: { branch: { equals: branch.name } },
+  })
 }
