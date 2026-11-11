@@ -5,6 +5,60 @@ import { describe, expect, it } from 'vitest'
 import { multiTenantPlugin } from './index.js'
 
 describe('multiTenantPlugin', () => {
+  describe('assignment modal', () => {
+    it('should preserve dependencies and register a custom assignment modal', async () => {
+      const config = await multiTenantPlugin({
+        assignTenantModalComponent: {
+          path: '/components/CustomAssignTenantModal/index.js#CustomAssignTenantModal',
+          clientProps: { description: 'Custom assignment modal' },
+        },
+        collections: {},
+      })({
+        admin: {
+          dependencies: {
+            existing: { path: '/components/Existing.js#Existing', type: 'component' },
+          },
+        },
+        collections: [
+          { slug: 'users', auth: true, fields: [] },
+          { slug: 'tenants', fields: [] },
+        ],
+      } as Config)
+
+      expect(config.admin?.dependencies).toEqual({
+        existing: { path: '/components/Existing.js#Existing', type: 'component' },
+        'plugin-multi-tenant-assign-tenant-modal': {
+          path: '/components/CustomAssignTenantModal/index.js#CustomAssignTenantModal',
+          type: 'component',
+        },
+      })
+      expect(config.admin?.components?.providers).toContainEqual(
+        expect.objectContaining({
+          path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelectionProvider',
+          serverProps: expect.objectContaining({
+            assignTenantModalComponent: {
+              path: '/components/CustomAssignTenantModal/index.js#CustomAssignTenantModal',
+              clientProps: { description: 'Custom assignment modal' },
+            },
+          }),
+        }),
+      )
+    })
+
+    it('should use the default assignment modal without registering a replacement', async () => {
+      const config = await multiTenantPlugin({ collections: {} })({
+        collections: [
+          { slug: 'users', auth: true, fields: [] },
+          { slug: 'tenants', fields: [] },
+        ],
+      } as Config)
+
+      expect(
+        config.admin?.dependencies?.['plugin-multi-tenant-assign-tenant-modal'],
+      ).toBeUndefined()
+    })
+  })
+
   describe('tenant selector', () => {
     const customSelector: CustomComponent = {
       path: '/components/CustomTenantSelector/index.js#CustomTenantSelector',

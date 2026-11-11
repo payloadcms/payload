@@ -7,14 +7,32 @@ import type {
   CollectionSlug,
   CustomComponent,
   Field,
+  PayloadComponent,
   RelationshipField,
   SingleRelationshipField,
   User,
 } from 'payload'
+import type { ReactNode } from 'react'
+
+export type AssignTenantModalProps = {
+  afterModalClose?: () => void
+  afterModalOpen?: () => void
+  children: ReactNode
+  onCancel?: () => void
+  onConfirm?: () => void
+  /** The modal slug used by the document action and required-field prompt. */
+  slug: string
+}
 
 export type TenantValue = (number | string)[] | (number | string)
 
 export type MultiTenantPluginConfig = {
+  /**
+   * Replace the assignment modal with a client component.
+   * Receives the tenant field as children and the modal callbacks.
+   * Omit this option to render the default modal.
+   */
+  assignTenantModalComponent?: Exclude<PayloadComponent<never, AssignTenantModalProps>, false>
   /**
    * After a tenant is deleted, the plugin will attempt to clean up related documents
    * - removing documents with the tenant ID

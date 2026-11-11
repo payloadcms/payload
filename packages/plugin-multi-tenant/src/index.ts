@@ -2,7 +2,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { Block, CollectionConfig } from 'payload'
 
 import { definePlugin } from 'payload'
-import { hasAutosaveEnabled } from 'payload/shared'
+import { hasAutosaveEnabled, parsePayloadComponent } from 'payload/shared'
 
 import type { MultiTenantPluginConfig } from './types.js'
 
@@ -457,10 +457,25 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
       }),
     )
 
+    const assignTenantModal = pluginConfig.assignTenantModalComponent
+      ? parsePayloadComponent(pluginConfig.assignTenantModalComponent)
+      : undefined
+
     return {
       ...incomingConfig,
       admin: {
         ...incomingConfig.admin,
+        ...(assignTenantModal
+          ? {
+              dependencies: {
+                ...incomingConfig.admin?.dependencies,
+                'plugin-multi-tenant-assign-tenant-modal': {
+                  type: 'component' as const,
+                  path: `${assignTenantModal.path}#${assignTenantModal.exportName}`,
+                },
+              },
+            }
+          : {}),
         components: {
           ...incomingConfig.admin?.components,
           actions: [
@@ -512,6 +527,9 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
                 userHasAccessToAllTenants,
               },
               path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelectionProvider',
+              serverProps: {
+                assignTenantModalComponent: pluginConfig.assignTenantModalComponent,
+              },
             },
           ],
         },

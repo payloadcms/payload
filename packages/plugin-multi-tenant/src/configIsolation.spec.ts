@@ -16,6 +16,7 @@ const createFixture = () => {
     filterOptions: customFilter,
   }
   const options: MultiTenantPluginConfig = {
+    assignTenantModalComponent: '/components/CustomAssignTenantModal.js#CustomAssignTenantModal',
     collections: { posts: {}, settings: { isGlobal: true } },
   }
   const config = {

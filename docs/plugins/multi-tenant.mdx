@@ -59,6 +59,14 @@ The plugin accepts an object with the following properties:
 ```ts
 type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
+   * Replace the assignment modal with a client component.
+   * Omit this option to render the default modal.
+   */
+  assignTenantModalComponent?: Exclude<
+    PayloadComponent<never, AssignTenantModalProps>,
+    false
+  >
+  /**
    * Base path for your application
    *
    * https://nextjs.org/docs/app/api-reference/config/next-config-js/basePath
@@ -337,6 +345,45 @@ const config = buildConfig({
 
 export default config
 ```
+
+## Custom assignment modal
+
+Use `assignTenantModalComponent` to replace the popup opened by the document's **Assign Tenant** action. This is separate from `tenantSelectorComponent`, which replaces the navigation selector. Omit the option to keep the default assignment modal.
+
+The replacement must be a Client Component. It receives the tenant relationship field as `children`, the modal `slug`, and the `afterModalOpen`, `afterModalClose`, `onConfirm`, and `onCancel` callbacks. The plugin keeps ownership of the temporary field value and applies it to the document form when `onConfirm` is called. Saving the document still persists the assignment.
+
+You can wrap the exported modal to preserve its dialog behavior:
+
+```ts
+multiTenantPlugin({
+  assignTenantModalComponent: {
+    path: '/components/CustomAssignTenantModal#CustomAssignTenantModal',
+    clientProps: { description: 'Choose the tenant that owns this document.' },
+  },
+  collections: { posts: {} },
+})
+```
+
+```tsx
+'use client'
+
+import type { AssignTenantModalProps } from '@payloadcms/plugin-multi-tenant/types'
+
+import { AssignTenantFieldModal } from '@payloadcms/plugin-multi-tenant/client'
+
+export const CustomAssignTenantModal = ({
+  children,
+  description,
+  ...modalProps
+}: AssignTenantModalProps & { description: string }) => (
+  <AssignTenantFieldModal {...modalProps}>
+    <p>{description}</p>
+    {children}
+  </AssignTenantFieldModal>
+)
+```
+
+If you build the entire dialog yourself, use the supplied `slug` so the existing document action and required-field prompt can open it. Call the lifecycle callbacks when the dialog opens and closes, call `onConfirm` when confirming, and close the dialog after confirming or cancelling. `afterModalOpen` resets the temporary selection to the document's current assignment. Preserve keyboard dismissal, focus management, and an accessible dialog title.
 
 ## Tenant write enforcement
 

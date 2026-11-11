@@ -1,11 +1,15 @@
 import type { Payload, ServerAdapter, User } from 'payload'
+import type { ComponentType } from 'react'
 
-import type { MultiTenantPluginConfig } from '../../types.js'
+import { getFromImportMap } from 'payload/shared'
+
+import type { AssignTenantModalProps, MultiTenantPluginConfig } from '../../types.js'
 
 import { getTenantOptions } from '../../utilities/getTenantOptions.js'
 import { TenantSelectionProviderClient } from './index.client.js'
 
 type Args = {
+  assignTenantModalComponent?: MultiTenantPluginConfig['assignTenantModalComponent']
   children: React.ReactNode
   payload: Payload
   server?: ServerAdapter
@@ -18,6 +22,7 @@ type Args = {
 }
 
 export const TenantSelectionProvider = async ({
+  assignTenantModalComponent,
   children,
   payload,
   server,
@@ -66,6 +71,19 @@ export const TenantSelectionProvider = async ({
 
   return (
     <TenantSelectionProviderClient
+      AssignTenantModal={
+        assignTenantModalComponent
+          ? getFromImportMap<ComponentType<AssignTenantModalProps>>({
+              importMap: payload.importMap,
+              PayloadComponent: assignTenantModalComponent,
+            })
+          : undefined
+      }
+      assignTenantModalClientProps={
+        typeof assignTenantModalComponent === 'object'
+          ? assignTenantModalComponent.clientProps
+          : undefined
+      }
       initialTenantOptions={tenantOptions}
       initialValue={initialValue}
       tenantsCollectionSlug={tenantsCollectionSlug}
