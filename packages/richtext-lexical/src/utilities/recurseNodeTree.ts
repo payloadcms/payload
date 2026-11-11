@@ -1,5 +1,7 @@
 import type { SerializedLexicalNode } from 'lexical'
 
+import { getChildNodes } from './getChildNodes.js'
+
 // Initialize both flattenedNodes and nodeIDMap
 export const recurseNodeTree = ({
   flattenedNodes,
@@ -34,11 +36,12 @@ export const recurseNodeTree = ({
       }
     }
 
-    if ('children' in node && Array.isArray(node?.children) && node?.children?.length) {
+    const childNodes = getChildNodes(node)
+    if (childNodes.length) {
       recurseNodeTree({
         flattenedNodes,
         nodeIDMap,
-        nodes: node.children as SerializedLexicalNode[],
+        nodes: childNodes,
       })
     }
   }
