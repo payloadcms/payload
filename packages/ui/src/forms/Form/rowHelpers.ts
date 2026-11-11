@@ -53,3 +53,24 @@ export const toggleAllRows = ({
     },
   )
 }
+
+/**
+ * Keeps collapsed row preferences for rows outside the current locale while replacing
+ * the collapsed state for rows in the current locale.
+ */
+export const mergeCollapsedIDs = ({
+  collapsedIDs,
+  existingCollapsedIDs,
+  rowIDs,
+}: {
+  collapsedIDs: string[]
+  existingCollapsedIDs: string[]
+  rowIDs: string[]
+}): string[] => {
+  const currentRowIDs = new Set(rowIDs)
+
+  return [
+    ...existingCollapsedIDs.filter((id) => !currentRowIDs.has(id)),
+    ...collapsedIDs,
+  ]
+}
