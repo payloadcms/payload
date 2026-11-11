@@ -27,7 +27,7 @@ import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { Pill } from '../../elements/Pill/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
-import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
+import { extractRowsAndCollapsedIDs, mergeCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 import { RowLabel } from '../../forms/RowLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -79,7 +79,7 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
 
   const minRows = minRowsProp ?? (required ? 1 : 0)
 
-  const { setDocFieldPreferences } = useDocumentInfo()
+  const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
   const {
     addFieldRow,
     dispatchFields,
@@ -217,17 +217,34 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
     [moveFieldRow, path],
   )
 
+  const saveCollapsedIDs = useCallback(
+    (collapsedIDs: string[]) => {
+      void getDocPreferences().then((preferences) => {
+        const existingCollapsedIDs = preferences?.fields?.[path]?.collapsed ?? []
+        const rowIDs = rows.map((row) => row.id)
+
+        setDocFieldPreferences(path, {
+          collapsed: mergeCollapsedIDs({
+            collapsedIDs,
+            existingCollapsedIDs,
+            rowIDs,
+          }),
+        })
+      })
+    },
+    [getDocPreferences, path, rows, setDocFieldPreferences],
+  )
+
   const toggleCollapseAll = useCallback(
     (collapsed: boolean) => {
       const { collapsedIDs, updatedRows } = toggleAllRows({
         collapsed,
         rows,
       })
-
       dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, updatedRows })
-      setDocFieldPreferences(path, { collapsed: collapsedIDs })
+      saveCollapsedIDs(collapsedIDs)
     },
-    [dispatchFields, path, rows, setDocFieldPreferences],
+    [dispatchFields, path, rows, saveCollapsedIDs],
   )
 
   const setCollapse = useCallback(
@@ -239,9 +256,9 @@ const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
       })
 
       dispatchFields({ type: 'SET_ROW_COLLAPSED', path, updatedRows })
-      setDocFieldPreferences(path, { collapsed: collapsedIDs })
+      saveCollapsedIDs(collapsedIDs)
     },
-    [dispatchFields, path, rows, setDocFieldPreferences],
+    [dispatchFields, path, rows, saveCollapsedIDs],
   )
 
   const copyRow = useCallback(
