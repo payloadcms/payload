@@ -10,27 +10,43 @@ export const hasAmbiguousYearInput = ({
   dateFormat,
   inputValue,
   locale,
+  rangeSeparator = ' - ',
 }: {
   date: Date | null | unknown
   dateFormat: string | string[]
   inputValue?: string
   locale?: DatePickerProps['locale']
+  rangeSeparator?: string
 }): boolean => {
-  if (!(date instanceof Date) || date.getFullYear() >= 100 || !inputValue) {
+  if (!inputValue) {
     return false
   }
 
   const formats = Array.isArray(dateFormat) ? dateFormat : [dateFormat]
   const resolvedLocale = resolveDatePickerLocale({ locale })
 
-  return !formats.some(
-    (dateFormat) =>
-      format(date, dateFormat, {
-        locale: resolvedLocale,
-        useAdditionalDayOfYearTokens: true,
-        useAdditionalWeekYearTokens: true,
-      }) === inputValue,
-  )
+  const isEndpointAmbiguous = (endpointDate: unknown, endpointInput?: string): boolean => {
+    const trimmedInput = endpointInput?.trim()
+    if (!(endpointDate instanceof Date) || endpointDate.getFullYear() >= 100 || !trimmedInput) {
+      return false
+    }
+
+    return !formats.some(
+      (fmt) =>
+        format(endpointDate, fmt, {
+          locale: resolvedLocale,
+          useAdditionalDayOfYearTokens: true,
+          useAdditionalWeekYearTokens: true,
+        }) === trimmedInput,
+    )
+  }
+
+  if (Array.isArray(date)) {
+    const parts = inputValue.split(rangeSeparator)
+    return date.some((endpointDate, index) => isEndpointAmbiguous(endpointDate, parts[index]))
+  }
+
+  return isEndpointAmbiguous(date, inputValue)
 }
 
 const resolveDatePickerLocale = ({ locale }: { locale?: DatePickerProps['locale'] }) => {

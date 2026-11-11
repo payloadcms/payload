@@ -175,6 +175,7 @@ const DatePicker: React.FC<Props> = (props) => {
         dateFormat: overrides?.dateFormat ?? dateFormat,
         inputValue,
         locale: overrides?.locale,
+        rangeSeparator: (overrides as { rangeSeparator?: string } | undefined)?.rangeSeparator,
       })
     ) {
       const picker = datePickerRef.current
@@ -192,7 +193,12 @@ const DatePicker: React.FC<Props> = (props) => {
 
       if (['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
         const tzOffset = dateValue.getTimezoneOffset() / 60
-        dateValue.setHours(12 - tzOffset, 0)
+        const targetHours = 12 - tzOffset
+        if (targetHours >= 0 && targetHours < 24) {
+          dateValue.setHours(targetHours, 0)
+        } else {
+          dateValue.setHours(12, 0)
+        }
       }
 
       if (!dateFormat.includes('SSS')) {
@@ -203,7 +209,11 @@ const DatePicker: React.FC<Props> = (props) => {
     }
 
     if (Array.isArray(newDate)) {
-      newDate.forEach(normalizeSelectedDate)
+      newDate.forEach((dateValue, index) => {
+        const clonedDate = dateValue instanceof Date ? new Date(dateValue.getTime()) : dateValue
+        normalizeSelectedDate(clonedDate)
+        newDate[index] = clonedDate
+      })
     } else {
       normalizeSelectedDate(newDate)
     }
