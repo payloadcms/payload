@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { APIError } from '../errors/APIError.js'
 import { FileUploadError } from '../errors/index.js'
 import { deepCopyObject } from '../utilities/deepCopyObject.js'
-import { generateFileData } from './generateFileData.js'
+import { generateFileData, getBranchUploadFilename } from './generateFileData.js'
 import { uploadTransformerInternal } from './transformers/uploadTransformerBridge.js'
 
 vi.mock('../utilities/deepCopyObject.js', async (importOriginal) => {
@@ -63,6 +63,47 @@ const createCollection = (uploadOverrides: Record<string, unknown> = {}): Collec
       },
     },
   }) as unknown as Collection
+
+describe('getBranchUploadFilename', () => {
+  it('should encode branch names containing spaces, path separators and Unicode', () => {
+    expect(getBranchUploadFilename({ branch: 'Campaign / 日本語', filename: 'photo.png' })).toBe(
+      `photo-${encodeURIComponent('Campaign / 日本語')}.png`,
+    )
+  })
+
+  it('should preserve extensionless filenames', () => {
+    expect(getBranchUploadFilename({ branch: 'campaign', filename: 'README' })).toBe(
+      'README-campaign',
+    )
+  })
+
+  it('should replace an existing branch suffix before filename deduplication', () => {
+    expect(getBranchUploadFilename({ branch: 'campaign', filename: 'photo-campaign-1.png' })).toBe(
+      'photo-campaign.png',
+    )
+  })
+
+  it('should reserve filename bytes for an ASCII branch and deduplication suffix', () => {
+    const filename = getBranchUploadFilename({
+      branch: 'campaign',
+      filename: `${'a'.repeat(251)}.png`,
+    })
+
+    expect(Buffer.byteLength(filename)).toBeLessThanOrEqual(243)
+    expect(filename).toMatch(/-campaign\.png$/)
+  })
+
+  it('should truncate a multibyte filename without splitting a character', () => {
+    const filename = getBranchUploadFilename({
+      branch: 'campaign',
+      filename: `${'界'.repeat(83)}.png`,
+    })
+
+    expect(Buffer.byteLength(filename)).toBeLessThanOrEqual(243)
+    expect(filename).not.toContain('�')
+    expect(filename).toMatch(/-campaign\.png$/)
+  })
+})
 
 describe('generateFileData', () => {
   let tempFilePath: string
@@ -340,6 +381,79 @@ describe('generateFileData', () => {
 
     expect(sharp).not.toHaveBeenCalled()
     expect(result.data).toMatchObject({ height: 1, mimeType: 'image/gif', width: 1 })
+  })
+
+  it('should preserve a provider-issued filename for a branch upload', async () => {
+    const fileContent = Buffer.from('provider upload')
+    const req = {
+      branch: 'campaign',
+      file: {
+        data: fileContent,
+        mimetype: 'text/plain',
+        name: 'document.txt',
+        size: fileContent.length,
+        uploadReference: { _objectKey: 'unique-object-key', prefix: 'media' },
+      },
+      payload: {
+        config: { branching: { enabled: true } },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: { _objectKey: 'unique-object-key', prefix: 'media' },
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(result.data).toMatchObject({ filename: 'document.txt' })
+  })
+
+  it('should replace transformed provider bytes without changing the isolated object filename', async () => {
+    const fileContent = Buffer.from('provider upload')
+    const req = {
+      branch: 'campaign',
+      file: {
+        data: fileContent,
+        mimetype: 'text/plain',
+        name: 'document.txt',
+        size: fileContent.length,
+        uploadReference: { _objectKey: 'unique-object-key', prefix: 'media' },
+      },
+      payload: {
+        config: {
+          branching: { enabled: true },
+          upload: {
+            transformers: [
+              {
+                mimeTypes: ['text/plain'],
+                slug: 'text-transformer',
+                transformFile: async ({ file }: { file: File }) => ({
+                  file: new File([await file.arrayBuffer()], file.name, { type: file.type }),
+                  status: 'complete' as const,
+                }),
+              },
+            ],
+          },
+        },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: { _objectKey: 'unique-object-key', prefix: 'media' },
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(result.data).toMatchObject({ filename: 'document.txt' })
+    expect(req.file?.uploadReference).toBeUndefined()
   })
 
   it('copies straight from the temp file instead of reading it into memory when local storage is enabled', async () => {
