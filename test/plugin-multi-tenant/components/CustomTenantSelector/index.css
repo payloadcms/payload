@@ -1,6 +1,7 @@
 .custom-tenant-selector__label {
   padding-inline-start: var(--spacer-3);
-  margin-block-end: var(--spacer-2);
+  padding-block-start: var(--spacer-2-5);
+  margin-block-end: calc(var(--spacer-2) * -1);
 }
 
 .custom-tenant-selector__pill {
