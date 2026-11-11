@@ -71,7 +71,7 @@
     "clean": "rimraf -g {dist,*.tsbuildinfo}"
   },
   "dependencies": {
-    "mongoose": "9.9.2",
+    "mongoose": "9.11.4",
     "mongoose-paginate-v2": "1.9.5",
     "prompts": "2.4.2",
     "uuid": "14.0.0"
