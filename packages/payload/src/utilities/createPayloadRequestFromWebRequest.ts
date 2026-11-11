@@ -49,6 +49,7 @@ export const createPayloadRequestFromWebRequest = async ({
 
   const urlProperties = new URL(request.url)
   const { pathname, searchParams } = urlProperties
+  const branch = searchParams.get('branch')
 
   const isGraphQL =
     !config.graphQL.disable &&
@@ -119,6 +120,7 @@ export const createPayloadRequestFromWebRequest = async ({
   })
 
   const req = await createPayloadRequest({
+    branch: branch || undefined,
     fallbackLocale: fallbackLocale as false | TypedLocale | undefined,
     locale: locale ?? undefined,
     payload,
