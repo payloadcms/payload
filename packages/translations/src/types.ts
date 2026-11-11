@@ -84,9 +84,12 @@ export type NestedKeysUnSanitized<T> = T extends object
 
 // Utility type to strip specific suffixes
 export type StripCountVariants<TKey> = TKey extends
+  | `${infer Base}_few`
   | `${infer Base}_many`
   | `${infer Base}_one`
   | `${infer Base}_other`
+  | `${infer Base}_two`
+  | `${infer Base}_zero`
   ? Base
   : TKey
 
