@@ -86,8 +86,6 @@ For Shadow DOM, load the stylesheet into the shadow root itself. A normal CSS im
 
 Values in `rem` use the document's root font size, including inside Shadow DOM. Load the fonts you want and apply typography tokens in your own styles.
 
-Admin-specific layout variables, such as navigation width and header heights, are defined separately in [app.css](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/app.css). They are not included in the token export.
-
 ## CSS Library
 
 To make it as easy as possible for you to override default styles, Payload uses [BEM naming conventions](http://getbem.com/) for all CSS within the Admin UI. If you provide your own CSS, you can override any built-in styles easily, including targeting nested components and their various component states.
@@ -100,7 +98,7 @@ The following variables are defined and can be overridden:
 - [Colors](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/colors.css)
   - Semantic tokens for background, text, border, and icon colors (e.g. `--color-bg`, `--color-text`, `--color-border`, `--color-icon`)
   - Success / warning / danger color tokens
-  - [The raw `--ramp-*` color palette](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/design-tokens.css)
+  - [The raw `--ramp-*` color palette](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/color-ramps.css)
 - [Sizing](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/app.css)
   - [Horizontal gutter](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/spacing.css)
   - Navigation width

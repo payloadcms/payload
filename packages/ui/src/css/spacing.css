@@ -16,6 +16,11 @@
     --spacing-field: var(--spacer-4);
     --spacing-view-bottom: var(--gutter-h);
 
+    /* Sidebar widths */
+    --nav-width: 275px;
+    --doc-sidebar-width: 325px;
+    --edit-upload-sidebar-width: 240px;
+
     /* Breakpoints */
     --breakpoint-xs-width: 400px;
     --breakpoint-s-width: 768px;
@@ -43,6 +48,7 @@
   @media (max-width: 768px) {
     :root,
     :host {
+      --nav-width: 100vw;
       --spacing-field: var(--spacer-2-5);
       --spacing-view-bottom: var(--spacer-6);
     }
