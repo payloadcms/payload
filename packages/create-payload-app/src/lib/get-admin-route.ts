@@ -37,8 +37,14 @@ export function getAdminRoute({ projectDir }: { projectDir: string }): string {
         'payload.config.js',
         'src/payload.config.ts',
         'src/payload.config.js',
-      ].map((file) => path.join(projectDir, file))
-  const configPaths = candidates.filter((file) => fse.existsSync(file))
+        ...(options.rootDir
+          ? [
+              path.join(options.rootDir, 'payload.config.ts'),
+              path.join(options.rootDir, 'payload.config.js'),
+            ]
+          : []),
+      ].map((file) => path.resolve(projectDir, file))
+  const configPaths = [...new Set(candidates)].filter((file) => fse.existsSync(file))
   const failure = new Error(
     'Cannot determine routes.admin safely. Use a statically defined admin route before upgrading with create-payload-app.',
   )
@@ -86,6 +92,8 @@ export function getAdminRoute({ projectDir }: { projectDir: string }): string {
   ) {
     throw failure
   }
+  assertDefaultImportMap({ config })
+
   const routesProperty = findConfigProperty({ name: 'routes', config })
 
   if (!routesProperty) {
@@ -123,6 +131,11 @@ export function getAdminRoute({ projectDir }: { projectDir: string }): string {
   ) {
     throw failure
   }
+  if (route.split('/').some((segment) => /^[([@]/.test(segment))) {
+    throw new Error(
+      'Cannot upgrade routes.admin containing Next.js special route segments. Update the admin wrappers manually.',
+    )
+  }
   return route.replace(/\/+$/, '') || '/'
 }
 
@@ -141,4 +154,37 @@ function findConfigProperty({ name, config }: { config: ObjectLiteralExpression;
     throw new Error(`Cannot determine routes.admin safely: duplicate ${name} properties.`)
   }
   return matches[0]
+}
+
+/** Stop before template wrappers can replace imports of a custom or unresolved import map. */
+function assertDefaultImportMap({ config }: { config: ObjectLiteralExpression }): void {
+  let object = config
+  const failure = new Error(
+    'Cannot safely upgrade admin.importMap.importMapFile with create-payload-app. Update the admin wrappers manually.',
+  )
+
+  for (const name of ['admin', 'importMap', 'importMapFile']) {
+    if (
+      object
+        .getProperties()
+        .some(
+          (property) =>
+            Node.isSpreadAssignment(property) ||
+            Node.isComputedPropertyName(property.getNameNode()),
+        )
+    ) {
+      throw failure
+    }
+    const property = findConfigProperty({ name, config: object })
+
+    if (!property) {
+      return
+    }
+    const value = property.asKind(SyntaxKind.PropertyAssignment)?.getInitializer()
+
+    if (name === 'importMapFile' || !Node.isObjectLiteralExpression(value)) {
+      throw failure
+    }
+    object = value
+  }
 }
