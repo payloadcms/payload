@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Page, Route } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { readFileSync, statSync } from 'fs'
@@ -2225,6 +2225,44 @@ describe('Uploads', () => {
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
+    })
+
+    test('should retain legacy field errors in the bulk upload form', async () => {
+      const saveURL = (url: URL) => url.pathname === `/api/${bulkUploadsHookErrorSlug}`
+      const failSave = async (route: Route) => {
+        if (route.request().method() !== 'POST') {
+          return route.fallback()
+        }
+
+        await route.fulfill({
+          body: JSON.stringify({
+            errors: [{ field: 'shouldFail', message: 'Cannot use this value' }],
+          }),
+          contentType: 'application/json',
+          status: 400,
+        })
+      }
+
+      await page.route(saveURL, failSave)
+
+      try {
+        await page.goto(bulkUploadsHookErrorURL.list)
+        await page.getByRole('button', { name: 'Bulk Upload', exact: true }).click()
+        await page
+          .locator('.dropzone input[type="file"]')
+          .setInputFiles(path.resolve(dirname, './image.png'))
+        await page.locator('.bulk-upload--actions-bar__saveButtons button').click()
+
+        const field = page.locator('.field-type.checkbox').filter({
+          has: page.locator('#field-shouldFail'),
+        })
+
+        await expect(field.getByText('Cannot use this value', { exact: true })).toBeVisible()
+        await expect(page.locator('.file-selections .error-pill__count').first()).toHaveText('1')
+        await expect(page.locator('.file-selections__fileRowContainer')).toHaveCount(1)
+      } finally {
+        await page.unroute(saveURL, failSave)
+      }
     })
 
     test('should report failure when beforeChange hook throws non-field error', async () => {

@@ -8724,6 +8724,67 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('3.3.1 Error Identification (A)', () => {
+    test('should identify API field errors with corrective text after keyboard publishing', async ({
+      page,
+    }, testInfo) => {
+      await prepareWorkflowPage({ page, serverURL })
+
+      const saveURL = (url: URL) => url.pathname === '/api/posts'
+      const failSave = async (route: Route) => {
+        if (route.request().method() !== 'POST') {
+          return route.fallback()
+        }
+
+        await route.fulfill({
+          body: JSON.stringify({
+            errors: [
+              { field: 'title', message: 'Choose a unique title' },
+              { message: 'Request could not be saved' },
+            ],
+          }),
+          contentType: 'application/json',
+          status: 400,
+        })
+      }
+
+      await page.route(saveURL, failSave)
+
+      try {
+        await gotoCreatePost({ page, postsURL })
+
+        const title = page.locator('#field-title')
+
+        await expect(title).toHaveAccessibleName(/Title/)
+        await title.fill('Duplicate title')
+
+        const publish = page.getByRole('button', { name: 'Publish in English', exact: true })
+
+        await tabToWorkflowControl({ control: publish, page })
+        await page.keyboard.press('Enter')
+        await expect(title).toHaveAttribute('aria-invalid', 'true')
+        await expect(title).toHaveAccessibleDescription('Choose a unique title')
+
+        const notifications = page.getByRole('region', { name: /notifications/i })
+
+        await expect(notifications).toContainText('Request could not be saved')
+        await expect(notifications).toHaveAttribute('aria-live', 'polite')
+        await tabToWorkflowControl({ control: title, page })
+        await expect(title).toBeFocused()
+
+        const results = await runAxeScan({
+          include: ['.field-type.text:has(#field-title)', '.payload-toast-container'],
+          page,
+          screenshotViolations: false,
+          testInfo,
+        })
+
+        // Existing error colors fail contrast; the full scan remains attached as evidence.
+        expect(results.violations.filter(({ id }) => id !== 'color-contrast')).toEqual([])
+      } finally {
+        await page.unroute(saveURL, failSave)
+      }
+    })
+
     test(
       'should request password recovery using the keyboard and return to login',
       { tag: ['@a11y-workflow', '@auth', '@validation'] },

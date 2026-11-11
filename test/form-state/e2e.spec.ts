@@ -114,6 +114,316 @@ test.describe('Form State', () => {
     await expect(page.locator('#field-title')).toBeEnabled()
   })
 
+  describe('API error responses', () => {
+    test('should show legacy field errors and retain errors for unrendered paths', async () => {
+      const saveURL = (url: URL) => url.pathname === '/api/posts'
+      const failSave = async (route: Route) => {
+        if (route.request().method() !== 'POST') {
+          return route.fallback()
+        }
+
+        await route.fulfill({
+          body: JSON.stringify({
+            errors: [
+              { field: 'title', message: 'Choose a different title' },
+              {
+                data: { errors: [{ message: 'Missing content', path: 'notRendered' }] },
+                message: 'Content could not be saved',
+              },
+            ],
+          }),
+          contentType: 'application/json',
+          status: 400,
+        })
+      }
+
+      await page.route(saveURL, failSave)
+
+      try {
+        await page.goto(postsUrl.create)
+        await waitForFormReady(page)
+        await page.locator('#field-title').fill('Server validation test')
+        await page.locator('#action-save').click()
+
+        await expect(page.locator('#field-title')).toHaveAttribute('aria-invalid', 'true')
+        await expect(page.getByText('Choose a different title', { exact: true })).toBeVisible()
+        await expect(page.getByLabel('Server error paths')).toContainText('notRendered')
+        await expect(page.getByLabel('Server error paths')).toContainText('title')
+        await expect(page.locator('.payload-toast-container')).toContainText(
+          'Content could not be saved',
+        )
+      } finally {
+        await page.unroute(saveURL, failSave)
+      }
+    })
+
+    test('should pass incomplete nested errors to the handler with a localized fallback', async () => {
+      const saveURL = (url: URL) => url.pathname === '/api/posts'
+      const failSave = async (route: Route) => {
+        if (route.request().method() !== 'POST') {
+          return route.fallback()
+        }
+
+        await route.fulfill({
+          body: JSON.stringify({
+            errors: [{ data: { errors: [null, { data: { code: 'parser-test', remaining: 0 } }] } }],
+          }),
+          contentType: 'application/json',
+          status: 400,
+        })
+      }
+
+      await page.route(saveURL, failSave)
+
+      try {
+        await page.goto(postsUrl.create)
+        await waitForFormReady(page)
+        await page.locator('#field-title').fill('Incomplete error test')
+        await page.locator('#action-save').click()
+
+        const handledError = page.getByRole('region', { name: 'Handled API error' })
+
+        await expect(
+          handledError.getByRole('status', { name: 'Handled error message' }),
+        ).toHaveText('An unknown error has occurred.')
+        await expect(handledError.getByLabel('Handled error metadata')).toHaveText(
+          '{"code":"parser-test","remaining":0}',
+        )
+        await expect(page.locator('#field-title')).toBeEnabled()
+      } finally {
+        await page.unroute(saveURL, failSave)
+      }
+    })
+
+    test('should preserve handler metadata and re-evaluate function overrides on retry', async () => {
+      const saveURL = (url: URL) => url.pathname === '/api/posts'
+      const submissions: string[] = []
+      const failFirstSave = async (route: Route) => {
+        if (route.request().method() !== 'POST') {
+          return route.fallback()
+        }
+
+        submissions.push(route.request().postData() || '')
+
+        if (submissions.length > 1) {
+          return route.fallback()
+        }
+
+        await route.fulfill({
+          body: JSON.stringify({
+            errors: [{ data: { code: 'parser-test', remaining: 0 }, message: 'Resolve the quota' }],
+          }),
+          contentType: 'application/json',
+          status: 422,
+        })
+      }
+
+      await page.route(saveURL, failFirstSave)
+
+      try {
+        await page.goto(postsUrl.create)
+        await waitForFormReady(page)
+        await page.locator('#field-title').fill('First title')
+        await page.getByRole('button', { name: 'Save with current title', exact: true }).click()
+
+        const handledError = page.getByRole('region', { name: 'Handled API error' })
+
+        await expect(
+          handledError.getByRole('status', { name: 'Handled error message' }),
+        ).toHaveText('Resolve the quota')
+        await expect(
+          page.locator('.payload-toast-container').getByText('Resolve the quota', { exact: true }),
+        ).toHaveCount(0)
+        await expect(handledError.getByLabel('Handled error metadata')).toHaveText(
+          '{"code":"parser-test","remaining":0}',
+        )
+
+        await page.locator('#field-title').fill('Second title')
+        await handledError.getByRole('button', { name: 'Retry save' }).press('Enter')
+
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+        await expect.poll(() => submissions).toHaveLength(2)
+        await expect.poll(() => submissions[0]).toContain('First title override')
+        await expect.poll(() => submissions[1]).toContain('Second title override')
+        await expect(handledError).toBeHidden()
+      } finally {
+        await page.unroute(saveURL, failFirstSave)
+      }
+    })
+
+    test('should retain direct message precedence over nested field errors', async () => {
+      const saveURL = (url: URL) => url.pathname === '/api/posts'
+      const failSave = async (route: Route) => {
+        if (route.request().method() !== 'POST') {
+          return route.fallback()
+        }
+
+        await route.fulfill({
+          body: JSON.stringify({
+            errors: [{ data: { errors: [{ message: 'Nested field error', path: 'title' }] } }],
+            message: 'Whole request rejected',
+          }),
+          contentType: 'application/json',
+          status: 400,
+        })
+      }
+
+      await page.route(saveURL, failSave)
+
+      try {
+        await page.goto(postsUrl.create)
+        await waitForFormReady(page)
+        await page.locator('#field-title').fill('Direct message test')
+        await page.locator('#action-save').click()
+
+        await expect(page.locator('.payload-toast-container')).toContainText(
+          'Whole request rejected',
+        )
+        await expect(page.locator('#field-title')).not.toHaveAttribute('aria-invalid', 'true')
+        await expect(page.getByLabel('Server error paths')).toBeEmpty()
+      } finally {
+        await page.unroute(saveURL, failSave)
+      }
+    })
+
+    for (const { body, contentType, name, status, message, shouldAbort } of [
+      {
+        body: '',
+        contentType: 'text/plain',
+        message: 'Your request was too large to submit successfully.',
+        name: 'oversized requests',
+        status: 413,
+      },
+      {
+        body: '<html>Proxy failure</html>',
+        contentType: 'text/html',
+        message: 'Internal Server Error',
+        name: 'non-JSON failures',
+        status: 500,
+      },
+      {
+        name: 'network failures',
+        shouldAbort: true,
+      },
+    ]) {
+      test(`should retain error handling and allow retry after ${name}`, async () => {
+        const saveURL = (url: URL) => url.pathname === '/api/posts'
+        const failSave = async (route: Route) => {
+          if (route.request().method() !== 'POST') {
+            return route.fallback()
+          }
+
+          if (shouldAbort) {
+            return route.abort('failed')
+          }
+
+          await route.fulfill({ body, contentType, status })
+        }
+
+        await page.route(saveURL, failSave)
+
+        try {
+          await page.goto(postsUrl.create)
+          await waitForFormReady(page)
+          await page.locator('#field-title').fill('Request failure test')
+          await page.locator('#action-save').click()
+          await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
+
+          if (message) {
+            await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+              message,
+            )
+          }
+
+          await expect(page.locator('#field-title')).toBeEnabled()
+        } finally {
+          await page.unroute(saveURL, failSave)
+        }
+
+        await page.locator('#field-title').fill('Recovered request')
+        await saveDocAndAssert(page)
+      })
+    }
+
+    test('should report malformed JSON and allow a successful retry', async ({
+      page: failurePage,
+    }) => {
+      const saveURL = (url: URL) => url.pathname === '/api/posts'
+      const submissionErrors: string[] = []
+      const pageErrors: string[] = []
+      const failSave = async (route: Route) => {
+        if (route.request().method() !== 'POST') {
+          return route.fallback()
+        }
+
+        await route.fulfill({ body: '{invalid', contentType: 'application/json', status: 500 })
+      }
+
+      failurePage.on('console', (message) => {
+        if (message.type() === 'error' && message.text().startsWith('Error submitting form')) {
+          submissionErrors.push(message.text())
+        }
+      })
+      failurePage.on('pageerror', (error) => pageErrors.push(error.message))
+
+      await failurePage.route(saveURL, failSave)
+
+      try {
+        await failurePage.goto(postsUrl.create)
+        await waitForFormReady(failurePage)
+        await failurePage.locator('#field-title').fill('Malformed JSON test')
+        await failurePage.locator('#action-save').click()
+        await expect(failurePage.locator('.payload-toast-container .toast-error')).toBeVisible()
+        await expect(failurePage.locator('#field-title')).toBeEnabled()
+        await expect.poll(() => submissionErrors).toHaveLength(1)
+        await expect.poll(() => submissionErrors[0]).toContain('SyntaxError')
+      } finally {
+        await failurePage.unroute(saveURL, failSave)
+      }
+
+      await failurePage.locator('#field-title').fill('Recovered JSON request')
+      await saveDocAndAssert(failurePage)
+      await expect.poll(() => pageErrors).toEqual([])
+    })
+
+    test('should retain the current empty-error-array behavior', async () => {
+      const saveURL = (url: URL) => url.pathname === '/api/posts'
+      const failSave = async (route: Route) => {
+        if (route.request().method() !== 'POST') {
+          return route.fallback()
+        }
+
+        await route.fulfill({
+          body: JSON.stringify({ errors: [] }),
+          contentType: 'application/json',
+          status: 400,
+        })
+      }
+
+      await page.route(saveURL, failSave)
+
+      try {
+        await page.goto(postsUrl.create)
+        await waitForFormReady(page)
+        await page.locator('#field-title').fill('Empty error array test')
+
+        const response = page.waitForResponse(
+          (response) =>
+            new URL(response.url()).pathname === '/api/posts' &&
+            response.request().method() === 'POST',
+        )
+
+        await page.locator('#action-save').click()
+        await response
+        await expect(page.locator('#field-title')).toBeEnabled()
+        await expect(page.locator('.payload-toast-container .toast-error')).toHaveCount(0)
+        await expect(page.getByLabel('Server error paths')).toBeEmpty()
+      } finally {
+        await page.unroute(saveURL, failSave)
+      }
+    })
+  })
+
   test('should only validate on submit via the `event` argument', async () => {
     await page.goto(postsUrl.create)
     await waitForFormReady(page)
