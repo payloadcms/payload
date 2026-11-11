@@ -354,6 +354,7 @@ describe('Payload project updates', () => {
     "process.env.ADMIN_ROUTE || '/cms'",
     "process.env.ADMIN_ROUTE as '/cms'",
     "'/../outside'",
+    "'/cms/(private)'",
     JSON.stringify('/..' + String.fromCharCode(92) + 'outside'),
   ])('should reject an unresolved or unsafe admin route before updating: %s', async (admin) => {
     writeProjectPackage(projectDir)
@@ -390,6 +391,39 @@ describe('Payload project updates', () => {
       expect(fse.existsSync(path.join(projectDir, 'app/(payload)'))).toBe(false)
     },
   )
+
+  it('should discover the admin route in the configured TypeScript rootDir', async () => {
+    writeProjectPackage(projectDir)
+    fse.outputJsonSync(path.join(projectDir, 'tsconfig.json'), {
+      compilerOptions: { rootDir: 'src/app' },
+    })
+    fse.outputFileSync(
+      path.join(projectDir, 'src/app/payload.config.ts'),
+      "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: '/cms' } })",
+    )
+
+    await updatePayloadInProject(nextDetails({ projectDir, appDir: 'app' }))
+
+    expect(
+      fse.existsSync(path.join(projectDir, 'app/(payload)/cms/[[...segments]]/page.tsx')),
+    ).toBe(true)
+    expect(fse.existsSync(path.join(projectDir, 'app/(payload)/admin'))).toBe(false)
+  })
+
+  it('should reject custom import-map files before installation or wrapper changes', async () => {
+    writeProjectPackage(projectDir)
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.ts'),
+      "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: '/cms' }, admin: { importMap: { importMapFile: './custom/importMap.js' } } })",
+    )
+
+    await expect(
+      updatePayloadInProject(nextDetails({ projectDir, appDir: 'app' })),
+    ).rejects.toThrow('admin.importMap.importMapFile')
+
+    expect(mocks.installPackages).not.toHaveBeenCalled()
+    expect(fse.existsSync(path.join(projectDir, 'app/(payload)'))).toBe(false)
+  })
 
   it('should refresh /admin when the alias points to a config without routes', async () => {
     writeProjectPackage(projectDir)
