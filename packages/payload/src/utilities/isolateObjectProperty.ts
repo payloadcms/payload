@@ -21,7 +21,18 @@ export function isolateObjectProperty<T extends object>(object: T, key: (keyof T
         return Reflect.get(delegate, p, receiver)
       }
       // Use target as receiver to preserve private field access (e.g., Request#headers in Node 24+)
-      return Reflect.get(target, p, target)
+      const value = Reflect.get(target, p, target)
+
+      if (
+        typeof value === 'function' &&
+        typeof Request !== 'undefined' &&
+        target instanceof Request &&
+        value === Reflect.get(Request.prototype, p, target)
+      ) {
+        return value.bind(target)
+      }
+
+      return value
     },
     has(target, p) {
       return Reflect.has(keys.includes(p as keyof T) ? delegate : target, p)

@@ -1,6 +1,6 @@
-import { expect, test } from 'vitest'
+import { describe, expect, it, test } from 'vitest'
 
-import { rewriteBranchIDs, rewriteBranchVersionParents } from './branchIDs.js'
+import { projectBranchIDs, rewriteBranchIDs, rewriteBranchVersionParents } from './branchIDs.js'
 
 test.each([true, false])(
   'should AND identity with sibling OR regardless of key order (%s)',
@@ -51,3 +51,39 @@ test.each(['not_equals', 'not_in'])(
     })
   },
 )
+
+describe('projectBranchIDs', () => {
+  it('should replace a shadow row id with its canonical id', () => {
+    const docs = [{ _branchDocID: 7, id: 456, title: 'shadow' }]
+
+    expect(projectBranchIDs(docs)[0]!.id).toBe(7)
+  })
+
+  it('should unwrap a relationship-shaped canonical id', () => {
+    const docs = [{ _branchDocID: { relationTo: 'posts', value: 7 }, id: 456 }]
+
+    expect(projectBranchIDs(docs)[0]!.id).toBe(7)
+  })
+
+  it('should leave main rows and branch-created rows alone', () => {
+    const docs = [{ _branchDocID: null, id: 1 }, { id: 2 }]
+
+    expect(projectBranchIDs(docs).map((doc) => doc.id)).toEqual([1, 2])
+  })
+})
+
+test('should preserve non-identity filters and undefined input', () => {
+  expect(rewriteBranchIDs(undefined)).toBeUndefined()
+  expect(rewriteBranchIDs({ title: { equals: 'hi' } })).toEqual({ title: { equals: 'hi' } })
+})
+
+test('should retain nested AND and OR filters while rewriting identity', () => {
+  expect(
+    rewriteBranchIDs({ and: [{ title: { equals: 'x' } }, { or: [{ id: { in: [1, 2] } }] }] }),
+  ).toMatchObject({
+    and: [
+      { title: { equals: 'x' } },
+      { or: [{ and: [{ or: [{ _branchDocID: { in: [1, 2] } }, {}] }] }] },
+    ],
+  })
+})

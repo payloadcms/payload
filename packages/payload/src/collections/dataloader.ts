@@ -62,6 +62,7 @@ const batchAndLoadDocs =
         draft,
         select,
         populate,
+        branch,
       ] = JSON.parse(key)
 
       const batchKeyArray = [
@@ -76,6 +77,7 @@ const batchAndLoadDocs =
         draft,
         select,
         populate,
+        branch,
       ]
 
       const batchKey = JSON.stringify(batchKeyArray)
@@ -103,6 +105,7 @@ const batchAndLoadDocs =
         draft,
         select,
         populate,
+        branch,
       ] = JSON.parse(batchKey)
 
       req.transactionID = transactionID
@@ -112,6 +115,7 @@ const batchAndLoadDocs =
 
       const result = await payload.find({
         collection,
+        ...(branch === null ? {} : { branch }),
         currentDepth,
         depth,
         disableErrors: true,
@@ -136,6 +140,7 @@ const batchAndLoadDocs =
       // Inject doc within docs array if index exists
       for (const doc of result.docs) {
         const docKey = createDataloaderCacheKey({
+          branch,
           collectionSlug: collection,
           currentDepth,
           depth,
@@ -182,6 +187,7 @@ export const getDataLoader = (req: PayloadRequest) => {
 }
 
 const createFindDataloaderCacheKey = ({
+  branch,
   collection,
   currentDepth,
   depth,
@@ -201,6 +207,7 @@ const createFindDataloaderCacheKey = ({
   where,
 }: FindOptions<string, SelectType>): string =>
   JSON.stringify([
+    branch ?? req?.branch,
     collection,
     currentDepth,
     depth,
@@ -224,6 +231,15 @@ const createFindDataloaderCacheKey = ({
   ])
 
 type CreateCacheKeyArgs = {
+  /**
+   * The branch the populating read is scoped to.
+   *
+   * Part of the key because a document ID means a different document on a different
+   * branch. Without it, one request that reads across branches — a diff view, or two
+   * GraphQL fields naming different branches — would serve the first branch's copy of a
+   * populated relationship to the second.
+   */
+  branch?: false | string
   collectionSlug: string
   currentDepth: number
   depth: number
@@ -238,6 +254,7 @@ type CreateCacheKeyArgs = {
   transactionID: number | Promise<number | string> | string
 }
 export const createDataloaderCacheKey = ({
+  branch,
   collectionSlug,
   currentDepth,
   depth,
@@ -264,4 +281,6 @@ export const createDataloaderCacheKey = ({
     draft,
     select,
     populate,
+    // Appended rather than inserted: the batch function reads this array positionally.
+    branch ?? null,
   ])

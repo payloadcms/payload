@@ -136,7 +136,7 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
       : args.req
 
   if (queryReq && queryReq !== args.req) {
-    resetBranchState(queryReq as PayloadRequest)
+    resetBranchState({ req: queryReq as PayloadRequest })
   }
 
   const {
