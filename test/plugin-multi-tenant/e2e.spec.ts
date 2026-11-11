@@ -83,7 +83,7 @@ test.describe('Multi Tenant', () => {
     await page.goto(menuItemsURL.list)
     await openNav(page)
 
-    await expect(page.getByText('Custom selector', { exact: true })).toBeVisible()
+    await expect(page.getByText('Custom', { exact: true })).toBeVisible()
     await expect(page.locator('.tenant-selector')).toHaveCount(1)
 
     await setTenantFilter({ page, tenant: 'Blue Dog' })
