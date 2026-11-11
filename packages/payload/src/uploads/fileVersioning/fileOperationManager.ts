@@ -2,9 +2,20 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 
 import type { PayloadRequest } from '../../types/index.js'
+import type { FileIdentity } from '../fileIdentity.js'
 import type { FileToSave } from '../types.js'
 
 import { hasActiveTransaction } from '../../utilities/initTransaction.js'
+import {
+  getFileHandleIdentity,
+  getFileIdentity,
+  hasRenameStableFileIdentity,
+} from '../fileIdentity.js'
+import {
+  discardQuarantinedFile,
+  quarantineFile,
+  restoreQuarantinedFile,
+} from '../fileQuarantine.js'
 
 export type StagedObject = {
   key: string
@@ -204,20 +215,28 @@ export const stageLocalUploadFiles = async ({
 
     if ('sourcePath' in file) {
       await fs.copyFile(file.sourcePath, destination, fs.constants.COPYFILE_EXCL)
+      const fileIdentity = await getFileIdentity({ filePath: destination })
+
       trackStagedObject({
         key,
-        remove: () => fs.rm(destination, { force: true }),
+        remove: () => removeUnchangedLocalFile({ fileIdentity, filePath: destination }),
       })
     } else {
       const handle = await fs.open(destination, 'wx')
+      let fileIdentity = await getFileHandleIdentity({ fileHandle: handle })
+
       trackStagedObject({
         key,
-        remove: () => fs.rm(destination, { force: true }),
+        remove: () => removeUnchangedLocalFile({ fileIdentity, filePath: destination }),
       })
       try {
         await handle.writeFile(file.buffer)
       } finally {
-        await handle.close()
+        try {
+          fileIdentity = await getFileHandleIdentity({ fileHandle: handle })
+        } finally {
+          await handle.close()
+        }
       }
     }
   }
@@ -380,4 +399,32 @@ const compensate = async ({
       })
     }
   }
+}
+
+/** Remove only the object staged by this attempt, preserving concurrent replacements. */
+const removeUnchangedLocalFile = async ({
+  fileIdentity,
+  filePath,
+}: {
+  fileIdentity: FileIdentity | undefined
+  filePath: string
+}): Promise<void> => {
+  if (!fileIdentity) {
+    return
+  }
+
+  const quarantinedFile = await quarantineFile({ filePath })
+
+  if (!quarantinedFile) {
+    return
+  }
+
+  if (
+    !hasRenameStableFileIdentity({ actual: quarantinedFile.fileIdentity, expected: fileIdentity })
+  ) {
+    await restoreQuarantinedFile({ quarantinedFile, targetFilePath: filePath })
+    return
+  }
+
+  await discardQuarantinedFile({ quarantinedFile })
 }
