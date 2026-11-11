@@ -185,15 +185,27 @@ const DatePicker: React.FC<Props> = (props) => {
     }
     rejectedInputValueRef.current = undefined
 
-    if (newDate instanceof Date && ['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
-      const tzOffset = incomingDate.getTimezoneOffset() / 60
-      newDate.setHours(12 - tzOffset, 0)
+    const normalizeSelectedDate = (dateValue: unknown) => {
+      if (!(dateValue instanceof Date)) {
+        return
+      }
+
+      if (['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
+        const tzOffset = dateValue.getTimezoneOffset() / 60
+        dateValue.setHours(12 - tzOffset, 0)
+      }
+
+      if (!dateFormat.includes('SSS')) {
+        // Unless the dateFormat includes milliseconds, set milliseconds to 0
+        // This is to ensure that the timestamp is consistent with the displayFormat
+        dateValue.setMilliseconds(0)
+      }
     }
 
-    if (newDate instanceof Date && !dateFormat.includes('SSS')) {
-      // Unless the dateFormat includes milliseconds, set milliseconds to 0
-      // This is to ensure that the timestamp is consistent with the displayFormat
-      newDate.setMilliseconds(0)
+    if (Array.isArray(newDate)) {
+      newDate.forEach(normalizeSelectedDate)
+    } else {
+      normalizeSelectedDate(newDate)
     }
 
     if (typeof onChangeFromProps === 'function') {

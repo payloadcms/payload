@@ -11,12 +11,12 @@ export const hasAmbiguousYearInput = ({
   inputValue,
   locale,
 }: {
-  date: Date | null
+  date: Date | null | unknown
   dateFormat: string | string[]
   inputValue?: string
   locale?: DatePickerProps['locale']
 }): boolean => {
-  if (!date || date.getFullYear() >= 100 || !inputValue) {
+  if (!(date instanceof Date) || date.getFullYear() >= 100 || !inputValue) {
     return false
   }
 
