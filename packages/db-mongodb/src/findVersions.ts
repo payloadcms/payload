@@ -1,12 +1,22 @@
 import type { PaginateOptions, QueryOptions } from 'mongoose'
 import type { FindVersions } from 'payload'
 
-import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
+import {
+  buildVersionCollectionFields,
+  flattenWhereToOperators,
+  projectBranchVersionParents,
+  resolveBranchReadState,
+  resolveBranchVersionHistoryQuery,
+  rewriteBranchVersionParents,
+  withBranchVersionSelect,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildBranchVisibilityStages } from './queries/buildBranchVisibility.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
+import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
@@ -15,6 +25,7 @@ import { transform } from './utilities/transform.js'
 export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,
   {
+    branch,
     collection: collectionSlug,
     limit = 0,
     locale,
@@ -31,6 +42,19 @@ export const findVersions: FindVersions = async function findVersions(
     collectionSlug,
     versions: true,
   })
+  const branchReadState = resolveBranchReadState({ branch, collectionSlug, req })
+
+  where = branchReadState.useBranching
+    ? (rewriteBranchVersionParents(where) ?? {})
+    : ((await resolveBranchVersionHistoryQuery({ branch, collectionSlug, req, where })) ?? {})
+  const branchVisibility = branchReadState.useBranching
+    ? buildBranchVisibilityStages({
+        adapter: this,
+        branch: branchReadState.branch,
+        collectionSlug,
+        mode: 'history',
+      })
+    : []
 
   let hasNearConstraint = false
 
@@ -55,8 +79,10 @@ export const findVersions: FindVersions = async function findVersions(
 
   const query = await buildQuery({
     adapter: this,
+    branch,
     fields,
     locale,
+    req,
     where,
   })
 
@@ -70,7 +96,8 @@ export const findVersions: FindVersions = async function findVersions(
   }
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
-  const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
+  const useEstimatedCount =
+    !branchVisibility.length && (hasNearConstraint || !query || Object.keys(query).length === 0)
   const paginationOptions: PaginateOptions = {
     lean: true,
     leanWithId: true,
@@ -81,7 +108,7 @@ export const findVersions: FindVersions = async function findVersions(
     projection: buildProjectionFromSelect({
       adapter: this,
       fields,
-      select,
+      select: withBranchVersionSelect({ branch, collectionSlug, req, select }),
     }),
     sort,
     useEstimatedCount,
@@ -139,7 +166,22 @@ export const findVersions: FindVersions = async function findVersions(
     }
   }
 
-  const result = await Model.paginate(query, paginationOptions)
+  const result = branchVisibility.length
+    ? await aggregatePaginate({
+        adapter: this,
+        branchVisibility,
+        collation: paginationOptions.collation,
+        limit: paginationOptions.limit,
+        Model,
+        page: paginationOptions.page,
+        pagination: paginationOptions.pagination,
+        projection: paginationOptions.projection,
+        query,
+        session: paginationOptions.options?.session ?? undefined,
+        sort: paginationOptions.sort as object,
+        useEstimatedCount: false,
+      })
+    : await Model.paginate(query, paginationOptions)
 
   transform({
     adapter: this,
@@ -147,6 +189,12 @@ export const findVersions: FindVersions = async function findVersions(
     fields: buildVersionCollectionFields(this.payload.config, collectionConfig),
     operation: 'read',
   })
+
+  if (branchReadState.useBranching) {
+    // A branch version hangs off the shadow row, so its `parent` is that row rather
+    // than the document the history belongs to.
+    projectBranchVersionParents(result.docs as Record<string, unknown>[])
+  }
 
   return result
 }

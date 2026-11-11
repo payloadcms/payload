@@ -1,3 +1,4 @@
+export { migrateBranching } from '../predefinedMigrations/migrateBranching.js'
 export {
   localizeStatus,
   migrateLocalizeStatus,
