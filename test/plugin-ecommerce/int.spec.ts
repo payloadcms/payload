@@ -566,6 +566,44 @@ test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect(after.updatedAt).toBe(variant.updatedAt)
     })
+
+    test('renaming a product does not change the publish status of its variants', async ({
+      payload,
+    }) => {
+      const product = await createProduct(payload, 'Beanie')
+
+      const draftVariant = await payload.create({
+        collection: 'variants',
+        data: { product: product.id, options: [smallID], _status: 'draft' },
+        overrideAccess: true,
+      })
+      const publishedVariant = await payload.create({
+        collection: 'variants',
+        data: { product: product.id, options: [mediumID], _status: 'published' },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: product.id,
+        data: { title: 'Wool Beanie' },
+        overrideAccess: true,
+      })
+
+      const draftAfter = await payload.findByID({
+        collection: 'variants',
+        id: draftVariant.id,
+        overrideAccess: true,
+      })
+      const publishedAfter = await payload.findByID({
+        collection: 'variants',
+        id: publishedVariant.id,
+        overrideAccess: true,
+      })
+
+      expect(draftAfter._status).toBe('draft')
+      expect(publishedAfter._status).toBe('published')
+    })
   })
 
   test.describe('cart item endpoints', () => {
