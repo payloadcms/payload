@@ -42,6 +42,8 @@ export function HierarchyListView(props: ListViewClientProps) {
     collectionSlug,
     currentHierarchyItem,
     Description,
+    disableBulkDelete,
+    disableBulkEdit,
     documentLayout,
     hasCreatePermission: hasCreatePermissionFromProps,
     hierarchyData,
@@ -364,6 +366,8 @@ export function HierarchyListView(props: ListViewClientProps) {
                   ) : null}
                 </React.Fragment>
               }
+              disableBulkDelete={disableBulkDelete}
+              disableBulkEdit={disableBulkEdit}
               hasUpdatePermission={currentHierarchyItem?.hasUpdatePermission}
               HierarchyIcon={HierarchyIcon}
               i18n={i18n}
