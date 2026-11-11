@@ -21,6 +21,8 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { transformForWrite } from '../../packages/drizzle/src/transform/write/index.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { traverseFields as traverseDrizzleFields } from '../../packages/drizzle/src/transform/write/traverseFields.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
@@ -581,11 +583,27 @@ describe('Auth', () => {
 
       try {
         traverseFields({ fields: [], fillEmpty: false, ref: sharedData })
-        transformForWrite({
+        const rowToInsert = transformForWrite({
           adapter: payload.db as DrizzleAdapter,
           data: drizzleData,
           fields: [],
           tableName: 'session_users',
+        })
+
+        expect(drizzleData).toEqual(createConstrainedData())
+
+        // Inspect dotted-key expansion directly because transformForWrite preserves its input.
+        traverseDrizzleFields({
+          ...rowToInsert,
+          adapter: payload.db as DrizzleAdapter,
+          baseTableName: 'session_users',
+          columnPrefix: '',
+          data: drizzleData,
+          fieldPrefix: '',
+          fields: [],
+          parentIsLocalized: false,
+          parentTableName: 'session_users',
+          path: '',
         })
 
         const response = await restClient.POST('/session-users/first-register', {
