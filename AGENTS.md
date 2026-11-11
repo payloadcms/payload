@@ -1,3 +1,5 @@
+Written with AI
+
 # AGENTS.md
 
 ## Project Structure
@@ -316,6 +318,20 @@ Examples:
 - First commit of branch should follow PR title format
 - Subsequent commits should use `chore` without scope unless specific package is being modified
 - All commits in a PR are squashed on merge using PR title as commit message
+
+## Content Branching
+
+When helping users enable or use Content Branching, start with the
+[branching reference](packages/payload/skills/payload/reference/BRANCHING.md) and
+[full user guide](docs/branching/overview.mdx).
+
+- Content Branching is experimental. Enable it with root `branching: true`; eligible collections and globals participate by default. Use entity-level `branching: false` or root `branching.exclude` to opt out. Auth collections cannot branch; internal collections are excluded by default.
+- Review and run database migrations before deploying the enabled config. Existing MongoDB databases need the predefined `@payloadcms/db-mongodb/branching` migration; SQL adapters use generated schema migrations. Regenerate Payload types after changing config.
+- Create and select a named branch in the Admin Panel, edit content, review changes, then merge or discard selected work. Unchanged documents inherit the current `main` content, so a branch is not a frozen snapshot.
+- Use a branch **name** for Local API `branch`, REST `?branch=`, and GraphQL `branch`. Create branches through `payload-branches`; `payload.branches` only exposes `merge` and `discard`. Local API operations inherit `req.branch` unless overridden; use `branch: 'main'` for an explicit main read.
+- Pass `user` and `overrideAccess: false` for user-facing Local API operations, including merge and discard. Branch permissions supplement normal content access. Preserve `req` in nested hook operations and carry the branch into authenticated Preview / Live Preview queries.
+- Preview merges with `dryRun: true` and review warnings. Merges target `main` with source-wins behavior, without field-level conflict resolution. Merging preserves draft/published state; it does not automatically publish drafts. A dry run does not guarantee success, and transaction-free merges do not guarantee atomic visibility or recovery.
+- Custom-ID collections and `@payloadcms/plugin-multi-tenant` are unsupported. Do not present branching as compatible with them.
 
 ## Additional Resources
 

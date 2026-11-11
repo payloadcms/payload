@@ -1,3 +1,5 @@
+Written with AI
+
 # Payload Adapters Reference
 
 Complete reference for database, storage, and email adapters.
@@ -46,6 +48,27 @@ export default buildConfig({
   }),
 })
 ```
+
+## Content Branching migrations
+
+Enabling experimental Content Branching changes content, global, version, and unique-index storage.
+Review and run migrations before deploying application code that expects the new schema:
+
+```sh
+# Postgres / SQLite: generate the normal schema migration after enabling branching
+pnpm payload migrate:create enable-branching
+
+# Existing MongoDB database: generate the predefined backfill and index migration
+pnpm payload migrate:create enable-branching --file @payloadcms/db-mongodb/branching
+
+# Review the migration, then apply it
+pnpm payload migrate
+```
+
+MongoDB schema defaults do not backfill existing documents. Unique values can be reused across
+branches, but merges must still satisfy uniqueness on `main`. A merge without a transaction can
+leave earlier writes visible after a later failure; do not promise atomic publication or guaranteed
+recovery. See [Content Branching](BRANCHING.md) for setup and usage.
 
 ## Transactions
 
