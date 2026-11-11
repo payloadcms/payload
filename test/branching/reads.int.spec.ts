@@ -621,5 +621,20 @@ test.suite('Branching: reads', { config: './config.ts', resetBetweenTests: false
         }),
       ).rejects.toThrow()
     })
+
+    test('should enforce branch access for Local API global reads', async () => {
+      await expect(
+        payload.findGlobal({
+          slug: headerGlobalSlug,
+          branch: privateBranch,
+          overrideAccess: false,
+          user: {
+            id: 'restricted-user',
+            collection: 'users',
+            email: 'restricted@example.com',
+          } as never,
+        }),
+      ).rejects.toThrow()
+    })
   })
 })

@@ -5,6 +5,7 @@ import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { assertBranchReadable } from '../../branching/assertBranchReadable.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
@@ -50,6 +51,10 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     }
 
     throw new NotFound(req.t)
+  }
+
+  if (!overrideAccess) {
+    await assertBranchReadable({ globalSlug: globalConfig.slug, req })
   }
 
   // /////////////////////////////////////

@@ -1,5 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
+import { isDeepStrictEqual } from 'node:util'
+
 import type { FindOptions } from '../../collections/operations/local/find.js'
 import type { Args as BeforeChangeArgs } from '../../fields/hooks/beforeChange/index.js'
 import type { GlobalSlug, JsonObject } from '../../index.js'
@@ -18,6 +20,14 @@ import type {
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
+import { assertBranchReadable } from '../../branching/assertBranchReadable.js'
+import { recordBranchGlobalChange, resolveBranchGlobalWrite } from '../../branching/globals.js'
+import {
+  assertBranchMergeValidationWriteAllowed,
+  runBranchMergeWriteGuard,
+} from '../../branching/mergeWriteGuard.js'
+import { branchField, MAIN_BRANCH } from '../../branching/types.js'
+import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, ValidationError } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -39,6 +49,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolvePublishAllLocales } from '../../utilities/resolvePublishAllLocales.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { markTransactionWrite } from '../../utilities/transactionMutationTracker.js'
 import {
   buildAllLocalesPublicationHookDoc,
   canApplyAllLocalesStatusChange,
@@ -80,7 +91,11 @@ export const updateOperation = async <
   const req = args.req
   const initialGlobalConfig = args.globalConfig
 
-  assertNoValidationWrite(req)
+  assertBranchMergeValidationWriteAllowed({ req })
+
+  if (!args.overrideAccess) {
+    await assertBranchReadable({ globalSlug: initialGlobalConfig.slug, req })
+  }
 
   validateAllLocalesPublicationFlags({
     publishAllLocales: args.publishAllLocales,
@@ -105,9 +120,10 @@ export const updateOperation = async <
     data: args.data,
     status: initialAllLocalesPublicationStatus,
   })
+  let shouldCommit = false
 
   try {
-    const shouldCommit = !args.disableTransaction && (await initTransaction(req))
+    shouldCommit = !args.disableTransaction && (await initTransaction(req))
 
     // /////////////////////////////////////
     // beforeOperation - Global
@@ -185,9 +201,8 @@ export const updateOperation = async <
       data._status = 'draft'
     }
 
-    const submittedTopLevelFieldNames = unpublishAllLocales
-      ? getTopLevelFieldNames(data)
-      : undefined
+    const incomingTopLevelFieldNames = getTopLevelFieldNames(data)
+    const submittedTopLevelFieldNames = unpublishAllLocales ? incomingTopLevelFieldNames : undefined
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -209,6 +224,14 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     const query: Where = overrideAccess ? undefined! : (accessResults as Where)
+    const writeBranch = resolveBranchGlobalWrite({
+      globalSlug: slug,
+      req,
+    })
+    const mainStorageQuery =
+      !writeBranch && config?.branching?.branchableGlobals.has(slug)
+        ? { [branchField]: { equals: MAIN_BRANCH } }
+        : undefined
 
     // /////////////////////////////////////
     // 2. Retrieve document
@@ -219,6 +242,7 @@ export const updateOperation = async <
       locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
       payload,
       req,
+      storageWhere: mainStorageQuery,
       where: query,
     })
     const { global, globalExists, latestVersionExists } = globalVersionResult || {}
@@ -242,7 +266,7 @@ export const updateOperation = async <
         slug,
         locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
         req,
-        where: accessResults,
+        where: mainStorageQuery ? combineQueries(accessResults, mainStorageQuery) : accessResults,
       })
 
       if (!existingGlobal || Object.keys(existingGlobal).length === 0) {
@@ -283,6 +307,7 @@ export const updateOperation = async <
       lockErrorMessage: `Global with slug "${slug}" is currently locked by another user and cannot be updated.`,
       overrideLock,
       req,
+      shouldDeleteLock: false,
     })
 
     // /////////////////////////////////////
@@ -445,7 +470,7 @@ export const updateOperation = async <
             slug: globalConfig.slug,
             locale: 'all',
             req,
-            where: query,
+            where: mainStorageQuery === undefined ? query : combineQueries(query, mainStorageQuery),
           })
 
           localizedPublishData = buildLocalizedPublishData({
@@ -498,6 +523,20 @@ export const updateOperation = async <
 
     const dataToUpdate: JsonObject = { ...(localizedPublishData ?? result) }
 
+    await runBranchMergeWriteGuard({ data: dataToUpdate, globalSlug: slug, req })
+
+    if (localizedPublishData) {
+      await runBranchMergeWriteGuard({ data: result, globalSlug: slug, req })
+    }
+
+    const branchConflictFieldNames = new Set(incomingTopLevelFieldNames)
+
+    for (const [fieldName, value] of Object.entries(dataToUpdate)) {
+      if (!isDeepStrictEqual(value, globalJSON[fieldName])) {
+        branchConflictFieldNames.add(fieldName)
+      }
+    }
+
     // /////////////////////////////////////
     // Update
     // /////////////////////////////////////
@@ -512,8 +551,14 @@ export const updateOperation = async <
       }),
     })
 
-    let resultWithLocales: JsonObject = result
+    await checkDocumentLockStatus({
+      globalSlug: slug,
+      lockErrorMessage: `Global with slug "${slug}" is currently locked by another user and cannot be updated.`,
+      overrideLock,
+      req,
+    })
 
+    let resultWithLocales: JsonObject = result
     if (!isSavingDraft) {
       const now = new Date().toISOString()
       // Ensure global has createdAt
@@ -524,9 +569,19 @@ export const updateOperation = async <
       // Ensure updatedAt date is always updated
       dataToUpdate.updatedAt = now
 
-      if (globalExists) {
+      const branchConflictData = deepCopyObjectSimple(
+        Object.fromEntries(
+          [...branchConflictFieldNames]
+            .filter((fieldName) => Object.hasOwn(dataToUpdate, fieldName))
+            .map((fieldName) => [fieldName, dataToUpdate[fieldName]]),
+        ),
+      )
+      branchConflictData.updatedAt = now
+
+      if (globalExists || writeBranch) {
         resultWithLocales = await payload.db.updateGlobal({
           slug,
+          branchConflictData,
           data: dataToUpdate,
           req,
           select,
@@ -538,6 +593,7 @@ export const updateOperation = async <
           req,
         })
       }
+      markTransactionWrite({ req })
 
       resultWithLocales.updatedAt = now
 
@@ -555,6 +611,10 @@ export const updateOperation = async <
     // Create version
     // /////////////////////////////////////
     if (globalConfig.versions) {
+      if (config?.branching?.branchableGlobals.has(slug)) {
+        resultWithLocales[branchField] = writeBranch ?? MAIN_BRANCH
+      }
+
       const { globalType } = resultWithLocales
       resultWithLocales = await saveVersion({
         autosave,
@@ -567,11 +627,16 @@ export const updateOperation = async <
         select,
         unpublish: shouldUnpublishAllLocales,
       })
+      markTransactionWrite({ req })
 
       resultWithLocales = {
         ...resultWithLocales,
         globalType,
       }
+    }
+
+    if (writeBranch) {
+      await recordBranchGlobalChange({ branch: writeBranch, globalSlug: slug, req })
     }
 
     // /////////////////////////////////////
@@ -669,7 +734,9 @@ export const updateOperation = async <
 
     return result as TransformGlobalWithSelect<TSlug, TSelect>
   } catch (error: unknown) {
-    await killTransaction(req)
+    if (shouldCommit) {
+      await killTransaction(req)
+    }
     throw error
   }
 }

@@ -25,9 +25,17 @@ import {
   type User,
 } from '../../../index.js'
 import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
+import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { updateOperation } from '../update.js'
 
+const MAX_TRANSIENT_TRANSACTION_ATTEMPTS = 10
+
 type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+  /**
+   * Read and write against a specific content branch instead of resolving one
+   * from the request. `false` bypasses branching entirely.
+   */
+  branch?: false | string
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -127,22 +135,85 @@ export async function updateGlobalLocal<
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
 
-  return updateOperation<TSlug, TSelect>({
-    slug: globalSlug,
-    data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
-    depth,
-    draft,
-    globalConfig,
-    overrideAccess,
-    overrideLock,
-    populate,
-    publishAllLocales,
-    req: await createPayloadRequest({
-      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
-      payload,
-    }),
-    select,
-    showHiddenFields,
-    unpublishAllLocales,
+  const hasIncomingTransaction = Boolean(options.req?.transactionID)
+
+  for (let attempt = 0; attempt < MAX_TRANSIENT_TRANSACTION_ATTEMPTS; attempt++) {
+    try {
+      return await updateOperation<TSlug, TSelect>({
+        slug: globalSlug,
+        // Each attempt starts from the caller's input because field and global hooks may mutate data.
+        data: deepCopyObjectSimple(data),
+        depth,
+        draft,
+        globalConfig,
+        overrideAccess,
+        overrideLock,
+        populate,
+        publishAllLocales,
+        req: await createGlobalUpdateRequest({ hasIncomingTransaction, options, payload }),
+        select,
+        showHiddenFields,
+        unpublishAllLocales,
+      })
+    } catch (error) {
+      if (
+        hasIncomingTransaction ||
+        !isTransientTransactionConflict(error) ||
+        attempt === MAX_TRANSIENT_TRANSACTION_ATTEMPTS - 1
+      ) {
+        throw error
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 20))
+    }
+  }
+
+  throw new Error('Global update transaction retry limit reached.')
+}
+
+const createGlobalUpdateRequest = async <
+  TSlug extends GlobalSlug,
+  TSelect extends SelectFromGlobalSlug<TSlug>,
+>({
+  hasIncomingTransaction,
+  options,
+  payload,
+}: {
+  hasIncomingTransaction: boolean
+  options: Options<TSlug, TSelect>
+  payload: Payload
+}): Promise<PayloadRequest> => {
+  let req = options.req
+
+  if (req && !hasIncomingTransaction) {
+    req = isolateObjectProperty(req, ['branch', 'context', 'payloadDataLoader', 'transactionID'])
+    req.context = { ...options.req?.context }
+    delete req.payloadDataLoader
+    delete req.transactionID
+  }
+
+  return createPayloadRequest({
+    ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+    payload,
+    req,
   })
+}
+
+const isTransientTransactionConflict = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') {
+    return false
+  }
+
+  const transactionError = error as {
+    code?: unknown
+    codeName?: unknown
+    errorLabels?: unknown
+  }
+
+  return (
+    transactionError.code === 112 ||
+    transactionError.codeName === 'WriteConflict' ||
+    (Array.isArray(transactionError.errorLabels) &&
+      transactionError.errorLabels.includes('TransientTransactionError'))
+  )
 }
