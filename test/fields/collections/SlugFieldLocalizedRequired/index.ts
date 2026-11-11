@@ -2,6 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import {
   slugLocalizedRequiredGroupSlug,
+  slugLocalizedRequiredNestedGroupSlug,
+  slugLocalizedRequiredNestedTabSlug,
   slugLocalizedRequiredSiblingSlug,
   slugLocalizedRequiredSlug,
 } from '../../slugs.js'
@@ -38,6 +40,39 @@ export const SlugFieldLocalizedRequiredSiblings: CollectionConfig[] = [
         fields: [{ name: 'body', type: 'text', required: true, localized: true }],
       },
       { name: 'slug', type: 'slug', localized: true, useAsSlug: 'title' },
+    ],
+    versions: false,
+  },
+]
+
+export const SlugFieldLocalizedRequiredNested: CollectionConfig[] = [
+  {
+    slug: slugLocalizedRequiredNestedGroupSlug,
+    fields: [
+      { name: 'title', type: 'text', required: true },
+      {
+        name: 'content',
+        type: 'group',
+        fields: [{ name: 'slug', type: 'slug', localized: true, required: true }],
+      },
+      { name: 'slug', type: 'slug', localized: true, required: true, useAsSlug: 'title' },
+    ],
+    versions: false,
+  },
+  {
+    slug: slugLocalizedRequiredNestedTabSlug,
+    fields: [
+      { name: 'title', type: 'text', required: true },
+      {
+        type: 'tabs',
+        tabs: [
+          {
+            name: 'content',
+            fields: [{ name: 'slug', type: 'slug', localized: true, required: true }],
+          },
+        ],
+      },
+      { name: 'slug', type: 'slug', localized: true, required: true, useAsSlug: 'title' },
     ],
     versions: false,
   },

@@ -34,6 +34,7 @@ import { SlugFieldAccess } from './collections/SlugFieldAccess/index.js'
 import { SlugFieldAutosave } from './collections/SlugFieldAutosave/index.js'
 import {
   SlugFieldLocalizedRequired,
+  SlugFieldLocalizedRequiredNested,
   SlugFieldLocalizedRequiredSiblings,
 } from './collections/SlugFieldLocalizedRequired/index.js'
 import TabsFields from './collections/Tabs/index.js'
@@ -93,6 +94,7 @@ export const collections: CollectionConfig[] = [
   SlugFieldAutosave,
   SlugFieldLocalizedRequired,
   ...SlugFieldLocalizedRequiredSiblings,
+  ...SlugFieldLocalizedRequiredNested,
   TabsFields2,
   TabsFields,
   TextFields,
