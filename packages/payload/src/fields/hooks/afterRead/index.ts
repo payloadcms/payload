@@ -29,6 +29,14 @@ export type AfterReadArgs<T extends JsonObject> = {
   req: PayloadRequest
   select?: SelectType
   showHiddenFields: boolean
+  /** @internal Skip field read access while retaining output-shape normalization. */
+  triggerAccessControl?: boolean
+  /** @internal Skip field defaults while retaining stored output shaping. */
+  triggerDefaultValue?: boolean
+  /** @internal Skip field hooks while retaining output-shape normalization. */
+  triggerHooks?: boolean
+  /** @internal Skip relationship and virtual-field population while retaining output shaping. */
+  triggerPopulation?: boolean
 }
 
 /**
@@ -59,6 +67,10 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     req,
     select,
     showHiddenFields,
+    triggerAccessControl,
+    triggerDefaultValue,
+    triggerHooks,
+    triggerPopulation,
   } = args
 
   const fieldPromises: Promise<void>[] = []
@@ -101,6 +113,10 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     selectMode: select ? getSelectMode(select) : undefined,
     showHiddenFields,
     siblingDoc: incomingDoc,
+    triggerAccessControl,
+    triggerDefaultValue,
+    triggerHooks,
+    triggerPopulation,
   })
 
   /**

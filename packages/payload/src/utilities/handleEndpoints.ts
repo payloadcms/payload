@@ -6,6 +6,7 @@ import type { APIError } from '../errors/APIError.js'
 import type { GlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
+import { assertBranchReadable } from '../branching/assertBranchReadable.js'
 import {
   authenticateRequest,
   createPayloadRequestFromWebRequest,
@@ -274,6 +275,9 @@ export const handleEndpoints = async ({
     if (!endpoint?.disableAuth) {
       await authenticateRequest({ canSetHeaders: true, req })
     }
+
+    // Branch access requires the authenticated user resolved for this endpoint.
+    await assertBranchReadable({ req })
 
     const response = await handler(req)
 
