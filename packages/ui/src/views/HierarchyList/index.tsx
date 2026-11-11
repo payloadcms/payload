@@ -34,6 +34,10 @@ import './index.css'
 
 const baseClass = 'hierarchy-list'
 
+/**
+ * Renders the hierarchy list view for a collection, including breadcrumbs,
+ * search and collection-type filters, bulk selection actions, and the hierarchy table.
+ */
 export function HierarchyListView(props: ListViewClientProps) {
   const {
     AfterList,
