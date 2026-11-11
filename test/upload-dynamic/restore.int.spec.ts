@@ -101,22 +101,48 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     payload,
     restClient,
   }) => {
-    const { selected } = await prepareHistory({ payload })
+    const { created, selected } = await prepareHistory({ payload })
+
+    await payload.db.updateVersion({
+      id: selected.id,
+      collection: versionedDynamicMediaSlug,
+      versionData: { version: { ...selected.version, alt: { en: 'selected', es: 'Español' } } },
+    })
     const filesBefore = (await readdir(versionedDynamicMediaDir)).sort()
-    const restored = await payload.restoreVersion({
+    const responseDoc = await payload.restoreVersion({
       id: String(selected.id),
       collection: versionedDynamicMediaSlug,
       // An upload stage that could apply the saved crop must not turn the restore into a rebuild.
       context: { isUploadCropEnabled: true },
       overrideAccess: true,
+      select: { alt: true },
     })
 
+    expect(responseDoc.alt).toBe('selected')
+    expect(responseDoc.filename).toBeUndefined()
+
+    const restored = await payload.db.findOne({
+      collection: versionedDynamicMediaSlug,
+      where: { id: { equals: created.id } },
+    })
+
+    expect(restored.alt).toEqual({ en: 'selected', es: 'Español' })
     expect(restored._stored).toBe(false)
     expect(restored.filename).toBe(restored.original?.filename)
     expect(restored.variants?.card?._stored).toBe(false)
     expect(restored._transforms).toEqual({ crop: savedCrop })
     expect((await readdir(versionedDynamicMediaDir)).sort()).toEqual(filesBefore)
     expect(sourceReadCalls).toHaveLength(0)
+
+    const versions = await getVersions({ payload, id: created.id })
+    const latest = versions.find(({ latest }) => latest)!.version
+
+    expect(latest).toMatchObject({
+      alt: { en: 'selected', es: 'Español' },
+      filename: restored.filename,
+      original: { filename: restored.original!.filename },
+      _transforms: { crop: savedCrop },
+    })
 
     const response = await restClient.GET(`/${versionedDynamicMediaSlug}/file/${restored.filename}`)
 
@@ -425,32 +451,6 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     })
   })
 
-  test('should share hook context with the caller on a stored-only restore', async ({
-    payload,
-  }) => {
-    const { selected } = await prepareStoredOnlyHistory({ payload })
-    const hooks = payload.collections[versionedDynamicMediaSlug].config.hooks
-    const afterChange: CollectionAfterChangeHook = ({ req }) => {
-      req.context.restoreHookMarker = 'set by afterChange'
-    }
-    const req: Partial<PayloadRequest> = {}
-
-    hooks.afterChange.push(afterChange)
-
-    try {
-      await payload.restoreVersion({
-        id: String(selected.id),
-        collection: versionedDynamicMediaSlug,
-        overrideAccess: true,
-        req,
-      })
-    } finally {
-      hooks.afterChange.splice(hooks.afterChange.indexOf(afterChange), 1)
-    }
-
-    expect(req.context?.restoreHookMarker).toBe('set by afterChange')
-  })
-
   test('should not let a caller cloud storage context reach the restore and should keep the caller cloud keys after it', async ({
     payload,
   }) => {
@@ -466,6 +466,7 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     }
     const afterChange: CollectionAfterChangeHook = ({ req }) => {
       seenKeys.push(Object.keys(req.context).filter((key) => key in callerCloudContext))
+      req.context.restoreHookMarker = 'set by afterChange'
     }
     const callerCloudContext = {
       _payloadManagedCloudMetadata: { filename: 'unrelated.png' },
@@ -491,7 +492,10 @@ test.suite('Restore request-time files', { config: './config.ts' }, () => {
     }
 
     expect(seenKeys).toEqual([[], []])
-    expect(req.context).toMatchObject(callerCloudContext)
+    expect(req.context).toMatchObject({
+      ...callerCloudContext,
+      restoreHookMarker: 'set by afterChange',
+    })
   })
 
   test('should put back the caller cloud storage context when the restore fails', async ({

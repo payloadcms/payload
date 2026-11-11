@@ -6,8 +6,6 @@ import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import type { RESTClient } from '../__helpers/shared/RESTClient.js'
-
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise the same inherited policy wrapper used during config sanitization.
 import { createInheritedReadVersionsAccess } from '../../packages/payload/src/collections/config/defaults.js'
 import { test } from '../__helpers/int/vitest.js'
@@ -42,11 +40,26 @@ test.suite('Historical request-time files', { config: './config.ts' }, () => {
   }) => {
     const { bytes, selected } = await replaceImage({ payload })
     const filesBefore = (await readdir(versionedDynamicMediaDir)).sort()
-    const response = await restClient.GET(
-      `/${versionedDynamicMediaSlug}/file/${selected.version.filename}?version=${selected.id}`,
-      { auth: false },
-    )
+    const collection = payload.collections[versionedDynamicMediaSlug].config
+    const originalRead = collection.access.read
+    const checkedModes: boolean[] = []
+    let response: Response
 
+    try {
+      collection.access.read = (args) => {
+        checkedModes.push(Boolean(args.req.fileTransform))
+        return originalRead(args)
+      }
+      response = await restClient.GET(
+        `/${versionedDynamicMediaSlug}/file/${selected.version.filename}?version=${selected.id}`,
+        { auth: false },
+      )
+    } finally {
+      collection.access.read = originalRead
+    }
+
+    expect(checkedModes.length).toBeGreaterThan(0)
+    expect(checkedModes).not.toContain(true)
     expect(response.status).toBe(200)
     expect(Buffer.from(await response.arrayBuffer())).toEqual(
       await sharp(bytes)
@@ -243,14 +256,6 @@ test.suite('Historical request-time files', { config: './config.ts' }, () => {
     expect(sourceReadCalls).toHaveLength(0)
   })
 
-  // `findVersionByID` always runs an ordinary read check of the parent first.
-  test('should run only a read access check for an old version without params', async ({
-    payload,
-    restClient,
-  }) => {
-    expect(await getCheckedAccessModes({ payload, query: '', restClient })).toEqual([false, false])
-  })
-
   test('should not let transform-only access read a historical file, with or without request parameters', async ({
     payload,
     restClient,
@@ -323,39 +328,6 @@ test.suite('Historical request-time files', { config: './config.ts' }, () => {
     }
   })
 })
-
-/** The `req.fileTransform` value of each read access call for one historical `card` request. */
-async function getCheckedAccessModes({
-  payload,
-  query,
-  restClient,
-}: {
-  payload: Payload
-  query: string
-  restClient: RESTClient
-}): Promise<boolean[]> {
-  const { selected } = await replaceImage({ payload })
-  const collection = payload.collections[versionedDynamicMediaSlug].config
-  const originalRead = collection.access.read
-  const checkedModes: boolean[] = []
-
-  try {
-    collection.access.read = ({ req }) => {
-      checkedModes.push(Boolean(req.fileTransform))
-      return true
-    }
-
-    const response = await restClient.GET(
-      `/${versionedDynamicMediaSlug}/file/${selected.version.variants!.card!.filename}?version=${selected.id}${query}`,
-    )
-
-    expect(response.status).toBe(200)
-  } finally {
-    collection.access.read = originalRead
-  }
-
-  return checkedModes
-}
 
 async function replaceImage({
   collection = versionedDynamicMediaSlug,

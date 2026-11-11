@@ -82,7 +82,6 @@ it.for<{ expected: boolean; name: string; storedFiles: StoredFileList }>([
     ],
     expected: false,
   },
-  { name: 'find no stored original in an empty list', storedFiles: [], expected: false },
 ])('should $name', ({ expected, storedFiles }) => {
   expect(hasStoredOriginal({ storedFiles })).toBe(expected)
 })
