@@ -37,9 +37,9 @@ export const issueLoginToken = async ({
     type: 'mcp',
     collectionConfig,
     // App schemes like `com.example.app:/callback` have no host
-    details: { redirectHost: new URL(client.redirectURI).host || client.redirectURI },
     email: user.email!,
     label: client.name,
+    metadata: { redirectHost: new URL(client.redirectURI).host || client.redirectURI },
     req,
     shouldCreateRefreshToken: true,
     user,

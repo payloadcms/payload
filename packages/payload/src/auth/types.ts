@@ -157,12 +157,12 @@ export type AuthenticatedUser = AuthRuntimeFields & User
 
 export type UserSession = {
   createdAt?: Date | null | string
-  /** More to show next to the label, e.g. `{ redirectHost: 'claude.ai' }`. Never anything secret. */
-  details?: null | Record<string, unknown>
   expiresAt: Date | string
   id: string
   /** What the session is, for people to read, e.g. "Claude Code" or "Chrome on macOS". */
   label?: null | string
+  /** More to show next to the label, e.g. `{ redirectHost: 'claude.ai' }`. Never anything secret. */
+  metadata?: null | Record<string, unknown>
   /**
    * How many times the session was refreshed with a refresh token. Refresh tokens remember it, so
    * the latest one can be told apart from older ones.

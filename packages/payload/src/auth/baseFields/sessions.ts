@@ -45,7 +45,7 @@ export const sessionsFieldConfig: ArrayField = {
       type: 'text',
     },
     {
-      name: 'details',
+      name: 'metadata',
       type: 'json',
     },
   ],

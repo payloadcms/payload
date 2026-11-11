@@ -285,11 +285,11 @@ Each refresh token is meant to be used once, so store the new one after every re
 
 ## Sessions
 
-With `useSessions`, Payload saves each login as a session on the user, and logging out ends it. Besides when it was created and when it expires, each session can say what it is:
+By default, Payload saves each login as a session on the user, and logging out ends it. Besides when it was created and when it expires, each session can say what it is:
 
 - `label`: for people to read, e.g. "Chrome on macOS".
 - `type`: how the session was created. Logins use `'login'`. Plugins can use their own values, e.g. `'mcp'`.
-- `details`: anything else to show next to the label, as JSON.
+- `metadata`: anything else to show next to the label, as JSON.
 
 A login sets `type` to `'login'`, and `label` to the browser and operating system from its User-Agent. Code that starts a session itself with `createAuthToken` can pass its own:
 
@@ -298,9 +298,9 @@ import { createAuthToken } from 'payload'
 
 const { token } = await createAuthToken({
   collectionConfig: req.payload.collections.users.config,
-  details: { redirectHost: 'localhost' },
   email: user.email,
   label: 'Claude Code',
+  metadata: { redirectHost: 'localhost' },
   req,
   type: 'mcp',
   user,

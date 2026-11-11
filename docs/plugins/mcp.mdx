@@ -307,7 +307,7 @@ tokens, so their clients sign in again when the access token expires.
 
 Each client gets its own [session](../authentication/overview#sessions), with
 `type: 'mcp'`, the client's name as its `label`, and the address it returns to in
-`details.redirectHost`.
+`metadata.redirectHost`.
 
 To give clients different tokens, pass `issueToken`. It runs when the user
 clicks Allow, on the user's own browser request, so `req.user` is the user who

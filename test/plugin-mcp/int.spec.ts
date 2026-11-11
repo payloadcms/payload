@@ -4543,7 +4543,7 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
       expect(user?.sessions).toContainEqual(
         expect.objectContaining({
           type: 'mcp',
-          details: { redirectHost: 'localhost:33418' },
+          metadata: { redirectHost: 'localhost:33418' },
           label: 'Test client',
         }),
       )

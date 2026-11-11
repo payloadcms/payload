@@ -14,9 +14,9 @@ import { addSessionToUser } from './sessions.js'
 export const createAuthToken = async ({
   type,
   collectionConfig,
-  details,
   email,
   label,
+  metadata,
   req,
   shouldCreateRefreshToken = false,
   user,
@@ -32,7 +32,7 @@ export const createAuthToken = async ({
    */
   shouldCreateRefreshToken?: boolean
   user: AuthenticatedUser
-} & Pick<UserSession, 'details' | 'label' | 'type'>): Promise<{
+} & Pick<UserSession, 'label' | 'metadata' | 'type'>): Promise<{
   exp: number
   refreshToken?: string
   /**
@@ -45,8 +45,8 @@ export const createAuthToken = async ({
   const { session, sid } = await addSessionToUser({
     type,
     collectionConfig,
-    details,
     label,
+    metadata,
     payload: req.payload,
     req,
     sessionExpiration: shouldCreateRefreshToken

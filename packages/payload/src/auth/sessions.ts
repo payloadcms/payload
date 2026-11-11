@@ -25,8 +25,8 @@ export const removeExpiredSessions = (sessions: UserSession[]): UserSession[] =>
 export const addSessionToUser = async ({
   type,
   collectionConfig,
-  details,
   label,
+  metadata,
   payload,
   req,
   sessionExpiration = collectionConfig.auth.tokenExpiration,
@@ -42,7 +42,7 @@ export const addSessionToUser = async ({
    */
   sessionExpiration?: number
   user: AuthenticatedUser
-} & Pick<UserSession, 'details' | 'label' | 'type'>): Promise<{
+} & Pick<UserSession, 'label' | 'metadata' | 'type'>): Promise<{
   session?: UserSession
   sid?: string
 }> => {
@@ -56,7 +56,7 @@ export const addSessionToUser = async ({
     const now = new Date()
     const expiresAt = new Date(now.getTime() + sessionExpiration * 1000)
 
-    session = { id: sid, type, createdAt: now, details, expiresAt, label }
+    session = { id: sid, type, createdAt: now, expiresAt, label, metadata }
 
     if (!user.sessions?.length) {
       user.sessions = [session]
