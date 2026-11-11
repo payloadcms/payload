@@ -1,15 +1,12 @@
 import type { Payload, PayloadRequest } from 'payload'
 
 import { createDataloaderCacheKey, createPayloadRequest, isolateObjectProperty } from 'payload'
-
 import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -18,7 +15,6 @@ import {
   pagesSlug,
   postsSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -56,13 +52,13 @@ test.suite('Branching: relationships', { config: './config.ts', resetBetweenTest
         const existing = await payload.find({
           collection: branchesSlug,
           pagination: false,
-          where: { slug: { equals: slug } },
+          where: { name: { equals: slug } },
         })
 
         if (!existing.docs.length) {
           await payload.create({
             collection: branchesSlug,
-            data: { name: slug, slug },
+            data: { name: slug },
           })
         }
       }
@@ -318,7 +314,7 @@ test.suite('Branching: relationships', { config: './config.ts', resetBetweenTest
     test.beforeEach(async () => {
       await payload.create({
         collection: branchesSlug,
-        data: { name: 'Join work', slug: 'joinwork' },
+        data: { name: 'joinwork' },
       })
 
       const category = await payload.create({
@@ -362,7 +358,7 @@ test.suite('Branching: relationships', { config: './config.ts', resetBetweenTest
         const rows = await payload.find({
           collection,
           pagination: false,
-          where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: 'joinwork' } },
+          where: { [collection === branchesSlug ? 'name' : 'branch']: { equals: 'joinwork' } },
         })
 
         for (const row of rows.docs) {

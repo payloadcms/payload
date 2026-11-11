@@ -79,7 +79,7 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
     })
     await payload.updateGlobal({
       slug: homepageGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { _status: 'published', heroTitle: 'branch current' },
       overrideAccess: true,
     })
@@ -88,12 +88,12 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
       branch: false,
       global: homepageGlobalSlug,
       pagination: false,
-      where: { _branch: { equals: branch.slug } },
+      where: { _branch: { equals: branch.name } },
     })
     const branchVersion = branchVersions.docs.find(
       ({ version }) => version.heroTitle === 'branch current',
     )
-    const globalChange = await findGlobalChange({ branch: branch.slug, payload })
+    const globalChange = await findGlobalChange({ branch: branch.name, payload })
 
     expect(branchVersion).toBeDefined()
 
@@ -115,7 +115,7 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
     hookSpy.mainMergeGlobalOriginalHeroTitles = []
 
     await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       changes: [globalChange.id],
       overrideAccess: true,
     })
@@ -143,15 +143,15 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
     })
     await payload.updateGlobal({
       slug: homepageGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { heroTitle: 'requires unlocked global' },
       draft: true,
       overrideAccess: true,
     })
 
-    const globalChange = await findGlobalChange({ branch: branch.slug, payload })
+    const globalChange = await findGlobalChange({ branch: branch.name, payload })
     const result = await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       changes: [globalChange.id],
       dryRun: true,
       overrideAccess: false,
@@ -173,7 +173,7 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
 
     await payload.updateGlobal({
       slug: homepageGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { heroTitle: 'locked branch draft' },
       draft: true,
       overrideAccess: true,
@@ -182,7 +182,7 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
     await expect(
       payload.updateGlobal({
         slug: homepageGlobalSlug,
-        branch: branch.slug,
+        branch: branch.name,
         data: { heroTitle: 'requires unlocked global' },
         draft: true,
         overrideAccess: false,
@@ -191,7 +191,7 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
 
     const current = await payload.findGlobal({
       slug: homepageGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       draft: true,
       overrideAccess: true,
     })
@@ -206,7 +206,7 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
 
     await payload.updateGlobal({
       slug: homepageGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { heroTitle: 'branch draft', localizedTitle: 'branch Spanish' },
       draft: true,
       locale: 'es',
@@ -215,7 +215,7 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
 
     const updated = await payload.updateGlobal({
       slug: homepageGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { heroTitle: 'draft allowed only off main' },
       draft: true,
       locale: 'es',
@@ -246,7 +246,7 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
 
     await payload.update({
       id: owner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: localizedSlug,
       data: { _status: 'published', title: 'branch English' },
       locale: 'en',
@@ -254,13 +254,13 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
     })
 
     const target = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: categoriesSlug,
       data: { name: 'unselected collection dependency' },
       overrideAccess: true,
     })
     const ownerChange = await findCollectionChange({
-      branch: branch.slug,
+      branch: branch.name,
       docID: owner.id,
       payload,
     })
@@ -272,7 +272,7 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
     try {
       await expect(
         payload.branches.merge({
-          branch: branch.slug,
+          branch: branch.name,
           changes: [ownerChange.id],
           overrideAccess: true,
         }),
@@ -323,19 +323,19 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
     })
     await payload.updateGlobal({
       slug: homepageGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { _status: 'published', localizedTitle: 'branch English' },
       locale: 'en',
       overrideAccess: true,
     })
 
     const target = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: categoriesSlug,
       data: { name: 'unselected global dependency' },
       overrideAccess: true,
     })
-    const globalChange = await findGlobalChange({ branch: branch.slug, payload })
+    const globalChange = await findGlobalChange({ branch: branch.name, payload })
     const originalBeginTransaction = payload.db.beginTransaction
 
     hookSpy.mainMergeLocalizedGlobalDependencyTargetID = target.id
@@ -344,7 +344,7 @@ test.suite('Branch merge version write guard', { config: './config.ts' }, () => 
     try {
       await expect(
         payload.branches.merge({
-          branch: branch.slug,
+          branch: branch.name,
           changes: [globalChange.id],
           overrideAccess: true,
         }),

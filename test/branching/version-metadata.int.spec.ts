@@ -21,7 +21,7 @@ const createVersionHistory = async ({ payload }: { payload: Payload }) => {
 
   await payload.update({
     id: doc.id,
-    branch: branch.slug,
+    branch: branch.name,
     collection: pagesSlug,
     data: { title: 'branch title' },
     overrideAccess: true,
@@ -31,7 +31,7 @@ const createVersionHistory = async ({ payload }: { payload: Payload }) => {
     branch: false,
     collection: pagesSlug,
     pagination: false,
-    where: { _branch: { equals: branch.slug } },
+    where: { _branch: { equals: branch.name } },
   })
   const version = stored.docs.find(({ version }) => version.title === 'branch title')!
 
@@ -39,7 +39,7 @@ const createVersionHistory = async ({ payload }: { payload: Payload }) => {
   expect(String(version.parent)).not.toBe(String(doc.id))
   expect(String(version._branchParent)).toBe(String(doc.id))
 
-  return { branch: branch.slug, doc, version }
+  return { branch: branch.name, doc, version }
 }
 
 test.suite('Branch version response metadata', { config: './config.ts' }, () => {

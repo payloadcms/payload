@@ -1,21 +1,15 @@
 import type { Payload } from 'payload'
 
 import { commitTransaction, createPayloadRequest, initTransaction, killTransaction } from 'payload'
-
 import { expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { databaseAdapterSupportsTransactions } from '../__helpers/shared/databaseAdapterCapabilities.js'
-
 import { mongooseList } from '../__helpers/shared/isMongoose.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -23,7 +17,6 @@ import {
   headerGlobalSlug,
   postsSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -96,7 +89,7 @@ test.suite('Branching: concurrency', { config: './config.ts', resetBetweenTests:
         const found = await payload.find({
           collection,
           pagination: false,
-          where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: 'racebranch' } },
+          where: { [collection === branchesSlug ? 'name' : 'branch']: { equals: 'racebranch' } },
         })
 
         for (const row of found.docs) {
@@ -108,7 +101,7 @@ test.suite('Branching: concurrency', { config: './config.ts', resetBetweenTests:
     test('should create exactly one shadow row when two edits race to fork the same document', async () => {
       await payload.create({
         collection: branchesSlug,
-        data: { name: 'Race', slug: 'racebranch' },
+        data: { name: 'racebranch' },
       })
 
       const doc = await payload.create({ collection: postsSlug, data: { title: 'racer' } })
@@ -243,7 +236,7 @@ test.suite('Branching: concurrency', { config: './config.ts', resetBetweenTests:
       async () => {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Race', slug: 'racebranch' },
+          data: { name: 'racebranch' },
         })
 
         const doc = await payload.create({ collection: postsSlug, data: { title: 'commit racer' } })
@@ -310,7 +303,7 @@ test.suite('Branching: concurrency', { config: './config.ts', resetBetweenTests:
     test('should create exactly one global row when first writes race', async () => {
       await payload.create({
         collection: branchesSlug,
-        data: { name: 'Race', slug: 'racebranch' },
+        data: { name: 'racebranch' },
       })
       await payload.updateGlobal({
         slug: headerGlobalSlug,
@@ -354,7 +347,7 @@ test.suite('Branching: concurrency', { config: './config.ts', resetBetweenTests:
       async () => {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Race', slug: 'racebranch' },
+          data: { name: 'racebranch' },
         })
         await payload.updateGlobal({
           slug: headerGlobalSlug,
@@ -422,7 +415,7 @@ test.suite('Branching: concurrency', { config: './config.ts', resetBetweenTests:
       async () => {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Race', slug: 'racebranch' },
+          data: { name: 'racebranch' },
         })
 
         const doc = await payload.create({ collection: postsSlug, data: { title: 'hook failure' } })
@@ -472,7 +465,7 @@ test.suite('Branching: concurrency', { config: './config.ts', resetBetweenTests:
       async () => {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Race', slug: 'racebranch' },
+          data: { name: 'racebranch' },
         })
 
         const doc = await payload.create({
@@ -528,7 +521,7 @@ test.suite('Branching: concurrency', { config: './config.ts', resetBetweenTests:
     test('should create exactly one tombstone when two deletes race to remove the same never-forked document', async () => {
       await payload.create({
         collection: branchesSlug,
-        data: { name: 'Race', slug: 'racebranch' },
+        data: { name: 'racebranch' },
       })
 
       const doc = await payload.create({ collection: postsSlug, data: { title: 'doomed' } })
@@ -649,7 +642,7 @@ test.suite('Branching: concurrency', { config: './config.ts', resetBetweenTests:
       async () => {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Race', slug: 'racebranch' },
+          data: { name: 'racebranch' },
         })
 
         const doc = await payload.create({
@@ -817,7 +810,7 @@ test.suite('Branching: concurrency', { config: './config.ts', resetBetweenTests:
       async () => {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Race', slug: 'racebranch' },
+          data: { name: 'racebranch' },
         })
 
         const doc = await payload.create({ collection: postsSlug, data: { title: 'mixed race' } })

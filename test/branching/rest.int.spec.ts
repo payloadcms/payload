@@ -1,17 +1,14 @@
 import type { Payload, PayloadRequest } from 'payload'
 
+import { Forbidden } from 'payload'
 import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import { hookSpy } from './hookSpy.js'
-
 import { branchChangesSlug, branchesSlug, postsSlug, restrictedSlug } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -41,7 +38,7 @@ test.suite('Branching: rest', { config: './config.ts', resetBetweenTests: false 
     test.beforeEach(async () => {
       const branchDoc = await payload.create({
         collection: branchesSlug,
-        data: { name: 'REST merge', slug: 'restmerge' },
+        data: { name: 'restmerge' },
       })
       branchID = branchDoc.id
 
@@ -73,7 +70,7 @@ test.suite('Branching: rest', { config: './config.ts', resetBetweenTests: false 
         const found = await payload.find({
           collection,
           pagination: false,
-          where: { [collection === branchesSlug ? 'slug' : 'branch']: { equals: 'restmerge' } },
+          where: { [collection === branchesSlug ? 'name' : 'branch']: { equals: 'restmerge' } },
         })
 
         for (const row of found.docs) {
@@ -137,8 +134,11 @@ test.suite('Branching: rest', { config: './config.ts', resetBetweenTests: false 
         where: { branch: { equals: 'restmerge' } },
       })
       const onMain = await payload.findByID({ id: docID, collection: postsSlug })
+      const body = await res.json()
 
       expect(res.status).toBe(403)
+      expect(body).toMatchObject({ type: 'error', message: new Forbidden().message })
+      expect(body.validationErrors).toBeUndefined()
       expect(onMain.title).toBe('original on main')
       expect(pendingChanges.docs).toHaveLength(1)
     })
@@ -289,8 +289,10 @@ test.suite('Branching: rest', { config: './config.ts', resetBetweenTests: false 
           where: { branch: { equals: 'restmerge' } },
         })
         const onMain = await payload.findByID({ id: docID, collection: postsSlug })
+        const failure = events.find((event) => event.type === 'error')
 
-        expect(events.some((event) => event.type === 'error')).toBe(true)
+        expect(failure).toMatchObject({ type: 'error', message: new Forbidden().message })
+        expect(failure!.validationErrors).toBeUndefined()
         expect(events.some((event) => event.type === 'complete')).toBe(false)
         expect(onMain.title).toBe('original on main')
         expect(pendingChanges.docs).toHaveLength(1)

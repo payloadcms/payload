@@ -155,7 +155,7 @@ const seedBenchmarkRows = async ({
 }): Promise<{ branchID: number | string; changeIDs: string[]; documentIDs: string[] }> => {
   const branchDocument = await payload.create({
     collection: branchesSlug,
-    data: { name: 'Merge benchmark', slug: branch },
+    data: { name: branch },
     overrideAccess: true,
   })
 

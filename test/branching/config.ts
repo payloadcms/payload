@@ -49,7 +49,9 @@ const readBranchAccess: Access = ({ req }) => {
     return false
   }
 
-  return req.user.email === devUser.email ? true : { slug: { not_equals: 'private-visibility' } }
+  return req.user.email === devUser.email
+    ? true
+    : { name: { not_in: ['Private Visibility', 'private-visibility'] } }
 }
 
 const localizedCategoryBlock: Block = {
@@ -74,9 +76,9 @@ const seedBranchingTestData = async (payload: Payload) => {
   // Seeded so the branch switcher in the admin panel has something to switch
   // between as soon as `pnpm dev branching` comes up.
   for (const branch of [
-    { name: 'Halloween Updates', slug: 'halloween-updates' },
-    { name: 'Q4 Campaign', slug: 'q4-campaign' },
-    { name: 'Pricing Refresh', slug: 'pricing-refresh' },
+    { name: 'Halloween Updates' },
+    { name: 'Q4 Campaign' },
+    { name: 'Pricing Refresh' },
   ]) {
     await payload.create({
       collection: branchesSlug,
@@ -101,7 +103,7 @@ export default buildConfigWithDefaults({
             return true
           }
 
-          return req.user?.email === devUser.email ? true : { slug: { not_equals: 'scheduled' } }
+          return req.user?.email === devUser.email ? true : { name: { not_equals: 'scheduled' } }
         },
       },
       hooks: {

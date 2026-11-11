@@ -54,9 +54,9 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
       })
     : null
 
-  const slug = (branch as { slug?: string } | null)?.slug
+  const name = (branch as { name?: string } | null)?.name
 
-  const changes = slug
+  const changes = name
     ? await payload.find({
         collection: branchChangesCollectionSlug,
         depth: 0,
@@ -65,7 +65,7 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
         req,
         sort: 'collectionSlug',
         user: req.user,
-        where: { branch: { equals: slug } },
+        where: { branch: { equals: name } },
       })
     : null
 
@@ -108,13 +108,13 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
     [],
   )
 
-  const documentChanges = slug
-    ? await filterReadableBranchChanges({ branch: slug, changes: registryChanges, req })
+  const documentChanges = name
+    ? await filterReadableBranchChanges({ branch: name, changes: registryChanges, req })
     : []
 
   // Upcoming schedules, soonest first. A branch can carry several — schedule a merge,
   // keep working, schedule another — so this is a list rather than a flag.
-  const scheduledJobs = slug
+  const scheduledJobs = name
     ? await payload.find({
         collection: 'payload-jobs',
         depth: 0,
@@ -123,7 +123,7 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
         pagination: false,
         req,
         sort: 'waitUntil',
-        where: buildUpcomingMergeWhere({ branchSlug: slug }),
+        where: buildUpcomingMergeWhere({ branchName: name }),
       })
     : null
 
@@ -168,7 +168,7 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
   )
   const historyPageNumber = Number.isFinite(historyPage) && historyPage > 0 ? historyPage : 1
 
-  const merges = slug
+  const merges = name
     ? await payload.find({
         collection: branchMergesCollectionSlug,
         depth: 0,
@@ -191,7 +191,7 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
         },
         sort: '-mergedAt',
         user: req.user,
-        where: { branch: { equals: slug } },
+        where: { branch: { equals: name } },
       })
     : null
 
@@ -244,8 +244,7 @@ export async function BranchChangesView(props: DocumentViewServerProps) {
       {branchID !== undefined && branchID !== null && (
         <BranchChanges
           branchID={branchID}
-          branchName={(branch as { name?: string } | null)?.name ?? slug ?? ''}
-          branchSlug={slug ?? ''}
+          branchName={name ?? ''}
           changes={documentChanges}
           historyPage={historyPageNumber}
           historyTotalPages={merges?.totalPages ?? 1}

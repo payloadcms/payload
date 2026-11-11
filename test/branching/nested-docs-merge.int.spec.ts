@@ -14,7 +14,7 @@ test.suite('Branching: nested docs merge', { config: './nested-docs-merge.config
 
     await payload.create({
       collection: branchesSlug,
-      data: { name: 'Nested category create', slug: branch },
+      data: { name: branch },
     })
 
     const category = await payload.create({
@@ -53,7 +53,7 @@ test.suite('Branching: nested docs merge', { config: './nested-docs-merge.config
 
     await payload.create({
       collection: branchesSlug,
-      data: { name: 'Nested category edit', slug: branch },
+      data: { name: branch },
     })
     await payload.update({
       id: category.id,

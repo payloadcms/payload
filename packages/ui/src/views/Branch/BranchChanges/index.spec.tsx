@@ -29,7 +29,6 @@ test.each([1, 3])(
       <BranchChanges
         branchID="id"
         branchName="Campaign"
-        branchSlug="campaign"
         changes={[]}
         historyPage={historyPage}
         historyTotalPages={3}

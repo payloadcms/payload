@@ -1526,7 +1526,7 @@ export type {
   ResolvedChange,
 } from './branching/effectiveOperations.js'
 export { operationsForChange, resolveEffectiveOperations } from './branching/effectiveOperations.js'
-export type { MergeStreamEvent } from './branching/endpoints/merge.js'
+export type { MergeFailure, MergeStreamEvent } from './branching/endpoints/merge.js'
 export {
   branchGlobalNeedsBothRows,
   pickBranchGlobal,

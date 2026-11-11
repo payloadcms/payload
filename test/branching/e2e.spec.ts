@@ -14,6 +14,7 @@ import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConf
 import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
+  autosaveSlug,
   branchChangesSlug,
   branchMergesSlug,
   headerGlobalSlug,
@@ -24,6 +25,7 @@ import {
   pagesSlug,
   postsSlug,
   slugDraftsSlug,
+  uniqueSlug,
   versionedMediaSlug,
 } from './shared.js'
 
@@ -32,7 +34,8 @@ const dirname = path.dirname(filename)
 
 /** Seeded by the suite's `onInit`. */
 const branchName = 'Halloween Updates'
-const branchSlug = 'halloween-updates'
+const encodedBranchName = new URLSearchParams({ branch: branchName }).toString().slice(7)
+const branchNamePattern = 'Halloween(?:\\+|%20)Updates'
 
 let payload: PayloadTestSDK<Config>
 let serverURL: string
@@ -68,7 +71,7 @@ async function switchBranch({ name, page }: { name: string; page: Page }): Promi
   await expect(label).toHaveText(name)
   await expect
     .poll(() => new URL(page.url()).searchParams.get('branch'))
-    .toBe(name === 'main' ? null : branchSlug)
+    .toBe(name === 'main' ? null : branchName)
 }
 
 function withCurrentBranch({ href, page }: { href: string; page: Page }): string {
@@ -94,7 +97,7 @@ test.describe('Branching', () => {
     const branch = await payload.find({
       collection: 'payload-branches',
       pagination: false,
-      where: { slug: { equals: branchSlug } },
+      where: { name: { equals: branchName } },
     })
 
     await page.goto(
@@ -131,8 +134,10 @@ test.describe('Branching', () => {
     // Shadow rows are addressed by their real primary key, so these deletes
     // bypass branch resolution rather than writing tombstones.
     for (const collection of [
+      autosaveSlug,
       localizedSlug,
       slugDraftsSlug,
+      uniqueSlug,
       mediaSlug,
       nestedSlug,
       pagesSlug,
@@ -206,6 +211,147 @@ test.describe('Branching', () => {
     }
   })
 
+  for (const branch of ['main', branchName]) {
+    for (const collection of [pagesSlug, postsSlug, autosaveSlug]) {
+      test(`should render the create document form for ${collection} on ${branch}`, async () => {
+        const query = new URLSearchParams({ branch })
+
+        await gotoAndWaitForForm(
+          page,
+          `${serverURL}/admin/collections/${collection}/create?${query}`,
+        )
+        await expect(page.locator('#field-title')).toBeVisible()
+        await expect(page.locator('#field-title')).toBeEditable()
+        await expect(page.locator('#field-title')).toHaveAccessibleName(/Title/)
+      })
+    }
+
+    test(`should render the create document form after renaming a draft slug on ${branch}`, async () => {
+      const draft = await payload.create({
+        branch,
+        collection: slugDraftsSlug,
+        data: {},
+        draft: true,
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: draft.id,
+        branch,
+        collection: slugDraftsSlug,
+        data: { slug: 'renamed-draft' },
+        draft: true,
+        locale: 'en',
+      })
+
+      const query = new URLSearchParams({ branch })
+
+      await gotoAndWaitForForm(
+        page,
+        `${serverURL}/admin/collections/${slugDraftsSlug}/create?${query}`,
+      )
+      await expect(page.locator('#field-title')).toBeVisible()
+      await expect(page.locator('#field-title')).toBeEditable()
+      await expect(page.locator('#field-title')).toHaveAccessibleName(/Title/)
+    })
+  }
+
+  test('should create and switch using the exact name and report duplicate names', async () => {
+    const name = 'Campaign / 日本語 & launch'
+    let branchID: string | undefined
+
+    const openCreate = async () => {
+      await page.locator('.branch-selector__trigger').click()
+      await page.getByRole('button', { name: 'Create new branch', exact: true }).click()
+      await page.locator('#new-branch').getByLabel('Branch name', { exact: false }).fill(name)
+    }
+
+    try {
+      await openCreate()
+      await page
+        .locator('#new-branch')
+        .getByRole('button', { name: 'Create and switch', exact: true })
+        .click()
+      await expect.poll(() => new URL(page.url()).searchParams.get('branch')).toBe(name)
+      await expect(page.locator('.branch-selector__trigger-name')).toHaveText(name)
+
+      const branches = await payload.find({
+        collection: 'payload-branches',
+        where: { name: { equals: name } },
+      })
+
+      branchID = branches.docs[0]!.id
+      expect(branches.docs[0]).not.toHaveProperty('slug')
+      await expect
+        .poll(
+          async () =>
+            (
+              await (
+                await page.request.get(
+                  `${serverURL}/api/payload-preferences/${PREFERENCE_KEYS.NAV}`,
+                )
+              ).json()
+            ).value?.branch,
+        )
+        .toBe(name)
+      await page.reload()
+      await expect(page.locator('.branch-selector__trigger-name')).toHaveText(name)
+      await openCreate()
+      await page
+        .locator('#new-branch')
+        .getByRole('button', { name: 'Create and switch', exact: true })
+        .click()
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Branch name',
+      )
+      await expect(page.locator('#new-branch')).toBeVisible()
+      await page.locator('#new-branch').getByRole('button', { name: 'Cancel', exact: true }).click()
+    } finally {
+      await switchBranch({ name: 'main', page })
+      if (branchID) {
+        await payload.delete({ collection: 'payload-branches', id: branchID })
+      }
+    }
+  })
+
+  test('should create a branch by name from the full create view', async () => {
+    const name = 'Full create view / launch'
+    let branchID: string | undefined
+
+    try {
+      await gotoAndWaitForForm(page, `${serverURL}/admin/collections/payload-branches/create`)
+      await expect(page.locator('#field-name')).toHaveAccessibleName('Branch name')
+      await expect(page.locator('#field-description')).toHaveAccessibleName('Branch description')
+      await page.locator('#field-name').fill(name)
+
+      const created = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === '/api/payload-branches' &&
+          response.request().method() === 'POST',
+      )
+
+      await page.locator('#action-save').click()
+
+      const response = await created
+      const { doc } = await response.json()
+
+      expect(response.status()).toBe(201)
+      expect(doc.name).toBe(name)
+      branchID = doc.id
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === `/admin/collections/payload-branches/${branchID}` &&
+          url.searchParams.get('branch') === name,
+      )
+      await expect(page.locator('.branch-selector__trigger-name')).toHaveText(name)
+    } finally {
+      await switchBranch({ name: 'main', page })
+      if (branchID) {
+        await payload.delete({ collection: 'payload-branches', id: branchID })
+      }
+    }
+  })
+
   test('should update the version count when switching branches without refreshing', async () => {
     const document = await payload.create({
       collection: pagesSlug,
@@ -215,7 +361,7 @@ test.describe('Branching', () => {
     for (const title of ['First branch version', 'Second branch version']) {
       await payload.update({
         id: document.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: pagesSlug,
         data: { title },
       })
@@ -228,7 +374,7 @@ test.describe('Branching', () => {
         where: { parent: { equals: document.id } },
       }),
       payload.findVersions({
-        branch: branchSlug,
+        branch: branchName,
         collection: pagesSlug,
         where: { parent: { equals: document.id } },
       }),
@@ -256,7 +402,7 @@ test.describe('Branching', () => {
       const branch = await payload.find({
         collection: 'payload-branches',
         pagination: false,
-        where: { slug: { equals: branchSlug } },
+        where: { name: { equals: branchName } },
       })
 
       if (branch.docs[0]?.status !== 'open') {
@@ -280,7 +426,10 @@ test.describe('Branching', () => {
       await expect
         .poll(() => image.evaluate((element) => (element as HTMLImageElement).naturalWidth))
         .toBeGreaterThan(0)
-      await expect(image).toHaveAttribute('src', new RegExp(expectedFilename.replace('.', '\\.')))
+      await expect(image).toHaveAttribute(
+        'src',
+        new RegExp(encodeURIComponent(expectedFilename).replace('.', '\\.')),
+      )
     }
 
     test('should upload and render media created on a branch', async () => {
@@ -304,12 +453,12 @@ test.describe('Branching', () => {
       const response = await saveResponse
 
       await expect.poll(() => response.ok()).toBe(true)
-      await expect.poll(() => new URL(response.url()).searchParams.get('branch')).toBe(branchSlug)
+      await expect.poll(() => new URL(response.url()).searchParams.get('branch')).toBe(branchName)
 
       const documentID = new URL(page.url()).pathname.split('/').pop()!
       const [onBranch, onMain] = await Promise.all([
         payload.find({
-          branch: branchSlug,
+          branch: branchName,
           collection: mediaSlug,
           pagination: false,
           where: { id: { equals: documentID } },
@@ -322,7 +471,7 @@ test.describe('Branching', () => {
       ])
       const branchDocument = onBranch.docs[0]!
 
-      await expect.poll(() => branchDocument.filename).toContain(branchSlug)
+      await expect.poll(() => branchDocument.filename).toContain(encodeURIComponent(branchName))
       await expectImagePreviewToLoad({ expectedFilename: branchDocument.filename! })
       await expect.poll(() => onMain.docs).toHaveLength(0)
     })
@@ -365,11 +514,11 @@ test.describe('Branching', () => {
       await expect.poll(() => metadataResponse.ok()).toBe(true)
       await expect
         .poll(() => new URL(metadataResponse.url()).searchParams.get('branch'))
-        .toBe(branchSlug)
+        .toBe(branchName)
 
       const [metadataOnBranch, metadataOnMain] = await Promise.all([
         payload.find({
-          branch: branchSlug,
+          branch: branchName,
           collection: mediaSlug,
           pagination: false,
           where: { id: { equals: documentID } },
@@ -384,7 +533,7 @@ test.describe('Branching', () => {
 
       await expect.poll(() => branchCopy.updatedAt).toBe(metadataResponseBody.doc.updatedAt)
       await expect.poll(() => branchCopy.filename).not.toBe(original.filename)
-      await expect.poll(() => branchCopy.filename).toContain(branchSlug)
+      await expect.poll(() => branchCopy.filename).toContain(encodeURIComponent(branchName))
       await expect.poll(() => metadataOnMain.docs[0]?.filename).toBe(original.filename)
       await expectImagePreviewToLoad({ expectedFilename: branchCopy.filename! })
 
@@ -407,11 +556,11 @@ test.describe('Branching', () => {
       const response = await saveResponse
 
       await expect.poll(() => response.ok()).toBe(true)
-      await expect.poll(() => new URL(response.url()).searchParams.get('branch')).toBe(branchSlug)
+      await expect.poll(() => new URL(response.url()).searchParams.get('branch')).toBe(branchName)
 
       const [onBranch, onMain] = await Promise.all([
         payload.find({
-          branch: branchSlug,
+          branch: branchName,
           collection: mediaSlug,
           pagination: false,
           where: { id: { equals: documentID } },
@@ -426,7 +575,7 @@ test.describe('Branching', () => {
       const mainDocument = onMain.docs[0]!
 
       await expect.poll(() => branchDocument.filename).not.toBe(original.filename)
-      await expect.poll(() => branchDocument.filename).toContain(branchSlug)
+      await expect.poll(() => branchDocument.filename).toContain(encodeURIComponent(branchName))
       await expect.poll(() => mainDocument.filename).toBe(original.filename)
       await expectImagePreviewToLoad({ expectedFilename: branchDocument.filename! })
 
@@ -508,20 +657,20 @@ test.describe('Branching', () => {
 
     await payload.update({
       id: post.id,
-      branch: branchSlug,
+      branch: branchName,
       collection: postsSlug,
       data: { title: 'Branch content' },
     })
-    await page.goto(`${postsURL.list}?branch=${branchSlug}`)
+    await page.goto(`${postsURL.list}?branch=${encodedBranchName}`)
     await expect(page.locator('.branch-selector__trigger-name')).toHaveText(branchName)
 
     const link = page.locator('.table a', { hasText: 'Branch content' }).first()
 
-    await expect(link).toHaveAttribute('href', new RegExp(`branch=${branchSlug}`))
+    await expect(link).toHaveAttribute('href', new RegExp(`branch=${branchNamePattern}`))
     await link.focus()
     await page.keyboard.press('Enter')
     await expect(page.locator('#field-title')).toHaveValue('Branch content')
-    await expect.poll(() => new URL(page.url()).searchParams.get('branch')).toBe(branchSlug)
+    await expect.poll(() => new URL(page.url()).searchParams.get('branch')).toBe(branchName)
 
     const sharedURL = page.url()
 
@@ -565,7 +714,7 @@ test.describe('Branching', () => {
       const response = await saveResponse
 
       expect(response.ok()).toBe(true)
-      expect(new URL(response.url()).searchParams.get('branch')).toBe(branchSlug)
+      expect(new URL(response.url()).searchParams.get('branch')).toBe(branchName)
       await expect(page.locator('.payload-toast-item')).toContainText('Updated successfully')
 
       const [mainPosts, branchPosts] = await Promise.all([
@@ -576,7 +725,7 @@ test.describe('Branching', () => {
           where: { id: { equals: post.id } },
         }),
         payload.find({
-          branch: branchSlug,
+          branch: branchName,
           collection: postsSlug,
           pagination: false,
           where: { id: { equals: post.id } },
@@ -599,7 +748,7 @@ test.describe('Branching', () => {
       // branch's copy of the document.
       await expect(row.locator('a').first()).toHaveAttribute(
         'href',
-        new RegExp(`/${postsSlug}/${post.id}[?]branch=${branchSlug}$`),
+        new RegExp(`/${postsSlug}/${post.id}[?]branch=${branchNamePattern}$`),
       )
     })
 
@@ -611,7 +760,7 @@ test.describe('Branching', () => {
 
       await payload.update({
         id: post.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Halloween Sale' },
       })
@@ -619,7 +768,11 @@ test.describe('Branching', () => {
       await page.goto(withCurrentBranch({ page, href: postsURL.list }))
       await switchBranch({ name: branchName, page })
 
-      await page.locator('.table .row-1 a').first().click()
+      const row = page.locator('.table .row-1')
+
+      // The URL can update before the branch's list has finished rendering.
+      await expect(row.locator('.cell-title')).toContainText('Halloween Sale')
+      await row.locator('a').first().click()
 
       await expect(page.locator('.branch-selector__trigger-name')).toHaveText(branchName)
 
@@ -640,7 +793,7 @@ test.describe('Branching', () => {
 
       await payload.update({
         id: post.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Halloween Sale' },
       })
@@ -669,15 +822,15 @@ test.describe('Branching', () => {
 
       await payload.update({
         id: updated.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { order: 99, title: 'Halloween Sale' },
       })
 
-      await payload.delete({ id: doomed.id, branch: branchSlug, collection: postsSlug })
+      await payload.delete({ id: doomed.id, branch: branchName, collection: postsSlug })
 
       const created = await payload.create({
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Spooky Exclusive' },
       })
@@ -808,12 +961,12 @@ test.describe('Branching', () => {
       const branch = await payload.find({
         collection: 'payload-branches',
         pagination: false,
-        where: { slug: { equals: branchSlug } },
+        where: { name: { equals: branchName } },
       })
 
       await expect(current.locator('a')).toHaveAttribute(
         'href',
-        new RegExp(`/payload-branches/${branch.docs[0]!.id}[?]branch=${branchSlug}$`),
+        new RegExp(`/payload-branches/${branch.docs[0]!.id}[?]branch=${branchNamePattern}$`),
       )
       await expect(current.locator('.btn')).toContainText('Merge')
 
@@ -826,14 +979,24 @@ test.describe('Branching', () => {
       ).toHaveCount(1)
     })
 
-    test('should not render branch slugs anywhere in the switcher', async () => {
+    test('should search branches by their unique name and persist the selected name', async () => {
       await gotoBranchView()
       await switchBranch({ name: branchName, page })
       await page.locator('.branch-selector__trigger').click()
 
-      // Searchable but not shown: the slug restates the name in kebab-case.
-      await expect(page.locator('.branch-selector__popup')).not.toContainText(branchSlug)
-      await expect(page.locator('.branch-selector__current')).not.toContainText(branchSlug)
+      const search = page.locator('.branch-selector__popup input')
+
+      await search.fill('Q4 Camp')
+      await expect(page.locator('.branch-selector__popup .combobox__entry')).toHaveCount(1)
+      await expect(page.locator('.branch-selector__popup .combobox__entry')).toContainText(
+        'Q4 Campaign',
+      )
+      await search.press('Tab')
+      await page.keyboard.press('Enter')
+      await expect.poll(() => new URL(page.url()).searchParams.get('branch')).toBe('Q4 Campaign')
+      await page.reload()
+      await expect(page.locator('.branch-selector__trigger-name')).toHaveText('Q4 Campaign')
+      await switchBranch({ name: 'main', page })
     })
 
     test('should lead each row with its operation', async () => {
@@ -872,7 +1035,7 @@ test.describe('Branching', () => {
       const branch = await payload.find({
         collection: 'payload-branches',
         pagination: false,
-        where: { slug: { equals: branchSlug } },
+        where: { name: { equals: branchName } },
       })
 
       if (branch.docs[0]?.status !== 'open') {
@@ -897,8 +1060,47 @@ test.describe('Branching', () => {
     const mergeMode = (label: string) =>
       page.locator('.merge-branch-modal__modes label').filter({ hasText: label })
 
+    test('should identify the document and field path when a merge write fails', async () => {
+      await payload.create({
+        branch: false,
+        collection: uniqueSlug,
+        data: { slug: 'merge-conflict' },
+      })
+
+      const doc = await payload.create({
+        branch: branchName,
+        collection: uniqueSlug,
+        data: { slug: 'merge-conflict' },
+      })
+
+      await gotoBranchView()
+      await openMergeModal()
+
+      const modal = page.locator('.merge-branch-modal')
+
+      await modal.getByRole('button', { name: 'Merge', exact: true }).click()
+
+      const errors = modal.getByRole('alert')
+
+      await expect(modal.getByRole('heading', { name: 'Merge blocked', exact: true })).toBeVisible()
+      await expect(errors).toContainText('Please correct invalid fields.')
+      await expect(errors.getByRole('listitem')).toHaveText(
+        `Unique Doc / #${doc.id} / slug: Value must be unique`,
+      )
+      await expect(page.getByText('No changes on this branch yet.', { exact: true })).toHaveCount(0)
+      await expect(modal.getByRole('progressbar')).toHaveCount(0)
+
+      await modal
+        .locator('.dialog__footer')
+        .getByRole('button', { name: 'Close', exact: true })
+        .click()
+
+      await expect(modal).toBeHidden()
+      await expect(page.locator('.changed-docs__row')).toHaveCount(1)
+    })
+
     test('should require a date before a merge can be scheduled', async () => {
-      await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Treat' } })
+      await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Treat' } })
       await gotoBranchView()
       await openMergeModal()
 
@@ -920,7 +1122,7 @@ test.describe('Branching', () => {
 
     test('should queue a job when a merge is scheduled', async () => {
       const post = await payload.create({
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Treat' },
       })
@@ -944,7 +1146,7 @@ test.describe('Branching', () => {
       })
 
       expect(jobs.docs).toHaveLength(1)
-      expect((jobs.docs[0]!.input as { branch?: string })?.branch).toBe(branchSlug)
+      expect((jobs.docs[0]!.input as { branch?: string })?.branch).toBe(branchName)
 
       // Queued, not applied: the branch still holds its change.
       const onMain = await payload.find({
@@ -961,8 +1163,8 @@ test.describe('Branching', () => {
     })
 
     test('should state how many documents the branch changed', async () => {
-      await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Treat' } })
-      await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Trick' } })
+      await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Treat' } })
+      await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Trick' } })
 
       await gotoBranchView()
       await openMergeModal()
@@ -982,14 +1184,14 @@ test.describe('Branching', () => {
     })
 
     test('should describe the merge by collection when the changes span several', async () => {
-      await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Treat' } })
-      await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Trick' } })
+      await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Treat' } })
+      await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Trick' } })
 
       const page1 = await payload.create({ collection: pagesSlug, data: { title: 'About' } })
 
       await payload.update({
         id: page1.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: pagesSlug,
         data: { title: 'About us' },
       })
@@ -1016,8 +1218,8 @@ test.describe('Branching', () => {
     })
 
     test('should count the changes and link to the review page when opened from the switcher', async () => {
-      await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Treat' } })
-      await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Trick' } })
+      await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Treat' } })
+      await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Trick' } })
 
       // From the switcher there is no selection to make, so the count has to be
       // fetched and the way to narrow it has to be offered.
@@ -1032,12 +1234,12 @@ test.describe('Branching', () => {
       const branch = await payload.find({
         collection: 'payload-branches',
         pagination: false,
-        where: { slug: { equals: branchSlug } },
+        where: { name: { equals: branchName } },
       })
 
       await expect(page.locator('.merge-branch-modal__review')).toHaveAttribute(
         'href',
-        new RegExp(`/payload-branches/${branch.docs[0]!.id}[?]branch=${branchSlug}$`),
+        new RegExp(`/payload-branches/${branch.docs[0]!.id}[?]branch=${branchNamePattern}$`),
       )
     })
 
@@ -1046,13 +1248,13 @@ test.describe('Branching', () => {
 
       await payload.update({
         id: main.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Halloween Sale' },
       })
 
       const branchCreated = await payload.create({
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Spooky Exclusive' },
       })
@@ -1133,7 +1335,7 @@ test.describe('Branching', () => {
     })
 
     test('should raise exactly one merge modal from the compare view', async () => {
-      await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Treat' } })
+      await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Treat' } })
       await gotoBranchView()
       await openMergeModal()
 
@@ -1148,7 +1350,7 @@ test.describe('Branching', () => {
     })
 
     test('should raise exactly one merge modal from the branch switcher', async () => {
-      await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Treat' } })
+      await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Treat' } })
 
       await page.goto(withCurrentBranch({ page, href: postsURL.list }))
       await switchBranch({ name: branchName, page })
@@ -1161,7 +1363,7 @@ test.describe('Branching', () => {
     })
 
     test('should hold the modal open on a completed merge until dismissed', async () => {
-      await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Treat' } })
+      await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Treat' } })
       await gotoBranchView()
       await openMergeModal()
       await page.locator('.merge-branch-modal .btn--style-primary').click()
@@ -1185,7 +1387,7 @@ test.describe('Branching', () => {
 
       await payload.update({
         id: main.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: pagesSlug,
         data: { _status: 'published', title: 'Halloween Sale' },
         draft: false,
@@ -1222,7 +1424,7 @@ test.describe('Branching', () => {
 
       await payload.update({
         id: main.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Halloween Sale' },
       })
@@ -1265,7 +1467,7 @@ test.describe('Branching', () => {
 
     test('should announce a scheduled merge and list what it will apply', async () => {
       await payload.create({
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Scheduled Exclusive' },
       })
@@ -1296,7 +1498,7 @@ test.describe('Branching', () => {
     })
 
     test('should render every schedule on a branch', async () => {
-      await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Treat' } })
+      await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Treat' } })
 
       await gotoBranchView()
       await openMergeModal()
@@ -1316,7 +1518,7 @@ test.describe('Branching', () => {
     })
 
     test('should cancel a scheduled merge from the branch view', async () => {
-      await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Treat' } })
+      await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Treat' } })
 
       await gotoBranchView()
       await openMergeModal()
@@ -1359,7 +1561,7 @@ test.describe('Branching', () => {
 
     test('should show current changes and the merge history together', async () => {
       await payload.create({
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Merged Exclusive' },
       })
@@ -1373,7 +1575,7 @@ test.describe('Branching', () => {
       // Kept open, then worked on again — the case where replacing the history with
       // the new work hid everything the branch had already done.
       await payload.create({
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Later Exclusive' },
       })
@@ -1399,7 +1601,7 @@ test.describe('Branching', () => {
 
     test('should show what was merged once the branch has nothing pending', async () => {
       await payload.create({
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Spooky Exclusive' },
       })
@@ -1426,14 +1628,14 @@ test.describe('Branching', () => {
       const branch = await payload.find({
         collection: 'payload-branches',
         pagination: false,
-        where: { slug: { equals: branchSlug } },
+        where: { name: { equals: branchName } },
       })
 
       expect(branch.docs[0]?.status).toBe('merged')
     })
 
     test('should close the branch when asked, and stop offering to merge it', async () => {
-      await payload.create({ branch: branchSlug, collection: postsSlug, data: { title: 'Treat' } })
+      await payload.create({ branch: branchName, collection: postsSlug, data: { title: 'Treat' } })
       await gotoBranchView()
       await openMergeModal()
 
@@ -1451,7 +1653,7 @@ test.describe('Branching', () => {
       const branch = await payload.find({
         collection: 'payload-branches',
         pagination: false,
-        where: { slug: { equals: branchSlug } },
+        where: { name: { equals: branchName } },
       })
 
       expect(branch.docs[0]?.status).toBe('closed')
@@ -1462,13 +1664,13 @@ test.describe('Branching', () => {
 
       await payload.update({
         id: main.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Halloween Sale' },
       })
 
       await payload.create({
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Spooky Exclusive' },
       })
@@ -1495,13 +1697,13 @@ test.describe('Branching', () => {
 
       await payload.update({
         id: main.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Halloween Sale' },
       })
 
       await payload.create({
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Spooky Exclusive' },
       })
@@ -1516,7 +1718,7 @@ test.describe('Branching', () => {
 
       // The branch reads through to main again, and main never moved.
       const onBranch = await payload.find({
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         pagination: false,
       })
@@ -1535,13 +1737,13 @@ test.describe('Branching', () => {
 
       await payload.update({
         id: main.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Halloween Sale' },
       })
 
       await payload.create({
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Spooky Exclusive' },
       })
@@ -1565,7 +1767,7 @@ test.describe('Branching', () => {
       await expect(page.locator('.payload-toast-item')).toContainText('discarded')
 
       const onBranch = await payload.find({
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         pagination: false,
       })
@@ -1612,13 +1814,13 @@ test.describe('Branching', () => {
 
       await payload.update({
         id: main.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Halloween Sale' },
       })
 
       await payload.create({
-        branch: branchSlug,
+        branch: branchName,
         collection: postsSlug,
         data: { title: 'Spooky Exclusive' },
       })
@@ -1693,7 +1895,7 @@ test.describe('Branching', () => {
 
       await payload.updateGlobal({
         slug: headerGlobalSlug,
-        branch: branchSlug,
+        branch: branchName,
         data: { navLabel: 'branch label' },
       })
 
@@ -1720,7 +1922,7 @@ test.describe('Branching', () => {
 
       await payload.updateGlobal({
         slug: homepageGlobalSlug,
-        branch: branchSlug,
+        branch: branchName,
         data: { heroTitle: 'branch hero' },
       })
 
@@ -1750,7 +1952,7 @@ test.describe('Branching', () => {
   test('should copy a branch-only document to another locale', async () => {
     const localizedURL = new AdminUrlUtil(serverURL, localizedSlug)
     const doc = await payload.create({
-      branch: branchSlug,
+      branch: branchName,
       collection: localizedSlug,
       data: { title: 'Branch English copy' },
       draft: true,
@@ -1773,7 +1975,7 @@ test.describe('Branching', () => {
     await expect(page.locator('#field-title')).toHaveValue('Branch English copy')
 
     const copied = await payload.find({
-      branch: branchSlug,
+      branch: branchName,
       collection: localizedSlug,
       draft: true,
       locale: 'es',
@@ -1803,7 +2005,7 @@ test.describe('Branching', () => {
 
       await payload.update({
         id: page1.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: pagesSlug,
         data: { _status: 'published', title: 'Halloween Page' },
       })
@@ -1817,7 +2019,7 @@ test.describe('Branching', () => {
       const loaded = page.waitForResponse(async (response) => {
         if (
           !response.url().includes(`/api/${pagesSlug}/${page1.id}`) ||
-          !response.url().includes(`branch=${branchSlug}`) ||
+          new URL(response.url()).searchParams.get('branch') !== branchName ||
           !response.ok()
         ) {
           return false
@@ -1838,7 +2040,7 @@ test.describe('Branching', () => {
 
       // And the URL on screen is the one that was requested.
       await expect(page.locator('.query-inspector__api-url-input input')).toHaveValue(
-        new RegExp(`branch=${branchSlug}`),
+        new RegExp(`branch=${branchNamePattern}`),
       )
     })
   })
@@ -1846,7 +2048,7 @@ test.describe('Branching', () => {
   test('should publish the current locale of an autosaved branch-only page', async () => {
     const slugDraftsURL = new AdminUrlUtil(serverURL, slugDraftsSlug)
     const doc = await payload.create({
-      branch: branchSlug,
+      branch: branchName,
       collection: slugDraftsSlug,
       data: { title: 'Initial branch draft' },
       draft: true,
@@ -1889,7 +2091,7 @@ test.describe('Branching', () => {
     const response = await published
     const query = new URL(response.url()).searchParams
 
-    expect(query.get('branch')).toBe(branchSlug)
+    expect(query.get('branch')).toBe(branchName)
     expect(query.get('locale')).toBe('en')
     expect(response.status()).toBe(200)
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
@@ -1898,7 +2100,7 @@ test.describe('Branching', () => {
     await expect(page.locator('.status')).toContainText('Published')
 
     const publishedDoc = await payload.find({
-      branch: branchSlug,
+      branch: branchName,
       collection: slugDraftsSlug,
       draft: false,
       locale: 'all',
@@ -1915,7 +2117,7 @@ test.describe('Branching', () => {
     expect(main.docs).toHaveLength(0)
   })
 
-  for (const branch of ['main', branchSlug]) {
+  for (const branch of ['main', branchName]) {
     test(`should autosave a title change with an unchanged native slug on ${branch}`, async () => {
       const slugDraftsURL = new AdminUrlUtil(serverURL, slugDraftsSlug)
       const doc = await payload.create({
@@ -1963,7 +2165,7 @@ test.describe('Branching', () => {
     test(`should publish all locales on a branch-only ${collectionSlug} document`, async () => {
       const localizedURL = new AdminUrlUtil(serverURL, collectionSlug)
       const doc = await payload.create({
-        branch: branchSlug,
+        branch: branchName,
         collection: collectionSlug,
         data: { title: 'Branch-only English draft' },
         draft: true,
@@ -1972,7 +2174,7 @@ test.describe('Branching', () => {
 
       await payload.update({
         id: doc.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: collectionSlug,
         data: { title: 'Borrador solo en la rama' },
         draft: true,
@@ -2012,14 +2214,14 @@ test.describe('Branching', () => {
         await expect
           .poll(() => validationRequests)
           .toEqual([
-            { branch: branchSlug, locales: ['en'], status: 200 },
-            { branch: branchSlug, locales: ['es'], status: 200 },
+            { branch: branchName, locales: ['en'], status: 200 },
+            { branch: branchName, locales: ['es'], status: 200 },
           ])
         await expect(page.locator('.payload-toast-container')).toContainText('successfully')
         await expect
           .poll(async () => {
             const published = await payload.find({
-              branch: branchSlug,
+              branch: branchName,
               collection: collectionSlug,
               draft: false,
               fallbackLocale: false,
@@ -2084,7 +2286,7 @@ test.describe('Branching', () => {
 
       const onMain = await payload.find({ collection: pagesSlug, draft: true, pagination: false })
       const onBranch = await payload.find({
-        branch: branchSlug,
+        branch: branchName,
         collection: pagesSlug,
         draft: true,
         pagination: false,
@@ -2114,7 +2316,7 @@ test.describe('Branching', () => {
 
       await payload.update({
         id: existing.id,
-        branch: branchSlug,
+        branch: branchName,
         collection: pagesSlug,
         data: { title: 'Halloween Landing' },
         draft: true,

@@ -58,19 +58,19 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
   test('should merge an acyclic chain of selected branch creates', async ({ payload }) => {
     const branch = await createBranch({ name: 'Acyclic dependency chain', payload })
     const root = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       data: { title: 'root' },
       overrideAccess: true,
     })
     const middle = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       data: { title: 'middle' },
       overrideAccess: true,
     })
     const leaf = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       data: { title: 'leaf' },
       overrideAccess: true,
@@ -78,21 +78,21 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
 
     await payload.update({
       id: root.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       data: { relatedTarget: middle.id },
       overrideAccess: true,
     })
     await payload.update({
       id: middle.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       data: { relatedTarget: leaf.id },
       overrideAccess: true,
     })
 
     const result = await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: true,
     })
     const mainRoot = await payload.findByID({
@@ -127,13 +127,13 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
   test('should reject cyclic selected branch creates before writing main', async ({ payload }) => {
     const branch = await createBranch({ name: 'Cyclic dependency', payload })
     const first = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       data: { title: 'first' },
       overrideAccess: true,
     })
     const second = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       data: { title: 'second' },
       overrideAccess: true,
@@ -141,21 +141,21 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
 
     await payload.update({
       id: first.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       data: { relatedTarget: second.id },
       overrideAccess: true,
     })
     await payload.update({
       id: second.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       data: { relatedTarget: first.id },
       overrideAccess: true,
     })
 
     await expect(
-      payload.branches.merge({ branch: branch.slug, overrideAccess: true }),
+      payload.branches.merge({ branch: branch.name, overrideAccess: true }),
     ).rejects.toMatchObject({ status: 409 })
 
     const firstOnMain = await payload.db.findOne({
@@ -174,7 +174,7 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
       collection: branchChangesSlug,
       overrideAccess: true,
       pagination: false,
-      where: { branch: { equals: branch.slug } },
+      where: { branch: { equals: branch.name } },
     })
 
     expect(firstOnMain).toBeNull()
@@ -187,7 +187,7 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
   }) => {
     const branch = await createBranch({ name: 'Global dependency', payload })
     const target = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       data: { title: 'global target' },
       overrideAccess: true,
@@ -195,13 +195,13 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
 
     await payload.updateGlobal({
       slug: deletionSafetyBranchGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { target: target.id },
       overrideAccess: true,
     })
 
     const result = await payload.branches.merge({
-      branch: branch.slug,
+      branch: branch.name,
       overrideAccess: true,
     })
     const mainTarget = await payload.findByID({
@@ -233,7 +233,7 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
       overrideAccess: true,
     })
     const target = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       data: { title: 'unselected target' },
       overrideAccess: true,
@@ -241,14 +241,14 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
 
     await payload.update({
       id: owner.id,
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyOwnersSlug,
       data: { title: 'branch owner' },
       overrideAccess: true,
     })
 
     const ownerChange = await findBranchChange({
-      branch: branch.slug,
+      branch: branch.name,
       collectionSlug: deletionSafetyOwnersSlug,
       docID: owner.id,
       payload,
@@ -261,7 +261,7 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
     try {
       await expect(
         payload.branches.merge({
-          branch: branch.slug,
+          branch: branch.name,
           changes: [ownerChange.id],
           overrideAccess: true,
         }),
@@ -293,7 +293,7 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
   }) => {
     const branch = await createBranch({ name: 'Global hook dependency', payload })
     const target = await payload.create({
-      branch: branch.slug,
+      branch: branch.name,
       collection: deletionSafetyTargetsSlug,
       data: { title: 'unselected global target' },
       overrideAccess: true,
@@ -307,7 +307,7 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
     })
     await payload.updateGlobal({
       slug: deletionSafetyBranchGlobalSlug,
-      branch: branch.slug,
+      branch: branch.name,
       data: { target: null, title: 'branch global' },
       overrideAccess: true,
     })
@@ -318,7 +318,7 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
       pagination: false,
       where: {
         and: [
-          { branch: { equals: branch.slug } },
+          { branch: { equals: branch.name } },
           { globalSlug: { equals: deletionSafetyBranchGlobalSlug } },
         ],
       },
@@ -332,7 +332,7 @@ test.suite('Branch merge dependency graph', { config: './deletion-safety.config.
     try {
       await expect(
         payload.branches.merge({
-          branch: branch.slug,
+          branch: branch.name,
           changes: [globalChange.id],
           overrideAccess: true,
         }),

@@ -8,6 +8,42 @@ import { test } from '../__helpers/int/vitest.js'
 import { slugDraftsSlug } from './shared.js'
 
 test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () => {
+  for (const branch of ['main', 'Halloween Updates']) {
+    test(`should create an empty draft after renaming a draft slug on ${branch}`, async ({
+      payload,
+    }) => {
+      const original = await payload.create({
+        branch,
+        collection: slugDraftsSlug,
+        data: {},
+        draft: true,
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: original.id,
+        branch,
+        collection: slugDraftsSlug,
+        data: { slug: 'renamed-draft' },
+        draft: true,
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      const created = await payload.create({
+        branch,
+        collection: slugDraftsSlug,
+        data: {},
+        draft: true,
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(created.slug).not.toBe(original.slug)
+    })
+  }
+
   test.options(
     'should replace a stale global slug index before autosaving a published page on a branch',
     { db: 'mongo' },
@@ -30,7 +66,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
         payload.update({
           id: doc.id,
           autosave: true,
-          branch: 'halloween-updates',
+          branch: 'Halloween Updates',
           collection: slugDraftsSlug,
           data: { slug: 'legacy-published-page', title: 'Branch edit' },
           draft: true,
@@ -105,7 +141,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
       const updated = await payload.update({
         id: doc.id,
         autosave: true,
-        branch: 'halloween-updates',
+        branch: 'Halloween Updates',
         collection: slugDraftsSlug,
         data: { _status: 'draft', slug: 'published-page', title },
         draft: true,
@@ -137,7 +173,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
       payload,
     }) => {
       await payload.create({
-        branch: 'halloween-updates',
+        branch: 'Halloween Updates',
         collection: slugDraftsSlug,
         data: { [field]: 'taken', title: 'First document' },
         overrideAccess: true,
@@ -145,7 +181,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
 
       await expect(
         payload.create({
-          branch: 'halloween-updates',
+          branch: 'Halloween Updates',
           collection: slugDraftsSlug,
           data: { [field]: 'taken', title: 'Second document' },
           overrideAccess: true,
@@ -160,7 +196,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
     payload,
   }) => {
     const doc = await payload.create({
-      branch: 'halloween-updates',
+      branch: 'Halloween Updates',
       collection: slugDraftsSlug,
       data: { slug: 'branch-only-slug', title: 'English title' },
       draft: true,
@@ -170,7 +206,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
 
     await payload.update({
       id: doc.id,
-      branch: 'halloween-updates',
+      branch: 'Halloween Updates',
       collection: slugDraftsSlug,
       data: { title: 'Spanish title' },
       draft: true,
@@ -185,7 +221,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
       draft: true,
       locale: ['en', 'es'],
       overrideAccess: true,
-      req: { branch: 'halloween-updates' },
+      req: { branch: 'Halloween Updates' },
     })
 
     expect(result).toMatchObject({ errors: [], valid: true })
@@ -244,7 +280,7 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
 
     const updated = await payload.update({
       id: doc.id,
-      branch: 'halloween-updates',
+      branch: 'Halloween Updates',
       collection: slugDraftsSlug,
       data: { title: 'Branch title' },
       draft: true,

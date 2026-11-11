@@ -37,7 +37,7 @@ describe('getBranchURL', () => {
     ).toBe('/admin/collections/posts')
   })
 
-  it('should preserve nested filters and encode branch slugs', () => {
+  it('should preserve nested filters and encode branch names', () => {
     const result = getBranchURL({
       adminRoute: '/custom-admin/',
       branch: 'campaign & launch',

@@ -64,7 +64,7 @@ export const getBranchMergeSummaryHandler: ServerFunction<
     user,
   })
 
-  if (!branch || typeof branch.slug !== 'string') {
+  if (!branch || typeof branch.name !== 'string') {
     throw new Forbidden(req.t)
   }
 
@@ -79,7 +79,7 @@ export const getBranchMergeSummaryHandler: ServerFunction<
       globalSlug: true,
       operation: true,
     },
-    where: { branch: { equals: branch.slug } },
+    where: { branch: { equals: branch.name } },
   })
 
   const docs = summary.docs.reduce<SummarizableChange[]>((summaries, change) => {
@@ -127,7 +127,7 @@ export const getUpcomingBranchMergesHandler: ServerFunction<
     user,
   })
 
-  if (!branch || typeof branch.slug !== 'string') {
+  if (!branch || typeof branch.name !== 'string') {
     throw new Forbidden(req.t)
   }
 
@@ -139,7 +139,7 @@ export const getUpcomingBranchMergesHandler: ServerFunction<
     req,
     select: { waitUntil: true },
     sort: 'waitUntil',
-    where: buildUpcomingMergeWhere({ branchSlug: branch.slug }),
+    where: buildUpcomingMergeWhere({ branchName: branch.name }),
   })
 
   return jobs.docs.reduce<UpcomingBranchMerge[]>((upcomingMerges, job) => {
@@ -193,13 +193,13 @@ export const scheduleMergeHandler: ServerFunction<ScheduleMergeHandlerArgs> = as
         overrideAccess: true,
         req,
       })
-      const scheduledBranchSlug =
+      const scheduledBranchName =
         scheduledMergeJob?.taskSlug === 'scheduleMerge' &&
         typeof scheduledMergeJob.input?.branch === 'string'
           ? scheduledMergeJob.input.branch
           : undefined
 
-      if (!scheduledBranchSlug) {
+      if (!scheduledBranchName) {
         throw new Forbidden(req.t)
       }
 
@@ -212,7 +212,7 @@ export const scheduleMergeHandler: ServerFunction<ScheduleMergeHandlerArgs> = as
           pagination: false,
           req,
           user,
-          where: { slug: { equals: scheduledBranchSlug } },
+          where: { name: { equals: scheduledBranchName } },
         })
       ).docs[0]
 
@@ -232,7 +232,7 @@ export const scheduleMergeHandler: ServerFunction<ScheduleMergeHandlerArgs> = as
         overrideAccess: true,
         req,
         where: buildScheduledMergeCancellationWhere({
-          branchSlug: scheduledBranchSlug,
+          branchName: scheduledBranchName,
           jobID: deleteID,
         }),
       })
@@ -273,7 +273,7 @@ export const scheduleMergeHandler: ServerFunction<ScheduleMergeHandlerArgs> = as
 
     await payload.jobs.queue({
       input: {
-        branch: branchDoc.slug as string,
+        branch: branchDoc.name as string,
         changes: changes?.map(String),
         closeBranch: Boolean(closeBranch),
         user:
@@ -302,10 +302,10 @@ export const scheduleMergeHandler: ServerFunction<ScheduleMergeHandlerArgs> = as
 }
 
 export const buildScheduledMergeCancellationWhere = ({
-  branchSlug,
+  branchName,
   jobID,
 }: {
-  branchSlug: string
+  branchName: string
   jobID: number | string
 }): Where => ({
   and: [
@@ -313,7 +313,7 @@ export const buildScheduledMergeCancellationWhere = ({
     { taskSlug: { equals: 'scheduleMerge' } },
     { completedAt: { exists: false } },
     { processingUntil: { exists: false } },
-    { 'input.branch': { equals: branchSlug } },
+    { 'input.branch': { equals: branchName } },
   ],
 })
 
@@ -321,6 +321,6 @@ export const buildScheduledMergeCancellationWhere = ({
  * The `where` for a branch's upcoming scheduled merges.
  *
  * Mirrors `buildUpcomingScheduleWhere`: same collection, same shape, filtered on the
- * branch slug carried in the job's input.
+ * branch name carried in the job's input.
  */
 export { buildUpcomingMergeWhere }

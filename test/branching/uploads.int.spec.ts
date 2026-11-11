@@ -76,13 +76,13 @@ test.suite('Branching: uploads', { config: './config.ts', resetBetweenTests: fal
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
-        where: { slug: { equals: 'uploadwork' } },
+        where: { name: { equals: 'uploadwork' } },
       })
 
       if (!existing.docs.length) {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Upload work', slug: 'uploadwork' },
+          data: { name: 'uploadwork' },
         })
       }
     })

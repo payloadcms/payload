@@ -23,7 +23,7 @@ let branch: Config['collections'][typeof branchesSlug]
 let editorID: string | undefined
 
 async function openDeletion({
-  activeBranch = branch.slug,
+  activeBranch = branch.name,
   page,
 }: {
   activeBranch?: string
@@ -47,11 +47,7 @@ test.describe('Deleting the selected branch', () => {
     editorID = undefined
     branch = await payload.create({
       collection: branchesSlug,
-      data: {
-        name: 'Selected branch deletion',
-        slug: `selected-deletion-${testInfo.testId}`,
-        status: 'open',
-      },
+      data: { status: 'open', name: `selected-deletion-${testInfo.testId}` },
       overrideAccess: true,
     })
     await initPage({ page, serverURL })
@@ -109,12 +105,12 @@ test.describe('Deleting the selected branch', () => {
   test('should preserve the selected branch when deleting another branch', async ({ page }) => {
     const retainedBranch = await payload.create({
       collection: branchesSlug,
-      data: { name: 'Keep this branch selected', slug: `retained-${branch.slug}`, status: 'open' },
+      data: { status: 'open', name: `retained-${branch.name}` },
       overrideAccess: true,
     })
 
     try {
-      await openDeletion({ activeBranch: retainedBranch.slug, page })
+      await openDeletion({ activeBranch: retainedBranch.name, page })
 
       const deleted = page.waitForResponse(
         (response) =>
@@ -127,7 +123,7 @@ test.describe('Deleting the selected branch', () => {
       await expect(page).toHaveURL(
         (url) =>
           url.pathname === `/admin/collections/${branchesSlug}` &&
-          url.searchParams.get('branch') === retainedBranch.slug,
+          url.searchParams.get('branch') === retainedBranch.name,
       )
       await expect(page.locator('.branch-selector__trigger-name')).toHaveText(retainedBranch.name)
       await expect(page.getByRole('heading', { name: 'Branches', exact: true })).toBeVisible()
@@ -158,7 +154,7 @@ test.describe('Deleting the selected branch', () => {
         .locator('.branch-selector__popup .combobox__entry', { hasText: branch.name })
         .click()
       await preferenceUpdate
-      await expect(page).toHaveURL((url) => url.searchParams.get('branch') === branch.slug)
+      await expect(page).toHaveURL((url) => url.searchParams.get('branch') === branch.name)
       await expect(page.locator('.branch-selector__trigger-name')).toHaveText(branch.name)
 
       const previousURL = page.url()
@@ -166,7 +162,7 @@ test.describe('Deleting the selected branch', () => {
 
       await expect
         .poll(async () => (await (await page.request.get(preferenceURL)).json()).value?.branch)
-        .toBe(branch.slug)
+        .toBe(branch.name)
 
       // Leave the admin while another session removes the selected workspace.
       await page.goto('about:blank')
@@ -180,7 +176,7 @@ test.describe('Deleting the selected branch', () => {
         .toBe(0)
       await expect
         .poll(async () => (await (await page.request.get(preferenceURL)).json()).value?.branch)
-        .toBe(branch.slug)
+        .toBe(branch.name)
 
       const response = await page.goto(returnToBranchURL ? previousURL : `${serverURL}/admin`)
 
@@ -233,12 +229,12 @@ test.describe('Deleting the selected branch', () => {
       'You are not allowed to perform this action',
     )
     await expect(page).toHaveURL(
-      `${serverURL}/admin/collections/${branchesSlug}/${branch.id}/manage?branch=${branch.slug}`,
+      `${serverURL}/admin/collections/${branchesSlug}/${branch.id}/manage?branch=${branch.name}`,
     )
     await expect(page.locator('.branch-selector__trigger-name')).toHaveText(branch.name)
     await expect(page.locator('.delete-document')).toBeHidden()
-    await page.locator('#field-name:visible').fill('Page still usable')
-    await expect(page.locator('#field-name:visible')).toHaveValue('Page still usable')
+    await page.locator('#field-description:visible').fill('Page still usable')
+    await expect(page.locator('#field-description:visible')).toHaveValue('Page still usable')
     await expect
       .poll(
         async () =>

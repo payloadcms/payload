@@ -1,17 +1,13 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
-
 import type { Payload, SanitizedCollectionConfig } from 'payload'
 
 import path from 'path'
-
 import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import {
   branchChangesSlug,
   branchesSlug,
@@ -21,7 +17,6 @@ import {
   postsSlug,
   uniqueSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -51,6 +46,18 @@ test.suite('Branching: schema', { config: './config.ts', resetBetweenTests: fals
   })
 
   test.describe('Schema', () => {
+    test('should identify branches with one required unique name field', () => {
+      const config = collectionConfig(branchesSlug)
+
+      expect(fieldNames(config)).not.toContain('slug')
+      expect(config.flattenedFields.find((field) => field.name === 'name')).toMatchObject({
+        type: 'text',
+        index: true,
+        required: true,
+        unique: true,
+      })
+    })
+
     test('should inject branch fields into a branch-enabled collection', () => {
       const names = fieldNames(collectionConfig(postsSlug))
 
@@ -82,7 +89,7 @@ test.suite('Branching: schema', { config: './config.ts', resetBetweenTests: fals
         overrideAccess: true,
       })
       const changeData = {
-        branch: branch.slug,
+        branch: branch.name,
         collectionSlug: postsSlug,
         doc: { relationTo: postsSlug, value: document.id },
         documentID: String(document.id),

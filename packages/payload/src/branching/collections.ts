@@ -5,6 +5,7 @@ import type { SanitizedBranchingConfig } from './types.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
 import { APIError } from '../errors/index.js'
+import { text } from '../fields/validations.js'
 import { wrapInternalEndpoints } from '../utilities/wrapInternalEndpoints.js'
 import { assertBranchCreatedDocumentsUnreferenced } from './assertBranchCreatedDocumentsUnreferenced.js'
 import { combineBranchAccess } from './combineBranchAccess.js'
@@ -38,7 +39,7 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
     }),
   },
   admin: {
-    defaultColumns: ['name', 'slug', 'status', 'updatedAt'],
+    defaultColumns: ['name', 'status', 'updatedAt'],
     // Reached only through the branch switcher in the app header, never from the
     // nav or the dashboard: branches are a scope control, not a content type.
     hidden: true,
@@ -56,35 +57,27 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
     {
       name: 'name',
       type: 'text',
+      access: { update: () => false },
+      hooks: {
+        // Branch state stores the name, so changing it would orphan shadow rows.
+        beforeChange: [
+          ({ operation, originalDoc, value }) =>
+            operation === 'create' ? value : ((originalDoc as { name?: string })?.name ?? value),
+        ],
+      },
+      index: true,
+      label: ({ t }) => t('branching:branchName'),
       required: true,
+      unique: true,
+      validate: (value: Parameters<typeof text>[0], options: Parameters<typeof text>[1]) =>
+        value === MAIN_BRANCH
+          ? `"${MAIN_BRANCH}" is a reserved branch name.`
+          : text(value, options),
     },
     {
       name: 'description',
       type: 'text',
-    },
-    {
-      // Payload's own slug field: it derives from `name`, slugifies, dedupes
-      // against existing branches, and defaults to `required`, `unique` and
-      // `index`. Read-only because editors name a branch; the slug follows.
-      name: 'slug',
-      type: 'slug',
-      admin: { readOnly: true },
-      hooks: {
-        // Sanitization appends custom hooks after the generator, so this has the
-        // last word. Immutable after create: `_branch` stores the slug rather than
-        // a foreign key, so renaming it would orphan every shadow row — and the
-        // generator lets an explicit value from the client win, which is exactly
-        // what must not happen here.
-        beforeChange: [
-          ({ operation, originalDoc, value }) =>
-            operation === 'create' ? value : ((originalDoc as { slug?: string })?.slug ?? value),
-        ],
-      },
-      useAsSlug: 'name',
-      // Permits empty deliberately: the generator populates the slug in
-      // `beforeChange`, which runs after validation.
-      validate: (value: unknown) =>
-        value === MAIN_BRANCH ? `"${MAIN_BRANCH}" is a reserved branch name.` : true,
+      label: ({ t }) => t('branching:branchDescription'),
     },
     {
       name: 'status',
@@ -144,7 +137,7 @@ export const getBranchesCollection = (branching: SanitizedBranchingConfig): Coll
       path: '/:id/discard',
     },
   ]),
-  // `slug` is immutable after creation: `_branch` stores the slug rather than
+  // `name` is immutable after creation: `_branch` stores the name rather than
   // a foreign key, so renaming it would orphan every shadow row.
   lockDocuments: false,
   // Payload 4 enables versions by default, and a branch record is bookkeeping —
@@ -442,7 +435,7 @@ const deleteBranchStateBeforeDelete: CollectionBeforeDeleteHook = async ({ id, r
     req,
   })
 
-  if (typeof branch.slug !== 'string') {
+  if (typeof branch.name !== 'string') {
     return
   }
 
@@ -453,7 +446,7 @@ const deleteBranchStateBeforeDelete: CollectionBeforeDeleteHook = async ({ id, r
     pagination: false,
     req,
     where: {
-      and: [{ branch: { equals: branch.slug } }, { operation: { equals: 'create' } }],
+      and: [{ branch: { equals: branch.name } }, { operation: { equals: 'create' } }],
     },
   })
   const branchCreatedTargets = branchCreatedChanges.docs.flatMap((change) => {
@@ -469,7 +462,7 @@ const deleteBranchStateBeforeDelete: CollectionBeforeDeleteHook = async ({ id, r
   })
 
   await assertBranchCreatedDocumentsUnreferenced({
-    ignoredOwnerBranch: branch.slug,
+    ignoredOwnerBranch: branch.name,
     req,
     targets: branchCreatedTargets,
   })
@@ -477,7 +470,7 @@ const deleteBranchStateBeforeDelete: CollectionBeforeDeleteHook = async ({ id, r
   if (req.payload.collections['payload-jobs']) {
     const scheduledMergeConditions: Where[] = [
       { taskSlug: { equals: 'scheduleMerge' } },
-      { 'input.branch': { equals: branch.slug } },
+      { 'input.branch': { equals: branch.name } },
     ]
     const now = new Date().toISOString()
     const activeScheduledMergeWhere: Where = {
@@ -525,12 +518,12 @@ const deleteBranchStateBeforeDelete: CollectionBeforeDeleteHook = async ({ id, r
     await assertNoActiveScheduledMerges()
   }
 
-  await discardBranchChangesBeforeBranchDeletion(req.payload, { branch: branch.slug, req })
+  await discardBranchChangesBeforeBranchDeletion(req.payload, { branch: branch.name, req })
 
   await req.payload.delete({
     collection: branchMergesCollectionSlug,
     overrideAccess: true,
     req,
-    where: { branch: { equals: branch.slug } },
+    where: { branch: { equals: branch.name } },
   })
 }

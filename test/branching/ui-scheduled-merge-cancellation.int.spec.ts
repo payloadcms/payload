@@ -8,7 +8,7 @@ import { scheduleMergeHandler } from '../../packages/ui/src/utilities/scheduleMe
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 
-const branch = 'halloween-updates'
+const branch = 'Halloween Updates'
 
 test.suite('Branching: confirmed schedule cancellation', { config: './config.ts' }, () => {
   for (const field of ['processingUntil', 'completedAt'] as const) {

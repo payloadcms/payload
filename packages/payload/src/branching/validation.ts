@@ -8,6 +8,7 @@ import {
   validateCollectionData,
   validateGlobalData,
 } from '../utilities/entityInputSchema/validateEntityData.js'
+import { hasDraftsEnabled, hasDraftValidationEnabled } from '../utilities/getVersionsConfig.js'
 import { traverseForLocalizedFields } from '../utilities/traverseForLocalizedFields.js'
 import {
   getGlobalMergeLocales,
@@ -55,7 +56,7 @@ export type BranchMergeValidate = (args: {
 }) => BranchMergeValidationResult | Promise<BranchMergeValidationResult>
 
 export const createMainBranchRequest = ({ req }: { req: PayloadRequest }): PayloadRequest => {
-  const targetReq = isolateBranchState({ req: req })
+  const targetReq = isolateBranchState({ req })
 
   targetReq.branch = MAIN_BRANCH
   targetReq.query = { ...targetReq.query }
@@ -193,7 +194,7 @@ export const prepareBranchMergeValidationCandidates = async ({
   return candidates
 }
 
-/** Best-effort structural validation for the exact candidates selected by merge. */
+/** Checks prepared content when the corresponding target write validates it. */
 export const defaultBranchMergeValidation: BranchMergeValidate = ({ candidates, req }) => {
   const errors: BranchMergeValidationError[] = []
 
@@ -202,7 +203,24 @@ export const defaultBranchMergeValidation: BranchMergeValidate = ({ candidates, 
       continue
     }
 
-    const candidateReq = isolateBranchState({ req: req })
+    const entityConfig =
+      candidate.entityType === 'collection' && candidate.collectionSlug
+        ? req.payload.collections[candidate.collectionSlug]?.config
+        : req.payload.globals.config.find(({ slug }) => slug === candidate.globalSlug)
+
+    // Match normal writes: unvalidated drafts can retain any content accepted by a draft save.
+    // A published locale still validates, even when another locale makes the overall write a draft.
+    if (
+      candidate.draft &&
+      candidate.data._status !== 'published' &&
+      entityConfig &&
+      hasDraftsEnabled(entityConfig) &&
+      !hasDraftValidationEnabled(entityConfig)
+    ) {
+      continue
+    }
+
+    const candidateReq = isolateBranchState({ req })
 
     if (candidate.locale) {
       candidateReq.locale = candidate.locale
@@ -213,7 +231,8 @@ export const defaultBranchMergeValidation: BranchMergeValidate = ({ candidates, 
         validateCollectionData({
           slug: candidate.collectionSlug as never,
           data: candidate.data,
-          partial: candidate.operation !== 'create',
+          // Branch-created rows are promoted through updates, just like existing main rows.
+          partial: true,
           req: candidateReq,
         })
       } else if (candidate.entityType === 'global' && candidate.globalSlug) {
@@ -281,14 +300,22 @@ const stripNonWritableFields = ({
     }
 
     if (field.type === 'row' || field.type === 'collapsible') {
-      writableData = stripNonWritableFields({ data: writableData, fields: field.fields, payload })
+      writableData = stripNonWritableFields({
+        data: writableData,
+        fields: field.fields,
+        payload,
+      })
       continue
     }
 
     if (field.type === 'tabs') {
       for (const tab of field.tabs) {
         if (!tabHasName(tab)) {
-          writableData = stripNonWritableFields({ data: writableData, fields: tab.fields, payload })
+          writableData = stripNonWritableFields({
+            data: writableData,
+            fields: tab.fields,
+            payload,
+          })
           continue
         }
 
@@ -308,7 +335,11 @@ const stripNonWritableFields = ({
 
     if (field.type === 'group') {
       if (!('name' in field) || !field.name) {
-        writableData = stripNonWritableFields({ data: writableData, fields: field.fields, payload })
+        writableData = stripNonWritableFields({
+          data: writableData,
+          fields: field.fields,
+          payload,
+        })
         continue
       }
 
@@ -331,7 +362,11 @@ const stripNonWritableFields = ({
       if (Array.isArray(rows)) {
         writableData[field.name] = rows.map((row) =>
           isRecord(row)
-            ? stripNonWritableFields({ data: row, fields: field.fields, payload })
+            ? stripNonWritableFields({
+                data: row,
+                fields: field.fields,
+                payload,
+              })
             : row,
         )
       }
@@ -356,7 +391,11 @@ const stripNonWritableFields = ({
 
           return !block || typeof block === 'string'
             ? row
-            : stripNonWritableFields({ data: row, fields: block.fields, payload })
+            : stripNonWritableFields({
+                data: row,
+                fields: block.fields,
+                payload,
+              })
         })
       }
     }

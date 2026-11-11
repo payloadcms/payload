@@ -11,7 +11,7 @@ const stateKey = '_branchWritable'
  *
  * Closing is the terminal state a merge can put a branch into, and it has to be
  * enforced rather than merely displayed: the switcher already hides closed
- * branches, but a `branch=<slug>` query param reaches the write path regardless,
+ * branches, but a `branch=<name>` query param reaches the write path regardless,
  * and so does a client that was already on the branch when it closed. Without this
  * a closed branch keeps accepting edits nobody can navigate to.
  *

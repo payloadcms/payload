@@ -58,7 +58,7 @@ const schedules = [
 test('should keep cancellation available when the server refuses it', async () => {
   serverFunction.mockResolvedValue({ error: 'Cancellation forbidden' })
   const screen = await render(
-    <ScheduledMerges branchID="campaign" branchSlug="campaign" schedules={schedules} />,
+    <ScheduledMerges branchID="campaign" branchName="campaign" schedules={schedules} />,
   )
 
   await screen.getByRole('button', { name: 'branching:cancelSchedule' }).click()
@@ -75,7 +75,7 @@ test('should keep cancellation available when the server refuses it', async () =
 test('should close and refresh only after successful cancellation', async () => {
   serverFunction.mockResolvedValue({ message: 'Success' })
   const screen = await render(
-    <ScheduledMerges branchID="campaign" branchSlug="campaign" schedules={schedules} />,
+    <ScheduledMerges branchID="campaign" branchName="campaign" schedules={schedules} />,
   )
 
   await screen.getByRole('button', { name: 'branching:cancelSchedule' }).click()

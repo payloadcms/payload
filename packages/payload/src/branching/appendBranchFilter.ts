@@ -3,7 +3,7 @@ import type { Where } from '../types/index.js'
 import { branchDocIDField, branchField, MAIN_BRANCH } from './types.js'
 
 type Args = {
-  /** The active branch slug, or `'main'`. */
+  /** The active branch name, or `'main'`. */
   branch: string
   /** Canonical IDs deleted on this branch, from the change manifest. */
   deletedIDs: (number | string)[]

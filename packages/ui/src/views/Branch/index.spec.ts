@@ -12,7 +12,7 @@ test('should read internal branch state only after the branch access check', asy
     docs: [],
     totalPages: collection === 'payload-branch-merges' ? 1 : undefined,
   }))
-  const findByID = vi.fn(async () => ({ name: 'Campaign', slug: 'campaign', status: 'open' }))
+  const findByID = vi.fn(async () => ({ status: 'open', name: 'campaign' }))
 
   await BranchChangesView({
     initPageResult: {
@@ -72,7 +72,7 @@ test.each([
       docID: 1,
       req: {
         i18n: { t: (key: string) => key },
-        payload: { find, findByID: vi.fn(async () => ({ name: 'Campaign', slug: 'campaign' })) },
+        payload: { find, findByID: vi.fn(async () => ({ name: 'campaign' })) },
         user: { id: 1 },
       },
     },

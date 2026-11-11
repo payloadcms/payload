@@ -22,6 +22,7 @@ export const autosaveSlug = 'autosave-docs'
 /** Localized and nested fields: per-locale forking, and the sub-table write paths. */
 export const localizedSlug = 'localized-docs'
 export const nestedSlug = 'nested-docs'
+export const nestedPagesSlug = 'nested-pages'
 
 export const headerGlobalSlug = 'header'
 export const homepageGlobalSlug = 'homepage'

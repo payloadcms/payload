@@ -5,9 +5,7 @@ import { expect } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
-
 import { devUser } from '../credentials.js'
-
 import {
   autosaveSlug,
   branchChangesSlug,
@@ -15,7 +13,6 @@ import {
   maxVersionsSlug,
   pagesSlug,
 } from './shared.js'
-
 import { createTrustedPayload } from './trustedPayload.js'
 
 let payload: Payload
@@ -49,13 +46,13 @@ test.suite('Branching: versions', { config: './config.ts', resetBetweenTests: fa
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
-        where: { slug: { equals: branch } },
+        where: { name: { equals: branch } },
       })
 
       if (!existing.docs.length) {
         await payload.create({
           collection: branchesSlug,
-          data: { name: 'Version writes', slug: branch },
+          data: { name: branch },
         })
       }
     })

@@ -7,7 +7,7 @@ export const SlugDrafts: CollectionConfig = {
   admin: { useAsTitle: 'title' },
   fields: [
     { name: 'title', type: 'text', localized: true, required: true },
-    { name: 'slug', type: 'slug', useAsSlug: 'title' },
+    { name: 'slug', type: 'slug', localized: true, useAsSlug: 'title' },
     { name: 'code', type: 'text', unique: true },
   ],
   versions: { drafts: { autosave: { interval: 100 } } },

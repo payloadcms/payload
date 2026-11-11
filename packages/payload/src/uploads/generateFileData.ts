@@ -492,7 +492,7 @@ export const generateFileData = async <T>({
     }
 
     let fsSafeName = getSanitizedUploadFilename(outputName, ext)
-    const branch = resolveBranch({ req: req })
+    const branch = resolveBranch({ req })
     const isIsolatedProviderUpload = Boolean(
       file.uploadReference &&
       typeof file.uploadReference === 'object' &&
@@ -821,7 +821,9 @@ export const getBranchUploadFilename = ({
   const ext = getFileExtension(filename)
   let extension = ext ? `.${ext}` : ''
   const name = extension ? filename.slice(0, -extension.length) : filename
-  const escapedBranch = branch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  // Names may contain path separators and other characters unsafe in filenames.
+  const filenameBranch = encodeURIComponent(branch)
+  const escapedBranch = filenameBranch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const unscopedName = name.replace(new RegExp(`-${escapedBranch}(?:-\\d+)?$`), '')
   const branchHash = createHash('sha256').update(branch).digest('hex').slice(0, 12)
   const minimumBranchSuffix = `-${branchHash}`
@@ -835,14 +837,14 @@ export const getBranchUploadFilename = ({
 
   const maximumBranchSuffixByteLength =
     maximumInitialFilenameByteLength - Buffer.byteLength(extension) - 1
-  let branchSuffix = `-${branch}`
+  let branchSuffix = `-${filenameBranch}`
 
   if (Buffer.byteLength(branchSuffix) > maximumBranchSuffixByteLength) {
     const maximumBranchPrefixByteLength =
       maximumBranchSuffixByteLength - Buffer.byteLength(minimumBranchSuffix) - 1
     const branchPrefix = truncateUtf8ByByteLength({
       maximumByteLength: maximumBranchPrefixByteLength,
-      value: branch,
+      value: filenameBranch,
     })
 
     branchSuffix = branchPrefix ? `-${branchPrefix}${minimumBranchSuffix}` : minimumBranchSuffix

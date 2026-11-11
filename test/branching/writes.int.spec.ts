@@ -45,11 +45,11 @@ test.suite('Branching: writes', { config: './config.ts', resetBetweenTests: fals
       const existing = await payload.find({
         collection: branchesSlug,
         pagination: false,
-        where: { slug: { equals: 'cow' } },
+        where: { name: { equals: 'cow' } },
       })
 
       if (!existing.docs.length) {
-        await payload.create({ collection: branchesSlug, data: { name: 'COW', slug: 'cow' } })
+        await payload.create({ collection: branchesSlug, data: { name: 'cow' } })
       }
     })
 

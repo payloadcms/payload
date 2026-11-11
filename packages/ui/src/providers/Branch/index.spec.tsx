@@ -9,7 +9,7 @@ import { BranchProvider, useBranch, useBranchParam } from './index.js'
 
 const state = vi.hoisted(() => ({
   mostRecentUpdate: undefined as
-    | { doc: { slug: string }; entitySlug: string; operation: string }
+    | { doc: { name: string }; entitySlug: string; operation: string }
     | undefined,
   error: vi.fn(),
   push: vi.fn(),
@@ -37,9 +37,13 @@ vi.mock('../RouteTransition/index.js', () => ({
 
 const originalURL = window.location.href
 
-afterEach(() => window.history.replaceState(null, '', originalURL))
+afterEach(() => {
+  window.history.replaceState(null, '', originalURL)
+  vi.unstubAllGlobals()
+})
 
 beforeEach(() => {
+  vi.stubGlobal('process', { env: {} })
   window.history.replaceState(null, '', '/admin/collections/posts?locale=fr#details')
   state.mostRecentUpdate = undefined
   vi.clearAllMocks()
@@ -61,7 +65,7 @@ test('should select and persist a created branch without refreshing', async () =
   const screen = await render(<Fixture activeBranch="main" />)
 
   state.mostRecentUpdate = {
-    doc: { slug: 'created-branch' },
+    doc: { name: 'created-branch' },
     entitySlug: branchesCollectionSlug,
     operation: 'create',
   }
@@ -79,6 +83,24 @@ test('should select and persist a created branch without refreshing', async () =
 
   await screen.rerender(<Fixture activeBranch="another-branch" />)
   expect(state.setPreference).toHaveBeenCalledTimes(1)
+})
+
+test('should preserve the full create view redirect after selecting the new branch', async () => {
+  window.history.replaceState(null, '', '/admin/collections/payload-branches/create')
+
+  const screen = await render(<Fixture activeBranch="main" />)
+
+  state.mostRecentUpdate = {
+    doc: { name: 'New campaign' },
+    entitySlug: branchesCollectionSlug,
+    operation: 'create',
+  }
+  await screen.rerender(<Fixture activeBranch="main" />)
+
+  await vi.waitFor(() =>
+    expect(state.setPreference).toHaveBeenCalledWith('nav', { branch: 'New campaign' }, true),
+  )
+  expect(state.replace).not.toHaveBeenCalled()
 })
 
 function Fixture({ activeBranch }: { activeBranch: string }) {
