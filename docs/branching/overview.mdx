@@ -340,6 +340,27 @@ Review generated migrations before deployment. For Postgres and SQLite, enable b
 pnpm payload migrate:create enable-branching
 ```
 
+### Existing SQLite databases
+
+With `@payloadcms/db-sqlite`, enabling branching changes the storage of array and block rows in branchable collections and globals. Their public text IDs move from `id` to `_uuid`; `id` becomes an internal integer primary key so copies on different branches can share the same public ID. Nested arrays and localized values must also have their parent references converted. A fresh database already has this layout and does not need this conversion.
+
+For an existing database:
+
+1. Back up the database and verify the upgrade on a copy first.
+2. Set `push: false` on the SQLite adapter before starting the upgraded application. Development schema push refuses this conversion and reports which table needs migrating.
+3. Ensure your latest committed migration snapshot describes the database **before** branching was enabled. With branching enabled in the config, run `pnpm payload migrate:create enable-branching`, review the generated migration, then run `pnpm payload migrate`.
+4. Keep SQLite `transactionOptions` disabled for this migration (the default). Rebuilding these tables requires disabling foreign keys outside a transaction. The generated migration refuses to proceed if foreign keys cannot be disabled, before changing content tables. Restore your usual settings after migrating.
+
+The generated migration preserves public array/block IDs and remaps nested and localized parent references. Existing version tables that already use integer keys and `_uuid` do not need the ID conversion. Regenerate any unapplied migration created with an older release that selects `_uuid` from a table where that column does not yet exist.
+
+If your project has only used development schema push, there may be no migration snapshot describing the existing database. Create and verify a baseline using the **old config and package versions**, and mark it as already applied in the existing database using your normal migration-baselining process. Do not run an initial `CREATE TABLE` migration against an existing database. Then enable branching and generate the upgrade migration against that baseline. See [migration workflows](/docs/database/migrations).
+
+Before rolling back the ID conversion, remove branch copies that share public array/block IDs. The old schema cannot represent duplicate IDs. Rollback refuses duplicate or missing public IDs before rebuilding tables. Keep a backup: as with other SQLite migrations run without transactions, an unrelated later failure can leave a partially applied migration.
+
+Resetting the database is an option for disposable development data only; it is not a migration for content you need to preserve.
+
+### Existing MongoDB databases
+
 For an existing MongoDB database, generate the predefined branching migration:
 
 ```text
