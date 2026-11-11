@@ -1523,21 +1523,26 @@ export type { DiscardOptions } from './branching/discard.js'
 export type { DiscardResult } from './branching/discard.js'
 export { discardBranchChanges } from './branching/discard.js'
 export type { EffectiveOperation } from './branching/effectiveOperations.js'
+export type { EffectiveWrite } from './branching/effectiveOperations.js'
+export type { ResolvedChange } from './branching/effectiveOperations.js'
+export { operationsForChange } from './branching/effectiveOperations.js'
+export { resolveEffectiveOperations } from './branching/effectiveOperations.js'
 export type { MergeStreamEvent } from './branching/endpoints/merge.js'
 export { resolveBranchGlobalQuery } from './branching/globals.js'
 export { branchGlobalNeedsBothRows } from './branching/globals.js'
 export { pickBranchGlobal } from './branching/globals.js'
 export { resolveBranchGlobalVersionQuery } from './branching/globals.js'
 export { resolveBranchGlobalWrite } from './branching/globals.js'
+
 export { recordBranchGlobalChange } from './branching/globals.js'
 export type { MergeResult } from './branching/merge.js'
 export type { BlockedChange } from './branching/preflight.js'
-export { resolveBranch } from './branching/resolveBranch.js'
 
+export { runMergePreflight } from './branching/preflight.js'
+export { resolveBranch } from './branching/resolveBranch.js'
 export { isolateBranchState } from './branching/resolveBranch.js'
 export { loadBranchDeletions } from './branching/resolveBranch.js'
 export { loadBranchManifest } from './branching/resolveBranch.js'
-
 export { resetBranchState } from './branching/resolveBranch.js'
 export { resolveBranchReadState } from './branching/resolveBranchQuery.js'
 export { resolveBranchQuery } from './branching/resolveBranchQuery.js'
@@ -1558,22 +1563,17 @@ export type { MergeProgress } from './branching/types.js'
 export type { MergeApplicationOutcome } from './branching/types.js'
 export type { MergeCleanupOutcome } from './branching/types.js'
 export type { MergeEventChange } from './branching/types.js'
+
 export type { MergeRecoveryOutcome } from './branching/types.js'
 export type { SanitizedBranchingConfig } from './branching/types.js'
+
 export { branchDocIDField } from './branching/types.js'
 export { branchesCollectionSlug } from './branching/types.js'
 export { branchParentField } from './branching/types.js'
-
 export { mergeApplicationOutcomes } from './branching/types.js'
 export { mergeCleanupOutcomes } from './branching/types.js'
 
 export { mergeRecoveryOutcomes } from './branching/types.js'
-export { defaultBranchMergeValidation } from './branching/validation.js'
-export type { BranchMergeValidate } from './branching/validation.js'
-export type { BranchMergeValidationCandidate } from './branching/validation.js'
-export type { BranchMergeValidationError } from './branching/validation.js'
-
-export type { BranchMergeValidationResult } from './branching/validation.js'
 
 export interface FieldCustom extends Record<string, any> {}
 
@@ -1585,15 +1585,22 @@ export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
 
+export { defaultBranchMergeValidation } from './branching/validation.js'
+export type { BranchMergeValidate } from './branching/validation.js'
+
+export type { BranchMergeValidationCandidate } from './branching/validation.js'
+
+export type { BranchMergeValidationError } from './branching/validation.js'
+export type { BranchMergeValidationResult } from './branching/validation.js'
+
 export { resolveBranchVersionHistoryQuery } from './branching/versions.js'
 export { resolveBranchVersionParent } from './branching/versions.js'
 
 export { projectBranchVersionParents } from './branching/versions.js'
-
 export { resolveBranchVersionQuery } from './branching/versions.js'
 export { projectBranchVersionParent } from './branching/versions.js'
-
 export { resolveBranchVersionQuerySync } from './branching/versions.js'
+
 export { resolveBranchOwnVersions } from './branching/versions.js'
 
 export { generateImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
@@ -1691,6 +1698,7 @@ export { renameFileOperation } from './collections/operations/renameFile.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
+
 export { buildConfig } from './config/build.js'
 export {
   type ClientConfig,
@@ -1704,8 +1712,8 @@ export {
 export { addDefaultsToConfig } from './config/defaults.js'
 export { definePlugin } from './config/definePlugin.js'
 export { type OrderableEndpointBody } from './config/orderable/index.js'
-
 export { sanitizeConfig } from './config/sanitize.js'
+
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
@@ -2118,7 +2126,6 @@ export type {
   WorkflowHandler,
   WorkflowSlug,
 } from './queues/config/types/workflowTypes.js'
-
 export { JobCancelledError } from './queues/errors/index.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
