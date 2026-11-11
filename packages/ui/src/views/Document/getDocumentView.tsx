@@ -9,11 +9,14 @@ import type {
 } from 'payload'
 import type React from 'react'
 
+import { branchesCollectionSlug } from 'payload/shared'
+
 import type { ViewToRender } from './index.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { DefaultEditView } from '../../exports/client/index.js'
+import { BranchManageView, DefaultEditView } from '../../exports/client/index.js'
 import { APIView as DefaultAPIView } from '../API/index.js'
+import { BranchChangesView } from '../Branch/index.js'
 import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
 import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
@@ -23,6 +26,25 @@ import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 export type ViewFromConfig<TProps extends object> = {
   Component?: React.FC<TProps>
   ComponentConfig?: PayloadComponent<TProps>
+}
+
+/**
+ * A branch's default view is what it changed, not its own form.
+ *
+ * The form — a name and a description — is incidental next to the reason the
+ * branch exists, so it moves one click away to `/manage`. Selected here by direct
+ * import rather than a config component path, the way `HierarchyView` is, so no
+ * import map is involved.
+ */
+const getBranchView = (
+  collectionConfig: SanitizedCollectionConfig | undefined,
+  segment: string | undefined,
+): null | ViewToRender => {
+  if (collectionConfig?.slug !== branchesCollectionSlug) {
+    return null
+  }
+
+  return segment === 'manage' ? (BranchManageView as ViewToRender) : BranchChangesView
 }
 
 export const getDocumentView = ({
@@ -105,7 +127,10 @@ export const getDocumentView = ({
               viewKey = customViewKey
               View = CustomViewComponent
             } else {
-              View = getCustomDocumentViewByKey(views, 'default') || DefaultEditView
+              View =
+                getCustomDocumentViewByKey(views, 'default') ||
+                getBranchView(collectionConfig, undefined) ||
+                DefaultEditView
             }
 
             break
@@ -167,6 +192,9 @@ export const getDocumentView = ({
             if (customViewKey) {
               viewKey = customViewKey
               View = CustomViewComponent
+            } else {
+              // --> /collections/payload-branches/:id/manage
+              View = getBranchView(collectionConfig, segment4)
             }
 
             break

@@ -1,0 +1,155 @@
+'use client'
+
+import type { MergeFailure, MergeProgress, MergeResult } from 'payload'
+
+import { branchesCollectionSlug, formatAdminURL } from 'payload/shared'
+import { useCallback, useState } from 'react'
+import { toast } from 'sonner'
+
+import type { MergeTarget } from './context.js'
+
+import { useConfig } from '../../providers/Config/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { readMergeStream } from './readMergeStream.js'
+
+export const useMergeBranchAction = ({
+  canCloseBranch,
+  closeBranch,
+  target,
+}: {
+  canCloseBranch: boolean
+  closeBranch: boolean
+  target: MergeTarget | null
+}): {
+  failure: MergeFailure | null
+  isMerging: boolean
+  mergeNow: () => Promise<void>
+  outcome: MergeResult | null
+  progress: MergeProgress | null
+  resetMerge: () => void
+} => {
+  const {
+    config: {
+      routes: { api },
+      serverURL,
+    },
+  } = useConfig()
+  const router = useRouter()
+  const { startRouteTransition } = useRouteTransition()
+  const { t } = useTranslation()
+  const [isMerging, setIsMerging] = useState(false)
+  const [progress, setProgress] = useState<MergeProgress | null>(null)
+  const [outcome, setOutcome] = useState<MergeResult | null>(null)
+  const [failure, setFailure] = useState<MergeFailure | null>(null)
+
+  const reportResult = useCallback(
+    (result: MergeResult) => {
+      if (result.merged.length) {
+        toast.success(t('branching:mergedCount', { count: result.merged.length }))
+      }
+
+      result.blocked.forEach(({ message }) => toast.error(message))
+
+      if (!result.merged.length && !result.blocked.length && !result.validationErrors.length) {
+        toast.info(t('branching:noChangesYet'))
+      }
+    },
+    [t],
+  )
+
+  const mergeNow = useCallback(async () => {
+    if (!target || isMerging) {
+      return
+    }
+
+    setIsMerging(true)
+    setProgress(null)
+    setOutcome(null)
+    setFailure(null)
+
+    try {
+      const response = await fetch(
+        formatAdminURL({
+          apiRoute: api,
+          path: `/${branchesCollectionSlug}/${target.branchID}/merge`,
+          serverURL,
+        }),
+        {
+          body: JSON.stringify({
+            changes: target.selectedChangeIDs,
+            closeBranch: canCloseBranch && closeBranch,
+            stream: true,
+          }),
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+        },
+      )
+
+      if (!response.ok || !response.body) {
+        const result = (await response.json().catch(() => null)) as
+          | ({ type: 'error' } & MergeFailure)
+          | MergeResult
+          | null
+
+        if (result && 'type' in result && result.type === 'error') {
+          setFailure(result)
+        } else if (
+          result &&
+          !('type' in result) &&
+          (result.blocked?.length || result.validationErrors?.length)
+        ) {
+          reportResult(result)
+          setOutcome(result)
+        } else {
+          toast.error(t('error:unknown'))
+        }
+
+        return
+      }
+
+      const result = await readMergeStream({ body: response.body, onProgress: setProgress })
+
+      if (!result) {
+        toast.error(t('branching:mergeInterrupted'))
+
+        return
+      }
+
+      if (result.type === 'error') {
+        setFailure(result)
+
+        return
+      }
+
+      reportResult(result.result)
+      setOutcome(result.result)
+      await startRouteTransition(() => router.refresh())
+    } catch (_err) {
+      toast.error(t('error:unknown'))
+    } finally {
+      setIsMerging(false)
+    }
+  }, [
+    api,
+    canCloseBranch,
+    closeBranch,
+    isMerging,
+    reportResult,
+    router,
+    serverURL,
+    startRouteTransition,
+    t,
+    target,
+  ])
+
+  const resetMerge = useCallback(() => {
+    setProgress(null)
+    setOutcome(null)
+    setFailure(null)
+  }, [])
+
+  return { failure, isMerging, mergeNow, outcome, progress, resetMerge }
+}
