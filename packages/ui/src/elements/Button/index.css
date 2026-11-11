@@ -89,6 +89,10 @@
     background-color: transparent;
     border: var(--stroke-width-small) dashed var(--special-border-translucent);
 
+    &.btn--icon-only {
+      border-width: var(--stroke-width-small);
+    }
+
     &:hover:not(.btn--disabled) {
       background-color: var(--color-bg-transparent-hover);
     }
