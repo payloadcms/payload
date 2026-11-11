@@ -368,6 +368,52 @@ describe('Access Control', () => {
         expect(sanitizePermissions(sanitized)).toEqual(sanitized)
       })
 
+      it('should only evaluate read access for fields on the queried path', async () => {
+        const evaluatedFields: string[] = []
+        const readAccess = (name: string) => () => {
+          evaluatedFields.push(name)
+          return true
+        }
+        const blockFields = [
+          { name: 'heading', type: 'text', access: { read: readAccess('heading') } },
+          { name: 'body', type: 'text', access: { read: readAccess('body') } },
+        ]
+        const fields = [
+          { name: 'title', type: 'text', access: { read: readAccess('title') } },
+          { name: 'unrelated', type: 'text', access: { read: readAccess('unrelated') } },
+          {
+            name: 'layout',
+            type: 'blocks',
+            blocks: [{ slug: 'content', fields: blockFields, flattenedFields: blockFields }],
+          },
+        ]
+        const collection = payload.collections[blocksFieldAccessSlug].config
+        const originalFields = collection.fields
+        const originalFlattenedFields = collection.flattenedFields
+        collection.fields = fields as unknown as typeof collection.fields
+        collection.flattenedFields = fields as unknown as typeof collection.flattenedFields
+
+        try {
+          await payload.find({
+            collection: blocksFieldAccessSlug,
+            overrideAccess: false,
+            where: { title: { equals: 'example' } },
+          })
+          expect(evaluatedFields).toEqual(['title'])
+
+          evaluatedFields.length = 0
+          await payload.find({
+            collection: blocksFieldAccessSlug,
+            overrideAccess: false,
+            where: { 'layout.heading': { equals: 'example' } },
+          })
+          expect(evaluatedFields).toEqual(['heading'])
+        } finally {
+          collection.fields = originalFields
+          collection.flattenedFields = originalFlattenedFields
+        }
+      })
+
       it('should reject constrained block children and allow readable siblings', async () => {
         await expect(
           payload.find({
