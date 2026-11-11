@@ -117,10 +117,11 @@ export default buildConfig({
 })
 ```
 
-To run [migrations](/docs/database/migrations), set `DATABASE_URL` to the direct string for that command:
+To run [migrations](/docs/database/migrations), store the direct string in a separate environment variable, for example `DIRECT_DATABASE_URL`, and pass it as `DATABASE_URL` for that command:
 
 ```bash
-DATABASE_URL="postgres://USER:PASSWORD@db.prisma.io:5432/postgres?sslmode=require" pnpm payload migrate
+# DIRECT_DATABASE_URL=postgres://USER:PASSWORD@db.prisma.io:5432/postgres?sslmode=require
+DATABASE_URL="$DIRECT_DATABASE_URL" pnpm payload migrate
 ```
 
 `payload migrate` also completes over the pooled connection, but the pooler ends any query that runs longer than 10 minutes and does not keep session state between transactions, so the direct connection is the safer choice for migrations. See the [Prisma Postgres connection pooling docs](https://www.prisma.io/docs/postgres/database/connection-pooling?utm_source=payload&utm_medium=docs&utm_campaign=payload_production_deployment) for the connection limits of each plan.
