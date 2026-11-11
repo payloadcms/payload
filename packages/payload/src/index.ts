@@ -1496,7 +1496,46 @@ export type {
   SanitizedPermissions,
   VerifyConfig,
 } from './auth/types.js'
+export { assertBranchActionAccess } from './branching/assertBranchActionAccess.js'
+export { assertBranchReadable } from './branching/assertBranchReadable.js'
+export { assertBranchUpdateAccess } from './branching/assertBranchUpdateAccess.js'
+export type { EffectiveOperation } from './branching/effectiveOperations.js'
+
+export type { MergeStreamEvent } from './branching/endpoints/merge.js'
+
+export type { MergeResult } from './branching/merge.js'
+
+export type { BlockedChange } from './branching/preflight.js'
+
 export { resetBranchState } from './branching/resolveBranch.js'
+export { resolveBranch } from './branching/resolveBranch.js'
+
+export type { BranchingConfig } from './branching/types.js'
+export type { MergeableChange } from './branching/types.js'
+export type { MergeWarning } from './branching/types.js'
+export { branchOperations } from './branching/types.js'
+export type { BranchOperation } from './branching/types.js'
+export type { MergeProgress } from './branching/types.js'
+export type { MergeApplicationOutcome } from './branching/types.js'
+export type { MergeCleanupOutcome } from './branching/types.js'
+export type { MergeEventChange } from './branching/types.js'
+export type { MergeRecoveryOutcome } from './branching/types.js'
+export type { SanitizedBranchingConfig } from './branching/types.js'
+export { branchChangesCollectionSlug } from './branching/types.js'
+export { branchDocIDField } from './branching/types.js'
+export { branchesCollectionSlug } from './branching/types.js'
+export { branchField } from './branching/types.js'
+export { branchParentField } from './branching/types.js'
+export { MAIN_BRANCH } from './branching/types.js'
+export { mergeApplicationOutcomes } from './branching/types.js'
+
+export { mergeCleanupOutcomes } from './branching/types.js'
+export { mergeRecoveryOutcomes } from './branching/types.js'
+export type { BranchMergeValidate } from './branching/validation.js'
+
+export type { BranchMergeValidationCandidate } from './branching/validation.js'
+export type { BranchMergeValidationError } from './branching/validation.js'
+export type { BranchMergeValidationResult } from './branching/validation.js'
 export { generateImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 export type { ImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 export { genImportMapIterateFields } from './cli/commands/generateImportMap/iterateFields.js'
@@ -1592,6 +1631,7 @@ export { renameFileOperation } from './collections/operations/renameFile.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
+
 export { buildConfig } from './config/build.js'
 export {
   type ClientConfig,
@@ -1607,6 +1647,7 @@ export { definePlugin } from './config/definePlugin.js'
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 
 export { sanitizeConfig } from './config/sanitize.js'
+
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
@@ -1707,7 +1748,6 @@ export type {
 } from './database/types.js'
 export type { DynamicMigrationTemplate } from './database/types.js'
 export type { DeleteBranchGlobal } from './database/types.js'
-
 export type { DeleteBranchGlobalArgs } from './database/types.js'
 export type { UpsertBranchGlobalChange } from './database/types.js'
 export type { UpsertBranchGlobalChangeArgs } from './database/types.js'
@@ -1741,25 +1781,13 @@ export {
   ValidationError,
   ValidationErrorName,
 } from './errors/index.js'
-
 export type { ValidationFieldError } from './errors/index.js'
 export type { Authorship, SanitizedAuthorship } from './fields/baseFields/authorship/index.js'
 export { createCreatedByField, createUpdatedByField } from './fields/baseFields/authorship/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 
-export interface FieldCustom extends Record<string, any> {}
-
-export interface CollectionCustom extends Record<string, any> {}
-
-export interface CollectionAdminCustom extends Record<string, any> {}
-
-export interface GlobalCustom extends Record<string, any> {}
-
-export interface GlobalAdminCustom extends Record<string, any> {}
-
 export { getSlugFallbackValue } from './fields/baseFields/slug/getSlugFallbackValue.js'
-
 export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 export {
   createClientBlocks,
@@ -1768,7 +1796,6 @@ export {
   type ServerOnlyFieldAdminProperties,
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
-
 export { sanitizeField, sanitizeFields } from './fields/config/sanitize.js'
 export type { SanitizeFieldArgs } from './fields/config/sanitize.js'
 export type {
@@ -1883,14 +1910,14 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
+
 export { getDefaultValue } from './fields/getDefaultValue.js'
-
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
-
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
+
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export { validateBlocksFilterOptions, validations } from './fields/validations.js'
 export type {
@@ -2128,11 +2155,13 @@ export {
   stripVirtualFields,
 } from './utilities/getVirtualFieldNames.js'
 export { handleEndpoints } from './utilities/handleEndpoints.js'
+
 export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
 export { isEntityHidden } from './utilities/isEntityHidden.js'
 export { isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 export { isPlainObject } from './utilities/isPlainObject.js'
+
 export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { logError } from './utilities/logError.js'
@@ -2151,10 +2180,10 @@ export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
 export { sanitizeSortParams } from './utilities/sanitizeSortParams.js'
 export { getConfigInfoInputSchema } from './utilities/sharedInputSchemas.js'
 export { stripUnselectedFields } from './utilities/stripUnselectedFields.js'
-export { beginDeferredCleanupScope } from './utilities/transactionCallbacks.js'
-export { beginDeferredCleanupScopeIfNeeded } from './utilities/transactionCallbacks.js'
 
 export {
+  beginDeferredCleanupScope,
+  beginDeferredCleanupScopeIfNeeded,
   clearDeferredCleanupScope,
   flushDeferredCleanupScope,
   scheduleAfterTransactionCommit,
@@ -2163,7 +2192,6 @@ export { transformPointDataToPayload } from './utilities/transformPointDataToPay
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { strictObject } from './utilities/zod.js'
-
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
@@ -2179,3 +2207,13 @@ export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'
 export { z } from 'zod/mini'
+
+export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
