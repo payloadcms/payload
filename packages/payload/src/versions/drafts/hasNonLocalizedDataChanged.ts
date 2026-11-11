@@ -26,7 +26,7 @@ export const hasNonLocalizedDataChanged = ({
 
     if (fieldAffectsData(field)) {
       // Storage identity is not a change to shared document content.
-      if ([branchField, branchDocIDField, branchParentField].includes(field.name)) {
+      if ([branchDocIDField, branchField, branchParentField].includes(field.name)) {
         continue
       }
 
