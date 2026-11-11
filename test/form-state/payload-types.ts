@@ -259,10 +259,10 @@ export interface AutosavePost {
 export interface Condition {
   id: string;
   showField?: boolean | null;
-  clientValidatedValue?: string | null;
   conditionalCustomField?: string | null;
   conditionalRowField?: string | null;
   conditionalCollapsibleField?: string | null;
+  clientValidatedValue?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -457,10 +457,10 @@ export interface AutosavePostsSelect<T extends boolean = true> {
  */
 export interface ConditionsSelect<T extends boolean = true> {
   showField?: T;
-  clientValidatedValue?: T;
   conditionalCustomField?: T;
   conditionalRowField?: T;
   conditionalCollapsibleField?: T;
+  clientValidatedValue?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

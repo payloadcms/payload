@@ -10,10 +10,6 @@ export const ConditionsCollection: CollectionConfig = {
       type: 'checkbox',
     },
     {
-      name: 'clientValidatedValue',
-      type: 'text',
-    },
-    {
       name: 'conditionalCustomField',
       type: 'text',
       admin: {
@@ -47,6 +43,10 @@ export const ConditionsCollection: CollectionConfig = {
           type: 'text',
         },
       ],
+    },
+    {
+      name: 'clientValidatedValue',
+      type: 'text',
     },
   ],
   versions: false,
