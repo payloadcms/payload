@@ -8,7 +8,7 @@ import type { UploadSessionIntentData } from '../../utilities/uploadWithSession.
 
 import { shouldUseUploadSession, uploadWithSession } from '../../utilities/uploadWithSession.js'
 import { useConfig } from '../Config/index.js'
-import { useUploadSessions } from '../UploadSessions/index.js'
+import { useOptionalUploadSessions } from '../UploadSessions/index.js'
 
 type UploadHandler = (args: {
   docPrefix?: string
@@ -27,7 +27,9 @@ const Context = React.createContext<null | UploadHandlersContext>(null)
 
 export const UploadHandlersProvider = ({ children }) => {
   const { config, getEntityConfig } = useConfig()
-  const uploadSessions = useUploadSessions()
+  // Optional, so this public provider still works when rendered on its own, without upload
+  // sessions; files then upload when the document is saved.
+  const uploadSessions = useOptionalUploadSessions()
   // A failed save submits the same File again, which then resumes its session instead of
   // starting another one that would hold a filename and a quota slot until it expires.
   const sessionIDsByFile = React.useRef(new WeakMap<File, number | string>())
@@ -45,7 +47,7 @@ export const UploadHandlersProvider = ({ children }) => {
 
     return async ({ docPrefix, file, intent, targetID }) => {
       // The upload may already be running since the file was picked; the save waits for it.
-      const runningUpload = uploadSessions.getUploadedFile({ file, intent })
+      const runningUpload = uploadSessions?.getUploadedFile({ docPrefix, file, intent }) ?? null
 
       if (runningUpload !== null) {
         return runningUpload

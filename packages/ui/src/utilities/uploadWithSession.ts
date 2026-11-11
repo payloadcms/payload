@@ -42,6 +42,10 @@ class UploadSessionRequestError extends Error {
   }
 }
 
+/** Whether a session request failed because the session no longer exists, not e.g. a network error. */
+export const isUploadSessionGoneError = (err: unknown): boolean =>
+  err instanceof UploadSessionRequestError && (err.status === 404 || err.status === 410)
+
 export type UploadSessionIntentData = {
   data: Record<string, unknown>
   draft?: boolean

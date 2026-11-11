@@ -136,13 +136,17 @@ export const useFormSubmission = ({
   /**
    * Validates the document on the server without saving it. The `file` field is skipped because
    * its bytes are being uploaded separately and are never part of the form state sent here.
+   * When the server cannot validate, `unavailableMessage` is returned instead of errors, so the
+   * save stops rather than storing data that was never validated.
    */
   const getServerValidationErrors = useCallback(
     async ({
       formState,
     }: {
       formState: FormState
-    }): Promise<{ message: string; path: string }[]> => {
+    }): Promise<
+      { errors: { message: string; path: string }[] } | { unavailableMessage: string }
+    > => {
       const result = await getFormState({
         id,
         collectionSlug,
@@ -156,9 +160,18 @@ export const useFormSubmission = ({
         skipValidation: false,
       })
 
-      return Object.entries(result?.state ?? {})
-        .filter(([path, field]) => path !== 'file' && field.valid === false)
-        .map(([path, field]) => ({ message: field.errorMessage ?? t('error:unknown'), path }))
+      if (!result?.state) {
+        return {
+          unavailableMessage:
+            result && 'message' in result && result.message ? result.message : t('error:unknown'),
+        }
+      }
+
+      return {
+        errors: Object.entries(result.state)
+          .filter(([path, field]) => path !== 'file' && field.valid === false)
+          .map(([path, field]) => ({ message: field.errorMessage ?? t('error:unknown'), path })),
+      }
     },
     [
       collectionSlug,
@@ -344,12 +357,19 @@ export const useFormSubmission = ({
           data?.file instanceof File && Boolean(uploadSessions?.isUploading({ file: data.file }))
 
         if (isValid && isWaitingOnUpload && !skipValidation) {
-          const serverErrors = await getServerValidationErrors({
+          const serverValidation = await getServerValidationErrors({
             formState: serializableFormState,
           })
 
-          if (serverErrors.length) {
-            dispatchFields({ type: 'ADD_SERVER_ERRORS', errors: serverErrors })
+          // The save stops so the user can retry; the upload keeps going meanwhile.
+          if ('unavailableMessage' in serverValidation) {
+            errorToast(serverValidation.unavailableMessage)
+            setIsSubmitted(true)
+            return
+          }
+
+          if (serverValidation.errors.length) {
+            dispatchFields({ type: 'ADD_SERVER_ERRORS', errors: serverValidation.errors })
             setIsValid(false)
             isValid = false
           }

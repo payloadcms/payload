@@ -177,22 +177,12 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
 
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const handleAdoptedFile = useCallback(
-    (file: File) => {
-      // An adopted upload replacing a stored file shows like a picked replacement.
-      if (data?.filename) {
-        setRemovedFile(true)
-      }
-
-      setValue(file)
-      setFilename(file.name)
-    },
-    [data?.filename, setValue],
-  )
-
   const { onFileChange: onSessionFileChange } = useFileFieldUploadSession({
     collectionSlug,
-    onAdopt: handleAdoptedFile,
+    hasStoredFile: Boolean(data?.filename),
+    setFilename,
+    setRemovedFile,
+    setValue,
   })
 
   const handleFileChange = useCallback(
@@ -396,7 +386,8 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <FieldError message={errorMessage} showError={showError} />
-      {data && data.filename && !removedFile && (
+      {/* A selected replacement hides the stored file, also after a failed save resets `removedFile`. */}
+      {data && data.filename && !removedFile && !value && (
         <FileDetails
           collectionSlug={collectionSlug}
           customUploadActions={customActions}

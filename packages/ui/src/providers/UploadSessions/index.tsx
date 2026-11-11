@@ -15,15 +15,19 @@ import {
   createUploadSession,
   getUploadSession,
   getUploadSessionFile,
-  listUploadSessions,
+  isUploadSessionGoneError,
   resumeUploadSession,
   setUploadSessionIntent,
   shouldUseUploadSession,
   UploadSessionClientError,
 } from '../../utilities/uploadWithSession.js'
+import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 import { useRouter } from '../RouterAdapter/index.js'
 import { useTranslation } from '../Translation/index.js'
+import { createProgressToast } from './browser.js'
+import { useAnswerOtherTabs } from './otherTabs.js'
+import { useRecoverUploadSessions } from './useRecoverUploadSessions.js'
 
 /** Thrown to a waiting save when its form unmounts; the coordinator finishes the save instead. */
 export class UploadContinuesInBackgroundError extends Error {
@@ -44,8 +48,8 @@ type UploadEntry = {
   /** The file the form currently holds, which changes when it is renamed. */
   formFile: File
   hasIntent: boolean
-  /** Pending request that stores the intent; background completion waits for it. */
-  intentRequest?: Promise<unknown>
+  /** Pending request that stores the intent. Never rejects; background completion waits for it. */
+  intentRequest?: Promise<void>
   /** Adopted from a link: the bytes are already in storage and not in this browser. */
   isAdopted?: boolean
   isAttached: boolean
@@ -57,8 +61,13 @@ type UploadEntry = {
   /** Whether a save has consumed or is waiting on this upload. */
   isWaitedOn: boolean
   session: Promise<ClientUploadSession>
-  /** Set once the session is created, so other tabs can be told this tab holds it. */
+  /**
+   * The session's ID once known, or the session being resumed until it resolves. Tells other tabs
+   * this tab holds it, and lets a later retry resume it instead of creating another one.
+   */
   sessionID?: string
+  /** The document prefix the session was started with. Storage keeps the object under it. */
+  startedDocPrefix?: string
   /** The name the session was started with. Storage keeps the object under this name. */
   startedName: string
   targetID?: number | string
@@ -77,6 +86,7 @@ export type UploadSessionsContext = {
   detach: (args: { file: File }) => void
   /** Returns a promise for the file reference if a session upload is tracked for this file. */
   getUploadedFile: (args: {
+    docPrefix?: string
     file: File
     intent?: UploadSessionIntentData
   }) => null | Promise<UploadInstructions['file']>
@@ -92,6 +102,8 @@ export type UploadSessionsContext = {
   /** Starts a session upload when the file qualifies. Returns whether one was started. */
   start: (args: {
     collectionSlug: UploadCollectionSlug
+    /** The document's storage prefix, which places the stored object. */
+    docPrefix?: string
     file: File
     /** A session this file already started, resumed instead of creating another one. */
     resumeSessionID?: string
@@ -101,21 +113,16 @@ export type UploadSessionsContext = {
 
 const Context = React.createContext<null | UploadSessionsContext>(null)
 
-const TABS_CHANNEL_NAME = 'payload-upload-sessions'
-const TABS_REPLY_TIMEOUT_MS = 300
-
-type TabsMessage =
-  | { sessionIDs: string[]; type: 'held' }
-  | { sessionIDs: string[]; type: 'whoHolds' }
-
 /**
  * Coordinates durable uploads for the whole Admin so they survive client-side navigation. Large
  * files start uploading when they are picked; saving waits for the upload instead of starting it.
  */
 export const UploadSessionsProvider = ({ children }: { children: React.ReactNode }) => {
   const { config, getEntityConfig } = useConfig()
+  const { user } = useAuth()
   const router = useRouter()
   const { t } = useTranslation()
+  const userID = user?.id
 
   const getErrorMessage = useCallback(
     (err: unknown) => {
@@ -132,6 +139,15 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
   const entriesRef = useRef(new Map<File, UploadEntry>())
   /** One adoption per session while its stand-in file is tracked, e.g. when a dev-mode effect runs twice. */
   const adoptionsRef = useRef(new Map<string, Promise<File | null>>())
+  /** Sessions this tab is resuming after a reload, reported to other tabs as held. */
+  const recoveringSessionIDsRef = useRef(new Set<string>())
+  /** Upload toasts that belong to the signed-in user and are dismissed when the user changes. */
+  const toastIDsRef = useRef(new Set<string>())
+
+  const trackToast = useCallback((id: string) => {
+    toastIDsRef.current.add(id)
+    return id
+  }, [])
 
   /**
    * Stops tracking an entry. A replacement may already be tracked under the same file (a renamed
@@ -162,7 +178,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
   )
 
   const getDocumentURL = useCallback(
-    ({ id, collectionSlug }: { collectionSlug: string; id?: number | string }) =>
+    ({ id, collectionSlug }: { collectionSlug: string; id?: null | number | string }) =>
       formatAdminURL({
         adminRoute: config.routes.admin,
         path: `/collections/${collectionSlug}/${id ?? 'create'}`,
@@ -170,10 +186,18 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
     [config.routes.admin],
   )
 
+  /** Opens the session's document with the upload attached, so the user can finish saving. */
+  const getFinishSavingURL = useCallback(
+    ({ session }: { session: ClientUploadSession }) =>
+      `${getDocumentURL({ id: session.targetID, collectionSlug: session.collectionSlug })}?uploadSession=${session.id}`,
+    [getDocumentURL],
+  )
+
   const showSaved = useCallback(
     ({ id, collectionSlug }: { collectionSlug: string; id: number | string }) => {
       // Persistent so keyboard and screen-reader users can reach the action (WCAG 2.2.1).
       toast.success(t('upload:uploadSavedInBackground'), {
+        id: trackToast(`upload-session-saved-${collectionSlug}-${id}`),
         action: {
           label: t('general:open'),
           onClick: () => router.push(getDocumentURL({ id, collectionSlug })),
@@ -182,37 +206,27 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         duration: Infinity,
       })
     },
-    [getDocumentURL, router, t],
+    [getDocumentURL, router, t, trackToast],
   )
 
   const showReadyToFinish = useCallback(
     ({ session }: { session: ClientUploadSession }) => {
-      const url = `${getDocumentURL({
-        id: session.targetID ?? undefined,
-        collectionSlug: session.collectionSlug,
-      })}?uploadSession=${session.id}`
-
       toast.info(t('upload:uploadReadyToFinishSaving', { filename: session.file.filename }), {
-        id: `upload-session-ready-${session.id}`,
-        action: { label: t('upload:finishSaving'), onClick: () => router.push(url) },
+        id: trackToast(`upload-session-ready-${session.id}`),
+        action: {
+          label: t('upload:finishSaving'),
+          onClick: () => router.push(getFinishSavingURL({ session })),
+        },
         closeButton: true,
         duration: Infinity,
       })
     },
-    [getDocumentURL, router, t],
+    [getFinishSavingURL, router, t, trackToast],
   )
 
   /** Called once storage is complete for an upload whose form is gone. */
   const finishInBackground = useCallback(
-    async ({
-      intentRequest,
-      session,
-    }: {
-      intentRequest?: Promise<unknown>
-      session: ClientUploadSession
-    }) => {
-      await intentRequest?.catch(() => {})
-
+    async ({ session }: { session: ClientUploadSession }) => {
       if (!session.hasIntent) {
         showReadyToFinish({ session })
         return
@@ -224,25 +238,29 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         showSaved({ id: doc.id, collectionSlug: session.collectionSlug })
       } catch (err) {
         toast.error(getErrorMessage(err), {
+          id: trackToast(`upload-session-ready-${session.id}`),
           action: {
             label: t('upload:finishSaving'),
-            onClick: () =>
-              router.push(
-                `${getDocumentURL({
-                  id: session.targetID ?? undefined,
-                  collectionSlug: session.collectionSlug,
-                })}?uploadSession=${session.id}`,
-              ),
+            onClick: () => router.push(getFinishSavingURL({ session })),
           },
           duration: Infinity,
         })
       }
     },
-    [getDocumentURL, getErrorMessage, requestArgs, router, showReadyToFinish, showSaved, t],
+    [
+      getErrorMessage,
+      getFinishSavingURL,
+      requestArgs,
+      router,
+      showReadyToFinish,
+      showSaved,
+      t,
+      trackToast,
+    ],
   )
 
   const start = useCallback<UploadSessionsContext['start']>(
-    ({ collectionSlug, file, resumeSessionID, targetID }) => {
+    ({ collectionSlug, docPrefix, file, resumeSessionID, targetID }) => {
       const collectionConfig = getEntityConfig({ collectionSlug })
 
       if (!collectionConfig || !shouldUseUploadSession({ collectionConfig, file })) {
@@ -250,7 +268,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       }
 
       const controller = new AbortController()
-      const toastID = `upload-session-${crypto.randomUUID()}`
+      const toastID = trackToast(`upload-session-${crypto.randomUUID()}`)
       let detach: UploadEntry['detach'] = () => {}
       const detached = new Promise<never>((_, reject) => {
         detach = reject
@@ -264,21 +282,29 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       const createSession = () =>
         createUploadSession({
           collectionSlug,
+          docPrefix,
           file,
           targetID,
           ...requestArgs,
         })
 
       // A retry after a failed upload continues its session, so only missing parts are sent and
-      // the session does not linger next to a new one.
+      // the session does not linger next to a new one. Only a session that is gone is replaced;
+      // other errors, e.g. while offline, fail this attempt and the next retry resumes again.
       const session = resumeSessionID
-        ? getUploadSession({ id: resumeSessionID, ...requestArgs })
-            .then((existing) =>
+        ? getUploadSession({ id: resumeSessionID, ...requestArgs }).then(
+            (existing) =>
               existing.status === 'pending' || existing.status === 'active'
                 ? existing
                 : createSession(),
-            )
-            .catch(createSession)
+            (err: unknown) => {
+              if (isUploadSessionGoneError(err)) {
+                return createSession()
+              }
+
+              throw err
+            },
+          )
         : createSession()
 
       const progress = createProgressToast({ id: toastID })
@@ -312,6 +338,8 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         isSettled: false,
         isWaitedOn: false,
         session,
+        sessionID: resumeSessionID,
+        startedDocPrefix: docPrefix,
         startedName: file.name,
         targetID,
         toastID,
@@ -334,8 +362,9 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
 
           if (!entry.isAttached) {
             removeEntry(entry)
+            // `hasIntent` is final only once the intent request has settled.
+            await entry.intentRequest
             await finishInBackground({
-              intentRequest: entry.intentRequest,
               session: { ...(await session), hasIntent: entry.hasIntent },
             })
             return
@@ -381,6 +410,7 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       removeEntry,
       requestArgs,
       t,
+      trackToast,
     ],
   )
 
@@ -397,8 +427,13 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       releaseWaitingSave(entry)
       toast.dismiss(entry.toastID)
 
+      // A resume that never reached the server still knows the ID of the session it resumes.
       void entry.session
-        .then(({ id }) => cancelUploadSession({ id, ...requestArgs }))
+        .then(
+          ({ id }) => id,
+          () => entry.sessionID,
+        )
+        .then((id) => (id === undefined ? undefined : cancelUploadSession({ id, ...requestArgs })))
         .catch(() => {})
     },
     [releaseWaitingSave, removeEntry, requestArgs],
@@ -459,33 +494,93 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
     [removeEntry, requestArgs, showReadyToFinish],
   )
 
+  /**
+   * Stores the submitted data on the session. A failure rejects the returned promise, so a save
+   * still waiting in its form shows the error. A save that already moved to the background gets
+   * an error toast, and once storage completes the user is offered to finish saving instead.
+   */
+  const storeIntent = useCallback(
+    ({ entry, intent }: { entry: UploadEntry; intent: UploadSessionIntentData }) => {
+      if (!entry.isCountedAsWaitingSave) {
+        entry.isCountedAsWaitingSave = true
+        setWaitingSaveCount((count) => count + 1)
+      }
+
+      entry.hasIntent = true
+
+      const request = entry.session.then(({ id }) =>
+        setUploadSessionIntent({ id, intent, ...requestArgs }),
+      )
+
+      const intentRequest = request.then(
+        () => {},
+        (err: unknown) => {
+          // A later save stored newer data; this failure no longer describes the session.
+          if (entry.intentRequest !== intentRequest) {
+            return
+          }
+
+          entry.hasIntent = false
+          // Leaving the form would now lose the data, so the leave prompt applies again.
+          releaseWaitingSave(entry)
+
+          if (!entry.isAttached) {
+            toast.error(getErrorMessage(err), {
+              id: trackToast(`upload-session-intent-${entry.toastID}`),
+              duration: Infinity,
+            })
+          }
+        },
+      )
+
+      entry.intentRequest = intentRequest
+
+      const failure = request.then(() => new Promise<never>(() => {}))
+
+      failure.catch(() => {})
+
+      return failure
+    },
+    [getErrorMessage, releaseWaitingSave, requestArgs, trackToast],
+  )
+
   const getUploadedFile = useCallback<UploadSessionsContext['getUploadedFile']>(
-    ({ file, intent }) => {
+    ({ docPrefix, file, intent }) => {
       let entry = entriesRef.current.get(file)
 
       if (!entry) {
         return null
       }
 
-      // Storage holds the object under the name picked at start, so a file renamed since then
-      // is uploaded again under its new name. Adopted uploads have no bytes here to send again.
-      if (file.name !== entry.startedName && !entry.isAdopted) {
+      // Storage holds the object under the name and prefix picked at start, so a file renamed or
+      // moved since then is uploaded again. Adopted uploads have no bytes here to send again.
+      const isMoved = file.name !== entry.startedName || docPrefix !== entry.startedDocPrefix
+
+      if (isMoved && !entry.isAdopted) {
         const { collectionSlug, targetID } = entry
 
         cancel({ file })
 
-        if (!start({ collectionSlug, file, targetID })) {
+        if (!start({ collectionSlug, docPrefix, file, targetID })) {
           return null
         }
 
         entry = entriesRef.current.get(file)!
       } else if (entry.isFailed) {
-        const { collectionSlug, sessionID, targetID } = entry
+        const { collectionSlug, sessionID, startedDocPrefix, targetID } = entry
 
         removeEntry(entry)
         toast.dismiss(entry.toastID)
 
-        if (!start({ collectionSlug, file, resumeSessionID: sessionID, targetID })) {
+        if (
+          !start({
+            collectionSlug,
+            docPrefix: startedDocPrefix,
+            file,
+            resumeSessionID: sessionID,
+            targetID,
+          })
+        ) {
           return null
         }
 
@@ -499,23 +594,15 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         return entry.session.then(({ id }) => getUploadSessionFile({ id, ...requestArgs }))
       }
 
-      if (intent) {
-        if (!entry.isCountedAsWaitingSave) {
-          entry.isCountedAsWaitingSave = true
-          setWaitingSaveCount((count) => count + 1)
-        }
+      const waits: Promise<UploadInstructions['file']>[] = [entry.file, entry.detached]
 
-        entry.hasIntent = true
-        entry.intentRequest = entry.session
-          .then(({ id }) => setUploadSessionIntent({ id, intent, ...requestArgs }))
-          .catch(() => {
-            entry.hasIntent = false
-          })
+      if (intent) {
+        waits.push(storeIntent({ entry, intent }))
       }
 
-      return Promise.race([entry.file, entry.detached])
+      return Promise.race(waits)
     },
-    [cancel, removeEntry, requestArgs, start],
+    [cancel, removeEntry, requestArgs, start, storeIntent],
   )
 
   const adoptSession = useCallback(
@@ -582,49 +669,58 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
     return Boolean(entry && !entry.isSettled)
   }, [])
 
+  // Sessions belong to the user who started them. On sign-out or a switch of user, stop this
+  // tab's uploads and hide their toasts. The sessions are kept, so their owner is offered to
+  // resume them after signing in again.
+  const previousUserIDRef = useRef(userID)
+
+  useEffect(() => {
+    if (previousUserIDRef.current === userID) {
+      return
+    }
+
+    previousUserIDRef.current = userID
+
+    for (const entry of entriesRef.current.values()) {
+      entry.controller.abort()
+    }
+
+    entriesRef.current.clear()
+    adoptionsRef.current.clear()
+
+    for (const id of toastIDsRef.current) {
+      toast.dismiss(id)
+    }
+
+    toastIDsRef.current.clear()
+  }, [userID])
+
   useBeforeUnload(
     () => [...entriesRef.current.values()].some(({ isSettled }) => !isSettled),
     t('upload:uploadInProgressLeaveWarning'),
   )
 
-  const recoveringSessionIDsRef = useRef(new Set<string>())
+  const getHeldSessionIDs = useCallback(() => {
+    const heldSessionIDs = new Set(recoveringSessionIDsRef.current)
 
-  // Answers other tabs, so they do not offer to recover an upload this tab is still running.
-  useEffect(() => {
-    if (typeof BroadcastChannel === 'undefined') {
-      return
-    }
-
-    const channel = new BroadcastChannel(TABS_CHANNEL_NAME)
-
-    channel.onmessage = ({ data }: MessageEvent<TabsMessage>) => {
-      if (data?.type !== 'whoHolds') {
-        return
-      }
-
-      const heldSessionIDs = new Set(recoveringSessionIDsRef.current)
-
-      for (const { sessionID } of entriesRef.current.values()) {
-        if (sessionID) {
-          heldSessionIDs.add(sessionID)
-        }
-      }
-
-      const sessionIDs = data.sessionIDs.filter((id) => heldSessionIDs.has(id))
-
-      if (sessionIDs.length) {
-        channel.postMessage({ type: 'held', sessionIDs } satisfies TabsMessage)
+    for (const { sessionID } of entriesRef.current.values()) {
+      if (sessionID) {
+        heldSessionIDs.add(sessionID)
       }
     }
 
-    return () => channel.close()
+    return heldSessionIDs
   }, [])
+
+  useAnswerOtherTabs({ getHeldSessionIDs })
 
   useRecoverUploadSessions({
     finishInBackground,
     getErrorMessage,
     recoveringSessionIDsRef,
     requestArgs,
+    trackToast,
+    userID,
   })
 
   // Changes identity whenever the count changes, so forms re-check their own file.
@@ -662,187 +758,4 @@ export const useUploadSessions = (): UploadSessionsContext => {
   }
 
   return context
-}
-
-/**
- * After a reload or browser restart, offers to resume each unfinished upload. The browser cannot
- * reopen the original file on its own, so the user reselects it; only missing segments are sent.
- */
-const useRecoverUploadSessions = ({
-  finishInBackground,
-  getErrorMessage,
-  recoveringSessionIDsRef,
-  requestArgs,
-}: {
-  finishInBackground: (args: { session: ClientUploadSession }) => Promise<void>
-  getErrorMessage: (err: unknown) => string
-  /** Sessions this tab is resuming, reported to other tabs as held. */
-  recoveringSessionIDsRef: React.RefObject<Set<string>>
-  requestArgs: { apiRoute: string; serverURL: string }
-}) => {
-  const { config, getEntityConfig } = useConfig()
-  const { t } = useTranslation()
-  const hasCheckedRef = useRef(false)
-
-  const hasSegmentedCollections = config.collections.some(
-    ({ upload }) => upload?.uploadInstructions?.supportsSegmentedUploads,
-  )
-
-  useEffect(() => {
-    if (!hasSegmentedCollections || hasCheckedRef.current) {
-      return
-    }
-
-    hasCheckedRef.current = true
-
-    void listUploadSessions(requestArgs)
-      .then(async (sessions) => {
-        const heldByOtherTabs = await findSessionsHeldByOtherTabs({
-          sessionIDs: sessions.map(({ id }) => String(id)),
-        })
-
-        for (const session of sessions) {
-          if (heldByOtherTabs.has(String(session.id))) {
-            continue
-          }
-
-          if (session.isStorageComplete) {
-            void finishInBackground({ session })
-            continue
-          }
-
-          const toastID = `upload-session-recovery-${session.id}`
-
-          toast.warning(
-            t(session.hasIntent ? 'upload:uploadInterruptedWillSave' : 'upload:uploadInterrupted', {
-              filename: session.file.filename,
-            }),
-            {
-              id: toastID,
-              action: {
-                label: t('upload:selectFile'),
-                onClick: () =>
-                  pickFile({
-                    accept: session.file.mimeType,
-                    onPick: (file) => {
-                      const progress = createProgressToast({ id: toastID })
-                      const sessionID = String(session.id)
-
-                      recoveringSessionIDsRef.current.add(sessionID)
-
-                      progress.show(t('upload:resumingFile', { filename: file.name }))
-
-                      resumeUploadSession({
-                        file,
-                        onProgress: ({ loaded, total }) =>
-                          progress.show(
-                            t('upload:uploadingFileProgress', {
-                              filename: file.name,
-                              percent: Math.floor((loaded / total) * 100),
-                            }),
-                          ),
-                        retries: getEntityConfig({ collectionSlug: session.collectionSlug })?.upload
-                          ?.transfer?.retries,
-                        session,
-                        ...requestArgs,
-                      })
-                        .then(() => {
-                          toast.dismiss(toastID)
-                          return finishInBackground({ session })
-                        })
-                        .catch((err: unknown) => toast.error(getErrorMessage(err), { id: toastID }))
-                        .finally(() => recoveringSessionIDsRef.current.delete(sessionID))
-                    },
-                  }),
-              },
-              cancel: {
-                label: t('upload:cancelUpload'),
-                onClick: () =>
-                  void cancelUploadSession({ id: session.id, ...requestArgs }).catch(() => {}),
-              },
-              duration: Infinity,
-            },
-          )
-        }
-      })
-      .catch(() => {})
-  }, [
-    finishInBackground,
-    getEntityConfig,
-    getErrorMessage,
-    hasSegmentedCollections,
-    recoveringSessionIDsRef,
-    requestArgs,
-    t,
-  ])
-}
-
-/** Asks the other open Admin tabs which of these sessions they are still uploading or holding. */
-const findSessionsHeldByOtherTabs = async ({
-  sessionIDs,
-}: {
-  sessionIDs: string[]
-}): Promise<Set<string>> => {
-  const heldSessionIDs = new Set<string>()
-
-  if (!sessionIDs.length || typeof BroadcastChannel === 'undefined') {
-    return heldSessionIDs
-  }
-
-  const channel = new BroadcastChannel(TABS_CHANNEL_NAME)
-
-  channel.onmessage = ({ data }: MessageEvent<TabsMessage>) => {
-    if (data?.type === 'held') {
-      data.sessionIDs.forEach((id) => heldSessionIDs.add(id))
-    }
-  }
-
-  channel.postMessage({ type: 'whoHolds', sessionIDs } satisfies TabsMessage)
-  await new Promise((resolve) => setTimeout(resolve, TABS_REPLY_TIMEOUT_MS))
-  channel.close()
-
-  return heldSessionIDs
-}
-
-/**
- * An auto-updating progress toast the user can hide (WCAG 2.2.2). Once closed it stays hidden
- * while the upload carries on; completion and errors still show their own toasts.
- */
-const createProgressToast = ({ id }: { id: string }) => {
-  let isHidden = false
-
-  return {
-    show: (message: string) => {
-      if (!isHidden) {
-        toast.loading(message, {
-          id,
-          closeButton: true,
-          onDismiss: () => {
-            isHidden = true
-          },
-        })
-      }
-    },
-  }
-}
-
-const pickFile = ({ accept, onPick }: { accept?: string; onPick: (file: File) => void }) => {
-  const input = document.createElement('input')
-
-  input.type = 'file'
-  input.accept = accept ?? ''
-  input.hidden = true
-  input.onchange = () => {
-    const file = input.files?.[0]
-
-    input.remove()
-
-    if (file) {
-      onPick(file)
-    }
-  }
-  input.oncancel = () => input.remove()
-  // Attached so every browser treats it as a regular file chooser.
-  document.body.append(input)
-  input.click()
 }

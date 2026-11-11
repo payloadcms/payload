@@ -137,23 +137,13 @@ export const FileManager: React.FC<FileManagerProps> = ({
     sidePanelMimeType !== 'image/svg+xml' &&
     sidePanelMimeType !== 'image/jxl'
 
-  const handleAdoptedFile = useCallback(
-    (file: File) => {
-      // An adopted upload replacing a stored file shows like a picked replacement.
-      if (data?.filename) {
-        setRemovedFile(true)
-      }
-
-      setValue(file)
-      setFilename(file.name)
-    },
-    [data?.filename, setValue],
-  )
-
   const { onFileChange: onSessionFileChange } = useFileFieldUploadSession({
     collectionSlug,
+    hasStoredFile: Boolean(data?.filename),
     isEnabled: isUploadStartedOnSelect,
-    onAdopt: handleAdoptedFile,
+    setFilename,
+    setRemovedFile,
+    setValue,
   })
 
   const renameFile = (fileToChange: File, newName: string): File =>

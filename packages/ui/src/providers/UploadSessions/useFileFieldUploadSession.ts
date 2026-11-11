@@ -1,8 +1,7 @@
 'use client'
-import type { UploadCollectionSlug } from 'payload'
-
 import { useCallback, useEffect, useRef } from 'react'
 
+import { useForm } from '../../forms/Form/index.js'
 import { useDocumentInfo } from '../DocumentInfo/index.js'
 import { useSearchParams } from '../RouterAdapter/index.js'
 import { useUploadSessions } from './index.js'
@@ -15,15 +14,23 @@ import { useUploadSessions } from './index.js'
  */
 export const useFileFieldUploadSession = ({
   collectionSlug,
+  hasStoredFile,
   isEnabled = true,
-  onAdopt,
+  setFilename,
+  setRemovedFile,
+  setValue,
 }: {
   collectionSlug: string
+  /** Whether the document already has a stored file, which an attached upload then replaces. */
+  hasStoredFile: boolean
   isEnabled?: boolean
-  /** Receives a stand-in file for an attached upload, to put in the form's file field. */
-  onAdopt: (file: File) => void
+  setFilename: (filename: string) => void
+  setRemovedFile: (isRemoved: boolean) => void
+  /** Sets the form's file field. */
+  setValue: (file: File) => void
 }): { onFileChange: (args: { file: File | null; isNewFile: boolean }) => void } => {
   const { id } = useDocumentInfo()
+  const { getDataByPath } = useForm()
   const uploadSessions = useUploadSessions()
   /**
    * The context value changes when a save starts waiting on an upload. Effects read the latest
@@ -65,13 +72,27 @@ export const useFileFieldUploadSession = ({
         file &&
         uploadSessions.start({
           collectionSlug,
+          docPrefix: getDocPrefix({ prefix: getDataByPath('prefix') }),
           file,
           targetID: id,
         })
           ? file
           : null
     },
-    [collectionSlug, id, isEnabled],
+    [collectionSlug, getDataByPath, id, isEnabled],
+  )
+
+  const onAdopt = useCallback(
+    (file: File) => {
+      // An attached upload replacing a stored file shows like a picked replacement.
+      if (hasStoredFile) {
+        setRemovedFile(true)
+      }
+
+      setValue(file)
+      setFilename(file.name)
+    },
+    [hasStoredFile, setFilename, setRemovedFile, setValue],
   )
 
   useEffect(() => {
@@ -113,3 +134,7 @@ export const useFileFieldUploadSession = ({
 
   return { onFileChange }
 }
+
+/** Matches the prefix a save sends with its file, so storage places the object the same way. */
+const getDocPrefix = ({ prefix }: { prefix: unknown }): string | undefined =>
+  typeof prefix === 'string' ? prefix : undefined
