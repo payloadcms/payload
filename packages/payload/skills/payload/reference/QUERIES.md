@@ -2,6 +2,21 @@
 
 Complete reference for querying data across Local API, REST, and GraphQL.
 
+## Content Branching
+
+When experimental Content Branching is enabled, select a branch by its **name**, not its record ID:
+
+- Local API: `branch: 'fall-campaign'` on supported operations. Without an explicit branch, operations inherit `req.branch`, then fall back to `main`. Use `branch: 'main'` when a query must read main even within a branch request.
+- REST: `GET /api/pages?branch=fall-campaign`. URL-encode branch names.
+- GraphQL: `Pages(branch: "fall-campaign")` on the query field.
+
+Pass `user` and `overrideAccess: false` for user-facing Local API queries. Branch access does not
+replace collection, global, or field access. Relationship and join reads retain branch context;
+pass `req` to nested operations in hooks to preserve it.
+
+See [Content Branching](BRANCHING.md) for creating branches, reading and editing content,
+merging, discarding, and authenticated previews.
+
 ## Query Operators
 
 ```ts

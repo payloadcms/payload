@@ -201,6 +201,23 @@ export const Pages: CollectionConfig = {
 }
 ```
 
+## Content Branching
+
+Content Branching is experimental and provides named workspaces across collections and globals.
+Enable it with `branching: true` in the root Payload Config; eligible collections and globals
+participate by default. Set `branching: false` on an entity or list its slug in root
+`branching.exclude` to keep its content shared across branches. Auth collections cannot branch,
+and internal collections are excluded by default. Custom-ID collections and the multi-tenant
+plugin are unsupported.
+
+Branching and drafts are separate features: enable `versions.drafts` for a draft/publish workflow.
+Merging a branch preserves its latest draft/published state and does not automatically publish
+drafts. Unchanged branch documents inherit current `main` content rather than a creation-time
+snapshot.
+
+See [Content Branching](BRANCHING.md) for enablement, migrations, Admin Panel workflow, API
+examples, and branch-aware previews.
+
 ## Versioning & Drafts
 
 Payload maintains version history and supports draft/publish workflows.
