@@ -63,3 +63,18 @@ test('should preserve native Request properties when isolating a branch', async 
   isolated.branch = 'other'
   expect(req.branch).toBe('campaign')
 })
+
+test('should isolate merge validation and upload request properties', () => {
+  const req = { branch: 'campaign', context: {}, query: {}, locale: 'en' } as PayloadRequest
+  const isolated = isolateBranchState({ req })
+
+  isolated.operation = 'validate'
+  isolated.locale = 'de'
+  isolated.query = { branch: 'main' }
+  isolated.file = undefined
+
+  expect(req.operation).toBeUndefined()
+  expect(req.locale).toBe('en')
+  expect(req.query).toEqual({})
+  expect(Object.hasOwn(req, 'file')).toBe(false)
+})
