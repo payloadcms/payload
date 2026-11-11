@@ -14,6 +14,7 @@ type Args = {
   published?: boolean
   req?: PayloadRequest
   slug: string
+  storageWhere?: Where
   where: Where
 }
 
@@ -24,6 +25,7 @@ export const getLatestGlobalVersion = async ({
   payload,
   published,
   req,
+  storageWhere,
   where,
 }: Args): Promise<{ global: Document; globalExists: boolean; latestVersionExists: boolean }> => {
   let latestVersion: TypeWithVersion<Document> | undefined
@@ -40,7 +42,9 @@ export const getLatestGlobalVersion = async ({
         locale: locale || req?.locale || undefined,
         pagination: false,
         req,
-        where: whereQuery as unknown as Where,
+        where: storageWhere
+          ? combineQueries(whereQuery as unknown as Where, storageWhere)
+          : (whereQuery as unknown as Where),
       })
     ).docs[0]
   }
@@ -49,13 +53,14 @@ export const getLatestGlobalVersion = async ({
     slug,
     locale,
     req,
-    where,
+    where: storageWhere ? combineQueries(where, storageWhere) : where,
   })
   const existingGlobal = hasWhereAccessResult(where)
     ? await payload.db.findGlobal({
         slug,
         locale,
         req,
+        where: storageWhere,
       })
     : global
   const globalExists = Boolean(existingGlobal && Object.keys(existingGlobal).length > 0)
@@ -77,9 +82,12 @@ export const getLatestGlobalVersion = async ({
         locale: locale || req?.locale || undefined,
         pagination: false,
         req,
-        where: combineQueries(appendGlobalVersionToQueryKey(where), {
-          id: { equals: latestVersion.id },
-        }),
+        where: combineQueries(
+          combineQueries(appendGlobalVersionToQueryKey(where), {
+            id: { equals: latestVersion.id },
+          }),
+          storageWhere ?? {},
+        ),
       })
     ).docs[0]
 
