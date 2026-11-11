@@ -20,7 +20,10 @@ type Args = {
   version: {
     id: number | string
     publishedLocale?: string
-    version: { _status?: 'draft' | 'published'; updatedAt: string }
+    version: {
+      _status?: 'draft' | 'published' | Record<string, 'draft' | 'published' | undefined>
+      updatedAt: string
+    }
   }
 }
 
@@ -39,7 +42,13 @@ export function getVersionLabel({
   name: 'currentDraft' | 'currentlyPublished' | 'draft' | 'previouslyPublished' | 'published'
   pillStyle: Parameters<typeof Pill>[0]['pillStyle']
 } {
-  const status = version.version._status
+  const rawStatus = version.version._status
+  const status =
+    rawStatus && typeof rawStatus === 'object'
+      ? currentLocale
+        ? rawStatus[currentLocale]
+        : undefined
+      : rawStatus
 
   if (status === 'draft') {
     const publishedNewerThanDraft =

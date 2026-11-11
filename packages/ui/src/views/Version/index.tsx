@@ -6,6 +6,7 @@ import type {
   TypeWithVersion,
 } from 'payload'
 
+import { isolateObjectProperty } from 'payload'
 import { hasDraftsEnabled } from 'payload/shared'
 import React from 'react'
 
@@ -66,7 +67,7 @@ export async function VersionView(props: DocumentViewServerProps) {
     globalSlug,
     locale: 'all',
     overrideAccess: false,
-    req,
+    req: isolateObjectProperty(req, ['fallbackLocale', 'locale']),
     user,
   })
 
@@ -93,7 +94,7 @@ export async function VersionView(props: DocumentViewServerProps) {
       locale: 'all',
       overrideAccess: false,
       parentID: id,
-      req,
+      req: isolateObjectProperty(req, ['fallbackLocale', 'locale']),
       sort: '-updatedAt',
       user,
       where: {
@@ -115,7 +116,7 @@ export async function VersionView(props: DocumentViewServerProps) {
           globalSlug,
           locale: 'all',
           overrideAccess: false,
-          req,
+          req: isolateObjectProperty(req, ['fallbackLocale', 'locale']),
           user,
         })
       : Promise.resolve(null)) as Promise<null | TypeWithVersion<object>>,
@@ -125,10 +126,10 @@ export async function VersionView(props: DocumentViewServerProps) {
           collectionSlug,
           depth: 0,
           globalSlug,
-          locale: req.locale,
+          locale: userLocale,
           overrideAccess: false,
           parentID: id,
-          req,
+          req: isolateObjectProperty(req, ['fallbackLocale', 'locale']),
           status: 'published',
           user,
         })
@@ -139,10 +140,10 @@ export async function VersionView(props: DocumentViewServerProps) {
           collectionSlug,
           depth: 0,
           globalSlug,
-          locale: 'all',
+          locale: userLocale,
           overrideAccess: false,
           parentID: id,
-          req,
+          req: isolateObjectProperty(req, ['fallbackLocale', 'locale']),
           status: 'draft',
           user,
         })
@@ -156,10 +157,10 @@ export async function VersionView(props: DocumentViewServerProps) {
           draft: true,
           globalSlug,
           limit: 1,
-          locale: 'all',
+          locale: userLocale,
           overrideAccess: false,
           parentID: id,
-          req,
+          req: isolateObjectProperty(req, ['fallbackLocale', 'locale']),
           sort: '-updatedAt',
           user,
           where: {
