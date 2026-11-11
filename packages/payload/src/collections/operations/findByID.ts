@@ -184,9 +184,7 @@ export const findByIDOperation = async <
       draftsEnabled: replaceWithVersion,
       joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
       locale: locale!,
-      req: {
-        transactionID: req.transactionID,
-      } as PayloadRequest,
+      req,
       select: dbSelect,
       where: fullWhere,
     }
