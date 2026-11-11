@@ -5,7 +5,11 @@ export const fileExists = async (filename: string): Promise<boolean> => {
     await fs.stat(filename)
 
     return true
-  } catch (ignore) {
-    return false
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return false
+    }
+
+    throw error
   }
 }

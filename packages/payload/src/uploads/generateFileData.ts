@@ -23,6 +23,7 @@ import {
   ValidationError,
 } from '../errors/index.js'
 import { TransformerContractError } from '../errors/TransformerContractError.js'
+import { UploadFilenameError } from '../errors/UploadFilenameError.js'
 import { deepCopyObject } from '../utilities/deepCopyObject.js'
 import { deepFreeze } from '../utilities/deepFreeze.js'
 import { formatAdminURL } from '../utilities/formatAdminURL.js'
@@ -1167,6 +1168,10 @@ const processUpload = async <T>({
       fileData.variants = variants
     }
   } catch (err) {
+    if (err instanceof UploadFilenameError) {
+      throw err
+    }
+
     throw toFileUploadError({ err, req })
   }
 
