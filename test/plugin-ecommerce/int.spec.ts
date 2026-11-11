@@ -539,6 +539,33 @@ test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () 
 
       expect(variant.title).toBe('Cap — Small')
     })
+
+    test('saving a product without changing its title leaves variants untouched', async ({
+      payload,
+    }) => {
+      const product = await createProduct(payload, 'Scarf')
+
+      const variant = await payload.create({
+        collection: 'variants',
+        data: { product: product.id, options: [smallID] },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: product.id,
+        data: { name: 'Scarf (renamed internally)' },
+        overrideAccess: true,
+      })
+
+      const after = await payload.findByID({
+        collection: 'variants',
+        id: variant.id,
+        overrideAccess: true,
+      })
+
+      expect(after.updatedAt).toBe(variant.updatedAt)
+    })
   })
 
   test.describe('cart item endpoints', () => {
