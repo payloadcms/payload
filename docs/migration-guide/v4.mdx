@@ -328,6 +328,31 @@ The spawned CLI discovers the Payload config from `cwd` or `PAYLOAD_CONFIG_PATH`
 
 `generateTypes` now returns `{ types, outputFile, written }` instead of returning the generated source directly when using `returnString: true`. `generateImportMap` now returns `{ outputFile, written }`, and `payload.db.generateSchema()` returns `{ outputFile }`. Code that ignores these return values does not need to change.
 
+### SQL array and block rows use separate public and storage IDs
+
+Array and block tables now always store two IDs: a generated physical primary key in `id`, and the public row ID in `_uuid`. This applies to relational arrays and blocks in collections and globals, whether versions are enabled or disabled. The physical key follows the adapter's `idType`; `_uuid` preserves the existing public ID and its configured text or numeric type. The column name does not mean public IDs must be native UUID values.
+
+Public IDs are no longer table-wide primary keys. Payload rejects duplicate or missing public IDs within a write to the same row table; an explicitly configured unique field still has its own uniqueness constraint.
+
+Payload continues to return the public value as `row.id`. Existing IDs, including ObjectId-style strings, custom IDs, and numeric `0`, remain unchanged. Database joins and localized/nested parent references use physical keys. If your application queries SQL tables directly, use `_uuid` for public row IDs and `id` for storage joins. Queries through Payload continue to use paths such as `items.id`.
+
+This makes nested storage independent of optional features that need multiple physical copies of the same logical row, such as version history and content branching. It does not change collection document IDs, MongoDB storage, or blocks stored as JSON. Existing version tables already using this layout do not need the ID conversion.
+
+**Existing SQL databases need a data migration**, including projects that do not use branching. Development schema push refuses to infer this conversion. For Postgres, Vercel Postgres, SQLite/libSQL, and D1:
+
+1. Back up the database and verify the upgrade on a copy. Stop application writes while applying the migration.
+2. Set `push: false` on your database adapter before starting the upgraded application against existing data.
+3. Ensure your latest committed migration snapshot matches the database before this change. Run `pnpm payload migrate:create uniform-row-ids`, review the generated migration, then run `pnpm payload migrate` with the upgraded packages installed.
+4. Keep the generated snapshot with the migration. It describes the final schema so the next migration does not repeat the conversion. Regenerate any unapplied older migration that casts text IDs directly to `serial`/`uuid`, or selects `_uuid` from a table where it does not exist.
+
+The generated migration preserves public IDs, assigns physical keys, and remaps the affected ownership graph, including nested arrays, blocks, localized values, and has-many select tables. It performs the conversion in an atomic transaction or batch with foreign-key enforcement kept active; it does not require disabling `transactionOptions` or foreign keys. Postgres sequences are advanced past copied IDs. Completed conversions can be retried without assigning new physical IDs. Other schema changes remain in the normal generated migration; atomicity of the row conversion does not make unrelated statements outside it atomic.
+
+Projects that have only used development schema push may not have a migration snapshot. Establish and verify a baseline with the old config and package versions, record that baseline as already applied in the existing database, and then generate the upgrade against it. Do not run an initial `CREATE TABLE` migration against a populated database. See [migration workflows](/docs/database/migrations). A fresh or disposable development database can instead be recreated; resetting a database is not a content-preserving upgrade.
+
+Review custom database objects before upgrading. The automatic conversion refuses unsupported foreign-key cycles, composite/custom unique key constraints, changed public ID types, and custom triggers or indexes absent from the snapshot; Postgres grants also require a custom migration. Database views and other manually managed objects may require a migration written for your schema. Large D1 migrations must also fit the platform's batch and resource limits; verify on a copy at representative scale.
+
+Run rollback while the upgraded packages still provide the migration helper. The old layout requires globally unique primary keys within each array/block table. Rollback refuses duplicate or missing public IDs atomically; resolve duplicates in the affected live-content tables or restore a compatible backup rather than discarding IDs. If the database contains a mixture of old and new row layouts after a manual schema edit, the migration stops and requires explicit repair.
+
 ### Default query depth has been reduced
 
 Queries that omit `depth` now populate one relationship level instead of two. This reduces database work and response size by default.
