@@ -110,17 +110,19 @@ export const fillEmptyLocalizedSlugs = async ({
 const hasMissingRequiredLocalizedField = ({
   data,
   fields,
+  isTopLevel = true,
   locale,
   parentIsLocalized = false,
 }: {
   data: JsonObject | undefined
   fields: FlattenedField[]
+  isTopLevel?: boolean
   locale: string
   parentIsLocalized?: boolean
 }): boolean =>
   fields.some((field) => {
-    // Slugs are generated together, so a missing slug must not block the others.
-    if (field.type === 'slug' || fieldIsVirtual(field) || field.admin?.condition) {
+    // Only top-level slugs are seeded together. Missing required nested slugs block their locale.
+    if ((isTopLevel && field.type === 'slug') || fieldIsVirtual(field) || field.admin?.condition) {
       return false
     }
 
@@ -134,6 +136,7 @@ const hasMissingRequiredLocalizedField = ({
       return hasMissingRequiredLocalizedField({
         data: value as JsonObject | undefined,
         fields: field.flattenedFields,
+        isTopLevel: false,
         locale,
         parentIsLocalized: isLocalized,
       })

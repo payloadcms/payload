@@ -3,6 +3,8 @@ import { expect } from 'vitest'
 import { test } from '../__helpers/int/vitest.js'
 import {
   slugLocalizedRequiredGroupSlug,
+  slugLocalizedRequiredNestedGroupSlug,
+  slugLocalizedRequiredNestedTabSlug,
   slugLocalizedRequiredSiblingSlug,
   slugLocalizedRequiredSlug,
 } from './slugs.js'
@@ -149,5 +151,67 @@ test.suite('Localized slugs with required localized fields', { config: './config
 
       expect(translated).toMatchObject({ slug: 'shared-title', content: { body: 'Second body' } })
     })
+  }
+
+  for (const collection of [
+    slugLocalizedRequiredNestedGroupSlug,
+    slugLocalizedRequiredNestedTabSlug,
+  ] as const) {
+    for (const locale of ['en', 'es'] as const) {
+      test(`should defer top-level slugs in ${locale} until a required nested slug in ${collection} is translated`, async ({
+        payload,
+      }) => {
+        const otherLocale = locale === 'en' ? 'es' : 'en'
+        const created = await payload.create({
+          collection,
+          data: { title: 'Shared title', content: { slug: 'First nested slug' } },
+          locale,
+          overrideAccess: true,
+        })
+
+        expect(created).toMatchObject({
+          slug: 'shared-title',
+          content: { slug: 'first-nested-slug' },
+        })
+
+        const untranslated = await payload.findByID({
+          collection,
+          id: created.id,
+          locale: otherLocale,
+          fallbackLocale: false,
+          overrideAccess: true,
+        })
+
+        expect(untranslated.slug ?? null).toBeNull()
+        expect(untranslated.content?.slug ?? null).toBeNull()
+
+        const translated = await payload.update({
+          collection,
+          id: created.id,
+          data: { content: { slug: 'Second nested slug' } },
+          locale: otherLocale,
+          fallbackLocale: false,
+          overrideAccess: true,
+        })
+
+        expect(translated).toMatchObject({
+          slug: 'shared-title',
+          content: { slug: 'second-nested-slug' },
+        })
+
+        const originalLocale = await payload.findByID({
+          collection,
+          id: created.id,
+          locale,
+          fallbackLocale: false,
+          overrideAccess: true,
+        })
+
+        expect(originalLocale).toMatchObject({
+          slug: created.slug,
+          content: { slug: created.content?.slug },
+        })
+      })
+    }
   }
 })
