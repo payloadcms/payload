@@ -1083,12 +1083,15 @@ export const getTableColumnFromPath = ({
     }
 
     const targetTable = aliasTable || newTable
+    const columnName =
+      field.name === 'id' && !columnPrefix && targetTable._uuid
+        ? '_uuid'
+        : `${columnPrefix}${field.name}`
 
-    selectFields[`${newTableName}.${columnPrefix}${field.name}`] =
-      targetTable[`${columnPrefix}${field.name}`]
+    selectFields[`${newTableName}.${columnPrefix}${field.name}`] = targetTable[columnName]
 
     return {
-      columnName: `${columnPrefix}${field.name}`,
+      columnName,
       constraints,
       field,
       pathSegments,

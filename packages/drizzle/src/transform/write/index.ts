@@ -1,6 +1,6 @@
 import type { FlattenedField } from 'payload'
 
-import { deepCopyObjectSimple } from 'payload'
+import { APIError, deepCopyObjectSimple } from 'payload'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { RowToInsert } from './types.js'
@@ -74,5 +74,44 @@ export const transformForWrite = ({
     textsToDelete: rowToInsert.textsToDelete,
   })
 
+  const seen = new Map<string, Set<string>>()
+  const checkRows = ({
+    tables,
+  }: {
+    tables: Record<
+      string,
+      {
+        arrays: RowToInsert['arrays']
+        arraysToPush: RowToInsert['arrays']
+        row: Record<string, unknown>
+      }[]
+    >
+  }) => {
+    for (const [tableName, rows] of Object.entries(tables)) {
+      for (const item of rows) {
+        if (item.row._uuid !== undefined && item.row._uuid !== null) {
+          const publicID = item.row._uuid
+
+          if (typeof publicID !== 'string' && typeof publicID !== 'number') {
+            throw new APIError('Array and block public IDs must be strings or numbers.', 400)
+          }
+          const ids = seen.get(tableName) ?? new Set<string>()
+          const id = String(publicID)
+
+          if (ids.has(id)) {
+            throw new APIError(`Duplicate public row ID in table ${tableName}.`, 400)
+          }
+          ids.add(id)
+          seen.set(tableName, ids)
+        }
+        checkRows({ tables: item.arrays })
+        checkRows({ tables: item.arraysToPush })
+      }
+    }
+  }
+
+  checkRows({ tables: rowToInsert.arrays })
+  checkRows({ tables: rowToInsert.arraysToPush })
+  checkRows({ tables: rowToInsert.blocks })
   return rowToInsert
 }

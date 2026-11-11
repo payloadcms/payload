@@ -8,6 +8,7 @@ import prompts from 'prompts'
 
 import type { DrizzleAdapter } from '../types.js'
 
+import { buildRowIDMigration } from '../migrations/rowIDs/buildMigration.js'
 import { getMigrationTemplate } from './getMigrationTemplate.js'
 
 export const buildCreateMigration = ({
@@ -99,10 +100,25 @@ export const buildCreateMigration = ({
       }
 
       payload.logger.info('Starting migration: generating UP statements...')
-      const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
+      const rowIDsUp = await buildRowIDMigration({
+        adapter: this,
+        after: drizzleJsonAfter,
+        before: drizzleJsonBefore,
+        generateMigration,
+      })
+      const sqlStatementsUp = await generateMigration(rowIDsUp.snapshot as never, drizzleJsonAfter)
 
       payload.logger.info('Migration UP complete. Generating DOWN statements...')
-      const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
+      const rowIDsDown = await buildRowIDMigration({
+        adapter: this,
+        after: drizzleJsonBefore,
+        before: drizzleJsonAfter,
+        generateMigration,
+      })
+      const sqlStatementsDown = await generateMigration(
+        rowIDsDown.snapshot as never,
+        drizzleJsonBefore,
+      )
 
       payload.logger.info('Migration DOWN statements generation complete.')
 
@@ -113,6 +129,16 @@ export const buildCreateMigration = ({
       }
       if (sqlStatementsDown?.length) {
         downSQL = sanitizeStatements({ sqlExecute, statements: sqlStatementsDown })
+      }
+
+      if (rowIDsUp.plan || rowIDsDown.plan) {
+        imports = `import { migrateSQLRowIDs } from '${this.packageName}/migration-utils'`
+        if (rowIDsUp.plan) {
+          upSQL = `await migrateSQLRowIDs({ db, plan: ${JSON.stringify(rowIDsUp.plan, null, 2)} })\n${upSQL || ''}`
+        }
+        if (rowIDsDown.plan) {
+          downSQL = `await migrateSQLRowIDs({ db, plan: ${JSON.stringify(rowIDsDown.plan, null, 2)} })\n${downSQL || ''}`
+        }
       }
 
       if (!upSQL?.length && !downSQL?.length && !forceAcceptWarning) {

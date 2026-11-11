@@ -137,7 +137,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
               const locale = row._locale
               const data = {}
               delete row._locale
-              if (row._uuid) {
+              if (row._uuid !== null && row._uuid !== undefined) {
                 row.id = row._uuid
                 delete row._uuid
               }
@@ -173,7 +173,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
           }, {})
         } else {
           result[field.name] = fieldData.reduce((acc, row, i) => {
-            if (row._uuid) {
+            if (row._uuid !== null && row._uuid !== undefined) {
               row.id = row._uuid
               delete row._uuid
             }
@@ -230,7 +230,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
           result[field.name] = {}
 
           blocksByPath.forEach((row) => {
-            if (row._uuid) {
+            if (row._uuid !== null && row._uuid !== undefined) {
               row.id = row._uuid
               delete row._uuid
             }
@@ -308,7 +308,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
           result[field.name] = blocksByPath.reduce((acc, row, i) => {
             delete row._order
-            if (row._uuid) {
+            if (row._uuid !== null && row._uuid !== undefined) {
               row.id = row._uuid
               delete row._uuid
             }

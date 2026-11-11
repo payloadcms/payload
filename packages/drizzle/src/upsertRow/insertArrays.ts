@@ -8,7 +8,7 @@ type Args = {
   }[]
   db: DrizzleAdapter['drizzle'] | DrizzleTransaction
   parentRows: Record<string, unknown>[]
-  uuidMap?: Record<string, number | string>
+  uuidMap?: Map<string, Map<string, number | string>>
 }
 
 type RowsByTable = {
@@ -26,7 +26,7 @@ export const insertArrays = async ({
   arrays,
   db,
   parentRows,
-  uuidMap = {},
+  uuidMap = new Map(),
 }: Args): Promise<void> => {
   // Maintain a map of flattened rows by table
   const rowsByTable: RowsByTable = {}
@@ -87,10 +87,13 @@ export const insertArrays = async ({
 
       insertedRows.forEach((row) => {
         if (
-          typeof row._uuid === 'string' &&
+          (typeof row._uuid === 'string' || typeof row._uuid === 'number') &&
           (typeof row.id === 'string' || typeof row.id === 'number')
         ) {
-          uuidMap[row._uuid] = row.id
+          if (!uuidMap.has(tableName)) {
+            uuidMap.set(tableName, new Map())
+          }
+          uuidMap.get(tableName).set(String(row._uuid), row.id)
         }
       })
     }

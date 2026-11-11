@@ -116,7 +116,7 @@ export const traverseFields = ({
 }: Args) => {
   let fieldsMatched = false
 
-  if (row._uuid) {
+  if (row._uuid !== null && row._uuid !== undefined) {
     data._uuid = row._uuid
   }
 
@@ -309,7 +309,7 @@ export const traverseFields = ({
         if (isLocalized) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             // preserve array ID if there is
-            localeData._uuid = data.id || data._uuid
+            localeData._uuid = data.id ?? data._uuid
 
             traverseFields({
               adapter,
@@ -345,7 +345,7 @@ export const traverseFields = ({
         } else {
           // preserve array ID if there is
           const groupData = data[field.name] as Record<string, unknown>
-          groupData._uuid = data.id || data._uuid
+          groupData._uuid = data.id ?? data._uuid
 
           traverseFields({
             adapter,
@@ -710,7 +710,7 @@ export const traverseFields = ({
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
               const newRows = transformSelects({
-                id: insideArrayOrBlock ? data._uuid || data.id : undefined,
+                id: insideArrayOrBlock ? (data._uuid ?? data.id) : undefined,
                 data: localeData,
                 locale: localeKey,
               })
@@ -721,7 +721,7 @@ export const traverseFields = ({
         }
       } else if (Array.isArray(data[field.name])) {
         const newRows = transformSelects({
-          id: insideArrayOrBlock ? data._uuid || data.id : undefined,
+          id: insideArrayOrBlock ? (data._uuid ?? data.id) : undefined,
           data: data[field.name],
           locale: withinArrayOrBlockLocale,
         })

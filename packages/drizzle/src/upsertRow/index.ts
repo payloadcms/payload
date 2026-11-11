@@ -87,7 +87,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           arrays: [arraysToPush],
           db,
           parentRows: [insertedRow],
-          uuidMap: {},
+          uuidMap: new Map(),
         })
       }
 
@@ -651,8 +651,8 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       }
     }
 
-    // When versions are enabled, adapter is used to track mapping between blocks/arrays ObjectID to their numeric generated representation, then we use it for nested to arrays/blocks select hasMany in versions.
-    const arraysBlocksUUIDMap: Record<string, number | string> = {}
+    // Resolve logical row IDs within their owning table before inserting nested selects.
+    const arraysBlocksUUIDMap = new Map<string, Map<string, number | string>>()
 
     for (const [tableName, blockRows] of Object.entries(blocksToInsert)) {
       insertedBlockRows[tableName] = await adapter.insert({
@@ -664,10 +664,13 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       insertedBlockRows[tableName].forEach((row, i) => {
         blockRows[i].row = row
         if (
-          typeof row._uuid === 'string' &&
+          (typeof row._uuid === 'string' || typeof row._uuid === 'number') &&
           (typeof row.id === 'string' || typeof row.id === 'number')
         ) {
-          arraysBlocksUUIDMap[row._uuid] = row.id
+          if (!arraysBlocksUUIDMap.has(tableName)) {
+            arraysBlocksUUIDMap.set(tableName, new Map())
+          }
+          arraysBlocksUUIDMap.get(tableName).set(String(row._uuid), row.id)
         }
       })
 
@@ -742,10 +745,13 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         })
       }
 
-      if (Object.keys(arraysBlocksUUIDMap).length > 0) {
+      const parentTableName = adapter.rawRelations[selectTableName]?.parent?.to
+      const parentIDs = arraysBlocksUUIDMap.get(parentTableName)
+
+      if (parentIDs) {
         tableRows.forEach((row: RelationshipRow) => {
-          if (row.parent in arraysBlocksUUIDMap) {
-            row.parent = arraysBlocksUUIDMap[row.parent]
+          if (parentIDs.has(String(row.parent))) {
+            row.parent = parentIDs.get(String(row.parent))
           }
         })
       }

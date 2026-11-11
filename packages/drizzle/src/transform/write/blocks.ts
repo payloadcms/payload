@@ -1,5 +1,6 @@
 import type { FlattenedBlock, FlattenedBlocksField } from 'payload'
 
+import { APIError } from 'payload'
 import { fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -111,6 +112,9 @@ export const transformBlocks = ({
     // So move the ID to a uuid field for storage
     // and allow the database to generate a serial id automatically
     if (hasUUID) {
+      if (blockRow.id === null || blockRow.id === undefined) {
+        throw new APIError('Array and block rows require a public ID.', 400)
+      }
       newRow.row._uuid = blockRow.id
       delete blockRow.id
     }
