@@ -1532,8 +1532,10 @@ export { resolveBranchReadState } from './branching/resolveBranchQuery.js'
 export { resolveBranchQuery } from './branching/resolveBranchQuery.js'
 export { getBranchPredicateSync } from './branching/resolveBranchQuery.js'
 export type { BranchReadState } from './branching/resolveBranchQuery.js'
+
 export { resolveBranchRowID } from './branching/resolveBranchRowID.js'
 export { resolveBranchDelete } from './branching/tombstone.js'
+export { willBranchAbsorbDelete } from './branching/tombstone.js'
 export { MAIN_BRANCH } from './branching/types.js'
 export { branchField } from './branching/types.js'
 export { branchChangesCollectionSlug } from './branching/types.js'
@@ -1554,20 +1556,19 @@ export { branchParentField } from './branching/types.js'
 export { mergeApplicationOutcomes } from './branching/types.js'
 export { mergeCleanupOutcomes } from './branching/types.js'
 export { mergeRecoveryOutcomes } from './branching/types.js'
+export { defaultBranchMergeValidation } from './branching/validation.js'
 export type { BranchMergeValidate } from './branching/validation.js'
+
 export type { BranchMergeValidationCandidate } from './branching/validation.js'
 export type { BranchMergeValidationError } from './branching/validation.js'
 
 export type { BranchMergeValidationResult } from './branching/validation.js'
 export { resolveBranchVersionHistoryQuery } from './branching/versions.js'
-
 export { resolveBranchVersionParent } from './branching/versions.js'
 export { projectBranchVersionParents } from './branching/versions.js'
 export { resolveBranchVersionQuery } from './branching/versions.js'
-export { projectBranchVersionParent } from './branching/versions.js'
-export { resolveBranchVersionQuerySync } from './branching/versions.js'
 
-export { resolveBranchOwnVersions } from './branching/versions.js'
+export { projectBranchVersionParent } from './branching/versions.js'
 
 export interface FieldCustom extends Record<string, any> {}
 
@@ -1579,7 +1580,11 @@ export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
 
+export { resolveBranchVersionQuerySync } from './branching/versions.js'
+export { resolveBranchOwnVersions } from './branching/versions.js'
+
 export { generateImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
+
 export type { ImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 export { genImportMapIterateFields } from './cli/commands/generateImportMap/iterateFields.js'
 export { registerCLIExitCodeHandler } from './cli/runtime/exitCodeHandlers.js'
@@ -2126,7 +2131,6 @@ export {
   type BatchProcessorResult,
 } from './utilities/batchProcessing.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'
-
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
@@ -2139,7 +2143,6 @@ export {
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
-
 export {
   createPayloadRequest,
   type CreatePayloadRequestArgs,

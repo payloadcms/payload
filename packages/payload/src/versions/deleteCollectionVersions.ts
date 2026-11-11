@@ -1,6 +1,8 @@
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequest, Where } from '../types/index.js'
 
+import { resolveBranchOwnVersions } from '../branching/versions.js'
 import { type Payload } from '../index.js'
+import { markTransactionWrite } from '../utilities/transactionMutationTracker.js'
 
 type Args = {
   id?: number | string
@@ -11,6 +13,7 @@ type Args = {
   payload: Payload
   req?: PayloadRequest
   slug: string
+  versionIDs?: (number | string)[]
 }
 
 /**
@@ -25,15 +28,42 @@ export const deleteCollectionVersions = async ({
   ids,
   payload,
   req,
+  versionIDs,
 }: Args): Promise<void> => {
   try {
+    const parentIDs = ids ?? (typeof id === 'undefined' ? [] : [id])
+
+    if (!parentIDs.length || (versionIDs && !versionIDs.length)) {
+      return
+    }
+
+    let where: Where
+
+    if (versionIDs) {
+      where = { id: { in: versionIDs } }
+    } else {
+      const branchScopedVersionQueries = await Promise.all(
+        parentIDs.map((parentID) =>
+          resolveBranchOwnVersions({ id: parentID, collectionSlug: slug, req }),
+        ),
+      )
+
+      if (branchScopedVersionQueries.length === 1) {
+        where = branchScopedVersionQueries[0]!
+      } else {
+        where = { or: branchScopedVersionQueries }
+      }
+    }
+
     await payload.db.deleteVersions({
       collection: slug,
       req,
-      where: {
-        parent: ids ? { in: ids } : { equals: id },
-      },
+      // Scoped to the branch performing the delete. A delete on a branch is a
+      // tombstone rather than a real delete, so cascading by canonical ID alone
+      // would strip main's version chain while leaving its row in place.
+      where,
     })
+    markTransactionWrite({ req })
   } catch (err) {
     payload.logger.error({
       err,

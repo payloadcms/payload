@@ -4,7 +4,13 @@ import { en } from '@payloadcms/translations/languages/en'
 
 import type { RichTextSanitizer } from '../fields/config/sanitize.js'
 import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
-import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
+import type { GlobalConfig } from '../globals/config/types.js'
+import type {
+  CollectionConfig,
+  CollectionSlug,
+  GlobalSlug,
+  SanitizedCollectionConfig,
+} from '../index.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type {
   Config,
@@ -20,6 +26,13 @@ import type {
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { supportedPasswordHashIterations } from '../auth/strategies/local/generatePasswordSaltHash.js'
+import {
+  getBranchChangesCollection,
+  getBranchesCollection,
+  getBranchMergesCollection,
+} from '../branching/collections.js'
+import { injectBranchFields, injectGlobalBranchFields } from '../branching/injectBranchFields.js'
+import { sanitizeBranchingConfig } from '../branching/sanitizeBranchingConfig.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
@@ -459,6 +472,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   // Track orderable join fields during sanitization
   const orderableJoins: OrderableJoinInfo[] = []
 
+  // Must be resolved before the sanitizeCollection loop below, which performs
+  // `_branch` field injection and unique-index rewriting, and after the default
+  // user collection has been injected above so auth detection sees it.
+  const branching = sanitizeBranchingConfig(config as unknown as Config)
+  config.branching = branching
+
   for (let i = 0; i < config.collections!.length; i++) {
     if (collectionSlugs.has(config.collections![i]!.slug)) {
       throw new DuplicateCollection('slug', config.collections![i]!.slug)
@@ -478,6 +497,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       if (!validRelationships.includes(queryPresetsCollectionSlug)) {
         validRelationships.push(queryPresetsCollectionSlug)
       }
+    }
+
+    if (branching.branchableCollections.has(config.collections![i]!.slug)) {
+      // Mutates the collection in place. Must run before sanitizeCollection
+      // below, which flattens fields and resolves compound indexes.
+      injectBranchFields(config.collections![i] as unknown as CollectionConfig)
     }
 
     config.collections![i] = sanitizeCollection(
@@ -539,6 +564,10 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     for (let i = 0; i < config.globals!.length; i++) {
       if (hasScheduledPublishEnabled(config.globals![i]!)) {
         schedulePublishGlobals.push(config.globals![i]!.slug)
+      }
+
+      if (branching.branchableGlobals.has(config.globals![i]!.slug)) {
+        injectGlobalBranchFields(config.globals![i] as unknown as GlobalConfig)
       }
 
       config.globals![i] = sanitizeGlobal(
@@ -612,6 +641,28 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     )
 
     ;(config.collections ??= []).push(sanitizedJobsCollection)
+  }
+
+  if (branching.enabled) {
+    // Registered after user collections are sanitized so the polymorphic `doc`
+    // relationship on the changeset registry can reference the resolved
+    // branchable set. All are hard-excluded from branching themselves.
+    for (const branchCollection of [
+      getBranchesCollection(branching),
+      getBranchChangesCollection(config as unknown as Config),
+      getBranchMergesCollection(),
+    ]) {
+      validRelationships.push(branchCollection.slug)
+
+      configWithDefaults.collections!.push(
+        sanitizeCollection(
+          config as unknown as Config,
+          branchCollection,
+          richTextSanitizers,
+          validRelationships,
+        ),
+      )
+    }
   }
 
   const lockedDocumentsCollection = getLockedDocumentsCollection(config as unknown as Config)

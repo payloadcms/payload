@@ -2,6 +2,7 @@ import type { Field } from '../../fields/config/types.js'
 import type { SanitizedConfig } from '../../index.js'
 import type { JsonObject } from '../../types/index.js'
 
+import { branchDocIDField, branchField, branchParentField } from '../../branching/types.js'
 import { fieldAffectsData, fieldIsVirtual, tabHasName } from '../../fields/config/types.js'
 
 type HasNonLocalizedDataChangedArgs = {
@@ -24,6 +25,11 @@ export const hasNonLocalizedDataChanged = ({
     }
 
     if (fieldAffectsData(field)) {
+      // Storage identity is not a change to shared document content.
+      if ([branchDocIDField, branchField, branchParentField].includes(field.name)) {
+        continue
+      }
+
       const beforeValue = before[field.name]
       const afterValue = after[field.name]
 
