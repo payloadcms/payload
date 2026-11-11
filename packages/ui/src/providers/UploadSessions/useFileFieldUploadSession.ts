@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useForm } from '../../forms/Form/index.js'
 import { useDocumentInfo } from '../DocumentInfo/index.js'
@@ -8,8 +8,8 @@ import { useUploadSessions } from './index.js'
 
 /**
  * Connects a document's file field to the upload coordinator: large files start uploading as soon
- * as they are picked, removing or replacing the file cancels the upload, renaming keeps it, and
- * leaving the form hands it to the coordinator. A `?uploadSession=` link attaches an upload whose
+ * as they are picked, removing or replacing the file cancels the upload, and leaving the form
+ * hands it to the coordinator. A `?uploadSession=` link attaches an upload whose
  * bytes are already in storage.
  */
 export const useFileFieldUploadSession = ({
@@ -28,7 +28,14 @@ export const useFileFieldUploadSession = ({
   setRemovedFile: (isRemoved: boolean) => void
   /** Sets the form's file field. */
   setValue: (file: File) => void
-}): { onFileChange: (args: { file: File | null; isNewFile: boolean }) => void } => {
+}): {
+  /**
+   * Whether the selected file uploads through a session. Storage keeps the object under the name
+   * it started with, so the form locks the file name instead of sending the whole file again.
+   */
+  hasUploadSession: boolean
+  onFileChange: (args: { file: File | null; isNewFile: boolean }) => void
+} => {
   const { id } = useDocumentInfo()
   const { getDataByPath } = useForm()
   const uploadSessions = useUploadSessions()
@@ -40,6 +47,11 @@ export const useFileFieldUploadSession = ({
   uploadSessionsRef.current = uploadSessions
   const searchParams = useSearchParams()
   const sessionFileRef = useRef<File | null>(null)
+  const [hasUploadSession, setHasUploadSession] = useState(false)
+  const setSessionFile = useCallback((file: File | null) => {
+    sessionFileRef.current = file
+    setHasUploadSession(file !== null)
+  }, [])
   /** Counts file selections, so an attached upload that arrives after the user picked a file is dropped. */
   const selectionCountRef = useRef(0)
   const adoptedSessionID = isEnabled ? searchParams.get('uploadSession') : null
@@ -54,12 +66,6 @@ export const useFileFieldUploadSession = ({
 
       const uploadSessions = uploadSessionsRef.current
 
-      if (!isNewFile && file && sessionFileRef.current) {
-        uploadSessions.rekey({ from: sessionFileRef.current, to: file })
-        sessionFileRef.current = file
-        return
-      }
-
       if (sessionFileRef.current === file) {
         return
       }
@@ -68,18 +74,19 @@ export const useFileFieldUploadSession = ({
         uploadSessions.cancel({ file: sessionFileRef.current })
       }
 
-      sessionFileRef.current =
+      setSessionFile(
         file &&
-        uploadSessions.start({
-          collectionSlug,
-          docPrefix: getDocPrefix({ prefix: getDataByPath('prefix') }),
-          file,
-          targetID: id,
-        })
+          uploadSessions.start({
+            collectionSlug,
+            docPrefix: getDocPrefix({ prefix: getDataByPath('prefix') }),
+            file,
+            targetID: id,
+          })
           ? file
-          : null
+          : null,
+      )
     },
-    [collectionSlug, getDataByPath, id, isEnabled],
+    [collectionSlug, getDataByPath, id, isEnabled, setSessionFile],
   )
 
   const onAdopt = useCallback(
@@ -114,14 +121,14 @@ export const useFileFieldUploadSession = ({
         return
       }
 
-      sessionFileRef.current = placeholder
+      setSessionFile(placeholder)
       onAdopt(placeholder)
     })
 
     return () => {
       isCancelled = true
     }
-  }, [adoptedSessionID, onAdopt])
+  }, [adoptedSessionID, onAdopt, setSessionFile])
 
   useEffect(
     () => () => {
@@ -132,7 +139,7 @@ export const useFileFieldUploadSession = ({
     [],
   )
 
-  return { onFileChange }
+  return { hasUploadSession, onFileChange }
 }
 
 /** Matches the prefix a save sends with its file, so storage places the object the same way. */

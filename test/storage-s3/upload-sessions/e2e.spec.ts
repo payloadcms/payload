@@ -264,7 +264,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await page.getByRole('button', { name: 'Leave anyway' }).click()
     await page.getByRole('button', { name: 'Finish saving' }).click()
     await expect(page).toHaveURL(/uploadSession=/)
-    // The attached upload shows in the form, so it can be renamed or removed before saving.
+    // The attached upload shows in the form, so it can be removed before saving.
     await expect(page.locator('#field-filemanager-filename')).toHaveValue(/\.mp4$/)
 
     const partPutsBeforeSaving = log.partPuts
@@ -347,26 +347,14 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await context.close()
   })
 
-  test('should finish the save in the background for a file renamed while uploading', async ({
+  test('should lock the file name while the file uploads through a session', async ({
     browser,
   }) => {
     const { context, log, page } = await openCreateForm({ browser, partDelay: 3000 })
-    const title = `Renamed mid-upload ${Date.now()}`
 
     await pickFile(page)
     await expect.poll(() => log.partPuts).toBeGreaterThan(0)
-    await page.locator('#field-filemanager-filename').fill('renamed-mid-upload.mp4')
-    await page.getByLabel('Title').fill(title)
-    await page.locator('#action-save').click()
-    await expect.poll(() => log.sessionCalls.some((call) => call.endsWith('/intent'))).toBe(true)
-    await page.getByRole('link', { name: 'Users' }).first().click()
-
-    // The coordinator still tracks the restarted upload: no leave prompt, and the save finishes here.
-    await expect(page).toHaveURL(/\/users/)
-    await expect(page.getByText('Upload finished and the document was saved.')).toBeVisible({
-      timeout: 60_000,
-    })
-    expect((await expectVideo(title)).filename).toBe('renamed-mid-upload.mp4')
+    await expect(page.locator('#field-filemanager-filename')).toBeDisabled()
 
     await context.close()
   })
@@ -391,26 +379,6 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await chooser.setFiles(filePath)
 
     await expectVideo(title)
-
-    await context.close()
-  })
-
-  test('should save a file renamed after its upload started under the new name', async ({
-    browser,
-  }) => {
-    const { context, log, page } = await openCreateForm({ browser })
-    const title = `Renamed ${Date.now()}`
-
-    await pickFile(page)
-    await expect.poll(() => log.partPuts).toBe(3)
-    await page.locator('#field-filemanager-filename').fill('renamed.mp4')
-    await page.getByLabel('Title').fill(title)
-    await page.locator('#action-save').click()
-
-    const doc = await expectVideo(title)
-
-    expect(doc.filename).toMatch(/^renamed/)
-    expect(doc.filesize).toBe(FILE_SIZE)
 
     await context.close()
   })

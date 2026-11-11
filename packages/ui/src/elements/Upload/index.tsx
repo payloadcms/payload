@@ -177,7 +177,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
 
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const { onFileChange: onSessionFileChange } = useFileFieldUploadSession({
+  const { hasUploadSession, onFileChange: onSessionFileChange } = useFileFieldUploadSession({
     collectionSlug,
     hasStoredFile: Boolean(data?.filename),
     setFilename,
@@ -471,6 +471,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
                   label={t('upload:fileName')}
                   onChange={handleFileNameChange}
                   path="filename"
+                  readOnly={hasUploadSession}
                   value={filename || value.name}
                 />
                 <UploadActions

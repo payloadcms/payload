@@ -137,7 +137,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
     sidePanelMimeType !== 'image/svg+xml' &&
     sidePanelMimeType !== 'image/jxl'
 
-  const { onFileChange: onSessionFileChange } = useFileFieldUploadSession({
+  const { hasUploadSession, onFileChange: onSessionFileChange } = useFileFieldUploadSession({
     collectionSlug,
     hasStoredFile: Boolean(data?.filename),
     isEnabled: isUploadStartedOnSelect,
@@ -444,6 +444,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
                       label={t('upload:fileName')}
                       onChange={handleFileNameChange}
                       path="filename"
+                      readOnly={hasUploadSession}
                       value={filename || value.name}
                     />
                     {(value.size || value.type) && (

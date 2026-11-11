@@ -45,7 +45,7 @@ type UploadEntry = {
   detached: Promise<never>
   /** Resolves with the file reference once storage is complete. */
   file: Promise<UploadInstructions['file']>
-  /** The file the form currently holds, which changes when it is renamed. */
+  /** The file the form holds, which the entry is tracked under. */
   formFile: File
   hasIntent: boolean
   /** Pending request that stores the intent. Never rejects; background completion waits for it. */
@@ -68,8 +68,6 @@ type UploadEntry = {
   sessionID?: string
   /** The document prefix the session was started with. Storage keeps the object under it. */
   startedDocPrefix?: string
-  /** The name the session was started with. Storage keeps the object under this name. */
-  startedName: string
   targetID?: number | string
   toastID: string
 }
@@ -97,8 +95,6 @@ export type UploadSessionsContext = {
   isSaveWaitingOnUpload: (args: { file: File }) => boolean
   /** Whether a session upload for this file is still transferring. */
   isUploading: (args: { file: File }) => boolean
-  /** The form renamed the file; keep the same upload. */
-  rekey: (args: { from: File; to: File }) => void
   /** Starts a session upload when the file qualifies. Returns whether one was started. */
   start: (args: {
     collectionSlug: UploadCollectionSlug
@@ -150,8 +146,8 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
   }, [])
 
   /**
-   * Stops tracking an entry. A replacement may already be tracked under the same file (a renamed
-   * upload that restarted), so only the entry itself is removed. A removed adoption is forgotten,
+   * Stops tracking an entry. A replacement may already be tracked under the same file (an upload
+   * restarted under a new prefix), so only the entry itself is removed. A removed adoption is forgotten,
    * so the next `adopt` tracks a new stand-in instead of returning this untracked one.
    */
   const removeEntry = useCallback((entry: UploadEntry) => {
@@ -340,7 +336,6 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         session,
         sessionID: resumeSessionID,
         startedDocPrefix: docPrefix,
-        startedName: file.name,
         targetID,
         toastID,
       }
@@ -438,16 +433,6 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
     },
     [releaseWaitingSave, removeEntry, requestArgs],
   )
-
-  const rekey = useCallback<UploadSessionsContext['rekey']>(({ from, to }) => {
-    const entry = entriesRef.current.get(from)
-
-    if (entry) {
-      entriesRef.current.delete(from)
-      entry.formFile = to
-      entriesRef.current.set(to, entry)
-    }
-  }, [])
 
   const detach = useCallback<UploadSessionsContext['detach']>(
     ({ file }) => {
@@ -552,11 +537,9 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         return null
       }
 
-      // Storage holds the object under the name and prefix picked at start, so a file renamed or
-      // moved since then is uploaded again. Adopted uploads have no bytes here to send again.
-      const isMoved = file.name !== entry.startedName || docPrefix !== entry.startedDocPrefix
-
-      if (isMoved && !entry.isAdopted) {
+      // Storage holds the object under the prefix picked at start, so a file whose prefix changed
+      // since then is uploaded again. Adopted uploads have no bytes here to send again.
+      if (docPrefix !== entry.startedDocPrefix && !entry.isAdopted) {
         const { collectionSlug, targetID } = entry
 
         cancel({ file })
@@ -631,7 +614,6 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
         isWaitedOn: false,
         session: Promise.resolve(session),
         sessionID: String(session.id),
-        startedName: placeholder.name,
         targetID: session.targetID ?? undefined,
         toastID: `upload-session-${session.id}`,
       })
@@ -738,10 +720,9 @@ export const UploadSessionsProvider = ({ children }: { children: React.ReactNode
       getUploadedFile,
       isSaveWaitingOnUpload,
       isUploading,
-      rekey,
       start,
     }),
-    [adopt, cancel, detach, getUploadedFile, isSaveWaitingOnUpload, isUploading, rekey, start],
+    [adopt, cancel, detach, getUploadedFile, isSaveWaitingOnUpload, isUploading, start],
   )
 
   return <Context value={value}>{children}</Context>
