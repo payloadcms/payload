@@ -1,6 +1,12 @@
 'use client'
 
-import { flattenTopLevelFields, formatAdminURL, getFieldPermissions } from 'payload/shared'
+import {
+  flattenTopLevelFields,
+  formatAdminURL,
+  getFieldPermissions,
+  isSparseFieldPermissions,
+  resolveFieldPermissions,
+} from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -60,8 +66,9 @@ export const Auth: React.FC<Props> = (props) => {
   let showPasswordFields = Boolean(docPermissions[operation])
   let showUnlock = true
   const hasLoginFieldOverride =
-    typeof docPermissions.fields === 'object' &&
-    ('username' in docPermissions.fields || 'email' in docPermissions.fields)
+    isSparseFieldPermissions(docPermissions.fields) ||
+    (typeof docPermissions.fields === 'object' &&
+      ('username' in docPermissions.fields || 'email' in docPermissions.fields))
 
   if (hasPasswordField) {
     const { operation: passwordPermission } = getFieldPermissions({
@@ -108,7 +115,7 @@ export const Auth: React.FC<Props> = (props) => {
 
   const disabled = readOnly || isInitializing || isTrashed
 
-  const apiKeyPermissions = docPermissions?.fields === true ? true : docPermissions?.fields?.apiKey
+  const apiKeyPermissions = resolveFieldPermissions(docPermissions?.fields, 'apiKey')
 
   const canManageAPIKey =
     apiKeyPermissions === true ||

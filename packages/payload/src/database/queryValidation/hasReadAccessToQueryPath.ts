@@ -3,6 +3,10 @@ import type { FlattenedField } from '../../fields/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { fieldShouldBeLocalized } from '../../fields/config/types.js'
+import { resolveFieldPermissions } from '../../utilities/getFieldPermissions.js'
+
+const childFields = (permission: any): FieldsPermissions | undefined =>
+  permission === true ? true : permission?.fields
 
 /**
  * A block path has no slug, so every schema contributing to that path must allow it.
@@ -35,7 +39,7 @@ export function hasReadAccessToQueryPath({
     return undefined
   }
 
-  const permission = permissions?.[field.name]
+  const permission: any = resolveFieldPermissions(permissions, field.name)
   const remainingPath = path.slice(1)
   const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized: isParentLocalized })
   const localization = req.payload.config.localization
@@ -67,7 +71,9 @@ export function hasReadAccessToQueryPath({
             isParentLocalized: isParentLocalized || isLocalized,
             isRelatedToMany,
             path: remainingPath,
-            permissions: permission?.blocks?.[block.slug]?.fields,
+            permissions: childFields(
+              permission === true ? true : resolveFieldPermissions(permission?.blocks, block.slug),
+            ),
             relatedCollectionSlug,
             req,
             shouldShowHiddenFields,
@@ -84,7 +90,7 @@ export function hasReadAccessToQueryPath({
         isParentLocalized: isParentLocalized || isLocalized,
         isRelatedToMany,
         path: remainingPath,
-        permissions: permission?.fields,
+        permissions: childFields(permission),
         relatedCollectionSlug,
         req,
         shouldShowHiddenFields,
@@ -126,7 +132,7 @@ export function hasReadAccessToQueryPath({
   }
 
   return Boolean(
-    permission?.read?.permission &&
+    (permission === true || permission?.read === true || permission?.read?.permission) &&
       hasChildAccess &&
       !('hidden' in field && field.hidden && !shouldShowHiddenFields),
   )

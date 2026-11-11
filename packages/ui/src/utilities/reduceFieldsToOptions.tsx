@@ -3,7 +3,13 @@ import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations
 import type { ClientField, SanitizedFieldPermissions, SanitizedFieldsPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldIsHiddenOrDisabled,
+  fieldIsID,
+  resolveFieldPermissions,
+  tabHasName,
+} from 'payload/shared'
 
 import type { ReducedField } from '../elements/WhereBuilder/types.js'
 
@@ -26,6 +32,13 @@ type ReduceFieldOptionsArgs = {
  * Transforms a fields schema into a flattened array of fields with labels and values.
  * Used in the `WhereBuilder` component to render the fields in the dropdown.
  */
+
+const getChildPermissions = (permissions: unknown, name: string): any => {
+  const permission: any = resolveFieldPermissions(permissions, name)
+
+  return permission === true ? true : permission?.fields || permission
+}
+
 export const reduceFieldsToOptions = ({
   fieldPermissions,
   fields,
@@ -87,7 +100,7 @@ export const reduceFieldsToOptions = ({
                   typeof fieldPermissions === 'boolean'
                     ? fieldPermissions
                     : tabHasName(tab) && tab.name
-                      ? fieldPermissions?.[tab.name]?.fields || fieldPermissions?.[tab.name]
+                      ? getChildPermissions(fieldPermissions, tab.name)
                       : fieldPermissions,
                 fields: tab.fields,
                 i18n,
@@ -154,9 +167,9 @@ export const reduceFieldsToOptions = ({
         reduced.push(
           ...reduceFieldsToOptions({
             fieldPermissions:
-              typeof fieldPermissions === 'boolean'
+              typeof fieldPermissions === 'boolean' || !field.name
                 ? fieldPermissions
-                : fieldPermissions?.[field.name]?.fields || fieldPermissions?.[field.name],
+                : getChildPermissions(fieldPermissions, field.name),
             fields: field.fields,
             i18n,
             labelPrefix: labelWithPrefix,
@@ -197,9 +210,9 @@ export const reduceFieldsToOptions = ({
       reduced.push(
         ...reduceFieldsToOptions({
           fieldPermissions:
-            typeof fieldPermissions === 'boolean'
+            typeof fieldPermissions === 'boolean' || !field.name
               ? fieldPermissions
-              : fieldPermissions?.[field.name]?.fields || fieldPermissions?.[field.name],
+              : getChildPermissions(fieldPermissions, field.name),
           fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,
@@ -214,8 +227,8 @@ export const reduceFieldsToOptions = ({
       if (
         fieldIsID(field) ||
         fieldPermissions === true ||
-        fieldPermissions?.[field.name] === true ||
-        fieldPermissions?.[field.name]?.read === true
+        resolveFieldPermissions(fieldPermissions, field.name) === true ||
+        (resolveFieldPermissions(fieldPermissions, field.name) as any)?.read === true
       ) {
         const operatorKeys = new Set()
 

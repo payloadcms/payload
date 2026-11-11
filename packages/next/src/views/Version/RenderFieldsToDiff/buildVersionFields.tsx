@@ -18,7 +18,13 @@ import {
   type SanitizedFieldsPermissions,
   type VersionField,
 } from 'payload'
-import { fieldIsID, fieldShouldBeLocalized, getFieldPaths, tabHasName } from 'payload/shared'
+import {
+  fieldIsID,
+  fieldShouldBeLocalized,
+  getFieldPaths,
+  resolveFieldPermissions,
+  tabHasName,
+} from 'payload/shared'
 
 import { diffComponents } from './fields/index.js'
 
@@ -232,7 +238,7 @@ const buildVersionField = ({
     fieldPermissions = parentFieldsPermissions
   } else {
     if ('name' in field) {
-      fieldPermissions = parentFieldsPermissions?.[field.name]
+      fieldPermissions = resolveFieldPermissions(parentFieldsPermissions, field.name)
       if (typeof fieldPermissions === 'boolean') {
         hasReadPermission = fieldPermissions
       } else if (typeof fieldPermissions?.read === 'boolean') {
@@ -309,7 +315,7 @@ const buildVersionField = ({
         tabFieldsPermissions = parentFieldsPermissions
       } else {
         if ('name' in tab) {
-          const tabPermissions = parentFieldsPermissions?.[tab.name]
+          const tabPermissions = resolveFieldPermissions(parentFieldsPermissions, tab.name)
           if (typeof tabPermissions === 'boolean') {
             tabFieldsPermissions = tabPermissions
           } else {
@@ -578,7 +584,7 @@ const getBlockFieldsPermissions = ({
     return fieldPermissions.blocks
   }
 
-  const blockPermissions = fieldPermissions?.blocks?.[blockSlug]
+  const blockPermissions = resolveFieldPermissions(fieldPermissions?.blocks, blockSlug)
 
   return typeof blockPermissions === 'boolean' ? blockPermissions : blockPermissions?.fields
 }
