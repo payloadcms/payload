@@ -816,6 +816,36 @@ This can be more efficient for large JSON payloads, as you avoid converting data
 
 ## Parsing Error Responses
 
+A REST error response can contain field validation errors and general API errors, such as a custom storage quota error:
+
+```json
+{
+  "errors": [
+    {
+      "name": "ValidationError",
+      "message": "The following field is invalid: Title",
+      "data": {
+        "collection": "posts",
+        "errors": [
+          {
+            "label": "Title",
+            "message": "This field is required.",
+            "path": "title"
+          }
+        ]
+      }
+    },
+    {
+      "name": "APIError",
+      "message": "Storage quota exceeded.",
+      "data": {
+        "code": "STORAGE_QUOTA_EXCEEDED"
+      }
+    }
+  ]
+}
+```
+
 Use `parseErrorResponse` from `payload/shared` to interpret a decoded REST error response in a browser or on the server:
 
 ```ts
@@ -832,6 +862,45 @@ if (!response.ok) {
   const { fieldErrors, message, nonFieldErrors } = parseErrorResponse({ body })
 }
 ```
+
+For the response above, the parsed result is:
+
+```json
+{
+  "fieldErrors": [
+    {
+      "message": "This field is required.",
+      "path": "title",
+      "label": "Title"
+    }
+  ],
+  "nonFieldErrors": [
+    {
+      "name": "ValidationError",
+      "data": {
+        "collection": "posts",
+        "errors": [
+          {
+            "label": "Title",
+            "message": "This field is required.",
+            "path": "title"
+          }
+        ]
+      },
+      "message": "The following field is invalid: Title"
+    },
+    {
+      "name": "APIError",
+      "data": {
+        "code": "STORAGE_QUOTA_EXCEEDED"
+      },
+      "message": "Storage quota exceeded."
+    }
+  ]
+}
+```
+
+The validation summary and the storage quota error remain in `nonFieldErrors`, including their original metadata. This response has no body-level `message`, so the parsed result omits it.
 
 The result contains:
 

@@ -14,9 +14,6 @@ export default buildConfigWithDefaults({
   suite: 'form-state',
   config: {
     admin: {
-      components: {
-        providers: ['./components/APIErrorHandler/index.js#APIErrorHandler'],
-      },
       importMap: {
         baseDir: path.resolve(dirname),
       },

@@ -9,15 +9,6 @@ export const PostsCollection: CollectionConfig = {
   },
   fields: [
     {
-      name: 'errorResponseObserver',
-      type: 'ui',
-      admin: {
-        components: {
-          Field: './components/ErrorResponseObserver/index.js#ErrorResponseObserver',
-        },
-      },
-    },
-    {
       name: 'title',
       type: 'text',
     },
