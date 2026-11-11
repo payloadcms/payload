@@ -10,3 +10,6 @@ const adaptersWithoutTransactions = new Set([
 
 export const databaseAdapterSupportsTransactions = ({ adapter }: { adapter: string }): boolean =>
   !adaptersWithoutTransactions.has(adapter)
+
+export const isPostgresDatabaseAdapter = ({ adapter }: { adapter: string }): boolean =>
+  adapter === 'supabase' || adapter.startsWith('postgres') || adapter.startsWith('vercel-postgres')
