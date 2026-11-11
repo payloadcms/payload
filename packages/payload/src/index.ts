@@ -1565,12 +1565,10 @@ export { resolveBranchVersionParent } from './branching/versions.js'
 export { projectBranchVersionParents } from './branching/versions.js'
 export { resolveBranchVersionQuery } from './branching/versions.js'
 export { projectBranchVersionParent } from './branching/versions.js'
+export { resolveBranchVersionQuerySync } from './branching/versions.js'
 export { generateImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
-export type { ImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 
-export { genImportMapIterateFields } from './cli/commands/generateImportMap/iterateFields.js'
-export { registerCLIExitCodeHandler } from './cli/runtime/exitCodeHandlers.js'
-export type { CLIExitCodeHandler } from './cli/runtime/exitCodeHandlers.js'
+export type { ImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 
 export interface FieldCustom extends Record<string, any> {}
 
@@ -1582,6 +1580,9 @@ export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
 
+export { genImportMapIterateFields } from './cli/commands/generateImportMap/iterateFields.js'
+export { registerCLIExitCodeHandler } from './cli/runtime/exitCodeHandlers.js'
+export type { CLIExitCodeHandler } from './cli/runtime/exitCodeHandlers.js'
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1707,7 +1708,6 @@ export { readMigrationFiles } from './database/migrations/readMigrationFiles.js'
 export { writeMigrationIndex } from './database/migrations/writeMigrationIndex.js'
 export type * from './database/queryValidation/types.js'
 export type { EntityPolicies, PathToQuery } from './database/queryValidation/types.js'
-
 export { validateQueryPaths } from './database/queryValidation/validateQueryPaths.js'
 export { validateSearchParam } from './database/queryValidation/validateSearchParams.js'
 
@@ -2124,6 +2124,7 @@ export {
   type BatchProcessorResult,
 } from './utilities/batchProcessing.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'
+
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
@@ -2135,8 +2136,8 @@ export {
   type SchemaVariant,
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
-export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
 
+export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
 export {
   createPayloadRequest,
   type CreatePayloadRequestArgs,
