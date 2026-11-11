@@ -4,6 +4,7 @@ import mongoose from 'mongoose'
 import {
   type ArrayField,
   type BlocksField,
+  branchField,
   type CheckboxField,
   type CodeField,
   type CollapsibleField,
@@ -214,14 +215,15 @@ export const buildSchema = (args: {
   if (args.compoundIndexes) {
     for (const index of args.compoundIndexes) {
       const requiredFields = index.requireExists ?? []
+      const hasBranchScope = index.fields.some(({ path }) => path === branchField)
       const hasLocalizedIndexField = index.fields.some(({ pathHasLocalized }) => pathHasLocalized)
       const hasLocalizedRequiredField = requiredFields.some(
         ({ pathHasLocalized }) => pathHasLocalized,
       )
       const localization = payload.config.localization
-      // Preserve existing compound index definitions unless a partial index was requested.
+      // Branch-scoped unique values must remain independent for each locale.
       const locales =
-        requiredFields.length &&
+        (requiredFields.length > 0 || hasBranchScope) &&
         localization &&
         (hasLocalizedIndexField || hasLocalizedRequiredField)
           ? localization.locales
@@ -241,7 +243,7 @@ export const buildSchema = (args: {
           pathHasLocalized && locale ? localizedPath.replaceAll('<locale>', locale.code) : path
 
         for (const field of index.fields) {
-          if (!requiredFields.length && field.pathHasLocalized && localization) {
+          if (!requiredFields.length && !hasBranchScope && field.pathHasLocalized && localization) {
             for (const indexLocale of localization.locales) {
               indexDefinition[field.localizedPath.replaceAll('<locale>', indexLocale.code)] = 1
             }
