@@ -46,6 +46,7 @@ type Args = {
   fields: FlattenedField[]
   forceLocalized?: boolean
   indexes: Record<string, RawIndex>
+  isBranchable: boolean
   localesColumns: Record<string, RawColumn>
   localesIndexes: Record<string, RawIndex>
   newTableName: string
@@ -87,6 +88,7 @@ export const traverseFields = ({
   fields,
   forceLocalized,
   indexes,
+  isBranchable,
   localesColumns,
   localesIndexes,
   newTableName,
@@ -260,7 +262,9 @@ export const traverseFields = ({
           disableNotNull: disableNotNullFromHere,
           disableRelsTableUnique: true,
           disableUnique,
-          fields: disableUnique ? idToUUID(field.flattenedFields) : field.flattenedFields,
+          fields:
+            disableUnique || isBranchable ? idToUUID(field.flattenedFields) : field.flattenedFields,
+          isBranchable,
           parentIsLocalized: parentIsLocalized || field.localized,
           rootRelationships: relationships,
           rootRelationsToBuild,
@@ -500,7 +504,11 @@ export const traverseFields = ({
               disableNotNull: disableNotNullFromHere,
               disableRelsTableUnique: true,
               disableUnique,
-              fields: disableUnique ? idToUUID(block.flattenedFields) : block.flattenedFields,
+              fields:
+                disableUnique || isBranchable
+                  ? idToUUID(block.flattenedFields)
+                  : block.flattenedFields,
+              isBranchable,
               parentIsLocalized: parentIsLocalized || field.localized,
               rootRelationships: relationships,
               rootRelationsToBuild,
@@ -672,6 +680,7 @@ export const traverseFields = ({
           fields: field.flattenedFields,
           forceLocalized: isFieldLocalized || Boolean(forceLocalized),
           indexes,
+          isBranchable,
           localesColumns,
           localesIndexes,
           newTableName: `${parentTableName}_${columnName}`,

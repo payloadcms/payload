@@ -48,6 +48,11 @@ export type NumberToDelete = {
   path: string
 }
 
+export type SelectToDelete = {
+  locale?: string
+  parent?: unknown
+}
+
 export type RowToInsert = {
   arrays: {
     [tableName: string]: ArrayRowToInsert[]
@@ -70,6 +75,9 @@ export type RowToInsert = {
   row: Record<string, unknown>
   selects: {
     [tableName: string]: Record<string, unknown>[]
+  }
+  selectsToDelete: {
+    [tableName: string]: SelectToDelete[]
   }
   texts: Record<string, unknown>[]
   textsToDelete: TextToDelete[]

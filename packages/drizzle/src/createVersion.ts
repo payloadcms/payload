@@ -1,7 +1,7 @@
 import type { CreateVersionArgs, JsonObject, TypeWithVersion } from 'payload'
 
 import { sql } from 'drizzle-orm'
-import { buildVersionCollectionFields } from 'payload'
+import { buildVersionCollectionFields, resolveBranchVersionParent } from 'payload'
 import { hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -37,6 +37,15 @@ export async function createVersion<T extends JsonObject = JsonObject>(
   const defaultTableName = toSnakeCase(collection.slug)
   const tableName = this.tableNameMap.get(`_${defaultTableName}${this.versionsSuffix}`)
 
+  const branched = await resolveBranchVersionParent({
+    collectionSlug,
+    parent,
+    req,
+    versionData: versionData as Record<string, unknown>,
+  })
+
+  parent = branched.parent
+
   const version = { ...versionData }
   if (version.id) {
     delete version.id
@@ -47,6 +56,12 @@ export async function createVersion<T extends JsonObject = JsonObject>(
     createdAt,
     latest: true,
     parent,
+    ...(branched.versionData._branch
+      ? {
+          _branch: branched.versionData._branch,
+          _branchParent: branched.versionData._branchParent,
+        }
+      : {}),
     publishedLocale,
     snapshot,
     updatedAt,
