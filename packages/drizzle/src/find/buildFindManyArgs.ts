@@ -1,5 +1,5 @@
 import type { DBQueryConfig } from 'drizzle-orm'
-import type { FlattenedField, JoinQuery, SelectType } from 'payload'
+import type { FlattenedField, JoinQuery, PayloadRequest, SelectType } from 'payload'
 
 import { getSelectMode } from 'payload/shared'
 
@@ -19,6 +19,7 @@ type BuildFindQueryArgs = {
    */
   joins?: BuildQueryJoinAliases
   locale?: string
+  req?: Partial<PayloadRequest>
   select?: SelectType
   tableName: string
   versions?: boolean
@@ -41,6 +42,7 @@ export const buildFindManyArgs = ({
   joinQuery,
   joins = [],
   locale,
+  req,
   select,
   tableName,
   versions,
@@ -88,6 +90,7 @@ export const buildFindManyArgs = ({
     joins,
     locale,
     path: '',
+    req,
     select,
     selectMode: select ? getSelectMode(select) : undefined,
     tablePath: '',

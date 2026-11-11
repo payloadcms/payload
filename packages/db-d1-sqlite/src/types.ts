@@ -75,6 +75,10 @@ export type Execute<T> = (args: {
 
 export type Insert = (args: {
   db: LibSQLDatabase
+  onConflictDoNothing?: {
+    target?: AnySQLiteColumn | AnySQLiteColumn[]
+    where?: SQL
+  }
   onConflictDoUpdate?: SQLiteInsertOnConflictDoUpdateConfig<any>
   tableName: string
   values: Record<string, unknown> | Record<string, unknown>[]

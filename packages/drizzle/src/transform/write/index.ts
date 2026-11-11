@@ -40,6 +40,7 @@ export const transformForWrite = ({
     relationshipsToDelete: [],
     row: {},
     selects: {},
+    selectsToDelete: {},
     texts: [],
     textsToDelete: [],
   }
@@ -70,6 +71,7 @@ export const transformForWrite = ({
     relationshipsToDelete: rowToInsert.relationshipsToDelete,
     row: rowToInsert.row,
     selects: rowToInsert.selects,
+    selectsToDelete: rowToInsert.selectsToDelete,
     texts: rowToInsert.texts,
     textsToDelete: rowToInsert.textsToDelete,
   })
