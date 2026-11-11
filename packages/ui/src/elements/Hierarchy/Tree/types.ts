@@ -7,6 +7,7 @@ export type HierarchyDocument = {
 
 export type HierarchyInitialData = {
   baseFilter?: null | Where
+  branch?: null | string
   docs: HierarchyDocument[]
   // Metadata about what was loaded - keyed by parent ID ('null' for root)
   loadedParents: Record<string, { hasMore: boolean; loadedCount?: number; totalDocs: number }>
@@ -49,6 +50,7 @@ export type CachedChildren = {
 export type TreeCache = RefObject<Map<string, CachedChildren>>
 
 export type TreeInitialData = {
+  branch?: null | string
   docs: TreeDocument[]
   loadedParents: Record<string, { hasMore: boolean; loadedCount?: number; totalDocs: number }>
 }

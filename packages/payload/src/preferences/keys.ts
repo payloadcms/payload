@@ -5,6 +5,12 @@
 
 export const PREFERENCE_KEYS = {
   /**
+   * Stores state global to the admin panel: active content branch, navigation group
+   * collapse/expand state, and nav open/closed state
+   */
+  NAV: 'nav',
+
+  /**
    * Stores dashboard layout configuration
    */
   DASHBOARD_LAYOUT: 'dashboard-layout',
@@ -13,11 +19,6 @@ export const PREFERENCE_KEYS = {
    * Stores hierarchy tree expand/collapse state per collection
    */
   HIERARCHY_TREE: 'hierarchy-tree',
-
-  /**
-   * Stores navigation group collapse/expand state and nav open/closed state
-   */
-  NAV: 'nav',
 
   /**
    * Stores active sidebar tab selection

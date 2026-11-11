@@ -10,6 +10,7 @@ import type { RelationshipFilterProps as Props, ValueWithRelation } from './type
 
 import { useDebounce } from '../../../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../../../hooks/useEffectEvent.js'
+import { useBranchParam } from '../../../../providers/Branch/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useLocale } from '../../../../providers/Locale/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
@@ -51,6 +52,9 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false)
   const { i18n, t } = useTranslation()
   const locale = useLocale()
+  const branch = useBranchParam()
+
+  const requestGeneration = React.useRef(0)
 
   const relationSlugs = hasMultipleRelations ? relationTo : [relationTo]
 
@@ -90,6 +94,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
       abortController: AbortController
       relationSlug: string
     }) => {
+      const generation = requestGeneration.current
       const loadedRelationship = loadedRelationships.current.get(relationSlug)
 
       if (relationSlug && !loadedRelationship.hasLoadedAll) {
@@ -104,6 +109,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
 
         const query = {
+          branch,
           depth: 0,
           limit: maxResultsPerRequest,
           locale: locale?.code,
@@ -143,6 +149,10 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
 
           if (response.ok) {
             const data: PaginatedDocs = await response.json()
+
+            if (generation !== requestGeneration.current || abortController.signal.aborted) {
+              return
+            }
             if (data.docs.length > 0) {
               addOptions(data, relationSlug)
 
@@ -158,7 +168,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
                 })
               }
             }
-          } else {
+          } else if (generation === requestGeneration.current && !abortController.signal.aborted) {
             setErrorLoading(t('error:unspecific'))
           }
         } catch (e) {
@@ -168,7 +178,9 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       }
 
-      setHasLoadedFirstOptions(true)
+      if (generation === requestGeneration.current && !abortController.signal.aborted) {
+        setHasLoadedFirstOptions(true)
+      }
     },
   )
 
@@ -267,9 +279,12 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
 
   const addOptionByID = useCallback(
     async (id, relation) => {
+      const generation = requestGeneration.current
+
       if (!errorLoading && id !== 'null' && id && relation) {
+        const queryString = qs.stringify({ branch, depth: 0 }, { addQueryPrefix: true })
         const response = await fetch(
-          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}?depth=0` }),
+          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}${queryString}` }),
           {
             credentials: 'include',
             headers: {
@@ -280,6 +295,10 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
 
         if (response.ok) {
           const data = await response.json()
+
+          if (generation !== requestGeneration.current) {
+            return
+          }
           addOptions({ docs: [data] }, relation)
         } else {
           // eslint-disable-next-line no-console
@@ -287,16 +306,13 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       }
     },
-    [i18n, addOptions, api, errorLoading, t],
+    [addOptions, api, branch, errorLoading, i18n, t],
   )
 
-  /**
-   * When `relationTo` changes externally, reset the options and reload them from scratch
-   * The `loadOptions` dependency is a useEffectEvent which has no dependencies of its own
-   * This means we can safely depend on it without it triggering this effect to run
-   * This is useful because this effect should _only_ run when `relationTo` changes
-   */
   useEffect(() => {
+    requestGeneration.current += 1
+    setErrorLoading('')
+
     const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
 
     loadedRelationships.current = new Map(
@@ -326,6 +342,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     })
 
     return () => {
+      requestGeneration.current += 1
       abortControllers.forEach((controller) => {
         if (controller.signal) {
           try {
@@ -336,7 +353,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       })
     }
-  }, [i18n, relationTo, debouncedSearch, filterOptions])
+  }, [branch, i18n, relationTo, debouncedSearch, filterOptions])
 
   /**
    * Load any other options that might exist in the value that were not loaded already

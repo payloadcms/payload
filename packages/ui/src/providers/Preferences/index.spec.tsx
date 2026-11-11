@@ -17,8 +17,8 @@ vi.mock('../../utilities/api.js', () => ({ requests: { post: mocks.post } }))
 test('should keep all merged callers pending until the shared write completes', async () => {
   let preferences: ReturnType<typeof usePreferences>
   let finishWrite: () => void
-  const persisted = new Promise<void>((resolve) => {
-    finishWrite = resolve
+  const persisted = new Promise<Response>((resolve) => {
+    finishWrite = () => resolve(new Response(null, { status: 200 }))
   })
 
   mocks.post.mockReset().mockReturnValue(persisted)
@@ -86,8 +86,8 @@ test('should reject all merged callers when persistence fails', async () => {
 test('should await an identical value while its write is in progress', async () => {
   let preferences: ReturnType<typeof usePreferences>
   let finishWrite: () => void
-  const persisted = new Promise<void>((resolve) => {
-    finishWrite = resolve
+  const persisted = new Promise<Response>((resolve) => {
+    finishWrite = () => resolve(new Response(null, { status: 200 }))
   })
 
   mocks.post.mockReset().mockReturnValue(persisted)
@@ -164,8 +164,8 @@ test.each([{ selected: true }, 'grid'])(
   async (value) => {
     let preferences: ReturnType<typeof usePreferences>
     let finishWrite: () => void
-    const persisted = new Promise<void>((resolve) => {
-      finishWrite = resolve
+    const persisted = new Promise<Response>((resolve) => {
+      finishWrite = () => resolve(new Response(null, { status: 200 }))
     })
 
     mocks.post.mockReset().mockReturnValue(persisted)
@@ -238,11 +238,11 @@ test('should ignore stale hydration until all queued merged writes finish', asyn
   let preferences: ReturnType<typeof usePreferences>
   let finishFirstWrite: () => void
   let finishSecondWrite: () => void
-  const firstWrite = new Promise<void>((resolve) => {
-    finishFirstWrite = resolve
+  const firstWrite = new Promise<Response>((resolve) => {
+    finishFirstWrite = () => resolve(new Response(null, { status: 200 }))
   })
-  const secondWrite = new Promise<void>((resolve) => {
-    finishSecondWrite = resolve
+  const secondWrite = new Promise<Response>((resolve) => {
+    finishSecondWrite = () => resolve(new Response(null, { status: 200 }))
   })
 
   mocks.post.mockReset().mockReturnValueOnce(firstWrite).mockReturnValueOnce(secondWrite)
@@ -288,11 +288,14 @@ test.each([false, true])(
   async (isNested) => {
     let preferences: ReturnType<typeof usePreferences>
     let finishFirstWrite: () => void
-    const firstWrite = new Promise<void>((resolve) => {
-      finishFirstWrite = resolve
+    const firstWrite = new Promise<Response>((resolve) => {
+      finishFirstWrite = () => resolve(new Response(null, { status: 200 }))
     })
 
-    mocks.post.mockReset().mockReturnValueOnce(firstWrite).mockResolvedValue(undefined)
+    mocks.post
+      .mockReset()
+      .mockReturnValueOnce(firstWrite)
+      .mockResolvedValue(new Response(null, { status: 200 }))
 
     function Consumer() {
       preferences = usePreferences()
@@ -339,3 +342,31 @@ test.each([false, true])(
     expect(await preferences!.getPreference(key)).toEqual(expected)
   },
 )
+
+test('should reject an HTTP failure and retry the same preference value', async () => {
+  let preferences: ReturnType<typeof usePreferences>
+  mocks.post
+    .mockReset()
+    .mockResolvedValueOnce(new Response(null, { status: 500 }))
+    .mockResolvedValueOnce(new Response(null, { status: 200 }))
+
+  function Consumer() {
+    preferences = usePreferences()
+    return null
+  }
+
+  await render(
+    <PreferencesProvider>
+      <Consumer />
+    </PreferencesProvider>,
+  )
+  preferences!.syncPreference('view', {})
+
+  await expect(preferences!.setPreference('view', { branch: 'feature' }, true)).rejects.toThrow(
+    '500',
+  )
+  preferences!.syncPreference('view', {})
+  await preferences!.setPreference('view', { branch: 'feature' }, true)
+
+  expect(mocks.post).toHaveBeenCalledTimes(2)
+})

@@ -9,6 +9,7 @@ import React, { useCallback, useRef } from 'react'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -32,6 +33,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
   const modified = useFormModified()
   const currentLocale = useLocale()
   const locale = currentLocale?.code
+  const branch = useBranchParam()
   const ref = useRef<HTMLButtonElement>(null)
   const editDepth = useEditDepth()
   const { t } = useTranslation()
@@ -46,8 +48,11 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
       return
     }
 
+    // `branch` scopes the write to the active branch. Omitting it would send the
+    // draft to main, so a branch's draft edits would leak into production.
     const search = qs.stringify(
       {
+        branch,
         depth: 0,
         draft: true,
         'fallback-locale': 'null',
@@ -56,6 +61,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
       },
       { addQueryPrefix: true },
     )
+
     let action
     let method = 'POST'
 
@@ -88,6 +94,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
     setUnpublishedVersionCount((count) => count + 1)
   }, [
     submit,
+    branch,
     collectionSlug,
     globalSlug,
     api,

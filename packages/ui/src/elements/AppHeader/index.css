@@ -9,6 +9,10 @@
     flex-shrink: 0;
   }
 
+  .app-header__branch-selector {
+    align-self: center;
+  }
+
   .app-header__content {
     display: flex;
     align-items: center;

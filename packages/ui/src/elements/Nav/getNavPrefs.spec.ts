@@ -8,13 +8,14 @@ test.each([undefined, 'document-transaction'])(
   'should read navigation preferences outside a concurrent document transaction (%s)',
   async (transactionID) => {
     const transactions: PayloadRequest['transactionID'][] = []
-    const find = vi.fn(async ({ req: preferencesReq }: { req: PayloadRequest }) => {
-      transactions.push(preferencesReq.transactionID)
+    const find = vi.fn(async ({ req: preferencesReq }: { req?: PayloadRequest }) => {
+      transactions.push(preferencesReq?.transactionID)
       req.transactionID = 'document-transaction'
 
       return { docs: [{ value: { activeTab: 'folders', groups: { Content: true }, open: false } }] }
     })
     const req = {
+      context: {},
       payload: { find },
       transactionID,
       user: { id: 'user-id', collection: 'users' },

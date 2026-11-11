@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef } from 'react'
 //    -  Source: https://github.com/streamich/react-use/blob/ade8d3905f544305515d010737b4ae604cc51024/src/useBeforeUnload.ts#L2
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
+import { navigationEventName } from './confirmNavigation.js'
 
 function on<T extends Document | EventTarget | HTMLElement | Window>(
   obj: null | T,
@@ -78,6 +79,7 @@ export const usePreventLeave = ({
 
   const router = useRouter()
   const cancelledURL = useRef<string>('')
+  const cancelledNavigation = useRef<(() => void) | null>(null)
 
   // check when page is about to be changed
   useEffect(() => {
@@ -129,6 +131,7 @@ export const usePreventLeave = ({
           if (isPageLeaving && prevent && (!onPrevent ? !window.confirm(message) : true)) {
             // Keep a reference of the href
             cancelledURL.current = newUrl
+            cancelledNavigation.current = null
 
             // Cancel the route change
             event.preventDefault()
@@ -145,24 +148,51 @@ export const usePreventLeave = ({
       }
     }
 
+    function handleNavigation(event: Event) {
+      if (event.defaultPrevented) {
+        return
+      }
+
+      if (!onPrevent && window.confirm(message)) {
+        return
+      }
+
+      event.preventDefault()
+      cancelledURL.current = ''
+      cancelledNavigation.current = (event as CustomEvent<{ navigate: () => void }>).detail.navigate
+      onPrevent?.()
+    }
+
     if (prevent) {
       // Add the global click event listener
       document.addEventListener('click', handleClick, true)
+      document.addEventListener(navigationEventName, handleNavigation)
     }
 
     // Clean up the global click event listener when the component is unmounted
     return () => {
       document.removeEventListener('click', handleClick, true)
+      document.removeEventListener(navigationEventName, handleNavigation)
     }
   }, [onPrevent, prevent, message])
 
   useEffect(() => {
-    if (hasAccepted && cancelledURL.current) {
+    if (hasAccepted && (cancelledURL.current || cancelledNavigation.current)) {
       if (onAccept) {
         onAccept()
       }
 
-      void startRouteTransition(() => router.push(cancelledURL.current))
+      const navigate = cancelledNavigation.current
+      const href = cancelledURL.current
+
+      cancelledNavigation.current = null
+      cancelledURL.current = ''
+
+      if (navigate) {
+        navigate()
+      } else {
+        void startRouteTransition(() => router.push(href))
+      }
     }
   }, [hasAccepted, onAccept, router, startRouteTransition])
 }

@@ -43,6 +43,8 @@ export {
 } from './admin/adapters/devReload.js'
 export type * from './admin/adapters/index.js'
 export type { FieldState } from './admin/forms/Form.js'
+export { getAdminPreferences } from './admin/getAdminPreferences.js'
+export { getRequestBranch } from './admin/getRequestBranch.js'
 export type * from './admin/types.js'
 export { EntityType } from './admin/views/dashboard.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
@@ -2105,6 +2107,7 @@ export * from './kv/adapters/InMemoryKVAdapter.js'
 export * from './kv/index.js'
 
 export type {
+  AdminPreferences,
   CollapsedPreferences,
   CollectionPreferences,
   /**

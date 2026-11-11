@@ -3,7 +3,7 @@ import type { LinkAdapterProps } from 'payload'
 
 import React from 'react'
 
-import { PayloadLink, useRouter } from '../../providers/RouterAdapter/index.js'
+import { PayloadLink, useNavigationURL, useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 
 function isModifiedEvent(event: React.MouseEvent): boolean {
@@ -35,7 +35,7 @@ type Props = {
 export const Link: React.FC<Props> = ({
   children,
   forceReload = false,
-  href,
+  href: hrefFromProps,
   onClick,
   preventDefault = true,
   ref,
@@ -43,6 +43,7 @@ export const Link: React.FC<Props> = ({
   scroll,
   ...rest
 }) => {
+  const href = useNavigationURL({ href: hrefFromProps })
   const router = useRouter()
   const { startRouteTransition } = useRouteTransition()
 
