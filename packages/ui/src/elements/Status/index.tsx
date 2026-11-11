@@ -62,75 +62,98 @@ export const Status: React.FC = () => {
     : statusToRender
 
   const performAction = useCallback(async () => {
-    let url
-    let method
+    try {
+      if (collectionSlug) {
+        const versionsURL = formatAdminURL({
+          apiRoute: api,
+          path: `/${collectionSlug}/versions?where[parent][equals]=${encodeURIComponent(String(id))}&where[version._status][equals]=published&sort=-updatedAt&limit=1&locale=${locale}`,
+        })
 
-    if (collectionSlug) {
-      url = formatAdminURL({
-        apiRoute: api,
-        path: `/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null&depth=0`,
-      })
-      method = 'patch'
-    }
+        const versionsRes = await requests.get(versionsURL, {
+          headers: {
+            'Accept-Language': i18n.language,
+            'Content-Type': 'application/json',
+          },
+        })
 
-    if (globalSlug) {
-      url = formatAdminURL({
-        apiRoute: api,
-        path: `/globals/${globalSlug}?locale=${locale}&fallback-locale=null&depth=0`,
-      })
-      method = 'post'
-    }
+        if (!versionsRes.ok) {
+          toast.error(t('error:revertingDocument'))
+          return
+        }
 
-    const publishedDoc = await requests
-      .get(url, {
-        headers: {
-          'Accept-Language': i18n.language,
-          'Content-Type': 'application/json',
-        },
-      })
-      .then((res) => res.json())
+        const versionsJson = await versionsRes.json()
+        const publishedVersion = versionsJson.docs?.[0]
 
-    const body = publishedDoc
+        if (!publishedVersion?.id) {
+          toast.error(t('error:revertingDocument'))
+          return
+        }
 
-    const res = await requests[method](url, {
-      body: JSON.stringify(body),
-      headers: {
-        'Accept-Language': i18n.language,
-        'Content-Type': 'application/json',
-      },
-    })
+        const restoreURL = formatAdminURL({
+          apiRoute: api,
+          path: `/${collectionSlug}/versions/${publishedVersion.id}?draft=false&locale=${locale}&fallback-locale=null`,
+        })
 
-    if (res.status === 200) {
-      let data
-      const json = await res.json()
+        const res = await requests.post(restoreURL, {
+          headers: {
+            'Accept-Language': i18n.language,
+            'Content-Type': 'application/json',
+          },
+        })
 
-      if (globalSlug) {
-        data = json.result
-      } else if (collectionSlug) {
-        data = json.doc
+        if (!res.ok) {
+          toast.error(t('error:revertingDocument'))
+          return
+        }
+
+        const json = await res.json()
+        const { message, ...restoredDoc } = json
+        await resetForm(restoredDoc)
+        toast.success(message)
+        incrementVersionCount()
+        setMostRecentVersionIsAutosaved(false)
+        setUnpublishedVersionCount(0)
+        return
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      resetForm(data)
-      toast.success(json.message)
-      incrementVersionCount()
-      setMostRecentVersionIsAutosaved(false)
+      // Keep the existing behavior for globals until their version lookup
+      // can be handled separately.
+      if (globalSlug) {
+        const url = formatAdminURL({
+          apiRoute: api,
+          path: `/globals/${globalSlug}?locale=${locale}&fallback-locale=null&depth=0`,
+        })
 
-      setUnpublishedVersionCount(0)
-    } else {
-      try {
-        const json = await res.json()
-        if (json.errors?.[0]?.message) {
-          toast.error(json.errors[0].message)
-        } else if (json.error) {
-          toast.error(json.error)
+        const publishedDoc = await requests
+          .get(url, {
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+            },
+          })
+          .then((res) => res.json())
+
+        const res = await requests.post(url, {
+          body: JSON.stringify(publishedDoc),
+          headers: {
+            'Accept-Language': i18n.language,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (res.status === 200) {
+          const json = await res.json()
+          await resetForm(json.result)
+          toast.success(json.message)
+          incrementVersionCount()
+          setMostRecentVersionIsAutosaved(false)
+          setUnpublishedVersionCount(0)
         } else {
           toast.error(t('error:revertingDocument'))
         }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (err) {
-        toast.error(t('error:revertingDocument'))
       }
+    } catch {
+      toast.error(t('error:revertingDocument'))
     }
   }, [
     api,
@@ -141,8 +164,8 @@ export const Status: React.FC = () => {
     incrementVersionCount,
     locale,
     resetForm,
-    setUnpublishedVersionCount,
     setMostRecentVersionIsAutosaved,
+    setUnpublishedVersionCount,
     t,
   ])
 
