@@ -659,20 +659,23 @@ export function fieldsToJSONSchema({
 
           case 'json': {
             const jsonFieldSchema = field.jsonSchema?.schema
-            fieldSchema = jsonFieldSchema
-              ? isRequired
-                ? jsonFieldSchema
-                : { anyOf: [jsonFieldSchema, { type: 'null' }] }
-              : {
-                  ...baseFieldSchema,
-                  type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
-                }
-            if (field.interfaceName && field.jsonSchema?.schema) {
-              fieldSchema = {
-                $ref: `#/$defs/${registerNamedInterface(field.interfaceName, fieldSchema)}`,
-              }
-            }
 
+            if (jsonFieldSchema && field.interfaceName) {
+              const reference = {
+                $ref: `#/$defs/${registerNamedInterface(field.interfaceName, jsonFieldSchema)}`,
+              }
+
+              fieldSchema = reference
+            } else {
+              fieldSchema = jsonFieldSchema
+                ? isRequired
+                  ? jsonFieldSchema
+                  : { anyOf: [jsonFieldSchema, { type: 'null' }] }
+                : {
+                    ...baseFieldSchema,
+                    type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
+                  }
+            }
             break
           }
 
