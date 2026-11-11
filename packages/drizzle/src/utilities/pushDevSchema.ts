@@ -34,9 +34,6 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
       }
 
       return
-    } else {
-      previousSchema.localeCodes = localeCodes
-      previousSchema.rawTables = adapter.rawTables
     }
   }
 
@@ -86,6 +83,9 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
   }
 
   await apply()
+  previousSchema.localeCodes =
+    adapter.payload.config.localization && adapter.payload.config.localization.localeCodes
+  previousSchema.rawTables = adapter.rawTables
   const migrationsTable = adapter.schemaName
     ? `"${adapter.schemaName}"."payload_migrations"`
     : '"payload_migrations"'

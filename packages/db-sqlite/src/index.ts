@@ -68,6 +68,7 @@ const filename = fileURLToPath(import.meta.url)
 
 const requireDrizzleKit = createRequireDrizzleKit({
   from: import.meta.url,
+  migrateBranchingRowIDs: true,
 })
 
 export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
