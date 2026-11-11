@@ -11,6 +11,10 @@ export type FormatDateArgs = {
 }
 
 export const formatDate = ({ date, i18n, pattern, timezone }: FormatDateArgs): string => {
+  if (date === undefined || !Number.isFinite(new Date(date).getTime())) {
+    return ''
+  }
+
   const theDate = new TZDate(new Date(date))
 
   if (timezone) {
@@ -39,5 +43,10 @@ type FormatTimeToNowArgs = {
 
 export const formatTimeToNow = ({ date, i18n }: FormatTimeToNowArgs): string => {
   const theDate = typeof date === 'string' ? new Date(date) : date
+
+  if (theDate === undefined || !Number.isFinite(new Date(theDate).getTime())) {
+    return ''
+  }
+
   return i18n?.dateFNS ? formatDistanceToNow(theDate, { locale: i18n.dateFNS }) : ''
 }

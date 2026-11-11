@@ -8,6 +8,7 @@ import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
 
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
@@ -30,6 +31,7 @@ export function ListEmptyTrashButton({
   const { i18n, t } = useTranslation()
   const currentLocale = useLocale()
   const locale = currentLocale?.code
+  const branch = useBranchParam()
   const { config } = useConfig()
   const { openModal } = useModal()
   const router = useRouter()
@@ -42,6 +44,7 @@ export function ListEmptyTrashButton({
     const fetchTrashCount = async () => {
       const queryString = qs.stringify(
         {
+          branch,
           depth: 0,
           limit: 0,
           locale,
@@ -77,7 +80,7 @@ export function ListEmptyTrashButton({
     }
 
     void fetchTrashCount()
-  }, [collectionConfig.slug, config, i18n.language, locale])
+  }, [branch, collectionConfig.slug, config, i18n.language, locale])
 
   const handleEmptyTrash = React.useCallback(async () => {
     if (!hasDeletePermission) {
@@ -88,6 +91,7 @@ export function ListEmptyTrashButton({
 
     const queryString = qs.stringify(
       {
+        branch,
         limit: 0,
         locale,
         trash: true,
@@ -147,6 +151,7 @@ export function ListEmptyTrashButton({
       toast.error(t('error:unknown'))
     }
   }, [
+    branch,
     collectionConfig,
     config,
     hasDeletePermission,

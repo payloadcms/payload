@@ -3,6 +3,7 @@ import type { PayloadRequest } from 'payload'
 import { hasDraftsEnabled } from 'payload/shared'
 
 type Args = {
+  branch?: string
   collectionSlug?: string
   globalSlug?: string
   id?: number | string
@@ -17,6 +18,7 @@ type Result = {
 
 export const handleStaleDataCheck = async ({
   id,
+  branch,
   collectionSlug,
   globalSlug,
   originalUpdatedAt,
@@ -32,11 +34,13 @@ export const handleStaleDataCheck = async ({
       // Fetch current document to compare updatedAt
       const currentDoc = await req.payload.findByID({
         id,
+        branch,
         collection: collectionSlug,
         depth: 0,
         draft: collectionHasDrafts,
         locale: req.locale,
         overrideAccess: false,
+        req,
         select: {
           updatedAt: true,
         },
@@ -51,10 +55,12 @@ export const handleStaleDataCheck = async ({
       // Fetch current global to compare updatedAt
       const currentGlobal = await req.payload.findGlobal({
         slug: globalSlug,
+        branch,
         depth: 0,
         draft: globalHasDrafts,
         locale: req.locale,
         overrideAccess: false,
+        req,
         select: {
           updatedAt: true,
         },

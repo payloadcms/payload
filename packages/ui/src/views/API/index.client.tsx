@@ -12,6 +12,7 @@ import { TextInput } from '../../fields/Text/Input.js'
 import { Form } from '../../forms/Form/index.js'
 import { MinimizeMaximizeIcon } from '../../icons/MinimizeMaximize/index.js'
 import { NewTabIcon } from '../../icons/NewTab/index.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -30,6 +31,7 @@ export const APIViewClient: React.FC = () => {
   const { i18n, t } = useTranslation()
   const currentLocale = useLocale()
   const code = currentLocale?.code
+  const branch = useBranchParam()
 
   const {
     config: {
@@ -106,12 +108,20 @@ export const APIViewClient: React.FC = () => {
 
   const trashParam = typeof initialData?.deletedAt === 'string'
 
-  const params = new URLSearchParams({
+  const searchParamsRecord: Record<string, string> = {
     depth,
     draft: String(draft),
     locale,
     trash: trashParam ? 'true' : 'false',
-  }).toString()
+  }
+
+  // The view inspects the document being edited, which on a branch is the branch's
+  // copy. Without this it shows main's, contradicting every other view.
+  if (branch) {
+    searchParamsRecord.branch = branch
+  }
+
+  const params = new URLSearchParams(searchParamsRecord).toString()
 
   const fetchURL = formatAdminURL({
     apiRoute,
@@ -120,6 +130,9 @@ export const APIViewClient: React.FC = () => {
   })
 
   React.useEffect(() => {
+    let isCurrent = true
+    const controller = new AbortController()
+
     const fetchData = async () => {
       try {
         const res = await fetch(fetchURL, {
@@ -128,22 +141,36 @@ export const APIViewClient: React.FC = () => {
             'Accept-Language': i18n.language,
           },
           method: 'GET',
+          signal: controller.signal,
         })
 
         try {
           const json = await res.json()
-          setData(json)
+          if (isCurrent) {
+            setData(json)
+          }
         } catch (error) {
+          if (!isCurrent) {
+            return
+          }
           toast.error('Error parsing response')
           console.error(error) // eslint-disable-line no-console
         }
       } catch (error) {
+        if (!isCurrent) {
+          return
+        }
         toast.error('Error making request')
         console.error(error) // eslint-disable-line no-console
       }
     }
 
     void fetchData()
+
+    return () => {
+      isCurrent = false
+      controller.abort()
+    }
   }, [i18n.language, fetchURL, authenticated])
 
   return (

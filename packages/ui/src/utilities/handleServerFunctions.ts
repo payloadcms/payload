@@ -14,6 +14,7 @@ type InitAdminContextFn = (args: {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   overrides?: Omit<Parameters<typeof createPayloadRequest>[0], 'payload'>
+  requestURL?: string
 }) => Promise<AdminContext>
 
 type CreateServerFunctionHandlerArgs = {
@@ -58,6 +59,7 @@ export const createServerFunctionHandler = ({
       configPromise,
       importMap,
       overrides: requestLocale !== undefined ? { locale: requestLocale } : undefined,
+      requestURL: args.requestURL,
     })
 
     const augmentedArgs: DefaultServerFunctionArgs = {

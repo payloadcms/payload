@@ -118,4 +118,11 @@
     padding-inline: var(--spacer-2);
     border: var(--stroke-width-small) solid transparent;
   }
+
+  /* A crumb that isn't a link has no button padding to separate it from what
+     follows, so the separator would sit against its last character. Only the
+     last crumb is followed by nothing. */
+  .step-nav__item:not(.btn):not(.step-nav__last) {
+    margin-inline-end: var(--spacer-2);
+  }
 }

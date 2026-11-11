@@ -38,6 +38,8 @@ export type ServerFunctionClientArgs = {
   /** The locale of the rendered page making this request. */
   locale?: Locale['code']
   name: string
+  /** Admin page URL whose branch and locale scope this action. */
+  requestURL?: string
 }
 
 export type ServerFunctionClient = (args: ServerFunctionClientArgs) => Promise<unknown> | unknown

@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
@@ -54,6 +55,7 @@ export const RestoreButton: React.FC<Props> = (props) => {
   const collectionConfig = getEntityConfig({ collectionSlug })
   const router = useRouter()
   const { i18n, t } = useTranslation()
+  const branch = useBranchParam()
   const { title } = useDocumentTitle()
   const { startRouteTransition } = useRouteTransition()
   const { openModal } = useModal()
@@ -72,6 +74,7 @@ export const RestoreButton: React.FC<Props> = (props) => {
         apiRoute: api,
         path: `/${collectionSlug}${qs.stringify(
           {
+            branch,
             trash: true,
             where: {
               and: [{ id: { equals: id } }, { deletedAt: { exists: true } }],
@@ -138,6 +141,7 @@ export const RestoreButton: React.FC<Props> = (props) => {
       addDefaultError()
     }
   }, [
+    branch,
     serverURL,
     api,
     collectionSlug,
