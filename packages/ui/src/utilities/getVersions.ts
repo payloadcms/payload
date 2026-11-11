@@ -13,6 +13,11 @@ import { sanitizeID } from './sanitizeID.js'
 import { traverseForLocalizedFields } from './traverseForLocalizedFields.js'
 
 type Args = {
+  /**
+   * Branch these counts are read from. The document header reports version state
+   * for the branch being viewed, not for main.
+   */
+  branch?: string
   collectionConfig?: SanitizedCollectionConfig
   /**
    * Optional - performance optimization.
@@ -41,6 +46,7 @@ type Result = Promise<{
 // Note from the future: I have attempted parallelizing these queries, but it made this function almost 2x slower.
 export const getVersions = async ({
   id: idArg,
+  branch,
   collectionConfig,
   doc,
   docPermissions,
@@ -97,6 +103,7 @@ export const getVersions = async ({
       } else {
         publishedDoc = (
           await payload.find({
+            branch,
             collection: collectionConfig.slug,
             depth: 0,
             limit: 1,
@@ -141,6 +148,7 @@ export const getVersions = async ({
         }
 
         const mostRecentVersion = await payload.findVersions({
+          branch,
           collection: collectionConfig.slug,
           depth: 0,
           limit: 1,
@@ -164,6 +172,7 @@ export const getVersions = async ({
 
       if (publishedDoc?.updatedAt) {
         ;({ totalDocs: unpublishedVersionCount } = await payload.countVersions({
+          branch,
           collection: collectionConfig.slug,
           locale,
           overrideAccess: true,
@@ -205,6 +214,7 @@ export const getVersions = async ({
     }
 
     ;({ totalDocs: versionCount } = await payload.countVersions({
+      branch,
       collection: collectionConfig.slug,
       locale,
       overrideAccess: true,
@@ -224,6 +234,7 @@ export const getVersions = async ({
       } else {
         publishedDoc = await payload.findGlobal({
           slug: globalConfig.slug,
+          branch,
           depth: 0,
           locale,
           overrideAccess: true,
@@ -241,6 +252,7 @@ export const getVersions = async ({
       if (hasAutosaveEnabled(globalConfig)) {
         const mostRecentVersion = await payload.findGlobalVersions({
           slug: globalConfig.slug,
+          branch,
           limit: 1,
           locale,
           overrideAccess: true,
@@ -261,6 +273,7 @@ export const getVersions = async ({
 
       if (publishedDoc?.updatedAt) {
         ;({ totalDocs: unpublishedVersionCount } = await payload.countGlobalVersions({
+          branch,
           global: globalConfig.slug,
           locale,
           overrideAccess: true,
@@ -287,6 +300,7 @@ export const getVersions = async ({
     }
 
     ;({ totalDocs: versionCount } = await payload.countGlobalVersions({
+      branch,
       global: globalConfig.slug,
       locale,
       overrideAccess: true,

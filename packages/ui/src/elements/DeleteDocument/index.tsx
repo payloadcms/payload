@@ -3,7 +3,8 @@ import type { SanitizedCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
+import { branchesCollectionSlug, formatAdminURL, MAIN_BRANCH } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -11,6 +12,7 @@ import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useForm } from '../../forms/Form/context.js'
+import { useBranchParam } from '../../providers/Branch/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -61,6 +63,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const { setModified } = useForm()
   const router = useRouter()
   const { i18n, t } = useTranslation()
+  const branch = useBranchParam()
   const { title } = useDocumentTitle()
   const { startRouteTransition } = useRouteTransition()
   const { openModal } = useModal()
@@ -91,7 +94,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     try {
       const url = formatAdminURL({
         apiRoute: api,
-        path: `/${collectionSlug}/${id}`,
+        path: `/${collectionSlug}/${id}${qs.stringify({ branch }, { addQueryPrefix: true })}`,
       })
       const res = permanentlyDelete
         ? await requests.delete(url, {
@@ -133,8 +136,20 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           // Navigating away tears this surface down, so just notify other surfaces.
           reportUpdate(deleteEvent)
 
+          const hasDeletedActiveBranch =
+            collectionSlug === branchesCollectionSlug && branch && json.doc?.name === branch
+
           return startRouteTransition(() =>
-            router.push(formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` })),
+            router.push(
+              formatAdminURL({
+                adminRoute,
+                // An explicit branch prevents navigation from preserving the deleted workspace.
+                path: `/collections/${collectionSlug}${qs.stringify(
+                  { branch: hasDeletedActiveBranch ? MAIN_BRANCH : undefined },
+                  { addQueryPrefix: true },
+                )}`,
+              }),
+            ),
           )
         }
 
@@ -158,6 +173,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
       return addDefaultError()
     }
   }, [
+    branch,
     deletePermanently,
     setModified,
     hasDeletePermission,

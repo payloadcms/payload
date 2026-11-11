@@ -5,6 +5,7 @@ import type { PathSegment } from '../ColumnBrowser/types.js'
 
 type FetchAncestorPathArgs = {
   api: string
+  branch?: string
   collectionSlug: string
   itemId: number | string
   parentFieldName: string
@@ -25,6 +26,7 @@ const MAX_HIERARCHY_DEPTH = 20
  */
 export async function fetchAncestorPath({
   api,
+  branch,
   collectionSlug,
   itemId,
   parentFieldName,
@@ -33,6 +35,7 @@ export async function fetchAncestorPath({
 }: FetchAncestorPathArgs): Promise<AncestorPathResult> {
   const queryString = qs.stringify(
     {
+      branch,
       depth: MAX_HIERARCHY_DEPTH,
       limit: 1,
       select: { [parentFieldName]: true, [useAsTitle]: true },

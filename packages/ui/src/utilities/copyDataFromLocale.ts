@@ -245,6 +245,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
 
   await canAccessAdmin({ req })
 
+  // Local API calls set req.locale; isolate parallel reads for each locale.
   const [fromLocaleData, toLocaleData] = await Promise.allSettled([
     globalSlug
       ? payload.findGlobal({
@@ -253,6 +254,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           draft: true,
           locale: fromLocale,
           overrideAccess: false,
+          req: { ...req },
           user,
           // `select` would allow us to select only the fields we need in the future
         })
@@ -264,6 +266,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           joins: false,
           locale: fromLocale,
           overrideAccess: false,
+          req: { ...req },
           user,
           // `select` would allow us to select only the fields we need in the future
         }),
@@ -274,6 +277,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           draft: true,
           locale: toLocale,
           overrideAccess: false,
+          req: { ...req },
           user,
           // `select` would allow us to select only the fields we need in the future
         })
@@ -285,6 +289,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           joins: false,
           locale: toLocale,
           overrideAccess: false,
+          req: { ...req },
           user,
           // `select` would allow us to select only the fields we need in the future
         }),
@@ -299,7 +304,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
   }
 
   const fields = globalSlug
-    ? globals[globalSlug].config.fields
+    ? globals.config.find(({ slug }) => slug === globalSlug)!.fields
     : collections[collectionSlug].config.fields
 
   const fromLocaleDataWithoutID = fromLocaleData.value

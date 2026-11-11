@@ -39,6 +39,7 @@ const runPayloadServerFn = createServerFn({ method: 'POST' })
       importMap: await getImportMap(),
       locale: data.locale,
       name: data.name,
+      requestURL: data.requestURL,
     })
   })
 
