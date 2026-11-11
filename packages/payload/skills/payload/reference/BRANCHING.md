@@ -1,5 +1,3 @@
-Written with AI
-
 # Payload Content Branching Reference
 
 Content Branching is experimental. It lets editors prepare and review a set of content changes

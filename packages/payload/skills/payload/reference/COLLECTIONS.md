@@ -1,5 +1,3 @@
-Written with AI
-
 # Payload Collections Reference
 
 Complete reference for collection configurations and patterns.

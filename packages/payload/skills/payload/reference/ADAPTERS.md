@@ -1,5 +1,3 @@
-Written with AI
-
 # Payload Adapters Reference
 
 Complete reference for database, storage, and email adapters.

@@ -1,5 +1,3 @@
-Written with AI
-
 # Payload Querying Reference
 
 Complete reference for querying data across Local API, REST, and GraphQL.

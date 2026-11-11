@@ -1,5 +1,3 @@
-Written with AI
-
 # AGENTS.md
 
 ## Project Structure
