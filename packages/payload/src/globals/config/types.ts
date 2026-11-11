@@ -241,6 +241,11 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
    * @default true
    */
   authorship?: Authorship | boolean
+  /**
+   * Opt this global into or out of content branching. Defaults to the root
+   * `branching` setting.
+   */
+  branching?: boolean
   /** Extension point to add your custom data. Server only. */
   custom?: GlobalCustom
   /**
