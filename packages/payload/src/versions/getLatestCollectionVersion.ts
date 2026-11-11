@@ -3,6 +3,7 @@ import type { FindOneArgs } from '../database/types.js'
 import type { Payload, PayloadRequest, Where } from '../types/index.js'
 import type { TypeWithVersion } from './types.js'
 
+import { resolveBranchRowID } from '../branching/resolveBranchRowID.js'
 import { combineQueries } from '../database/combineQueries.js'
 import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
 import { appendVersionToQueryKey } from './drafts/appendVersionToQueryKey.js'
@@ -26,9 +27,13 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
 }: Args): Promise<T | undefined> => {
   let latestVersion!: TypeWithVersion<T>
 
+  // Version rows on a branch hang off the shadow row, so `parent` is that row's
+  // primary key rather than the canonical document ID the caller passed.
+  const parentID = await resolveBranchRowID({ id, collectionSlug: config.slug, req })
+
   const whereQuery = published
-    ? { and: [{ parent: { equals: id } }, { 'version._status': { equals: 'published' } }] }
-    : { and: [{ parent: { equals: id } }, { latest: { equals: true } }] }
+    ? { and: [{ parent: { equals: parentID } }, { 'version._status': { equals: 'published' } }] }
+    : { and: [{ parent: { equals: parentID } }, { latest: { equals: true } }] }
 
   if (hasDraftsEnabled(config)) {
     const { docs } = await payload.db.findVersions<T>({

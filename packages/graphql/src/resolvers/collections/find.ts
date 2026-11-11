@@ -1,15 +1,17 @@
 import type { GraphQLResolveInfo } from 'graphql'
 import type { Collection, PaginatedDocs, Where } from 'payload'
 
-import { findOperation, isolateObjectProperty } from 'payload'
+import { findOperation } from 'payload'
 
 import type { Context } from '../types.js'
 
 import { buildSelectForCollectionMany } from '../../utilities/select.js'
+import { getGraphQLRequest } from '../getGraphQLRequest.js'
 
 export type Resolver = (
   _: unknown,
   args: {
+    branch?: string
     data: Record<string, unknown>
     draft: boolean
     fallbackLocale?: string
@@ -29,18 +31,15 @@ export type Resolver = (
 
 export function findResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context, info) {
-    const req = (context.req = isolateObjectProperty(context.req, [
-      'locale',
-      'fallbackLocale',
-      'transactionID',
-    ]))
-    const select = (context.select = args.select
-      ? buildSelectForCollectionMany(info, context)
-      : undefined)
-
-    req.locale = args.locale || req.locale
-    req.fallbackLocale = args.fallbackLocale || req.fallbackLocale
-    req.query = req.query || {}
+    const req = await getGraphQLRequest({
+      branch: args.branch,
+      collectionSlug: collection.config.slug,
+      context,
+      fallbackLocale: args.fallbackLocale,
+      info,
+      locale: args.locale,
+    })
+    const select = args.select ? buildSelectForCollectionMany(info, context) : undefined
 
     const draft: boolean =
       (args.draft ?? req.query?.draft === 'false')

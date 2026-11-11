@@ -471,6 +471,7 @@ export function fieldsToJSONSchema({
         }
 
         let fieldSchema: JSONSchema4
+        let shouldWrapRichTextSchema = false
 
         switch (field.type) {
           case 'array': {
@@ -657,17 +658,24 @@ export function fieldsToJSONSchema({
           }
 
           case 'json': {
-            fieldSchema = field.jsonSchema?.schema || {
-              ...baseFieldSchema,
-              type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
-            }
+            const jsonFieldSchema = field.jsonSchema?.schema
 
-            if (field.interfaceName && field.jsonSchema?.schema) {
-              fieldSchema = {
-                $ref: `#/$defs/${registerNamedInterface(field.interfaceName, fieldSchema)}`,
+            if (jsonFieldSchema && field.interfaceName) {
+              const reference = {
+                $ref: `#/$defs/${registerNamedInterface(field.interfaceName, jsonFieldSchema)}`,
               }
-            }
 
+              fieldSchema = reference
+            } else {
+              fieldSchema = jsonFieldSchema
+                ? isRequired
+                  ? jsonFieldSchema
+                  : { anyOf: [jsonFieldSchema, { type: 'null' }] }
+                : {
+                    ...baseFieldSchema,
+                    type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
+                  }
+            }
             break
           }
 
@@ -823,7 +831,7 @@ export function fieldsToJSONSchema({
               throw new Error('Attempted to access unsanitized rich text editor.')
             }
             if (field.editor.jsonSchema) {
-              fieldSchema = {
+              const richTextSchema = {
                 ...baseFieldSchema,
                 ...field.editor.jsonSchema({
                   collectionIDFieldTypes,
@@ -836,6 +844,8 @@ export function fieldsToJSONSchema({
                   variant,
                 }),
               }
+              fieldSchema = richTextSchema
+              shouldWrapRichTextSchema = !isRequired
             } else {
               // Maintain backwards compatibility with existing rich text editors
               fieldSchema = {
@@ -951,6 +961,10 @@ export function fieldsToJSONSchema({
           for (const schema of field.jsonSchema) {
             fieldSchema = schema({ jsonSchema: fieldSchema!, variant })
           }
+        }
+
+        if (shouldWrapRichTextSchema) {
+          fieldSchema = { anyOf: [fieldSchema!, { type: 'null' }] }
         }
 
         if (fieldSchema! && fieldAffectsData(field)) {

@@ -9,6 +9,11 @@ import { countGlobalVersionsOperation } from '../countGlobalVersions.js'
 
 export type CountGlobalVersionsOptions<TSlug extends GlobalSlug> = {
   /**
+   * Read against a specific content branch instead of resolving one from the
+   * request. `false` bypasses branching entirely.
+   */
+  branch?: false | string
+  /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
    * shouldn't be necessarily part of the document, for example a `triggerBeforeChange` option which can be read by the BeforeChange hook

@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { databaseAdapterSupportsTransactions } from '../../../__helpers/shared/databaseAdapterCapabilities.js'
+
 export const hooksSlug = 'hooks'
 const Hooks: CollectionConfig = {
   slug: hooksSlug,
@@ -13,6 +15,9 @@ const Hooks: CollectionConfig = {
     beforeOperation: [
       ({ operation, req }) => {
         if (
+          databaseAdapterSupportsTransactions({
+            adapter: process.env.PAYLOAD_DATABASE ?? 'mongodb',
+          }) &&
           typeof req.payload.db.beginTransaction === 'function' &&
           !req.transactionID &&
           ['create', 'delete', 'update'].includes(operation)

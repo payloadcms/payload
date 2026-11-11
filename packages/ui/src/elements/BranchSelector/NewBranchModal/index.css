@@ -1,0 +1,46 @@
+@layer payload-default {
+  .new-branch-modal {
+    --dialog-width: 400px;
+  }
+
+  .new-branch-modal__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .new-branch-modal__form .field-type {
+    margin-bottom: 0;
+  }
+
+  .new-branch-modal__source {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1);
+  }
+
+  .new-branch-modal__source-label {
+    color: var(--color-text);
+  }
+
+  /* Shaped like the inputs above it so the trail reads as one column, but inert:
+     there is only ever one source branch to show. */
+  .new-branch-modal__source-value {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    min-height: var(--spacer-5);
+    padding-inline: var(--spacer-1);
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-medium);
+    color: var(--color-text-secondary);
+  }
+
+  .new-branch-modal__source-value .icon--branch {
+    color: var(--color-icon);
+  }
+
+  .new-branch-modal__source-name {
+    color: var(--color-text);
+  }
+}

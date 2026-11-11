@@ -64,3 +64,11 @@ export const collectionSlugs = [
   uploads3Slug,
   uiSlug,
 ]
+
+export const slugLocalizedRequiredSlug = 'slug-localized-required'
+
+export const slugLocalizedRequiredSiblingSlug = 'slug-localized-required-siblings'
+export const slugLocalizedRequiredGroupSlug = 'slug-localized-required-group'
+
+export const slugLocalizedRequiredNestedGroupSlug = 'slug-localized-required-nested-group'
+export const slugLocalizedRequiredNestedTabSlug = 'slug-localized-required-nested-tab'

@@ -1,4 +1,6 @@
-import { buildVersionGlobalFields, type CreateGlobalVersion } from 'payload'
+import type { CreateGlobalVersion } from 'payload'
+
+import { buildVersionGlobalFields, MAIN_BRANCH, resolveBranch } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -22,7 +24,12 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
 ) {
   const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug, versions: true })
 
+  const versionBranch = req?.payload?.config?.branching?.branchableGlobals?.has(globalSlug)
+    ? resolveBranch({ req: req as never })
+    : MAIN_BRANCH
+
   const data = {
+    _branch: versionBranch,
     autosave,
     createdAt,
     latest: true,
@@ -52,6 +59,9 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
 
   let [doc] = await Model.create([data], options)
 
+  // Scoped by `_branch`. Unlike collection versions, global versions have no
+  // `parent` to separate streams by — every version of a global shares one — so
+  // without this an unscoped clear would wipe main's latest flag from a branch.
   await Model.updateMany(
     {
       $and: [
@@ -64,6 +74,12 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
           latest: {
             $eq: true,
           },
+        },
+        {
+          $or: [
+            { _branch: { $eq: versionBranch } },
+            ...(versionBranch === MAIN_BRANCH ? [{ _branch: { $exists: false } }] : []),
+          ],
         },
       ],
     },

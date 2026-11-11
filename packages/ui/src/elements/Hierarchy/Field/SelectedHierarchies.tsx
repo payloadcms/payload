@@ -1,8 +1,9 @@
 'use client'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
+import { useBranchParam } from '../../../providers/Branch/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Chip } from '../../Chip/index.js'
@@ -33,10 +34,9 @@ export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
 }) => {
   const { config, getEntityConfig } = useConfig()
   const { i18n } = useTranslation()
+  const branch = useBranchParam()
   const [items, setItems] = useState<HierarchyItem[]>([])
   const [isInitialLoad, setIsInitialLoad] = useState(true)
-
-  const prevSelectedIdsRef = useRef<string>('')
 
   const {
     routes: { api },
@@ -45,32 +45,38 @@ export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
 
   const collectionConfig = getEntityConfig({ collectionSlug: hierarchySlug })
 
-  const selectedIdsKey = useMemo(() => selectedIds.slice().sort().join(','), [selectedIds])
+  const selectedIdsKey = JSON.stringify(selectedIds)
+  const requestedIds = useMemo<(number | string)[]>(
+    () => JSON.parse(selectedIdsKey),
+    [selectedIdsKey],
+  )
 
   useEffect(() => {
-    if (!selectedIds || selectedIds.length === 0) {
+    let isCurrent = true
+
+    setItems([])
+
+    if (requestedIds.length === 0) {
       setItems([])
       setIsInitialLoad(false)
       return
     }
 
-    if (prevSelectedIdsRef.current === selectedIdsKey) {
-      return
-    }
-    prevSelectedIdsRef.current = selectedIdsKey
+    setIsInitialLoad(true)
 
     const fetchItems = async () => {
       const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
 
       const query = {
+        branch,
         depth: 0,
-        limit: selectedIds.length,
+        limit: requestedIds.length,
         select: {
           [useAsTitle]: true,
         },
         where: {
           id: {
-            in: selectedIds,
+            in: requestedIds,
           },
         },
       }
@@ -107,21 +113,29 @@ export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
           })
 
           // Order by selectedIds to preserve selection order
-          const orderedItems = selectedIds
+          const orderedItems = requestedIds
             .map((id) => fetchedItems.find((item) => item.id === id))
             .filter((item): item is HierarchyItem => item !== undefined)
 
-          setItems(orderedItems)
+          if (isCurrent) {
+            setItems(orderedItems)
+          }
         }
       } catch {
         // Silently fail - items will remain empty
       } finally {
-        setIsInitialLoad(false)
+        if (isCurrent) {
+          setIsInitialLoad(false)
+        }
       }
     }
 
     void fetchItems()
-  }, [selectedIds, selectedIdsKey, hierarchySlug, collectionConfig, serverURL, api, i18n.language])
+
+    return () => {
+      isCurrent = false
+    }
+  }, [branch, requestedIds, hierarchySlug, collectionConfig, serverURL, api, i18n.language])
 
   if (isInitialLoad) {
     return (

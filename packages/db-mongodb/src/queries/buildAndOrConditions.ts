@@ -1,22 +1,26 @@
-import type { FlattenedField, Payload, Where } from 'payload'
+import type { FlattenedField, Payload, PayloadRequest, Where } from 'payload'
 
 import { parseParams } from './parseParams.js'
 
 export async function buildAndOrConditions({
+  branch,
   collectionSlug,
   fields,
   globalSlug,
   locale,
   parentIsLocalized,
   payload,
+  req,
   where,
 }: {
+  branch?: false | string
   collectionSlug?: string
   fields: FlattenedField[]
   globalSlug?: string
   locale?: string
   parentIsLocalized: boolean
   payload: Payload
+  req?: Partial<PayloadRequest>
   where: Where[]
 }): Promise<Record<string, unknown>[]> {
   const completedConditions = []
@@ -27,12 +31,14 @@ export async function buildAndOrConditions({
     // If the operation is properly formatted as an object
     if (typeof condition === 'object') {
       const result = await parseParams({
+        branch,
         collectionSlug,
         fields,
         globalSlug,
         locale,
         parentIsLocalized,
         payload,
+        req,
         where: condition,
       })
       if (Object.keys(result).length > 0) {
