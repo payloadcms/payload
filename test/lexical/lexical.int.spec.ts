@@ -1918,6 +1918,62 @@ test.describe('Lexical link fields interface generation', () => {
       Object.keys((defs[name] as { properties: Record<string, unknown> }).properties).sort()
     expect(propsOf(linkFieldsNames[0]!)).not.toEqual(propsOf(linkFieldsNames[1]!))
   })
+
+  test('preserves custom linkType options in the JSON schema and generated types even without extra link fields', async () => {
+    const config = {
+      collections: [
+        {
+          slug: 'articles',
+          fields: [
+            {
+              name: 'content',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: [
+                  LinkFeature({
+                    fields: ({ defaultFields }) =>
+                      defaultFields.map((field) => {
+                        if (field.name === 'linkType' && field.type === 'radio') {
+                          return {
+                            ...field,
+                            options: [...field.options, { label: 'Email', value: 'email' }],
+                          }
+                        }
+                        return field
+                      }),
+                  }),
+                ],
+              }),
+            },
+          ],
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = sanitizeConfig(config)
+    const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
+    const defs = jsonSchema.$defs!
+
+    const linkFieldsNames = Object.keys(defs).filter((k) =>
+      /^LexicalLinkFields_[0-9A-F]{8}$/.test(k),
+    )
+    expect(linkFieldsNames).toHaveLength(1)
+
+    const linkFieldsSchema = defs[linkFieldsNames[0]!] as {
+      properties: { linkType: { enum: string[] } }
+    }
+    expect(linkFieldsSchema.properties.linkType.enum).toContain('email')
+
+    ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
+      defaultIDType: 'text',
+    }
+    const { types: generatedTypes } = await generateTypes(sanitizedConfig, {
+      log: false,
+      returnString: true,
+    })
+
+    expect(generatedTypes).toContain(`'email'`)
+  })
 })
 
 test.describe('Lexical upload node type generation', () => {

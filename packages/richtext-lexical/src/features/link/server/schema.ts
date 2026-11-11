@@ -63,6 +63,18 @@ export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> 
   fields: TFields;
 }`
 
+const DEFAULT_LINK_TYPE_OPTIONS = new Set(['custom', 'internal'])
+
+const hasCustomLinkTypeOptions = (field: Field): boolean => {
+  if (field.type !== 'radio' && field.type !== 'select') {
+    return true
+  }
+  return field.options.some((opt) => {
+    const value = typeof opt === 'string' ? opt : opt.value
+    return !DEFAULT_LINK_TYPE_OPTIONS.has(value)
+  })
+}
+
 const buildLinkFieldsJSONSchema = (
   sanitizedFieldsWithoutText: Field[],
   {
@@ -87,6 +99,16 @@ const buildLinkFieldsJSONSchema = (
           variant,
         })
       : { properties: {}, required: [] }
+
+  const linkTypeField = sanitizedFieldsWithoutText.find(
+    (field) => 'name' in field && field.name === 'linkType',
+  )
+  const linkTypeSchema =
+    linkTypeField &&
+    hasCustomLinkTypeOptions(linkTypeField) &&
+    userFieldsSchema.properties?.linkType
+      ? userFieldsSchema.properties.linkType
+      : ({ type: 'string', enum: ['custom', 'internal'] } satisfies JSONSchema4)
 
   return {
     type: 'object',
@@ -119,7 +141,7 @@ const buildLinkFieldsJSONSchema = (
           { type: 'null' },
         ],
       },
-      linkType: { type: 'string', enum: ['custom', 'internal'] },
+      linkType: linkTypeSchema,
       newTab: { type: 'boolean' },
       url: { type: 'string' },
     },
@@ -145,9 +167,15 @@ const resolveLinkFieldsRef = (
   args: JSONSchemaArgs,
 ): { fieldsRef: JSONSchema4; fieldsTypeName: string } => {
   const fieldsSchema = buildLinkFieldsJSONSchema(sanitizedFieldsWithoutText, args)
-  const hasUserExtras = sanitizedFieldsWithoutText.some(
-    (field) => 'name' in field && !STANDARD_LINK_FIELD_NAMES.has(field.name),
-  )
+  const hasUserExtras = sanitizedFieldsWithoutText.some((field) => {
+    if (!('name' in field)) {
+      return false
+    }
+    if (!STANDARD_LINK_FIELD_NAMES.has(field.name)) {
+      return true
+    }
+    return field.name === 'linkType' && hasCustomLinkTypeOptions(field)
+  })
   if (!hasUserExtras) {
     return { fieldsRef: fieldsSchema, fieldsTypeName: 'LexicalLinkFields' }
   }
