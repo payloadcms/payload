@@ -210,7 +210,6 @@ export const buildJoinAggregation = async ({
       aggregate.push({
         $lookup: {
           as: alias,
-          foreignField: join.field.on,
           from: JoinModel.collection.name,
           let: {
             root_id_: rootIDExpression,
@@ -247,7 +246,6 @@ export const buildJoinAggregation = async ({
         aggregate.push({
           $lookup: {
             as: `${as}.totalDocs.${alias}`,
-            foreignField: join.field.on,
             from: JoinModel.collection.name,
             let: {
               root_id_: rootIDExpression,

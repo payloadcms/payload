@@ -148,11 +148,6 @@ export const handleEndpoints = async ({
       shouldAuthenticate: false,
     })
 
-    // Here rather than inside `createPayloadRequest`: the check needs the resolved user,
-    // and it has to be able to fail as a formatted response, which means the request has
-    // to exist first. §12.5 — a caller may not read through a branch they cannot see.
-    await assertBranchReadable({ req })
-
     const { payload } = req
     const { config } = payload
 
@@ -280,6 +275,9 @@ export const handleEndpoints = async ({
     if (!endpoint?.disableAuth) {
       await authenticateRequest({ canSetHeaders: true, req })
     }
+
+    // Branch access requires the authenticated user resolved for this endpoint.
+    await assertBranchReadable({ req })
 
     const response = await handler(req)
 
