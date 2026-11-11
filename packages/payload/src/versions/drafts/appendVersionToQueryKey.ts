@@ -1,6 +1,6 @@
 import type { Where } from '../../types/index.js'
 
-const appendVersionToQueryKeyWithIDPath = (query: Where, idPath?: string): Where => {
+const appendVersionToQueryKeyWithIDPath = (query: Where, idPath?: false | string): Where => {
   return Object.entries(query).reduce((res, [key, val]) => {
     if (['and', 'or'].includes(key.toLowerCase()) && Array.isArray(val)) {
       return {
@@ -8,6 +8,13 @@ const appendVersionToQueryKeyWithIDPath = (query: Where, idPath?: string): Where
         [key.toLowerCase()]: val.map((subQuery) =>
           appendVersionToQueryKeyWithIDPath(subQuery, idPath),
         ),
+      }
+    }
+
+    if (key === 'id' && idPath === false) {
+      return {
+        ...res,
+        id: { exists: false },
       }
     }
 
@@ -19,7 +26,7 @@ const appendVersionToQueryKeyWithIDPath = (query: Where, idPath?: string): Where
 }
 
 export const appendGlobalVersionToQueryKey = (query: Where = {}): Where =>
-  appendVersionToQueryKeyWithIDPath(query)
+  appendVersionToQueryKeyWithIDPath(query, false)
 
 export const appendVersionToQueryKey = (query: Where = {}): Where =>
   appendVersionToQueryKeyWithIDPath(query, 'parent')

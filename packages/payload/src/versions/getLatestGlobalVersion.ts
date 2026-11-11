@@ -5,7 +5,7 @@ import type { TypeWithVersion } from './types.js'
 import { hasWhereAccessResult } from '../auth/types.js'
 import { combineQueries } from '../database/combineQueries.js'
 import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
-import { appendVersionToQueryKey } from './drafts/appendVersionToQueryKey.js'
+import { appendGlobalVersionToQueryKey } from './drafts/appendVersionToQueryKey.js'
 
 type Args = {
   config: SanitizedGlobalConfig
@@ -25,7 +25,7 @@ export const getLatestGlobalVersion = async ({
   published,
   req,
   where,
-}: Args): Promise<{ global: Document; globalExists: boolean }> => {
+}: Args): Promise<{ global: Document; globalExists: boolean; latestVersionExists: boolean }> => {
   let latestVersion: TypeWithVersion<Document> | undefined
 
   const whereQuery = published
@@ -40,7 +40,7 @@ export const getLatestGlobalVersion = async ({
         locale: locale || req?.locale || undefined,
         pagination: false,
         req,
-        where: combineQueries(appendVersionToQueryKey(where), whereQuery as unknown as Where),
+        where: whereQuery as unknown as Where,
       })
     ).docs[0]
   }
@@ -59,11 +59,36 @@ export const getLatestGlobalVersion = async ({
       })
     : global
   const globalExists = Boolean(existingGlobal && Object.keys(existingGlobal).length > 0)
+  const latestVersionExists = Boolean(latestVersion)
 
   if (!latestVersion) {
     return {
       global,
       globalExists,
+      latestVersionExists,
+    }
+  }
+
+  if (hasWhereAccessResult(where)) {
+    latestVersion = (
+      await payload.db.findGlobalVersions({
+        global: slug,
+        limit: 1,
+        locale: locale || req?.locale || undefined,
+        pagination: false,
+        req,
+        where: combineQueries(appendGlobalVersionToQueryKey(where), {
+          id: { equals: latestVersion.id },
+        }),
+      })
+    ).docs[0]
+
+    if (!latestVersion) {
+      return {
+        global: {},
+        globalExists,
+        latestVersionExists,
+      }
     }
   }
 
@@ -78,5 +103,6 @@ export const getLatestGlobalVersion = async ({
   return {
     global: latestVersion.version,
     globalExists,
+    latestVersionExists,
   }
 }
