@@ -1920,32 +1920,28 @@ test.describe('Lexical link fields interface generation', () => {
   })
 
   test('preserves custom linkType options in the JSON schema and generated types even without extra link fields', async () => {
+    const customLinkTypeEditor = lexicalEditor({
+      features: [
+        LinkFeature({
+          fields: ({ defaultFields }) =>
+            defaultFields.map((field) => {
+              if (field.name === 'linkType' && field.type === 'radio') {
+                return {
+                  ...field,
+                  options: [...field.options, { label: 'Email', value: 'email' }],
+                }
+              }
+              return field
+            }),
+        }),
+      ],
+    })
+
     const config = {
       collections: [
         {
-          slug: 'articles',
-          fields: [
-            {
-              name: 'content',
-              type: 'richText',
-              editor: lexicalEditor({
-                features: [
-                  LinkFeature({
-                    fields: ({ defaultFields }) =>
-                      defaultFields.map((field) => {
-                        if (field.name === 'linkType' && field.type === 'radio') {
-                          return {
-                            ...field,
-                            options: [...field.options, { label: 'Email', value: 'email' }],
-                          }
-                        }
-                        return field
-                      }),
-                  }),
-                ],
-              }),
-            },
-          ],
+          slug: 'linkCollisionTest',
+          fields: [{ name: 'content', type: 'richText', editor: customLinkTypeEditor }],
         },
       ],
     } as unknown as Config

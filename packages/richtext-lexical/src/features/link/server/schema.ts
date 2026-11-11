@@ -1,6 +1,6 @@
 import type { JSONSchema4 } from 'json-schema'
 import type { SerializedLexicalNode } from 'lexical'
-import type { DefaultDocumentIDType, Field } from 'payload'
+import type { DefaultDocumentIDType, Field, FlattenedField } from 'payload'
 
 import { createHash } from 'crypto'
 import { fieldsToJSONSchema, flattenAllFields } from 'payload'
@@ -65,7 +65,11 @@ export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> 
 
 const DEFAULT_LINK_TYPE_OPTIONS = new Set(['custom', 'internal'])
 
-const hasCustomLinkTypeOptions = (field: Field): boolean => {
+/**
+ * Checks whether a `linkType` field defines custom options outside the built-in
+ * `'custom' | 'internal'` set.
+ */
+const hasCustomLinkTypeOptions = (field: Field | FlattenedField): boolean => {
   if (field.type !== 'radio' && field.type !== 'select') {
     return true
   }
@@ -100,9 +104,7 @@ const buildLinkFieldsJSONSchema = (
         })
       : { properties: {}, required: [] }
 
-  const linkTypeField = sanitizedFieldsWithoutText.find(
-    (field) => 'name' in field && field.name === 'linkType',
-  )
+  const linkTypeField = flattenedExtraFields.find((field) => field.name === 'linkType')
   const linkTypeSchema =
     linkTypeField &&
     hasCustomLinkTypeOptions(linkTypeField) &&
@@ -167,10 +169,8 @@ const resolveLinkFieldsRef = (
   args: JSONSchemaArgs,
 ): { fieldsRef: JSONSchema4; fieldsTypeName: string } => {
   const fieldsSchema = buildLinkFieldsJSONSchema(sanitizedFieldsWithoutText, args)
-  const hasUserExtras = sanitizedFieldsWithoutText.some((field) => {
-    if (!('name' in field)) {
-      return false
-    }
+  const flattenedFields = flattenAllFields({ fields: sanitizedFieldsWithoutText })
+  const hasUserExtras = flattenedFields.some((field) => {
     if (!STANDARD_LINK_FIELD_NAMES.has(field.name)) {
       return true
     }
