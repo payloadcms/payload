@@ -97,6 +97,34 @@ Payload can be used with any Postgres database or MongoDB-compatible database in
 
 Out of the box, Payload templates pass the `process.env.DATABASE_URL` environment variable to its database adapters, so make sure you've got that environment variable (and all others that you use) assigned in your deployment platform.
 
+### Prisma Postgres
+
+[Prisma Postgres](https://www.prisma.io/postgres?utm_source=payload&utm_medium=docs&utm_campaign=payload_production_deployment) gives each database two connection strings that differ only in the hostname:
+
+- **Pooled** (`pooled.db.prisma.io`): connects through PgBouncer in transaction mode. Use it as `DATABASE_URL` for the running app, especially on serverless platforms where many instances open connections at the same time.
+- **Direct** (`db.prisma.io`): connects straight to the database. Use it when you run `payload migrate`.
+
+```ts
+import { postgresAdapter } from '@payloadcms/db-postgres'
+
+export default buildConfig({
+  db: postgresAdapter({
+    pool: {
+      // postgres://USER:PASSWORD@pooled.db.prisma.io:5432/postgres?sslmode=require
+      connectionString: process.env.DATABASE_URL,
+    },
+  }),
+})
+```
+
+To run [migrations](/docs/database/migrations), set `DATABASE_URL` to the direct string for that command:
+
+```bash
+DATABASE_URL="postgres://USER:PASSWORD@db.prisma.io:5432/postgres?sslmode=require" pnpm payload migrate
+```
+
+`payload migrate` also completes over the pooled connection, but the pooler ends any query that runs longer than 10 minutes and does not keep session state between transactions, so the direct connection is the safer choice for migrations. See the [Prisma Postgres connection pooling docs](https://www.prisma.io/docs/postgres/database/connection-pooling?utm_source=payload&utm_medium=docs&utm_campaign=payload_production_deployment) for the connection limits of each plan.
+
 ### DocumentDB
 
 When using AWS DocumentDB, you will need to configure connection options for authentication in the `connectOptions`
