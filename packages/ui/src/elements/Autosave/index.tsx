@@ -5,8 +5,8 @@ import { dequal } from 'dequal/lite'
 import {
   formatAdminURL,
   getAutosaveInterval,
+  getDataFromFormState,
   hasDraftValidationEnabled,
-  reduceFieldsToValues,
 } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
@@ -202,7 +202,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   })
 
   const didMount = useRef(false)
-  const previousDebouncedData = useRef(reduceFieldsToValues(debouncedFormState))
+  const previousDebouncedData = useRef(getDataFromFormState(debouncedFormState))
   const previousUploadEdits = useRef(uploadEdits)
 
   // When debounced fields change, autosave
@@ -219,7 +219,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
      * Ensure autosave only runs if the form data changes, not every time the entire form state changes
      * Remove `updatedAt` from comparison as it changes on every autosave interval.
      */
-    const { updatedAt: _, ...formData } = reduceFieldsToValues(debouncedFormState)
+    const { updatedAt: _, ...formData } = getDataFromFormState(debouncedFormState)
     const { updatedAt: __, ...prevFormData } = previousDebouncedData.current
 
     if (dequal(formData, prevFormData) && dequal(uploadEdits, previousUploadEdits.current)) {

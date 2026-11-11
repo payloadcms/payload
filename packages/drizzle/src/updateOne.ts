@@ -2,7 +2,7 @@ import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateOne } from 'payload'
 
-import { and, eq } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import {
   applyBranchIDProjection,
   resolveBranchQuery,
@@ -11,7 +11,7 @@ import {
 } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
-import type { DrizzleAdapter } from './types.js'
+import type { DrizzleAdapter, PostgresDB } from './types.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
@@ -86,23 +86,25 @@ export const updateOne: UpdateOne = async function updateOne(
       }
 
       const table = this.tables[tableName]
-      const matchingRows = await (db as LibSQLDatabase)
+      const matchingRowQuery = (db as PostgresDB)
         .select({ id: table.id })
         .from(table)
         .where(where)
         .limit(1)
-      const matchingRowID = matchingRows[0]?.id
 
-      if (matchingRowID === undefined || matchingRowID === null) {
-        return null
-      }
+      // PostgreSQL must lock the candidate before applying LIMIT so a waiting caller can
+      // continue to another match if a concurrent update makes the first row ineligible.
+      // NO KEY UPDATE permits concurrent foreign-key checks on the candidate.
+      // SQLite serializes writers and does not support SELECT ... FOR UPDATE.
+      const matchingRow =
+        this.name === 'postgres' ? matchingRowQuery.for('no key update') : matchingRowQuery
 
       markWrite(this)
 
       const docs = await (db as LibSQLDatabase)
         .update(table)
         .set(row)
-        .where(and(eq(table.id, matchingRowID), where))
+        .where(eq(table.id, matchingRow))
         .returning()
 
       if (!docs[0]) {

@@ -952,6 +952,7 @@ export type CompoundIndex = {
   /**
    * MongoDB only: include documents in this index only when every listed field exists.
    * Explicit null values count as existing. SQL adapters ignore this option.
+   * Unique indexes using this option cannot index paths nested inside arrays or blocks.
    */
   requireExists?: string[]
   unique?: boolean

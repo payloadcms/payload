@@ -5,7 +5,7 @@ import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { branchesCollectionSlug, formatAdminURL, MAIN_BRANCH } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { Fragment, useCallback, useState } from 'react'
+import React, { Fragment, useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
@@ -70,6 +70,11 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const { reportUpdate } = useDocumentEvents()
 
   const modalSlug = `delete-${id}`
+  const descriptionID = `${modalSlug}-description`
+  const focusTrapOptions = useMemo(
+    () => ({ initialFocus: () => document.getElementById(`${modalSlug}-cancel`) ?? false }),
+    [modalSlug],
+  )
 
   const [deletePermanently, setDeletePermanently] = useState(false)
 
@@ -197,23 +202,26 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           {t('general:delete')}
         </PopupList.Button>
         <ConfirmationModal
+          aria-describedby={descriptionID}
           body={
             <Fragment>
-              <Translation
-                elements={{
-                  '1': ({ children }) => <strong>{children}</strong>,
-                }}
-                i18nKey={
-                  collectionConfig.trash && hasTrashPermission
-                    ? 'general:aboutToTrash'
-                    : 'general:aboutToDelete'
-                }
-                t={t}
-                variables={{
-                  label: getTranslation(singularLabel, i18n),
-                  title: titleFromProps || title || id,
-                }}
-              />
+              <span id={descriptionID}>
+                <Translation
+                  elements={{
+                    '1': ({ children }) => <strong>{children}</strong>,
+                  }}
+                  i18nKey={
+                    collectionConfig.trash && hasTrashPermission
+                      ? 'general:aboutToTrash'
+                      : 'general:aboutToDelete'
+                  }
+                  t={t}
+                  variables={{
+                    label: getTranslation(singularLabel, i18n),
+                    title: titleFromProps || title || id,
+                  }}
+                />
+              </span>
               {collectionConfig.trash && hasTrashPermission && hasDeletePermission && (
                 <CheckboxInput
                   checked={deletePermanently}
@@ -227,9 +235,11 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           }
           className={baseClass}
           confirmingLabel={t('general:deleting')}
+          focusTrapOptions={focusTrapOptions}
           heading={t('general:confirmDeletion')}
           modalSlug={modalSlug}
           onConfirm={handleDelete}
+          role="alertdialog"
         />
       </Fragment>
     )

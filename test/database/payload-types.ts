@@ -85,6 +85,7 @@ export type LexicalNodes_B1AC347C =
   | SerializedAutoLinkNode<LexicalNodes_B1AC347C, LexicalLinkFields_0A7E9EC0>
   | SerializedLinkNode<LexicalNodes_B1AC347C, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
+      | 'write-input'
       | 'noTimeStamps'
       | 'categories'
       | 'simple'
@@ -125,6 +126,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    'write-input': WriteInput;
     noTimeStamps: NoTimeStamp;
     categories: Category;
     simple: Simple;
@@ -164,6 +166,7 @@ export interface Config {
     };
   };
   collectionsSelect: {
+    'write-input': WriteInputSelect<false> | WriteInputSelect<true>;
     noTimeStamps: NoTimeStampsSelect<false> | NoTimeStampsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     simple: SimpleSelect<false> | SimpleSelect<true>;
@@ -244,6 +247,45 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Content".
+ */
+export interface Content {
+  items?:
+    | {
+        settings?: {
+          label?: string | null;
+        };
+        translations?: {
+          label?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "write-input".
+ */
+export interface WriteInput {
+  id: string;
+  title?: string | null;
+  layout?: Content[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1113,6 +1155,10 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'write-input';
+        value: string | WriteInput;
+      } | null)
+    | ({
         relationTo: 'noTimeStamps';
         value: string | NoTimeStamp;
       } | null)
@@ -1265,6 +1311,42 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "write-input_select".
+ */
+export interface WriteInputSelect<T extends boolean = true> {
+  title?: T;
+  layout?:
+    | T
+    | {
+        content?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    settings?:
+                      | T
+                      | {
+                          label?: T;
+                        };
+                    translations?:
+                      | T
+                      | {
+                          label?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2141,6 +2223,7 @@ export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
     relatedCollection:
+      | 'write-input'
       | 'noTimeStamps'
       | 'categories'
       | 'simple'
@@ -2192,6 +2275,7 @@ export interface ActivityWidget {
   data?: {
     excludedCollections?:
       | (
+          | 'write-input'
           | 'noTimeStamps'
           | 'categories'
           | 'simple'

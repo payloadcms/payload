@@ -1,8 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
-import path from 'node:path'
 
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
@@ -31,6 +29,8 @@ import { validateSortQuery } from '../../database/queryValidation/validateSortQu
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
+import { copyTempFileForDocument } from '../../uploads/copyTempFileForDocument.js'
+import { createSharedClientUploadDownload } from '../../uploads/createSharedClientUploadDownload.js'
 import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
@@ -398,6 +398,7 @@ export const updateOperation = async <
       : null
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
+    const sharedClientUploadDownload = createSharedClientUploadDownload()
     // File replacement cleanup needs a per-document checkpoint. Process file uploads in order so
     // each checkpoint remains the active nested scope until that document finishes.
     const shouldProcessDocumentsSequentially =
@@ -494,13 +495,10 @@ export const updateOperation = async <
             }
 
             const documentFile = documentReq.file ? { ...documentReq.file } : undefined
-            if (collectionConfig.upload && !overrideAccess && documentFile?.tempFilePath) {
-              const extension = path.extname(documentFile.tempFilePath)
-              documentTempFilePath = path.join(
-                path.dirname(documentFile.tempFilePath),
-                `${path.basename(documentFile.tempFilePath, extension)}-${randomUUID()}${extension}`,
-              )
-              await fs.copyFile(documentFile.tempFilePath, documentTempFilePath)
+            if (collectionConfig.upload && documentFile?.tempFilePath) {
+              documentTempFilePath = await copyTempFileForDocument({
+                tempFilePath: documentFile.tempFilePath,
+              })
               documentFile.tempFilePath = documentTempFilePath
             }
 
@@ -523,6 +521,7 @@ export const updateOperation = async <
                     collectionConfig.flattenedFields,
                   ),
                 }),
+                fetchFullClientUpload: sharedClientUploadDownload.fetchFullClientUpload,
                 operation: 'update',
                 originalDoc: docWithLocales,
                 overwriteExistingFiles,
@@ -672,10 +671,15 @@ export const updateOperation = async <
               message: error instanceof Error ? error.message : 'Unknown error',
             })
           } finally {
-            if (documentTempFilePath) {
-              await fs.rm(documentTempFilePath, { force: true }).catch((error) => {
-                req.payload.logger.error({ err: error, msg: 'Failed to remove temp file copy' })
-              })
+            const downloadedTempFilePath =
+              documentReq !== req ? documentReq.file?.tempFilePath : undefined
+
+            for (const tempFilePath of new Set([documentTempFilePath, downloadedTempFilePath])) {
+              if (tempFilePath) {
+                await fs.rm(tempFilePath, { force: true }).catch((error) => {
+                  req.payload.logger.error({ err: error, msg: 'Failed to remove temp file copy' })
+                })
+              }
             }
           }
           return null
@@ -686,20 +690,26 @@ export const updateOperation = async <
     // finish before the next starts. Branch updates also run in order because each result owns its
     // fork transaction. Other metadata-only bulk updates retain their parallel behavior.
     let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
-    if (shouldProcessDocumentsSequentially) {
-      awaitedDocs = []
-      for (const doc of docs) {
-        awaitedDocs.push(await processDocument(doc))
-      }
-    } else {
-      const documentPromises = docs.map(processDocument)
+    try {
+      if (shouldProcessDocumentsSequentially) {
+        awaitedDocs = []
+        for (const doc of docs) {
+          awaitedDocs.push(await processDocument(doc))
+        }
+      } else {
+        const documentPromises = docs.map(processDocument)
 
-      try {
-        awaitedDocs = await Promise.all(documentPromises)
-      } catch (error) {
-        await Promise.allSettled(documentPromises)
-        throw error
+        try {
+          awaitedDocs = await Promise.all(documentPromises)
+        } catch (error) {
+          await Promise.allSettled(documentPromises)
+          throw error
+        }
       }
+    } finally {
+      await sharedClientUploadDownload.removeSharedDownload().catch((error) => {
+        req.payload.logger.error({ err: error, msg: 'Failed to remove temp file' })
+      })
     }
 
     await unlinkTempFiles({
@@ -747,7 +757,7 @@ export const updateOperation = async <
     }
 
     if (isBranchUpdate) {
-      refreshRequestDataLoader({ req: req })
+      refreshRequestDataLoader({ req })
     }
 
     if (hasFileOperationScope) {

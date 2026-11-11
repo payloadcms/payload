@@ -17,7 +17,13 @@ import {
   type SanitizedFieldsPermissions,
   type VersionField,
 } from 'payload'
-import { fieldIsID, fieldShouldBeLocalized, getFieldPaths, tabHasName } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldIsID,
+  fieldShouldBeLocalized,
+  getFieldPaths,
+  tabHasName,
+} from 'payload/shared'
 
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import { diffComponents } from './fields/index.js'
@@ -80,12 +86,10 @@ export const buildVersionFields = ({
       continue
     }
 
-    // A `hidden` field is stripped from API responses entirely, so a diff for it
-    // can only ever compare nothing against nothing. Rendering it produces a
-    // labelled, permanently empty row. Note this is `field.hidden`, not
-    // `admin.hidden` — the latter only hides a field from the edit form and its
-    // value is still real, so it remains diffable.
-    if ('hidden' in field && field.hidden) {
+    // Hidden data fields are stripped from API responses, so they have no values to diff.
+    // Unnamed layout fields still need to be traversed because their children remain readable.
+    // Fields with only `admin.hidden` also retain their values and remain diffable.
+    if (fieldAffectsData(field) && field.hidden) {
       continue
     }
 

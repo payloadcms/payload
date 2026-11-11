@@ -55,7 +55,7 @@ export const transformForWrite = ({
     blocks: rowToInsert.blocks,
     blocksToDelete: rowToInsert.blocksToDelete,
     columnPrefix: '',
-    // Publishing reuses this data to save a version after nested row IDs are transformed.
+    // Traversal rewrites row IDs and annotates nested groups for relational storage.
     data: deepCopyObjectSimple(data),
     enableAtomicWrites,
     fieldPrefix: '',

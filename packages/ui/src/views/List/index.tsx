@@ -664,6 +664,7 @@ export const renderListView = async (
           </Fragment>
         ) : (
           <ListQueryProvider
+            baseFilter={baseFilterConstraint}
             collectionSlug={collectionSlug}
             data={data}
             modifySearchParams={!isInDrawer}

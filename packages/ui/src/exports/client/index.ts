@@ -480,6 +480,7 @@ export {
 export { BranchProvider, useBranch, useShowBranchSelector } from '../../providers/Branch/index.js'
 export type { BranchContext, BranchOption } from '../../providers/Branch/index.js'
 export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/Config/index.js'
+export { PageLocaleProvider } from '../../providers/PageLocale/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export {
   FormErrorHandlerContext,

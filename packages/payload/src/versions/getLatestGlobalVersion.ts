@@ -3,7 +3,6 @@ import type { Document, Payload, PayloadRequest, Where } from '../types/index.js
 import type { TypeWithVersion } from './types.js'
 
 import { hasWhereAccessResult } from '../auth/types.js'
-import { branchField } from '../branching/types.js'
 import { combineQueries } from '../database/combineQueries.js'
 import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
 import { appendGlobalVersionToQueryKey } from './drafts/appendVersionToQueryKey.js'
@@ -15,15 +14,8 @@ type Args = {
   published?: boolean
   req?: PayloadRequest
   slug: string
-  /** Filters stored global and global-version rows without changing access-query field paths. */
   storageWhere?: Where
   where: Where
-}
-
-type Result = {
-  global: Document
-  globalExists: boolean
-  hasLiveGlobal: boolean
 }
 
 export const getLatestGlobalVersion = async ({
@@ -35,15 +27,12 @@ export const getLatestGlobalVersion = async ({
   req,
   storageWhere,
   where,
-}: Args): Promise<Result> => {
+}: Args): Promise<{ global: Document; globalExists: boolean; latestVersionExists: boolean }> => {
   let latestVersion: TypeWithVersion<Document> | undefined
 
   const whereQuery = published
     ? { 'version._status': { equals: 'published' } }
     : { latest: { equals: true } }
-  const scopedVersionQuery = storageWhere
-    ? combineQueries(whereQuery as unknown as Where, storageWhere)
-    : (whereQuery as unknown as Where)
 
   if (hasDraftsEnabled(config)) {
     latestVersion = (
@@ -53,92 +42,75 @@ export const getLatestGlobalVersion = async ({
         locale: locale || req?.locale || undefined,
         pagination: false,
         req,
-        where: scopedVersionQuery,
+        where: storageWhere
+          ? combineQueries(whereQuery as unknown as Where, storageWhere)
+          : (whereQuery as unknown as Where),
       })
     ).docs[0]
   }
 
-  const scopedLiveGlobal = await payload.db.findGlobal({
+  const global = await payload.db.findGlobal({
     slug,
     locale,
     req,
-    where: storageWhere,
+    where: storageWhere ? combineQueries(where, storageWhere) : where,
   })
-  const hasLiveGlobal = Boolean(scopedLiveGlobal && Object.keys(scopedLiveGlobal).length > 0)
-  const globalExists = Boolean(latestVersion) || hasLiveGlobal
-
-  if (latestVersion) {
-    let accessibleLatestVersion: TypeWithVersion<Document> | undefined = latestVersion
-
-    if (hasWhereAccessResult(where)) {
-      const versionAccessQuery = combineQueries(appendGlobalVersionToQueryKey(where), {
-        id: { equals: latestVersion.id },
+  const existingGlobal = hasWhereAccessResult(where)
+    ? await payload.db.findGlobal({
+        slug,
+        locale,
+        req,
+        where: storageWhere,
       })
-      const scopedVersionAccessQuery = storageWhere
-        ? combineQueries(versionAccessQuery, storageWhere)
-        : versionAccessQuery
+    : global
+  const globalExists = Boolean(existingGlobal && Object.keys(existingGlobal).length > 0)
+  const latestVersionExists = Boolean(latestVersion)
 
-      accessibleLatestVersion = (
-        await payload.db.findGlobalVersions({
-          global: slug,
-          limit: 1,
-          locale: locale || req?.locale || undefined,
-          pagination: false,
-          req,
-          where: scopedVersionAccessQuery,
-        })
-      ).docs[0]
+  if (!latestVersion) {
+    return {
+      global,
+      globalExists,
+      latestVersionExists,
     }
+  }
 
-    if (!accessibleLatestVersion) {
+  if (hasWhereAccessResult(where)) {
+    latestVersion = (
+      await payload.db.findGlobalVersions({
+        global: slug,
+        limit: 1,
+        locale: locale || req?.locale || undefined,
+        pagination: false,
+        req,
+        where: combineQueries(
+          combineQueries(appendGlobalVersionToQueryKey(where), {
+            id: { equals: latestVersion.id },
+          }),
+          storageWhere ?? {},
+        ),
+      })
+    ).docs[0]
+
+    if (!latestVersion) {
       return {
         global: {},
         globalExists,
-        hasLiveGlobal,
+        latestVersionExists,
       }
     }
-
-    if (!accessibleLatestVersion.version.createdAt) {
-      accessibleLatestVersion.version.createdAt = accessibleLatestVersion.createdAt
-    }
-
-    if (!accessibleLatestVersion.version.updatedAt) {
-      accessibleLatestVersion.version.updatedAt = accessibleLatestVersion.updatedAt
-    }
-
-    return {
-      global: accessibleLatestVersion.version,
-      globalExists,
-      hasLiveGlobal,
-    }
   }
 
-  if (!hasWhereAccessResult(where) || !hasLiveGlobal) {
-    return {
-      global: scopedLiveGlobal,
-      globalExists,
-      hasLiveGlobal,
-    }
+  if (!latestVersion.version.createdAt) {
+    latestVersion.version.createdAt = latestVersion.createdAt
   }
 
-  const liveGlobalBranch = scopedLiveGlobal[branchField]
-  const exactLiveStorageWhere =
-    typeof liveGlobalBranch === 'string'
-      ? combineQueries(storageWhere ?? {}, { [branchField]: { equals: liveGlobalBranch } })
-      : storageWhere
-  const liveAccessQuery = exactLiveStorageWhere
-    ? combineQueries(where, exactLiveStorageWhere)
-    : where
-  const accessibleLiveGlobal = await payload.db.findGlobal({
-    slug,
-    locale,
-    req,
-    where: liveAccessQuery,
-  })
+  if (!latestVersion.version.updatedAt) {
+    latestVersion.version.updatedAt = latestVersion.updatedAt
+  }
 
   return {
-    global: accessibleLiveGlobal,
+    global: latestVersion.version,
     globalExists,
-    hasLiveGlobal,
+    latestVersionExists,
   }
 }

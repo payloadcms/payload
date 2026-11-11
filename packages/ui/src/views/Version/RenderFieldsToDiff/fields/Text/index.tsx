@@ -76,6 +76,7 @@ export const Text: React.FC<TextFieldDiffClientProps> = ({
   const renderedValueTo: string = formattedValueTo.value ?? placeholder
 
   const { From, To } = getHTMLDiffComponents({
+    deletedLabel: i18n.t('general:deleted'),
     fromHTML: '<p>' + renderedValueFrom + '</p>',
     fromLabel: i18n.t('version:comparingAgainst'),
     postProcess: unescapeDiffHTML,

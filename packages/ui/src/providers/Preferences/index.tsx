@@ -48,7 +48,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   const scheduledMergedUpdates = useRef<Record<string, Promise<void>>>({})
   const pendingWrites = useRef<Record<string, number>>({})
   const updateQueues = useRef<Record<string, Promise<void>>>({})
-  const activeWrites = useRef<Record<string, Promise<void>>>({})
+  const latestWrites = useRef<Record<string, Promise<void>>>({})
   const { config } = useConfig()
   const { user } = useAuth()
   const { i18n } = useTranslation()
@@ -64,7 +64,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
       pendingUpdate.current = {}
       pendingWrites.current = {}
       updateQueues.current = {}
-      activeWrites.current = {}
+      latestWrites.current = {}
     }
   }, [user])
 
@@ -162,6 +162,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
           await persistPreference({ key, value: nextValue })
         })
 
+        latestWrites.current[key] = update
         updateQueues.current[key] = update.catch(() => undefined)
         try {
           await update
@@ -176,7 +177,10 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         pendingWrites.current[key] = (pendingWrites.current[key] ?? 0) + 1
 
         try {
-          await persistPreference({ key, value })
+          const update = persistPreference({ key, value })
+
+          latestWrites.current[key] = update
+          await update
         } finally {
           pendingWrites.current[key] -= 1
         }
@@ -199,18 +203,18 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         }
 
         if (dequal(newValue, currentPreference)) {
-          await activeWrites.current[key]
+          await latestWrites.current[key]
           return
         }
 
         // add the requested changes to a pendingUpdate batch for the key
-        pendingUpdate.current[key] = {
-          ...pendingUpdate.current[key],
-          ...(newValue as Record<string, unknown>),
-        }
+        pendingUpdate.current[key] = mergePreferenceValues({
+          current: pendingUpdate.current[key],
+          value,
+        })
       } else {
         if (newValue === currentPreference) {
-          await activeWrites.current[key]
+          await latestWrites.current[key]
           return
         }
 
@@ -224,21 +228,37 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         }
 
         // Take this batch before awaiting persistence so later changes form a new batch.
-        const nextValue = pendingUpdate.current[key]
+        const changes = pendingUpdate.current[key]
 
         delete pendingUpdate.current[key]
-        preferencesRef.current[key] = nextValue
+        preferencesRef.current[key] = mergePreferenceValues({
+          current: preferencesRef.current[key],
+          value: changes,
+        })
+        pendingWrites.current[key] = (pendingWrites.current[key] ?? 0) + 1
 
         const previousUpdate = updateQueues.current[key] ?? Promise.resolve()
-        const update = previousUpdate.then(() => persistPreference({ key, value: nextValue }))
+        const update = previousUpdate.then(async () => {
+          // Rebase only this batch's changes after earlier updater writes have finished.
+          const nextValue = mergePreferenceValues({
+            current: await getPreference(key),
+            value: changes,
+          })
 
-        activeWrites.current[key] = update
+          preferencesRef.current[key] = nextValue
 
-        updateQueues.current[key] = update.then(
-          () => undefined,
-          () => undefined,
-        )
-        await update
+          await persistPreference({ key, value: nextValue })
+        })
+
+        const latestWrite = update.then(() => undefined)
+
+        latestWrites.current[key] = latestWrite
+        updateQueues.current[key] = latestWrite.catch(() => undefined)
+        try {
+          await update
+        } finally {
+          pendingWrites.current[key] -= 1
+        }
       }
 
       // Callers coalesced into the same batch must all await its persisted write.
@@ -263,3 +283,11 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
 }
 
 export const usePreferences = (): PreferencesContext => use(Context)
+
+function mergePreferenceValues({ current, value }: { current: unknown; value: unknown }): unknown {
+  if (current && value && typeof current === 'object' && typeof value === 'object') {
+    return deepMergeSimple(current, value)
+  }
+
+  return value
+}

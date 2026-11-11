@@ -1,8 +1,19 @@
 import type { Config } from 'payload'
 
-import { applicationEndpoint, customCorsEndpoint, rootEndpoint } from '../shared.js'
+import { applicationEndpoint, customCorsEndpoint, rootEndpoint, userEndpoint } from '../shared.js'
 
 export const endpoints: Config['endpoints'] = [
+  {
+    handler: (req) => Response.json({ email: req.user?.email ?? null }),
+    method: 'get',
+    path: `/${userEndpoint}`,
+  },
+  {
+    disableAuth: true,
+    handler: (req) => Response.json({ email: req.user?.email ?? null }),
+    method: 'get',
+    path: `/${userEndpoint}/without-auth`,
+  },
   {
     handler: (req) => {
       return Response.json(req.body)

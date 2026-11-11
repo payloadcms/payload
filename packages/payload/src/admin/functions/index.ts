@@ -35,6 +35,8 @@ export type ServerFunctionArgs = {
 
 export type ServerFunctionClientArgs = {
   args: Record<string, unknown>
+  /** The locale of the rendered page making this request. */
+  locale?: Locale['code']
   name: string
   /** Admin page URL whose branch and locale scope this action. */
   requestURL?: string

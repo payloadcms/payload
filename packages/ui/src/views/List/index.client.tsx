@@ -211,7 +211,7 @@ export function DefaultListView(props: ListViewClientProps) {
       return data.docs.map((doc) => {
         return {
           ...doc,
-          filesize: formatFilesize(doc.filesize),
+          filesize: typeof doc.filesize === 'number' ? formatFilesize(doc.filesize) : null,
         }
       })
     } else {
@@ -474,6 +474,7 @@ export function DefaultListView(props: ListViewClientProps) {
                         disableBulkEdit={disableBulkEdit}
                         label={collectionLabel}
                         showSelectAllAcrossPages={!isGroupingBy}
+                        viewType={viewType}
                       />
                       <div className={`${baseClass}__list-selection-actions`}>{beforeActions}</div>
                     </div>

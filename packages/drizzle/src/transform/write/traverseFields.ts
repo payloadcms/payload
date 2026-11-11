@@ -205,7 +205,7 @@ export const traverseFields = ({
       } else {
         let value = data[field.name]
         let push = false
-        if (typeof value === 'object' && '$push' in value) {
+        if (value !== null && typeof value === 'object' && '$push' in value) {
           value = Array.isArray(value.$push) ? value.$push : [value.$push]
           push = true
         }
