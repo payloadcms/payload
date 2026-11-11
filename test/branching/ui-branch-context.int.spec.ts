@@ -9,6 +9,7 @@ import { buildTableStateHandler } from '../../packages/ui/src/utilities/buildTab
 import { copyDataFromLocale } from '../../packages/ui/src/utilities/copyDataFromLocale.js'
 import { getDocumentPermissions } from '../../packages/ui/src/utilities/getDocumentPermissions.js'
 import { getVersions } from '../../packages/ui/src/utilities/getVersions.js'
+import { handleStaleDataCheck } from '../../packages/ui/src/utilities/handleStaleDataCheck.js'
 import { CollectionQueryWidget } from '../../packages/ui/src/widgets/CollectionQuery/index.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
@@ -23,6 +24,49 @@ import {
 const branch = 'Halloween Updates'
 
 test.suite('Branching: UI request context', { config: './config.ts' }, () => {
+  test('should compare stale data against the document on the request branch', async ({
+    payload,
+  }) => {
+    const main = await payload.create({
+      collection: postsSlug,
+      data: { title: 'Main document' },
+      overrideAccess: true,
+    })
+    const doc = await payload.update({
+      id: main.id,
+      branch,
+      collection: postsSlug,
+      data: { title: 'Branch document' },
+      overrideAccess: true,
+    })
+    const req = await getRequest({ payload })
+
+    await payload.db.updateOne({
+      id: main.id,
+      collection: postsSlug,
+      data: { updatedAt: '2000-01-01T00:00:00.000Z' },
+      returning: false,
+    })
+
+    const result = await handleStaleDataCheck({
+      id: doc.id,
+      collectionSlug: postsSlug,
+      originalUpdatedAt: doc.updatedAt,
+      req,
+    })
+
+    expect(result).toEqual({ currentUpdatedAt: doc.updatedAt, isStale: false })
+
+    const staleResult = await handleStaleDataCheck({
+      id: doc.id,
+      collectionSlug: postsSlug,
+      originalUpdatedAt: '2000-01-01T00:00:00.000Z',
+      req,
+    })
+
+    expect(staleResult).toEqual({ currentUpdatedAt: doc.updatedAt, isStale: true })
+  })
+
   test('should copy a branch-only document between locales', async ({ payload }) => {
     const doc = await payload.create({
       branch,

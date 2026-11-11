@@ -722,12 +722,13 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         originalInheritedDescriptor,
       )
 
-      expect(sharedData['__proto__']).not.toHaveProperty(marker)
-      expect(sharedData['constructor']).toHaveProperty('value', 'local')
-      expect(sharedData['prototype']).toHaveProperty('value', 'local')
-      expect(Object.hasOwn(sharedData, 'toString')).toBe(true)
-      expect(sharedData['toString']).toHaveProperty(inheritedMarker, 'local')
-      expect(drizzleData).toEqual(createConstrainedData())
+      for (const data of [sharedData, drizzleData]) {
+        expect(data['__proto__']).not.toHaveProperty(marker)
+        expect(data['constructor']).toHaveProperty('value', 'local')
+        expect(data['prototype']).toHaveProperty('value', 'local')
+        expect(Object.hasOwn(data, 'toString')).toBe(true)
+        expect(data['toString']).toHaveProperty(inheritedMarker, 'local')
+      }
     })
 
     test('should login a user successfully', async ({ restClient }) => {

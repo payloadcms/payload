@@ -82,7 +82,6 @@ export const buildJoinAggregation = async ({
     localField = canonicalParentField
   }
 
-  const rootIDExpression = outerBranchReadState.useBranching ? `$${canonicalParentField}` : '$_id'
   const polymorphicJoinsConfig = adapter.payload.collections[collection]?.config?.polymorphicJoins
 
   if (!polymorphicJoinsConfig) {
@@ -185,15 +184,7 @@ export const buildJoinAggregation = async ({
         },
         {
           $match: {
-            $and: [
-              {
-                $expr: {
-                  $eq: [`$${join.field.on}`, '$$root_id_'],
-                },
-              },
-              $match,
-              ...(branchMatch ? [branchMatch] : []),
-            ],
+            $and: [$match, ...(branchMatch ? [branchMatch] : [])],
           },
         },
         ...branchVisibility,
@@ -210,10 +201,9 @@ export const buildJoinAggregation = async ({
       aggregate.push({
         $lookup: {
           as: alias,
+          foreignField: join.field.on,
           from: JoinModel.collection.name,
-          let: {
-            root_id_: rootIDExpression,
-          },
+          localField,
           pipeline: [
             ...basePipeline,
             {
@@ -246,10 +236,9 @@ export const buildJoinAggregation = async ({
         aggregate.push({
           $lookup: {
             as: `${as}.totalDocs.${alias}`,
+            foreignField: join.field.on,
             from: JoinModel.collection.name,
-            let: {
-              root_id_: rootIDExpression,
-            },
+            localField,
             pipeline: [
               ...basePipeline,
               {
