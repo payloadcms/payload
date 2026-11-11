@@ -1,8 +1,6 @@
 'use client'
 
-import React, { createContext, use, useEffect, useState } from 'react'
-
-import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import React, { createContext, use, useState } from 'react'
 
 type ActionsContextType = {
   Actions: {
@@ -26,13 +24,12 @@ export const ActionsProvider: React.FC<{
   readonly viewKey?: string
 }> = ({ Actions, children, viewKey }) => {
   const [viewActions, setViewActions] = useState(Actions)
-  const resetViewActions = useEffectEvent(() => {
-    setViewActions(Actions)
-  })
+  const [previousViewKey, setPreviousViewKey] = useState(viewKey)
 
-  useEffect(() => {
-    resetViewActions()
-  }, [viewKey])
+  if (previousViewKey !== viewKey) {
+    setPreviousViewKey(viewKey)
+    setViewActions(Actions)
+  }
 
   return (
     <ActionsContext
