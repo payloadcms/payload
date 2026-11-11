@@ -1,0 +1,83 @@
+@layer payload-default {
+  /* One line, stated plainly, above everything it qualifies. */
+  .scheduled-merges__banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacer-3);
+    margin-block-end: var(--spacer-3);
+    padding: var(--spacer-2) var(--spacer-3);
+    border: var(--stroke-width-small) solid var(--color-border-success);
+    border-radius: var(--radius-medium);
+    background: var(--color-bg-success-tertiary);
+  }
+
+  .scheduled-merges__banner-text {
+    min-width: 0;
+  }
+
+  .scheduled-merges__banner-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    flex-shrink: 0;
+  }
+
+  .scheduled-merges__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-4);
+  }
+
+  .scheduled-merges__schedule-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacer-3);
+    margin-block-end: var(--spacer-2);
+  }
+
+  .scheduled-merges__when,
+  .scheduled-merges__manage-when {
+    margin: 0;
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+  }
+
+  .scheduled-merges__meta,
+  .scheduled-merges__empty {
+    color: var(--color-text-secondary);
+  }
+
+  .scheduled-merges__manage-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .scheduled-merges__manage-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacer-3);
+    padding-block-end: var(--spacer-3);
+    border-block-end: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  /* Stacked, so the date leads and the ledger reads underneath it. */
+  .scheduled-merges__manage-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1);
+    min-width: 0;
+  }
+
+  .scheduled-merges__manage-row:last-child {
+    padding-block-end: 0;
+    border-block-end: none;
+  }
+}

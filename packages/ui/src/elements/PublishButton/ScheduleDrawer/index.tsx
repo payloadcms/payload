@@ -128,9 +128,13 @@ export const ScheduleDrawer: React.FC<Props> = ({
   const deleteHandler = React.useCallback(
     async (id: number | string) => {
       try {
-        await schedulePublish({
+        const result = (await schedulePublish({
           deleteID: id,
-        })
+        })) as { error?: string }
+        if (result?.error) {
+          throw new Error(result.error)
+        }
+
         await fetchUpcoming()
         toast.success(t('general:deletedSuccessfully'))
       } catch (err) {
@@ -159,7 +163,7 @@ export const ScheduleDrawer: React.FC<Props> = ({
     }
 
     try {
-      await schedulePublish({
+      const result = (await schedulePublish({
         type,
         date,
         doc: collectionSlug
@@ -171,7 +175,11 @@ export const ScheduleDrawer: React.FC<Props> = ({
         global: globalSlug || undefined,
         localeToPublish,
         timezone,
-      })
+      })) as { error?: string }
+
+      if (result?.error) {
+        throw new Error(result.error)
+      }
 
       setDate(undefined)
       setNow(new Date())
