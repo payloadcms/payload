@@ -106,10 +106,12 @@ const joinFieldPath = ({ name, parentPath }: { name: string; parentPath: string 
 const rewriteUniqueFields = ({
   fields,
   indexes,
+  parentIsLocalized = false,
   parentPath = '',
 }: {
   fields: Field[]
   indexes: CompoundIndex[]
+  parentIsLocalized?: boolean
   parentPath?: string
 }): void => {
   for (const field of fields) {
@@ -123,7 +125,10 @@ const rewriteUniqueFields = ({
       field.unique = false
       indexes.push({
         fields: [fieldPath, branchField],
-        ...(field.required === true || (field.type === 'slug' && field.required !== false)
+        // Required localized fields can still be absent in untranslated locales.
+        ...(!parentIsLocalized &&
+        !field.localized &&
+        (field.required === true || (field.type === 'slug' && field.required !== false))
           ? {}
           : { requireExists: [fieldPath] }),
         unique: true,
@@ -134,6 +139,7 @@ const rewriteUniqueFields = ({
       rewriteUniqueFields({
         fields: field.fields,
         indexes,
+        parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath:
           field.type === 'group' && fieldAffectsData(field)
             ? joinFieldPath({ name: field.name, parentPath })
@@ -144,6 +150,7 @@ const rewriteUniqueFields = ({
         rewriteUniqueFields({
           fields: tab.fields,
           indexes,
+          parentIsLocalized: parentIsLocalized || ('localized' in tab && tab.localized),
           parentPath: tabHasName(tab) ? joinFieldPath({ name: tab.name, parentPath }) : parentPath,
         })
       }

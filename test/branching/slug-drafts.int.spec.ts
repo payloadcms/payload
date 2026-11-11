@@ -42,6 +42,32 @@ test.suite('Branching: unique fields in drafts', { config: './config.ts' }, () =
 
       expect(created.slug).not.toBe(original.slug)
     })
+
+    test(`should allow multiple documents with an untranslated required slug on ${branch}`, async ({
+      payload,
+    }) => {
+      for (const title of ['First English page', 'Second English page']) {
+        const created = await payload.create({
+          branch,
+          collection: slugDraftsSlug,
+          data: { title },
+          locale: 'en',
+          overrideAccess: true,
+        })
+
+        const untranslated = await payload.findByID({
+          id: created.id,
+          branch,
+          collection: slugDraftsSlug,
+          fallbackLocale: false,
+          locale: 'es',
+          overrideAccess: true,
+        })
+
+        expect(created.slug).toBeTruthy()
+        expect(untranslated.slug ?? null).toBeNull()
+      }
+    })
   }
 
   test.options(
