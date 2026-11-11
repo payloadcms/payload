@@ -391,6 +391,32 @@ describe('Payload project updates', () => {
     },
   )
 
+  it('should refresh /admin when the alias points to a config without routes', async () => {
+    writeProjectPackage(projectDir)
+    fse.outputJsonSync(path.join(projectDir, 'tsconfig.json'), {
+      compilerOptions: { baseUrl: '.', paths: { '@payload-config': ['./cms/payload.config.ts'] } },
+    })
+    fse.outputFileSync(
+      path.join(projectDir, 'cms/payload.config.ts'),
+      "import { buildConfig } from 'payload'; export default buildConfig({})",
+    )
+    // The decoy catches fallback discovery that ignores the alias.
+    fse.outputFileSync(
+      path.join(projectDir, 'payload.config.ts'),
+      "import { buildConfig } from 'payload'; export default buildConfig({ routes: { admin: '/wrong' } })",
+    )
+
+    await updatePayloadInProject(nextDetails({ projectDir, appDir: 'src/app' }))
+
+    const payloadDir = path.join(projectDir, 'src/app/(payload)')
+
+    expect(fse.existsSync(path.join(payloadDir, 'admin/[[...segments]]/page.tsx'))).toBe(true)
+    expect(fse.existsSync(path.join(payloadDir, 'wrong'))).toBe(false)
+    expect(fse.readFileSync(path.join(payloadDir, 'layout.tsx'), 'utf8')).toContain(
+      "from './admin/importMap.js'",
+    )
+  })
+
   it('should retain the default route when the config does not customize it', async () => {
     writeProjectPackage(projectDir)
     fse.outputFileSync(
