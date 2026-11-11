@@ -390,6 +390,8 @@ export type Count = (args: CountArgs) => Promise<{ totalDocs: number }>
 export type CountVersions = (args: CountArgs) => Promise<{ totalDocs: number }>
 
 export type CountGlobalVersionArgs = {
+  /** Branch to scope this operation to. `false` bypasses branching entirely. */
+  branch?: false | string
   global: string
   locale?: string
   req?: Partial<PayloadRequest>
