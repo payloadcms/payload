@@ -32,28 +32,36 @@ export const documentMatchingWhereExists = async ({
   shouldUseTransaction = false,
   where,
 }: DocumentMatchingWhereExistsArgs): Promise<boolean> => {
-  const queryReq = isolateObjectProperty(req, ['query', 'transactionID'])
-  queryReq.query = { ...req.query }
-
-  if (!shouldUseTransaction) {
-    delete queryReq.transactionID
-  }
-
   const includeTrashed = Boolean(req.payload.collections[collection]?.config.trash)
 
-  const { docs } = await req.payload.find({
-    collection,
-    depth: 0,
-    disableErrors: true,
-    draft: Boolean(draftsEnabled),
-    limit: 2,
-    locale,
-    overrideAccess,
-    pagination: false,
-    req: queryReq,
-    trash: includeTrashed,
-    where,
-  })
+  // Drafts can replace a field's value while the stored row still reserves the old value
+  // in a unique index. Check both representations before treating a value as available.
+  for (const draft of draftsEnabled ? [false, true] : [false]) {
+    const queryReq = isolateObjectProperty(req, ['query', 'transactionID'])
 
-  return docs.some((doc) => doc.id !== id)
+    queryReq.query = { ...req.query }
+    if (!shouldUseTransaction) {
+      delete queryReq.transactionID
+    }
+
+    const { docs } = await req.payload.find({
+      collection,
+      depth: 0,
+      disableErrors: true,
+      draft,
+      limit: 2,
+      locale,
+      overrideAccess,
+      pagination: false,
+      req: queryReq,
+      trash: includeTrashed,
+      where,
+    })
+
+    if (docs.some((doc) => doc.id !== id)) {
+      return true
+    }
+  }
+
+  return false
 }
