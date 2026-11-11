@@ -331,10 +331,12 @@ See [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control
 
 ### 2. Transaction Failures in Hooks
 
-**When transactions are enabled, nested operations in hooks without `req` break transaction atomicity.**
+**Always pass `req` to nested operations in hooks to preserve request context and share the active transaction, if any.**
+
+Passing `req` does not enable transactions. SQLite transactions are disabled by default and should remain disabled because enabling them can cause locking issues.
 
 ```ts
-// ❌ DATA CORRUPTION RISK: Separate transaction
+// ❌ Missing request context and any active transaction
 hooks: {
   afterChange: [
     async ({ doc, req }) => {
@@ -342,13 +344,13 @@ hooks: {
         collection: 'audit-log',
         overrideAccess: true,
         data: { docId: doc.id },
-        // Missing req - runs in separate transaction!
+        // Missing req - does not share the parent transaction
       })
     },
   ]
 }
 
-// ✅ ATOMIC: Same transaction
+// ✅ Preserves request context and any active transaction
 hooks: {
   afterChange: [
     async ({ doc, req }) => {
@@ -356,7 +358,7 @@ hooks: {
         collection: 'audit-log',
         overrideAccess: true,
         data: { docId: doc.id },
-        req, // Maintains atomicity
+        req, // Shares the active transaction, if any
       })
     },
   ]
@@ -465,7 +467,7 @@ import type { Post, User } from '@/payload-types'
 6. **Draft status** — `_status` field is auto-injected when drafts are enabled
 7. **Types regenerate automatically** in dev (`autoGenerate`) and during `payload build` — avoid running `generate:types` manually
 8. **MongoDB transactions** require replica set configuration
-9. **SQLite transactions**: Leave disabled by default. Do not add `transactionOptions: {}` unless enabling transactions is explicitly requested.
+9. **SQLite transactions** default to `transactionOptions: false`. Keep this default: transactions are not fully supported or recommended in Payload and can cause locking issues. Do not add `transactionOptions: {}` as a setup step or a fix for hook atomicity.
 10. **Point fields** are not fully supported in SQLite. Geospatial indexes are not created and the query operators `near`, `within`, and `intersects` will not work.
 11. **Computed virtual titles** — fields configured with `virtual: true` cannot be used in `admin.useAsTitle`; use a stored top-level field
 
@@ -501,7 +503,8 @@ import type { Post, User } from '@/payload-types'
 
 - Always pass `req` to nested operations in hooks
 - Use context flags to prevent infinite hook loops
-- Enable transactions for MongoDB (requires replica set) and Postgres
+- MongoDB (with a replica set) and Postgres use transactions by default unless disabled
+- Keep SQLite transactions disabled; passing `req` does not make nested writes atomic when transactions are disabled
 - Use `beforeValidate` for data formatting
 - Use `beforeChange` for business logic
 
