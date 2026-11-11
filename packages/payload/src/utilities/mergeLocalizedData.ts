@@ -128,7 +128,7 @@ export function mergeLocalizedData({
               }
             } else if (Array.isArray(newValue)) {
               // Non-localized array - still process children for any localized fields
-              result[field.name] = newValue.map((newItem: JsonObject, index: number) => {
+              result[field.name] = newValue.map((newItem: JsonObject) => {
                 const existingItem =
                   (newItem?.id && Array.isArray(existingValue)
                     ? existingValue.find(
@@ -138,7 +138,7 @@ export function mergeLocalizedData({
                           'id' in row &&
                           row.id === newItem.id,
                       )
-                    : existingValue?.[index]) || {}
+                    : undefined) || {}
 
                 return mergeLocalizedData({
                   configBlockReferences,
@@ -178,7 +178,7 @@ export function mergeLocalizedData({
               }
             } else if (Array.isArray(newValue)) {
               // Non-localized blocks - still process children for any localized fields
-              result[field.name] = newValue.map((newBlockData: JsonObject, index: number) => {
+              result[field.name] = newValue.map((newBlockData: JsonObject) => {
                 const blockOrSlug = field.blocks.find((b) => {
                   const slug = typeof b === 'string' ? b : b.slug
                   return slug === newBlockData.blockType
@@ -200,11 +200,7 @@ export function mergeLocalizedData({
                             'blockType' in row &&
                             row.blockType === newBlockData.blockType,
                         )
-                      : Array.isArray(existingValue) &&
-                        existingValue[index] &&
-                        (existingValue[index] as JsonObject).blockType === newBlockData.blockType
-                        ? existingValue[index]
-                        : undefined) || {}
+                      : undefined) || {}
 
                   const merged = mergeLocalizedData({
                     configBlockReferences,
