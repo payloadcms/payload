@@ -2282,6 +2282,8 @@ The `disableBulkEdit`, `disableGroupBy`, `disableListColumn`, and `disableListFi
 
 Run `npx @payloadcms/codemod --transform migrate-disabled-fields` to migrate automatically.
 
+The codemod only handles inline `admin` object literals. Shared or spread `admin` objects are skipped, and if `admin.disabled` is already an expression the old `disable*` values are removed without being merged, so check those fields and migrate them manually.
+
 ### Image size admin controls have been consolidated ([#16593](https://github.com/payloadcms/payload/pull/16593))
 
 The `disableListColumn`, `disableListFilter`, and `disableGroupBy` properties under `ImageSize.admin` have been replaced with a single `disabled` object, consistent with the shape used by all other fields.
