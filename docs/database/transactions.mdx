@@ -3,12 +3,14 @@ title: Transactions
 label: Transactions
 order: 30
 keywords: database, transactions, sql, mongodb, postgres, documentation, Content Management System, cms, headless, typescript, node, react, nextjs
-desc: Database transactions are fully supported within Payload.
+desc: How Payload uses database transactions with supported database adapters.
 ---
 
-Database transactions allow your application to make a series of database changes in an all-or-nothing commit. Consider an HTTP request that creates a new **Order** and has an `afterChange` hook to update the stock count of related **Items**. If an error occurs when updating an **Item** and an HTTP error is returned to the user, you would not want the new **Order** to be persisted or any other items to be changed either. This kind of interaction with the database is handled seamlessly with transactions.
+Database transactions allow your application to make a series of database changes in an all-or-nothing commit. Consider an HTTP request that creates a new **Order** and has an `afterChange` hook to update the stock count of related **Items**. If an error occurs when updating an **Item** and an HTTP error is returned to the user, you would not want the new **Order** to be persisted or any other items to be changed either. When transactions are enabled, Payload can roll back these related database changes together.
 
-By default, Payload will use transactions for all data changing operations, as long as it is supported by the configured database. Database changes are contained within all Payload operations and any errors thrown will result in all changes being rolled back without being committed. When transactions are not supported by the database, Payload will continue to operate as expected without them.
+Payload uses transactions by default for data-changing operations with Postgres and with MongoDB when connected to a replica set, unless transactions are disabled in the adapter configuration. When a Payload operation starts a transaction, its database changes are committed on success or rolled back on failure. Nested operations share that transaction when you pass `req`.
+
+When transactions are disabled or unavailable, Payload continues to operate, but related operations do not have an all-or-nothing guarantee. If a later operation fails, earlier database changes can persist.
 
 <Banner type="info">
   **Note:**
@@ -20,16 +22,16 @@ MongoDB requires a connection to a replicaset in order to make use of transactio
 <Banner type="info">
   **Note:**
 
-Transactions in SQLite are disabled by default. You need to pass `transactionOptions: {}` to enable them.
+SQLite transactions are disabled by default (`transactionOptions: false`). Leave this option unset or set to `false`. Transactions with the SQLite adapter are not fully supported or recommended because enabling them can cause database locking issues. Do not enable them as a general setup step or to make nested hook operations atomic.
 
 </Banner>
 
-The initial request made to Payload will begin a new transaction and attach it to the `req.transactionID`. If you have a `hook` that interacts with the database, you can opt in to using the same transaction by passing the `req` in the arguments. For example:
+When transactions are enabled, a data-changing Payload operation begins a transaction and attaches its identifier to `req.transactionID`. Pass `req` to nested database operations in hooks so they share the active transaction. Passing `req` is also recommended when transactions are disabled because it preserves request context, but it does not enable transactions or provide rollback across operations. For example:
 
 ```ts
 const afterChange: CollectionAfterChangeHook = async ({ req }) => {
-  // because req.transactionID is assigned from Payload and passed through,
-  // my-slug will only persist if the entire request is successful
+  // Share the parent operation's transaction, if active.
+  // Without a transaction, this write is not rolled back if the parent fails.
   await req.payload.create({
     req,
     collection: 'my-slug',
@@ -71,9 +73,11 @@ const afterChange: CollectionAfterChangeHook = async ({ req }) => {
 
 When writing your own scripts or custom endpoints, you may wish to have direct control over transactions. This is useful for interacting with your database outside of Payload's Local API.
 
+Direct transaction control requires an adapter with transactions enabled. Keep SQLite transactions disabled; calling these methods does not enable them.
+
 The following functions can be used for managing transactions:
 
-- `payload.db.beginTransaction` - Starts a new session and returns a transaction ID for use in other Payload Local API calls.
+- `payload.db.beginTransaction` - Starts a new transaction and returns its ID for use in other Payload Local API calls, or `null` when transactions are disabled.
 - `payload.db.commitTransaction` - Takes the identifier for the transaction, finalizes any changes.
 - `payload.db.rollbackTransaction` - Takes the identifier for the transaction, discards any changes.
 
@@ -89,6 +93,10 @@ const standalonePayloadScript = async () => {
   await payload.init({ config })
 
   const transactionID = await payload.db.beginTransaction()
+
+  if (transactionID == null) {
+    throw new Error('This operation requires transactions to be enabled')
+  }
 
   try {
     // Make an update using the Local API
@@ -113,6 +121,7 @@ const standalonePayloadScript = async () => {
   } catch (error) {
     // Rollback the transaction
     await payload.db.rollbackTransaction(transactionID)
+    throw error
   }
 }
 
@@ -121,7 +130,7 @@ standalonePayloadScript()
 
 ## Disabling Transactions
 
-If you wish to disable transactions entirely, you can do so by passing `false` as the `transactionOptions` in your database adapter configuration. All the official Payload database adapters support this option.
+If you wish to disable transactions entirely, you can do so by passing `false` as the `transactionOptions` in your database adapter configuration. All the official Payload database adapters support this option. This is already the default for SQLite; you do not need to add it to your SQLite configuration.
 
 In addition to allowing database transactions to be disabled at the adapter level. You can prevent Payload from using a transaction in direct calls to the Local API by adding `disableTransaction: true` to the args. For example:
 

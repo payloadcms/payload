@@ -85,7 +85,9 @@ _There are more options available on an operation by operation basis outlined be
 
 ## Transactions
 
-When your database uses transactions you need to thread req through to all local operations. Postgres uses transactions and MongoDB uses transactions when you are using replica sets. Passing req without transactions is still recommended.
+Pass `req` to nested Local API operations so they share the active transaction, if any. Postgres and MongoDB with replica sets use transactions by default unless disabled in the adapter configuration.
+
+SQLite transactions are disabled by default and should remain disabled because enabling them can cause locking issues. Passing `req` is still recommended to preserve request context, but it does not enable transactions or provide atomicity or rollback across operations when transactions are disabled. See [Transactions](../database/transactions) for details.
 
 ```js
 const post = await payload.find({
