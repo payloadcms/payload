@@ -699,7 +699,7 @@ pnpm add stripe
 | `webhookSecret`  | `string`           | The webhook secret used to verify incoming webhook requests from Stripe.                                                                                                             |
 | `webhooks`       | `WebhookHandler[]` | An array of webhook handlers to register within Payload's REST API for Stripe to callback.                                                                                           |
 | `apiVersion`     | `string`           | The Stripe API version to use. See [docs](https://stripe.com/docs/api/versioning). This will be deprecated soon by Stripe's SDK, configure the API version in your Stripe Dashboard. |
-| `appInfo`        | `object`           | The application info to pass to Stripe. See [docs](https://stripe.com/docs/api/app_info).                                                                                            |
+| `appInfo`        | `object`           | The application info to pass to Stripe. See [docs](https://docs.stripe.com/api).                                                                                            |
 
 ```ts
 import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
