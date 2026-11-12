@@ -1,7 +1,7 @@
+/* oxlint-disable @vitest/no-identical-title -- LOCAL/REST/GraphQL API suites intentionally reuse the same test titles */
 import type { CollectionSlug } from 'payload'
 
 import { ValidationError } from 'payload'
-import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import type { DifferentiatedTrashCollection, Post, RestrictedCollection } from './payload-types.js'
@@ -1360,6 +1360,107 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
 
         expect(result.totalDocs).toEqual(1) // Only postsDocTwo
       })
+    })
+
+    test('should keep published content when trashing and restoring a document with a pending draft', async ({
+      payload,
+    }) => {
+      const published = await payload.create({
+        collection: postsSlug,
+        data: {
+          _status: 'published',
+          title: 'published-v1',
+        },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          title: 'draft-v2',
+        },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      const beforeTrash = await payload.findByID({
+        id: published.id,
+        collection: postsSlug,
+        overrideAccess: true,
+      })
+
+      expect(beforeTrash.title).toBe('published-v1')
+      expect(beforeTrash._status).toBe('published')
+
+      const trashed = await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          deletedAt: new Date().toISOString(),
+        },
+        overrideAccess: true,
+      })
+
+      expect(trashed.deletedAt).toBeTruthy()
+      expect(trashed.title).toBe('published-v1')
+      expect(trashed._status).toBe('published')
+
+      const trashedMain = await payload.findByID({
+        id: published.id,
+        collection: postsSlug,
+        overrideAccess: true,
+        trash: true,
+      })
+
+      expect(trashedMain.title).toBe('published-v1')
+      expect(trashedMain._status).toBe('published')
+      expect(trashedMain.deletedAt).toBeTruthy()
+
+      const latestDraftWhileTrashed = await payload.findByID({
+        id: published.id,
+        collection: postsSlug,
+        draft: true,
+        overrideAccess: true,
+        trash: true,
+      })
+
+      expect(latestDraftWhileTrashed.title).toBe('draft-v2')
+      expect(latestDraftWhileTrashed._status).toBe('draft')
+
+      const restored = await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          deletedAt: null,
+        },
+        overrideAccess: true,
+        trash: true,
+      })
+
+      expect(restored.deletedAt).toBeNull()
+      expect(restored.title).toBe('published-v1')
+      expect(restored._status).toBe('published')
+
+      const restoredMain = await payload.findByID({
+        id: published.id,
+        collection: postsSlug,
+        overrideAccess: true,
+      })
+
+      expect(restoredMain.title).toBe('published-v1')
+      expect(restoredMain._status).toBe('published')
+      expect(restoredMain.deletedAt).toBeNull()
+
+      const latestDraftAfterRestore = await payload.findByID({
+        id: published.id,
+        collection: postsSlug,
+        draft: true,
+        overrideAccess: true,
+      })
+
+      expect(latestDraftAfterRestore.title).toBe('draft-v2')
+      expect(latestDraftAfterRestore._status).toBe('draft')
     })
 
     test('should preserve localized field data when bulk trashing draft documents', async ({
