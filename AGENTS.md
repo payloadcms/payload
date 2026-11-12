@@ -317,6 +317,10 @@ Examples:
 - Subsequent commits should use `chore` without scope unless specific package is being modified
 - All commits in a PR are squashed on merge using PR title as commit message
 
+### Breaking Changes
+
+Mark breaking PRs with `!` in the title and add a `## Breaking Changes` section to the body. The releaser copies that section, alone, into the GitHub release notes. It must state who is affected and what to do, with a `diff` block when user code changes. Without the section, the release notes show the first paragraph of the body.
+
 ## Additional Resources
 
 - LLMS.txt: <https://payloadcms.com/llms.txt>
