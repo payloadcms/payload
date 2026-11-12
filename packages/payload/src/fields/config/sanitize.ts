@@ -28,13 +28,13 @@ import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
 import { defaultTimezones } from '../baseFields/timezone/defaultTimezones.js'
 import { getFieldPaths } from '../getFieldPaths.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
-import { validations } from '../validations.js'
 import {
   reservedAPIKeyFieldNames,
   reservedBaseAuthFieldNames,
   reservedBaseUploadFieldNames,
   reservedVerifyFieldNames,
 } from './reservedFieldNames.js'
+import { sanitizeFieldValidation } from './sanitizeFieldValidation.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
 import { fieldAffectsData as _fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
 
@@ -327,19 +327,13 @@ export const sanitizeField = async ({
       }
     }
 
-    if (typeof field.validate === 'undefined') {
-      if ('virtual' in field && field.virtual) {
-        field.validate = (): true => true
-      } else {
-        const defaultValidate = validations[field.type as keyof typeof validations]
-        if (defaultValidate) {
-          field.validate = (val: any, options: any) =>
-            defaultValidate(val, { ...field, ...options })
-        } else {
-          field.validate = (): true => true
-        }
-      }
-    }
+    sanitizeFieldValidation({
+      field,
+      fieldPath: [collectionConfig?.slug ?? globalConfig?.slug, schemaPath]
+        .filter(Boolean)
+        .join('.'),
+      shouldWarn: !collectionConfig?.auth || Boolean(parentSchemaPath),
+    })
 
     if (!field.hooks) {
       field.hooks = {}

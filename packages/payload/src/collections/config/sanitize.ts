@@ -12,6 +12,7 @@ import { apiKeyRevealEndpoint, authCollectionEndpoints } from '../../auth/endpoi
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
+import { sanitizeFieldValidation } from '../../fields/config/sanitizeFieldValidation.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
@@ -346,6 +347,12 @@ export const sanitizeCollection = async (
       sanitized.fields,
       getBaseAuthFields(sanitized.auth, sanitized.fields),
     )
+
+    for (const field of sanitized.fields) {
+      if (fieldAffectsData(field) && typeof field.validate === 'function') {
+        sanitizeFieldValidation({ field, fieldPath: `${sanitized.slug}.${field.name}` })
+      }
+    }
   }
 
   if (collection?.admin?.pagination?.limits?.length) {

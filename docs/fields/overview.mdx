@@ -515,7 +515,11 @@ This way you can use [Custom Translations](https://payloadcms.com/docs/configura
 
 #### Reusing Default Field Validations
 
-When using custom validation functions, Payload will use yours in place of the default. However, you might want to simply augment the default validation with your own custom logic.
+When using custom validation functions, Payload will use yours in place of the default. This includes the default checks for `required`, `minLength`, `maxLength`, and other field constraints. A field with `required: true` can therefore accept an empty value if its custom validator returns `true` without checking it. The Admin Panel's required indicator and generated types do not change this behavior.
+
+In development, Payload warns when a non-virtual field combines `required: true` with a custom `validate` function. This warning is informational: Payload cannot determine whether your function already calls the default validator. It does not change validation behavior.
+
+To retain the default checks, compose the appropriate default validator as shown below.
 
 To reuse default field validations, call them from within your custom validation function:
 
@@ -525,6 +529,7 @@ import { text } from 'payload/shared'
 const field: Field = {
   name: 'notBad',
   type: 'text',
+  required: true,
   validate: (val, args) => {
     if (val === 'bad') return 'This cannot be "bad"'
     return text(val, args) // highlight-line
