@@ -72,6 +72,8 @@ export interface Config {
     folders: Folder;
     tags: Tag;
     'organized-docs': OrganizedDoc;
+    orderable: Orderable;
+    'orderable-drafts': OrderableDraft;
     'slug-drafts': SlugDraft;
     posts: Post;
     pages: Page;
@@ -109,6 +111,8 @@ export interface Config {
     folders: FoldersSelect<false> | FoldersSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     'organized-docs': OrganizedDocsSelect<false> | OrganizedDocsSelect<true>;
+    orderable: OrderableSelect<false> | OrderableSelect<true>;
+    'orderable-drafts': OrderableDraftsSelect<false> | OrderableDraftsSelect<true>;
     'slug-drafts': SlugDraftsSelect<false> | SlugDraftsSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -902,6 +906,14 @@ export interface PayloadBranchChange {
         value: string | OrganizedDoc;
       } | null)
     | ({
+        relationTo: 'orderable';
+        value: string | Orderable;
+      } | null)
+    | ({
+        relationTo: 'orderable-drafts';
+        value: string | OrderableDraft;
+      } | null)
+    | ({
         relationTo: 'slug-drafts';
         value: string | SlugDraft;
       } | null)
@@ -1122,6 +1134,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'organized-docs';
         value: string | OrganizedDoc;
+      } | null)
+    | ({
+        relationTo: 'orderable';
+        value: string | Orderable;
+      } | null)
+    | ({
+        relationTo: 'orderable-drafts';
+        value: string | OrderableDraft;
       } | null)
     | ({
         relationTo: 'slug-drafts';
@@ -1918,6 +1938,8 @@ export interface CollectionQueryWidget {
       | 'folders'
       | 'tags'
       | 'organized-docs'
+      | 'orderable'
+      | 'orderable-drafts'
       | 'slug-drafts'
       | 'posts'
       | 'pages'
@@ -1961,6 +1983,8 @@ export interface ActivityWidget {
           | 'folders'
           | 'tags'
           | 'organized-docs'
+          | 'orderable'
+          | 'orderable-drafts'
           | 'slug-drafts'
           | 'posts'
           | 'pages'
@@ -2050,6 +2074,82 @@ export interface SlugDraftsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   code?: T;
+  _branch?: T;
+  _branchDocID?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable".
+ */
+export interface Orderable {
+  id: string;
+  _order?: string | null;
+  title: string;
+  _branch: string;
+  _branchDocID?: (string | null) | Orderable;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable-drafts".
+ */
+export interface OrderableDraft {
+  id: string;
+  _order?: string | null;
+  title: string;
+  _branch: string;
+  _branchDocID?: (string | null) | OrderableDraft;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable_select".
+ */
+export interface OrderableSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  _branch?: T;
+  _branchDocID?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable-drafts_select".
+ */
+export interface OrderableDraftsSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
   _branch?: T;
   _branchDocID?: T;
   createdBy?: T;
