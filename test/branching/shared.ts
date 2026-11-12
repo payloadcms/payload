@@ -33,3 +33,6 @@ export const branchesSlug = 'payload-branches'
 export const branchChangesSlug = 'payload-branch-changes'
 export const branchMergesSlug = 'payload-branch-merges'
 export const whereAccessSlug = 'where-access-docs'
+
+export const mergeValidationSlug = 'merge-validation-parity'
+export const mergeValidationGlobalSlug = 'merge-validation-parity-global'

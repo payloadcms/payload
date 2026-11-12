@@ -16,6 +16,7 @@ import {
   resolveGlobalMergeWrites,
 } from './globalMergeWrites.js'
 import { branchMergeValidationContextKey } from './mergeWriteGuard.js'
+import { prepareValidationData } from './prepareValidationData.js'
 import { readLocalizedBranchWrite } from './readLocalizedBranchWrite.js'
 import { isolateBranchState } from './resolveBranch.js'
 import { stripBranchMergeData, stripBranchMergeGlobalData } from './stripBranchMergeData.js'
@@ -227,10 +228,18 @@ export const defaultBranchMergeValidation: BranchMergeValidate = ({ candidates, 
     }
 
     try {
+      const data = entityConfig
+        ? prepareValidationData({
+            data: candidate.data,
+            fields: entityConfig.fields,
+            req: candidateReq,
+          })
+        : candidate.data
+
       if (candidate.entityType === 'collection' && candidate.collectionSlug) {
         validateCollectionData({
           slug: candidate.collectionSlug as never,
-          data: candidate.data,
+          data,
           // Branch-created rows are promoted through updates, just like existing main rows.
           partial: true,
           req: candidateReq,
@@ -238,7 +247,7 @@ export const defaultBranchMergeValidation: BranchMergeValidate = ({ candidates, 
       } else if (candidate.entityType === 'global' && candidate.globalSlug) {
         validateGlobalData({
           slug: candidate.globalSlug as never,
-          data: candidate.data,
+          data,
           req: candidateReq,
         })
       }
