@@ -1,5 +1,5 @@
 import type { ProbedImageSize } from 'payload'
-import type { PreparedUploadTransformation, UploadTransformerInternal } from 'payload/internal'
+import type { UploadTransformation, UploadTransformerInternal } from 'payload/internal'
 
 import type { SharpCollectionConfig, SharpDependency, SharpUploadTaskOptions } from './types.js'
 
@@ -72,7 +72,7 @@ export function createTransformUpload({
       sharpDependency,
     })
 
-    const results: PreparedUploadTransformation[] = [mainResult]
+    const results: UploadTransformation[] = [mainResult]
 
     // Same precedence `init()` applies: Sharp's setting, else the collection's own `focalPoint`.
     const effectiveFocalPoint =
@@ -94,7 +94,7 @@ export function createTransformUpload({
         })
 
         if (resizeAction === 'omit') {
-          return { fieldPath } satisfies PreparedUploadTransformation
+          return { fieldPath } satisfies UploadTransformation
         }
 
         const sizeResultFile = await transform({
@@ -129,11 +129,11 @@ async function describeResult({
   resultFile,
   sharpDependency,
 }: {
-  fieldPath: PreparedUploadTransformation['fieldPath']
+  fieldPath: UploadTransformation['fieldPath']
   fileSupportsResize: boolean
   resultFile: File
   sharpDependency: SharpDependency
-}): Promise<PreparedUploadTransformation> {
+}): Promise<UploadTransformation> {
   if (!fileSupportsResize) {
     return { fieldPath, file: resultFile, mimeType: resultFile.type }
   }

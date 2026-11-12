@@ -2,7 +2,7 @@ import { fileTypeFromBuffer } from 'file-type'
 
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { PayloadRequest } from '../../../types/index.js'
-import type { PreparedUploadTransformation } from '../../transformers/uploadTransformerBridge.js'
+import type { UploadTransformation } from '../../transformers/uploadTransformerBridge.js'
 import type { FileData, FileSizes, FileToSave } from '../../types.js'
 
 import { getUnplannedSafeFileName } from '../../getSafeFilename.js'
@@ -42,7 +42,7 @@ export async function buildVariantOutputs({
   prefix?: string
   req: PayloadRequest
   shouldStageCloudFiles: boolean
-  sizeResults: PreparedUploadTransformation[]
+  sizeResults: UploadTransformation[]
   /** The prefix saved on each size entry. */
   storedPrefix?: string
 }): Promise<{

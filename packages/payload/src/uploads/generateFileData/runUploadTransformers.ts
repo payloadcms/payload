@@ -2,7 +2,7 @@ import { openAsBlob } from 'node:fs'
 
 import type { Document, PayloadRequest } from '../../types/index.js'
 import type { UploadTransformer } from '../transformers/types.js'
-import type { PreparedUploadTransformation } from '../transformers/uploadTransformerBridge.js'
+import type { UploadTransformation } from '../transformers/uploadTransformerBridge.js'
 import type { UploadStages } from './plan/planUploadStages.js'
 
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
@@ -25,7 +25,7 @@ export type UploadTransformerOutput = {
   /** The incoming file, as the stages received it. */
   originalFile: File
   /** The sizes that the Sharp bridge built. */
-  sizeResults: PreparedUploadTransformation[]
+  sizeResults: UploadTransformation[]
   /** The main file that the stages returned, when it is not the incoming file. */
   transformedMainFile?: File
   /** The final `_transforms` of the transformer `doc`, after every stage ran. */
@@ -64,7 +64,7 @@ export async function runUploadTransformers({
   const originalFile = await toWebFile({ file })
   let mainFile: File
   let bridgeDimensions: UploadTransformerOutput['bridgeDimensions']
-  let sizeResults: PreparedUploadTransformation[] = []
+  let sizeResults: UploadTransformation[] = []
 
   if (bridgeTransformer) {
     const bridge = getUploadTransformerInternal(bridgeTransformer)!

@@ -30,7 +30,8 @@ export type UploadTransformTask<TOptions = unknown> = {
   options: TOptions
 }
 
-export type PreparedUploadTransformation = {
+/** One file that `transformUpload` built: the main file (`filename`) or a stored size. */
+export type UploadTransformation = {
   fieldPath: 'filename' | `variants.${string}`
   /** Omitted when this task was intentionally skipped (e.g. an image size too small to enlarge) — recorded with null metadata, matching the existing `variants` shape. */
   file?: File
@@ -57,7 +58,7 @@ export type UploadTransformerInternal = {
     file: File
     req: PayloadRequest
     transform: (task: UploadTransformTask) => Promise<File>
-  }) => Promise<PreparedUploadTransformation[]>
+  }) => Promise<UploadTransformation[]>
 }
 
 export type TransformerWithInternalBridge = {
