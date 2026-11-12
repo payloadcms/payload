@@ -8,7 +8,7 @@ export type CollapseAllToggleProps = {
   controls?: string
   isExpanded?: boolean
   label?: string
-  onClick: (collapsed: boolean) => void
+  onClick: (collapsed: boolean) => Promise<void> | void
 }
 
 export const CollapseAllToggle: React.FC<CollapseAllToggleProps> = ({
