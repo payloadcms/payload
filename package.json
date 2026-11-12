@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "4.0.0-beta.6",
+  "version": "4.0.0-beta.8",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -156,8 +156,8 @@
     "@ai-sdk/openai": "3.0.71",
     "@axe-core/playwright": "4.13.0",
     "@clack/prompts": "1.2.0",
-    "@guidepup/guidepup": "0.34.0",
-    "@guidepup/playwright": "0.19.1",
+    "@guidepup/guidepup": "0.36.4",
+    "@guidepup/playwright": "0.20.0",
     "@libsql/client": "0.14.0",
     "@next/bundle-analyzer": "16.4.2",
     "@payloadcms/db-postgres": "workspace:*",
@@ -208,6 +208,8 @@
     "p-limit": "^5.0.0",
     "pg": "8.20.0",
     "postcss": "^8.4.49",
+    "postcss-resolve-nested-selector": "^0.1.7",
+    "postcss-selector-parser": "^7.1.7",
     "react": "catalog:",
     "react-dom": "catalog:",
     "rimraf": "6.0.1",

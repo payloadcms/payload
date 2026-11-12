@@ -23,6 +23,8 @@ import { EditUpload } from '../EditUpload/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 import { getEditorFileSrc } from '../Upload/getEditorFileSrc.js'
+import { getFileDownloadSrc, getFilePreviewSrc } from '../Upload/getFilePreviewSrc.js'
+import { getInitialCrop } from '../Upload/getInitialCrop.js'
 import { editDrawerSlug, sizePreviewSlug } from '../Upload/index.js'
 import { UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
 import { usePasteFromClipboard } from '../Upload/usePasteFromClipboard.js'
@@ -118,9 +120,8 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const selectedSizeData = selectedSize
     ? (data?.variants?.[selectedSize] as Record<string, unknown>)
     : null
-  const sidePanelFileSrc = (selectedSizeData?.url ?? data?.thumbnailURL ?? data?.url ?? null) as
-    | null
-    | string
+  const previewSrc = getFilePreviewSrc({ data, selectedSizeData })
+  const downloadSrc = getFileDownloadSrc({ data, selectedSizeData })
   const sidePanelMimeType = data?.mimeType as string | undefined
   const fileTypeIsAdjustable =
     !!sidePanelMimeType &&
@@ -313,11 +314,13 @@ export const FileManager: React.FC<FileManagerProps> = ({
             fileName={value?.name || (data?.filename as string)}
             fileSrc={getEditorFileSrc({ data, fileSrc, hasSelectedFile: Boolean(value) })}
             imageCacheTag={imageCacheTag}
-            initialCrop={uploadEdits?.crop ?? undefined}
+            initialCrop={getInitialCrop({ data, hasSelectedFile: Boolean(value), uploadEdits })}
             initialFocalPoint={{
               x: uploadEdits?.focalPoint?.x || (data?.focalX as number) || 50,
               y: uploadEdits?.focalPoint?.y || (data?.focalY as number) || 50,
             }}
+            // The editor keeps its crop in state, so it starts again for each new file.
+            key={value ? `${value.name}-${value.lastModified}` : (data?.filename as string)}
             onSave={onEditsSave}
             showCrop={showCrop}
             showFocalPoint={showFocalPoint}
@@ -356,7 +359,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
         {data?.filename && !removedFile && (
           <FileToolbar
             filename={data.filename as string}
-            fileSrc={sidePanelFileSrc}
+            fileSrc={downloadSrc}
             fileUrl={data?.url as string}
             hideRemoveFile={uploadConfig?.hideRemoveFile}
             isAdjustable={fileTypeIsAdjustable}
@@ -369,6 +372,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
             <FilePreview
               collectionSlug={collectionSlug}
               data={data}
+              fileSrc={previewSrc}
               imageCacheTag={imageCacheTag}
               selectedSize={selectedSize}
               selectedSizeData={selectedSizeData}

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "4.0.0-beta.6",
+  "version": "4.0.0-beta.8",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -865,8 +865,8 @@
     "@faceless-ui/modal": "3.0.2",
     "@faceless-ui/scroll-info": "2.0.0",
     "payload": "workspace:*",
-    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
-    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "lint-staged": {
     "*.{cjs,css,cts,graphql,html,json,jsonc,md,mdx,mjs,mts,scss,toml,yaml,yml}": "oxfmt --no-error-on-unmatched-pattern",

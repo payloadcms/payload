@@ -32,6 +32,7 @@ import {
   mediaSlug,
   menuItemsSlug,
   menuSlug,
+  multiTenantPostsSlug,
   tenantsSlug,
   usersSlug,
 } from './shared.js'
@@ -75,6 +76,238 @@ test.describe('Multi Tenant', () => {
       serverURL,
     })
     await page.goto(usersURL.admin)
+  })
+
+  test('should preserve other tenants when deleting all selected-tenant documents', async () => {
+    await loginClientSide({ data: credentials.admin, page, serverURL })
+    await setTenantFilter({ page, tenant: 'Blue Dog', urlUtil: menuItemsURL })
+
+    const { docs: tenants } = await payload.find({
+      collection: tenantsSlug,
+      overrideAccess: true,
+      where: { name: { equals: 'Blue Dog' } },
+    })
+    const { docs: selectedTenantDocs } = await payload.find({
+      collection: menuItemsSlug,
+      limit: 0,
+      overrideAccess: true,
+      where: { tenant: { equals: tenants[0].id } },
+    })
+    const { docs: otherTenantDocs } = await payload.find({
+      collection: menuItemsSlug,
+      limit: 0,
+      overrideAccess: true,
+      where: { tenant: { not_equals: tenants[0].id } },
+    })
+
+    await page.goto(`${menuItemsURL.list}?limit=2`)
+    await expect(page.locator('.table tbody tr')).toHaveCount(2)
+    await page.locator('.table tbody tr input[type="checkbox"]').first().check()
+    await page.locator('button#select-all-across-pages').click()
+    await page.getByRole('button', { name: 'Delete', exact: true }).click()
+    await expect(page.locator('#confirm-delete-many-docs')).toContainText(
+      String(selectedTenantDocs.length),
+    )
+    await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      `Deleted ${selectedTenantDocs.length}`,
+    )
+
+    await expect
+      .poll(async () => {
+        const { docs: remainingDocs } = await payload.find({
+          collection: menuItemsSlug,
+          limit: 0,
+          overrideAccess: true,
+        })
+
+        return remainingDocs.map(({ id }) => id).sort()
+      })
+      .toEqual(otherTenantDocs.map(({ id }) => id).sort())
+  })
+
+  test.describe('Bulk action scope', () => {
+    let previousViewport: { height: number; width: number }
+
+    test.beforeEach(() => {
+      previousViewport = page.viewportSize()!
+    })
+
+    test.afterEach(async () => {
+      await page.setViewportSize(previousViewport)
+    })
+
+    for (const action of ['edit', 'publish', 'unpublish', 'trash', 'delete', 'restore'] as const) {
+      const selections =
+        action === 'restore'
+          ? (['all', 'individual', 'group', 'mobile'] as const)
+          : (['all', 'individual', 'group'] as const)
+
+      for (const selection of selections) {
+        test(`should scope ${action} to ${selection} selected documents with tenant and URL filters`, async () => {
+          const expected = await runBulkAction({ action, selection })
+
+          await expect
+            .poll(async () => {
+              const result = await payload.find({
+                collection: multiTenantPostsSlug,
+                overrideAccess: true,
+                depth: 0,
+                limit: 0,
+                draft: true,
+                trash: true,
+              })
+
+              return result.docs
+                .map((doc) => ({
+                  id: doc.id,
+                  description: doc.description,
+                  status: doc._status,
+                  isTrashed: Boolean(doc.deletedAt),
+                }))
+                .sort((a, b) => String(a.id).localeCompare(String(b.id)))
+            })
+            .toEqual(expected)
+        })
+      }
+    }
+
+    async function runBulkAction({
+      action,
+      selection,
+    }: {
+      action: 'delete' | 'edit' | 'publish' | 'restore' | 'trash' | 'unpublish'
+      selection: 'all' | 'group' | 'individual' | 'mobile'
+    }) {
+      if (selection === 'mobile') {
+        await page.setViewportSize({ width: 390, height: 844 })
+      }
+
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+
+      const { docs: tenants } = await payload.find({
+        collection: tenantsSlug,
+        overrideAccess: true,
+        where: { name: { in: ['Blue Dog', 'Steel Cat'] } },
+      })
+      const tenantA = tenants.find(({ name }) => name === 'Blue Dog')!
+      const tenantB = tenants.find(({ name }) => name === 'Steel Cat')!
+      const postsURL = new AdminUrlUtil(serverURL, multiTenantPostsSlug)
+      const isTrashView = action === 'restore'
+      const initialStatus = action === 'publish' ? 'draft' : 'published'
+
+      const docs = await Promise.all(
+        Array.from({ length: 11 }, (_, index) =>
+          payload.create({
+            collection: multiTenantPostsSlug,
+            overrideAccess: true,
+            data: {
+              title: index < 9 ? `Batch ${index}` : `Outside ${index}`,
+              description: 'Original',
+              category: index < 3 || index >= 6 ? 'target' : 'other',
+              tenant: [index < 6 || index >= 9 ? tenantA.id : tenantB.id],
+              _status: initialStatus,
+              ...(isTrashView && index !== 9 ? { deletedAt: '2026-01-01T00:00:00.000Z' } : {}),
+            },
+          }),
+        ),
+      )
+
+      await setTenantFilter({ page, tenant: 'Blue Dog', urlUtil: postsURL })
+      const groupingQuery =
+        selection === 'group'
+          ? '&groupBy=category&queryByGroup[target][limit]=2'
+          : '&where[and][1][category][equals]=target'
+
+      await page.goto(
+        `${isTrashView ? postsURL.trash : postsURL.list}?limit=2&sort=title&where[and][0][title][contains]=Batch${groupingQuery}`,
+      )
+
+      const selectionArea =
+        selection === 'group' ? page.locator('.table-wrap[data-group-id="target"]') : page
+
+      await expect(selectionArea.locator('.table tbody tr')).toHaveCount(2)
+      await selectionArea.locator('.table tbody tr input[type="checkbox"]').first().check()
+
+      if (selection !== 'individual') {
+        await selectionArea.locator('button#select-all-across-pages').click()
+      }
+
+      const modalPrefix = selection === 'group' ? 'target-' : ''
+
+      if (action === 'edit') {
+        await page.getByRole('button', { name: 'Edit', exact: true }).click()
+
+        const drawer = page.locator(`#${modalPrefix}edit-${multiTenantPostsSlug}`)
+
+        await drawer.locator('.field-select .rs__control').click()
+        await getSelectMenu({ page }).getByText('Description', { exact: true }).click()
+        await drawer.locator('#field-description').fill('Updated')
+        await drawer.locator('.edit-many__publish').click()
+      } else if (action === 'publish' || action === 'unpublish') {
+        await page
+          .getByRole('button', {
+            name: action === 'publish' ? 'Publish' : 'Unpublish',
+            exact: true,
+          })
+          .click()
+        await page
+          .locator(
+            `#${modalPrefix}${action}-${multiTenantPostsSlug} [data-dialog-action="confirm"]`,
+          )
+          .click()
+      } else if (action === 'restore') {
+        const restoreButton = page.getByRole('button', { name: 'Restore', exact: true })
+        const confirmation = page.locator(
+          `#${modalPrefix}confirm-restore-many-docs [data-dialog-action="confirm"]`,
+        )
+
+        if (selection === 'mobile') {
+          await restoreButton.focus()
+          await page.keyboard.press('Enter')
+          await expect(confirmation).toBeVisible()
+          await confirmation.focus()
+          await page.keyboard.press('Enter')
+        } else {
+          await restoreButton.click()
+          await confirmation.click()
+        }
+      } else {
+        await page.getByRole('button', { name: 'Delete', exact: true }).click()
+
+        if (action === 'delete') {
+          await page.locator(`#${modalPrefix}confirm-delete-many-docs #delete-forever`).check()
+        }
+
+        await page
+          .locator(`#${modalPrefix}confirm-delete-many-docs [data-dialog-action="confirm"]`)
+          .click()
+      }
+
+      const selectedIDs = new Set(
+        (selection === 'individual' ? docs.slice(0, 1) : docs.slice(0, 3)).map(({ id }) => id),
+      )
+      const expected = docs
+        .filter(({ id }) => action !== 'delete' || !selectedIDs.has(id))
+        .map((doc) => {
+          const isSelected = selectedIDs.has(doc.id)
+
+          return {
+            id: doc.id,
+            description: isSelected && action === 'edit' ? 'Updated' : 'Original',
+            status:
+              isSelected && (action === 'unpublish' || action === 'restore')
+                ? 'draft'
+                : isSelected && action === 'publish'
+                  ? 'published'
+                  : initialStatus,
+            isTrashed: isSelected ? action === 'trash' : Boolean(doc.deletedAt),
+          }
+        })
+        .sort((a, b) => String(a.id).localeCompare(String(b.id)))
+
+      return expected
+    }
   })
 
   test.describe('Filters', () => {
@@ -594,6 +827,17 @@ test.describe('Multi Tenant', () => {
         page,
         tenant: 'Blue Dog',
         urlUtil: tenantsURL,
+      })
+      await page.goto(globalMenuURL.list)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+      await expect(page.locator('#field-title')).toHaveValue('Blue Dog Menu')
+    })
+
+    test('should redirect list view to edit view for a user without access to all tenants', async () => {
+      await loginClientSide({
+        data: credentials.blueDog,
+        page,
+        serverURL,
       })
       await page.goto(globalMenuURL.list)
       await expect(page.locator('.collection-edit')).toBeVisible()

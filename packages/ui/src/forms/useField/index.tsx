@@ -83,16 +83,17 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
 
       dispatchField({
         type: 'UPDATE',
-        disableFormData: disableFormData || (hasRows && val > 0),
+        disableFormData,
         path,
         value: val,
+        ...(hasRows && !Array.isArray(field?.rows) ? { rows: [] } : {}),
       })
 
       if (!disableModifyingForm) {
         setModified(true)
       }
     },
-    [setModified, path, dispatchField, disableFormData, hasRows],
+    [setModified, path, dispatchField, disableFormData, hasRows, field?.rows],
   )
 
   // Store result from hook as ref
@@ -193,7 +194,7 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
             value,
           }
 
-          if (disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false)) {
+          if (disableFormData) {
             update.disableFormData = true
           }
 

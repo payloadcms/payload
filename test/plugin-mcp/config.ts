@@ -192,6 +192,8 @@ export default buildConfigWithDefaults({
             },
           },
         },
+        // Most tests send API keys or no credentials. The OAuth tests turn it on themselves.
+        oauth: false,
         tools: {
           hiddenTool: defineTool({
             access: () => false,

@@ -496,6 +496,11 @@ export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Respon
 export type Endpoint = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+  /**
+   * Skip Payload's authentication before the handler runs, so `req.user` is `null`. Use this when
+   * the handler authenticates the request itself, e.g. with `req.payload.auth()`.
+   */
+  disableAuth?: boolean
 
   /**
    * Middleware that will be called when the path/method matches
@@ -511,13 +516,6 @@ export type Endpoint = {
    * Compatible with the Express router
    */
   path: string
-  /**
-   * Please add "root" routes under the /api folder in the Payload Project.
-   * https://nextjs.org/docs/app/api-reference/file-conventions/route
-   *
-   * @deprecated in 3.0
-   */
-  root?: never
 }
 
 /**
