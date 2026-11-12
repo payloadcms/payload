@@ -9,6 +9,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Folders, OrganizedDocs, Tags } from './collections/Hierarchy.js'
 import { Orderable, OrderableDrafts } from './collections/Orderable.js'
+import { OrderableJoin } from './collections/OrderableJoin.js'
 import { SlugDrafts } from './collections/SlugDrafts.js'
 import { hookSpy } from './hookSpy.js'
 import {
@@ -121,6 +122,7 @@ export default buildConfigWithDefaults({
       OrganizedDocs,
       Orderable,
       OrderableDrafts,
+      OrderableJoin,
       SlugDrafts,
       {
         slug: postsSlug,
