@@ -2182,8 +2182,6 @@ export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
-export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
-export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
