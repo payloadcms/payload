@@ -604,6 +604,60 @@ test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () 
       expect(draftAfter._status).toBe('draft')
       expect(publishedAfter._status).toBe('published')
     })
+
+    test('renaming a product does not publish pending draft changes on a variant', async ({
+      payload,
+    }) => {
+      const product = await createProduct(payload, 'Gloves')
+
+      const variant = await payload.create({
+        collection: 'variants',
+        data: { product: product.id, options: [smallID], inventory: 5, _status: 'published' },
+        overrideAccess: true,
+      })
+
+      // a pending draft change: only a new draft version, the published doc stays as it is
+      await payload.update({
+        collection: 'variants',
+        id: variant.id,
+        data: { inventory: 99 },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      const beforeRename = await payload.findByID({
+        collection: 'variants',
+        id: variant.id,
+        overrideAccess: true,
+      })
+      expect(beforeRename._status).toBe('published')
+      expect(beforeRename.inventory).toBe(5)
+
+      await payload.update({
+        collection: 'products',
+        id: product.id,
+        data: { title: 'Leather Gloves' },
+        overrideAccess: true,
+      })
+
+      const published = await payload.findByID({
+        collection: 'variants',
+        id: variant.id,
+        overrideAccess: true,
+      })
+      const latestDraft = await payload.findByID({
+        collection: 'variants',
+        id: variant.id,
+        draft: true,
+        overrideAccess: true,
+      })
+
+      expect(published._status).toBe('published')
+      expect(published.inventory).toBe(5)
+      expect(latestDraft.inventory).toBe(99)
+      expect(published.title).toBe('Leather Gloves — Small')
+      expect(latestDraft.title).toBe('Leather Gloves — Small')
+    })
   })
 
   test.describe('cart item endpoints', () => {
