@@ -313,9 +313,13 @@ export const TenantSelectionProviderClient = ({
         tenantCookie: getTenantCookie(),
       })
     ) {
-      setTenant({ id: undefined, refresh: true })
+      if (initialHasAccessToAllTenants) {
+        setTenantAndCookie({ id: undefined, refresh: true })
+      } else {
+        setTenant({ id: undefined, refresh: true })
+      }
     }
-  }, [initialValue, setTenant])
+  }, [initialHasAccessToAllTenants, initialValue, setTenant, setTenantAndCookie])
 
   /**
    * If there is no selected tenant ID and the entity type is 'global', set the first tenant as selected.
