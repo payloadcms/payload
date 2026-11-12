@@ -56,6 +56,7 @@ export async function loginLocal<TSlug extends AuthCollectionSlug>(
   const result = await loginOperation<TSlug>(args)
 
   if (collection.config.auth.removeTokenFromResponses) {
+    delete result.refreshToken
     delete result.token
   }
 

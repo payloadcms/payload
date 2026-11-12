@@ -24,6 +24,7 @@ export const reservedAPIKeyFieldNames = [/* 'apiKeyIndex', 'apiKeyLast4', 'apiKe
  */
 export const reservedBaseUploadFieldNames = [
   'file',
+  '_transforms',
   /* 'mimeType',
     'thumbnailURL',
     'width',

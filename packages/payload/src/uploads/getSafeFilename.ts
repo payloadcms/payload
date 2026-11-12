@@ -13,8 +13,9 @@ import { fileExists } from './fileExists.js'
  * incrementName('file-99.jpg') // 'file-100.jpg'
  */
 export const incrementName = (name: string): string => {
-  const extension = name.split('.').pop()
-  const baseFilename = sanitize(name.substring(0, name.lastIndexOf('.')) || name)
+  const extensionIndex = name.lastIndexOf('.')
+  const extension = extensionIndex === -1 ? '' : name.slice(extensionIndex)
+  const baseFilename = sanitize(name.substring(0, extensionIndex) || name)
   let incrementedName = baseFilename
   const regex = /(.*)-(\d+)$/
   const found = baseFilename.match(regex)
@@ -26,12 +27,14 @@ export const incrementName = (name: string): string => {
     const incremented = Number(matchedNumber) + 1
     incrementedName = `${matchedName}-${incremented}`
   }
-  return `${incrementedName}.${extension}`
+  return `${incrementedName}${extension}`
 }
 
 type Args = {
   collectionSlug: string
   desiredFilename: string
+  /** Ignores this document's own files, for writes that store a new version in its own folder. */
+  excludeDocumentID?: number | string
   prefix?: string
   req: PayloadRequest
   /**
@@ -66,6 +69,7 @@ type Args = {
 export async function getSafeFileName({
   collectionSlug,
   desiredFilename,
+  excludeDocumentID,
   prefix,
   req,
   staticPath,
@@ -75,6 +79,7 @@ export async function getSafeFileName({
   while (
     (await docWithFilenameExists({
       collectionSlug,
+      excludeDocumentID,
       filename: modifiedFilename,
       path: staticPath ?? '',
       prefix,
@@ -86,4 +91,23 @@ export async function getSafeFileName({
   }
 
   return modifiedFilename
+}
+
+/** Finds a name that is free in storage and that `canUseName` accepts for this save. */
+export async function getUnplannedSafeFileName({
+  canUseName,
+  desiredFilename,
+  ...args
+}: {
+  canUseName: (filename: string) => boolean
+} & Parameters<typeof getSafeFileName>[0]): Promise<string> {
+  let filename = desiredFilename
+
+  while (true) {
+    filename = await getSafeFileName({ ...args, desiredFilename: filename })
+    if (canUseName(filename)) {
+      return filename
+    }
+    filename = incrementName(filename)
+  }
 }

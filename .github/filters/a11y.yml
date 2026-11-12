@@ -1,0 +1,27 @@
+needs_a11y:
+  - '.github/filters/a11y.yml'
+  - '.github/scripts/a11y/**'
+  # Production UI and frontend logic, including plain TypeScript.
+  - 'packages/**/*.{css,scss,tsx,jsx,svg,png,jpg,jpeg,gif,webp,avif,ico,woff,woff2,ttf,otf}'
+  - 'packages/{ui,richtext-*,admin-bar,live-preview*,translations,plugin-seo}/src/**/*.{ts,js,mjs,cjs,json}'
+  - 'packages/*/src/{admin,client,components,elements,providers,views}/**/*.{ts,js,mjs,cjs,json}'
+  - 'packages/**/*.{client,browser}.{ts,js}'
+  - 'packages/{next,tanstack-start}/src/{adapters,auth,exports,rsc,utilities,withPayload}/**/*.{ts,js,mjs,cjs,json}'
+  - 'packages/payload/src/{admin,config,collections/config,globals/config,fields}/**/*.{ts,js,json}'
+  - 'packages/payload/src/{exports/{shared,internal},auth/getLoginOptions,utilities/formatAdminURL}.{ts,js}'
+  - 'packages/payload/src/cli/commands/generateImportMap/**/*.{ts,js}'
+  # A11y fixtures and the browser/server setup they use.
+  - 'test/a11y/**/*.{ts,tsx,js,jsx,json,css,scss,svg,png,jpg,jpeg,gif,webp,avif,woff,woff2}'
+  - 'test/{__helpers/e2e,__helpers/shared,__setup,app,app-tanstack}/**/*.{ts,tsx,js,jsx,mjs,json,css,scss}'
+  - 'test/admin/components/{CustomProvider,CustomProviderServer}/**/*.{ts,tsx,js,jsx,css,scss}'
+  - 'test/{buildConfigWithDefaults,runE2E,setupProd,dev,initDevAndTest,runInit,runInitSeparateProcess,credentials,testHooks,dbAdapters}.ts'
+  - 'test/{playwright*,next.config,vite.tanstack*,tsconfig*}.{ts,mjs,json}'
+  - 'test/uploads/image.png'
+  # Dependencies and build inputs; the root lockfile is intentionally conservative.
+  - '{package.json,pnpm-lock.yaml,pnpm-workspace.yaml,.npmrc,.tool-versions,turbo.json,tsconfig*.json}'
+  - 'packages/{ui,richtext-*,admin-bar,live-preview*,translations,next,tanstack-start,payload,plugin-seo}/{package.json,tsconfig*.json,tsup.config.*,esbuild*}'
+  - 'test/{package.json,pnpm-lock.yaml}'
+  - 'tools/scripts/src/{pack-all-to-dest,local-package-tarballs}.ts'
+  - 'scripts/{pack_to_dest.sh,replacePayloadConfigPath.js}'
+  - '.github/workflows/main.yml'
+  - '.github/actions/{setup,setup-playwright,start-services}/**'

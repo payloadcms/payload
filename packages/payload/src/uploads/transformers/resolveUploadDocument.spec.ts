@@ -38,6 +38,6 @@ describe('getRequestedFile', () => {
     ],
     ['an unmatched filename', 'unknown.png', { filename: 'logo.png', mimeType: 'image/png' }],
   ])('should resolve the requested file for %s', (_, filename, expected) => {
-    expect(getRequestedFile({ document, filename })).toEqual(expected)
+    expect(getRequestedFile({ document, filename })).toMatchObject(expected)
   })
 })

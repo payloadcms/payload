@@ -77,8 +77,14 @@ export type FixResult =
     }
   | { status: 'none' }
   | {
-      /** `registry`: a packument was unreachable. `no-current-version`: the owner's declared version is unknown (e.g. declared outside packages/), so a safe minimal bump cannot be computed. */
-      reason: 'no-current-version' | 'registry'
+      /**
+       * Why a safe minimal bump cannot be computed:
+       * - `no-current-version`: the owner's declared version is unknown (e.g. declared outside packages/).
+       * - `no-patched-range`: the advisory carries no patched range to trace against.
+       * - `registry`: a packument was unreachable.
+       * - `unsupported-spec`: the declared spec is not a semver range (alias, tag, file, or git).
+       */
+      reason: 'no-current-version' | 'no-patched-range' | 'registry' | 'unsupported-spec'
       status: 'unknown'
     }
 

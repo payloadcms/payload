@@ -3,10 +3,12 @@
      Non-themed Tokens
      ————————————————————————————————————————————— */
 
-  :root {
+  :root,
+  :host,
+  [data-theme='light'] {
     /* Special */
     --special-bg-hover-on-light-canvas: var(--ramp-black-300);
-    --special-text-highlight: var(--color-blue-300);
+    --special-text-highlight: var(--ramp-blue-300);
 
     --special-multiplayer-blue: var(--ramp-blue-600);
     --special-multiplayer-purple: var(--ramp-purple-500);
@@ -37,6 +39,8 @@
 
     /* Focal point */
     --color-focal-point-backdrop: var(--ramp-black-500);
+
+    --scrollbar-color: var(--color-bg-secondary-pressed);
 
     /* ——————————————————————————————————————————————
        Light Theme (default)
@@ -308,8 +312,10 @@
      Only overrides where the palette reference changes.
      ————————————————————————————————————————————— */
 
-  html[data-theme='dark'],
+  :host([data-theme='dark']),
   [data-theme='dark'] {
+    --scrollbar-color: var(--color-bg-secondary-pressed);
+
     /* Background */
     --color-bg-assistive: var(--ramp-pink-500);
     --color-bg-assistive-hover: var(--ramp-pink-600);
@@ -497,14 +503,18 @@
   /* Reapply the contrast palette at theme boundaries, including portaled menus.
      Component-specific mappings live with their component styles. */
   html[data-enhanced-contrast],
-  html[data-enhanced-contrast] [data-theme] {
+  html[data-enhanced-contrast] [data-theme],
+  :host([data-enhanced-contrast]),
+  :host([data-enhanced-contrast]) [data-theme] {
     --color-border: var(--color-border-control);
     --color-border-control-strong: var(--color-border-control);
     --color-border-menu-separator: var(--ramp-white-500);
   }
 
   html[data-enhanced-contrast],
-  html[data-enhanced-contrast] [data-theme='light'] {
+  html[data-enhanced-contrast] [data-theme='light'],
+  :host([data-enhanced-contrast]),
+  :host([data-enhanced-contrast]) [data-theme='light'] {
     --color-bg-brand: var(--ramp-blue-700);
     --color-bg-brand-hover: var(--ramp-blue-800);
     --color-bg-brand-pressed: var(--ramp-blue-900);
@@ -529,7 +539,9 @@
   }
 
   html[data-enhanced-contrast][data-theme='dark'],
-  html[data-enhanced-contrast] [data-theme='dark'] {
+  html[data-enhanced-contrast] [data-theme='dark'],
+  :host([data-enhanced-contrast][data-theme='dark']),
+  :host([data-enhanced-contrast]) [data-theme='dark'] {
     --color-bg-brand: var(--ramp-blue-700);
     --color-bg-brand-hover: var(--ramp-blue-800);
     --color-bg-brand-pressed: var(--ramp-blue-900);
@@ -551,5 +563,11 @@
     --color-text-secondary: var(--ramp-white-500);
     --color-text-selected: var(--ramp-blue-200);
     --color-text-tertiary: var(--ramp-white-500);
+  }
+
+  :root,
+  :host,
+  [data-theme] {
+    --accessibility-focus-color: var(--color-border-selected);
   }
 }

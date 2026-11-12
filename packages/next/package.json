@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "4.0.0-beta.5",
+  "version": "4.0.0-beta.8",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
@@ -167,7 +167,7 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": ">=16.4.0 <17.0.0",
+    "next": ">=16.4.1 <17.0.0",
     "payload": "workspace:*"
   },
   "lint-staged": {

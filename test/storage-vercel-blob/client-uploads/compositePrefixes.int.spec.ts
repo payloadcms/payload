@@ -64,7 +64,7 @@ test.suite(
       }
 
       expect(instructions.data.pathname).toBe(
-        `${collectionPrefix}/${instructions.file.uploadReference.prefix}/${instructions.file.uploadReference._objectKey}/client-composite-image-original.png`,
+        `${collectionPrefix}/${instructions.file.uploadReference.prefix}/${instructions.file.uploadReference._objectKey}/client-composite-image.png`,
       )
 
       await put(instructions.data.pathname, new Blob([file], { type: 'image/png' }), {
