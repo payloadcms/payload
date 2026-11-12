@@ -212,6 +212,30 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     expect(flipStagePlannedMimeTypes).toEqual(['image/png'])
   })
 
+  test('should cut image sizes around the saved focal point', async ({ payload }) => {
+    // Red on the left half, blue on the right half. The `small` size is 200 x 200, so a cut around
+    // a focal point at x = 90 is all blue, and a cut from the center starts on red.
+    const half = { channels: 3, height: 200, width: 200 } as const
+    const bytes = await sharp({ create: { ...half, background: '#ff0000', width: 400 } })
+      .composite([{ input: { create: { ...half, background: '#0000ff' } }, left: 200, top: 0 }])
+      .png()
+      .toBuffer()
+
+    const created = await payload.create({
+      collection: transformedMediaSlug,
+      data: { _transforms: { focalPoint: { x: 90, y: 50 } } },
+      file: { name: 'halves.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+
+    const small = await sharp(
+      await readFile(path.join(transformedMediaDir, created.variants!.small!.filename!)),
+    )
+      .raw()
+      .toBuffer({ resolveWithObject: true })
+
+    expect([...small.data.subarray(0, 3)]).toEqual([0, 0, 255])
+  })
+
   test('should keep the saved crop when only the focal point changes', async ({ payload }) => {
     const created = await createImage({ _transforms: { crop: savedCrop }, payload })
 

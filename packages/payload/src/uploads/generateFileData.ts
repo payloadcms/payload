@@ -711,6 +711,7 @@ const processUpload = async <T>({
 
         const results = await bridge.prepareUpload!({
           collectionSlug: collectionConfig.slug,
+          cropSize: getCropSize({ edits: editsForTransformer }),
           file: originalWebFile,
           req,
           transform: async (task) => {
@@ -739,7 +740,6 @@ const processUpload = async <T>({
 
             return taskFile
           },
-          uploadEdits: editsForTransformer,
         })
 
         const mainResult = results.find((result) => result.fieldPath === 'filename')
@@ -1286,6 +1286,22 @@ const hasTransformValidators = ({ req }: { req: PayloadRequest }): boolean =>
       transformDefinitions?.some(({ validate }) => validate),
     ),
   )
+
+/**
+ * The pixel size of the crop in the edits, which a request can send apart from the crop itself.
+ * The Sharp bridge reads the crop from `_transforms`, so only this size is passed to it.
+ */
+function getCropSize({
+  edits,
+}: {
+  edits: undefined | UploadEdits
+}): { height: number; width: number } | undefined {
+  if (!edits?.crop || edits.widthInPixels === undefined || edits.heightInPixels === undefined) {
+    return undefined
+  }
+
+  return { height: Number(edits.heightInPixels), width: Number(edits.widthInPixels) }
+}
 
 /** Puts the incoming file's name, size and MIME type into the transformer `doc`. */
 function setIncomingFileFields({
