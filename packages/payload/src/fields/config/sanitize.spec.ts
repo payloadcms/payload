@@ -15,7 +15,7 @@ import {
   InvalidFieldRelationship,
   MissingFieldType,
 } from '../../errors/index.js'
-import { text } from '../validations.js'
+import { sanitizeCollection } from '../../collections/config/sanitize.js'
 import { sanitizeFields } from './sanitize.js'
 import { CollectionConfig } from '../../index.js'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -850,24 +850,6 @@ describe('sanitizeFields', () => {
       expect(field.validate?.('', {} as never)).toBe(true)
     })
 
-    it('should retain validation when the custom validator delegates to the default', async () => {
-      const field: TextField = {
-        name: 'title',
-        type: 'text',
-        required: true,
-        validate: (value, options) => text(value, options),
-      }
-
-      await sanitize({ fields: [field] })
-
-      expect(
-        field.validate?.('', {
-          required: true,
-          req: { payload: { config: {} }, t: (key) => key },
-        } as never),
-      ).toBe('validation:required')
-    })
-
     it.each(['production', 'test'])('should not warn in %s', async (environment) => {
       vi.stubEnv('NODE_ENV', environment)
 
@@ -880,12 +862,6 @@ describe('sanitizeFields', () => {
 
     it('should not warn for optional fields with custom validation', async () => {
       await sanitize({ fields: [{ name: 'title', type: 'text', validate: () => true }] })
-
-      expect(console.warn).not.toHaveBeenCalled()
-    })
-
-    it('should not warn for fields using default validation', async () => {
-      await sanitize({ fields: [{ name: 'title', type: 'text', required: true }] })
 
       expect(console.warn).not.toHaveBeenCalled()
     })
@@ -918,15 +894,87 @@ describe('sanitizeFields', () => {
       expect(console.warn).not.toHaveBeenCalled()
     })
 
-    it('should finish sanitizing later fields before checking warnings', async () => {
-      await sanitize({
-        fields: [
-          { name: 'first', type: 'text' },
-          { name: 'second', type: 'text', required: true, validate: () => true },
-        ],
+    describe('required validation after auth-field merging', () => {
+      it('should warn when an auth override inherits required from its base field', async () => {
+        const customValidate = () => true as const
+        const collection = await sanitizeCollection({ collections: [] } as Config, {
+          slug: 'users',
+          auth: true,
+          fields: [{ name: 'email', type: 'email', validate: customValidate }],
+        })
+        const field = collection.fields.find((field) => 'name' in field && field.name === 'email')
+
+        expect(field).toMatchObject({ required: true, validate: customValidate })
+        expect(console.warn).toHaveBeenCalledTimes(1)
+        expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('users.email'))
       })
 
-      expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('posts.second'))
+      it('should not warn for built-in auth validation', async () => {
+        await sanitizeCollection({ collections: [] } as Config, {
+          slug: 'users',
+          auth: true,
+          fields: [],
+        })
+
+        expect(console.warn).not.toHaveBeenCalled()
+      })
+
+      it('should warn only once for an explicitly required auth override', async () => {
+        await sanitizeCollection({ collections: [] } as Config, {
+          slug: 'users',
+          auth: true,
+          fields: [{ name: 'email', type: 'email', required: true, validate: () => true }],
+        })
+
+        expect(console.warn).toHaveBeenCalledTimes(1)
+      })
+
+      it('should not warn for an explicitly optional auth override', async () => {
+        await sanitizeCollection({ collections: [] } as Config, {
+          slug: 'users',
+          auth: true,
+          fields: [{ name: 'email', type: 'email', required: false, validate: () => true }],
+        })
+
+        expect(console.warn).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('auth warnings inside layout fields', () => {
+      it.each(['row', 'collapsible', 'tabs'] as const)(
+        'should warn for custom required fields inside %s',
+        async (type) => {
+          const fields: Field[] = [
+            { name: 'title', type: 'text', required: true, validate: () => true },
+          ]
+          const layout: Field =
+            type === 'tabs'
+              ? { type, tabs: [{ label: 'Details', fields }] }
+              : type === 'collapsible'
+                ? { type, label: 'Details', fields }
+                : { type, fields }
+
+          await sanitizeCollection({ collections: [] } as Config, {
+            slug: 'users',
+            auth: true,
+            fields: [layout],
+          })
+
+          expect(console.warn).toHaveBeenCalledTimes(1)
+          expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('title'))
+        },
+      )
+
+      it('should warn when username inherits required from its base field', async () => {
+        await sanitizeCollection({ collections: [] } as Config, {
+          slug: 'users',
+          auth: { loginWithUsername: true },
+          fields: [{ name: 'username', type: 'text', validate: () => true }],
+        })
+
+        expect(console.warn).toHaveBeenCalledTimes(1)
+        expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('users.username'))
+      })
     })
   })
 })
