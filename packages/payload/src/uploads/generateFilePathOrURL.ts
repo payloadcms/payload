@@ -1,6 +1,6 @@
 import type { Config } from '../config/types.js'
 
-import { formatAdminURL } from '../utilities/formatAdminURL.js'
+import { formatAdminURL, stripTrailingSlash } from '../utilities/formatAdminURL.js'
 
 /**
  * Generates a file path or URL based on the provided parameters.
@@ -35,12 +35,21 @@ export function generateFilePathOrURL({
 
   if (filename) {
     // local file url
-    return formatAdminURL({
+    const url = formatAdminURL({
       apiRoute: config.routes?.api || '',
       path: `/${collectionSlug}/file/${encodeURIComponent(filename)}`,
       relative,
       serverURL: config.serverURL,
     })
+
+    // A file URL points at an object, not a route: with Next.js `trailingSlash: true`,
+    // formatAdminURL appends a slash (`/api/media/file/image.png/`), which storage
+    // adapters and CDNs resolve to a different, missing key.
+    const queryIndex = url.search(/[?#]/)
+
+    return queryIndex === -1
+      ? stripTrailingSlash(url)
+      : `${stripTrailingSlash(url.slice(0, queryIndex))}${url.slice(queryIndex)}`
   }
 
   return null
