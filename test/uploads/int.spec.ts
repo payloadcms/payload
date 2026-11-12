@@ -3522,6 +3522,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       const relationDoc = await payload.create({
         collection: relationSlug,
         data: {},
+        overrideAccess: true,
         req,
       })
 
@@ -3533,7 +3534,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       expect(req.file).toBeDefined()
       expect(req.file?.name).toBe('preserve-req-file-test.png')
 
-      await payload.delete({ collection: relationSlug, id: relationDoc.id })
+      await payload.delete({ collection: relationSlug, id: relationDoc.id, overrideAccess: true })
     })
 
     test('should not use the outer req.file for a nested upload update without a file', async ({
