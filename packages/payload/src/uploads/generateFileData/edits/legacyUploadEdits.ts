@@ -1,8 +1,8 @@
 /**
  * Compatibility with the inputs that predate `_transforms`: the `uploadEdits` query (the admin
  * crop and focal point editor), `focalX`/`focalY`, and the `UploadEdits` that core still reads to
- * decide on rebuilds, crop resets and the crop size for the Sharp bridge. The general `_transforms`
- * rules are in transformState/transformStateInput.ts.
+ * decide on rebuilds, crop resets and the crop size for the upload bridge. The general
+ * `_transforms` rules are in transformState/transformStateInput.ts.
  */
 import { isDeepStrictEqual } from 'node:util'
 
@@ -224,7 +224,7 @@ export function getNextFocalPoint({
  * The edits for the upload pipeline. Without a query crop, the crop comes from the saved state:
  * a changed crop or focal point reprocesses the original, and an unchanged crop does not. A
  * removed crop is sent as a crop of the whole original: the rebuild decision and the crop reset
- * (`getCropResetAndFocalPointChange`) read it that way, and the Sharp bridge gets its size.
+ * (`getCropResetAndFocalPointChange`) read it that way, and the upload bridge gets its size.
  */
 export function toPipelineEdits({
   hasFocalPointChange,
@@ -347,7 +347,7 @@ export function hasLegacyCropOrFocalPointEdit({
 /**
  * Whether the edits reset the crop of a document that keeps its original, and whether they change
  * the focal point. A crop reset is a crop of the whole original at its own size. With no other
- * change it reuses the retained original, so the Sharp bridge does not get its crop size.
+ * change it reuses the retained original, so the upload bridge does not get its crop size.
  */
 export function getCropResetAndFocalPointChange({
   currentFileData,
@@ -360,7 +360,7 @@ export function getCropResetAndFocalPointChange({
 }): {
   /**
    * The pixel size of the crop in the edits, which a request can send apart from the crop itself.
-   * The Sharp bridge reads the crop from `_transforms`, so only this size is passed to it.
+   * The upload bridge reads the crop from `_transforms`, so only this size is passed to it.
    */
   cropSize?: { height: number; width: number }
   hasFocalPointChange: boolean

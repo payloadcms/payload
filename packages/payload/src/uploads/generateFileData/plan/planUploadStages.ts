@@ -11,7 +11,7 @@ import { isFocalPointKey } from '../../transformState/transformKeyClaims.js'
 import { toFileUploadError } from '../utils/toFileUploadError.js'
 
 export type UploadStages = {
-  /** The one Sharp bridge that drives the upload, if the plan has any. */
+  /** The one upload bridge that drives the upload, if the plan has any. */
   bridgeTransformer?: UploadTransformer
   claimsOfStagesThatRun: Map<UploadTransformer, string[]>
   /** Request-time stages apply the saved keys, so the default file is not stored. */

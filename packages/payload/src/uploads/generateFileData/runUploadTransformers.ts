@@ -16,15 +16,15 @@ import { assertTransformKeysCovered } from '../transformState/planUpload.js'
 
 export type UploadTransformerOutput = {
   /**
-   * The main file's size from the Sharp bridge. Set when the bridge ran, also when it gave no
+   * The main file's size from the upload bridge. Set when the bridge ran, also when it gave no
    * size, so the saved size then follows the bridge and is not probed from the file.
    */
   bridgeDimensions?: { height?: number; width?: number }
-  /** The Sharp bridge that ran, if one did. */
+  /** The upload bridge that ran, if one did. */
   bridgeTransformer?: UploadTransformer
   /** The incoming file, as the stages received it. */
   originalFile: File
-  /** The sizes that the Sharp bridge built. */
+  /** The sizes that the upload bridge built. */
   sizeResults: UploadTransformation[]
   /** The main file that the stages returned, when it is not the incoming file. */
   transformedMainFile?: File
@@ -33,7 +33,7 @@ export type UploadTransformerOutput = {
 }
 
 /**
- * Runs the upload stages on the incoming file. With a Sharp bridge, the bridge drives the stages
+ * Runs the upload stages on the incoming file. With an upload bridge, the bridge drives the stages
  * once for the main file and once for each size. Otherwise the stages run once for the main file.
  *
  * The stages can change `pipelineDoc._transforms`. Only the main task's changes are kept: size
@@ -49,7 +49,7 @@ export async function runUploadTransformers({
   stages: { bridgeTransformer, claimsOfStagesThatRun, pipeline, plan, stagesThatRun },
 }: {
   collectionSlug: string
-  /** The pixel size of a crop that the request sent, for the Sharp bridge. */
+  /** The pixel size of a crop that the request sent, for the upload bridge. */
   cropSize?: { height: number; width: number }
   /** The incoming file, with its whole contents. */
   file: NonNullable<PayloadRequest['file']>

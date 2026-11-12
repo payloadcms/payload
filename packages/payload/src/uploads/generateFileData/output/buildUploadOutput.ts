@@ -29,7 +29,7 @@ type IncomingFile = NonNullable<PayloadRequest['file']>
  * 1. The main file: its name, type, size and dimensions.
  * 2. The original, when it can be stored.
  * 3. The main file to store. This also updates `req.file` or the temp file to the stored bytes.
- * 4. The sizes that the Sharp bridge built.
+ * 4. The sizes that the upload bridge built.
  * 5. The fields for files that request-time stages build.
  *
  * A crop reset that no stage changed reuses the retained original as the main file, and stores
@@ -341,7 +341,7 @@ async function describeMainFile({
   transformedMainFile,
 }: {
   file: IncomingFile
-  /** False when the Sharp bridge gave the dimensions. */
+  /** False when the upload bridge gave the dimensions. */
   shouldProbeDimensions: boolean
   transformedMainFile?: File
 }): Promise<{

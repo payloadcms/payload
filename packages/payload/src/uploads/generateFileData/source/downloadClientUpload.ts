@@ -12,9 +12,9 @@ type IncomingFile = NonNullable<PayloadRequest['file']>
 
 /**
  * Whether a stage needs the bytes of a client upload that arrived with only a header probe or no
- * contents (see getFileContentRequirement.ts). The content requirement covers what Sharp's bridge
- * needs for its configuration, but not saved keys that it claims. A focal point only guides
- * sizes, which the content requirement already covers, so it needs no download.
+ * contents (see getFileContentRequirement.ts). The content requirement covers what the upload
+ * bridge needs for its configuration, but not saved keys that it claims. A focal point only
+ * guides sizes, which the content requirement already covers, so it needs no download.
  */
 export function needsFullClientUpload({
   file,

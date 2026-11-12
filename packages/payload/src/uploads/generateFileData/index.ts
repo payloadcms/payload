@@ -250,26 +250,21 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     retainedOriginal,
     uploadEdits,
   })
-  const planStages = ({
-    mimeType,
-    originalDoc: stageOriginalDoc,
-  }: {
-    mimeType: string
-    originalDoc: Readonly<Document>
-  }) =>
-    planUploadStages({
-      // Request-time stages start from the stored original, so one must be stored.
-      canApplyAtRequest: storage.canStoreOriginal,
-      collectionSlug: collection.slug,
-      documentID,
-      earlierPlan,
-      mimeType,
-      pipelineDoc,
-      pipelineOriginalDoc: stageOriginalDoc,
-      req,
-    })
-
-  let stages = await planStages({ mimeType: file.mimetype, originalDoc: pipelineOriginalDoc })
+  // The stages are planned again below when a download changes the MIME type.
+  const stagePlanArgs = {
+    // Request-time stages start from the stored original, so one must be stored.
+    canApplyAtRequest: storage.canStoreOriginal,
+    collectionSlug: collection.slug,
+    documentID,
+    earlierPlan,
+    pipelineDoc,
+    req,
+  }
+  let stages = await planUploadStages({
+    ...stagePlanArgs,
+    mimeType: file.mimetype,
+    pipelineOriginalDoc,
+  })
 
   // `resolveUploadEdits` drops `crop` from a duplicate before this, even with no claimer. A copy
   // made from the source's original keeps every key.
@@ -290,7 +285,11 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     if (download.hasTypeChanged) {
       setIncomingFileFields({ doc: pipelineDoc, file })
       pipelineOriginalDoc = createOriginalDoc({ doc: pipelineDoc })
-      stages = await planStages({ mimeType: file.mimetype, originalDoc: pipelineOriginalDoc })
+      stages = await planUploadStages({
+        ...stagePlanArgs,
+        mimeType: file.mimetype,
+        pipelineOriginalDoc,
+      })
     }
   }
 

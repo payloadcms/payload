@@ -5,7 +5,9 @@ import type { PayloadRequest } from '../../types/index.js'
  * symbol. Lets the official Sharp package reproduce the current main-image and
  * legacy `variants` upload behavior without core exposing a general persisted-
  * variants API. Never exported from `payload` — `payload/internal` only, and
- * never documented for third-party use.
+ * never documented for third-party use. Today only `@payloadcms/transformer-sharp`
+ * sets it. Core does not check which transformer does, so it calls it "the upload
+ * bridge".
  */
 export const uploadTransformerInternal = Symbol.for('payload.uploadTransformerInternal')
 const uploadFilePath = Symbol.for('payload.uploadFilePath')

@@ -11,7 +11,7 @@ import { parseFilename } from '../../parseFilename.js'
 import { generateImageSizeFilename } from '../utils/generateImageSizeFilename.js'
 
 /**
- * The saved entry and the file to store for each size that the Sharp bridge built. A size with
+ * The saved entry and the file to store for each size that the upload bridge built. A size with
  * the same bytes as another planned size shares its file.
  */
 export async function buildVariantOutputs({
