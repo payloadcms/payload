@@ -3,7 +3,7 @@
 import type { TFunction } from '@payloadcms/translations'
 import type { LoginWithUsernameOptions, SanitizedFieldPermissions } from 'payload'
 
-import { email, getFieldPermissions, username } from 'payload/shared'
+import { email, getFieldPermissions, isSparseFieldPermissions, username } from 'payload/shared'
 import React from 'react'
 
 import { EmailField } from '../../fields/Email/index.js'
@@ -46,9 +46,11 @@ export function EmailAndUsernameFields(props: RenderEmailAndUsernameFieldsProps)
   }
 
   const hasEmailFieldOverride =
-    typeof permissions === 'object' && 'email' in permissions && permissions.email
+    isSparseFieldPermissions(permissions) ||
+    (typeof permissions === 'object' && 'email' in permissions && permissions.email)
   const hasUsernameFieldOverride =
-    typeof permissions === 'object' && 'username' in permissions && permissions.username
+    isSparseFieldPermissions(permissions) ||
+    (typeof permissions === 'object' && 'username' in permissions && permissions.username)
 
   const emailPermissions = hasEmailFieldOverride
     ? {

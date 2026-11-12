@@ -5,6 +5,8 @@ import {
   fieldHasSubFields,
   fieldIsHiddenOrDisabled,
   getFieldPermissions,
+  isSparseFieldPermissions,
+  resolveFieldPermissions,
 } from 'payload/shared'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
@@ -93,7 +95,11 @@ export const reduceFieldOptions = ({
             : labelPrefix,
           parentPath: path,
           path: createNestedClientFieldPath(path, field),
-          permissions: fieldPermissions,
+          permissions: isSparseFieldPermissions(
+            fieldPermissions && fieldPermissions !== true ? fieldPermissions.fields : undefined,
+          )
+            ? (fieldPermissions as Exclude<SanitizedFieldPermissions, true>).fields
+            : fieldPermissions,
         }),
       ]
     }
@@ -107,7 +113,7 @@ export const reduceFieldOptions = ({
 
             const namedTabPermissions =
               isNamedTab && fieldPermissions && fieldPermissions !== true
-                ? fieldPermissions[tab.name]
+                ? resolveFieldPermissions(fieldPermissions, tab.name)
                 : undefined
 
             const tabPermissions = isNamedTab
