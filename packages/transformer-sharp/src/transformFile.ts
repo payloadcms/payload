@@ -45,7 +45,8 @@ async function transformMain({
   sharpDependency: SharpDependency
 }): Promise<TransformFileResult> {
   const { collectionUpload, cropSize, originalDimensions } = options
-  const crop = getSavedCrop({ doc })
+  // A full-image selection saves no crop, but a request crop size still extracts from the corner.
+  const crop = getSavedCrop({ doc }) ?? (cropSize ? { ...cropSize, x: 0, y: 0 } : undefined)
   const { constructorOptions, formatOptions, resizeOptions, trimOptions, withMetadata } =
     collectionUpload
 

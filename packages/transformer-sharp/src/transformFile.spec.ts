@@ -139,14 +139,14 @@ describe('createTransformFile', () => {
       cropSize,
       image,
     }: {
-      crop: { height: number; width: number; x: number; y: number }
+      crop?: { height: number; width: number; x: number; y: number }
       cropSize?: { height: number; width: number }
       image: Buffer
     }) => {
       const transformFile = createTransformFile({ sharpDependency: sharp })
 
       const result = await transformFile({
-        doc: { _transforms: { crop } },
+        doc: crop ? { _transforms: { crop } } : {},
         file: new File([image], 'photo.png', { type: 'image/png' }),
         options: {
           collectionUpload: {},
@@ -190,6 +190,17 @@ describe('createTransformFile', () => {
       })
 
       expect((await cropped.metadata()).width).toBe(70)
+    })
+
+    it('should extract the request crop size from the top-left corner when no crop is saved', async () => {
+      // A full-image selection saves no crop, but the request can still send a smaller
+      // `widthInPixels`/`heightInPixels` to extract.
+      const cropped = await cropMain({
+        cropSize: { height: 5, width: 20 },
+        image: await makeImageBuffer({ height: 10, width: 100 }),
+      })
+
+      expect(await cropped.metadata()).toMatchObject({ height: 5, width: 20 })
     })
   })
 
