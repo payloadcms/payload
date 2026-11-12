@@ -38,7 +38,7 @@ const validate = async ({ field, value }: { field: Field; value: unknown }) => {
 describe('required validation with custom validators', () => {
   it.each([
     { field: { type: 'text' }, value: undefined, expected: 'validation:required' },
-    { field: { type: 'select', options: ['one'] }, value: null, expected: 'validation:required' },
+    { field: { type: 'select', options: ['one'] }, value: '', expected: 'validation:required' },
     { field: { type: 'array', fields: [] }, value: [], expected: 'validation:required' },
     { field: { type: 'array', fields: [] }, value: 0, expected: 'validation:required' },
     { field: { type: 'blocks', blocks: [] }, value: 0, expected: 'validation:required' },
@@ -151,7 +151,12 @@ describe('required validation with custom validators', () => {
     const field = collection.fields.find((field) => 'name' in field && field.name === 'email')!
 
     expect(field).toMatchObject({ required: true })
-    await expect(validate({ field, value: '' })).resolves.toBe('validation:required')
+
+    if (!('validate' in field) || !field.validate) {
+      throw new Error('Expected a field validator')
+    }
+
+    expect(await field.validate('' as never, options as never)).toBe('validation:required')
   })
 
   it('should permit a blank native slug during form-state refresh and enforce it on submit', async () => {
@@ -180,18 +185,21 @@ describe('required validation with custom validators', () => {
     await expect(validate({ field, value: '' })).resolves.toBe('validation:required')
   })
 
-  it('should accept a configured empty-string select option with a composed validator', async () => {
-    await expect(
-      validate({
-        field: {
-          name: 'choice',
-          type: 'select',
-          required: true,
-          options: [{ label: 'None', value: '' }],
-          validate: (value, args) => select(value, args),
-        },
-        value: '',
-      }),
-    ).resolves.toBe(true)
-  })
+  it.each([[''], [{ label: 'None', value: '' }]])(
+    'should accept a configured empty-string select option %j with a composed validator',
+    async (option) => {
+      await expect(
+        validate({
+          field: {
+            name: 'choice',
+            type: 'select',
+            required: true,
+            options: [option],
+            validate: (value, args) => select(value, args),
+          },
+          value: '',
+        }),
+      ).resolves.toBe(true)
+    },
+  )
 })

@@ -13,7 +13,11 @@ export const validateRequired: Validate<unknown, unknown, unknown, Field> = (val
   const isEmpty =
     value === undefined ||
     value === null ||
-    (value === '' && options.type !== 'select') ||
+    (value === '' &&
+      (options.type !== 'select' ||
+        !options.options.some(
+          (option) => option === '' || (typeof option !== 'string' && option.value === ''),
+        ))) ||
     ((options.type === 'array' || options.type === 'blocks') && !value) ||
     (options.type !== 'json' &&
       options.type !== 'point' &&
