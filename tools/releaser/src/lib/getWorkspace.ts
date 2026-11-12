@@ -7,6 +7,7 @@ import fse from 'fs-extra'
 import path from 'path'
 import semver from 'semver'
 
+import type { Preid } from './preids.js'
 import type { PublishResult } from './runPublishSequence.js'
 
 import { getCanaryVersion } from './canaryVersion.js'
@@ -42,7 +43,7 @@ type PublishOpts = {
 type BumpVersionOpts = {
   /** Canary date; defaults to now. */
   date?: Date
-  preid?: 'beta' | 'canary'
+  preid?: Preid
 }
 
 export type Workspace = {

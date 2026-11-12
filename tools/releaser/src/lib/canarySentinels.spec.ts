@@ -96,6 +96,15 @@ describe('isCanaryAtHead', () => {
     expect(await isCanaryAtHead({ head, log, registry, sentinelNames })).toBe(false)
     expect(log).toHaveBeenCalledWith(expect.stringContaining('registry down'))
   })
+
+  it('should return false and log when the provenance read throws', async () => {
+    const registry = fakeRegistry({ canaryByName: allNames(version), commitByName: allNames(head) })
+    registry.getProvenanceCommit.mockRejectedValueOnce(new Error('bad attestation JSON'))
+    const log = vi.fn()
+
+    expect(await isCanaryAtHead({ head, log, registry, sentinelNames })).toBe(false)
+    expect(log).toHaveBeenCalledWith(expect.stringContaining('bad attestation JSON'))
+  })
 })
 
 describe('assertCanaryVersionFromHead', () => {

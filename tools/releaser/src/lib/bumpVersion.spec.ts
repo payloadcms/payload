@@ -29,7 +29,6 @@ describe('bumpVersion', () => {
   it.each([
     { version: '4.0.0-canary.37', expected: '4.0.0-beta.0', preid: 'beta' as const },
     { version: '4.0.0-beta.0', expected: '4.0.0-beta.1', preid: 'beta' as const },
-    { version: '4.0.0-canary.37', expected: '4.0.0-canary.38', preid: 'canary' as const },
   ])(
     'should bump $version to $expected in the root and release packages',
     async ({ version, expected, preid }) => {

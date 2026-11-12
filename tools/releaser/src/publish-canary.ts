@@ -6,6 +6,9 @@
  * Usage: pnpm publish-canary [--skip-if-unchanged] [--dry-run]
  *
  * --skip-if-unchanged exits early when the current canary was built from this commit.
+ *
+ * The bump writes every release package.json to disk, also in --dry-run. Discarded on
+ * ephemeral CI; locally revert with `git checkout -- packages package.json`.
  */
 import { spawnSync } from 'child_process'
 import minimist from 'minimist'
