@@ -63,6 +63,7 @@ import { fileURLToPath } from 'url'
 import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
+import { findDocumentLocks } from './findDocumentLocks.js'
 
 const filename = fileURLToPath(import.meta.url)
 
@@ -135,6 +136,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       },
       fieldConstraints: {},
       findDistinct,
+      findDocumentLocks,
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'pg-core',
