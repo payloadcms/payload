@@ -34,4 +34,13 @@ describe('getClientUploadErrorMessage', () => {
 
     await expect(getClientUploadErrorMessage(response, 'fallback')).resolves.toBe('fallback')
   })
+
+  it('should return the fallback when every message is blank', async () => {
+    const response = Response.json(
+      { errors: [{ message: '' }, { message: '  ' }] },
+      { status: 400 },
+    )
+
+    await expect(getClientUploadErrorMessage(response, 'fallback')).resolves.toBe('fallback')
+  })
 })

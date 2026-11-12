@@ -9,7 +9,11 @@ export const getClientUploadErrorMessage = async (
   try {
     const body = (await response.json()) as { errors?: { message?: unknown }[] }
     const messages = Array.isArray(body?.errors)
-      ? body.errors.map((error) => error?.message).filter((message) => typeof message === 'string')
+      ? body.errors
+          .map((error) => error?.message)
+          .filter(
+            (message): message is string => typeof message === 'string' && message.trim() !== '',
+          )
       : []
 
     if (messages.length > 0) {
