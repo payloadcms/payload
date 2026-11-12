@@ -20,6 +20,7 @@ import {
   sanitizeAuthorship,
 } from '../../fields/baseFields/authorship/index.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
+import { sanitizeFieldValidation } from '../../fields/config/sanitizeFieldValidation.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { buildFoldersHierarchy, buildTagsHierarchy } from '../../hierarchy/presets.js'
@@ -427,6 +428,12 @@ export const sanitizeCollection = (
       sanitized.fields,
       getBaseAuthFields(sanitized.auth, sanitized.fields),
     )
+
+    for (const field of sanitized.fields) {
+      if (fieldAffectsData(field) && typeof field.validate === 'function') {
+        sanitizeFieldValidation({ field })
+      }
+    }
   }
 
   if (collection?.admin?.pagination?.limits?.length) {

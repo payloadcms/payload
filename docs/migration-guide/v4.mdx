@@ -20,6 +20,16 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Required fields with custom validation
+
+`required: true` is now enforced independently of a custom field `validate` function. In 3.x, returning `true` from a custom validator could bypass the default required check. In 4.0, missing required values produce a validation error before the custom validator runs.
+
+Audit required fields with custom validators that intentionally accept empty input. If the value is generated on the server, populate it in a field `beforeChange` hook before validation. If empty values are intentionally valid, set `required: false`. Regenerate types and review consumers when changing `required`, because it also affects generated types and JSON Schema.
+
+Custom validators can still replace other default constraints. Compose the [default field validator](../fields/overview#reusing-default-field-validations) when you want to retain those checks. Draft saves, conditional validation, and virtual fields retain their existing validation skips.
+
+Custom rich text adapters can provide `isEmpty({ value })` to define whether a required editor has content independently of a custom field validator. The built-in Lexical adapter implements this. For adapters without `isEmpty`, required fields with custom validation fall back to the editor's default `validate`, which can also enforce its other editor rules.
+
 ### Form-state data utilities are renamed
 
 The shared form-state utilities exported from `payload/shared` now explicitly name their source:

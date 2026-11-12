@@ -256,6 +256,7 @@ type RichTextAdapterBase<
     siblingDoc: JsonObject
   }) => void
   hooks?: RichTextHooks
+  isEmpty?: (args: { value: null | undefined | Value }) => boolean
   /**
    * Return the JSON schema for the field value. The JSON schema is read by
    * `json-schema-to-typescript` which is used to generate types for this richtext field

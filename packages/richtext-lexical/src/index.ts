@@ -1,4 +1,5 @@
 import type { GenericLanguages, GenericTranslationsObject } from '@payloadcms/translations'
+import type { SerializedEditorState } from 'lexical'
 
 import { checkDependencies, deepMergeSimple } from 'payload'
 
@@ -22,6 +23,7 @@ import { featuresInputToEditorConfig } from './utilities/editorConfigFactory.js'
 import { getGenerateImportMap } from './utilities/generateImportMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
 import { getDefaultSanitizedEditorConfig } from './utilities/getDefaultSanitizedEditorConfig.js'
+import { hasText } from './validate/hasText.js'
 import { richTextValidateHOC } from './validate/index.js'
 
 let checkedDependencies = false
@@ -169,6 +171,7 @@ export function lexicalEditor(args?: LexicalEditorArgs): LexicalRichTextAdapterP
       hooks: getLexicalHooks({
         editorConfig: finalSanitizedEditorConfig,
       }),
+      isEmpty: ({ value }: { value: null | SerializedEditorState | undefined }) => !hasText(value),
       jsonSchema: getFieldToJSONSchema({ editorConfig: finalSanitizedEditorConfig }),
       presets: {
         llmInstructions: (presetArgs) =>
