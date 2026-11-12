@@ -414,6 +414,13 @@ export const completeUploadSession = async ({
 }): Promise<{ doc: Record<string, unknown>; session: ClientUploadSession }> => {
   let session = await findOwnedSession({ id, req })
 
+  const { data, draft, options } = dataArg
+    ? { data: dataArg, draft: draftArg, options: optionsArg }
+    : (session.intent ?? {})
+
+  // Before access checks and document reads, so both use the locale of the original save.
+  applySaveOptions({ options, req })
+
   if (session.status === 'completed' && session.documentID) {
     return {
       doc: await findTargetDocument({ id: session.documentID, req, session }),
@@ -423,10 +430,6 @@ export const completeUploadSession = async ({
 
   assertResumable({ session })
   await assertSessionAccess({ req, session })
-
-  const { data, draft, options } = dataArg
-    ? { data: dataArg, draft: draftArg, options: optionsArg }
-    : (session.intent ?? {})
 
   if (!data) {
     throw new APIError('Document data is required to finish this upload.', 400)
@@ -450,8 +453,6 @@ export const completeUploadSession = async ({
     }
 
     const collection = req.payload.collections[session.collectionSlug]!
-
-    applySaveOptions({ options, req })
 
     req.file = await getFileFromUploadInstructions({
       collectionSlug: session.collectionSlug,

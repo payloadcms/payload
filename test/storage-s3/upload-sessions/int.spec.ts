@@ -735,6 +735,35 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
     expect(inEnglish.caption).toBeUndefined()
   })
 
+  test('should check access in the locale of the original save', async ({ restClient }) => {
+    const session = await uploadImageSession({ restClient })
+
+    await restClient.POST(`${sessionsPath}/${session.id}/intent`, {
+      body: JSON.stringify({ data: { caption: 'Hallo' }, options: { locale: 'de' } }),
+    })
+
+    const response = await restClient.POST(`${sessionsPath}/${session.id}/complete`, {
+      headers: { 'x-required-locale': 'de' },
+    })
+
+    expect(response.status).toBe(200)
+  })
+
+  test('should return a retried completion in the locale of the original save', async ({
+    restClient,
+  }) => {
+    const session = await uploadImageSession({ restClient })
+    const body = JSON.stringify({ data: { caption: 'Hallo' }, options: { locale: 'de' } })
+
+    await restClient.POST(`${sessionsPath}/${session.id}/complete`, { body })
+
+    const { doc } = await restClient
+      .POST(`${sessionsPath}/${session.id}/complete`, { body })
+      .then((res) => res.json<{ doc: { caption?: string } }>())
+
+    expect(doc.caption).toBe('Hallo')
+  })
+
   test('should apply the upload edits of the original save to a background-finished upload', async ({
     restClient,
   }) => {
@@ -746,7 +775,7 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
         options: {
           uploadEdits: {
             // Strings, as the Admin sends them in its query string.
-            crop: { height: '25', unit: '%', width: '50', x: '0', y: '0' },
+            crop: { height: '25', unit: '%', width: '50', x: '25', y: '50' },
             heightInPixels: '500',
             widthInPixels: '1000',
           },
@@ -756,10 +785,13 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
 
     const { doc } = await restClient
       .POST(`${sessionsPath}/${session.id}/complete`)
-      .then((res) => res.json<{ doc: { height: number; width: number } }>())
+      .then((res) =>
+        res.json<{ doc: { _transforms?: { crop?: unknown }; height: number; width: number } }>(),
+      )
 
     // A quarter of the height and half the width of the 2000×2000 original.
     expect(doc).toMatchObject({ height: 500, width: 1000 })
+    expect(doc._transforms?.crop).toMatchObject({ height: 500, width: 1000, x: 500, y: 1000 })
   })
 
   test('should offer a cleared intent for saving instead of saving it in the background', async ({
