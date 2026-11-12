@@ -24,19 +24,19 @@ async function tryProbe(file: File, sharpDependency: SharpDependency) {
 }
 
 /**
- * Computes the legacy upload tasks (the main file, optionally cropped, and every
- * configured legacy image size) and hands each to the injected `transform` callback
- * exactly once. Reads the Sharp-owned config from `sharpTransformer({ collections })`
- * at factory-construction time — not from the sanitized collection, which only gets
- * the narrowed projection `init()` writes back.
+ * Creates the Sharp bridge's `transformUpload`. When core calls it, it plans the upload tasks (the
+ * main file, optionally cropped, and every configured image size), runs each one through the
+ * injected `transform` callback exactly once, and reads the size of each result. Reads the
+ * Sharp-owned config from `sharpTransformer({ collections })` at factory-construction time — not
+ * from the sanitized collection, which only gets the narrowed projection `init()` writes back.
  */
-export function createPrepareLegacyUpload({
+export function createTransformUpload({
   collections,
   sharpDependency,
 }: {
   collections: Partial<Record<string, SharpCollectionConfig>>
   sharpDependency: SharpDependency
-}): NonNullable<UploadTransformerInternal['prepareUpload']> {
+}): NonNullable<UploadTransformerInternal['transformUpload']> {
   return async ({ collectionSlug, cropSize, file, req, transform }) => {
     const collectionUpload = collections[collectionSlug] ?? {}
 

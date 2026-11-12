@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import type { SharpCollectionConfig, SharpDependency, SharpUploadTaskOptions } from './types.js'
 
-import { createPrepareLegacyUpload } from './prepareLegacyUpload.js'
+import { createTransformUpload } from './transformUpload.js'
 
 const sharpDependency = (() => ({
   metadata: async () => ({ height: 1000, width: 1000 }),
@@ -16,7 +16,7 @@ const makeReq = ({ focalPoint }: { focalPoint?: boolean }): PayloadRequest =>
     payload: { collections: { media: { config: { upload: { focalPoint } } } } },
   }) as unknown as PayloadRequest
 
-const runPrepareUpload = async ({
+const runTransformUpload = async ({
   collectionFocalPoint,
   sharpConfig,
 }: {
@@ -27,7 +27,7 @@ const runPrepareUpload = async ({
     async (_task: UploadTransformTask) => new File(['x'], 'image.png', { type: 'image/png' }),
   )
 
-  await createPrepareLegacyUpload({ collections: { media: sharpConfig }, sharpDependency })({
+  await createTransformUpload({ collections: { media: sharpConfig }, sharpDependency })({
     collectionSlug: 'media',
     file: new File(['x'], 'image.png', { type: 'image/png' }),
     req: makeReq({ focalPoint: collectionFocalPoint }),
@@ -43,7 +43,7 @@ const runPrepareUpload = async ({
 
 const variants = [{ name: 'card', height: 200, width: 400 }]
 
-describe('createPrepareLegacyUpload', () => {
+describe('createTransformUpload', () => {
   it.each([
     { collectionFocalPoint: false, expected: false, sharpFocalPoint: undefined },
     { collectionFocalPoint: false, expected: true, sharpFocalPoint: true },
@@ -52,7 +52,7 @@ describe('createPrepareLegacyUpload', () => {
     'should let sizes use a saved focal point when Sharp ($sharpFocalPoint) or else the collection ($collectionFocalPoint) enables it',
     async ({ collectionFocalPoint, expected, sharpFocalPoint }) => {
       expect(
-        await runPrepareUpload({
+        await runTransformUpload({
           collectionFocalPoint,
           sharpConfig: { focalPoint: sharpFocalPoint, variants },
         }),

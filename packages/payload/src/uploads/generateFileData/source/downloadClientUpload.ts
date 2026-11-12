@@ -38,7 +38,7 @@ export function needsFullClientUpload({
 
   return (
     isBridgeApplyingSavedKey ||
-    pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.prepareUpload)
+    pipeline.some((transformer) => !getUploadTransformerInternal(transformer)?.transformUpload)
   )
 }
 

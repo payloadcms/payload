@@ -11,7 +11,7 @@ const stage = (handledTransformKeys?: string[], isBridge = false): UploadTransfo
   canTransform: () => (handledTransformKeys ? { canTransform: true, handledTransformKeys } : true),
   mimeTypes: ['text/*'],
   transformFile: vi.fn(),
-  ...(isBridge ? { [uploadTransformerInternal]: { prepareUpload: vi.fn() } } : {}),
+  ...(isBridge ? { [uploadTransformerInternal]: { transformUpload: vi.fn() } } : {}),
 })
 
 const rotate = { rotate: { angle: 90 } }

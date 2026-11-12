@@ -46,7 +46,12 @@ export type UploadTransformerInternal = {
    * collection, falling back to the first bridge when none does.
    */
   handlesCollection?: (args: { collectionSlug: string }) => boolean
-  prepareUpload?: (args: {
+  /**
+   * Transforms a whole upload: decides which files to build (the main file and each stored
+   * size), builds each one through `transform`, and returns them. `transform` runs core's stage
+   * pipeline (`transformUploadFile`) for one file, so other transformers also apply to each output.
+   */
+  transformUpload?: (args: {
     collectionSlug: string
     cropSize?: { height: number; width: number }
     file: File

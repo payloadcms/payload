@@ -571,9 +571,9 @@ describe('generateFileData - _transforms claims', () => {
   })
 
   it('should not download a header-only client upload for a focal point alone', async () => {
-    const prepareUpload = vi.fn()
+    const transformUpload = vi.fn()
     const sharp = stage(claim(['crop', 'focalPoint']), {
-      [uploadTransformerInternal]: { prepareUpload },
+      [uploadTransformerInternal]: { transformUpload },
     })
 
     await run({
@@ -583,7 +583,7 @@ describe('generateFileData - _transforms claims', () => {
     })
 
     expect(fetchFullClientUpload).not.toHaveBeenCalled()
-    expect(prepareUpload).not.toHaveBeenCalled()
+    expect(transformUpload).not.toHaveBeenCalled()
   })
 
   it('should log a canTransform error during rebuild planning and throw a FileUploadError', async () => {

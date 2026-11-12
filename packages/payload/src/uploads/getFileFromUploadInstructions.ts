@@ -190,7 +190,7 @@ export const getFileFromUploadInstructions = async ({
         const bridge = getUploadTransformerInternal(transformer)
 
         return (
-          Boolean(bridge?.prepareUpload) &&
+          Boolean(bridge?.transformUpload) &&
           bridge?.handlesCollection?.({ collectionSlug }) !== false
         )
       },

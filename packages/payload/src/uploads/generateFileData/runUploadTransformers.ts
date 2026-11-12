@@ -70,7 +70,7 @@ export async function runUploadTransformers({
     const bridge = getUploadTransformerInternal(bridgeTransformer)!
     let sizeTaskDoc: Readonly<Document> | undefined
 
-    const results = await bridge.prepareUpload!({
+    const results = await bridge.transformUpload!({
       collectionSlug,
       cropSize,
       file: originalFile,
