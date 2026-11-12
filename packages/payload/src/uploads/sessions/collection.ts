@@ -58,6 +58,7 @@ export const getUploadSessionsCollection = (): CollectionConfig => ({
     { name: 'expiresAt', type: 'date', index: true, required: true },
     { name: 'lastActivityAt', type: 'date', required: true },
     { name: 'finalizingUntil', type: 'date' },
+    { name: 'fileReferencesValidUntil', type: 'date' },
     { name: 'storageCompletedAt', type: 'date' },
     { name: 'completedAt', type: 'date' },
     { name: 'cancelledAt', type: 'date' },
