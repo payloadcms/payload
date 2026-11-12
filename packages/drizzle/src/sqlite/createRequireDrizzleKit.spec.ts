@@ -55,10 +55,10 @@ function installTooling({ dialect, directory }: { dialect: string; directory: st
   mkdirSync(packageDirectory, { recursive: true })
   writeFileSync(
     path.join(packageDirectory, 'package.json'),
-    JSON.stringify({ exports: { './api': './api.cjs' }, name: 'drizzle-kit' }),
+    JSON.stringify({ exports: { [`./payload/${dialect}`]: './api.cjs' }, name: 'drizzle-kit' }),
   )
   writeFileSync(
     path.join(packageDirectory, 'api.cjs'),
-    `exports.${dialect === 'sqlite' ? 'generateSQLiteDrizzleJson' : 'generateDrizzleJson'} = () => ({ dialect: ${JSON.stringify(dialect)}, source: ${JSON.stringify(directory)} })`,
+    `exports.generateDrizzleJson = () => ({ dialect: ${JSON.stringify(dialect)}, source: ${JSON.stringify(directory)} })`,
   )
 }

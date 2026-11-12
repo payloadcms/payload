@@ -77,7 +77,7 @@ const { createClient } = require('@libsql/client')
 const { drizzle } = require('drizzle-orm/libsql')
 const client = createClient({ url: 'file::memory:' })
 try {
-  const pushed = await tooling.pushSchema(schema, drizzle(client))
+  const pushed = await tooling.pushSchema(schema, drizzle({ client }))
   await pushed.apply()
   await client.execute('INSERT INTO probe (id) VALUES (42)')
   const result = await client.execute('SELECT id FROM probe')

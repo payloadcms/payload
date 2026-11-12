@@ -145,13 +145,9 @@ export const buildDrizzleTable = ({
     }
 
     if (typeof column.default !== 'undefined') {
-      let sanitizedDefault = column.default
-
-      if (column.type === 'geometry' && Array.isArray(column.default)) {
-        sanitizedDefault = `SRID=4326;POINT(${column.default[0]} ${column.default[1]})`
-      }
-
-      columns[key].default(sanitizedDefault)
+      // The native `geometry` column marshals its `[x, y]` tuple default itself, so pass the
+      // raw value through rather than pre-formatting an EWKT string as the old customType needed.
+      columns[key].default(column.default)
     }
 
     if (column.type === 'geometry') {

@@ -45,22 +45,23 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
   const { extensions = {}, tablesFilter } = adapter as BasePostgresAdapter
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
-  const { apply, hasDataLoss, warnings } = await pushSchema(
+  const { apply, hints } = await pushSchema(
     adapter.schema,
     adapter.drizzle,
-    adapter.schemaName ? [adapter.schemaName] : undefined,
-    tablesFilter,
-    // Drizzle extensionsFilter supports only postgis for now
-    // https://github.com/drizzle-team/drizzle-orm/blob/83daf2d5cf023112de878bc2249ee2c41a2a5b1b/drizzle-kit/src/cli/validations/cli.ts#L26
-    extensions.postgis ? ['postgis'] : undefined,
+    {
+      // Drizzle extensionsFilter supports only postgis for now
+      // https://github.com/drizzle-team/drizzle-orm/blob/83daf2d5cf023112de878bc2249ee2c41a2a5b1b/drizzle-kit/src/cli/validations/cli.ts#L26
+      extensions: extensions.postgis ? ['postgis'] : undefined,
+      schemas: adapter.schemaName ? [adapter.schemaName] : undefined,
+      tables: tablesFilter,
+    },
+    adapter.schemaName ? { schema: adapter.schemaName } : undefined,
   )
+
+  const warnings = hints.map(({ hint }) => hint)
 
   if (warnings.length) {
     let message = `Warnings detected during schema push: \n\n${warnings.join('\n')}\n\n`
-
-    if (hasDataLoss) {
-      message += `DATA LOSS WARNING: Possible data loss detected if schema is pushed.\n\n`
-    }
 
     message += `Accept warnings and push schema to database?`
 
@@ -97,7 +98,7 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
     raw: `SELECT * FROM ${migrationsTable} WHERE batch = '-1'`,
   })
 
-  const devPush = result.rows
+  const devPush = (result as { rows: unknown[] }).rows
 
   if (!devPush.length) {
     // Use drizzle for insert so $defaultFn's are called

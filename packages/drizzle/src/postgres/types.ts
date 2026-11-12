@@ -1,12 +1,4 @@
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
-import type {
-  ColumnBaseConfig,
-  ColumnDataType,
-  DrizzleConfig,
-  Relation,
-  Relations,
-  SQL,
-} from 'drizzle-orm'
+import type { AnyRelations, DrizzleConfig, SQL, TableRelationalConfig } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type {
   ForeignKeyBuilder,
@@ -29,6 +21,7 @@ import type {
   BuildQueryJoinAliases,
   DrizzleAdapter,
   DrizzleOperatorHandler,
+  DrizzleSnapshotJSON,
   TransactionPg,
 } from '../types.js'
 
@@ -47,10 +40,7 @@ export type RelationMap = Map<
   }
 >
 
-export type GenericColumn = PgColumn<
-  ColumnBaseConfig<ColumnDataType, string>,
-  Record<string, unknown>
->
+export type GenericColumn = PgColumn
 
 export type GenericColumns = {
   [x: string]: GenericColumn
@@ -59,15 +49,16 @@ export type GenericColumns = {
 export type GenericTable = PgTableWithColumns<{
   columns: GenericColumns
   dialect: string
+  isAlias: boolean
   name: string
   schema: string
 }>
 
 export type GenericEnum = PgEnum<[string, ...string[]]>
 
-export type GenericRelation = Relations<string, Record<string, Relation<string>>>
+export type GenericRelation = TableRelationalConfig
 
-export type PostgresDB = NodePgDatabase<Record<string, unknown>>
+export type PostgresDB = NodePgDatabase<AnyRelations>
 
 export type CountDistinct = (args: {
   column?: PgColumn<any> | SQLiteColumn<any>
