@@ -284,6 +284,7 @@ export const useFormSubmission = ({
           },
         )
 
+        let didRefreshFormState = false
         let res
         let rejectedFields: FormState | undefined
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -326,11 +327,15 @@ export const useFormSubmission = ({
             }
           }
 
-          const { data, fields, isValid } = await validateForm({
+          const validation = await validateForm({
             isCurrent: requestContext.isCurrent,
             isLocalSubmission: Boolean(onSubmit && !hasFormSubmitAction),
             skipValidation,
           })
+
+          didRefreshFormState = validation.didRefreshFormState
+
+          const { data, fields, isValid } = validation
 
           if (!requestContext.isCurrent()) {
             return
@@ -415,15 +420,11 @@ export const useFormSubmission = ({
         } finally {
           const isSuccessfulResponse = res?.status < 400
 
-          if (
-            requestContext.isCurrent() &&
-            hasFormSubmitAction &&
-            (!isSuccessfulResponse || typeof handleResponse !== 'function')
-          ) {
+          if (requestContext.isCurrent() && (hasFormSubmitAction || !didRefreshFormState)) {
             try {
               // Refresh before applying save errors so the refresh cannot erase them.
               await refreshFormState(
-                isSuccessfulResponse
+                isSuccessfulResponse && typeof handleResponse !== 'function'
                   ? {
                       type: 'afterSave',
                       acceptValues,
@@ -478,6 +479,10 @@ export const useFormSubmission = ({
         }
 
         if (typeof handleResponse === 'function') {
+          if (!requestContext.isCurrent()) {
+            return
+          }
+
           preservePromiseToast = true
 
           await handleResponse(res, successToast, errorToast)

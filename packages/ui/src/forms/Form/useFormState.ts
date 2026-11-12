@@ -52,6 +52,8 @@ type ValidateArgs = {
 type FormValidationResult = {
   /** Values derived from the validated fields, ready for the submission handler. */
   data: Data
+  /** Whether server validation already rebuilt field state for this submission. */
+  didRefreshFormState: boolean
   /** The fields already applied to the form, including errors and server-rendered components. */
   fields: FormState
   /** False when server or enabled client validation rejects a field. */
@@ -618,10 +620,13 @@ export const useFormState = ({
 
   const validateForm = useCallback<UseFormStateResult['validateForm']>(
     async ({ isCurrent = () => true, isLocalSubmission = false, skipValidation = false } = {}) => {
+      let didRefreshFormState = false
       let isValid = true
 
       if (!skipValidation && isLocalSubmission) {
         const fields = await refreshFormState({ type: 'validate', isCurrent })
+
+        didRefreshFormState = Boolean(fields)
         isValid = !fields || Object.values(fields).every((field) => field.valid !== false)
       }
 
@@ -636,7 +641,7 @@ export const useFormState = ({
         setIsValid(isValid)
       }
 
-      return { data, fields, isValid }
+      return { data, didRefreshFormState, fields, isValid }
     },
     [contextRef, refreshFormState, validateFields],
   )
