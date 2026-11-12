@@ -51,6 +51,45 @@ describe('validateTransformers', () => {
     expect(() => validateTransformers({ transformers })).toThrow(/"a".*"b"|"b".*"a"/is)
   })
 
+  it.each([
+    {
+      name: 'redefines a built-in key',
+      definition: { key: 'crop', schema: { type: 'object' } },
+      error: /"crop".*built-in/i,
+    },
+    {
+      name: 'has an empty key',
+      definition: { key: '', schema: { type: 'object' } },
+      error: /key/i,
+    },
+    {
+      name: 'has a schema that is not a JSON Schema',
+      definition: { key: 'watermark', schema: { type: 'not-a-type' } },
+      error: /"watermark".*schema/i,
+    },
+    {
+      name: 'has a validate that is not a function',
+      definition: { key: 'watermark', schema: { type: 'object' }, validate: 'no' },
+      error: /"watermark".*validate/i,
+    },
+  ])('should throw when a transform definition $name', ({ definition, error }) => {
+    const transformer = makeTransformer({
+      transformDefinitions: [definition],
+    } as unknown as Partial<UploadTransformer>)
+
+    expect(() => validateTransformers({ transformers: [transformer] })).toThrow(error)
+  })
+
+  it('should throw when two transformers define the same key', () => {
+    const definition = { key: 'watermark', schema: { type: 'object' } as const }
+    const transformers = [
+      makeTransformer({ slug: 'a', transformDefinitions: [definition] }),
+      makeTransformer({ slug: 'b', transformDefinitions: [definition] }),
+    ]
+
+    expect(() => validateTransformers({ transformers })).toThrow(/"watermark".*"a".*"b"/is)
+  })
+
   it('should report multiple distinct problems across transformers in a single error', () => {
     const transformers = [makeTransformer({ mimeTypes: [] }), makeTransformer({ slug: '' })]
 

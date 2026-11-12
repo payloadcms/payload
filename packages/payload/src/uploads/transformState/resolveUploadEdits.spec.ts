@@ -49,7 +49,11 @@ const resolve = ({
     focalPointEnabled: true,
     operation: 'update',
     originalDoc,
-    req: { file, query: {} } as unknown as PayloadRequest,
+    req: {
+      file,
+      payload: { config: { upload: { transformers: [] } } },
+      query: {},
+    } as unknown as PayloadRequest,
   })
 
 /** A document whose focal point is saved in `_transforms`, with the rounded `focalX`. */

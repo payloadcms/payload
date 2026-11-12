@@ -74,9 +74,10 @@ export async function transformUploadFile({
       previous: transformsBeforeStage,
       transformer,
     })
-    await assertValidTransformsChange({
+    assertValidTransformsChange({
       next: doc._transforms,
       previous: transformsBeforeStage,
+      transformers: req.payload.config.upload?.transformers ?? [],
       transformerSlug: transformer.slug,
     })
 
@@ -150,25 +151,28 @@ function assertNoChangeToOtherClaims({
  * the stages. So a value that a stage writes is checked here. Values the stage did not change were
  * already checked, and an error for them must not name the stage.
  */
-async function assertValidTransformsChange({
+function assertValidTransformsChange({
   next,
   previous,
+  transformers,
   transformerSlug,
 }: {
   next: unknown
   previous: unknown
+  /** Every configured transformer, for the declared keys in the schema. */
+  transformers: readonly UploadTransformer[]
   transformerSlug: string
-}): Promise<void> {
+}): void {
   if (isDeepStrictEqual(next, previous)) {
     return
   }
 
   const error =
-    getNonJSONValueError({ value: next }) ?? (await getTransformStateError({ value: next }))
+    getNonJSONValueError({ value: next }) ?? getTransformStateError({ transformers, value: next })
 
   if (error) {
     throw new TransformerContractError(
-      `The "${transformerSlug}" transformer wrote an invalid _transforms value. ${error}`,
+      `The "${transformerSlug}" transformer wrote an invalid _transforms value. ${error.message}`,
     )
   }
 }

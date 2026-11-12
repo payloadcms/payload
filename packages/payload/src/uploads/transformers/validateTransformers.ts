@@ -1,4 +1,10 @@
+import type { core } from 'zod'
+
+import { fromJSONSchema } from 'zod'
+
 import type { UploadTransformer } from './types.js'
+
+import { builtInTransformKeys } from '../transformState/transformStateSchema.js'
 
 const MIME_TOKEN_PATTERN = /^[\w!#$&^.+-]+$/
 
@@ -28,7 +34,8 @@ function isValidMimeTypePattern(pattern: unknown): boolean {
 
 /**
  * Validates `upload.transformers` at startup: unique, non-empty slugs; at least one
- * well-formed MIME pattern per transformer; and every declared capability is a function.
+ * well-formed MIME pattern per transformer; every declared capability is a function; and every
+ * transform definition has a new, unique key, a usable JSON Schema and a function `validate`.
  * Called once for the authored list and again after every transformer `init()` runs,
  * since `init()` may return a mutated transformers list.
  */
@@ -39,6 +46,7 @@ export function validateTransformers({
 }): void {
   const errors: string[] = []
   const slugCounts = new Map<string, number>()
+  const definitionOwners = new Map<string, string[]>()
 
   transformers.forEach((transformer, index) => {
     const label = `upload.transformers[${index}]`
@@ -72,7 +80,19 @@ export function validateTransformers({
         errors.push(`Transformer ${identifier}'s \`${capability}\` must be a function.`)
       }
     }
+
+    errors.push(
+      ...getDefinitionErrors({ definitionOwners, identifier, transformer: transformer ?? {} }),
+    )
   })
+
+  for (const [key, owners] of definitionOwners) {
+    if (owners.length > 1) {
+      errors.push(
+        `The _transforms key "${key}" is defined by more than one transformer: ${owners.join(', ')}. Only one transformer can define a key.`,
+      )
+    }
+  }
 
   for (const [slug, count] of slugCounts) {
     if (count > 1) {
@@ -85,4 +105,76 @@ export function validateTransformers({
   if (errors.length > 0) {
     throw new Error(`Invalid \`upload.transformers\` configuration:\n${errors.join('\n')}`)
   }
+}
+
+/** Checks one transformer's `transformDefinitions`, and records each key's owner. */
+function getDefinitionErrors({
+  definitionOwners,
+  identifier,
+  transformer,
+}: {
+  /** Each defined key and the transformers that define it, to find duplicates. */
+  definitionOwners: Map<string, string[]>
+  identifier: string
+  transformer: Partial<UploadTransformer>
+}): string[] {
+  const { transformDefinitions } = transformer
+
+  if (transformDefinitions === undefined) {
+    return []
+  }
+
+  if (!Array.isArray(transformDefinitions)) {
+    return [`Transformer ${identifier}'s \`transformDefinitions\` must be an array.`]
+  }
+
+  const errors: string[] = []
+
+  for (const definition of transformDefinitions) {
+    const key = definition?.key
+
+    if (typeof key !== 'string' || key.trim().length === 0) {
+      errors.push(`Transformer ${identifier} has a transform definition without a \`key\`.`)
+      continue
+    }
+
+    if (builtInTransformKeys.includes(key)) {
+      errors.push(
+        `Transformer ${identifier} defines "${key}", which is a built-in _transforms key. Choose another key.`,
+      )
+    }
+
+    definitionOwners.set(key, [...(definitionOwners.get(key) ?? []), identifier])
+
+    const schemaError = getSchemaError({ schema: definition.schema })
+
+    if (schemaError) {
+      errors.push(
+        `Transformer ${identifier}'s definition of "${key}" has an invalid schema: ${schemaError}`,
+      )
+    }
+
+    if (definition.validate !== undefined && typeof definition.validate !== 'function') {
+      errors.push(
+        `Transformer ${identifier}'s definition of "${key}" has a \`validate\` that is not a function.`,
+      )
+    }
+  }
+
+  return errors
+}
+
+/** Why a JSON Schema cannot be used to check values, or `undefined` when it can. */
+function getSchemaError({ schema }: { schema: unknown }): string | undefined {
+  if (!schema || typeof schema !== 'object' || Array.isArray(schema)) {
+    return 'it must be a JSON Schema object'
+  }
+
+  try {
+    fromJSONSchema(schema as core.JSONSchema.JSONSchema)
+  } catch (err) {
+    return err instanceof Error ? err.message : 'it cannot be read'
+  }
+
+  return undefined
 }

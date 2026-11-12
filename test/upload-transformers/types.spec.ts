@@ -11,6 +11,8 @@ import type { generatePayloadFileURL as generatePayloadFileURLFromShared } from 
 import { generatePayloadFileURL } from 'payload'
 import { describe, expect, test } from 'tstyche'
 
+import type { UploadTransforms } from './payload-types.js'
+
 describe('upload transformer contracts', () => {
   test('should require a file when a transformFile result is complete', () => {
     expect<{ status: 'complete' }>().type.not.toBeAssignableTo<TransformFileResult>()
@@ -38,5 +40,11 @@ describe('upload transformer contracts', () => {
     ) => ReturnType<SharpDependency>
 
     expect<ExistingSharpWrapper>().type.toBeAssignableTo<SharpDependency>()
+  })
+
+  test('should add a key from transformDefinitions to the generated UploadTransforms type', () => {
+    expect<NonNullable<UploadTransforms>['watermark']>().type.toBe<
+      { opacity?: number; text: string } | undefined
+    >()
   })
 })

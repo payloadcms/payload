@@ -81,6 +81,13 @@ export type UploadTransforms = {
   rotate?: {
     angle: number;
   };
+  /**
+   * Text drawn over the file.
+   */
+  watermark?: {
+    opacity?: number;
+    text: string;
+  };
   [k: string]: unknown;
 } | null;
 /**

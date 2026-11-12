@@ -47,6 +47,7 @@ import {
   setUploadFilePath,
 } from './transformers/uploadTransformerBridge.js'
 import { isFullCrop } from './transformState/cropUnits.js'
+import { getChangedTransformKeys } from './transformState/getChangedTransformKeys.js'
 import {
   assertTransformKeysCovered,
   canBuildAtRequest,
@@ -57,6 +58,7 @@ import {
 } from './transformState/planUpload.js'
 import { resolveUploadEdits, withSavedEdits } from './transformState/resolveUploadEdits.js'
 import { isClaimRequired, isFocalPointKey } from './transformState/transformKeyClaims.js'
+import { getTransformDefinitionError } from './transformState/validateTransformState.js'
 import { validateUploadURL } from './validateUploadURL.js'
 type Args<T> = {
   collection: Collection
@@ -191,10 +193,27 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
 
     return hasTransformers ? deepCopyObject(doc) : { ...doc }
   }
+  const pipelineDoc = createPipelineDoc()
+  // `validate` gets the document as it was before the stages, frozen, as transformers get it.
+  const pipelineSnapshot = hasTransformValidators({ req })
+    ? deepFreeze(deepCopyObject(pipelineDoc))
+    : undefined
+
+  // A supplied `_transforms` replaces the stored value, so each declared key in it is checked,
+  // changed or not. An update without `_transforms` keeps the stored value and checks nothing.
+  if (pipelineSnapshot && (data as Document | undefined)?._transforms !== undefined) {
+    await assertDeclaredTransformsValid({
+      collectionSlug: collection.config.slug,
+      doc: pipelineDoc,
+      originalDoc: pipelineSnapshot,
+      req,
+    })
+  }
+
   const { transforms, ...result } = await processUpload({
     ...args,
     hasTransformers,
-    pipelineDoc: createPipelineDoc(),
+    pipelineDoc,
     resolveEditsForFile: edits.isWaitingForFile
       ? async (file) => {
           edits = await resolveUploadEdits({ ...editArgs, file })
@@ -207,6 +226,22 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
   if (edits.isWaitingForFile) {
     // No file was read, so the crop cannot be checked. This throws its validation error.
     edits = await resolveUploadEdits(editArgs)
+  }
+
+  // A stage can change a declared key, so that key is checked again on the final value. Files are
+  // written later in the operation, so this still runs before any storage work.
+  const keysChangedByStages = pipelineSnapshot
+    ? getChangedTransformKeys({ next: transforms, previous: pipelineSnapshot._transforms })
+    : []
+
+  if (pipelineSnapshot && keysChangedByStages.length > 0) {
+    await assertDeclaredTransformsValid({
+      collectionSlug: collection.config.slug,
+      doc: { ...pipelineDoc, _transforms: transforms },
+      keys: keysChangedByStages,
+      originalDoc: pipelineSnapshot,
+      req,
+    })
   }
 
   // A stage can change the focal point, so focalX and focalY follow the final value, rounded as
@@ -1213,8 +1248,44 @@ async function downloadClientUpload({
   return { file: checkedFile, hasTypeChanged: checkedFile.mimetype !== probedFile.mimetype }
 }
 
+/** Runs the `validate` of the declared keys in `doc._transforms`, and throws for the first error. */
+async function assertDeclaredTransformsValid({
+  collectionSlug,
+  doc,
+  keys,
+  originalDoc,
+  req,
+}: {
+  collectionSlug: string
+  doc: Document
+  keys?: string[]
+  originalDoc: Readonly<Document>
+  req: PayloadRequest
+}): Promise<void> {
+  const error = await getTransformDefinitionError({
+    collectionSlug,
+    doc,
+    keys,
+    originalDoc,
+    req,
+    transforms: doc._transforms,
+  })
+
+  if (error) {
+    throw new ValidationError({ collection: collectionSlug, errors: [error], req }, req.t)
+  }
+}
+
 const hasUploadTransformers = ({ req }: { req: PayloadRequest }): boolean =>
   Boolean(req.payload.config.upload?.transformers?.length)
+
+/** Whether a configured transformer declares a `_transforms` key with a `validate`. */
+const hasTransformValidators = ({ req }: { req: PayloadRequest }): boolean =>
+  Boolean(
+    req.payload.config.upload?.transformers?.some(({ transformDefinitions }) =>
+      transformDefinitions?.some(({ validate }) => validate),
+    ),
+  )
 
 /** Puts the incoming file's name, size and MIME type into the transformer `doc`. */
 function setIncomingFileFields({

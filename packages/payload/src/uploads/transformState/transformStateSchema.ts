@@ -1,5 +1,7 @@
 import type { JSONSchema4 } from 'json-schema'
 
+import type { UploadTransformer } from '../transformers/types.js'
+
 const nonNegativeInteger: JSONSchema4 = { type: 'integer', minimum: 0 }
 const positiveInteger: JSONSchema4 = { type: 'integer', minimum: 1 }
 const percentage: JSONSchema4 = { type: 'number', maximum: 100, minimum: 0 }
@@ -76,6 +78,34 @@ export const transformStateObjectSchema: JSONSchema4 = {
   },
 }
 
-export const transformStateSchema: JSONSchema4 = {
-  anyOf: [transformStateObjectSchema, { type: 'null' }],
+/** The `_transforms` keys that Payload defines. A transformer cannot define them again. */
+export const builtInTransformKeys: readonly string[] = Object.keys(
+  transformStateObjectSchema.properties!,
+)
+
+/** The `_transforms` object schema: the built-in shapes plus every key a transformer declares. */
+export function getTransformStateObjectSchema({
+  transformers,
+}: {
+  transformers: readonly UploadTransformer[]
+}): JSONSchema4 {
+  const declaredProperties = Object.fromEntries(
+    transformers.flatMap(({ transformDefinitions }) =>
+      (transformDefinitions ?? []).map(({ key, schema }) => [key, schema]),
+    ),
+  )
+
+  return {
+    ...transformStateObjectSchema,
+    properties: { ...transformStateObjectSchema.properties, ...declaredProperties },
+  }
+}
+
+/** The `_transforms` field schema, which also allows `null`. */
+export function getTransformStateSchema({
+  transformers,
+}: {
+  transformers: readonly UploadTransformer[]
+}): JSONSchema4 {
+  return { anyOf: [getTransformStateObjectSchema({ transformers }), { type: 'null' }] }
 }

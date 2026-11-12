@@ -7,8 +7,15 @@ import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { StoredFileList } from './types.js'
 
 import { APIError } from '../../errors/APIError.js'
+import { ValidationError } from '../../errors/ValidationError.js'
+import { deepCopyObject } from '../../utilities/deepCopyObject.js'
+import { deepFreeze } from '../../utilities/deepFreeze.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
+import {
+  getTransformDefinitionError,
+  getTransformStateError,
+} from '../transformState/validateTransformState.js'
 import { archiveOutgoingLocalFiles, replaceStoredFileReferences } from './archive.js'
 import { removeUnreferencedStagedObjects, scheduleUnreferencedFileCleanup } from './cleanup.js'
 import { runFileOperationPlan, shareFileOperationScope } from './fileOperationManager.js'
@@ -50,6 +57,8 @@ export const isolateRestoreRequest = ({ req }: { req: PayloadRequest }): Payload
  * request time keeps that file request-time, and never gets new stored files.
  */
 export const runFileRestore = async <T>(args: FileRestoreArgs<T>): Promise<T> => {
+  await assertRestoredTransformsValid(args)
+
   const entries = [args.selected, ...Object.values(args.selected.variants ?? {})]
   return entries.some((entry) => isRequestTimeFile({ entry: entry as JsonObject }))
     ? runRequestTimeFileRestore({ ...args, runStoredRestore: runStoredFileRestore })
@@ -196,4 +205,37 @@ export const runStoredFileRestore = async <T>({
       return result
     },
   })
+}
+
+/**
+ * A restore writes the version's `_transforms` again, so it must pass the current schema and the
+ * `validate` of each declared key, as an update that supplies it would. A rule can change after the
+ * version was saved. This runs before any file work, so a failed check changes nothing.
+ */
+async function assertRestoredTransformsValid({
+  collection,
+  req,
+  selected,
+}: Pick<FileRestoreArgs<unknown>, 'collection' | 'req' | 'selected'>): Promise<void> {
+  if (selected._transforms === null || selected._transforms === undefined) {
+    return
+  }
+
+  const snapshot = deepFreeze(deepCopyObject(selected))
+  const error =
+    getTransformStateError({
+      transformers: req.payload.config.upload?.transformers ?? [],
+      value: selected._transforms,
+    }) ??
+    (await getTransformDefinitionError({
+      collectionSlug: collection.slug,
+      doc: selected,
+      originalDoc: snapshot,
+      req,
+      transforms: selected._transforms,
+    }))
+
+  if (error) {
+    throw new ValidationError({ collection: collection.slug, errors: [error], req }, req.t)
+  }
 }

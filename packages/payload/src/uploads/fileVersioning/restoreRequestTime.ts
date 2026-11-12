@@ -47,13 +47,17 @@ export async function runRequestTimeFileRestore<T>({
   }
 
   const transforms = selected._transforms
-  const transformError = await getTransformStateError({ original, value: transforms })
+  const transformError = getTransformStateError({
+    original,
+    transformers: req.payload.config.upload?.transformers ?? [],
+    value: transforms,
+  })
 
   if (transformError) {
     throw new ValidationError(
       {
         collection: collection.slug,
-        errors: [{ message: transformError, path: '_transforms' }],
+        errors: [transformError],
         req,
       },
       req.t,

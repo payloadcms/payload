@@ -86,7 +86,10 @@ test.suite('File transform state', { config: './config.ts' }, () => {
     ).rejects.toMatchObject({
       data: {
         errors: [
-          expect.objectContaining({ message: expect.stringContaining(key), path: '_transforms' }),
+          expect.objectContaining({
+            message: expect.stringContaining(key),
+            path: `_transforms.${key.split('.')[0]}`,
+          }),
         ],
       },
     })

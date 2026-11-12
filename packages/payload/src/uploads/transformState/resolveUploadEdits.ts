@@ -3,13 +3,14 @@ import { isDeepStrictEqual } from 'node:util'
 import type { Document, PayloadRequest } from '../../types/index.js'
 import type { FileData, FocalPoint, UploadEdits } from '../types.js'
 import type { PixelCrop } from './cropUnits.js'
+import type { TransformStateError } from './validateTransformState.js'
 
 import { ValidationError } from '../../errors/ValidationError.js'
 import { isNumber } from '../../utilities/isNumber.js'
 import { getImageSize } from '../getImageSize.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { cropToPercent, cropToPixels, isFullCrop } from './cropUnits.js'
-import { getTransformStateError } from './validateTransformState.js'
+import { getTransformStateError, getTransformStatePath } from './validateTransformState.js'
 
 type TransformState = {
   [key: string]: unknown
@@ -103,7 +104,7 @@ export async function resolveUploadEdits({
     throw new ValidationError(
       {
         collection: collectionSlug,
-        errors: [{ message: nonJSONValueError, path: '_transforms' }],
+        errors: [nonJSONValueError],
         req,
       },
       req.t,
@@ -126,16 +127,20 @@ export async function resolveUploadEdits({
   }
 
   if (isSubmitted) {
-    const message =
+    const error =
       submitted?.crop && !original
-        ? 'crop: needs an image with known dimensions'
-        : await getTransformStateError({ original, value: submitted })
+        ? {
+            message: 'crop: needs an image with known dimensions',
+            path: getTransformStatePath('crop'),
+          }
+        : getTransformStateError({
+            original,
+            transformers: req.payload.config.upload?.transformers ?? [],
+            value: submitted,
+          })
 
-    if (message) {
-      throw new ValidationError(
-        { collection: collectionSlug, errors: [{ message, path: '_transforms' }], req },
-        req.t,
-      )
+    if (error) {
+      throw new ValidationError({ collection: collectionSlug, errors: [error], req }, req.t)
     }
   }
 
@@ -474,15 +479,19 @@ export function getNonJSONValueError({
 }: {
   path?: string[]
   value: unknown
-}): string | undefined {
+}): TransformStateError | undefined {
   const name = path.join('.')
+  const toError = (message: string): TransformStateError => ({
+    message,
+    path: getTransformStatePath(path[0]),
+  })
 
   if (value === null || typeof value === 'string' || typeof value === 'boolean') {
     return undefined
   }
 
   if (typeof value === 'number') {
-    return Number.isFinite(value) ? undefined : `${name}: must be a finite number`
+    return Number.isFinite(value) ? undefined : toError(`${name}: must be a finite number`)
   }
 
   if (Array.isArray(value)) {
@@ -517,5 +526,5 @@ export function getNonJSONValueError({
     return undefined
   }
 
-  return `${name || '_transforms'}: must be a JSON value`
+  return toError(`${name || '_transforms'}: must be a JSON value`)
 }
