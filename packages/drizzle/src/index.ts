@@ -1,3 +1,5 @@
+export { buildBranchingMigration } from './branching/migrations/buildBranchingMigration.js'
+export { migrateSQLBranching } from './branching/migrations/migrateBranching.js'
 export { count } from './count.js'
 export { countGlobalVersions } from './countGlobalVersions.js'
 export { countVersions } from './countVersions.js'
@@ -99,5 +101,6 @@ export { createSchemaGenerator } from './utilities/createSchemaGenerator.js'
 export { executeSchemaHooks } from './utilities/executeSchemaHooks.js'
 export { extendDrizzleTable } from './utilities/extendDrizzleTable.js'
 export { hasLocalesTable } from './utilities/hasLocalesTable.js'
+
 export { pushDevSchema } from './utilities/pushDevSchema.js'
 export { validateExistingBlockIsIdentical } from './utilities/validateExistingBlockIsIdentical.js'

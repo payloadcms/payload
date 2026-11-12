@@ -8,6 +8,7 @@ import prompts from 'prompts'
 
 import type { DrizzleAdapter } from '../types.js'
 
+import { requiresBranchingMigration } from '../branching/migrations/buildBranchingMigration.js'
 import { getMigrationTemplate } from './getMigrationTemplate.js'
 
 export const buildCreateMigration = ({
@@ -96,6 +97,15 @@ export const buildCreateMigration = ({
         if (upSnapshot && drizzleJsonBefore.version < drizzleJsonAfter.version) {
           drizzleJsonBefore = upSnapshot(drizzleJsonBefore)
         }
+      }
+
+      if (
+        payload.config.branching?.enabled &&
+        requiresBranchingMigration({ after: drizzleJsonAfter, before: drizzleJsonBefore })
+      ) {
+        throw new Error(
+          `Preserving existing SQL content when enabling branching requires the predefined migration. Run payload migrate:create enable-branching --file ${this.packageName}/branching.`,
+        )
       }
 
       payload.logger.info('Starting migration: generating UP statements...')
