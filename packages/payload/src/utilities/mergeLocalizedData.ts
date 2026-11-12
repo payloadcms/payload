@@ -133,10 +133,7 @@ export function mergeLocalizedData({
                   (newItem?.id && Array.isArray(existingValue)
                     ? existingValue.find(
                         (row) =>
-                          row &&
-                          typeof row === 'object' &&
-                          'id' in row &&
-                          row.id === newItem.id,
+                          row && typeof row === 'object' && 'id' in row && row.id === newItem.id,
                       )
                     : undefined) || {}
 
