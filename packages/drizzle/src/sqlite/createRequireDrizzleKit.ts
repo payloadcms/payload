@@ -23,7 +23,9 @@ export const createRequireDrizzleKit =
 
     return {
       generateDrizzleJson,
-      generateMigration,
+      generateMigration: generateMigration as unknown as Awaited<
+        ReturnType<RequireDrizzleKit>
+      >['generateMigration'],
       // drizzle-kit v1's SQLite push takes a raw `SQLiteClient` ({ query, run, batch }) rather
       // than the drizzle instance (and has no entities filter). We adapt the drizzle instance
       // into that shape via its driver-agnostic raw-SQL methods so this works for libsql and D1.
