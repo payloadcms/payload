@@ -358,7 +358,7 @@ const getClientData = ({
 /**
  * Whether the request's `uploadEdits` query param carries a crop or resize edit - reads the raw
  * `req.query.uploadEdits`, since a full parse (with its `data`/`originalDoc` focal-point
- * fallback, done in generateFileData.ts) isn't available yet at this point in the request
+ * fallback, done in generateFileData/) isn't available yet at this point in the request
  * lifecycle. Saved `_transforms` keys are not checked here: whether a stage applies them is known
  * only after planning, so generateFileData decides that download.
  */
