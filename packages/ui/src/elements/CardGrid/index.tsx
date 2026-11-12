@@ -11,12 +11,14 @@ export type CardGridProps<T> = {
   readonly className?: string
   readonly getItemClassName?: (item: T) => string | undefined
   readonly getKey: (item: T) => React.Key
+  readonly id?: string
   readonly items: readonly T[]
   readonly renderItem: (item: T) => React.ReactNode
 }
 
 /** A presentation-only responsive grid. Selection, navigation, and drag behavior belong to callers. */
 export const CardGrid = <T,>({
+  id,
   ariaLabel,
   className,
   getItemClassName,
@@ -24,7 +26,7 @@ export const CardGrid = <T,>({
   items,
   renderItem,
 }: CardGridProps<T>) => (
-  <ul aria-label={ariaLabel} className={[baseClass, className].filter(Boolean).join(' ')}>
+  <ul aria-label={ariaLabel} className={[baseClass, className].filter(Boolean).join(' ')} id={id}>
     {items.map((item) => (
       <li
         className={[`${baseClass}__item`, getItemClassName?.(item)].filter(Boolean).join(' ')}

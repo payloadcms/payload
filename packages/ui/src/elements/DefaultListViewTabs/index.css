@@ -15,7 +15,8 @@
   .default-list-view-tabs__button--active {
     color: var(--color-text);
 
-    html[data-enhanced-contrast] & {
+    html[data-enhanced-contrast] &,
+    :host([data-enhanced-contrast]) & {
       border-color: var(--color-border-control);
     }
   }

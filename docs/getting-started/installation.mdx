@@ -12,7 +12,8 @@ Payload requires the following software:
 
 - Any JavaScript package manager (pnpm, npm, or yarn 2+ - pnpm is preferred, yarn 1.x is not supported)
 - Node.js version `24.22.1`+
-- Next.js `16.4.0`+
+- Next.js `16.4.1`+ (below `17.0.0`)
+- React and React DOM `^19.3.1`
 - TypeScript version `6.0.3`+. Types are not guaranteed to work on older versions.
 - Any [compatible database](/docs/database/overview) (MongoDB, Postgres or SQLite)
 
@@ -60,6 +61,8 @@ If you are running the Admin Panel on TanStack Start, install `@payloadcms/tanst
 pnpm i payload @payloadcms/tanstack-start
 ```
 
+TanStack Start applications require `@vitejs/plugin-rsc` `0.5.38` or newer within the `0.5.x` release line. Earlier versions bundle an affected React Server Components implementation.
+
 You'll also likely want to install the following optional packages:
 
 - `@payloadcms/richtext-lexical` - Rich text editor (not needed if you don't use Rich Text)
@@ -71,8 +74,10 @@ pnpm i @payloadcms/richtext-lexical sharp graphql
 ```
 
 <Banner type="warning">
-  **Note:** Swap out `pnpm` for your package manager. If you are using npm, you
-  might need to install using legacy peer deps: `npm i --legacy-peer-deps`.
+  Use versions that satisfy all peer dependency requirements. For pnpm, enable
+  `strict-peer-dependencies=true` to reject incompatible versions during
+  installation. Do not bypass peer checks with `--legacy-peer-deps` or
+  `--force`; doing so can leave vulnerable framework versions installed.
 </Banner>
 
 Next, install a [Database Adapter](/docs/database/overview). Payload requires a Database Adapter to establish a database connection. Payload works with all types of databases, but the most common are MongoDB and Postgres.
