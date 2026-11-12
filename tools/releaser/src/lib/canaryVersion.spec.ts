@@ -1,9 +1,13 @@
 import semver from 'semver'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { getCanaryVersion } from './canaryVersion.js'
 
 describe('getCanaryVersion', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   it.each([
     { monorepoVersion: '4.0.0-beta.8', expected: '4.0.0-canary.20261112' },
     { monorepoVersion: '4.0.0', expected: '4.1.0-canary.20261112' },
@@ -15,6 +19,9 @@ describe('getCanaryVersion', () => {
   })
 
   it('should use the UTC date, not the local date', () => {
+    // Pinned west of UTC: on a UTC runner, local and UTC dates agree and the test proves nothing.
+    vi.stubEnv('TZ', 'America/Los_Angeles')
+
     expect(
       getCanaryVersion({
         date: new Date('2026-11-12T23:30:00-08:00'),
