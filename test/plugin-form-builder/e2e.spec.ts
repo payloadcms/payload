@@ -771,6 +771,7 @@ test.describe('Form Builder Plugin', () => {
 
       const imageFormSection = page.locator(`[data-testid="form-section-${imageFormId}"]`)
 
+      await imageFormSection.locator('input[name="description"]').fill('E2E image upload')
       await imageFormSection
         .locator('input[type="file"][name="image"]')
         .setInputFiles(testImagePath)
