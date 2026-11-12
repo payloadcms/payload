@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import type { SharpCollectionConfig, SharpDependency, SharpUploadTaskOptions } from './types.js'
 
-import { createTransformUpload } from './transformUpload.js'
+import { createTransformUpload } from './createTransformUpload.js'
 
 const sharpDependency = (() => ({
   metadata: async () => ({ height: 1000, width: 1000 }),

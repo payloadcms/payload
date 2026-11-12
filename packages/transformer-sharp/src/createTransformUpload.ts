@@ -37,7 +37,7 @@ export function createTransformUpload({
   collections: Partial<Record<string, SharpCollectionConfig>>
   sharpDependency: SharpDependency
 }): NonNullable<UploadTransformerInternal['transformUpload']> {
-  return async ({ collectionSlug, cropSize, file, req, transform }) => {
+  return async function transformUpload({ collectionSlug, cropSize, file, req, transform }) {
     const collectionUpload = collections[collectionSlug] ?? {}
 
     const fileSupportsResize = canResizeImage(file.type)

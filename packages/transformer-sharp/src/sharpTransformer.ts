@@ -6,11 +6,11 @@ import bundledSharp from 'sharp'
 
 import type { SharpDynamicDefaults, SharpDynamicOptions, SharpTransformerOptions } from './types.js'
 
+import { createTransformUpload } from './createTransformUpload.js'
 import { createHandleRequest } from './handleRequest.js'
 import { initSharpCollections } from './initSharpCollections.js'
 import { parseDynamicResize } from './parseDynamicResize.js'
 import { createTransformFile } from './transformFile.js'
-import { createTransformUpload } from './transformUpload.js'
 
 const DEFAULT_MIME_TYPES = [
   'image/jpeg',
