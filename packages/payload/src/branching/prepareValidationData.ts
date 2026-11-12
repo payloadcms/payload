@@ -2,135 +2,117 @@ import type { Field } from '../fields/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { fieldAffectsData, fieldShouldBeLocalized } from '../fields/config/types.js'
+import { deepCopyObject } from '../utilities/deepCopyObject.js'
+import { traverseFields } from '../utilities/traverseFields.js'
 
-/**
- * Project only the values ordinary updates validate into the schema precheck. The original
- * candidate remains intact for replacement validators and the eventual main write.
- */
-export const prepareValidationData = ({
-  blockData,
-  data,
-  fields,
-  parentIsLocalized = false,
-  path = [],
-  projection,
-  req,
-  shouldSkipParentValidation = false,
-  siblingData = data,
-}: {
+type ValidationContext = {
   blockData?: Record<string, unknown>
   data: Record<string, unknown>
+  isParentLocalized: boolean
+  path: string[]
+  shouldSkipValidation?: boolean
+}
+
+/** Project the values ordinary updates validate, preserving the original merge candidate. */
+export const prepareValidationData = ({
+  data,
+  fields,
+  req,
+}: {
+  data: Record<string, unknown>
   fields: Field[]
-  parentIsLocalized?: boolean
-  path?: string[]
-  projection?: Record<string, unknown>
   req: PayloadRequest
-  shouldSkipParentValidation?: boolean
-  siblingData?: Record<string, unknown>
 }): Record<string, unknown> => {
-  let validationData = { ...(projection ?? siblingData) }
+  const validationData = deepCopyObject(data)
+  const contexts = new WeakMap<object, ValidationContext>([
+    [validationData, { data, isParentLocalized: false, path: [] }],
+  ])
+  const skippedFields = new Map<Record<string, unknown>, Set<string>>()
   const localization = req.payload.config.localization
   const locale = req.locale || (localization ? localization.defaultLocale : 'en')
 
-  for (const field of fields) {
-    const fieldPath = fieldAffectsData(field) ? [...path, field.name] : path
-    const shouldSkipValidation =
-      shouldSkipParentValidation ||
-      (field.admin?.condition &&
-        !field.admin.condition(data, siblingData, {
-          blockData: blockData!,
-          operation: 'update',
-          path: fieldPath,
-          user: req.user,
-        }))
-    const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
-    const prepareChildren = ({
-      childBlockData = blockData,
-      childFields,
-      childIsLocalized = parentIsLocalized || isLocalized,
-      childPath = fieldPath,
-      childProjection,
-      childSiblingData = siblingData,
-    }: {
-      childBlockData?: Record<string, unknown>
-      childFields: Field[]
-      childIsLocalized?: boolean
-      childPath?: string[]
-      childProjection?: Record<string, unknown>
-      childSiblingData?: Record<string, unknown>
-    }) =>
-      prepareValidationData({
-        blockData: childBlockData,
-        data,
-        fields: childFields,
-        parentIsLocalized: childIsLocalized,
-        path: childPath,
-        projection: childProjection,
-        req,
-        shouldSkipParentValidation: Boolean(shouldSkipValidation),
-        siblingData: childSiblingData,
-      })
-
-    if (field.type === 'tabs') {
-      validationData = prepareChildren({
-        childFields: field.tabs.map((tab) => ({ ...tab, type: 'group' })),
-        childProjection: validationData,
-      })
-      continue
-    }
-
-    if (!fieldAffectsData(field)) {
-      if ('fields' in field) {
-        validationData = prepareChildren({
-          childFields: field.fields,
-          childProjection: validationData,
-        })
+  traverseFields({
+    callback: ({ field, ref }) => {
+      if (!isRecord(ref)) {
+        return
       }
-      continue
-    }
+      const context = contexts.get(ref)
 
-    const value = siblingData[field.name]
-    const isLocalizedFallback =
-      localization &&
-      locale !== localization.defaultLocale &&
-      isLocalized &&
-      (field.type === 'array' || field.type === 'blocks') &&
-      value === null
-
-    if (shouldSkipValidation || isLocalizedFallback) {
-      delete validationData[field.name]
-      continue
-    }
-
-    if (field.type === 'group' && isRecord(value)) {
-      validationData[field.name] = prepareChildren({
-        childFields: field.fields,
-        childSiblingData: value,
+      if (!context) {
+        return
+      }
+      const name = fieldAffectsData(field) ? field.name : undefined
+      const path = name ? [...context.path, name] : context.path
+      const shouldSkipValidation =
+        context.shouldSkipValidation ||
+        (name && skippedFields.get(ref)?.has(name)) ||
+        (field.admin?.condition &&
+          !field.admin.condition(data, context.data, {
+            blockData: context.blockData!,
+            operation: 'update',
+            path,
+            user: req.user,
+          }))
+      const isLocalized = fieldShouldBeLocalized({
+        field,
+        parentIsLocalized: context.isParentLocalized,
       })
-    } else if ((field.type === 'array' || field.type === 'blocks') && Array.isArray(value)) {
-      validationData[field.name] = value.map((row, index) => {
-        if (!isRecord(row)) {
-          return row
+      const isLocalizedFallback =
+        localization &&
+        locale !== localization.defaultLocale &&
+        isLocalized &&
+        (field.type === 'array' || field.type === 'blocks') &&
+        ref[field.name] === null
+
+      if (shouldSkipValidation || isLocalizedFallback) {
+        const skipped = skippedFields.get(ref) ?? new Set<string>()
+
+        // Schema traversal also finds the data owned by unnamed conditional containers.
+        traverseFields({
+          callback: ({ field, parentPath }) => {
+            if (!parentPath && fieldAffectsData(field) && field.name) {
+              skipped.add(field.name)
+            }
+          },
+          config: req.payload.config,
+          fields: [field],
+        })
+        skippedFields.set(ref, skipped)
+      }
+
+      if (!name) {
+        return
+      }
+      const value = ref[name]
+      const originalValue = context.data[name]
+      const children = Array.isArray(value) ? value : [value]
+      const originalChildren = Array.isArray(originalValue) ? originalValue : [originalValue]
+
+      children.forEach((child, index) => {
+        const originalChild = originalChildren[index]
+
+        if (isRecord(child) && isRecord(originalChild)) {
+          contexts.set(child, {
+            blockData: field.type === 'blocks' ? originalChild : context.blockData,
+            data: originalChild,
+            isParentLocalized: context.isParentLocalized || isLocalized,
+            path: Array.isArray(value) ? [...path, String(index)] : path,
+            shouldSkipValidation: Boolean(shouldSkipValidation),
+          })
         }
-
-        const block =
-          field.type === 'blocks'
-            ? field.blocks.find((block) =>
-                typeof block === 'string' ? block === row.blockType : block.slug === row.blockType,
-              )
-            : undefined
-        const resolvedBlock = typeof block === 'string' ? req.payload.blocks[block] : block
-        const childFields = field.type === 'array' ? field.fields : resolvedBlock?.fields
-
-        return childFields
-          ? prepareChildren({
-              childBlockData: field.type === 'blocks' ? row : blockData,
-              childFields,
-              childPath: [...fieldPath, String(index)],
-              childSiblingData: row,
-            })
-          : row
       })
+    },
+    config: req.payload.config,
+    fields,
+    fillEmpty: false,
+    // Candidates already contain one locale; prevent traversal from treating groups as locale maps.
+    parentIsLocalized: true,
+    ref: validationData,
+  })
+
+  for (const [ref, names] of skippedFields) {
+    for (const name of names) {
+      delete ref[name]
     }
   }
 

@@ -225,3 +225,33 @@ describe('merge validation conditions', () => {
     })
   })
 })
+
+it.each(['group', 'tab'] as const)(
+  'should traverse a single-locale localized %s without treating its children as locales',
+  (containerType) => {
+    const childFields: Field[] = [
+      { name: 'link', type: 'group', fields: linkFields },
+      { name: 'items', type: 'array', localized: true, required: true, fields: [] },
+    ]
+    const fields: Field[] = [
+      containerType === 'group'
+        ? { name: 'details', type: 'group', localized: true, fields: childFields }
+        : { type: 'tabs', tabs: [{ name: 'details', localized: true, fields: childFields }] },
+    ]
+    const data = { details: { link: inactiveReference, items: null } }
+    const original = structuredClone(data)
+    const result = prepareValidationData({
+      data,
+      fields,
+      req: {
+        locale: 'fr',
+        payload: { config: { localization: { defaultLocale: 'en' } } },
+      } as PayloadRequest,
+    })
+
+    expect(result).toEqual({
+      details: { link: { type: 'custom', url: '/accepted' }, items: null },
+    })
+    expect(data).toEqual(original)
+  },
+)
