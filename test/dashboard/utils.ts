@@ -136,7 +136,7 @@ export class DashboardHelper {
 
   resizeWidget = async (position: number, width: WidgetWidth) => {
     const widget = this.widgetByPos(position)
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     const widthButton = widget.locator('.widget-wrapper__size-btn')
     await expect(widthButton).toBeVisible()
     await widthButton.click()
@@ -153,7 +153,7 @@ export class DashboardHelper {
 
   assertWidthRange = async (arg: { max: WidgetWidth; min: WidgetWidth; position: number }) => {
     const widget = this.widgetByPos(arg.position)
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     const widthButton = widget.locator('.widget-wrapper__size-btn')
     if ((await widthButton.count()) === 0) {
       await expect(widget).toHaveAttribute('data-width', arg.min)
@@ -232,7 +232,7 @@ export class DashboardHelper {
     const widgetsCount = await this.widgets.count()
     const widget = this.widgetByPos(position)
     const widgetDomElem = await widget.elementHandle()
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     await this.getDeleteWidgetButton(widget).click()
     expect(await widgetDomElem?.isHidden()).toBe(true)
     await expect(this.widgets).toHaveCount(widgetsCount - 1)
@@ -240,7 +240,7 @@ export class DashboardHelper {
 
   editWidget = async (position: number, title: string) => {
     const widget = this.widgetByPos(position)
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     await widget.locator('.widget-wrapper__edit-btn').click()
 
     const drawer = this.page.locator('.drawer__content:visible')
@@ -282,7 +282,7 @@ export class DashboardHelper {
 
   moveWidget = async (from: number, to: number, place: 'after' | 'before' = 'before') => {
     const srcWidget = this.widgetByPos(from)
-    await srcWidget.hover()
+    await srcWidget.locator('.widget-wrapper__drag-btn').click()
     const srcWidgetBox = (await srcWidget.locator('.widget-wrapper__drag-btn').boundingBox())!
     const targetWidget = this.widgetByPos(to)
     const snapshot = await this.getSnapshot()
@@ -302,15 +302,26 @@ export class DashboardHelper {
       srcWidgetBox.y + srcWidgetBox.height / 2,
     )
     await this.page.mouse.down()
-    await targetWidget.scrollIntoViewIfNeeded()
-    const targetWidgetBox = (await targetWidget.boundingBox())!
     await this.page.mouse.move(
-      targetWidgetBox.x + targetWidgetBox.width / 2 + (place === 'after' ? 5 : -5),
-      targetWidgetBox.y + targetWidgetBox.height / 2,
-      {
-        // steps is important: move slightly to trigger the drag sensor of DnD-kit
-        steps: 10,
-      },
+      srcWidgetBox.x + srcWidgetBox.width / 2 + 10,
+      srcWidgetBox.y + srcWidgetBox.height / 2,
+    )
+    await expect(this.dashboard.locator('.dashboard-row-drop-targets')).toBeVisible()
+    const targetID = await targetWidget.getAttribute('data-slug')
+    let dropTarget = this.page.getByTestId(`${targetID}-${place}`)
+
+    if (!(await dropTarget.isVisible())) {
+      const dropIndex = place === 'after' ? to : to - 1
+
+      dropTarget = this.page.locator(`.dashboard-row-drop-target[data-drop-index="${dropIndex}"]`)
+    }
+    await expect(dropTarget).toBeVisible()
+    await dropTarget.evaluate((element) => element.scrollIntoView({ block: 'center' }))
+    const targetBounds = (await dropTarget.boundingBox())!
+
+    await this.page.mouse.move(
+      targetBounds.x + targetBounds.width / 2,
+      targetBounds.y + targetBounds.height / 2,
     )
     await this.page.mouse.up()
     await this.page.waitForTimeout(400) // dndkit animation

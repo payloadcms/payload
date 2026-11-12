@@ -483,6 +483,7 @@ export const taTranslations: DefaultTranslationsObject = {
     remove: 'நீக்கு',
     removeFilter: 'வடிகட்டியை அகற்று',
     rename: 'பெயர் மாற்று',
+    replace: 'மாற்றவும்',
     replaceRow: 'வரிசையை மாற்றவும்',
     requiredFields: '* குறியிடப்பட்ட புலங்கள் கட்டாயமானவை.',
     reset: 'மீட்டமை',

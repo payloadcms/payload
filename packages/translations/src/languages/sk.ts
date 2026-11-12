@@ -487,6 +487,7 @@ export const skTranslations: DefaultTranslationsObject = {
     remove: 'Odstrániť',
     removeFilter: 'Odstrániť filter',
     rename: 'Premenovať',
+    replace: 'Nahradiť',
     replaceRow: 'Nahradiť riadok',
     requiredFields: 'Polia označené * sú povinné.',
     reset: 'Resetovať',

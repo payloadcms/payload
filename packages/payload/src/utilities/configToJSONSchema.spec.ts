@@ -8,6 +8,44 @@ import { configToJSONSchema, entityToStandaloneJSONSchema } from './configToJSON
 import type { Block, BlocksField, RichTextField } from '../fields/config/types.js'
 
 describe('configToJSONSchema', () => {
+  it.each([true, false])(
+    'should generate toolbar control data types with drawer fields: %s',
+    (hasDrawerFields) => {
+      const config = sanitizeConfig({
+        admin: {
+          dashboard: {
+            widgets: [
+              {
+                slug: 'sales-toolbar',
+                Component: './Sales.js',
+                controls: [
+                  {
+                    name: 'timeframe',
+                    type: 'select',
+                    defaultValue: 'monthly',
+                    options: ['weekly', 'monthly'],
+                  },
+                ],
+                fields: hasDrawerFields ? [{ name: 'title', type: 'text' }] : [],
+              },
+            ],
+          },
+        },
+        collections: [],
+      } as unknown as Config)
+      const { jsonSchema } = configToJSONSchema(config, 'text')
+      const dataSchema = jsonSchema.$defs['sales-toolbar_widget'].properties.data as JSONSchema4
+
+      if (hasDrawerFields) {
+        expect(dataSchema.properties.title).toMatchObject({ type: ['string', 'null'] })
+      }
+      expect(dataSchema.properties.timeframe).toMatchObject({
+        type: ['string', 'null'],
+        enum: ['weekly', 'monthly'],
+      })
+    },
+  )
+
   it('should handle optional arrays with required fields', () => {
     // @ts-expect-error
     const config: Config = {

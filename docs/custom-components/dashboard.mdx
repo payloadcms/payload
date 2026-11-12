@@ -59,15 +59,48 @@ export default buildConfig({
 
 ### Widget Configuration
 
-| Property       | Type          | Description                                                          |
-| -------------- | ------------- | -------------------------------------------------------------------- |
-| `slug` \*      | `string`      | Unique identifier for the widget                                     |
-| `Component` \* | `string`      | Path to the widget component (supports `#` syntax for named exports) |
-| `fields`       | `Field[]`     | Optional widget-specific form fields shown in the edit drawer        |
-| `minWidth`     | `WidgetWidth` | Minimum width the widget can be resized to (default: `'x-small'`)    |
-| `maxWidth`     | `WidgetWidth` | Maximum width the widget can be resized to (default: `'full'`)       |
+| Property       | Type              | Description                                                                        |
+| -------------- | ----------------- | ---------------------------------------------------------------------------------- |
+| `slug` \*      | `string`          | Unique identifier for the widget                                                   |
+| `Component` \* | `string`          | Path to the widget component (supports `#` syntax for named exports)               |
+| `controls`     | `WidgetControl[]` | Optional settings shown in the edit toolbar, currently supporting select dropdowns |
+| `fields`       | `Field[]`         | Optional widget-specific form fields shown in the edit drawer                      |
+| `minWidth`     | `WidgetWidth`     | Minimum width the widget can be resized to (default: `'x-small'`)                  |
+| `maxWidth`     | `WidgetWidth`     | Maximum width the widget can be resized to (default: `'full'`)                     |
 
 **WidgetWidth Values:** `'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full'`.
+
+### Toolbar Controls
+
+Use `controls` for simple settings that editors can change directly in the selected widget's toolbar. Use `fields` for settings that belong in the edit drawer.
+
+```ts
+{
+  slug: 'sales-summary',
+  Component: './components/SalesSummary.tsx#default',
+  controls: [
+    {
+      name: 'timeframe',
+      type: 'select',
+      Icon: { path: '@payloadcms/ui#TableIcon', clientProps: { size: 16 } },
+      label: 'Timeframe',
+      defaultValue: 'monthly',
+      options: [
+        { label: 'Weekly', value: 'weekly' },
+        { label: 'Monthly', value: 'monthly' },
+        { label: 'Yearly', value: 'yearly' },
+      ],
+    },
+  ],
+  fields: [{ name: 'title', type: 'text' }],
+}
+```
+
+A select control accepts `name`, `type: 'select'`, `options`, an optional `label`, an optional string `defaultValue`, and an optional `Icon` component reference. `Icon` follows the standard Payload import-map format, using a component path string or an object with `path` and optional component props. Icons render decoratively before the selected value. Options can be strings or `{ label, value }` objects. Control and option labels support translation objects and label functions.
+
+Each control reads and updates its named top-level property in `widgetData`, such as `widgetData.timeframe`. Use distinct names for controls and drawer fields. Defaults apply when a value is unset, including when adding or replacing a widget. Choosing an option previews the change immediately; dashboard **Save changes** persists it, and **Cancel** restores the previous settings. Drawer saves preserve control values.
+
+Controls are included in generated widget data types alongside drawer fields. Controls do not render in the edit drawer.
 
 ### Creating a Widget Component
 
@@ -138,7 +171,7 @@ export default buildConfig({
 
 The `defaultLayout` function receives the request object and should return an array of `WidgetInstance` objects.
 
-If your widget has `fields`, you can type `widgetData` with generated widget types:
+If your widget has `fields` or `controls`, you can type `widgetData` with generated widget types:
 
 ```tsx
 import type { WidgetServerProps } from 'payload'

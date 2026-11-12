@@ -1,5 +1,6 @@
-import type { Field, ServerFunction, WidgetServerProps } from 'payload'
+import type { ServerFunction, WidgetServerProps } from 'payload'
 
+import { getWidgetControlData } from 'payload/shared'
 import React from 'react'
 
 import { RenderServerComponent } from '../../../../../elements/RenderServerComponent/index.js'
@@ -13,6 +14,7 @@ export type RenderWidgetServerFnArgs = {
   /**
    * The slug of the widget to render
    */
+  widgetId?: string
   widgetSlug: string
 }
 
@@ -27,7 +29,7 @@ export type RenderWidgetServerFnReturnType = {
 export const renderWidgetHandler: ServerFunction<
   RenderWidgetServerFnArgs,
   RenderWidgetServerFnReturnType
-> = ({ cookies, locale, permissions, req, user, widgetData, widgetSlug }) => {
+> = ({ cookies, locale, permissions, req, user, widgetData, widgetId, widgetSlug }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -58,9 +60,13 @@ export const renderWidgetHandler: ServerFunction<
   }
 
   try {
+    const data = getWidgetControlData({ controls: widgetConfig.controls, data: widgetData })
+    const controlData = Object.fromEntries(
+      widgetConfig.controls?.map(({ name }) => [name, data[name]]) ?? [],
+    )
     const localeFilteredData = widgetConfig.fields?.length
-      ? extractLocaleData(widgetData || {}, req.locale || 'en', widgetConfig.fields)
-      : widgetData || {}
+      ? { ...controlData, ...extractLocaleData(data, req.locale || 'en', widgetConfig.fields) }
+      : data
 
     const serverProps: WidgetServerProps = {
       cookies,
@@ -69,6 +75,7 @@ export const renderWidgetHandler: ServerFunction<
       req,
       user,
       widgetData: localeFilteredData,
+      widgetId,
       widgetSlug,
     }
 

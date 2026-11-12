@@ -502,6 +502,7 @@ export const frTranslations: DefaultTranslationsObject = {
     remove: 'Retirer',
     removeFilter: 'Supprimer le filtre',
     rename: 'Renommer',
+    replace: 'Remplacer',
     replaceRow: 'Remplacer la ligne',
     requiredFields: 'Les champs marqués d’un * sont obligatoires.',
     reset: 'Réinitialiser',

@@ -7,20 +7,31 @@ import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/co
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import { getTranslation } from '@payloadcms/translations'
 import { toWords } from 'payload/shared'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Button } from '../../../../elements/Button/index.js'
+import { useModal } from '../../../../elements/Modal/index.js'
 import { Popup } from '../../../../elements/Popup/index.js'
 import * as PopupList from '../../../../elements/Popup/PopupButtonList/index.js'
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
+import { TrashIcon } from '../../../../icons/Trash/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { DashboardStepNav } from './DashboardStepNav.js'
+import { RowDropTargets } from './RowDropTargets/index.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
 import { closestInXAxis } from './utils/collisionDetection.js'
+import {
+  getValidSideDropTargets,
+  isValidWidgetDropTarget,
+} from './utils/getValidSideDropTargets.js'
+import { getWidgetIDFromDropTarget, getWidgetMoveIndexes } from './utils/getWidgetMoveIndexes.js'
+import { WIDTH_TO_PERCENTAGE } from './utils/resizeWidget.js'
 import { useDashboardSensors } from './utils/sensors.js'
 import { WidgetContent } from './WidgetContent/index.js'
 import { WidgetEditControl } from './WidgetEditControl.js'
-import { WidgetMoveControl } from './WidgetMoveControl/index.js'
+import { WidgetReplaceControl } from './WidgetReplaceControl/index.js'
+import { WidgetResizeHandles } from './WidgetResizeHandles/index.js'
+import { WidgetSelectControl } from './WidgetSelectControl/index.js'
 
 /**
  * Custom modifier that only applies snapCenterToCursor for pointer events.
@@ -57,15 +68,6 @@ export type DropTargetWidget = {
 } | null
 
 /* eslint-disable perfectionist/sort-objects */
-const WIDTH_TO_PERCENTAGE = {
-  'x-small': 25,
-  small: (1 / 3) * 100,
-  medium: 50,
-  large: (2 / 3) * 100,
-  'x-large': 75,
-  full: 100,
-} as const
-
 export function ModularDashboardClient({
   clientLayout: initialLayout,
   widgets,
@@ -74,6 +76,8 @@ export function ModularDashboardClient({
   widgets: ClientWidget[]
 }) {
   const { i18n, t } = useTranslation()
+  const { modalState } = useModal()
+  const hasOpenModal = Object.values(modalState).some(({ isOpen }) => isOpen)
   const {
     addWidget,
     cancel,
@@ -82,6 +86,7 @@ export function ModularDashboardClient({
     deleteWidget,
     isEditing,
     moveWidget,
+    replaceWidget,
     resetLayout,
     resizeWidget,
     saveLayout,
@@ -89,10 +94,21 @@ export function ModularDashboardClient({
     updateWidgetData,
   } = useDashboardLayout(initialLayout)
 
-  const [moveAnnouncement, setMoveAnnouncement] = useState('')
   const [activeDragId, setActiveDragId] = useState<null | string>(null)
-  const [activeControlsWidgetID, setActiveControlsWidgetID] = useState<null | string>(null)
+  const [selectedWidgetID, setSelectedWidgetID] = useState<null | string>(null)
+  const widgetInteractionEventRef = useRef<Event | null>(null)
+  const dashboardRef = useRef<HTMLDivElement>(null)
   const sensors = useDashboardSensors()
+  const validSideDropTargets = useMemo(
+    () =>
+      activeDragId === null
+        ? null
+        : getValidSideDropTargets({
+            activeID: activeDragId,
+            layout: currentLayout.map(({ item }) => item),
+          }),
+    [activeDragId, currentLayout],
+  )
 
   useEffect(() => {
     if (activeDragId !== null) {
@@ -105,7 +121,7 @@ export function ModularDashboardClient({
 
   const announcements = useMemo<Announcements>(() => {
     const describeWidget = ({ id, index }: { id: UniqueIdentifier; index?: number }) => {
-      const widgetID = String(id).replace(/-(?:before|after)$/, '')
+      const widgetID = getWidgetIDFromDropTarget({ id })
       const slug = widgetID.slice(0, widgetID.lastIndexOf('-'))
       const label = getTranslation(
         widgets.find((widget) => widget.slug === slug)?.label ?? toWords(slug),
@@ -118,7 +134,14 @@ export function ModularDashboardClient({
     const announceCancel: Announcements['onDragCancel'] = ({ active }) =>
       `${t('general:cancel')}: ${describeWidget({ id: active.id })}`
     const announceMove: NonNullable<Announcements['onDragOver']> = ({ active, over }) => {
-      if (!over) {
+      if (
+        !over ||
+        !isValidWidgetDropTarget({
+          activeID: String(active.id),
+          layout: currentLayout.map(({ item }) => item),
+          overID: String(over.id),
+        })
+      ) {
         return undefined
       }
       const { moveToIndex } = getWidgetMoveIndexes({
@@ -136,7 +159,14 @@ export function ModularDashboardClient({
     return {
       onDragCancel: announceCancel,
       onDragEnd: (event) => {
-        if (event.over) {
+        if (
+          event.over &&
+          isValidWidgetDropTarget({
+            activeID: String(event.active.id),
+            layout: currentLayout.map(({ item }) => item),
+            overID: String(event.over.id),
+          })
+        ) {
           const { moveFromIndex, moveToIndex } = getWidgetMoveIndexes({
             activeID: event.active.id,
             layout: currentLayout,
@@ -162,9 +192,26 @@ export function ModularDashboardClient({
 
   useEffect(() => {
     if (!isEditing) {
-      setActiveControlsWidgetID(null)
-      setMoveAnnouncement('')
+      setSelectedWidgetID(null)
     }
+  }, [isEditing])
+
+  useEffect(() => {
+    if (!isEditing) {
+      return
+    }
+
+    const deselectOutsideWidget = (event: MouseEvent) => {
+      const isWidgetInteraction = widgetInteractionEventRef.current === event
+
+      widgetInteractionEventRef.current = null
+      if (!isWidgetInteraction) {
+        setSelectedWidgetID(null)
+      }
+    }
+
+    document.addEventListener('click', deselectOutsideWidget)
+    return () => document.removeEventListener('click', deselectOutsideWidget)
   }, [isEditing])
 
   return (
@@ -187,7 +234,14 @@ export function ModularDashboardClient({
         onDragEnd={(event) => {
           setActiveDragId(null)
 
-          if (!event.over) {
+          if (
+            !event.over ||
+            !isValidWidgetDropTarget({
+              activeID: String(event.active.id),
+              layout: currentLayout.map(({ item }) => item),
+              overID: String(event.over.id),
+            })
+          ) {
             return
           }
           const indexes = getWidgetMoveIndexes({
@@ -202,11 +256,13 @@ export function ModularDashboardClient({
         }}
         onDragStart={(event) => {
           setActiveDragId(event.active.id as string)
+          setSelectedWidgetID(event.active.id as string)
         }}
         sensors={sensors}
       >
         <div
-          className={`modular-dashboard ${isEditing ? 'editing' : ''}`}
+          className={`modular-dashboard ${isEditing ? 'editing' : ''} ${hasOpenModal ? 'modular-dashboard--modal-open' : ''}`}
+          ref={dashboardRef}
           style={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -221,17 +277,26 @@ export function ModularDashboardClient({
           )}
           {currentLayout?.map((widget, index) => {
             const slug = widget.item.id.slice(0, widget.item.id.lastIndexOf('-'))
-            const label = getTranslation(
-              widgets.find((widgetConfig) => widgetConfig.slug === slug)?.label ?? toWords(slug),
-              i18n,
-            )
+            const widgetConfig = widgets.find((widgetConfig) => widgetConfig.slug === slug)
+            const label = getTranslation(widgetConfig?.label ?? toWords(slug), i18n)
 
             return (
               <DraggableItem
+                canDropAfter={
+                  validSideDropTargets === null ||
+                  validSideDropTargets.has(`${widget.item.id}-after`)
+                }
+                canDropBefore={
+                  validSideDropTargets === null ||
+                  validSideDropTargets.has(`${widget.item.id}-before`)
+                }
                 disabled={!isEditing}
                 id={widget.item.id}
+                index={index}
+                isSelected={selectedWidgetID === widget.item.id}
                 key={widget.item.id}
                 label={label}
+                onSelect={() => setSelectedWidgetID(widget.item.id)}
                 style={{
                   width: `${WIDTH_TO_PERCENTAGE[widget.item.width]}%`,
                 }}
@@ -242,19 +307,53 @@ export function ModularDashboardClient({
                     className={[
                       'widget-wrapper',
                       isEditing ? 'widget-wrapper--editing' : '',
-                      activeControlsWidgetID === widget.item.id
-                        ? 'widget-wrapper--controls-active'
-                        : '',
+                      selectedWidgetID === widget.item.id ? 'widget-wrapper--controls-active' : '',
                     ]
                       .filter(Boolean)
                       .join(' ')}
+                    onClickCapture={(event) => {
+                      // React capture includes this widget's portaled menus and drawers.
+                      widgetInteractionEventRef.current = event.nativeEvent
+                    }}
                   >
                     <WidgetContent id={`${widget.item.id}-content`} isEditing={isEditing}>
                       {widget.component}
                     </WidgetContent>
                     {dragHandle}
                     {isEditing && (
-                      <div className="widget-wrapper__controls">
+                      <div
+                        aria-label={t('general:editLabel', { label })}
+                        className="widget-wrapper__controls"
+                        data-theme="dark"
+                        id={`${widget.item.id}-controls`}
+                        role="group"
+                      >
+                        <WidgetWidthDropdown
+                          currentWidth={widget.item.width}
+                          maxWidth={widget.item.maxWidth}
+                          minWidth={widget.item.minWidth}
+                          onOpenChange={(isOpen) => {
+                            if (isOpen) {
+                              setSelectedWidgetID(widget.item.id)
+                            }
+                          }}
+                          onResize={(width) => resizeWidget(widget.item.id, width)}
+                          widgetLabel={label}
+                        />
+                        {widgetConfig?.controls?.map((control) => (
+                          <WidgetSelectControl
+                            control={control}
+                            key={control.name}
+                            onChange={({ value }) => {
+                              updateWidgetData(widget.item.id, {
+                                ...widget.item.data,
+                                [control.name]: value,
+                              })
+                            }}
+                            value={widget.item.data?.[control.name]}
+                            widgetLabel={label}
+                          />
+                        ))}
                         <WidgetEditControl
                           onSave={(data) => {
                             updateWidgetData(widget.item.id, data)
@@ -263,50 +362,51 @@ export function ModularDashboardClient({
                           widgetID={widget.item.id}
                           widgetLabel={label}
                         />
-                        <WidgetWidthDropdown
-                          currentWidth={widget.item.width}
-                          maxWidth={widget.item.maxWidth}
-                          minWidth={widget.item.minWidth}
-                          onOpenChange={(isOpen) => {
-                            setActiveControlsWidgetID(isOpen ? widget.item.id : null)
+                        <WidgetReplaceControl
+                          onReplace={({ widgetSlug }) => {
+                            const newWidgetID = replaceWidget({
+                              widgetID: widget.item.id,
+                              widgetSlug,
+                            })
+
+                            if (newWidgetID) {
+                              setSelectedWidgetID(newWidgetID)
+                            }
                           }}
-                          onResize={(width) => resizeWidget(widget.item.id, width)}
                           widgetLabel={label}
-                        />
-                        <WidgetMoveControl
-                          index={index}
-                          onMove={({ moveToIndex }) => {
-                            moveWidget({ moveFromIndex: index, moveToIndex })
-                            setMoveAnnouncement(
-                              t('hierarchy:itemsMovedTo', {
-                                title: label,
-                                destination: `${t('general:order')}: ${moveToIndex + 1}`,
-                              }),
-                            )
-                          }}
-                          onOpenChange={(isOpen) => {
-                            setActiveControlsWidgetID(isOpen ? widget.item.id : null)
-                          }}
-                          total={currentLayout.length}
-                          widgetLabel={label}
+                          widgets={widgets}
                         />
                         <Button
                           aria-label={t('general:deleteLabel', { label })}
-                          buttonStyle="destructive"
+                          buttonStyle="ghost"
                           className="widget-wrapper__delete-btn"
                           extraButtonProps={{ tabIndex: 0 }}
-                          icon="x"
+                          icon={<TrashIcon />}
                           margin={false}
                           onClick={() => deleteWidget(widget.item.id)}
-                          round
                         />
                       </div>
                     )}
+                    {isEditing &&
+                      selectedWidgetID === widget.item.id &&
+                      !hasOpenModal &&
+                      activeDragId === null && (
+                        <WidgetResizeHandles
+                          maxWidth={widget.item.maxWidth}
+                          minWidth={widget.item.minWidth}
+                          onResize={({ width }) => resizeWidget(widget.item.id, width)}
+                          widgetLabel={label}
+                          width={widget.item.width}
+                        />
+                      )}
                   </div>
                 )}
               </DraggableItem>
             )
           })}
+          {activeDragId !== null && (
+            <RowDropTargets dashboardRef={dashboardRef} layout={currentLayout} />
+          )}
           <DragOverlay
             className="drag-overlay"
             dropAnimation={{
@@ -340,9 +440,6 @@ export function ModularDashboardClient({
           </DragOverlay>
         </div>
       </DndContext>
-      <div aria-atomic="true" className="sr-only" role="status">
-        {moveAnnouncement}
-      </div>
       <DashboardStepNav
         addWidget={addWidget}
         cancel={cancel}
@@ -394,61 +491,69 @@ function WidgetWidthDropdown({
   }
 
   return (
-    <Popup
-      onToggleClose={() => onOpenChange(false)}
-      onToggleOpen={onOpenChange}
-      popupType="menu"
-      render={({ close }) => (
-        <PopupList.ButtonGroup>
-          {validOptions.map((option) => {
-            const isSelected = option.width === currentWidth
-            return (
-              <PopupList.Button
-                active={isSelected}
-                key={option.width}
-                onClick={() => {
-                  onResize(option.width)
-                  close()
-                }}
-              >
-                <span className="widget-wrapper__size-btn-label">{option.width}</span>
-                <span className="widget-wrapper__size-btn-percentage">
-                  {option.percentage.toFixed(0)}%
-                </span>
-              </PopupList.Button>
-            )
-          })}
-        </PopupList.ButtonGroup>
-      )}
-      renderButton={({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
-        <Button
-          aria-label={t('dashboard:resizeWidget', { label: widgetLabel, size: currentWidth })}
-          buttonStyle="secondary"
-          className="widget-wrapper__size-btn"
-          extraButtonProps={{
-            onKeyDown,
-            ...ariaProps,
-            tabIndex: 0,
-          }}
-          icon={<ChevronIcon className="widget-wrapper__size-btn-icon" size={16} />}
-          margin={false}
-          onClick={onClick}
-          selected={_active}
-        >
-          {currentWidth}
-        </Button>
-      )}
-      size="small"
-      verticalAlign="bottom"
-    />
+    <>
+      <Popup
+        onToggleClose={() => onOpenChange(false)}
+        onToggleOpen={onOpenChange}
+        popupType="menu"
+        render={({ close }) => (
+          <PopupList.ButtonGroup>
+            {validOptions.map((option) => {
+              const isSelected = option.width === currentWidth
+              return (
+                <PopupList.Button
+                  active={isSelected}
+                  key={option.width}
+                  onClick={() => {
+                    onResize(option.width)
+                    close()
+                  }}
+                >
+                  <span className="widget-wrapper__size-btn-label">{option.width}</span>
+                  <span className="widget-wrapper__size-btn-percentage">
+                    {option.percentage.toFixed(0)}%
+                  </span>
+                </PopupList.Button>
+              )
+            })}
+          </PopupList.ButtonGroup>
+        )}
+        renderButton={({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
+          <Button
+            aria-label={t('dashboard:resizeWidget', { label: widgetLabel, size: currentWidth })}
+            buttonStyle="ghost"
+            className="widget-wrapper__size-btn"
+            extraButtonProps={{
+              onKeyDown,
+              ...ariaProps,
+              tabIndex: 0,
+            }}
+            icon={<ChevronIcon className="widget-wrapper__size-btn-icon" size={16} />}
+            margin={false}
+            onClick={onClick}
+            selected={_active}
+          >
+            {currentWidth}
+          </Button>
+        )}
+        size="small"
+        verticalAlign="bottom"
+      />
+      <span aria-hidden="true" className="widget-wrapper__controls-divider" />
+    </>
   )
 }
 
 function DraggableItem(props: {
+  canDropAfter: boolean
+  canDropBefore: boolean
   children: (args: { dragHandle: React.ReactNode }) => React.ReactNode
   disabled?: boolean
   id: string
+  index: number
+  isSelected: boolean
   label: string
+  onSelect: () => void
   style?: React.CSSProperties
   width: WidgetWidth
 }) {
@@ -465,13 +570,25 @@ function DraggableItem(props: {
   }
 
   return (
-    <div className="widget" data-slug={props.id} data-width={props.width} style={mergedStyles}>
-      <DroppableItem id={props.id} position="before" />
+    <div
+      className={`widget${props.isSelected ? ' widget--selected' : ''}`}
+      data-slug={props.id}
+      data-widget-index={props.index}
+      data-width={props.width}
+      style={mergedStyles}
+    >
+      <DroppableItem
+        id={props.id}
+        index={props.index}
+        isEnabled={props.canDropBefore}
+        position="before"
+      />
       <div
         aria-label={props.label}
         aria-labelledby={props.disabled ? undefined : `${props.id}-content`}
         className="draggable"
         id={props.id}
+        onFocus={props.disabled ? undefined : props.onSelect}
         ref={setNodeRef}
         role="group"
         style={{
@@ -486,29 +603,53 @@ function DraggableItem(props: {
             <button
               {...attributes}
               {...listeners}
+              aria-controls={`${props.id}-controls`}
               aria-describedby={[attributes['aria-describedby'], `${props.id}-content`]
                 .filter(Boolean)
                 .join(' ')}
+              aria-expanded={props.isSelected}
               aria-label={t('general:dragToReorder')}
               className="widget-wrapper__edit-overlay widget-wrapper__drag-btn"
+              onClick={props.onSelect}
               ref={setActivatorNodeRef}
               type="button"
             />
           ),
         })}
       </div>
-      <DroppableItem id={props.id} position="after" />
+      <DroppableItem
+        id={props.id}
+        index={props.index + 1}
+        isEnabled={props.canDropAfter}
+        position="after"
+      />
     </div>
   )
 }
 
-function DroppableItem({ id, position }: { id: string; position: 'after' | 'before' }) {
-  const { setNodeRef, isOver } = useDroppable({ id: `${id}-${position}`, data: { position } })
+function DroppableItem({
+  id,
+  index,
+  isEnabled,
+  position,
+}: {
+  id: string
+  index: number
+  isEnabled: boolean
+  position: 'after' | 'before'
+}) {
+  const droppableArgs = useMemo(
+    () => ({ id: `${id}-${position}`, data: { position }, disabled: !isEnabled }),
+    [id, isEnabled, position],
+  )
+  const { setNodeRef, isOver } = useDroppable(droppableArgs)
 
   return (
     <div
       className="droppable-widget"
+      data-drop-index={index}
       data-testid={`${id}-${position}`}
+      hidden={!isEnabled}
       ref={setNodeRef}
       style={{
         position: 'absolute',
@@ -526,29 +667,4 @@ function DroppableItem({ id, position }: { id: string; position: 'after' | 'befo
       }}
     />
   )
-}
-
-function getWidgetMoveIndexes({
-  activeID,
-  layout,
-  overID,
-}: {
-  activeID: UniqueIdentifier
-  layout: WidgetInstanceClient[]
-  overID: UniqueIdentifier
-}) {
-  const widgetID = String(overID).replace(/-(?:before|after)$/, '')
-  const moveFromIndex = layout.findIndex((widget) => widget.item.id === activeID)
-  let moveToIndex = layout.findIndex((widget) => widget.item.id === widgetID)
-
-  if (widgetID !== activeID) {
-    if (moveFromIndex < moveToIndex) {
-      moveToIndex--
-    }
-    if (String(overID).endsWith('-after')) {
-      moveToIndex++
-    }
-  }
-
-  return { moveFromIndex, moveToIndex }
 }

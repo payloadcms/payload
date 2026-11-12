@@ -6,7 +6,7 @@ import React, { useId } from 'react'
 
 import { Button } from '../../../../elements/Button/index.js'
 import { useModal } from '../../../../elements/Modal/index.js'
-import { EditIcon } from '../../../../icons/Edit/index.js'
+import { WriteIcon } from '../../../../icons/Write/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { WidgetConfigDrawer } from './WidgetConfigDrawer.js'
@@ -44,10 +44,10 @@ export function WidgetEditControl({
     <>
       <Button
         aria-label={t('general:editLabel', { label: widgetLabel })}
-        buttonStyle="secondary"
+        buttonStyle="ghost"
         className="widget-wrapper__edit-btn"
         extraButtonProps={{ tabIndex: 0 }}
-        icon={<EditIcon />}
+        icon={<WriteIcon />}
         margin={false}
         onClick={() => {
           openModal(drawerSlug)

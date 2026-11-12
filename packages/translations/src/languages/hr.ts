@@ -489,6 +489,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     remove: 'Ukloni',
     removeFilter: 'Ukloni filtar',
     rename: 'Preimenuj',
+    replace: 'Zamijeni',
     replaceRow: 'Zamijeni redak',
     requiredFields: 'Polja označena s * obavezna su.',
     reset: 'Ponovno postavi',

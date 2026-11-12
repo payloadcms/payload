@@ -28,6 +28,8 @@ export type WidgetServerProps<TWidget extends { data?: unknown } | never = never
     : WidgetDataFromWidget<Exclude<TWidget, never>> extends Record<string, unknown>
       ? WidgetDataFromWidget<Exclude<TWidget, never>>
       : Record<string, unknown>
+  /** Stable ID of this dashboard widget instance. */
+  widgetId?: string
   widgetSlug: [TWidget] extends [never]
     ? string
     : [WidgetSlugFromWidget<{ data?: unknown } & Exclude<TWidget, never>>] extends [never]

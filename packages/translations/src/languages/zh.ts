@@ -466,6 +466,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     remove: '移除',
     removeFilter: '移除筛选器',
     rename: '重命名',
+    replace: '替换',
     replaceRow: '替换行',
     requiredFields: '标有 * 的字段为必填项。',
     reset: '重置',

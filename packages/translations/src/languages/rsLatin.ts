@@ -489,6 +489,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     remove: 'Ukloni',
     removeFilter: 'Ukloni filter',
     rename: 'Preimenuj',
+    replace: 'Zameni',
     replaceRow: 'Zameni red',
     requiredFields: 'Polja označena sa * su obavezna.',
     reset: 'Ponovo postavi',

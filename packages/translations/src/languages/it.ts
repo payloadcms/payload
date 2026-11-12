@@ -495,6 +495,7 @@ export const itTranslations: DefaultTranslationsObject = {
     remove: 'Rimuovi',
     removeFilter: 'Rimuovi filtro',
     rename: 'Rinomina',
+    replace: 'Sostituisci',
     replaceRow: 'Sostituisci riga',
     requiredFields: 'I campi contrassegnati con * sono obbligatori.',
     reset: 'Ripristina',

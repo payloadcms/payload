@@ -486,6 +486,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     remove: 'Видалити',
     removeFilter: 'Видалити фільтр',
     rename: 'Перейменувати',
+    replace: 'Замінити',
     replaceRow: 'Замінити рядок',
     requiredFields: 'Поля, позначені *, є обов’язковими.',
     reset: 'Скидання',

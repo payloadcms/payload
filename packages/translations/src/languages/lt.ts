@@ -494,6 +494,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     remove: 'Pašalinti',
     removeFilter: 'Pašalinti filtrą',
     rename: 'Pervadinti',
+    replace: 'Pakeisti',
     replaceRow: 'Pakeisti eilutę',
     requiredFields: '* pažymėti laukai yra privalomi.',
     reset: 'Atstatyti',

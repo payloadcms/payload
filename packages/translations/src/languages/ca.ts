@@ -494,6 +494,7 @@ export const caTranslations: DefaultTranslationsObject = {
     remove: 'Elimina',
     removeFilter: 'Elimina el filtre',
     rename: 'Canvia el nom',
+    replace: 'Reemplaça',
     replaceRow: 'Reemplaça fila',
     requiredFields: 'Els camps marcats amb * són obligatoris.',
     reset: 'Restableix',

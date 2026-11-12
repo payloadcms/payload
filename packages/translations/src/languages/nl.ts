@@ -497,6 +497,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     remove: 'Verwijderen',
     removeFilter: 'Filter verwijderen',
     rename: 'Hernoemen',
+    replace: 'Vervangen',
     replaceRow: 'Rij vervangen',
     requiredFields: 'Velden gemarkeerd met * zijn verplicht.',
     reset: 'Resetten',

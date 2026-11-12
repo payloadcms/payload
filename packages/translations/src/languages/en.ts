@@ -490,6 +490,7 @@ export const enTranslations = {
     remove: 'Remove',
     removeFilter: 'Remove filter',
     rename: 'Rename',
+    replace: 'Replace',
     replaceRow: 'Replace Row',
     requiredFields: 'Fields marked with * are required.',
     reset: 'Reset',

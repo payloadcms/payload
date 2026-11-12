@@ -1,7 +1,7 @@
 import type { WidgetWidth } from 'payload'
 
 import { arrayMove } from '@dnd-kit/sortable'
-import { PREFERENCE_KEYS } from 'payload/shared'
+import { getWidgetControlData, PREFERENCE_KEYS } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { v4 as uuid } from 'uuid'
@@ -17,6 +17,8 @@ import { usePreferences } from '../../../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { RenderWidget } from './renderWidget/RenderWidget.js'
+
+const WIDGET_WIDTHS: WidgetWidth[] = ['x-small', 'small', 'medium', 'large', 'x-large', 'full']
 
 export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   const setLayoutPreference = useSetLayoutPreference()
@@ -126,15 +128,17 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       const widgetId = `${widgetSlug}-${uuid().replaceAll('-', '')}`
       const widget = widgets.find((widget) => widget.slug === widgetSlug)
 
+      const data = getWidgetControlData({ controls: widget?.controls })
+
       // Create a new widget instance using RenderWidget
       const newWidgetInstance: WidgetInstanceClient = {
         component: React.createElement(RenderWidget, {
-          widgetData: {},
+          widgetData: data,
           widgetId,
         }),
         item: {
           id: widgetId,
-          data: {},
+          data,
           maxWidth: widget?.maxWidth ?? 'full',
           minWidth: widget?.minWidth ?? 'x-small',
           width: widget?.minWidth ?? 'x-small',
@@ -166,6 +170,49 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       }, 100)
     },
     [isEditing, widgets],
+  )
+
+  const replaceWidget = useCallback(
+    ({ widgetID, widgetSlug }: { widgetID: string; widgetSlug: string }) => {
+      const currentWidget = currentLayout.find(({ item }) => item.id === widgetID)
+      const widget = widgets.find(({ slug }) => slug === widgetSlug)
+
+      if (!isEditing || !currentWidget || !widget) {
+        return
+      }
+
+      const newWidgetID = `${widgetSlug}-${uuid().replaceAll('-', '')}`
+      const minWidth = widget.minWidth ?? 'x-small'
+      const maxWidth = widget.maxWidth ?? 'full'
+      const widthIndex = Math.max(
+        WIDGET_WIDTHS.indexOf(minWidth),
+        Math.min(WIDGET_WIDTHS.indexOf(currentWidget.item.width), WIDGET_WIDTHS.indexOf(maxWidth)),
+      )
+      const data = getWidgetControlData({ controls: widget.controls })
+      const replacement: WidgetInstanceClient = {
+        component: React.createElement(RenderWidget, {
+          widgetData: data,
+          widgetId: newWidgetID,
+        }),
+        item: {
+          id: newWidgetID,
+          data,
+          maxWidth,
+          minWidth,
+          width: WIDGET_WIDTHS[widthIndex],
+        },
+      }
+
+      setCurrentLayout((prev) =>
+        prev.map((item) => (item.item.id === widgetID ? replacement : item)),
+      )
+      setTimeout(() => {
+        document.getElementById(newWidgetID)?.focus({ preventScroll: true })
+      }, 100)
+
+      return newWidgetID
+    },
+    [currentLayout, isEditing, widgets],
   )
 
   const deleteWidget = useCallback(
@@ -242,6 +289,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     deleteWidget,
     isEditing,
     moveWidget,
+    replaceWidget,
     resetLayout,
     resizeWidget,
     saveLayout,

@@ -491,6 +491,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     remove: 'Հեռացնել',
     removeFilter: 'Հեռացնել զտիչը',
     rename: 'Վերանվանել',
+    replace: 'Փոխարինել',
     replaceRow: 'Տողը փոխարինել',
     requiredFields: '* նշանով դաշտերը պարտադիր են։',
     reset: 'Վերակայել',

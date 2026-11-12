@@ -486,6 +486,7 @@ export const etTranslations: DefaultTranslationsObject = {
     remove: 'Eemalda',
     removeFilter: 'Eemalda filter',
     rename: 'Nimeta ümber',
+    replace: 'Asenda',
     replaceRow: 'Asenda rida',
     requiredFields: 'Tärniga * tähistatud väljad on kohustuslikud.',
     reset: 'Lähtesta',

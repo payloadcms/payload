@@ -181,25 +181,23 @@ export default buildConfigWithDefaults({
           {
             slug: 'count',
             Component: './components/Count.tsx#default',
+            controls: [
+              {
+                name: 'collection',
+                type: 'select',
+                defaultValue: 'tickets',
+                label: ({ t }) => t('general:collection'),
+                options: [
+                  { label: 'Tickets', value: 'tickets' },
+                  { label: 'Events', value: 'events' },
+                ],
+              },
+            ],
             fields: [
               {
                 name: 'title',
                 type: 'text',
                 required: true,
-              },
-              {
-                name: 'collection',
-                type: 'select',
-                options: [
-                  {
-                    label: 'Tickets',
-                    value: 'tickets',
-                  },
-                  {
-                    label: 'Events',
-                    value: 'events',
-                  },
-                ],
               },
             ],
             label: {

@@ -491,6 +491,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     remove: 'Fjern',
     removeFilter: 'Fjern filter',
     rename: 'Endre navn',
+    replace: 'Erstatt',
     replaceRow: 'Erstatt rad',
     requiredFields: 'Felter merket med * er obligatoriske.',
     reset: 'Tilbakestill',

@@ -40,6 +40,7 @@ export {
   generateNKeysBetween,
 } from '../config/orderable/fractional-indexing.js'
 export { isUserMenuSettingsGroup, serverProps } from '../config/types.js'
+export { createClientWidgetControls, getWidgetControlData } from '../config/widgetControls.js'
 export { combineQueries } from '../database/combineQueries.js'
 export { isNestedRelationshipQuery } from '../database/isNestedRelationshipQuery.js'
 

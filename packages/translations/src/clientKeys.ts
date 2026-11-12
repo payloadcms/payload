@@ -418,6 +418,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:remove',
   'general:removeFilter',
   'general:rename',
+  'general:replace',
   'general:replaceRow',
   'general:reset',
   'general:resetPreferences',

@@ -1,0 +1,52 @@
+@layer payload-default {
+  .widget-wrapper__resize-handles {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    pointer-events: none;
+  }
+
+  .widget-resize-handle {
+    position: absolute;
+    inset-block-start: 50%;
+    translate: 0 -50%;
+    width: var(--spacer-4);
+    height: var(--spacer-6);
+    cursor: ew-resize;
+    touch-action: none;
+    pointer-events: auto;
+    border-radius: var(--radius-medium);
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: var(--spacer-2);
+      height: var(--spacer-4);
+      box-sizing: border-box;
+      border: var(--stroke-width-small) solid var(--color-border-selected-strong);
+      border-radius: var(--radius-full);
+      background: var(--color-bg);
+      pointer-events: none;
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
+  }
+
+  .widget-resize-handle--start {
+    inset-inline-start: calc(var(--spacer-2-5) * -1);
+  }
+
+  .widget-resize-handle--end {
+    inset-inline-end: calc(var(--spacer-2-5) * -1);
+  }
+
+  body.is-resizing-widgets,
+  body.is-resizing-widgets * {
+    cursor: ew-resize;
+  }
+}

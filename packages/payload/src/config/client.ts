@@ -17,6 +17,7 @@ import {
 } from '../collections/config/client.js'
 import { createClientBlocks, createClientFields } from '../fields/config/client.js'
 import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/config/client.js'
+import { createClientWidgetControls } from './widgetControls.js'
 
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
@@ -190,9 +191,10 @@ export const createClientConfig = ({
         if (config.admin.dashboard?.widgets) {
           ;(clientConfig.admin.dashboard ??= {}).widgets = config.admin.dashboard.widgets.map(
             (widget) => {
-              const { Component: _, fields, label, ...rest } = widget
+              const { Component: _, controls, fields, label, ...rest } = widget
               return {
                 ...rest,
+                controls: createClientWidgetControls({ controls, i18n, importMap }),
                 ...(fields?.length
                   ? {
                       fields: createClientFields({

@@ -491,6 +491,7 @@ export const viTranslations: DefaultTranslationsObject = {
     remove: 'Xóa',
     removeFilter: 'Xóa bộ lọc',
     rename: 'Đổi tên',
+    replace: 'Thay thế',
     replaceRow: 'Thay thế hàng',
     requiredFields: 'Các trường được đánh dấu * là bắt buộc.',
     reset: 'Đặt lại',

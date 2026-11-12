@@ -490,6 +490,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     remove: 'অপসারণ করুন',
     removeFilter: 'ফিল্টার সরান',
     rename: 'নাম পরিবর্তন করুন',
+    replace: 'প্রতিস্থাপন করুন',
     replaceRow: 'সারি প্রতিস্থাপন করুন',
     requiredFields: '* চিহ্নিত ঘরগুলি পূরণ করা আবশ্যক।',
     reset: 'রিসেট করুন',

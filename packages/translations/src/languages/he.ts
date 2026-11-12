@@ -474,6 +474,7 @@ export const heTranslations: DefaultTranslationsObject = {
     remove: 'הסר',
     removeFilter: 'הסרת מסנן',
     rename: 'שנה שם',
+    replace: 'החלף',
     replaceRow: 'החלף שורה',
     requiredFields: 'שדות המסומנים ב-* הם שדות חובה.',
     reset: 'איפוס',

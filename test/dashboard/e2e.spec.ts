@@ -1217,7 +1217,7 @@ describe('Dashboard', () => {
     // Open the activity widget configuration.
     await d.setEditing()
     const widget = d.widgetByPos(2)
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     await widget.locator('.widget-wrapper__edit-btn').click()
 
     const drawer = page.locator('.drawer__content:visible')
@@ -1311,7 +1311,7 @@ describe('Dashboard', () => {
     await d.addWidget('Upload files')
 
     const widget = d.widgetByPos(TOTAL_WIDGETS + 1)
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     await widget.locator('.widget-wrapper__edit-btn').click()
 
     const drawer = page.locator('.drawer__content:visible')
@@ -1496,7 +1496,7 @@ describe('Dashboard', () => {
     await d.setEditing()
     await d.addWidget('Upload files')
     const widget = d.widgetByPos(TOTAL_WIDGETS + 1)
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     await widget.locator('.widget-wrapper__edit-btn').click()
 
     const drawer = page.locator('.drawer__content:visible')
@@ -1517,7 +1517,10 @@ describe('Dashboard', () => {
     await modal.getByRole('button', { name: 'Close' }).click()
 
     await d.setEditing()
-    await d.widgetByPos(TOTAL_WIDGETS + 1).hover()
+    await d
+      .widgetByPos(TOTAL_WIDGETS + 1)
+      .locator('.widget-wrapper__drag-btn')
+      .click()
     await d
       .widgetByPos(TOTAL_WIDGETS + 1)
       .locator('.widget-wrapper__edit-btn')
@@ -1527,6 +1530,275 @@ describe('Dashboard', () => {
     await expect(
       savedField.getByRole('checkbox', { name: 'Media Alts', exact: true }),
     ).toBeChecked()
+  })
+
+  test('should show controls only for the selected widget and retain them after resizing', async ({
+    page,
+  }) => {
+    const d = new DashboardHelper(page)
+
+    await d.setEditing()
+    const firstWidget = d.widgetByPos(3)
+    const secondWidget = d.widgetByPos(4)
+    const firstControls = firstWidget.locator('.widget-wrapper__controls')
+    const secondControls = secondWidget.locator('.widget-wrapper__controls')
+
+    await firstWidget.hover()
+    await expect(firstControls).toBeHidden()
+    await firstWidget.locator('.widget-wrapper__drag-btn').click()
+    await expect(firstControls).toBeVisible()
+    await expect
+      .poll(async () => {
+        const widgetBounds = await firstWidget.locator('.widget-wrapper').boundingBox()
+        const toolbarBounds = await firstControls.boundingBox()
+
+        if (!widgetBounds || !toolbarBounds) {
+          return null
+        }
+
+        return {
+          centerOffset: Math.round(
+            toolbarBounds.x + toolbarBounds.width / 2 - widgetBounds.x - widgetBounds.width / 2,
+          ),
+          gap: Math.round(widgetBounds.y - toolbarBounds.y - toolbarBounds.height),
+          height: Math.round(toolbarBounds.height),
+        }
+      })
+      .toEqual({ centerOffset: 0, gap: 8, height: 40 })
+    await secondWidget.hover()
+    await expect(firstControls).toBeVisible()
+    await expect(secondControls).toBeHidden()
+    await secondWidget.locator('.widget-wrapper__drag-btn').click()
+    await expect(firstControls).toBeHidden()
+    await expect(secondControls).toBeVisible()
+    await d.resizeWidget(4, 'small')
+    await expect(secondControls).toBeVisible()
+    await d.cancelEditing()
+    await d.setEditing()
+    await expect(secondWidget.locator('.widget-wrapper__controls')).toBeHidden()
+  })
+
+  test('should preview toolbar selections and preserve them when saving drawer fields and the dashboard', async ({
+    page,
+  }) => {
+    const d = new DashboardHelper(page)
+
+    await d.setEditing()
+    const widget = d.widgetByPos(4)
+    const control = widget.locator('.widget-wrapper__select-btn')
+
+    await widget.locator('.widget-wrapper__drag-btn').click()
+    await expect(control).toHaveText('Tickets')
+    await control.click()
+    await expect(page.getByRole('menuitemradio', { name: 'Tickets', exact: true })).toBeChecked()
+    await page.getByRole('menuitemradio', { name: 'Events', exact: true }).click()
+    await expect(control).toHaveText('Events')
+    await expect(widget.locator('.widget-wrapper__controls')).toBeVisible()
+    await d.editWidget(4, 'Toolbar selection')
+    await expect(control).toHaveText('Events')
+    await d.saveChangesAndValidate()
+    await page.reload()
+    await waitForDashboardHydration({ page })
+    await d.setEditing()
+    await widget.locator('.widget-wrapper__drag-btn').click()
+    await expect(control).toHaveText('Events')
+    await control.click()
+    await page.getByRole('menuitemradio', { name: 'Tickets', exact: true }).click()
+    await d.cancelEditing()
+    await d.setEditing()
+    await widget.locator('.widget-wrapper__drag-btn').click()
+    await expect(control).toHaveText('Events')
+  })
+
+  test('should offer only row targets when dragging a full-width widget', async ({ page }) => {
+    const dashboard = new DashboardHelper(page)
+
+    await dashboard.setEditing()
+    await dashboard.resizeWidget(8, 'large')
+    const source = dashboard.widgetByPos(1).locator('.widget-wrapper__drag-btn')
+
+    await source.scrollIntoViewIfNeeded()
+    const bounds = await source.boundingBox()
+
+    if (!bounds) {
+      throw new Error('Expected a visible full-width widget')
+    }
+
+    const x = bounds.x + bounds.width / 2
+    const y = bounds.y + bounds.height / 2
+
+    await page.mouse.move(x, y)
+    await page.mouse.down()
+    await page.mouse.move(x + 10, y)
+    await expect(page.locator('body')).toHaveClass(/\bis-dragging\b/)
+    await expect(page.locator('.droppable-widget:not([hidden])')).toHaveCount(0)
+    await expect(page.locator('.dashboard-row-drop-targets')).toBeVisible()
+    await page.keyboard.press('Escape')
+    await page.mouse.up()
+    await dashboard.cancelEditing()
+  })
+
+  test('should show a horizontal indicator and insert after a row when dropping below it', async ({
+    page,
+  }) => {
+    const dashboard = new DashboardHelper(page)
+
+    await dashboard.setEditing()
+    const source = dashboard.widgetByPos(4)
+    const lastInRow = dashboard.widgetByPos(7)
+    const sourceID = await source.getAttribute('data-slug')
+    const lastInRowID = await lastInRow.getAttribute('data-slug')
+    const handle = source.locator('.widget-wrapper__drag-btn')
+
+    await handle.scrollIntoViewIfNeeded()
+    const sourceBounds = await handle.boundingBox()
+
+    if (!sourceBounds || !sourceID || !lastInRowID) {
+      throw new Error('Expected a visible source widget and row anchor')
+    }
+
+    const x = sourceBounds.x + sourceBounds.width / 2
+    const y = sourceBounds.y + sourceBounds.height / 2
+
+    await page.mouse.move(x, y)
+    await page.mouse.down()
+    await page.mouse.move(x + 10, y, { steps: 2 })
+    const rowTarget = page.getByTestId(`${lastInRowID}-row-after`)
+
+    await expect(rowTarget).toBeVisible()
+    await rowTarget.evaluate((element) => element.scrollIntoView({ block: 'center' }))
+    const rowBounds = await rowTarget.boundingBox()
+
+    if (!rowBounds) {
+      throw new Error('Expected a measured row drop target')
+    }
+
+    await page.mouse.move(rowBounds.x + rowBounds.width / 2, rowBounds.y + rowBounds.height / 2, {
+      steps: 10,
+    })
+    await expect(rowTarget).toHaveClass(/dashboard-row-drop-target--active/)
+    await page.mouse.up()
+    await expect(dashboard.widgetByPos(7)).toHaveAttribute('data-slug', sourceID)
+    await expect(page.locator('.dashboard-row-drop-targets')).toHaveCount(0)
+    await dashboard.cancelEditing()
+  })
+
+  test('should resize a selected widget from its edge without reordering it', async ({ page }) => {
+    const dashboard = new DashboardHelper(page)
+
+    await dashboard.setEditing()
+    const widget = dashboard.widgetByPos(4)
+    const initialLayout = await dashboard.getSnapshot()
+
+    await widget.locator('.widget-wrapper__drag-btn').click()
+    const handle = widget.locator('.widget-resize-handle--end')
+    const handleBounds = await handle.boundingBox()
+    const dashboardBounds = await dashboard.dashboard.boundingBox()
+
+    if (!handleBounds || !dashboardBounds) {
+      throw new Error('Expected visible widget resize handle and dashboard bounds')
+    }
+
+    const x = handleBounds.x + handleBounds.width / 2
+    const y = handleBounds.y + handleBounds.height / 2
+
+    await page.mouse.move(x, y)
+    await page.mouse.down()
+    await page.mouse.move(x + dashboardBounds.width * 0.3, y, { steps: 10 })
+    await expect(page.locator('body')).not.toHaveClass(/\bis-dragging\b/)
+    await page.mouse.up()
+    await expect(widget).toHaveAttribute('data-width', 'medium')
+    await expect
+      .poll(async () => (await dashboard.getSnapshot()).map(([slug]) => slug))
+      .toEqual(initialLayout.map(([slug]) => slug))
+    await dashboard.cancelEditing()
+    await expect(widget).toHaveAttribute('data-width', 'x-small')
+  })
+
+  test('should deselect a widget when clicking outside it', async ({ page }) => {
+    const d = new DashboardHelper(page)
+
+    await d.setEditing()
+    const widget = d.widgetByPos(4)
+    const controls = widget.locator('.widget-wrapper__controls')
+
+    await widget.locator('.widget-wrapper__drag-btn').click()
+    await expect(controls).toBeVisible()
+    await d.dashboard.click({ position: { x: 1, y: 1 } })
+    await expect(controls).toBeHidden()
+    await expect(widget.locator('.widget-wrapper')).not.toHaveClass(/controls-active/)
+    await widget.locator('.widget-wrapper__drag-btn').click()
+    await expect(controls).toBeVisible()
+    await d.assertIsEditing(true)
+  })
+
+  test('should retain widget selection while interacting with its replacement picker', async ({
+    page,
+  }) => {
+    const d = new DashboardHelper(page)
+
+    await d.setEditing()
+    const widget = d.widgetByPos(4)
+    const controls = widget.locator('.widget-wrapper__controls')
+
+    await widget.locator('.widget-wrapper__drag-btn').click()
+    await widget.getByRole('button', { name: /^Replace / }).click()
+    const picker = page.locator('.drawer__content:visible')
+
+    await picker.getByPlaceholder('Search widgets').click()
+    await expect(widget.locator('.widget-wrapper')).toHaveClass(/controls-active/)
+    await picker.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(picker).toBeHidden()
+    await expect(controls).toBeVisible()
+  })
+
+  test('should reveal widget controls in keyboard focus order', async ({ page }) => {
+    const d = new DashboardHelper(page)
+
+    await d.setEditing()
+    const widget = d.widgetByPos(4)
+    const controls = widget.locator('.widget-wrapper__controls')
+    const dragHandle = widget.locator('.widget-wrapper__drag-btn')
+
+    await expect(controls).toBeHidden()
+    await widget.locator('.draggable').focus()
+    await expect(controls).toBeVisible()
+    await page.keyboard.press('Tab')
+    await expect(dragHandle).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(widget.locator('.widget-wrapper__size-btn')).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(widget.locator('.widget-wrapper__select-btn')).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(widget.locator('.widget-wrapper__edit-btn')).toBeFocused()
+    await page.keyboard.press('Enter')
+    await expect(page.locator('.drawer__content:visible')).toBeVisible()
+  })
+
+  test('should replace a selected widget in place and restore it when editing is canceled', async ({
+    page,
+  }) => {
+    const d = new DashboardHelper(page)
+
+    await d.setEditing()
+    await d.resizeWidget(4, 'medium')
+    const originalWidgetID = await d.widgetByPos(4).getAttribute('data-slug')
+
+    await d
+      .widgetByPos(4)
+      .getByRole('button', { name: /^Replace / })
+      .click()
+    const picker = page.locator('.drawer__content:visible')
+
+    await expect(picker.getByRole('heading', { name: /^Replace / })).toBeVisible()
+    await picker.getByRole('button', { name: 'Upload files', exact: true }).click()
+    await expect(picker).toBeHidden()
+    await expect(d.widgets).toHaveCount(TOTAL_WIDGETS)
+    await d.assertWidget(4, 'upload-dropzone', 'medium')
+    await expect(d.widgetByPos(4).locator('.draggable')).toBeFocused()
+    await expect(d.widgetByPos(4).locator('.widget-wrapper__controls')).toBeVisible()
+    await d.cancelEditing()
+    await expect(d.widgetByPos(4)).toHaveAttribute('data-slug', originalWidgetID!)
   })
 
   test('delete widget', async ({ page }) => {
@@ -1652,6 +1924,7 @@ describe('Dashboard', () => {
 
     // verify the opposite:
     await d.setEditing()
+    await dragHandle.click()
     await expect(d.getDeleteWidgetButton(widget)).toBeVisible()
     await expect(dragHandle).toBeVisible()
     await expect(dragHandle).toBeEnabled()
@@ -1676,7 +1949,7 @@ describe('Dashboard', () => {
     await d.setEditing()
 
     const widget = d.widgetByPos(4)
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     await widget.locator('.widget-wrapper__edit-btn').click()
 
     const drawer = page.locator('.drawer__content:visible')
@@ -1724,7 +1997,7 @@ describe('Dashboard', () => {
     const widgetCount = await d.widgets.count()
     const widget = d.widgetByPos(widgetCount)
 
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     await widget.locator('.widget-wrapper__edit-btn').click()
 
     const drawer = page.locator('.drawer__content:visible')
@@ -1758,7 +2031,7 @@ describe('Dashboard', () => {
     const widgetCount = await d.widgets.count()
     const widget = d.widgetByPos(widgetCount)
 
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     await widget.locator('.widget-wrapper__edit-btn').click()
 
     const drawer = page.locator('.drawer__content:visible')
@@ -1780,7 +2053,7 @@ describe('Dashboard', () => {
     await drawer.getByRole('button', { name: 'Save Changes' }).click()
     await expect(drawer).toBeHidden()
 
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     await widget.locator('.widget-wrapper__edit-btn').click()
     await expect(drawer).toBeVisible()
     const selectedValue = drawer.locator('.field-type.relationship .rs__single-value')
@@ -1800,7 +2073,7 @@ describe('Dashboard', () => {
 
     // Edit in English locale (default)
     const widget = d.widgetByPos(widgetPos)
-    await widget.hover()
+    await widget.locator('.widget-wrapper__drag-btn').click()
     await widget.locator('.widget-wrapper__edit-btn').click()
 
     let drawer = page.locator('.drawer__content:visible')
@@ -1829,7 +2102,7 @@ describe('Dashboard', () => {
     await d2.setEditing()
 
     const widgetEs = d2.widgetByPos(widgetPos)
-    await widgetEs.hover()
+    await widgetEs.locator('.widget-wrapper__drag-btn').click()
     await widgetEs.locator('.widget-wrapper__edit-btn').click()
 
     drawer = page.locator('.drawer__content:visible')
@@ -1859,7 +2132,7 @@ describe('Dashboard', () => {
     await d3.setEditing()
 
     const widgetEn = d3.widgetByPos(widgetPos)
-    await widgetEn.hover()
+    await widgetEn.locator('.widget-wrapper__drag-btn').click()
     await widgetEn.locator('.widget-wrapper__edit-btn').click()
 
     drawer = page.locator('.drawer__content:visible')

@@ -478,6 +478,7 @@ export const arTranslations: DefaultTranslationsObject = {
     remove: 'إزالة',
     removeFilter: 'إزالة عامل التصفية',
     rename: 'إعادة تسمية',
+    replace: 'استبدال',
     replaceRow: 'استبدال الصف',
     requiredFields: 'الحقول المميزة بعلامة * مطلوبة.',
     reset: 'إعادة تعيين',

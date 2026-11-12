@@ -490,6 +490,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     remove: 'Noņemt',
     removeFilter: 'Noņemt filtru',
     rename: 'Pārdēvēt',
+    replace: 'Aizstāt',
     replaceRow: 'Aizstāt rindu',
     requiredFields: 'Lauki, kas atzīmēti ar *, ir obligāti.',
     reset: 'Atiestatīt',

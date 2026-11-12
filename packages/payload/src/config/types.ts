@@ -929,8 +929,29 @@ export type AfterErrorHook = (
 
 export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x-small'
 
+export type WidgetSelectControl = {
+  defaultValue?: string
+  /** Optional decorative icon rendered before the selected value. */
+  Icon?: PayloadComponent
+  label?: LabelFunction | StaticLabel
+  /** The key in widgetData that this control reads and updates. */
+  name: string
+  options: ({ label: LabelFunction | StaticLabel; value: string } | string)[]
+  type: 'select'
+}
+
+export type WidgetControl = WidgetSelectControl
+
+export type ClientWidgetControl = {
+  Icon?: React.ReactNode
+  label?: StaticLabel
+  options: ({ label: StaticLabel; value: string } | string)[]
+} & Omit<WidgetSelectControl, 'Icon' | 'label' | 'options'>
+
 export type Widget = {
   Component: PayloadComponent
+  /** Simple widget settings displayed in the dashboard edit toolbar. */
+  controls?: WidgetControl[]
   fields?: Field[]
   /**
    * Human-friendly label for the widget.
@@ -949,6 +970,7 @@ export type Widget = {
  * Client-side widget type with resolved label (no functions).
  */
 export type ClientWidget = {
+  controls?: ClientWidgetControl[]
   fields?: ClientField[]
   label?: StaticLabel
   maxWidth?: WidgetWidth

@@ -490,6 +490,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     remove: 'Премахни',
     removeFilter: 'Премахване на филтъра',
     rename: 'Преименувайте',
+    replace: 'Замени',
     replaceRow: 'Заменете ред',
     requiredFields: 'Полетата, отбелязани с *, са задължителни.',
     reset: 'Нулиране',

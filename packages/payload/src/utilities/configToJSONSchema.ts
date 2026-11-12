@@ -213,11 +213,13 @@ function generateWidgetSchemas({
     })
     let dataSchema: JSONSchema4
 
-    if (widget.fields?.length) {
+    const widgetFields = [...(widget.fields ?? []), ...(widget.controls ?? [])]
+
+    if (widgetFields.length) {
       const widgetFieldSchemas = fieldsToJSONSchema({
         collectionIDFieldTypes,
         config,
-        fields: flattenAllFields({ fields: widget.fields }),
+        fields: flattenAllFields({ fields: widgetFields }),
         forceInlineBlocks,
         i18n,
         interfaceNameDefinitions,
