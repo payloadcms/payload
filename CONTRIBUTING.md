@@ -271,6 +271,10 @@ When opening a PR from a fork, please leave **"Allow edits and access to secrets
 
 If that permission is disabled and we need to push changes to move the PR forward, we may close your PR and re-open an equivalent branch directly in the Payload repository so the team can iterate on it.
 
+## Releasing
+
+Releases are published from GitHub Actions by maintainers authorized to run the release workflow. If you are one of them, follow the [`release` skill](.agents/skills/release/SKILL.md). Your AI tool loads it when you ask it to cut a release, and it is short enough to follow by hand.
+
 ## Previewing docs
 
 This is how you can preview changes you made locally to the docs:
