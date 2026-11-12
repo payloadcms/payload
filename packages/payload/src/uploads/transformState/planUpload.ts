@@ -1,0 +1,366 @@
+import type { Document, PayloadRequest } from '../../types/index.js'
+import type { PlannedTransformerPipeline } from '../transformers/planTransformerPipeline.js'
+import type { UploadTransformer } from '../transformers/types.js'
+
+import { ValidationError } from '../../errors/ValidationError.js'
+import { planTransformerPipeline } from '../transformers/planTransformerPipeline.js'
+import { getUploadTransformerInternal } from '../transformers/uploadTransformerBridge.js'
+import { getChangedTransformKeys } from './getChangedTransformKeys.js'
+import { getTransformKeyCoverageErrors } from './getTransformKeyCoverageErrors.js'
+import { planPersistedDefaultStages } from './planPersistedDefaultStages.js'
+import { isClaimRequired, isFocalPointKey } from './transformKeyClaims.js'
+
+export type UploadPlan = { mimeType: string } & PlannedTransformerPipeline
+
+/**
+ * What an upload with no new file does with its stored file.
+ * - `keep`: nothing changes the file, so the stored files stay.
+ * - `rebuild`: upload stages build new files from the stored file.
+ * - `applyAtRequest`: request-time stages apply the saved keys, so no file is read or written.
+ * - `copyForRequest`: a copy reads the source's original to store its own, and request-time stages
+ *   apply the saved keys. No upload stage runs.
+ */
+export type UploadRebuildOutcome = 'applyAtRequest' | 'copyForRequest' | 'keep' | 'rebuild'
+
+type PlanArgs = {
+  collectionSlug: string
+  pipelineDoc: Document
+  pipelineOriginalDoc: Readonly<Document>
+  req: PayloadRequest
+}
+
+/**
+ * Decides whether an upload without a new file rebuilds from the stored file. A rebuild is planned
+ * with the stored MIME type, so a key that cannot be applied fails before the stored file is read.
+ * When request-time stages apply the saved keys, an update writes no file, and only a copy reads
+ * the stored original.
+ */
+export async function planUploadRebuild({
+  canApplyAtRequest,
+  documentID,
+  hasCropOrFocalPointEdit,
+  hasCropOrResizeEdit,
+  isDuplicating,
+  isExternalSource,
+  previousTransforms,
+  storedMimeType,
+  ...planArgs
+}: {
+  /** False when no original would be stored for request-time stages to start from. */
+  canApplyAtRequest: boolean
+  documentID?: number | string
+  /**
+   * A crop or resize in `uploadEdits`, or a focal point that differs from the stored one
+   * (`shouldReupload`). These triggers rebuilt the file before claims existed.
+   */
+  hasCropOrFocalPointEdit: boolean
+  /** A crop or resize sent in the `uploadEdits` query. */
+  hasCropOrResizeEdit: boolean
+  isDuplicating: boolean
+  isExternalSource: boolean
+  /** The stored `_transforms` on an update; `undefined` when there is nothing to compare. */
+  previousTransforms: Document['_transforms'] | undefined
+  storedMimeType: string | undefined
+} & PlanArgs): Promise<{ outcome: UploadRebuildOutcome; rebuildPlan?: UploadPlan }> {
+  if (isExternalSource) {
+    return { outcome: 'rebuild' }
+  }
+
+  const changedKeys =
+    previousTransforms === undefined
+      ? []
+      : getChangedTransformKeys({
+          next: planArgs.pipelineDoc._transforms,
+          previous: previousTransforms,
+        })
+  const hasNonFocalPointChange = changedKeys.some((key) => !isFocalPointKey(key))
+
+  if (!isDuplicating && !hasNonFocalPointChange && !hasCropOrFocalPointEdit) {
+    return { outcome: 'keep' }
+  }
+
+  if (!storedMimeType) {
+    return { outcome: 'rebuild' }
+  }
+
+  const rebuildPlan = await planUploadPipeline({ ...planArgs, mimeType: storedMimeType })
+  const hasRequiredChange =
+    isDuplicating || hasCropOrResizeEdit || changedKeys.some(isClaimRequired)
+  const shouldRebuild =
+    hasRequiredChange ||
+    hasClaimedOptionalChange({
+      changedKeys,
+      collectionSlug: planArgs.collectionSlug,
+      hasCropOrFocalPointEdit,
+      plan: rebuildPlan,
+    })
+
+  if (!shouldRebuild) {
+    return { outcome: 'keep', rebuildPlan }
+  }
+
+  const { isAppliedAtRequest } = await resolveTransformKeyCoverage({
+    ...planArgs,
+    canApplyAtRequest,
+    documentID,
+    mimeType: storedMimeType,
+    plan: rebuildPlan,
+  })
+
+  if (!isAppliedAtRequest) {
+    return { outcome: 'rebuild', rebuildPlan }
+  }
+
+  return { outcome: isDuplicating ? 'copyForRequest' : 'applyAtRequest', rebuildPlan }
+}
+
+/**
+ * Whether a stage that runs claims a changed key that rebuilds the file only when claimed: a
+ * focal point or a custom key. An edit sent through `uploadEdits`, `focalX` or `focalY` is not in
+ * `changedKeys`, because those inputs predate `_transforms`; it counts as a focal point change.
+ */
+function hasClaimedOptionalChange({
+  changedKeys,
+  collectionSlug,
+  hasCropOrFocalPointEdit,
+  plan,
+}: {
+  changedKeys: string[]
+  collectionSlug: string
+  hasCropOrFocalPointEdit: boolean
+  plan: UploadPlan
+}): boolean {
+  const optionalChangedKeys = changedKeys.filter((key) => !isClaimRequired(key))
+
+  if (hasCropOrFocalPointEdit) {
+    optionalChangedKeys.push('focalPoint')
+  }
+
+  return getStagesThatRun({ collectionSlug, plan }).stagesThatRun.some((transformer) =>
+    plan.claims.get(transformer)?.some((key) => optionalChangedKeys.includes(key)),
+  )
+}
+
+/** Plans the upload pipeline for one MIME type, without checking claims. */
+export async function planUploadPipeline({
+  collectionSlug,
+  mimeType,
+  pipelineOriginalDoc,
+  req,
+}: { mimeType: string } & PlanArgs): Promise<UploadPlan> {
+  const plan = await planTransformerPipeline({
+    args: {
+      collectionSlug,
+      doc: pipelineOriginalDoc,
+      mimeType,
+      operation: 'upload',
+      originalDoc: pipelineOriginalDoc,
+      req,
+    },
+    capability: 'transformFile',
+    transformers: req.payload.config.upload?.transformers ?? [],
+  })
+
+  return { ...plan, mimeType }
+}
+
+/**
+ * The planned stages that run. Only one Sharp bridge drives an upload: the one that owns the
+ * collection, or the first. The other bridges do not run, so they do not count as claimers, and
+ * they must not see the chosen bridge's task options, which are private to it.
+ */
+export function getStagesThatRun({
+  collectionSlug,
+  plan,
+}: {
+  collectionSlug: string
+  plan: PlannedTransformerPipeline
+}): {
+  bridgeTransformer?: UploadTransformer
+  /** The claims of the stages that run. */
+  claimsOfStagesThatRun: Map<UploadTransformer, string[]>
+  stagesThatRun: UploadTransformer[]
+} {
+  const bridgeTransformers = plan.pipeline.filter((transformer) =>
+    Boolean(getUploadTransformerInternal(transformer)?.prepareUpload),
+  )
+  const bridgeTransformer =
+    bridgeTransformers.find((transformer) =>
+      getUploadTransformerInternal(transformer)!.handlesCollection?.({ collectionSlug }),
+    ) ?? bridgeTransformers[0]
+
+  const stagesThatRun = plan.pipeline.filter(
+    (transformer) => transformer === bridgeTransformer || !bridgeTransformers.includes(transformer),
+  )
+
+  return {
+    bridgeTransformer,
+    claimsOfStagesThatRun: new Map(
+      [...plan.claims].filter(([transformer]) => stagesThatRun.includes(transformer)),
+    ),
+    stagesThatRun,
+  }
+}
+
+/**
+ * Decides where the saved keys are applied. Upload stages that run apply them into a stored file.
+ * When those leave a key with no claim, request-time stages can apply every saved key instead: the
+ * default file is then built when it is requested, and only the original is stored. When both kinds
+ * claim a key, the upload stage wins. Fails before any file work when neither covers the keys.
+ */
+export async function resolveTransformKeyCoverage({
+  canApplyAtRequest,
+  collectionSlug,
+  documentID,
+  mimeType,
+  pipelineDoc,
+  pipelineOriginalDoc,
+  plan,
+  req,
+}: {
+  /** False when no original would be stored for request-time stages to start from. */
+  canApplyAtRequest: boolean
+  documentID?: number | string
+  mimeType: string
+  plan: PlannedTransformerPipeline
+} & PlanArgs): Promise<{ isAppliedAtRequest: boolean }> {
+  const { claimsOfStagesThatRun } = getStagesThatRun({ collectionSlug, plan })
+  const errors = getTransformKeyCoverageErrors({
+    claims: claimsOfStagesThatRun,
+    transforms: pipelineDoc._transforms,
+  })
+
+  if (errors.length === 0) {
+    return { isAppliedAtRequest: false }
+  }
+
+  const uploadClaimedKeys = new Set([...claimsOfStagesThatRun.values()].flat())
+  const hasOnlyUnclaimedKeys = errors.every(
+    ({ path }) => !uploadClaimedKeys.has(path.slice('_transforms.'.length)),
+  )
+  // Every output must apply the saved keys. Sizes are stored at upload unless their owner builds
+  // them at request time, so with sizes the owner must be a request-time stage too.
+  const upload = req.payload.collections?.[collectionSlug]?.config.upload
+  const hasVariants = Boolean(upload?.variants?.length)
+  const canBuildVariantsAtRequest = !hasVariants || Boolean(upload?.variantsTransformerSlug)
+
+  if (
+    canApplyAtRequest &&
+    hasOnlyUnclaimedKeys &&
+    canBuildVariantsAtRequest &&
+    (await canBuildAtRequest({
+      collectionSlug,
+      documentID,
+      mimeType,
+      pipelineDoc,
+      pipelineOriginalDoc,
+      req,
+      requiredTransformerSlug: hasVariants ? upload?.variantsTransformerSlug : undefined,
+    }))
+  ) {
+    return { isAppliedAtRequest: true }
+  }
+
+  throw new ValidationError({ collection: collectionSlug, errors, req }, req.t)
+}
+
+/** Fails before any file work when a saved key has no claiming stage, or more than one. */
+export function assertTransformKeysCovered({
+  collectionSlug,
+  pipelineDoc,
+  plan,
+  req,
+}: {
+  plan: PlannedTransformerPipeline
+} & Pick<PlanArgs, 'collectionSlug' | 'pipelineDoc' | 'req'>): void {
+  const { claimsOfStagesThatRun } = getStagesThatRun({ collectionSlug, plan })
+  const errors = getTransformKeyCoverageErrors({
+    claims: claimsOfStagesThatRun,
+    transforms: pipelineDoc._transforms,
+  })
+
+  if (errors.length > 0) {
+    throw new ValidationError({ collection: collectionSlug, errors, req }, req.t)
+  }
+}
+
+/**
+ * Whether request-time stages can build a file of this MIME type from the original, applying every
+ * saved key. With `requiredTransformerSlug`, that transformer must also be one of the stages.
+ */
+export async function canBuildAtRequest({
+  requiredTransformerSlug,
+  ...buildArgs
+}: {
+  requiredTransformerSlug?: string
+} & RequestTimeBuildArgs): Promise<boolean> {
+  return isBuildableAtRequest({
+    requestTimeBuild: await planRequestTimeBuild(buildArgs),
+    requiredTransformerSlug,
+  })
+}
+
+type RequestTimeBuildArgs = {
+  documentID?: number | string
+  mimeType: string
+} & PlanArgs
+
+export type RequestTimeBuildPlan = Awaited<ReturnType<typeof planPersistedDefaultStages>>
+
+/**
+ * Plans the request-time stages that would build a file of this MIME type from the original. Check
+ * the result with `isBuildableAtRequest`. Use both to check more than one condition on one plan.
+ */
+export function planRequestTimeBuild({
+  collectionSlug,
+  documentID,
+  mimeType,
+  pipelineDoc,
+  pipelineOriginalDoc,
+  req,
+}: RequestTimeBuildArgs): Promise<RequestTimeBuildPlan> {
+  return planPersistedDefaultStages({
+    collectionSlug,
+    doc: pipelineOriginalDoc,
+    documentID,
+    mimeType,
+    req,
+    transforms: pipelineDoc._transforms,
+  })
+}
+
+/**
+ * Whether a planned request-time build has stages that apply every saved key. With
+ * `requiredTransformerSlug`, that transformer must also be one of the stages.
+ */
+export function isBuildableAtRequest({
+  requestTimeBuild: { coverageErrors, plan },
+  requiredTransformerSlug,
+}: {
+  requestTimeBuild: RequestTimeBuildPlan
+  requiredTransformerSlug?: string
+}): boolean {
+  return (
+    plan.pipeline.length > 0 &&
+    (requiredTransformerSlug === undefined ||
+      plan.pipeline.some((transformer) => transformer.slug === requiredTransformerSlug)) &&
+    coverageErrors.length === 0
+  )
+}
+
+/**
+ * Whether a planned request-time build can build the collection's sizes. The transformer that
+ * registered the sizes (`variantsTransformerSlug`) must be one of the stages.
+ */
+export function areVariantsBuildableAtRequest({
+  requestTimeBuild,
+  variantsTransformerSlug,
+}: {
+  requestTimeBuild: RequestTimeBuildPlan
+  variantsTransformerSlug?: string
+}): boolean {
+  return (
+    Boolean(variantsTransformerSlug) &&
+    isBuildableAtRequest({ requestTimeBuild, requiredTransformerSlug: variantsTransformerSlug })
+  )
+}

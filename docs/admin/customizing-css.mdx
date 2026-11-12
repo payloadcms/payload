@@ -37,7 +37,7 @@ Here is an example of how you might target the Dashboard View and change the bac
 
 ### Specificity rules
 
-All Payload CSS is encapsulated inside CSS layers under `@layer payload-default`. Any custom css will now have the highest possible specificity.
+Payload's default styles and design tokens are declared in `@layer payload-default`. Unlayered custom CSS takes precedence over these normal declarations, regardless of selector specificity or stylesheet load order.
 
 We have also provided a layer `@layer payload` if you want to use layers and ensure that your styles are applied after payload.
 
@@ -45,13 +45,13 @@ To override existing styles in a way that the previous rules of specificity woul
 
 ```css
 @layer payload-default {
-  // my styles within the Payload specificity
+  /* my styles within the Payload specificity */
 }
 ```
 
 ## Re-using Payload CSS variables
 
-Payload exposes its design tokens as global [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties). These are defined globally on `:root`, so you can consume them in your own stylesheets without importing anything.
+Payload defines its design tokens as [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) on both `:root` and `:host`. Custom admin components inherit these tokens without importing anything.
 
 ```css
 @layer payload-default {
@@ -61,6 +61,30 @@ Payload exposes its design tokens as global [CSS Variables](https://developer.mo
   }
 }
 ```
+
+### Overriding tokens
+
+Override token values on `:root` in your own unlayered CSS:
+
+```css
+:root {
+  --button-radius: 19px;
+}
+```
+
+<Banner type="info">Inside Shadow DOM, override tokens on `:host`.</Banner>
+
+### Using tokens outside the Admin Panel
+
+Import `@payloadcms/ui/css/tokens` to use Payload's design tokens outside the Admin Panel without loading its resets, component styles, fonts, or global element styles:
+
+```ts
+import '@payloadcms/ui/css/tokens'
+```
+
+For Shadow DOM, load the stylesheet into the shadow root itself. A normal CSS import may place it in the outer document instead.
+
+Values in `rem` use the document's root font size, including inside Shadow DOM. Load the fonts you want and apply typography tokens in your own styles.
 
 ## CSS Library
 
@@ -74,11 +98,11 @@ The following variables are defined and can be overridden:
 - [Colors](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/colors.css)
   - Semantic tokens for background, text, border, and icon colors (e.g. `--color-bg`, `--color-text`, `--color-border`, `--color-icon`)
   - Success / warning / danger color tokens
-  - The raw `--ramp-*` color palette
+  - [The raw `--ramp-*` color palette](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/color-ramps.css)
 - [Sizing](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/app.css)
-  - Horizontal gutter
-  - Transition speeds
-  - Font sizes
+  - [Horizontal gutter](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/spacing.css)
+  - Navigation width
+  - [Font sizes](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/typography.css)
   - Etc.
 
 For an up-to-date, comprehensive list of all available variables, please refer to the [Source Code](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css).
@@ -90,4 +114,8 @@ For an up-to-date, comprehensive list of all available variables, please refer t
 
 #### Dark Mode
 
-Colors are designed to automatically adapt to the theme of the [Admin Panel](./overview). All `--color-*` tokens are redefined under `[data-theme='dark']`, so semantic tokens like `--color-bg` and `--color-text`, along with the success / warning / danger colors, adjust automatically for dark mode.
+Colors are designed to automatically adapt to the theme of the [Admin Panel](./overview). Theme-dependent `--color-*` tokens are redefined under `[data-theme='dark']` and `:host([data-theme='dark'])`, so semantic tokens like `--color-bg` and `--color-text`, along with the success / warning / danger colors, adjust automatically for dark mode.
+
+Tokens default to light mode. Set `data-theme="dark"` or `data-theme="light"` on the document's `<html>` element or on the shadow host to select its palette. Add `data-enhanced-contrast` to that same element to enable enhanced contrast, including nested themed controls.
+
+A nested `data-theme` changes colors and elevations while inheriting shared spacing, typography, radii, and component customizations.

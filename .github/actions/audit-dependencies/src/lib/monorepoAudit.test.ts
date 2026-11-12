@@ -58,4 +58,12 @@ describe('runMonorepoAudit', () => {
       /exit code 1[\s\S]*ERR_PNPM_AUDIT_NO_LOCKFILE/,
     )
   })
+
+  it('does not ignore registry errors, which would read as a clean audit', async () => {
+    const run = runReturning({ code: 0, stderr: '', stdout: JSON.stringify({ advisories: {} }) })
+
+    await runMonorepoAudit({ cwd: '/repo', run })
+
+    expect(run.mock.calls[0]?.[0].args).not.toContain('--ignore-registry-errors')
+  })
 })

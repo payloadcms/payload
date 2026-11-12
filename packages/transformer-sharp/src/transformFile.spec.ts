@@ -1,4 +1,4 @@
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest, UploadEdits } from 'payload'
 
 import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
@@ -135,6 +135,69 @@ describe('createTransformFile', () => {
         expect(metadata.height).toBe(expectedSize)
       },
     )
+  })
+
+  describe('main crop', () => {
+    const cropMain = async ({
+      cropData,
+      image,
+    }: {
+      cropData: NonNullable<UploadEdits['crop']>
+      image: Buffer
+    }) => {
+      const transformFile = createTransformFile({ sharpDependency: sharp })
+
+      const result = await transformFile({
+        file: new File([image], 'photo.png', { type: 'image/png' }),
+        options: {
+          collectionUpload: {},
+          crop: {
+            cropData,
+            heightInPixels: 10,
+            originalDimensions: { height: 10, width: 100 },
+            widthInPixels: cropData.width,
+          },
+          kind: 'main',
+        } satisfies SharpUploadTaskOptions,
+        req: makeReq(),
+      })
+
+      return sharp(await toBuffer(result.file!))
+    }
+
+    it('should start the crop at the saved pixel, not 1px before it', async () => {
+      // Red columns 0-28, blue from column 29. Core saves x = 29px and sends it as 29 / 100 * 100,
+      // which is 28.999…%, so flooring it starts the crop on the last red column.
+      const blue = await makeImageBuffer({
+        background: { b: 255, g: 0, r: 0 },
+        height: 10,
+        width: 71,
+      })
+      const image = await sharp({
+        create: { background: { b: 0, g: 0, r: 255 }, channels: 3, height: 10, width: 100 },
+      })
+        .composite([{ input: blue, left: 29, top: 0 }])
+        .png()
+        .toBuffer()
+
+      const cropped = await cropMain({
+        cropData: { height: 100, unit: '%', width: 10, x: (29 / 100) * 100, y: 0 },
+        image,
+      })
+
+      const raw = await cropped.raw().toBuffer({ resolveWithObject: true })
+      expect(sampleRawPixel({ ...raw, x: 0, y: 0 })).toEqual({ b: 255, g: 0, r: 0 })
+    })
+
+    it('should keep a rounded crop inside the image', async () => {
+      // 30.5% rounds up to 31px, and 31 + 70 would pass the right edge of a 100px image.
+      const cropped = await cropMain({
+        cropData: { height: 100, unit: '%', width: 70, x: 30.5, y: 0 },
+        image: await makeImageBuffer({ height: 10, width: 100 }),
+      })
+
+      expect((await cropped.metadata()).width).toBe(70)
+    })
   })
 
   describe('size (transformSize)', () => {

@@ -1008,6 +1008,39 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         })
       })
 
+      test('should save the full document as the new version when a restore has select', async ({
+        payload,
+      }) => {
+        const post = await payload.create({
+          collection: draftCollectionSlug,
+          data: { _status: 'published', description: 'description', title: 'restore with select' },
+          overrideAccess: true,
+        })
+        const { docs } = await payload.findVersions({
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          where: { parent: { equals: post.id } },
+        })
+
+        const restored = await payload.restoreVersion({
+          id: docs[0]!.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          select: { title: true },
+        })
+        const { docs: latest } = await payload.findVersions({
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+          where: { and: [{ parent: { equals: post.id } }, { latest: { equals: true } }] },
+        })
+
+        expect(restored).not.toHaveProperty('description')
+        expect(latest[0]!.version).toMatchObject({
+          description: 'description',
+          title: 'restore with select',
+        })
+      })
+
       test('should return `findVersions` in correct order', async ({ payload }) => {
         const somePost = await payload.create({
           collection: draftCollectionSlug,
@@ -3532,7 +3565,10 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         })
       })
 
-      test('should allow a version to be restored', async ({ payload, restClient }) => {
+      test('should allow a version to be restored through GraphQL', async ({
+        payload,
+        restClient,
+      }) => {
         // Update it
         const update = `mutation {
           updateAutosavePost(id: ${formatGraphQLID({ payload }, postID)}, data: {title: "${'Wrong title'}"}) {
@@ -3907,7 +3943,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(publishedVersion._status).toStrictEqual('published')
       })
 
-      test('should have different createdAt in a new version while the same version.createdAt', async ({
+      test('should have different createdAt in a new global version while the same version.createdAt', async ({
         payload,
       }) => {
         await seedGlobalSiblingLocales({
@@ -4053,7 +4089,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         }
       })
 
-      test('should allow a version to be retrieved by ID', async ({ payload }) => {
+      test('should allow a global version to be retrieved by ID', async ({ payload }) => {
         const version = await payload.findGlobalVersionByID({
           id: globalVersionID,
           slug: autoSaveGlobalSlug,
@@ -4084,7 +4120,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
 
     test.describe('Update', () => {
-      test('should allow a version to save locales properly', async ({ payload }) => {
+      test('should allow a global version to save locales properly', async ({ payload }) => {
         const englishTitle = 'Title in EN'
         const spanishTitle = 'Title in ES'
 
@@ -4192,7 +4228,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         await payload.db.deleteVersions({ globalSlug: simpleDraftGlobalSlug, where: {} })
       })
 
-      test('should allow a version to be restored', async ({ payload }) => {
+      test('should allow a global version to be restored', async ({ payload }) => {
         const title2 = 'Another updated title in EN'
 
         await seedGlobalSiblingLocales({
@@ -5125,7 +5161,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
 
     test.describe('Patch', () => {
-      test('should allow a draft to be patched', async ({ payload }) => {
+      test('should allow a global draft to be patched', async ({ payload }) => {
         const originalTitle = 'Here is a published global'
 
         await seedGlobalSiblingLocales({
@@ -5339,7 +5375,10 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       await createAndSetVersionID({ restClient })
     })
     test.describe('Read', () => {
-      test('should allow read of versions by version id', async ({ payload, restClient }) => {
+      test('should allow read of global versions by version id', async ({
+        payload,
+        restClient,
+      }) => {
         // language=graphql
         const query = `query {
           versionAutosaveGlobal(id: ${formatGraphQLID({ payload }, autosaveGlobalVersionID)}) {
@@ -5360,7 +5399,9 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(data.versionAutosaveGlobal.version.title).toStrictEqual(globalGraphQLOriginalTitle)
       })
 
-      test('should allow read of versions by querying version content', async ({ restClient }) => {
+      test('should allow read of global versions by querying version content', async ({
+        restClient,
+      }) => {
         // language=graphQL
         const query = `query {
           versionsAutosaveGlobal(where: { version__title: {equals: "${globalGraphQLOriginalTitle}" } }) {
@@ -5387,7 +5428,10 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
 
     test.describe('Restore', () => {
-      test('should allow a version to be restored', async ({ payload, restClient }) => {
+      test('should allow a global version to be restored through GraphQL', async ({
+        payload,
+        restClient,
+      }) => {
         const updatedTitle = 'Wrong global title'
 
         // Update it
@@ -6813,7 +6857,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(globalData.title.de).toStrictEqual('German published')
       })
 
-      test('should not leak draft data', async ({ payload }) => {
+      test('should not leak draft data of a global', async ({ payload }) => {
         // save spanish draft
         await payload.updateGlobal({
           slug: global,
@@ -6848,7 +6892,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(globalData.title.en).toStrictEqual('Eng published')
       })
 
-      test('should merge draft data from other locales when publishing all', async ({
+      test('should merge draft data from other locales when publishing all locales of a global', async ({
         payload,
       }) => {
         // save spanish draft
@@ -6902,7 +6946,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(publishedAll.title.en).toStrictEqual('Eng published')
       })
 
-      test('should publish non-default individual locale', async ({ payload }) => {
+      test('should publish a non-default individual locale of a global', async ({ payload }) => {
         // save spanish draft
         await payload.updateGlobal({
           slug: global,
@@ -6937,7 +6981,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         expect(globalData.title.de).toStrictEqual('German published')
       })
 
-      test('should show correct data in latest version', async ({ payload }) => {
+      test('should show correct data in the latest global version', async ({ payload }) => {
         // save spanish draft
         await payload.updateGlobal({
           slug: global,

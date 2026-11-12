@@ -185,6 +185,7 @@ export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sess
 export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
 export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
 
+export { createAuthToken } from './auth/createAuthToken.js'
 export { defaultUserCollection } from './auth/defaultUser.js'
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
@@ -1471,6 +1472,7 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+export { redeemRefreshToken } from './auth/redeemRefreshToken.js'
 export { rotateSecret } from './auth/rotateSecret.js'
 export type { RotateSecretArgs, RotateSecretResult } from './auth/rotateSecret.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'
@@ -1498,6 +1500,8 @@ export { generateImportMap } from './cli/commands/generateImportMap/generateImpo
 export type { ImportMap } from './cli/commands/generateImportMap/generateImportMap.js'
 
 export { genImportMapIterateFields } from './cli/commands/generateImportMap/iterateFields.js'
+export { registerCLIExitCodeHandler } from './cli/runtime/exitCodeHandlers.js'
+export type { CLIExitCodeHandler } from './cli/runtime/exitCodeHandlers.js'
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -2063,6 +2067,7 @@ export * from './types/index.js'
 export type { ValidationResult } from './types/validation.js'
 export { generatePayloadFileURL } from './uploads/generatePayloadFileURL.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
+export { registerUploadVariants } from './uploads/registerUploadVariants.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 export type * from './uploads/transformers/types.js'
 export type * from './uploads/types.js'
@@ -2177,8 +2182,6 @@ export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
-export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
-export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'

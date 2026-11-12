@@ -26,6 +26,8 @@ import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { transformForWrite } from '../../packages/drizzle/src/transform/write/index.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { traverseFields as traverseDrizzleFields } from '../../packages/drizzle/src/transform/write/traverseFields.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import {
@@ -359,6 +361,54 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         expect(updatedUser?.salt).not.toBe(existingSalt)
       })
 
+      test('should rehash a 100k password hash to 600k after login', async ({ payload }) => {
+        const testEmail = '100k-password-hash@example.com'
+        const testPassword = 'test-password'
+        const existingSalt = crypto.randomBytes(32).toString('hex')
+        const existingHash = `pbkdf2-sha256-100k-v1:${crypto
+          .pbkdf2Sync(testPassword, existingSalt, 100000, 32, 'sha256')
+          .toString('hex')}`
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+          overrideAccess: true,
+        })
+        createdUserIDs.push(user.id)
+
+        await payload.db.updateOne({
+          id: user.id,
+          collection: slug,
+          data: {
+            hash: existingHash,
+            salt: existingSalt,
+          },
+        })
+
+        await payload.login({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+          overrideAccess: true,
+        })
+
+        const updatedUser = await payload.db.findOne({
+          collection: slug,
+          select: {
+            hash: true,
+          },
+          where: {
+            id: { equals: user.id },
+          },
+        })
+
+        expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v1:[a-f0-9]{64}$/)
+      })
+
       test('should preserve a password changed during login', async ({ payload }) => {
         const testEmail = 'password-change-during-login@example.com'
         const testPassword = 'test-password'
@@ -629,11 +679,27 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
       try {
         traverseFields({ fields: [], fillEmpty: false, ref: sharedData })
-        transformForWrite({
+        const rowToInsert = transformForWrite({
           adapter: payload.db,
           data: drizzleData,
           fields: [],
           tableName: 'session_users',
+        })
+
+        expect(drizzleData).toEqual(createConstrainedData())
+
+        // Inspect dotted-key expansion directly because transformForWrite preserves its input.
+        traverseDrizzleFields({
+          ...rowToInsert,
+          adapter: payload.db as DrizzleAdapter,
+          baseTableName: 'session_users',
+          columnPrefix: '',
+          data: drizzleData,
+          fieldPrefix: '',
+          fields: [],
+          parentIsLocalized: false,
+          parentTableName: 'session_users',
+          path: '',
         })
         processStateChanged =
           Object.hasOwn(Object.prototype, marker) || Object.hasOwn(inheritedTarget, inheritedMarker)
@@ -680,6 +746,25 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       expect(data.user.collection).toBe(slug)
       expect(data.user._strategy).toBeDefined()
       expect(data.token).toBeDefined()
+    })
+
+    test('should say which browser a login session is from', async ({ payload, restClient }) => {
+      const response = await restClient.POST(`/${slug}/login`, {
+        body: JSON.stringify({ email, password }),
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+        },
+      })
+      const { user } = await response.json()
+
+      const { sessions } = await payload.findByID({
+        id: user.id,
+        collection: slug,
+        overrideAccess: true,
+      })
+
+      expect(sessions?.at(-1)).toMatchObject({ type: 'login', label: 'Chrome on macOS' })
     })
 
     test('should return a user with read access from the login operation', async ({

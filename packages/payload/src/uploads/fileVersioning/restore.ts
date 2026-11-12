@@ -7,16 +7,54 @@ import type { JsonObject, PayloadRequest } from '../../types/index.js'
 import type { StoredFileList } from './types.js'
 
 import { APIError } from '../../errors/APIError.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
+import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { archiveOutgoingLocalFiles, replaceStoredFileReferences } from './archive.js'
 import { removeUnreferencedStagedObjects, scheduleUnreferencedFileCleanup } from './cleanup.js'
-import { runFileOperationPlan } from './fileOperationManager.js'
+import { runFileOperationPlan, shareFileOperationScope } from './fileOperationManager.js'
 import { copyLocalFile } from './localStorage.js'
 import { getArchivedFilename } from './naming.js'
+import { runRequestTimeFileRestore } from './restoreRequestTime.js'
 import {
   collectStoredFiles,
   getStoredFileIdentity,
   withLegacyCloudUploadFileData,
 } from './storedFiles.js'
+
+export type FileRestoreArgs<T> = {
+  collection: SanitizedCollectionConfig
+  current: JsonObject
+  id: number | string
+  req: PayloadRequest
+  selected: JsonObject
+  write: (restored: JsonObject) => Promise<T>
+}
+
+/**
+ * The request for a restore of an upload document. A restore can run inside another upload
+ * operation, so it must not use that upload's file, sizes or edits. It shares `req.context` with
+ * the caller; use `hideCloudStorageState` to keep the caller's cloud storage state out of it.
+ */
+export const isolateRestoreRequest = ({ req }: { req: PayloadRequest }): PayloadRequest => {
+  const isolated = isolateObjectProperty(req, ['file', 'payloadUploadSizes', 'query'])
+  isolated.file = undefined
+  isolated.payloadUploadSizes = undefined
+  isolated.query = { ...req.query }
+  delete isolated.query.uploadEdits
+  shareFileOperationScope({ owner: req, req: isolated })
+  return isolated
+}
+
+/**
+ * Restores the selected version's files. Stored files are copied. A version with a file built at
+ * request time keeps that file request-time, and never gets new stored files.
+ */
+export const runFileRestore = async <T>(args: FileRestoreArgs<T>): Promise<T> => {
+  const entries = [args.selected, ...Object.values(args.selected.variants ?? {})]
+  return entries.some((entry) => isRequestTimeFile({ entry: entry as JsonObject }))
+    ? runRequestTimeFileRestore({ ...args, runStoredRestore: runStoredFileRestore })
+    : runStoredFileRestore(args)
+}
 
 /** Copies the selected stored files before making that version current. */
 export const runStoredFileRestore = async <T>({
@@ -26,14 +64,7 @@ export const runStoredFileRestore = async <T>({
   req,
   selected,
   write,
-}: {
-  collection: SanitizedCollectionConfig
-  current: JsonObject
-  id: number | string
-  req: PayloadRequest
-  selected: JsonObject
-  write: (restored: JsonObject) => Promise<T>
-}): Promise<T> => {
+}: FileRestoreArgs<T>): Promise<T> => {
   const stored = await withLegacyCloudUploadFileData({
     collection,
     doc: selected,
@@ -65,6 +96,7 @@ export const runStoredFileRestore = async <T>({
           ? selectedVariants[sizeKey]
           : {
               _objectKey: null,
+              _stored: null,
               filename: null,
               filesize: null,
               height: null,

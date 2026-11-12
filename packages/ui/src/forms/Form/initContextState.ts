@@ -53,6 +53,7 @@ export const initContextState: Context = {
   setProcessing,
   setSubmitted,
   submit,
+  submitted: false,
 
   validateForm,
 }

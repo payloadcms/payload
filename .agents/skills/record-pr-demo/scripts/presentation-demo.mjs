@@ -13,7 +13,7 @@ export async function createPresentation({
   const wrapper = (route) =>
     route.fulfill({
       contentType: 'text/html',
-      body: '<!doctype html><html data-pr-demo-stage><head><meta charset="utf-8"><title>Demo recording</title><style>body{margin:0}</style></head><body><div id="demo-stage"></div></body></html>',
+      body: '<!doctype html><html><head><meta charset="utf-8"><title>Demo recording</title><style>body{margin:0}</style></head><body><div id="demo-stage"></div></body></html>',
     })
   if (options.accessibility) {
     const observerSource = await readFile(
@@ -31,17 +31,24 @@ export async function createPresentation({
   try {
     await stage.goto(wrapperURL)
     const source = await readFile(new URL('./WindowChrome/index.mjs', import.meta.url), 'utf8')
+    const sidebarSource = Buffer.from(
+      await readFile(new URL('./WindowChrome/sidebar.mjs', import.meta.url)),
+    ).toString('base64')
     await stage.evaluate(
-      async ({ source, options, viewport, shouldAnimateAnnotations }) => {
-        const { mountDemoChrome } = await import(`data:text/javascript;base64,${source}`)
+      async ({ source, sidebarSource, options, viewport, shouldAnimateAnnotations }) => {
+        const { mountDemoChrome, bindDemoHistory } = await import(
+          `data:text/javascript;base64,${source}`
+        )
         const root = document.querySelector('#demo-stage')
+        const app = document.createElement('iframe')
         window.demoChrome = mountDemoChrome({
           ...options,
+          onNavigate: (direction) => app.contentWindow.history.go(direction),
+          onRefresh: () => window.refreshDemoApplication(),
           root,
           viewport,
-          shouldAnimateAnnotations,
+          shouldAnimateFeedback: shouldAnimateAnnotations,
         })
-        const app = document.createElement('iframe')
         app.setAttribute('data-pr-demo-app', '')
         app.name = 'pr-demo-app'
         app.title = 'Payload application'
@@ -57,10 +64,21 @@ export async function createPresentation({
           }
           window.addEventListener('message', window.demoAccessibilityListener)
         }
+        window.stopDemoHistory = bindDemoHistory({ app, chrome: window.demoChrome })
         root.append(app)
+        const { mountAnnotationSidebar } = await import(
+          `data:text/javascript;base64,${sidebarSource}`
+        )
+        window.demoSidebar = mountAnnotationSidebar({
+          root,
+          change: options.change,
+          steps: options.annotationSteps,
+          shouldAnimate: shouldAnimateAnnotations,
+        })
       },
       {
         source: Buffer.from(source).toString('base64'),
+        sidebarSource,
         options,
         viewport,
         shouldAnimateAnnotations: pauseScale > 0,
@@ -74,10 +92,20 @@ export async function createPresentation({
     const call = ({ method, value }) =>
       stage.evaluate(
         async ({ method, value }) => {
-          await window.demoChrome[method](value)
+          const target = method === 'setAnnotation' ? window.demoSidebar : window.demoChrome
+          await target[method](value)
         },
         { method, value },
       )
+    const onAppNavigation = (navigatedFrame) => {
+      if (navigatedFrame === frame) {
+        void call({ method: 'setURL', value: frame.url() }).catch(() => {
+          // Navigation can invalidate a cosmetic URL update; the frame binding also syncs it.
+        })
+      }
+    }
+    stage.on('framenavigated', onAppNavigation)
+    await call({ method: 'setURL', value: frame.url() })
     let currentViewport = { ...viewport }
     let isResizing = false
     let isRefreshing = false
@@ -135,7 +163,9 @@ export async function createPresentation({
           }
         if (property === 'goBack' || property === 'goForward')
           return async () => {
-            throw new Error(`${property} is not supported in presentation mode; use page.goto()`)
+            throw new Error(
+              `${property} is not supported in presentation mode; use await click(chrome.${property === 'goBack' ? 'back' : 'forward'})`,
+            )
           }
         if (property === 'addInitScript') return stage.context().addInitScript.bind(stage.context())
         const owner = property in target ? target : stage
@@ -143,9 +173,17 @@ export async function createPresentation({
         return typeof value === 'function' ? value.bind(owner) : value
       },
     })
+    const refreshBinding = await stage.exposeFunction('refreshDemoApplication', () =>
+      appPage.reload(),
+    )
     return {
       page: stage,
       appPage,
+      chrome: {
+        back: stage.getByRole('button', { name: 'Back', exact: true }),
+        forward: stage.getByRole('button', { name: 'Forward', exact: true }),
+        refresh: stage.getByRole('button', { name: 'Refresh frame', exact: true }),
+      },
       startedAt,
       resizeWindow,
       setAnnotation: (value) => call({ method: 'setAnnotation', value }),
@@ -156,6 +194,12 @@ export async function createPresentation({
             new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
         ),
       stop: async () => {
+        stage.off('framenavigated', onAppNavigation)
+        await refreshBinding?.dispose()
+        await stage.evaluate(() => {
+          window.stopDemoHistory?.()
+          window.demoSidebar?.destroy()
+        })
         if (options.accessibility) {
           await frame.evaluate(() => window.__stopDemoAccessibility?.()).catch(() => {})
           await stage.evaluate(() => {
