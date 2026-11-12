@@ -1,0 +1,25 @@
+# Used instead of a root .dockerignore when building with -f apps/cms/Dockerfile.
+# Keeps the build context to the sources the image actually needs.
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+!**/.env.example
+.git
+.github
+.husky
+.claude
+.agents
+.playwright-mcp
+docs
+examples
+media
+test
+app
+app-tanstack
+templates
+apps/cms/local-packages
+apps/cms/media

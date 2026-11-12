@@ -1,0 +1,98 @@
+/* Pages of the iOS app, read mostly on a phone after tapping a link in the app */
+:root {
+  --app-page-background: #ffffff;
+  --app-page-text: #1c1c1e;
+  --app-page-muted: #6c6c70;
+  --app-page-link: #0a6b4f;
+  --app-page-rule: #e5e5ea;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --app-page-background: #000000;
+    --app-page-text: #f2f2f7;
+    --app-page-muted: #aeaeb2;
+    --app-page-link: #5fd3a6;
+    --app-page-rule: #38383a;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--app-page-background);
+  color: var(--app-page-text);
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+
+.app-page {
+  box-sizing: border-box;
+  max-width: 44rem;
+  margin-inline: auto;
+  padding-block: 32px 64px;
+  padding-inline: 20px;
+  overflow-wrap: break-word;
+}
+
+.app-page__app {
+  margin-block: 0 4px;
+  color: var(--app-page-muted);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.app-page h1 {
+  margin-block: 0 24px;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.app-page h2 {
+  margin-block: 40px 12px;
+  padding-block-start: 24px;
+  border-block-start: 1px solid var(--app-page-rule);
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.app-page h3 {
+  margin-block: 28px 8px;
+  font-size: 19px;
+}
+
+.app-page h4 {
+  margin-block: 24px 8px;
+  font-size: 17px;
+}
+
+.app-page p,
+.app-page ul,
+.app-page ol {
+  margin-block: 0 16px;
+}
+
+.app-page ul,
+.app-page ol {
+  padding-inline-start: 24px;
+}
+
+.app-page li {
+  margin-block-end: 6px;
+}
+
+.app-page a {
+  color: var(--app-page-link);
+}
+
+.app-page pre {
+  overflow-x: auto;
+  padding: 12px;
+  border: 1px solid var(--app-page-rule);
+  border-radius: 8px;
+  font-size: 14px;
+}
