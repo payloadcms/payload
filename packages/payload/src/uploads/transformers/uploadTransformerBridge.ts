@@ -1,5 +1,4 @@
 import type { PayloadRequest } from '../../types/index.js'
-import type { UploadEdits } from '../types.js'
 
 /**
  * Private v4 compatibility bridge, attached to a transformer object under this
@@ -49,10 +48,10 @@ export type UploadTransformerInternal = {
   handlesCollection?: (args: { collectionSlug: string }) => boolean
   prepareUpload?: (args: {
     collectionSlug: string
+    cropSize?: { height: number; width: number }
     file: File
     req: PayloadRequest
     transform: (task: UploadTransformTask) => Promise<File>
-    uploadEdits: UploadEdits
   }) => Promise<PreparedUploadTransformation[]>
 }
 
