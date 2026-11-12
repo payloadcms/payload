@@ -270,6 +270,16 @@ async function getContributors(commits: GitCommit[]): Promise<Contributor[]> {
             return null
           }
 
+          // The user search never matches GitHub noreply emails, so read the login from them
+          const noreplyLogin = getLoginFromNoreplyEmail(email)
+          if (noreplyLogin) {
+            if (!contributors.some((c) => c.username === noreplyLogin)) {
+              contributors.push({ name, username: noreplyLogin })
+            }
+            emails.add(email)
+            return noreplyLogin
+          }
+
           // Get co-author's GitHub username by email
           try {
             const response = await fetch(
@@ -312,6 +322,14 @@ async function getContributors(commits: GitCommit[]): Promise<Contributor[]> {
 }
 
 type Contributor = { name: string; username: string }
+
+/**
+ * Returns the login in a GitHub noreply email: `ID+login@users.noreply.github.com`,
+ * or `login@users.noreply.github.com` for older accounts.
+ */
+function getLoginFromNoreplyEmail(email: string): string | undefined {
+  return email.match(/^(?:\d+\+)?(?<login>[a-z\d-]+)@users\.noreply\.github\.com$/i)?.groups?.login
+}
 
 function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = false): string {
   const { description, isBreaking, references, scope } = commit
