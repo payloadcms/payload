@@ -88,12 +88,9 @@ export async function updateJobs({
     return result.docs as Job[]
   }
 
-  const jobReq = {
-    transactionID:
-      req.payload.db.name !== 'mongoose'
-        ? ((await req.payload.db.beginTransaction()) as string)
-        : undefined,
-  }
+  const transactionID =
+    req.payload.db.name !== 'mongoose' ? await req.payload.db.beginTransaction() : undefined
+  const jobReq = { transactionID: transactionID ?? undefined }
 
   if (typeof data.updatedAt === 'undefined') {
     // Ensure updatedAt date is always updated
@@ -116,10 +113,24 @@ export async function updateJobs({
         where: where as Where,
       }
 
-  const updatedJobs: Job[] | null = await req.payload.db.updateJobs(args)
+  let updatedJobs: Job[] | null
 
-  if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
-    await req.payload.db.commitTransaction(jobReq.transactionID)
+  try {
+    updatedJobs = await req.payload.db.updateJobs(args)
+
+    if (transactionID !== null && typeof transactionID !== 'undefined') {
+      await req.payload.db.commitTransaction(transactionID)
+    }
+  } catch (error) {
+    if (transactionID !== null && typeof transactionID !== 'undefined') {
+      try {
+        await req.payload.db.rollbackTransaction(transactionID)
+      } catch {
+        // Preserve the update or commit error that caused the rollback.
+      }
+    }
+
+    throw error
   }
 
   if (returning === false || !updatedJobs?.length) {
