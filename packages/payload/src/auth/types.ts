@@ -159,6 +159,10 @@ export type UserSession = {
   createdAt?: Date | null | string
   expiresAt: Date | string
   id: string
+  /** What the session is, for people to read, e.g. "Claude Code" or "Chrome on macOS". */
+  label?: null | string
+  /** More to show next to the label, e.g. `{ redirectHost: 'claude.ai' }`. Never anything secret. */
+  metadata?: null | Record<string, unknown>
   /**
    * How many times the session was refreshed with a refresh token. Refresh tokens remember it, so
    * the latest one can be told apart from older ones.
@@ -166,6 +170,11 @@ export type UserSession = {
   refreshCount?: null | number
   /** When the session was last refreshed with a refresh token. */
   refreshedAt?: Date | null | string
+  /**
+   * How the session was created: `'login'` for a sign-in, or e.g. `'mcp'` for an MCP client the
+   * user allowed. Plugins can use their own values.
+   */
+  type?: null | string
 }
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
   req: PayloadRequest

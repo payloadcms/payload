@@ -4532,6 +4532,21 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
 
       const { tools } = await client.listTools()
       expect(tools.some((tool) => tool.name === 'findDocuments')).toBe(true)
+
+      const {
+        docs: [user],
+      } = await payload.find({
+        collection: 'users',
+        overrideAccess: true,
+        where: { email: { equals: devUser.email } },
+      })
+      expect(user?.sessions).toContainEqual(
+        expect.objectContaining({
+          type: 'mcp',
+          metadata: { redirectHost: 'localhost:33418' },
+          label: 'Test client',
+        }),
+      )
     })
 
     test('should only issue tokens to the client that started the sign-in', async ({
