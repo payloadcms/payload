@@ -321,7 +321,7 @@ Examples:
 
 - LLMS.txt: <https://payloadcms.com/llms.txt>
 - LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
-- Node version: >=24.22.1
+- Node version: >=24.22.3
 - pnpm version: ^11.28.6
 
 ## Admin Panel

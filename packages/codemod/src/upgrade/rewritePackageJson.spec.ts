@@ -5,7 +5,7 @@ import type { ResolvedVersions } from './types.js'
 import { rewritePackageJson } from './rewritePackageJson.js'
 
 const resolved: ResolvedVersions = {
-  enginesNode: '>=24.22.1',
+  enginesNode: '>=24.22.3',
   nextTarget: '16.9.3',
   payloadVersion: '4.0.0-canary.20',
   typesNode: '24.12.3',
@@ -51,7 +51,7 @@ describe('rewritePackageJson', () => {
         '@types/node': '24.12.3',
         typescript: '6.0.3',
       },
-      engines: { node: '>=24.22.1' },
+      engines: { node: '>=24.22.3' },
       pnpm: { overrides: { 'some-other': '1.0.0' } }, // payload override removed, unrelated kept
       // resolutions removed entirely (only key was a payload package)
     })
@@ -108,7 +108,7 @@ describe('rewritePackageJson', () => {
       '@types/node': '24.12.3',
       typescript: '6.0.3',
     })
-    expect(data.engines).toEqual({ node: '>=24.22.1' })
+    expect(data.engines).toEqual({ node: '>=24.22.3' })
   })
 
   it('keeps toolchain versions already at or above the floor', () => {
