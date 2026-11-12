@@ -8,7 +8,7 @@ const mimeTypesByExtension: Record<string, string> = {
   jpg: 'image/jpeg',
   m4a: 'audio/mp4',
   m4v: 'video/x-m4v',
-  mkv: 'video/x-matroska',
+  mkv: 'video/matroska',
   mov: 'video/quicktime',
   mp3: 'audio/mpeg',
   mp4: 'video/mp4',
