@@ -138,10 +138,6 @@ export const findMany = async function find({
     selectDistinctResult = await selectDistinct({
       adapter,
       db,
-      // findMany selects the unique primary key, so DISTINCT is only needed to dedupe rows
-      // multiplied by joins. Without joins it's redundant and would break ORDER BY on expressions
-      // Postgres requires in the select list (e.g. the `near` distance sort).
-      disableDistinct: joins.length === 0,
       joins,
       query: ({ query }) => {
         if (orderBy) {
