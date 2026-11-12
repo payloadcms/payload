@@ -1,3 +1,4 @@
+import type { CollectionPermission } from '../../auth/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
@@ -12,6 +13,7 @@ import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { isNestedRelationshipQuery } from '../isNestedRelationshipQuery.js'
 import { prefixWherePaths } from '../prefixWherePaths.js'
 import { hasReadAccessToQueryPath } from './hasReadAccessToQueryPath.js'
+import { pruneFieldsForQueryPath } from './pruneFieldsForQueryPath.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
 type Args = {
@@ -31,6 +33,60 @@ type Args = {
   showHiddenFields?: boolean
   val: unknown
   versionFields?: FlattenedField[]
+}
+
+/**
+ * Read permissions per `collectionSlug:path`, built from only the fields on that path.
+ * Keyed by the policies object, which lives for one `validateQueryPaths` call.
+ */
+const queryPathPermissionsByPolicies = new WeakMap<
+  EntityPolicies,
+  Map<string, Promise<CollectionPermission>>
+>()
+
+const getQueryPathPermissions = ({
+  collectionSlug,
+  policies,
+  queryPath,
+  req,
+}: {
+  collectionSlug: string
+  policies: EntityPolicies
+  queryPath: string
+  req: PayloadRequest
+}): Promise<CollectionPermission> => {
+  let queryPathPermissions = queryPathPermissionsByPolicies.get(policies)
+
+  if (!queryPathPermissions) {
+    queryPathPermissions = new Map()
+    queryPathPermissionsByPolicies.set(policies, queryPathPermissions)
+  }
+
+  const key = `${collectionSlug}:${queryPath}`
+  let permissions = queryPathPermissions.get(key)
+
+  if (!permissions) {
+    const collectionConfig = req.payload.collections[collectionSlug]!.config
+
+    permissions = getEntityPermissions({
+      blockReferencesPermissions: {},
+      entity: {
+        ...collectionConfig,
+        fields: pruneFieldsForQueryPath({
+          fields: collectionConfig.fields,
+          names: new Set(queryPath.split('.')),
+          req,
+        }),
+      },
+      entityType: 'collection',
+      fetchData: false,
+      operations: ['read'],
+      req: isolateObjectProperty(req, 'transactionID'),
+    })
+    queryPathPermissions.set(key, permissions)
+  }
+
+  return permissions
 }
 
 /**
@@ -190,17 +246,18 @@ export async function validateSearchParam({
       }
 
       if (!overrideAccess && fieldAffectsData(field)) {
+        let collectionPermissions: CollectionPermission | undefined
+
         if (collectionSlug) {
-          if (!policies.collections![collectionSlug]) {
-            policies.collections![collectionSlug] = await getEntityPermissions({
-              blockReferencesPermissions,
-              entity: req.payload.collections[collectionSlug]!.config,
-              entityType: 'collection',
-              fetchData: false,
-              operations: ['read'],
-              req: isolateObjectProperty(req, 'transactionID'),
-            })
-          }
+          const queryPath =
+            versionFields && !i ? path.replace(/^(?:parent|version|snapshot|latest)\./, '') : path
+
+          collectionPermissions = await getQueryPathPermissions({
+            collectionSlug,
+            policies,
+            queryPath,
+            req,
+          })
 
           if (
             ['hash', 'salt'].includes(incomingPath) &&
@@ -210,7 +267,7 @@ export async function validateSearchParam({
             errors.push({ path: incomingPath })
           }
 
-          const relatedCollectionReadPermission = policies.collections![collectionSlug].read
+          const relatedCollectionReadPermission = collectionPermissions.read
           const previousSegment = paths[i - 1]
           const traversedField = previousSegment?.field
           const isRelationshipHop =
@@ -306,7 +363,9 @@ export async function validateSearchParam({
               ((field.type === 'relationship' || field.type === 'upload') &&
                 Boolean(field.hasMany)),
             path: fieldPath.split('.'),
-            permissions: policies[entityType]![entitySlug]!.fields,
+            permissions: collectionPermissions
+              ? collectionPermissions.fields
+              : policies[entityType]![entitySlug]!.fields,
             relatedCollectionSlug: paths[i + 1]?.collectionSlug || nestedCollectionSlug,
             req,
             shouldShowHiddenFields: showHiddenFields,
