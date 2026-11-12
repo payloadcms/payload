@@ -293,6 +293,8 @@ Payload provides for an ability to schedule publishing / unpublishing events in 
 
 You can enable this functionality on both collections and globals via the `versions.drafts.schedulePublish: true` property.
 
+Scheduling, viewing, and cancelling events from the Admin UI requires permission to publish the target document or global, the same `update` access that publishing it directly would require. When the job runs, Payload checks access again as the user who scheduled it.
+
 <Banner type="warning">
   **Important:** if you are going to enable scheduled publish / unpublish, you
   need to make sure your Payload app is set up to process
