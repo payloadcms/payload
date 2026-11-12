@@ -1,5 +1,4 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { PaginatedDocs } from '../database/types.js'
 import type { JsonObject, PayloadRequest, Where } from '../types/index.js'
 
 import { Locked } from '../errors/index.js'
@@ -66,10 +65,12 @@ export const checkDocumentLockStatus = async ({
 
     const finalLockErrorMessage = lockErrorMessage || defaultLockErrorMessage
 
-    const lockedDocumentResult: PaginatedDocs<JsonObject & TypeWithID> = await payload.db.find({
+    const findLocks = (payload.db.findDocumentLocks ?? payload.db.find).bind(payload.db)
+    const lockedDocumentResult = await findLocks<JsonObject & TypeWithID>({
       collection: lockedDocumentsCollectionSlug,
       limit: 1,
       pagination: false,
+      req: payload.db.findDocumentLocks ? req : undefined,
       sort: '-updatedAt',
       where: lockedDocumentQuery,
     })
@@ -149,10 +150,12 @@ export const getLockedDocumentIds = async ({
   const { payload } = req
   const lockDocumentsProp = payload.collections?.[collectionSlug]?.config?.lockDocuments
 
-  const lockedDocumentResult: PaginatedDocs<JsonObject & TypeWithID> = await payload.db.find({
+  const findLocks = (payload.db.findDocumentLocks ?? payload.db.find).bind(payload.db)
+  const lockedDocumentResult = await findLocks<JsonObject & TypeWithID>({
     collection: lockedDocumentsCollectionSlug,
     limit: 0,
     pagination: false,
+    req: payload.db.findDocumentLocks ? req : undefined,
     sort: '-updatedAt',
     where: buildBulkLockedDocumentQuery(collectionSlug, ids),
   })

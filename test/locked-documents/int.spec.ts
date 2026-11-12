@@ -1,4 +1,10 @@
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type { PostgresAdapter } from '@payloadcms/db-postgres'
+import type {
+  Payload,
+  PayloadRequest,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+} from 'payload'
 
 import { Locked, NotFound } from 'payload'
 import { wait } from 'payload/shared'
@@ -10,7 +16,7 @@ import type { Post, User } from './payload-types.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { menuSlug } from './globals/Menu/index.js'
-import { pagesSlug, postsSlug } from './slugs.js'
+import { pagesSlug, postsSlug, simpleSlug, usersSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
@@ -695,4 +701,217 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(docsFromLocksCollection.docs).toHaveLength(1)
     expect((docsFromLocksCollection.docs[0]?.user.value as User)?.id).toEqual(user.id)
   })
+
+  test.options.describe(
+    'Postgres lock transactions',
+    { db: (adapter) => adapter === 'postgres' },
+    () => {
+      for (const isolationLevel of ['repeatable read', 'serializable'] as const) {
+        test(`should reject a save locked after a ${isolationLevel} snapshot`, async ({
+          payload,
+        }) => {
+          const doc = await payload.create({
+            collection: simpleSlug,
+            data: { fieldA: 'before' },
+            overrideAccess: true,
+          })
+          const transactionID = await payload.db.beginTransaction({ isolationLevel })
+
+          if (!transactionID) {
+            throw new Error('Expected a Postgres transaction')
+          }
+
+          try {
+            const req = { transactionID }
+
+            await payload.findByID({
+              collection: simpleSlug,
+              id: doc.id,
+              overrideAccess: true,
+              req,
+            })
+            await payload.create({
+              collection: lockedDocumentCollection,
+              data: {
+                document: { relationTo: simpleSlug, value: doc.id },
+                user: { relationTo: usersSlug, value: user2.id },
+              },
+              overrideAccess: true,
+            })
+
+            await expect(
+              payload.update({
+                collection: simpleSlug,
+                id: doc.id,
+                data: { fieldA: 'after' },
+                overrideAccess: true,
+                overrideLock: false,
+                req,
+                user,
+              }),
+            ).rejects.toBeInstanceOf(Locked)
+          } finally {
+            await payload.db.rollbackTransaction(transactionID)
+          }
+        })
+
+        test(`should skip a bulk delete locked after a ${isolationLevel} snapshot`, async ({
+          payload,
+        }) => {
+          const doc = await payload.create({
+            collection: simpleSlug,
+            data: {},
+            overrideAccess: true,
+          })
+          const transactionID = await payload.db.beginTransaction({ isolationLevel })
+
+          if (!transactionID) {
+            throw new Error('Expected a Postgres transaction')
+          }
+
+          try {
+            const req = { transactionID }
+
+            await payload.findByID({
+              collection: simpleSlug,
+              id: doc.id,
+              overrideAccess: true,
+              req,
+            })
+            await payload.create({
+              collection: lockedDocumentCollection,
+              data: {
+                document: { relationTo: simpleSlug, value: doc.id },
+                user: { relationTo: usersSlug, value: user2.id },
+              },
+              overrideAccess: true,
+            })
+
+            const result = await payload.delete({
+              collection: simpleSlug,
+              where: { id: { equals: doc.id } },
+              overrideAccess: true,
+              overrideLock: false,
+              req,
+              user,
+            })
+
+            expect(result.docs).toEqual([])
+            expect(result.errors).toEqual([
+              expect.objectContaining({
+                id: doc.id,
+                message: expect.stringContaining('currently locked'),
+              }),
+            ])
+          } finally {
+            await payload.db.rollbackTransaction(transactionID)
+          }
+
+          const remaining = await payload.findByID({
+            collection: simpleSlug,
+            id: doc.id,
+            overrideAccess: true,
+          })
+
+          expect(remaining.id).toBe(doc.id)
+        })
+      }
+
+      test('should save a document using its existing transaction', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: simpleSlug,
+          overrideAccess: true,
+          data: { fieldA: 'before' },
+        })
+
+        const updated = await withFullPostgresPool({
+          payload,
+          operation: ({ req }) =>
+            payload.update({
+              collection: simpleSlug,
+              overrideAccess: true,
+              id: doc.id,
+              data: { fieldA: 'after' },
+              overrideLock: false,
+              req,
+            }),
+        })
+
+        expect(updated.fieldA).toBe('after')
+      })
+
+      test('should bulk delete documents using its existing transaction', async ({ payload }) => {
+        const first = await payload.create({
+          collection: simpleSlug,
+          overrideAccess: true,
+          data: {},
+        })
+        const second = await payload.create({
+          collection: simpleSlug,
+          overrideAccess: true,
+          data: {},
+        })
+
+        const result = await withFullPostgresPool({
+          payload,
+          operation: ({ req }) =>
+            payload.delete({
+              collection: simpleSlug,
+              overrideAccess: true,
+              where: { id: { in: [first.id, second.id] } },
+              overrideLock: false,
+              req,
+            }),
+        })
+
+        expect(result.errors).toEqual([])
+        expect(result.docs.map(({ id }) => id).sort()).toEqual([first.id, second.id].sort())
+      })
+    },
+  )
 })
+
+async function withFullPostgresPool<T>({
+  operation,
+  payload,
+}: {
+  operation: (args: { req: Partial<PayloadRequest> }) => Promise<T>
+  payload: Payload
+}): Promise<T> {
+  const { pool } = payload.db as unknown as PostgresAdapter
+  const originalConnectionTimeout = pool.options.connectionTimeoutMillis
+  const originalMax = pool.options.max
+  const transactionIDs: (number | string)[] = []
+
+  try {
+    // Bound acquisition waits so a lock read outside the transaction fails instead of hanging.
+    pool.options.connectionTimeoutMillis = 2000
+    pool.options.max = 2
+
+    while (pool.totalCount > pool.options.max && pool.idleCount > 0) {
+      const client = await pool.connect()
+
+      client.release(true)
+    }
+
+    // Reserve both connections so an independent lock read cannot borrow another.
+    for (let index = 0; index < pool.options.max; index++) {
+      const transactionID = await payload.db.beginTransaction()
+
+      if (!transactionID) {
+        throw new Error('Expected Postgres to start a transaction')
+      }
+
+      transactionIDs.push(transactionID)
+    }
+
+    return await operation({ req: { transactionID: transactionIDs[0] } })
+  } finally {
+    try {
+      await Promise.all(transactionIDs.map((id) => payload.db.rollbackTransaction(id)))
+    } finally {
+      pool.options.connectionTimeoutMillis = originalConnectionTimeout
+      pool.options.max = originalMax
+    }
+  }
+}

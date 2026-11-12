@@ -82,6 +82,9 @@ export interface BaseDatabaseAdapter {
 
   findDistinct: FindDistinct
 
+  /** Read document locks using the adapter's transaction visibility rules. */
+  findDocumentLocks?: Find
+
   findGlobal: FindGlobal
 
   findGlobalVersions: FindGlobalVersions
