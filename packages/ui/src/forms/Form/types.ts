@@ -28,6 +28,8 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
      * The form state that was sent with the request when retrieving the `json` arg.
      */
     formState?: FormState
+    /** Returns false after the form resets or unmounts, so callbacks can skip updates to the form. */
+    isCurrent?: () => boolean
   },
 ) => Promise<void> | void
 

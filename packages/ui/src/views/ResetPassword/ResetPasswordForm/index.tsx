@@ -5,6 +5,8 @@ import type { FormState } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+import type { FormOnSuccess } from '../../../forms/Form/types.js'
+
 import { FormHeader } from '../../../elements/FormHeader/index.js'
 import { ConfirmPasswordField } from '../../../fields/ConfirmPassword/index.js'
 import { HiddenField } from '../../../fields/Hidden/index.js'
@@ -38,19 +40,27 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
   const history = useRouter()
   const { fetchFullUser } = useAuth()
 
-  const onSuccess = React.useCallback(async () => {
-    const user = await fetchFullUser()
-    if (user) {
-      history.push(adminRoute)
-    } else {
-      history.push(
-        formatAdminURL({
-          adminRoute,
-          path: loginRoute,
-        }),
-      )
-    }
-  }, [adminRoute, fetchFullUser, history, loginRoute])
+  const onSuccess = React.useCallback<FormOnSuccess>(
+    async (_, { isCurrent } = {}) => {
+      const user = await fetchFullUser()
+
+      if (isCurrent && !isCurrent()) {
+        return
+      }
+
+      if (user) {
+        history.push(adminRoute)
+      } else {
+        history.push(
+          formatAdminURL({
+            adminRoute,
+            path: loginRoute,
+          }),
+        )
+      }
+    },
+    [adminRoute, fetchFullUser, history, loginRoute],
+  )
 
   const initialState = React.useMemo<FormState>(
     () => ({

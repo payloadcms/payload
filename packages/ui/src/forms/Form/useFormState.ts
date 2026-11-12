@@ -405,7 +405,6 @@ export const useFormState = ({
           current.onReset()
 
           const fields = successResponse.state
-          contextRef.current.fields = fields
           contextRef.current.setModified(false)
           prevFormStateRef.current = fields
           dispatchFields({ type: 'REPLACE_STATE', state: fields })
@@ -487,10 +486,6 @@ export const useFormState = ({
           currentState: stateToMerge,
           incomingState: successResponse.state,
         })
-
-        if (isValidation) {
-          contextRef.current.fields = appliedState
-        }
 
         const merge = () => {
           if (isValidation) {
@@ -607,7 +602,6 @@ export const useFormState = ({
       }
 
       if (!dequal(contextRef.current.fields, validatedFieldState)) {
-        contextRef.current.fields = validatedFieldState
         dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
       }
 

@@ -395,15 +395,13 @@ export const useFormSubmission = ({
             res = await action(formData)
           }
 
-          if (!requestContext.isCurrent()) {
-            return
-          }
+          if (requestContext.isCurrent()) {
+            if (res.status < 400 && !isModifiedWhileProcessing.current) {
+              setIsModified(false)
+            }
 
-          if (res.status < 400 && !isModifiedWhileProcessing.current) {
-            setIsModified(false)
+            isModifiedWhileProcessing.current = false
           }
-
-          isModifiedWhileProcessing.current = false
 
           if (typeof handleResponse !== 'function') {
             const contentType = res.headers.get('content-type')
@@ -412,10 +410,6 @@ export const useFormSubmission = ({
             if (isJSON) {
               json = await res.json()
             }
-          }
-
-          if (!requestContext.isCurrent()) {
-            return
           }
         } finally {
           const isSuccessfulResponse = res?.status < 400
@@ -480,6 +474,14 @@ export const useFormSubmission = ({
 
         if (typeof handleResponse === 'function') {
           if (!requestContext.isCurrent()) {
+            if (res.status < 400) {
+              preservePromiseToast = true
+
+              if (!disableToast) {
+                successToast(t('general:submissionSuccessful'))
+              }
+            }
+
             return
           }
 
@@ -491,13 +493,16 @@ export const useFormSubmission = ({
         }
 
         if (res.status < 400) {
-          setSuccessfulSubmitCount((count) => count + 1)
+          if (requestContext.isCurrent()) {
+            setSuccessfulSubmitCount((count) => count + 1)
+          }
 
-          if (requestContext.isCurrent() && typeof onSuccess === 'function') {
+          if (typeof onSuccess === 'function') {
             try {
               await onSuccess(json, {
                 context,
                 formState: serializableFormState,
+                isCurrent: requestContext.isCurrent,
               })
             } catch (err) {
               toast.error(err instanceof Error ? err.message : t('error:unknown'))
@@ -506,12 +511,13 @@ export const useFormSubmission = ({
 
           // The save succeeded even if `onSuccess` reset or unmounted the form, so always settle the toast.
           preservePromiseToast = true
-          setIsSubmitted(false)
 
-          if (redirect) {
-            if (requestContext.isCurrent()) {
-              void startRouteTransition(() => router.push(redirect))
-            }
+          if (requestContext.isCurrent()) {
+            setIsSubmitted(false)
+          }
+
+          if (redirect && requestContext.isCurrent()) {
+            void startRouteTransition(() => router.push(redirect))
           } else if (!disableToast) {
             successToast(json.message || t('general:submissionSuccessful'))
           }

@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react'
 
+/** @internal */
 export type TaskContext = {
   /**
    * Returns `true` if the queue has not been reset since this task started.
@@ -9,11 +10,16 @@ export type TaskContext = {
   isCurrent: () => boolean
 }
 
-/** Runs when this task reaches the active position in the queue. */
+/**
+ * Runs when this task reaches the active position in the queue.
+ * @internal
+ */
 export type Task<T> = (context: TaskContext) => Promise<T>
 
+/** @internal */
 export type QueueResult<T> = { status: 'completed'; value: T } | { status: 'superseded' }
 
+/** @internal */
 export type UseQueueResult = {
   /** Adds work to the queue and reports whether it completed or was superseded. */
   queueTask: <T>(options: {
