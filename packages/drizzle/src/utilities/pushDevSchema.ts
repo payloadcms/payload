@@ -4,6 +4,8 @@ import prompts from 'prompts'
 import type { BasePostgresAdapter } from '../postgres/types.js'
 import type { DrizzleAdapter, PostgresDB, RawTable } from '../types.js'
 
+import { assertBranchingSchemaCanBePushed } from '../branching/migrations/assertCanPush.js'
+
 const previousSchema: {
   localeCodes: null | string[]
   rawTables: null | Record<string, RawTable>
@@ -19,6 +21,9 @@ const previousSchema: {
  * @returns {Promise<void>} - A promise that resolves once the schema push is complete.
  */
 export const pushDevSchema = async (adapter: DrizzleAdapter) => {
+  // A cached config does not establish that another database has already migrated.
+  await assertBranchingSchemaCanBePushed({ adapter })
+
   if (process.env.PAYLOAD_FORCE_DRIZZLE_PUSH !== 'true') {
     const localeCodes =
       adapter.payload.config.localization && adapter.payload.config.localization.localeCodes
@@ -34,9 +39,6 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
       }
 
       return
-    } else {
-      previousSchema.localeCodes = localeCodes
-      previousSchema.rawTables = adapter.rawTables
     }
   }
 
@@ -86,6 +88,9 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
   }
 
   await apply()
+  previousSchema.localeCodes =
+    adapter.payload.config.localization && adapter.payload.config.localization.localeCodes
+  previousSchema.rawTables = adapter.rawTables
   const migrationsTable = adapter.schemaName
     ? `"${adapter.schemaName}"."payload_migrations"`
     : '"payload_migrations"'
