@@ -1,4 +1,5 @@
 export { createClientUploadHandler } from '../client/createClientUploadHandler.js'
+export { getClientUploadErrorMessage } from '../client/getClientUploadErrorMessage.js'
 export {
   buildStoragePathData,
   buildStoragePathData as getFileKey,

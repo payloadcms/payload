@@ -5,6 +5,7 @@ import type { ClientUploadContext } from '@payloadcms/plugin-cloud-storage/types
 import {
   buildUploadStoragePathData,
   createClientUploadHandler,
+  getClientUploadErrorMessage,
 } from '@payloadcms/plugin-cloud-storage/client'
 import { formatAdminURL } from 'payload/shared'
 
@@ -52,7 +53,9 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
     // upload the file directly to R2 using the signed URL
     const multipart = await fetch(getEndpoint(), { method: 'POST' })
     if (!multipart.ok) {
-      throw new Error('Failed to initialize multipart upload')
+      throw new Error(
+        await getClientUploadErrorMessage(multipart, 'Failed to initialize multipart upload'),
+      )
     }
 
     const {
