@@ -5,7 +5,6 @@ import type {
   SanitizedConfig,
   TextField,
   TextFieldSingleValidation,
-  User,
 } from 'payload'
 
 import type { LinkFields } from './schema.js'
@@ -108,34 +107,25 @@ export const getBaseFields = (
 
     baseFields.push({
       name: 'doc',
+      type: 'relationship',
       admin: {
         condition: (_data, _siblingData) => {
           return _siblingData.linkType === 'internal'
         },
       },
-      // when admin.hidden is a function we need to dynamically call hidden with the user to know if the collection should be shown
-      type: 'relationship',
-      filterOptions:
-        !enabledCollections && !disabledCollections
-          ? async ({ relationTo, req, user }) => {
-              const admin = config.collections.find(({ slug }) => slug === relationTo)?.admin
+      filterOptions: async ({ relationTo, req }) => {
+        const admin = config.collections.find(({ slug }) => slug === relationTo)?.admin
+        const baseFilter = admin?.baseFilter ?? admin?.baseListFilter
 
-              const hidden = admin?.hidden
-              if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
-                return false
-              }
-
-              const baseFilter = admin?.baseFilter ?? admin?.baseListFilter
-              return (
-                (await baseFilter?.({
-                  limit: 0,
-                  page: 1,
-                  req,
-                  sort: 'id',
-                })) ?? true
-              )
-            }
-          : null,
+        return (
+          (await baseFilter?.({
+            limit: 0,
+            page: 1,
+            req,
+            sort: 'id',
+          })) ?? true
+        )
+      },
       label: ({ t }) => t('fields:chooseDocumentToLink'),
       maxDepth,
       relationTo: enabledRelations,
