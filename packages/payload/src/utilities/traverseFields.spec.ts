@@ -169,5 +169,39 @@ describe('traverseFields', () => {
 
       expect(textParentIsLocalized).toBe(true)
     })
+
+    it('should traverse localized group children in a locale-resolved document', () => {
+      const fields: Field[] = [
+        {
+          name: 'legal',
+          type: 'group',
+          localized: true,
+          fields: [
+            {
+              name: 'notice',
+              type: 'text',
+            },
+          ],
+        },
+      ]
+      const visited: string[] = []
+
+      traverseFields({
+        fields,
+        callback: ({ field }) => {
+          if ('name' in field && field.name) {
+            visited.push(field.name)
+          }
+        },
+        fillEmpty: false,
+        ref: {
+          legal: {
+            notice: 'value',
+          },
+        },
+      })
+
+      expect(visited).toContain('notice')
+    })
   })
 })
