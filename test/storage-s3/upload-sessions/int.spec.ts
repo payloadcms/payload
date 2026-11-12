@@ -54,6 +54,11 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
     await abortMultipartUploads()
   })
 
+  test.afterEach(async () => {
+    await clearTestBucket()
+    await abortMultipartUploads()
+  })
+
   test('should upload a file in segments and create the document on completion', async ({
     restClient,
   }) => {
