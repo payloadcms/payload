@@ -1142,6 +1142,29 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       createdDuplicateIDs.length = 0
     })
 
+    test('should reject clearing required text when custom validation ignores required', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.update({
+          collection: textFieldsSlug,
+          id: doc.id,
+          data: { text: '' },
+          overrideAccess: true,
+        }),
+      ).rejects.toMatchObject({
+        data: { errors: [{ path: 'text' }] },
+      })
+
+      const savedDoc = await payload.findByID({
+        collection: textFieldsSlug,
+        id: doc.id,
+        overrideAccess: true,
+      })
+
+      expect(savedDoc.text).toBe(text)
+    })
+
     test('should use the default for a field disabled during duplication', async ({ payload }) => {
       const source = await payload.create({
         collection: duplicateFieldsSlug,
