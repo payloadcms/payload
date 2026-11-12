@@ -30,8 +30,8 @@ async function build() {
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [commonjs()],
     sourcemap: true,
-    // 22.23.4 is the lowest version of node supported by Payload
-    target: 'node22.23.4',
+    // 22.23.5 is the lowest version of node supported by Payload
+    target: 'node22.23.5',
   })
   console.log('db-sqlite bundled successfully')
 
