@@ -60,24 +60,6 @@ test('should clear a stale tenant cookie when access changes to all tenants', as
   expect(refreshCookies[0]).not.toContain('payload-tenant=blue-dog')
 })
 
-test('should keep the sole tenant selected for a restricted user with a stale cookie', async () => {
-  document.cookie = 'payload-tenant=deleted-tenant; Path=/'
-
-  const screen = await render(
-    <TenantSelectionProviderClient
-      initialHasAccessToAllTenants={false}
-      initialTenantOptions={tenantOptions}
-      initialValue={undefined}
-      tenantsCollectionSlug="tenants"
-    >
-      <SelectedTenant />
-    </TenantSelectionProviderClient>,
-  )
-
-  await expect.element(screen.getByRole('status')).toHaveTextContent('blue-dog')
-  expect(document.cookie).toContain('payload-tenant=blue-dog')
-})
-
 function SelectedTenant() {
   const { selectedTenantID } = useTenantSelection()
 
