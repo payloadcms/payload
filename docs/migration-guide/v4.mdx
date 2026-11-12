@@ -2261,6 +2261,28 @@ On Postgres and SQLite, `_stored` adds columns for file entries in each upload c
 + import type { FileSize } from 'payload'
 ```
 
+### Field admin disable options have been consolidated ([#16504](https://github.com/payloadcms/payload/pull/16504))
+
+The `disableBulkEdit`, `disableGroupBy`, `disableListColumn`, and `disableListFilter` properties under a field's `admin` config have been replaced with a single `admin.disabled` property. It still accepts `true` to disable the field everywhere, or an object to disable it in specific areas only. See [Disabled](../fields/overview#disabled).
+
+```diff
+  {
+    name: 'internalRef',
+    type: 'text',
+    admin: {
+-     disableBulkEdit: true,
+-     disableGroupBy: true,
+-     disableListColumn: true,
+-     disableListFilter: true,
++     disabled: { bulkEdit: true, column: true, filter: true, groupBy: true },
+    },
+  }
+```
+
+Run `npx @payloadcms/codemod --transform migrate-disabled-fields` to migrate automatically.
+
+The codemod only handles inline `admin` object literals. Shared or spread `admin` objects are skipped, and if `admin.disabled` is already an expression the old `disable*` values are removed without being merged, so check those fields and migrate them manually.
+
 ### Image size admin controls have been consolidated ([#16593](https://github.com/payloadcms/payload/pull/16593))
 
 The `disableListColumn`, `disableListFilter`, and `disableGroupBy` properties under `ImageSize.admin` have been replaced with a single `disabled` object, consistent with the shape used by all other fields.
