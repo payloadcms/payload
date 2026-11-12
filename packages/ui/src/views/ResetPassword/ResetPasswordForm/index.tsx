@@ -1,6 +1,7 @@
 'use client'
 
-import { type FormState } from 'payload'
+import type { FormState } from 'payload'
+
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
@@ -51,23 +52,26 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
     }
   }, [adminRoute, fetchFullUser, history, loginRoute])
 
-  const initialState: FormState = {
-    'confirm-password': {
-      initialValue: '',
-      valid: false,
-      value: '',
-    },
-    password: {
-      initialValue: '',
-      valid: false,
-      value: '',
-    },
-    token: {
-      initialValue: token,
-      valid: true,
-      value: token,
-    },
-  }
+  const initialState = React.useMemo<FormState>(
+    () => ({
+      'confirm-password': {
+        initialValue: '',
+        valid: false,
+        value: '',
+      },
+      password: {
+        initialValue: '',
+        valid: false,
+        value: '',
+      },
+      token: {
+        initialValue: token,
+        valid: true,
+        value: token,
+      },
+    }),
+    [token],
+  )
 
   return (
     <Form
