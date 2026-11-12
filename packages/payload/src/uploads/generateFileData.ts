@@ -678,7 +678,6 @@ const processUpload = async <T>({
           collectionSlug: collectionConfig.slug,
           cropSize: getCropSize({ edits: editsForTransformer }),
           file: originalWebFile,
-          hasFocalPoint: Boolean(editsForTransformer?.focalPoint),
           req,
           transform: async (task) => {
             // Size tasks run after the main task, maybe in parallel, so only the main task's

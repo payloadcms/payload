@@ -37,7 +37,7 @@ export function createPrepareLegacyUpload({
   collections: Partial<Record<string, SharpCollectionConfig>>
   sharpDependency: SharpDependency
 }): NonNullable<UploadTransformerInternal['prepareUpload']> {
-  return async ({ collectionSlug, cropSize, file, hasFocalPoint, req, transform }) => {
+  return async ({ collectionSlug, cropSize, file, req, transform }) => {
     const collectionUpload = collections[collectionSlug] ?? {}
 
     const fileSupportsResize = canResizeImage(file.type)
@@ -82,16 +82,14 @@ export function createPrepareLegacyUpload({
     const variants = collectionUpload.variants
 
     if (canProcessAsImage && Array.isArray(variants) && originalDimensions) {
-      // The value is read from `doc._transforms` by `transformFile`. Only its presence is known here.
-      const hasEnabledFocalPoint = focalPointEnabled && hasFocalPoint
-
       const sizeResults = await mapWithBoundedConcurrency(variants, async (rawConfig) => {
         const imageResizeConfig = sanitizeResizeConfig(rawConfig)
         const fieldPath = `variants.${imageResizeConfig.name}` as const
 
         const resizeAction = getImageResizeAction({
           dimensions: originalDimensions,
-          hasFocalPoint: hasEnabledFocalPoint,
+          // Whether a size may use a focal point. `transformFile` uses one only when it is saved.
+          hasFocalPoint: focalPointEnabled,
           imageResizeConfig,
         })
 
@@ -102,11 +100,11 @@ export function createPrepareLegacyUpload({
         const sizeResultFile = await transform({
           fieldPath,
           options: {
+            canUseFocalPoint: resizeAction === 'resizeWithFocalPoint',
             collectionUpload,
             imageResizeConfig,
             kind: 'size',
             originalDimensions,
-            shouldUseFocalPoint: resizeAction === 'resizeWithFocalPoint',
           } satisfies SharpUploadTaskOptions,
         })
 

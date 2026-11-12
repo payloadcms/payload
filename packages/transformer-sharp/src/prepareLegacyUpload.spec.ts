@@ -30,7 +30,6 @@ const runPrepareUpload = async ({
   await createPrepareLegacyUpload({ collections: { media: sharpConfig }, sharpDependency })({
     collectionSlug: 'media',
     file: new File(['x'], 'image.png', { type: 'image/png' }),
-    hasFocalPoint: true,
     req: makeReq({ focalPoint: collectionFocalPoint }),
     transform,
   })
@@ -39,7 +38,7 @@ const runPrepareUpload = async ({
     .map(([task]) => task.options as SharpUploadTaskOptions)
     .find((options) => options.kind === 'size')
 
-  return sizeTask?.kind === 'size' ? sizeTask.shouldUseFocalPoint : undefined
+  return sizeTask?.kind === 'size' ? sizeTask.canUseFocalPoint : undefined
 }
 
 const variants = [{ name: 'card', height: 200, width: 400 }]
@@ -50,7 +49,7 @@ describe('createPrepareLegacyUpload', () => {
     { collectionFocalPoint: false, expected: true, sharpFocalPoint: true },
     { collectionFocalPoint: undefined, expected: true, sharpFocalPoint: undefined },
   ])(
-    'should use the saved focal point for sizes when Sharp ($sharpFocalPoint) or else the collection ($collectionFocalPoint) enables it',
+    'should let sizes use a saved focal point when Sharp ($sharpFocalPoint) or else the collection ($collectionFocalPoint) enables it',
     async ({ collectionFocalPoint, expected, sharpFocalPoint }) => {
       expect(
         await runPrepareUpload({

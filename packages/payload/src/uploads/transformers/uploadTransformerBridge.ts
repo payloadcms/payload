@@ -58,11 +58,6 @@ export type UploadTransformerInternal = {
      */
     cropSize?: { height: number; width: number }
     file: File
-    /**
-     * Whether this upload has a focal point to apply. Sizes are then cut around the saved focal
-     * point. Without one they are resized from the center, which can give a different result.
-     */
-    hasFocalPoint: boolean
     req: PayloadRequest
     transform: (task: UploadTransformTask) => Promise<File>
   }) => Promise<PreparedUploadTransformation[]>

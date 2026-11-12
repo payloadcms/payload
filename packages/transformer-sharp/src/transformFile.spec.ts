@@ -232,8 +232,8 @@ describe('createTransformFile', () => {
             collectionUpload: {},
             imageResizeConfig: { name: 'thumb', height: 50, width: 50 },
             kind: 'size',
+            canUseFocalPoint: true,
             originalDimensions: { height: original.height, width: original.width },
-            shouldUseFocalPoint: true,
           } satisfies SharpUploadTaskOptions,
           req: makeReq(),
         })
@@ -248,5 +248,34 @@ describe('createTransformFile', () => {
         }
       },
     )
+
+    // A focal point at the center is not saved, so it means "no focal point". The size then uses
+    // its own `position`: a left-aligned 50px cut of the 100px resize is red. A cut around the
+    // center would end on blue.
+    it.each<{ doc: Document; name: string }>([
+      { name: 'no saved focal point', doc: {} },
+      { name: 'a legacy focal point at the center', doc: { focalX: 50, focalY: 50 } },
+    ])('should resize with the size config when there is $name', async ({ doc }) => {
+      const buffer = await makeTwoColorImage({ height: 100, splitAxis: 'x', width: 200 })
+      const transformFile = createTransformFile({ sharpDependency: sharp })
+
+      const result = await transformFile({
+        doc,
+        file: new File([buffer], 'photo.png', { type: 'image/png' }),
+        options: {
+          canUseFocalPoint: true,
+          collectionUpload: {},
+          imageResizeConfig: { name: 'thumb', height: 50, position: 'left', width: 50 },
+          kind: 'size',
+          originalDimensions: { height: 100, width: 200 },
+        } satisfies SharpUploadTaskOptions,
+        req: makeReq(),
+      })
+
+      const raw = await sharp(await toBuffer(result.file!))
+        .raw()
+        .toBuffer({ resolveWithObject: true })
+      expect(sampleRawPixel({ ...raw, x: 40, y: 25 })).toEqual({ b: 0, g: 0, r: 255 })
+    })
   })
 })

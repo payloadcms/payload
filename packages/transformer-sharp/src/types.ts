@@ -163,6 +163,18 @@ export type SharpTransformerOptions = {
  */
 export type SharpUploadTaskOptions =
   | {
+      /**
+       * Whether this size may be cut around a focal point: the focal point is enabled, and the
+       * size's `fit` allows a cut. `transformFile` cuts around it only when one is saved, and
+       * otherwise resizes with the size's own config.
+       */
+      canUseFocalPoint?: boolean
+      collectionUpload: SharpCollectionConfig
+      imageResizeConfig: ImageSize
+      kind: 'size'
+      originalDimensions: ProbedImageSize
+    }
+  | {
       collectionUpload: SharpCollectionConfig
       /**
        * The pixel size of a crop sent in the request (`uploadEdits.widthInPixels` and
@@ -172,12 +184,4 @@ export type SharpUploadTaskOptions =
       kind: 'main'
       /** The original's size. Without it, the saved crop cannot be applied. */
       originalDimensions?: ProbedImageSize
-    }
-  | {
-      collectionUpload: SharpCollectionConfig
-      imageResizeConfig: ImageSize
-      kind: 'size'
-      originalDimensions: ProbedImageSize
-      /** Cut the size around the saved focal point, instead of resizing it from the center. */
-      shouldUseFocalPoint?: boolean
     }

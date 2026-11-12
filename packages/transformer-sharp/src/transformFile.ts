@@ -185,8 +185,8 @@ async function transformSize({
   req: PayloadRequest
   sharpDependency: SharpDependency
 }): Promise<TransformFileResult> {
-  const { collectionUpload, imageResizeConfig, originalDimensions, shouldUseFocalPoint } = options
-  const focalPoint = shouldUseFocalPoint ? getSavedFocalPoint({ doc }) : undefined
+  const { canUseFocalPoint, collectionUpload, imageResizeConfig, originalDimensions } = options
+  const focalPoint = canUseFocalPoint ? getSavedFocalPoint({ doc }) : undefined
   const { withMetadata } = collectionUpload
 
   const fileIsAnimatedType = ANIMATED_MIME_TYPES.includes(file.type)

@@ -5,8 +5,6 @@ import { isNumber } from 'payload/shared'
 /** A saved crop: whole pixels on the original file. */
 export type SavedCrop = { height: number; width: number; x: number; y: number }
 
-const centerFocalPoint: FocalPoint = { x: 50, y: 50 }
-
 /** The crop saved in `doc._transforms`, or `undefined` when there is none. */
 export function getSavedCrop({ doc }: { doc?: Document }): SavedCrop | undefined {
   const crop = getTransforms({ doc })?.crop
@@ -24,10 +22,10 @@ export function getSavedCrop({ doc }: { doc?: Document }): SavedCrop | undefined
 
 /**
  * The focal point saved in `doc._transforms`, rounded to whole percent as `focalX`/`focalY` are.
- * A document saved before `_transforms` existed has only `focalX`/`focalY`. With neither, the
- * center.
+ * A document saved before `_transforms` existed has only `focalX`/`focalY`. Payload does not save
+ * a focal point at the center, so `focalX`/`focalY` at the center also mean "no focal point".
  */
-export function getSavedFocalPoint({ doc }: { doc?: Document }): FocalPoint {
+export function getSavedFocalPoint({ doc }: { doc?: Document }): FocalPoint | undefined {
   const focalPoint = getTransforms({ doc })?.focalPoint
 
   if (focalPoint && isNumber(focalPoint.x) && isNumber(focalPoint.y)) {
@@ -35,10 +33,10 @@ export function getSavedFocalPoint({ doc }: { doc?: Document }): FocalPoint {
   }
 
   if (isNumber(doc?.focalX) && isNumber(doc?.focalY)) {
-    return { x: Math.round(doc.focalX), y: Math.round(doc.focalY) }
-  }
+    const legacyFocalPoint = { x: Math.round(doc.focalX), y: Math.round(doc.focalY) }
 
-  return centerFocalPoint
+    return legacyFocalPoint.x === 50 && legacyFocalPoint.y === 50 ? undefined : legacyFocalPoint
+  }
 }
 
 function getTransforms({ doc }: { doc?: Document }):
