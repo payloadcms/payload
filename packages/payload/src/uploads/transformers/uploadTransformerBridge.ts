@@ -1,5 +1,4 @@
 import type { PayloadRequest } from '../../types/index.js'
-import type { UploadEdits } from '../types.js'
 
 /**
  * Private v4 compatibility bridge, attached to a transformer object under this
@@ -47,12 +46,25 @@ export type UploadTransformerInternal = {
    * collection, falling back to the first bridge when none does.
    */
   handlesCollection?: (args: { collectionSlug: string }) => boolean
+  /**
+   * Schedules the main-file and size tasks. Each task reads the saved crop and focal point from
+   * `doc._transforms` itself.
+   */
   prepareUpload?: (args: {
     collectionSlug: string
+    /**
+     * The pixel size of a crop sent in the request (`uploadEdits.widthInPixels` and
+     * `heightInPixels`). It is not saved, and replaces the saved crop's size for this upload only.
+     */
+    cropSize?: { height: number; width: number }
     file: File
+    /**
+     * Whether this upload has a focal point to apply. Sizes are then cut around the saved focal
+     * point. Without one they are resized from the center, which can give a different result.
+     */
+    hasFocalPoint: boolean
     req: PayloadRequest
     transform: (task: UploadTransformTask) => Promise<File>
-    uploadEdits: UploadEdits
   }) => Promise<PreparedUploadTransformation[]>
 }
 

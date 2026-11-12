@@ -1,4 +1,4 @@
-import type { PayloadRequest, UploadEdits } from 'payload'
+import type { Document, PayloadRequest } from 'payload'
 
 import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
@@ -116,16 +116,12 @@ describe('createTransformFile', () => {
         const transformFile = createTransformFile({ sharpDependency: sharp })
 
         const result = await transformFile({
+          doc: { _transforms: { crop: { height: 40, width: 40, x: 25, y: 25 } } },
           file,
           options: {
             collectionUpload: { resizeOptions },
-            crop: {
-              cropData: { height: 40, unit: '%', width: 40, x: 25, y: 25 },
-              heightInPixels: 40,
-              originalDimensions: { height: 100, width: 100 },
-              widthInPixels: 40,
-            },
             kind: 'main',
+            originalDimensions: { height: 100, width: 100 },
           } satisfies SharpUploadTaskOptions,
           req: makeReq(),
         })
@@ -139,25 +135,24 @@ describe('createTransformFile', () => {
 
   describe('main crop', () => {
     const cropMain = async ({
-      cropData,
+      crop,
+      cropSize,
       image,
     }: {
-      cropData: NonNullable<UploadEdits['crop']>
+      crop: { height: number; width: number; x: number; y: number }
+      cropSize?: { height: number; width: number }
       image: Buffer
     }) => {
       const transformFile = createTransformFile({ sharpDependency: sharp })
 
       const result = await transformFile({
+        doc: { _transforms: { crop } },
         file: new File([image], 'photo.png', { type: 'image/png' }),
         options: {
           collectionUpload: {},
-          crop: {
-            cropData,
-            heightInPixels: 10,
-            originalDimensions: { height: 10, width: 100 },
-            widthInPixels: cropData.width,
-          },
+          cropSize,
           kind: 'main',
+          originalDimensions: { height: 10, width: 100 },
         } satisfies SharpUploadTaskOptions,
         req: makeReq(),
       })
@@ -166,8 +161,8 @@ describe('createTransformFile', () => {
     }
 
     it('should start the crop at the saved pixel, not 1px before it', async () => {
-      // Red columns 0-28, blue from column 29. Core saves x = 29px and sends it as 29 / 100 * 100,
-      // which is 28.999…%, so flooring it starts the crop on the last red column.
+      // Red columns 0-28, blue from column 29. The crop is read from `doc._transforms` in pixels,
+      // so it starts on the first blue column.
       const blue = await makeImageBuffer({
         background: { b: 255, g: 0, r: 0 },
         height: 10,
@@ -180,19 +175,17 @@ describe('createTransformFile', () => {
         .png()
         .toBuffer()
 
-      const cropped = await cropMain({
-        cropData: { height: 100, unit: '%', width: 10, x: (29 / 100) * 100, y: 0 },
-        image,
-      })
+      const cropped = await cropMain({ crop: { height: 10, width: 10, x: 29, y: 0 }, image })
 
       const raw = await cropped.raw().toBuffer({ resolveWithObject: true })
       expect(sampleRawPixel({ ...raw, x: 0, y: 0 })).toEqual({ b: 255, g: 0, r: 0 })
     })
 
-    it('should keep a rounded crop inside the image', async () => {
-      // 30.5% rounds up to 31px, and 31 + 70 would pass the right edge of a 100px image.
+    it('should keep a crop inside the image when the request crop size is larger than the saved crop', async () => {
+      // The request's `widthInPixels` is 70, and 31 + 70 would pass the right edge of a 100px image.
       const cropped = await cropMain({
-        cropData: { height: 100, unit: '%', width: 70, x: 30.5, y: 0 },
+        crop: { height: 10, width: 69, x: 31, y: 0 },
+        cropSize: { height: 10, width: 70 },
         image: await makeImageBuffer({ height: 10, width: 100 }),
       })
 
@@ -203,38 +196,44 @@ describe('createTransformFile', () => {
   describe('size (transformSize)', () => {
     // Each original forces one resize-priority branch, and a focal point at 80% pushes the
     // 50px extract window against the clamped far edge, so a correct crop is entirely blue.
-    it.each([
+    it.each<{
+      doc: Document
+      original: { height: number; splitAxis: 'x' | 'y'; width: number }
+      samples: { x: number; y: number }[]
+    }>([
       {
-        focalPoint: { x: 80, y: 50 },
-        original: { height: 100, splitAxis: 'x' as const, width: 200 },
+        doc: { _transforms: { focalPoint: { x: 79.6, y: 50 } } },
+        original: { height: 100, splitAxis: 'x', width: 200 },
         samples: [
           { x: 10, y: 25 },
           { x: 40, y: 25 },
         ],
       },
+      // A document saved before `_transforms` existed has only `focalX`/`focalY`.
       {
-        focalPoint: { x: 50, y: 80 },
-        original: { height: 200, splitAxis: 'y' as const, width: 100 },
+        doc: { focalX: 50, focalY: 80 },
+        original: { height: 200, splitAxis: 'y', width: 100 },
         samples: [
           { x: 25, y: 10 },
           { x: 25, y: 40 },
         ],
       },
     ])(
-      'should extract the focal-point region along the $original.splitAxis axis',
-      async ({ focalPoint, original, samples }) => {
+      'should extract the saved focal-point region along the $original.splitAxis axis',
+      async ({ doc, original, samples }) => {
         const buffer = await makeTwoColorImage(original)
         const file = new File([buffer], 'photo.png', { type: 'image/png' })
         const transformFile = createTransformFile({ sharpDependency: sharp })
 
         const result = await transformFile({
+          doc,
           file,
           options: {
             collectionUpload: {},
-            focalPoint,
             imageResizeConfig: { name: 'thumb', height: 50, width: 50 },
             kind: 'size',
             originalDimensions: { height: original.height, width: original.width },
+            shouldUseFocalPoint: true,
           } satisfies SharpUploadTaskOptions,
           req: makeReq(),
         })

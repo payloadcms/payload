@@ -676,7 +676,9 @@ const processUpload = async <T>({
 
         const results = await bridge.prepareUpload!({
           collectionSlug: collectionConfig.slug,
+          cropSize: getCropSize({ edits: editsForTransformer }),
           file: originalWebFile,
+          hasFocalPoint: Boolean(editsForTransformer?.focalPoint),
           req,
           transform: async (task) => {
             // Size tasks run after the main task, maybe in parallel, so only the main task's
@@ -704,7 +706,6 @@ const processUpload = async <T>({
 
             return taskFile
           },
-          uploadEdits: editsForTransformer,
         })
 
         const mainResult = results.find((result) => result.fieldPath === 'filename')
@@ -1215,6 +1216,22 @@ async function downloadClientUpload({
 
 const hasUploadTransformers = ({ req }: { req: PayloadRequest }): boolean =>
   Boolean(req.payload.config.upload?.transformers?.length)
+
+/**
+ * The pixel size of the crop in the edits, which a request can send apart from the crop itself.
+ * The Sharp bridge reads the crop from `_transforms`, so only this size is passed to it.
+ */
+function getCropSize({
+  edits,
+}: {
+  edits: undefined | UploadEdits
+}): { height: number; width: number } | undefined {
+  if (!edits?.crop || edits.widthInPixels === undefined || edits.heightInPixels === undefined) {
+    return undefined
+  }
+
+  return { height: Number(edits.heightInPixels), width: Number(edits.widthInPixels) }
+}
 
 /** Puts the incoming file's name, size and MIME type into the transformer `doc`. */
 function setIncomingFileFields({

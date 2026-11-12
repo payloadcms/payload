@@ -1,11 +1,4 @@
-import type {
-  FocalPoint,
-  ImageSize,
-  PayloadRequest,
-  ProbedImageSize,
-  UploadCollectionSlug,
-  UploadEdits,
-} from 'payload'
+import type { ImageSize, PayloadRequest, ProbedImageSize, UploadCollectionSlug } from 'payload'
 import type { FitEnum, ResizeOptions, Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
 
 /**
@@ -165,23 +158,26 @@ export type SharpTransformerOptions = {
 /**
  * `options` for the one-file-in/one-file-out `transformFile` primitive, computed
  * by `prepareLegacyUpload` for each task it hands to the injected `transform`
- * callback: the main file (optionally a crop), or one named legacy image size.
+ * callback: the main file, or one named legacy image size. The crop and focal point
+ * are not options: `transformFile` reads them from `doc._transforms`.
  */
 export type SharpUploadTaskOptions =
   | {
       collectionUpload: SharpCollectionConfig
-      crop?: {
-        cropData: NonNullable<UploadEdits['crop']>
-        heightInPixels: number
-        originalDimensions: ProbedImageSize
-        widthInPixels: number
-      }
+      /**
+       * The pixel size of a crop sent in the request (`uploadEdits.widthInPixels` and
+       * `heightInPixels`). It replaces the saved crop's size for this upload only.
+       */
+      cropSize?: { height: number; width: number }
       kind: 'main'
+      /** The original's size. Without it, the saved crop cannot be applied. */
+      originalDimensions?: ProbedImageSize
     }
   | {
       collectionUpload: SharpCollectionConfig
-      focalPoint?: FocalPoint
       imageResizeConfig: ImageSize
       kind: 'size'
       originalDimensions: ProbedImageSize
+      /** Cut the size around the saved focal point, instead of resizing it from the center. */
+      shouldUseFocalPoint?: boolean
     }
