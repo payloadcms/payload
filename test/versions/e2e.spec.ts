@@ -81,6 +81,7 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
+  restoreAccessCollectionSlug,
   simpleDraftGlobalSlug,
   textCollectionSlug,
   versionCollectionSlug,
@@ -292,6 +293,94 @@ describe('Versions', () => {
 
       await page.goto(`${page.url()}/versions`)
       await expect(page.locator('.app-header .collection-versions-button')).toHaveCount(1)
+    })
+
+    test('should restore a draft without changing the published document', async () => {
+      const doc = await payload.create({
+        collection: restoreAccessCollectionSlug,
+        data: { _status: 'draft', title: 'Historical' },
+        draft: true,
+        overrideAccess: true,
+      })
+      const { docs } = await payload.findVersions({
+        collection: restoreAccessCollectionSlug,
+        limit: 1,
+        overrideAccess: true,
+        sort: '-updatedAt',
+        where: { parent: { equals: doc.id } },
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: restoreAccessCollectionSlug,
+        data: { _status: 'published', title: 'Current' },
+        overrideAccess: true,
+      })
+
+      const restoreURL = new AdminUrlUtil(serverURL, restoreAccessCollectionSlug)
+      const editorURL = restoreURL.edit(doc.id)
+      const apiURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${restoreAccessCollectionSlug}/${doc.id}`,
+        serverURL,
+      })
+
+      await page.goto(restoreURL.version(doc.id, docs[0]!.id))
+      await page.getByRole('button', { name: 'Restore as draft', exact: true }).click()
+      await page.getByRole('dialog').getByRole('button', { name: 'Confirm', exact: true }).click()
+      await page.waitForURL(editorURL)
+      await expect(page.locator('#field-title')).toHaveValue('Historical')
+
+      const draftResponse = await page.request.get(apiURL, { params: { draft: true } })
+
+      await expect(draftResponse).toBeOK()
+      expect(await draftResponse.json()).toMatchObject({ _status: 'draft', title: 'Historical' })
+
+      const liveResponse = await page.request.get(apiURL, { params: { draft: false } })
+
+      await expect(liveResponse).toBeOK()
+      expect(await liveResponse.json()).toMatchObject({ _status: 'published', title: 'Current' })
+    })
+
+    test('should restore a version as published after a cancelled restore as draft', async () => {
+      const doc = await payload.create({
+        collection: restoreAccessCollectionSlug,
+        data: { _status: 'published', title: 'Historical' },
+        overrideAccess: true,
+      })
+      const { docs } = await payload.findVersions({
+        collection: restoreAccessCollectionSlug,
+        limit: 1,
+        overrideAccess: true,
+        sort: '-updatedAt',
+        where: { parent: { equals: doc.id } },
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: restoreAccessCollectionSlug,
+        data: { _status: 'published', title: 'Current' },
+        overrideAccess: true,
+      })
+
+      const restoreURL = new AdminUrlUtil(serverURL, restoreAccessCollectionSlug)
+      const apiURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${restoreAccessCollectionSlug}/${doc.id}`,
+        serverURL,
+      })
+
+      await page.goto(restoreURL.version(doc.id, docs[0]!.id))
+      await page.locator('.restore-version .popup__trigger-wrap button').click()
+      await page.getByRole('button', { name: 'Restore as draft', exact: true }).click()
+      await page.getByRole('dialog').getByRole('button', { name: 'Cancel', exact: true }).click()
+      await page.getByRole('button', { name: 'Restore this version', exact: true }).click()
+      await page.getByRole('dialog').getByRole('button', { name: 'Confirm', exact: true }).click()
+      await page.waitForURL(restoreURL.edit(doc.id))
+
+      await expect
+        .poll(async () => (await page.request.get(apiURL, { params: { draft: false } })).json())
+        .toMatchObject({ _status: 'published', title: 'Historical' })
     })
 
     test('should restore version with correct data', async () => {
