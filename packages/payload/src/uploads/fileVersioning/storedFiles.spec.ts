@@ -2,8 +2,9 @@ import { expect, it } from 'vitest'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
+import type { StoredFileList } from './types.js'
 
-import { collectStoredFiles } from './storedFiles.js'
+import { collectStoredFiles, hasStoredOriginal } from './storedFiles.js'
 
 const collection = {
   slug: 'media',
@@ -48,4 +49,39 @@ it.for([
 
   expect(files).toEqual(expect.arrayContaining(expected))
   expect(files).toHaveLength(expected.length)
+})
+
+it('should retain an archived original whose saved URL still asks for the original role', () => {
+  const files = collectStoredFiles({
+    collection: { slug: 'media', upload: {} } as SanitizedCollectionConfig,
+    doc: {
+      _stored: false,
+      filename: 'photo.png',
+      original: {
+        filename: 'photo-version.png',
+        url: '/api/media/file/photo-version.png?original=true',
+      },
+    },
+    req: { payload: { config: { routes: { api: '/api' } } } } as PayloadRequest,
+  })
+
+  expect(files).toEqual([{ key: 'photo-version.png', roles: [{ type: 'original' }] }])
+})
+
+it.for<{ expected: boolean; name: string; storedFiles: StoredFileList }>([
+  {
+    name: 'find a stored original that shares its file with the main file',
+    storedFiles: [{ key: 'photo.png', roles: [{ type: 'default' }, { type: 'original' }] }],
+    expected: true,
+  },
+  {
+    name: 'find no stored original when only the main file and sizes are stored',
+    storedFiles: [
+      { key: 'photo.png', roles: [{ type: 'default' }] },
+      { key: 'photo-card.png', roles: [{ sizeKey: 'card', type: 'size' }] },
+    ],
+    expected: false,
+  },
+])('should $name', ({ expected, storedFiles }) => {
+  expect(hasStoredOriginal({ storedFiles })).toBe(expected)
 })

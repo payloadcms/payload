@@ -289,19 +289,37 @@ export function assertTransformKeysCovered({
  * saved key. With `requiredTransformerSlug`, that transformer must also be one of the stages.
  */
 export async function canBuildAtRequest({
+  requiredTransformerSlug,
+  ...buildArgs
+}: {
+  requiredTransformerSlug?: string
+} & RequestTimeBuildArgs): Promise<boolean> {
+  return isBuildableAtRequest({
+    requestTimeBuild: await planRequestTimeBuild(buildArgs),
+    requiredTransformerSlug,
+  })
+}
+
+type RequestTimeBuildArgs = {
+  documentID?: number | string
+  mimeType: string
+} & PlanArgs
+
+export type RequestTimeBuildPlan = Awaited<ReturnType<typeof planPersistedDefaultStages>>
+
+/**
+ * Plans the request-time stages that would build a file of this MIME type from the original. Check
+ * the result with `isBuildableAtRequest`. Use both to check more than one condition on one plan.
+ */
+export function planRequestTimeBuild({
   collectionSlug,
   documentID,
   mimeType,
   pipelineDoc,
   pipelineOriginalDoc,
   req,
-  requiredTransformerSlug,
-}: {
-  documentID?: number | string
-  mimeType: string
-  requiredTransformerSlug?: string
-} & PlanArgs): Promise<boolean> {
-  const { coverageErrors, plan: requestPlan } = await planPersistedDefaultStages({
+}: RequestTimeBuildArgs): Promise<RequestTimeBuildPlan> {
+  return planPersistedDefaultStages({
     collectionSlug,
     doc: pipelineOriginalDoc,
     documentID,
@@ -309,11 +327,40 @@ export async function canBuildAtRequest({
     req,
     transforms: pipelineDoc._transforms,
   })
+}
 
+/**
+ * Whether a planned request-time build has stages that apply every saved key. With
+ * `requiredTransformerSlug`, that transformer must also be one of the stages.
+ */
+export function isBuildableAtRequest({
+  requestTimeBuild: { coverageErrors, plan },
+  requiredTransformerSlug,
+}: {
+  requestTimeBuild: RequestTimeBuildPlan
+  requiredTransformerSlug?: string
+}): boolean {
   return (
-    requestPlan.pipeline.length > 0 &&
+    plan.pipeline.length > 0 &&
     (requiredTransformerSlug === undefined ||
-      requestPlan.pipeline.some((transformer) => transformer.slug === requiredTransformerSlug)) &&
+      plan.pipeline.some((transformer) => transformer.slug === requiredTransformerSlug)) &&
     coverageErrors.length === 0
+  )
+}
+
+/**
+ * Whether a planned request-time build can build the collection's sizes. The transformer that
+ * registered the sizes (`variantsTransformerSlug`) must be one of the stages.
+ */
+export function areVariantsBuildableAtRequest({
+  requestTimeBuild,
+  variantsTransformerSlug,
+}: {
+  requestTimeBuild: RequestTimeBuildPlan
+  variantsTransformerSlug?: string
+}): boolean {
+  return (
+    Boolean(variantsTransformerSlug) &&
+    isBuildableAtRequest({ requestTimeBuild, requiredTransformerSlug: variantsTransformerSlug })
   )
 }

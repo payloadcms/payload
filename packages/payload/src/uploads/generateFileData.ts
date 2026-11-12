@@ -12,8 +12,7 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
 import type { ExternalUploadSource } from './sanitizeUploadData.js'
 import type { PreparedUploadTransformation } from './transformers/uploadTransformerBridge.js'
-import type { PixelCrop } from './transformState/cropUnits.js'
-import type { FileData, FileSizes, FileToSave, OriginalFileData, UploadEdits } from './types.js'
+import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
 import {
   FileRetrievalError,
@@ -41,6 +40,7 @@ import { hasFullFileContents } from './hasFullFileContents.js'
 import { isProcessableImage } from './isProcessableImage.js'
 import { isRequestTimeFile } from './isRequestTimeFile.js'
 import { parseFilename } from './parseFilename.js'
+import { getRequestTimeDefaultFileData, getRequestTimeVariants } from './requestTimeFileData.js'
 import { transformUploadFile } from './transformers/transformUploadFile.js'
 import {
   getUploadTransformerInternal,
@@ -1134,37 +1134,15 @@ const processUpload = async <T>({
         requiredTransformerSlug: variantsTransformerSlug,
       }))
     ) {
-      // The size is built from the original, so it takes the original's extension.
-      const { name: baseName } = parseFilename(fileData.filename!)
-      const baseExt = getFileExtension(fileData.original.filename!)
-      const plannedNames = new Set([fileData.filename, fileData.original.filename])
-      const variants: FileSizes = {}
-
-      for (const { name: variantName } of declaredVariants) {
-        const filename = await getUnplannedSafeFileName({
-          canUseName: (name) => !plannedNames.has(name),
-          collectionSlug: collectionConfig.slug,
-          desiredFilename: `${baseName}-${variantName}${baseExt ? `.${baseExt}` : ''}`,
-          // A size with no stored file can keep a name this document used before.
-          excludeDocumentID: documentID,
-          prefix,
-          req,
-          staticPath: disableLocalStorage ? undefined : staticPath!,
-        })
-        plannedNames.add(filename)
-        variants[variantName] = {
-          _stored: false,
-          filename,
-          filesize: null,
-          height: null,
-          mimeType: null,
-          prefix: fileData.original.prefix,
-          url: null,
-          width: null,
-        }
-      }
-
-      fileData.variants = variants
+      fileData.variants = await getRequestTimeVariants({
+        collection: collectionConfig,
+        documentID,
+        filename: fileData.filename!,
+        original: fileData.original,
+        prefix,
+        req,
+        staticPath: disableLocalStorage ? undefined : staticPath!,
+      })
     }
   } catch (err) {
     throw toFileUploadError({ err, req })
@@ -1180,33 +1158,6 @@ const processUpload = async <T>({
     data: newData,
     files: filesToSave,
     transforms: pipelineDoc._transforms,
-  }
-}
-
-/**
- * The default file entry of an upload whose saved `_transforms` are applied when the file is
- * requested. It has the original's name and no object. Its size is the saved crop, or the
- * original's size, and its file size is unknown until the file is built.
- */
-function getRequestTimeDefaultFileData({
-  original,
-  transforms,
-}: {
-  original: OriginalFileData
-  transforms: Document['_transforms']
-}) {
-  const crop = (transforms as { crop?: PixelCrop } | null | undefined)?.crop
-
-  return {
-    _objectKey: null,
-    _stored: false,
-    filename: original.filename,
-    filesize: null,
-    height: crop?.height ?? original.height ?? null,
-    mimeType: original.mimeType,
-    prefix: original.prefix,
-    url: null,
-    width: crop?.width ?? original.width ?? null,
   }
 }
 
