@@ -75,6 +75,7 @@ export const getLatestGlobalVersion = async ({
         req,
         where: combineQueries(appendGlobalVersionToQueryKey(where), {
           id: { equals: latestVersion.id },
+          latest: { equals: true },
         }),
       })
     ).docs[0]
