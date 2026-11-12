@@ -9,6 +9,7 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import { gotoAndWaitForForm, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
+import { moveRow } from '../__helpers/e2e/sort/moveRow.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
@@ -22,6 +23,9 @@ import {
   localizedSlug,
   mediaSlug,
   nestedSlug,
+  orderableDraftsSlug,
+  orderableJoinSlug,
+  orderableSlug,
   pagesSlug,
   postsSlug,
   slugDraftsSlug,
@@ -135,6 +139,9 @@ test.describe('Branching', () => {
     // bypass branch resolution rather than writing tombstones.
     for (const collection of [
       autosaveSlug,
+      orderableSlug,
+      orderableDraftsSlug,
+      orderableJoinSlug,
       localizedSlug,
       slugDraftsSlug,
       uniqueSlug,
@@ -1059,6 +1066,117 @@ test.describe('Branching', () => {
     /** Clicked by label rather than id, which the radio derives from edit depth. */
     const mergeMode = (label: string) =>
       page.locator('.merge-branch-modal__modes label').filter({ hasText: label })
+
+    for (const collection of [orderableSlug, orderableDraftsSlug] as const) {
+      test(`should preserve branch ordering after merging from the panel (${collection})`, async () => {
+        const hasDrafts = collection === orderableDraftsSlug
+
+        for (const title of ['A', 'B', 'C']) {
+          await payload.create({
+            collection,
+            data: { ...(hasDrafts ? { _status: 'published' as const } : {}), title },
+          })
+        }
+
+        const url = new AdminUrlUtil(serverURL, collection)
+        const titles = page.locator('tbody .cell-title > :first-child')
+
+        await page.goto(`${url.list}?sort=_order`)
+        await expect(titles).toHaveText(['A', 'B', 'C'])
+        await switchBranch({ name: branchName, page })
+        await expect(titles).toHaveText(['A', 'B', 'C'])
+
+        const reorderResponse = page.waitForResponse(
+          (response) =>
+            new URL(response.url()).pathname.endsWith('/reorder') &&
+            response.request().method() === 'POST',
+        )
+
+        await moveRow(page, { fromIndex: 2, toIndex: 0 })
+        // oxlint-disable-next-line payload/no-flaky-assertions -- This completed HTTP response is immutable.
+        expect((await reorderResponse).status()).toBe(200)
+        await expect(titles).toHaveText(['C', 'A', 'B'])
+        await page.reload()
+        await expect(titles).toHaveText(['C', 'A', 'B'])
+
+        await switchBranch({ name: 'main', page })
+        await expect(titles).toHaveText(['A', 'B', 'C'])
+        await switchBranch({ name: branchName, page })
+        await expect(titles).toHaveText(['C', 'A', 'B'])
+
+        await gotoBranchView()
+        await openMergeModal()
+        await page.locator('.merge-branch-modal .btn--style-primary').click()
+        await expect(page.locator('.merge-branch-modal__progress-fill--complete')).toBeVisible()
+        await page.locator('.merge-branch-modal .btn--style-primary').click()
+        await switchBranch({ name: 'main', page })
+        await page.goto(`${url.list}?sort=_order`)
+        await expect(titles).toHaveText(['C', 'A', 'B'])
+      })
+    }
+
+    for (const { collection, hasDrafts, joinField } of [
+      { collection: orderableSlug, hasDrafts: false, joinField: 'items' },
+      { collection: orderableDraftsSlug, hasDrafts: true, joinField: 'draftItems' },
+    ] as const) {
+      test(`should preserve orderable join ordering after merging from the panel (${collection})`, async () => {
+        const parent = await payload.create({
+          collection: orderableJoinSlug,
+          data: { title: 'Ordered parent' },
+        })
+
+        for (const title of ['A', 'B', 'C', 'D']) {
+          await payload.create({
+            collection,
+            data: {
+              ...(hasDrafts ? { _status: 'published' as const } : {}),
+              parent: parent.id,
+              title,
+            },
+          })
+        }
+
+        const url = new AdminUrlUtil(serverURL, orderableJoinSlug)
+        const scope = page.locator(`#field-${joinField}`)
+        const titles = scope.locator('tbody .cell-title > :first-child')
+
+        await page.goto(url.edit(parent.id))
+        await expect(titles).toHaveText(['A', 'B', 'C', 'D'])
+        await switchBranch({ name: branchName, page })
+        await expect(titles).toHaveText(['A', 'B', 'C', 'D'])
+
+        for (const fromIndex of [2, 3]) {
+          const reorderResponse = page.waitForResponse(
+            (response) =>
+              new URL(response.url()).pathname.endsWith('/reorder') &&
+              response.request().method() === 'POST',
+          )
+
+          await moveRow(page, { fromIndex, toIndex: 1, scope })
+          // oxlint-disable-next-line payload/no-flaky-assertions -- This completed HTTP response is immutable.
+          expect((await reorderResponse).status()).toBe(200)
+          await expect(titles).toHaveText(
+            fromIndex === 2 ? ['A', 'C', 'B', 'D'] : ['A', 'D', 'C', 'B'],
+          )
+        }
+
+        await page.reload()
+        await expect(titles).toHaveText(['A', 'D', 'C', 'B'])
+        await switchBranch({ name: 'main', page })
+        await expect(titles).toHaveText(['A', 'B', 'C', 'D'])
+        await switchBranch({ name: branchName, page })
+        await expect(titles).toHaveText(['A', 'D', 'C', 'B'])
+
+        await gotoBranchView()
+        await openMergeModal()
+        await page.locator('.merge-branch-modal .btn--style-primary').click()
+        await expect(page.locator('.merge-branch-modal__progress-fill--complete')).toBeVisible()
+        await page.locator('.merge-branch-modal .btn--style-primary').click()
+        await switchBranch({ name: 'main', page })
+        await page.goto(url.edit(parent.id))
+        await expect(titles).toHaveText(['A', 'D', 'C', 'B'])
+      })
+    }
 
     test('should identify the document and field path when a merge write fails', async () => {
       await payload.create({
