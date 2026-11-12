@@ -45,7 +45,7 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
       type: 'text',
       admin: {
         description:
-          'Used for administrative purposes, not shown to customers. This is populated by default.',
+          'Used for administrative purposes, not shown to customers. Generated automatically from the product title and the selected variant options.',
         readOnly: true,
       },
     },
