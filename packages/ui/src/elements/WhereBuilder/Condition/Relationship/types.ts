@@ -11,7 +11,7 @@ import type { DefaultFilterProps } from '../types.js'
 
 export type RelationshipFilterProps = {
   readonly field: RelationshipFieldClient | UploadFieldClient
-  readonly filterOptions: ResolvedFilterOptions
+  readonly filterOptions?: ResolvedFilterOptions
 } & DefaultFilterProps
 
 export type Option = {

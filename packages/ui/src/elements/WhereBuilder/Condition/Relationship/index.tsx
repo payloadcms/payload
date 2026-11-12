@@ -290,12 +290,11 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     [i18n, addOptions, api, errorLoading, t],
   )
 
-  /**
-   * When `relationTo` changes externally, reset the options and reload them from scratch
-   * The `loadOptions` dependency is a useEffectEvent which has no dependencies of its own
-   * This means we can safely depend on it without it triggering this effect to run
-   * This is useful because this effect should _only_ run when `relationTo` changes
-   */
+  const clearOptions = useEffectEvent(() => {
+    dispatchOptions({ type: 'CLEAR', i18n, required: false })
+  })
+
+  // Reset for changes to the query or language, rather than the i18n object's identity.
   useEffect(() => {
     const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
 
@@ -309,7 +308,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
       ]),
     )
 
-    dispatchOptions({ type: 'CLEAR', i18n, required: false })
+    clearOptions()
     setHasLoadedFirstOptions(false)
 
     const abortControllers: AbortController[] = []
@@ -336,7 +335,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       })
     }
-  }, [i18n, relationTo, debouncedSearch, filterOptions])
+  }, [i18n.language, locale?.code, relationTo, debouncedSearch, filterOptions])
 
   /**
    * Load any other options that might exist in the value that were not loaded already
