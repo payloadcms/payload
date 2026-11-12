@@ -544,6 +544,87 @@ test.suite('@payloadcms/storage-s3 upload sessions', { config: './config.ts' }, 
     expect(Contents.filter(({ Size }) => Size === fileBytes.length)).toHaveLength(2)
   })
 
+  test('should keep the stored file when a session is cancelled while its file reference is valid', async ({
+    restClient,
+  }) => {
+    const session = await createSession({ restClient })
+
+    await uploadAllSegments({ restClient, session })
+
+    const { file } = await completeStorage({ restClient, session })
+    const cancel = await restClient.DELETE(`${sessionsPath}/${session.id}`)
+
+    expect(cancel.status).toBe(200)
+    expect(await countStoredFiles()).toBe(1)
+
+    // A form that received the file reference before the cancel can still save it.
+    const response = await createWithFileReference({ file, restClient, title: 'Saved late' })
+
+    expect(response.status).toBe(201)
+
+    const { doc } = await response.json()
+    const download = await restClient.GET(`/${videosSlug}/file/${doc.filename}`)
+
+    expect(download.status).toBe(200)
+  })
+
+  test('should complete a cancelled session whose file was saved before its file reference expired', async ({
+    payload,
+    restClient,
+  }) => {
+    const session = await createSession({ restClient })
+
+    await uploadAllSegments({ restClient, session })
+
+    const { file } = await completeStorage({ restClient, session })
+
+    await restClient.DELETE(`${sessionsPath}/${session.id}`)
+
+    const { doc } = await (
+      await createWithFileReference({ file, restClient, title: 'Saved late' })
+    ).json()
+
+    await expireFileReferences({ payload, session })
+
+    // Listing runs the cleanup sweep.
+    await restClient.GET(sessionsPath)
+
+    const swept = await payload.db.findOne<{ documentID?: string; status: string }>({
+      collection: uploadSessionsCollectionSlug,
+      where: { id: { equals: session.id } },
+    })
+
+    expect(swept).toMatchObject({ documentID: String(doc.id), status: 'completed' })
+    expect(await countStoredFiles()).toBe(1)
+  })
+
+  test('should delete the stored file of a cancelled session once its file references expire', async ({
+    payload,
+    restClient,
+  }) => {
+    const session = await createSession({ restClient })
+
+    await uploadAllSegments({ restClient, session })
+    await completeStorage({ restClient, session })
+    await restClient.DELETE(`${sessionsPath}/${session.id}`)
+
+    expect(await countStoredFiles()).toBe(1)
+
+    await expireFileReferences({ payload, session })
+
+    // Listing runs the cleanup sweep.
+    await restClient.GET(sessionsPath)
+
+    const swept = await payload.db.findOne<{ cleanupCompletedAt?: string; status: string }>({
+      collection: uploadSessionsCollectionSlug,
+      where: { id: { equals: session.id } },
+    })
+
+    expect(swept?.status).toBe('cancelled')
+    expect(swept?.cleanupCompletedAt).toBeTruthy()
+    expect(await countStoredFiles()).toBe(0)
+  })
+
   test('should release the filename when the session is cancelled', async ({ restClient }) => {
     const first = await createSession({ restClient })
 
@@ -1319,6 +1400,29 @@ const setIntent = ({
   restClient: RESTClient
   session: ClientUploadSession
 }) => restClient.POST(`${sessionsPath}/${session.id}/intent`, { body: JSON.stringify({ data }) })
+
+/** Counts stored objects with the size of the uploaded file. */
+const countStoredFiles = async (): Promise<number> => {
+  const { Contents = [] } = await getAWSClient().send(
+    new ListObjectsV2Command({ Bucket: getTestBucketName() }),
+  )
+
+  return Contents.filter(({ Size }) => Size === fileBytes.length).length
+}
+
+/** Moves the expiry of every file reference the session handed out into the past. */
+const expireFileReferences = ({
+  payload,
+  session,
+}: {
+  payload: Payload
+  session: ClientUploadSession
+}) =>
+  payload.db.updateOne({
+    id: session.id,
+    collection: uploadSessionsCollectionSlug,
+    data: { fileReferencesValidUntil: new Date(Date.now() - 1000).toISOString() },
+  })
 
 const completeStorage = async ({
   restClient,

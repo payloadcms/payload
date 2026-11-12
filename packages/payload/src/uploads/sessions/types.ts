@@ -146,6 +146,11 @@ export type UploadSessionDoc = {
     mimeType: string
     size: number
   }
+  /**
+   * When the last file reference handed out for a normal save expires. Until then a form may
+   * still save the stored object, so cancellation and expiry keep it.
+   */
+  fileReferencesValidUntil?: null | string
   /** Exclusive finalization claim; an expired claim may be taken over. */
   finalizingUntil?: null | string
   id: number | string

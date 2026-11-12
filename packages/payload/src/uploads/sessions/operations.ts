@@ -23,7 +23,10 @@ import { APIError, Forbidden, NotFound, ValidationError } from '../../errors/ind
 import { sanitizeLocales } from '../../utilities/addLocalesToRequest.js'
 import { assertClientUploadAllowed } from '../assertClientUploadAllowed.js'
 import { checkFileMetadataRestrictions } from '../checkFileRestrictions.js'
-import { createClientUploadReceipt } from '../clientUploadReceipt.js'
+import {
+  CLIENT_UPLOAD_RECEIPT_LIFETIME_MS,
+  createClientUploadReceipt,
+} from '../clientUploadReceipt.js'
 import { getFileFromUploadInstructions } from '../getFileFromUploadInstructions.js'
 import { uploadRequiresServerValidation } from '../getFileTypeIdentity.js'
 import { planSegments } from './planSegments.js'
@@ -334,7 +337,21 @@ export const completeUploadSessionStorage = async ({
     }
   }
 
-  return { file: createFileReference({ req, session }), session: toClientSession({ session }) }
+  const file = createFileReference({ req, session })
+
+  // Recorded before the reference is returned, and only while the session is still resumable,
+  // so a cancel either sees this reference and keeps the object, or the reference is never sent.
+  session = await updateResumableSession({
+    data: {
+      fileReferencesValidUntil: new Date(
+        Date.now() + CLIENT_UPLOAD_RECEIPT_LIFETIME_MS,
+      ).toISOString(),
+    },
+    req,
+    session,
+  })
+
+  return { file, session: toClientSession({ session }) }
 }
 
 /**
@@ -569,6 +586,8 @@ export const sweepUploadSessions = async ({
 
   // Failed sessions may hold provider state, e.g. a multipart upload whose size did not match.
   // A failed cleanup attempt bumps `updatedAt`, so oldest-first rotates stuck sessions to the back.
+  // Sessions whose file references are still valid wait without a cleanup attempt, so they are
+  // left out instead of filling the batch.
   const { docs: uncleanedSessions } = await req.payload.db.find<UploadSessionDoc>({
     collection: slug,
     limit,
@@ -576,7 +595,17 @@ export const sweepUploadSessions = async ({
     req,
     sort: 'updatedAt',
     where: {
-      and: [{ status: { in: ['cancelled', 'failed'] } }, { cleanupCompletedAt: { exists: false } }],
+      and: [
+        { status: { in: ['cancelled', 'failed'] } },
+        { cleanupCompletedAt: { exists: false } },
+        {
+          or: [
+            { fileReferencesValidUntil: { exists: false } },
+            { fileReferencesValidUntil: { equals: null } },
+            { fileReferencesValidUntil: { less_than: now } },
+          ],
+        },
+      ],
     },
   })
 
@@ -1208,6 +1237,12 @@ const cleanupSessionStorage = async ({
   req: PayloadRequest
   session: UploadSessionDoc
 }): Promise<UploadSessionDoc> => {
+  // A form may still save a file reference this session handed out. The sweep retries once they
+  // expire, after first checking whether a document claimed the object.
+  if (hasValidFileReferences({ session })) {
+    return session
+  }
+
   const segmented =
     req.payload.collections[session.collectionSlug]?.config.upload?.uploadInstructions?.segmented
 
@@ -1221,6 +1256,12 @@ const cleanupSessionStorage = async ({
     session,
   })
 }
+
+const hasValidFileReferences = ({ session }: { session: UploadSessionDoc }): boolean =>
+  Boolean(
+    session.fileReferencesValidUntil &&
+    new Date(session.fileReferencesValidUntil).getTime() > Date.now(),
+  )
 
 const getMissingSegments = ({
   reconciled,
