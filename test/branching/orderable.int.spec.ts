@@ -21,12 +21,10 @@ test.suite('Branching: orderable', { config: './config.ts', db: 'all' }, () => {
         }) => {
           const hasDrafts = collection === orderableDraftsSlug
           const joinField = hasDrafts ? 'draftItems' : 'items'
-          const orderableFieldName =
-            scope === 'collection'
-              ? '_order'
-              : hasDrafts
-                ? '_orderable-drafts_draftItems_order'
-                : '_orderable_items_order'
+          const joinOrderFieldName = hasDrafts
+            ? '_orderable-drafts_draftItems_order'
+            : '_orderable_items_order'
+          const orderableFieldName = scope === 'collection' ? '_order' : joinOrderFieldName
           const branch = await payload.create({
             collection: branchesSlug,
             data: { name: 'Successive reorder review' },
