@@ -67,6 +67,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'لیست ها',
     toolbarItemsActive: '{{count}} فعال',
   },
+  fi: {
+    placeholder: "Aloita kirjoittaminen, tai paina '/' komentoja varten...",
+    slashMenuBasicGroupLabel: 'Perustoiminnot',
+    slashMenuListGroupLabel: 'Luettelot',
+    toolbarItemsActive: '{{count}} aktiivisena',
+  },
   fr: {
     placeholder: "Commencez à taper, ou appuyez sur '/' pour les commandes...",
     slashMenuBasicGroupLabel: 'De base',
