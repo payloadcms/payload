@@ -496,6 +496,11 @@ export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Respon
 export type Endpoint = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+  /**
+   * Skip Payload's authentication before the handler runs, so `req.user` is `null`. Use this when
+   * the handler authenticates the request itself, e.g. with `req.payload.auth()`.
+   */
+  disableAuth?: boolean
 
   /**
    * Middleware that will be called when the path/method matches
@@ -511,13 +516,6 @@ export type Endpoint = {
    * Compatible with the Express router
    */
   path: string
-  /**
-   * Please add "root" routes under the /api folder in the Payload Project.
-   * https://nextjs.org/docs/app/api-reference/file-conventions/route
-   *
-   * @deprecated in 3.0
-   */
-  root?: never
 }
 
 /**
@@ -1451,6 +1449,15 @@ export type Config = {
      * Defaults to ['JWT', 'Bearer', 'cookie]
      */
     jwtOrder?: ('Bearer' | 'cookie' | 'JWT')[]
+    /**
+     * PBKDF2-SHA256 iterations used when hashing new passwords for the local auth strategy.
+     *
+     * Use `100000` in environments that do not support 600,000 iterations, such as Cloudflare
+     * Workers. Stored hashes that use a different count are rehashed on the next successful login.
+     *
+     * @default 600000
+     */
+    passwordHashIterations?: 100000 | 600000
   }
   /**
    * Define Collection and Global access constraints that are combined with document Access Control using AND semantics.

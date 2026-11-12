@@ -103,7 +103,7 @@ runs:
     - name: Start Supabase
       id: supabase
       if: inputs.database == 'supabase'
-      uses: supabase/setup-cli@v1
+      uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
       with:
         # Pinned instead of `latest` to skip setup-cli's GitHub API release lookup,
         # which flakes on shared CI runners with "rate limit exceeded" (unauthenticated

@@ -11,6 +11,7 @@ import { APIError } from 'payload'
 import { buildMcpServer } from '../mcp/buildMcpServer.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 import { getAuthorizedMCP } from './access.js'
+import { getMCPResource, oauthChallenge } from './oauth.js'
 
 export const mcpEndpoint: PayloadHandler = async (req) => {
   if (!req.url) {
@@ -18,6 +19,8 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
   }
 
   req.payloadAPI = 'MCP' as const
+  // Lets auth strategies check that an OAuth access token was issued for this MCP server
+  req.context.mcp = { resource: getMCPResource({ req }) }
 
   const pluginConfig = getPluginConfig({ config: req.payload.config })
   const overrideAccessParam = new URL(req.url).searchParams.get('overrideAccess')
@@ -33,7 +36,20 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
     throw new APIError('MCP overrideAccess must be "true" or "false".', 400)
   }
 
-  const authorizedMCP = await getAuthorizedMCP({ overrideAccess, req })
+  const authorizedMCP = await getAuthorizedMCP({ isHTTP: true, overrideAccess, req })
+
+  // Clients like Codex send a GET first to find out where to sign in, so this comes before the
+  // GET check
+  if (pluginConfig.oauth && !req.user) {
+    return oauthChallenge({ req })
+  }
+
+  // Streamable HTTP's optional server-to-client stream. We don't offer one, so answer 405 per
+  // spec, and clients skip it
+  if (req.method === 'GET') {
+    return new Response(null, { headers: { Allow: 'POST' }, status: 405 })
+  }
+
   const maxRequestBodySize = pluginConfig.mcp?.maxRequestBodySize
   // Payload augments the original web-standard Request in place.
   const mcpRequest = req as PayloadRequest & Request

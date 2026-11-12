@@ -8,8 +8,10 @@ import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
-import { getOriginalFilename } from './fileVersioning/naming.js'
-import { getFileFromUploadInstructions } from './getFileFromUploadInstructions.js'
+import {
+  fetchFullClientUpload,
+  getFileFromUploadInstructions,
+} from './getFileFromUploadInstructions.js'
 
 vi.mock('./clientUploadReceipt.js', () => ({
   verifyClientUploadReceipt: vi.fn(({ signedReceipt }: { signedReceipt: unknown }) => {
@@ -65,11 +67,9 @@ const createUploadReferenceFile = (
   const uploadReference = overrides.uploadReference ?? {}
   const prefix = typeof uploadReference.prefix === 'string' ? uploadReference.prefix : ''
   const objectKey = 'upload-1'
-  const originalFilename =
-    filename.includes('/') || filename.includes('\\') ? filename : getOriginalFilename({ filename })
   const storageFilePath = prefix
-    ? `${prefix}/${objectKey}/${originalFilename}`
-    : `media/${objectKey}/${originalFilename}`
+    ? `${prefix}/${objectKey}/${filename}`
+    : `media/${objectKey}/${filename}`
   return {
     filename: 'video.mp4',
     mimeType: 'video/mp4',
@@ -159,6 +159,24 @@ describe('getFileFromUploadInstructions', () => {
     expect(path.dirname(file.tempFilePath!)).toBe(customTempDir)
 
     fs.rmSync(customTempDir, { force: true, recursive: true })
+  })
+
+  // `generateFileData` downloads the whole file only once `canTransform` accepts it.
+  it('should use the MIME type of the full download when it fetches a deferred client upload', async () => {
+    const handler = vi.fn(
+      async () =>
+        new Response('some file contents', { headers: { 'Content-Type': 'video/quicktime' } }),
+    )
+    const { filename, size, uploadReference } = createUploadReferenceFile()
+
+    const file = await fetchFullClientUpload({
+      collectionSlug: 'media',
+      file: { name: filename, data: Buffer.alloc(0), mimetype: 'video/mp4', size, uploadReference },
+      req: createReq([handler]),
+    })
+    tempFilesToClean.push(file.tempFilePath!)
+
+    expect(file.mimetype).toBe('video/quicktime')
   })
 
   it('throws when no handler returns a response with a body', async () => {
@@ -442,7 +460,55 @@ describe('getFileFromUploadInstructions', () => {
     expect(result.uploadReference).toStrictEqual({ prefix: '' })
   })
 
-  it('fetches only a bounded header for an image with no configured adjustments', async () => {
+  it('should reject a receipt signed for the beta -original filename', async () => {
+    const req = createReq([vi.fn()], {})
+    const file = createUploadReferenceFile()
+    file.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(file.uploadReference.signedReceipt as string),
+      storageFilePath: 'media/upload-1/video-original.mp4',
+    })
+
+    await expect(
+      getFileFromUploadInstructions({ collectionSlug: 'media', file, req }),
+    ).rejects.toThrow('Invalid upload reference.')
+  })
+
+  it('should accept a receipt for the plain uploaded filename', async () => {
+    const storedFilename = 'video.mp4'
+    const handler = vi.fn(
+      async () =>
+        new Response(Buffer.alloc(18), { headers: { 'Content-Length': '18' }, status: 200 }),
+    )
+    const req = createReq([handler], {})
+    const file = createUploadReferenceFile()
+    file.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(file.uploadReference.signedReceipt as string),
+      storageFilePath: `media/upload-1/${storedFilename}`,
+    })
+
+    await getFileFromUploadInstructions({ collectionSlug: 'media', file, req })
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        params: expect.objectContaining({ filename: storedFilename }),
+      }),
+    )
+    expect(req.context?._payloadVerifiedProviderOriginal).toMatchObject({
+      filename: storedFilename,
+      key: `media/upload-1/${storedFilename}`,
+    })
+  })
+
+  it.for([
+    { name: 'no configured adjustments', data: undefined },
+    // Whether a stage applies a saved crop is known only after planning, so generateFileData
+    // decides that download.
+    {
+      name: 'a _transforms crop in the request body',
+      data: { _transforms: { crop: { height: 1, width: 1, x: 0, y: 0 } } },
+    },
+  ])('fetches only a bounded header for an image with $name', async ({ data }) => {
     const handler = vi.fn(async (handlerReq: PayloadRequest) => {
       expect(handlerReq.headers.get('range')).toBe(`bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}`)
       return new Response(MINIMAL_PNG, {
@@ -455,6 +521,7 @@ describe('getFileFromUploadInstructions', () => {
     })
 
     const req = createReq([handler], {})
+    req.data = data
 
     const file = await getFileFromUploadInstructions({
       collectionSlug: 'media',

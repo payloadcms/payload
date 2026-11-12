@@ -3,7 +3,7 @@ import { test } from 'node:test'
 
 import { createAnnotationInteraction } from './annotation-demo.mjs'
 
-test('should use the chrome panel with a single annotation by default', async () => {
+test('should use the sidebar with a single annotation by default', async () => {
   const updates = []
   let clears = 0
   const { showAnnotation, hideAnnotation } = createAnnotationInteraction({

@@ -10,11 +10,13 @@ import { formatAdminURL } from '../utilities/formatAdminURL.js'
  * If neither condition is met, it returns null.
  *
  * If you set relative to true, the returned URL will be relative to the serverURL (unless external).
+ * With `isOriginal`, a generated URL asks for the original with `?original=true`.
  */
 export function generateFilePathOrURL({
   collectionSlug,
   config,
   filename,
+  isOriginal,
   relative,
   serverURL,
   urlOrPath,
@@ -22,6 +24,7 @@ export function generateFilePathOrURL({
   collectionSlug: string
   config: Pick<Config, 'routes' | 'serverURL'>
   filename?: string
+  isOriginal?: boolean
   relative: boolean
   serverURL?: string
   urlOrPath: string | undefined
@@ -37,7 +40,7 @@ export function generateFilePathOrURL({
     // local file url
     return formatAdminURL({
       apiRoute: config.routes?.api || '',
-      path: `/${collectionSlug}/file/${encodeURIComponent(filename)}`,
+      path: `/${collectionSlug}/file/${encodeURIComponent(filename)}${isOriginal ? '?original=true' : ''}`,
       relative,
       serverURL: config.serverURL,
     })

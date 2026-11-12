@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview-react",
-  "version": "4.0.0-beta.5",
+  "version": "4.0.0-beta.8",
   "description": "The official React SDK for Payload Live Preview",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
@@ -60,7 +60,7 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1",
-    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1"
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.3.1",
+    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.3.1"
   }
 }

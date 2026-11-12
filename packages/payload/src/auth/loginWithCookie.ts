@@ -58,6 +58,7 @@ export const loginWithCookie = async <
   })
 
   if (collection.config.auth.removeTokenFromResponses) {
+    delete result.refreshToken
     delete result.token
   }
 
