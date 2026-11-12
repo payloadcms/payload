@@ -267,12 +267,12 @@ export const getTableColumnFromPath = ({
           let blockAliasTable: BuildQueryJoinAliases[0]['table'] | undefined
 
           if (isFieldLocalized && adapter.payload.config.localization) {
-            // Include locale in the query path so same-locale fields reuse one join while
-            // different locales (e.g. layout.en.heading OR layout.de.caption) keep distinct aliases.
+            // Include locale and block slug so same-locale/same-block fields reuse one join while
+            // different locales or block types keep distinct aliases (e.g. card vs hero).
             const blockQueryPath =
               locale && locale !== 'all'
-                ? `${constraintPath}${field.name}.${locale}`
-                : `${constraintPath}${field.name}`
+                ? `${constraintPath}${field.name}.${locale}.${block.slug}`
+                : `${constraintPath}${field.name}.${block.slug}`
 
             const existingBlockJoin = joins.find(
               (eachJoin) => eachJoin.queryPath === blockQueryPath,

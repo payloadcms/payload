@@ -203,4 +203,98 @@ test.suite('Blocks OR join alias (#19459)', { config: './config.ts', db: 'drizzl
     expect(sameLocaleOrResult.docs.map((doc) => doc.id).sort()).toEqual([match.id].sort())
     expect(sameLocaleOrResult.totalDocs).toBe(1)
   })
+
+  test('should keep distinct joins when OR/AND spans fields in different localized block types', async ({
+    payload,
+  }) => {
+    const cardNeedle = 'blocks-or-join-alias-card-needle'
+    const heroNeedle = 'blocks-or-join-alias-hero-needle'
+
+    const cardDoc = await payload.create({
+      collection: 'articles',
+      locale: 'en',
+      data: {
+        localizedLayout: [
+          {
+            blockType: 'card',
+            heading: cardNeedle,
+            caption: 'card-caption-other',
+          },
+        ],
+      },
+      overrideAccess: true,
+    })
+
+    const heroDoc = await payload.create({
+      collection: 'articles',
+      locale: 'en',
+      data: {
+        localizedLayout: [
+          {
+            blockType: 'hero',
+            heroTitle: heroNeedle,
+          },
+        ],
+      },
+      overrideAccess: true,
+    })
+
+    const cardHeadingLike = {
+      'localizedLayout.heading': {
+        like: cardNeedle,
+      },
+    }
+    const heroTitleLike = {
+      'localizedLayout.heroTitle': {
+        like: heroNeedle,
+      },
+    }
+
+    // Resolve card first so a shared queryPath would reuse the card join for heroTitle.
+    const orResult = await payload.find({
+      collection: 'articles',
+      depth: 0,
+      where: {
+        or: [cardHeadingLike, heroTitleLike],
+      },
+      overrideAccess: true,
+    })
+
+    const andCardOnly = await payload.find({
+      collection: 'articles',
+      depth: 0,
+      where: {
+        and: [
+          cardHeadingLike,
+          {
+            'localizedLayout.heroTitle': {
+              like: 'no-match-forces-hero-join',
+            },
+          },
+        ],
+      },
+      overrideAccess: true,
+    })
+
+    const andHeroOnly = await payload.find({
+      collection: 'articles',
+      depth: 0,
+      where: {
+        and: [
+          {
+            'localizedLayout.heading': {
+              like: 'no-match-forces-card-join',
+            },
+          },
+          heroTitleLike,
+        ],
+      },
+      overrideAccess: true,
+    })
+
+    expect(orResult.docs.map((doc) => doc.id).sort()).toEqual([cardDoc.id, heroDoc.id].sort())
+    expect(orResult.totalDocs).toBe(2)
+    expect(andCardOnly.totalDocs).toBe(0)
+    expect(andHeroOnly.totalDocs).toBe(0)
+  })
 })

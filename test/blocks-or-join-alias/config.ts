@@ -52,6 +52,15 @@ export default buildConfigWithDefaults({
                   },
                 ],
               },
+              {
+                slug: 'hero',
+                fields: [
+                  {
+                    name: 'heroTitle',
+                    type: 'text',
+                  },
+                ],
+              },
             ],
           },
         ],
