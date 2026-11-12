@@ -12,8 +12,8 @@ import { apiKeyRevealEndpoint, authCollectionEndpoints } from '../../auth/endpoi
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
-import { sanitizeFieldValidation } from '../../fields/config/sanitizeFieldValidation.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
+import { warnOnRequiredWithCustomValidate } from '../../fields/config/warnOnRequiredWithCustomValidate.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
@@ -350,7 +350,7 @@ export const sanitizeCollection = async (
 
     for (const field of sanitized.fields) {
       if (fieldAffectsData(field) && typeof field.validate === 'function') {
-        sanitizeFieldValidation({ field, fieldPath: `${sanitized.slug}.${field.name}` })
+        warnOnRequiredWithCustomValidate({ field, fieldPath: `${sanitized.slug}.${field.name}` })
       }
     }
   }

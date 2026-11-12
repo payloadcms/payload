@@ -1,4 +1,4 @@
-import type { Field, ValidateOptions } from './types.js'
+import type { Field } from './types.js'
 
 import { username, validations } from '../validations.js'
 import { fieldAffectsData } from './types.js'
@@ -6,18 +6,24 @@ import { fieldAffectsData } from './types.js'
 const defaultValidators = new WeakSet<object>([...Object.values(validations), username])
 const warnedFields = new WeakSet<Field>()
 
-/** Also used after auth base fields are merged so inherited required flags are considered. */
-export const sanitizeFieldValidation = ({
+/** Warn after auth base fields are merged too, since they can supply the required flag. */
+export const warnOnRequiredWithCustomValidate = ({
   field,
   fieldPath,
+  hasCustomValidate = true,
   shouldWarn = true,
 }: {
   field: Field
   fieldPath: string
+  hasCustomValidate?: boolean
   shouldWarn?: boolean
-}): Field => {
+}): void => {
   if (!fieldAffectsData(field)) {
-    return field
+    return
+  }
+
+  if (!hasCustomValidate && typeof field.validate === 'function') {
+    defaultValidators.add(field.validate)
   }
 
   if (
@@ -34,20 +40,4 @@ export const sanitizeFieldValidation = ({
     )
     warnedFields.add(field)
   }
-
-  if (typeof field.validate === 'undefined') {
-    const defaultValidate =
-      'virtual' in field && field.virtual
-        ? undefined
-        : validations[field.type as keyof typeof validations]
-
-    field.validate = defaultValidate
-      ? (value: unknown, options: ValidateOptions<unknown, unknown, object, unknown>) =>
-          defaultValidate(value as never, { ...field, ...options } as never)
-      : (): true => true
-
-    defaultValidators.add(field.validate)
-  }
-
-  return field
 }
