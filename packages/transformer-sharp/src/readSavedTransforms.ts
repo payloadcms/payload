@@ -1,12 +1,9 @@
-import type { Document, FocalPoint } from 'payload'
+import type { Crop, Document, FocalPoint } from 'payload'
 
 import { isNumber } from 'payload/shared'
 
-/** A saved crop: whole pixels on the original file. */
-export type SavedCrop = { height: number; width: number; x: number; y: number }
-
 /** The crop saved in `doc._transforms`, or `undefined` when there is none. */
-export function getSavedCrop({ doc }: { doc?: Document }): SavedCrop | undefined {
+export function getSavedCrop({ doc }: { doc?: Document }): Omit<Crop, 'unit'> | undefined {
   const crop = getTransforms({ doc })?.crop
 
   if (
@@ -41,7 +38,7 @@ export function getSavedFocalPoint({ doc }: { doc?: Document }): FocalPoint | un
 
 function getTransforms({ doc }: { doc?: Document }):
   | {
-      crop?: Partial<Record<keyof SavedCrop, unknown>>
+      crop?: Partial<Record<keyof Omit<Crop, 'unit'>, unknown>>
       focalPoint?: { x?: unknown; y?: unknown }
     }
   | undefined {

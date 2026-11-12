@@ -1,7 +1,12 @@
-import type { Document, PayloadRequest, TransformFileArgs, TransformFileResult } from 'payload'
+import type {
+  Crop,
+  Document,
+  PayloadRequest,
+  TransformFileArgs,
+  TransformFileResult,
+} from 'payload'
 import type { ResizeOptions, SharpOptions } from 'sharp'
 
-import type { SavedCrop } from './readSavedTransforms.js'
 import type { SharpDependency, SharpUploadTaskOptions } from './types.js'
 
 import { createSharpFromFile } from './createSharpFromFile.js'
@@ -114,7 +119,7 @@ async function transformCrop({
   sharpDependency,
   withMetadata,
 }: {
-  crop: SavedCrop
+  crop: Omit<Crop, 'unit'>
   cropSize: Extract<SharpUploadTaskOptions, { kind: 'main' }>['cropSize']
   file: File
   fileIsAnimatedType: boolean

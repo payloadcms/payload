@@ -46,16 +46,8 @@ export type UploadTransformerInternal = {
    * collection, falling back to the first bridge when none does.
    */
   handlesCollection?: (args: { collectionSlug: string }) => boolean
-  /**
-   * Schedules the main-file and size tasks. Each task reads the saved crop and focal point from
-   * `doc._transforms` itself.
-   */
   prepareUpload?: (args: {
     collectionSlug: string
-    /**
-     * The pixel size of a crop sent in the request (`uploadEdits.widthInPixels` and
-     * `heightInPixels`). It is not saved, and replaces the saved crop's size for this upload only.
-     */
     cropSize?: { height: number; width: number }
     file: File
     req: PayloadRequest
