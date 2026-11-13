@@ -20,7 +20,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore, handleAbortRef } from '@payloadcms/ui/shared'
-import { formatAdminURL } from 'payload/shared'
+import { flattenTopLevelFields, formatAdminURL } from 'payload/shared'
 import React, { useEffect } from 'react'
 
 export const CreateFirstUserClient: React.FC<{
@@ -32,6 +32,7 @@ export const CreateFirstUserClient: React.FC<{
 }> = ({ docPermissions, docPreferences, initialState, loginWithUsername, userSlug }) => {
   const {
     config: {
+      defaultMaxTextLength,
       routes: { admin, api: apiRoute },
     },
     getEntityConfig,
@@ -45,6 +46,10 @@ export const CreateFirstUserClient: React.FC<{
   const abortOnChangeRef = React.useRef<AbortController>(null)
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
+
+  const passwordField = flattenTopLevelFields(collectionConfig.fields).find(
+    (field) => field.name === 'password',
+  )
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
     async ({ formState: prevFormState, submitted }) => {
@@ -114,6 +119,14 @@ export const CreateFirstUserClient: React.FC<{
         field={{
           name: 'password',
           label: t('authentication:newPassword'),
+          maxLength:
+            passwordField?.type === 'text' && typeof passwordField.maxLength === 'number'
+              ? Math.min(passwordField.maxLength, defaultMaxTextLength ?? passwordField.maxLength)
+              : undefined,
+          minLength:
+            passwordField?.type === 'text' && typeof passwordField.minLength === 'number'
+              ? Math.max(passwordField.minLength, 3)
+              : undefined,
           required: true,
         }}
         path="password"

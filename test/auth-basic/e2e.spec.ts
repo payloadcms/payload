@@ -60,7 +60,7 @@ const createFirstUser = async ({
   await page.locator('#field-confirm-password').fill('12')
   await page.locator('.form-submit > button').click()
   await expect(page.locator('.field-type.password .field-error')).toHaveText(
-    'This value must be longer than the minimum length of 3 characters.',
+    'This value must be longer than the minimum length of 4 characters.',
   )
 
   await page.locator('#field-email').fill(devUser.email)
