@@ -343,7 +343,7 @@ For an existing MongoDB database, generate the predefined branching migration:
 pnpm payload migrate:create enable-branching --file @payloadcms/db-mongodb/branching
 ```
 
-The migration assigns legacy content to `main` and creates branch-aware indexes before removing the old unique indexes they replace. Unrelated indexes are preserved. Matching legacy indexes are replaced even if created manually.
+The migration preserves existing content, assigning documents without a branch to `main`. It creates branch-aware indexes before replacing corresponding existing unique indexes, including manually created ones. Unrelated indexes are preserved.
 
 Review warnings about retained custom indexes, which may still block branch copies. If the migration fails, resolve the error and rerun it; completed changes may persist.
 

@@ -25,9 +25,9 @@ pnpm payload migrate:create enable-branching --file @payloadcms/db-mongodb/branc
 pnpm payload migrate
 ```
 
-It assigns legacy content to `main` and creates branch-aware indexes before replacing matching
-legacy unique indexes, including manually created ones. Unrelated indexes are preserved;
-`ensureIndexes: true` is not required.
+It preserves existing content, assigning documents without a branch to `main`. It creates
+branch-aware indexes before replacing corresponding existing unique indexes, including manually
+created ones. Unrelated indexes are preserved; `ensureIndexes: true` is not required.
 
 Review warnings about retained custom indexes, which may still block branch copies. Resolve errors
 and rerun failed migrations; completed changes may persist.
