@@ -365,47 +365,12 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should prompt for a tenant when a hasMany tenant field is empty', async () => {
-      test.skip(
-        Boolean(process.env.PAYLOAD_DATABASE && process.env.PAYLOAD_DATABASE !== 'mongodb'),
-        'The empty tenant fixture uses MongoDB',
-      )
-
-      const { docs: tenants } = await payload.find({
-        collection: tenantsSlug,
-        overrideAccess: true,
-      })
       const post = await payload.create({
         collection: multiTenantPostsSlug,
-        data: { title: 'Legacy post', tenant: [tenants[0].id], _status: 'published' },
+        data: { title: 'Unassigned draft', tenant: [] },
+        draft: true,
         overrideAccess: true,
       })
-      connection = await mongoose.createConnection(mongoURL).asPromise()
-      if (!connection.db) {
-        throw new Error('MongoDB connection is unavailable')
-      }
-      await connection.db
-        .collection(multiTenantPostsSlug)
-        .updateOne({ _id: new mongoose.Types.ObjectId(String(post.id)) }, { $set: { tenant: [] } })
-      await connection.db
-        .collection(`_${multiTenantPostsSlug}_versions`)
-        .updateMany(
-          { parent: new mongoose.Types.ObjectId(String(post.id)) },
-          { $set: { 'version.tenant': [] } },
-        )
-
-      await expect
-        .poll(async () => {
-          const persistedPost = await payload.find({
-            collection: multiTenantPostsSlug,
-            overrideAccess: true,
-            draft: true,
-            where: { id: { equals: String(post.id) } },
-          })
-
-          return persistedPost.docs[0]?.tenant
-        })
-        .toEqual([])
-
       const postsURL = new AdminUrlUtil(serverURL, multiTenantPostsSlug)
 
       await loginClientSide({ data: credentials.admin, page, serverURL })
