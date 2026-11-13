@@ -1172,8 +1172,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       csv-parse:
-        specifier: 5.6.0
-        version: 5.6.0
+        specifier: 7.0.2
+        version: 7.0.2
       csv-stringify:
         specifier: 6.5.2
         version: 6.5.2
@@ -9828,6 +9828,9 @@ packages:
 
   csv-parse@5.6.0:
     resolution: {integrity: sha512-l3nz3euub2QMg5ouu5U09Ew9Wf6/wQ8I++ch1loQ0ljmzhmfZYrH9fflS22i/PQEvsPvxCwxgz5q7UB8K1JO4Q==}
+
+  csv-parse@7.0.2:
+    resolution: {integrity: sha512-uKZghv9UmPkMVLYy//KZ9HFAIJsl7wkhoEdIL0+rhuSY9pZQlhaeGEDPIe+/w7eh81MOql8Q/9+inAGWG6ZHYA==}
 
   csv-stringify@6.5.2:
     resolution: {integrity: sha512-RFPahj0sXcmUyjrObAK+DOWtMvMIFV328n4qZJhgX3x2RqkQgOTU2mCUmiFR0CzM6AzChlRSUErjiJeEt8BaQA==}
@@ -23505,6 +23508,8 @@ snapshots:
   csstype@3.2.3: {}
 
   csv-parse@5.6.0: {}
+
+  csv-parse@7.0.2: {}
 
   csv-stringify@6.5.2: {}
 
