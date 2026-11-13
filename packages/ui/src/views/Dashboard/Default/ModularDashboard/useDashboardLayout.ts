@@ -2,7 +2,7 @@ import type { WidgetWidth } from 'payload'
 
 import { arrayMove } from '@dnd-kit/sortable'
 import { PREFERENCE_KEYS } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { startTransition, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { v4 as uuid } from 'uuid'
 
@@ -44,7 +44,9 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   // Sync state when initialLayout prop changes (e.g., when query params change and server component re-renders)
   useEffect(() => {
     if (!isEditing) {
-      setCurrentLayout(initialLayout)
+      // A transition keeps showing the current widgets while a new widget's server-rendered
+      // content is still streaming. A sync update would show the nearest Suspense fallback instead.
+      startTransition(() => setCurrentLayout(initialLayout))
     }
     // do not sync while editing. Depending on `isEditing` in this effect causes an
     // unintended rollback when toggling from editing -> view mode after save.
