@@ -2444,6 +2444,56 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
           deleteSpy.mockRestore()
         }
       })
+      it('should set isError when a bulk deleteDocuments result has errors', async ({
+        mcp,
+        getApiKey,
+        payload,
+      }) => {
+        const post = await payload.create({
+          collection: 'posts',
+          data: { content: 'Bulk delete partial', title: 'Bulk Delete Partial' },
+          overrideAccess: true,
+        })
+        const client = await mcp.connect(await getApiKey())
+        // One document deleted, one refused (as a beforeDelete hook or an access rule would refuse it)
+        const deleteSpy = vi.spyOn(payload, 'delete').mockResolvedValueOnce({
+          docs: [{ id: post.id }],
+          errors: [{ id: 'refused-id', message: 'Refused by a beforeDelete hook' }],
+        } as never)
+        try {
+          const callResponse = await client.callTool({
+            arguments: { slug: 'posts', where: { title: { equals: 'Bulk Delete Partial' } } },
+            name: 'deleteDocuments',
+          })
+          expect(callResponse.content[0].text).toContain('Errors: 1')
+          expect(callResponse.isError).toBe(true)
+        } finally {
+          deleteSpy.mockRestore()
+          await payload.delete({ id: post.id, collection: 'posts', overrideAccess: true })
+        }
+      })
+      it('should set isError when deleteDocuments throws', async ({ mcp, getApiKey, payload }) => {
+        const post = await payload.create({
+          collection: 'posts',
+          data: { content: 'Delete throws', title: 'Delete Throws' },
+          overrideAccess: true,
+        })
+        const client = await mcp.connect(await getApiKey())
+        const deleteSpy = vi
+          .spyOn(payload, 'delete')
+          .mockRejectedValueOnce(new Error('Refused by a beforeDelete hook'))
+        try {
+          const callResponse = await client.callTool({
+            arguments: { slug: 'posts', id: post.id },
+            name: 'deleteDocuments',
+          })
+          expect(callResponse.content[0].text).toContain('Error deleting document')
+          expect(callResponse.isError).toBe(true)
+        } finally {
+          deleteSpy.mockRestore()
+          await payload.delete({ id: post.id, collection: 'posts', overrideAccess: true })
+        }
+      })
       it('should call updateDocument with object where clause', async ({
         mcp,
         getApiKey,
