@@ -37,6 +37,9 @@ type DbService = {
 const publishLocally = (hostPort: number, containerPort: number) =>
   `127.0.0.1:${hostPort}:${containerPort}`
 
+/** docker compose interpolates `$VARIABLE`, `$$` is a literal `$` */
+const escapeComposeValue = (value: string) => value.replaceAll('$', '$$$$')
+
 /* eslint-disable perfectionist/sort-objects -- the key order is the order in docker-compose.yml */
 const mongoService: DbService = {
   name: 'mongo',
@@ -60,10 +63,12 @@ const postgresService: DbService = {
     volumes: ['pgdata:/var/lib/postgresql'],
     ports: [publishLocally(hostPort, 5432)],
     environment: {
-      POSTGRES_USER: dbUser || 'postgres',
-      POSTGRES_DB: dbName,
+      POSTGRES_USER: escapeComposeValue(dbUser || 'postgres'),
+      POSTGRES_DB: escapeComposeValue(dbName),
       // Use the password of the connection string, only allow connecting without one when it has none
-      ...(dbPassword ? { POSTGRES_PASSWORD: dbPassword } : { POSTGRES_HOST_AUTH_METHOD: 'trust' }),
+      ...(dbPassword
+        ? { POSTGRES_PASSWORD: escapeComposeValue(dbPassword) }
+        : { POSTGRES_HOST_AUTH_METHOD: 'trust' }),
     },
   }),
   volume: 'pgdata',
@@ -275,7 +280,7 @@ export function updateDockerCompose(args: { dbDetails: DbDetails; template: stri
           comment: ' Inside docker the database is reachable by its service name, not 127.0.0.1',
           doc,
           servicePath: appServicePath,
-          value: toServiceUri(dbDetails.dbUri, dbService),
+          value: escapeComposeValue(toServiceUri(dbDetails.dbUri, dbService)),
         })
       }
     }

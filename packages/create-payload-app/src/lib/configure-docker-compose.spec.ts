@@ -79,6 +79,21 @@ describe('updateDockerCompose', () => {
     })
   })
 
+  it('escapes $ so docker compose does not interpolate it', () => {
+    const { compose } = update({
+      type: 'postgres',
+      dbUri: 'postgres://postgres:pa$word@127.0.0.1:5432/my%24app',
+    })
+
+    expect(compose.services.postgres?.environment).toMatchObject({
+      POSTGRES_DB: 'my$$app',
+      POSTGRES_PASSWORD: 'pa$$word',
+    })
+    expect(compose.services.payload?.environment).toStrictEqual({
+      DATABASE_URL: 'postgres://postgres:pa$$word@postgres:5432/my%24app',
+    })
+  })
+
   it('only allows connecting to Postgres without a password when the connection string has none', () => {
     const { compose } = update({ type: 'postgres', dbUri: 'postgres://127.0.0.1:5432/my-app' })
 
