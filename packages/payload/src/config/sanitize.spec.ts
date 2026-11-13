@@ -15,6 +15,18 @@ const configDefaults: Config = {
 }
 
 describe('sanitizeConfig', () => {
+  it.each([
+    { cookiePrefix: undefined, expected: 'payload' },
+    { cookiePrefix: '', expected: 'payload' },
+    { cookiePrefix: 'payload', expected: 'payload' },
+    { cookiePrefix: 'my-app', expected: 'my-app' },
+    { cookiePrefix: ' ', expected: ' ' },
+  ])('should sanitize cookiePrefix $cookiePrefix to $expected', ({ cookiePrefix, expected }) => {
+    const sanitizedConfig = sanitizeConfig({ ...configDefaults, cookiePrefix })
+
+    expect(sanitizedConfig.cookiePrefix).toBe(expected)
+  })
+
   it('should populate sanitized root config defaults for a minimal config', () => {
     const config: Config = {
       ...configDefaults,
@@ -22,6 +34,7 @@ describe('sanitizeConfig', () => {
 
     const sanitizedConfig = sanitizeConfig(config)
 
+    expect(sanitizedConfig.cookiePrefix).toBe('payload')
     expect(sanitizedConfig.admin).toMatchObject({
       avatar: 'gravatar',
       components: {},

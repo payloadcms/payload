@@ -1488,6 +1488,7 @@ export type Config = {
   collections?: CollectionConfig[]
   /**
    * Prefix a string to all cookies that Payload sets.
+   * Empty strings use the default prefix.
    *
    * @default "payload"
    */
