@@ -132,7 +132,8 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
     }
     if (
       showField &&
-      ((!isFormValid && showError) || (!value && (!selectedTenantID || hasAccessToAllTenants)))
+      ((!isFormValid && showError) ||
+        (!value && !modalValue && (!selectedTenantID || hasAccessToAllTenants)))
     ) {
       openModal(assignTenantModalSlug)
     }
@@ -141,6 +142,7 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
     isEditManyModalOpen,
     isFormValid,
     hasAccessToAllTenants,
+    modalValue,
     showError,
     showField,
     openModal,
