@@ -18,6 +18,7 @@ const VersionPosts: CollectionConfig = {
     defaultColumns: ['title', 'description', 'createdAt'],
     useAsTitle: 'title',
   },
+  authorship: false,
   fields: [
     {
       name: 'title',

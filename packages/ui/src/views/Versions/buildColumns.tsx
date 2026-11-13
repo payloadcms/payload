@@ -18,6 +18,7 @@ import {
   VersionsCreatedAtCell as CreatedAtCell,
   VersionsIDCell as IDCell,
   SortColumn,
+  VersionsUpdatedByCell as UpdatedByCell,
 } from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 
@@ -73,6 +74,22 @@ export const buildVersionColumns = ({
       }),
     },
   ]
+
+  if (entityConfig?.authorship?.updatedBy) {
+    columns.push({
+      accessor: 'version.updatedBy',
+      active: true,
+      field: {
+        name: '',
+        type: 'text',
+      },
+      Heading: t('general:updatedBy'),
+      renderedCells: docs.map((doc, i) => {
+        const updatedBy = (doc as any).version?.updatedBy ?? null
+        return <UpdatedByCell key={i} updatedBy={updatedBy} />
+      }),
+    })
+  }
 
   if (hasDraftsEnabled(entityConfig)) {
     columns.push({
