@@ -4,6 +4,7 @@ import globby from 'globby'
 import * as os from 'node:os'
 import path from 'path'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
+import { parse } from 'yaml'
 import type { CliArgs, DbType, ProjectExample, ProjectTemplate } from '../types.js'
 
 import { createProject, updatePackageJSONDependencies } from './create-project.js'
@@ -185,15 +186,18 @@ describe('createProject', () => {
         }
 
         // Verify docker-compose.yml runs the selected database
-        const dockerCompose = fse.readFileSync(
-          path.resolve(projectDir, 'docker-compose.yml'),
-          'utf8',
-        )
+        const dockerCompose = parse(
+          fse.readFileSync(path.resolve(projectDir, 'docker-compose.yml'), 'utf8'),
+        ) as {
+          services: Record<string, { depends_on?: string[]; environment?: Record<string, string> }>
+        }
         const dbService = db === 'mongodb' ? 'mongo' : 'postgres'
-        const otherDbService = db === 'mongodb' ? 'postgres' : 'mongo'
 
-        expect(dockerCompose).toContain(`\n  ${dbService}:\n`)
-        expect(dockerCompose).not.toContain(`\n  ${otherDbService}:\n`)
+        expect(Object.keys(dockerCompose.services)).toStrictEqual(['payload', dbService])
+        expect(dockerCompose.services.payload?.depends_on).toStrictEqual([dbService])
+        expect(
+          new URL(dockerCompose.services.payload?.environment?.DATABASE_URL ?? '').hostname,
+        ).toBe(dbService)
       })
     })
 
