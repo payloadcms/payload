@@ -27,7 +27,7 @@ export const contractCalls = {
   handleRequest: [] as ({ slug: string } & HandleTransformRequestArgs)[],
   /** `docAtStart` is a copy of `doc` before the stage ran. */
   transformFile: [] as ({ docAtStart: Record<string, unknown> } & TransformFileArgs)[],
-  /** Each call of the `watermark` definition's `validate`. */
+  /** Each call of the `watermark` definition's `validate`, with `doc` copied when it was called. */
   validate: [] as { context: Parameters<TransformValidate>[1]; value: unknown }[],
 }
 
@@ -94,7 +94,10 @@ export const contractTransformers: UploadTransformer[] = [
           required: ['text'],
         },
         validate: (value, context) => {
-          contractCalls.validate.push({ context, value })
+          contractCalls.validate.push({
+            context: { ...context, doc: structuredClone(context.doc) },
+            value,
+          })
 
           return (value as { text: string }).text === 'forbidden'
             ? 'watermark: this text is not allowed'

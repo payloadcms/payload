@@ -346,6 +346,33 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     expect(contractCalls.validate).toHaveLength(2)
   })
 
+  test('should give validate the incoming file, on a create with a supplied declared key', async ({
+    payload,
+  }) => {
+    await createNote({ _transforms: { watermark: { text: 'draft' } }, payload })
+
+    expect(contractCalls.validate[0]?.context.doc).toMatchObject({
+      filename: 'note.md',
+      filesize: 5,
+      mimeType: 'text/markdown',
+    })
+  })
+
+  test('should give validate the new file, not the replaced one, on an update with a supplied declared key', async ({
+    payload,
+  }) => {
+    const created = await createNote({ payload })
+
+    await payload.update({
+      id: created.id,
+      collection: contractMediaSlug,
+      data: { _transforms: { watermark: { text: 'draft' } } },
+      file: textFile('hello world'),
+    })
+
+    expect(contractCalls.validate[0]?.context.doc).toMatchObject({ filesize: 11 })
+  })
+
   test('should keep a saved declared value that its schema no longer accepts, on an update that leaves _transforms out', async ({
     payload,
   }) => {
@@ -592,6 +619,33 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       })
 
       expect(contractCalls.validate.at(-1)?.context.doc).toMatchObject({
+        filename: source.filename,
+        mimeType: 'image/png',
+      })
+    })
+
+    test('should give validate the read file, on a create from a URL with a supplied declared key', async ({
+      payload,
+    }) => {
+      const source = await createImage({ payload })
+
+      await payload.create({
+        collection: variantMediaSlug,
+        context: { contractStages: { handledTransformKeys: ['watermark'] } },
+        // A crop makes the create wait for the file, which is read from the collection's folder.
+        data: {
+          _transforms: {
+            crop: { height: 10, width: 10, x: 0, y: 0 },
+            watermark: { text: 'draft' },
+          },
+          filename: source.filename,
+          url: new URL(source.url!, 'http://payload.local').pathname,
+        },
+        overrideAccess: true,
+      })
+
+      expect(contractCalls.validate).toHaveLength(1)
+      expect(contractCalls.validate[0]?.context.doc).toMatchObject({
         filename: source.filename,
         mimeType: 'image/png',
       })
