@@ -9,12 +9,22 @@ import React, { createContext } from 'react'
 import { generateCookie } from '../../utilities/generateCookie.js'
 import { shouldRefreshTenantSelection } from '../../utilities/shouldRefreshTenantSelection.js'
 
+type DocumentContext = {
+  entityType: 'document' | 'global'
+  key: string
+  tenantID: number | string | undefined
+}
+
 type ContextType = {
+  /** The persistent tenant filter used outside document views. */
+  browsingTenantID: number | string | undefined
+  /** Removes only the closing document or drawer from the active context. */
+  clearDocumentContext: (args: { key: string }) => void
   /**
    * What is the context of the selector? It is either 'document' | 'global' | undefined.
    *
    * - 'document' means you are viewing a document in the context of a tenant
-   * - 'global' means you are viewing a "global" (globals are collection documents but prevent you from viewing the list view) document in the context of a tenant
+   * - 'global' means you are viewing a "global" (globals are collection documents with one document per tenant) document in the context of a tenant
    * - undefined means you are not viewing a document at all
    */
   entityType?: 'document' | 'global'
@@ -27,9 +37,11 @@ type ContextType = {
    */
   options: OptionObject[]
   /**
-   * The currently selected tenant ID
+   * The effective tenant for the current document or browsing view
    */
   selectedTenantID: number | string | undefined
+  /** Updates document context without changing the browsing filter or cookie. */
+  setDocumentContext: (args: DocumentContext) => void
   /**
    * Sets the entityType when a document is loaded and sets it to undefined when the document unmounts.
    */
@@ -39,7 +51,7 @@ type ContextType = {
    */
   setModified: React.Dispatch<React.SetStateAction<boolean>>
   /**
-   * Sets the selected tenant ID
+   * Sets the persistent browsing tenant ID
    *
    * @param args.id - The ID of the tenant to select
    * @param args.refresh - Whether to refresh the page after changing the tenant
@@ -56,9 +68,12 @@ type ContextType = {
 }
 
 const Context = createContext<ContextType>({
+  browsingTenantID: undefined,
+  clearDocumentContext: () => undefined,
   entityType: undefined,
   options: [],
   selectedTenantID: undefined,
+  setDocumentContext: () => undefined,
   setEntityType: () => undefined,
   setModified: () => undefined,
   setTenant: () => null,
@@ -66,7 +81,7 @@ const Context = createContext<ContextType>({
   updateTenants: () => null,
 })
 
-const DEFAULT_COOKIE_NAME = 'payload-tenant'
+const DEFAULT_COOKIE_NAME = 'payload-tenant-filter'
 
 const setTenantCookie = (args: { cookieName?: string; value: string }) => {
   const { cookieName = DEFAULT_COOKIE_NAME, value } = args
@@ -97,7 +112,9 @@ const getTenantCookie = (args: { cookieName?: string } = {}): string | undefined
   if (parts.length === 2) {
     return parts.pop()?.split(';').shift()
   }
-  return undefined
+  return cookieName === DEFAULT_COOKIE_NAME
+    ? getTenantCookie({ cookieName: 'payload-tenant' })
+    : undefined
 }
 
 export const TenantSelectionProviderClient = ({
@@ -111,11 +128,35 @@ export const TenantSelectionProviderClient = ({
   initialValue?: number | string
   tenantsCollectionSlug: string
 }) => {
-  const [selectedTenantID, setSelectedTenantID] = React.useState<number | string | undefined>(
+  const [browsingTenantID, setSelectedTenantID] = React.useState<number | string | undefined>(
     initialValue,
   )
+  const [documentContexts, setDocumentContexts] = React.useState<DocumentContext[]>([])
   const [modified, setModified] = React.useState<boolean>(false)
-  const [entityType, setEntityType] = React.useState<'document' | 'global' | undefined>(undefined)
+  const [legacyEntityType, setEntityType] = React.useState<'document' | 'global' | undefined>(
+    undefined,
+  )
+  const documentContext = documentContexts[documentContexts.length - 1]
+  const hasDocumentContext = documentContext !== undefined
+  const documentTenantID = documentContext?.tenantID
+  const entityType = documentContext?.entityType ?? legacyEntityType
+  const selectedTenantID = documentContext ? documentContext.tenantID : browsingTenantID
+
+  const setDocumentContext = React.useCallback<ContextType['setDocumentContext']>((context) => {
+    setDocumentContexts((previous) => {
+      const index = previous.findIndex(({ key }) => key === context.key)
+
+      if (index === -1) {
+        return [...previous, context]
+      }
+
+      return previous.map((entry, entryIndex) => (entryIndex === index ? context : entry))
+    })
+  }, [])
+
+  const clearDocumentContext = React.useCallback<ContextType['clearDocumentContext']>(({ key }) => {
+    setDocumentContexts((previous) => previous.filter((entry) => entry.key !== key))
+  }, [])
   const { user } = useAuth()
   const { config } = useConfig()
   const router = useRouter()
@@ -130,13 +171,34 @@ export const TenantSelectionProviderClient = ({
     [selectedTenantID, tenantOptions],
   )
 
+  React.useEffect(() => {
+    setTenantCookie({ value: browsingTenantID === undefined ? '' : String(browsingTenantID) })
+  }, [browsingTenantID])
+
+  React.useEffect(() => {
+    if (!hasDocumentContext) {
+      return
+    }
+
+    if (documentTenantID === undefined) {
+      deleteTenantCookie({ cookieName: 'payload-tenant' })
+    } else {
+      setTenantCookie({ cookieName: 'payload-tenant', value: String(documentTenantID) })
+    }
+  }, [documentTenantID, hasDocumentContext])
+
   const setTenantAndCookie = React.useCallback(
     ({ id, refresh }: { id: number | string | undefined; refresh?: boolean }) => {
       setSelectedTenantID(id)
       if (id !== undefined) {
         setTenantCookie({ value: String(id) })
       } else {
-        deleteTenantCookie()
+        setTenantCookie({ value: '' })
+      }
+      if (id !== undefined) {
+        setTenantCookie({ cookieName: 'payload-tenant', value: String(id) })
+      } else {
+        deleteTenantCookie({ cookieName: 'payload-tenant' })
       }
       if (refresh) {
         router.refresh()
@@ -190,6 +252,10 @@ export const TenantSelectionProviderClient = ({
         if (result.tenantOptions.length === 1) {
           setSelectedTenantID(result.tenantOptions[0].value)
           setTenantCookie({ value: String(result.tenantOptions[0].value) })
+          setTenantCookie({
+            cookieName: 'payload-tenant',
+            value: String(result.tenantOptions[0].value),
+          })
         }
       }
     } catch (e) {
@@ -238,6 +304,10 @@ export const TenantSelectionProviderClient = ({
       if (initialTenantOptions.length === 1 && initialTenantOptions[0]) {
         setSelectedTenantID(initialTenantOptions[0].value)
         setTenantCookie({ value: String(initialTenantOptions[0].value) })
+        setTenantCookie({
+          cookieName: 'payload-tenant',
+          value: String(initialTenantOptions[0].value),
+        })
       }
     }
   }, [initialTenantOptions])
@@ -252,6 +322,7 @@ export const TenantSelectionProviderClient = ({
       // user logging out
       setSelectedTenantID(undefined)
       deleteTenantCookie()
+      deleteTenantCookie({ cookieName: 'payload-tenant' })
       setTenantOptions((prev) => (prev.length > 0 ? [] : prev))
       router.refresh()
     }
@@ -300,19 +371,6 @@ export const TenantSelectionProviderClient = ({
     }
   }, [initialValue, setTenant])
 
-  /**
-   * If there is no selected tenant ID and the entity type is 'global', set the first tenant as selected.
-   * This ensures that the global tenant is always set when the component mounts.
-   */
-  React.useEffect(() => {
-    if (!selectedTenantID && tenantOptions.length > 0 && entityType === 'global') {
-      setTenant({
-        id: tenantOptions[0]?.value,
-        refresh: true,
-      })
-    }
-  }, [selectedTenantID, tenantOptions, entityType, setTenant])
-
   return (
     <span
       data-selected-tenant-id={selectedTenantID}
@@ -320,10 +378,13 @@ export const TenantSelectionProviderClient = ({
     >
       <Context
         value={{
+          browsingTenantID,
+          clearDocumentContext,
           entityType,
           modified,
           options: tenantOptions,
           selectedTenantID,
+          setDocumentContext,
           setEntityType,
           setModified,
           setTenant,

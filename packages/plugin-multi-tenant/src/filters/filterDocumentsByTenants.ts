@@ -20,6 +20,7 @@ type Args = {
   tenantsArrayTenantFieldName?: string
   tenantsCollectionSlug: string
   userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
+  useTenantFilter?: boolean
 }
 export const filterDocumentsByTenants = ({
   docTenantID,
@@ -29,6 +30,7 @@ export const filterDocumentsByTenants = ({
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   userHasAccessToAllTenants,
+  useTenantFilter = false,
 }: Args): null | Where => {
   const idType = getCollectionIDType({
     collectionSlug: tenantsCollectionSlug,
@@ -36,7 +38,8 @@ export const filterDocumentsByTenants = ({
   })
 
   // scope results to selected tenant
-  const selectedTenant = docTenantID ?? getTenantFromCookie(req.headers, idType)
+  const selectedTenant =
+    docTenantID ?? getTenantFromCookie(req.headers, idType, { useTenantFilter })
   if (selectedTenant) {
     return {
       [filterFieldName]: {

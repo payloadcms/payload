@@ -11,9 +11,13 @@ import { isNumber } from 'payload/shared'
 export function getTenantFromCookie(
   headers: Headers,
   idType: 'number' | 'text',
+  { useTenantFilter = false }: { useTenantFilter?: boolean } = {},
 ): null | number | string {
   const cookies = parseCookies(headers)
-  const selectedTenant = cookies.get('payload-tenant') || null
+  const selectedTenant =
+    (useTenantFilter && cookies.has('payload-tenant-filter')
+      ? cookies.get('payload-tenant-filter')
+      : cookies.get('payload-tenant')) || null
   return selectedTenant
     ? idType === 'number' && isNumber(selectedTenant)
       ? parseFloat(selectedTenant)

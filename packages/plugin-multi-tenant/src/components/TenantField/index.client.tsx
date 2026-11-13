@@ -33,7 +33,9 @@ type Props = {
 } & RelationshipFieldClientProps
 
 export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
-  const { entityType, options, selectedTenantID, setEntityType, setTenant } = useTenantSelection()
+  const { browsingTenantID, clearDocumentContext, options, selectedTenantID, setDocumentContext } =
+    useTenantSelection()
+  const documentContextKey = React.useId()
   const tenantField = useField<TenantValue>()
   const { setValue, showError, value } = tenantField
   const { isValid: isFormValid } = useForm()
@@ -57,70 +59,44 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   const showField =
     (options.length > 1 && !fieldArgs.field.admin?.hidden && !fieldArgs.field.hidden) || debug
 
-  function getTenantIDToSelect({
-    selectedTenantID,
-    value,
-  }: {
-    selectedTenantID: number | string | undefined
-    value: TenantValue | undefined
-  }): number | string | undefined {
-    if (Array.isArray(value)) {
-      if (!value.length) {
-        return undefined
-      }
-
-      if (!selectedTenantID || !value.includes(selectedTenantID)) {
-        return value[0]
-      }
-
-      return undefined
-    }
-
-    if (value && selectedTenantID !== value) {
-      return value
-    }
-
-    return undefined
-  }
-
-  const syncTenantSelectionFromValue = React.useCallback(
-    (tenantValue: TenantValue | undefined) => {
-      const tenantID = getTenantIDToSelect({ selectedTenantID, value: tenantValue })
-
-      if (tenantID) {
-        setTenant({ id: tenantID, refresh: false })
-      }
-    },
-    [selectedTenantID, setTenant],
-  )
-
   const onConfirm = React.useCallback(() => {
     if (hasTenantValueChanged({ hasMany: fieldArgs.field.hasMany, modalValue, value })) {
       setValue(modalValue)
-      syncTenantSelectionFromValue(modalValue)
     }
-  }, [fieldArgs.field.hasMany, modalValue, setValue, syncTenantSelectionFromValue, value])
+  }, [fieldArgs.field.hasMany, modalValue, setValue, value])
 
   const afterModalOpen = React.useCallback(() => {
     setModalValue(value)
   }, [value])
 
   React.useEffect(() => {
-    if (!entityType) {
-      setEntityType(unique ? 'global' : 'document')
-    } else {
-      // unique documents are controlled from the global TenantSelector
-      if (!unique) {
-        syncTenantSelectionFromValue(value)
-      }
+    return () => clearDocumentContext({ key: documentContextKey })
+  }, [clearDocumentContext, documentContextKey])
+
+  React.useEffect(() => {
+    if (isEditManyModalOpen) {
+      clearDocumentContext({ key: documentContextKey })
+      return
     }
 
-    return () => {
-      if (entityType) {
-        setEntityType(undefined)
-      }
-    }
-  }, [entityType, setEntityType, syncTenantSelectionFromValue, unique, value])
+    const tenantID = Array.isArray(value)
+      ? (value.find((id) => id === browsingTenantID) ?? value[0])
+      : value
+
+    setDocumentContext({
+      entityType: unique ? 'global' : 'document',
+      key: documentContextKey,
+      tenantID: tenantID ?? undefined,
+    })
+  }, [
+    browsingTenantID,
+    clearDocumentContext,
+    documentContextKey,
+    isEditManyModalOpen,
+    setDocumentContext,
+    unique,
+    value,
+  ])
 
   React.useEffect(() => {
     if (unique || debug || isEditManyModalOpen) {
