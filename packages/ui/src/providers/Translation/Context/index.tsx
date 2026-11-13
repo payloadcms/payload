@@ -58,6 +58,12 @@ export type TranslationContextProviderProps = {
   translations: I18nClient['translations']
 }
 
+/**
+ * Provides a shared translation context for native Payload components and custom UI, including standalone integrations such as visual editing.
+ *
+ * Must remain independent of admin routing and server functions because standalone consumers do not have the admin provider tree.
+ * Keep admin language persistence and navigation in `TranslationProvider`; use `onLanguageChange` for integration callbacks.
+ */
 export const TranslationContextProvider: React.FC<TranslationContextProviderProps> = ({
   children,
   dateFNSKey,
