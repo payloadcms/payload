@@ -1,10 +1,6 @@
-/**
- * beforeDelete Hook Responsibilities:
- * - Delete child folders when parent is deleted (cascade delete)
- * - Set context flag for deletion tracking
- */
-
 import type { CollectionBeforeDeleteHook } from '../../index.js'
+
+import { deleteHierarchyChildren } from '../deleteHierarchyChildren.js'
 
 type Args = {
   /**
@@ -16,18 +12,5 @@ type Args = {
 export const hierarchyCollectionBeforeDelete =
   ({ parentFieldName }: Args): CollectionBeforeDeleteHook =>
   async ({ id, collection, req }) => {
-    req.context = req.context || {}
-    req.context.isDeleting = true
-
-    // Delete all child folders (cascade delete)
-    await req.payload.delete({
-      collection: collection.slug,
-      overrideAccess: true,
-      req,
-      where: {
-        [parentFieldName]: {
-          equals: id,
-        },
-      },
-    })
+    await deleteHierarchyChildren({ id, collection, parentFieldName, req })
   }
