@@ -1,3 +1,6 @@
+import type { MongooseAdapter } from '@payloadcms/db-mongodb'
+import type { Pool } from 'pg'
+
 import path from 'path'
 import {
   _internal_jobSystemGlobals,
@@ -10,11 +13,12 @@ import {
 } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
@@ -753,6 +757,1425 @@ describe('Queues - Payload', () => {
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
     expect(jobAfterRun.input.amountRetried).toBe(4)
+  })
+
+  describe.each([
+    { depth: 0, label: 'without hooks', runHooks: false },
+    { depth: 0, label: 'with runHooks enabled', runHooks: true },
+    { depth: 1, label: 'with nonzero depth', runHooks: false },
+  ])('multiple workers on the same queue ($label)', ({ depth, runHooks }) => {
+    const queue = 'multi-worker'
+    let originalDepth: number | undefined
+    let originalRunHooks: boolean | undefined
+
+    beforeEach(() => {
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      originalDepth = payload.config.jobs.depth
+      originalRunHooks = payload.config.jobs.runHooks
+      payload.config.jobs.depth = depth
+      payload.config.jobs.runHooks = runHooks
+    })
+
+    afterEach(async () => {
+      payload.config.jobs.depth = originalDepth
+      payload.config.jobs.runHooks = originalRunHooks
+      await payload.db.deleteMany({
+        collection: 'payload-jobs',
+        where: { queue: { equals: queue } },
+      })
+      await payload.delete({ collection: 'simple', where: { id: { exists: true } } })
+    })
+
+    const queueJobs = async ({ count, message }: { count: number; message: string }) => {
+      const jobs = []
+
+      for (let i = 0; i < count; i++) {
+        jobs.push(
+          await payload.jobs.queue({
+            input: { message: `${message} ${i}` },
+            queue,
+            task: 'CreateSimple',
+          }),
+        )
+      }
+
+      return jobs
+    }
+
+    const countSimplesByMessage = async ({ message }: { message: string }) => {
+      const { docs } = await payload.find({
+        collection: 'simple',
+        limit: 0,
+        where: { title: { like: message } },
+      })
+
+      const counts: Record<string, number> = {}
+
+      for (const doc of docs) {
+        counts[doc.title] = (counts[doc.title] ?? 0) + 1
+      }
+
+      return counts
+    }
+
+    it('should run every job of a batch claimed by a single runner with the default limit', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      const message = 'single runner batch'
+      const jobs = await queueJobs({ count: 3, message })
+
+      const result = await payload.jobs.run({ queue, silent: true })
+
+      expect(Object.keys(result.jobStatus ?? {})).toHaveLength(jobs.length)
+
+      const counts = await countSimplesByMessage({ message })
+
+      expect(Object.values(counts)).toEqual([1, 1, 1])
+
+      const { docs: jobsAfterRun } = await payload.find({
+        collection: 'payload-jobs',
+        limit: 0,
+        where: { queue: { equals: queue } },
+      })
+
+      expect(jobsAfterRun).toHaveLength(jobs.length)
+
+      for (const job of jobsAfterRun) {
+        expect(job.processing).toBe(false)
+        expect(job.completedAt).toBeTruthy()
+      }
+    })
+
+    it('should run a job only once when multiple workers poll the same queue with limit 1', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      const message = 'limit 1 workers'
+      const [job] = await queueJobs({ count: 1, message })
+
+      const results = await Promise.all(
+        Array.from({ length: 10 }, () => payload.jobs.run({ limit: 1, queue, silent: true })),
+      )
+
+      const counts = await countSimplesByMessage({ message })
+
+      expect(Object.values(counts)).toEqual([1])
+
+      const workersThatRanTheJob = results.filter((result) => result.jobStatus?.[job!.id])
+
+      expect(workersThatRanTheJob).toHaveLength(1)
+    })
+
+    it('should run each job only once when multiple workers claim batches from the same queue', async () => {
+      payload.config.jobs.deleteJobOnComplete = true
+      const message = 'batch workers'
+      const jobs = await queueJobs({ count: 6, message })
+
+      const results = await Promise.all(
+        Array.from({ length: 5 }, () => payload.jobs.run({ queue, silent: true })),
+      )
+
+      const counts = await countSimplesByMessage({ message })
+
+      expect(Object.keys(counts)).toHaveLength(jobs.length)
+      expect(Object.values(counts).every((count) => count === 1)).toBe(true)
+
+      const timesEachJobRan = jobs.map(
+        (job) => results.filter((result) => result.jobStatus?.[job.id]).length,
+      )
+
+      expect(timesEachJobRan).toEqual(jobs.map(() => 1))
+
+      // With deleteJobOnComplete, every job is cleaned up once it completes
+      const remainingJobs = await payload.count({
+        collection: 'payload-jobs',
+        where: { queue: { equals: queue } },
+      })
+
+      expect(remainingJobs.totalDocs).toBe(0)
+    })
+
+    it('should run a job only once when multiple workers run the same job by ID', async () => {
+      payload.config.jobs.deleteJobOnComplete = true
+      const message = 'run by ID workers'
+      const [job] = await queueJobs({ count: 1, message })
+
+      const results = await Promise.all(
+        Array.from({ length: 10 }, () => payload.jobs.runByID({ id: job!.id, silent: true })),
+      )
+
+      const counts = await countSimplesByMessage({ message })
+
+      expect(Object.values(counts)).toEqual([1])
+
+      const workersThatRanTheJob = results.filter((result) => result.jobStatus?.[job!.id])
+
+      expect(workersThatRanTheJob).toHaveLength(1)
+
+      const remainingJobs = await payload.count({
+        collection: 'payload-jobs',
+        where: { id: { equals: job!.id } },
+      })
+
+      expect(remainingJobs.totalDocs).toBe(0)
+    })
+
+    it('should preserve runByID support for a future job with an error', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      const job = await payload.jobs.queue({
+        input: { message: 'explicit future errored job' },
+        queue,
+        task: 'CreateSimple',
+        waitUntil: new Date(Date.now() + 60_000),
+      })
+      await payload.update({ id: job.id, collection: 'payload-jobs', data: { hasError: true } })
+
+      const result = await payload.jobs.runByID({ id: job.id, silent: true })
+
+      expect(result.jobStatus?.[job.id]?.status).toBe('success')
+
+      // Retained jobs can be rerun manually; completed jobs awaiting deletion cannot.
+      const rerun = await payload.jobs.runByID({ id: job.id, silent: true })
+      expect(rerun.jobStatus?.[job.id]?.status).toBe('success')
+      payload.config.jobs.deleteJobOnComplete = true
+      const duringCleanup = await payload.jobs.runByID({ id: job.id, silent: true })
+      expect(duringCleanup.noJobsRemaining).toBe(true)
+    })
+
+    it('should not run a job by ID that another runner is already processing', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      const message = 'run by ID while processing'
+      const [job] = await queueJobs({ count: 1, message })
+
+      await payload.update({
+        id: job!.id,
+        collection: 'payload-jobs',
+        data: { processing: true },
+      })
+
+      const result = await payload.jobs.runByID({ id: job!.id, silent: true })
+
+      expect(result.noJobsRemaining).toBe(true)
+      expect(await countSimplesByMessage({ message })).toEqual({})
+    })
+  })
+
+  describe('atomic claim failure recovery', () => {
+    const queue = 'claim-failure-recovery'
+
+    beforeEach(() => {
+      _internal_jobSystemGlobals.shouldAutoRun = false
+    })
+
+    afterEach(async () => {
+      vi.restoreAllMocks()
+      await payload.db.deleteMany({
+        collection: 'payload-jobs',
+        where: { queue: { equals: queue } },
+      })
+      await payload.delete({ collection: 'simple', where: { id: { exists: true } } })
+    })
+
+    const queueJobWithFailedLog = async () => {
+      const job = await payload.jobs.queue({
+        input: { message: 'joined lock race' },
+        queue,
+        task: 'CreateSimple',
+      })
+      const date = new Date().toISOString()
+      await payload.update({
+        id: job.id,
+        collection: 'payload-jobs',
+        data: {
+          log: [
+            {
+              completedAt: date,
+              error: { message: 'Earlier attempt failed' },
+              executedAt: date,
+              state: 'failed',
+              taskID: '1',
+              taskSlug: 'CreateSimple',
+            },
+          ],
+        },
+      })
+      return job
+    }
+
+    const waitForJobClaimLock = async (pool: Pool): Promise<boolean> => {
+      for (let i = 0; i < 200; i++) {
+        const result = await pool.query(
+          "SELECT 1 FROM pg_stat_activity WHERE wait_event_type = 'Lock' AND query LIKE 'update \"payload_jobs\"%'",
+        )
+        if (result.rowCount) {
+          return true
+        }
+        await wait(10)
+      }
+      return false
+    }
+
+    it('should retry a contended batch before reporting the queue is empty', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      await Promise.all(
+        Array.from({ length: 20 }, (_, i) =>
+          payload.jobs.queue({
+            input: { message: `contended batch ${i}` },
+            queue,
+            task: 'CreateSimple',
+          }),
+        ),
+      )
+      let candidateCount = 0
+      let contended = false
+      if (isMongoose(payload)) {
+        const model = (payload.db as MongooseAdapter).collections['payload-jobs']!
+        const find = model.find.bind(model)
+        vi.spyOn(model, 'find').mockImplementation((...args: Parameters<typeof model.find>) => {
+          const query = find(...args)
+          const exec = query.exec.bind(query)
+          if (
+            !contended &&
+            args[2]?.projection?._id === 1 &&
+            Object.keys(args[2].projection).length === 1
+          ) {
+            contended = true
+            vi.spyOn(query, 'exec').mockImplementationOnce(async () => {
+              const docs = await exec()
+              candidateCount = docs.length
+              await model.updateMany(
+                { _id: { $in: docs.map((doc) => doc._id) } },
+                { processing: true },
+              )
+              return docs
+            })
+          }
+          return query
+        })
+      } else {
+        const findModule = await import('../../packages/drizzle/src/find/findMany.js')
+        const find = findModule.findMany
+        vi.spyOn(findModule, 'findMany').mockImplementation(async (args) => {
+          const result = await find(args)
+          if (!contended && args.collectionSlug === 'payload-jobs' && args.limit === 10) {
+            contended = true
+            candidateCount = result.docs.length
+            await payload.db.updateMany({
+              collection: 'payload-jobs',
+              data: { processing: true },
+              returning: false,
+              where: { id: { in: result.docs.map((doc) => doc.id) } },
+            })
+          }
+          return result
+        })
+      }
+
+      const result = await payload.jobs.run({ queue, silent: true })
+
+      expect(contended).toBe(true)
+      expect(candidateCount).toBe(10)
+      expect(result.noJobsRemaining).not.toBe(true)
+      expect(Object.keys(result.jobStatus ?? {})).toHaveLength(10)
+      const outputs = await payload.count({
+        collection: 'simple',
+        where: { title: { like: 'contended batch' } },
+      })
+      expect(outputs.totalDocs).toBe(10)
+      expect((await payload.jobs.run({ queue, silent: true })).noJobsRemaining).toBe(true)
+    })
+
+    it.runIf(process.env.PAYLOAD_DATABASE === 'd1')(
+      'should release large D1 batches when reading winners fails',
+      async () => {
+        await Promise.all(
+          Array.from({ length: 105 }, (_, i) =>
+            payload.jobs.queue({
+              input: { message: `large D1 recovery ${i}` },
+              queue,
+              task: 'CreateSimple',
+            }),
+          ),
+        )
+        const findModule = await import('../../packages/drizzle/src/find/findMany.js')
+        const findMany = findModule.findMany
+        const error = new Error('Large winner read failure')
+        vi.spyOn(findModule, 'findMany')
+          .mockImplementationOnce(findMany)
+          .mockRejectedValueOnce(error)
+        const logged = vi.spyOn(payload.logger, 'error').mockImplementation(() => {})
+
+        await expect(
+          payload.db.updateJobs({
+            data: { processing: true },
+            limit: 105,
+            returning: true,
+            where: { and: [{ processing: { equals: false } }, { queue: { equals: queue } }] },
+          }),
+        ).rejects.toBe(error)
+
+        const active = await payload.count({
+          collection: 'payload-jobs',
+          where: { and: [{ processing: { equals: true } }, { queue: { equals: queue } }] },
+        })
+        expect(active.totalDocs).toBe(0)
+        expect(logged).not.toHaveBeenCalled()
+      },
+    )
+
+    it.runIf(process.env.PAYLOAD_DATABASE === 'd1')(
+      'should claim batches larger than the D1 bound-parameter limit',
+      async () => {
+        const jobs = await Promise.all(
+          Array.from({ length: 105 }, (_, i) =>
+            payload.jobs.queue({
+              input: { message: `large D1 batch ${i}` },
+              queue,
+              task: 'CreateSimple',
+            }),
+          ),
+        )
+
+        const result = await payload.db.updateJobs({
+          data: { processing: true },
+          limit: jobs.length,
+          returning: true,
+          where: { and: [{ processing: { equals: false } }, { queue: { equals: queue } }] },
+        })
+
+        expect(result).toHaveLength(jobs.length)
+      },
+    )
+
+    it.runIf(process.env.PAYLOAD_DATABASE === 'postgres').each(['and', 'AND'])(
+      'should recheck base eligibility after a joined SQL claim waits for a row lock (%s)',
+      async (conjunction) => {
+        const job = await queueJobWithFailedLog()
+        const pool = (payload.db as unknown as { pool: Pool }).pool
+        const blocker = await pool.connect()
+        let claiming: ReturnType<typeof payload.db.updateJobs> | undefined
+        try {
+          await blocker.query('BEGIN')
+          await blocker.query('SELECT id FROM payload_jobs WHERE id = $1 FOR UPDATE', [job.id])
+          claiming = payload.db.updateJobs({
+            data: { processing: true },
+            limit: 10,
+            returning: true,
+            where: {
+              [conjunction]: [
+                { processing: { equals: false } },
+                { completedAt: { exists: false } },
+                { queue: { equals: queue } },
+                { 'log.taskSlug': { equals: 'CreateSimple' } },
+              ],
+            },
+          })
+          expect(await waitForJobClaimLock(pool)).toBe(true)
+          await blocker.query(
+            'UPDATE payload_jobs SET processing = false, completed_at = NOW() WHERE id = $1',
+            [job.id],
+          )
+          await blocker.query('COMMIT')
+          expect(await claiming).toEqual([])
+        } finally {
+          await blocker.query('ROLLBACK')
+          blocker.release()
+          await claiming
+        }
+      },
+    )
+
+    it.runIf(process.env.PAYLOAD_DATABASE === 'postgres').each([
+      { conjunction: 'or', matchingLog: false },
+      { conjunction: 'OR', matchingLog: false },
+      { conjunction: 'or', matchingLog: true },
+      { conjunction: 'OR', matchingLog: true },
+    ])(
+      'should recheck mixed joined OR eligibility after a row-lock wait ($conjunction, matching log: $matchingLog)',
+      async ({ conjunction, matchingLog }) => {
+        const job = await queueJobWithFailedLog()
+        const pool = (payload.db as unknown as { pool: Pool }).pool
+        const blocker = await pool.connect()
+        let claiming: ReturnType<typeof payload.db.updateJobs> | undefined
+        try {
+          await blocker.query('BEGIN')
+          await blocker.query('SELECT id FROM payload_jobs WHERE id = $1 FOR UPDATE', [job.id])
+          claiming = payload.db.updateJobs({
+            data: { processing: true },
+            limit: 10,
+            returning: true,
+            where: {
+              and: [
+                { processing: { equals: false } },
+                { completedAt: { exists: false } },
+                { queue: { equals: queue } },
+                {
+                  [conjunction]: [
+                    { totalTried: { equals: 0 } },
+                    { 'log.taskSlug': { equals: matchingLog ? 'CreateSimple' : 'DoNothingTask' } },
+                  ],
+                },
+              ],
+            },
+          })
+          expect(await waitForJobClaimLock(pool)).toBe(true)
+          await blocker.query('UPDATE payload_jobs SET total_tried = 1 WHERE id = $1', [job.id])
+          await blocker.query('COMMIT')
+          expect(await claiming).toHaveLength(matchingLog ? 1 : 0)
+        } finally {
+          await blocker.query('ROLLBACK')
+          blocker.release()
+          await claiming
+        }
+      },
+    )
+
+    it.skipIf(isMongoose())(
+      'should release SQL claims if reading winners fails without a transaction',
+      async () => {
+        const job = await payload.jobs.queue({
+          input: { message: 'winner read failure' },
+          queue,
+          task: 'CreateSimple',
+        })
+        const findModule = await import('../../packages/drizzle/src/find/findMany.js')
+        const findMany = findModule.findMany
+        const error = new Error('Injected winner read failure')
+        vi.spyOn(findModule, 'findMany')
+          .mockImplementationOnce(findMany)
+          .mockRejectedValueOnce(error)
+
+        await expect(
+          payload.db.updateJobs({
+            data: { processing: true },
+            limit: 10,
+            returning: true,
+            where: { and: [{ processing: { equals: false } }, { queue: { equals: queue } }] },
+          }),
+        ).rejects.toBe(error)
+
+        const after = await payload.findByID({ id: job.id, collection: 'payload-jobs' })
+        expect(after.processing).toBe(false)
+      },
+    )
+
+    it.skipIf(isMongoose())(
+      'should recheck SQL eligibility after selecting candidates',
+      async () => {
+        const job = await payload.jobs.queue({
+          input: { message: 'stale eligibility' },
+          queue,
+          task: 'CreateSimple',
+        })
+        const findModule = await import('../../packages/drizzle/src/find/findMany.js')
+        const findMany = findModule.findMany
+        vi.spyOn(findModule, 'findMany').mockImplementationOnce(async (args) => {
+          const result = await findMany(args)
+          // Another runner finishes this retained job between selection and claim.
+          await payload.update({
+            id: job.id,
+            collection: 'payload-jobs',
+            data: {
+              completedAt: new Date().toISOString(),
+              processing: false,
+            },
+          })
+          return result
+        })
+
+        const result = await payload.db.updateJobs({
+          data: { processing: true },
+          limit: 10,
+          returning: true,
+          where: {
+            and: [
+              { processing: { equals: false } },
+              { completedAt: { exists: false } },
+              { queue: { equals: queue } },
+            ],
+          },
+        })
+
+        expect(result).toEqual([])
+        const completed = await payload.findByID({ id: job.id, collection: 'payload-jobs' })
+        expect(completed.processing).toBe(false)
+      },
+    )
+
+    it.skipIf(isMongoose())(
+      'should claim a base-matching OR when the joined log is absent',
+      async () => {
+        const job = await payload.jobs.queue({
+          input: { message: 'missing joined log' },
+          queue,
+          task: 'CreateSimple',
+        })
+
+        const result = await payload.db.updateJobs({
+          data: { processing: true },
+          limit: 10,
+          returning: true,
+          where: {
+            and: [
+              { processing: { equals: false } },
+              { queue: { equals: queue } },
+              {
+                or: [
+                  { totalTried: { equals: 0 } },
+                  { 'log.taskSlug': { equals: 'DoNothingTask' } },
+                ],
+              },
+            ],
+          },
+        })
+
+        expect(result?.map((claimed) => claimed.id)).toEqual([job.id])
+      },
+    )
+
+    it.skipIf(isMongoose())(
+      'should require joined claim conditions to match the same log entry',
+      async () => {
+        const job = await payload.jobs.queue({
+          input: { message: 'same log entry' },
+          queue,
+          task: 'CreateSimple',
+        })
+        const date = new Date().toISOString()
+        const makeLog = (matching: boolean) => [
+          {
+            completedAt: date,
+            error: { message: 'fixture' },
+            executedAt: date,
+            state: matching ? ('failed' as const) : ('succeeded' as const),
+            taskID: '1',
+            taskSlug: 'CreateSimple' as const,
+          },
+          {
+            completedAt: date,
+            error: { message: 'fixture' },
+            executedAt: date,
+            state: matching ? ('succeeded' as const) : ('failed' as const),
+            taskID: '2',
+            taskSlug: 'DoNothingTask' as const,
+          },
+        ]
+        await payload.update({
+          id: job.id,
+          collection: 'payload-jobs',
+          data: { log: makeLog(true) },
+        })
+        const findModule = await import('../../packages/drizzle/src/find/findMany.js')
+        const findMany = findModule.findMany
+        vi.spyOn(findModule, 'findMany').mockImplementationOnce(async (args) => {
+          const result = await findMany(args)
+          expect(result.docs).toHaveLength(1)
+          await payload.update({
+            id: job.id,
+            collection: 'payload-jobs',
+            data: { log: makeLog(false) },
+          })
+          return result
+        })
+
+        const result = await payload.db.updateJobs({
+          data: { processing: true },
+          limit: 10,
+          returning: true,
+          where: {
+            and: [
+              { processing: { equals: false } },
+              { queue: { equals: queue } },
+              { 'log.taskSlug': { equals: 'CreateSimple' } },
+              { 'log.state': { equals: 'failed' } },
+            ],
+          },
+        })
+
+        expect(result).toEqual([])
+      },
+    )
+
+    it.skipIf(isMongoose())(
+      'should return current SQL job input after an edit between selection and claim',
+      async () => {
+        const job = await payload.jobs.queue({
+          input: { message: 'old input' },
+          queue,
+          task: 'CreateSimple',
+        })
+        const findModule = await import('../../packages/drizzle/src/find/findMany.js')
+        const findMany = findModule.findMany
+        vi.spyOn(findModule, 'findMany').mockImplementationOnce(async (args) => {
+          const result = await findMany(args)
+          await payload.update({
+            id: job.id,
+            collection: 'payload-jobs',
+            data: { input: { message: 'new input' } },
+          })
+          return result
+        })
+
+        const result = await payload.db.updateJobs({
+          data: { processing: true },
+          limit: 10,
+          returning: true,
+          where: { and: [{ processing: { equals: false } }, { queue: { equals: queue } }] },
+        })
+
+        expect(result?.[0]?.input).toEqual({ message: 'new input' })
+      },
+    )
+
+    it.skipIf(isMongoose())(
+      'should roll back the claim transaction when the adapter throws',
+      async () => {
+        await payload.jobs.queue({
+          input: { message: 'transaction failure' },
+          queue,
+          task: 'CreateSimple',
+        })
+        const sessionsBefore = Object.keys(payload.db.sessions)
+        const error = new Error('Injected claim failure')
+        vi.spyOn(payload.db, 'updateJobs').mockRejectedValueOnce(error)
+
+        await expect(payload.jobs.run({ queue, silent: true })).rejects.toBe(error)
+        expect(Object.keys(payload.db.sessions)).toEqual(sessionsBefore)
+      },
+    )
+
+    it.runIf(isMongoose())(
+      'should release earlier MongoDB claims if a later batch claim fails',
+      async () => {
+        const first = await payload.jobs.queue({
+          input: { message: 'partial claim 1' },
+          queue,
+          task: 'CreateSimple',
+        })
+        await payload.jobs.queue({
+          input: { message: 'partial claim 2' },
+          queue,
+          task: 'CreateSimple',
+        })
+        const model = (payload.db as MongooseAdapter).collections['payload-jobs']!
+        const originalClaim = model.findOneAndUpdate.bind(model)
+        const error = new Error('Injected second claim failure')
+        vi.spyOn(model, 'findOneAndUpdate')
+          .mockImplementationOnce(originalClaim)
+          .mockImplementationOnce(() => {
+            throw error
+          })
+
+        await expect(payload.jobs.run({ queue, silent: true })).rejects.toBe(error)
+        const afterFailure = await payload.findByID({ id: first.id, collection: 'payload-jobs' })
+        expect(afterFailure.processing).toBe(false)
+        const recovery = await payload.jobs.run({ queue, silent: true })
+        expect(Object.keys(recovery.jobStatus ?? {})).toHaveLength(2)
+      },
+    )
+
+    it.runIf(isMongoose())(
+      'should return a batch to only one MongoDB runner after both select the same candidates',
+      async () => {
+        payload.config.jobs.deleteJobOnComplete = false
+        const jobs = await Promise.all(
+          Array.from({ length: 3 }, (_, i) =>
+            payload.jobs.queue({
+              input: { message: `deterministic claim ${i}` },
+              queue,
+              task: 'CreateSimple',
+            }),
+          ),
+        )
+        const model = (payload.db as MongooseAdapter).collections['payload-jobs']!
+        const originalFind = model.find.bind(model)
+        let reads = 0
+        let release!: () => void
+        const bothRead = new Promise<void>((resolve) => {
+          release = resolve
+        })
+        vi.spyOn(model, 'find').mockImplementation((...args: Parameters<typeof model.find>) => {
+          const query = originalFind(...args)
+          const execute = query.exec.bind(query)
+          if (args[2]?.projection?._id === 1) {
+            vi.spyOn(query, 'exec').mockImplementation(async () => {
+              const docs = await execute()
+              reads++
+              if (reads === 2) {
+                release()
+              }
+              await bothRead
+              return docs
+            })
+          }
+          return query
+        })
+
+        const results = await Promise.all([
+          payload.jobs.run({ queue, silent: true }),
+          payload.jobs.run({ queue, silent: true }),
+        ])
+
+        expect(reads).toBeGreaterThanOrEqual(2)
+        for (const job of jobs) {
+          expect(results.filter((result) => result.jobStatus?.[job.id])).toHaveLength(1)
+        }
+        const outputs = await payload.count({
+          collection: 'simple',
+          where: { title: { like: 'deterministic claim' } },
+        })
+        expect(outputs.totalDocs).toBe(3)
+      },
+    )
+  })
+
+  describe('job claim hooks and depth population', () => {
+    const queue = 'claim-hooks-depth'
+    let originalDepth: number | undefined
+    let originalFields: (typeof payload.collections)['payload-jobs']['config']['fields']
+    let originalHooks: (typeof payload.collections)['payload-jobs']['config']['hooks']
+    let originalRunHooks: boolean | undefined
+
+    beforeEach(() => {
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      originalDepth = payload.config.jobs.depth
+      originalRunHooks = payload.config.jobs.runHooks
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      originalFields = [...jobsCollectionConfig.fields]
+      originalHooks = {
+        ...jobsCollectionConfig.hooks,
+        afterChange: [...(jobsCollectionConfig.hooks?.afterChange ?? [])],
+        afterOperation: [...(jobsCollectionConfig.hooks?.afterOperation ?? [])],
+        afterRead: [...(jobsCollectionConfig.hooks?.afterRead ?? [])],
+        beforeChange: [...(jobsCollectionConfig.hooks?.beforeChange ?? [])],
+        beforeOperation: [...(jobsCollectionConfig.hooks?.beforeOperation ?? [])],
+        beforeValidate: [...(jobsCollectionConfig.hooks?.beforeValidate ?? [])],
+      }
+    })
+
+    afterEach(async () => {
+      vi.restoreAllMocks()
+      payload.config.jobs.depth = originalDepth
+      payload.config.jobs.runHooks = originalRunHooks
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.fields = originalFields
+      jobsCollectionConfig.hooks = originalHooks
+      await payload.db.deleteMany({
+        collection: 'payload-jobs',
+        where: { queue: { equals: queue } },
+      })
+      await payload.delete({ collection: 'simple', where: { id: { exists: true } } })
+    })
+
+    it('should preserve pending-to-processing transition semantics in custom job hooks under concurrent workers', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      payload.config.jobs.runHooks = true
+
+      const claimBeforeChanges: Array<{
+        id: number | string
+        nextProcessing: boolean | null | undefined
+        originalProcessing: boolean | null | undefined
+      }> = []
+      const claimAfterChanges: Array<{
+        currentProcessing: boolean | null | undefined
+        id: number | string
+        previousProcessing: boolean | null | undefined
+      }> = []
+
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.hooks = {
+        ...jobsCollectionConfig.hooks,
+        afterChange: [
+          ...(jobsCollectionConfig.hooks?.afterChange ?? []),
+          ({ doc, operation, previousDoc }) => {
+            if (operation === 'update' && doc?.processing === true && !doc?.log?.length) {
+              claimAfterChanges.push({
+                id: doc.id,
+                currentProcessing: doc.processing,
+                previousProcessing: previousDoc?.processing,
+              })
+            }
+            return doc
+          },
+        ],
+        beforeChange: [
+          ...(jobsCollectionConfig.hooks?.beforeChange ?? []),
+          ({ data, operation, originalDoc }) => {
+            if (
+              operation === 'update' &&
+              data?.processing === true &&
+              !data?.log?.length &&
+              originalDoc
+            ) {
+              claimBeforeChanges.push({
+                id: originalDoc.id,
+                nextProcessing: data.processing,
+                originalProcessing: originalDoc.processing,
+              })
+            }
+            return data
+          },
+        ],
+      }
+
+      const batchJobs = await Promise.all(
+        Array.from({ length: 3 }, (_, i) =>
+          payload.jobs.queue({
+            input: { message: `hook transition batch ${i}` },
+            queue,
+            task: 'CreateSimple',
+          }),
+        ),
+      )
+
+      await Promise.all(Array.from({ length: 5 }, () => payload.jobs.run({ queue, silent: true })))
+
+      const byIDJob = await payload.jobs.queue({
+        input: { message: 'hook transition runByID' },
+        queue,
+        task: 'CreateSimple',
+      })
+
+      await Promise.all(
+        Array.from({ length: 5 }, () => payload.jobs.runByID({ id: byIDJob.id, silent: true })),
+      )
+
+      const allJobIDs = [...batchJobs.map((job) => job.id), byIDJob.id]
+
+      expect(claimBeforeChanges).toHaveLength(allJobIDs.length)
+      expect(claimAfterChanges).toHaveLength(allJobIDs.length)
+
+      for (const jobID of allJobIDs) {
+        expect(claimBeforeChanges.filter((entry) => entry.id === jobID)).toEqual([
+          {
+            id: jobID,
+            nextProcessing: true,
+            originalProcessing: false,
+          },
+        ])
+        expect(claimAfterChanges.filter((entry) => entry.id === jobID)).toEqual([
+          {
+            id: jobID,
+            currentProcessing: true,
+            previousProcessing: false,
+          },
+        ])
+      }
+    })
+
+    it('should keep operation-hook reads accurate without consuming the previous claim state', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      payload.config.jobs.runHooks = true
+      const job = await payload.jobs.queue({
+        input: { message: 'operation hook read' },
+        queue,
+        task: 'CreateSimple',
+      })
+      const observedReads: boolean[] = []
+      const previousStates: boolean[] = []
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.hooks = {
+        ...jobsCollectionConfig.hooks,
+        beforeChange: [
+          ...(jobsCollectionConfig.hooks?.beforeChange ?? []),
+          ({ data, originalDoc }) => {
+            if (data.processing === true && !data.log?.length) {
+              previousStates.push(originalDoc!.processing)
+            }
+            return data
+          },
+        ],
+        beforeOperation: [
+          ...(jobsCollectionConfig.hooks?.beforeOperation ?? []),
+          async ({ args, operation, req }) => {
+            if (operation === 'update' && args.data?.processing === true && !args.data?.log) {
+              const result = await payload.find({
+                collection: 'payload-jobs',
+                req,
+                where: { id: { equals: job.id } },
+              })
+              observedReads.push(result.docs[0]!.processing!)
+            }
+            return args
+          },
+        ],
+      }
+
+      const result = await payload.jobs.runByID({ id: job.id, silent: true })
+
+      expect(result.jobStatus?.[job.id]?.status).toBe('success')
+      expect(observedReads).toEqual([true])
+      expect(previousStates).toEqual([false])
+    })
+
+    it('should restrict hook-modified batch queries to this runners claimed jobs', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      payload.config.jobs.runHooks = true
+      const ownedJob = await payload.jobs.queue({
+        input: { message: 'owned claim' },
+        queue,
+        task: 'CreateSimple',
+      })
+      const foreignJob = await payload.jobs.queue({
+        input: { message: 'foreign claim' },
+        queue,
+        task: 'CreateSimple',
+      })
+      await payload.update({
+        id: foreignJob.id,
+        collection: 'payload-jobs',
+        data: { processing: true },
+      })
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.hooks = {
+        ...jobsCollectionConfig.hooks,
+        beforeOperation: [
+          ...(jobsCollectionConfig.hooks?.beforeOperation ?? []),
+          ({ args, operation }) => {
+            if (operation === 'update' && args.data?.processing === true && !args.data?.log) {
+              args.where = { queue: { equals: queue } }
+              args.limit = 0
+            }
+            return args
+          },
+        ],
+      }
+
+      const result = await payload.jobs.runByID({ id: ownedJob.id, silent: true })
+
+      expect(Object.keys(result.jobStatus ?? {})).toEqual([String(ownedJob.id)])
+      const foreignAfter = await payload.findByID({ id: foreignJob.id, collection: 'payload-jobs' })
+      expect(foreignAfter.processing).toBe(true)
+      expect(foreignAfter.completedAt).toBeFalsy()
+      const outputs = await payload.find({
+        collection: 'simple',
+        where: { title: { equals: 'foreign claim' } },
+      })
+      expect(outputs.totalDocs).toBe(0)
+    })
+
+    it('should release the claim when a document-level hook throws so failed jobs are not stranded as processing', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      payload.config.jobs.runHooks = true
+
+      const job1 = await payload.jobs.queue({
+        input: { message: 'doc hook failure job 1' },
+        queue,
+        task: 'CreateSimple',
+      })
+      const job2 = await payload.jobs.queue({
+        input: { message: 'doc hook failure job 2' },
+        queue,
+        task: 'CreateSimple',
+      })
+
+      let shouldRejectJob1Claim = true
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.hooks = {
+        ...jobsCollectionConfig.hooks,
+        beforeChange: [
+          ...(jobsCollectionConfig.hooks?.beforeChange ?? []),
+          ({ data, operation, originalDoc }) => {
+            if (
+              shouldRejectJob1Claim &&
+              operation === 'update' &&
+              data?.processing === true &&
+              originalDoc?.id === job1.id
+            ) {
+              throw new Error('Claim rejected by beforeChange hook')
+            }
+            return data
+          },
+        ],
+      }
+
+      const firstRun = await payload.jobs.run({ queue, silent: true })
+
+      expect(firstRun.jobStatus?.[job1.id]).toBeUndefined()
+      expect(firstRun.jobStatus?.[job2.id]?.status).toBe('success')
+
+      const job1AfterFirstRun = await payload.findByID({
+        id: job1.id,
+        collection: 'payload-jobs',
+      })
+      const job2AfterFirstRun = await payload.findByID({
+        id: job2.id,
+        collection: 'payload-jobs',
+      })
+
+      expect(job1AfterFirstRun.processing).toBe(false)
+      expect(job1AfterFirstRun.completedAt).toBeFalsy()
+      expect(job2AfterFirstRun.processing).toBe(false)
+      expect(job2AfterFirstRun.completedAt).toBeTruthy()
+
+      shouldRejectJob1Claim = false
+      const secondRun = await payload.jobs.run({ queue, silent: true })
+
+      expect(secondRun.jobStatus?.[job1.id]?.status).toBe('success')
+
+      const job1AfterSecondRun = await payload.findByID({
+        id: job1.id,
+        collection: 'payload-jobs',
+      })
+
+      expect(job1AfterSecondRun.processing).toBe(false)
+      expect(job1AfterSecondRun.completedAt).toBeTruthy()
+    })
+
+    it.each([
+      { depth: 0, runHooks: true },
+      { depth: 1, runHooks: false },
+    ])(
+      'should execute claims with hidden and unselected processing at depth=$depth, runHooks=$runHooks',
+      async ({ depth, runHooks }) => {
+        payload.config.jobs.deleteJobOnComplete = false
+        payload.config.jobs.depth = depth
+        payload.config.jobs.runHooks = runHooks
+        const jobsCollectionConfig = payload.collections['payload-jobs'].config
+        jobsCollectionConfig.fields = jobsCollectionConfig.fields.map((field) =>
+          'name' in field && field.name === 'processing' ? { ...field, hidden: true } : field,
+        )
+        jobsCollectionConfig.hooks.beforeOperation = [
+          ...(jobsCollectionConfig.hooks.beforeOperation ?? []),
+          ({ args, operation }) =>
+            operation === 'update' ? { ...args, select: { processing: false } } : args,
+        ]
+
+        const job = await payload.jobs.queue({
+          input: { message: 'hidden and unselected processing' },
+          queue,
+          task: 'CreateSimple',
+        })
+        const result = await payload.jobs.run({ queue, silent: true })
+        expect(result.jobStatus?.[job.id]?.status).toBe('success')
+        const visible = await payload.findByID({ id: job.id, collection: 'payload-jobs' })
+        expect(visible.processing).toBeUndefined()
+      },
+    )
+
+    it('should preserve native Request headers and URL in claim hooks', async () => {
+      payload.config.jobs.runHooks = true
+      const job = await payload.jobs.queue({
+        input: { message: 'request metadata' },
+        queue,
+        task: 'CreateSimple',
+      })
+      const observed: unknown[] = []
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.hooks = {
+        ...jobsCollectionConfig.hooks,
+        beforeChange: [
+          ...(jobsCollectionConfig.hooks?.beforeChange ?? []),
+          ({ data, req }) => {
+            if (data.processing === true && !data.log?.length) {
+              observed.push([req.headers.get('x-claim-test'), req.url, req.method])
+            }
+            return data
+          },
+        ],
+      }
+      const req = await createLocalReq(
+        {
+          req: new Request('https://example.com/run-jobs', {
+            headers: { 'x-claim-test': 'preserved' },
+            method: 'POST',
+          }),
+        },
+        payload,
+      )
+
+      await payload.jobs.runByID({ id: job.id, req, silent: true })
+
+      expect(observed).toEqual([['preserved', 'https://example.com/run-jobs', 'POST']])
+    })
+
+    it('should hold a vetoed hook claim until cleanup so another runner cannot acquire it early', async () => {
+      payload.config.jobs.runHooks = true
+      payload.config.jobs.deleteJobOnComplete = false
+      const job = await payload.jobs.queue({
+        input: { message: 'veto claim' },
+        queue,
+        task: 'CreateSimple',
+      })
+      let vetoed = false
+      let attempted = false
+      let competingRun: Awaited<ReturnType<typeof payload.jobs.runByID>> | undefined
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.fields = jobsCollectionConfig.fields.map((field) =>
+        'name' in field && field.name === 'processing' ? { ...field, hidden: true } : field,
+      )
+      jobsCollectionConfig.hooks = {
+        ...jobsCollectionConfig.hooks,
+        afterChange: [
+          ...(jobsCollectionConfig.hooks?.afterChange ?? []),
+          async ({ doc }) => {
+            if (vetoed && !attempted && doc.processing === false) {
+              attempted = true
+              competingRun = await payload.jobs.runByID({ id: job.id, silent: true })
+            }
+            return doc
+          },
+        ],
+        beforeChange: [
+          ...(jobsCollectionConfig.hooks?.beforeChange ?? []),
+          ({ data }) => {
+            if (!vetoed && data.processing === true && !data.log?.length) {
+              vetoed = true
+              data.processing = false
+            }
+            return data
+          },
+        ],
+        beforeOperation: [
+          ...(jobsCollectionConfig.hooks?.beforeOperation ?? []),
+          ({ args, operation }) =>
+            operation === 'update' ? { ...args, select: { processing: false } } : args,
+        ],
+      }
+
+      const result = await payload.jobs.runByID({ id: job.id, silent: true })
+
+      expect(competingRun?.noJobsRemaining).toBe(true)
+      expect(Object.keys(result.jobStatus ?? {})).toHaveLength(0)
+      const after = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+        showHiddenFields: true,
+      })
+      expect(after.processing).toBe(false)
+      expect(after.completedAt).toBeFalsy()
+    })
+
+    it('should execute successful hook claims when releasing a failed claim throws', async () => {
+      payload.config.jobs.runHooks = true
+      payload.config.jobs.deleteJobOnComplete = false
+      const failed = await payload.jobs.queue({
+        input: { message: 'failed hook claim' },
+        queue,
+        task: 'CreateSimple',
+      })
+      const successful = await payload.jobs.queue({
+        input: { message: 'successful hook claim' },
+        queue,
+        task: 'CreateSimple',
+      })
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.hooks = {
+        ...jobsCollectionConfig.hooks,
+        beforeChange: [
+          ...(jobsCollectionConfig.hooks?.beforeChange ?? []),
+          ({ data, originalDoc }) => {
+            if (data.processing === true && originalDoc?.id === failed.id) {
+              throw new Error('Reject this claim')
+            }
+            return data
+          },
+        ],
+      }
+      const releaseError = new Error('Transient failed-claim release error')
+      const update = payload.db.updateJobs.bind(payload.db)
+      vi.spyOn(payload.db, 'updateJobs').mockImplementation((args) => {
+        if (!args.id && args.data.processing === false) {
+          return Promise.reject(releaseError)
+        }
+        return update(args)
+      })
+      const logged = vi.spyOn(payload.logger, 'error').mockImplementation(() => {})
+
+      const result = await payload.jobs.run({ queue, silent: true })
+
+      expect(result.jobStatus?.[successful.id]?.status).toBe('success')
+      expect(result.jobStatus?.[failed.id]).toBeUndefined()
+      expect(logged).toHaveBeenCalledWith(expect.objectContaining({ err: releaseError }))
+      const after = await payload.findByID({ id: successful.id, collection: 'payload-jobs' })
+      expect(after.processing).toBe(false)
+      expect(after.completedAt).toBeTruthy()
+    })
+
+    it('should preserve the hook error if releasing its claims also fails', async () => {
+      payload.config.jobs.runHooks = true
+      await payload.jobs.queue({
+        input: { message: 'hook and release failure' },
+        queue,
+        task: 'CreateSimple',
+      })
+      const hookError = new Error('Original hook failure')
+      const releaseError = new Error('Secondary release failure')
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.hooks = {
+        ...jobsCollectionConfig.hooks,
+        beforeOperation: [
+          ...(jobsCollectionConfig.hooks?.beforeOperation ?? []),
+          ({ args, operation }) => {
+            if (operation === 'update' && args.data?.processing === true) {
+              throw hookError
+            }
+            return args
+          },
+        ],
+      }
+      const updateJobs = payload.db.updateJobs.bind(payload.db)
+      const updateSpy = vi.spyOn(payload.db, 'updateJobs').mockImplementation((args) => {
+        if (args.data.processing === false) {
+          return Promise.reject(releaseError)
+        }
+        return updateJobs(args)
+      })
+      const logged = vi.spyOn(payload.logger, 'error').mockImplementation(() => {})
+
+      await expect(payload.jobs.run({ queue, silent: true })).rejects.toBe(hookError)
+
+      expect(logged).toHaveBeenCalledWith(expect.objectContaining({ err: releaseError }))
+      updateSpy.mockRestore()
+      logged.mockRestore()
+    })
+
+    it('should release all claimed jobs when an operation-level hook throws during claiming', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      payload.config.jobs.runHooks = true
+
+      const job1 = await payload.jobs.queue({
+        input: { message: 'op hook failure job 1' },
+        queue,
+        task: 'CreateSimple',
+      })
+      const job2 = await payload.jobs.queue({
+        input: { message: 'op hook failure job 2' },
+        queue,
+        task: 'CreateSimple',
+      })
+
+      let shouldThrowInBeforeOperation = true
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.hooks = {
+        ...jobsCollectionConfig.hooks,
+        beforeOperation: [
+          ...(jobsCollectionConfig.hooks?.beforeOperation ?? []),
+          ({ args, operation }) => {
+            if (
+              shouldThrowInBeforeOperation &&
+              operation === 'update' &&
+              (args.data as { processing?: boolean } | undefined)?.processing === true
+            ) {
+              throw new Error('Operation-level claim hook failure')
+            }
+            return args
+          },
+        ],
+      }
+
+      await expect(payload.jobs.run({ queue, silent: true })).rejects.toThrow(
+        'Operation-level claim hook failure',
+      )
+
+      const [job1AfterFailedRun, job2AfterFailedRun] = await Promise.all([
+        payload.findByID({ id: job1.id, collection: 'payload-jobs' }),
+        payload.findByID({ id: job2.id, collection: 'payload-jobs' }),
+      ])
+
+      expect(job1AfterFailedRun.processing).toBe(false)
+      expect(job1AfterFailedRun.completedAt).toBeFalsy()
+      expect(job2AfterFailedRun.processing).toBe(false)
+      expect(job2AfterFailedRun.completedAt).toBeFalsy()
+
+      shouldThrowInBeforeOperation = false
+      const recoveryRun = await payload.jobs.run({ queue, silent: true })
+
+      expect(recoveryRun.jobStatus?.[job1.id]?.status).toBe('success')
+      expect(recoveryRun.jobStatus?.[job2.id]?.status).toBe('success')
+    })
+
+    it('should populate relationships on claimed jobs when jobs.depth is greater than 0 alongside concurrent workers', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const targetSimple = await payload.create({
+        collection: 'simple',
+        data: { title: 'depth-populated-target' },
+      })
+
+      const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.fields = [
+        ...jobsCollectionConfig.fields,
+        {
+          name: 'relatedSimple',
+          type: 'relationship',
+          hooks: {
+            afterRead: [
+              ({ siblingData }) =>
+                (siblingData?.input as { simpleID?: number | string } | undefined)?.simpleID,
+            ],
+            beforeChange: [
+              ({ siblingData }) => {
+                delete siblingData.relatedSimple
+              },
+            ],
+          },
+          relationTo: 'simple',
+          virtual: true,
+        },
+      ]
+
+      const inlineWorkflow = payload.config.jobs.workflows?.find(
+        (workflow) => workflow.slug === 'inlineTaskTest',
+      )
+      const originalHandler = inlineWorkflow?.handler
+      const observedRelatedSimples: unknown[] = []
+
+      if (!inlineWorkflow || typeof originalHandler !== 'function') {
+        throw new Error('Expected inlineTaskTest workflow handler to be registered')
+      }
+
+      inlineWorkflow.handler = async (handlerArgs) => {
+        observedRelatedSimples.push(
+          (handlerArgs.job as unknown as { relatedSimple?: unknown }).relatedSimple,
+        )
+        return originalHandler(handlerArgs)
+      }
+
+      try {
+        payload.config.jobs.depth = 1
+        payload.config.jobs.runHooks = false
+
+        const depth1Job = await payload.jobs.queue({
+          input: {
+            message: 'depth-1-workflow-run',
+            // @ts-expect-error extra input property for relationship population test
+            simpleID: targetSimple.id,
+          },
+          queue,
+          workflow: 'inlineTaskTest',
+        })
+
+        const results = await Promise.all(
+          Array.from({ length: 5 }, () => payload.jobs.run({ queue, silent: true })),
+        )
+
+        const workersThatRanJob = results.filter((result) => result.jobStatus?.[depth1Job.id])
+        expect(workersThatRanJob).toHaveLength(1)
+        expect(observedRelatedSimples).toHaveLength(1)
+        expect(observedRelatedSimples[0]).toMatchObject({
+          id: targetSimple.id,
+          title: 'depth-populated-target',
+        })
+
+        observedRelatedSimples.length = 0
+        payload.config.jobs.depth = 0
+        payload.config.jobs.runHooks = true
+
+        await payload.jobs.queue({
+          input: {
+            message: 'depth-0-workflow-run',
+            // @ts-expect-error extra input property for relationship population test
+            simpleID: targetSimple.id,
+          },
+          queue,
+          workflow: 'inlineTaskTest',
+        })
+
+        await payload.jobs.run({ queue, silent: true })
+
+        expect(observedRelatedSimples).toEqual([targetSimple.id])
+      } finally {
+        inlineWorkflow.handler = originalHandler
+      }
+    })
   })
 
   it('ensure backoff strategy of task is respected', async () => {

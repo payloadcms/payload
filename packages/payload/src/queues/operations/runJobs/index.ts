@@ -198,19 +198,29 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   let jobs: Job[] = []
 
   if (id) {
-    // Only one job to run
-    const job = await updateJob({
-      id,
+    // Only one job to run. Claim it only if it is not already processing, so that concurrent
+    // runByID calls (or a queue runner that already claimed it) cannot run the same job twice.
+    // Queue, hasError and waitUntil are intentionally not checked, and retained completed jobs
+    // can still be rerun manually. Auto-deleted jobs cannot be reclaimed before cleanup finishes.
+    const updatedDocs = await updateJobs({
       data: {
         processing: true,
       },
       depth: jobsConfig.depth,
       disableTransaction: true,
+      limit: 1,
       req,
       returning: true,
+      where: {
+        and: [
+          { id: { equals: id } },
+          { processing: { equals: false } },
+          ...(jobsConfig.deleteJobOnComplete ? [{ completedAt: { exists: false } }] : []),
+        ],
+      },
     })
-    if (job) {
-      jobs = [job]
+    if (updatedDocs) {
+      jobs = updatedDocs
     }
   } else {
     let defaultProcessingOrder: Sort =

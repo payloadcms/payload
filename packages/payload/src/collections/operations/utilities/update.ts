@@ -59,6 +59,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   fallbackLocale: TypedFallbackLocale
   filesToUpload: FileToSave[]
   id: number | string
+  jobClaim?: boolean
   locale: string
   overrideAccess: boolean
   overrideLock: boolean
@@ -99,6 +100,7 @@ export const updateDocument = async <
   draftArg,
   fallbackLocale,
   filesToUpload,
+  jobClaim,
   locale,
   overrideAccess,
   overrideLock,
@@ -423,6 +425,13 @@ export const updateDocument = async <
   }
 
   const dataToUpdate: JsonObject = { ...result }
+  const claimProcessing = result.processing
+  // Keep the reservation until the runner has finished every hook. A hook may
+  // veto execution, but persisting false here would let another runner acquire
+  // the job before this operation finishes its failure cleanup.
+  if (jobClaim) {
+    dataToUpdate.processing = true
+  }
 
   // /////////////////////////////////////
   // Handle potential password update
@@ -468,6 +477,10 @@ export const updateDocument = async <
       locale,
       req,
     })
+  }
+
+  if (jobClaim) {
+    result.processing = claimProcessing
   }
 
   // /////////////////////////////////////
