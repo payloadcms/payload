@@ -1,14 +1,10 @@
-import Script from 'next/script'
-import React from 'react'
+'use client'
+
+import React, { useSyncExternalStore } from 'react'
 
 import { defaultTheme, themeLocalStorageKey } from '../ThemeSelector/types'
 
-export const InitTheme: React.FC = () => {
-  return (
-    // eslint-disable-next-line @next/next/no-before-interactive-script-outside-document
-    <Script
-      dangerouslySetInnerHTML={{
-        __html: `
+const themeScript = `
   (function () {
     function getImplicitPreference() {
       var mediaQuery = '(prefers-color-scheme: dark)'
@@ -41,10 +37,22 @@ export const InitTheme: React.FC = () => {
 
     document.documentElement.setAttribute('data-theme', themeToSet)
   })();
-  `,
-      }}
-      id="theme-script"
-      strategy="beforeInteractive"
-    />
+  `
+
+const subscribe = () => () => {}
+
+export const InitTheme: React.FC = () => {
+  // true during SSR and hydration, false when React renders this fresh on the client.
+  // The latter happens e.g. on a notFound() page, where Next sends an error shell and
+  // renders the root layout client-side. Scripts created on the client never execute
+  // (React warns about this), and ThemeProvider applies the theme in that case anyway.
+  const isServerRendered = useSyncExternalStore(
+    subscribe,
+    () => false,
+    () => true,
   )
+
+  if (!isServerRendered) return null
+
+  return <script dangerouslySetInnerHTML={{ __html: themeScript }} id="theme-script" />
 }
