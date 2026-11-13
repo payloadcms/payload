@@ -20,6 +20,7 @@ import {
   resolvePackageVersion,
 } from '../utils/resolvePackageVersion.js'
 import { buildAgentConfigFiles } from './agent-config.js'
+import { configureDockerCompose } from './configure-docker-compose.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
 import { configurePluginProject } from './configure-plugin-project.js'
 import { ensurePnpmBuildApprovals } from './configure-pnpm-builds.js'
@@ -221,6 +222,10 @@ export async function createProject(
     projectDir,
     template: 'template' in args ? args.template : undefined,
   })
+
+  if ('template' in args && args.template.type !== 'plugin') {
+    await configureDockerCompose({ dbDetails, debug: cliArgs['--debug'], projectDir })
+  }
 
   if (!cliArgs['--no-agent']) {
     for (const { content, fileName } of buildAgentConfigFiles()) {
