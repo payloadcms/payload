@@ -650,13 +650,18 @@ describe('Trash', () => {
       }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
-        for (const fieldPath of ['richText', 'richTextInTab']) {
+        for (const { fieldPath, label } of [
+          { fieldPath: 'richText', label: 'Rich Text' },
+          { fieldPath: 'richTextInTab', label: 'Rich Text In Tab' },
+        ]) {
           const editor = page.locator(
             `[data-field-path="${fieldPath}"] .ContentEditable__root[data-lexical-editor="true"]`,
           )
 
           await expect(editor).toBeVisible()
           await expect(editor).toHaveAttribute('contenteditable', 'false')
+          await expect(editor).toHaveRole('textbox')
+          await expect(editor).toHaveAccessibleName(label)
           await expect(editor).toHaveAttribute('aria-readonly', 'true')
         }
       })
