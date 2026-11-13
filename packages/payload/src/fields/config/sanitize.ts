@@ -37,6 +37,7 @@ import {
 } from './reservedFieldNames.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
 import { fieldAffectsData as _fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
+import { warnOnRequiredWithCustomValidate } from './warnOnRequiredWithCustomValidate.js'
 
 type SanitizeFieldsArgs = {
   collectionConfig?: CollectionConfig
@@ -327,6 +328,8 @@ export const sanitizeField = async ({
       }
     }
 
+    const hasCustomValidate = typeof field.validate === 'function'
+
     if (typeof field.validate === 'undefined') {
       if ('virtual' in field && field.virtual) {
         field.validate = (): true => true
@@ -340,6 +343,15 @@ export const sanitizeField = async ({
         }
       }
     }
+
+    warnOnRequiredWithCustomValidate({
+      field,
+      fieldPath: [collectionConfig?.slug ?? globalConfig?.slug, schemaPath]
+        .filter(Boolean)
+        .join('.'),
+      hasCustomValidate,
+      shouldWarn: !collectionConfig?.auth || Boolean(parentSchemaPath),
+    })
 
     if (!field.hooks) {
       field.hooks = {}
