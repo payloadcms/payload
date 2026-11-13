@@ -164,7 +164,7 @@ export const tenantField = <ConfigType = unknown>({
           })
 
           if (totalDocs === 1) {
-            return hasMany ? docs.map(({ id }) => id) : docs[0]?.id
+            return hasMany ? [docs[0].id] : docs[0].id
           }
         }
         if (req.user && isAutosaveEnabled) {
