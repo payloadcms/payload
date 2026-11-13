@@ -1,4 +1,4 @@
-import type { RelationshipFieldValidation, SingleRelationshipField } from 'payload'
+import type { RelationshipFieldValidation, SingleRelationshipField, TypedUser } from 'payload'
 
 import type { MultiTenantPluginConfig, RootTenantFieldConfigOverrides } from '../../types.js'
 
@@ -142,7 +142,30 @@ export const tenantField = <ConfigType = unknown>({
               },
             },
           })
-          return totalDocs > 0 ? tenantFromCookie : null
+          if (totalDocs > 0) {
+            return tenantFromCookie
+          }
+        }
+        if (
+          req.user &&
+          overrides.admin?.hidden &&
+          userHasAccessToAllTenants?.(
+            req.user as ConfigType extends { user: unknown } ? ConfigType['user'] : TypedUser,
+          )
+        ) {
+          const { docs, totalDocs } = await req.payload.find({
+            collection: tenantsCollectionSlug,
+            depth: 0,
+            limit: 2,
+            overrideAccess: false,
+            req,
+            select: { id: true },
+            user: req.user,
+          })
+
+          if (totalDocs === 1 && docs[0]) {
+            return hasMany ? [docs[0].id] : docs[0].id
+          }
         }
         if (req.user && isAutosaveEnabled) {
           const userTenants = getUserTenantIDs(req.user, {
