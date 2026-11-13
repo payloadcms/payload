@@ -409,6 +409,7 @@ test.describe('Multi Tenant', () => {
       })
       const itemID = String(item.docs[0]?.id)
 
+      // Simulate content created before tenant validation was installed.
       const response = await page.request.post(
         formatAdminURL({ apiRoute: '/api', path: `/unassign-tenant/${itemID}`, serverURL }),
       )
