@@ -53,6 +53,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const locale = useLocale()
 
   const relationSlugs = hasMultipleRelations ? relationTo : [relationTo]
+  const scrollAbortController = React.useRef<AbortController | null>(null)
 
   const loadedRelationships = React.useRef<
     Map<
@@ -143,6 +144,11 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
 
           if (response.ok) {
             const data: PaginatedDocs = await response.json()
+
+            if (abortController.signal.aborted) {
+              return
+            }
+
             if (data.docs.length > 0) {
               addOptions(data, relationSlug)
 
@@ -168,7 +174,9 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       }
 
-      setHasLoadedFirstOptions(true)
+      if (!abortController.signal.aborted) {
+        setHasLoadedFirstOptions(true)
+      }
     },
   )
 
@@ -176,7 +184,9 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     const relationshipToLoad = loadedRelationships.current.entries().next().value
 
     if (relationshipToLoad[0] && !relationshipToLoad[1].hasLoadedAll) {
+      scrollAbortController.current?.abort()
       const abortController = new AbortController()
+      scrollAbortController.current = abortController
 
       void loadOptions({
         abortController,
@@ -245,6 +255,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const handleInputChange = useCallback(
     (input: string) => {
       if (input !== search) {
+        scrollAbortController.current?.abort()
         dispatchOptions({ type: 'CLEAR', i18n, required: false })
 
         const relationSlugs = Array.isArray(relationTo) ? relationTo : [relationTo]
@@ -331,6 +342,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     })
 
     return () => {
+      scrollAbortController.current?.abort()
       abortControllers.forEach((controller) => {
         if (controller.signal) {
           try {
