@@ -525,8 +525,8 @@ export {
 export { EmbedProvider, useEmbed } from '../../providers/Embed/index.js'
 export type { EmbedContext } from '../../providers/Embed/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
-export { TranslationContextProvider } from '../../providers/TranslationContext/index.js'
-export type { TranslationContextProviderProps } from '../../providers/TranslationContext/index.js'
+export { TranslationContextProvider } from '../../providers/Translation/Context/index.js'
+export type { TranslationContextProviderProps } from '../../providers/Translation/Context/index.js'
 export { useWindowInfo, WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 export { useControllableState } from '../../hooks/useControllableState.js'
 
