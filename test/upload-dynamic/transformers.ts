@@ -189,6 +189,6 @@ export const uploadBridgeTransformer: TransformerWithInternalBridge & UploadTran
   mimeTypes: ['image/*'],
   transformFile: () => Promise.resolve({ status: 'continue' }),
   [uploadTransformerInternal]: {
-    prepareUpload: ({ file }) => Promise.resolve([{ fieldPath: 'filename', file }]),
+    transformUpload: ({ file }) => Promise.resolve([{ fieldPath: 'filename', file }]),
   },
 }

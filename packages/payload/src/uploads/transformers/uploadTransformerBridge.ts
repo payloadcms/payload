@@ -5,7 +5,9 @@ import type { PayloadRequest } from '../../types/index.js'
  * symbol. Lets the official Sharp package reproduce the current main-image and
  * legacy `variants` upload behavior without core exposing a general persisted-
  * variants API. Never exported from `payload` — `payload/internal` only, and
- * never documented for third-party use.
+ * never documented for third-party use. Today only `@payloadcms/transformer-sharp`
+ * sets it. Core does not check which transformer does, so it calls it "the upload
+ * bridge".
  */
 export const uploadTransformerInternal = Symbol.for('payload.uploadTransformerInternal')
 const uploadFilePath = Symbol.for('payload.uploadFilePath')
@@ -30,7 +32,8 @@ export type UploadTransformTask<TOptions = unknown> = {
   options: TOptions
 }
 
-export type PreparedUploadTransformation = {
+/** One file that `transformUpload` built: the main file (`filename`) or a stored size. */
+export type UploadTransformation = {
   fieldPath: 'filename' | `variants.${string}`
   /** Omitted when this task was intentionally skipped (e.g. an image size too small to enlarge) — recorded with null metadata, matching the existing `variants` shape. */
   file?: File
@@ -46,13 +49,18 @@ export type UploadTransformerInternal = {
    * collection, falling back to the first bridge when none does.
    */
   handlesCollection?: (args: { collectionSlug: string }) => boolean
-  prepareUpload?: (args: {
+  /**
+   * Transforms a whole upload: decides which files to build (the main file and each stored
+   * size), builds each one through `transform`, and returns them. `transform` runs core's stage
+   * pipeline (`transformUploadFile`) for one file, so other transformers also apply to each output.
+   */
+  transformUpload?: (args: {
     collectionSlug: string
     cropSize?: { height: number; width: number }
     file: File
     req: PayloadRequest
     transform: (task: UploadTransformTask) => Promise<File>
-  }) => Promise<PreparedUploadTransformation[]>
+  }) => Promise<UploadTransformation[]>
 }
 
 export type TransformerWithInternalBridge = {
