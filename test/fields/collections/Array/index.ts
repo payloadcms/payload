@@ -98,6 +98,41 @@ const ArrayFields: CollectionConfig = {
       type: 'array',
     },
     {
+      name: 'collapsedGroupWithCondition',
+      admin: {
+        initCollapsed: true,
+      },
+      defaultValue: [
+        {
+          group: {
+            text: 'conditional text',
+            toggle: true,
+          },
+        },
+      ],
+      fields: [
+        {
+          name: 'group',
+          fields: [
+            {
+              name: 'toggle',
+              defaultValue: true,
+              type: 'checkbox',
+            },
+            {
+              name: 'text',
+              admin: {
+                condition: (_, siblingData) => Boolean(siblingData?.toggle),
+              },
+              type: 'text',
+            },
+          ],
+          type: 'group',
+        },
+      ],
+      type: 'array',
+    },
+    {
       name: 'localized',
       defaultValue: arrayDefaultValue,
       fields: [
