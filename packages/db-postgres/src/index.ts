@@ -52,6 +52,7 @@ import {
   deleteWhere,
   dropDatabase,
   execute,
+  findDocumentLocks,
   init,
   insert,
 } from '@payloadcms/drizzle/postgres'
@@ -63,7 +64,6 @@ import { fileURLToPath } from 'url'
 import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
-import { findDocumentLocks } from './findDocumentLocks.js'
 
 const filename = fileURLToPath(import.meta.url)
 
