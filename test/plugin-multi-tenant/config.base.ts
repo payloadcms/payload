@@ -63,6 +63,21 @@ export const baseConfig: Partial<Config> = {
       },
     },
   },
+  endpoints: [
+    {
+      path: '/unassign-tenant/:id',
+      method: 'post',
+      handler: async (req) => {
+        await req.payload.db.updateOne({
+          collection: menuItemsSlug,
+          id: String(req.routeParams?.id),
+          data: { tenant: null },
+        })
+
+        return Response.json({ success: true })
+      },
+    },
+  ],
   onInit: async (payload) => {
     // IMPORTANT: This should only seed, not clear the database.
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
