@@ -44,6 +44,8 @@ export const useRecoverUploadSessions = ({
   const checkedUserIDRef = useRef<number | string | undefined>(undefined)
   /** Recovery uploads in progress, stopped when the user changes. */
   const recoveryControllersRef = useRef(new Map<string, AbortController>())
+  /** The signed-in user now, so a late reply does not show another user's sessions. */
+  const currentUserIDRef = useRef(userID)
 
   const hasSegmentedCollections = config.collections.some(
     ({ upload }) => upload?.uploadInstructions?.supportsSegmentedUploads,
@@ -51,6 +53,8 @@ export const useRecoverUploadSessions = ({
 
   // Sessions belong to the user who started them, so a new user must not keep sending them.
   useEffect(() => {
+    currentUserIDRef.current = userID
+
     const recoveryControllers = recoveryControllersRef.current
     const recoveringSessionIDs = recoveringSessionIDsRef.current
 
@@ -147,12 +151,18 @@ export const useRecoverUploadSessions = ({
           },
           cancel: {
             label: t('upload:cancelUpload'),
-            onClick: () =>
+            onClick: () => {
+              const cancelledByUserID = currentUserIDRef.current
+
               void cancelUploadSession({ id: session.id, ...requestArgs }).catch((err: unknown) => {
-                if (!isUploadSessionGoneError(err)) {
+                if (
+                  !isUploadSessionGoneError(err) &&
+                  currentUserIDRef.current === cancelledByUserID
+                ) {
                   offer({ description: getErrorMessage(err), session })
                 }
-              }),
+              })
+            },
           },
           description,
           duration: Infinity,

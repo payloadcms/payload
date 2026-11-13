@@ -181,6 +181,32 @@ describe('useRecoverUploadSessions', () => {
     expect(toast.error).not.toHaveBeenCalled()
   })
 
+  test.each([
+    { case: 'another user signs in', nextUserID: 'user-b' },
+    { case: 'the user signs out', nextUserID: undefined },
+  ])(
+    'should not offer recovery again when cancelling fails after $case',
+    async ({ nextUserID }) => {
+      let rejectCancel: (err: unknown) => void = () => {}
+
+      vi.mocked(cancelUploadSession).mockReturnValue(
+        new Promise((_resolve, reject) => {
+          rejectCancel = reject
+        }),
+      )
+      const { hook, props } = await renderRecovery()
+
+      clickCancel()
+
+      vi.mocked(listUploadSessions).mockResolvedValue([])
+      await hook.rerender({ ...props, userID: nextUserID })
+      rejectCancel(new Error('Network down'))
+
+      await expect.poll(() => vi.mocked(isUploadSessionGoneError).mock.calls.length).toBe(1)
+      expect(toast.warning).toHaveBeenCalledTimes(1)
+    },
+  )
+
   test('should stop a recovery upload when the user changes', async () => {
     let signal: AbortSignal | undefined
 

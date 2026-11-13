@@ -384,9 +384,9 @@ export const useFormSubmission = ({
               errors: serverValidation.errors,
             }
 
-            // A background refresh validates without the overrides, so a running one or one the
-            // errors would start clears them. Cancel it, and mark the latest fields with the
-            // errors as already refreshed.
+            // A background refresh validates without the overrides, so a running or queued one,
+            // or one the errors would start, clears them. Cancel them, and mark the latest fields
+            // with the errors as already refreshed.
             cancelFormStateRefresh()
             prevFormStateRef.current = fieldReducer(contextRef.current.fields, serverErrorAction)
             dispatchFields(serverErrorAction)

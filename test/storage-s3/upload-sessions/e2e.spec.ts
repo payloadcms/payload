@@ -10,6 +10,7 @@ import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import { gotoAndWaitForForm } from '../../__helpers/e2e/helpers.js'
+import { isFormStateRequest } from '../../__helpers/e2e/isFormStateRequest.js'
 import { AdminUrlUtil } from '../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../../__setup/e2e/ensureCompilationIsDone.js'
@@ -286,6 +287,20 @@ test.describe('storage-s3 upload sessions E2E', () => {
     // Valid as a draft, invalid once published.
     const title = `${draftOnlyTitlePrefix} ${Date.now()}`
 
+    // A background refresh validates the title as a draft, so one sent after Publish would clear
+    // the error. Only the early check sends the `published` status that Publish adds.
+    let refreshCount = 0
+    const pageURL = page.url()
+
+    page.on('request', (request) => {
+      if (
+        isFormStateRequest({ pageURL, request }) &&
+        !(request.postData() ?? '').includes('"published"')
+      ) {
+        refreshCount += 1
+      }
+    })
+
     await pickFile(page)
     await expect.poll(() => log.partPuts).toBeGreaterThan(0)
 
@@ -296,9 +311,12 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await expect(page.locator('#field-error-title')).toBeVisible()
     expect(log.sessionCalls.some((call) => call.endsWith('/intent'))).toBe(false)
 
-    // A background refresh would validate the title as a draft and clear the error. The onChange
-    // refresh runs 250 ms after a change, so 1 s is enough for one to arrive.
+    // The onChange refresh starts 250 ms after a change. This counts requests sent, so a slow
+    // reply cannot make the check pass early.
+    const refreshCountWithErrors = refreshCount
+
     await page.waitForTimeout(1000)
+    expect(refreshCount).toBe(refreshCountWithErrors)
     await expect(page.locator('#field-error-title')).toBeVisible()
 
     releaseParts()

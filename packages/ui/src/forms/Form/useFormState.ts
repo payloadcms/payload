@@ -64,7 +64,7 @@ type FormValidationResult = {
 }
 
 export type UseFormStateResult = {
-  /** Stops a running background refresh, so its reply is not applied. */
+  /** Stops the running background refresh and the queued ones, so no reply is applied. */
   cancelFormStateRefresh: () => void
   /** Applies local field updates through the form reducer. */
   dispatchFields: Dispatch<FieldAction>
@@ -197,6 +197,8 @@ export const useFormState = ({
   const refreshAbortControllerRef = useRef<AbortController>(null)
   const resetAbortControllerRef = useRef<AbortController>(null)
   const hasPendingRefreshRef = useRef(false)
+  /** Goes up on each cancel, so a refresh queued before the cancel does not run. */
+  const refreshGenerationRef = useRef(0)
   const isMountedRef = useRef(true)
 
   useEffect(() => {
@@ -554,11 +556,18 @@ export const useFormState = ({
   )
 
   const cancelFormStateRefresh = useCallback<UseFormStateResult['cancelFormStateRefresh']>(() => {
+    refreshGenerationRef.current += 1
     abortAndIgnore(refreshAbortControllerRef.current)
   }, [])
 
   const queueFormStateRefresh = useCallback<UseFormStateResult['refreshFormState']>(() => {
+    const generation = refreshGenerationRef.current
+
     queueTask(async () => {
+      if (refreshGenerationRef.current !== generation) {
+        return
+      }
+
       await refreshFormState({ type: 'refresh' })
     })
   }, [queueTask, refreshFormState])
