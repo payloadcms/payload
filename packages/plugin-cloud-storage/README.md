@@ -60,10 +60,10 @@ If the code is included _in any way in your config_ but conditionally disabled i
 
 This plugin supports the following adapters:
 
-- [Azure Blob Storage](#azure-blob-storage-adapter)
-- [AWS S3-style Storage](#s3-adapter)
-- [Google Cloud Storage](#gcs-adapter)
-- [Vercel Blob Storage](#vercel-blob-adapter)
+- [Azure Blob Storage](https://github.com/payloadcms/payload/tree/main/packages/storage-azure)
+- [AWS S3-style Storage](https://github.com/payloadcms/payload/tree/main/packages/storage-s3)
+- [Google Cloud Storage](https://github.com/payloadcms/payload/tree/main/packages/storage-gcs)
+- [Vercel Blob Storage](https://github.com/payloadcms/payload/tree/main/packages/storage-vercel-blob)
 
 However, you can create your own adapter for any third-party service you would like to use.
 
