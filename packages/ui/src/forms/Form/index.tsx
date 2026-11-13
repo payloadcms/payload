@@ -40,6 +40,7 @@ import {
   SubmittedContext,
   SuccessfulSubmitCountContext,
 } from './context.js'
+import { getSaveOptions } from './getSaveOptions.js'
 import { initContextState } from './initContextState.js'
 import { useFormState } from './useFormState.js'
 import { useFormSubmission } from './useFormSubmission.js'
@@ -80,6 +81,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const submissionActivityRef = useRef<SubmissionActivity>({ running: 0, started: 0 })
 
   const {
+    cancelFormStateRefresh,
     dispatchFields,
     formState,
     isInitializing,
@@ -113,6 +115,7 @@ export const Form: React.FC<FormProps> = (props) => {
     submitted,
     successfulSubmitCount,
   } = useFormSubmission({
+    cancelFormStateRefresh,
     contextRef,
     dispatchFields,
     formRef,
@@ -149,7 +152,7 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const createFormData = useCallback<CreateFormData>(
-    async (overrides, { data: dataFromArgs, mergeOverrideData = true }) => {
+    async (overrides, { action, data: dataFromArgs, mergeOverrideData = true }) => {
       let data = dataFromArgs || getDataFromFormState(contextRef.current.fields, true)
 
       let file = data?.file
@@ -167,10 +170,17 @@ export const Form: React.FC<FormProps> = (props) => {
             mimeType: file.type,
           })
         ) {
+          const intentData = mergeOverrideData ? { ...data, ...overrides } : overrides
+
           file = JSON.stringify(
             await handler({
               docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
               file,
+              intent: {
+                data: intentData,
+                draft: intentData?._status === 'draft',
+                options: getSaveOptions({ action }),
+              },
               targetID: id,
             }),
           )

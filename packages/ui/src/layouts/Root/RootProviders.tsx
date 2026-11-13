@@ -33,6 +33,7 @@ import { ThemeProvider } from '../../providers/Theme/index.js'
 import { ToastContainer } from '../../providers/ToastContainer/index.js'
 import { TranslationProvider } from '../../providers/Translation/index.js'
 import { UploadHandlersProvider } from '../../providers/UploadHandlers/index.js'
+import { UploadSessionsProvider } from '../../providers/UploadSessions/index.js'
 import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 
 export type RootProviderProps = {
@@ -115,16 +116,18 @@ export const RootProviders: React.FC<RootProviderProps> = ({
                                               <LoadingOverlayProvider>
                                                 <DocumentEventsProvider>
                                                   <NavProvider initialIsOpen={isNavOpen}>
-                                                    <UploadHandlersProvider>
-                                                      <DndContext
-                                                        collisionDetection={pointerWithin}
-                                                        // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                        id={dndContextID}
-                                                      >
-                                                        <ProgressBar />
-                                                        {children}
-                                                      </DndContext>
-                                                    </UploadHandlersProvider>
+                                                    <UploadSessionsProvider>
+                                                      <UploadHandlersProvider>
+                                                        <DndContext
+                                                          collisionDetection={pointerWithin}
+                                                          // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                          id={dndContextID}
+                                                        >
+                                                          <ProgressBar />
+                                                          {children}
+                                                        </DndContext>
+                                                      </UploadHandlersProvider>
+                                                    </UploadSessionsProvider>
                                                   </NavProvider>
                                                 </DocumentEventsProvider>
                                               </LoadingOverlayProvider>

@@ -646,6 +646,7 @@ export const caTranslations: DefaultTranslationsObject = {
     addFile: 'Afegir fitxer',
     addFiles: 'Afegir fitxers',
     bulkUpload: 'Carregar arxius massius',
+    cancelUpload: 'Cancel·la la càrrega',
     copyLinkToFile: "Copia l'enllaç al fitxer",
     copyURL: 'Copia l’URL',
     crop: 'Retallar',
@@ -667,6 +668,7 @@ export const caTranslations: DefaultTranslationsObject = {
     fileSize: 'Mida del fitxer',
     filesToUpload: 'Fitxers a carregar',
     fileToUpload: 'Fitxer a carregar',
+    finishSaving: 'Acaba de desar',
     focalPoint: 'Punt focal',
     focalPointDescription:
       'Arrossega el punt focal directament sobre la vista prèvia o ajusta els valors a continuació.',
@@ -681,12 +683,26 @@ export const caTranslations: DefaultTranslationsObject = {
     previewSizes: 'Mides de la vista prèvia',
     renameFile: 'Canviar el nom del fitxer',
     replaceFile: 'Reemplaça fitxer',
+    resumingFile: 'Reprenent {{filename}}',
+    savingInBackground: 'La càrrega acabarà en segon pla i llavors es desarà el document.',
     selectCollectionToBrowse: 'Selecciona una col·lecció per explorar',
     selectFile: 'Selecciona un fitxer',
     setCropArea: "Estableix l'àrea de retall",
     setFocalPoint: 'Estableix el punt focal',
     sizes: 'Mides',
     sizesFor: 'Mides per a {{label}}',
+    uploadFileMismatch: 'El fitxer seleccionat no coincideix amb la càrrega interrompuda.',
+    uploadingFile: 'Carregant {{filename}}',
+    uploadingFileProgress: 'Carregant {{filename}}: {{percent}}%',
+    uploadInProgressLeaveWarning: "Encara hi ha una càrrega en curs. Si surts ara, s'interromprà.",
+    uploadInterrupted: "S'ha interromput la càrrega de {{filename}}.",
+    uploadInterruptedWillSave:
+      "S'ha interromput la càrrega de {{filename}}. El document es desarà quan acabi.",
+    uploadReadyToFinishSaving:
+      "{{filename}} s'ha acabat de carregar. Obre el formulari per acabar de desar.",
+    uploadSavedInBackground: "La càrrega ha acabat i s'ha desat el document.",
+    uploadStorageRejectedSegments:
+      "L'emmagatzematge no ha acceptat cap segment de la càrrega. Comprova la política CORS del bucket.",
     width: 'Amplada',
   },
   validation: {

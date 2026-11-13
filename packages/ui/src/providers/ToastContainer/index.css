@@ -117,6 +117,36 @@
   display: none;
 }
 
+/* Toasts with buttons put them on a second row so they stay inside the fixed-width toast instead
+   of overflowing it (and the viewport) next to the message. */
+.payload-toast-container
+  .payload-toast-item:has(.payload-toast-action-button, .payload-toast-cancel-button) {
+  flex-wrap: wrap;
+}
+
+.payload-toast-container
+  .payload-toast-item:has(.payload-toast-action-button, .payload-toast-cancel-button)
+  .toast-content {
+  /* Fill the first row beside the icon and close button, so the buttons wrap below. */
+  flex: 1 1 calc(100% - 2 * var(--spacer-4) - 2 * var(--spacer-2));
+  min-inline-size: 0;
+}
+
+/* Toast buttons (e.g. "Finish saving") meet the 24px minimum target size (WCAG 2.5.8). */
+.payload-toast-container .payload-toast-item .payload-toast-action-button,
+.payload-toast-container .payload-toast-item .payload-toast-cancel-button {
+  order: 1;
+  min-block-size: var(--spacer-4);
+  padding-inline: var(--spacer-2);
+}
+
+.payload-toast-container .payload-toast-item .payload-toast-cancel-button,
+.payload-toast-container
+  .payload-toast-item:not(:has(.payload-toast-cancel-button))
+  .payload-toast-action-button {
+  margin-inline-start: auto;
+}
+
 /* Sonner positions [data-close-button] absolutely; place it inline as a --spacer-4 (24px) IconButton. */
 .payload-toast-container .payload-toast-item .payload-toast-close-button {
   position: relative;

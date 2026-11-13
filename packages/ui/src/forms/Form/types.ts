@@ -147,6 +147,11 @@ export type CreateFormData = (
    */
   options?: {
     /**
+     * The URL the form data is sent to. Its locale and upload edits are kept with an upload that
+     * finishes the save in the background.
+     */
+    action?: string
+    /**
      * If provided, will use this instead of of derived data from the current form state.
      */
     data?: Data
