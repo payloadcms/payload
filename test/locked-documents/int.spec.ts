@@ -691,8 +691,8 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     'Postgres lock transactions',
     { db: (adapter) => adapter === 'postgres' },
     () => {
-      for (const isolationLevel of ['repeatable read', 'serializable'] as const) {
-        test(`should reject a save locked after a ${isolationLevel} snapshot`, async ({
+      for (const isolationLevel of ['read committed', 'repeatable read', 'serializable'] as const) {
+        test(`should reject a save locked after the first ${isolationLevel} read`, async ({
           payload,
         }) => {
           const doc = await payload.create({
@@ -738,9 +738,17 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
           } finally {
             await payload.db.rollbackTransaction(transactionID)
           }
+
+          const remaining = await payload.findByID({
+            collection: simpleSlug,
+            id: doc.id,
+            overrideAccess: true,
+          })
+
+          expect(remaining.fieldA).toBe('before')
         })
 
-        test(`should skip a bulk delete locked after a ${isolationLevel} snapshot`, async ({
+        test(`should skip a bulk delete locked after the first ${isolationLevel} read`, async ({
           payload,
         }) => {
           const doc = await payload.create({
