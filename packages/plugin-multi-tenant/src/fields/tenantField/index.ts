@@ -163,8 +163,10 @@ export const tenantField = <ConfigType = unknown>({
             user: req.user,
           })
 
-          if (totalDocs === 1) {
-            return hasMany ? [docs[0].id] : docs[0].id
+          const [tenant] = docs
+
+          if (totalDocs === 1 && tenant) {
+            return hasMany ? [tenant.id] : tenant.id
           }
         }
         if (req.user && isAutosaveEnabled) {
