@@ -59,14 +59,6 @@ The plugin accepts an object with the following properties:
 ```ts
 type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
-   * Replace the assignment modal with a client component.
-   * Omit this option to render the default modal.
-   */
-  assignTenantModalComponent?: Exclude<
-    PayloadComponent<never, AssignTenantModalProps>,
-    false
-  >
-  /**
    * Base path for your application
    *
    * https://nextjs.org/docs/app/api-reference/config/next-config-js/basePath
@@ -139,6 +131,16 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
        */
       useTenantAccess?: boolean
     }
+  }
+  /** Custom components for the plugin's admin UI. */
+  components?: {
+    /** Replace the assignment modal with a client component. */
+    AssignTenantModal?: Exclude<
+      PayloadComponent<never, AssignTenantModalProps>,
+      false
+    >
+    /** Replace the navigation selector, or hide it with `null`. */
+    TenantSelector?: CustomComponent | null
   }
   /**
    * Enables debug mode
@@ -238,11 +240,6 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
         rowFields?: never
         tenantFieldAccess?: never
       }
-  /**
-   * Replace the tenant selector with a custom component, or hide it with `null`.
-   * Omit this option to render the default selector.
-   */
-  tenantSelectorComponent?: CustomComponent | null
   /**
    * Customize tenant selector label
    *
@@ -348,7 +345,7 @@ export default config
 
 ## Custom assignment modal
 
-Use `assignTenantModalComponent` to replace the popup opened by the document's **Assign Tenant** action. This is separate from `tenantSelectorComponent`, which replaces the navigation selector. Omit the option to keep the default assignment modal.
+Use `components.AssignTenantModal` to replace the popup opened by the document's **Assign Tenant** action. This is separate from `components.TenantSelector`, which replaces the navigation selector. Omit the option to keep the default assignment modal.
 
 The replacement must be a Client Component. It receives the tenant relationship field as `children`, the modal `slug`, and the `afterModalOpen`, `afterModalClose`, `onConfirm`, and `onCancel` callbacks. The plugin keeps ownership of the temporary field value and applies it to the document form when `onConfirm` is called. Saving the document still persists the assignment.
 
@@ -356,9 +353,13 @@ You can wrap the exported modal to preserve its dialog behavior:
 
 ```ts
 multiTenantPlugin({
-  assignTenantModalComponent: {
-    path: '/components/CustomAssignTenantModal#CustomAssignTenantModal',
-    clientProps: { description: 'Choose the tenant that owns this document.' },
+  components: {
+    AssignTenantModal: {
+      path: '/components/CustomAssignTenantModal#CustomAssignTenantModal',
+      clientProps: {
+        description: 'Choose the tenant that owns this document.',
+      },
+    },
   },
   collections: { posts: {} },
 })

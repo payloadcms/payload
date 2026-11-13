@@ -28,12 +28,6 @@ export type TenantValue = (number | string)[] | (number | string)
 
 export type MultiTenantPluginConfig = {
   /**
-   * Replace the assignment modal with a client component.
-   * Receives the tenant field as children and the modal callbacks.
-   * Omit this option to render the default modal.
-   */
-  assignTenantModalComponent?: Exclude<PayloadComponent<never, AssignTenantModalProps>, false>
-  /**
    * After a tenant is deleted, the plugin will attempt to clean up related documents
    * - removing documents with the tenant ID
    * - removing the tenant from users
@@ -96,6 +90,20 @@ export type MultiTenantPluginConfig = {
        */
       useTenantAccess?: boolean
     }
+  }
+  /** Custom components for the plugin's admin UI. */
+  components?: {
+    /**
+     * Replace the assignment modal with a client component.
+     * Receives the tenant field as children and the modal callbacks.
+     * Omit this option to render the default modal.
+     */
+    AssignTenantModal?: Exclude<PayloadComponent<never, AssignTenantModalProps>, false>
+    /**
+     * Replace the navigation tenant selector, or hide it with `null`.
+     * Omit this option to render the default selector.
+     */
+    TenantSelector?: CustomComponent | null
   }
   /**
    * Enables debug mode
@@ -195,11 +203,6 @@ export type MultiTenantPluginConfig = {
         rowFields?: never
         tenantFieldAccess?: never
       }
-  /**
-   * Replace the tenant selector with a custom component, or hide it with `null`.
-   * Omit this option to render the default selector.
-   */
-  tenantSelectorComponent?: CustomComponent | null
   /**
    * Customize tenant selector label
    *

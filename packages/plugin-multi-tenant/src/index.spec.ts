@@ -8,9 +8,11 @@ describe('multiTenantPlugin', () => {
   describe('assignment modal', () => {
     it('should preserve dependencies and register a custom assignment modal', async () => {
       const config = await multiTenantPlugin({
-        assignTenantModalComponent: {
-          path: '/components/CustomAssignTenantModal/index.js#CustomAssignTenantModal',
-          clientProps: { description: 'Custom assignment modal' },
+        components: {
+          AssignTenantModal: {
+            path: '/components/CustomAssignTenantModal/index.js#CustomAssignTenantModal',
+            clientProps: { description: 'Custom assignment modal' },
+          },
         },
         collections: {},
       })({
@@ -82,7 +84,7 @@ describe('multiTenantPlugin', () => {
       async ({ expectedSelector, tenantSelectorComponent }) => {
         const config = await multiTenantPlugin({
           collections: {},
-          tenantSelectorComponent,
+          components: { TenantSelector: tenantSelectorComponent },
         })({
           admin: { components: { beforeNav: [existingComponent] } },
           collections: [

@@ -457,8 +457,8 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
       }),
     )
 
-    const assignTenantModal = pluginConfig.assignTenantModalComponent
-      ? parsePayloadComponent(pluginConfig.assignTenantModalComponent)
+    const assignTenantModal = pluginConfig.components?.AssignTenantModal
+      ? parsePayloadComponent(pluginConfig.components.AssignTenantModal)
       : undefined
 
     return {
@@ -499,10 +499,10 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
           ],
           beforeNav: [
             ...(incomingConfig.admin?.components?.beforeNav || []),
-            ...(pluginConfig.tenantSelectorComponent === null
+            ...(pluginConfig.components?.TenantSelector === null
               ? []
               : [
-                  pluginConfig.tenantSelectorComponent ?? {
+                  pluginConfig.components?.TenantSelector ?? {
                     clientProps: {
                       enabledSlugs: [
                         ...collectionSlugs,
@@ -528,7 +528,7 @@ export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
               },
               path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelectionProvider',
               serverProps: {
-                assignTenantModalComponent: pluginConfig.assignTenantModalComponent,
+                assignTenantModalComponent: pluginConfig.components?.AssignTenantModal,
               },
             },
           ],

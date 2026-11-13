@@ -9,7 +9,9 @@ import { getTenantOptions } from '../../utilities/getTenantOptions.js'
 import { TenantSelectionProviderClient } from './index.client.js'
 
 type Args = {
-  assignTenantModalComponent?: MultiTenantPluginConfig['assignTenantModalComponent']
+  assignTenantModalComponent?: NonNullable<
+    MultiTenantPluginConfig['components']
+  >['AssignTenantModal']
   children: React.ReactNode
   payload: Payload
   server?: ServerAdapter
