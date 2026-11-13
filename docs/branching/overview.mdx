@@ -332,7 +332,7 @@ Do not undo a successful target write only because source cleanup failed.
 
 ## Database indexes and migrations
 
-Branching adds branch identity to branchable content, global, and version storage. Unique fields and developer-defined unique indexes include the branch identity so separate branches can use the same value. The normal `main` constraint still applies during merge, so a collision on `main` fails the real write.
+Branching adds branch identity to branchable content, global, and version storage. Unique fields and unique indexes declared in the Payload Config include the branch identity so separate branches can use the same value. Custom unique indexes created directly in the database may still enforce uniqueness across branches. The normal `main` constraint still applies during merge, so a collision on `main` fails the real write.
 
 Review generated migrations before deployment. For Postgres and SQLite, enable branching in the config and generate the normal schema migration:
 
@@ -346,7 +346,9 @@ For an existing MongoDB database, generate the predefined branching migration:
 pnpm payload migrate:create enable-branching --file @payloadcms/db-mongodb/branching
 ```
 
-The MongoDB migration sets missing or null branch identities to `main` for branchable content, globals, and versions before it synchronizes indexes. If the backfill finds a uniqueness conflict, the migration stops before it removes the old index. Resolve the conflicting data and run the migration again.
+The migration preserves existing content, assigning documents without a branch to `main`. It creates branch-aware indexes before replacing corresponding existing unique indexes, including manually created ones. Unrelated indexes are preserved.
+
+Review warnings about retained custom indexes, which may still block branch copies. If the migration fails, resolve the error and rerun it; completed changes may persist.
 
 Run migrations before starting application code that expects branching fields and indexes. Do not rely on MongoDB schema defaults to rewrite existing documents.
 

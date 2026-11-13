@@ -16,6 +16,24 @@ export default buildConfig({
 })
 ```
 
+#### Content Branching migration
+
+After enabling Content Branching, review and run the predefined migration before deploying:
+
+```sh
+pnpm payload migrate:create enable-branching --file @payloadcms/db-mongodb/branching
+pnpm payload migrate
+```
+
+It preserves existing content, assigning documents without a branch to `main`. It creates
+branch-aware indexes before replacing corresponding existing unique indexes, including manually
+created ones. Unrelated indexes are preserved; `ensureIndexes: true` is not required.
+
+Review warnings about retained custom indexes, which may still block branch copies. Resolve errors
+and rerun failed migrations; completed changes may persist.
+
+See the [Content Branching guide](https://payloadcms.com/docs/branching/overview#database-indexes-and-migrations).
+
 ### Postgres
 
 ```ts
