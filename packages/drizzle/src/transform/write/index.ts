@@ -30,6 +30,7 @@ export const transformForWrite = ({
   const rowToInsert: RowToInsert = {
     arrays: {},
     arraysToPush: {},
+    blockPlacements: [],
     blocks: {},
     blocksToDelete: new Set(),
     locales: {},
@@ -51,6 +52,7 @@ export const transformForWrite = ({
     arrays: rowToInsert.arrays,
     arraysToPush: rowToInsert.arraysToPush,
     baseTableName: tableName,
+    blockPlacements: rowToInsert.blockPlacements,
     blocks: rowToInsert.blocks,
     blocksToDelete: rowToInsert.blocksToDelete,
     columnPrefix: '',
