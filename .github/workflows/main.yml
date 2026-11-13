@@ -889,7 +889,7 @@ jobs:
   # Test content-api integration with packed packages. Each job runs its own
   # ephemeral Content API instance pulled from Figma's ECR, backed by a Postgres
   # service container, a Valkey container (required at startup for rate
-  # limiting), and a LocalStack container for S3 storage tests. This
+  # limiting and stale collections), and a LocalStack container for S3 storage tests. This
   # gives each run an isolated sandbox, avoiding data collisions between
   # concurrent CI runs and removing the need for shared credentials.
   tests-content-api:
@@ -1015,6 +1015,7 @@ jobs:
             -e S3_ENDPOINT=http://localhost:4566 \
             -e RATE_LIMIT_VALKEY_URL=redis://localhost:6379 \
             -e VALKEY_URL=redis://localhost:6379 \
+            -e STALE_COLLECTION_VALKEY_URL=redis://localhost:6379 \
             "$IMAGE"
 
       - name: Wait for Content API to be ready
