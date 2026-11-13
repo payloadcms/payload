@@ -130,8 +130,14 @@ export function mergeLocalizedData({
               result[field.name] = null
             } else if (Array.isArray(newValue)) {
               // Non-localized array - still process children for any localized fields
-              result[field.name] = newValue.map((newItem: JsonObject, index: number) => {
-                const existingItem = existingValue?.[index] || {}
+              result[field.name] = newValue.map((newItem: JsonObject) => {
+                const existingItem =
+                  (newItem?.id && Array.isArray(existingValue)
+                    ? existingValue.find(
+                        (row) =>
+                          row && typeof row === 'object' && 'id' in row && row.id === newItem.id,
+                      )
+                    : undefined) || {}
 
                 return mergeLocalizedData({
                   configBlockReferences,
@@ -173,7 +179,7 @@ export function mergeLocalizedData({
               result[field.name] = null
             } else if (Array.isArray(newValue)) {
               // Non-localized blocks - still process children for any localized fields
-              result[field.name] = newValue.map((newBlockData: JsonObject, index: number) => {
+              result[field.name] = newValue.map((newBlockData: JsonObject) => {
                 const blockOrSlug = field.blocks.find((b) => {
                   const slug = typeof b === 'string' ? b : b.slug
                   return slug === newBlockData.blockType
@@ -185,9 +191,17 @@ export function mergeLocalizedData({
 
                 if (block) {
                   const blockData =
-                    Array.isArray(existingValue) && existingValue[index]
-                      ? (existingValue[index] as JsonObject)
-                      : {}
+                    (newBlockData?.id && Array.isArray(existingValue)
+                      ? existingValue.find(
+                          (row) =>
+                            row &&
+                            typeof row === 'object' &&
+                            'id' in row &&
+                            row.id === newBlockData.id &&
+                            'blockType' in row &&
+                            row.blockType === newBlockData.blockType,
+                        )
+                      : undefined) || {}
 
                   const merged = mergeLocalizedData({
                     configBlockReferences,
