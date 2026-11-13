@@ -1,13 +1,13 @@
 'use client'
 import React from 'react'
 
-import type { TranslationContextProviderProps } from './Context/index.js'
+import type { TranslationContextProviderProps } from './ContextProvider/index.js'
 
 import { useRouter } from '../RouterAdapter/index.js'
 import { useServerFunctions } from '../ServerFunctions/index.js'
-import { TranslationContextProvider } from './Context/index.js'
+import { TranslationContextProvider } from './ContextProvider/index.js'
 
-export { useTranslation } from './Context/index.js'
+export { useTranslation } from './context.js'
 
 type Props = Omit<TranslationContextProviderProps, 'onLanguageChange'>
 
