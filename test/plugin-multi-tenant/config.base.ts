@@ -68,6 +68,7 @@ export const baseConfig: Partial<Config> = {
       path: '/unassign-tenant/:id',
       method: 'post',
       handler: async (req) => {
+        // Bypass tenant validation to simulate content created before the multi-tenant plugin was installed.
         await req.payload.db.updateOne({
           collection: menuItemsSlug,
           id: String(req.routeParams?.id),
