@@ -53,6 +53,7 @@ import {
   deleteWhere,
   dropDatabase,
   execute,
+  findDocumentLocks,
   init,
   insert,
 } from '@payloadcms/drizzle/postgres'
@@ -122,6 +123,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
         json: true,
       },
       fieldConstraints: {},
+      findDocumentLocks,
       forceUseVercelPostgres: args.forceUseVercelPostgres ?? false,
       foreignKeys: new Set(),
       generateSchema: createSchemaGenerator({
