@@ -5,6 +5,7 @@ import fs from 'fs/promises'
 import path from 'path'
 
 import { mapTarballsToFileSpecs } from './local-package-tarballs.js'
+import { TEMPLATE_ALLOW_BUILDS } from './template-allow-builds.js'
 
 main().catch((error) => {
   console.error(error)
@@ -78,8 +79,9 @@ async function main() {
   await fs.writeFile(
     path.join(templatePath, 'pnpm-workspace.yaml'),
     toWorkspaceYaml({
-      // sharp/esbuild/unrs-resolver: all templates; mongodb-memory-server/@swc/core: plugin template.
-      allowBuilds: ['esbuild', 'sharp', 'unrs-resolver', 'mongodb-memory-server', '@swc/core'],
+      // Shared with the templates' own pnpm-workspace.yaml, so a dependency that needs approving
+      // cannot be approved in the generated template and missed by the preview install.
+      allowBuilds: TEMPLATE_ALLOW_BUILDS,
       overrides: fileSpecByPackageName,
     }),
   )
