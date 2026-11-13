@@ -2,18 +2,17 @@ import type { SanitizedConfig } from 'payload'
 
 import type { Theme } from '../providers/Theme/shared.js'
 
-import { resolveTheme } from '../providers/Theme/shared.js'
+import { resolveTheme } from '../providers/Theme/utilities.js'
 
 type GetRequestThemeArgs = {
+  /** Sanitized config, including its defaulted cookie prefix. */
   config: SanitizedConfig
   cookies: Map<string, string>
   headers: Request['headers']
 }
 
-/** @internal */
 export type RequestThemeSource = 'config' | 'cookie' | 'default' | 'header'
 
-/** @internal */
 export type RequestThemeResult = {
   /** The request's resolved theme. */
   theme: Theme
@@ -21,14 +20,17 @@ export type RequestThemeResult = {
   themeSource: RequestThemeSource
 }
 
-/** @internal */
+/**
+ * Resolves the admin theme from sanitized config and request preferences.
+ * Priority: config (ignoring `all`), cookie, color-scheme client hint, then the default theme.
+ */
 export const getRequestTheme = ({
   config,
   cookies,
   headers,
 }: GetRequestThemeArgs): RequestThemeResult => {
   const { theme, themeSource } = resolveTheme({
-    themeFromCookie: cookies.get(`${config.cookiePrefix || 'payload'}-theme`),
+    themeFromCookie: cookies.get(`${config.cookiePrefix}-theme`),
     themeFromSystem: headers.get('Sec-CH-Prefers-Color-Scheme'),
     themeSettingFromConfig: config.admin.theme,
   })

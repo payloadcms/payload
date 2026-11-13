@@ -7,7 +7,15 @@ import type { Theme } from './shared.js'
 
 import { useConfig } from '../Config/index.js'
 import { RouterAdapterContext } from '../RouterAdapter/index.js'
-import { defaultTheme, resolveTheme } from './shared.js'
+import { defaultTheme } from './shared.js'
+import {
+  getHighContrastModeFromSystem,
+  getThemeFromCookie,
+  getThemeFromSystem,
+  isValidThemeParam,
+  resolveHighContrastMode,
+  resolveTheme,
+} from './utilities.js'
 
 export { defaultTheme, type Theme }
 
@@ -65,7 +73,7 @@ export const ThemeProvider: React.FC<{
   const configContext = useConfig()
   const routerAdapter = use(RouterAdapterContext)
   const preselectedTheme = themeSettingFromConfig ?? configContext?.config.admin.theme ?? 'all'
-  const resolvedCookiePrefix = cookiePrefix || configContext?.config.cookiePrefix || 'payload'
+  const resolvedCookiePrefix = cookiePrefix ?? configContext?.config.cookiePrefix ?? 'payload'
   const themeCookieKey = `${resolvedCookiePrefix}-theme`
   const contrastCookieKey = `${resolvedCookiePrefix}-high-contrast-mode`
   const themeTarget =
@@ -237,65 +245,13 @@ export const ThemeProvider: React.FC<{
   )
 }
 
+/** Reads the nearest theme context, or the default context when no provider is present. */
 export const useTheme = (): ThemeContext => use(Context) ?? initialContext
 
-const getThemeFromSystem = (): Theme => {
-  try {
-    return typeof window !== 'undefined' &&
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : defaultTheme
-  } catch {
-    return defaultTheme
-  }
-}
-
-const getThemeFromCookie = ({ cookieKey }: { cookieKey: string }): string | undefined => {
-  if (typeof document === 'undefined') {
-    return undefined
-  }
-
-  return document.cookie
-    .split('; ')
-    .find((row) => row.startsWith(`${cookieKey}=`))
-    ?.split('=')[1]
-}
-
-/** Priority: cookie, system preference, then disabled. */
-const resolveHighContrastMode = ({
-  highContrastModeFromCookie,
-  highContrastModeFromSystem,
-}: {
-  highContrastModeFromCookie?: unknown
-  highContrastModeFromSystem?: boolean
-}): boolean => {
-  if (highContrastModeFromCookie === 'true') {
-    return true
-  }
-
-  if (highContrastModeFromCookie === 'false') {
-    return false
-  }
-
-  return highContrastModeFromSystem ?? false
-}
-
-const getHighContrastModeFromSystem = (): boolean => {
-  try {
-    return (
-      typeof window !== 'undefined' &&
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-contrast: more)').matches
-    )
-  } catch {
-    return false
-  }
-}
-
-const isValidThemeParam = (value: null | string): value is 'auto' | Theme =>
-  value === 'auto' || value === 'light' || value === 'dark'
-
+/**
+ * Sets a current-origin preference cookie at `/`, with a lifetime in days.
+ * A negative lifetime expires the cookie.
+ */
 function setCookie(cname: string, cvalue: string, exdays: number) {
   const d = new Date()
   d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000)
