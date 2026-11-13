@@ -6,12 +6,14 @@ import { branchField, MAIN_BRANCH } from 'payload'
 import type { MongooseAdapter } from '../index.js'
 import type { CollectionModel, GlobalModel } from '../types.js'
 
+import { getBranchingIndexReplacements } from './getBranchingIndexReplacements.js'
+
 type BranchingMigrationArgs = {
   payload: Payload
   session?: ClientSession
 }
 
-type SyncableModel = CollectionModel | GlobalModel
+type BranchingModel = CollectionModel | GlobalModel
 
 const legacyMainFilter = {
   $or: [{ [branchField]: { $exists: false } }, { [branchField]: null }],
@@ -22,8 +24,9 @@ const legacyMainFilter = {
  *
  * Run this generated migration after enabling branching. Backfill errors stop the migration
  * before any indexes are removed, so uniqueness conflicts remain visible and recoverable.
- * Index synchronization removes indexes not declared in the configured Mongoose schema;
- * declare user-managed indexes in that schema before running this migration.
+ * All schema indexes are created and awaited before any legacy unique constraints are removed.
+ * Only recognized unscoped counterparts of configured branch-scoped unique indexes are dropped;
+ * unrelated indexes and indexes with custom options are preserved.
  */
 export const migrateBranching = async ({
   payload,
@@ -37,7 +40,7 @@ export const migrateBranching = async ({
   }
 
   const adapter = payload.db as MongooseAdapter
-  const modelsToSync = new Set<SyncableModel>()
+  const models = new Set<BranchingModel>()
   const updateOptions = session ? { session } : {}
 
   payload.logger.info({ msg: 'Starting branching data and index migration' })
@@ -55,7 +58,7 @@ export const migrateBranching = async ({
       { $set: { [branchField]: MAIN_BRANCH } },
       updateOptions,
     )
-    modelsToSync.add(collectionModel)
+    models.add(collectionModel)
 
     if (versionModel) {
       await versionModel.collection.updateMany(
@@ -63,7 +66,7 @@ export const migrateBranching = async ({
         { $set: { [branchField]: MAIN_BRANCH } },
         updateOptions,
       )
-      modelsToSync.add(versionModel)
+      models.add(versionModel)
     }
   }
 
@@ -76,7 +79,7 @@ export const migrateBranching = async ({
       { $set: { [branchField]: MAIN_BRANCH } },
       updateOptions,
     )
-    modelsToSync.add(adapter.globals)
+    models.add(adapter.globals)
 
     for (const globalSlug of branching.branchableGlobals) {
       const versionModel = adapter.versions[globalSlug]
@@ -87,13 +90,36 @@ export const migrateBranching = async ({
           { $set: { [branchField]: MAIN_BRANCH } },
           updateOptions,
         )
-        modelsToSync.add(versionModel)
+        models.add(versionModel)
       }
     }
   }
 
-  for (const model of modelsToSync) {
-    await model.syncIndexes()
+  // Build every replacement before removing any constraint, including across collections.
+  // Do not rely on autoIndex: it can be disabled or have already run before the backfill.
+  for (const model of models) {
+    await model.createIndexes()
+  }
+
+  const replacements = []
+
+  for (const collectionSlug of branching.branchableCollections) {
+    const model = adapter.collections[collectionSlug]!
+
+    replacements.push(
+      ...(await getBranchingIndexReplacements({
+        collection: payload.collections[collectionSlug]!.config,
+        model,
+        payload,
+      })),
+    )
+  }
+
+  for (const { indexName, model } of replacements) {
+    payload.logger.info({
+      msg: `Replacing legacy branching index "${indexName}" on "${model.collection.name}"`,
+    })
+    await model.collection.dropIndex(indexName)
   }
 
   payload.logger.info({ msg: 'Branching data and index migration completed successfully' })
