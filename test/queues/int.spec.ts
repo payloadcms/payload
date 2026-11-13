@@ -1,4 +1,5 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
+import type { Pool } from 'pg'
 
 import path from 'path'
 import {
@@ -972,6 +973,45 @@ describe('Queues - Payload', () => {
       await payload.delete({ collection: 'simple', where: { id: { exists: true } } })
     })
 
+    const queueJobWithFailedLog = async () => {
+      const job = await payload.jobs.queue({
+        input: { message: 'joined lock race' },
+        queue,
+        task: 'CreateSimple',
+      })
+      const date = new Date().toISOString()
+      await payload.update({
+        id: job.id,
+        collection: 'payload-jobs',
+        data: {
+          log: [
+            {
+              completedAt: date,
+              error: { message: 'Earlier attempt failed' },
+              executedAt: date,
+              state: 'failed',
+              taskID: '1',
+              taskSlug: 'CreateSimple',
+            },
+          ],
+        },
+      })
+      return job
+    }
+
+    const waitForJobClaimLock = async (pool: Pool): Promise<boolean> => {
+      for (let i = 0; i < 200; i++) {
+        const result = await pool.query(
+          "SELECT 1 FROM pg_stat_activity WHERE wait_event_type = 'Lock' AND query LIKE 'update \"payload_jobs\"%'",
+        )
+        if (result.rowCount) {
+          return true
+        }
+        await wait(10)
+      }
+      return false
+    }
+
     it('should retry a contended batch before reporting the queue is empty', async () => {
       payload.config.jobs.deleteJobOnComplete = false
       await Promise.all(
@@ -1107,29 +1147,8 @@ describe('Queues - Payload', () => {
     it.runIf(process.env.PAYLOAD_DATABASE === 'postgres').each(['and', 'AND'])(
       'should recheck base eligibility after a joined SQL claim waits for a row lock (%s)',
       async (conjunction) => {
-        const job = await payload.jobs.queue({
-          input: { message: 'joined lock race' },
-          queue,
-          task: 'CreateSimple',
-        })
-        const date = new Date().toISOString()
-        await payload.update({
-          id: job.id,
-          collection: 'payload-jobs',
-          data: {
-            log: [
-              {
-                completedAt: date,
-                error: { message: 'Earlier attempt failed' },
-                executedAt: date,
-                state: 'failed',
-                taskID: '1',
-                taskSlug: 'CreateSimple',
-              },
-            ],
-          },
-        })
-        const pool = (payload.db as unknown as { pool: import('pg').Pool }).pool
+        const job = await queueJobWithFailedLog()
+        const pool = (payload.db as unknown as { pool: Pool }).pool
         const blocker = await pool.connect()
         let claiming: ReturnType<typeof payload.db.updateJobs> | undefined
         try {
@@ -1148,18 +1167,7 @@ describe('Queues - Payload', () => {
               ],
             },
           })
-          let waiting = false
-          for (let i = 0; i < 200; i++) {
-            const result = await pool.query(
-              "SELECT 1 FROM pg_stat_activity WHERE wait_event_type = 'Lock' AND query LIKE 'update \"payload_jobs\"%'",
-            )
-            if (result.rowCount) {
-              waiting = true
-              break
-            }
-            await wait(10)
-          }
-          expect(waiting).toBe(true)
+          expect(await waitForJobClaimLock(pool)).toBe(true)
           await blocker.query(
             'UPDATE payload_jobs SET processing = false, completed_at = NOW() WHERE id = $1',
             [job.id],
@@ -1182,29 +1190,8 @@ describe('Queues - Payload', () => {
     ])(
       'should recheck mixed joined OR eligibility after a row-lock wait ($conjunction, matching log: $matchingLog)',
       async ({ conjunction, matchingLog }) => {
-        const job = await payload.jobs.queue({
-          input: { message: 'joined lock race' },
-          queue,
-          task: 'CreateSimple',
-        })
-        const date = new Date().toISOString()
-        await payload.update({
-          id: job.id,
-          collection: 'payload-jobs',
-          data: {
-            log: [
-              {
-                completedAt: date,
-                error: { message: 'Earlier attempt failed' },
-                executedAt: date,
-                state: 'failed',
-                taskID: '1',
-                taskSlug: 'CreateSimple',
-              },
-            ],
-          },
-        })
-        const pool = (payload.db as unknown as { pool: import('pg').Pool }).pool
+        const job = await queueJobWithFailedLog()
+        const pool = (payload.db as unknown as { pool: Pool }).pool
         const blocker = await pool.connect()
         let claiming: ReturnType<typeof payload.db.updateJobs> | undefined
         try {
@@ -1228,18 +1215,7 @@ describe('Queues - Payload', () => {
               ],
             },
           })
-          let waiting = false
-          for (let i = 0; i < 200; i++) {
-            const result = await pool.query(
-              "SELECT 1 FROM pg_stat_activity WHERE wait_event_type = 'Lock' AND query LIKE 'update \"payload_jobs\"%'",
-            )
-            if (result.rowCount) {
-              waiting = true
-              break
-            }
-            await wait(10)
-          }
-          expect(waiting).toBe(true)
+          expect(await waitForJobClaimLock(pool)).toBe(true)
           await blocker.query('UPDATE payload_jobs SET total_tried = 1 WHERE id = $1', [job.id])
           await blocker.query('COMMIT')
           expect(await claiming).toHaveLength(matchingLog ? 1 : 0)
