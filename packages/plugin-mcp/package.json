@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-mcp",
-  "version": "4.0.0-beta.8",
+  "version": "4.0.0-beta.9",
   "description": "MCP (Model Context Protocol) capabilities with Payload",
   "keywords": [
     "mcp",
