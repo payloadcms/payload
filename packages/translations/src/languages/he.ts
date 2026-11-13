@@ -456,6 +456,7 @@ export const heTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'דרוס את נתוני השדה הקיימים',
     pageNotFound: 'הדף לא נמצא',
     pageNumberRange: 'הזינו מספר עמוד מ־1 עד {{totalPages}}.',
+    parentDocument: 'מסמך אב',
     password: 'סיסמה',
     pasteBelow: 'הדבק למטה',
     pasteField: 'הדבק שדה',

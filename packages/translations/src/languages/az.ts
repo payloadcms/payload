@@ -475,6 +475,7 @@ export const azTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Mövcud sahə məlumatlarını yenidən yazın',
     pageNotFound: 'Səhifə tapılmadı',
     pageNumberRange: '1 ilə {{totalPages}} arasında səhifə nömrəsi daxil edin.',
+    parentDocument: 'Üst sənəd',
     password: 'Şifrə',
     pasteBelow: 'Aşağı yapışdırın',
     pasteField: 'Sahəni yapışdır',

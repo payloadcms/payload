@@ -475,6 +475,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Sobrescrever dados de campo existentes',
     pageNotFound: 'Página não encontrada',
     pageNumberRange: 'Introduza um número de página de 1 a {{totalPages}}.',
+    parentDocument: 'Documento principal',
     password: 'Senha',
     pasteBelow: 'Colar abaixo',
     pasteField: 'Colar campo',

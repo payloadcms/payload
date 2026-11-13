@@ -470,6 +470,7 @@ export const slTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Prepišite obstoječe podatke polja',
     pageNotFound: 'Stran ni najdena',
     pageNumberRange: 'Vnesite številko strani od 1 do {{totalPages}}.',
+    parentDocument: 'Nadrejeni dokument',
     password: 'Geslo',
     pasteBelow: 'Prilepite spodaj',
     pasteField: 'Prilepi polje',

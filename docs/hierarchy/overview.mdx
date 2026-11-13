@@ -1044,3 +1044,20 @@ These actions affect hierarchy items only. Documents assigned to a folder or tag
 Structural updates run field and collection change hooks and preserve ordinary published content and pending drafts separately. Operation-level update hooks do not run for the internal draft/published repair. Reparenting non-leaf items with localized publication status (`versions.drafts.localizeStatus`) is not yet supported and fails before modifying children. Explicit cascade remains available. Use database transactions to roll back all child changes if a later hook fails.
 
 Existing applications that relied on recursive folder or tag deletion should explicitly choose `'cascade'` for those operations. This changes the default behavior of the v4 prerelease hierarchy API.
+
+## Nested document collections
+
+Use `nestedDocs: true` to give a content collection its own single-parent hierarchy. The editor adds a **Parent document** relationship in the sidebar. Folder and tag relationship fields remain independent of the document's parent.
+
+```ts
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  admin: { useAsTitle: 'title' },
+  nestedDocs: true,
+  fields: [{ name: 'title', type: 'text', required: true }],
+}
+```
+
+The parent relationship defaults to `_h_parent`. Use `nestedDocs: { parentFieldName: 'parentPage' }` to choose another field name. The parent relationship cannot be localized or have multiple values. Existing single-value parent fields may omit `hasMany`. Only one of `nestedDocs`, `hierarchy`, `folders`, and `tags` can be configured on a collection.
+
+Deletion and trash operations use the shared hierarchy behavior described above: reparent by default, with an explicit cascade choice per operation.

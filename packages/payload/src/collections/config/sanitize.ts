@@ -22,7 +22,11 @@ import {
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
-import { buildFoldersHierarchy, buildTagsHierarchy } from '../../hierarchy/presets.js'
+import {
+  buildFoldersHierarchy,
+  buildNestedDocsHierarchy,
+  buildTagsHierarchy,
+} from '../../hierarchy/presets.js'
 import { sanitizeHierarchyCollection } from '../../hierarchy/sanitizeHierarchyCollection.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { withLegacyCloudUploadFileData } from '../../uploads/fileVersioning/storedFiles.js'
@@ -103,13 +107,21 @@ export const sanitizeCollection = (
   // Convert folders/tags to hierarchy
   // /////////////////////////////////
 
-  const presetCount = [sanitized.folders, sanitized.tags, sanitized.hierarchy].filter(
-    Boolean,
-  ).length
+  const presetCount = [
+    sanitized.folders,
+    sanitized.tags,
+    sanitized.hierarchy,
+    sanitized.nestedDocs,
+  ].filter(Boolean).length
   if (presetCount > 1) {
     throw new Error(
-      `Collection "${sanitized.slug}": Only one of 'folders', 'tags', or 'hierarchy' can be specified`,
+      `Collection "${sanitized.slug}": Only one of 'folders', 'tags', 'hierarchy', or 'nestedDocs' can be specified`,
     )
+  }
+
+  if (sanitized.nestedDocs) {
+    sanitized.hierarchy = buildNestedDocsHierarchy({ config: sanitized.nestedDocs })
+    sanitized.nestedDocs = true
   }
 
   if (sanitized.folders) {

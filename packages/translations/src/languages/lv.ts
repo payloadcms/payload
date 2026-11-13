@@ -472,6 +472,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Pārrakstīt esošos datus',
     pageNotFound: 'Lapa nav atrasta',
     pageNumberRange: 'Ievadiet lapas numuru no 1 līdz {{totalPages}}.',
+    parentDocument: 'Vecākdokuments',
     password: 'Parole',
     pasteBelow: 'Ielīmēt zemāk',
     pasteField: 'Ielīmēt lauku',
