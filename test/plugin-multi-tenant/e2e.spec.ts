@@ -1,9 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import mongoose from 'mongoose'
 import * as path from 'path'
-import { wait } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
@@ -312,17 +311,6 @@ test.describe('Multi Tenant', () => {
   })
 
   test.describe('Single tenant selection', () => {
-    let connection: mongoose.Connection | undefined
-    const mongoURL =
-      process.env.MONGODB_URL ||
-      process.env.DATABASE_URL ||
-      'mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0'
-
-    test.afterEach(async () => {
-      await connection?.close()
-      connection = undefined
-    })
-
     test.beforeEach(async () => {
       const tenants = await payload.find({
         collection: tenantsSlug,
@@ -410,28 +398,18 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should let an admin assign the only tenant to a legacy document', async () => {
-      test.skip(
-        Boolean(process.env.PAYLOAD_DATABASE && process.env.PAYLOAD_DATABASE !== 'mongodb'),
-        'The legacy document fixture uses MongoDB',
-      )
-
       const item = await payload.find({
         collection: menuItemsSlug,
         overrideAccess: true,
         where: { name: { equals: 'Spicy Mac' } },
       })
       const itemID = String(item.docs[0]?.id)
-      connection = await mongoose.createConnection(mongoURL).asPromise()
-      if (!connection.db) {
-        throw new Error('MongoDB connection is unavailable')
-      }
+      // Simulate content created before tenant validation was installed.
+      const response = await page.request.post(
+        formatAdminURL({ apiRoute: '/api', path: `/unassign-tenant/${itemID}`, serverURL }),
+      )
 
-      // Simulate a document created before the plugin added tenant validation.
-      const result = await connection.db
-        .collection(menuItemsSlug)
-        .updateOne({ _id: new mongoose.Types.ObjectId(itemID) }, { $unset: { tenant: 1 } })
-
-      expect(result.matchedCount).toBe(1)
+      expect(response.ok()).toBeTruthy()
 
       await loginClientSide({ data: credentials.admin, page, serverURL })
       await page.goto(menuItemsURL.list)
