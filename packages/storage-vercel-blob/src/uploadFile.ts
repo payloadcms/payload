@@ -9,14 +9,27 @@ interface UploadFileArgs {
   cacheControlMaxAge?: number
   mimeType: string
   storageFilePath: string
+  /**
+   * Store ID for OIDC authentication. When no `token` is provided, @vercel/blob
+   * resolves OIDC credentials from the environment and uses this store ID.
+   */
+  storeId?: string
   tempFilePath?: string
-  token: string
+  /**
+   * Read/write token. When undefined, @vercel/blob resolves OIDC credentials
+   * from the environment instead.
+   */
+  token?: string
 }
 
 interface UploadFileResult {
   filename?: string
 }
 
+/**
+ * Uploads a file to Vercel Blob and returns the stored filename when a random
+ * suffix was added. Authenticates with `token`, or via OIDC when it is omitted.
+ */
 export async function uploadFile({
   access,
   addRandomSuffix,
@@ -24,6 +37,7 @@ export async function uploadFile({
   cacheControlMaxAge,
   mimeType,
   storageFilePath,
+  storeId,
   tempFilePath,
   token,
 }: UploadFileArgs): Promise<UploadFileResult> {
@@ -34,6 +48,7 @@ export async function uploadFile({
     allowOverwrite: true,
     cacheControlMaxAge,
     contentType: mimeType,
+    storeId,
     token,
   })
 
