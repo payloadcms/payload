@@ -1,13 +1,14 @@
 'use client'
 import type { ClientUploadSession } from 'payload'
 
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
 import {
   cancelUploadSession,
   listUploadSessions,
   resumeUploadSession,
+  UploadSessionClientError,
 } from '../../utilities/uploadWithSession.js'
 import { useConfig } from '../Config/index.js'
 import { useTranslation } from '../Translation/index.js'
@@ -40,9 +41,121 @@ export const useRecoverUploadSessions = ({
   const { t } = useTranslation()
   /** The user whose sessions were last offered, so each user is checked once. */
   const checkedUserIDRef = useRef<number | string | undefined>(undefined)
+  /** Recovery uploads in progress, stopped when the user changes. */
+  const recoveryControllersRef = useRef(new Map<string, AbortController>())
 
   const hasSegmentedCollections = config.collections.some(
     ({ upload }) => upload?.uploadInstructions?.supportsSegmentedUploads,
+  )
+
+  // Sessions belong to the user who started them, so a new user must not keep sending them.
+  useEffect(() => {
+    const recoveryControllers = recoveryControllersRef.current
+    const recoveringSessionIDs = recoveringSessionIDsRef.current
+
+    return () => {
+      for (const [sessionID, controller] of recoveryControllers) {
+        controller.abort()
+        recoveringSessionIDs.delete(sessionID)
+      }
+
+      recoveryControllers.clear()
+    }
+  }, [recoveringSessionIDsRef, userID])
+
+  const offerRecovery = useCallback(
+    function offer({
+      session,
+      wasFileMismatch,
+    }: {
+      session: ClientUploadSession
+      wasFileMismatch?: boolean
+    }) {
+      const sessionID = String(session.id)
+      const toastID = trackToast(`upload-session-recovery-${sessionID}`)
+
+      const resume = (file: File) => {
+        const controller = new AbortController()
+        const progress = createProgressToast({ id: toastID })
+
+        recoveryControllersRef.current.set(sessionID, controller)
+        recoveringSessionIDsRef.current.add(sessionID)
+
+        progress.show(t('upload:resumingFile', { filename: file.name }))
+
+        resumeUploadSession({
+          file,
+          onProgress: ({ loaded, total }) =>
+            progress.show(
+              t('upload:uploadingFileProgress', {
+                filename: file.name,
+                percent: Math.floor((loaded / total) * 100),
+              }),
+            ),
+          retries: getEntityConfig({ collectionSlug: session.collectionSlug })?.upload?.transfer
+            ?.retries,
+          session,
+          signal: controller.signal,
+          ...requestArgs,
+        })
+          .then(() => {
+            toast.dismiss(toastID)
+            return finishInBackground({ session })
+          })
+          .catch((err: unknown) => {
+            if (controller.signal.aborted) {
+              return
+            }
+
+            // The user picked the wrong file, so they can pick again.
+            if (err instanceof UploadSessionClientError && err.code === 'fileMismatch') {
+              offer({ session, wasFileMismatch: true })
+              return
+            }
+
+            toast.error(getErrorMessage(err), { id: toastID })
+          })
+          .finally(() => {
+            if (recoveryControllersRef.current.get(sessionID) === controller) {
+              recoveryControllersRef.current.delete(sessionID)
+              recoveringSessionIDsRef.current.delete(sessionID)
+            }
+          })
+      }
+
+      toast.warning(
+        t(session.hasIntent ? 'upload:uploadInterruptedWillSave' : 'upload:uploadInterrupted', {
+          filename: session.file.filename,
+        }),
+        {
+          id: toastID,
+          action: {
+            label: t('upload:selectFile'),
+            onClick: (event) => {
+              // Keeps the offer open while the picker is open, so cancelling it loses nothing.
+              event.preventDefault()
+              pickFile({ accept: session.file.mimeType, onPick: resume })
+            },
+          },
+          cancel: {
+            label: t('upload:cancelUpload'),
+            onClick: () =>
+              void cancelUploadSession({ id: session.id, ...requestArgs }).catch(() => {}),
+          },
+          description: wasFileMismatch ? t('upload:uploadFileMismatch') : undefined,
+          duration: Infinity,
+        },
+      )
+    },
+    [
+      finishInBackground,
+      getEntityConfig,
+      getErrorMessage,
+      recoveringSessionIDsRef,
+      requestArgs,
+      t,
+      trackToast,
+    ],
   )
 
   useEffect(() => {
@@ -73,70 +186,9 @@ export const useRecoverUploadSessions = ({
             continue
           }
 
-          const toastID = trackToast(`upload-session-recovery-${session.id}`)
-
-          toast.warning(
-            t(session.hasIntent ? 'upload:uploadInterruptedWillSave' : 'upload:uploadInterrupted', {
-              filename: session.file.filename,
-            }),
-            {
-              id: toastID,
-              action: {
-                label: t('upload:selectFile'),
-                onClick: () =>
-                  pickFile({
-                    accept: session.file.mimeType,
-                    onPick: (file) => {
-                      const progress = createProgressToast({ id: toastID })
-                      const sessionID = String(session.id)
-
-                      recoveringSessionIDsRef.current.add(sessionID)
-
-                      progress.show(t('upload:resumingFile', { filename: file.name }))
-
-                      resumeUploadSession({
-                        file,
-                        onProgress: ({ loaded, total }) =>
-                          progress.show(
-                            t('upload:uploadingFileProgress', {
-                              filename: file.name,
-                              percent: Math.floor((loaded / total) * 100),
-                            }),
-                          ),
-                        retries: getEntityConfig({ collectionSlug: session.collectionSlug })?.upload
-                          ?.transfer?.retries,
-                        session,
-                        ...requestArgs,
-                      })
-                        .then(() => {
-                          toast.dismiss(toastID)
-                          return finishInBackground({ session })
-                        })
-                        .catch((err: unknown) => toast.error(getErrorMessage(err), { id: toastID }))
-                        .finally(() => recoveringSessionIDsRef.current.delete(sessionID))
-                    },
-                  }),
-              },
-              cancel: {
-                label: t('upload:cancelUpload'),
-                onClick: () =>
-                  void cancelUploadSession({ id: session.id, ...requestArgs }).catch(() => {}),
-              },
-              duration: Infinity,
-            },
-          )
+          offerRecovery({ session })
         }
       })
       .catch(() => {})
-  }, [
-    finishInBackground,
-    getEntityConfig,
-    getErrorMessage,
-    hasSegmentedCollections,
-    recoveringSessionIDsRef,
-    requestArgs,
-    t,
-    trackToast,
-    userID,
-  ])
+  }, [finishInBackground, hasSegmentedCollections, offerRecovery, requestArgs, userID])
 }

@@ -350,6 +350,13 @@ export const useFormSubmission = ({
         })
         const { data, fields } = validation
         let { isValid } = validation
+        let overrides = {}
+
+        if (typeof overridesFromArgs === 'function') {
+          overrides = overridesFromArgs(fields)
+        } else if (typeof overridesFromArgs === 'object') {
+          overrides = overridesFromArgs
+        }
 
         // Document forms leave validation to the server, which would only answer after a large
         // upload finishes. Ask it now so field errors show immediately while the upload continues.
@@ -358,7 +365,8 @@ export const useFormSubmission = ({
 
         if (isValid && isWaitingOnUpload && !skipValidation) {
           const serverValidation = await getServerValidationErrors({
-            formState: serializableFormState,
+            // Validates what the save submits, such as the `_status` that Publish adds.
+            formState: applyOverridesToFormState({ formState: serializableFormState, overrides }),
           })
 
           // The save stops so the user can retry; the upload keeps going meanwhile.
@@ -379,14 +387,6 @@ export const useFormSubmission = ({
           errorToast(t('error:correctInvalidFields'))
           setIsSubmitted(true)
           return
-        }
-
-        let overrides = {}
-
-        if (typeof overridesFromArgs === 'function') {
-          overrides = overridesFromArgs(fields)
-        } else if (typeof overridesFromArgs === 'object') {
-          overrides = overridesFromArgs
         }
 
         // If submit handler comes through via props, run that
@@ -643,4 +643,20 @@ export const useFormSubmission = ({
     submitted: isSubmitted,
     successfulSubmitCount,
   }
+}
+
+const applyOverridesToFormState = ({
+  formState,
+  overrides,
+}: {
+  formState: FormState
+  overrides: object
+}): FormState => {
+  const formStateWithOverrides = { ...formState }
+
+  for (const [path, value] of Object.entries(overrides)) {
+    formStateWithOverrides[path] = { ...formState[path], value }
+  }
+
+  return formStateWithOverrides
 }

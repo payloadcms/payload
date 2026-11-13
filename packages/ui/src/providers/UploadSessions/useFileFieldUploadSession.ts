@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from '../../forms/Form/index.js'
 import { useDocumentInfo } from '../DocumentInfo/index.js'
 import { useSearchParams } from '../RouterAdapter/index.js'
-import { useUploadSessions } from './index.js'
+import { useOptionalUploadSessions } from './index.js'
 
 /**
  * Connects a document's file field to the upload coordinator: large files start uploading as soon
@@ -38,7 +38,10 @@ export const useFileFieldUploadSession = ({
 } => {
   const { id } = useDocumentInfo()
   const { getDataByPath } = useForm()
-  const uploadSessions = useUploadSessions()
+  // `Upload` is a public export, so it can render outside the Admin. Without the provider, files
+  // upload with the form as before.
+  const uploadSessions = useOptionalUploadSessions()
+  const canUseSessions = isEnabled && uploadSessions !== null
   /**
    * The context value changes when a save starts waiting on an upload. Effects read the latest
    * value from this ref so that change never looks like the form unmounting.
@@ -54,17 +57,17 @@ export const useFileFieldUploadSession = ({
   }, [])
   /** Counts file selections, so an attached upload that arrives after the user picked a file is dropped. */
   const selectionCountRef = useRef(0)
-  const adoptedSessionID = isEnabled ? searchParams.get('uploadSession') : null
+  const adoptedSessionID = canUseSessions ? searchParams.get('uploadSession') : null
 
   const onFileChange = useCallback(
     ({ file, isNewFile }: { file: File | null; isNewFile: boolean }) => {
-      if (!isEnabled) {
+      const uploadSessions = uploadSessionsRef.current
+
+      if (!canUseSessions || !uploadSessions) {
         return
       }
 
       selectionCountRef.current += 1
-
-      const uploadSessions = uploadSessionsRef.current
 
       if (sessionFileRef.current === file) {
         return
@@ -86,7 +89,7 @@ export const useFileFieldUploadSession = ({
           : null,
       )
     },
-    [collectionSlug, getDataByPath, id, isEnabled, setSessionFile],
+    [canUseSessions, collectionSlug, getDataByPath, id, setSessionFile],
   )
 
   const onAdopt = useCallback(
@@ -103,21 +106,23 @@ export const useFileFieldUploadSession = ({
   )
 
   useEffect(() => {
-    if (!adoptedSessionID || sessionFileRef.current) {
+    const uploadSessions = uploadSessionsRef.current
+
+    if (!adoptedSessionID || !uploadSessions || sessionFileRef.current) {
       return
     }
 
     let isCancelled = false
     const selectionCount = selectionCountRef.current
 
-    void uploadSessionsRef.current.adopt({ sessionID: adoptedSessionID }).then((placeholder) => {
+    void uploadSessions.adopt({ sessionID: adoptedSessionID }).then((placeholder) => {
       if (!placeholder || isCancelled) {
         return
       }
 
       // The user picked a file meanwhile. Detaching keeps the session recoverable.
       if (selectionCount !== selectionCountRef.current) {
-        uploadSessionsRef.current.detach({ file: placeholder })
+        uploadSessionsRef.current?.detach({ file: placeholder })
         return
       }
 
@@ -133,7 +138,7 @@ export const useFileFieldUploadSession = ({
   useEffect(
     () => () => {
       if (sessionFileRef.current) {
-        uploadSessionsRef.current.detach({ file: sessionFileRef.current })
+        uploadSessionsRef.current?.detach({ file: sessionFileRef.current })
       }
     },
     [],

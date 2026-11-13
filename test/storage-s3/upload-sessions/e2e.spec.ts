@@ -14,8 +14,9 @@ import { AdminUrlUtil } from '../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { ensureCompilationIsDone } from '../../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../../playwright.config.js'
-import { imagesTransformedSlug, videosSlug } from '../shared.js'
+import { imagesTransformedSlug, videosSlug, videosWithDraftsSlug } from '../shared.js'
 import { createTestBucket } from '../test-utils.js'
+import { draftOnlyTitlePrefix } from './collections/VideosWithDrafts.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -39,12 +40,14 @@ type UploadLog = {
 test.describe('storage-s3 upload sessions E2E', () => {
   let serverURL: string
   let videosURL: AdminUrlUtil
+  let videosWithDraftsURL: AdminUrlUtil
   let imagesURL: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
     videosURL = new AdminUrlUtil(serverURL, videosSlug)
+    videosWithDraftsURL = new AdminUrlUtil(serverURL, videosWithDraftsSlug)
     imagesURL = new AdminUrlUtil(serverURL, imagesTransformedSlug)
 
     await createTestBucket()
@@ -75,27 +78,39 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await rm(imagePath, { force: true })
   })
 
-  // Several tests slow S3 part uploads on purpose so they can act mid-upload.
+  // Several tests hold S3 part uploads on purpose so they can act mid-upload.
   test.beforeEach(() => {
     test.setTimeout(TEST_TIMEOUT_LONG)
   })
 
   /**
-   * Opens the create form in a fresh browser context with no leftover sessions. `partDelay`
-   * slows each S3 part upload so a test can act while the upload is still running.
+   * Opens the create form in a fresh browser context with no leftover sessions. `holdParts`
+   * stops every S3 part upload until the test calls `releaseParts`, so the upload is certain to
+   * be running when the test acts.
    */
   const openCreateForm = async ({
     browser,
-    partDelay = 0,
+    holdParts = false,
     url = videosURL.create,
   }: {
     browser: import('@playwright/test').Browser
-    partDelay?: number
+    holdParts?: boolean
     url?: string
-  }): Promise<{ context: BrowserContext; log: UploadLog; page: Page }> => {
+  }): Promise<{
+    context: BrowserContext
+    log: UploadLog
+    page: Page
+    releaseParts: () => void
+  }> => {
     const context = await browser.newContext()
     const page = await context.newPage()
     const log: UploadLog = { intentBodies: [], partPuts: 0, sessionBodies: [], sessionCalls: [] }
+    let releaseParts = () => {}
+    const partsReleased = holdParts
+      ? new Promise<void>((resolve) => {
+          releaseParts = resolve
+        })
+      : Promise.resolve()
 
     page.on('dialog', (dialog) => dialog.accept())
     page.on('request', (request) => {
@@ -119,10 +134,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
       async (route) => {
         if (route.request().method() === 'PUT') {
           log.partPuts++
-
-          if (partDelay) {
-            await new Promise((resolve) => setTimeout(resolve, partDelay))
-          }
+          await partsReleased
         }
 
         await route.continue()
@@ -141,7 +153,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
     })
     await gotoAndWaitForForm(page, url)
 
-    return { context, log, page }
+    return { context, log, page, releaseParts }
   }
 
   const pickFile = (page: Page) =>
@@ -193,13 +205,15 @@ test.describe('storage-s3 upload sessions E2E', () => {
   test('should wait for a running upload when saving, then save through the form', async ({
     browser,
   }) => {
-    const { context, log, page } = await openCreateForm({ browser, partDelay: 3000 })
+    const { context, log, page, releaseParts } = await openCreateForm({ browser, holdParts: true })
     const title = `Saved mid-upload ${Date.now()}`
 
     await pickFile(page)
     await page.getByLabel('Title').fill(title)
     await expect.poll(() => log.partPuts).toBeGreaterThan(0)
     await page.locator('#action-save').click()
+    await expect.poll(() => log.sessionCalls.some((call) => call.endsWith('/intent'))).toBe(true)
+    releaseParts()
 
     const doc = await expectVideo(title)
 
@@ -213,7 +227,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
   test('should report invalid fields on Save without waiting for the upload', async ({
     browser,
   }) => {
-    const { context, log, page } = await openCreateForm({ browser, partDelay: 4000 })
+    const { context, log, page, releaseParts } = await openCreateForm({ browser, holdParts: true })
 
     await pickFile(page)
     await expect.poll(() => log.partPuts).toBeGreaterThan(0)
@@ -222,6 +236,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
 
     await expect(page.locator('.field-error')).toBeVisible({ timeout: 2000 })
     expect(log.sessionCalls.some((call) => call.endsWith('/intent'))).toBe(false)
+    releaseParts()
 
     // The upload keeps running, so fixing the field and saving again still works.
     const title = `Fixed after validation ${Date.now()}`
@@ -234,8 +249,34 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await context.close()
   })
 
+  test('should check the published status on Publish without waiting for the upload', async ({
+    browser,
+  }) => {
+    const { context, log, page, releaseParts } = await openCreateForm({
+      browser,
+      holdParts: true,
+      url: videosWithDraftsURL.create,
+    })
+
+    // Valid as a draft, invalid once published.
+    const title = `${draftOnlyTitlePrefix} ${Date.now()}`
+
+    await pickFile(page)
+    await expect.poll(() => log.partPuts).toBeGreaterThan(0)
+
+    await page.getByLabel('Title').fill(title)
+    await page.locator('#action-save').click()
+
+    // The field error itself is not checked: a late form-state reply for the title can clear it.
+    await expect(page.getByText('Please correct invalid fields.')).toBeVisible()
+    expect(log.sessionCalls.some((call) => call.endsWith('/intent'))).toBe(false)
+
+    releaseParts()
+    await context.close()
+  })
+
   test('should finish the save in the background after navigating away', async ({ browser }) => {
-    const { context, log, page } = await openCreateForm({ browser, partDelay: 3000 })
+    const { context, log, page, releaseParts } = await openCreateForm({ browser, holdParts: true })
     const title = `Saved in background ${Date.now()}`
 
     await pickFile(page)
@@ -246,6 +287,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
 
     // Client-side navigation keeps the upload coordinator mounted.
     await page.getByRole('link', { name: 'Users' }).first().click()
+    releaseParts()
 
     await expectVideo(title)
     await expect(page.getByText('Upload finished and the document was saved.')).toBeVisible()
@@ -350,7 +392,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
   test('should lock the file name while the file uploads through a session', async ({
     browser,
   }) => {
-    const { context, log, page } = await openCreateForm({ browser, partDelay: 3000 })
+    const { context, log, page } = await openCreateForm({ browser, holdParts: true })
 
     await pickFile(page)
     await expect.poll(() => log.partPuts).toBeGreaterThan(0)
@@ -360,7 +402,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
   })
 
   test('should resume after a reload once the file is selected again', async ({ browser }) => {
-    const { context, log, page } = await openCreateForm({ browser, partDelay: 4000 })
+    const { context, log, page, releaseParts } = await openCreateForm({ browser, holdParts: true })
     const title = `Recovered after reload ${Date.now()}`
 
     await pickFile(page)
@@ -369,6 +411,8 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await page.locator('#action-save').click()
     await expect.poll(() => log.sessionCalls.some((call) => call.endsWith('/intent'))).toBe(true)
     await page.reload()
+    // Routes outlive the reload, so the resumed upload goes through the same gate.
+    releaseParts()
 
     const [chooser] = await Promise.all([
       page.waitForEvent('filechooser'),
@@ -386,7 +430,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
   test('should still warn about unsaved changes elsewhere while a save continues in the background', async ({
     browser,
   }) => {
-    const { context, log, page } = await openCreateForm({ browser, partDelay: 4000 })
+    const { context, log, page } = await openCreateForm({ browser, holdParts: true })
 
     await pickFile(page)
     await page.getByLabel('Title').fill(`Background ${Date.now()}`)
@@ -451,16 +495,22 @@ test.describe('storage-s3 upload sessions E2E', () => {
   test('should not offer to recover an upload another tab is still sending', async ({
     browser,
   }) => {
-    const { context, log, page } = await openCreateForm({ browser, partDelay: 3000 })
+    const { context, log, page } = await openCreateForm({ browser, holdParts: true })
 
     await pickFile(page)
     await expect.poll(() => log.partPuts).toBeGreaterThan(0)
 
     const otherTab = await context.newPage()
+    const sessionsListed = otherTab.waitForResponse(
+      (response) =>
+        response.request().method() === 'GET' &&
+        new URL(response.url()).pathname === '/api/payload-upload-sessions',
+    )
 
     await otherTab.goto(videosURL.list)
-    // Recovery waits briefly for other tabs to answer before showing anything.
-    await otherTab.waitForTimeout(2000)
+    await sessionsListed
+    // After listing, recovery gives other tabs 300 ms to answer before it offers anything.
+    await otherTab.waitForTimeout(1000)
 
     await expect(otherTab.getByText(/was interrupted/)).toHaveCount(0)
 
@@ -498,9 +548,9 @@ test.describe('storage-s3 upload sessions E2E', () => {
   test('should save a background-finished upload in the locale it was edited in', async ({
     browser,
   }) => {
-    const { context, log, page } = await openCreateForm({
+    const { context, log, page, releaseParts } = await openCreateForm({
       browser,
-      partDelay: 3000,
+      holdParts: true,
       url: `${imagesURL.create}?locale=de`,
     })
     const caption = `Hallo ${Date.now()}`
@@ -511,6 +561,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await page.locator('#action-save').click()
     await expect.poll(() => log.sessionCalls.some((call) => call.endsWith('/intent'))).toBe(true)
     await page.getByRole('link', { name: 'Users' }).first().click()
+    releaseParts()
 
     await expect(page.getByText('Upload finished and the document was saved.')).toBeVisible({
       timeout: 60_000,
@@ -573,21 +624,23 @@ test.describe('storage-s3 upload sessions E2E', () => {
   test('should offer to finish saving after a failed save instead of saving it on its own later', async ({
     browser,
   }) => {
-    const { context, log, page } = await openCreateForm({ browser, partDelay: 2000 })
+    const { context, log, page, releaseParts } = await openCreateForm({ browser, holdParts: true })
     const title = `Failed save ${Date.now()}`
 
-    await page.route(
-      (url) => url.pathname === `/api/${videosSlug}`,
-      (route) =>
-        route.request().method() === 'POST'
-          ? route.fulfill({ json: { errors: [{ message: 'Server unavailable' }] }, status: 500 })
-          : route.fallback(),
+    const isVideosCollectionURL = (url: URL) => url.pathname === `/api/${videosSlug}`
+
+    await page.route(isVideosCollectionURL, (route) =>
+      route.request().method() === 'POST'
+        ? route.fulfill({ json: { errors: [{ message: 'Server unavailable' }] }, status: 500 })
+        : route.fallback(),
     )
 
     await pickFile(page)
     await page.getByLabel('Title').fill(title)
     await expect.poll(() => log.partPuts).toBeGreaterThan(0)
     await page.locator('#action-save').click()
+    await expect.poll(() => log.sessionCalls.some((call) => call.endsWith('/intent'))).toBe(true)
+    releaseParts()
 
     // The upload finishes while the form is open, so the form saves and that save fails.
     await expect(page.getByText('Server unavailable')).toBeVisible({ timeout: 60_000 })
@@ -595,7 +648,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
       log.sessionCalls.some((call) => call.startsWith('DELETE ') && call.endsWith('/intent')),
     ).toBe(true)
 
-    await page.unroute((url) => url.pathname === `/api/${videosSlug}`)
+    await page.unroute(isVideosCollectionURL)
     await page.getByRole('link', { name: 'Users' }).first().click()
     await page.getByRole('button', { name: 'Leave anyway' }).click()
     await expect(page.getByRole('button', { name: 'Finish saving' })).toBeVisible()
@@ -609,7 +662,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
   })
 
   test('should cancel the session when the file is removed', async ({ browser }) => {
-    const { context, log, page } = await openCreateForm({ browser, partDelay: 3000 })
+    const { context, log, page } = await openCreateForm({ browser, holdParts: true })
 
     await pickFile(page)
     await expect
