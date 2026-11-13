@@ -28,6 +28,16 @@ Then, you could configure two different runner strategies:
 
 As mentioned above, you can queue jobs, but the jobs won't run unless a worker picks up your jobs and runs them. This can be done in four ways:
 
+### Multiple workers on the same queue
+
+The built-in MongoDB, PostgreSQL, Vercel Postgres, SQLite, and D1 adapters claim jobs conditionally, so competing runners only execute jobs they successfully claimed. This applies to queue runs and `runByID`, including when `jobs.runHooks` or `jobs.depth` is enabled. All workers must use a version containing this fix before relying on concurrent execution; an older worker can still claim a job incorrectly.
+
+Hooks retain their document transition and population behavior. A hook that sets `processing` to `false` can decline a claim; Payload keeps the reservation until the hook update finishes, then releases it. Avoid resetting a running job's `processing` field through a separate database or Local API operation, as that makes the job available to other runners.
+
+Custom database adapters must provide an atomic `updateJobs` implementation to offer the same guarantee. The optional v3 fallback remains available for compatibility, but does not make concurrent claims safe; use one runner with those adapters.
+
+Atomic claiming does not provide exactly-once external side effects. A task may run again after a retry, and a crashed worker can leave a job marked as processing. Make external writes idempotent, and only reset an abandoned claim after confirming its worker has stopped.
+
 ### Bin script (Recommended for Dedicated Servers)
 
 For dedicated servers, the recommended approach is to use Payload's bin script to run jobs. This creates a completely separate process from your Next.js server, making it easier to deploy, scale, and manage workers independently.

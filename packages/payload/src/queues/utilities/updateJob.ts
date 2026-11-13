@@ -1,11 +1,15 @@
-import type { BulkOperationResult, TypeWithID } from '../../collections/config/types.js'
+import type { BulkOperationResult } from '../../collections/config/types.js'
 import type { ManyOptions } from '../../collections/operations/local/update.js'
-import type { Find, FindArgs, PaginatedDocs, UpdateJobsArgs } from '../../database/types.js'
+import type { UpdateJobsArgs } from '../../database/types.js'
 import type { Job, JobLog } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 
+import { getDataLoader } from '../../collections/dataloader.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
 import { jobAfterRead, jobsCollectionSlug } from '../config/collection.js'
 import { getCurrentDate } from './getCurrentDate.js'
+import { clearJobClaim, registerJobClaim } from './jobClaim.js'
 
 type BaseArgs = {
   data: Partial<Job>
@@ -31,9 +35,6 @@ type ArgsWhere = {
 }
 
 type RunJobsArgs = (ArgsByID | ArgsWhere) & BaseArgs
-
-const pendingClaimHooksByReq = new WeakMap<object, Set<number | string>>()
-const patchedDbAdapters = new WeakSet<object>()
 
 /**
  * Convenience method for updateJobs by id
@@ -120,59 +121,6 @@ function isJobClaim(data: Partial<Job>): boolean {
 }
 
 /**
- * Ensures the initial `payload.db.find` performed by `payload.update` for a pre-claimed batch sees
- * `processing: false` on the claimed documents, so collection and field hooks (`beforeValidate`,
- * `beforeChange`, `afterChange`) observe the `false -> true` transition while the database rows
- * remain locked with `processing: true`.
- */
-function registerPendingClaimHooks(req: PayloadRequest, claimedIDs: (number | string)[]): void {
-  const db = req.payload?.db
-  if (!db || typeof db.find !== 'function') {
-    return
-  }
-
-  if (!patchedDbAdapters.has(db)) {
-    const originalFind = db.find.bind(db)
-
-    const wrappedFind: Find = async <T = TypeWithID>(
-      findArgs: FindArgs,
-    ): Promise<PaginatedDocs<T>> => {
-      const claimedSet =
-        findArgs?.collection === jobsCollectionSlug && findArgs?.req
-          ? pendingClaimHooksByReq.get(findArgs.req)
-          : undefined
-
-      if (claimedSet && findArgs.req) {
-        pendingClaimHooksByReq.delete(findArgs.req)
-      }
-
-      const findResult = await originalFind<T>(findArgs)
-
-      if (!claimedSet || !findResult?.docs?.length) {
-        return findResult
-      }
-
-      return {
-        ...findResult,
-        docs: findResult.docs.map((doc) =>
-          doc &&
-          typeof doc === 'object' &&
-          'id' in doc &&
-          claimedSet.has((doc as { id: number | string }).id)
-            ? ({ ...doc, processing: false } as T)
-            : doc,
-        ),
-      }
-    }
-
-    db.find = wrappedFind
-    patchedDbAdapters.add(db)
-  }
-
-  pendingClaimHooksByReq.set(req, new Set(claimedIDs))
-}
-
-/**
  * `payload.update` selects documents and then updates them one by one, which is not atomic.
  * When hooks or population are enabled, jobs are therefore claimed through the database adapter first,
  * and only the jobs this runner actually claimed are passed through `payload.update` so that the
@@ -205,17 +153,18 @@ async function claimJobsWithHooks({
   }
 
   const claimedIDs = claimedJobs.map((job) => job.id)
-  const claimReq = {
-    ...req,
-  } as PayloadRequest
+  const claimReq = isolateObjectProperty(req, ['transactionID', 'payloadDataLoader'])
+  delete claimReq.transactionID
+  claimReq.payloadDataLoader = getDataLoader(claimReq)
 
-  registerPendingClaimHooks(claimReq, claimedIDs)
+  const claimData = { ...data }
+  registerJobClaim(claimData, claimedIDs)
 
   let result: BulkOperationResult<any, any>
   try {
     result = await req.payload.update({
       collection: jobsCollectionSlug,
-      data,
+      data: claimData,
       depth,
       disableTransaction,
       limit: claimedIDs.length,
@@ -223,22 +172,39 @@ async function claimJobsWithHooks({
       where: { id: { in: claimedIDs } },
     } as ManyOptions<any, any>)
   } catch (error) {
-    await updateJobsInDatabase({
-      data: { processing: false },
-      req,
-      returning: false,
-      where: { id: { in: claimedIDs } },
-    })
+    try {
+      await updateJobsInDatabase({
+        data: { processing: false },
+        req,
+        returning: false,
+        where: { id: { in: claimedIDs } },
+      })
+    } catch (releaseError) {
+      req.payload.logger.error({
+        err: releaseError,
+        msg: 'Failed to release job claims after hook failure',
+      })
+    }
     throw error
   } finally {
-    pendingClaimHooksByReq.delete(claimReq)
+    clearJobClaim(claimData)
   }
 
   const erroredIDs = new Set((result?.errors ?? []).map((err: { id: number | string }) => err.id))
-  const updatedDocs = ((result?.docs as Job[] | undefined) ?? []).filter(
-    (doc) => !erroredIDs.has(doc.id) && doc.processing !== false,
-  )
-  const succeededIDs = new Set(updatedDocs.map((doc) => doc.id))
+  const claimedSet = new Set(claimedIDs)
+  const succeededIDs = new Set<number | string>()
+  const updatedDocs = ((result?.docs as Job[] | undefined) ?? []).filter((doc) => {
+    if (
+      !claimedSet.has(doc.id) ||
+      succeededIDs.has(doc.id) ||
+      erroredIDs.has(doc.id) ||
+      doc.processing !== true
+    ) {
+      return false
+    }
+    succeededIDs.add(doc.id)
+    return true
+  })
   const failedIDs = claimedIDs.filter((claimedID) => !succeededIDs.has(claimedID))
 
   if (failedIDs.length > 0) {
@@ -257,9 +223,7 @@ async function claimJobsWithHooks({
   // Preserve the processing order the jobs were claimed in
   const claimedOrder = new Map(claimedIDs.map((claimedID, index) => [claimedID, index]))
 
-  return updatedDocs.sort(
-    (a, b) => (claimedOrder.get(a.id) ?? 0) - (claimedOrder.get(b.id) ?? 0),
-  )
+  return updatedDocs.sort((a, b) => (claimedOrder.get(a.id) ?? 0) - (claimedOrder.get(b.id) ?? 0))
 }
 
 async function updateJobsInDatabase({
@@ -275,12 +239,11 @@ async function updateJobsInDatabase({
   sort?: Sort
   where?: Where
 } & Omit<BaseArgs, 'depth' | 'disableTransaction'>): Promise<Job[] | null> {
-  const jobReq = {
-    transactionID:
-      req.payload.db.name !== 'mongoose'
-        ? ((await req.payload.db.beginTransaction()) as string)
-        : undefined,
-  }
+  const jobReq = isolateObjectProperty(req, 'transactionID')
+  jobReq.transactionID =
+    req.payload.db.name !== 'mongoose'
+      ? ((await req.payload.db.beginTransaction()) as string)
+      : undefined
 
   if (typeof data.updatedAt === 'undefined') {
     // Ensure updatedAt date is always updated
@@ -303,10 +266,16 @@ async function updateJobsInDatabase({
         where: where as Where,
       }
 
-  const updatedJobs: Job[] | null = await req.payload.db.updateJobs(args)
+  let updatedJobs: Job[] | null
+  try {
+    updatedJobs = await req.payload.db.updateJobs(args)
 
-  if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
-    await req.payload.db.commitTransaction(jobReq.transactionID)
+    if (jobReq.transactionID) {
+      await req.payload.db.commitTransaction(jobReq.transactionID)
+    }
+  } catch (error) {
+    await killTransaction(jobReq)
+    throw error
   }
 
   if (returning === false || !updatedJobs?.length) {

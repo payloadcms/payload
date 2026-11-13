@@ -93,6 +93,10 @@ export const updateJobs: UpdateJobs = async function updateMany(
   }
 
   let result: Job[] = []
+  const claimedIDs: unknown[] = []
+  const isJobClaim =
+    data.processing === true &&
+    Object.keys(data).every((field) => field === 'processing' || field === 'updatedAt')
 
   try {
     if (id) {
@@ -155,6 +159,9 @@ export const updateJobs: UpdateJobs = async function updateMany(
 
         if (doc) {
           result.push(doc)
+          if (isJobClaim) {
+            claimedIDs.push(candidate._id)
+          }
         }
       }
 
@@ -163,6 +170,23 @@ export const updateJobs: UpdateJobs = async function updateMany(
       }
     }
   } catch (error) {
+    // Earlier per-document claims have not been returned to a runner yet. Release
+    // those known winners if a later write fails, so the batch can be retried.
+    // A caller-supplied transaction owns its rollback instead.
+    if (claimedIDs.length && !baseOptions.session) {
+      try {
+        await Model.updateMany(
+          { _id: { $in: claimedIDs }, processing: true },
+          { $set: { processing: false } },
+          baseOptions,
+        )
+      } catch (releaseError) {
+        this.payload.logger.error({
+          err: releaseError,
+          msg: 'Failed to release partial job claims',
+        })
+      }
+    }
     handleError({ collection: collectionConfig.slug, error, req })
   }
 

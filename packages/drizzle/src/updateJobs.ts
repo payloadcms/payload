@@ -1,12 +1,14 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
+import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 import type { UpdateJobs, Where } from 'payload'
 
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, eq, exists, sql } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
+import { buildQuery } from './queries/buildQuery.js'
 import { transformForWrite } from './transform/write/index.js'
 import { upsertRow } from './upsertRow/index.js'
 import { shouldUseOptimizedUpsertRow } from './upsertRow/shouldUseOptimizedUpsertRow.js'
@@ -65,8 +67,11 @@ export const updateJobs: UpdateJobs = async function updateMany(
     return returning === false ? null : [result]
   }
 
+  // Candidate reads and winner reads belong to this write, even with read replicas.
+  const db = getPrimaryDb(this, await getTransaction(this, req))
+  const jobAdapter = { ...this, drizzle: db } as DrizzleAdapter
   const jobs = await findMany({
-    adapter: this,
+    adapter: jobAdapter,
     collectionSlug: 'payload-jobs',
     fields: collection.flattenedFields,
     limit: id ? 1 : limit,
@@ -79,8 +84,6 @@ export const updateJobs: UpdateJobs = async function updateMany(
   if (!jobs.docs.length) {
     return []
   }
-
-  const db = getPrimaryDb(this, await getTransaction(this, req))
 
   if (isJobClaim(data)) {
     const _db = db as LibSQLDatabase
@@ -98,10 +101,40 @@ export const updateJobs: UpdateJobs = async function updateMany(
     }
 
     const jobIDs = jobs.docs.map((job) => job.id)
+    // Use the adapter's validated ID predicate builder, which also handles D1's
+    // bound-parameter limit for large batches.
+    const { where: candidateWhere } = buildQuery({
+      adapter: this,
+      fields: collection.flattenedFields,
+      tableName,
+      where: { id: { in: jobIDs } },
+    })
+    const { joins, where: claimWhere } = buildQuery({
+      adapter: this,
+      fields: collection.flattenedFields,
+      tableName,
+      where: whereToUse,
+    })
+    let claimCondition = claimWhere
+    if (joins.length) {
+      // Do not select the jobs table again inside this subquery: that would read
+      // its old statement snapshot after a PostgreSQL row-lock wait. Base-field
+      // references must stay correlated to the UPDATE's current tuple. Keeping
+      // all joins together also preserves conditions on the same related row.
+      let joinedClaimQuery: SQLiteSelect = _db
+        .select({ value: sql<number>`1` })
+        .from(sql`(select 1) as ${sql.identifier('job_claim')}`)
+        .$dynamic()
+
+      for (const join of joins) {
+        joinedClaimQuery = joinedClaimQuery[join.type ?? 'leftJoin'](join.table, join.condition)
+      }
+      claimCondition = exists(joinedClaimQuery.where(claimWhere))
+    }
     const claimedRows = await _db
       .update(table)
       .set(row)
-      .where(and(inArray(table.id, jobIDs), eq(table.processing, false)))
+      .where(and(candidateWhere, eq(table.processing, false), claimCondition))
       .returning({ id: table.id })
 
     if (claimedRows.length) {
@@ -112,8 +145,56 @@ export const updateJobs: UpdateJobs = async function updateMany(
       return null
     }
 
-    const claimedIDs = new Set(claimedRows.map(({ id }) => id))
-    return jobs.docs.filter((job) => claimedIDs.has(job.id)).map((job) => ({ ...job, ...data }))
+    if (!claimedRows.length) {
+      return []
+    }
+
+    // Return the current job and related data, rather than the candidate snapshot.
+    let claimedJobs: Awaited<ReturnType<typeof findMany>>
+    try {
+      claimedJobs = await findMany({
+        adapter: jobAdapter,
+        collectionSlug: 'payload-jobs',
+        fields: collection.flattenedFields,
+        limit: claimedRows.length,
+        pagination: false,
+        req,
+        tableName,
+        where: { id: { in: claimedRows.map(({ id }) => id) } },
+      })
+    } catch (error) {
+      // Transactional callers roll back the claim. SQLite/D1 may run without
+      // transactions, so release known winners that were never returned to a runner.
+      if (!req?.transactionID) {
+        try {
+          await _db
+            .update(table)
+            .set({ processing: false })
+            .where(
+              and(
+                buildQuery({
+                  adapter: this,
+                  fields: collection.flattenedFields,
+                  tableName,
+                  where: { id: { in: claimedRows.map(({ id }) => id) } },
+                }).where,
+                eq(table.processing, true),
+              ),
+            )
+          markWrite(this)
+        } catch (releaseError) {
+          this.payload.logger.error({
+            err: releaseError,
+            msg: 'Failed to release unread job claims',
+          })
+        }
+      }
+      throw error
+    }
+    const claimOrder = new Map<number | string, number>(jobIDs.map((id, index) => [id, index]))
+    return claimedJobs.docs.sort(
+      (a, b) => (claimOrder.get(a.id) ?? 0) - (claimOrder.get(b.id) ?? 0),
+    )
   }
 
   const results = []
