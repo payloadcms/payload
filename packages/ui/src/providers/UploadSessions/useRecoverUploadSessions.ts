@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 
 import {
   cancelUploadSession,
+  isUploadSessionGoneError,
   listUploadSessions,
   resumeUploadSession,
   UploadSessionClientError,
@@ -65,11 +66,12 @@ export const useRecoverUploadSessions = ({
 
   const offerRecovery = useCallback(
     function offer({
+      description,
       session,
-      wasFileMismatch,
     }: {
+      /** Why the offer shows again, such as a failed upload or cancel. */
+      description?: string
       session: ClientUploadSession
-      wasFileMismatch?: boolean
     }) {
       const sessionID = String(session.id)
       const toastID = trackToast(`upload-session-recovery-${sessionID}`)
@@ -107,13 +109,19 @@ export const useRecoverUploadSessions = ({
               return
             }
 
-            // The user picked the wrong file, so they can pick again.
-            if (err instanceof UploadSessionClientError && err.code === 'fileMismatch') {
-              offer({ session, wasFileMismatch: true })
+            if (isUploadSessionGoneError(err)) {
+              toast.error(getErrorMessage(err), { id: toastID })
               return
             }
 
-            toast.error(getErrorMessage(err), { id: toastID })
+            // The session still exists, so the user can pick the file again.
+            offer({
+              description:
+                err instanceof UploadSessionClientError && err.code === 'fileMismatch'
+                  ? t('upload:uploadFileMismatch')
+                  : getErrorMessage(err),
+              session,
+            })
           })
           .finally(() => {
             if (recoveryControllersRef.current.get(sessionID) === controller) {
@@ -140,9 +148,13 @@ export const useRecoverUploadSessions = ({
           cancel: {
             label: t('upload:cancelUpload'),
             onClick: () =>
-              void cancelUploadSession({ id: session.id, ...requestArgs }).catch(() => {}),
+              void cancelUploadSession({ id: session.id, ...requestArgs }).catch((err: unknown) => {
+                if (!isUploadSessionGoneError(err)) {
+                  offer({ description: getErrorMessage(err), session })
+                }
+              }),
           },
-          description: wasFileMismatch ? t('upload:uploadFileMismatch') : undefined,
+          description,
           duration: Infinity,
         },
       )

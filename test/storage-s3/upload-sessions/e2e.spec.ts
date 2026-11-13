@@ -32,6 +32,8 @@ const imagePath = path.join(os.tmpdir(), `upload-sessions-e2e-${process.pid}.png
 
 type UploadLog = {
   intentBodies: Record<string, unknown>[]
+  /** Set once storage confirms all parts. A counted part PUT can still be sending. */
+  isStorageComplete: boolean
   partPuts: number
   sessionBodies: Record<string, unknown>[]
   sessionCalls: string[]
@@ -104,7 +106,13 @@ test.describe('storage-s3 upload sessions E2E', () => {
   }> => {
     const context = await browser.newContext()
     const page = await context.newPage()
-    const log: UploadLog = { intentBodies: [], partPuts: 0, sessionBodies: [], sessionCalls: [] }
+    const log: UploadLog = {
+      intentBodies: [],
+      isStorageComplete: false,
+      partPuts: 0,
+      sessionBodies: [],
+      sessionCalls: [],
+    }
     let releaseParts = () => {}
     const partsReleased = holdParts
       ? new Promise<void>((resolve) => {
@@ -128,6 +136,18 @@ test.describe('storage-s3 upload sessions E2E', () => {
         }
       }
     })
+    page.on('response', (response) => {
+      const { pathname } = new URL(response.url())
+
+      if (
+        response.request().method() === 'POST' &&
+        pathname.startsWith('/api/payload-upload-sessions') &&
+        pathname.endsWith('/storage') &&
+        response.ok()
+      ) {
+        log.isStorageComplete = true
+      }
+    })
 
     await page.route(
       (url) => url.host === s3Host,
@@ -141,19 +161,24 @@ test.describe('storage-s3 upload sessions E2E', () => {
       },
     )
 
-    await page.goto(videosURL.create)
-    await page.evaluate(async () => {
-      const { docs } = await fetch('/api/payload-upload-sessions').then((res) => res.json())
-
-      await Promise.all(
-        docs.map(({ id }: { id: string }) =>
-          fetch(`/api/payload-upload-sessions/${id}`, { method: 'DELETE' }),
-        ),
-      )
-    })
+    // The form shows only after auto-login, so the auth cookie is set for the cleanup requests.
+    await gotoAndWaitForForm(page, videosURL.create)
+    await deleteLeftoverSessions(context)
     await gotoAndWaitForForm(page, url)
 
     return { context, log, page, releaseParts }
+  }
+
+  /** Uses the context's request client, so the deletions stay out of the page's request log. */
+  const deleteLeftoverSessions = async (context: BrowserContext) => {
+    const sessionsURL = `${serverURL}/api/payload-upload-sessions`
+    const response = await context.request.get(sessionsURL)
+
+    expect(response.ok()).toBe(true)
+
+    const { docs } = (await response.json()) as { docs: { id: string }[] }
+
+    await Promise.all(docs.map(({ id }) => context.request.delete(`${sessionsURL}/${id}`)))
   }
 
   const pickFile = (page: Page) =>
@@ -193,7 +218,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
     const title = `Saved after upload ${Date.now()}`
 
     await pickFile(page)
-    await expect.poll(() => log.partPuts).toBe(3)
+    await expect.poll(() => log.isStorageComplete).toBe(true)
     await page.getByLabel('Title').fill(title)
     await page.locator('#action-save').click()
 
@@ -301,7 +326,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
     const title = `Finished from link ${Date.now()}`
 
     await pickFile(page)
-    await expect.poll(() => log.partPuts).toBe(3)
+    await expect.poll(() => log.isStorageComplete).toBe(true)
     await page.getByRole('link', { name: 'Users' }).first().click()
     await page.getByRole('button', { name: 'Leave anyway' }).click()
     await page.getByRole('button', { name: 'Finish saving' }).click()
@@ -325,7 +350,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
     const title = `Finished from link twice ${Date.now()}`
 
     await pickFile(page)
-    await expect.poll(() => log.partPuts).toBe(3)
+    await expect.poll(() => log.isStorageComplete).toBe(true)
 
     for (let visit = 0; visit < 2; visit++) {
       await page.getByRole('link', { name: 'Users' }).first().click()
@@ -349,7 +374,7 @@ test.describe('storage-s3 upload sessions E2E', () => {
     const { context, log, page } = await openCreateForm({ browser })
 
     await pickFile(page)
-    await expect.poll(() => log.partPuts).toBe(3)
+    await expect.poll(() => log.isStorageComplete).toBe(true)
     await page.getByRole('link', { name: 'Users' }).first().click()
     await page.getByRole('button', { name: 'Leave anyway' }).click()
 
@@ -458,6 +483,12 @@ test.describe('storage-s3 upload sessions E2E', () => {
     const { context, log, page } = await openCreateForm({ browser })
 
     // The server creates the session, but its response reaches the browser only after removal.
+    let isSessionCreated = false
+    let releaseCreation = () => {}
+    const creationReleased = new Promise<void>((resolve) => {
+      releaseCreation = resolve
+    })
+
     await page.route('**/api/payload-upload-sessions', async (route) => {
       if (route.request().method() !== 'POST') {
         return route.fallback()
@@ -465,15 +496,15 @@ test.describe('storage-s3 upload sessions E2E', () => {
 
       const response = await route.fetch()
 
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      isSessionCreated = true
+      await creationReleased
       await route.fulfill({ response }).catch(() => {})
     })
 
     await pickFile(page)
-    await expect
-      .poll(() => log.sessionCalls.includes('POST /api/payload-upload-sessions'))
-      .toBe(true)
+    await expect.poll(() => isSessionCreated).toBe(true)
     await page.getByRole('button', { name: 'Cancel', exact: true }).first().click()
+    releaseCreation()
 
     await expect
       .poll(() => log.sessionCalls.some((call) => call.startsWith('DELETE ')), { timeout: 10_000 })

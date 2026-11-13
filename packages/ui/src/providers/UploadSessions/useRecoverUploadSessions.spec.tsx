@@ -5,6 +5,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { renderHook } from 'vitest-browser-react'
 
 import {
+  cancelUploadSession,
+  isUploadSessionGoneError,
   listUploadSessions,
   resumeUploadSession,
   UploadSessionClientError,
@@ -19,6 +21,7 @@ vi.mock('sonner', () => ({
 vi.mock(import('../../utilities/uploadWithSession.js'), async (importOriginal) => ({
   ...(await importOriginal()),
   cancelUploadSession: vi.fn(),
+  isUploadSessionGoneError: vi.fn(),
   listUploadSessions: vi.fn(),
   resumeUploadSession: vi.fn(),
 }))
@@ -79,20 +82,28 @@ const renderRecovery = async () => {
   return { hook, props, recoveringSessionIDsRef }
 }
 
+type ToastButton = { onClick: (event: MouseEvent) => void }
+
+const getLastOffer = () => vi.mocked(toast.warning).mock.calls.at(-1)![1]!
+
 /** Clicks "Select file" on the recovery offer that was shown last. */
 const clickSelectFile = () => {
-  const options = vi.mocked(toast.warning).mock.calls.at(-1)![1]!
-  const action = options.action as { onClick: (event: MouseEvent) => void }
   const event = new MouseEvent('click', { cancelable: true })
 
-  action.onClick(event)
+  ;(getLastOffer().action as ToastButton).onClick(event)
 
   return event
+}
+
+/** Clicks "Cancel upload" on the recovery offer that was shown last. */
+const clickCancel = () => {
+  ;(getLastOffer().cancel as ToastButton).onClick(new MouseEvent('click'))
 }
 
 describe('useRecoverUploadSessions', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(isUploadSessionGoneError).mockReturnValue(false)
     vi.mocked(listUploadSessions).mockResolvedValue([session])
     vi.mocked(pickFile).mockImplementation(({ onPick }) => onPick(pickedFile))
   })
@@ -117,6 +128,57 @@ describe('useRecoverUploadSessions', () => {
       id: `upload-session-recovery-${session.id}`,
       action: { label: 'upload:selectFile' },
     })
+  })
+
+  test('should offer recovery again with the error when a recovery upload fails', async () => {
+    const err = new Error('Network down')
+
+    vi.mocked(resumeUploadSession).mockRejectedValue(err)
+    await renderRecovery()
+
+    clickSelectFile()
+
+    await expect.poll(() => vi.mocked(toast.warning).mock.calls.length).toBe(2)
+    expect(getLastOffer()).toMatchObject({
+      action: { label: 'upload:selectFile' },
+      description: String(err),
+    })
+    expect(toast.error).not.toHaveBeenCalled()
+  })
+
+  test('should show an error without a new offer when the session no longer exists', async () => {
+    vi.mocked(resumeUploadSession).mockRejectedValue(new Error('Not found'))
+    vi.mocked(isUploadSessionGoneError).mockReturnValue(true)
+    await renderRecovery()
+
+    clickSelectFile()
+
+    await expect.poll(() => vi.mocked(toast.error).mock.calls.length).toBe(1)
+    expect(toast.warning).toHaveBeenCalledTimes(1)
+  })
+
+  test('should offer recovery again with the error when cancelling fails', async () => {
+    const err = new Error('Network down')
+
+    vi.mocked(cancelUploadSession).mockRejectedValue(err)
+    await renderRecovery()
+
+    clickCancel()
+
+    await expect.poll(() => vi.mocked(toast.warning).mock.calls.length).toBe(2)
+    expect(getLastOffer()).toMatchObject({ description: String(err) })
+  })
+
+  test('should not offer recovery again when the cancelled session no longer exists', async () => {
+    vi.mocked(cancelUploadSession).mockRejectedValue(new Error('Not found'))
+    vi.mocked(isUploadSessionGoneError).mockReturnValue(true)
+    await renderRecovery()
+
+    clickCancel()
+
+    await expect.poll(() => vi.mocked(isUploadSessionGoneError).mock.calls.length).toBe(1)
+    expect(toast.warning).toHaveBeenCalledTimes(1)
+    expect(toast.error).not.toHaveBeenCalled()
   })
 
   test('should stop a recovery upload when the user changes', async () => {

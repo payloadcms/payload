@@ -57,6 +57,8 @@ export const useFileFieldUploadSession = ({
   }, [])
   /** Counts file selections, so an attached upload that arrives after the user picked a file is dropped. */
   const selectionCountRef = useRef(0)
+  /** Set only after a real unmount. A StrictMode re-mount sets it back to `false`. */
+  const isUnmountedRef = useRef(false)
   const adoptedSessionID = canUseSessions ? searchParams.get('uploadSession') : null
 
   const onFileChange = useCallback(
@@ -116,7 +118,16 @@ export const useFileFieldUploadSession = ({
     const selectionCount = selectionCountRef.current
 
     void uploadSessions.adopt({ sessionID: adoptedSessionID }).then((placeholder) => {
-      if (!placeholder || isCancelled) {
+      if (!placeholder) {
+        return
+      }
+
+      if (isCancelled) {
+        // A re-run of this effect gets the same placeholder and applies it. A closed form never
+        // shows it, so it is detached and the upload can still be finished.
+        if (isUnmountedRef.current) {
+          uploadSessionsRef.current?.detach({ file: placeholder })
+        }
         return
       }
 
@@ -135,14 +146,17 @@ export const useFileFieldUploadSession = ({
     }
   }, [adoptedSessionID, onAdopt, setSessionFile])
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    isUnmountedRef.current = false
+
+    return () => {
+      isUnmountedRef.current = true
+
       if (sessionFileRef.current) {
         uploadSessionsRef.current?.detach({ file: sessionFileRef.current })
       }
-    },
-    [],
-  )
+    }
+  }, [])
 
   return { hasUploadSession, onFileChange }
 }
