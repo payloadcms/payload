@@ -1,10 +1,7 @@
-const imports = `import { migrateLocalizeStatus } from '@payloadcms/db-postgres/migration-utils'`
-const upSQL = `   await migrateLocalizeStatus({
-        db,
-        payload,
-        req,
-        sql,
-        })
-`
+import type { DynamicMigrationTemplate } from 'payload'
 
-export { imports, upSQL }
+import { buildDynamicPredefinedLocalizeStatusMigration } from '@payloadcms/drizzle'
+
+export const dynamic: DynamicMigrationTemplate = buildDynamicPredefinedLocalizeStatusMigration({
+  packageName: '@payloadcms/db-postgres',
+})

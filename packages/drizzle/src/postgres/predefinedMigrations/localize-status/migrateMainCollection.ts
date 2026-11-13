@@ -50,7 +50,11 @@ export async function migrateMainCollectionStatus({
         `,
       })
 
-      const status = latestVersionStatus.rows[0]?._status || 'draft'
+      const status = latestVersionStatus.rows[0]?._status
+
+      if (!status) {
+        continue
+      }
 
       // Update the main collection's locales table with this status
       await db.execute({
