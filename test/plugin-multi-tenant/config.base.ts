@@ -91,6 +91,7 @@ export const baseConfig: Partial<Config> = {
           collection: menuItemsSlug,
           id: String(req.routeParams?.id),
           data: { tenant: null },
+          returning: false,
         })
 
         return Response.json({ success: true })
