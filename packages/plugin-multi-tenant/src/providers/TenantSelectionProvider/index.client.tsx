@@ -6,6 +6,8 @@ import { toast, useAuth, useConfig, useRouter } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React, { createContext } from 'react'
 
+import type { GetTenantOptionsResponse } from '../../endpoints/getTenantOptionsEndpoint.js'
+
 import { generateCookie } from '../../utilities/generateCookie.js'
 import { shouldRefreshTenantSelection } from '../../utilities/shouldRefreshTenantSelection.js'
 
@@ -188,10 +190,7 @@ export const TenantSelectionProviderClient = ({
         },
       )
 
-      const result = (await req.json()) as {
-        hasAccessToAllTenants: boolean
-        tenantOptions: OptionObject[]
-      }
+      const result = (await req.json()) as GetTenantOptionsResponse
 
       if (result.tenantOptions && userID) {
         setHasAccessToAllTenants(result.hasAccessToAllTenants)

@@ -1,10 +1,15 @@
-import type { Endpoint } from 'payload'
+import type { Endpoint, OptionObject } from 'payload'
 
 import { APIError } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 
 import { getTenantOptions } from '../utilities/getTenantOptions.js'
+
+export type GetTenantOptionsResponse = {
+  hasAccessToAllTenants: boolean
+  tenantOptions: OptionObject[]
+}
 
 export const getTenantOptionsEndpoint = ({
   tenantsArrayFieldName,
@@ -37,12 +42,9 @@ export const getTenantOptionsEndpoint = ({
       user,
     })
 
-    return new Response(
-      JSON.stringify({
-        hasAccessToAllTenants,
-        tenantOptions,
-      }),
-    )
+    const result: GetTenantOptionsResponse = { hasAccessToAllTenants, tenantOptions }
+
+    return new Response(JSON.stringify(result))
   },
   method: 'get',
   path: '/populate-tenant-options',
