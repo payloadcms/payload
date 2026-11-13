@@ -68,8 +68,8 @@
     "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/"
   },
   "dependencies": {
-    "@sentry/nextjs": "^11.11.0",
-    "@sentry/types": "^9.5.0"
+    "@sentry/core": "^11.12.0",
+    "@sentry/nextjs": "^11.12.0"
   },
   "devDependencies": {
     "@types/react": "19.3.0",
