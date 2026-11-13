@@ -276,10 +276,10 @@
       "types": "./src/utilities/getRequestEmbed.ts",
       "default": "./src/utilities/getRequestEmbed.ts"
     },
-    "./utilities/theme": {
-      "import": "./src/utilities/theme.ts",
-      "types": "./src/utilities/theme.ts",
-      "default": "./src/utilities/theme.ts"
+    "./utilities/getRequestTheme": {
+      "import": "./src/utilities/getRequestTheme.ts",
+      "types": "./src/utilities/getRequestTheme.ts",
+      "default": "./src/utilities/getRequestTheme.ts"
     },
     "./utilities/getRouteWithoutAdmin": {
       "import": "./src/utilities/getRouteWithoutAdmin.ts",

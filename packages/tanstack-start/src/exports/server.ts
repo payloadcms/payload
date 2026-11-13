@@ -17,4 +17,4 @@ export { handleGraphQL } from '../routes/graphql/handler.server.js'
 export { handleAPIRoute } from '../routes/rest/handler.server.js'
 export { getRequestI18n } from '../utilities/getRequestI18n.server.js'
 /** @internal */
-export { getRequestTheme } from '@payloadcms/ui/utilities/theme'
+export { getRequestTheme } from '@payloadcms/ui/utilities/getRequestTheme'
