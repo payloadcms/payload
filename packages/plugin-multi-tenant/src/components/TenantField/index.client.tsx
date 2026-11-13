@@ -60,6 +60,10 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
       !fieldArgs.field.admin?.hidden &&
       !fieldArgs.field.hidden) ||
     debug
+  const hasTenantValue = Array.isArray(value) ? value.length > 0 : Boolean(value)
+  const hasPendingTenantValue = Array.isArray(modalValue)
+    ? modalValue.length > 0
+    : Boolean(modalValue)
 
   function getTenantIDToSelect({
     selectedTenantID,
@@ -133,7 +137,7 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
     if (
       showField &&
       ((!isFormValid && showError) ||
-        (!value && !modalValue && (!selectedTenantID || hasAccessToAllTenants)))
+        (!hasTenantValue && !hasPendingTenantValue && (!selectedTenantID || hasAccessToAllTenants)))
     ) {
       openModal(assignTenantModalSlug)
     }
@@ -142,11 +146,11 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
     isEditManyModalOpen,
     isFormValid,
     hasAccessToAllTenants,
-    modalValue,
+    hasPendingTenantValue,
+    hasTenantValue,
     showError,
     showField,
     openModal,
-    value,
     docID,
     selectedTenantID,
     unique,

@@ -312,6 +312,17 @@ test.describe('Multi Tenant', () => {
   })
 
   test.describe('Single tenant selection', () => {
+    let connection: mongoose.Connection | undefined
+    const mongoURL =
+      process.env.MONGODB_URL ||
+      process.env.DATABASE_URL ||
+      'mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0'
+
+    test.afterEach(async () => {
+      await connection?.close()
+      connection = undefined
+    })
+
     test.beforeEach(async () => {
       const tenants = await payload.find({
         collection: tenantsSlug,
@@ -347,6 +358,56 @@ test.describe('Multi Tenant', () => {
           (await page.context().cookies()).find(({ name }) => name === 'payload-tenant'),
         )
         .toBeUndefined()
+    })
+
+    test('should prompt for a tenant when a hasMany tenant field is empty', async () => {
+      test.skip(
+        Boolean(process.env.PAYLOAD_DATABASE && process.env.PAYLOAD_DATABASE !== 'mongodb'),
+        'The empty tenant fixture uses MongoDB',
+      )
+
+      const { docs: tenants } = await payload.find({
+        collection: tenantsSlug,
+        overrideAccess: true,
+      })
+      const post = await payload.create({
+        collection: multiTenantPostsSlug,
+        data: { title: 'Legacy post', tenant: [tenants[0].id], _status: 'published' },
+        overrideAccess: true,
+      })
+      connection = await mongoose.createConnection(mongoURL).asPromise()
+      if (!connection.db) {
+        throw new Error('MongoDB connection is unavailable')
+      }
+      await connection.db
+        .collection(multiTenantPostsSlug)
+        .updateOne({ _id: new mongoose.Types.ObjectId(String(post.id)) }, { $set: { tenant: [] } })
+      await connection.db
+        .collection(`_${multiTenantPostsSlug}_versions`)
+        .updateMany(
+          { parent: new mongoose.Types.ObjectId(String(post.id)) },
+          { $set: { 'version.tenant': [] } },
+        )
+
+      await expect
+        .poll(async () => {
+          const persistedPost = await payload.find({
+            collection: multiTenantPostsSlug,
+            overrideAccess: true,
+            draft: true,
+            where: { id: { equals: String(post.id) } },
+          })
+
+          return persistedPost.docs[0]?.tenant
+        })
+        .toEqual([])
+
+      const postsURL = new AdminUrlUtil(serverURL, multiTenantPostsSlug)
+
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await page.goto(postsURL.edit(post.id))
+
+      await expect(page.locator('#assign-tenant-field-modal')).toBeVisible()
     })
 
     test('should keep the only tenant clearable after selection and navigation', async () => {
@@ -395,26 +456,17 @@ test.describe('Multi Tenant', () => {
         where: { name: { equals: 'Spicy Mac' } },
       })
       const itemID = String(item.docs[0]?.id)
-      const mongoURL =
-        process.env.MONGODB_URL ||
-        process.env.DATABASE_URL ||
-        'mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0'
-      const connection = await mongoose.createConnection(mongoURL).asPromise()
-
-      try {
-        if (!connection.db) {
-          throw new Error('MongoDB connection is unavailable')
-        }
-
-        // Simulate a document created before the plugin added tenant validation.
-        const result = await connection.db
-          .collection(menuItemsSlug)
-          .updateOne({ _id: new mongoose.Types.ObjectId(itemID) }, { $unset: { tenant: 1 } })
-
-        expect(result.matchedCount).toBe(1)
-      } finally {
-        await connection.close()
+      connection = await mongoose.createConnection(mongoURL).asPromise()
+      if (!connection.db) {
+        throw new Error('MongoDB connection is unavailable')
       }
+
+      // Simulate a document created before the plugin added tenant validation.
+      const result = await connection.db
+        .collection(menuItemsSlug)
+        .updateOne({ _id: new mongoose.Types.ObjectId(itemID) }, { $unset: { tenant: 1 } })
+
+      expect(result.matchedCount).toBe(1)
 
       await loginClientSide({ data: credentials.admin, page, serverURL })
       await page.goto(menuItemsURL.list)

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { tenantField } from './index.js'
 
@@ -34,5 +34,52 @@ describe('tenantField access', () => {
 
     expect(field.access!.create!({ req } as never)).toBe(false)
     expect(field.access!.update!({ req } as never)).toBe(false)
+  })
+})
+
+describe('tenantField default value', () => {
+  it('should assign the only available tenant when the field is hidden', async () => {
+    const field = tenantField({
+      ...baseArgs,
+      overrides: { admin: { hidden: true } },
+      userHasAccessToAllTenants: () => true,
+    })
+    const find = vi.fn().mockResolvedValue({ docs: [{ id: 'blue-dog' }], totalDocs: 1 })
+    const req = {
+      headers: new Headers(),
+      payload: { collections: { tenants: { customIDType: 'text' } }, db: {}, find },
+      user: { collection: 'users' },
+    }
+
+    expect(typeof field.defaultValue).toBe('function')
+    if (typeof field.defaultValue !== 'function') {
+      return
+    }
+
+    expect(await field.defaultValue({ req } as never)).toBe('blue-dog')
+    expect(find).toHaveBeenCalledWith(
+      expect.objectContaining({ collection: 'tenants', overrideAccess: false, user: req.user }),
+    )
+  })
+
+  it('should leave a hidden tenant field unassigned when multiple tenants are available', async () => {
+    const field = tenantField({
+      ...baseArgs,
+      overrides: { admin: { hidden: true } },
+      userHasAccessToAllTenants: () => true,
+    })
+    const find = vi.fn().mockResolvedValue({ docs: [{ id: 'blue-dog' }, { id: 'red-cat' }] })
+    const req = {
+      headers: new Headers(),
+      payload: { collections: { tenants: { customIDType: 'text' } }, db: {}, find },
+      user: { collection: 'users' },
+    }
+
+    expect(typeof field.defaultValue).toBe('function')
+    if (typeof field.defaultValue !== 'function') {
+      return
+    }
+
+    expect(await field.defaultValue({ req } as never)).toBeNull()
   })
 })
