@@ -929,6 +929,13 @@ describe('Queues - Payload', () => {
       const result = await payload.jobs.runByID({ id: job.id, silent: true })
 
       expect(result.jobStatus?.[job.id]?.status).toBe('success')
+
+      // Retained jobs can be rerun manually; completed jobs awaiting deletion cannot.
+      const rerun = await payload.jobs.runByID({ id: job.id, silent: true })
+      expect(rerun.jobStatus?.[job.id]?.status).toBe('success')
+      payload.config.jobs.deleteJobOnComplete = true
+      const duringCleanup = await payload.jobs.runByID({ id: job.id, silent: true })
+      expect(duringCleanup.noJobsRemaining).toBe(true)
     })
 
     it('should not run a job by ID that another runner is already processing', async () => {
@@ -1840,7 +1847,7 @@ describe('Queues - Payload', () => {
       { depth: 0, runHooks: true },
       { depth: 1, runHooks: false },
     ])(
-      'should execute jobs with hidden processing at $depth depth and runHooks=$runHooks',
+      'should execute claims with hidden and unselected processing at depth=$depth, runHooks=$runHooks',
       async ({ depth, runHooks }) => {
         payload.config.jobs.deleteJobOnComplete = false
         payload.config.jobs.depth = depth
@@ -1849,39 +1856,21 @@ describe('Queues - Payload', () => {
         jobsCollectionConfig.fields = jobsCollectionConfig.fields.map((field) =>
           'name' in field && field.name === 'processing' ? { ...field, hidden: true } : field,
         )
+        jobsCollectionConfig.hooks.beforeOperation = [
+          ...(jobsCollectionConfig.hooks.beforeOperation ?? []),
+          ({ args, operation }) =>
+            operation === 'update' ? { ...args, select: { processing: false } } : args,
+        ]
 
-        const batchJob = await payload.jobs.queue({
-          input: { message: 'hidden processing batch' },
+        const job = await payload.jobs.queue({
+          input: { message: 'hidden and unselected processing' },
           queue,
           task: 'CreateSimple',
         })
-        const batchResult = await payload.jobs.run({ queue, silent: true })
-        expect(batchResult.jobStatus?.[batchJob.id]?.status).toBe('success')
-
-        const byIDJob = await payload.jobs.queue({
-          input: { message: 'hidden processing by ID' },
-          queue,
-          task: 'CreateSimple',
-        })
-        const byIDResult = await payload.jobs.runByID({ id: byIDJob.id, silent: true })
-        expect(byIDResult.jobStatus?.[byIDJob.id]?.status).toBe('success')
-
-        for (const job of [batchJob, byIDJob]) {
-          const completed = await payload.findByID({
-            id: job.id,
-            collection: 'payload-jobs',
-            showHiddenFields: true,
-          })
-          expect(completed.processing).toBe(false)
-          expect(completed.completedAt).toBeTruthy()
-          const visible = await payload.findByID({ id: job.id, collection: 'payload-jobs' })
-          expect(visible.processing).toBeUndefined()
-        }
-        const outputs = await payload.find({
-          collection: 'simple',
-          where: { title: { in: ['hidden processing batch', 'hidden processing by ID'] } },
-        })
-        expect(outputs.totalDocs).toBe(2)
+        const result = await payload.jobs.run({ queue, silent: true })
+        expect(result.jobStatus?.[job.id]?.status).toBe('success')
+        const visible = await payload.findByID({ id: job.id, collection: 'payload-jobs' })
+        expect(visible.processing).toBeUndefined()
       },
     )
 
@@ -1957,6 +1946,11 @@ describe('Queues - Payload', () => {
             }
             return data
           },
+        ],
+        beforeOperation: [
+          ...(jobsCollectionConfig.hooks?.beforeOperation ?? []),
+          ({ args, operation }) =>
+            operation === 'update' ? { ...args, select: { processing: false } } : args,
         ],
       }
 

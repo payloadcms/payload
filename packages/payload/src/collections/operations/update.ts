@@ -390,10 +390,11 @@ export const updateOperation = async <
             throwOnMissingFile: false,
           }))
 
+        // Internal claims need full job state, regardless of a hook's response projection.
         const select = sanitizeSelect({
           fields: collectionConfig.flattenedFields,
           forceSelect: collectionConfig.forceSelect,
-          select: incomingSelect,
+          select: claimedJobIDs?.has(id) ? undefined : incomingSelect,
         })
 
         // ///////////////////////////////////////////////
