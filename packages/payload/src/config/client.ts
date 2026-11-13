@@ -73,6 +73,7 @@ export type UnauthenticatedClientConfig = {
       slug: string
     },
   ]
+  cookiePrefix: ClientConfig['cookiePrefix']
   globals: []
   routes: ClientConfig['routes']
   serverURL: ClientConfig['serverURL']
@@ -150,6 +151,7 @@ export const createUnauthenticatedClientConfig = ({
         auth: adminUserCollection.auth,
       },
     ],
+    cookiePrefix: clientConfig.cookiePrefix,
     globals: [],
     routes: clientConfig.routes,
     serverURL: clientConfig.serverURL,

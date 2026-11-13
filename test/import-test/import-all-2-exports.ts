@@ -319,8 +319,6 @@ import {
   buildVersionGlobalFields,
   deleteCollectionVersions,
   enforceMaxVersions,
-  getLatestCollectionVersion,
-  getLatestGlobalVersion,
   saveVersion,
 } from 'payload/versions'
 

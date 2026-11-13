@@ -183,4 +183,4 @@ const publishedOnField: DateField = {
 - Use `afterChange` for side effects
 - Use `afterRead` for computed fields
 - Store expensive operations in `context`
-- Pass `req` to nested operations for transaction safety (see [ADAPTERS.md#threading-req-through-operations](ADAPTERS.md#threading-req-through-operations))
+- Pass `req` to nested operations to preserve request context and maintain transaction safety when transactions are enabled (see [ADAPTERS.md#threading-req-through-operations](ADAPTERS.md#threading-req-through-operations))

@@ -14,9 +14,11 @@ import { deepFreeze } from '../../utilities/deepFreeze.js'
 import { httpStatus } from '../../utilities/httpStatus.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { retrieveFileResponse } from '../endpoints/getFile.js'
+import { fileSelectionParams } from '../fileSelectionParams.js'
 import { isOriginalFileRequest } from '../isOriginalFileRequest.js'
 import { isRequestTimeFile } from '../isRequestTimeFile.js'
 import { planPersistedDefaultStages } from '../transformState/planPersistedDefaultStages.js'
+import { areVariantsBuildableAtRequest } from '../transformState/planUpload.js'
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
@@ -37,17 +39,24 @@ import { withFileTransformAccessContext } from './withFileTransformAccessContext
 export async function handleDynamicFileRequest({
   collection,
   filename,
+  historicalDocument,
   isOriginal: isOriginalParam,
   prefix,
   req,
 }: {
   collection: Collection
   filename: string
+  /**
+   * A version snapshot whose version access is checked. Its file access is checked here, as for the
+   * current file. Source retrieval and planning must never use current data.
+   */
+  historicalDocument?: ResolvedUploadDocument
   isOriginal?: boolean
   prefix?: string
   req: PayloadRequest
 }): Promise<Response> {
-  const resolvedDocument = await resolveUploadDocument({ collection, filename, prefix, req })
+  const resolvedDocument =
+    historicalDocument ?? (await resolveUploadDocument({ collection, filename, prefix, req }))
 
   if (!resolvedDocument) {
     // There's no mimeType to plan a pipeline from, so both access modes must pass
@@ -95,6 +104,7 @@ export async function handleDynamicFileRequest({
   const { document, documentSnapshot, pipeline } = await authorizeDocument({
     collection,
     filename,
+    isHistorical: Boolean(historicalDocument),
     prefix,
     req,
     resolvedDocument,
@@ -308,12 +318,14 @@ async function planRequestPipeline({
   document,
   documentSnapshot,
   filename,
+  isHistorical,
   req,
 }: {
   collection: Collection
   document: ResolvedUploadDocument
   documentSnapshot: Readonly<ResolvedUploadDocument>
   filename: string
+  isHistorical: boolean
   req: PayloadRequest
 }): Promise<RequestStage[]> {
   const requestedFile = getRequestedFile({ document, filename })
@@ -333,10 +345,11 @@ async function planRequestPipeline({
     let plan: PlannedTransformerPipeline
 
     if (purpose === 'persisted-default') {
-      const { coverageErrors, plan: persistedDefaultPlan } = await planPersistedDefaultStages({
+      const persistedDefaultBuild = await planPersistedDefaultStages({
         ...planArgs,
         transforms: document._transforms,
       })
+      const { coverageErrors } = persistedDefaultBuild
 
       if (coverageErrors.length > 0) {
         throw new APIError(
@@ -345,7 +358,24 @@ async function planRequestPipeline({
         )
       }
 
-      plan = persistedDefaultPlan
+      plan = persistedDefaultBuild.plan
+
+      if (
+        isHistorical &&
+        requestedFile.variantName &&
+        (!collection.config.upload.variants?.some(
+          ({ name }) => name === requestedFile.variantName,
+        ) ||
+          !areVariantsBuildableAtRequest({
+            requestTimeBuild: persistedDefaultBuild,
+            variantsTransformerSlug: collection.config.upload.variantsTransformerSlug,
+          }))
+      ) {
+        throw new APIError(
+          `No configured transformer can build historical size "${requestedFile.variantName}".`,
+          httpStatus.INTERNAL_SERVER_ERROR,
+        )
+      }
     } else {
       plan = await planTransformerPipeline({
         args: { ...planArgs, operation: 'request', originalDoc: documentSnapshot, purpose },
@@ -373,7 +403,8 @@ type AccessResult = { document?: ResolvedUploadDocument; isAllowed: true } | { i
  * before any application-defined transformer code (`canTransform`) executes.
  *
  * 1. The first access mode comes from MIME matching alone: a transform-aware check
- *    when any transformer could handle the file, otherwise an ordinary read.
+ *    when any transformer could handle the file, otherwise an ordinary read. A historical
+ *    request without request parameters starts with an ordinary read.
  * 2. If the transform-aware check is denied, an ordinary read may still be allowed
  *    (e.g. public originals, signed-in-only variants), so that mode is tried next.
  * 3. Only once a check has passed does `canTransform` plan the real pipeline.
@@ -389,12 +420,14 @@ type AccessResult = { document?: ResolvedUploadDocument; isAllowed: true } | { i
 async function authorizeDocument({
   collection,
   filename,
+  isHistorical,
   prefix,
   req,
   resolvedDocument,
 }: {
   collection: Collection
   filename: string
+  isHistorical: boolean
   prefix?: string
   req: PayloadRequest
   resolvedDocument: ResolvedUploadDocument
@@ -411,7 +444,13 @@ async function authorizeDocument({
       accessResults.set(
         isTransform,
         withFileTransformAccessContext({
-          callback: () => checkFileAccess({ collection, filename, prefix, req }),
+          callback: () =>
+            checkFileAccess({
+              collection,
+              filename,
+              ...(isHistorical ? { documentID: resolvedDocument.id } : { prefix }),
+              req,
+            }),
           isTransform,
           req,
         }).then(
@@ -440,7 +479,10 @@ async function authorizeDocument({
       transformers: req.payload.config.upload.transformers,
     }).length > 0
 
-  let isTransformAccess = hasCandidateTransformers
+  // A historical request without request parameters only applies the saved state, so it starts as
+  // an ordinary read. The planned pipeline below still decides which access it needs.
+  let isTransformAccess =
+    hasCandidateTransformers && (!isHistorical || hasNonSelectionParams({ req }))
   let access = await checkAccess({ isTransform: isTransformAccess })
 
   if (!access.isAllowed && isTransformAccess) {
@@ -453,7 +495,7 @@ async function authorizeDocument({
   }
 
   const document =
-    access.document && access.document.id !== resolvedDocument.id
+    !isHistorical && access.document && access.document.id !== resolvedDocument.id
       ? access.document
       : resolvedDocument
 
@@ -463,6 +505,7 @@ async function authorizeDocument({
     document,
     documentSnapshot,
     filename,
+    isHistorical,
     req,
   })
   // Only the request's own parameters make it a transform. Applying the saved state is an ordinary
@@ -481,4 +524,15 @@ async function authorizeDocument({
   }
 
   return { document, documentSnapshot, pipeline }
+}
+
+const fileSelectionParamNames = new Set<string>(Object.values(fileSelectionParams))
+
+/**
+ * Whether a historical request has query parameters other than the ones that pick the file. This
+ * only picks which access check runs first: other parameters, such as `locale` or a cache-buster,
+ * also count. The planned pipeline then decides which access the request needs.
+ */
+function hasNonSelectionParams({ req }: { req: PayloadRequest }): boolean {
+  return [...(req.searchParams?.keys() ?? [])].some((key) => !fileSelectionParamNames.has(key))
 }

@@ -6,7 +6,7 @@ import type { UploadTransformer } from './types.js'
 import { TransformerContractError } from '../../errors/TransformerContractError.js'
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
 import { getChangedTransformKeys } from '../transformState/getChangedTransformKeys.js'
-import { getNonJSONValueError } from '../transformState/resolveUploadEdits.js'
+import { getNonJSONValueError } from '../transformState/transformStateInput.js'
 import { getTransformStateError } from '../transformState/validateTransformState.js'
 import { createFileSource } from './createFileSource.js'
 

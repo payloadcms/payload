@@ -85,7 +85,18 @@ export const collectStoredFiles = ({
           isOriginal: role.type === 'original' && shouldRequestOriginal({ doc }),
           relative: true,
           urlOrPath: undefined,
-        })
+        }) &&
+      // Archiving can rename the original away from the main file while retaining its role query.
+      (role.type !== 'original' ||
+        representation.url !==
+          generateFilePathOrURL({
+            collectionSlug: collection.slug,
+            config: req.payload.config,
+            filename,
+            isOriginal: true,
+            relative: true,
+            urlOrPath: undefined,
+          }))
     ) {
       return
     }
@@ -115,6 +126,10 @@ export const collectStoredFiles = ({
   }
   return createStoredFileList({ references })
 }
+
+/** Whether the original is one of the stored files, so a request-time file can be built from it. */
+export const hasStoredOriginal = ({ storedFiles }: { storedFiles: StoredFileList }): boolean =>
+  storedFiles.some(({ roles }) => roles.some(({ type }) => type === 'original'))
 
 export const withLegacyUploadFileData = ({
   collection,

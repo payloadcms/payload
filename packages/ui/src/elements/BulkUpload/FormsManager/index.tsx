@@ -11,7 +11,7 @@ import type {
 } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL, validateMimeType } from 'payload/shared'
+import { formatAdminURL, parseErrorResponse, validateMimeType } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -517,33 +517,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             })
           }
 
-          // should expose some sort of helper for this
-          const [fieldErrors, nonFieldErrors] = (json?.errors || []).reduce(
-            ([fieldErrs, nonFieldErrs], err) => {
-              const newFieldErrs: any[] = []
-              const newNonFieldErrs: any[] = []
-
-              if (err?.message) {
-                newNonFieldErrs.push(err)
-              }
-
-              if (Array.isArray(err?.data?.errors)) {
-                err.data?.errors.forEach((dataError) => {
-                  if (dataError?.path) {
-                    newFieldErrs.push(dataError)
-                  } else {
-                    newNonFieldErrs.push(dataError)
-                  }
-                })
-              }
-
-              return [
-                [...fieldErrs, ...newFieldErrs],
-                [...nonFieldErrs, ...newNonFieldErrs],
-              ]
-            },
-            [[], []],
-          )
+          const { fieldErrors, nonFieldErrors } = parseErrorResponse({ body: json })
 
           const missingFile = !fileValue && req.status === 400
           const exceedsLimit = fileValue && req.status === 413

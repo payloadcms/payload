@@ -11,7 +11,7 @@ export const getRequestHighContrast = ({
   cookies,
   headers,
 }: GetRequestHighContrastArgs): boolean => {
-  const cookieKey = `${config.cookiePrefix || 'payload'}-high-contrast-mode`
+  const cookieKey = `${config.cookiePrefix}-high-contrast-mode`
   const modeFromCookie = cookies.get(cookieKey)
 
   if (modeFromCookie === 'true') {

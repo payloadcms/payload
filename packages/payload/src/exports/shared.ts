@@ -9,7 +9,7 @@ export {
 } from '../auth/cookies.js'
 
 export { extractAccessFromPermission } from '../auth/extractAccessFromPermission.js'
-export { extractJWT } from '../auth/extractJWT.js'
+export { extractBearerToken, extractJWT } from '../auth/extractJWT.js'
 export { getLoginOptions } from '../auth/getLoginOptions.js'
 export { addSessionToUser, removeExpiredSessions } from '../auth/sessions.js'
 
@@ -211,6 +211,9 @@ export {
 } from '../utilities/mergeListSearchAndWhere.js'
 
 export { parseDocumentID } from '../utilities/parseDocumentID.js'
+
+export { parseErrorResponse } from '../utilities/parseErrorResponse.js'
+export type { ParsedErrorResponse, ParsedNonFieldError } from '../utilities/parseErrorResponse.js'
 
 export { sanitizeFilename } from '../utilities/sanitizeFilename.js'
 

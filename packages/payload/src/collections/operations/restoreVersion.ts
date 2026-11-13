@@ -17,13 +17,14 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { hideCloudStorageState } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
   beginFileOperationScope,
   completeFileOperationScope,
   shareFileOperationScope,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
-import { runStoredFileRestore } from '../../uploads/fileVersioning/restore.js'
+import { isolateRestoreRequest, runFileRestore } from '../../uploads/fileVersioning/restore.js'
 import { restoreUploadDataFromDocument } from '../../uploads/sanitizeUploadData.js'
 import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -68,15 +69,21 @@ export const restoreVersionOperation = async <
     draft: draftArg = false,
     overrideAccess = false,
     populate,
-    req,
+    req: incomingReq,
     req: { fallbackLocale, locale, payload },
     select: incomingSelect,
     showHiddenFields,
   } = args
   const hasFileOperationScope = Boolean(collectionConfig.upload)
+  let req = incomingReq
+  let putBackCallerCloudStorageState: (() => void) | undefined
 
   if (hasFileOperationScope) {
+    req = isolateRestoreRequest({ req: incomingReq })
+    args = { ...args, req }
     beginFileOperationScope({ req })
+    // The restore shares the caller's context, but must not use the caller's cloud storage state.
+    putBackCallerCloudStorageState = hideCloudStorageState({ req })
   }
 
   try {
@@ -344,7 +351,6 @@ export const restoreVersionOperation = async <
           collection: collectionConfig.slug,
           data: result,
           req: reqWithValidationLocale,
-          select,
         })
       }
 
@@ -363,7 +369,7 @@ export const restoreVersionOperation = async <
     }
 
     result = collectionConfig.upload
-      ? await runStoredFileRestore({
+      ? await runFileRestore({
           id: parentDocID,
           collection: collectionConfig,
           current: prevDocWithLocales,
@@ -442,6 +448,7 @@ export const restoreVersionOperation = async <
             overrideAccess,
             previousDoc: prevDocWithLocales,
             req,
+            select,
           })) || result
       }
     }
@@ -473,5 +480,7 @@ export const restoreVersionOperation = async <
       await abortFileOperationScope({ req })
     }
     throw error
+  } finally {
+    putBackCallerCloudStorageState?.()
   }
 }
