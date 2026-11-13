@@ -1,9 +1,21 @@
 'use client'
-import React, { createContext, use, useCallback, useEffect, useState } from 'react'
+import type { SanitizedConfig } from 'payload'
+
+import React, { createContext, use, useCallback, useEffect, useEffectEvent, useState } from 'react'
+
+import type { Theme } from './shared.js'
 
 import { useConfig } from '../Config/index.js'
-import { useSearchParams } from '../RouterAdapter/index.js'
-import { defaultTheme, type Theme } from './shared.js'
+import { RouterAdapterContext } from '../RouterAdapter/index.js'
+import { defaultTheme } from './shared.js'
+import {
+  getHighContrastModeFromSystem,
+  getThemeFromCookie,
+  getThemeFromSystem,
+  isValidThemeParam,
+  resolveHighContrastMode,
+  resolveTheme,
+} from './utilities.js'
 
 export { defaultTheme, type Theme }
 
@@ -25,90 +37,57 @@ const initialContext: ThemeContext = {
 
 const Context = createContext<ThemeContext | undefined>(undefined)
 
-function setCookie(cname: string, cvalue: string, exdays: number) {
-  const d = new Date()
-  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000)
-  const expires = 'expires=' + d.toUTCString()
-  document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/'
-}
-
-const detectTheme = (cookieKey: string): { isAutoMode: boolean; theme: Theme } => {
-  const fromCookie = window.document.cookie
-    .split('; ')
-    .find((row) => row.startsWith(`${cookieKey}=`))
-    ?.split('=')[1]
-
-  const theme: Theme =
-    fromCookie === 'light' || fromCookie === 'dark'
-      ? fromCookie
-      : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-
-  document.documentElement.setAttribute('data-theme', theme)
-
-  return { isAutoMode: fromCookie !== 'light' && fromCookie !== 'dark', theme }
-}
-
-const detectHighContrastMode = (cookieKey: string): boolean => {
-  const fromCookie =
-    window.document.cookie
-      .split('; ')
-      .find((row) => row.startsWith(`${cookieKey}=`))
-      ?.split('=')[1] ?? null
-
-  const isHighContrast =
-    fromCookie === 'true'
-      ? true
-      : fromCookie === 'false'
-        ? false
-        : !!(window.matchMedia && window.matchMedia('(prefers-contrast: more)').matches)
-
-  if (isHighContrast) {
-    document.documentElement.setAttribute('data-enhanced-contrast', '')
-  } else {
-    document.documentElement.removeAttribute('data-enhanced-contrast')
-  }
-
-  return isHighContrast
-}
-
-const isValidThemeParam = (value: null | string): value is 'auto' | Theme =>
-  value === 'auto' || value === 'light' || value === 'dark'
-
 /**
- * Provides theme context to its children.
- *
- * At the root (no parent ThemeProvider): reads/writes cookies, responds to
- * OS preference, owns setTheme and setHighContrastMode.
- *
- * When nested inside another ThemeProvider (e.g. inside a Popup): acts as a
- * scoped visual  the `theme` prop sets the local theme, but setThemeoverride
- * and setHighContrastMode bubble up through each level to the root provider so
- * mutations always affect the global user preference.
- *
- * The ThemeProvider also reads the `?theme=light|dark|auto` query parameter and
- * persists it to the theme cookie using the same mechanism as manual theme selection.
+ * Shares theme state and setters inside or outside the admin panel.
+ * Uses admin config and router contexts when present; external UIs can supply preferences directly.
+ * Nested setters bubble to the root provider unless called with `{ scoped: true }`.
  */
 export const ThemeProvider: React.FC<{
   children?: React.ReactNode
+  cookiePrefix?: string
   highContrastMode?: boolean
+  /** `null` means no saved preference; omitted values are read from the current document. */
+  highContrastModeFromCookie?: null | string
+  /** Disable when the current document does not share the admin's cookie origin. */
+  shouldPersistPreferences?: boolean
+  /** Receives theme attributes instead of `document.documentElement`; `null` waits for a target. */
+  target?: HTMLElement | null
   theme?: Theme
-}> = ({ children, highContrastMode: initialHighContrastMode, theme: themeOverride }) => {
+  /** `null` means no saved preference; omitted values are read from the current document. */
+  themeFromCookie?: null | string
+  themeSettingFromConfig?: SanitizedConfig['admin']['theme']
+}> = ({
+  children,
+  cookiePrefix,
+  highContrastMode: initialHighContrastMode,
+  highContrastModeFromCookie,
+  shouldPersistPreferences = true,
+  target,
+  theme: themeOverride,
+  themeFromCookie,
+  themeSettingFromConfig,
+}) => {
   const outerContext = use(Context)
   const isScoped = outerContext !== undefined
 
-  const { config } = useConfig()
-  const preselectedTheme = config.admin.theme
-  const themeCookieKey = `${config.cookiePrefix || 'payload'}-theme`
-  const contrastCookieKey = `${config.cookiePrefix || 'payload'}-high-contrast-mode`
+  const configContext = useConfig()
+  const routerAdapter = use(RouterAdapterContext)
+  const preselectedTheme = themeSettingFromConfig ?? configContext?.config.admin.theme ?? 'all'
+  const resolvedCookiePrefix = cookiePrefix ?? configContext?.config.cookiePrefix ?? 'payload'
+  const themeCookieKey = `${resolvedCookiePrefix}-theme`
+  const contrastCookieKey = `${resolvedCookiePrefix}-high-contrast-mode`
+  const themeTarget =
+    target === undefined && typeof document !== 'undefined' ? document.documentElement : target
 
-  const themeParam = useSearchParams().get('theme')?.toLowerCase()
+  const themeParam = routerAdapter?.searchParams.get('theme')?.toLowerCase()
+  const initialTheme = resolveTheme({ themeFromCookie, themeSettingFromConfig: preselectedTheme })
 
-  const [theme, setThemeState] = useState<Theme>(themeOverride ?? defaultTheme)
-  const [autoMode, setAutoMode] = useState<boolean>(!isScoped)
-  const [highContrastMode, setHighContrastModeState] = useState<boolean>(
-    isScoped ? (outerContext.highContrastMode ?? false) : (initialHighContrastMode ?? false),
+  const [theme, setThemeState] = useState<Theme>(themeOverride ?? initialTheme.theme)
+  const [autoMode, setAutoMode] = useState<boolean>(!isScoped && initialTheme.autoMode)
+  const [highContrastMode, setHighContrastModeState] = useState<boolean>(() =>
+    isScoped
+      ? (outerContext.highContrastMode ?? false)
+      : (initialHighContrastMode ?? resolveHighContrastMode({ highContrastModeFromCookie })),
   )
 
   // Setters bubble up to the root provider by default. Pass { scoped: true }
@@ -119,22 +98,20 @@ export const ThemeProvider: React.FC<{
         outerContext.setTheme(themeToSet, options)
         return
       }
-      const resolvedTheme: Theme =
-        themeToSet === 'auto'
-          ? window.matchMedia?.('(prefers-color-scheme: dark)').matches
-            ? 'dark'
-            : 'light'
-          : themeToSet
+      const resolvedTheme = themeToSet === 'auto' ? getThemeFromSystem() : themeToSet
 
       setThemeState(resolvedTheme)
       setAutoMode(themeToSet === 'auto')
 
       if (!isScoped) {
-        setCookie(themeCookieKey, themeToSet, themeToSet === 'auto' ? -1 : 365)
-        document.documentElement.setAttribute('data-theme', resolvedTheme)
+        if (shouldPersistPreferences) {
+          setCookie(themeCookieKey, themeToSet, themeToSet === 'auto' ? -1 : 365)
+        }
+
+        themeTarget?.setAttribute('data-theme', resolvedTheme)
       }
     },
-    [isScoped, outerContext, themeCookieKey],
+    [isScoped, outerContext, shouldPersistPreferences, themeCookieKey, themeTarget],
   )
 
   const setHighContrastMode = useCallback(
@@ -145,16 +122,54 @@ export const ThemeProvider: React.FC<{
       }
       setHighContrastModeState(isHighContrast)
       if (!isScoped) {
-        setCookie(contrastCookieKey, String(isHighContrast), 365)
+        if (shouldPersistPreferences) {
+          setCookie(contrastCookieKey, String(isHighContrast), 365)
+        }
+
         if (isHighContrast) {
-          document.documentElement.setAttribute('data-enhanced-contrast', '')
+          themeTarget?.setAttribute('data-enhanced-contrast', '')
         } else {
-          document.documentElement.removeAttribute('data-enhanced-contrast')
+          themeTarget?.removeAttribute('data-enhanced-contrast')
         }
       }
     },
-    [isScoped, outerContext, contrastCookieKey],
+    [isScoped, outerContext, shouldPersistPreferences, contrastCookieKey, themeTarget],
   )
+
+  const syncThemeTarget = useEffectEvent(() => {
+    themeTarget?.setAttribute('data-theme', theme)
+    themeTarget?.toggleAttribute('data-enhanced-contrast', highContrastMode)
+  })
+
+  useEffect(() => {
+    if (isScoped || target === null) {
+      return
+    }
+
+    if (target === undefined) {
+      syncThemeTarget()
+      return
+    }
+
+    const previousTheme = target.getAttribute('data-theme')
+    const previousContrast = target.getAttribute('data-enhanced-contrast')
+
+    syncThemeTarget()
+
+    return () => {
+      if (previousTheme === null) {
+        target.removeAttribute('data-theme')
+      } else {
+        target.setAttribute('data-theme', previousTheme)
+      }
+
+      if (previousContrast === null) {
+        target.removeAttribute('data-enhanced-contrast')
+      } else {
+        target.setAttribute('data-enhanced-contrast', previousContrast)
+      }
+    }
+  }, [isScoped, target])
 
   // Keep highContrastMode in sync with the outer provider when scoped.
   useEffect(() => {
@@ -163,28 +178,57 @@ export const ThemeProvider: React.FC<{
     }
   }, [isScoped, outerContext?.highContrastMode])
 
-  // Resolve the root theme: a valid `?theme` param wins (applied via setTheme so
-  // it persists to the theme cookie exactly like a manual selection; otherwise
-  // fall back to the cookie or OS preference.
-  useEffect(() => {
-    if (isScoped || preselectedTheme !== 'all') {
-      return
-    }
-    if (isValidThemeParam(themeParam)) {
-      setTheme(themeParam)
-      return
-    }
-    const { isAutoMode, theme: detectedTheme } = detectTheme(themeCookieKey)
-    setThemeState(detectedTheme)
-    setAutoMode(isAutoMode)
-  }, [isScoped, preselectedTheme, themeCookieKey, themeParam, setTheme])
-
-  useEffect(() => {
+  const initializeTheme = useEffectEvent(() => {
     if (isScoped) {
       return
     }
-    setHighContrastModeState(detectHighContrastMode(contrastCookieKey))
-  }, [isScoped, contrastCookieKey])
+    if (preselectedTheme === 'all' && isValidThemeParam(themeParam)) {
+      setTheme(themeParam)
+      return
+    }
+
+    const { autoMode: isAutoMode, theme: detectedTheme } = resolveTheme({
+      themeFromCookie:
+        themeFromCookie === undefined
+          ? getThemeFromCookie({ cookieKey: themeCookieKey })
+          : themeFromCookie,
+      themeFromSystem: getThemeFromSystem(),
+      themeSettingFromConfig: preselectedTheme,
+    })
+
+    themeTarget?.setAttribute('data-theme', detectedTheme)
+    setThemeState(detectedTheme)
+    setAutoMode(isAutoMode)
+  })
+
+  useEffect(() => {
+    initializeTheme()
+  }, [isScoped, preselectedTheme, themeCookieKey, themeFromCookie, themeParam])
+
+  const initializeHighContrastMode = useEffectEvent(() => {
+    if (isScoped) {
+      return
+    }
+    const isHighContrast = resolveHighContrastMode({
+      highContrastModeFromCookie:
+        highContrastModeFromCookie === undefined
+          ? getThemeFromCookie({ cookieKey: contrastCookieKey })
+          : highContrastModeFromCookie,
+      highContrastModeFromSystem: getHighContrastModeFromSystem(),
+    })
+
+    if (isHighContrast) {
+      themeTarget?.setAttribute('data-enhanced-contrast', '')
+    } else {
+      themeTarget?.removeAttribute('data-enhanced-contrast')
+    }
+
+    setHighContrastModeState(isHighContrast)
+  })
+
+  useEffect(() => {
+    initializeHighContrastMode()
+  }, [isScoped, contrastCookieKey, highContrastModeFromCookie])
 
   return (
     <Context
@@ -201,4 +245,16 @@ export const ThemeProvider: React.FC<{
   )
 }
 
+/** Reads the nearest theme context, or the default context when no provider is present. */
 export const useTheme = (): ThemeContext => use(Context) ?? initialContext
+
+/**
+ * Sets a current-origin preference cookie at `/`, with a lifetime in days.
+ * A negative lifetime expires the cookie.
+ */
+function setCookie(cname: string, cvalue: string, exdays: number) {
+  const d = new Date()
+  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000)
+  const expires = 'expires=' + d.toUTCString()
+  document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/'
+}

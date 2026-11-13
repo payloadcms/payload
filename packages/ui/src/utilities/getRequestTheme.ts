@@ -1,8 +1,11 @@
 import type { SanitizedConfig } from 'payload'
 
-import { defaultTheme, type Theme } from '../providers/Theme/shared.js'
+import type { Theme } from '../providers/Theme/shared.js'
+
+import { resolveTheme } from '../providers/Theme/utilities.js'
 
 type GetRequestThemeArgs = {
+  /** Sanitized config, including its defaulted cookie prefix. */
   config: SanitizedConfig
   cookies: Map<string, string>
   headers: Request['headers']
@@ -17,28 +20,24 @@ export type RequestThemeResult = {
   themeSource: RequestThemeSource
 }
 
-const acceptedThemes: Theme[] = ['dark', 'light']
-
+/**
+ * Resolves the admin theme from sanitized config and request preferences.
+ * Priority: config (ignoring `all`), cookie, color-scheme client hint, then the default theme.
+ */
 export const getRequestTheme = ({
   config,
   cookies,
   headers,
 }: GetRequestThemeArgs): RequestThemeResult => {
-  if (config.admin.theme !== 'all' && acceptedThemes.includes(config.admin.theme)) {
-    return { theme: config.admin.theme, themeSource: 'config' }
+  const { theme, themeSource } = resolveTheme({
+    themeFromCookie: cookies.get(`${config.cookiePrefix}-theme`),
+    themeFromSystem: headers.get('Sec-CH-Prefers-Color-Scheme'),
+    themeSettingFromConfig: config.admin.theme,
+  })
+
+  return {
+    theme,
+    themeSource:
+      themeSource === 'preference' ? 'cookie' : themeSource === 'system' ? 'header' : themeSource,
   }
-
-  const themeFromCookie = cookies.get(`${config.cookiePrefix || 'payload'}-theme`) as Theme
-
-  if (themeFromCookie && acceptedThemes.includes(themeFromCookie)) {
-    return { theme: themeFromCookie, themeSource: 'cookie' }
-  }
-
-  const themeFromHeader = headers.get('Sec-CH-Prefers-Color-Scheme') as Theme
-
-  if (themeFromHeader && acceptedThemes.includes(themeFromHeader)) {
-    return { theme: themeFromHeader, themeSource: 'header' }
-  }
-
-  return { theme: defaultTheme, themeSource: 'default' }
 }
