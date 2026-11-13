@@ -169,6 +169,7 @@ async function claimJobsWithHooks({
       disableTransaction,
       limit: claimedIDs.length,
       req: claimReq,
+      showHiddenFields: true,
       where: { id: { in: claimedIDs } },
     } as ManyOptions<any, any>)
   } catch (error) {

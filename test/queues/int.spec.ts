@@ -1836,6 +1836,55 @@ describe('Queues - Payload', () => {
       expect(job1AfterSecondRun.completedAt).toBeTruthy()
     })
 
+    it.each([
+      { depth: 0, runHooks: true },
+      { depth: 1, runHooks: false },
+    ])(
+      'should execute jobs with hidden processing at $depth depth and runHooks=$runHooks',
+      async ({ depth, runHooks }) => {
+        payload.config.jobs.deleteJobOnComplete = false
+        payload.config.jobs.depth = depth
+        payload.config.jobs.runHooks = runHooks
+        const jobsCollectionConfig = payload.collections['payload-jobs'].config
+        jobsCollectionConfig.fields = jobsCollectionConfig.fields.map((field) =>
+          'name' in field && field.name === 'processing' ? { ...field, hidden: true } : field,
+        )
+
+        const batchJob = await payload.jobs.queue({
+          input: { message: 'hidden processing batch' },
+          queue,
+          task: 'CreateSimple',
+        })
+        const batchResult = await payload.jobs.run({ queue, silent: true })
+        expect(batchResult.jobStatus?.[batchJob.id]?.status).toBe('success')
+
+        const byIDJob = await payload.jobs.queue({
+          input: { message: 'hidden processing by ID' },
+          queue,
+          task: 'CreateSimple',
+        })
+        const byIDResult = await payload.jobs.runByID({ id: byIDJob.id, silent: true })
+        expect(byIDResult.jobStatus?.[byIDJob.id]?.status).toBe('success')
+
+        for (const job of [batchJob, byIDJob]) {
+          const completed = await payload.findByID({
+            id: job.id,
+            collection: 'payload-jobs',
+            showHiddenFields: true,
+          })
+          expect(completed.processing).toBe(false)
+          expect(completed.completedAt).toBeTruthy()
+          const visible = await payload.findByID({ id: job.id, collection: 'payload-jobs' })
+          expect(visible.processing).toBeUndefined()
+        }
+        const outputs = await payload.find({
+          collection: 'simple',
+          where: { title: { in: ['hidden processing batch', 'hidden processing by ID'] } },
+        })
+        expect(outputs.totalDocs).toBe(2)
+      },
+    )
+
     it('should preserve native Request headers and URL in claim hooks', async () => {
       payload.config.jobs.runHooks = true
       const job = await payload.jobs.queue({
@@ -1884,6 +1933,9 @@ describe('Queues - Payload', () => {
       let attempted = false
       let competingRun: Awaited<ReturnType<typeof payload.jobs.runByID>> | undefined
       const jobsCollectionConfig = payload.collections['payload-jobs'].config
+      jobsCollectionConfig.fields = jobsCollectionConfig.fields.map((field) =>
+        'name' in field && field.name === 'processing' ? { ...field, hidden: true } : field,
+      )
       jobsCollectionConfig.hooks = {
         ...jobsCollectionConfig.hooks,
         afterChange: [
@@ -1912,7 +1964,11 @@ describe('Queues - Payload', () => {
 
       expect(competingRun?.noJobsRemaining).toBe(true)
       expect(Object.keys(result.jobStatus ?? {})).toHaveLength(0)
-      const after = await payload.findByID({ id: job.id, collection: 'payload-jobs' })
+      const after = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+        showHiddenFields: true,
+      })
       expect(after.processing).toBe(false)
       expect(after.completedAt).toBeFalsy()
     })
