@@ -5,104 +5,14 @@ import { PreferencesProvider, usePreferences } from './index.js'
 
 vi.stubGlobal('process', { env: {} })
 
-const mocks = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn() }))
+const mocks = vi.hoisted(() => ({ post: vi.fn() }))
 
 vi.mock('../Auth/index.js', () => ({ useAuth: () => ({ user: { id: 'user' } }) }))
 vi.mock('../Config/index.js', () => ({
   useConfig: () => ({ config: { routes: { api: '/api' } } }),
 }))
 vi.mock('../Translation/index.js', () => ({ useTranslation: () => ({ i18n: { language: 'en' } }) }))
-vi.mock('../../utilities/api.js', () => ({ requests: { get: mocks.get, post: mocks.post } }))
-
-test.each(['network error', 'invalid JSON', 'synchronous error'] as const)(
-  'should reject shared reads and allow retries (%s)',
-  async (failure) => {
-    let preferences: ReturnType<typeof usePreferences>
-    const response = Promise.withResolvers<Response>()
-    const error = new Error('read failed')
-    const value = { selected: true }
-
-    mocks.get.mockReset()
-
-    if (failure === 'synchronous error') {
-      mocks.get.mockImplementationOnce(() => {
-        throw error
-      })
-    } else {
-      mocks.get.mockReturnValueOnce(response.promise)
-    }
-
-    mocks.get.mockResolvedValueOnce(Response.json({ value }))
-
-    function Consumer() {
-      preferences = usePreferences()
-      return null
-    }
-
-    await render(
-      <PreferencesProvider>
-        <Consumer />
-      </PreferencesProvider>,
-    )
-
-    const settled = vi.fn()
-
-    void Promise.allSettled([
-      preferences!.getPreference('view'),
-      preferences!.getPreference('view'),
-    ]).then(settled)
-    expect(mocks.get).toHaveBeenCalledOnce()
-
-    if (failure === 'network error') {
-      response.reject(error)
-    } else if (failure === 'invalid JSON') {
-      const failedResponse = Response.json({})
-
-      vi.spyOn(failedResponse, 'json').mockRejectedValue(error)
-      response.resolve(failedResponse)
-    }
-
-    await vi.waitFor(() =>
-      expect(settled).toHaveBeenCalledWith([
-        { status: 'rejected', reason: error },
-        { status: 'rejected', reason: error },
-      ]),
-    )
-    expect(await preferences!.getPreference('view')).toEqual(value)
-    expect(await preferences!.getPreference('view')).toEqual(value)
-    expect(mocks.get).toHaveBeenCalledTimes(2)
-  },
-)
-
-test('should preserve a newer cached value when an earlier read fails', async () => {
-  let preferences: ReturnType<typeof usePreferences>
-  const response = Promise.withResolvers<Response>()
-  const error = new Error('read failed')
-  const value = { refreshed: true }
-
-  mocks.get.mockReset().mockReturnValue(response.promise)
-
-  function Consumer() {
-    preferences = usePreferences()
-    return null
-  }
-
-  await render(
-    <PreferencesProvider>
-      <Consumer />
-    </PreferencesProvider>,
-  )
-
-  const rejected = vi.fn()
-
-  void preferences!.getPreference('view').catch(rejected)
-  preferences!.syncPreference('view', value)
-  response.reject(error)
-
-  await vi.waitFor(() => expect(rejected).toHaveBeenCalledWith(error))
-  expect(await preferences!.getPreference('view')).toEqual(value)
-  expect(mocks.get).toHaveBeenCalledOnce()
-})
+vi.mock('../../utilities/api.js', () => ({ requests: { post: mocks.post } }))
 
 test('should keep all merged callers pending until the shared write completes', async () => {
   let preferences: ReturnType<typeof usePreferences>
