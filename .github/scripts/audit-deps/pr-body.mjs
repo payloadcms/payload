@@ -91,8 +91,8 @@ function assemble({ head, packages, tail }) {
   return compose({ keep })
 }
 
-function composePackage({ heading, advisoryLine, info, notes, commits }) {
-  return [heading, advisoryLine, info, notes, commits].filter(Boolean).join('\n\n')
+function composePackage({ heading, advisoryQuote, info, notes, commits }) {
+  return [heading, advisoryQuote, info, notes, commits].filter(Boolean).join('\n\n')
 }
 
 function renderMajorBanner({ prBumps, details }) {
@@ -233,29 +233,32 @@ function renderPackageSections({ bump, detail }) {
   const advisories = detail.advisories ?? []
 
   return {
-    heading: renderHeading({ bump, advisories }),
-    advisoryLine: renderAdvisoryLine({ advisories }),
+    heading: renderHeading({ bump }),
+    advisoryQuote: renderAdvisoryQuote({ advisories }),
     info: renderInfo({ advisories }),
     notes: renderNotes({ detail }),
     commits: renderCommits({ detail }),
   }
 }
 
-function renderHeading({ bump, advisories }) {
-  const summaries = advisories
-    .map((advisory) => oneLine({ text: advisory.summary, maxLength: 200 }))
-    .filter(Boolean)
-  const suffix = summaries.length > 0 ? `: ${summaries.join(' · ')}` : ''
-  return `### ${oneLine({ text: bump.dependency, maxLength: 100 })}${suffix}`
+function renderHeading({ bump }) {
+  return `### ${oneLine({ text: bump.dependency, maxLength: 100 })}`
 }
 
-function renderAdvisoryLine({ advisories }) {
+// A `>` line between advisories keeps each one a separate paragraph in the quote block.
+function renderAdvisoryQuote({ advisories }) {
   if (advisories.length === 0) {
     return null
   }
-  const links = advisories.map((advisory) => ghsaLink({ advisory, label: advisory.ghsa }))
-  const severity = oneLine({ text: highestSeverity({ advisories }), maxLength: 20 })
-  return `${links.join(', ')} · ${severity}`
+  return advisories.map((advisory) => `> ${renderAdvisoryParagraph({ advisory })}`).join('\n>\n')
+}
+
+function renderAdvisoryParagraph({ advisory }) {
+  const link = ghsaLink({ advisory, label: advisory.ghsa })
+  const severity = oneLine({ text: advisory.severity, maxLength: 20 })
+  const reference = severity ? `${link} · ${severity}` : link
+  const summary = oneLine({ text: advisory.summary, maxLength: 200 })
+  return summary ? `${summary} (${reference})` : reference
 }
 
 function renderInfo({ advisories }) {

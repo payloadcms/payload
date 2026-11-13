@@ -131,6 +131,45 @@ describe('major review banner', () => {
   })
 })
 
+describe('package heading', () => {
+  it('should quote each advisory with its own link and severity under a name-only heading', () => {
+    const second = {
+      ghsa: 'GHSA-w5hq-cccc-ffff',
+      summary: 'Second',
+      description: '',
+      severity: 'high',
+    }
+    const one = renderCsv({ details: csvDetails })
+    const two = renderCsv({
+      details: { ...csvDetails, advisories: [...csvDetails.advisories, second] },
+    })
+    const firstParagraph =
+      '> Prototype replacement still reachable via columns path ([GHSA-8cw4-87c7-c6xx](https://github.com/advisories/GHSA-8cw4-87c7-c6xx) · moderate)'
+    const secondParagraph =
+      '> Second ([GHSA-w5hq-cccc-ffff](https://github.com/advisories/GHSA-w5hq-cccc-ffff) · high)'
+
+    expect(one).toContain(`### csv-parse\n\n${firstParagraph}\n\n<details>`)
+    expect(two).toContain(`### csv-parse\n\n${firstParagraph}\n>\n${secondParagraph}\n\n<details>`)
+  })
+
+  it('should quote only the link and severity when an advisory has no summary', () => {
+    const body = renderCsv({
+      details: { ...csvDetails, advisories: [{ ...csvDetails.advisories[0], summary: '' }] },
+    })
+
+    expect(body).toContain(
+      '### csv-parse\n\n> [GHSA-8cw4-87c7-c6xx](https://github.com/advisories/GHSA-8cw4-87c7-c6xx) · moderate\n\n',
+    )
+  })
+
+  it('should render no quote block when the package has no advisories', () => {
+    const body = renderCsv({ details: { ...csvDetails, advisories: [] } })
+
+    expect(body).toContain('### csv-parse\n\n<details>')
+    expect(body).not.toMatch(/^>/m)
+  })
+})
+
 describe('partly fixed advisories', () => {
   it('should render partly in the Fixes column and the lead line', () => {
     const partlyAdvisory = {
