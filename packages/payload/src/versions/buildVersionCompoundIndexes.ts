@@ -12,6 +12,15 @@ export const buildVersionCompoundIndexes = ({
       path: `version.${path}`,
       pathHasLocalized,
     })),
+    ...(each.requireExists
+      ? {
+          requireExists: each.requireExists.map(({ localizedPath, path, pathHasLocalized }) => ({
+            localizedPath: `version.${localizedPath}`,
+            path: `version.${path}`,
+            pathHasLocalized,
+          })),
+        }
+      : {}),
     unique: false,
   }))
 }
