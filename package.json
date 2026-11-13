@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "4.0.0-beta.7",
+  "version": "4.0.0-beta.9",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -198,7 +198,7 @@
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
     "monaco-editor": "0.57.0",
-    "mongoose": "9.9.2",
+    "mongoose": "9.11.4",
     "next": "16.4.2",
     "node-gyp": "12.3.0",
     "open": "^10.1.0",

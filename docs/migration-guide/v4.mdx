@@ -18,6 +18,12 @@ npx @payloadcms/codemod
 
 The codemod is idempotent and safe to run on a partially-migrated project.
 
+## Database migrations
+
+Payload 4 adds new tables and columns. On SQL adapters (Postgres, SQLite and D1), generate one migration after upgrading with `payload migrate:create`, check it, and run it with `payload migrate`. In development, the schema is pushed automatically. MongoDB needs no migration for new fields.
+
+Changes that need more than that, like renamed columns, say so in their own section below.
+
 ## Breaking Changes
 
 ### Form-state data utilities are renamed
@@ -93,6 +99,20 @@ npx @payloadcms/codemod --transform migrate-payload-request-creation
 
 Automatic call migration requires a plain identifier payload argument and either `{}` or an initialized local `const` options identifier. The options type must expose all seven old option properties, or be `any`. For that identifier form, the generated argument captures payload first and uses forwarding getters for `context`, `depth`, `fallbackLocale`, `locale`, `req`, `urlSuffix`, and `user`. This preserves inherited getters, their read order, and rejected promises from throwing getters without reading unrelated properties. Complex expressions, mutable/unresolved options bindings, narrow option types, collisions, and unsupported type usages are left unchanged with notes for manual migration.
 
+### Cookie prefixes are normalized and validated
+
+Projects configured with `cookiePrefix: ''` now use the default `payload` prefix, changing the auth cookie name from `-token` to `payload-token`. Omitting `cookiePrefix` or using a valid non-empty custom prefix keeps the same cookie names.
+
+Prefixes containing whitespace or other invalid [cookie-name characters](https://www.rfc-editor.org/rfc/rfc6265#section-4.1.1) now throw `InvalidConfiguration` during config sanitization. Update these prefixes to use valid characters before starting Payload. Changing a prefix changes its cookie names, so existing users must sign in again.
+
+When upgrading a project with an empty prefix:
+
+- Users with existing `-token` sessions must sign in again.
+- Custom integrations that read or write `-token` must use `payload-token`.
+- Existing `-token` cookies are no longer read or cleared by Payload. Remove them or allow them to expire.
+
+The empty `cookiePrefix` setting can be removed from the config to use the default.
+
 ### JWT authentication is versioned without moving token data
 
 Payload 4 keeps the decoded JWT payload flat, so integrations can continue reading `id`, `collection`, `sid`, `email`, and fields selected by `saveToJWT` from the same paths as Payload 3.
@@ -143,12 +163,6 @@ if (decodeProtectedHeader(token).authVersion !== JWT_AUTH_VERSION) {
 A token is also rejected if its `collection` is not auth-enabled or has `disableLocalStrategy` enabled.
 
 See [Token Data](../authentication/token-data) for the full token data shape.
-
-### Sessions track their refreshes
-
-Auth collections with `useSessions` (the default) now store two more fields on each session, `refreshCount` and `refreshedAt`. [Refresh tokens](../authentication/overview#refresh-tokens) use them to tell the latest refresh token apart from older ones.
-
-On SQL adapters this adds two columns to each `<collection>_sessions` table, so existing projects need a database migration. In development the schema is pushed automatically; in production, generate a migration with `payload migrate:create` and run `payload migrate`. Existing sessions keep working, since an empty `refreshCount` counts as `0`. MongoDB needs no migration.
 
 ### Local API access is now enforced by default #overrideaccess-now-defaults-to-false-on-local-api-operations
 
@@ -358,7 +372,7 @@ Collections and globals now have `versions: true` by default (`maxPerDoc`/`max: 
 
 **What changes:**
 
-- Any collection or global without an explicit `versions` property will automatically get a `_<slug>_versions` table or collection in the database. You will need to run a database migration to add these new tables for existing projects.
+- Any collection or global without an explicit `versions` property will automatically get a `_<slug>_versions` table or collection in the database (see [Database migrations](#database-migrations)).
 - Auth collections such as Users do **not** get versions by default — the built-in user collection already ships with `versions: false`, and you should do the same for any custom auth collection.
 - The bare `versions: true` you may have added previously is now redundant and can be removed.
 
@@ -409,7 +423,7 @@ Collections and globals now track authorship by default: Payload injects `create
 
 **What changes:**
 
-- Every non-internal collection and global gains `createdBy` and `updatedBy` when your config has at least one auth collection. On SQL adapters this adds relationship rows (stored in each entity's `_rels` table), so existing projects need a database migration. In development the schema is pushed automatically; in production, generate a migration with `payload migrate:create` and run `payload migrate`. Existing documents are backfilled with `null`.
+- Every non-internal collection and global gains `createdBy` and `updatedBy` when your config has at least one auth collection. On SQL adapters this adds relationship rows in each entity's `_rels` table (see [Database migrations](#database-migrations)). Existing documents are backfilled with `null`.
 - `createdBy` is only derived on a document's first write, so editing a document whose `createdBy` is `null` (for example a migrated or anonymously created document) does not backfill the editor as the creator.
 - Payload's internal system collections and globals are excluded automatically: `payload-jobs`, `payload-jobs-stats`, `payload-preferences`, `payload-locked-documents`, `payload-migrations`, `payload-query-presets`, and the KV collection.
 
@@ -1154,6 +1168,12 @@ Remove `diffMethod` from your props. If you passed it on to a diffing utility, p
   }) => {
 ```
 
+### `root` removed from the `Endpoint` type
+
+The deprecated `root` property has been removed from the `Endpoint` type. It has been typed as `never` since 3.0, so it couldn't be set, and Payload ignored it.
+
+To serve a route outside of `routes.api`, add it to your app directly, e.g. as a [Next.js route handler](https://nextjs.org/docs/app/api-reference/file-conventions/route).
+
 ### Collection after-operation hooks no longer report read operations
 
 The deprecated `'read'` value for the `operation` argument of collection `afterOperation` hooks has been removed. Payload has not dispatched `afterOperation` with `operation: 'read'` for some time — the `find` and `findByID` operations report their own names (`'find'` and `'findByID'`) instead.
@@ -1272,9 +1292,9 @@ The deprecated `findMigrationDir` re-export has been removed from `@payloadcms/d
 + import { findMigrationDir } from 'payload'
 ```
 
-### Minimum supported Node.js version is now 24.22.1 ([#16540](https://github.com/payloadcms/payload/pull/16540))
+### Minimum supported Node.js version is now 24.22.3 ([#16540](https://github.com/payloadcms/payload/pull/16540))
 
-The minimum supported Node.js version is now **24.22.1** (previously 18.20.2). Upgrade your runtime — along with any CI, Docker images, and deployment targets — to the latest node LTS version or newer before upgrading to 4.0.
+The minimum supported Node.js version is now **24.22.3** (previously 18.20.2). Upgrade your runtime — along with any CI, Docker images, and deployment targets — to the latest node LTS version or newer before upgrading to 4.0.
 
 ### Minimum supported Next.js version is now 16.4.1 ([#16537](https://github.com/payloadcms/payload/pull/16537))
 
@@ -1733,13 +1753,13 @@ Generated workflow slugs and explicit input objects continue to work as before. 
 
 When jobs are enabled, Payload now always adds the `payload-jobs-stats` global and the `meta` field on the `payload-jobs` collection. Previously, these were only added when a task or workflow used a schedule.
 
-Existing projects that use sqlite/postgres and jobs may need a database migration.
+On SQL adapters this adds tables and columns (see [Database migrations](#database-migrations)).
 
 ### Jobs: concurrency controls and parent task logging are always enabled
 
 Concurrency controls add the indexed `concurrencyKey` field to the `payload-jobs` collection. Parent task logging adds parent information to nested task logs. Task log input is also now required and is stored as an empty object when a task has no input.
 
-The `jobs.enableConcurrencyControl` and `jobs.addParentToTaskLog` options have been removed. Existing SQL projects that use jobs should generate a database migration for these schema changes.
+The `jobs.enableConcurrencyControl` and `jobs.addParentToTaskLog` options have been removed. The new fields are new columns on SQL adapters (see [Database migrations](#database-migrations)).
 
 ### Jobs: task and workflow types have been renamed
 
@@ -2244,18 +2264,17 @@ The `alwaysInsertFields` option (on `cloudStoragePlugin` and every `storage-*` a
 
 - Anyone with an upload collection that uses a storage adapter or `cloudStoragePlugin`. Every such collection now gets a hidden `prefix` field, including collections that never configured a `prefix` and collections where the plugin is disabled (`enabled: false`).
 - Anyone who set `alwaysInsertFields` explicitly — the option no longer exists on any storage adapter or plugin option type.
-- Postgres, SQLite, and D1 users: the new field is a new database column. Running `payload migrate:create` will generate a migration that adds a `prefix` column to every affected collection's table.
+- Postgres, SQLite, and D1 users: the new field is a new `prefix` column on every affected collection's table (see [Database migrations](#database-migrations)).
 
 **How to migrate:**
 
 - Remove `alwaysInsertFields` from your storage adapter or `cloudStoragePlugin` config — it has no effect and no longer exists on the option types.
-- For Postgres, SQLite, or D1 projects, run `payload migrate:create` to generate the migration that adds the `prefix` column, then run `payload migrate` to apply it.
 
 ### Upload collections retain originals and file history
 
 Upload collections now store `original` metadata and a `prefix` and `_objectKey` for each stored file (the main file, `original`, and each variant), so saved versions can find their files. New uploads keep their uploaded filename. With a storage adapter, each new file is stored under its own `_objectKey` folder, so update any code or infrastructure that relies on the old object key. When a processed main file and its original share a filename, request the original with `?original=true`; `original.url` already includes it. With local storage, the original gets a counter name instead (for example `photo-1.png`). Files saved by earlier v4 beta releases with an `-original` filename keep that name and are still served. Custom storage adapters should handle the new `params.isOriginal` in `staticHandler`; see [Custom Storage Adapters](../upload/storage-adapters#custom-storage-adapters).
 
-**Postgres and SQLite:** after updating, run `payload migrate:create`, check that it adds these columns to each upload collection table and its versions table, then run `payload migrate`. Existing rows keep `null` values until their next write.
+On Postgres and SQLite, these are new columns on each upload collection table and its versions table (see [Database migrations](#database-migrations)). Existing rows keep `null` values until their next write.
 
 ### Upload collections save crop and focal point edits in `_transforms`
 
@@ -2265,13 +2284,13 @@ Upload collections now have a `_transforms` JSON field that saves the crop and f
 - `focalX` and `focalY` stay available and match `_transforms.focalPoint` when it is set. For a document saved before `_transforms` existed, the first write that saves `_transforms` copies its focal point into `_transforms`.
 - Replacing the file now sets `focalX` and `focalY` to the center, unless the request sends a new focal point. Before, the old values stayed on the document, but the new image sizes did not use them.
 
-**Postgres and SQLite:** run `payload migrate:create`, check that it adds a `_transforms` column to each upload collection table and its versions table, then run `payload migrate`. Existing rows keep `null` until their next write.
+On Postgres and SQLite, `_transforms` is a new column on each upload collection table and its versions table (see [Database migrations](#database-migrations)). Existing rows keep `null` until their next write.
 
 Upload collections also have a core-controlled `_stored` field on the main file, on `original`, and on each entry under `variants`. A value of `false` marks an entry with no stored object. A missing or `null` value means stored, so existing documents need no data backfill. Payload ignores client writes to this field. It is hidden in the Admin Panel, but can appear in API responses; it is not a field-level hidden value. See [Files with no stored default](../upload/transformers#files-with-no-stored-default).
 
 `_stored` is now reserved for these file entries. If an upload collection already defines a custom `_stored` field, rename it and move its data, including data in saved versions, before upgrading. Remove the old custom values from `_stored`: existing `false` values would otherwise be treated as files with no stored object, and writes to the custom field would be ignored.
 
-**Postgres and SQLite:** run `payload migrate:create`, check that it adds the `_stored` columns for file entries in each upload collection and its versions, then run `payload migrate`. Existing rows keep `null`.
+On Postgres and SQLite, `_stored` adds columns for file entries in each upload collection and its versions (see [Database migrations](#database-migrations)). Existing rows keep `null`.
 
 ### File size types have been consolidated ([#16593](https://github.com/payloadcms/payload/pull/16593))
 

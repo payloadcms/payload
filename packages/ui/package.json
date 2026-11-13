@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "4.0.0-beta.7",
+  "version": "4.0.0-beta.9",
   "homepage": "https://payloadcms.com",
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
@@ -322,6 +322,7 @@
       "default": "./src/forms/fieldSchemasToFormState/renderField.tsx"
     },
     "./css/app.css": "./src/css/app.css",
+    "./css/tokens": "./src/css/tokens.css",
     "./assets": {
       "import": "./src/assets/index.ts",
       "types": "./src/assets/index.ts",
@@ -427,6 +428,7 @@
         "default": "./dist/styles.css"
       },
       "./css/app.css": "./dist/css/app.css",
+      "./css/tokens": "./dist/css/tokens.css",
       "./rsc": {
         "import": "./dist/exports/rsc/index.js",
         "types": "./dist/exports/rsc/index.d.ts",
@@ -716,6 +718,6 @@
     "react-dom": "^19.3.1"
   },
   "engines": {
-    "node": ">=24.22.1"
+    "node": "^24.22.3 || >=26.13.1"
   }
 }

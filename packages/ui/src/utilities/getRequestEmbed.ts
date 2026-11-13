@@ -12,4 +12,4 @@ type GetRequestEmbedArgs = {
  * params.
  */
 export const getRequestEmbed = ({ config, cookies }: GetRequestEmbedArgs): boolean =>
-  cookies.get(`${config.cookiePrefix || 'payload'}-embed`) === 'true'
+  cookies.get(`${config.cookiePrefix}-embed`) === 'true'

@@ -83,25 +83,19 @@ async function build() {
   })
 
   try {
-    // The esbuild pass above bundles only component styles. The design tokens
-    // live in `src/css/*.css` (referenced via `src/styles.css`'s `@import`
-    // chain). `copyfiles` also copies `src/styles.css` to `dist/styles.css`,
-    // but the write below would overwrite it — dropping the tokens entirely.
-    // Consumers that load `styles.css` directly (the `@payloadcms/ui/css`
-    // export, and `css/app.css`'s `@import '../styles.css'`) would then get
-    // components with no CSS custom properties, so every `var(--spacer-*)`
-    // resolves empty (e.g. switch toggles collapse to 0×0). Prepend the token
-    // chain so the published `styles.css` is a complete, self-contained sheet.
-    // Read the tokens straight from `src/css/*.css` so this works regardless of
-    // `directoryArg` (e.g. `dist` for the normal build, `esbuild` for the
-    // bundle-size analysis build, which `copyfiles` does not populate).
+    // Writing esbuild's component styles alone would overwrite the base stylesheet copied by copyfiles.
+    // Include the entry's imports and global rules so published styles retain the tokens that prevent controls from collapsing.
+    // Read from source because copyfiles does not populate alternative output directories such as esbuild.
     const stylesEntry = fs.readFileSync('src/styles.css', 'utf8')
-    const tokenCss = [...stylesEntry.matchAll(/@import\s+['"]\.\/(css\/[^'"]+)['"]/g)]
-      .map((match) => fs.readFileSync(path.join('src', match[1]), 'utf8'))
-      .join('\n')
+
+    const baseCss = stylesEntry.replace(
+      /@import\s+['"]\.\/(css\/[^'"]+)['"];?/g,
+      (_import, relativePath) => fs.readFileSync(path.join('src', relativePath), 'utf8'),
+    )
+
     const componentCss = fs.readFileSync('dist-styles/index.css', 'utf8')
 
-    fs.writeFileSync(`${directoryArg}/styles.css`, `${tokenCss}\n${componentCss}`, 'utf8')
+    fs.writeFileSync(`${directoryArg}/styles.css`, `${baseCss}\n${componentCss}`, 'utf8')
     fs.rmSync('dist-styles', { recursive: true })
   } catch (err) {
     console.error(`Error while bundling styles.css and removing dist-styles: ${err}`)
@@ -173,8 +167,8 @@ function require(m) {
         }),*/
     ],
     sourcemap: true,
-    // 24.22.1 is the lowest version of node supported by Payload
-    target: 'node24.22.1',
+    // 24.22.3 is the lowest version of node supported by Payload
+    target: 'node24.22.3',
   })
   console.log('client.ts bundled successfully')
 
@@ -212,8 +206,8 @@ function require(m) {
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [removeCSSImports, commonjs()],
     sourcemap: true,
-    // 24.22.1 is the lowest version of node supported by Payload
-    target: 'node24.22.1',
+    // 24.22.3 is the lowest version of node supported by Payload
+    target: 'node24.22.3',
   })
   console.log('shared.ts bundled successfully')
 

@@ -110,8 +110,8 @@ async function build() {
     minify: true,
     metafile: true,
     treeShaking: true,
-    // 24.22.1 is the lowest version of node supported by Payload
-    target: 'node24.22.1',
+    // 24.22.3 is the lowest version of node supported by Payload
+    target: 'node24.22.3',
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [
       removeCSSImports,

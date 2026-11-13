@@ -9,12 +9,6 @@ import { getFieldsToSign } from './getFieldsToSign.js'
 import { jwtSign } from './jwt.js'
 import { extendSession, removeExpiredSessions, revokeSession } from './sessions.js'
 
-/**
- * How long the refresh token from right before the latest refresh still works, in milliseconds.
- * Clients that send requests in parallel can refresh twice at once.
- */
-const reuseInterval = 30 * 1000
-
 /** What a refresh token points to. It's encrypted, so clients can't read or change it. */
 type RefreshTokenContents = {
   collection: string
@@ -40,11 +34,19 @@ export const redeemRefreshToken = async ({
   collection,
   refreshToken,
   req,
+  reuseInterval = 30 * 1000,
 }: {
   /** Only accept refresh tokens of this collection. */
   collection?: string
   refreshToken: string
   req: PayloadRequest
+  /**
+   * How long the refresh token from right before the latest refresh still works, in milliseconds.
+   * Clients that send requests in parallel can refresh twice at once. `0` means none.
+   *
+   * @default 30000
+   */
+  reuseInterval?: number
 }): Promise<{
   collectionConfig: SanitizedCollectionConfig
   exp: number

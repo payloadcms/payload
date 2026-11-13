@@ -8,6 +8,7 @@ import {
   deepCopyObjectSimpleWithoutReactComponents,
   getDataByPath,
   hasDraftValidationEnabled,
+  parseErrorResponse,
   wait,
 } from 'payload/shared'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -543,38 +544,18 @@ export const useFormSubmission = ({
           }
 
           if (Array.isArray(json.errors)) {
-            const [fieldErrors, nonFieldErrors] = json.errors.reduce(
-              ([fieldErrs, nonFieldErrs], err) => {
-                const newFieldErrs = []
-                const newNonFieldErrs = []
-
-                if (err?.message) {
-                  newNonFieldErrs.push(err)
-                }
-
-                if (Array.isArray(err?.data?.errors)) {
-                  err.data?.errors.forEach((dataError) => {
-                    if (dataError?.path) {
-                      newFieldErrs.push(dataError)
-                    } else {
-                      newNonFieldErrs.push(dataError)
-                    }
-                  })
-                }
-
-                return [
-                  [...fieldErrs, ...newFieldErrs],
-                  [...nonFieldErrs, ...newNonFieldErrs],
-                ]
-              },
-              [[], []],
-            )
+            const { fieldErrors, nonFieldErrors } = parseErrorResponse({ body: json })
 
             setIsValid(false)
 
             applyFieldErrors({ errors: fieldErrors })
 
-            nonFieldErrors.forEach((err) => {
+            nonFieldErrors.forEach((error) => {
+              const err = {
+                ...error,
+                message: typeof error.message === 'string' ? error.message : t('error:unknown'),
+              }
+
               // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
               if (
                 onNonFieldError?.(

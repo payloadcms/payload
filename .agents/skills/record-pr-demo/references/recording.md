@@ -34,7 +34,7 @@ Prefer 10–45 seconds. Avoid long typing sequences, setup screens, loading wait
 
 ## Editorial annotations over the recording
 
-For a known step sequence, declare `presentation.annotationSteps` and select the [sidebar API](window-chrome.md#step-sidebar). Call `showAnnotation` when an explanation becomes relevant and `hideAnnotation` when it no longer applies. Keep the scenario’s change metadata constant. For a multi-step sidebar, supply the step’s one-based `index` and the full declared step count as `total` on every call. In the top layout, `index` and `total` are optional and default to 1. If the scenario uses annotations, show the initial note before `ready()` and keep it visible at that marker. Starting annotations after an unannotated opening is rejected. Recordings without annotations remain supported. The shared component controls layout, progress, and transitions; see [window-chrome.md](window-chrome.md).
+For a known step sequence, declare `presentation.annotationSteps` and select the [sidebar API](window-chrome.md#step-sidebar). Call `showAnnotation` when an explanation becomes relevant and `hideAnnotation` when it no longer applies. Keep the scenario’s change metadata constant. For a multi-step sidebar, supply the step’s one-based `index` and the full declared step count as `total` on every call. For a single current sidebar note without declared steps, `index` and `total` default to 1. If the scenario uses annotations, show the initial note before `ready()` and keep it visible at that marker. Starting annotations after an unannotated opening is rejected. Recordings without annotations remain supported. The shared component controls layout, progress, and transitions; see [window-chrome.md](window-chrome.md).
 
 ```js
 await showAnnotation({
@@ -115,6 +115,7 @@ The recorder supplies:
 - `moveCursor(locator, options?)`: smoothly points at a locator and pauses without clicking;
 - `circleCursor(locator, options?)`: approaches a visible target, makes two tight loops near its center, and eases to rest without clicking;
 - `page`: the application iframe facade; navigation, locators, and evaluation target the app, while input devices and page events use the recording page;
+- `pressKey({ key, settleMs = 800 })`: press a key or shortcut with an 80ms hold, then let its result settle; validation skips the hold and settling time. The key logger observes the real key event immediately. Override `settleMs` when an action needs more or less time;
 - `pause(milliseconds = 700)`: a short presentation pause;
 - `ready()`: marks the loaded opening state and holds it for 1.2 seconds; call it exactly once before the first visible interaction;
 - `typeText({ locator, text, clear = false, delay = 50 })`: click to focus, optionally select all with `ControlOrMeta+A`, then type character by character;
@@ -127,7 +128,7 @@ The recorder supplies:
 The scenario drives the same controls a person uses:
 
 - Open the starting route with one `page.goto()` before UI preparation and `ready()`. Reach subsequent routes by clicking visible links, navigation items, breadcrumbs, or buttons. Do not jump to known document URLs between steps.
-- Use the recorder's `click` helper for pointer actions. Use `page.keyboard.press()` and `page.keyboard.type()` for shortcuts and paced typing after focusing the control with a click. Do not use `fill()`, `selectOption()`, synthetic event dispatch, or DOM value assignments.
+- Use the recorder's `click` helper for pointer actions. Use `pressKey({ key })` for shortcuts and navigation keys, and `typeText` or `page.keyboard.type()` for paced typing after focusing the control with a click. Do not use `fill()`, `selectOption()`, synthetic event dispatch, or DOM value assignments.
 - Use `scroll` with `input: 'wheel'` and `cursorPlacement: 'inside'` for visible scrolling. Reveal offscreen controls with a wheel gesture before clicking them; do not rely on locator auto-scrolling.
 - In the scenario function, create and reset content through these same gestures, including UI preparation before `ready()`. Put optional API seeding and cleanup in `setup`/`teardown`, outside the walkthrough. Do not call REST endpoints, the Local API, application functions, or mutate browser storage to advance the demonstrated interaction.
 - Locators, assertions, network observation, and read-only DOM measurements may verify state. Presentation annotations, window framing, recording, encoding, and verification are harness operations.
@@ -136,7 +137,7 @@ For example, edit a focused field through keyboard input:
 
 ```js
 await click(page.getByRole('textbox', { name: 'Title', exact: true }))
-await page.keyboard.press('ControlOrMeta+A')
+await pressKey({ key: 'ControlOrMeta+A' })
 await page.keyboard.type('Halloween Sale', { delay: 50 })
 await click(page.getByRole('button', { name: 'Save', exact: true }))
 ```
@@ -273,7 +274,7 @@ Set `presentation.accessibility: true` to show navigation keys and shortcuts. Or
 
 Also set `presentation.showAnnouncements: true` to display observed live-region text. This captures DOM text, not actual screen-reader audio. Feedback remains available when the step note is hidden. The recorder preserves application focus and native focus styling; it adds no focus outline.
 
-Use real keyboard events such as `page.keyboard.press('Tab')` and `page.keyboard.press('Enter')`, with pauses around important commands. Long announcements and older history may truncate, so verify the relevant evidence in the finished take. Preview with `?accessibility&announcements&kind=fix`; layout and styling come from the shared component.
+Use `pressKey({ key: 'Tab' })` and `pressKey({ key: 'Enter', settleMs: 800 })` for real keyboard events with readable pacing. Long announcements and older history may truncate, so verify the relevant evidence in the finished take. Preview with `?accessibility&announcements&kind=fix`; layout and styling come from the shared component.
 
 ### Reuse a scenario with or without a11y feedback
 
@@ -286,7 +287,7 @@ node .agents/skills/record-pr-demo/scripts/prepare-demo.mjs candidate --scenario
 
 ### Capture resolution and encoding
 
-The default canvas fits the initial application viewport at 1:1 scale, including space for chrome and annotations. With the left sidebar, a 1440×900 viewport produces an 1794×1086 video so the initial app window stays at 1:1 scale. The top layout produces a 1600×1148 video, or 1600×1188 with accessibility feedback. The canvas stays fixed during responsive resizing. An explicit `presentation.canvas` overrides those dimensions and can scale the app to fit. `--viewport` controls the application iframe's CSS dimensions.
+The default canvas fits the initial application viewport at 1:1 scale, including space for chrome and annotations. With the left sidebar, a 1440×900 viewport produces an 1794×1086 video so the initial app window stays at 1:1 scale. Accessibility feedback appears at the bottom of the sidebar and uses the same canvas dimensions. The canvas stays fixed during responsive resizing. An explicit `presentation.canvas` overrides those dimensions and can scale the app to fit. `--viewport` controls the application iframe's CSS dimensions.
 
 The MP4 converter uses H.264 CRF 18 to preserve detail through conversion. The existing 10 MB review/upload budget still applies.
 

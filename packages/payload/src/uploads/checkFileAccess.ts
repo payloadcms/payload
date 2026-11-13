@@ -50,6 +50,7 @@ export const checkFileAccess = async ({
           })
         : await req.payload.db.findOne({
             collection: config.slug,
+            locale: req.locale ?? undefined,
             req,
             where: { and: [{ id: { equals: documentID } }, ...constraints] },
           })

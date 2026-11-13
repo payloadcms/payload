@@ -3,6 +3,7 @@ import type { Payload, SanitizedCollectionConfig } from 'payload'
 import { randomBytes, randomUUID } from 'crypto'
 import { serialize } from 'object-to-formdata'
 import { APIError, NotFound } from 'payload'
+import { parseErrorResponse } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
@@ -2106,6 +2107,220 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
   })
 
   test.describe('Error Handler', () => {
+    test.describe('API error response parser', () => {
+      test('should retain serialized validation details alongside their summary', async ({
+        payload,
+        restClient,
+      }) => {
+        const titleField = payload.collections.posts.config.fields.find(
+          (field) => 'name' in field && field.name === 'title',
+        )
+
+        if (titleField?.type !== 'text') {
+          throw new Error('Expected the posts title field')
+        }
+
+        const originalValidate = titleField.validate
+
+        try {
+          titleField.validate = () => 'Use a different title'
+
+          const response = await restClient.POST(`/${postsSlug}`, {
+            body: JSON.stringify({ title: 'Invalid title' }),
+          })
+          const body = await response.json()
+          const originalBody = structuredClone(body)
+          const result = parseErrorResponse({ body })
+
+          expect(response.status).toBe(400)
+          expect(result.fieldErrors).toEqual([
+            expect.objectContaining({ message: 'Use a different title', path: 'title' }),
+          ])
+          expect(result.nonFieldErrors).toEqual([body.errors[0]])
+          expect(result.message).toBeUndefined()
+          expect(body).toEqual(originalBody)
+        } finally {
+          titleField.validate = originalValidate
+        }
+      })
+
+      test('should parse a general API failure without inventing field errors', async ({
+        restClient,
+      }) => {
+        const response = await restClient.GET('/api-error-here')
+        const body = await response.json()
+
+        expect(response.status).toBe(500)
+        expect(parseErrorResponse({ body })).toEqual({
+          fieldErrors: [],
+          nonFieldErrors: [{ message: 'Something went wrong.' }],
+        })
+      })
+
+      test('should preserve mixed error metadata and repeated localized paths', async ({
+        payload,
+        restClient,
+      }) => {
+        const body = await getOverriddenErrorBody({
+          body: {
+            errors: [
+              {
+                data: {
+                  code: 'quota',
+                  errors: [
+                    { label: { en: 'Title' }, locale: 'en', message: 'Required', path: 'title' },
+                    { locale: 'fr', message: 'Obligatoire', path: 'title', tableName: 'posts' },
+                    { code: 'quota', data: { remaining: 0 }, message: 'Free some space' },
+                  ],
+                },
+                message: 'Cannot save',
+                name: 'APIError',
+              },
+            ],
+            message: 'Request failed',
+          },
+          payload,
+          restClient,
+        })
+        const originalBody = structuredClone(body)
+
+        expect(parseErrorResponse({ body })).toEqual({
+          fieldErrors: [
+            { label: { en: 'Title' }, locale: 'en', message: 'Required', path: 'title' },
+            { locale: 'fr', message: 'Obligatoire', path: 'title', tableName: 'posts' },
+          ],
+          message: 'Request failed',
+          nonFieldErrors: [
+            expect.objectContaining({
+              data: expect.objectContaining({ code: 'quota' }),
+              message: 'Cannot save',
+              name: 'APIError',
+            }),
+            { code: 'quota', data: { remaining: 0 }, message: 'Free some space' },
+          ],
+        })
+        expect(body).toEqual(originalBody)
+      })
+
+      test('should normalize legacy field errors while preferring canonical paths', async ({
+        payload,
+        restClient,
+      }) => {
+        const body = await getOverriddenErrorBody({
+          body: {
+            errors: [
+              { field: 'title', message: 'Already taken' },
+              {
+                data: {
+                  errors: [
+                    { field: 'number', message: 'Invalid number' },
+                    { field: 'oldPath', message: 'Invalid title', path: 'title' },
+                  ],
+                },
+                message: 'Validation failed',
+              },
+            ],
+          },
+          payload,
+          restClient,
+        })
+
+        expect(parseErrorResponse({ body })).toEqual({
+          fieldErrors: [
+            { message: 'Already taken', path: 'title' },
+            { message: 'Invalid number', path: 'number' },
+            { message: 'Invalid title', path: 'title' },
+          ],
+          nonFieldErrors: [expect.objectContaining({ message: 'Validation failed' })],
+        })
+      })
+
+      test('should preserve document error metadata without treating an invalid field alias as a path', async ({
+        payload,
+        restClient,
+      }) => {
+        const body = await getOverriddenErrorBody({
+          body: {
+            errors: [{ field: 42, id: 'document-id', message: 'Cannot update', path: 'operation' }],
+          },
+          payload,
+          restClient,
+        })
+
+        expect(parseErrorResponse({ body })).toEqual({
+          fieldErrors: [],
+          nonFieldErrors: [
+            { field: 42, id: 'document-id', message: 'Cannot update', path: 'operation' },
+          ],
+        })
+      })
+
+      test('should retain incomplete nested records without accepting malformed field metadata', async ({
+        payload,
+        restClient,
+      }) => {
+        const body = await getOverriddenErrorBody({
+          body: {
+            errors: [
+              null,
+              42,
+              [],
+              {
+                data: {
+                  errors: [
+                    null,
+                    false,
+                    [],
+                    { path: 'number' },
+                    { code: 'missing-message', message: 42 },
+                    {
+                      label: { en: 7 },
+                      locale: 42,
+                      message: 'Invalid number',
+                      path: 'number',
+                      tableName: 42,
+                    },
+                  ],
+                },
+                message: 'Validation failed',
+              },
+            ],
+          },
+          payload,
+          restClient,
+        })
+
+        expect(parseErrorResponse({ body })).toEqual({
+          fieldErrors: [{ message: 'Invalid number', path: 'number' }],
+          nonFieldErrors: [
+            expect.objectContaining({ message: 'Validation failed' }),
+            { path: 'number' },
+            { code: 'missing-message' },
+          ],
+        })
+      })
+
+      for (const { body: responseBody, message } of [
+        { body: {}, message: undefined },
+        { body: { errors: [] }, message: undefined },
+        { body: { errors: null, message: 42 }, message: undefined },
+        { body: { errors: {}, message: 'Body message' }, message: 'Body message' },
+      ]) {
+        test(`should safely parse an overridden response ${JSON.stringify(responseBody)}`, async ({
+          payload,
+          restClient,
+        }) => {
+          const body = await getOverriddenErrorBody({ body: responseBody, payload, restClient })
+
+          expect(parseErrorResponse({ body })).toEqual({
+            fieldErrors: [],
+            ...(message === undefined ? {} : { message }),
+            nonFieldErrors: [],
+          })
+        })
+      }
+    })
+
     test('should return the minimum allowed information about internal errors', async ({
       restClient,
     }) => {
@@ -2358,6 +2573,30 @@ test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false
     ).resolves.toBeTruthy()
   })
 })
+
+async function getOverriddenErrorBody({
+  body,
+  payload,
+  restClient,
+}: {
+  body: Record<string, unknown>
+  payload: Payload
+  restClient: RESTClient
+}): Promise<unknown> {
+  const originalHooks = payload.config.hooks.afterError
+
+  try {
+    payload.config.hooks.afterError = [() => ({ response: body })]
+
+    const response = await restClient.GET('/api-error-here')
+
+    expect(response.status).toBe(500)
+
+    return await response.json()
+  } finally {
+    payload.config.hooks.afterError = originalHooks
+  }
+}
 
 async function createPost({ restClient }: { restClient: RESTClient }, overrides?: Partial<Post>) {
   const { doc } = await restClient

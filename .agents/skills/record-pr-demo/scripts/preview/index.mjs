@@ -1,4 +1,4 @@
-import { bindDemoHistory, mountDemoChrome } from '../WindowChrome/index.mjs'
+import { bindDemoHistory, getDefaultCanvas, mountDemoChrome } from '../WindowChrome/index.mjs'
 import { mountAnnotationSidebar } from '../WindowChrome/sidebar.mjs'
 import { observeAccessibility } from '../accessibility-demo.mjs'
 
@@ -6,26 +6,27 @@ const isAccessibility = new URLSearchParams(location.search).has('accessibility'
 
 let theme = new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light'
 
+const canvas = getDefaultCanvas({ viewport: { width: 1280, height: 720 } })
 const root = document.querySelector('#chrome')
 const application = document.createElement('iframe')
+const change = {
+  kind:
+    { feature: 'Feature', fix: 'Fix', bug: 'Bug' }[
+      new URLSearchParams(location.search).get('kind')
+    ] ?? 'Feature',
+  title: isAccessibility ? 'Make keyboard interactions visible' : 'Responsive collection lists',
+  description: isAccessibility
+    ? 'Follow keyboard input and movement announcements.'
+    : 'Browse and manage content on desktop, tablet, and mobile.',
+}
 const chrome = mountDemoChrome({
   onNavigate: (direction) => application.contentWindow.history.go(direction),
   onRefresh: refreshApplication,
   root,
+  canvas,
   accessibility: isAccessibility,
-  annotationLayout: 'left',
   showAnnouncements: new URLSearchParams(location.search).has('announcements'),
   theme,
-  change: {
-    kind:
-      { feature: 'Feature', fix: 'Fix', bug: 'Bug' }[
-        new URLSearchParams(location.search).get('kind')
-      ] ?? 'Feature',
-    title: isAccessibility ? 'Make keyboard interactions visible' : 'Responsive collection lists',
-    description: isAccessibility
-      ? 'Follow keyboard input and movement announcements.'
-      : 'Browse and manage content on desktop, tablet, and mobile.',
-  },
 })
 application.slot = 'content'
 application.title = 'Responsive sample application'
@@ -143,10 +144,9 @@ manySteps.addEventListener('change', () => {
   else url.searchParams.delete('manySteps')
   location.href = url.href
 })
-const layoutControl = document.querySelector('#annotation-layout')
-layoutControl.closest('.toolbar-field').hidden = isAccessibility
 const sidebar = mountAnnotationSidebar({
   root,
+  change,
   steps,
   onSelect: (index) => {
     renderAt({
@@ -157,7 +157,6 @@ const sidebar = mountAnnotationSidebar({
     stop()
   },
 })
-layoutControl.addEventListener('change', () => renderAt({ milliseconds: time }))
 
 function renderAt({ milliseconds }) {
   time = Math.max(0, Math.min(timelineDuration, milliseconds))
@@ -174,25 +173,9 @@ function renderAt({ milliseconds }) {
         ? 1
         : 2
   const step = { ...steps[stepIndex], index: stepIndex + 1 }
-  chrome.setAnnotation(
-    document.querySelector('#annotation').checked
-      ? isAccessibility
-        ? {
-            index: 1,
-            total: 1,
-            title: 'Try it with the keyboard',
-            body: 'Click a Move down button, then use Tab and Enter. Commands and announcements appear below this step.',
-          }
-        : { ...step, total: steps.length }
-      : null,
+  sidebar.setAnnotation(
+    document.querySelector('#annotation').checked ? { ...step, total: steps.length } : null,
   )
-  sidebar.update({
-    index: stepIndex,
-    width,
-    height: 720,
-    enabled: !isAccessibility && layoutControl.value !== 'top',
-    visible: document.querySelector('#annotation').checked,
-  })
   timeline.value = String(time)
   document.querySelector('#time').textContent =
     `${(time / 1000).toFixed(2)} / ${(timelineDuration / 1000).toFixed(2)} s`
@@ -204,7 +187,8 @@ function stop() {
   cancelAnimationFrame(animation)
   animation = undefined
   play.textContent = 'Play resize'
-  document.querySelector('#status').textContent = `Window: ${width} × 720. Canvas: 1600 × 1000.`
+  document.querySelector('#status').textContent =
+    `Window: ${width} × 720. Canvas: ${canvas.width} × ${canvas.height}.`
 }
 document.querySelectorAll('[data-width]').forEach((button) =>
   button.addEventListener('click', () => {
@@ -243,6 +227,7 @@ play.addEventListener('click', () => {
   animation = requestAnimationFrame(tick)
 })
 renderAt({ milliseconds: 0 })
+stop()
 
 let isRefreshing = false
 
