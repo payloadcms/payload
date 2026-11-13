@@ -1,6 +1,13 @@
 'use client'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 
+import {
+  getHighContrastModeFromSystem,
+  getThemeFromCookie,
+  getThemeFromSystem,
+  resolveHighContrastMode,
+  resolveTheme,
+} from '../../utilities/theme.js'
 import { useConfig } from '../Config/index.js'
 import { useSearchParams } from '../RouterAdapter/index.js'
 import { defaultTheme, type Theme } from './shared.js'
@@ -32,45 +39,15 @@ function setCookie(cname: string, cvalue: string, exdays: number) {
   document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/'
 }
 
-const detectTheme = (cookieKey: string): { isAutoMode: boolean; theme: Theme } => {
-  const fromCookie = window.document.cookie
-    .split('; ')
-    .find((row) => row.startsWith(`${cookieKey}=`))
-    ?.split('=')[1]
-
-  const theme: Theme =
-    fromCookie === 'light' || fromCookie === 'dark'
-      ? fromCookie
-      : window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
+const detectTheme = (cookieKey: string): { autoMode: boolean; theme: Theme } => {
+  const { autoMode, theme } = resolveTheme({
+    themeFromCookie: getThemeFromCookie({ cookieKey }),
+    themeFromSystem: getThemeFromSystem(),
+  })
 
   document.documentElement.setAttribute('data-theme', theme)
 
-  return { isAutoMode: fromCookie !== 'light' && fromCookie !== 'dark', theme }
-}
-
-const detectHighContrastMode = (cookieKey: string): boolean => {
-  const fromCookie =
-    window.document.cookie
-      .split('; ')
-      .find((row) => row.startsWith(`${cookieKey}=`))
-      ?.split('=')[1] ?? null
-
-  const isHighContrast =
-    fromCookie === 'true'
-      ? true
-      : fromCookie === 'false'
-        ? false
-        : !!(window.matchMedia && window.matchMedia('(prefers-contrast: more)').matches)
-
-  if (isHighContrast) {
-    document.documentElement.setAttribute('data-enhanced-contrast', '')
-  } else {
-    document.documentElement.removeAttribute('data-enhanced-contrast')
-  }
-
-  return isHighContrast
+  return { autoMode, theme }
 }
 
 const isValidThemeParam = (value: null | string): value is 'auto' | Theme =>
@@ -119,12 +96,7 @@ export const ThemeProvider: React.FC<{
         outerContext.setTheme(themeToSet, options)
         return
       }
-      const resolvedTheme: Theme =
-        themeToSet === 'auto'
-          ? window.matchMedia?.('(prefers-color-scheme: dark)').matches
-            ? 'dark'
-            : 'light'
-          : themeToSet
+      const resolvedTheme = themeToSet === 'auto' ? getThemeFromSystem() : themeToSet
 
       setThemeState(resolvedTheme)
       setAutoMode(themeToSet === 'auto')
@@ -174,7 +146,7 @@ export const ThemeProvider: React.FC<{
       setTheme(themeParam)
       return
     }
-    const { isAutoMode, theme: detectedTheme } = detectTheme(themeCookieKey)
+    const { autoMode: isAutoMode, theme: detectedTheme } = detectTheme(themeCookieKey)
     setThemeState(detectedTheme)
     setAutoMode(isAutoMode)
   }, [isScoped, preselectedTheme, themeCookieKey, themeParam, setTheme])
@@ -183,7 +155,18 @@ export const ThemeProvider: React.FC<{
     if (isScoped) {
       return
     }
-    setHighContrastModeState(detectHighContrastMode(contrastCookieKey))
+    const isHighContrast = resolveHighContrastMode({
+      highContrastModeFromCookie: getThemeFromCookie({ cookieKey: contrastCookieKey }),
+      highContrastModeFromSystem: getHighContrastModeFromSystem(),
+    })
+
+    if (isHighContrast) {
+      document.documentElement.setAttribute('data-enhanced-contrast', '')
+    } else {
+      document.documentElement.removeAttribute('data-enhanced-contrast')
+    }
+
+    setHighContrastModeState(isHighContrast)
   }, [isScoped, contrastCookieKey])
 
   return (

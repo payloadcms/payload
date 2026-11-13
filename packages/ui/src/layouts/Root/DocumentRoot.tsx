@@ -5,7 +5,7 @@ import type { HtmlHTMLAttributes, ReactNode } from 'react'
 import React from 'react'
 
 import type { Theme } from '../../providers/Theme/shared.js'
-import type { RequestThemeSource } from '../../utilities/getRequestTheme.js'
+import type { RequestThemeSource } from '../../utilities/theme.js'
 
 import { defaultTheme } from '../../providers/Theme/shared.js'
 import { ResolveThemeOnClient } from './ResolveThemeOnClient.js'
