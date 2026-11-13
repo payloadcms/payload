@@ -1,8 +1,13 @@
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type { PostgresAdapter } from '@payloadcms/db-postgres'
+import type {
+  Payload,
+  PayloadRequest,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+} from 'payload'
 
 import { Locked, NotFound } from 'payload'
 import { wait } from 'payload/shared'
-import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import type { Post, User } from './payload-types.js'
@@ -10,7 +15,7 @@ import type { Post, User } from './payload-types.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { menuSlug } from './globals/Menu/index.js'
-import { pagesSlug, postsSlug } from './slugs.js'
+import { pagesSlug, postsSlug, simpleSlug, usersSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
@@ -170,15 +175,13 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(updateLockedDoc.text).toEqual('updated post 2')
 
     // Check to make sure the document does not exist in payload-locked-documents anymore
-    try {
-      await payload.findByID({
+    await expect(
+      payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
         overrideAccess: true,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(NotFound)
-    }
+      }),
+    ).rejects.toBeInstanceOf(NotFound)
 
     const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
@@ -230,15 +233,13 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(updateGlobalLockedDoc.globalText).toEqual('global text 2')
 
     // Check to make sure the document does not exist in payload-locked-documents anymore
-    try {
-      await payload.findByID({
+    await expect(
+      payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedGlobalInstance.id,
         overrideAccess: true,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(NotFound)
-    }
+      }),
+    ).rejects.toBeInstanceOf(NotFound)
 
     const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
@@ -279,20 +280,20 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
       overrideAccess: true,
     })
 
-    try {
-      await payload.update({
-        collection: postsSlug,
-        data: {
-          text: 'updated post',
-        },
-        overrideLock: false, // necessary to trigger the lock check
-        id: newPost.id,
-        overrideAccess: true,
-      })
-    } catch (error: any) {
-      expect(error).toBeInstanceOf(Locked)
-      expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
-    }
+    const operation = payload.update({
+      collection: postsSlug,
+      data: {
+        text: 'updated post',
+      },
+      overrideLock: false, // necessary to trigger the lock check
+      id: newPost.id,
+      overrideAccess: true,
+    })
+
+    await expect(operation).rejects.toBeInstanceOf(Locked)
+    await expect(operation).rejects.toThrow(
+      /currently locked by another user and cannot be updated/,
+    )
 
     const updatedPost = await payload.findByID({
       collection: postsSlug,
@@ -319,19 +320,19 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
       overrideAccess: true,
     })
 
-    try {
-      await payload.updateGlobal({
-        data: {
-          globalText: 'updated global text',
-        },
-        overrideLock: false, // necessary to trigger the lock check
-        slug: menuSlug,
-        overrideAccess: true,
-      })
-    } catch (error: any) {
-      expect(error).toBeInstanceOf(Locked)
-      expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
-    }
+    const operation = payload.updateGlobal({
+      data: {
+        globalText: 'updated global text',
+      },
+      overrideLock: false, // necessary to trigger the lock check
+      slug: menuSlug,
+      overrideAccess: true,
+    })
+
+    await expect(operation).rejects.toBeInstanceOf(Locked)
+    await expect(operation).rejects.toThrow(
+      /currently locked by another user and cannot be updated/,
+    )
 
     const updatedGlobalMenu = await payload.findGlobal({
       slug: menuSlug,
@@ -369,17 +370,15 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
       overrideAccess: true,
     })
 
-    try {
-      await payload.delete({
-        collection: postsSlug,
-        id: newPost3.id,
-        overrideLock: false,
-        overrideAccess: true, // necessary to trigger the lock check
-      })
-    } catch (error: any) {
-      expect(error).toBeInstanceOf(Locked)
-      expect(error.message).toMatch(/currently locked and cannot be deleted/)
-    }
+    const operation = payload.delete({
+      collection: postsSlug,
+      id: newPost3.id,
+      overrideLock: false,
+      overrideAccess: true, // necessary to trigger the lock check
+    })
+
+    await expect(operation).rejects.toBeInstanceOf(Locked)
+    await expect(operation).rejects.toThrow(/currently locked and cannot be deleted/)
 
     const findPostDocs = await payload.find({
       collection: postsSlug,
@@ -441,15 +440,13 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(findPostDocs.docs).toHaveLength(0)
 
     // Check to make sure the document does not exist in payload-locked-documents anymore
-    try {
-      await payload.findByID({
+    await expect(
+      payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
         overrideAccess: true,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(NotFound)
-    }
+      }),
+    ).rejects.toBeInstanceOf(NotFound)
 
     const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
@@ -504,15 +501,13 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(updateLockedDoc.text).toEqual('updated post 5')
 
     // Check to make sure the document does not exist in payload-locked-documents anymore
-    try {
-      await payload.findByID({
+    await expect(
+      payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
         overrideAccess: true,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(NotFound)
-    }
+      }),
+    ).rejects.toBeInstanceOf(NotFound)
 
     const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
@@ -557,15 +552,13 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(updateGlobalLockedDoc.globalText).toEqual('updated global text 2')
 
     // Check to make sure the document does not exist in payload-locked-documents anymore
-    try {
-      await payload.findByID({
+    await expect(
+      payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedGlobalInstance.id,
         overrideAccess: true,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(NotFound)
-    }
+      }),
+    ).rejects.toBeInstanceOf(NotFound)
 
     const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
@@ -626,15 +619,13 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(findPostDocs.docs).toHaveLength(0)
 
     // Check to make sure the document does not exist in payload-locked-documents anymore
-    try {
-      await payload.findByID({
+    await expect(
+      payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
         overrideAccess: true,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(NotFound)
-    }
+      }),
+    ).rejects.toBeInstanceOf(NotFound)
 
     const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
@@ -695,4 +686,333 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(docsFromLocksCollection.docs).toHaveLength(1)
     expect((docsFromLocksCollection.docs[0]?.user.value as User)?.id).toEqual(user.id)
   })
+
+  test.options.describe(
+    'Postgres lock transactions',
+    { db: (adapter) => adapter === 'postgres' },
+    () => {
+      for (const isolationLevel of ['read committed', 'repeatable read', 'serializable'] as const) {
+        test(`should reject a save locked after the first ${isolationLevel} read`, async ({
+          payload,
+        }) => {
+          const doc = await payload.create({
+            collection: simpleSlug,
+            data: { fieldA: 'before' },
+            overrideAccess: true,
+          })
+          const transactionID = await payload.db.beginTransaction({ isolationLevel })
+
+          if (!transactionID) {
+            throw new Error('Expected a Postgres transaction')
+          }
+
+          try {
+            const req = { transactionID }
+
+            await payload.findByID({
+              collection: simpleSlug,
+              id: doc.id,
+              overrideAccess: true,
+              req,
+            })
+            await payload.create({
+              collection: lockedDocumentCollection,
+              data: {
+                document: { relationTo: simpleSlug, value: doc.id },
+                user: { relationTo: usersSlug, value: user2.id },
+              },
+              overrideAccess: true,
+            })
+
+            await expect(
+              payload.update({
+                collection: simpleSlug,
+                id: doc.id,
+                data: { fieldA: 'after' },
+                overrideAccess: true,
+                overrideLock: false,
+                req,
+                user,
+              }),
+            ).rejects.toBeInstanceOf(Locked)
+          } finally {
+            await payload.db.rollbackTransaction(transactionID)
+          }
+
+          const remaining = await payload.findByID({
+            collection: simpleSlug,
+            id: doc.id,
+            overrideAccess: true,
+          })
+
+          expect(remaining.fieldA).toBe('before')
+        })
+
+        test(`should skip a bulk delete locked after the first ${isolationLevel} read`, async ({
+          payload,
+        }) => {
+          const doc = await payload.create({
+            collection: simpleSlug,
+            data: {},
+            overrideAccess: true,
+          })
+          const transactionID = await payload.db.beginTransaction({ isolationLevel })
+
+          if (!transactionID) {
+            throw new Error('Expected a Postgres transaction')
+          }
+
+          try {
+            const req = { transactionID }
+
+            await payload.findByID({
+              collection: simpleSlug,
+              id: doc.id,
+              overrideAccess: true,
+              req,
+            })
+            await payload.create({
+              collection: lockedDocumentCollection,
+              data: {
+                document: { relationTo: simpleSlug, value: doc.id },
+                user: { relationTo: usersSlug, value: user2.id },
+              },
+              overrideAccess: true,
+            })
+
+            const result = await payload.delete({
+              collection: simpleSlug,
+              where: { id: { equals: doc.id } },
+              overrideAccess: true,
+              overrideLock: false,
+              req,
+              user,
+            })
+
+            expect(result.docs).toEqual([])
+            expect(result.errors).toEqual([
+              expect.objectContaining({
+                id: doc.id,
+                message: expect.stringContaining('currently locked'),
+              }),
+            ])
+          } finally {
+            await payload.db.rollbackTransaction(transactionID)
+          }
+
+          const remaining = await payload.findByID({
+            collection: simpleSlug,
+            id: doc.id,
+            overrideAccess: true,
+          })
+
+          expect(remaining.id).toBe(doc.id)
+        })
+      }
+
+      test('should save a document using an automatically managed transaction with a full pool', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: simpleSlug,
+          user,
+          data: { fieldA: 'before' },
+        })
+
+        await withLimitedPostgresPool({
+          max: 1,
+          payload,
+          operation: () =>
+            payload.update({
+              collection: simpleSlug,
+              user,
+              id: doc.id,
+              data: { fieldA: 'after' },
+              overrideLock: false,
+            }),
+        })
+
+        const persisted = await payload.findByID({ collection: simpleSlug, user, id: doc.id })
+
+        expect(persisted.fieldA).toBe('after')
+      })
+
+      test('should commit a save and its nested hook update with a full pool', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: simpleSlug,
+          user,
+          data: { fieldA: 'before' },
+        })
+        const relatedDoc = await payload.create({
+          collection: simpleSlug,
+          user,
+          data: { fieldA: 'related before' },
+        })
+        const collectionConfig = payload.collections[simpleSlug].config
+        const originalBeforeChange = collectionConfig.hooks.beforeChange
+
+        try {
+          collectionConfig.hooks.beforeChange = [
+            ...originalBeforeChange,
+            async ({ data, originalDoc, req }) => {
+              if (originalDoc?.id === doc.id) {
+                await req.payload.update({
+                  collection: simpleSlug,
+                  user,
+                  id: relatedDoc.id,
+                  data: { fieldA: 'related after' },
+                  overrideLock: false,
+                  req,
+                })
+              }
+
+              return data
+            },
+          ]
+
+          await withLimitedPostgresPool({
+            max: 1,
+            payload,
+            operation: () =>
+              payload.update({
+                collection: simpleSlug,
+                user,
+                id: doc.id,
+                data: { fieldA: 'after' },
+                overrideLock: false,
+              }),
+          })
+
+          const persisted = await payload.findByID({ collection: simpleSlug, user, id: doc.id })
+          const persistedRelated = await payload.findByID({
+            collection: simpleSlug,
+            user,
+            id: relatedDoc.id,
+          })
+
+          expect(persisted.fieldA).toBe('after')
+          expect(persistedRelated.fieldA).toBe('related after')
+        } finally {
+          collectionConfig.hooks.beforeChange = originalBeforeChange
+        }
+      })
+
+      test('should save a document using its existing transaction', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: simpleSlug,
+          overrideAccess: true,
+          data: { fieldA: 'before' },
+        })
+
+        const updated = await withFullPostgresPool({
+          payload,
+          operation: ({ req }) =>
+            payload.update({
+              collection: simpleSlug,
+              overrideAccess: true,
+              id: doc.id,
+              data: { fieldA: 'after' },
+              overrideLock: false,
+              req,
+            }),
+        })
+
+        expect(updated.fieldA).toBe('after')
+      })
+
+      test('should bulk delete documents using its existing transaction', async ({ payload }) => {
+        const first = await payload.create({
+          collection: simpleSlug,
+          overrideAccess: true,
+          data: {},
+        })
+        const second = await payload.create({
+          collection: simpleSlug,
+          overrideAccess: true,
+          data: {},
+        })
+
+        const result = await withFullPostgresPool({
+          payload,
+          operation: ({ req }) =>
+            payload.delete({
+              collection: simpleSlug,
+              overrideAccess: true,
+              where: { id: { in: [first.id, second.id] } },
+              overrideLock: false,
+              req,
+            }),
+        })
+
+        expect(result.errors).toEqual([])
+        expect(result.docs.map(({ id }) => id).sort()).toEqual([first.id, second.id].sort())
+      })
+    },
+  )
 })
+
+async function withFullPostgresPool<T>({
+  operation,
+  payload,
+}: {
+  operation: (args: { req: Partial<PayloadRequest> }) => Promise<T>
+  payload: Payload
+}): Promise<T> {
+  const transactionIDs: (number | string)[] = []
+
+  return withLimitedPostgresPool({
+    max: 2,
+    payload,
+    operation: async () => {
+      try {
+        // Reserve both connections so an independent lock read cannot borrow another.
+        for (let index = 0; index < 2; index++) {
+          const transactionID = await payload.db.beginTransaction()
+
+          if (!transactionID) {
+            throw new Error('Expected Postgres to start a transaction')
+          }
+
+          transactionIDs.push(transactionID)
+        }
+
+        return await operation({ req: { transactionID: transactionIDs[0] } })
+      } finally {
+        await Promise.all(transactionIDs.map((id) => payload.db.rollbackTransaction(id)))
+      }
+    },
+  })
+}
+
+async function withLimitedPostgresPool<T>({
+  max,
+  operation,
+  payload,
+}: {
+  max: number
+  operation: () => Promise<T>
+  payload: Payload
+}): Promise<T> {
+  const { pool } = payload.db as unknown as PostgresAdapter
+  const originalConnectionTimeout = pool.options.connectionTimeoutMillis
+  const originalMax = pool.options.max
+
+  try {
+    // Bound acquisition waits so a lock read outside the transaction fails instead of hanging.
+    pool.options.connectionTimeoutMillis = 2000
+    pool.options.max = max
+
+    while (pool.totalCount > pool.options.max && pool.idleCount > 0) {
+      const client = await pool.connect()
+
+      client.release(true)
+    }
+
+    return await operation()
+  } finally {
+    pool.options.connectionTimeoutMillis = originalConnectionTimeout
+    pool.options.max = originalMax
+  }
+}

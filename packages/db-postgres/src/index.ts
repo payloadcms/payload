@@ -53,6 +53,7 @@ import {
   deleteWhere,
   dropDatabase,
   execute,
+  findDocumentLocks,
   init,
   insert,
 } from '@payloadcms/drizzle/postgres'
@@ -140,6 +141,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       },
       fieldConstraints: {},
       findDistinct,
+      findDocumentLocks,
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'pg-core',
