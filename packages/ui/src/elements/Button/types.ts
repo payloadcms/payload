@@ -17,7 +17,6 @@ export type Props = {
     | 'dashed'
     | 'destructive'
     | 'ghost'
-    | 'link'
     | 'pill'
     | 'primary'
     | 'primary-ghost'
