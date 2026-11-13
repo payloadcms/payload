@@ -142,6 +142,11 @@ const relationshipSort = ({
   return null
 }
 
+const parseSortItem = (item: string): { direction: SortDirection; property: string } =>
+  item.indexOf('-') === 0
+    ? { direction: 'desc', property: item.substring(1) }
+    : { direction: 'asc', property: item }
+
 export const buildSortParam = ({
   adapter,
   config,
@@ -167,7 +172,7 @@ export const buildSortParam = ({
 
   // We use this flag to determine if the sort is unique or not to decide whether to add a fallback sort.
   const isUniqueSort = sort.some((item) => {
-    const field = getFieldByPath({ fields, path: item })
+    const field = getFieldByPath({ fields, path: parseSortItem(item).property })
     return field?.field?.unique
   })
 
@@ -189,15 +194,8 @@ export const buildSortParam = ({
   }
 
   const sorting = sort.reduce<Record<string, string>>((acc, item) => {
-    let sortProperty: string
-    let sortDirection: SortDirection
-    if (item.indexOf('-') === 0) {
-      sortProperty = item.substring(1)
-      sortDirection = 'desc'
-    } else {
-      sortProperty = item
-      sortDirection = 'asc'
-    }
+    const { direction: sortDirection, property: sortProperty } = parseSortItem(item)
+
     if (sortProperty === 'id') {
       acc['_id'] = sortDirection
       return acc
