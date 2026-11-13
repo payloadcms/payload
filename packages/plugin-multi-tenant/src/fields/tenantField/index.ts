@@ -135,7 +135,26 @@ export const tenantField = ({
               },
             },
           })
-          return totalDocs > 0 ? tenantFromCookie : null
+          if (totalDocs > 0) {
+            return tenantFromCookie
+          }
+        }
+        if (req.user && overrides.admin?.hidden && userHasAccessToAllTenants?.(req.user)) {
+          const { docs, totalDocs } = await req.payload.find({
+            collection: tenantsCollectionSlug,
+            depth: 0,
+            limit: 2,
+            overrideAccess: false,
+            req,
+            select: { id: true },
+            user: req.user,
+          })
+
+          const [tenant] = docs
+
+          if (totalDocs === 1 && tenant) {
+            return hasMany ? [tenant.id] : tenant.id
+          }
         }
         if (req.user && isAutosaveEnabled) {
           const userTenants = getUserTenantIDs(req.user, {
