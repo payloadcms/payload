@@ -13,6 +13,7 @@ import type { ToolbarGroupState } from '../useToolbarStates.js'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import './index.css'
 import { DropDown, DropDownItem } from './DropDown.js'
+import { getDropdownGroupLabel } from './getDropdownGroupLabel.js'
 
 const ToolbarItem = ({
   active,
@@ -110,7 +111,7 @@ export const ToolbarDropdown = ({
       ? item.label({ featureClientSchemaMap, i18n, schemaPath })
       : item.label || item.key,
   )
-  const dropdownLabel = groupKey === 'text' ? i18n.t('lexical:general:textStyle') : undefined
+  const dropdownLabel = getDropdownGroupLabel({ groupKey, i18n })
   const buttonAriaLabel =
     [...new Set([label, ...activeItemLabels, dropdownLabel].filter(Boolean))].join(', ') || groupKey
 

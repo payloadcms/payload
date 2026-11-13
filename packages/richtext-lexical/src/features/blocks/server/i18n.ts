@@ -1,6 +1,15 @@
 import type { GenericLanguages } from '@payloadcms/translations'
 
 export const i18n: Partial<GenericLanguages> = {
+  id: {
+    inlineBlocks: {
+      create: 'Buat {{label}}',
+      edit: 'Sunting {{label}}',
+      label: 'Blok Sebaris',
+      remove: 'Hapus {{label}}',
+    },
+    label: 'Blok',
+  },
   ar: {
     inlineBlocks: {
       create: 'أنشئ {{label}}',
@@ -27,6 +36,33 @@ export const i18n: Partial<GenericLanguages> = {
       remove: 'Премахнете {{label}}',
     },
     label: 'Блокове',
+  },
+  'bn-BD': {
+    inlineBlocks: {
+      create: '{{label}} তৈরি করুন',
+      edit: '{{label}} সম্পাদনা করুন',
+      label: 'ইনলাইন ব্লক',
+      remove: '{{label}} সরান',
+    },
+    label: 'ব্লক',
+  },
+  'bn-IN': {
+    inlineBlocks: {
+      create: '{{label}} তৈরি করুন',
+      edit: '{{label}} সম্পাদনা করুন',
+      label: 'ইনলাইন ব্লক',
+      remove: '{{label}} সরান',
+    },
+    label: 'ব্লক',
+  },
+  ca: {
+    inlineBlocks: {
+      create: 'Crea {{label}}',
+      edit: 'Edita {{label}}',
+      label: 'Blocs en línia',
+      remove: 'Elimina {{label}}',
+    },
+    label: 'Blocs',
   },
   cs: {
     inlineBlocks: {
@@ -127,6 +163,15 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: 'Blokkok',
   },
+  hy: {
+    inlineBlocks: {
+      create: 'Ստեղծել {{label}}',
+      edit: 'Խմբագրել {{label}}',
+      label: 'Ներտողային բլոկներ',
+      remove: 'Հեռացնել {{label}}',
+    },
+    label: 'Բլոկներ',
+  },
   is: {
     inlineBlocks: {
       create: 'Skrá {{label}}',
@@ -163,6 +208,24 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: '블록',
   },
+  lt: {
+    inlineBlocks: {
+      create: 'Sukurti {{label}}',
+      edit: 'Redaguoti {{label}}',
+      label: 'Eilutės blokai',
+      remove: 'Pašalinti {{label}}',
+    },
+    label: 'Blokai',
+  },
+  lv: {
+    inlineBlocks: {
+      create: 'Izveidot {{label}}',
+      edit: 'Rediģēt {{label}}',
+      label: 'Iekļautie bloki',
+      remove: 'Noņemt {{label}}',
+    },
+    label: 'Bloki',
+  },
   my: {
     inlineBlocks: {
       create: 'Cipta {{label}}',
@@ -170,7 +233,7 @@ export const i18n: Partial<GenericLanguages> = {
       label: 'Inline Blocks [SKIPPED]',
       remove: 'Buang {{label}}',
     },
-    label: 'တံတားများ',
+    label: 'ဘလောက်များ',
   },
   nb: {
     inlineBlocks: {

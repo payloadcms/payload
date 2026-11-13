@@ -25,6 +25,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return false
       },
       key: 'bold',
+      label: ({ i18n }) => {
+        return i18n.t('lexical:bold:label')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')
       },

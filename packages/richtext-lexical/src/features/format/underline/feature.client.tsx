@@ -20,6 +20,9 @@ const toolbarGroups: ToolbarGroup[] = [
         return false
       },
       key: 'underline',
+      label: ({ i18n }) => {
+        return i18n.t('lexical:underline:label')
+      },
       onSelect: ({ editor }) => {
         editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')
       },
