@@ -269,7 +269,13 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     async (id, relation) => {
       if (!errorLoading && id !== 'null' && id && relation) {
         const response = await fetch(
-          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}?depth=0` }),
+          formatAdminURL({
+            apiRoute: api,
+            path: `/${relation}/${id}${qs.stringify(
+              { depth: 0, locale: locale?.code },
+              { addQueryPrefix: true },
+            )}`,
+          }),
           {
             credentials: 'include',
             headers: {
@@ -287,7 +293,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       }
     },
-    [i18n, addOptions, api, errorLoading, t],
+    [i18n, addOptions, api, errorLoading, locale?.code, t],
   )
 
   const clearOptions = useEffectEvent(() => {
