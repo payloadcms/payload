@@ -5278,6 +5278,53 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
   })
 
+  test.describe('Latest version flag', () => {
+    test('should keep exactly one latest version when two versions share the same updatedAt', async ({
+      payload,
+    }) => {
+      // Two writers (for example a scheduled publish and a scheduled unpublish that are both due)
+      // can create a version with the same millisecond timestamp. Ids that do not increase (uuid)
+      // can put the version that is written last either below or above the other one, so try
+      // several pairs to cover both orders.
+      for (let attempt = 0; attempt < 10; attempt++) {
+        const draft = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'hello',
+            title: `my doc with two concurrent versions ${attempt}`,
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        const updatedAt = new Date(Date.now() + 60_000 + attempt * 1000).toISOString()
+
+        for (let writer = 0; writer < 2; writer++) {
+          await payload.db.createVersion({
+            autosave: false,
+            collectionSlug: draftCollectionSlug,
+            createdAt: updatedAt,
+            parent: draft.id,
+            updatedAt,
+            versionData: {},
+          })
+        }
+
+        const { docs: latest } = await payload.db.findVersions({
+          collection: draftCollectionSlug,
+          limit: 0,
+          where: {
+            and: [{ parent: { equals: draft.id } }, { latest: { equals: true } }],
+          },
+        })
+
+        expect(latest).toHaveLength(1)
+      }
+
+      await cleanupDocuments({ collectionSlugs: [draftCollectionSlug], payload })
+    })
+  })
+
   test.describe('Scheduled Publish', () => {
     test('should allow collection scheduled publish', async ({ payload }) => {
       const draft = await payload.create({
