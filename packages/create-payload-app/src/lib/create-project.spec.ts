@@ -183,6 +183,17 @@ describe('createProject', () => {
           expect(content).toContain("import { postgresAdapter } from '@payloadcms/db-postgres'")
           expect(content).toContain('postgresAdapter')
         }
+
+        // Verify docker-compose.yml runs the selected database
+        const dockerCompose = fse.readFileSync(
+          path.resolve(projectDir, 'docker-compose.yml'),
+          'utf8',
+        )
+        const dbService = db === 'mongodb' ? 'mongo' : 'postgres'
+        const otherDbService = db === 'mongodb' ? 'postgres' : 'mongo'
+
+        expect(dockerCompose).toContain(`\n  ${dbService}:\n`)
+        expect(dockerCompose).not.toContain(`\n  ${otherDbService}:\n`)
       })
     })
 
