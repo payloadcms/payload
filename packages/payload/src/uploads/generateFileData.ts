@@ -88,8 +88,11 @@ type Result<T> = Promise<{
 type ProcessUploadResult<T> = Promise<{
   data: T
   files: FileToSave[]
-  /** The final `_transforms` of the transformer `doc`, after every stage ran. */
-  transforms: Document['_transforms']
+  /**
+   * The final transformer `doc`, after every stage ran. A create from a URL builds it again once
+   * the file is read, so this is not always the `pipelineDoc` that was passed in.
+   */
+  pipelineDoc: Document
 }>
 
 const shouldReupload = (
@@ -210,7 +213,7 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
     })
   }
 
-  const { transforms, ...result } = await processUpload({
+  const { pipelineDoc: finalPipelineDoc, ...result } = await processUpload({
     ...args,
     hasTransformers,
     pipelineDoc,
@@ -222,6 +225,7 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
       : undefined,
     uploadEdits: edits.uploadEdits,
   })
+  const transforms = finalPipelineDoc._transforms
 
   if (edits.isWaitingForFile) {
     // No file was read, so the crop cannot be checked. This throws its validation error.
@@ -237,7 +241,7 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
   if (pipelineSnapshot && keysChangedByStages.length > 0) {
     await assertDeclaredTransformsValid({
       collectionSlug: collection.config.slug,
-      doc: { ...pipelineDoc, _transforms: transforms },
+      doc: finalPipelineDoc,
       keys: keysChangedByStages,
       originalDoc: pipelineSnapshot,
       req,
@@ -298,7 +302,7 @@ const processUpload = async <T>({
     return {
       data,
       files: [],
-      transforms: pipelineDoc._transforms,
+      pipelineDoc,
     }
   }
 
@@ -433,7 +437,7 @@ const processUpload = async <T>({
         ...(draft ? { _status: 'draft' } : {}),
       } as T,
       files: [],
-      transforms: pipelineDoc._transforms,
+      pipelineDoc,
     }
   }
 
@@ -529,7 +533,7 @@ const processUpload = async <T>({
     return {
       data: incomingFileData!,
       files: [],
-      transforms: pipelineDoc._transforms,
+      pipelineDoc,
     }
   }
 
@@ -807,7 +811,7 @@ const processUpload = async <T>({
           ...(draft ? { _status: 'draft' } : {}),
         } as T,
         files: [],
-        transforms: pipelineDoc._transforms,
+        pipelineDoc,
       }
     }
     const mainBuffer = fileWasTransformed
@@ -1192,7 +1196,7 @@ const processUpload = async <T>({
   return {
     data: newData,
     files: filesToSave,
-    transforms: pipelineDoc._transforms,
+    pipelineDoc,
   }
 }
 

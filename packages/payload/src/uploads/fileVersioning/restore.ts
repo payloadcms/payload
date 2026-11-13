@@ -224,6 +224,7 @@ async function assertRestoredTransformsValid({
   const snapshot = deepFreeze(deepCopyObject(selected))
   const error =
     getTransformStateError({
+      original: selected.original,
       transformers: req.payload.config.upload?.transformers ?? [],
       value: selected._transforms,
     }) ??

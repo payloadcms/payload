@@ -146,7 +146,7 @@ function getDefinitionErrors({
 
     definitionOwners.set(key, [...(definitionOwners.get(key) ?? []), identifier])
 
-    const schemaError = getSchemaError({ schema: definition.schema })
+    const schemaError = getSchemaError({ key, schema: definition.schema })
 
     if (schemaError) {
       errors.push(
@@ -164,14 +164,18 @@ function getDefinitionErrors({
   return errors
 }
 
-/** Why a JSON Schema cannot be used to check values, or `undefined` when it can. */
-function getSchemaError({ schema }: { schema: unknown }): string | undefined {
+/**
+ * Why a JSON Schema cannot be used to check values, or `undefined` when it can. The schema is read
+ * where the `_transforms` schema puts it, under `properties`, so a `$ref` into the definition's own
+ * schema fails here and not on the first save.
+ */
+function getSchemaError({ key, schema }: { key: string; schema: unknown }): string | undefined {
   if (!schema || typeof schema !== 'object' || Array.isArray(schema)) {
     return 'it must be a JSON Schema object'
   }
 
   try {
-    fromJSONSchema(schema as core.JSONSchema.JSONSchema)
+    fromJSONSchema({ type: 'object', properties: { [key]: schema } } as core.JSONSchema.JSONSchema)
   } catch (err) {
     return err instanceof Error ? err.message : 'it cannot be read'
   }

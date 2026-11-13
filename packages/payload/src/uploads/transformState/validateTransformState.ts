@@ -1,5 +1,6 @@
 import type { core } from 'zod'
 
+import { isDeepStrictEqual } from 'node:util'
 import { fromJSONSchema } from 'zod'
 
 import type { Validate } from '../../fields/config/types.js'
@@ -98,7 +99,13 @@ export async function getTransformDefinitionError({
 
   for (const { transformDefinitions } of req.payload.config.upload?.transformers ?? []) {
     for (const { key, validate } of transformDefinitions ?? []) {
-      if (!validate || values[key] === undefined || (keys && !keys.includes(key))) {
+      // `hasOwn`: a key such as `toString` must not read the value from the prototype.
+      if (
+        !validate ||
+        !Object.hasOwn(values, key) ||
+        values[key] === undefined ||
+        (keys && !keys.includes(key))
+      ) {
         continue
       }
 
@@ -119,9 +126,15 @@ export async function getTransformDefinitionError({
   return undefined
 }
 
-export const validateTransformState: Validate = (value, { data, req }) =>
-  getTransformStateError({
+/**
+ * The `_transforms` field validator. A value equal to the saved one is kept unchecked, so an
+ * update that leaves `_transforms` out still saves after a definition's schema changed.
+ */
+export const validateTransformState: Validate = (value, { data, previousValue, req }) =>
+  isDeepStrictEqual(value, previousValue) ||
+  (getTransformStateError({
     original: (data as { original?: Dimensions })?.original,
     transformers: req.payload.config.upload?.transformers ?? [],
     value,
-  })?.message ?? true
+  })?.message ??
+    true)

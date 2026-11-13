@@ -68,6 +68,18 @@ describe('validateTransformers', () => {
       error: /"watermark".*schema/i,
     },
     {
+      name: 'has a $ref into its own schema, which is merged under another root',
+      definition: {
+        key: 'watermark',
+        schema: {
+          type: 'object',
+          $defs: { text: { type: 'string' } },
+          properties: { text: { $ref: '#/$defs/text' } },
+        },
+      },
+      error: /"watermark".*schema/i,
+    },
+    {
       name: 'has a validate that is not a function',
       definition: { key: 'watermark', schema: { type: 'object' }, validate: 'no' },
       error: /"watermark".*validate/i,

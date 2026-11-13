@@ -346,6 +346,40 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     expect(contractCalls.validate).toHaveLength(2)
   })
 
+  test('should keep a saved declared value that its schema no longer accepts, on an update that leaves _transforms out', async ({
+    payload,
+  }) => {
+    const created = await createNote({ payload })
+    const [version] = (
+      await payload.db.findVersions({
+        collection: contractMediaSlug,
+        where: { parent: { equals: created.id } },
+      })
+    ).docs
+    // The schema changed after the value was saved: `opacity` above 1 is no longer allowed.
+    const saved = { watermark: { opacity: 2, text: 'draft' } }
+
+    // The collection has drafts, so an update reads the latest version.
+    await payload.db.updateOne({
+      id: created.id,
+      collection: contractMediaSlug,
+      data: { _transforms: saved },
+    })
+    await payload.db.updateVersion({
+      id: version!.id,
+      collection: contractMediaSlug,
+      versionData: { version: { ...version!.version, _transforms: saved } },
+    })
+
+    const updated = await payload.update({
+      id: created.id,
+      collection: contractMediaSlug,
+      data: { alt: 'changed' },
+    })
+
+    expect(updated).toMatchObject({ _transforms: saved, alt: 'changed' })
+  })
+
   test('should validate a declared key on a draft save, which skips field validation', async ({
     payload,
   }) => {
@@ -529,6 +563,38 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       expect(created._transforms).toEqual({ contractScore: 1 })
       expect(calls.map(({ doc }) => Object.isFrozen(doc))).toEqual([false, true])
       expect(calls[1]?.docAtStart._transforms).toEqual({ contractScore: 1 })
+    })
+
+    test('should give validate the read file, on a create from a URL where a stage changes a declared key', async ({
+      payload,
+    }) => {
+      const source = await createImage({ payload })
+
+      await payload.create({
+        collection: variantMediaSlug,
+        context: {
+          contractStages: {
+            first: ({ doc }) => {
+              if (!Object.isFrozen(doc)) {
+                doc._transforms = { ...doc._transforms, watermark: { text: 'draft' } }
+              }
+            },
+            handledTransformKeys: ['watermark'],
+          },
+        },
+        // A crop makes the create wait for the file, which is read from the collection's folder.
+        data: {
+          _transforms: { crop: { height: 10, width: 10, x: 0, y: 0 } },
+          filename: source.filename,
+          url: new URL(source.url!, 'http://payload.local').pathname,
+        },
+        overrideAccess: true,
+      })
+
+      expect(contractCalls.validate.at(-1)?.context.doc).toMatchObject({
+        filename: source.filename,
+        mimeType: 'image/png',
+      })
     })
 
     test('should reject a doc change from a size task', async ({ payload }) => {
