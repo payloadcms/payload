@@ -216,6 +216,112 @@ describe('createProject', () => {
 
         expect(initialJSON).toEqual(correctlyModifiedJSON)
       })
+
+      it('bumps Payload packages pinned in devDependencies and peerDependencies', () => {
+        const latestVersion = '4.0.0-beta.7'
+        const initialJSON = {
+          name: 'test-plugin',
+          version: '1.0.0',
+          dependencies: {
+            '@payloadcms/ui': '3.82.1',
+          },
+          devDependencies: {
+            '@payloadcms/db-mongodb': '3.82.1',
+            '@payloadcms/eslint-config': '3.28.0',
+            '@payloadcms/next': '3.82.1',
+            '@payloadcms/transformer-sharp': '4.0.0-beta.4',
+            payload: '3.82.1',
+          },
+          peerDependencies: {
+            payload: '^3.82.1',
+          },
+        }
+
+        const correctlyModifiedJSON = {
+          name: 'test-plugin',
+          version: '1.0.0',
+          dependencies: {
+            '@payloadcms/ui': `${latestVersion}`,
+          },
+          devDependencies: {
+            '@payloadcms/db-mongodb': `${latestVersion}`,
+            '@payloadcms/eslint-config': '3.28.0',
+            '@payloadcms/next': `${latestVersion}`,
+            '@payloadcms/transformer-sharp': `${latestVersion}`,
+            payload: `${latestVersion}`,
+          },
+          peerDependencies: {
+            payload: `^${latestVersion}`,
+          },
+        }
+
+        updatePackageJSONDependencies({
+          latestVersion,
+          packageJson: initialJSON,
+        })
+
+        expect(initialJSON).toEqual(correctlyModifiedJSON)
+      })
+
+      it('keeps v4-only package pins when a v3 version is resolved', () => {
+        const latestVersion = '3.93.0'
+        const initialJSON = {
+          name: 'test-plugin',
+          version: '1.0.0',
+          devDependencies: {
+            '@payloadcms/next': '3.82.1',
+            '@payloadcms/transformer-sharp': '4.0.0-beta.4',
+            payload: '3.82.1',
+          },
+        }
+
+        const correctlyModifiedJSON = {
+          name: 'test-plugin',
+          version: '1.0.0',
+          devDependencies: {
+            '@payloadcms/next': `${latestVersion}`,
+            '@payloadcms/transformer-sharp': '4.0.0-beta.4',
+            payload: `${latestVersion}`,
+          },
+        }
+
+        updatePackageJSONDependencies({
+          latestVersion,
+          packageJson: initialJSON,
+        })
+
+        expect(initialJSON).toEqual(correctlyModifiedJSON)
+      })
+
+      it('never leaves a workspace: placeholder in the scaffolded package.json', () => {
+        const latestVersion = '3.93.0'
+        const initialJSON = {
+          name: 'test-blank',
+          version: '1.0.0',
+          dependencies: {
+            '@payloadcms/next': 'workspace:*',
+            '@payloadcms/transformer-sharp': 'workspace:*',
+            payload: 'workspace:*',
+          },
+        }
+
+        const correctlyModifiedJSON = {
+          name: 'test-blank',
+          version: '1.0.0',
+          dependencies: {
+            '@payloadcms/next': `${latestVersion}`,
+            '@payloadcms/transformer-sharp': `${latestVersion}`,
+            payload: `${latestVersion}`,
+          },
+        }
+
+        updatePackageJSONDependencies({
+          latestVersion,
+          packageJson: initialJSON,
+        })
+
+        expect(initialJSON).toEqual(correctlyModifiedJSON)
+      })
     })
   })
 })
