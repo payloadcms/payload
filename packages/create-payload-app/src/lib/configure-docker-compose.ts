@@ -21,6 +21,7 @@ type DbService = {
   /** docker compose service definition */
   definition: (args: {
     dbName: string
+    dbPassword?: string
     dbUser?: string
     hostPort: number
   }) => Record<string, unknown>
@@ -29,13 +30,20 @@ type DbService = {
   volume: string
 }
 
+/**
+ * Database ports are only published on the loopback interface. The databases are meant for local
+ * development, and MongoDB runs without authentication.
+ */
+const publishLocally = (hostPort: number, containerPort: number) =>
+  `127.0.0.1:${hostPort}:${containerPort}`
+
 /* eslint-disable perfectionist/sort-objects -- the key order is the order in docker-compose.yml */
 const mongoService: DbService = {
   name: 'mongo',
   containerPort: 27017,
   definition: ({ hostPort }) => ({
     image: 'mongo:latest',
-    ports: [`${hostPort}:27017`],
+    ports: [publishLocally(hostPort, 27017)],
     command: ['--storageEngine=wiredTiger'],
     volumes: ['data:/data/db'],
     logging: { driver: 'none' },
@@ -46,15 +54,16 @@ const mongoService: DbService = {
 const postgresService: DbService = {
   name: 'postgres',
   containerPort: 5432,
-  definition: ({ dbName, dbUser, hostPort }) => ({
+  definition: ({ dbName, dbPassword, dbUser, hostPort }) => ({
     restart: 'always',
     image: 'postgres:latest',
     volumes: ['pgdata:/var/lib/postgresql'],
-    ports: [`${hostPort}:5432`],
+    ports: [publishLocally(hostPort, 5432)],
     environment: {
       POSTGRES_USER: dbUser || 'postgres',
       POSTGRES_DB: dbName,
-      POSTGRES_HOST_AUTH_METHOD: 'trust',
+      // Use the password of the connection string, only allow connecting without one when it has none
+      ...(dbPassword ? { POSTGRES_PASSWORD: dbPassword } : { POSTGRES_HOST_AUTH_METHOD: 'trust' }),
     },
   }),
   volume: 'pgdata',
@@ -80,6 +89,7 @@ const AUTHORITY_REGEX = /^([a-z][\d+.a-z-]*:\/\/(?:[^/?#@]*@)?)([^/?#]+)/i
 
 type ParsedDbUri = {
   dbName?: string
+  dbPassword?: string
   dbUser?: string
   isLocal: boolean
   port?: number
@@ -90,6 +100,7 @@ function parseDbUri(dbUri: string): ParsedDbUri | undefined {
     const url = new URL(dbUri)
     return {
       dbName: decodeURIComponent(url.pathname.replace(/^\//, '')) || undefined,
+      dbPassword: decodeURIComponent(url.password) || undefined,
       dbUser: decodeURIComponent(url.username) || undefined,
       isLocal: LOCAL_HOSTNAMES.includes(url.hostname),
       port: url.port ? Number(url.port) : undefined,
@@ -240,6 +251,7 @@ export function updateDockerCompose(args: { dbDetails: DbDetails; template: stri
   if (dbService) {
     const definition = dbService.definition({
       dbName: parsedUri?.dbName || 'payload',
+      dbPassword: parsedUri?.dbPassword,
       dbUser: parsedUri?.dbUser,
       hostPort: parsedUri?.port ?? dbService.containerPort,
     })

@@ -39,7 +39,7 @@ describe('updateDockerCompose', () => {
     const { compose } = update({ type: 'mongodb', dbUri: 'mongodb://127.0.0.1/my-app' })
 
     expect(Object.keys(compose.services)).toStrictEqual(['payload', 'mongo'])
-    expect(compose.services.mongo?.ports).toStrictEqual(['27017:27017'])
+    expect(compose.services.mongo?.ports).toStrictEqual(['127.0.0.1:27017:27017'])
     expect(compose.services.payload?.depends_on).toStrictEqual(['mongo'])
     expect(compose.services.payload?.environment).toStrictEqual({
       DATABASE_URL: 'mongodb://mongo:27017/my-app',
@@ -54,9 +54,10 @@ describe('updateDockerCompose', () => {
     })
 
     expect(Object.keys(compose.services)).toStrictEqual(['payload', 'postgres'])
-    expect(compose.services.postgres?.ports).toStrictEqual(['54320:5432'])
-    expect(compose.services.postgres?.environment).toMatchObject({
+    expect(compose.services.postgres?.ports).toStrictEqual(['127.0.0.1:54320:5432'])
+    expect(compose.services.postgres?.environment).toStrictEqual({
       POSTGRES_DB: 'my-app',
+      POSTGRES_PASSWORD: '<password>',
       POSTGRES_USER: 'postgres',
     })
     expect(compose.services.payload?.depends_on).toStrictEqual(['postgres'])
@@ -75,6 +76,16 @@ describe('updateDockerCompose', () => {
     expect(compose.services.postgres).toBeDefined()
     expect(compose.services.payload?.environment).toStrictEqual({
       POSTGRES_URL: 'postgres://postgres@postgres:5432/my-app',
+    })
+  })
+
+  it('only allows connecting to Postgres without a password when the connection string has none', () => {
+    const { compose } = update({ type: 'postgres', dbUri: 'postgres://127.0.0.1:5432/my-app' })
+
+    expect(compose.services.postgres?.environment).toStrictEqual({
+      POSTGRES_DB: 'my-app',
+      POSTGRES_HOST_AUTH_METHOD: 'trust',
+      POSTGRES_USER: 'postgres',
     })
   })
 
