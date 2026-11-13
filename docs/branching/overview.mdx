@@ -11,13 +11,15 @@ Content Branching lets editors create named workspaces for content changes. A br
 You can use branches for release campaigns, large editorial updates, or other work that must be reviewed as one set. Branches support collections, globals, drafts, versions, localization, relationships, uploads, and Trash.
 
 <Banner type="warning">
-  Content Branching is experimental and can include breaking changes in minor releases. Its
-  configuration, APIs, database structure, and behavior are not stable.
+  Content Branching is experimental and can include breaking changes in minor
+  releases. Its configuration, APIs, database structure, and behavior are not
+  stable.
 </Banner>
 
 <Banner type="warning">
-  A merge always targets <code>main</code>. Content Branching does not provide branch-to-branch
-  merges, three-way conflict resolution, or field-level conflict resolution.
+  A merge always targets <code>main</code>. Content Branching does not provide
+  branch-to-branch merges, three-way conflict resolution, or field-level
+  conflict resolution.
 </Banner>
 
 ## Enable Content Branching
@@ -236,8 +238,9 @@ For example, if a document on `main` has the published title “Original”:
 | Published title: “Campaign” | Published title becomes “Campaign”.                                 |
 
 <Banner type="warning">
-  A successful dry run is not an authorization token or a guarantee that the real merge will
-  succeed. Hooks, permissions, content, and database constraints can change before the write.
+  A successful dry run is not an authorization token or a guarantee that the
+  real merge will succeed. Hooks, permissions, content, and database constraints
+  can change before the write.
 </Banner>
 
 Discard removes only branch-owned work. It does not change `main`. Payload blocks removal of a branch-created document if a surviving document, global, or version still references it.
