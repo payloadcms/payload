@@ -13,6 +13,7 @@ import {
   HIERARCHY_SLUG_PATH_FIELD,
   HIERARCHY_TITLE_PATH_FIELD,
 } from './constants.js'
+import { hierarchyContentsEndpoint } from './endpoints/contents.js'
 import { ensureSafeCollectionsChange } from './hooks/ensureSafeCollectionsChange.js'
 
 /**
@@ -32,6 +33,27 @@ export const sanitizeHierarchyCollection = (
   if (!collectionConfig.hierarchy) {
     collectionConfig.hierarchy = false
     return
+  }
+
+  if (
+    collectionConfig.endpoints !== false &&
+    typeof collectionConfig.hierarchy === 'object' &&
+    collectionConfig.hierarchy.allowHasMany === false &&
+    !collectionConfig.nestedDocs
+  ) {
+    const existingEndpoint = (collectionConfig.endpoints || []).find(
+      (endpoint) => endpoint.path === hierarchyContentsEndpoint.path && endpoint.method === 'get',
+    )
+
+    if (existingEndpoint && existingEndpoint.handler !== hierarchyContentsEndpoint.handler) {
+      throw new Error(`The folder endpoint ${hierarchyContentsEndpoint.path} is reserved.`)
+    }
+    if (!existingEndpoint) {
+      collectionConfig.endpoints = [
+        hierarchyContentsEndpoint,
+        ...(collectionConfig.endpoints || []),
+      ]
+    }
   }
 
   // Normalize boolean to object and apply parentFieldName default

@@ -9,7 +9,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getAncestors } from 'payload'
+import { getAncestors, getHierarchyContents } from 'payload'
 import { combineWhereConstraints, DEFAULT_HIERARCHY_LIST_LIMIT } from 'payload/shared'
 
 /**
@@ -20,6 +20,7 @@ export const handleHierarchy = async ({
   baseFilter,
   collectionConfig,
   collectionSlug,
+  isFolderTree,
   parentId,
   permissions,
   req,
@@ -30,6 +31,7 @@ export const handleHierarchy = async ({
   baseFilter?: null | Where
   collectionConfig: SanitizedCollectionConfig
   collectionSlug: string
+  isFolderTree?: boolean
   parentId: null | number | string
   permissions?: SanitizedPermissions
   req: PayloadRequest
@@ -50,6 +52,103 @@ export const handleHierarchy = async ({
   const parentFieldName = hierarchyConfig.parentFieldName
 
   const useAsTitle = collectionConfig.admin?.useAsTitle || 'id'
+
+  if (isFolderTree) {
+    const contents = await getHierarchyContents({
+      collectionSlug,
+      limit: 10,
+      parentID: parentId,
+      req,
+      search,
+    })
+    const selectedParent =
+      parentId === null
+        ? null
+        : await req.payload.findByID({
+            id: parentId,
+            collection: collectionSlug,
+            depth: 0,
+            draft: true,
+            joins: false,
+            overrideAccess: false,
+            req,
+            user,
+          })
+    const toResult = (
+      source: (typeof contents.sources)[number],
+    ): HierarchyViewData['childrenData'] => ({
+      docs: source?.docs ?? [],
+      hasNextPage: source?.hasNextPage ?? false,
+      hasPrevPage: false,
+      limit: 10,
+      nextPage: source?.hasNextPage ? 2 : null,
+      page: 1,
+      pagingCounter: 1,
+      prevPage: null,
+      totalDocs: source?.totalDocs ?? 0,
+      totalPages: source?.totalPages ?? 1,
+    })
+    const relatedDocumentsByCollection: RelatedDocumentsGrouped = {}
+    const relatedBaseFilters: Record<string, Where> = {}
+    for (const source of contents.sources) {
+      if (source.collectionSlug === collectionSlug) {
+        continue
+      }
+      const field = hierarchyConfig.relatedCollections[source.collectionSlug]
+      const config = req.payload.collections[source.collectionSlug].config
+      const relatedBaseFilter = await (config.admin.baseFilter ?? config.admin.baseListFilter)?.({
+        limit: 10,
+        page: 1,
+        req,
+        sort: 'id',
+      })
+      if (relatedBaseFilter) {
+        relatedBaseFilters[source.collectionSlug] = relatedBaseFilter
+      }
+      relatedDocumentsByCollection[source.collectionSlug] = {
+        fieldName: field.fieldName,
+        hasMany: field.hasMany,
+        label: getTranslation(config.labels.plural, req.i18n),
+        result: toResult(source),
+      }
+    }
+    let allowedCollections: Array<{ label: string; slug: string }> | undefined
+    if (hierarchyConfig.collectionSpecific && selectedParent) {
+      const values = selectedParent[hierarchyConfig.collectionSpecific.fieldName] as
+        | string[]
+        | undefined
+      allowedCollections = values?.length
+        ? values.map((slug) => ({
+            slug,
+            label: getTranslation(req.payload.collections[slug]?.config.labels.plural, req.i18n),
+          }))
+        : []
+    }
+    const title = selectedParent?.[useAsTitle]
+    // A minimal trail avoids resolving unreadable ancestor names for this browse-only slice.
+    return {
+      allowedCollections,
+      breadcrumbs: selectedParent
+        ? [
+            {
+              id: selectedParent.id,
+              title:
+                typeof title === 'string' || typeof title === 'number'
+                  ? String(title)
+                  : String(selectedParent.id),
+            },
+          ]
+        : [],
+      childrenData: toResult(
+        contents.sources.find((source) => source.collectionSlug === collectionSlug),
+      ),
+      parent: selectedParent,
+      parentFieldName,
+      parentId,
+      relatedBaseFilters,
+      relatedDocumentsByCollection,
+    }
+  }
 
   // Fetch the parent item and breadcrumbs (skip for root level)
   let parent: null | (Record<string, unknown> & TypeWithID) = null

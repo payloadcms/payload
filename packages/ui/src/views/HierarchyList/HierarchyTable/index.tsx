@@ -1,6 +1,6 @@
 'use client'
 
-import type { PaginatedDocs, Where } from 'payload'
+import type { HierarchyContents, PaginatedDocs, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -72,6 +72,7 @@ export type HierarchyTableProps = {
   relatedGroups: RelatedGroup[]
   search?: string
   useAsTitle: string
+  useContentsEndpoint?: boolean
 }
 
 export function HierarchyTable({
@@ -89,6 +90,7 @@ export function HierarchyTable({
   relatedGroups,
   search,
   useAsTitle,
+  useContentsEndpoint = false,
 }: HierarchyTableProps) {
   const { i18n, t } = useTranslation()
   const { clearRouteCache } = useRouteCache()
@@ -156,6 +158,40 @@ export function HierarchyTable({
     [isLocked],
   )
 
+  const getContentsPage = useCallback(
+    async ({ page, source }: { page: number; source: string }): Promise<PaginatedDocs> => {
+      const limit = 10
+      const queryString = qs.stringify(
+        { limit, page, parentID: parentId ?? undefined, search: search || undefined, source },
+        { addQueryPrefix: true },
+      )
+      const url = formatAdminURL({
+        apiRoute,
+        path: `/${collectionSlug}/hierarchy-contents${queryString}`,
+        serverURL,
+      })
+      const response = await fetch(url, { credentials: 'include' })
+      if (!response.ok) {
+        throw new Error('Failed to load folder contents')
+      }
+      const contents: HierarchyContents = await response.json()
+      const data = contents.sources.find((value) => value.collectionSlug === source)
+      return {
+        docs: data?.docs ?? [],
+        hasNextPage: data?.hasNextPage ?? false,
+        hasPrevPage: page > 1,
+        limit,
+        nextPage: data?.hasNextPage ? page + 1 : null,
+        page,
+        pagingCounter: (page - 1) * limit + 1,
+        prevPage: page > 1 ? page - 1 : null,
+        totalDocs: data?.totalDocs ?? 0,
+        totalPages: data?.totalPages ?? 1,
+      }
+    },
+    [apiRoute, collectionSlug, parentId, search, serverURL],
+  )
+
   // Page change for children
   const handlePageChangeChildren = useCallback(
     async (page: number) => {
@@ -188,13 +224,15 @@ export function HierarchyTable({
           serverURL,
         })
 
-        const response = await fetch(url, { credentials: 'include' })
-
-        if (!response.ok) {
-          throw new Error('Failed to load page')
-        }
-
-        const result: PaginatedDocs = await response.json()
+        const result: PaginatedDocs = useContentsEndpoint
+          ? await getContentsPage({ page, source: collectionSlug })
+          : await (async () => {
+              const response = await fetch(url, { credentials: 'include' })
+              if (!response.ok) {
+                throw new Error('Failed to load page')
+              }
+              return response.json()
+            })()
 
         setChildDocs(result.docs)
         setChildPaginationData({
@@ -216,12 +254,14 @@ export function HierarchyTable({
       apiRoute,
       baseFilter,
       childLoading,
+      getContentsPage,
       collectionSlug,
       parentFieldName,
       parentId,
       search,
       serverURL,
       useAsTitle,
+      useContentsEndpoint,
     ],
   )
 
@@ -285,13 +325,15 @@ export function HierarchyTable({
           serverURL,
         })
 
-        const response = await fetch(url, { credentials: 'include' })
-
-        if (!response.ok) {
-          throw new Error('Failed to load page')
-        }
-
-        const result: PaginatedDocs = await response.json()
+        const result: PaginatedDocs = useContentsEndpoint
+          ? await getContentsPage({ page, source: relatedSlug })
+          : await (async () => {
+              const response = await fetch(url, { credentials: 'include' })
+              if (!response.ok) {
+                throw new Error('Failed to load page')
+              }
+              return response.json()
+            })()
 
         setRelatedState((prev) => ({
           ...prev,
@@ -316,6 +358,7 @@ export function HierarchyTable({
     },
     [
       apiRoute,
+      getContentsPage,
       getEntityConfig,
       parentFieldName,
       parentId,
@@ -324,6 +367,7 @@ export function HierarchyTable({
       relatedState,
       search,
       serverURL,
+      useContentsEndpoint,
     ],
   )
 

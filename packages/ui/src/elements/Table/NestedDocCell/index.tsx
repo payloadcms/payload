@@ -16,6 +16,8 @@ export function NestedDocCell({
   id,
   children,
   isLastRendered,
+  isPending,
+  onToggle,
   parentTitle,
   row,
   title,
@@ -23,13 +25,15 @@ export function NestedDocCell({
   children: React.ReactNode
   id: string
   isLastRendered: boolean
+  isPending?: boolean
+  onToggle?: () => void
   parentTitle?: string
   row: NestedDocRow
   title: string
 }) {
   const { t } = useTranslation()
   const tree = useNestedDocs()
-  const isBranchPending = tree?.pending.has(branchKey(id))
+  const isBranchPending = isPending ?? tree?.pending.has(branchKey(id))
   const hasLoadingDelay = useDebounce(Boolean(isBranchPending), 200)
   const shouldShowSpinner = row.isExpanded && isBranchPending && hasLoadingDelay
 
@@ -70,11 +74,11 @@ export function NestedDocCell({
       </span>
       {row.hasChildren ? (
         <button
-          aria-disabled={!tree || undefined}
+          aria-disabled={(!onToggle && !tree) || undefined}
           aria-expanded={row.isExpanded}
           aria-label={`${t(row.isExpanded ? 'general:collapse' : 'general:expand')}: ${title}`}
           className="nested-doc-cell__toggle"
-          onClick={() => tree?.toggle({ id })}
+          onClick={() => (onToggle ? onToggle() : tree?.toggle({ id }))}
           type="button"
         >
           <span aria-hidden="true">

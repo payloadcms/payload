@@ -606,6 +606,12 @@ export const renderListView = async (
       baseFilter: baseFilterConstraint,
       collectionConfig,
       collectionSlug,
+      isFolderTree:
+        collectionPreferences?.documentLayout === 'tree' &&
+        typeof collectionConfig.hierarchy === 'object' &&
+        collectionConfig.hierarchy.allowHasMany === false &&
+        !collectionConfig.nestedDocs &&
+        !drawerSlug,
       parentId: hierarchyParentId,
       permissions,
       req,
@@ -735,7 +741,14 @@ export const renderListView = async (
       disableQueryPresets,
       documentLayout:
         collectionPreferences?.documentLayout === 'tree' &&
-        (!collectionConfig.nestedDocs || viewType !== 'list' || drawerSlug)
+        (!(
+          (collectionConfig.nestedDocs && viewType === 'list') ||
+          (typeof collectionConfig.hierarchy === 'object' &&
+            collectionConfig.hierarchy.allowHasMany === false &&
+            !collectionConfig.nestedDocs &&
+            viewType === 'hierarchy')
+        ) ||
+          drawerSlug)
           ? 'table'
           : collectionPreferences?.documentLayout,
       documentURLs,
