@@ -28,17 +28,20 @@ export const getTenantOptionsEndpoint = <ConfigType>({
       throw new APIError('Unauthorized', 401)
     }
 
+    const hasAccessToAllTenants = userHasAccessToAllTenants(
+      user as Parameters<typeof userHasAccessToAllTenants>[0],
+    )
     const tenantOptions = await getTenantOptions({
+      hasAccessToAllTenants,
       payload,
       tenantsArrayFieldName,
       tenantsArrayTenantFieldName,
       tenantsCollectionSlug,
       useAsTitle,
       user,
-      userHasAccessToAllTenants,
     })
 
-    return new Response(JSON.stringify({ tenantOptions }))
+    return new Response(JSON.stringify({ hasAccessToAllTenants, tenantOptions }))
   },
   method: 'get',
   path: '/populate-tenant-options',
