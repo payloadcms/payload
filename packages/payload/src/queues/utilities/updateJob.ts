@@ -208,12 +208,17 @@ async function claimJobsWithHooks({
   const failedIDs = claimedIDs.filter((claimedID) => !succeededIDs.has(claimedID))
 
   if (failedIDs.length > 0) {
-    await updateJobsInDatabase({
-      data: { processing: false },
-      req,
-      returning: false,
-      where: { id: { in: failedIDs } },
-    })
+    try {
+      await updateJobsInDatabase({
+        data: { processing: false },
+        req,
+        returning: false,
+        where: { id: { in: failedIDs } },
+      })
+    } catch (releaseError) {
+      // Successful claims still belong to this runner and must reach execution.
+      req.payload.logger.error({ err: releaseError, msg: 'Failed to release failed hook claims' })
+    }
   }
 
   if (returning === false || !updatedDocs.length) {

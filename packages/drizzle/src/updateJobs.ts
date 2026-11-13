@@ -36,6 +36,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
     delete data.log
   }
 
+  const isClaim = isJobClaim(data)
   const whereToUse: Where = id ? { id: { equals: id } } : whereArg
   const limit = id ? 1 : limitArg
 
@@ -79,13 +80,13 @@ export const updateJobs: UpdateJobs = async function updateMany(
     req,
     sort,
     tableName,
-    where: whereToUse,
+    where: isClaim ? { and: [whereToUse, { processing: { equals: false } }] } : whereToUse,
   })
   if (!jobs.docs.length) {
     return []
   }
 
-  if (isJobClaim(data)) {
+  if (isClaim) {
     const _db = db as LibSQLDatabase
     const table = this.tables[tableName]
     const { row } = transformForWrite({
@@ -141,12 +142,21 @@ export const updateJobs: UpdateJobs = async function updateMany(
       markWrite(this)
     }
 
-    if (returning === false) {
-      return null
+    if (!claimedRows.length) {
+      // A competitor won the selected batch. Recheck the queue before treating
+      // zero claimed rows as exhaustion.
+      return updateJobs.call(this, {
+        data,
+        limit: limitArg,
+        req,
+        returning,
+        sort: sortArg,
+        where: whereToUse,
+      })
     }
 
-    if (!claimedRows.length) {
-      return []
+    if (returning === false) {
+      return null
     }
 
     // Return the current job and related data, rather than the candidate snapshot.

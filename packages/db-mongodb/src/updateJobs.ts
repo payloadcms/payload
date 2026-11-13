@@ -165,6 +165,12 @@ export const updateJobs: UpdateJobs = async function updateMany(
         }
       }
 
+      // Losing every candidate does not mean the queue is empty. Select again
+      // so jobs beyond this batch remain available to this runner.
+      if (isJobClaim && candidates.length && !result.length) {
+        return updateJobs.call(this, { data, limit, req, returning, sort: sortArg, where })
+      }
+
       if (returning === false) {
         return null
       }
