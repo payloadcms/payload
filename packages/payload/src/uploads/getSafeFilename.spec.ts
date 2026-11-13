@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getSafeFileName, incrementName } from './getSafeFilename.js'
+import { getSafeFileName, getUnplannedSafeFileName, incrementName } from './getSafeFilename.js'
 
 vi.mock('./docWithFilenameExists.js', () => ({
   docWithFilenameExists: vi.fn(),
@@ -51,7 +51,9 @@ describe('incrementName', () => {
   })
 
   it('should handle filename with no extension', () => {
-    expect(incrementName('filename')).toBe('filename-1.filename')
+    expect(incrementName('filename')).toBe('filename-1')
+    expect(incrementName('hero-card')).toBe('hero-card-1')
+    expect(incrementName('hero-card-1')).toBe('hero-card-2')
   })
 
   it('should handle filename that is just an extension', () => {
@@ -59,7 +61,7 @@ describe('incrementName', () => {
   })
 
   it('should handle empty string', () => {
-    expect(incrementName('')).toBe('-1.')
+    expect(incrementName('')).toBe('-1')
   })
 
   it('should handle filename ending with hyphen and non-numeric', () => {
@@ -345,5 +347,21 @@ describe('getSafeFileName', () => {
     })
 
     expect(result).toBe('video-1.mp4')
+  })
+})
+
+describe('getUnplannedSafeFileName', () => {
+  it('should keep extensionless names when avoiding stored and planned filenames', async () => {
+    mockDocWithFilenameExists.mockReset()
+    mockDocWithFilenameExists.mockResolvedValueOnce(true).mockResolvedValue(false)
+
+    const filename = await getUnplannedSafeFileName({
+      canUseName: (name) => name !== 'hero-card-1',
+      collectionSlug: 'media',
+      desiredFilename: 'hero-card',
+      req: {} as Parameters<typeof getUnplannedSafeFileName>[0]['req'],
+    })
+
+    expect(filename).toBe('hero-card-2')
   })
 })

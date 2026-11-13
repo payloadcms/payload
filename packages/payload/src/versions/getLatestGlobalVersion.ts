@@ -11,7 +11,6 @@ type Args = {
   config: SanitizedGlobalConfig
   locale?: string
   payload: Payload
-  published?: boolean
   req?: PayloadRequest
   slug: string
   where: Where
@@ -22,15 +21,12 @@ export const getLatestGlobalVersion = async ({
   config,
   locale,
   payload,
-  published,
   req,
   where,
 }: Args): Promise<{ global: Document; globalExists: boolean }> => {
   let latestVersion: TypeWithVersion<Document> | undefined
 
-  const whereQuery = published
-    ? { 'version._status': { equals: 'published' } }
-    : { latest: { equals: true } }
+  const whereQuery: Where = { latest: { equals: true } }
 
   if (hasDraftsEnabled(config)) {
     latestVersion = (
@@ -40,7 +36,7 @@ export const getLatestGlobalVersion = async ({
         locale: locale || req?.locale || undefined,
         pagination: false,
         req,
-        where: combineQueries(appendVersionToQueryKey(where), whereQuery as unknown as Where),
+        where: combineQueries(appendVersionToQueryKey(where), whereQuery),
       })
     ).docs[0]
   }

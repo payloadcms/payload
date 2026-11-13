@@ -18,6 +18,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { applyUserReadAccess } from '../applyUserReadAccess.js'
 import { createAuthToken } from '../createAuthToken.js'
+import { getUserAgentLabel } from '../getUserAgentLabel.js'
 import { revokeSession } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
@@ -173,8 +174,10 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     user._strategy = 'local-jwt'
 
     const { token, ...session } = await createAuthToken({
+      type: 'login',
       collectionConfig,
       email: user.email!,
+      label: getUserAgentLabel({ userAgent: req.headers?.get('User-Agent') }),
       req,
       user,
     })

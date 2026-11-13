@@ -28,7 +28,7 @@ test('parseArgs makes candidate creation the one-command default', () => {
     label: 'hierarchy-move',
     manifest: '/tmp/payload-pr-demo-hierarchy-move.json',
     mode: 'candidate',
-    mouseMoveMs: 300,
+    mouseMoveMs: 450,
     output: '/tmp/payload-pr-demo-hierarchy-move.mp4',
     rawOutput: '/tmp/payload-pr-demo-hierarchy-move.mkv',
     scenario: '/tmp/demo.mjs',

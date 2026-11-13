@@ -20,7 +20,7 @@ export function createAnnotationInteraction({ presentation }) {
         throw new Error('Annotations require title and body')
       }
       if (['type', 'position', 'width'].some((key) => key in options)) {
-        throw new Error('Annotations always use the chrome panel; remove type, position, and width')
+        throw new Error('Annotations always use the sidebar; remove type, position, and width')
       }
       if (isReady && !hasOpeningAnnotation) throw new Error(openingAnnotationError)
       const { body, index = 1, total = 1, title } = options

@@ -1,9 +1,10 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
-import type { ValidationError } from 'payload'
+import type { FlattenedField, ValidationError } from 'payload'
 
 import { slugifyHandler } from '@payloadcms/ui/utilities/slugify'
 import { createPayloadRequest, reload } from 'payload'
+import { getDateOnlyComparison } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
@@ -35,8 +36,10 @@ import {
   dateFieldsSlug,
   duplicateFieldsSlug,
   groupFieldsSlug,
+  jsonFieldsSlug,
   numberFieldsSlug,
   relationshipFieldsSlug,
+  selectVersionsFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
 } from './slugs.js'
@@ -5468,6 +5471,60 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
   })
 
   test.describe('json', () => {
+    test.describe('fallback values', () => {
+      const createdDocs: {
+        collection: typeof jsonFieldsSlug | typeof selectVersionsFieldsSlug
+        id: number | string
+      }[] = []
+
+      test.afterEach(async ({ payload }) => {
+        for (const doc of createdDocs) {
+          await payload.delete({ ...doc, overrideAccess: true })
+        }
+        createdDocs.length = 0
+      })
+
+      for (const draft of [false, true]) {
+        const operation = draft ? 'draft save' : 'partial update'
+        const collection = draft ? selectVersionsFieldsSlug : jsonFieldsSlug
+
+        test(`should preserve omitted JSON tuples after a ${operation}`, async ({ payload }) => {
+          const doc = await payload.create({
+            collection,
+            data: {
+              customJSON: [
+                [100, 200],
+                [300, 400],
+              ],
+            },
+            draft,
+            overrideAccess: true,
+          })
+          createdDocs.push({ collection, id: doc.id })
+
+          await payload.update({
+            id: doc.id,
+            collection,
+            data: draft ? { hasMany: ['a'] } : { json: { foo: 'bar' } },
+            draft,
+            overrideAccess: true,
+          })
+
+          const stored = await payload.findByID({
+            id: doc.id,
+            collection,
+            draft,
+            overrideAccess: true,
+          })
+
+          expect(stored.customJSON).toStrictEqual([
+            [100, 200],
+            [300, 400],
+          ])
+        })
+      }
+    })
+
     test('should save json data', async ({ payload }) => {
       const json = { foo: 'bar' }
       const doc = await payload.create({
@@ -6713,6 +6770,128 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
   })
 
   test.describe('date fields with timezones', () => {
+    test('should filter configured calendar-day boundaries across databases', async ({
+      payload,
+    }) => {
+      const documents = await Promise.all(
+        [
+          '2026-03-28T23:59:59.999Z',
+          '2026-03-29T00:00:00.000Z',
+          '2026-03-29T22:59:59.999Z',
+          '2026-03-29T23:00:00.000Z',
+          null,
+        ].map((defaultWithTimezone) =>
+          payload.create({
+            collection: dateFieldsSlug,
+            data: { ...dateDoc, defaultWithTimezone },
+            overrideAccess: true,
+          }),
+        ),
+      )
+
+      try {
+        const documentIDs = new Set(documents.map(({ id }) => id))
+        const findTestIDs = async ({
+          operator,
+          value,
+        }: {
+          operator:
+            | 'equals'
+            | 'greater_than'
+            | 'greater_than_equal'
+            | 'less_than'
+            | 'less_than_equal'
+            | 'not_equals'
+          value: string
+        }) => {
+          const result = await payload.find({
+            collection: dateFieldsSlug,
+            overrideAccess: true,
+            where: { defaultWithTimezone: { [operator]: value } },
+          })
+
+          return result.docs.map(({ id }) => id).filter((id) => documentIDs.has(id))
+        }
+
+        const equalsIDs = await findTestIDs({ operator: 'equals', value: '2026-03-29' })
+
+        expect(equalsIDs).toHaveLength(2)
+        expect(equalsIDs).toEqual(expect.arrayContaining([documents[1]!.id, documents[2]!.id]))
+        const notEqualsIDs = await findTestIDs({ operator: 'not_equals', value: '2026-03-29' })
+
+        expect(notEqualsIDs).toHaveLength(3)
+        expect(notEqualsIDs).toEqual(
+          expect.arrayContaining([documents[0]!.id, documents[3]!.id, documents[4]!.id]),
+        )
+        const greaterThanEqualIDs = await findTestIDs({
+          operator: 'greater_than_equal',
+          value: '2026-03-29',
+        })
+
+        expect(greaterThanEqualIDs).toHaveLength(3)
+        expect(greaterThanEqualIDs).toEqual(
+          expect.arrayContaining(documents.slice(1, 4).map(({ id }) => id)),
+        )
+        expect(await findTestIDs({ operator: 'greater_than', value: '2026-03-29' })).toEqual([
+          documents[3]!.id,
+        ])
+        expect(await findTestIDs({ operator: 'less_than', value: '2026-03-29' })).toEqual([
+          documents[0]!.id,
+        ])
+        const lessThanEqualIDs = await findTestIDs({
+          operator: 'less_than_equal',
+          value: '2026-03-29',
+        })
+
+        expect(lessThanEqualIDs).toHaveLength(3)
+        expect(lessThanEqualIDs).toEqual(
+          expect.arrayContaining(documents.slice(0, 3).map(({ id }) => id)),
+        )
+        expect(
+          await findTestIDs({ operator: 'equals', value: '2026-03-29T00:00:00.000Z' }),
+        ).toEqual([documents[1]!.id])
+      } finally {
+        await Promise.all(
+          documents.map(({ id }) =>
+            payload.delete({ collection: dateFieldsSlug, id, overrideAccess: true }),
+          ),
+        )
+      }
+    })
+
+    test('should use the sole supported timezone for calendar-day boundaries', ({ payload }) => {
+      const comparison = getDateOnlyComparison({
+        config: payload.config,
+        field: {
+          name: 'singletonTimezone',
+          type: 'date',
+          timezone: {
+            defaultTimezone: 'America/New_York',
+            supportedTimezones: [{ label: 'London', value: 'Europe/London' }],
+          },
+        } as FlattenedField,
+        operator: 'equals',
+        value: '2026-03-29',
+      })
+
+      expect(comparison?.constraints.map(({ value }) => value.toISOString())).toEqual([
+        '2026-03-29T00:00:00.000Z',
+        '2026-03-29T23:00:00.000Z',
+      ])
+
+      const earlyDateComparison = getDateOnlyComparison({
+        config: payload.config,
+        field: { name: 'earlyDate', type: 'date' } as FlattenedField,
+        operator: 'equals',
+        value: '0001-01-01',
+      })
+
+      expect(earlyDateComparison?.constraints.map(({ value }) => value.toISOString())).toEqual([
+        '0001-01-01T00:00:00.000Z',
+        '0001-01-02T00:00:00.000Z',
+      ])
+    })
+
     test('should create document with UTC offset timezone', async ({ payload }) => {
       const doc = await payload.create({
         collection: dateFieldsSlug,

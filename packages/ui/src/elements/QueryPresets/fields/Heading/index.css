@@ -17,17 +17,17 @@
       flex-wrap: nowrap;
 
       /* Size controls to their content and drop Row's inline margins so the last
-         one aligns with the right edge. Matches Row's `:has` selector to win on
+         one aligns with the right edge. Matches Row's selectors to win on
          mobile, where Row's media-query reset has too little specificity. */
       &:has(> *:nth-child(2)) {
         margin-inline: 0;
+      }
 
-        > * {
-          flex: 0 0 auto;
-          margin-inline: 0;
-          /* Clamp against Row's mobile `width: 100% !important`. */
-          max-width: fit-content;
-        }
+      > *:not(:only-child) {
+        flex: 0 0 auto;
+        margin-inline: 0;
+        /* Clamp against Row's mobile `width: 100% !important`. */
+        max-width: fit-content;
       }
 
       /* Stay in a row on mobile, where Row otherwise stacks into a column. */
@@ -39,7 +39,7 @@
 
     /* The heading absorbs the free space to push the controls to the right edge;
        the row owns the top spacing, so collapse the heading's own block margins. */
-    .row__fields:has(> *:nth-child(2)) > .query-preset-heading {
+    .row__fields > .query-preset-heading:not(:only-child) {
       margin-block: 0;
       margin-inline-end: auto;
     }

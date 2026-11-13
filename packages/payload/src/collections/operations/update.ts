@@ -1,8 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
-import path from 'node:path'
 
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
@@ -21,6 +19,8 @@ import { validateSortQuery } from '../../database/queryValidation/validateSortQu
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
+import { copyTempFileForDocument } from '../../uploads/copyTempFileForDocument.js'
+import { createSharedClientUploadDownload } from '../../uploads/createSharedClientUploadDownload.js'
 import { runCloudFileUpdate } from '../../uploads/fileVersioning/cloudStorage.js'
 import {
   abortFileOperationScope,
@@ -338,6 +338,7 @@ export const updateOperation = async <
       : null
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
+    const sharedClientUploadDownload = createSharedClientUploadDownload()
 
     const processDocument = async (incomingDoc: (typeof docs)[number]) => {
       let docWithLocales = incomingDoc
@@ -354,12 +355,9 @@ export const updateOperation = async <
 
         const documentFile = req.file ? { ...req.file } : undefined
         if (collectionConfig.upload && documentFile?.tempFilePath) {
-          const extension = path.extname(documentFile.tempFilePath)
-          documentTempFilePath = path.join(
-            path.dirname(documentFile.tempFilePath),
-            `${path.basename(documentFile.tempFilePath, extension)}-${randomUUID()}${extension}`,
-          )
-          await fs.copyFile(documentFile.tempFilePath, documentTempFilePath)
+          documentTempFilePath = await copyTempFileForDocument({
+            tempFilePath: documentFile.tempFilePath,
+          })
           documentFile.tempFilePath = documentTempFilePath
         }
 
@@ -394,6 +392,7 @@ export const updateOperation = async <
                   : locale,
               localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
             }),
+            fetchFullClientUpload: sharedClientUploadDownload.fetchFullClientUpload,
             operation: 'update',
             originalDoc: docWithLocales,
             overwriteExistingFiles,
@@ -481,10 +480,18 @@ export const updateOperation = async <
           message: error instanceof Error ? error.message : 'Unknown error',
         })
       } finally {
-        if (documentTempFilePath) {
-          await fs.rm(documentTempFilePath, { force: true }).catch((error) => {
-            req.payload.logger.error({ err: error, msg: 'Failed to remove temp file copy' })
-          })
+        // generateFileData can replace the document's file with its copy of the shared client
+        // upload download. That copy is only on the document's request, so the operation
+        // cleanup misses it.
+        const downloadedTempFilePath =
+          documentReq !== req ? documentReq.file?.tempFilePath : undefined
+
+        for (const tempFilePath of new Set([documentTempFilePath, downloadedTempFilePath])) {
+          if (tempFilePath) {
+            await fs.rm(tempFilePath, { force: true }).catch((error) => {
+              req.payload.logger.error({ err: error, msg: 'Failed to remove temp file copy' })
+            })
+          }
         }
       }
       return null
@@ -497,13 +504,20 @@ export const updateOperation = async <
     const processSequentially =
       req.payload.db.bulkOperationsSingleTransaction || Boolean(collectionConfig.upload && req.file)
     let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
-    if (processSequentially) {
-      awaitedDocs = []
-      for (const doc of docs) {
-        awaitedDocs.push(await processDocument(doc))
+    try {
+      if (processSequentially) {
+        awaitedDocs = []
+        for (const doc of docs) {
+          awaitedDocs.push(await processDocument(doc))
+        }
+      } else {
+        awaitedDocs = await Promise.all(docs.map(processDocument))
       }
-    } else {
-      awaitedDocs = await Promise.all(docs.map(processDocument))
+    } finally {
+      // Each document removes its own copy; the shared download is removed once here.
+      await sharedClientUploadDownload.removeSharedDownload().catch((error) => {
+        req.payload.logger.error({ err: error, msg: 'Failed to remove temp file' })
+      })
     }
 
     await unlinkTempFiles({

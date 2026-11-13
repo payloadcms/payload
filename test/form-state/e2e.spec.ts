@@ -414,6 +414,94 @@ test.describe('Form State', () => {
     ).toHaveValue('This is a computed value.')
   })
 
+  test('should finish post-save rebuilding before a pending edit refresh', async () => {
+    const doc = await createPost({ title: 'Before save' })
+    const { page: savePage } = await initPage({ context, serverURL })
+    const editURL = postsUrl.edit(doc.id)
+    const backgroundStarted = Promise.withResolvers<void>()
+    const releaseBackground = Promise.withResolvers<void>()
+    const backgroundReleased = Promise.withResolvers<void>()
+    const permissionsStarted = Promise.withResolvers<void>()
+    const releasePermissions = Promise.withResolvers<void>()
+    let hasHeldBackground = false
+    let hasHeldPermissions = false
+
+    try {
+      await savePage.clock.install()
+      await savePage.goto(editURL)
+      await waitForFormReady(savePage)
+      await savePage.clock.pauseAt(await savePage.evaluate(() => Date.now() + 1000))
+
+      await savePage.route(
+        (url) =>
+          url.href === editURL ||
+          (currentFramework === 'tanstack-start' && url.pathname.startsWith('/_serverFn/')),
+        async (route) => {
+          const request = route.request()
+
+          if (request.method() !== 'POST' || hasHeldBackground) {
+            return route.fallback()
+          }
+
+          const call = (
+            currentFramework === 'tanstack-start'
+              ? fromJSON(request.postDataJSON()).data
+              : request.postDataJSON()[0]
+          ) as { name?: string }
+
+          if (call?.name !== 'form-state') {
+            return route.fallback()
+          }
+
+          hasHeldBackground = true
+          const response = await route.fetch()
+
+          backgroundStarted.resolve()
+          await releaseBackground.promise
+          await route.fulfill({ response })
+          backgroundReleased.resolve()
+        },
+      )
+      await savePage.route(`**/api/posts/access/${doc.id}*`, async (route) => {
+        if (hasHeldPermissions || route.request().method() !== 'POST') {
+          return route.fallback()
+        }
+
+        hasHeldPermissions = true
+        const response = await route.fetch()
+
+        permissionsStarted.resolve()
+        await releasePermissions.promise
+        await route.fulfill({ response })
+      })
+
+      const titleField = savePage.locator('#field-title')
+
+      await titleField.fill('Intermediate title')
+      await savePage.clock.runFor(300)
+      await backgroundStarted.promise
+      await titleField.fill('After save')
+      await savePage.clock.runFor(300)
+      await savePage.locator('#action-save').click()
+      await permissionsStarted.promise
+
+      // Drain the queued edit while post-save rebuilding is waiting for permissions.
+      releaseBackground.resolve()
+      await backgroundReleased.promise
+      await savePage.clock.runFor(300)
+      releasePermissions.resolve()
+      await savePage.clock.resume()
+
+      await expect(savePage.locator('.payload-toast-container')).toContainText('successfully')
+      await expect(savePage.locator('#field-computedTitle')).toHaveValue('After save')
+    } finally {
+      releaseBackground.resolve()
+      releasePermissions.resolve()
+      await savePage.unrouteAll({ behavior: 'wait' })
+      await savePage.close()
+    }
+  })
+
   test('should fetch new doc permissions after save', async () => {
     const doc = await createPost({ title: 'Initial Title' })
     await page.goto(postsUrl.edit(doc.id))

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-mcp",
-  "version": "4.0.0-beta.7",
+  "version": "4.0.0-beta.8",
   "description": "MCP (Model Context Protocol) capabilities with Payload",
   "keywords": [
     "mcp",
@@ -52,6 +52,11 @@
       "import": "./src/exports/internal.ts",
       "types": "./src/exports/internal.ts",
       "default": "./src/exports/internal.ts"
+    },
+    "./rsc": {
+      "import": "./src/exports/rsc.ts",
+      "types": "./src/exports/rsc.ts",
+      "default": "./src/exports/rsc.ts"
     }
   },
   "publishConfig": {
@@ -77,6 +82,11 @@
         "import": "./dist/exports/internal.js",
         "types": "./dist/exports/internal.d.ts",
         "default": "./dist/exports/internal.js"
+      },
+      "./rsc": {
+        "import": "./dist/exports/rsc.js",
+        "types": "./dist/exports/rsc.d.ts",
+        "default": "./dist/exports/rsc.js"
       }
     }
   },
@@ -94,9 +104,11 @@
     "tsx": "4.23.15"
   },
   "devDependencies": {
+    "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*"
   },
   "peerDependencies": {
+    "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*"
   },
   "//deps_notes": {
