@@ -1,7 +1,7 @@
-import type { Collection } from '../collections/config/types.js'
-import type { SanitizedConfig } from '../config/types.js'
-import type { PayloadRequest } from '../types/index.js'
-import type { UploadTransformer } from './transformers/types.js'
+import type { Collection } from '../../collections/config/types.js'
+import type { SanitizedConfig } from '../../config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { UploadTransformer } from '../transformers/types.js'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -23,7 +23,7 @@ vi.mock('fs/promises', () => ({
   },
 }))
 
-const { generateFileData } = await import('./generateFileData.js')
+const { generateFileData } = await import('./index.js')
 
 const createCollection = (disableLocalStorage: boolean): Collection =>
   ({

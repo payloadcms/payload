@@ -182,7 +182,7 @@ export function getStagesThatRun({
   stagesThatRun: UploadTransformer[]
 } {
   const bridgeTransformers = plan.pipeline.filter((transformer) =>
-    Boolean(getUploadTransformerInternal(transformer)?.prepareUpload),
+    Boolean(getUploadTransformerInternal(transformer)?.transformUpload),
   )
   const bridgeTransformer =
     bridgeTransformers.find((transformer) =>

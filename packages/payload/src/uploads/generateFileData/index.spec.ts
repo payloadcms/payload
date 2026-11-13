@@ -1,7 +1,7 @@
-import type { Collection } from '../collections/config/types.js'
-import type { SanitizedConfig } from '../config/types.js'
-import type { PayloadRequest } from '../types/index.js'
-import type { UploadTransformer } from './transformers/types.js'
+import type { Collection } from '../../collections/config/types.js'
+import type { SanitizedConfig } from '../../config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { UploadTransformer } from '../transformers/types.js'
 
 import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
@@ -9,14 +9,14 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { APIError } from '../errors/APIError.js'
-import { FileUploadError } from '../errors/index.js'
-import { deepCopyObject } from '../utilities/deepCopyObject.js'
-import { generateFileData } from './generateFileData.js'
-import { uploadTransformerInternal } from './transformers/uploadTransformerBridge.js'
+import { APIError } from '../../errors/APIError.js'
+import { FileUploadError } from '../../errors/index.js'
+import { deepCopyObject } from '../../utilities/deepCopyObject.js'
+import { generateFileData } from './index.js'
+import { uploadTransformerInternal } from '../transformers/uploadTransformerBridge.js'
 
-vi.mock('../utilities/deepCopyObject.js', async (importOriginal) => {
-  const original = await importOriginal<typeof import('../utilities/deepCopyObject.js')>()
+vi.mock('../../utilities/deepCopyObject.js', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../../utilities/deepCopyObject.js')>()
 
   return { ...original, deepCopyObject: vi.fn(original.deepCopyObject) }
 })
@@ -411,10 +411,12 @@ describe('generateFileData - client uploads without full contents', () => {
   const runClientUpload = ({
     fetchFullClientUpload,
     size,
+    transformers,
     transformFile,
   }: Pick<UploadTransformer, 'transformFile'> &
     Required<Pick<Parameters<typeof generateFileData>[0], 'fetchFullClientUpload'>> & {
       size: number
+      transformers?: UploadTransformer[]
     }) =>
     generateFileData({
       collection: createCollection(),
@@ -436,7 +438,9 @@ describe('generateFileData - client uploads without full contents', () => {
           config: {
             routes: { api: '/api' },
             upload: {
-              transformers: [{ slug: 'accepting', mimeTypes: ['video/*'], transformFile }],
+              transformers: transformers ?? [
+                { slug: 'accepting', mimeTypes: ['video/*'], transformFile },
+              ],
             },
           },
           db: { findOne: vi.fn(async () => null) },
@@ -463,6 +467,23 @@ describe('generateFileData - client uploads without full contents', () => {
       data: { errors: [{ message: 'Invalid or corrupted ISO base media file.' }] },
     })
     expect(transformFile).not.toHaveBeenCalled()
+  })
+
+  it('should plan the stages again when the downloaded file has another type than the probe', async () => {
+    const videoTransformFile = vi.fn(async () => ({ status: 'continue' as const }))
+    const imageTransformFile = vi.fn(async () => ({ status: 'continue' as const }))
+
+    await runClientUpload({
+      fetchFullClientUpload: async ({ file }) => ({ ...file, data: PNG_SIGNATURE }),
+      size: PNG_SIGNATURE.length,
+      transformers: [
+        { slug: 'video', mimeTypes: ['video/*'], transformFile: videoTransformFile },
+        { slug: 'image', mimeTypes: ['image/*'], transformFile: imageTransformFile },
+      ],
+    })
+
+    expect(videoTransformFile).not.toHaveBeenCalled()
+    expect(imageTransformFile).toHaveBeenCalledOnce()
   })
 
   it('should keep the message and status of an error from the download', async () => {
@@ -550,9 +571,9 @@ describe('generateFileData - _transforms claims', () => {
   })
 
   it('should not download a header-only client upload for a focal point alone', async () => {
-    const prepareUpload = vi.fn()
+    const transformUpload = vi.fn()
     const sharp = stage(claim(['crop', 'focalPoint']), {
-      [uploadTransformerInternal]: { prepareUpload },
+      [uploadTransformerInternal]: { transformUpload },
     })
 
     await run({
@@ -562,7 +583,7 @@ describe('generateFileData - _transforms claims', () => {
     })
 
     expect(fetchFullClientUpload).not.toHaveBeenCalled()
-    expect(prepareUpload).not.toHaveBeenCalled()
+    expect(transformUpload).not.toHaveBeenCalled()
   })
 
   it('should log a canTransform error during rebuild planning and throw a FileUploadError', async () => {

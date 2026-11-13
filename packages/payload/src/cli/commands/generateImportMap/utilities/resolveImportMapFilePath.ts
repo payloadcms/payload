@@ -20,14 +20,19 @@ async function pathOrFileExists(path: string): Promise<boolean> {
  *
  * Adapters with a bespoke layout can still bypass this via `candidateDirectories`.
  */
-const defaultCandidateDirectories = (rootDir: string, adminRoute: string): string[] => [
-  // Next.js App Router: `(payload)` route group nested under the admin route
-  path.resolve(rootDir, `app/${NEXT_PAYLOAD_ROUTE_GROUP}${adminRoute}/`),
-  path.resolve(rootDir, `src/app/${NEXT_PAYLOAD_ROUTE_GROUP}${adminRoute}/`),
-  // TanStack Start: `_payload` pathless route folder at the app root
-  path.resolve(rootDir, `app/${TANSTACK_PAYLOAD_DIR}/`),
-  path.resolve(rootDir, `src/app/${TANSTACK_PAYLOAD_DIR}/`),
-]
+const defaultCandidateDirectories = (rootDir: string, adminRoute: string): string[] => {
+  // Next.js uses %5F for routable segments that begin with an underscore.
+  const adminFolder = adminRoute.replace(/(^|\/)_/g, '$1%5F')
+
+  return [
+    // Next.js App Router: `(payload)` route group nested under the admin route
+    path.resolve(rootDir, `app/${NEXT_PAYLOAD_ROUTE_GROUP}${adminFolder}/`),
+    path.resolve(rootDir, `src/app/${NEXT_PAYLOAD_ROUTE_GROUP}${adminFolder}/`),
+    // TanStack Start: `_payload` pathless route folder at the app root
+    path.resolve(rootDir, `app/${TANSTACK_PAYLOAD_DIR}/`),
+    path.resolve(rootDir, `src/app/${TANSTACK_PAYLOAD_DIR}/`),
+  ]
+}
 
 /**
  * Returns the path to the import map file. If the import map file is not found, it throws an error.

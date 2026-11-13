@@ -1,38 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 
-import {
-  resolveNextState,
-  resolveUploadEdits,
-  toPipelineEdits,
-  withSavedEdits,
-} from './resolveUploadEdits.js'
+import { resolveUploadEdits } from './resolveUploadEdits.js'
 
 const original = { height: 1000, width: 2000 }
-const center = { x: 50, y: 50 }
 const crop = { height: 500, width: 1000, x: 200, y: 100 }
-
-const nextState = (args: Partial<Parameters<typeof resolveNextState>[0]>) =>
-  resolveNextState({
-    currentFocalPoint: center,
-    isLegacyDocument: false,
-    original,
-    previous: null,
-    ...args,
-  })
-
-const pipelineEdits = (args: Partial<Parameters<typeof toPipelineEdits>[0]>) =>
-  toPipelineEdits({
-    hasFocalPointChange: false,
-    hasNewFile: false,
-    next: null,
-    nextFocalPoint: center,
-    original,
-    parsedEdits: {},
-    previous: null,
-    ...args,
-  })
 
 const resolve = ({
   data,
@@ -61,79 +34,6 @@ const focalAt = (x: number, y: number) => ({
   _transforms: { focalPoint: { x, y } },
   focalX: Math.round(x),
   focalY: y,
-})
-
-describe('resolveNextState', () => {
-  it.each([
-    { name: 'save an empty object as null', args: { submitted: {} }, expected: null },
-    {
-      name: 'replace the whole saved state with a submitted object',
-      args: { previous: { crop, focalPoint: center }, submitted: { focalPoint: { x: 60, y: 70 } } },
-      expected: { focalPoint: { x: 60, y: 70 } },
-    },
-    {
-      name: 'remove the crop when the admin crop selects the whole image',
-      args: {
-        adminCrop: { height: 100, unit: '%' as const, width: 100, x: 0, y: 0 },
-        previous: { crop, watermark: true },
-      },
-      expected: { watermark: true },
-    },
-    {
-      name: 'not save a written focal point equal to the current one',
-      args: { focalPointWrite: center },
-      expected: null,
-    },
-    {
-      name: 'not copy a legacy focal point at the center',
-      args: { isLegacyDocument: true, submitted: { crop } },
-      expected: { crop },
-    },
-    {
-      name: 'not copy a focal point when the document is not legacy',
-      args: { currentFocalPoint: { x: 30, y: 70 }, submitted: { crop } },
-      expected: { crop },
-    },
-  ])('should $name', ({ args, expected }) => {
-    expect(nextState(args)).toEqual(expected)
-  })
-})
-
-describe('toPipelineEdits', () => {
-  it('should send no crop when the saved crop did not change', () => {
-    expect(pipelineEdits({ next: { crop }, previous: { crop } })).toEqual({})
-  })
-
-  it('should send the saved focal point with a changed crop, so sizes keep it', () => {
-    const focalPoint = { x: 30, y: 70 }
-
-    const edits = pipelineEdits({
-      next: { crop, focalPoint },
-      nextFocalPoint: focalPoint,
-      previous: { crop: { ...crop, x: 0 }, focalPoint },
-    })
-
-    expect(edits).toMatchObject({ crop: { unit: '%' }, focalPoint })
-  })
-
-  it('should send the saved crop for a new file', () => {
-    expect(pipelineEdits({ hasNewFile: true, next: { crop }, previous: { crop } })).toHaveProperty(
-      'crop',
-    )
-  })
-
-  it('should replace a parsed focal point with the resolved one', () => {
-    const edits = pipelineEdits({
-      nextFocalPoint: { x: 10, y: 90 },
-      parsedEdits: { focalPoint: center },
-    })
-
-    expect(edits).toEqual({ focalPoint: { x: 10, y: 90 } })
-  })
-
-  it('should leave the edits unchanged when the original size is unknown', () => {
-    expect(pipelineEdits({ next: { crop }, original: undefined })).toEqual({})
-  })
 })
 
 describe('resolveUploadEdits', () => {
@@ -234,31 +134,5 @@ describe('resolveUploadEdits', () => {
 
     // An unrounded value differs from the sent focalX, which makes the pipeline reprocess the file.
     expect(uploadEdits.focalPoint).toEqual({ x: 33, y: 50 })
-  })
-})
-
-describe('withSavedEdits', () => {
-  // A rebuild that another key starts must apply the saved crop and focal point again, so the
-  // sizes match the saved state.
-  it.each([
-    ['the saved focal point when the edits have none', {}, { x: 20, y: 80 }],
-    [
-      'the focal point of the edits over the saved one',
-      { focalPoint: { x: 5, y: 5 } },
-      { x: 5, y: 5 },
-    ],
-  ])('should use %s', (_name, edits, expectedFocalPoint) => {
-    const savedEdits = withSavedEdits({
-      edits,
-      original,
-      transforms: { crop, focalPoint: { x: 20, y: 80 } },
-    })
-
-    expect(savedEdits).toEqual({
-      crop: { height: 50, unit: '%', width: 50, x: 10, y: 10 },
-      focalPoint: expectedFocalPoint,
-      heightInPixels: crop.height,
-      widthInPixels: crop.width,
-    })
   })
 })
