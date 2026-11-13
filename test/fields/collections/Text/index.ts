@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { text as validateText } from 'payload/shared'
+
 import { defaultText, textFieldsSlug } from './shared.js'
 
 const TextFields: CollectionConfig = {
@@ -13,6 +15,8 @@ const TextFields: CollectionConfig = {
       name: 'text',
       type: 'text',
       required: true,
+      // Custom validation deliberately omits required; Payload must still enforce it.
+      validate: (value, args) => validateText(value, { ...args, required: false }),
       hooks: {
         beforeDuplicate: [({ value }) => `${value} - duplicate`],
       },

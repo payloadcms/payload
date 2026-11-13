@@ -444,7 +444,7 @@ export const myField: Field = {
 
 ### Validation
 
-Fields are automatically validated based on their [Field Type](#field-types) and other [Field Options](#field-options) such as `required` or `min` and `max` value constraints. If needed, however, field validations can be customized or entirely replaced by providing your own custom validation functions.
+Fields are automatically validated based on their [Field Type](#field-types) and other [Field Options](#field-options) such as `required` or `min` and `max` value constraints. Custom validation functions can replace the default validator, but `required: true` remains enforced independently.
 
 To set a custom field validation function, use the `validate` property in your Field Config:
 
@@ -515,7 +515,9 @@ This way you can use [Custom Translations](https://payloadcms.com/docs/configura
 
 #### Reusing Default Field Validations
 
-When using custom validation functions, Payload will use yours in place of the default. However, you might want to simply augment the default validation with your own custom logic.
+Custom validation functions replace the default field validator, but `required: true` is enforced independently and cannot be bypassed by returning `true` from a custom validator. Optional and virtual fields retain their existing behavior. Other default constraints, such as `minLength` and `maxLength`, still need to be composed explicitly.
+
+On the server, required validation runs after field `beforeChange` hooks, so hooks can populate a missing value before it is checked. Existing validation skips, such as draft saves with draft validation disabled, still apply.
 
 To reuse default field validations, call them from within your custom validation function:
 
@@ -525,6 +527,7 @@ import { text } from 'payload/shared'
 const field: Field = {
   name: 'notBad',
   type: 'text',
+  required: true,
   validate: (val, args) => {
     if (val === 'bad') return 'This cannot be "bad"'
     return text(val, args) // highlight-line
