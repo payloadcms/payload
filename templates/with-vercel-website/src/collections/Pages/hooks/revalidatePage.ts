@@ -46,10 +46,9 @@ export const recordPublishedPage: CollectionBeforeChangeHook<Page> = async ({
   return data
 }
 
-export const revalidatePage: CollectionAfterChangeHook<Page> = ({
-  doc,
-  req: { payload, context },
-}) => {
+export const revalidatePage: CollectionAfterChangeHook<Page> = async ({ doc, req }) => {
+  const { context, payload } = req
+
   if (!context.disableRevalidate) {
     if (doc._status === 'published') {
       const path = doc.slug === 'home' ? '/' : `/${doc.slug}`
@@ -66,12 +65,26 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
     ]
 
     if (publishedSlug !== undefined && doc._status !== 'published') {
-      const oldPath = publishedSlug === 'home' ? '/' : `/${publishedSlug}`
+      // A draft save leaves the published page live. The Local API's `draft: true` doesn't set
+      // `req.query.draft`, so check the live page again before treating this as an unpublish.
+      const livePage = await payload.findByID({
+        id: doc.id,
+        collection: 'pages',
+        depth: 0,
+        draft: false,
+        overrideAccess: true,
+        req,
+        select: { _status: true },
+      })
 
-      payload.logger.info(`Revalidating old page at path: ${oldPath}`)
+      if (livePage?._status !== 'published') {
+        const oldPath = publishedSlug === 'home' ? '/' : `/${publishedSlug}`
 
-      revalidatePath(oldPath)
-      revalidateTag('pages-sitemap', 'max')
+        payload.logger.info(`Revalidating old page at path: ${oldPath}`)
+
+        revalidatePath(oldPath)
+        revalidateTag('pages-sitemap', 'max')
+      }
     }
   }
   return doc

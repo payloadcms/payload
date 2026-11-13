@@ -128,4 +128,18 @@ describe('revalidatePage', () => {
 
     expect(revalidatePath).not.toHaveBeenCalled()
   })
+
+  it('does not revalidate when a draft is saved through the Local API without req.query', async () => {
+    const page = await publishPage(`local-draft-save-${Date.now()}`)
+
+    await payload.update({
+      id: page.id,
+      collection: 'pages',
+      data: { title: 'draft edit' },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    expect(revalidatePath).not.toHaveBeenCalled()
+  })
 })

@@ -46,10 +46,9 @@ export const recordPublishedPost: CollectionBeforeChangeHook<Post> = async ({
   return data
 }
 
-export const revalidatePost: CollectionAfterChangeHook<Post> = ({
-  doc,
-  req: { payload, context },
-}) => {
+export const revalidatePost: CollectionAfterChangeHook<Post> = async ({ doc, req }) => {
+  const { context, payload } = req
+
   if (!context.disableRevalidate) {
     if (doc._status === 'published') {
       const path = `/posts/${doc.slug}`
@@ -66,12 +65,26 @@ export const revalidatePost: CollectionAfterChangeHook<Post> = ({
     ]
 
     if (publishedSlug !== undefined && doc._status !== 'published') {
-      const oldPath = `/posts/${publishedSlug}`
+      // A draft save leaves the published post live. The Local API's `draft: true` doesn't set
+      // `req.query.draft`, so check the live post again before treating this as an unpublish.
+      const livePost = await payload.findByID({
+        id: doc.id,
+        collection: 'posts',
+        depth: 0,
+        draft: false,
+        overrideAccess: true,
+        req,
+        select: { _status: true },
+      })
 
-      payload.logger.info(`Revalidating old post at path: ${oldPath}`)
+      if (livePost?._status !== 'published') {
+        const oldPath = `/posts/${publishedSlug}`
 
-      revalidatePath(oldPath)
-      revalidateTag('posts-sitemap', 'max')
+        payload.logger.info(`Revalidating old post at path: ${oldPath}`)
+
+        revalidatePath(oldPath)
+        revalidateTag('posts-sitemap', 'max')
+      }
     }
   }
   return doc
