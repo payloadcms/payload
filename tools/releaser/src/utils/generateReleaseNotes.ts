@@ -276,7 +276,6 @@ async function getContributors(commits: GitCommit[]): Promise<Contributor[]> {
             if (!contributors.some((c) => c.username === noreplyLogin)) {
               contributors.push({ name, username: noreplyLogin })
             }
-            emails.add(email)
             return noreplyLogin
           }
 

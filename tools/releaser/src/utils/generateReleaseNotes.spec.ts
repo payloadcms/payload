@@ -166,6 +166,41 @@ describe('generateReleaseNotes', () => {
     expect(fetchMock.mock.calls.filter(([url]) => url.includes('/search/users'))).toHaveLength(1)
   })
 
+  it('should credit co-authors on commits by an author who co-authored an earlier commit', async () => {
+    vi.mocked(getLatestCommits).mockResolvedValueOnce([
+      {
+        ...featureCommit,
+        body: 'Co-authored-by: New User <12345678+new-user@users.noreply.github.com>',
+      },
+      {
+        ...featureCommit,
+        author: { email: '12345678+new-user@users.noreply.github.com', name: 'New User' },
+        authors: [{ email: '12345678+new-user@users.noreply.github.com', name: 'New User' }],
+        body: 'Co-authored-by: Other User <other-user@users.noreply.github.com>',
+        references: [{ type: 'hash', value: '7654321fedcba098' }],
+        shortHash: '7654321',
+      },
+    ])
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => ({
+        ok: true,
+        json: async () =>
+          url.endsWith('/7654321')
+            ? { author: { email: '12345678+new-user@users.noreply.github.com', login: 'new-user' } }
+            : { author: { email: 'dev@example.com', login: 'dev' } },
+      })),
+    )
+
+    const { releaseNotes } = await generateReleaseNotes({
+      fromVersion: 'v4.0.0-canary.8',
+      toVersion: 'v4.0.0-canary.10',
+    })
+
+    expect(releaseNotes).toContain('- New User (@new-user)')
+    expect(releaseNotes).toContain('- Other User (@other-user)')
+  })
+
   it('should label notes with releaseTag for a HEAD range', async () => {
     vi.stubGlobal('fetch', vi.fn())
 
