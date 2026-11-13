@@ -633,3 +633,81 @@ describe('generateFileData - _transforms claims', () => {
     ).rejects.toMatchObject({ data: { errors: [{ path: '_transforms.crop' }] } })
   })
 })
+
+describe('generateFileData - filename errors', () => {
+  const createFilenameReq = ({
+    filename,
+    hasCollision = false,
+    transformers = [],
+  }: {
+    filename: string
+    hasCollision?: boolean
+    transformers?: UploadTransformer[]
+  }): PayloadRequest =>
+    ({
+      file: {
+        data: Buffer.from('plain text contents'),
+        mimetype: 'text/plain',
+        name: filename,
+        size: 19,
+      },
+      payload: {
+        collections: { media: { config: { fields: [], upload: {} } } },
+        config: { routes: { api: '/api' }, upload: { transformers } },
+        db: { findOne: vi.fn().mockResolvedValue(hasCollision ? { id: 'existing' } : null) },
+        logger: { error: vi.fn() },
+      },
+    }) as unknown as PayloadRequest
+
+  const run = ({ req }: { req: PayloadRequest }) =>
+    generateFileData({
+      collection: createCollection({ disableLocalStorage: false }),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      req,
+    })
+
+  it('should preserve the message and 400 status for an overlong extension', async () => {
+    const req = createFilenameReq({ filename: `a.${'é'.repeat(128)}` })
+
+    await expect(run({ req })).rejects.toMatchObject({
+      message: 'Upload filename extension exceeds the filename byte limit',
+      status: 400,
+    })
+  })
+
+  it.each([
+    ['suffix overflow', `a.${'x'.repeat(253)}`],
+    ['persistent collisions', 'photo.txt'],
+  ])('should preserve the message and 409 status for %s', async (_, filename) => {
+    const req = createFilenameReq({ filename, hasCollision: true })
+
+    await expect(run({ req })).rejects.toMatchObject({
+      message: 'Unable to find an available upload filename',
+      status: 409,
+    })
+  })
+
+  it('should keep wrapping unrelated transformer API errors as upload failures', async () => {
+    const failure = new APIError('Private transformer failure', 409)
+    const req = createFilenameReq({
+      filename: 'photo.txt',
+      transformers: [
+        {
+          slug: 'failing',
+          mimeTypes: ['text/plain'],
+          transformFile: () => {
+            throw failure
+          },
+        },
+      ],
+    })
+
+    await expect(run({ req })).rejects.toMatchObject({
+      name: 'FileUploadError',
+      status: 400,
+    })
+    expect(req.payload.logger.error).toHaveBeenCalledWith(failure)
+  })
+})

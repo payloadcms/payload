@@ -19,6 +19,7 @@ vi.mock('fs/promises', () => ({
   default: {
     mkdir: mkdirMock,
     readFile: readFileMock,
+    stat: vi.fn().mockRejectedValue(Object.assign(new Error('File not found'), { code: 'ENOENT' })),
     writeFile: writeFileMock,
   },
 }))
