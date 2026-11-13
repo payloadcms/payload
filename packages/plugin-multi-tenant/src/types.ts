@@ -5,11 +5,24 @@ import type {
   ArrayField,
   CollectionConfig,
   CollectionSlug,
+  CustomComponent,
   Field,
+  PayloadComponent,
   RelationshipField,
   SingleRelationshipField,
   User,
 } from 'payload'
+import type { ReactNode } from 'react'
+
+export type AssignTenantModalProps = {
+  afterModalClose?: () => void
+  afterModalOpen?: () => void
+  children: ReactNode
+  onCancel?: () => void
+  onConfirm?: () => void
+  /** The modal slug used by the document action and required-field prompt. */
+  slug: string
+}
 
 export type TenantValue = (number | string)[] | (number | string)
 
@@ -77,6 +90,20 @@ export type MultiTenantPluginConfig = {
        */
       useTenantAccess?: boolean
     }
+  }
+  /** Custom components for the plugin's admin UI. */
+  components?: {
+    /**
+     * Replace the assignment modal with a client component.
+     * Receives the tenant field as children and the modal callbacks.
+     * Omit this option to render the default modal.
+     */
+    AssignTenantModal?: Exclude<PayloadComponent<never, AssignTenantModalProps>, false>
+    /**
+     * Replace the navigation tenant selector, or hide it with `null`.
+     * Omit this option to render the default selector.
+     */
+    TenantSelector?: CustomComponent | null
   }
   /**
    * Enables debug mode

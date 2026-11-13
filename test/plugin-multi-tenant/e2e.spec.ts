@@ -78,6 +78,31 @@ test.describe('Multi Tenant', () => {
     await page.goto(usersURL.admin)
   })
 
+  test('should render a custom wrapper around the exported tenant selector and filter documents', async () => {
+    await loginClientSide({ data: credentials.admin, page, serverURL })
+    await page.goto(menuItemsURL.list)
+    await openNav(page)
+
+    await expect(page.getByText('Custom', { exact: true })).toBeVisible()
+    await expect(page.locator('.tenant-selector')).toHaveCount(1)
+
+    await setTenantFilter({ page, tenant: 'Blue Dog' })
+
+    await expect(
+      page.locator('.collection-list .cell-name', { hasText: 'Spicy Mac' }),
+    ).toBeVisible()
+    await expect(
+      page.locator('.collection-list .cell-name', { hasText: 'Pretzel Bites' }),
+    ).toBeHidden()
+
+    await setTenantFilter({ page, tenant: 'Steel Cat' })
+
+    await expect(
+      page.locator('.collection-list .cell-name', { hasText: 'Pretzel Bites' }),
+    ).toBeVisible()
+    await expect(page.locator('.collection-list .cell-name', { hasText: 'Spicy Mac' })).toBeHidden()
+  })
+
   test('should preserve other tenants when deleting all selected-tenant documents', async () => {
     await loginClientSide({ data: credentials.admin, page, serverURL })
     await setTenantFilter({ page, tenant: 'Blue Dog', urlUtil: menuItemsURL })
@@ -583,6 +608,7 @@ test.describe('Multi Tenant', () => {
 
       await closeNav(page)
       await openAssignTenantModal({ page, payload })
+      await expect(page.getByText('Custom assignment modal', { exact: true })).toBeVisible()
       await selectInput({
         multiSelect: false,
         option: 'Steel Cat',
@@ -605,6 +631,7 @@ test.describe('Multi Tenant', () => {
 
       await closeNav(page)
       await openAssignTenantModal({ page, payload })
+      await expect(page.getByText('Custom assignment modal', { exact: true })).toBeVisible()
       await expect
         .poll(async () =>
           getSelectInputValue({
@@ -620,6 +647,47 @@ test.describe('Multi Tenant', () => {
         .poll(async () => {
           return await getSelectedTenantFilterName({ page, payload })
         })
+        .toBe('Blue Dog')
+    })
+
+    test('should dismiss the custom assignment modal with Escape without applying changes', async () => {
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+      await page.goto(menuItemsURL.list)
+      await clearTenantFilter({ page })
+      await goToListDoc({
+        cellClass: '.cell-name',
+        page,
+        search: 'Spicy Mac',
+        textToMatch: 'Spicy Mac',
+        urlUtil: menuItemsURL,
+      })
+      await closeNav(page)
+      await openAssignTenantModal({ page, payload })
+
+      const modal = page.locator('#assign-tenant-field-modal')
+
+      await expect(modal).toHaveAccessibleName(/Spicy Mac/)
+      await expect(modal.getByText('Custom assignment modal', { exact: true })).toBeVisible()
+      await selectInput({
+        multiSelect: false,
+        option: 'Steel Cat',
+        page,
+        selectLocator: page.locator('.tenantField'),
+      })
+      await page.keyboard.press('Escape')
+
+      await expect(modal).toBeHidden()
+      await expect(page.locator('#action-save')).toBeDisabled()
+
+      await openAssignTenantModal({ page, payload })
+      await expect
+        .poll(async () =>
+          getSelectInputValue({
+            multiSelect: false,
+            selectLocator: page.locator('.tenantField'),
+            selectType: 'relationship',
+          }),
+        )
         .toBe('Blue Dog')
     })
 
@@ -643,6 +711,7 @@ test.describe('Multi Tenant', () => {
 
       await closeNav(page)
       await openAssignTenantModal({ page, payload })
+      await expect(page.getByText('Custom assignment modal', { exact: true })).toBeVisible()
       await selectInput({
         multiSelect: false,
         option: 'Steel Cat',

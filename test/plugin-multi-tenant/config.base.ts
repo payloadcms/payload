@@ -83,6 +83,14 @@ export const baseConfig: Partial<Config> = {
   },
   plugins: [
     multiTenantPlugin<ConfigType>({
+      components: {
+        AssignTenantModal: {
+          path: '/components/CustomAssignTenantModal/index.js',
+          exportName: 'CustomAssignTenantModal',
+          clientProps: { description: 'Custom assignment modal' },
+        },
+        TenantSelector: '/components/CustomTenantSelector/index.js#CustomTenantSelector',
+      },
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
       useTenantsCollectionAccess: false,
       tenantField: {
