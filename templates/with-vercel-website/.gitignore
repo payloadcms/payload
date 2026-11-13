@@ -20,3 +20,12 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# typescript
+*.tsbuildinfo
+
+# SQLite
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
