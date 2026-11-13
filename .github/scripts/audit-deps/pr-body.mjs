@@ -91,8 +91,8 @@ function assemble({ head, packages, tail }) {
   return compose({ keep })
 }
 
-function composePackage({ heading, advisoryQuote, info, notes, commits }) {
-  return [heading, advisoryQuote, info, notes, commits].filter(Boolean).join('\n\n')
+function composePackage({ heading, summaryQuote, advisoryLine, info, notes, commits }) {
+  return [heading, summaryQuote, advisoryLine, info, notes, commits].filter(Boolean).join('\n\n')
 }
 
 function renderMajorBanner({ prBumps, details }) {
@@ -234,7 +234,8 @@ function renderPackageSections({ bump, detail }) {
 
   return {
     heading: renderHeading({ bump }),
-    advisoryQuote: renderAdvisoryQuote({ advisories }),
+    summaryQuote: renderSummaryQuote({ advisories }),
+    advisoryLine: renderAdvisoryLine({ advisories }),
     info: renderInfo({ advisories }),
     notes: renderNotes({ detail }),
     commits: renderCommits({ detail }),
@@ -245,20 +246,29 @@ function renderHeading({ bump }) {
   return `### ${oneLine({ text: bump.dependency, maxLength: 100 })}`
 }
 
-// A `>` line between advisories keeps each one a separate paragraph in the quote block.
-function renderAdvisoryQuote({ advisories }) {
+// A `>` line between summaries keeps each one a separate paragraph in the quote block.
+function renderSummaryQuote({ advisories }) {
+  const summaries = advisories
+    .map((advisory) => oneLine({ text: advisory.summary, maxLength: 200 }))
+    .filter(Boolean)
+  if (summaries.length === 0) {
+    return null
+  }
+  return summaries.map((summary) => `> ${summary}`).join('\n>\n')
+}
+
+// Each link carries its own severity and keeps the summary order, so readers can pair them.
+function renderAdvisoryLine({ advisories }) {
   if (advisories.length === 0) {
     return null
   }
-  return advisories.map((advisory) => `> ${renderAdvisoryParagraph({ advisory })}`).join('\n>\n')
-}
-
-function renderAdvisoryParagraph({ advisory }) {
-  const link = ghsaLink({ advisory, label: advisory.ghsa })
-  const severity = oneLine({ text: advisory.severity, maxLength: 20 })
-  const reference = severity ? `${link} · ${severity}` : link
-  const summary = oneLine({ text: advisory.summary, maxLength: 200 })
-  return summary ? `${summary} (${reference})` : reference
+  return advisories
+    .map((advisory) => {
+      const link = ghsaLink({ advisory, label: advisory.ghsa })
+      const severity = oneLine({ text: advisory.severity, maxLength: 20 })
+      return severity ? `${link} · ${severity}` : link
+    })
+    .join(', ')
 }
 
 function renderInfo({ advisories }) {
