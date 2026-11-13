@@ -1,6 +1,6 @@
 import type { BeforeChangeHook, CollectionConfig } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
-import type { Field, TextField } from '../../fields/config/types.js'
+import type { TextField } from '../../fields/config/types.js'
 import type { Endpoint, PayloadHandler, SanitizedConfig } from '../types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
