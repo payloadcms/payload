@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import React, { act } from 'react'
+import React, { act, Suspense, use } from 'react'
 import { createRoot } from 'react-dom/client'
 import { afterEach, expect, it, vi } from 'vitest'
 
@@ -66,6 +66,41 @@ it('should distinguish widgets added in the same millisecond when moving and del
     expect(dashboard.currentLayout.map(({ item }) => item.id)).toEqual([ids[1], ids[0]])
     act(() => dashboard.deleteWidget(ids[0]))
     expect(dashboard.currentLayout.map(({ item }) => item.id)).toEqual([ids[1]])
+  } finally {
+    act(() => root.unmount())
+  }
+})
+
+it('should keep showing the current widgets while a new layout from the server is still loading', () => {
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  const container = document.createElement('div')
+  const root = createRoot(container)
+  const item = { id: 'activity-1', maxWidth: 'full', minWidth: 'full', width: 'full' } as const
+  // Stands in for a widget whose server-rendered content is still streaming
+  const pending = new Promise<React.ReactNode>(() => {})
+  const PendingWidget = () => use(pending)
+
+  const Harness = ({ layout }: { layout: WidgetInstanceClient[] }) => {
+    const { currentLayout } = useDashboardLayout(layout)
+    return currentLayout.map(({ component, item }) =>
+      React.createElement(React.Fragment, { key: item.id }, component),
+    )
+  }
+  const render = (layout: WidgetInstanceClient[]) =>
+    root.render(
+      React.createElement(
+        Suspense,
+        { fallback: 'fallback' },
+        React.createElement(Harness, { layout }),
+      ),
+    )
+
+  try {
+    act(() => render([{ component: 'ready', item }]))
+    expect(container.textContent).toBe('ready')
+
+    act(() => render([{ component: React.createElement(PendingWidget), item }]))
+    expect(container.textContent).toBe('ready')
   } finally {
     act(() => root.unmount())
   }
