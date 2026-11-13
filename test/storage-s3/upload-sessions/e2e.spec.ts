@@ -292,9 +292,14 @@ test.describe('storage-s3 upload sessions E2E', () => {
     await page.getByLabel('Title').fill(title)
     await page.locator('#action-save').click()
 
-    // The field error itself is not checked: a late form-state reply for the title can clear it.
     await expect(page.getByText('Please correct invalid fields.')).toBeVisible()
+    await expect(page.locator('#field-error-title')).toBeVisible()
     expect(log.sessionCalls.some((call) => call.endsWith('/intent'))).toBe(false)
+
+    // A background refresh would validate the title as a draft and clear the error. The onChange
+    // refresh runs 250 ms after a change, so 1 s is enough for one to arrive.
+    await page.waitForTimeout(1000)
+    await expect(page.locator('#field-error-title')).toBeVisible()
 
     releaseParts()
     await context.close()

@@ -38,6 +38,7 @@ import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 
 type Args = {
+  cancelFormStateRefresh: UseFormStateResult['cancelFormStateRefresh']
   contextRef: RefObject<FormContextType>
   dispatchFields: Dispatch<FieldAction>
   formRef: RefObject<HTMLFormElement | null>
@@ -62,6 +63,7 @@ type Args = {
  * await submit({ overrides: { _status: 'draft' } })
  */
 export const useFormSubmission = ({
+  cancelFormStateRefresh,
   contextRef,
   dispatchFields,
   formRef,
@@ -377,7 +379,17 @@ export const useFormSubmission = ({
           }
 
           if (serverValidation.errors.length) {
-            dispatchFields({ type: 'ADD_SERVER_ERRORS', errors: serverValidation.errors })
+            const serverErrorAction = {
+              type: 'ADD_SERVER_ERRORS' as const,
+              errors: serverValidation.errors,
+            }
+
+            // A background refresh validates without the overrides, so a running one or one the
+            // errors would start clears them. Cancel it, and mark the latest fields with the
+            // errors as already refreshed.
+            cancelFormStateRefresh()
+            prevFormStateRef.current = fieldReducer(contextRef.current.fields, serverErrorAction)
+            dispatchFields(serverErrorAction)
             setIsValid(false)
             isValid = false
           }
@@ -600,6 +612,7 @@ export const useFormSubmission = ({
       waitForAutocomplete,
       setIsModified,
       onNonFieldError,
+      cancelFormStateRefresh,
       contextRef,
       formRef,
       prevFormStateRef,

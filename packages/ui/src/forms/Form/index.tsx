@@ -81,6 +81,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const submissionActivityRef = useRef<SubmissionActivity>({ running: 0, started: 0 })
 
   const {
+    cancelFormStateRefresh,
     dispatchFields,
     formState,
     isInitializing,
@@ -114,6 +115,7 @@ export const Form: React.FC<FormProps> = (props) => {
     submitted,
     successfulSubmitCount,
   } = useFormSubmission({
+    cancelFormStateRefresh,
     contextRef,
     dispatchFields,
     formRef,
