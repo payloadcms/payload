@@ -11,15 +11,13 @@ Content Branching lets editors create named workspaces for content changes. A br
 You can use branches for release campaigns, large editorial updates, or other work that must be reviewed as one set. Branches support collections, globals, drafts, versions, localization, relationships, uploads, and Trash.
 
 <Banner type="warning">
-  Content Branching is experimental and can include breaking changes in minor
-  releases. Its configuration, APIs, database structure, and behavior are not
-  stable.
+  Content Branching is experimental and can include breaking changes in minor releases. Its
+  configuration, APIs, database structure, and behavior are not stable.
 </Banner>
 
 <Banner type="warning">
-  A merge always targets <code>main</code>. Content Branching does not provide
-  branch-to-branch merges, three-way conflict resolution, or field-level
-  conflict resolution.
+  A merge always targets <code>main</code>. Content Branching does not provide branch-to-branch
+  merges, three-way conflict resolution, or field-level conflict resolution.
 </Banner>
 
 ## Enable Content Branching
@@ -238,9 +236,8 @@ For example, if a document on `main` has the published title “Original”:
 | Published title: “Campaign” | Published title becomes “Campaign”.                                 |
 
 <Banner type="warning">
-  A successful dry run is not an authorization token or a guarantee that the
-  real merge will succeed. Hooks, permissions, content, and database constraints
-  can change before the write.
+  A successful dry run is not an authorization token or a guarantee that the real merge will
+  succeed. Hooks, permissions, content, and database constraints can change before the write.
 </Banner>
 
 Discard removes only branch-owned work. It does not change `main`. Payload blocks removal of a branch-created document if a surviving document, global, or version still references it.
@@ -332,7 +329,7 @@ Do not undo a successful target write only because source cleanup failed.
 
 ## Database indexes and migrations
 
-Branching adds branch identity to branchable content, global, and version storage. Unique fields and developer-defined unique indexes include the branch identity so separate branches can use the same value. The normal `main` constraint still applies during merge, so a collision on `main` fails the real write.
+Branching adds branch identity to branchable content, global, and version storage. Unique fields and unique indexes declared in the Payload Config include the branch identity so separate branches can use the same value. Custom unique indexes created directly in the database may still enforce uniqueness across branches. The normal `main` constraint still applies during merge, so a collision on `main` fails the real write.
 
 Review generated migrations before deployment. For Postgres and SQLite, enable branching in the config and generate the normal schema migration:
 
@@ -346,7 +343,11 @@ For an existing MongoDB database, generate the predefined branching migration:
 pnpm payload migrate:create enable-branching --file @payloadcms/db-mongodb/branching
 ```
 
-The MongoDB migration sets missing or null branch identities to `main` for branchable content, globals, and versions before it synchronizes indexes. If the backfill finds a uniqueness conflict, the migration stops before it removes the old index. Resolve the conflicting data and run the migration again.
+The MongoDB migration sets missing or null branch identities to `main` for branchable content, globals, and versions. It then creates and waits for schema-defined indexes on all affected models before removing recognized legacy unique indexes replaced by branch-aware constraints. It performs this work explicitly, even when automatic index creation is disabled; you do not need to enable the adapter's `ensureIndexes` option.
+
+Unrelated indexes are preserved. Review migration warnings about custom index definitions left in place: their constraints may still prevent content from being copied across branches. Decide whether to retain or adapt those constraints before using branches. An index that matches a recognized legacy constraint is replaced even if it was created manually or has a custom name.
+
+If backfilling or index creation fails, no legacy indexes are removed. Some backfilled data or newly created indexes may already persist; the migration does not guarantee rollback of the whole operation. Resolve the error and rerun the migration. If index removal fails after some replacements complete, rerunning retries the remaining work. Index-name conflicts are reported without automatically deleting the conflicting index.
 
 Run migrations before starting application code that expects branching fields and indexes. Do not rely on MongoDB schema defaults to rewrite existing documents.
 

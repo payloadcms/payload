@@ -16,6 +16,37 @@ export default buildConfig({
 })
 ```
 
+#### Content Branching migration
+
+After enabling experimental Content Branching in the Payload Config, generate and review the
+predefined migration for an existing MongoDB database, then apply it before serving branch-aware
+application code:
+
+```sh
+pnpm payload migrate:create enable-branching --file @payloadcms/db-mongodb/branching
+pnpm payload migrate
+```
+
+The migration backfills missing or null branch identities to `main`, explicitly creates and waits
+for schema-defined indexes on all affected models, then removes recognized legacy unique indexes
+replaced by branch-aware constraints. It works with automatic index creation disabled and does not
+require `ensureIndexes: true`. Do not substitute the adapter's startup indexing for this migration
+or recommend `syncIndexes()` to finish it.
+
+Unrelated indexes are preserved. Custom definitions that resemble a legacy constraint but cannot
+be safely matched are preserved with a warning. Review those warnings: a retained custom unique
+index can still prohibit duplicate values across branches. Do not automatically drop it or promise
+that every custom constraint supports branching. An index identical to a recognized legacy
+constraint is replaced regardless of its name or whether it was created manually.
+
+Backfill or index-creation failures leave legacy indexes intact, but earlier backfills or newly
+created indexes can persist. Resolve the error and rerun; do not promise whole-migration rollback.
+A rerun also resumes after partial index removal. Conflicting index names produce errors rather
+than automatic deletion of the conflicting index.
+
+See the [Content Branching guide](https://payloadcms.com/docs/branching/overview#database-indexes-and-migrations)
+for the complete setup.
+
 ### Postgres
 
 ```ts
