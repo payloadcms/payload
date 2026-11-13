@@ -8,7 +8,6 @@ import type {
 
 import { Locked, NotFound } from 'payload'
 import { wait } from 'payload/shared'
-import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import type { Post, User } from './payload-types.js'
@@ -176,15 +175,13 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(updateLockedDoc.text).toEqual('updated post 2')
 
     // Check to make sure the document does not exist in payload-locked-documents anymore
-    try {
-      await payload.findByID({
+    await expect(
+      payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
         overrideAccess: true,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(NotFound)
-    }
+      }),
+    ).rejects.toBeInstanceOf(NotFound)
 
     const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
@@ -236,15 +233,13 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(updateGlobalLockedDoc.globalText).toEqual('global text 2')
 
     // Check to make sure the document does not exist in payload-locked-documents anymore
-    try {
-      await payload.findByID({
+    await expect(
+      payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedGlobalInstance.id,
         overrideAccess: true,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(NotFound)
-    }
+      }),
+    ).rejects.toBeInstanceOf(NotFound)
 
     const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
@@ -285,20 +280,20 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
       overrideAccess: true,
     })
 
-    try {
-      await payload.update({
-        collection: postsSlug,
-        data: {
-          text: 'updated post',
-        },
-        overrideLock: false, // necessary to trigger the lock check
-        id: newPost.id,
-        overrideAccess: true,
-      })
-    } catch (error: any) {
-      expect(error).toBeInstanceOf(Locked)
-      expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
-    }
+    const operation = payload.update({
+      collection: postsSlug,
+      data: {
+        text: 'updated post',
+      },
+      overrideLock: false, // necessary to trigger the lock check
+      id: newPost.id,
+      overrideAccess: true,
+    })
+
+    await expect(operation).rejects.toBeInstanceOf(Locked)
+    await expect(operation).rejects.toThrow(
+      /currently locked by another user and cannot be updated/,
+    )
 
     const updatedPost = await payload.findByID({
       collection: postsSlug,
@@ -325,19 +320,19 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
       overrideAccess: true,
     })
 
-    try {
-      await payload.updateGlobal({
-        data: {
-          globalText: 'updated global text',
-        },
-        overrideLock: false, // necessary to trigger the lock check
-        slug: menuSlug,
-        overrideAccess: true,
-      })
-    } catch (error: any) {
-      expect(error).toBeInstanceOf(Locked)
-      expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
-    }
+    const operation = payload.updateGlobal({
+      data: {
+        globalText: 'updated global text',
+      },
+      overrideLock: false, // necessary to trigger the lock check
+      slug: menuSlug,
+      overrideAccess: true,
+    })
+
+    await expect(operation).rejects.toBeInstanceOf(Locked)
+    await expect(operation).rejects.toThrow(
+      /currently locked by another user and cannot be updated/,
+    )
 
     const updatedGlobalMenu = await payload.findGlobal({
       slug: menuSlug,
@@ -375,17 +370,15 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
       overrideAccess: true,
     })
 
-    try {
-      await payload.delete({
-        collection: postsSlug,
-        id: newPost3.id,
-        overrideLock: false,
-        overrideAccess: true, // necessary to trigger the lock check
-      })
-    } catch (error: any) {
-      expect(error).toBeInstanceOf(Locked)
-      expect(error.message).toMatch(/currently locked and cannot be deleted/)
-    }
+    const operation = payload.delete({
+      collection: postsSlug,
+      id: newPost3.id,
+      overrideLock: false,
+      overrideAccess: true, // necessary to trigger the lock check
+    })
+
+    await expect(operation).rejects.toBeInstanceOf(Locked)
+    await expect(operation).rejects.toThrow(/currently locked and cannot be deleted/)
 
     const findPostDocs = await payload.find({
       collection: postsSlug,
@@ -447,15 +440,13 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(findPostDocs.docs).toHaveLength(0)
 
     // Check to make sure the document does not exist in payload-locked-documents anymore
-    try {
-      await payload.findByID({
+    await expect(
+      payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
         overrideAccess: true,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(NotFound)
-    }
+      }),
+    ).rejects.toBeInstanceOf(NotFound)
 
     const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
@@ -510,15 +501,13 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(updateLockedDoc.text).toEqual('updated post 5')
 
     // Check to make sure the document does not exist in payload-locked-documents anymore
-    try {
-      await payload.findByID({
+    await expect(
+      payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
         overrideAccess: true,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(NotFound)
-    }
+      }),
+    ).rejects.toBeInstanceOf(NotFound)
 
     const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
@@ -563,15 +552,13 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(updateGlobalLockedDoc.globalText).toEqual('updated global text 2')
 
     // Check to make sure the document does not exist in payload-locked-documents anymore
-    try {
-      await payload.findByID({
+    await expect(
+      payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedGlobalInstance.id,
         overrideAccess: true,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(NotFound)
-    }
+      }),
+    ).rejects.toBeInstanceOf(NotFound)
 
     const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
@@ -632,15 +619,13 @@ test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false
     expect(findPostDocs.docs).toHaveLength(0)
 
     // Check to make sure the document does not exist in payload-locked-documents anymore
-    try {
-      await payload.findByID({
+    await expect(
+      payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
         overrideAccess: true,
-      })
-    } catch (error) {
-      expect(error).toBeInstanceOf(NotFound)
-    }
+      }),
+    ).rejects.toBeInstanceOf(NotFound)
 
     const docsFromLocksCollection = await payload.find({
       collection: lockedDocumentCollection,
