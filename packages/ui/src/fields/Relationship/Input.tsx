@@ -200,7 +200,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       if (!permissions) {
         return
       }
-      queueTask(async () => {
+
+      const task = async () => {
         const lastFullyLoadedRelationToUse =
           typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1
 
@@ -354,6 +355,10 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             onSuccess()
           }
         }
+      }
+
+      void queueTask({ task }).catch((error) => {
+        console.error('Error in queued function:', error) // eslint-disable-line no-console
       })
     },
     [

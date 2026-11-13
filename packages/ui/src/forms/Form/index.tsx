@@ -18,7 +18,6 @@ import type {
   FormProps,
   GetDataByPath,
 } from './types.js'
-import type { SubmissionActivity } from './useFormState.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
@@ -67,7 +66,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const currentLocale = useLocale()
   const locale = currentLocale?.code
   const { refreshCookie } = useAuth()
-  const { queueTask } = useQueue()
+  const { queueTask, resetQueue } = useQueue()
 
   const { getUploadHandler } = useUploadHandlers()
 
@@ -77,8 +76,6 @@ export const Form: React.FC<FormProps> = (props) => {
   const contextRef = useRef({} as FormContextType)
   const isFirstRenderRef = useRef(true)
 
-  const submissionActivityRef = useRef<SubmissionActivity>({ running: 0, started: 0 })
-
   const {
     dispatchFields,
     formState,
@@ -86,8 +83,8 @@ export const Form: React.FC<FormProps> = (props) => {
     isModified,
     isValid,
     prevFormStateRef,
+    queueFormStateRefresh,
     refreshFormState,
-    refreshFormStateAfterSave,
     resetFormState,
     setIsValid,
     setModified: setFormStateModified,
@@ -95,15 +92,19 @@ export const Form: React.FC<FormProps> = (props) => {
   } = useFormState({
     contextRef,
     onApplied: (appliedFormState, isSubmitted) => notifyOnChange(appliedFormState, isSubmitted),
+    onReset: () => {
+      resetQueue()
+      restoreRequestState()
+    },
     props,
     queueTask,
-    submissionActivityRef,
   })
 
   const {
     backgroundProcessing,
     disabledBySubmission,
     processing,
+    restoreRequestState,
     setBackgroundProcessing,
     setDisabled,
     setModified,
@@ -118,10 +119,10 @@ export const Form: React.FC<FormProps> = (props) => {
     formRef,
     prevFormStateRef,
     props,
-    refreshFormStateAfterSave,
+    queueTask,
+    refreshFormState,
     setIsValid,
     setModified: setFormStateModified,
-    submissionActivityRef,
     validateForm,
   })
 
@@ -211,10 +212,12 @@ export const Form: React.FC<FormProps> = (props) => {
         disabled: contextRef.current.disabled,
         submitted: contextRef.current.submitted,
       }
+      resetQueue()
+      restoreRequestState()
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
-    [dispatchFields, setModified],
+    [dispatchFields, resetQueue, restoreRequestState, setModified],
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
@@ -278,6 +281,10 @@ export const Form: React.FC<FormProps> = (props) => {
     [dispatchFields, getDataByPath, setModified],
   )
 
+  useEffect(() => {
+    return () => resetQueue()
+  }, [resetQueue])
+
   contextRef.current.submit = submit
   contextRef.current.getFields = getFields
   contextRef.current.getField = getField
@@ -312,18 +319,21 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useEffect(() => {
     if (initialState) {
+      // Restore after replacing the context, so the submit guard sees the restored disabled state immediately.
       contextRef.current = {
         ...initContextState,
         disabled: contextRef.current.disabled,
         submitted: contextRef.current.submitted,
       }
+      resetQueue()
+      restoreRequestState()
       dispatchFields({
         type: 'REPLACE_STATE',
         optimize: false,
         state: initialState,
       })
     }
-  }, [initialState, dispatchFields])
+  }, [initialState, dispatchFields, resetQueue, restoreRequestState])
 
   useThrottledEffect(
     () => {
@@ -360,7 +370,7 @@ export const Form: React.FC<FormProps> = (props) => {
         (isFirstRenderRef.current || !dequal(formState, prevFormStateRef.current)) &&
         isModified
       ) {
-        refreshFormState()
+        queueFormStateRefresh()
       }
 
       prevFormStateRef.current = formState

@@ -54,27 +54,31 @@ export const LoginForm: React.FC<{
   const { t } = useTranslation()
   const { setUser } = useAuth()
 
-  const initialState: FormState = {
-    password: {
-      initialValue: prefillPassword ?? undefined,
-      valid: true,
-      value: prefillPassword ?? undefined,
-    },
-  }
+  const initialState = React.useMemo<FormState>(() => {
+    const state: FormState = {
+      password: {
+        initialValue: prefillPassword ?? undefined,
+        valid: true,
+        value: prefillPassword ?? undefined,
+      },
+    }
 
-  if (loginWithUsername) {
-    initialState.username = {
-      initialValue: prefillUsername ?? undefined,
-      valid: true,
-      value: prefillUsername ?? undefined,
+    if (loginWithUsername) {
+      state.username = {
+        initialValue: prefillUsername ?? undefined,
+        valid: true,
+        value: prefillUsername ?? undefined,
+      }
+    } else {
+      state.email = {
+        initialValue: prefillEmail ?? undefined,
+        valid: true,
+        value: prefillEmail ?? undefined,
+      }
     }
-  } else {
-    initialState.email = {
-      initialValue: prefillEmail ?? undefined,
-      valid: true,
-      value: prefillEmail ?? undefined,
-    }
-  }
+
+    return state
+  }, [loginWithUsername, prefillEmail, prefillPassword, prefillUsername])
 
   const handleLogin = (data: UserWithToken) => {
     setUser(data)

@@ -276,7 +276,7 @@ export function DefaultEditView({
 
   const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
     (json, ctx) => {
-      const { context } = ctx || {}
+      const { context, isCurrent = () => true } = ctx || {}
 
       const document = json?.doc || json?.result
 
@@ -288,14 +288,16 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      setLastUpdateTime(new Date(updatedAt).getTime())
+      if (isCurrent()) {
+        setLastUpdateTime(new Date(updatedAt).getTime())
 
-      if (context?.incrementVersionCount !== false) {
-        incrementVersionCount()
-      }
+        if (context?.incrementVersionCount !== false) {
+          incrementVersionCount()
+        }
 
-      if (typeof setData === 'function') {
-        void setData(document || {})
+        if (typeof setData === 'function') {
+          void setData(document || {})
+        }
       }
 
       if (typeof onSaveFromContext === 'function') {
@@ -313,26 +315,28 @@ export function DefaultEditView({
         })
       }
 
-      if (!isEditing && depth < 2 && redirectAfterCreate !== false) {
-        // Store success message to show after redirect
-        if (json.message && typeof window !== 'undefined') {
-          window.sessionStorage.setItem(PENDING_SUCCESS_TOAST_KEY, json.message)
+      if (isCurrent()) {
+        if (!isEditing && depth < 2 && redirectAfterCreate !== false) {
+          // Store success message to show after redirect
+          if (json.message && typeof window !== 'undefined') {
+            window.sessionStorage.setItem(PENDING_SUCCESS_TOAST_KEY, json.message)
+          }
+
+          // Redirect to the same locale if it's been set
+          const redirectRoute = formatAdminURL({
+            adminRoute,
+            path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
+          })
+
+          void startRouteTransition(() => router.push(redirectRoute))
+        } else {
+          resetUploadEdits()
         }
-
-        // Redirect to the same locale if it's been set
-        const redirectRoute = formatAdminURL({
-          adminRoute,
-          path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
-        })
-
-        void startRouteTransition(() => router.push(redirectRoute))
-      } else {
-        resetUploadEdits()
       }
 
       if (id || globalSlug) {
         // Unlock the document after save
-        if (isLockingEnabled) {
+        if (isCurrent() && isLockingEnabled) {
           setDocumentIsLocked(false)
         }
 

@@ -44,6 +44,10 @@ export const ConditionsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'clientValidatedValue',
+      type: 'text',
+    },
   ],
   versions: false,
 }
