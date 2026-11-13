@@ -131,6 +131,48 @@ describe('major review banner', () => {
   })
 })
 
+describe('package heading', () => {
+  const firstLink =
+    '[GHSA-8cw4-87c7-c6xx](https://github.com/advisories/GHSA-8cw4-87c7-c6xx) · moderate'
+
+  it('should quote summaries under a name-only heading and link each advisory below', () => {
+    const second = {
+      ghsa: 'GHSA-w5hq-cccc-ffff',
+      summary: 'Second',
+      description: '',
+      severity: 'high',
+    }
+    const one = renderCsv({ details: csvDetails })
+    const two = renderCsv({
+      details: { ...csvDetails, advisories: [...csvDetails.advisories, second] },
+    })
+    const firstQuote = '> Prototype replacement still reachable via columns path'
+    const secondLink =
+      '[GHSA-w5hq-cccc-ffff](https://github.com/advisories/GHSA-w5hq-cccc-ffff) · high'
+
+    expect(one).toContain(`### csv-parse\n\n${firstQuote}\n\n${firstLink}\n\n<details>`)
+    expect(two).toContain(
+      `### csv-parse\n\n${firstQuote}\n>\n> Second\n\n${firstLink}, ${secondLink}\n\n<details>`,
+    )
+  })
+
+  it('should render only the link line when an advisory has no summary', () => {
+    const body = renderCsv({
+      details: { ...csvDetails, advisories: [{ ...csvDetails.advisories[0], summary: '' }] },
+    })
+
+    expect(body).toContain(`### csv-parse\n\n${firstLink}\n\n<details>`)
+    expect(body).not.toMatch(/^>/m)
+  })
+
+  it('should render no quote block when the package has no advisories', () => {
+    const body = renderCsv({ details: { ...csvDetails, advisories: [] } })
+
+    expect(body).toContain('### csv-parse\n\n<details>')
+    expect(body).not.toMatch(/^>/m)
+  })
+})
+
 describe('partly fixed advisories', () => {
   it('should render partly in the Fixes column and the lead line', () => {
     const partlyAdvisory = {
