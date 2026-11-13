@@ -35,10 +35,11 @@ export async function GET(req: NextRequest): Promise<Response> {
   let user
 
   try {
-    user = await payload.auth({
+    const authResult = await payload.auth({
       req: req as unknown as PayloadRequest,
       headers: req.headers,
     })
+    user = authResult.user
   } catch (error) {
     payload.logger.error({ err: error }, 'Error verifying token for live preview')
     return new Response('You are not allowed to preview this page', { status: 403 })
