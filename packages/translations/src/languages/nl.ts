@@ -368,7 +368,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     loading: 'Laden',
     locale: 'Taal',
     locales: 'Talen',
-    lock: 'Slot',
+    lock: 'Vergrendelen',
     menu: 'Menu',
     moreOptions: 'Meer opties',
     move: 'Verplaatsen',
