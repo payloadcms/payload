@@ -20,11 +20,30 @@ describe('sanitizeConfig', () => {
     { cookiePrefix: '', expected: 'payload' },
     { cookiePrefix: 'payload', expected: 'payload' },
     { cookiePrefix: 'my-app', expected: 'my-app' },
-    { cookiePrefix: ' ', expected: ' ' },
+    { cookiePrefix: 'My_app.123', expected: 'My_app.123' },
+    { cookiePrefix: "!#$%&'*+-.^_`|~", expected: "!#$%&'*+-.^_`|~" },
   ])('should sanitize cookiePrefix $cookiePrefix to $expected', ({ cookiePrefix, expected }) => {
     const sanitizedConfig = sanitizeConfig({ ...configDefaults, cookiePrefix })
 
     expect(sanitizedConfig.cookiePrefix).toBe(expected)
+  })
+
+  it.each([
+    ' ',
+    '\t',
+    '\n',
+    ' my-app',
+    'my-app ',
+    'my app',
+    'my-app\n',
+    'my;app',
+    'my=app',
+    'my/app',
+    'my\u0000app',
+    'my\u007Fapp',
+    'caf\u00E9',
+  ])('should reject invalid cookiePrefix %j', (cookiePrefix) => {
+    expect(() => sanitizeConfig({ ...configDefaults, cookiePrefix })).toThrow(InvalidConfiguration)
   })
 
   it('should populate sanitized root config defaults for a minimal config', () => {

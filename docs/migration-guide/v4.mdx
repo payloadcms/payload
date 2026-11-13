@@ -99,9 +99,11 @@ npx @payloadcms/codemod --transform migrate-payload-request-creation
 
 Automatic call migration requires a plain identifier payload argument and either `{}` or an initialized local `const` options identifier. The options type must expose all seven old option properties, or be `any`. For that identifier form, the generated argument captures payload first and uses forwarding getters for `context`, `depth`, `fallbackLocale`, `locale`, `req`, `urlSuffix`, and `user`. This preserves inherited getters, their read order, and rejected promises from throwing getters without reading unrelated properties. Complex expressions, mutable/unresolved options bindings, narrow option types, collisions, and unsupported type usages are left unchanged with notes for manual migration.
 
-### Empty cookie prefixes use the default
+### Cookie prefixes are normalized and validated
 
-Projects configured with `cookiePrefix: ''` now use the default `payload` prefix, changing the auth cookie name from `-token` to `payload-token`. Omitting `cookiePrefix` or using a non-empty custom prefix keeps the same cookie names.
+Projects configured with `cookiePrefix: ''` now use the default `payload` prefix, changing the auth cookie name from `-token` to `payload-token`. Omitting `cookiePrefix` or using a valid non-empty custom prefix keeps the same cookie names.
+
+Prefixes containing whitespace or other invalid [cookie-name characters](https://www.rfc-editor.org/rfc/rfc6265#section-4.1.1) now throw `InvalidConfiguration` during config sanitization. Update these prefixes to use valid characters before starting Payload. Changing a prefix changes its cookie names, so existing users must sign in again.
 
 When upgrading a project with an empty prefix:
 
