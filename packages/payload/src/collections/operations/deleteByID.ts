@@ -206,7 +206,8 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // /////////////////////////////////////
     if (hasScheduledPublishEnabled(collectionConfig)) {
       await deleteScheduledPublishJobs({
-        id,
+        // the stored id, so that an id passed as a string still matches a job queued with the stored type
+        id: docToDelete?.id ?? id,
         slug: collectionConfig.slug,
         payload,
         req,
