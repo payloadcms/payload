@@ -80,6 +80,7 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    'restricted-folder-docs': RestrictedFolderDoc;
     'nested-articles': NestedArticle;
     'page-folders': PageFolder;
     'nested-pages': NestedPage;
@@ -92,6 +93,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    'restricted-folder-docs': RestrictedFolderDocsSelect<false> | RestrictedFolderDocsSelect<true>;
     'nested-articles': NestedArticlesSelect<false> | NestedArticlesSelect<true>;
     'page-folders': PageFoldersSelect<false> | PageFoldersSelect<true>;
     'nested-pages': NestedPagesSelect<false> | NestedPagesSelect<true>;
@@ -174,12 +176,12 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "nested-articles".
+ * via the `definition` "restricted-folder-docs".
  */
-export interface NestedArticle {
+export interface RestrictedFolderDoc {
   id: number;
-  ancestor?: (number | null) | NestedArticle;
   title?: string | null;
+  '_h_page-folders'?: (number | null) | PageFolder;
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -190,9 +192,6 @@ export interface NestedArticle {
   } | null;
   updatedAt: string;
   createdAt: string;
-  deletedAt?: string | null;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -212,6 +211,30 @@ export interface PageFolder {
   } | null;
   updatedAt: string;
   createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-articles".
+ */
+export interface NestedArticle {
+  id: number;
+  ancestor?: (number | null) | NestedArticle;
+  title?: string | null;
+  secret?: string | null;
+  '_h_page-folders'?: (number | null) | PageFolder;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
 }
@@ -266,6 +289,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: number | User;
+      } | null)
+    | ({
+        relationTo: 'restricted-folder-docs';
+        value: number | RestrictedFolderDoc;
       } | null)
     | ({
         relationTo: 'nested-articles';
@@ -370,11 +397,25 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-folder-docs_select".
+ */
+export interface RestrictedFolderDocsSelect<T extends boolean = true> {
+  title?: T;
+  '_h_page-folders'?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "nested-articles_select".
  */
 export interface NestedArticlesSelect<T extends boolean = true> {
   ancestor?: T;
   title?: T;
+  secret?: T;
+  '_h_page-folders'?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -497,7 +538,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'users' | 'nested-articles' | 'page-folders' | 'nested-pages';
+    relatedCollection: 'users' | 'restricted-folder-docs' | 'nested-articles' | 'page-folders' | 'nested-pages';
     where?:
       | {
           [k: string]: unknown;
@@ -519,7 +560,8 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('users' | 'nested-articles' | 'page-folders' | 'nested-pages')[] | null;
+    excludedCollections?:
+      ('users' | 'restricted-folder-docs' | 'nested-articles' | 'page-folders' | 'nested-pages')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
