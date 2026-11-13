@@ -10,6 +10,7 @@ import type { SignedDownloadsConfig } from './getFile.js'
 
 import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
+import { createSegmentedUpload } from './segmentedUpload.js'
 
 interface CreateS3AdapterArgs {
   acl?: 'private' | 'public-read'
@@ -30,6 +31,8 @@ export function createS3Adapter({
   signedDownloads,
   useCompositePrefixes = false,
 }: CreateS3AdapterArgs): Adapter {
+  const clientUploadsAccess = typeof clientUploads === 'object' ? clientUploads.access : undefined
+
   const deleteStoredFile: DeleteFile = async ({ storageFilePath }) => {
     const { deleteFile } = await import('./deleteFile.js')
     return deleteFile({ bucket, client: getStorageClient(), storageFilePath })
@@ -58,7 +61,7 @@ export function createS3Adapter({
     uploadInstructions: {
       enabled: Boolean(clientUploads),
       generate: generateUploadInstructions({
-        access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+        access: clientUploadsAccess,
         acl,
         bucket,
         collectionPrefix: prefix,
@@ -66,6 +69,14 @@ export function createS3Adapter({
         useCompositePrefixes,
       }),
       requiresUploadReceipt: true,
+      segmented: createSegmentedUpload({
+        access: clientUploadsAccess,
+        acl,
+        bucket,
+        collectionPrefix: prefix,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
       useInAdmin: true,
     },
 

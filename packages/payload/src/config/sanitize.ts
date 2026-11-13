@@ -40,6 +40,7 @@ import {
   stagedUploadEndpoints,
   uploadInstructionsEndpoint,
 } from '../uploads/endpoints/uploadInstructions.js'
+import { getUploadSessionsCollection } from '../uploads/sessions/collection.js'
 import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
@@ -621,6 +622,31 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       sanitizeCollection(
         config as unknown as Config,
         lockedDocumentsCollection,
+        richTextSanitizers,
+        validRelationships,
+      ),
+    )
+  }
+
+  const segmentedUploadCollections = configWithDefaults.collections!.filter(
+    ({ upload }) => typeof upload === 'object' && upload.uploadInstructions?.segmented,
+  )
+
+  if (segmentedUploadCollections.length) {
+    // Resolve transfer preferences per collection so the Admin can read them from client config.
+    for (const collection of segmentedUploadCollections) {
+      if (typeof collection.upload === 'object') {
+        collection.upload.transfer = {
+          ...configWithDefaults.upload?.transfer,
+          ...collection.upload.transfer,
+        }
+      }
+    }
+
+    configWithDefaults.collections!.push(
+      sanitizeCollection(
+        config as unknown as Config,
+        getUploadSessionsCollection(),
         richTextSanitizers,
         validRelationships,
       ),
