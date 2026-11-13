@@ -12,6 +12,7 @@ import { deepFreeze } from '../../utilities/deepFreeze.js'
 import { fetchFullClientUpload as downloadFullClientUpload } from '../getFileFromUploadInstructions.js'
 import { hasFullFileContents } from '../hasFullFileContents.js'
 import { getRequestTimeDefaultFileData } from '../requestTimeFileData.js'
+import { createDeclaredTransformChecks } from './edits/declaredTransformChecks.js'
 import { getCropResetAndFocalPointChange, withSavedEdits } from './edits/legacyUploadEdits.js'
 import { resolveUploadEdits } from './edits/resolveUploadEdits.js'
 import { buildUploadOutput } from './output/buildUploadOutput.js'
@@ -121,15 +122,11 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
   })
   let uploadEdits = edits.uploadEdits
   let pipelineDoc = createPipelineDoc({ doc: docToSave, edits, hasTransformers })
-  // Reads `edits` and `pipelineDoc` when it is called: both can change after a file is read.
-  const assemble = ({ data: fileData, files }: { data: Document; files: FileToSave[] }) =>
-    assembleResult<T>({
-      data: fileData,
-      editArgs,
-      edits,
-      files,
-      transforms: pipelineDoc._transforms,
-    })
+  const declaredChecks = createDeclaredTransformChecks({
+    collectionSlug: collection.slug,
+    isSupplied: (data as Document | undefined)?._transforms !== undefined,
+    req,
+  })
 
   // 2. Select the source and decide whether it is processed. Nothing is read yet.
   const source = selectUploadSource({
@@ -151,6 +148,24 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
   }
 
   let pipelineOriginalDoc = createOriginalDoc({ doc: pipelineDoc })
+  // Reads `edits`, `pipelineDoc` and `pipelineOriginalDoc` when it is called: each can change
+  // after a file is read.
+  const assemble = async ({ data: fileData, files }: { data: Document; files: FileToSave[] }) => {
+    const docs = { doc: pipelineDoc, originalDoc: pipelineOriginalDoc }
+
+    // A save that read no file has not checked a supplied `_transforms` yet.
+    await declaredChecks.checkSupplied(docs)
+    await declaredChecks.checkStageChanges(docs)
+
+    return assembleResult<T>({
+      data: fileData,
+      editArgs,
+      edits,
+      files,
+      transforms: pipelineDoc._transforms,
+    })
+  }
+
   const rebuild = await planSourceRebuild({
     canStoreOriginal: storage.canStoreOriginal,
     collectionSlug: collection.slug,
@@ -292,6 +307,9 @@ export const generateFileData = async <T>(args: Args<T>): Result<T> => {
       })
     }
   }
+
+  // The doc now has the file's final name, size and MIME type, and no stage has run yet.
+  await declaredChecks.checkSupplied({ doc: pipelineDoc, originalDoc: pipelineOriginalDoc })
 
   // 4. Run the transformers, and build the file fields and the files to store.
   let output: Awaited<ReturnType<typeof buildUploadOutput>>

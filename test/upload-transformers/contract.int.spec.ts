@@ -295,6 +295,194 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
     expect(totalDocs).toBe(0)
   })
 
+  test.for([
+    { name: 'a value its schema rejects', watermark: { opacity: 2, text: 'draft' } },
+    { name: 'a value its validate rejects', watermark: { text: 'forbidden' } },
+  ])(
+    'should reject a declared key with $name, on the key path, and save nothing',
+    async ({ watermark }, { payload }) => {
+      await expect(createNote({ _transforms: { watermark }, payload })).rejects.toMatchObject({
+        data: { errors: [{ path: '_transforms.watermark' }] },
+      })
+
+      const { totalDocs } = await payload.count({ collection: contractMediaSlug })
+
+      expect(totalDocs).toBe(0)
+    },
+  )
+
+  test('should validate a declared key on every supplied value, but not when an update leaves _transforms out', async ({
+    payload,
+  }) => {
+    const watermark = { text: 'draft' }
+    const created = await createNote({ _transforms: { watermark }, payload })
+
+    expect(contractCalls.validate).toHaveLength(1)
+    expect(contractCalls.validate[0]).toMatchObject({
+      context: {
+        collectionSlug: contractMediaSlug,
+        doc: { alt: 'note' },
+        // The pipeline-entry snapshot, as transformers get it: it already has the supplied value.
+        originalDoc: { _transforms: { watermark }, alt: 'note' },
+        transforms: { watermark },
+      },
+      value: watermark,
+    })
+
+    await payload.update({
+      id: created.id,
+      collection: contractMediaSlug,
+      data: { alt: 'changed' },
+    })
+
+    expect(contractCalls.validate).toHaveLength(1)
+
+    await payload.update({
+      id: created.id,
+      collection: contractMediaSlug,
+      data: { _transforms: { watermark } },
+    })
+
+    expect(contractCalls.validate).toHaveLength(2)
+  })
+
+  test('should give validate the incoming file, on a create with a supplied declared key', async ({
+    payload,
+  }) => {
+    await createNote({ _transforms: { watermark: { text: 'draft' } }, payload })
+
+    expect(contractCalls.validate[0]?.context.doc).toMatchObject({
+      filename: 'note.md',
+      filesize: 5,
+      mimeType: 'text/markdown',
+    })
+  })
+
+  test('should give validate the new file, not the replaced one, on an update with a supplied declared key', async ({
+    payload,
+  }) => {
+    const created = await createNote({ payload })
+
+    await payload.update({
+      id: created.id,
+      collection: contractMediaSlug,
+      data: { _transforms: { watermark: { text: 'draft' } } },
+      file: textFile('hello world'),
+    })
+
+    expect(contractCalls.validate[0]?.context.doc).toMatchObject({ filesize: 11 })
+  })
+
+  test('should keep a saved declared value that its schema no longer accepts, on an update that leaves _transforms out', async ({
+    payload,
+  }) => {
+    const created = await createNote({ payload })
+    const [version] = (
+      await payload.db.findVersions({
+        collection: contractMediaSlug,
+        where: { parent: { equals: created.id } },
+      })
+    ).docs
+    // The schema changed after the value was saved: `opacity` above 1 is no longer allowed.
+    const saved = { watermark: { opacity: 2, text: 'draft' } }
+
+    // The collection has drafts, so an update reads the latest version.
+    await payload.db.updateOne({
+      id: created.id,
+      collection: contractMediaSlug,
+      data: { _transforms: saved },
+    })
+    await payload.db.updateVersion({
+      id: version!.id,
+      collection: contractMediaSlug,
+      versionData: { version: { ...version!.version, _transforms: saved } },
+    })
+
+    const updated = await payload.update({
+      id: created.id,
+      collection: contractMediaSlug,
+      data: { alt: 'changed' },
+    })
+
+    expect(updated).toMatchObject({ _transforms: saved, alt: 'changed' })
+  })
+
+  test('should validate a declared key on a draft save, which skips field validation', async ({
+    payload,
+  }) => {
+    const created = await createNote({ payload })
+
+    await expect(
+      payload.update({
+        id: created.id,
+        collection: contractMediaSlug,
+        data: { _transforms: { watermark: { text: 'forbidden' } } },
+        draft: true,
+      }),
+    ).rejects.toMatchObject({ data: { errors: [{ path: '_transforms.watermark' }] } })
+
+    const { totalDocs } = await payload.countVersions({
+      collection: contractMediaSlug,
+      where: { parent: { equals: created.id } },
+    })
+
+    expect(totalDocs).toBe(1)
+  })
+
+  test('should validate a declared key on restore, before any change', async ({ payload }) => {
+    const created = await createNote({ _transforms: { watermark: { text: 'draft' } }, payload })
+    const [version] = (
+      await payload.db.findVersions({
+        collection: contractMediaSlug,
+        where: { parent: { equals: created.id } },
+      })
+    ).docs
+
+    // The rule changed after the version was saved: its value is no longer allowed.
+    await payload.db.updateVersion({
+      id: version!.id,
+      collection: contractMediaSlug,
+      versionData: {
+        version: { ...version!.version, _transforms: { watermark: { text: 'forbidden' } } },
+      },
+    })
+    await payload.update({
+      id: created.id,
+      collection: contractMediaSlug,
+      data: { _transforms: { watermark: { text: 'current' } } },
+    })
+
+    await expect(
+      payload.restoreVersion({
+        id: String(version!.id),
+        collection: contractMediaSlug,
+        overrideAccess: true,
+      }),
+    ).rejects.toMatchObject({ data: { errors: [{ path: '_transforms.watermark' }] }, status: 400 })
+
+    const current = await payload.findByID({ id: created.id, collection: contractMediaSlug })
+
+    expect(current._transforms).toEqual({ watermark: { text: 'current' } })
+  })
+
+  test('should validate a declared key that a stage changes, and save nothing when it fails', async ({
+    payload,
+  }) => {
+    await expect(
+      createNote({
+        contractStages: {
+          first: setTransforms({ watermark: { text: 'forbidden' } }),
+          handledTransformKeys: ['watermark'],
+        },
+        payload,
+      }),
+    ).rejects.toMatchObject({ data: { errors: [{ path: '_transforms.watermark' }] } })
+
+    const { totalDocs } = await payload.count({ collection: contractMediaSlug })
+
+    expect(totalDocs).toBe(0)
+  })
+
   test.describe('Sharp bridge tasks', () => {
     test.afterEach(async () => {
       await rm(variantMediaDir, { force: true, recursive: true })
@@ -402,6 +590,65 @@ test.suite('File transformer contract', { config: './config.ts' }, () => {
       expect(created._transforms).toEqual({ contractScore: 1 })
       expect(calls.map(({ doc }) => Object.isFrozen(doc))).toEqual([false, true])
       expect(calls[1]?.docAtStart._transforms).toEqual({ contractScore: 1 })
+    })
+
+    test('should give validate the read file, on a create from a URL where a stage changes a declared key', async ({
+      payload,
+    }) => {
+      const source = await createImage({ payload })
+
+      await payload.create({
+        collection: variantMediaSlug,
+        context: {
+          contractStages: {
+            first: ({ doc }) => {
+              if (!Object.isFrozen(doc)) {
+                doc._transforms = { ...doc._transforms, watermark: { text: 'draft' } }
+              }
+            },
+            handledTransformKeys: ['watermark'],
+          },
+        },
+        // A crop makes the create wait for the file, which is read from the collection's folder.
+        data: {
+          _transforms: { crop: { height: 10, width: 10, x: 0, y: 0 } },
+          filename: source.filename,
+          url: new URL(source.url!, 'http://payload.local').pathname,
+        },
+        overrideAccess: true,
+      })
+
+      expect(contractCalls.validate.at(-1)?.context.doc).toMatchObject({
+        filename: source.filename,
+        mimeType: 'image/png',
+      })
+    })
+
+    test('should give validate the read file, on a create from a URL with a supplied declared key', async ({
+      payload,
+    }) => {
+      const source = await createImage({ payload })
+
+      await payload.create({
+        collection: variantMediaSlug,
+        context: { contractStages: { handledTransformKeys: ['watermark'] } },
+        // A crop makes the create wait for the file, which is read from the collection's folder.
+        data: {
+          _transforms: {
+            crop: { height: 10, width: 10, x: 0, y: 0 },
+            watermark: { text: 'draft' },
+          },
+          filename: source.filename,
+          url: new URL(source.url!, 'http://payload.local').pathname,
+        },
+        overrideAccess: true,
+      })
+
+      expect(contractCalls.validate).toHaveLength(1)
+      expect(contractCalls.validate[0]?.context.doc).toMatchObject({
+        filename: source.filename,
+        mimeType: 'image/png',
+      })
     })
 
     test('should reject a doc change from a size task', async ({ payload }) => {

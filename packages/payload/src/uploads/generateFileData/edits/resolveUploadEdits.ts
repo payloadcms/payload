@@ -93,7 +93,7 @@ export async function resolveUploadEdits({
   }
 
   if (submitted !== undefined) {
-    await assertValidTransformState({ collectionSlug, original, req, submitted })
+    assertValidTransformState({ collectionSlug, original, req, submitted })
   }
 
   const currentFocalPoint = getCurrentFocalPoint({ current, previous })

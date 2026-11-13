@@ -1,6 +1,6 @@
-import { transformStateObjectSchema } from './transformStateSchema.js'
+import { builtInTransformKeys as builtInTransformKeyList } from './transformStateSchema.js'
 
-const builtInTransformKeys = new Set(Object.keys(transformStateObjectSchema.properties ?? {}))
+const builtInTransformKeys = new Set(builtInTransformKeyList)
 
 /**
  * Whether a saved `_transforms` key needs a stage that claims it when the file is processed.

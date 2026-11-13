@@ -1,5 +1,7 @@
+import type { JSONSchema4 } from 'json-schema'
+
 import type { Config } from '../../config/types.js'
-import type { Document, PayloadRequest } from '../../types/index.js'
+import type { Document, JsonObject, PayloadRequest } from '../../types/index.js'
 
 /**
  * A lazy, storage-neutral, read-only view of a file. No bytes are read until a method is
@@ -136,6 +138,33 @@ export type HandleTransformRequestResult =
     }
 
 /**
+ * Checks a declared `_transforms` value for rules that its JSON Schema cannot express, for example
+ * rules that depend on other fields. Returns `true`, or an error message. As for transformers,
+ * `originalDoc` is the frozen document at the start of the pipeline, not the stored document.
+ */
+export type TransformValidate<TValue = unknown> = (
+  value: TValue,
+  context: {
+    /** The complete proposed `_transforms` value. */
+    transforms: Readonly<JsonObject>
+  } & Pick<CanTransformArgs, 'collectionSlug' | 'doc' | 'originalDoc' | 'req'>,
+) => Promise<string | true> | string | true
+
+/**
+ * A custom `_transforms` key and the shape of its value. Payload adds it to the `_transforms`
+ * schema and to the generated `UploadTransforms` type. A definition does not decide which stage
+ * applies the key: a stage claims it with `handledTransformKeys`.
+ */
+export type TransformDefinition<TValue = unknown> = {
+  /** The `_transforms` key. It cannot be a built-in key, and only one transformer can define it. */
+  key: string
+  /** The JSON Schema of the value. Its `description` becomes the JSDoc of the generated type. */
+  schema: JSONSchema4
+  /** Runs after the schema check, on every supplied value and on a value that a stage changes. */
+  validate?: TransformValidate<TValue>
+}
+
+/**
  * A capability adapter that can transform files during upload, handle dynamic
  * file requests, or both. Configured only under `upload.transformers`.
  */
@@ -163,6 +192,10 @@ export type UploadTransformer = {
    * Must be unique across `upload.transformers`.
    */
   slug: string
+  /**
+   * Custom `_transforms` keys that this transformer declares, with the shape of each value.
+   */
+  transformDefinitions?: TransformDefinition[]
   /**
    * One-file-in, one-file-out upload processing primitive. Never writes to storage.
    */

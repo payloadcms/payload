@@ -143,6 +143,50 @@ An update that does not process the file, such as a change to another field, kee
 
 An older upload with no retained `original` is processed from its current main file the first time. Payload then keeps that file as its `original`, and later changes start from it.
 
+### Declaring custom `_transforms` keys
+
+A transformer can declare the custom keys that it reads, with `transformDefinitions`. Payload adds each key to the `_transforms` schema and to the generated `UploadTransforms` type. The schema's `description` becomes the JSDoc of the key. A definition does not decide which stage applies the key: a stage still claims it with `handledTransformKeys`.
+
+```ts
+const watermarkTransformer: UploadTransformer = {
+  slug: 'watermark',
+  mimeTypes: ['image/*'],
+  transformDefinitions: [
+    {
+      key: 'watermark',
+      schema: {
+        type: 'object',
+        additionalProperties: false,
+        description: 'Text drawn over the file.',
+        properties: {
+          opacity: { type: 'number', maximum: 1, minimum: 0 },
+          text: { type: 'string', minLength: 1 },
+        },
+        required: ['text'],
+      },
+      // Optional. For rules that the schema cannot express.
+      validate: (value, { doc }) =>
+        (value as { text: string }).text !== doc.alt ||
+        'watermark: the text cannot repeat the alt text',
+    },
+  ],
+  // ...
+}
+```
+
+The definitions of all configured transformers apply to every upload collection. Payload checks them at startup, and fails if a key is a built-in key, if two transformers define the same key, or if a schema is not a usable JSON Schema.
+
+Payload checks a declared key with its schema, then with its `validate`:
+
+- When a write supplies `_transforms`, Payload checks every declared key in it, changed or not, because the supplied value replaces the saved one.
+- When a stage changes a declared key, Payload checks that key again on the final value.
+- An update that does not supply `_transforms` keeps the saved value and checks nothing.
+- A restore writes the version's `_transforms` again, so Payload checks it with the current definitions before any file changes. A rule can change after the version was saved.
+
+`validate` gets the value, and a context with the document as the operation would save it (`doc`), the frozen document at the start of the pipeline (`originalDoc`, as transformers get it; not the stored document), the complete proposed `_transforms` value (`transforms`), `collectionSlug` and `req`. It returns `true`, or an error message. A failed check fails the operation with a validation error for `_transforms.<key>`, and nothing is saved. These checks run in upload processing, so they also run on draft saves.
+
+When a transformer is removed, its keys keep the generated catch-all type. Their saved values stay readable and are kept by updates.
+
 ## The `transformFile` capability (uploads)
 
 ```ts
