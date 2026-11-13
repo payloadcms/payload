@@ -26,6 +26,8 @@ import type { RESTClient } from '../__helpers/shared/RESTClient.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { transformForWrite } from '../../packages/drizzle/src/transform/write/index.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { traverseFields as traverseDrizzleFields } from '../../packages/drizzle/src/transform/write/traverseFields.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import {
@@ -677,11 +679,27 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
       try {
         traverseFields({ fields: [], fillEmpty: false, ref: sharedData })
-        transformForWrite({
+        const rowToInsert = transformForWrite({
           adapter: payload.db,
           data: drizzleData,
           fields: [],
           tableName: 'session_users',
+        })
+
+        expect(drizzleData).toEqual(createConstrainedData())
+
+        // Inspect dotted-key expansion directly because transformForWrite preserves its input.
+        traverseDrizzleFields({
+          ...rowToInsert,
+          adapter: payload.db as DrizzleAdapter,
+          baseTableName: 'session_users',
+          columnPrefix: '',
+          data: drizzleData,
+          fieldPrefix: '',
+          fields: [],
+          parentIsLocalized: false,
+          parentTableName: 'session_users',
+          path: '',
         })
         processStateChanged =
           Object.hasOwn(Object.prototype, marker) || Object.hasOwn(inheritedTarget, inheritedMarker)
@@ -728,6 +746,25 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       expect(data.user.collection).toBe(slug)
       expect(data.user._strategy).toBeDefined()
       expect(data.token).toBeDefined()
+    })
+
+    test('should say which browser a login session is from', async ({ payload, restClient }) => {
+      const response = await restClient.POST(`/${slug}/login`, {
+        body: JSON.stringify({ email, password }),
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+        },
+      })
+      const { user } = await response.json()
+
+      const { sessions } = await payload.findByID({
+        id: user.id,
+        collection: slug,
+        overrideAccess: true,
+      })
+
+      expect(sessions?.at(-1)).toMatchObject({ type: 'login', label: 'Chrome on macOS' })
     })
 
     test('should return a user with read access from the login operation', async ({

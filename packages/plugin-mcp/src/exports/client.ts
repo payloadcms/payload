@@ -1,3 +1,3 @@
 'use client'
 
-export {}
+export { AllowButtons } from '../views/Authorize/AllowButtons/index.js'

@@ -8,13 +8,14 @@ import { getDefaultCanvas } from './WindowChrome/index.mjs'
 import { startLosslessCapture } from './capture-demo.mjs'
 
 import { createAnnotationInteraction } from './annotation-demo.mjs'
+import { createKeyInteraction } from './keyboard-demo.mjs'
 import { createPresentation } from './presentation-demo.mjs'
 import { createScrollInteraction } from './scroll-demo.mjs'
 
 const DEFAULT_BASE_URL = 'http://localhost:3000'
 const DEFAULT_INTERACTION_PAUSE_MS = 300
 const DEFAULT_LABEL = 'feature-demo'
-const DEFAULT_MOUSE_MOVE_MS = 300
+const DEFAULT_MOUSE_MOVE_MS = 450
 const DEFAULT_VIEWPORT = { height: 900, width: 1440 }
 
 export function parseArgs(argv) {
@@ -228,8 +229,6 @@ async function executeDemo({
     presentationOptions.canvas ??
     getDefaultCanvas({
       viewport,
-      accessibility: presentationOptions.accessibility,
-      annotationLayout: presentationOptions.annotationLayout,
     })
   const context = await browser.newContext({
     viewport: recordedViewport,
@@ -445,7 +444,9 @@ async function executeDemo({
       interactionPauseMs,
       mouseMoveMs,
       page,
+      pauseScale,
     })
+    const pressKey = createKeyInteraction({ page, pauseScale })
     const annotationInteractions = createAnnotationInteraction({
       presentation,
     })
@@ -459,9 +460,11 @@ async function executeDemo({
       baseURL: parsedBaseURL.toString().replace(/\/$/, ''),
       chrome: presentation.chrome,
       click: pointerInteractions.click,
-      typeText: async ({ locator, text, clear = false, delay = 80 }) => {
+      circleCursor: pointerInteractions.circleCursor,
+      pressKey,
+      typeText: async ({ locator, text, clear = false, delay = 50 }) => {
         await pointerInteractions.click(locator)
-        if (clear) await page.keyboard.press('ControlOrMeta+A')
+        if (clear) await pressKey({ key: 'ControlOrMeta+A' })
         await page.keyboard.type(text, { delay })
       },
       expect,
@@ -526,7 +529,7 @@ async function executeDemo({
   return resolvedOutput ?? resolvedScreenshotOutput
 }
 
-function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
+function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page, pauseScale }) {
   let pointerPosition = { x: 0, y: 0 }
 
   const getTargetPoint = async ({ locator, position, pagePoint }) => {
@@ -630,11 +633,18 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
     { duration = mouseMoveMs, pauseAfter = interactionPauseMs, position } = {},
   ) => {
     const targetPosition = await getTargetPoint({ locator, position })
-    const steps = duration === 0 ? 1 : Math.max(2, Math.round(duration / 16))
-    const stepDelay = steps === 1 ? 0 : duration / steps
+    await moveToPoint({ targetPosition, duration, pauseAfter })
+  }
 
-    for (let step = 1; step <= steps; step += 1) {
-      const progress = step / steps
+  const moveToPoint = async ({ targetPosition, duration, pauseAfter = 0 }) => {
+    if (!Number.isFinite(duration) || duration < 0) {
+      throw new Error('Cursor duration must be a finite non-negative number')
+    }
+    const startedAt = performance.now()
+    let progress = 0
+
+    do {
+      progress = duration === 0 ? 1 : Math.min(1, (performance.now() - startedAt) / duration)
       const easedProgress =
         progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2
 
@@ -643,16 +653,86 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
         pointerPosition.y + (targetPosition.y - pointerPosition.y) * easedProgress,
       )
 
-      if (step < steps && stepDelay > 0) {
-        await page.waitForTimeout(stepDelay)
+      if (progress < 1) {
+        const elapsed = performance.now() - startedAt
+        const nextFrame = Math.min(duration, (Math.floor(elapsed / 16) + 1) * 16)
+        const remaining = nextFrame - elapsed
+        if (remaining > 0) await page.waitForTimeout(remaining)
       }
-    }
+    } while (progress < 1)
 
     pointerPosition = targetPosition
 
     if (pauseAfter > 0) {
       await page.waitForTimeout(pauseAfter)
     }
+  }
+
+  const circleCursor = async (
+    locator,
+    { duration = 1200, pauseAfter = interactionPauseMs, position, radius = 16 } = {},
+  ) => {
+    for (const [name, value] of Object.entries({ duration, pauseAfter })) {
+      if (!Number.isFinite(value) || value < 0) {
+        throw new Error(`Circle ${name} must be a finite non-negative number`)
+      }
+    }
+    if (radius !== undefined && (!Number.isFinite(radius) || radius <= 0)) {
+      throw new Error('Circle radius must be a finite positive number')
+    }
+
+    const target = await getTargetPoint({ locator, position })
+    const box = await locator.boundingBox()
+    const frame = await locator.evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      return {
+        x: rect.x,
+        y: rect.y,
+        width: rect.width,
+        height: rect.height,
+        viewportWidth: innerWidth,
+        viewportHeight: innerHeight,
+      }
+    })
+    const scaleX = box.width / frame.width
+    const scaleY = box.height / frame.height
+    const left = box.x - frame.x * scaleX
+    const top = box.y - frame.y * scaleY
+    const width = frame.viewportWidth * scaleX
+    const height = frame.viewportHeight * scaleY
+    // Leave room for the slight asymmetry, even beside viewport edges.
+    const radiusX = Math.min(radius * scaleX, (width - 4) / 2.08)
+    const radiusY = Math.min(radius * scaleY, (height - 4) / 2.08)
+    const center = {
+      x: Math.max(left + radiusX * 1.04 + 2, Math.min(left + width - radiusX * 1.04 - 2, target.x)),
+      y: Math.max(top + radiusY * 1.04 + 2, Math.min(top + height - radiusY * 1.04 - 2, target.y)),
+    }
+    const startAngle = Math.atan2(
+      (pointerPosition.y - center.y) / radiusY,
+      (pointerPosition.x - center.x) / radiusX,
+    )
+    const pointAt = (angle) => {
+      const looseness = 1 + 0.03 * Math.sin(3 * angle)
+      return {
+        x: center.x + Math.cos(angle) * radiusX * looseness,
+        y: center.y + Math.sin(angle) * radiusY * looseness,
+      }
+    }
+    await moveToPoint({ targetPosition: pointAt(startAngle), duration: mouseMoveMs })
+
+    const steps = Math.max(75, Math.ceil(duration / 16))
+    const stepDelay = (duration * pauseScale) / steps
+    const startedAt = performance.now()
+    for (let step = 1; step <= steps; step += 1) {
+      const progress = step / steps
+      const easedProgress = progress * progress * (3 - 2 * progress)
+      const point = pointAt(startAngle + Math.PI * 4 * easedProgress)
+      await page.mouse.move(point.x, point.y)
+      pointerPosition = point
+      const remaining = startedAt + step * stepDelay - performance.now()
+      if (step < steps && remaining > 0) await page.waitForTimeout(remaining)
+    }
+    if (pauseAfter * pauseScale > 0) await page.waitForTimeout(pauseAfter * pauseScale)
   }
 
   const click = async (
@@ -685,7 +765,7 @@ function createPointerInteractions({ interactionPauseMs, mouseMoveMs, page }) {
     }
   }
 
-  return { click, moveCursor }
+  return { circleCursor, click, moveCursor }
 }
 
 function printHelp() {

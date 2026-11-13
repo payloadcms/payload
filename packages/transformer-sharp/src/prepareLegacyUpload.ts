@@ -1,7 +1,5 @@
-import type { FocalPoint, ProbedImageSize } from 'payload'
+import type { ProbedImageSize } from 'payload'
 import type { PreparedUploadTransformation, UploadTransformerInternal } from 'payload/internal'
-
-import { isNumber } from 'payload/shared'
 
 import type { SharpCollectionConfig, SharpDependency, SharpUploadTaskOptions } from './types.js'
 
@@ -39,15 +37,10 @@ export function createPrepareLegacyUpload({
   collections: Partial<Record<string, SharpCollectionConfig>>
   sharpDependency: SharpDependency
 }): NonNullable<UploadTransformerInternal['prepareUpload']> {
-  return async ({ collectionSlug, file, req, transform, uploadEdits }) => {
+  return async ({ collectionSlug, cropSize, file, req, transform }) => {
     const collectionUpload = collections[collectionSlug] ?? {}
 
     const fileSupportsResize = canResizeImage(file.type)
-
-    const cropData =
-      uploadEdits && typeof uploadEdits === 'object' && 'crop' in uploadEdits
-        ? uploadEdits.crop
-        : undefined
 
     let originalDimensions: ProbedImageSize | undefined
 
@@ -61,19 +54,15 @@ export function createPrepareLegacyUpload({
     // Unreadable dimensions can't be cropped/resized — treat as non-resizable rather than failing the upload.
     const canProcessAsImage = fileSupportsResize && originalDimensions !== undefined
 
-    const crop =
-      cropData && originalDimensions
-        ? {
-            cropData,
-            heightInPixels: uploadEdits.heightInPixels!,
-            originalDimensions,
-            widthInPixels: uploadEdits.widthInPixels!,
-          }
-        : undefined
-
+    // `transformFile` reads the crop from `doc._transforms`. It needs the original's size for it.
     const mainResultFile = await transform({
       fieldPath: 'filename',
-      options: { collectionUpload, crop, kind: 'main' } satisfies SharpUploadTaskOptions,
+      options: {
+        collectionUpload,
+        cropSize,
+        kind: 'main',
+        originalDimensions,
+      } satisfies SharpUploadTaskOptions,
     })
 
     const mainResult = await describeResult({
@@ -93,21 +82,14 @@ export function createPrepareLegacyUpload({
     const variants = collectionUpload.variants
 
     if (canProcessAsImage && Array.isArray(variants) && originalDimensions) {
-      const focalPoint: FocalPoint | undefined =
-        focalPointEnabled && uploadEdits?.focalPoint
-          ? {
-              x: isNumber(uploadEdits.focalPoint.x) ? Math.round(uploadEdits.focalPoint.x) : 50,
-              y: isNumber(uploadEdits.focalPoint.y) ? Math.round(uploadEdits.focalPoint.y) : 50,
-            }
-          : undefined
-
       const sizeResults = await mapWithBoundedConcurrency(variants, async (rawConfig) => {
         const imageResizeConfig = sanitizeResizeConfig(rawConfig)
         const fieldPath = `variants.${imageResizeConfig.name}` as const
 
         const resizeAction = getImageResizeAction({
           dimensions: originalDimensions,
-          hasFocalPoint: Boolean(focalPoint),
+          // Whether a size may use a focal point. `transformFile` uses one only when it is saved.
+          hasFocalPoint: focalPointEnabled,
           imageResizeConfig,
         })
 
@@ -118,8 +100,8 @@ export function createPrepareLegacyUpload({
         const sizeResultFile = await transform({
           fieldPath,
           options: {
+            canUseFocalPoint: resizeAction === 'resizeWithFocalPoint',
             collectionUpload,
-            focalPoint: resizeAction === 'resizeWithFocalPoint' ? focalPoint : undefined,
             imageResizeConfig,
             kind: 'size',
             originalDimensions,

@@ -11,10 +11,8 @@ import {
   unflatten,
 } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
-import type { FormProps } from '../../forms/Form/index.js'
-import type { OnFieldSelect } from '../FieldSelect/index.js'
 import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
 import type { EditManyProps } from './index.js'
 
@@ -29,9 +27,7 @@ import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { OperationContext } from '../../providers/Operation/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
-import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { Button } from '../Button/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
@@ -180,14 +176,9 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     },
   } = useConfig()
 
-  const { getFormState } = useServerFunctions()
-
   const { i18n, t } = useTranslation()
 
-  const [isInitializing, setIsInitializing] = useState(false)
-
   const router = useRouter()
-  const abortFormStateRef = React.useRef<AbortController>(null)
   const collectionPermissions = permissions?.collections?.[collection.slug]
   const searchParams = useSearchParams()
 
@@ -199,37 +190,6 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
       }, {} as SelectType),
     )
   }, [selectedFields])
-
-  const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState, submitted }) => {
-      const controller = handleAbortRef(abortFormStateRef)
-
-      const { state } = await getFormState({
-        collectionSlug: collection.slug,
-        docPermissions: collectionPermissions,
-        docPreferences: null,
-        formState: prevFormState,
-        operation: 'update',
-        schemaPath: collection.slug,
-        select,
-        signal: controller.signal,
-        skipValidation: !submitted,
-      })
-
-      abortFormStateRef.current = null
-
-      return state
-    },
-    [getFormState, collection, collectionPermissions, select],
-  )
-
-  useEffect(() => {
-    const abortFormState = abortFormStateRef.current
-
-    return () => {
-      abortAndIgnore(abortFormState)
-    }
-  }, [])
 
   const queryString = useMemo((): string => {
     const whereConstraints: Where[] = []
@@ -293,38 +253,6 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     }
   }
 
-  const onFieldSelect = useCallback<OnFieldSelect>(
-    async ({ dispatchFields, formState, selected }) => {
-      setIsInitializing(true)
-
-      setSelectedFields(selected || [])
-
-      const { state } = await getFormState({
-        collectionSlug: collection.slug,
-        docPermissions: collectionPermissions,
-        docPreferences: null,
-        formState,
-        operation: 'update',
-        schemaPath: collection.slug,
-        select: unflatten(
-          selected.reduce((acc, option) => {
-            acc[option.value.path] = true
-            return acc
-          }, {} as SelectType),
-        ),
-        skipValidation: true,
-      })
-
-      dispatchFields({
-        type: 'MERGE_SERVER_STATE',
-        serverState: state,
-      })
-
-      setIsInitializing(false)
-    },
-    [getFormState, collection.slug, collectionPermissions, setSelectedFields],
-  )
-
   const title = t('general:editingLabel', {
     count,
     label: getTranslation(count > 1 ? plural : singular, i18n),
@@ -334,6 +262,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     <DocumentInfoProvider
       collectionSlug={collection.slug}
       currentEditor={user}
+      docPermissions={collectionPermissions}
       hasPublishedDoc={false}
       id={null}
       initialData={{}}
@@ -346,9 +275,9 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
       <OperationContext value="update">
         <Form
           className={`${baseClass}__form`}
-          isInitializing={isInitializing}
-          onChange={[onChange]}
           onSuccess={onSuccess}
+          schemaPath={collection.slug}
+          select={select}
         >
           <div className={`${baseClass}__header`}>
             <Button
@@ -394,7 +323,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
             <div className={`${baseClass}__select-fields`}>
               <FieldSelect
                 fields={fields}
-                onChange={onFieldSelect}
+                onChange={setSelectedFields}
                 permissions={collectionPermissions.fields}
               />
             </div>
