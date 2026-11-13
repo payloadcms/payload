@@ -76,35 +76,39 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         return prefs[key]
       }
 
-      const promise = new Promise((resolve: (value: T) => void) => {
-        void (async () => {
-          const request = await requests.get(
-            formatAdminURL({
-              apiRoute: api,
-              path: `/payload-preferences/${key}`,
-            }),
-            {
-              credentials: 'include',
-              headers: {
-                'Accept-Language': i18n.language,
-              },
+      const promise: Promise<T> = (async () => {
+        const request = await requests.get(
+          formatAdminURL({
+            apiRoute: api,
+            path: `/payload-preferences/${key}`,
+          }),
+          {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
             },
-          )
+          },
+        )
 
-          let value = null
+        let value = null
 
-          if (request.status === 200) {
-            const preference = await request.json()
-            value = preference.value
-          }
+        if (request.status === 200) {
+          const preference = await request.json()
+          value = preference.value
+        }
 
-          if (prefs[key] === promise) {
-            prefs[key] = value
-            resolve(value)
-          } else {
-            resolve(await prefs[key])
-          }
-        })()
+        if (prefs[key] === promise) {
+          prefs[key] = value
+          return value
+        }
+
+        return prefs[key]
+      })().catch((error) => {
+        if (prefs[key] === promise) {
+          delete prefs[key]
+        }
+
+        throw error
       })
 
       prefs[key] = promise
