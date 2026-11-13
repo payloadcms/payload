@@ -67,13 +67,34 @@ export type TransformGlobalWithSelect<
 
 type SystemFields = 'createdAt' | 'id' | 'updatedAt' | 'variants'
 
-export type RequiredDataFromCollection<TData> = Omit<TData, SystemFields> &
-  Partial<Pick<Record<SystemFields, unknown> & TData, SystemFields>>
+export type OptionalKeys<T> = [T] extends [never]
+  ? never
+  : {
+      [K in keyof T]-?: Record<string, never> extends Pick<T, K> ? K : never
+    }[keyof T]
+
+export type RequiredDataFromCollection<TData, TInput = never> = Omit<
+  TData,
+  OptionalKeys<TInput> | SystemFields
+> &
+  Partial<
+    Pick<
+      Record<SystemFields, unknown> & TData,
+      Extract<keyof TData, OptionalKeys<TInput> | SystemFields>
+    >
+  >
 
 export type RequiredDataFromCollectionSlug<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
-> = RequiredDataFromCollection<T['collections'][TSlug]>
+> = RequiredDataFromCollection<
+  T['collections'][TSlug],
+  T extends { collectionsInput: infer TInput }
+    ? TSlug extends keyof TInput
+      ? TInput[TSlug]
+      : never
+    : never
+>
 
 export type JoinQuery<T extends PayloadTypesShape, TSlug extends CollectionSlug<T>> =
   T['collectionsJoins'][TSlug] extends Record<string, string>
