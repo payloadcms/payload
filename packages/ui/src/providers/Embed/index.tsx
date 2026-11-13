@@ -63,7 +63,7 @@ export const EmbedProvider: React.FC<{
   embed?: boolean
 }> = ({ children, embed }) => {
   const { config } = useConfig()
-  const embedCookieKey = `${config.cookiePrefix || 'payload'}-embed`
+  const embedCookieKey = `${config.cookiePrefix}-embed`
   const embedParam = useSearchParams().get('embed')?.toLowerCase()
 
   const [isEmbedded, setIsEmbedded] = useState<boolean>(() =>

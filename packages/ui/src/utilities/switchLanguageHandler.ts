@@ -14,7 +14,7 @@ export const switchLanguageHandler: ServerFunction<SwitchLanguageArgs, Promise<v
   lang,
   req,
 }) => {
-  const cookieName = `${req.payload.config.cookiePrefix || 'payload'}-lng`
+  const cookieName = `${req.payload.config.cookiePrefix}-lng`
 
   await req.server.setCookie(cookieName, lang, {
     maxAge: 60 * 60 * 24 * 365,
