@@ -184,6 +184,7 @@ export const updateDocument = async <
     const resolved = resolveTrashRestoreDocs({
       data: data as JsonObject,
       latestVersionDoc: latestVersionDoc ?? incomingDocWithLocales,
+      locale,
       mainDoc,
     })
 

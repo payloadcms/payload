@@ -3,12 +3,26 @@ import type { TypeWithID } from '../../config/types.js'
 
 type DocWithLocales = JsonObject & TypeWithID
 
+const getStatusForLocale = ({ locale, status }: { locale?: string; status: unknown }): unknown => {
+  if (
+    status &&
+    typeof status === 'object' &&
+    !Array.isArray(status) &&
+    typeof locale === 'string' &&
+    locale !== 'all'
+  ) {
+    return (status as Record<string, unknown>)[locale]
+  }
+
+  return status
+}
+
 const isPublishedStatus = (status: unknown): boolean => {
   if (status === 'published') {
     return true
   }
 
-  if (status && typeof status === 'object') {
+  if (status && typeof status === 'object' && !Array.isArray(status)) {
     return Object.values(status as Record<string, unknown>).includes('published')
   }
 
@@ -20,10 +34,11 @@ const isDraftStatus = (status: unknown): boolean => {
     return true
   }
 
-  if (status && typeof status === 'object') {
+  if (status && typeof status === 'object' && !Array.isArray(status)) {
     const values = Object.values(status as Record<string, unknown>)
 
-    return values.length > 0 && values.every((value) => value === 'draft')
+    // locale `all` / whole-object fallback: any draft means a pending draft exists
+    return values.length > 0 && values.includes('draft')
   }
 
   return false
@@ -36,25 +51,31 @@ const isDraftStatus = (status: unknown): boolean => {
  *
  * In that case, keep the published main document as the update base and version from the
  * pending draft so deletedAt is stamped on both without replacing published content.
- * Explicitly restoring as draft (`_status: 'draft'`) still uses the pending draft as the base.
+ * Explicitly restoring as draft (`_status: 'draft'`) or publishing (`_status: 'published'`)
+ * still uses the pending draft as the base.
  */
 export const resolveTrashRestoreDocs = ({
   data,
   latestVersionDoc,
+  locale,
   mainDoc,
 }: {
   data: JsonObject
   latestVersionDoc: DocWithLocales
+  locale?: string
   mainDoc: DocWithLocales | null | undefined
 }): {
   docWithLocales: DocWithLocales
   versionDocWithLocales?: DocWithLocales
 } => {
-  if (!mainDoc || data._status === 'draft') {
+  if (!mainDoc || data._status === 'draft' || data._status === 'published') {
     return { docWithLocales: latestVersionDoc }
   }
 
-  if (isPublishedStatus(mainDoc._status) && isDraftStatus(latestVersionDoc._status)) {
+  const mainStatus = getStatusForLocale({ locale, status: mainDoc._status })
+  const latestStatus = getStatusForLocale({ locale, status: latestVersionDoc._status })
+
+  if (isPublishedStatus(mainStatus) && isDraftStatus(latestStatus)) {
     return {
       docWithLocales: mainDoc,
       versionDocWithLocales: latestVersionDoc,

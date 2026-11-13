@@ -1463,6 +1463,148 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       expect(latestDraftAfterRestore._status).toBe('draft')
     })
 
+    test('should keep published locale content when trashing a document with a pending locale draft', async ({
+      payload,
+    }) => {
+      const published = await payload.create({
+        collection: postsSlug,
+        data: {
+          _status: 'published',
+          localizedField: 'en-published',
+          title: 'published-shared',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          _status: 'published',
+          localizedField: 'es-published',
+        },
+        locale: 'es',
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          localizedField: 'es-draft',
+        },
+        draft: true,
+        locale: 'es',
+        overrideAccess: true,
+      })
+
+      const beforeTrashES = await payload.findByID({
+        id: published.id,
+        collection: postsSlug,
+        locale: 'es',
+        overrideAccess: true,
+      })
+
+      expect(beforeTrashES.localizedField).toBe('es-published')
+      expect(beforeTrashES._status).toBe('published')
+
+      const trashed = await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          deletedAt: new Date().toISOString(),
+        },
+        locale: 'es',
+        overrideAccess: true,
+      })
+
+      expect(trashed.deletedAt).toBeTruthy()
+      expect(trashed.localizedField).toBe('es-published')
+      expect(trashed._status).toBe('published')
+
+      const trashedMainES = await payload.findByID({
+        id: published.id,
+        collection: postsSlug,
+        locale: 'es',
+        overrideAccess: true,
+        trash: true,
+      })
+
+      expect(trashedMainES.localizedField).toBe('es-published')
+      expect(trashedMainES._status).toBe('published')
+      expect(trashedMainES.deletedAt).toBeTruthy()
+
+      const latestDraftWhileTrashed = await payload.findByID({
+        id: published.id,
+        collection: postsSlug,
+        draft: true,
+        locale: 'es',
+        overrideAccess: true,
+        trash: true,
+      })
+
+      expect(latestDraftWhileTrashed.localizedField).toBe('es-draft')
+      expect(latestDraftWhileTrashed._status).toBe('draft')
+    })
+
+    test('should publish the pending draft when restoring with an explicit published status', async ({
+      payload,
+    }) => {
+      const published = await payload.create({
+        collection: postsSlug,
+        data: {
+          _status: 'published',
+          title: 'published-v1',
+        },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          title: 'draft-v2',
+        },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          deletedAt: new Date().toISOString(),
+        },
+        overrideAccess: true,
+      })
+
+      const restored = await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          _status: 'published',
+          deletedAt: null,
+        },
+        overrideAccess: true,
+        trash: true,
+      })
+
+      expect(restored.deletedAt).toBeNull()
+      expect(restored.title).toBe('draft-v2')
+      expect(restored._status).toBe('published')
+
+      const restoredMain = await payload.findByID({
+        id: published.id,
+        collection: postsSlug,
+        overrideAccess: true,
+      })
+
+      expect(restoredMain.title).toBe('draft-v2')
+      expect(restoredMain._status).toBe('published')
+      expect(restoredMain.deletedAt).toBeNull()
+    })
+
     test('should preserve localized field data when bulk trashing draft documents', async ({
       payload,
     }) => {
