@@ -26,9 +26,8 @@ export { PluginOptions }
  * })
  * ```
  */
-export const sentryPlugin =
-  (pluginOptions: PluginOptions) =>
-  (config: Config): Config => {
+export const sentryPlugin = (pluginOptions: PluginOptions) => {
+  const plugin = (config: Config): Config => {
     const { enabled = true, options = {}, Sentry } = pluginOptions
 
     if (!enabled || !Sentry) {
@@ -90,3 +89,6 @@ export const sentryPlugin =
       },
     }
   }
+
+  return Object.assign(plugin, { slug: '@payloadcms/plugin-sentry' })
+}

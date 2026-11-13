@@ -13,9 +13,8 @@ export { fields } from './collections/Forms/fields.js'
 export { translations as formBuilderTranslations } from './translations/index.js'
 export { getPaymentTotal } from './utilities/getPaymentTotal.js'
 
-export const formBuilderPlugin =
-  (incomingFormConfig: FormBuilderPluginConfig) =>
-  (config: Config): Config => {
+export const formBuilderPlugin = (incomingFormConfig: FormBuilderPluginConfig) => {
+  const plugin = (config: Config): Config => {
     if (!config.i18n) {
       config.i18n = {}
     }
@@ -77,3 +76,6 @@ export const formBuilderPlugin =
       },
     }
   }
+
+  return Object.assign(plugin, { slug: '@payloadcms/plugin-form-builder' })
+}
