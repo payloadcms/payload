@@ -88,7 +88,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
     }
   }
   config.collections = config.collections ?? []
-  config.cookiePrefix = config.cookiePrefix ?? 'payload'
+  config.cookiePrefix = config.cookiePrefix || 'payload'
   config.cors = config.cors ?? []
   config.csrf = config.csrf ?? []
   config.custom = config.custom ?? {}

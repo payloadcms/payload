@@ -99,6 +99,20 @@ npx @payloadcms/codemod --transform migrate-payload-request-creation
 
 Automatic call migration requires a plain identifier payload argument and either `{}` or an initialized local `const` options identifier. The options type must expose all seven old option properties, or be `any`. For that identifier form, the generated argument captures payload first and uses forwarding getters for `context`, `depth`, `fallbackLocale`, `locale`, `req`, `urlSuffix`, and `user`. This preserves inherited getters, their read order, and rejected promises from throwing getters without reading unrelated properties. Complex expressions, mutable/unresolved options bindings, narrow option types, collisions, and unsupported type usages are left unchanged with notes for manual migration.
 
+### Cookie prefixes are normalized and validated
+
+Projects configured with `cookiePrefix: ''` now use the default `payload` prefix, changing the auth cookie name from `-token` to `payload-token`. Omitting `cookiePrefix` or using a valid non-empty custom prefix keeps the same cookie names.
+
+Prefixes containing whitespace or other invalid [cookie-name characters](https://www.rfc-editor.org/rfc/rfc6265#section-4.1.1) now throw `InvalidConfiguration` during config sanitization. Update these prefixes to use valid characters before starting Payload. Changing a prefix changes its cookie names, so existing users must sign in again.
+
+When upgrading a project with an empty prefix:
+
+- Users with existing `-token` sessions must sign in again.
+- Custom integrations that read or write `-token` must use `payload-token`.
+- Existing `-token` cookies are no longer read or cleared by Payload. Remove them or allow them to expire.
+
+The empty `cookiePrefix` setting can be removed from the config to use the default.
+
 ### JWT authentication is versioned without moving token data
 
 Payload 4 keeps the decoded JWT payload flat, so integrations can continue reading `id`, `collection`, `sid`, `email`, and fields selected by `saveToJWT` from the same paths as Payload 3.
