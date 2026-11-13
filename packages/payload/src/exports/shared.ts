@@ -212,6 +212,9 @@ export {
 
 export { parseDocumentID } from '../utilities/parseDocumentID.js'
 
+export { parseErrorResponse } from '../utilities/parseErrorResponse.js'
+export type { ParsedErrorResponse, ParsedNonFieldError } from '../utilities/parseErrorResponse.js'
+
 export { sanitizeFilename } from '../utilities/sanitizeFilename.js'
 
 export { sanitizeUploadPrefix } from '../utilities/sanitizeUploadPrefix.js'
