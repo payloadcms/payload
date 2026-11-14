@@ -6,7 +6,7 @@ import type { Theme } from '../shared.js'
 
 import { useConfig } from '../../Config/index.js'
 import { useSearchParams } from '../../RouterAdapter/index.js'
-import { Context } from '../context.js'
+import { Context, RootContext } from '../context.js'
 import { defaultTheme } from '../shared.js'
 
 export const RootThemeProvider: React.FC<ThemeProviderProps> = ({
@@ -81,10 +81,12 @@ export const RootThemeProvider: React.FC<ThemeProviderProps> = ({
     setHighContrastModeState(detectHighContrastMode(contrastCookieKey))
   }, [contrastCookieKey])
 
+  const value = { autoMode, highContrastMode, setHighContrastMode, setTheme, theme }
+
   return (
-    <Context value={{ autoMode, highContrastMode, setHighContrastMode, setTheme, theme }}>
-      {children}
-    </Context>
+    <RootContext value={value}>
+      <Context value={value}>{children}</Context>
+    </RootContext>
   )
 }
 

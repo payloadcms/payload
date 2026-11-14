@@ -1032,27 +1032,46 @@ Returns methods to set and get user preferences. More info can be found [here](h
 
 ## useTheme
 
-Returns the currently selected theme (`light`, `dark` or `auto`), a set function to update it and a boolean `autoMode`, used to determine if the theme value should be set automatically based on the user's device preferences.
+Returns the effective `theme` (`'light'` or `'dark'`), `autoMode`, `highContrastMode`, and preference setters from the nearest `ThemeProvider`.
+
+Nested providers expose their overrides. For example, inside a dark `Popup` on a light page, `theme` is `'dark'`. An explicit nested `theme` prop sets `autoMode` to `false`. Omitted theme or contrast props inherit from the nearest parent.
 
 ```tsx
 'use client'
 import { useTheme } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
-  // highlight-start
-  const { autoMode, setTheme, theme } = useTheme()
-  // highlight-end
+  const { theme } = useTheme()
+
+  return <span>The surrounding theme is {theme}</span>
+}
+```
+
+The `setTheme` and `setHighContrastMode` setters always update root preferences, document attributes, and cookies. To change a local override, update the nested `ThemeProvider` props. For local theme styling, apply `data-theme` to the surrounding element. The provider does not add a DOM element or write local attributes. Nested `highContrastMode` overrides affect context only; built-in enhanced contrast styling follows the document or shadow host setting. Local visual contrast overrides require custom styling.
+
+Use [`useRootTheme`](#useroottheme) for controls that read or change the root preference.
+
+## useRootTheme
+
+Returns the root `theme`, `autoMode`, `highContrastMode`, `setTheme`, and `setHighContrastMode`, regardless of surrounding theme overrides. For example, inside a dark `Popup` on a light page, `theme` is `'light'`. Theme and contrast preference controls should use this hook so they reflect the root selection.
+
+`setTheme` accepts `'light'`, `'dark'`, or `'auto'`. Automatic mode follows the system preference and removes the explicit theme cookie. `setHighContrastMode` accepts a boolean and persists the choice. Both setters update the root state and document attributes; neither changes an explicit nested override.
+
+```tsx
+'use client'
+import { useRootTheme } from '@payloadcms/ui'
+
+const ToggleTheme: React.FC = () => {
+  const { autoMode, setTheme, theme } = useRootTheme()
 
   return (
     <>
       <span>
-        The current theme is {theme} and autoMode is {autoMode}
+        The root theme is {theme} and autoMode is {String(autoMode)}
       </span>
       <button
         type="button"
-        onClick={() =>
-          setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
-        }
+        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
       >
         Toggle theme
       </button>

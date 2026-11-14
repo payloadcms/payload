@@ -26,11 +26,21 @@ Changes that need more than that, like renamed columns, say so in their own sect
 
 ## Breaking Changes
 
-### Nested theme providers inherit root preferences
+### Theme context distinguishes local overrides from root preferences
 
-Nested `ThemeProvider` components now inherit the existing root theme context directly. Their `theme` and `highContrastMode` props no longer create local state. For local visual overrides, set `data-theme` or `data-enhanced-contrast` on the surrounding element; `Popup` already sets its own `data-theme`. The `useTheme` hook continues to report the root preferences.
+The `useTheme` hook now returns the nearest `ThemeProvider` overrides. For example, inside a dark `Popup` on a light page, `useTheme().theme` returns `'dark'`. An explicit nested `theme` prop sets `autoMode` to `false`; omitted theme and contrast props inherit from the nearest parent. Nested overrides are controlled by their props and do not create preference state or write cookies or document attributes.
 
-The optional `options` argument has been removed from `setTheme` and `setHighContrastMode`. Both setters always update the root preference, document attributes, and cookies. Remove the second argument from custom calls:
+Use the new `useRootTheme` hook for preference controls that need the root selection, even inside an override:
+
+```diff
+-import { useTheme } from '@payloadcms/ui'
++import { useRootTheme } from '@payloadcms/ui'
+
+-const { autoMode, setTheme, theme } = useTheme()
++const { autoMode, setTheme, theme } = useRootTheme()
+```
+
+Both hooks expose the same setters, which always update the root preference, document attributes, and cookies. The optional `options` argument has been removed from `setTheme` and `setHighContrastMode`. Remove the second argument from custom calls:
 
 ```diff
 -setTheme('dark', { scoped: true })
@@ -40,7 +50,7 @@ The optional `options` argument has been removed from `setTheme` and `setHighCon
 +setHighContrastMode(true)
 ```
 
-These calls now update the root preference instead of local provider state.
+These calls now update the root preference instead of local provider state. To change a local override, update the nested provider's props. For local theme styling, apply `data-theme` to the surrounding element; `Popup` already does this. Nested `highContrastMode` overrides affect context only. Built-in enhanced contrast styling follows the document or shadow host setting; local visual contrast overrides require custom styling.
 
 ### Form-state data utilities are renamed
 

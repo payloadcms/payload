@@ -520,6 +520,7 @@ export {
   type Theme,
   type ThemeContext,
   ThemeProvider,
+  useRootTheme,
   useTheme,
 } from '../../providers/Theme/index.js'
 export { EmbedProvider, useEmbed } from '../../providers/Embed/index.js'
