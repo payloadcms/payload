@@ -1,7 +1,8 @@
 /**
  * Sanitizes a URL to ensure only allowed protocols are used.
  * Allows: http, https, mailto, tel, relative paths, and fragment (#) URLs.
- * Returns '#' for any URL with a disallowed protocol (e.g. javascript:, data:).
+ * Returns '#' for any URL with a disallowed protocol (e.g. javascript:, data:)
+ * or protocol-relative URLs (e.g. //evil.com, /\\evil.com).
  */
 export function sanitizeUrl(url: string): string {
   if (!url) {
@@ -15,6 +16,11 @@ export function sanitizeUrl(url: string): string {
 
   if (cleaned.startsWith('#')) {
     return cleaned
+  }
+
+  // Reject protocol-relative and backslash-relative URLs
+  if (cleaned.startsWith('//') || cleaned.startsWith('/\\') || cleaned.startsWith('\\\\')) {
+    return '#'
   }
 
   if (cleaned.startsWith('/') || cleaned.startsWith('./') || cleaned.startsWith('../')) {
