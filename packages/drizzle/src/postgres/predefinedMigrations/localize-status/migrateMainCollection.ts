@@ -26,20 +26,18 @@ export async function migrateMainCollectionStatus({
   payload.logger.info({ msg: `Migrating main collection locales for: ${mainLocalesTable}` })
 
   // Get all documents
-  const documents = await db.execute({
-    drizzle: db.drizzle,
-    sql: sql`
+  const documents = await db.execute(
+    sql`
       SELECT DISTINCT id
       FROM ${sql.identifier(mainTable)}
     `,
-  })
+  )
 
   for (const doc of documents.rows) {
     // For each locale, get the latest version status
     for (const locale of locales) {
-      const latestVersionStatus = await db.execute({
-        drizzle: db.drizzle,
-        sql: sql`
+      const latestVersionStatus = await db.execute(
+        sql`
           SELECT l.version__status as _status
           FROM ${sql.identifier(versionsTable)} v
           JOIN ${sql.raw(`${versionsTable}_locales`)} l ON l._parent_id = v.id
@@ -48,20 +46,19 @@ export async function migrateMainCollectionStatus({
           ORDER BY v.created_at DESC
           LIMIT 1
         `,
-      })
+      )
 
       const status = latestVersionStatus.rows[0]?._status || 'draft'
 
       // Update the main collection's locales table with this status
-      await db.execute({
-        drizzle: db.drizzle,
-        sql: sql`
+      await db.execute(
+        sql`
           UPDATE ${sql.identifier(mainLocalesTable)}
           SET _status = ${status}
           WHERE _parent_id = ${doc.id}
           AND _locale = ${locale}
         `,
-      })
+      )
     }
   }
 

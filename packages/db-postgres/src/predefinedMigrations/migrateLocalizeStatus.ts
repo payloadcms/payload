@@ -12,16 +12,22 @@ import { toSnakeCase } from 'payload/migrations'
  * 3. Drops the `snapshot` column from each version table
  */
 export async function migrateLocalizeStatus({
-  db,
+  db: dbArg,
   payload,
   req,
   sql,
 }: {
+  /**
+   * The Drizzle instance passed to the migration's `up` function (the migration transaction).
+   * Passing the Postgres adapter (`payload.db`) is also supported.
+   */
   db: any
   payload: Payload
   req: PayloadRequest
   sql: any
 }): Promise<void> {
+  const db = dbArg?.drizzle ?? dbArg
+
   if (!payload.config.localization) {
     payload.logger.info({
       msg: 'Localization not enabled, skipping localize-status migration',
@@ -80,11 +86,10 @@ async function _cleanupSnapshotColumn({
   sql: any
   versionsTable: string
 }): Promise<void> {
-  const schemaName = db.schemaName ?? 'public'
+  const schemaName = (payload.db as { schemaName?: string }).schemaName ?? 'public'
 
-  const columnCheck = await db.execute({
-    drizzle: db.drizzle,
-    sql: sql`
+  const columnCheck = await db.execute(
+    sql`
       SELECT EXISTS (
         SELECT FROM information_schema.columns
         WHERE table_schema = ${schemaName}
@@ -92,18 +97,17 @@ async function _cleanupSnapshotColumn({
         AND column_name = 'snapshot'
       ) as exists
     `,
-  })
+  )
 
   if (!columnCheck.rows[0]?.exists) {
     return
   }
 
-  const deleteResult = await db.execute({
-    drizzle: db.drizzle,
-    sql: sql`
+  const deleteResult = await db.execute(
+    sql`
       DELETE FROM ${sql.identifier(versionsTable)} WHERE snapshot = true
     `,
-  })
+  )
 
   if (deleteResult.rowCount > 0) {
     payload.logger.info({
@@ -111,12 +115,11 @@ async function _cleanupSnapshotColumn({
     })
   }
 
-  await db.execute({
-    drizzle: db.drizzle,
-    sql: sql`
+  await db.execute(
+    sql`
       ALTER TABLE ${sql.identifier(versionsTable)} DROP COLUMN snapshot
     `,
-  })
+  )
 
   payload.logger.info({ msg: `Dropped snapshot column from ${versionsTable}` })
 }
