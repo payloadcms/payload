@@ -2245,6 +2245,80 @@ describe('Types testing', () => {
       expect(payload.update).type.toBeCallableWith({ id: 1, collection: 'input-types', data })
     })
 
+    test('payload.create allows omitting fields with defaultValue and required: true', () => {
+      expect(payload.create).type.toBeCallableWith({
+        collection: 'input-types',
+        data: {
+          title: 'Hello',
+        },
+      })
+    })
+
+    test('payload.create rejects omitting required fields with NO defaultValue', () => {
+      expect(payload.create).type.not.toBeCallableWith({
+        collection: 'input-types',
+        data: {
+          status: 'draft',
+        },
+      })
+    })
+
+    test('payload.create allows providing explicit values for defaulted fields', () => {
+      expect(payload.create).type.toBeCallableWith({
+        collection: 'input-types',
+        data: {
+          title: 'Hello',
+          status: 'published',
+        },
+      })
+    })
+
+    test('payload.create rejects invalid values for defaulted fields', () => {
+      expect(payload.create).type.not.toBeCallableWith({
+        collection: 'input-types',
+        data: {
+          title: 'Hello',
+          status: 'invalid-status',
+        },
+      })
+    })
+
+    test('a full InputTypeInput is valid payload.create data', () => {
+      const data = {} as InputTypeInput
+      expect(payload.create).type.toBeCallableWith({ collection: 'input-types', data })
+    })
+
+    test('payload.create accepts relationship IDs and populated documents alongside omitted defaulted fields', () => {
+      const category = {} as PagesCategory
+      const categories = {} as PagesCategory[]
+      const image = {} as Media
+      const page = {} as Page
+
+      // ID representations
+      expect(payload.create).type.toBeCallableWith({
+        collection: 'input-types',
+        data: {
+          title: 'With IDs',
+          category: 'cat-id',
+          categories: ['cat-1', 'cat-2'],
+          image: 'media-id',
+          related: { relationTo: 'pages', value: 'page-id' },
+        },
+      })
+
+      // Populated document representations
+      expect(payload.create).type.toBeCallableWith({
+        collection: 'input-types',
+        data: {
+          title: 'With docs',
+          category,
+          categories,
+          image,
+          related: { relationTo: 'pages', value: page },
+        },
+      })
+    })
+
     test('input field values (relationship, hasMany, polymorphic, upload, defaulted) are valid update data', () => {
       const input = {} as InputTypeInput
       expect(payload.update).type.toBeCallableWith({

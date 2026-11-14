@@ -205,11 +205,13 @@ export interface PayloadTypesShape {
   auth: Record<string, unknown>
   blocks: Record<string, unknown>
   collections: Record<string, unknown>
+  collectionsInput?: Record<string, unknown>
   collectionsJoins: Record<string, unknown>
   collectionsSelect: Record<string, unknown>
   db: { defaultIDType: unknown }
   fallbackLocale: unknown
   globals: Record<string, unknown>
+  globalsInput?: Record<string, unknown>
   globalsSelect: Record<string, unknown>
   jobs: unknown
   locale: unknown
@@ -398,6 +400,14 @@ export type PayloadTypes = IsAugmented extends true
   : UntypedPayloadTypes
 
 export type TypedCollection<T extends PayloadTypesShape = PayloadTypes> = T['collections']
+
+export type TypedCollectionInput<T extends PayloadTypesShape = PayloadTypes> = T extends {
+  collectionsInput: infer TInput
+}
+  ? TInput extends Record<string, unknown>
+    ? TInput
+    : never
+  : never
 
 export type TypedBlock = PayloadTypes['blocks']
 
@@ -1537,10 +1547,12 @@ export type {
   CollectionAccess,
   CollectionAdminOptions,
   CollectionConfig,
+  DataFromCollectionInputSlug,
   DataFromCollectionSlug,
   HookOperationType,
   IDTypeForCollectionSlug,
   MeHook as CollectionMeHook,
+  OptionalKeys,
   RefreshHook as CollectionRefreshHook,
   RequiredDataFromCollection,
   RequiredDataFromCollectionSlug,
