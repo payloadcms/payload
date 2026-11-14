@@ -11,10 +11,18 @@ export { useRootTheme, useTheme } from './context.js'
 export { defaultTheme, type Theme } from './shared.js'
 
 /**
- * Provides root theme preferences or stateless overrides of the nearest theme context.
- * Nested providers share the root setters and leave DOM attributes and cookies unchanged.
- * Apply `data-theme` to the surrounding element for local theme styling.
- * Built-in enhanced contrast styling follows the document or shadow host, regardless of nested context overrides.
+ * Provides theme context to its children.
+ *
+ * At the root (no parent ThemeProvider): renders `RootThemeProvider`, which reads/writes cookies, detects OS preferences, and owns `setTheme` and `setHighContrastMode`.
+ *
+ * When nested inside another ThemeProvider (e.g. inside a Popup): acts as a scoped context override.
+ * The `theme` and `highContrastMode` props set local context values; omitted values inherit from the parent.
+ * `useTheme` reads this local context, while `useRootTheme` reads the root preferences.
+ * `setTheme` and `setHighContrastMode` are shared directly with the root provider, so mutations always affect the global user preference.
+ * Nested providers do not own preference state or write cookies or DOM attributes.
+ * `Popup` sets its own `data-theme` attribute for its visual override.
+ *
+ * The root provider also reads the `?theme=light|dark|auto` query parameter and persists it to the theme cookie using the same mechanism as manual theme selection, when `admin.theme` is `all`.
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
