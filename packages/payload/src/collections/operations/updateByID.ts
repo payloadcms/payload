@@ -115,6 +115,16 @@ export const updateByIDOperation = async <
     })
 
     const initialCollectionConfig = args.collection.config
+    // Capture before normalizeAllLocalesPublicationStatus may write a generated `_status`
+    // (e.g. locale `all` defaulting to publish-all). Trash/restore base selection needs the
+    // caller's original intent (#19449).
+    const hasRequestedStatus =
+      typeof args.data === 'object' &&
+      args.data !== null &&
+      Object.prototype.hasOwnProperty.call(args.data, '_status')
+    const requestedStatus = hasRequestedStatus
+      ? (args.data as { _status?: unknown })._status
+      : undefined
     const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
       hasLocalizedStatus: Boolean(
         args.req.payload.config.localization && hasLocalizeStatusEnabled(initialCollectionConfig),
@@ -333,6 +343,7 @@ export const updateByIDOperation = async <
       draftArg,
       fallbackLocale: fallbackLocale!,
       filesToUpload,
+      hasRequestedStatus,
       locale: locale!,
       overrideAccess: overrideAccess!,
       overrideLock: overrideLock!,
@@ -340,6 +351,7 @@ export const updateByIDOperation = async <
       populate,
       publishAllLocales,
       req,
+      requestedStatus,
       select: select!,
       shouldManageLocalFiles: true,
       showHiddenFields: showHiddenFields!,

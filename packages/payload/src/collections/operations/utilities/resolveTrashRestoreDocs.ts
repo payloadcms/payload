@@ -51,24 +51,46 @@ const isDraftStatus = (status: unknown): boolean => {
  *
  * In that case, keep the published main document as the update base and version from the
  * pending draft so deletedAt is stamped on both without replacing published content.
- * Explicitly restoring as draft (`_status: 'draft'`) or publishing (`_status: 'published'`)
- * still uses the pending draft as the base.
+ * Explicit draft/publish requests (including explicit `publishAllLocales`) still use the
+ * pending draft as the base. Generated `_status` from draft saves / unpublish-all also
+ * uses the latest version; a generated publish status alone must not.
  */
 export const resolveTrashRestoreDocs = ({
   data,
   latestVersionDoc,
   locale,
   mainDoc,
+  publishAllLocales,
+  requestedStatus,
 }: {
   data: JsonObject
   latestVersionDoc: DocWithLocales
   locale?: string
   mainDoc: DocWithLocales | null | undefined
+  /**
+   * Explicit `publishAllLocales: true` from the caller. Do not pass the resolved default —
+   * locale `all` can default-publish and overwrite `data._status` before this runs.
+   */
+  publishAllLocales?: boolean
+  /**
+   * Caller's `_status` before updateDocument may generate one for draft / publish-all /
+   * unpublish-all. Prefer this over `data._status` for publish intent.
+   */
+  requestedStatus?: unknown
 }): {
   docWithLocales: DocWithLocales
   versionDocWithLocales?: DocWithLocales
 } => {
-  if (!mainDoc || data._status === 'draft' || data._status === 'published') {
+  // `data._status === 'draft'` still covers generated draft from `draft: true` / unpublish-all.
+  // Publish intent must come from the caller's original `_status` or explicit publishAllLocales —
+  // a generated `data._status === 'published'` (locale `all` default) must not select the draft.
+  if (
+    !mainDoc ||
+    data._status === 'draft' ||
+    requestedStatus === 'draft' ||
+    requestedStatus === 'published' ||
+    publishAllLocales
+  ) {
     return { docWithLocales: latestVersionDoc }
   }
 

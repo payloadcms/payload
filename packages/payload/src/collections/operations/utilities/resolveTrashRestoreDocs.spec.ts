@@ -31,6 +31,7 @@ describe('resolveTrashRestoreDocs', () => {
       data: { _status: 'draft', deletedAt: null },
       latestVersionDoc,
       mainDoc,
+      requestedStatus: 'draft',
     })
 
     expect(result.docWithLocales).toBe(latestVersionDoc)
@@ -42,6 +43,7 @@ describe('resolveTrashRestoreDocs', () => {
       data: { _status: 'published', deletedAt: null },
       latestVersionDoc,
       mainDoc,
+      requestedStatus: 'published',
     })
 
     expect(result.docWithLocales).toBe(latestVersionDoc)
@@ -114,6 +116,57 @@ describe('resolveTrashRestoreDocs', () => {
     })
 
     expect(result.docWithLocales).toBe(localizedLatestVersionDoc)
+    expect(result.versionDocWithLocales).toBeUndefined()
+  })
+
+  it('should ignore a generated published status when the caller did not request publish', () => {
+    // updateDocument may set data._status to 'published' when locale is `all` and
+    // localizeStatus is enabled, even though the trash request only set deletedAt.
+    const result = resolveTrashRestoreDocs({
+      data: { _status: 'published', deletedAt: new Date().toISOString() },
+      latestVersionDoc,
+      mainDoc,
+      requestedStatus: undefined,
+    })
+
+    expect(result.docWithLocales).toBe(mainDoc)
+    expect(result.versionDocWithLocales).toBe(latestVersionDoc)
+  })
+
+  it('should use the latest version when publishAllLocales is explicitly requested', () => {
+    const result = resolveTrashRestoreDocs({
+      data: { _status: 'published', deletedAt: null },
+      latestVersionDoc,
+      mainDoc,
+      publishAllLocales: true,
+      requestedStatus: undefined,
+    })
+
+    expect(result.docWithLocales).toBe(latestVersionDoc)
+    expect(result.versionDocWithLocales).toBeUndefined()
+  })
+
+  it('should use the latest version when the caller requested published status', () => {
+    const result = resolveTrashRestoreDocs({
+      data: { _status: 'published', deletedAt: null },
+      latestVersionDoc,
+      mainDoc,
+      requestedStatus: 'published',
+    })
+
+    expect(result.docWithLocales).toBe(latestVersionDoc)
+    expect(result.versionDocWithLocales).toBeUndefined()
+  })
+
+  it('should use the latest version when a generated draft status is present', () => {
+    const result = resolveTrashRestoreDocs({
+      data: { _status: 'draft', deletedAt: new Date().toISOString() },
+      latestVersionDoc,
+      mainDoc,
+      requestedStatus: undefined,
+    })
+
+    expect(result.docWithLocales).toBe(latestVersionDoc)
     expect(result.versionDocWithLocales).toBeUndefined()
   })
 })

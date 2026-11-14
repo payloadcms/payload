@@ -66,6 +66,12 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   draftArg: boolean
   fallbackLocale: TypedFallbackLocale
   filesToUpload: FileToSave[]
+  /**
+   * True when `requestedStatus` was captured from the caller's data before publish-all /
+   * draft normalization. Distinguishes "caller omitted `_status`" from direct callers that
+   * do not pass these fields at all.
+   */
+  hasRequestedStatus?: boolean
   id: number | string
   locale: string
   overrideLock: boolean
@@ -73,6 +79,12 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   populate?: PopulateType
   publishAllLocales?: boolean
   req: PayloadRequest
+  /**
+   * Caller's `_status` before `normalizeAllLocalesPublicationStatus` / draft generation may
+   * rewrite `data._status`. Required for correct trash/restore base selection when locale
+   * `all` defaults to publish-all (#19449).
+   */
+  requestedStatus?: unknown
   select: SelectType
   shouldManageLocalFiles: boolean
   showHiddenFields: boolean
@@ -106,6 +118,7 @@ export const updateDocument = async <
   draftArg,
   fallbackLocale,
   filesToUpload,
+  hasRequestedStatus,
   locale,
   overrideAccess,
   overrideLock,
@@ -113,6 +126,7 @@ export const updateDocument = async <
   populate,
   publishAllLocales: publishAllLocalesArg,
   req,
+  requestedStatus: requestedStatusArg,
   select,
   shouldManageLocalFiles,
   showHiddenFields,
@@ -128,6 +142,15 @@ export const updateDocument = async <
     unpublishAllLocales: unpublishAllLocalesArg,
   })
 
+  // updateByID / bulk update always pass hasRequestedStatus so we keep the pre-normalize
+  // intent (including "caller omitted `_status`"). Direct callers omit the flag and fall
+  // back to data._status before draft / publish-all generation below.
+  const requestedStatus =
+    typeof hasRequestedStatus === 'boolean'
+      ? hasRequestedStatus
+        ? requestedStatusArg
+        : undefined
+      : data._status
   const publishAllLocales = resolvePublishAllLocales({
     draft: draftArg,
     hasLocalizeStatusEnabled: hasLocalizeStatusEnabled(collectionConfig),
@@ -186,6 +209,8 @@ export const updateDocument = async <
       latestVersionDoc: latestVersionDoc ?? incomingDocWithLocales,
       locale,
       mainDoc,
+      publishAllLocales: publishAllLocalesArg === true,
+      requestedStatus,
     })
 
     docWithLocales = resolved.docWithLocales
