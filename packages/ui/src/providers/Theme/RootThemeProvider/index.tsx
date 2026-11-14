@@ -10,17 +10,11 @@ import { Context, RootContext } from '../context.js'
 import { defaultTheme } from '../shared.js'
 
 /**
- * Owns the root theme and enhanced contrast preferences.
- * This is the only theme provider that owns preference state, reads/writes preference cookies, detects OS preferences, and updates `<html>`'s `data-theme` and `data-enhanced-contrast` attributes.
+ * Theme providers can be nested, but only this root provider reads and writes cookies, detects system preferences, and updates theme and contrast attributes on `<html>`.
+ * It owns the preference state and the setters shared by every provider.
  *
- * When `admin.theme` is `all`, a valid `?theme=light|dark|auto` query parameter takes priority over the saved theme cookie and OS preference.
- * It is applied through `setTheme`, so an explicit theme is saved to the cookie and `auto` expires the cookie.
- * With `admin.theme` set to `all` and no valid query preference, theme detection restores the saved theme or OS preference without writing a cookie.
- * Enhanced contrast detection similarly restores the saved contrast choice or OS preference without writing a cookie.
- *
- * Defines `setTheme` and `setHighContrastMode`, which update root state, document attributes, and preference cookies.
- * Nested providers share these functions directly; calling either setter through `useTheme` or `useRootTheme` updates the root preference, even inside an override.
- * Explicit nested overrides remain controlled by their props.
+ * `ThemeProvider` creates it when there isn't already a theme context.
+ * Nested providers can override the values their children read, but their setters still update the root preference.
  */
 export const RootThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
