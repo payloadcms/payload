@@ -50,7 +50,68 @@ export const ConfigProvider: React.FC<{
   // useControllableState handles this for us.
   const [config, setConfig] = useControllableState<ClientConfig>(configFromProps)
 
-  // Build lookup maps for collections and globals so we can do O(1) lookups by slug
+  const value = useConfigContextValue({ config, setConfig })
+
+  return <RootConfigContext value={value}>{children}</RootConfigContext>
+}
+
+export const useConfig = (): ClientConfigContext => use(RootConfigContext)
+
+/**
+ * This provider shadows the `ConfigProvider` on the _page_ level, allowing us to
+ * update the config when needed, e.g. after authentication.
+ * The layout `ConfigProvider` is not updated on page navigation / authentication,
+ * as the layout does not re-render in those cases.
+ *
+ * If the config here has the same reference as the config from the layout, we
+ * simply reuse the context from the layout to avoid unnecessary re-renders.
+ *
+ * @experimental This component is experimental and may change or be removed in future releases. Use at your own risk.
+ */
+export const PageConfigProvider: React.FC<{
+  readonly children: React.ReactNode
+  readonly config: ClientConfig
+}> = ({ children, config: configFromProps }) => {
+  const rootContext = useConfig()
+  const { config: rootConfig, setConfig: setRootConfig } = rootContext
+  const pageContext = useConfigContextValue({ config: configFromProps, setConfig: setRootConfig })
+
+  /**
+   * This `useEffect` is required in order for the _page_ to be able to refresh the client config,
+   * which may have been cached on the _layout_ level, where the `ConfigProvider` is managed.
+   * Since the layout does not re-render on page navigation / authentication, we need to manually
+   * update the config, as the user may have been authenticated in the process, which affects the client config.
+   */
+  useEffect(() => {
+    setRootConfig(configFromProps)
+  }, [configFromProps, setRootConfig])
+
+  // If this component receives a different config than what is in context from the layout, it is stale.
+  // While stale, we provide the new config until the root context is updated.
+  // Unfortunately, referential equality alone does not work bc the reference is lost during server/client serialization,
+  // so we need to also compare the `unauthenticated` property.
+  const isRootConfigStale =
+    rootConfig !== configFromProps && rootConfig.unauthenticated !== configFromProps.unauthenticated
+
+  // Always render the same provider and only swap its value. Switching between a provider and bare
+  // `children` would change the element type and make React remount the whole page.
+  return (
+    <RootConfigContext value={isRootConfigStale ? pageContext : rootContext}>
+      {children}
+    </RootConfigContext>
+  )
+}
+
+/**
+ * Builds the context value for a config, with lookup maps for O(1) `getEntityConfig` lookups by slug.
+ */
+function useConfigContextValue({
+  config,
+  setConfig,
+}: {
+  config: ClientConfig
+  setConfig: (config: ClientConfig) => void
+}): ClientConfigContext {
   const { collectionsBySlug, globalsBySlug } = useMemo(() => {
     const collectionsBySlug: Record<string, ClientCollectionConfig> = {}
     const globalsBySlug: Record<string, ClientGlobalConfig> = {}
@@ -81,53 +142,8 @@ export const ConfigProvider: React.FC<{
     [collectionsBySlug, globalsBySlug],
   )
 
-  const value = useMemo(
+  return useMemo(
     () => ({ config, getEntityConfig, setConfig }),
     [config, getEntityConfig, setConfig],
   )
-
-  return <RootConfigContext value={value}>{children}</RootConfigContext>
-}
-
-export const useConfig = (): ClientConfigContext => use(RootConfigContext)
-
-/**
- * This provider shadows the `ConfigProvider` on the _page_ level, allowing us to
- * update the config when needed, e.g. after authentication.
- * The layout `ConfigProvider` is not updated on page navigation / authentication,
- * as the layout does not re-render in those cases.
- *
- * If the config here has the same reference as the config from the layout, we
- * simply reuse the context from the layout to avoid unnecessary re-renders.
- *
- * @experimental This component is experimental and may change or be removed in future releases. Use at your own risk.
- */
-export const PageConfigProvider: React.FC<{
-  readonly children: React.ReactNode
-  readonly config: ClientConfig
-}> = ({ children, config: configFromProps }) => {
-  const { config: rootConfig, setConfig: setRootConfig } = useConfig()
-
-  /**
-   * This `useEffect` is required in order for the _page_ to be able to refresh the client config,
-   * which may have been cached on the _layout_ level, where the `ConfigProvider` is managed.
-   * Since the layout does not re-render on page navigation / authentication, we need to manually
-   * update the config, as the user may have been authenticated in the process, which affects the client config.
-   */
-  useEffect(() => {
-    setRootConfig(configFromProps)
-  }, [configFromProps, setRootConfig])
-
-  // If this component receives a different config than what is in context from the layout, it is stale.
-  // While stale, we instantiate a new context provider that provides the new config until the root context is updated.
-  // Unfortunately, referential equality alone does not work bc the reference is lost during server/client serialization,
-  // so we need to also compare the `unauthenticated` property.
-  if (
-    rootConfig !== configFromProps &&
-    rootConfig.unauthenticated !== configFromProps.unauthenticated
-  ) {
-    return <ConfigProvider config={configFromProps}>{children}</ConfigProvider>
-  }
-
-  return children
 }
