@@ -538,6 +538,43 @@ test.describe('Multi Tenant', () => {
   })
 
   test.describe('Documents', () => {
+    test('should allow assigning a tenant from a nested document drawer', async () => {
+      await loginClientSide({ data: credentials.admin, page, serverURL })
+
+      await page.goto(usersURL.list)
+      await clearTenantFilter({ page })
+      await goToListDoc({
+        cellClass: '.cell-email',
+        page,
+        textToMatch: credentials.blueDog.email,
+        urlUtil: usersURL,
+      })
+
+      await page.getByRole('button', { name: 'Edit Blue Dog' }).click()
+
+      const tenantDrawer = page.locator('.doc-drawer').filter({ has: page.locator('#field-image') })
+      await tenantDrawer.getByRole('button', { name: 'Create New' }).click()
+
+      const mediaDrawer = page.locator('.doc-drawer.drawer--nested').filter({
+        has: page.locator('#field-alt'),
+      })
+      const assignTenantModal = page.locator('#assign-tenant-field-modal')
+      await selectInput({
+        multiSelect: false,
+        option: 'Blue Dog',
+        selectLocator: assignTenantModal.locator('.tenantField'),
+        selectType: 'relationship',
+      })
+      await assignTenantModal.getByRole('button', { name: 'Confirm' }).click()
+      await expect(assignTenantModal).toBeHidden()
+
+      const altInput = mediaDrawer.locator('#field-alt')
+      await altInput.click()
+      await expect(altInput).toBeFocused()
+      await altInput.pressSequentially('Nested media')
+      await expect(altInput).toHaveValue('Nested media')
+    })
+
     test('should set tenant upon entering document', async () => {
       await loginClientSide({
         data: credentials.admin,

@@ -1,6 +1,6 @@
 import type { Access, CollectionConfig, Where } from 'payload'
 
-import { tenantsSlug } from '../shared.js'
+import { mediaSlug, tenantsSlug } from '../shared.js'
 
 const tenantAccess: Access = ({ req }) => {
   // admins can access all tenants
@@ -74,6 +74,11 @@ export const Tenants: CollectionConfig = {
       name: 'domain',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'image',
+      type: 'upload',
+      relationTo: mediaSlug,
     },
     {
       type: 'join',
