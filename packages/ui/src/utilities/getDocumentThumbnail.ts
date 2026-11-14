@@ -10,11 +10,12 @@ export function getDocumentThumbnail({
 }): string | undefined {
   const value = useAsThumbnail ? doc[useAsThumbnail] : undefined
   const firstValue = Array.isArray(value) ? value[0] : value
-  const candidate = Array.isArray(value)
-    ? firstValue
-    : firstValue && typeof firstValue === 'object'
+  const candidate =
+    Array.isArray(value) && value.length > 0
       ? firstValue
-      : doc
+      : firstValue && typeof firstValue === 'object'
+        ? firstValue
+        : doc
   const thumbnailDoc =
     candidate && typeof candidate === 'object' && 'relationTo' in candidate && 'value' in candidate
       ? candidate.value
