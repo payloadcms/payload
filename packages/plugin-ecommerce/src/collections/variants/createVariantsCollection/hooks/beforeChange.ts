@@ -15,7 +15,9 @@ export const variantsCollectionBeforeChange: (args: Props) => CollectionBeforeCh
         id: productID,
         collection: productsSlug,
         depth: 0,
+        draft: true,
         overrideAccess: true,
+        req,
         select: {
           title: true,
           variantTypes: true,
