@@ -22,6 +22,18 @@ export const BulkUploadsCollection: CollectionConfig = {
       required: true,
     },
     {
+      type: 'checkbox',
+      name: 'isDecorative',
+      defaultValue: false,
+    },
+    {
+      type: 'text',
+      name: 'alt',
+      admin: {
+        condition: (_, siblingData) => !siblingData.isDecorative,
+      },
+    },
+    {
       name: 'relationship',
       type: 'relationship',
       relationTo: ['simple-relationship'],
