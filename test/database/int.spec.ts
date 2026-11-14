@@ -6988,6 +6988,42 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     expect(res.blocks[0]?.nested[0]?.nested).toHaveLength(0)
   })
 
+  test('should delete nested block rows when their parent block is removed', async ({
+    payload,
+  }) => {
+    if (payload.db.name === 'mongoose') {
+      return
+    }
+
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        blocks: [{ blockType: 'block-third', nested: [{ blockType: 'block-fourth', nested: [] }] }],
+        title: 'title',
+      },
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      id: post.id,
+      collection: 'posts',
+      data: { blocks: [] },
+      overrideAccess: true,
+    })
+
+    // Nested block rows reference the document, not their parent block, so they are not
+    // removed by a cascade. Left behind, they get merged into any block that later takes
+    // the same `_path`.
+    const db = payload.db as unknown as PostgresAdapter
+    const nestedTable = db.tables[db.tableNameMap.get('posts_blocks_block_fourth')!]!
+    const rows = await db.drizzle
+      .select()
+      .from(nestedTable)
+      .where(sql`${nestedTable._parentID} = ${post.id}`)
+
+    expect(rows).toHaveLength(0)
+  })
+
   test('should ignore blocks that exist in the db but not in the config', async ({ payload }) => {
     // not possible w/ SQL anyway
     if (payload.db.name !== 'mongoose') {
