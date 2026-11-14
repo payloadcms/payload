@@ -1,13 +1,16 @@
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import { localizeStatus } from '@payloadcms/db-mongodb/migration-utils'
 import { sql } from '@payloadcms/db-postgres'
-import { migratePostgresLocalizeStatus } from '@payloadcms/db-postgres/migration-utils'
+import {
+  migrateLocalizeStatus,
+  migratePostgresLocalizeStatus,
+} from '@payloadcms/db-postgres/migration-utils'
 import { migrateSqliteLocalizeStatus } from '@payloadcms/db-sqlite/migration-utils'
 import { sql as drizzleSql } from 'drizzle-orm'
 import { Types } from 'mongoose'
+import { commitTransaction, createPayloadRequest, initTransaction, killTransaction } from 'payload'
 import { wait } from 'payload/shared'
-import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -570,6 +573,133 @@ test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' },
         expect(tableExists.rows[0].exists).toBe(false)
       })
     })
+
+    test.describe('Scenario 6: Run as a generated migration', () => {
+      test('should migrate when db is the migration transaction', async ({ payload }) => {
+        const post = await payload.create({
+          collection: 'testMigrationPosts',
+          data: { title: 'Post' },
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: post.id,
+          collection: 'testMigrationPosts',
+          data: { _status: 'published' },
+          overrideAccess: true,
+        })
+
+        await runAsMigration({
+          payload,
+          up: ({ db, req }) =>
+            migratePostgresLocalizeStatus({
+              collectionSlug: 'testMigrationPosts',
+              db,
+              payload,
+              req,
+              sql,
+            }),
+        })
+
+        const versionStatusColumn = await payload.db.drizzle.execute(sql`
+          SELECT EXISTS (
+            SELECT FROM information_schema.columns
+            WHERE table_schema = 'public'
+            AND table_name = '_test_migration_posts_v'
+            AND column_name = 'version__status'
+          ) as exists
+        `)
+
+        expect(versionStatusColumn.rows[0].exists).toBe(false)
+
+        const localesData = await payload.db.drizzle.execute(sql`
+          SELECT l._locale, l.version__status as _status
+          FROM _test_migration_posts_v_locales l
+          JOIN _test_migration_posts_v v ON l._parent_id = v.id
+          WHERE v.parent_id = ${post.id}
+        `)
+
+        expect(localesData.rows.length).toBeGreaterThan(0)
+        expect(localesData.rows.some((row) => row._status === 'published')).toBe(true)
+      })
+
+      test('should run the generated migration when db is the migration transaction', async ({
+        payload,
+      }) => {
+        const db = payload.db
+
+        const articleResult = await db.drizzle.execute(sql`
+          INSERT INTO test_migration_articles (_status, created_at, updated_at)
+          VALUES ('published', NOW(), NOW())
+          RETURNING id
+        `)
+        const articleId = articleResult.rows[0].id
+
+        await db.drizzle.execute(sql`
+          INSERT INTO test_migration_articles_locales (_locale, _parent_id, title)
+          VALUES ('en', ${articleId}, 'English'), ('es', ${articleId}, 'Español'), ('de', ${articleId}, 'Deutsch')
+        `)
+
+        const versionResult = await db.drizzle.execute(sql`
+          INSERT INTO _test_migration_articles_v (parent_id, version__status, snapshot, created_at, updated_at)
+          VALUES (${articleId}, 'published', false, NOW(), NOW())
+          RETURNING id
+        `)
+        const versionId = versionResult.rows[0].id
+
+        const snapshotResult = await db.drizzle.execute(sql`
+          INSERT INTO _test_migration_articles_v (parent_id, version__status, snapshot, created_at, updated_at)
+          VALUES (${articleId}, 'draft', true, NOW() - INTERVAL '1 second', NOW() - INTERVAL '1 second')
+          RETURNING id
+        `)
+        const snapshotVersionId = snapshotResult.rows[0].id
+
+        for (const parentId of [versionId, snapshotVersionId]) {
+          for (const locale of ['en', 'es', 'de']) {
+            await db.drizzle.execute(sql`
+              INSERT INTO _test_migration_articles_v_locales (_locale, _parent_id)
+              VALUES (${locale}, ${parentId})
+            `)
+          }
+        }
+
+        await runAsMigration({
+          payload,
+          up: ({ db: migrationDb, req }) =>
+            migrateLocalizeStatus({ db: migrationDb, payload, req, sql }),
+        })
+
+        const snapshotColumn = await db.drizzle.execute(sql`
+          SELECT EXISTS (
+            SELECT FROM information_schema.columns
+            WHERE table_schema = 'public'
+            AND table_name = '_test_migration_articles_v'
+            AND column_name = 'snapshot'
+          ) as exists
+        `)
+
+        expect(snapshotColumn.rows[0].exists).toBe(false)
+
+        const remainingVersions = await db.drizzle.execute(sql`
+          SELECT id FROM _test_migration_articles_v WHERE parent_id = ${articleId}
+        `)
+
+        expect(remainingVersions.rows.map((row) => row.id)).toEqual([versionId])
+
+        const mainLocalesData = await db.drizzle.execute(sql`
+          SELECT _locale, _status
+          FROM test_migration_articles_locales
+          WHERE _parent_id = ${articleId}
+          ORDER BY _locale
+        `)
+
+        expect(mainLocalesData.rows).toEqual([
+          { _locale: 'de', _status: 'published' },
+          { _locale: 'en', _status: 'published' },
+          { _locale: 'es', _status: 'published' },
+        ])
+      })
+    })
   })
 
   test.options.describe('SQLite', { db: (adapter) => adapter === 'sqlite' }, () => {
@@ -681,7 +811,7 @@ test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' },
     })
 
     test.describe('Scenario 1: Creating new locales table', () => {
-      test('should migrate non-localized _status to localized', async ({ payload }) => {
+      test('should migrate non-localized _status to localized in SQLite', async ({ payload }) => {
         const drizzle = payload.db.drizzle
 
         const post1 = await payload.create({
@@ -810,7 +940,7 @@ test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' },
     })
 
     test.describe('Scenario 3: Test publishedLocale handling', () => {
-      test('should handle publishedLocale correctly', async ({ payload }) => {
+      test('should handle publishedLocale correctly in SQLite', async ({ payload }) => {
         const drizzle = payload.db.drizzle
 
         await drizzle.run(drizzleSql.raw(`DELETE FROM _test_migration_articles_v`))
@@ -900,7 +1030,7 @@ test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' },
     })
 
     test.describe('Scenario 4: Skip collections without versions', () => {
-      test('should skip migration for collections without versions enabled', async ({
+      test('should skip migration for collections without versions enabled in SQLite', async ({
         payload,
       }) => {
         const doc = await payload.create({
@@ -1066,3 +1196,31 @@ test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' },
     })
   })
 })
+
+/**
+ * Runs `up` the way `payload migrate` runs a migration: inside a transaction, with that
+ * transaction's Drizzle instance passed as `db`.
+ */
+async function runAsMigration({
+  payload,
+  up,
+}: {
+  payload: Payload
+  up: (args: { db: any; req: PayloadRequest }) => Promise<void>
+}): Promise<void> {
+  const req = await createPayloadRequest({ payload })
+
+  await initTransaction(req)
+
+  const transactionID = await req.transactionID
+
+  expect(transactionID).toBeDefined()
+
+  try {
+    await up({ db: payload.db.sessions[transactionID!]!.db, req })
+    await commitTransaction(req)
+  } catch (err) {
+    await killTransaction(req)
+    throw err
+  }
+}
