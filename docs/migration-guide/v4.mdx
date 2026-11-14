@@ -26,6 +26,22 @@ Changes that need more than that, like renamed columns, say so in their own sect
 
 ## Breaking Changes
 
+### Nested theme providers inherit root preferences
+
+Nested `ThemeProvider` components now inherit the existing root theme context directly. Their `theme` and `highContrastMode` props no longer create local state. For local visual overrides, set `data-theme` or `data-enhanced-contrast` on the surrounding element; `Popup` already sets its own `data-theme`. The `useTheme` hook continues to report the root preferences.
+
+The optional `options` argument has been removed from `setTheme` and `setHighContrastMode`. Both setters always update the root preference, document attributes, and cookies. Remove the second argument from custom calls:
+
+```diff
+-setTheme('dark', { scoped: true })
++setTheme('dark')
+
+-setHighContrastMode(true, { scoped: true })
++setHighContrastMode(true)
+```
+
+These calls now update the root preference instead of local provider state.
+
 ### Form-state data utilities are renamed
 
 The shared form-state utilities exported from `payload/shared` now explicitly name their source:
