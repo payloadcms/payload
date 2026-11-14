@@ -2381,6 +2381,102 @@ describe('database', () => {
       })
     })
 
+    it('should preserve omitted arrays when updating blocks with db.updateOne', async () => {
+      const doc = await payload.create({
+        collection: customSchemaSlug,
+        data: {
+          array: [{ text: 'array row' }],
+          blocks: [{ blockType: 'block-second', text: 'block row' }],
+        },
+      })
+
+      await payload.db.updateOne({
+        collection: customSchemaSlug,
+        id: doc.id,
+        data: {
+          blocks: [],
+        },
+      })
+
+      const updated = await payload.findByID({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+
+      expect(updated.blocks).toHaveLength(0)
+      expect(updated.array).toHaveLength(1)
+      expect(updated.array[0].text).toStrictEqual('array row')
+
+      await payload.delete({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+    })
+
+    it('should preserve omitted blocks when updating an array with db.updateOne', async () => {
+      const doc = await payload.create({
+        collection: customSchemaSlug,
+        data: {
+          array: [{ text: 'array row' }],
+          blocks: [{ blockType: 'block-second', text: 'block row' }],
+        },
+      })
+
+      await payload.db.updateOne({
+        collection: customSchemaSlug,
+        id: doc.id,
+        data: {
+          array: [],
+        },
+      })
+
+      const updated = await payload.findByID({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+
+      expect(updated.array).toHaveLength(0)
+      expect(updated.blocks).toHaveLength(1)
+      expect(updated.blocks[0].text).toStrictEqual('block row')
+
+      await payload.delete({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+    })
+
+    it('should clear arrays and blocks when provided as empty arrays to db.updateOne', async () => {
+      const doc = await payload.create({
+        collection: customSchemaSlug,
+        data: {
+          array: [{ text: 'array row' }],
+          blocks: [{ blockType: 'block-second', text: 'block row' }],
+        },
+      })
+
+      await payload.db.updateOne({
+        collection: customSchemaSlug,
+        id: doc.id,
+        data: {
+          array: [],
+          blocks: [],
+        },
+      })
+
+      const updated = await payload.findByID({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+
+      expect(updated.array).toHaveLength(0)
+      expect(updated.blocks).toHaveLength(0)
+
+      await payload.delete({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+    })
+
     it('arrays should work with both long field names and dbName', async () => {
       const { id } = await payload.create({
         collection: 'aliases',

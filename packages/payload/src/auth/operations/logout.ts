@@ -79,13 +79,13 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
         userWithSessions.sessions = sessionsAfterLogout
       }
 
-      // Prevent updatedAt from being updated when only removing a session
-      ;(userWithSessions as any).updatedAt = null
-
       await req.payload.db.updateOne({
         id: user.id,
         collection: collectionConfig.slug,
-        data: userWithSessions,
+        data: {
+          sessions: userWithSessions.sessions,
+          updatedAt: null,
+        },
         req,
         returning: false,
       })
