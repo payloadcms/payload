@@ -16,6 +16,8 @@ export const customParamViewPathBase = '/custom-param'
 
 export const customParamViewPath = `${customParamViewPathBase}/:id`
 
+export const searchParamsViewPath = '/search-params'
+
 export const customViewTitle = 'Custom View'
 
 export const customCollectionViewTitle = 'Custom Collection View'
