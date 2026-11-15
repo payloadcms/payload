@@ -1,4 +1,4 @@
-import type { Payload, PayloadRequest } from 'payload'
+import type { Payload, PayloadRequest, Where } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
 import { Types } from 'mongoose'
@@ -1999,7 +1999,9 @@ test.suite('Relationships', { config: './config.ts' }, () => {
         })
       })
 
-      test('should allow querying two levels deep', async ({ payload }) => {
+      test('should allow querying two levels deep across separate collections', async ({
+        payload,
+      }) => {
         const query = await payload.find({
           collection: 'screenings',
           where: {
@@ -2779,6 +2781,75 @@ test.suite('Relationships', { config: './config.ts' }, () => {
       expect(inResult_3.docs.some((each) => each.id === relToCustomIdText.id)).toBeTruthy()
       expect(inResult_3.docs.some((each) => each.id === relToCustomIdNumber.id)).toBeTruthy()
       expect(inResult_3.docs.some((each) => each.id === relToPage.id)).toBeTruthy()
+    })
+
+    test('should query the relationTo of a polymorphic relationship with every operator', async ({
+      payload,
+    }) => {
+      const page = await payload.create({
+        collection: 'pages',
+        data: {},
+        overrideAccess: true,
+      })
+
+      const customIDText = await payload.create({
+        collection: 'custom-id',
+        data: { id: 'custom-id' },
+        overrideAccess: true,
+      })
+
+      const relToPage = await payload.create({
+        collection: 'rels-to-pages-and-custom-text-ids',
+        data: { rel: { relationTo: 'pages', value: page.id } },
+        overrideAccess: true,
+      })
+
+      const relToCustomIdText = await payload.create({
+        collection: 'rels-to-pages-and-custom-text-ids',
+        data: { rel: { relationTo: 'custom-id', value: customIDText.id } },
+        overrideAccess: true,
+      })
+
+      const relToNothing = await payload.create({
+        collection: 'rels-to-pages-and-custom-text-ids',
+        data: {},
+        overrideAccess: true,
+      })
+
+      const findIDs = async (where: Where) => {
+        const { docs } = await payload.find({
+          collection: 'rels-to-pages-and-custom-text-ids',
+          overrideAccess: true,
+          where,
+        })
+
+        return docs.map(({ id }) => String(id)).sort()
+      }
+
+      const ids = (...docs: { id: number | string }[]) => docs.map(({ id }) => String(id)).sort()
+
+      expect(await findIDs({ 'rel.relationTo': { equals: 'pages' } })).toStrictEqual(ids(relToPage))
+      expect(await findIDs({ 'rel.relationTo': { not_equals: 'pages' } })).toStrictEqual(
+        ids(relToCustomIdText, relToNothing),
+      )
+      expect(await findIDs({ 'rel.relationTo': { in: ['pages', 'custom-id'] } })).toStrictEqual(
+        ids(relToPage, relToCustomIdText),
+      )
+      expect(await findIDs({ 'rel.relationTo': { in: 'pages,custom-id' } })).toStrictEqual(
+        ids(relToPage, relToCustomIdText),
+      )
+      expect(await findIDs({ 'rel.relationTo': { not_in: ['pages'] } })).toStrictEqual(
+        ids(relToCustomIdText, relToNothing),
+      )
+      expect(await findIDs({ 'rel.relationTo': { not_in: ['pages', 'custom-id'] } })).toStrictEqual(
+        ids(relToNothing),
+      )
+      expect(await findIDs({ 'rel.relationTo': { exists: true } })).toStrictEqual(
+        ids(relToPage, relToCustomIdText),
+      )
+      expect(await findIDs({ 'rel.relationTo': { exists: false } })).toStrictEqual(
+        ids(relToNothing),
+      )
     })
   })
 })
