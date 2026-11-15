@@ -48,6 +48,26 @@ export const ConditionsCollection: CollectionConfig = {
       name: 'clientValidatedValue',
       type: 'text',
     },
+    {
+      name: 'address',
+      type: 'group',
+      admin: {
+        condition: (data) => data?.showField === true,
+      },
+      fields: [
+        {
+          name: 'country',
+          type: 'text',
+        },
+        {
+          name: 'city',
+          type: 'text',
+          admin: {
+            condition: (_, siblingData) => siblingData?.country === 'US',
+          },
+        },
+      ],
+    },
   ],
   versions: false,
 }

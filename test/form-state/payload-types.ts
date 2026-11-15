@@ -302,6 +302,10 @@ export interface Condition {
   conditionalRowField?: string | null;
   conditionalCollapsibleField?: string | null;
   clientValidatedValue?: string | null;
+  address?: {
+    country?: string | null;
+    city?: string | null;
+  };
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -535,6 +539,12 @@ export interface ConditionsSelect<T extends boolean = true> {
   conditionalRowField?: T;
   conditionalCollapsibleField?: T;
   clientValidatedValue?: T;
+  address?:
+    | T
+    | {
+        country?: T;
+        city?: T;
+      };
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

@@ -35,6 +35,11 @@ type Args = {
   blockData: Data | undefined
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
+  /**
+   * With `select`, a copy of `data` taken before unselected fields are stripped from it.
+   * Field conditions read it, so they still see fields outside `select`.
+   */
+  conditionData?: Data
   data: Data
   fields: (Field | TabAsField)[]
   fieldSchemaMap: FieldSchemaMap
@@ -84,6 +89,22 @@ type Args = {
 }
 
 /**
+ * Finds the object holding the field at `path` (its siblings) in `data`.
+ * Unnamed fields (rows, collapsibles, unnamed tabs) add `_index-` segments that hold no data.
+ */
+const getUnstrippedSiblingData = (data: Data, path: string): Data | undefined => {
+  let siblingData: Data | undefined = data
+
+  for (const segment of path.split('.').slice(0, -1)) {
+    if (!segment.startsWith('_index-')) {
+      siblingData = siblingData?.[segment]
+    }
+  }
+
+  return siblingData
+}
+
+/**
  * Flattens the fields schema and fields data
  */
 export const iterateFields = async ({
@@ -93,6 +114,7 @@ export const iterateFields = async ({
   blockData,
   clientFieldSchemaMap,
   collectionSlug,
+  conditionData,
   data,
   fields,
   fieldSchemaMap,
@@ -154,12 +176,16 @@ export const iterateFields = async ({
         passesCondition = Boolean(
           (field?.admin?.condition
             ? Boolean(
-                field.admin.condition(fullData || {}, data || {}, {
-                  blockData,
-                  operation,
-                  path: pathSegments,
-                  user: req.user,
-                }),
+                field.admin.condition(
+                  fullData || {},
+                  (conditionData ? getUnstrippedSiblingData(conditionData, path) : data) || {},
+                  {
+                    blockData,
+                    operation,
+                    path: pathSegments,
+                    user: req.user,
+                  },
+                ),
               )
             : true) && parentPassesCondition,
         )
@@ -181,6 +207,7 @@ export const iterateFields = async ({
         blockData,
         clientFieldSchemaMap,
         collectionSlug,
+        conditionData,
         data,
         field,
         fieldIndex,

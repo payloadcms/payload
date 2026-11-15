@@ -14,6 +14,8 @@ import type {
   SelectType,
 } from 'payload'
 
+import { deepCopyObjectSimple } from 'payload/shared'
+
 import type { RenderFieldMethod } from './types.js'
 
 import { calculateDefaultValues } from './calculateDefaultValues/index.js'
@@ -116,6 +118,9 @@ export const fieldSchemasToFormState = async ({
   if (fields && fields.length) {
     const state: FormStateWithoutComponents = {}
 
+    // `select` strips unselected fields from the data below, but field conditions may read them
+    const conditionData = select ? deepCopyObjectSimple(data) : undefined
+
     const dataWithDefaultValues = { ...data }
 
     await calculateDefaultValues({
@@ -130,7 +135,7 @@ export const fieldSchemasToFormState = async ({
       user: req.user,
     })
 
-    let fullData = dataWithDefaultValues
+    let fullData = conditionData ?? dataWithDefaultValues
 
     if (documentData) {
       // By the time this function is used to get form state for nested forms, their default values should have already been calculated
@@ -144,6 +149,7 @@ export const fieldSchemasToFormState = async ({
       blockData: initialBlockData,
       clientFieldSchemaMap,
       collectionSlug,
+      conditionData,
       data: dataWithDefaultValues,
       fields,
       fieldSchemaMap,
