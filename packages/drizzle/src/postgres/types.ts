@@ -133,6 +133,18 @@ export type PostgresSchemaHook = (
   args: PostgresSchemaHookArgs,
 ) => PostgresSchema | Promise<PostgresSchema>
 
+/**
+ * Resolves the Postgres schema of a table or enum by its name.
+ * Return `undefined` to use the adapter's default schema (`schemaName`, or `public`).
+ */
+export type TableSchemaResolver = (args: {
+  /**
+   * The name of the table or enum in the database, for example `posts`, `_posts_v` or `enum_posts_status`.
+   */
+  name: string
+  type: 'enum' | 'table'
+}) => string | undefined
+
 export type PostgresOperatorHandler = {
   /**
    * Postgres extensions that must be installed in the database for this handler to be usable.
@@ -194,6 +206,7 @@ export type BasePostgresAdapter = {
   }
   tableNameMap: Map<string, string>
   tables: Record<string, GenericTable>
+  tableSchema?: TableSchemaResolver
   tablesFilter?: string[]
   versionsSuffix?: string
 } & PostgresDrizzleAdapter
