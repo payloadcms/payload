@@ -35,6 +35,10 @@ import { beforeValidate } from '../../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { runLocalFileUpdate } from '../../../uploads/fileVersioning/archive.js'
+import {
+  getLocalizedUploadProperties,
+  restoreUploadDataFromDocument,
+} from '../../../uploads/sanitizeUploadData.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
 import { getTopLevelFieldNames } from '../../../utilities/getTopLevelFieldNames.js'
@@ -132,11 +136,6 @@ export const updateDocument = async <
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
-  const nextFileData =
-    collectionConfig.upload && shouldManageLocalFiles && !collectionConfig.upload.fileOperations
-      ? deepCopyObjectSimple(data)
-      : undefined
-
   validateAllLocalesPublicationFlags({
     publishAllLocales: publishAllLocalesArg,
     unpublishAllLocales: unpublishAllLocalesArg,
@@ -215,7 +214,28 @@ export const updateDocument = async <
 
     docWithLocales = resolved.docWithLocales
     versionDocWithLocales = resolved.versionDocWithLocales
+
+    // updateByID / bulk update prepare file identity from the latest version (often the pending
+    // draft). When the main write uses the published document instead, rebind upload fields to
+    // that document so trash/restore does not point the live record at the draft's file.
+    if (collectionConfig.upload && versionDocWithLocales) {
+      data = restoreUploadDataFromDocument(data, docWithLocales, {
+        locale:
+          locale === 'all' || !locale
+            ? config.localization
+              ? config.localization.defaultLocale
+              : undefined
+            : locale,
+        localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
+      })
+    }
   }
+
+  // Capture after trash/restore may rebind upload identity onto the published main document.
+  const nextFileData =
+    collectionConfig.upload && shouldManageLocalFiles && !collectionConfig.upload.fileOperations
+      ? deepCopyObjectSimple(data)
+      : undefined
 
   // /////////////////////////////////////
   // Handle potentially locked documents
