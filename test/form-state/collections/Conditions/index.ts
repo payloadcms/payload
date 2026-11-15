@@ -88,6 +88,23 @@ export const ConditionsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'rows',
+      type: 'array',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'rowIdField',
+          type: 'text',
+          admin: {
+            condition: (_, siblingData) => Boolean(siblingData?.id),
+          },
+        },
+      ],
+    },
   ],
   versions: false,
 }

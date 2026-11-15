@@ -36,9 +36,20 @@ import type { RenderFieldMethod } from './types.js'
 
 import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
 import { isRowCollapsed } from './isRowCollapsed.js'
-import { iterateFields } from './iterateFields.js'
+import { getUnstrippedSiblingData, iterateFields } from './iterateFields.js'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
+
+/**
+ * Gives the matching row in the unstripped condition data the ID generated for a new row.
+ */
+const syncRowId = (conditionData: Data | undefined, rowPath: string, id: string) => {
+  const conditionRow = conditionData && getUnstrippedSiblingData(conditionData, `${rowPath}.id`)
+
+  if (conditionRow && typeof conditionRow === 'object' && !conditionRow.id) {
+    conditionRow.id = id
+  }
+}
 
 export type AddFieldStatePromiseArgs = {
   addErrorPathToParent: (fieldPath: string) => void
@@ -324,6 +335,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             const rowPath = path + '.' + rowIndex
 
             row.id = row?.id || new ObjectId().toHexString()
+            syncRowId(conditionData, rowPath, row.id)
 
             if (!omitParents && (!filter || filter(args))) {
               const idKey = rowPath + '.id'
@@ -495,6 +507,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
             if (block) {
               row.id = row?.id || new ObjectId().toHexString()
+              syncRowId(conditionData, rowPath, row.id)
 
               const previousRow: Row = (previousFormState?.[path]?.rows || []).find(
                 (prevRow) => prevRow.id === row.id,

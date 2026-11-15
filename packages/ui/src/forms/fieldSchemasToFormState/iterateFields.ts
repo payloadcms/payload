@@ -92,7 +92,7 @@ type Args = {
  * Finds the object holding the field at `path` (its siblings) in `data`.
  * Unnamed fields (rows, collapsibles, unnamed tabs) add `_index-` segments that hold no data.
  */
-const getUnstrippedSiblingData = (data: Data, path: string): Data | undefined => {
+export const getUnstrippedSiblingData = (data: Data, path: string): Data | undefined => {
   let siblingData: Data | undefined = data
 
   for (const segment of path.split('.').slice(0, -1)) {
