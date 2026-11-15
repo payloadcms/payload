@@ -41,14 +41,19 @@ import { getUnstrippedSiblingData, iterateFields } from './iterateFields.js'
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 /**
- * Gives the matching row in the unstripped condition data the ID generated for a new row.
+ * Returns the row's ID, taking it from the unstripped condition data when `select` stripped it,
+ * and gives a newly generated ID to the matching row in the condition data.
  */
-const syncRowId = (conditionData: Data | undefined, rowPath: string, id: string) => {
+const getRowId = (row: Data, rowPath: string, conditionData: Data | undefined): string => {
   const conditionRow = conditionData && getUnstrippedSiblingData(conditionData, `${rowPath}.id`)
+  const hasConditionRow = Boolean(conditionRow) && typeof conditionRow === 'object'
+  const rowId = row?.id || (hasConditionRow && conditionRow.id) || new ObjectId().toHexString()
 
-  if (conditionRow && typeof conditionRow === 'object' && !conditionRow.id) {
-    conditionRow.id = id
+  if (hasConditionRow && !conditionRow.id) {
+    conditionRow.id = rowId
   }
+
+  return rowId
 }
 
 export type AddFieldStatePromiseArgs = {
@@ -334,8 +339,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           (acc, row, rowIndex: number) => {
             const rowPath = path + '.' + rowIndex
 
-            row.id = row?.id || new ObjectId().toHexString()
-            syncRowId(conditionData, rowPath, row.id)
+            row.id = getRowId(row, rowPath, conditionData)
 
             if (!omitParents && (!filter || filter(args))) {
               const idKey = rowPath + '.id'
@@ -506,8 +510,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             const rowPath = path + '.' + i
 
             if (block) {
-              row.id = row?.id || new ObjectId().toHexString()
-              syncRowId(conditionData, rowPath, row.id)
+              row.id = getRowId(row, rowPath, conditionData)
 
               const previousRow: Row = (previousFormState?.[path]?.rows || []).find(
                 (prevRow) => prevRow.id === row.id,
@@ -596,7 +599,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   id,
                   addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
-                  blockData: row,
+                  // `select` strips unselected fields from `row`, but conditions may read them
+                  blockData:
+                    (conditionData && getUnstrippedSiblingData(conditionData, `${rowPath}.id`)) ||
+                    row,
                   clientFieldSchemaMap,
                   collectionSlug,
                   conditionData,
