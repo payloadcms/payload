@@ -52,6 +52,10 @@ import {
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import {
+  readDataStatus,
+  resolveRequestedStatusAfterBeforeOperation,
+} from './utilities/resolveRequestedStatusAfterBeforeOperation.js'
 import { updateDocument } from './utilities/update.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
@@ -142,6 +146,8 @@ export const updateByIDOperation = async <
       data: args.data,
       status: initialAllLocalesPublicationStatus,
     })
+    // Capture after normalize so a generated `_status` is not treated as hook intent below.
+    const statusBeforeOperation = readDataStatus(args.data)
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -151,6 +157,13 @@ export const updateByIDOperation = async <
       collection: args.collection.config,
       operation: 'update',
       overrideAccess: args.overrideAccess!,
+    })
+
+    const resolvedRequestedStatus = resolveRequestedStatusAfterBeforeOperation({
+      hasRequestedStatus,
+      requestedStatus,
+      statusAfterOperation: readDataStatus(args.data),
+      statusBeforeOperation,
     })
 
     const {
@@ -343,7 +356,7 @@ export const updateByIDOperation = async <
       draftArg,
       fallbackLocale: fallbackLocale!,
       filesToUpload,
-      hasRequestedStatus,
+      hasRequestedStatus: resolvedRequestedStatus.hasRequestedStatus,
       locale: locale!,
       overrideAccess: overrideAccess!,
       overrideLock: overrideLock!,
@@ -351,7 +364,7 @@ export const updateByIDOperation = async <
       populate,
       publishAllLocales,
       req,
-      requestedStatus,
+      requestedStatus: resolvedRequestedStatus.requestedStatus,
       select: select!,
       shouldManageLocalFiles: true,
       showHiddenFields: showHiddenFields!,

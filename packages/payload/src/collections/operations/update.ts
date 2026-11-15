@@ -60,6 +60,10 @@ import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { copyDataWithFreshRowIDs } from './utilities/copyDataWithFreshRowIDs.js'
+import {
+  readDataStatus,
+  resolveRequestedStatusAfterBeforeOperation,
+} from './utilities/resolveRequestedStatusAfterBeforeOperation.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
 
@@ -160,6 +164,8 @@ export const updateOperation = async <
       data: args.data,
       status: initialAllLocalesPublicationStatus,
     })
+    // Capture after normalize so a generated `_status` is not treated as hook intent below.
+    const statusBeforeOperation = readDataStatus(args.data)
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -169,6 +175,13 @@ export const updateOperation = async <
       collection: args.collection.config,
       operation: 'update',
       overrideAccess: args.overrideAccess!,
+    })
+
+    const resolvedRequestedStatus = resolveRequestedStatusAfterBeforeOperation({
+      hasRequestedStatus,
+      requestedStatus,
+      statusAfterOperation: readDataStatus(args.data),
+      statusBeforeOperation,
     })
 
     const {
@@ -440,7 +453,7 @@ export const updateOperation = async <
           draftArg,
           fallbackLocale: fallbackLocale!,
           filesToUpload: generatedFileData.files,
-          hasRequestedStatus,
+          hasRequestedStatus: resolvedRequestedStatus.hasRequestedStatus,
           locale: locale!,
           overrideAccess: overrideAccess!,
           overrideLock: overrideLock!,
@@ -448,7 +461,7 @@ export const updateOperation = async <
           populate,
           publishAllLocales,
           req: documentReq,
-          requestedStatus,
+          requestedStatus: resolvedRequestedStatus.requestedStatus,
           select: select!,
           shouldManageLocalFiles: true,
           showHiddenFields: showHiddenFields!,

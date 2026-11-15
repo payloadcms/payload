@@ -1708,6 +1708,90 @@ test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
       expect(restoredMain.deletedAt).toBeNull()
     })
 
+    test('should publish the pending draft when beforeOperation sets published status on restore', async ({
+      payload,
+    }) => {
+      const published = await payload.create({
+        collection: postsSlug,
+        data: {
+          _status: 'published',
+          title: 'published-v1',
+        },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          title: 'draft-v2',
+        },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: published.id,
+        collection: postsSlug,
+        data: {
+          deletedAt: new Date().toISOString(),
+        },
+        overrideAccess: true,
+      })
+
+      const collectionHooks = payload.collections[postsSlug].config.hooks
+      const originalBeforeOperation = collectionHooks.beforeOperation
+      collectionHooks.beforeOperation = [
+        ...(originalBeforeOperation ?? []),
+        ({ args }) => {
+          if (
+            args.data &&
+            typeof args.data === 'object' &&
+            'deletedAt' in args.data &&
+            args.data.deletedAt == null
+          ) {
+            return {
+              ...args,
+              data: {
+                ...args.data,
+                _status: 'published',
+              },
+            }
+          }
+
+          return args
+        },
+      ]
+
+      try {
+        const restored = await payload.update({
+          id: published.id,
+          collection: postsSlug,
+          data: {
+            deletedAt: null,
+          },
+          overrideAccess: true,
+          trash: true,
+        })
+
+        expect(restored.deletedAt).toBeNull()
+        expect(restored.title).toBe('draft-v2')
+        expect(restored._status).toBe('published')
+
+        const restoredMain = await payload.findByID({
+          id: published.id,
+          collection: postsSlug,
+          overrideAccess: true,
+        })
+
+        expect(restoredMain.title).toBe('draft-v2')
+        expect(restoredMain._status).toBe('published')
+        expect(restoredMain.deletedAt).toBeNull()
+      } finally {
+        collectionHooks.beforeOperation = originalBeforeOperation
+      }
+    })
+
     test('should preserve localized field data when bulk trashing draft documents', async ({
       payload,
     }) => {
