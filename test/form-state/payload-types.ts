@@ -318,6 +318,15 @@ export interface Condition {
         id?: string | null;
       }[]
     | null;
+  layout?:
+    | {
+        country?: string | null;
+        city?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'conditionBlock';
+      }[]
+    | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -570,6 +579,18 @@ export interface ConditionsSelect<T extends boolean = true> {
         title?: T;
         rowIdField?: T;
         id?: T;
+      };
+  layout?:
+    | T
+    | {
+        conditionBlock?:
+          | T
+          | {
+              country?: T;
+              city?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   createdBy?: T;
   updatedBy?: T;

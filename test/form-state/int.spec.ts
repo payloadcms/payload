@@ -383,6 +383,24 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(rowsState['rows.0.rowIdField']).toBeDefined()
     expect(rowsState['rows.0.rowIdField']?.passesCondition).not.toBe(false)
 
+    // Rows keep their ID when `select` strips it
+    const rowId = '6745a1b2c3d4e5f6a7b8c9d0'
+    const { state: rowsWithIdState } = await buildSelectedState(
+      { rows: { rowIdField: true } },
+      { rows: [{ id: rowId, title: 'A' }] },
+    )
+
+    expect(rowsWithIdState['rows.0.id']?.value).toBe(rowId)
+
+    // Block conditions see unselected fields in `blockData`
+    const { state: blockState } = await buildSelectedState(
+      { layout: { conditionBlock: { city: true } } },
+      { layout: [{ blockType: 'conditionBlock', city: 'Austin', country: 'US' }] },
+    )
+
+    expect(blockState['layout.0.city']).toBeDefined()
+    expect(blockState['layout.0.city']?.passesCondition).not.toBe(false)
+
     // A hidden group still only carries its selected fields
     const hiddenDoc = await payload.create({
       collection: conditionsSlug,

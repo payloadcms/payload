@@ -109,6 +109,28 @@ export const ConditionsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'layout',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'conditionBlock',
+          fields: [
+            {
+              name: 'country',
+              type: 'text',
+            },
+            {
+              name: 'city',
+              type: 'text',
+              admin: {
+                condition: (_, __, { blockData }) => blockData?.country === 'US',
+              },
+            },
+          ],
+        },
+      ],
+    },
   ],
   versions: false,
 }
