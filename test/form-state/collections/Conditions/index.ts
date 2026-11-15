@@ -68,6 +68,30 @@ export const ConditionsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'enabledByDefault',
+      type: 'checkbox',
+      defaultValue: true,
+    },
+    {
+      name: 'shipping',
+      type: 'group',
+      fields: [
+        {
+          name: 'region',
+          type: 'text',
+          defaultValue: 'US',
+        },
+        {
+          name: 'zip',
+          type: 'text',
+          admin: {
+            condition: (data, siblingData) =>
+              data?.enabledByDefault === true && siblingData?.region === 'US',
+          },
+        },
+      ],
+    },
   ],
   versions: false,
 }
