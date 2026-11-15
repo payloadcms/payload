@@ -311,6 +311,77 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(stateWithTitle?.['array.1.customTextField']?.customComponents?.Field).toBeDefined()
   })
 
+  // https://github.com/payloadcms/payload/issues/19604
+  test('should evaluate `admin.condition` against unselected fields when using `select`', async ({
+    payload,
+  }) => {
+    const req = await createPayloadRequest({ payload, user })
+
+    const doc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        address: { city: 'Austin', country: 'US' },
+        conditionalCustomField: 'value',
+        showField: true,
+      },
+      overrideAccess: true,
+    })
+
+    const buildSelectedState = (select: Record<string, unknown>, data: Data) =>
+      buildFormState({
+        id: data.id,
+        collectionSlug: conditionsSlug,
+        data,
+        docPermissions: undefined,
+        docPreferences: {
+          fields: {},
+        },
+        documentFormState: undefined,
+        mockRSCs: true,
+        operation: 'update',
+        renderAllFields: false,
+        req,
+        schemaPath: conditionsSlug,
+        select,
+      })
+
+    const { state: topLevelState } = await buildSelectedState(
+      { conditionalCustomField: true },
+      structuredClone(doc),
+    )
+
+    expect(topLevelState.conditionalCustomField).toBeDefined()
+    expect(topLevelState.conditionalCustomField?.passesCondition).not.toBe(false)
+    expect(topLevelState.showField).toBeUndefined()
+
+    const { state: groupState } = await buildSelectedState(
+      { address: { city: true } },
+      structuredClone(doc),
+    )
+
+    expect(groupState['address.city']).toBeDefined()
+    expect(groupState['address.city']?.passesCondition).not.toBe(false)
+    expect(groupState['address.country']).toBeUndefined()
+
+    // A hidden group still only carries its selected fields
+    const hiddenDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        address: { city: 'Austin', country: 'US' },
+        showField: false,
+      },
+      overrideAccess: true,
+    })
+
+    const { state: hiddenGroupState } = await buildSelectedState(
+      { address: { city: true } },
+      structuredClone(hiddenDoc),
+    )
+
+    expect(hiddenGroupState.address?.passesCondition).toBe(false)
+    expect(hiddenGroupState.address?.value).toStrictEqual({ city: 'Austin' })
+  })
+
   test('should not render custom Field components for fields hidden by admin.condition', async ({
     payload,
   }) => {

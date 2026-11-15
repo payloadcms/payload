@@ -52,6 +52,11 @@ export type AddFieldStatePromiseArgs = {
   blockData: Data | undefined
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
+  /**
+   * With `select`, a copy of `data` taken before unselected fields are stripped from it.
+   * Field conditions read it, so they still see fields outside `select`.
+   */
+  conditionData?: Data
   data: Data
   field: Field | TabAsField
   fieldIndex: number
@@ -120,6 +125,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     blockData,
     clientFieldSchemaMap,
     collectionSlug,
+    conditionData,
     data,
     field,
     fieldSchemaMap,
@@ -340,6 +346,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 blockData,
                 clientFieldSchemaMap,
                 collectionSlug,
+                conditionData,
                 data: row,
                 fields: field.fields,
                 fieldSchemaMap,
@@ -579,6 +586,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   blockData: row,
                   clientFieldSchemaMap,
                   collectionSlug,
+                  conditionData,
                   data: row,
                   fields: block.fields,
                   fieldSchemaMap,
@@ -689,6 +697,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           blockData,
           clientFieldSchemaMap,
           collectionSlug,
+          conditionData,
           data: data?.[field.name] || {},
           fields: field.fields,
           fieldSchemaMap,
@@ -872,6 +881,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       blockData,
       clientFieldSchemaMap,
       collectionSlug,
+      conditionData,
       data,
       fields: field.fields,
       fieldSchemaMap,
@@ -955,6 +965,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       blockData,
       clientFieldSchemaMap,
       collectionSlug,
+      conditionData,
       data: isNamedTab ? data?.[field.name] || {} : data,
       fields: field.fields,
       fieldSchemaMap,
@@ -996,6 +1007,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       blockData,
       clientFieldSchemaMap,
       collectionSlug,
+      conditionData,
       data,
       fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
       fieldSchemaMap,
