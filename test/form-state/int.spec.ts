@@ -354,14 +354,23 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(topLevelState.conditionalCustomField?.passesCondition).not.toBe(false)
     expect(topLevelState.showField).toBeUndefined()
 
-    const { state: groupState } = await buildSelectedState(
-      { address: { city: true } },
-      structuredClone(doc),
-    )
+    const groupInput = structuredClone(doc)
+    const { state: groupState } = await buildSelectedState({ address: { city: true } }, groupInput)
 
     expect(groupState['address.city']).toBeDefined()
     expect(groupState['address.city']?.passesCondition).not.toBe(false)
     expect(groupState['address.country']).toBeUndefined()
+    // The caller's data is not mutated
+    expect(groupInput.address?.country).toBe('US')
+
+    // Conditions see the default values of selected fields
+    const { state: defaultsState } = await buildSelectedState(
+      { enabledByDefault: true, shipping: { region: true, zip: true } },
+      {},
+    )
+
+    expect(defaultsState['shipping.zip']).toBeDefined()
+    expect(defaultsState['shipping.zip']?.passesCondition).not.toBe(false)
 
     // A hidden group still only carries its selected fields
     const hiddenDoc = await payload.create({

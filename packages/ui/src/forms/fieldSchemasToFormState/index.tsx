@@ -84,6 +84,26 @@ type Args = {
   skipValidation?: boolean
 }
 
+/**
+ * Copies values from `source` into `target` where `target` has none, recursing into objects and arrays.
+ */
+const addMissingValues = (target: Data, source: Data): Data => {
+  for (const [key, value] of Object.entries(source)) {
+    if (typeof target[key] === 'undefined') {
+      target[key] = value
+    } else if (
+      value &&
+      typeof value === 'object' &&
+      target[key] &&
+      typeof target[key] === 'object'
+    ) {
+      addMissingValues(target[key], value)
+    }
+  }
+
+  return target
+}
+
 export const fieldSchemasToFormState = async ({
   id,
   clientFieldSchemaMap,
@@ -118,10 +138,8 @@ export const fieldSchemasToFormState = async ({
   if (fields && fields.length) {
     const state: FormStateWithoutComponents = {}
 
-    // `select` strips unselected fields from the data below, but field conditions may read them
-    const conditionData = select ? deepCopyObjectSimple(data) : undefined
-
-    const dataWithDefaultValues = { ...data }
+    // With `select`, unselected fields are deleted from nested objects too, so copy them deeply
+    const dataWithDefaultValues = select ? deepCopyObjectSimple(data) : { ...data }
 
     await calculateDefaultValues({
       id,
@@ -134,6 +152,11 @@ export const fieldSchemasToFormState = async ({
       siblingData: dataWithDefaultValues,
       user: req.user,
     })
+
+    // `select` strips unselected fields from `dataWithDefaultValues`, but field conditions may read them
+    const conditionData = select
+      ? addMissingValues(deepCopyObjectSimple(data), deepCopyObjectSimple(dataWithDefaultValues))
+      : undefined
 
     let fullData = conditionData ?? dataWithDefaultValues
 

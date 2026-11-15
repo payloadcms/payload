@@ -262,6 +262,11 @@ export interface Condition {
     country?: string | null;
     city?: string | null;
   };
+  enabledByDefault?: boolean | null;
+  shipping?: {
+    region?: string | null;
+    zip?: string | null;
+  };
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -439,6 +444,13 @@ export interface ConditionsSelect<T extends boolean = true> {
     | {
         country?: T;
         city?: T;
+      };
+  enabledByDefault?: T;
+  shipping?:
+    | T
+    | {
+        region?: T;
+        zip?: T;
       };
   createdBy?: T;
   updatedBy?: T;
