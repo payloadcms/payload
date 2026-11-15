@@ -67,6 +67,7 @@ import {
   restrictedMimeTypesSlug,
   svgOnlySlug,
   threeDimensionalSlug,
+  wideFilePreviewSlug,
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
   withoutEnlargeSlug,
@@ -133,6 +134,7 @@ let relationToNoFilesRequiredURL: AdminUrlUtil
 let adminUploadFilePreviewSingleURL: AdminUrlUtil
 let adminUploadFilePreviewMapURL: AdminUrlUtil
 let filePreviewURL: AdminUrlUtil
+let wideFilePreviewURL: AdminUrlUtil
 let mediaWithFieldsURL: AdminUrlUtil
 let pdfOnlyURL: AdminUrlUtil
 let restrictedMimeTypesURL: AdminUrlUtil
@@ -183,6 +185,7 @@ describe('Uploads', () => {
     adminUploadFilePreviewSingleURL = new AdminUrlUtil(serverURL, adminUploadFilePreviewSingleSlug)
     adminUploadFilePreviewMapURL = new AdminUrlUtil(serverURL, adminUploadFilePreviewMapSlug)
     filePreviewURL = new AdminUrlUtil(serverURL, filePreviewSlug)
+    wideFilePreviewURL = new AdminUrlUtil(serverURL, wideFilePreviewSlug)
     mediaWithFieldsURL = new AdminUrlUtil(serverURL, mediaWithFieldsSlug)
     pdfOnlyURL = new AdminUrlUtil(serverURL, pdfOnlySlug)
     restrictedMimeTypesURL = new AdminUrlUtil(serverURL, restrictedMimeTypesSlug)
@@ -3247,6 +3250,42 @@ describe('Uploads', () => {
       await expect(page.locator('.file-preview__image-wrap .thumbnail')).toBeVisible()
       await expect(page.locator('#custom-file-preview-pdf')).toBeHidden()
       await expect(page.locator('#custom-file-preview-audio')).toBeHidden()
+    })
+
+    test('should keep the fields column beside a filePreview wider than the file panel', async () => {
+      const wideDoc = (
+        await payload.find({
+          collection: wideFilePreviewSlug,
+          depth: 0,
+          limit: 1,
+          overrideAccess: true,
+        })
+      ).docs[0]
+
+      try {
+        // Wide enough for the edit view to place the file panel beside the fields.
+        await page.setViewportSize({ height: 900, width: 1600 })
+        await page.goto(wideFilePreviewURL.edit(wideDoc!.id))
+        await waitForFormReady(page)
+
+        await expect(page.locator('#wide-file-preview')).toBeVisible()
+
+        await expect(async () => {
+          const fieldsBox = await page.locator('.document-fields').boundingBox()
+          const fileManagerBox = await page.locator('.file-manager').boundingBox()
+          const previewBox = await page.locator('#wide-file-preview').boundingBox()
+
+          // The panel starts after the fields column instead of covering the whole row.
+          expect(fileManagerBox!.x).toBeGreaterThan(fieldsBox!.x)
+          expect(fieldsBox!.width).toBeGreaterThan(fileManagerBox!.width / 3)
+          // The preview scrolls inside the panel instead of stretching it.
+          expect(previewBox!.width).toBeLessThanOrEqual(fileManagerBox!.width)
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        await expect(page.locator('#field-alt')).toBeInViewport({ ratio: 1 })
+      } finally {
+        await page.setViewportSize({ height: 720, width: 1280 })
+      }
     })
   })
 
