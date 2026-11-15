@@ -27,8 +27,9 @@
     min-height: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
-    overflow: hidden;
+    /* A custom preview wider than the panel starts at its leading edge and scrolls sideways. */
+    justify-content: safe center;
+    overflow: auto hidden;
 
     .thumbnail {
       max-width: 100%;
