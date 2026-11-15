@@ -5,6 +5,7 @@ import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { useConfig } from '../Config/index.js'
+import { resolveUploadFile } from './resolveUploadFile.js'
 
 type UploadHandler = (args: {
   docPrefix?: string
@@ -29,7 +30,8 @@ export const UploadHandlersProvider = ({ children }) => {
       return null
     }
 
-    return async ({ docPrefix, file }) => {
+    return async ({ docPrefix, file: selectedFile }) => {
+      const file = resolveUploadFile(selectedFile)
       const response = await fetch(uploadInstructionsURL, {
         body: JSON.stringify({
           collectionSlug,
