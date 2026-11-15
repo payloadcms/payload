@@ -374,6 +374,15 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
     expect(defaultsState['shipping.zip']).toBeDefined()
     expect(defaultsState['shipping.zip']?.passesCondition).not.toBe(false)
 
+    // Conditions see the IDs generated for new rows
+    const { state: rowsState } = await buildSelectedState(
+      { rows: { rowIdField: true } },
+      { rows: [{ title: 'A' }] },
+    )
+
+    expect(rowsState['rows.0.rowIdField']).toBeDefined()
+    expect(rowsState['rows.0.rowIdField']?.passesCondition).not.toBe(false)
+
     // A hidden group still only carries its selected fields
     const hiddenDoc = await payload.create({
       collection: conditionsSlug,

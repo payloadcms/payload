@@ -311,6 +311,13 @@ export interface Condition {
     region?: string | null;
     zip?: string | null;
   };
+  rows?:
+    | {
+        title?: string | null;
+        rowIdField?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -556,6 +563,13 @@ export interface ConditionsSelect<T extends boolean = true> {
     | {
         region?: T;
         zip?: T;
+      };
+  rows?:
+    | T
+    | {
+        title?: T;
+        rowIdField?: T;
+        id?: T;
       };
   createdBy?: T;
   updatedBy?: T;
