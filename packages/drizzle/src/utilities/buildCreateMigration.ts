@@ -6,6 +6,7 @@ import { getPredefinedMigration, writeMigrationIndex } from 'payload'
 import prompts from 'prompts'
 
 import type { DrizzleAdapter, DrizzleMigrationHint, DrizzleSnapshotJSON } from '../types.js'
+import type { ChooseRenameSource, ConfirmDataLoss } from './resolveMigrationHints.js'
 
 import { getMigrationTemplate } from './getMigrationTemplate.js'
 import {
@@ -102,16 +103,7 @@ export const buildCreateMigration = ({
       let upHints: DrizzleMigrationHint[] = []
 
       const sqlStatementsUp = await resolveMigrationHints({
-        chooseRenameSource: forceAcceptWarning
-          ? () => Promise.resolve(null)
-          : shouldPrompt
-            ? promptRenameSource
-            : undefined,
-        confirmDataLoss: forceAcceptWarning
-          ? () => Promise.resolve(true)
-          : shouldPrompt
-            ? promptDataLoss
-            : undefined,
+        ...getHintDecisionHandlers({ forceAcceptWarning, shouldPrompt }),
         getDroppedEntities: () =>
           getDroppedSnapshotEntities({ after: drizzleJsonAfter, before: drizzleJsonBefore }),
         run: (hints) => {
@@ -180,4 +172,30 @@ export const buildCreateMigration = ({
 
     return { created: true, path: fullPath }
   }
+}
+
+/**
+ * Decides how ambiguous renames and data-loss changes are resolved: `forceAcceptWarning` creates
+ * every ambiguous entity and accepts data loss, interactive runs prompt, and anything else leaves
+ * the handlers unset so the migration fails with an explanatory error.
+ */
+const getHintDecisionHandlers = ({
+  forceAcceptWarning,
+  shouldPrompt,
+}: {
+  forceAcceptWarning?: boolean
+  shouldPrompt: boolean
+}): { chooseRenameSource?: ChooseRenameSource; confirmDataLoss?: ConfirmDataLoss } => {
+  if (forceAcceptWarning) {
+    return {
+      chooseRenameSource: () => Promise.resolve(null),
+      confirmDataLoss: () => Promise.resolve(true),
+    }
+  }
+
+  if (shouldPrompt) {
+    return { chooseRenameSource: promptRenameSource, confirmDataLoss: promptDataLoss }
+  }
+
+  return {}
 }
