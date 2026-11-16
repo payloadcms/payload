@@ -31,8 +31,8 @@ To enhance DX, you can use [Payload SDK](#payload-rest-api-sdk) to query your RE
 - [fallback-locale](/docs/configuration/localization#retrieving-localized-docs) - specifies a fallback locale if no locale value exists
 - [select](../queries/select) - specifies which fields to include in the result
 - [populate](../queries/select#populate) - specifies which fields to include in the result from populated documents
-- [limit](../queries/pagination#pagination-controls) - limits the number of documents returned
-- [page](../queries/pagination#pagination-controls) - specifies which page to get documents from when used with a limit
+- [limit](../queries/pagination#options) - limits the number of documents returned
+- [page](../queries/pagination#options) - specifies which page to get documents from when used with a limit
 - [sort](../queries/sort#rest-api) - specifies the field(s) to use to sort the returned documents by
 - [where](../queries/overview) - specifies advanced filters to use to query documents
 - [joins](/docs/fields/join#rest-api) - specifies the custom request for each join field by name of the field
@@ -73,8 +73,8 @@ The \`find\` endpoint supports the following additional query parameters:
 
 - [sort](/docs/queries/overview#sort) - sort by field
 - [where](/docs/queries/overview) - pass a where query to constrain returned documents
-- [limit](/docs/queries/pagination#pagination-controls) - limit the returned documents to a certain number
-- [page](/docs/queries/pagination#pagination-controls) - get a specific page of documents
+- [limit](/docs/queries/pagination#options) - limit the returned documents to a certain number
+- [page](/docs/queries/pagination#options) - get a specific page of documents
   `
   },
   },
@@ -585,13 +585,12 @@ Additional REST API endpoints can be added to your application by providing an a
 
 Each endpoint object needs to have:
 
-| Property      | Description                                                                                                                                                                                                                                                |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`path`**    | A string for the endpoint route after the collection or globals slug                                                                                                                                                                                       |
-| **`method`**  | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options'                                                                                                                                                             |
-| **`handler`** | A function that accepts **req** - `PayloadRequest` object which contains [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) properties, currently authenticated `user` and the Local API instance `payload`.                          |
-| **`root`**    | When `true`, defines the endpoint on the root Next.js app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload Config, endpoints defined on `collections` or `globals` cannot be root. |
-| **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                  |
+| Property      | Description                                                                                                                                                                                                                       |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`path`**    | A string for the endpoint route after the collection or globals slug                                                                                                                                                              |
+| **`method`**  | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options'                                                                                                                                    |
+| **`handler`** | A function that accepts **req** - `PayloadRequest` object which contains [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) properties, currently authenticated `user` and the Local API instance `payload`. |
+| **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                         |
 
 Example:
 
@@ -667,6 +666,20 @@ export const Orders: CollectionConfig = {
   of [Access Control](../access-control/overview) and
   [Hooks](../hooks/overview).
 </Banner>
+
+#### Root-level routes
+
+Custom endpoints defined in your Payload Config are always mounted under your configured `routes.api` path (default: `/api`). To define a route that is not prefixed by this path, add a Next.js [Route Handler](https://nextjs.org/docs/app/api-reference/file-conventions/route) at the desired location in your app directory:
+
+```ts
+// src/app/my-route/route.ts
+
+export const GET = async () => {
+  return Response.json({
+    message: 'This is an example of a custom route.',
+  })
+}
+```
 
 #### Helpful tips
 

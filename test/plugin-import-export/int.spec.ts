@@ -1,4 +1,4 @@
-import type { CollectionSlug, Payload } from 'payload'
+import type { ClientField, CollectionSlug, Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -9,6 +9,10 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
+import {
+  filterSelectableFieldValues,
+  reduceFields,
+} from '../../packages/plugin-import-export/src/components/FieldsToExport/reduceFields.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser, regularUser } from '../credentials.js'
 import { clearTestBucket, createTestBucket } from '../storage-s3/test-utils.js'
@@ -5912,6 +5916,24 @@ describe('@payloadcms/plugin-import-export', () => {
   })
 
   describe('collection configuration', () => {
+    it('should exclude disabled default columns from the export field selection', () => {
+      const postsConfig = payload.collections['posts-exports-only'].config
+      const disabledFields =
+        postsConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
+      const fieldOptions = reduceFields({
+        disabledFields,
+        fields: postsConfig.fields as ClientField[],
+      })
+      const initialSelection = filterSelectableFieldValues({
+        fieldOptions,
+        values: postsConfig.admin?.defaultColumns ?? [],
+      })
+
+      expect(postsConfig.admin?.defaultColumns).toContain('disabledForImportExport')
+      expect(disabledFields).toContain('disabledForImportExport')
+      expect(initialSelection).not.toContain('disabledForImportExport')
+    })
+
     it('should exclude collections with custom export collections from base exports', () => {
       const exportsConfig = payload.collections['exports'].config
       const validSlugs =
@@ -6417,6 +6439,48 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(response.status).toBe(400)
       const data = await response.json()
       expect(data.error).toContain('not found')
+    })
+
+    it('rejects an invalid preview field path and keeps collection access unchanged', async () => {
+      const post = await payload.create({
+        collection: 'posts-imports-only',
+        data: {
+          title: 'Preview field validation',
+        },
+      })
+      const objectPrototypeBefore = Object.getOwnPropertyDescriptors(Object.prototype)
+
+      try {
+        const previewResponse = await restClient.POST('/exports/export-preview', {
+          auth: false,
+          body: JSON.stringify({
+            collectionSlug: 'posts-imports-only',
+            fields: ['__proto__.overrideAccess'],
+            format: 'json',
+          }),
+        })
+        const objectPrototypeAfterPreview = Object.getOwnPropertyDescriptors(Object.prototype)
+
+        const updateResponse = await restClient.PATCH(`/posts-imports-only/${post.id}`, {
+          auth: false,
+          body: JSON.stringify({ title: 'Updated preview field validation' }),
+        })
+        const unchangedPost = await payload.findByID({
+          collection: 'posts-imports-only',
+          id: post.id,
+        })
+
+        expect(previewResponse.status).toBe(400)
+        expect(objectPrototypeAfterPreview).toEqual(objectPrototypeBefore)
+        expect(updateResponse.status).toBe(403)
+        expect(unchangedPost.title).toBe('Preview field validation')
+      } finally {
+        delete (Object.prototype as Record<string, unknown>).overrideAccess
+        await payload.delete({
+          collection: 'posts-imports-only',
+          id: post.id,
+        })
+      }
     })
 
     it('should apply toCSV customizations in export preview and remove replaced columns', async () => {

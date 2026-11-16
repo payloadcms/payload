@@ -417,6 +417,7 @@ export interface ReorderTab {
 export interface CustomField {
   id: string;
   customTextServerField?: string | null;
+  fieldWithUndefinedComponents?: string | null;
   customTextClientField?: string | null;
   /**
    * Static field description.
@@ -1087,6 +1088,7 @@ export interface ReorderTabsSelect<T extends boolean = true> {
  */
 export interface CustomFieldsSelect<T extends boolean = true> {
   customTextServerField?: T;
+  fieldWithUndefinedComponents?: T;
   customTextClientField?: T;
   descriptionAsString?: T;
   descriptionAsFunction?: T;

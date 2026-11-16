@@ -6,6 +6,7 @@ import { QuoteNode } from '@lexical/rich-text'
 import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
+import { ALLOWED_TEXT_ALIGN } from '../../converters/lexicalToHtml_deprecated/converter/constants.js'
 import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
 import { MarkdownTransformer } from '../markdownTransformer.js'
@@ -50,7 +51,9 @@ export const BlockquoteFeature = createServerFeature({
                 showHiddenFields,
               })
               const style = [
-                node.format ? `text-align: ${node.format};` : '',
+                node.format && ALLOWED_TEXT_ALIGN.has(node.format)
+                  ? `text-align: ${node.format};`
+                  : '',
                 // the unit should be px. Do not change it to rem, em, or something else.
                 // The quantity should be 40px. Do not change it either.
                 // See rationale in

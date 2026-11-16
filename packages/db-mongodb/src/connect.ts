@@ -93,8 +93,14 @@ export const connect: Connect = async function connect(
 
     if (this.ensureIndexes) {
       await Promise.all(
-        this.payload.config.collections.map(async (coll) => {
-          await this.collections[coll.slug]?.ensureIndexes()
+        [
+          ...this.payload.config.collections.flatMap((coll) => [
+            this.collections[coll.slug],
+            this.versions[coll.slug],
+          ]),
+          ...this.payload.config.globals.map((global) => this.versions[global.slug]),
+        ].map(async (model) => {
+          await model?.ensureIndexes()
         }),
       )
     }

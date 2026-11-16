@@ -141,7 +141,9 @@ export function useToolbarStates(
   useEffect(() => {
     void runDeprioritized(updateStates)
 
-    const listener = () => runDeprioritized(updateStates)
+    const listener = () => {
+      void runDeprioritized(updateStates)
+    }
 
     const cleanup = mergeRegister(editor.registerUpdateListener(listener))
     document.addEventListener('mouseup', listener)

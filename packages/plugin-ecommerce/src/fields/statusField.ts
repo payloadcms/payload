@@ -8,6 +8,11 @@ export const statusOptions: SelectField['options'] = [
   },
   {
     // @ts-expect-error - translations are not typed in plugins yet
+    label: ({ t }) => t('plugin-ecommerce:processing'),
+    value: 'processing',
+  },
+  {
+    // @ts-expect-error - translations are not typed in plugins yet
     label: ({ t }) => t('plugin-ecommerce:succeeded'),
     value: 'succeeded',
   },

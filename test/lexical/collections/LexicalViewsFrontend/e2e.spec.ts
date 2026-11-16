@@ -20,7 +20,8 @@ const dirname = path.resolve(currentFolder, '../../')
 let _payload: PayloadTestSDK<Config>
 let serverURL: string
 
-const { beforeAll, beforeEach, describe } = test
+const { afterEach, beforeAll, beforeEach, describe } = test
+const createdLexicalViewIDs: Array<number | string> = []
 
 // Unlike the other suites, this one runs in parallel, as they run on create URLs and are "pure" tests
 // PLEASE do not reset the database or perform any operations that modify it in this file.
@@ -37,6 +38,16 @@ describe('Lexical Views', () => {
     const page = await browser.newPage()
     await ensureCompilationIsDone({ page, serverURL })
     await page.close()
+  })
+
+  afterEach(async () => {
+    for (const id of createdLexicalViewIDs) {
+      await _payload.delete({
+        id,
+        collection: lexicalViewsSlug,
+      })
+    }
+    createdLexicalViewIDs.length = 0
   })
 
   describe('LexicalViewsFrontend - view selector with frontend view', () => {
@@ -371,6 +382,39 @@ describe('Lexical Views', () => {
       // LexicalViews only has a "default" view, so the selector should be hidden
       const viewSelector = page.locator('.lexical-view-selector')
       await expect(viewSelector).toHaveCount(0)
+    })
+
+    test('should render a custom Block component on initial document load', async ({ page }) => {
+      const url = new AdminUrlUtil(serverURL, lexicalViewsSlug)
+
+      const doc = await _payload.create({
+        collection: lexicalViewsSlug,
+        data: {
+          customDefaultView: buildEditorState({
+            nodes: [
+              {
+                type: 'block',
+                fields: {
+                  id: 'e2e-initial-custom-block-view',
+                  blockName: '',
+                  blockType: 'viewsTestBlock',
+                  text: 'Initial custom block view',
+                },
+                format: '',
+                version: 2,
+              },
+            ],
+          }),
+        },
+        depth: 0,
+      })
+      createdLexicalViewIDs.push(doc.id)
+
+      await page.goto(url.edit(doc.id))
+
+      const editor = page.locator('.rich-text-lexical').first()
+      await expect(editor).toBeVisible()
+      await expect(editor.getByText('This block is always a div').first()).toBeVisible()
     })
   })
 })

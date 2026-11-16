@@ -18,6 +18,7 @@ type ContextHandlers = {
 export type OnListQueryChange = (query: ListQuery) => void
 
 export type ListQueryProps = {
+  readonly baseFilter?: Where
   readonly children: React.ReactNode
   readonly collectionSlug?: ClientCollectionConfig['slug']
   readonly data: PaginatedDocs | undefined
@@ -32,6 +33,7 @@ export type ListQueryProps = {
 }
 
 export type IListQueryContext = {
+  baseFilter?: Where
   collectionSlug: ClientCollectionConfig['slug']
   data: ListQueryProps['data']
   defaultLimit?: number

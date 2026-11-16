@@ -129,4 +129,52 @@ describe('Endpoints', () => {
       expect(response.headers.get('Access-Control-Allow-Headers')).toBe('X-Custom-Header')
     })
   })
+
+  describe('Open Graph image', () => {
+    it('should ignore description characters beyond the length limit', async () => {
+      // Whitespace collapses when rendered, so any text visible past the first 200 characters
+      // would only appear in the image if the description were not clamped
+      const clampedDescription = ' '.repeat(200)
+
+      const clampedResponse = await restClient.GET('/og', {
+        auth: false,
+        query: { description: clampedDescription },
+      })
+      const overflowingResponse = await restClient.GET('/og', {
+        auth: false,
+        query: { description: `${clampedDescription}${'Overflow '.repeat(1_000)}` },
+      })
+
+      expect(clampedResponse.status).toBe(200)
+      expect(overflowingResponse.status).toBe(200)
+      expect(overflowingResponse.headers.get('Content-Type')).toBe('image/png')
+
+      const clampedImage = Buffer.from(await clampedResponse.arrayBuffer())
+      const overflowingImage = Buffer.from(await overflowingResponse.arrayBuffer())
+
+      expect(overflowingImage.equals(clampedImage)).toBe(true)
+    })
+
+    it('should render a description within the length limit intact', async () => {
+      // Dropping the final character changes the image only if the full description is rendered
+      const description = 'A normal description that fits well within the length limit.'
+
+      const fullResponse = await restClient.GET('/og', {
+        auth: false,
+        query: { description },
+      })
+      const shortenedResponse = await restClient.GET('/og', {
+        auth: false,
+        query: { description: description.slice(0, -1) },
+      })
+
+      expect(fullResponse.status).toBe(200)
+      expect(shortenedResponse.status).toBe(200)
+
+      const fullImage = Buffer.from(await fullResponse.arrayBuffer())
+      const shortenedImage = Buffer.from(await shortenedResponse.arrayBuffer())
+
+      expect(fullImage.equals(shortenedImage)).toBe(false)
+    })
+  })
 })

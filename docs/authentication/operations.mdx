@@ -210,6 +210,29 @@ mutation {
 
 By default, logging out will only end the session pertaining to the JWT that was used to log out with. However, you can pass `allSessions: true` to the logout operation in order to end all sessions for the user logging out.
 
+#### Password changes and sessions
+
+With sessions enabled, changing a user's password ends that user's other sessions, so tokens that were issued before the change stop working.
+
+- Updating the password of the user making the request - through the admin Account view, the REST and GraphQL update endpoints, or a Local API update that receives the authenticated user - keeps the session that the request was made with and ends the rest.
+- Updating a user's password on their behalf, such as an admin updating another user, ends all of that user's sessions.
+- The `resetPassword` operation ends all existing sessions and returns a token for the new session that it creates.
+
+A Local API update that runs without an authenticated user has no session to keep, so it ends all of the user's sessions. Pass the `user` returned by `payload.auth` when the user making the request should stay logged in:
+
+```ts
+const { user } = await payload.auth({ headers })
+
+await payload.update({
+  collection: 'users',
+  id: user.id,
+  data: {
+    password: 'new-password',
+  },
+  user,
+})
+```
+
 ## Refresh
 
 Allows for "refreshing" JWTs. If your user has a token that is about to expire, but the user is still active and using the app, you might want to use the `refresh` operation to receive a new token by executing this operation via the authenticated user.

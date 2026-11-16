@@ -1,7 +1,11 @@
 import type { PayloadRequest, Where } from 'payload'
 import type { UTApi } from 'uploadthing/server'
 
-import { getRangeRequestInfo } from 'payload/internal'
+import {
+  getRangeRequestInfo,
+  isXmlMimeType,
+  UPLOAD_CONTENT_SECURITY_POLICY,
+} from 'payload/internal'
 
 import { getKeyFromFilename } from './utilities.js'
 
@@ -131,8 +135,8 @@ export async function getFile({
       headers.append('ETag', objectEtag)
     }
 
-    if (contentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    if (isXmlMimeType(contentType)) {
+      headers.append('Content-Security-Policy', UPLOAD_CONTENT_SECURITY_POLICY)
     }
 
     if (

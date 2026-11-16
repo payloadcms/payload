@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { Cron } from 'croner'
 import minimist from 'minimist'
+import * as nodeModule from 'node:module'
 import { pathToFileURL } from 'node:url'
 import path from 'path'
 
@@ -26,6 +27,24 @@ const availableScripts = [
 
 export const bin = async () => {
   loadEnv()
+
+  // Lexical 0.50's Node entry points use top-level dynamic imports that can stall under tsx.
+  // Select its equivalent static exports after loading the user's environment instead.
+  const environmentCondition = process.env.NODE_ENV === 'production' ? 'production' : 'development'
+
+  if (typeof nodeModule.registerHooks === 'function') {
+    const { initialize, resolve } = await import(
+      new URL('../../lexicalLoader.mjs', import.meta.url).href
+    )
+
+    initialize(environmentCondition)
+    nodeModule.registerHooks({ resolve })
+  } else {
+    nodeModule.register('../../lexicalLoader.mjs', import.meta.url, {
+      data: environmentCondition,
+    })
+  }
+
   process.env.DISABLE_PAYLOAD_HMR = 'true'
 
   const args = minimist(process.argv.slice(2))

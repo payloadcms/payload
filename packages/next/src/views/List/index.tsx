@@ -92,6 +92,7 @@ export const renderListView = async (
     query: queryFromArgs,
     searchParams,
     trash,
+    user: userWithReadAccess,
     viewType,
   } = args
 
@@ -377,7 +378,7 @@ export const renderListView = async (
     payload,
     permissions,
     searchParams,
-    user,
+    user: userWithReadAccess,
   }
 
   const listViewSlots = renderListViewSlots({
@@ -406,6 +407,9 @@ export const renderListView = async (
       <Fragment>
         <HydrateAuthProvider permissions={permissions} />
         <ListQueryProvider
+          baseFilter={
+            baseFilterConstraint ? JSON.parse(JSON.stringify(baseFilterConstraint)) : undefined
+          }
           collectionSlug={collectionSlug}
           data={data}
           modifySearchParams={!isInDrawer}

@@ -58,6 +58,7 @@ export const frTranslations: DefaultTranslationsObject = {
     newPassword: 'Nouveau mot de passe',
     passed: 'Authentification réussie',
     passwordResetSuccessfully: 'Réinitialisation du mot de passe réussie.',
+    resend: 'Renvoyer',
     resetPassword: 'Réinitialiser le mot de passe',
     resetPasswordExpiration: 'Réinitialiser l’expiration du mot de passe',
     resetPasswordToken: 'Réinitialiser le jeton de mot de passe',

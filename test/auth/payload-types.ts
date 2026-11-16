@@ -281,6 +281,7 @@ export interface User {
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
+  resetPasswordRequestedAt?: string | null;
   salt?: string | null;
   hash?: string | null;
   loginAttempts?: number | null;
@@ -580,6 +581,7 @@ export interface UsersSelect<T extends boolean = true> {
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
+  resetPasswordRequestedAt?: T;
   salt?: T;
   hash?: T;
   loginAttempts?: T;
@@ -729,6 +731,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

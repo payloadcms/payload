@@ -9,8 +9,11 @@ import { MissingEditorProp } from '../../../errors/index.js'
 import { type RequestContext, validateBlocksFilterOptions } from '../../../index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
+import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
+import { getBlockFromField } from '../../getBlockFromField.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
+import { flattenValidationData } from './flattenValidationData.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -29,6 +32,7 @@ type Args = {
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
    */
   blockData?: JsonObject
+  blockFields?: Field[]
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -58,6 +62,7 @@ type Args = {
   siblingDocWithLocales?: JsonObject
   siblingFields?: (Field | TabAsField)[]
   skipValidation: boolean
+  submittedTopLevelFieldNames?: ReadonlySet<string>
 }
 
 // This function is responsible for the following actions, in order:
@@ -71,6 +76,7 @@ type Args = {
 export const promise = async ({
   id,
   blockData,
+  blockFields,
   collection,
   context,
   data,
@@ -94,6 +100,7 @@ export const promise = async ({
   siblingDocWithLocales,
   siblingFields,
   skipValidation,
+  submittedTopLevelFieldNames,
 }: Args): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -121,7 +128,11 @@ export const promise = async ({
         }),
       )
     : true
-  let skipValidationFromHere = skipValidation || !passesCondition
+  const isOutsideSubmittedFieldScope =
+    submittedTopLevelFieldNames !== undefined &&
+    fieldAffectsData(field) &&
+    !submittedTopLevelFieldNames.has(pathSegments[0]!)
+  let skipValidationFromHere = skipValidation || isOutsideSubmittedFieldScope || !passesCondition
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
@@ -161,9 +172,63 @@ export const promise = async ({
       }
     }
 
+    if (hasInvalidFieldValueShape({ field, value: siblingData[field.name!] })) {
+      errors.push({
+        label: buildFieldLabel(
+          fieldLabelPath,
+          getTranslatedLabel(field?.label || field?.name, req.i18n),
+        ),
+        message: req.t('validation:invalidInput'),
+        path,
+      })
+      return
+    }
+
+    if (field.type === 'blocks' && Array.isArray(siblingData[field.name])) {
+      for (const row of siblingData[field.name] as JsonObject[]) {
+        const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
+        const blockType = (row.blockType || rowSiblingDoc.blockType) as string
+
+        if (!getBlockFromField({ blockType, field, req })) {
+          errors.push({
+            label: buildFieldLabel(
+              fieldLabelPath,
+              getTranslatedLabel(field?.label || field?.name, req.i18n),
+            ),
+            message: req.t('validation:invalidBlock', { block: blockType }),
+            path,
+          })
+          return
+        }
+      }
+    }
+
     // Validate
     if (!skipValidationFromHere && 'validate' in field && field.validate) {
       const valueToValidate = siblingData[field.name]
+
+      // With `locale: 'all'` a localized scalar is a locale-keyed object; validate each locale, not the
+      // wrapper. Containers (`group`/`array`/`blocks`) are excluded - per-locale child validation is a follow-up.
+      const isLocaleKeyedValue =
+        operationLocale === 'all' &&
+        localization &&
+        fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+        field.type !== 'group' &&
+        valueToValidate !== null &&
+        typeof valueToValidate === 'object' &&
+        !Array.isArray(valueToValidate)
+
+      const localizedValuesToValidate: { locale?: string; value: unknown }[] = isLocaleKeyedValue
+        ? localization.localeCodes
+            .filter((locale) => locale in (valueToValidate as JsonObject))
+            .map((locale) => ({ locale, value: (valueToValidate as JsonObject)[locale] }))
+        : [{ value: valueToValidate }]
+
+      // No recognized locales (e.g. `{}`): validate `undefined` once so required/optional still apply.
+      if (localizedValuesToValidate.length === 0) {
+        localizedValuesToValidate.push({ value: undefined })
+      }
+
       let jsonError: object
 
       if (field.type === 'json' && typeof siblingData[field.name] === 'string') {
@@ -181,23 +246,72 @@ export const promise = async ({
         object
       >
 
-      const validationResult = await validateFn(valueToValidate as never, {
-        ...field,
-        id,
-        blockData: blockData!,
-        collectionSlug: collection?.slug,
-        data: deepMergeWithSourceArrays(doc, data),
-        event: 'submit',
-        // @ts-expect-error
-        jsonError,
-        operation,
-        overrideAccess,
-        path: pathSegments,
-        preferences: { fields: {} },
-        previousValue: siblingDoc[field.name],
-        req,
-        siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-      })
+      let validationResult: string | true = true
+      let failedLocale: string | undefined
+
+      const validationData = deepMergeWithSourceArrays<JsonObject>(doc, data)
+      const validationSiblingData = deepMergeWithSourceArrays<JsonObject>(siblingDoc, siblingData)
+
+      for (const { locale, value } of localizedValuesToValidate) {
+        // Scope `req.locale` to the current locale via a proxy, without mutating the shared request.
+        const validationReq = locale ? isolateObjectProperty(req, 'locale') : req
+        if (locale) {
+          validationReq.locale = locale
+        }
+
+        const localeContext = locale
+          ? {
+              blockData:
+                blockData && blockFields
+                  ? flattenValidationData({
+                      config: req.payload.config,
+                      data: blockData,
+                      fields: blockFields,
+                      locale,
+                      parentIsLocalized,
+                    })
+                  : blockData,
+              data: flattenValidationData({
+                config: req.payload.config,
+                data: validationData,
+                fields: (collection?.fields || global?.fields)!,
+                locale,
+              }),
+              siblingData: flattenValidationData({
+                config: req.payload.config,
+                data: validationSiblingData,
+                fields: siblingFields!,
+                locale,
+                parentIsLocalized,
+              }),
+            }
+          : { blockData, data: validationData, siblingData: validationSiblingData }
+
+        validationResult = await validateFn(value as never, {
+          ...field,
+          id,
+          blockData: localeContext.blockData!,
+          collectionSlug: collection?.slug,
+          data: localeContext.data,
+          event: 'submit',
+          // @ts-expect-error generic validation options cannot infer JSON fields
+          jsonError,
+          operation,
+          overrideAccess,
+          path: pathSegments,
+          preferences: { fields: {} },
+          previousValue: locale
+            ? (siblingDoc[field.name] as JsonObject)?.[locale]
+            : siblingDoc[field.name],
+          req: validationReq,
+          siblingData: localeContext.siblingData,
+        })
+
+        if (typeof validationResult === 'string') {
+          failedLocale = locale
+          break
+        }
+      }
 
       if (typeof validationResult === 'string') {
         let filterOptionsError = false
@@ -257,7 +371,7 @@ export const promise = async ({
           )
 
           errors.push({
-            label: fieldLabel,
+            label: failedLocale ? `${fieldLabel} (${failedLocale})` : fieldLabel,
             message: validationResult,
             path,
           })
@@ -270,11 +384,25 @@ export const promise = async ({
       mergeLocaleActions.push(() => {
         const localeData: Record<string, unknown> = {}
 
+        // With `locale: 'all'`, siblingData holds a locale-keyed object (`{ en, es }`) rather than a single
+        // locale's value - take each submitted locale, falling back to the existing doc for ones not sent.
+        const submittedValue = siblingData[field.name!]
+        const isAllLocales =
+          req.locale === 'all' &&
+          submittedValue !== null &&
+          typeof submittedValue === 'object' &&
+          !Array.isArray(submittedValue)
+
         for (const locale of localization.localeCodes) {
-          const fieldValue =
-            locale === req.locale
-              ? siblingData[field.name!]
-              : siblingDocWithLocales?.[field.name!]?.[locale]
+          const existingValue = siblingDocWithLocales?.[field.name!]?.[locale]
+
+          const fieldValue = isAllLocales
+            ? locale in (submittedValue as Record<string, unknown>)
+              ? (submittedValue as Record<string, unknown>)[locale]
+              : existingValue
+            : locale === req.locale
+              ? submittedValue
+              : existingValue
 
           // update locale value if it's not undefined
           if (typeof fieldValue !== 'undefined') {
@@ -302,6 +430,7 @@ export const promise = async ({
             traverseFields({
               id,
               blockData,
+              blockFields,
               collection,
               context,
               data,
@@ -332,6 +461,7 @@ export const promise = async ({
                 siblingDocWithLocales?.[field.name],
               ),
               skipValidation: skipValidationFromHere,
+              submittedTopLevelFieldNames,
             }),
           )
         })
@@ -357,11 +487,7 @@ export const promise = async ({
 
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
 
-          const block: Block | undefined =
-            req.payload.blocks[blockTypeToMatch] ??
-            ((field.blockReferences ?? field.blocks).find(
-              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-            ) as Block | undefined)
+          const block = getBlockFromField({ blockType: blockTypeToMatch, field, req })
 
           const blockLabelPath =
             field?.label === false
@@ -376,6 +502,7 @@ export const promise = async ({
               traverseFields({
                 id,
                 blockData: row,
+                blockFields: block.fields,
                 collection,
                 context,
                 data,
@@ -383,7 +510,6 @@ export const promise = async ({
                 docWithLocales,
                 errors,
                 fieldLabelPath: blockLabelPath,
-
                 fields: block.fields,
                 global,
                 mergeLocaleActions,
@@ -398,6 +524,7 @@ export const promise = async ({
                 siblingDoc: rowSiblingDoc,
                 siblingDocWithLocales: rowSiblingDocWithLocales,
                 skipValidation: skipValidationFromHere,
+                submittedTopLevelFieldNames,
               }),
             )
           }
@@ -414,6 +541,7 @@ export const promise = async ({
       await traverseFields({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,
@@ -441,6 +569,7 @@ export const promise = async ({
         siblingDoc,
         siblingDocWithLocales: siblingDocWithLocales!,
         skipValidation: skipValidationFromHere,
+        submittedTopLevelFieldNames,
       })
 
       break
@@ -487,6 +616,7 @@ export const promise = async ({
       await traverseFields({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,
@@ -511,6 +641,7 @@ export const promise = async ({
         siblingDoc: groupSiblingDoc,
         siblingDocWithLocales: groupSiblingDocWithLocales!,
         skipValidation: skipValidationFromHere,
+        submittedTopLevelFieldNames,
       })
 
       break
@@ -576,7 +707,7 @@ export const promise = async ({
             schemaPath: schemaPathSegments,
             siblingData,
             siblingDocWithLocales,
-            skipValidation,
+            skipValidation: skipValidationFromHere,
             value: siblingData[field.name],
           })
 
@@ -617,6 +748,7 @@ export const promise = async ({
       await traverseFields({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,
@@ -644,6 +776,7 @@ export const promise = async ({
         siblingDoc: tabSiblingDoc,
         siblingDocWithLocales: tabSiblingDocWithLocales!,
         skipValidation: skipValidationFromHere,
+        submittedTopLevelFieldNames,
       })
 
       break
@@ -653,6 +786,7 @@ export const promise = async ({
       await traverseFields({
         id,
         blockData,
+        blockFields,
         collection,
         context,
         data,
@@ -677,6 +811,7 @@ export const promise = async ({
         siblingDoc,
         siblingDocWithLocales: siblingDocWithLocales!,
         skipValidation: skipValidationFromHere,
+        submittedTopLevelFieldNames,
       })
 
       break
@@ -686,4 +821,49 @@ export const promise = async ({
       break
     }
   }
+}
+
+function hasInvalidFieldValueShape({
+  field,
+  value,
+}: {
+  field: Field | TabAsField
+  value: unknown
+}): boolean {
+  if (value === null || typeof value === 'undefined' || !fieldAffectsData(field)) {
+    return false
+  }
+
+  if (field.type === 'array' || field.type === 'blocks') {
+    // Form state may use a numeric row count, while submitted values use arrays.
+    return !(Array.isArray(value) || typeof value === 'number')
+  }
+
+  if (field.type === 'number') {
+    // Only hasMany number fields may receive arrays.
+    return typeof value === 'object' && !(field.hasMany && Array.isArray(value))
+  }
+
+  if ((field.type === 'relationship' || field.type === 'upload') && field.hasMany) {
+    // HasMany relationships/uploads may receive arrays or one valid polymorphic value.
+    if (typeof value !== 'object' || Array.isArray(value)) {
+      return false
+    }
+
+    const relationshipValue = value as Record<PropertyKey, unknown>
+    const valuePrototype = Object.getPrototypeOf(value)
+    const isSinglePolymorphicRelationshipValue =
+      Array.isArray(field.relationTo) &&
+      (valuePrototype === null || valuePrototype === Object.prototype) &&
+      Object.hasOwn(relationshipValue, 'relationTo') &&
+      Object.hasOwn(relationshipValue, 'value') &&
+      Reflect.ownKeys(relationshipValue).length === 2 &&
+      typeof relationshipValue.relationTo === 'string' &&
+      field.relationTo.includes(relationshipValue.relationTo) &&
+      (typeof relationshipValue.value === 'string' || typeof relationshipValue.value === 'number')
+
+    return !isSinglePolymorphicRelationshipValue
+  }
+
+  return false
 }

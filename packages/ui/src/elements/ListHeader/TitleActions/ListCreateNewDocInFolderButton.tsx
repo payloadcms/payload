@@ -2,15 +2,12 @@
 
 import type { ClientCollectionConfig, CollectionSlug } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { useConfig } from '../../../providers/Config/index.js'
-import { useFolder } from '../../../providers/Folders/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
-import { DocumentDrawer, useDocumentDrawer } from '../../DocumentDrawer/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
 
 const baseClass = 'create-new-doc-in-folder'
@@ -20,9 +17,7 @@ export function ListCreateNewDocInFolderButton({
   buttonSize = 'small',
   buttonStyle = 'pill',
   collectionSlugs,
-  folderAssignedCollections,
-  onCreateSuccess,
-  slugPrefix,
+  onRequestCreate,
 }: {
   buttonLabel: string
   buttonSize?: 'large' | 'medium' | 'small' | 'xsmall'
@@ -37,23 +32,10 @@ export function ListCreateNewDocInFolderButton({
     | 'tab'
     | 'transparent'
   collectionSlugs: CollectionSlug[]
-  folderAssignedCollections: CollectionSlug[]
-  onCreateSuccess: (args: {
-    collectionSlug: CollectionSlug
-    doc: Record<string, unknown>
-  }) => Promise<void> | void
-  slugPrefix: string
+  onRequestCreate: (collectionSlug: CollectionSlug) => void
 }) {
-  const newDocInFolderDrawerSlug = `${slugPrefix}-new-doc-in-folder-drawer`
   const { i18n } = useTranslation()
-  const { closeModal, openModal } = useModal()
   const { config } = useConfig()
-  const { folderCollectionConfig, folderCollectionSlug, folderFieldName, folderID } = useFolder()
-  const [FolderDocumentDrawer, , { closeDrawer: closeFolderDrawer, openDrawer: openFolderDrawer }] =
-    useDocumentDrawer({
-      collectionSlug: folderCollectionSlug,
-    })
-  const [createCollectionSlug, setCreateCollectionSlug] = React.useState<string | undefined>()
   const [enabledCollections] = React.useState<ClientCollectionConfig[]>(() =>
     collectionSlugs.reduce((acc, collectionSlug) => {
       const collectionConfig = config.collections.find(({ slug }) => slug === collectionSlug)
@@ -76,14 +58,7 @@ export function ListCreateNewDocInFolderButton({
           buttonStyle={buttonStyle}
           className={`${baseClass}__button`}
           el="div"
-          onClick={() => {
-            if (enabledCollections[0].slug === folderCollectionConfig.slug) {
-              openFolderDrawer()
-            } else {
-              setCreateCollectionSlug(enabledCollections[0].slug)
-              openModal(newDocInFolderDrawerSlug)
-            }
-          }}
+          onClick={() => onRequestCreate(enabledCollections[0].slug)}
           size={buttonSize}
         >
           {buttonLabel}
@@ -107,60 +82,13 @@ export function ListCreateNewDocInFolderButton({
           <PopupList.ButtonGroup>
             {enabledCollections.map((collection, index) => {
               return (
-                <PopupList.Button
-                  key={index}
-                  onClick={() => {
-                    if (collection.slug === folderCollectionConfig.slug) {
-                      openFolderDrawer()
-                    } else {
-                      setCreateCollectionSlug(collection.slug)
-                      openModal(newDocInFolderDrawerSlug)
-                    }
-                  }}
-                >
+                <PopupList.Button key={index} onClick={() => onRequestCreate(collection.slug)}>
                   {getTranslation(collection.labels.singular, i18n)}
                 </PopupList.Button>
               )
             })}
           </PopupList.ButtonGroup>
         </Popup>
-      )}
-
-      {createCollectionSlug && (
-        <DocumentDrawer
-          collectionSlug={createCollectionSlug}
-          drawerSlug={newDocInFolderDrawerSlug}
-          initialData={{
-            [folderFieldName]: folderID,
-          }}
-          onSave={async ({ doc }) => {
-            await onCreateSuccess({
-              collectionSlug: createCollectionSlug,
-              doc,
-            })
-            closeModal(newDocInFolderDrawerSlug)
-          }}
-          redirectAfterCreate={false}
-        />
-      )}
-
-      {collectionSlugs.includes(folderCollectionConfig.slug) && (
-        <FolderDocumentDrawer
-          initialData={{
-            [folderFieldName]: folderID,
-            folderType: createCollectionSlug
-              ? folderAssignedCollections || [createCollectionSlug]
-              : folderAssignedCollections,
-          }}
-          onSave={async (result) => {
-            await onCreateSuccess({
-              collectionSlug: folderCollectionConfig.slug,
-              doc: result.doc,
-            })
-            closeFolderDrawer()
-          }}
-          redirectAfterCreate={false}
-        />
       )}
     </React.Fragment>
   )

@@ -104,6 +104,18 @@ export const reduceFieldOptions = ({
         ...field.tabs.reduce((tabFields, tab) => {
           if ('fields' in tab) {
             const isNamedTab = 'name' in tab && tab.name
+
+            const namedTabPermissions =
+              isNamedTab && fieldPermissions && fieldPermissions !== true
+                ? fieldPermissions[tab.name]
+                : undefined
+
+            const tabPermissions = isNamedTab
+              ? namedTabPermissions === true
+                ? true
+                : (namedTabPermissions?.fields ?? fieldPermissions)
+              : fieldPermissions
+
             return [
               ...tabFields,
               ...reduceFieldOptions({
@@ -111,7 +123,7 @@ export const reduceFieldOptions = ({
                 labelPrefix,
                 parentPath: path,
                 path: isNamedTab ? createNestedClientFieldPath(path, tab as ClientField) : path,
-                permissions: fieldPermissions,
+                permissions: tabPermissions,
               }),
             ]
           }

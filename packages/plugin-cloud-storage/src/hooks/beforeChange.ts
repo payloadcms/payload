@@ -2,12 +2,23 @@ import type { CollectionConfig, FieldHook, ImageSize } from 'payload'
 
 import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
+import { buildPrefixWithObjectKey } from '../utilities/buildPrefixWithObjectKey.js'
+
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
   disablePayloadAccessControl?: boolean
   generateFileURL?: GenerateFileURL
   size?: ImageSize
+}
+
+// The object's folder: semantic prefix + `_objectKey` segment.
+const getObjectFolder = (data: unknown, originalDoc: unknown): string => {
+  const source = (data ?? originalDoc ?? {}) as { _objectKey?: string; prefix?: string }
+  return buildPrefixWithObjectKey({
+    objectKey: source._objectKey,
+    prefix: source.prefix,
+  })
 }
 
 export const getBeforeChangeHook =
@@ -18,7 +29,7 @@ export const getBeforeChangeHook =
       ? originalDoc?.sizes?.[size.name]?.filename
       : originalDoc?.filename
     const filename = newFilename || originalFilename
-    const prefix = data?.prefix
+    const prefix = getObjectFolder(data, originalDoc)
     let url = value
 
     if (generateFileURL && filename) {

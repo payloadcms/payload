@@ -81,7 +81,7 @@ export const DefaultFilter: React.FC<Props> = ({
         <RelationshipFilter
           disabled={disabled}
           field={internalField.field}
-          filterOptions={filterOptions ?? {}}
+          filterOptions={filterOptions}
           onChange={onChange}
           operator={operator}
           value={value}
@@ -94,7 +94,7 @@ export const DefaultFilter: React.FC<Props> = ({
         <RelationshipFilter
           disabled={disabled}
           field={internalField.field}
-          filterOptions={filterOptions ?? {}}
+          filterOptions={filterOptions}
           onChange={onChange}
           operator={operator}
           value={value}

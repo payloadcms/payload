@@ -6,6 +6,8 @@ import { useConfig } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
+import { bannerStylesViewPath } from '../../shared.js'
+
 const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 const baseClass = 'after-nav-links'
@@ -67,6 +69,14 @@ export const AfterNavLinks: PayloadClientReactComponent<
             style={{ color: '#1976d2', textDecoration: 'none' }}
           >
             Button Styles
+          </Link>
+        </p>
+        <p className="nav__link" style={{ margin: 0 }}>
+          <Link
+            href={`${adminRoute}${bannerStylesViewPath}`}
+            style={{ color: '#1976d2', textDecoration: 'none' }}
+          >
+            Banner Styles
           </Link>
         </p>
         <div id="custom-css" />

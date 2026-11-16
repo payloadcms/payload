@@ -1,14 +1,15 @@
 'use client'
 
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { FolderListViewClientProps } from 'payload'
+import type { CollectionSlug, FolderListViewClientProps } from 'payload'
 
 import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { PREFERENCE_KEYS } from 'payload/shared'
+import { hasAutosaveEnabled, PREFERENCE_KEYS } from 'payload/shared'
 import React, { Fragment } from 'react'
 
+import { ControlledDocumentDrawer } from '../../elements/DocumentDrawer/ControlledDocumentDrawer.js'
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
 import { ColoredFolderIcon } from '../../elements/FolderView/ColoredFolderIcon/index.js'
 import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderActions/index.js'
@@ -24,6 +25,7 @@ import { ListCreateNewDocInFolderButton } from '../../elements/ListHeader/TitleA
 import { NoListResults } from '../../elements/NoListResults/index.js'
 import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -97,6 +99,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
   } = props
 
   const router = useRouter()
+  const { config } = useConfig()
   const { i18n, t } = useTranslation()
   const drawerDepth = useEditDepth()
   const { setStepNav } = useStepNav()
@@ -112,6 +115,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
     documents,
     dragOverlayItem,
     folderCollectionConfig,
+    folderFieldName,
     folderID,
     folderType,
     getFolderRoute,
@@ -123,6 +127,8 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
     setIsDragging,
     subfolders,
   } = useFolder()
+  const [createDrawerCollectionSlug, setCreateDrawerCollectionSlug] =
+    React.useState<CollectionSlug>()
 
   const [activeView, setActiveView] = React.useState<'grid' | 'list'>(viewPreference || 'grid')
   const [searchPlaceholder] = React.useState(() => {
@@ -156,6 +162,11 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
   const listHeaderTitle = !breadcrumbs.length
     ? t('folder:browseByFolder')
     : breadcrumbs[breadcrumbs.length - 1].name
+  const activeCreateDrawerCollectionSlug = createDrawerCollectionSlug || folderCollectionConfig.slug
+  const activeCreateDrawerCollectionConfig = config.collections.find(
+    ({ slug }) => slug === activeCreateDrawerCollectionSlug,
+  )
+  const isCreatingFolder = activeCreateDrawerCollectionSlug === folderCollectionConfig.slug
 
   const handleSetViewType = React.useCallback(
     (view: 'grid' | 'list') => {
@@ -229,6 +240,11 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
   const nonFolderCollectionSlugs = allowCreateCollectionSlugs.filter(
     (slug) => slug !== folderCollectionConfig.slug,
   )
+  const folderAssignedCollectionSlugs = Array.isArray(folderType) ? folderType : []
+
+  const handleRequestCreate = React.useCallback((collectionSlug: CollectionSlug) => {
+    setCreateDrawerCollectionSlug(collectionSlug)
+  }, [])
 
   return (
     <Fragment>
@@ -258,10 +274,8 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                       : `${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`
                   }
                   collectionSlugs={allowCreateCollectionSlugs}
-                  folderAssignedCollections={Array.isArray(folderType) ? folderType : []}
                   key="create-new-button"
-                  onCreateSuccess={clearRouteCache}
-                  slugPrefix="create-document--header-pill"
+                  onRequestCreate={handleRequestCreate}
                 />
               ),
             ].filter(Boolean)}
@@ -317,10 +331,8 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                     buttonSize="medium"
                     buttonStyle="primary"
                     collectionSlugs={[folderCollectionConfig.slug]}
-                    folderAssignedCollections={Array.isArray(folderType) ? folderType : []}
                     key="create-folder"
-                    onCreateSuccess={clearRouteCache}
-                    slugPrefix="create-folder--no-results"
+                    onRequestCreate={handleRequestCreate}
                   />
                 ),
                 folderID && nonFolderCollectionSlugs.length > 0 && (
@@ -329,10 +341,8 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                     buttonSize="medium"
                     buttonStyle="primary"
                     collectionSlugs={nonFolderCollectionSlugs}
-                    folderAssignedCollections={Array.isArray(folderType) ? folderType : []}
                     key="create-document"
-                    onCreateSuccess={clearRouteCache}
-                    slugPrefix="create-document--no-results"
+                    onRequestCreate={handleRequestCreate}
                   />
                 ),
               ].filter(Boolean)}
@@ -351,6 +361,31 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
       {selectedItemKeys.size > 0 && dragOverlayItem && (
         <DragOverlaySelection item={dragOverlayItem} selectedCount={selectedItemKeys.size} />
       )}
+      <ControlledDocumentDrawer
+        collectionSlug={activeCreateDrawerCollectionSlug}
+        initialData={{
+          [folderFieldName]: folderID,
+          ...(isCreatingFolder ? { folderType: folderAssignedCollectionSlugs } : {}),
+        }}
+        isOpen={Boolean(createDrawerCollectionSlug)}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setCreateDrawerCollectionSlug(undefined)
+          }
+        }}
+        onSave={({ operation }) => {
+          const isAutosaveCollection = hasAutosaveEnabled(activeCreateDrawerCollectionConfig)
+
+          if (isAutosaveCollection || operation === 'create') {
+            clearRouteCache()
+          }
+
+          if (operation === 'create' && !isAutosaveCollection) {
+            setCreateDrawerCollectionSlug(undefined)
+          }
+        }}
+        redirectAfterCreate={false}
+      />
     </Fragment>
   )
 }

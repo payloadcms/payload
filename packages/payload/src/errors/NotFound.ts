@@ -8,5 +8,6 @@ import { APIError } from './APIError.js'
 export class NotFound extends APIError {
   constructor(t?: TFunction) {
     super(t ? t('general:notFound') : en.translations.general.notFound, httpStatus.NOT_FOUND)
+    this.name = 'NotFound'
   }
 }

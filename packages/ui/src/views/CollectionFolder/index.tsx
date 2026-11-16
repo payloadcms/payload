@@ -1,15 +1,16 @@
 'use client'
 
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { FolderListViewClientProps } from 'payload'
+import type { CollectionSlug, FolderListViewClientProps } from 'payload'
 
 import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { DefaultListViewTabs } from '../../elements/DefaultListViewTabs/index.js'
+import { ControlledDocumentDrawer } from '../../elements/DocumentDrawer/ControlledDocumentDrawer.js'
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
 import { ColoredFolderIcon } from '../../elements/FolderView/ColoredFolderIcon/index.js'
 import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderActions/index.js'
@@ -110,6 +111,8 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
     dragOverlayItem,
     folderCollectionConfig,
     folderCollectionSlug,
+    folderFieldName,
+    folderID,
     FolderResultsComponent,
     folderType,
     getSelectedItems,
@@ -133,6 +136,8 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
+  const [createDrawerCollectionSlug, setCreateDrawerCollectionSlug] =
+    React.useState<CollectionSlug>()
 
   const onDragEnd = React.useCallback(
     async (event: DragEndEvent) => {
@@ -146,9 +151,9 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
             itemsToMove: getSelectedItems(),
             toFolderID: event.over.data.current.id,
           })
-        } catch (error) {
+        } catch (_error) {
           // eslint-disable-next-line no-console
-          console.error('Error moving items:', error)
+          console.error('Error moving items:', _error)
         }
 
         clearRouteCache()
@@ -166,6 +171,11 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
     },
     [collectionSlug, setPreference, clearRouteCache],
   )
+  const activeCreateDrawerCollectionSlug = createDrawerCollectionSlug || folderCollectionSlug
+  const activeCreateDrawerCollectionConfig = config.collections.find(
+    ({ slug }) => slug === activeCreateDrawerCollectionSlug,
+  )
+  const isCreatingFolder = activeCreateDrawerCollectionSlug === folderCollectionSlug
 
   React.useEffect(() => {
     if (!drawerDepth) {
@@ -253,6 +263,11 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
   ])
 
   const totalDocsAndSubfolders = documents.length + subfolders.length
+  const folderAssignedCollectionSlugs = Array.isArray(folderType) ? folderType : [collectionSlug]
+
+  const handleRequestCreate = React.useCallback((requestedCollectionSlug: CollectionSlug) => {
+    setCreateDrawerCollectionSlug(requestedCollectionSlug)
+  }, [])
 
   return (
     <Fragment>
@@ -291,12 +306,8 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                       : `${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`
                   }
                   collectionSlugs={allowCreateCollectionSlugs}
-                  folderAssignedCollections={
-                    Array.isArray(folderType) ? folderType : [collectionSlug]
-                  }
                   key="create-new-button"
-                  onCreateSuccess={clearRouteCache}
-                  slugPrefix="create-document--header-pill"
+                  onRequestCreate={handleRequestCreate}
                 />
               ),
               <ListBulkUploadButton
@@ -334,12 +345,8 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                     buttonSize="medium"
                     buttonStyle="primary"
                     collectionSlugs={[folderCollectionConfig.slug]}
-                    folderAssignedCollections={
-                      Array.isArray(folderType) ? folderType : [collectionSlug]
-                    }
                     key="create-folder"
-                    onCreateSuccess={clearRouteCache}
-                    slugPrefix="create-folder--no-results"
+                    onRequestCreate={handleRequestCreate}
                   />
                 ),
                 allowCreateCollectionSlugs.includes(collectionSlug) && (
@@ -348,12 +355,8 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                     buttonSize="medium"
                     buttonStyle="primary"
                     collectionSlugs={[collectionSlug]}
-                    folderAssignedCollections={
-                      Array.isArray(folderType) ? folderType : [collectionSlug]
-                    }
                     key="create-document"
-                    onCreateSuccess={clearRouteCache}
-                    slugPrefix="create-document--no-results"
+                    onRequestCreate={handleRequestCreate}
                   />
                 ),
               ].filter(Boolean)}
@@ -372,6 +375,31 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
       {selectedItemKeys.size > 0 && dragOverlayItem && (
         <DragOverlaySelection item={dragOverlayItem} selectedCount={selectedItemKeys.size} />
       )}
+      <ControlledDocumentDrawer
+        collectionSlug={activeCreateDrawerCollectionSlug}
+        initialData={{
+          [folderFieldName]: folderID,
+          ...(isCreatingFolder ? { folderType: folderAssignedCollectionSlugs } : {}),
+        }}
+        isOpen={Boolean(createDrawerCollectionSlug)}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setCreateDrawerCollectionSlug(undefined)
+          }
+        }}
+        onSave={({ operation }) => {
+          const isAutosaveCollection = hasAutosaveEnabled(activeCreateDrawerCollectionConfig)
+
+          if (isAutosaveCollection || operation === 'create') {
+            clearRouteCache()
+          }
+
+          if (operation === 'create' && !isAutosaveCollection) {
+            setCreateDrawerCollectionSlug(undefined)
+          }
+        }}
+        redirectAfterCreate={false}
+      />
     </Fragment>
   )
 }

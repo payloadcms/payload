@@ -1,22 +1,23 @@
 import type { BlobDownloadResponseParsed, ContainerClient } from '@azure/storage-blob'
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 import type { Readable } from 'stream'
 
 import { RestError } from '@azure/storage-blob'
+import { getStorageFilePath } from '@payloadcms/plugin-cloud-storage/utilities'
 import {
-  getFilePrefix as getDocPrefix,
-  getFileKey,
-} from '@payloadcms/plugin-cloud-storage/utilities'
-import { getRangeRequestInfo } from 'payload/internal'
+  getRangeRequestInfo,
+  isXmlMimeType,
+  UPLOAD_CONTENT_SECURITY_POLICY,
+} from 'payload/internal'
 
 interface GetFileArgs {
   client: ContainerClient
   clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
   req: PayloadRequest
   useCompositePrefixes?: boolean
 }
@@ -56,9 +57,9 @@ export async function getFile({
   clientUploadContext,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
   req,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
@@ -73,22 +74,17 @@ export async function getFile({
   }
 
   try {
-    const docPrefix = await getDocPrefix({
+    const filePath = await getStorageFilePath({
       clientUploadContext,
       collection,
-      filename,
-      prefixQueryParam,
-      req,
-    })
-
-    const { fileKey } = getFileKey({
       collectionPrefix,
-      docPrefix,
+      doc,
       filename,
+      req,
       useCompositePrefixes,
     })
 
-    const blockBlobClient = client.getBlockBlobClient(fileKey)
+    const blockBlobClient = client.getBlockBlobClient(filePath)
 
     // Get file size for range validation
     const properties = await blockBlobClient.getProperties()
@@ -132,9 +128,9 @@ export async function getFile({
       headers.append('ETag', String(properties.etag))
     }
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (properties.contentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    // Add Content-Security-Policy header for XML-family files
+    if (isXmlMimeType(properties.contentType)) {
+      headers.append('Content-Security-Policy', UPLOAD_CONTENT_SECURITY_POLICY)
     }
 
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')

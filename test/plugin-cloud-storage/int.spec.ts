@@ -1,5 +1,7 @@
+import type { R2StorageOptions } from '@payloadcms/storage-r2'
 import type { Payload } from 'payload'
 import type { SuiteAPI } from 'vitest'
+import type { PlatformProxy } from 'wrangler'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
@@ -9,11 +11,14 @@ import { APIError } from 'payload'
 import { sanitizeFilename } from 'payload/shared'
 import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Config } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { recordedCleanupTargets } from './buildPluginCloudStorageIntConfig.js'
+import { r2TestStorage } from './r2.js'
 import {
   mediaSlug,
   mediaWithCustomURLSlug,
@@ -268,10 +273,11 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
   describe('integration (non-composite prefixes)', () => {
     let payload: Payload
+    let restClient: NextRESTClient
     let TEST_BUCKET: string
 
     beforeAll(async () => {
-      ;({ payload } = await initPayloadInt(dirname, undefined, true, 'config.ts'))
+      ;({ payload, restClient } = await initPayloadInt(dirname, undefined, true, 'config.ts'))
       TEST_BUCKET = process.env.S3_BUCKET!
     })
 
@@ -558,6 +564,130 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           }
         }
         createdIDs.length = 0
+        recordedCleanupTargets.length = 0
+      })
+
+      it('should preserve cleanup coordinates after a metadata-only update', async () => {
+        await restClient.login({ slug: 'users' })
+
+        const upload = await payload.create({
+          collection: testMetadataSlug,
+          data: {
+            testNote: 'Cleanup ownership',
+          },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        createdIDs.push(upload.id)
+
+        const originalFilenames = [
+          upload.filename,
+          ...Object.values(upload.sizes || {}).map((size) => size?.filename),
+        ].filter((value): value is string => typeof value === 'string')
+
+        const updateResponse = await restClient.PATCH(`/${testMetadataSlug}/${upload.id}`, {
+          body: JSON.stringify({
+            filename: 'submitted.png',
+            prefix: 'submitted-prefix',
+            sizes: {
+              thumbnail: {
+                filename: 'submitted-thumbnail.png',
+              },
+            },
+          }),
+        })
+
+        expect(updateResponse.status).toBe(200)
+
+        await payload.delete({ id: upload.id, collection: testMetadataSlug })
+        createdIDs.length = 0
+
+        expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(originalFilenames)
+        expect(new Set(recordedCleanupTargets.map(({ prefix }) => prefix)).size).toBe(1)
+        expect(recordedCleanupTargets[0]?.prefix).toBe('test-metadata')
+      })
+
+      it('should preserve cleanup metadata across a metadata override attempt and replacement', async () => {
+        await restClient.login({ slug: 'users' })
+
+        const upload = await payload.create({
+          collection: testMetadataSlug,
+          data: {
+            testNote: 'Replacement cleanup ownership',
+          },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        createdIDs.push(upload.id)
+
+        const originalFilenames = [
+          upload.filename,
+          ...Object.values(upload.sizes || {}).map((size) => size?.filename),
+        ].filter((value): value is string => typeof value === 'string')
+
+        const metadataUpdateResponse = await restClient.PATCH(`/${testMetadataSlug}/${upload.id}`, {
+          body: JSON.stringify({
+            filename: 'submitted.png',
+            prefix: 'submitted-prefix',
+            sizes: {
+              thumbnail: {
+                filename: 'submitted-thumbnail.png',
+              },
+            },
+          }),
+        })
+
+        expect(metadataUpdateResponse.status).toBe(200)
+
+        const preservedUpload = await payload.findByID({
+          id: upload.id,
+          collection: testMetadataSlug,
+        })
+
+        expect(preservedUpload.filename).toBe(upload.filename)
+        expect(preservedUpload.prefix).toBe('test-metadata')
+        expect(preservedUpload.sizes).toEqual(upload.sizes)
+
+        recordedCleanupTargets.length = 0
+
+        const formData = new FormData()
+        formData.append('_payload', JSON.stringify({ testNote: 'Replacement uploaded' }))
+        formData.append(
+          'file',
+          new Blob([fs.readFileSync(path.resolve(dirname, '../uploads/small.png'))], {
+            type: 'image/png',
+          }),
+          'replacement.png',
+        )
+
+        const updateResponse = await restClient.PATCH(`/${testMetadataSlug}/${upload.id}`, {
+          body: formData,
+        })
+
+        expect(updateResponse.status).toBe(200)
+        expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(originalFilenames)
+        expect(new Set(recordedCleanupTargets.map(({ prefix }) => prefix)).size).toBe(1)
+        expect(recordedCleanupTargets[0]?.prefix).toBe('test-metadata')
+
+        const replacement = await payload.findByID({
+          id: upload.id,
+          collection: testMetadataSlug,
+        })
+        const replacementFilenames = [
+          replacement.filename,
+          ...Object.values(replacement.sizes || {}).map((size) => size?.filename),
+        ].filter((value): value is string => typeof value === 'string')
+
+        expect(replacement.filename).not.toBe('submitted.png')
+        expect(replacementFilenames).not.toContain('submitted-thumbnail.png')
+
+        recordedCleanupTargets.length = 0
+        await payload.delete({ id: upload.id, collection: testMetadataSlug })
+        createdIDs.length = 0
+
+        expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(replacementFilenames)
+        expect(new Set(recordedCleanupTargets.map(({ prefix }) => prefix)).size).toBe(1)
+        expect(recordedCleanupTargets[0]?.prefix).toBe('test-metadata')
       })
 
       it('should automatically persist metadata returned by custom adapters', async () => {
@@ -798,7 +928,112 @@ describe('@payloadcms/plugin-cloud-storage', () => {
     })
 
     describe('R2', () => {
-      it.todo('can upload')
+      const endpoint = '/storage-r2-multi-part-upload'
+      const query = { collection: mediaSlug, fileName: 'reference.png', fileType: 'image/png' }
+      const uploadURL = `${endpoint}?${new URLSearchParams(query)}` as const
+      const uploads: { key: string; uploadId: string }[] = []
+      let r2Environment: PlatformProxy<{ R2: R2StorageOptions['bucket'] }>
+
+      beforeAll(async () => {
+        const { getPlatformProxy } = await import('wrangler')
+        r2Environment = await getPlatformProxy<{ R2: R2StorageOptions['bucket'] }>({
+          configPath: path.resolve(dirname, '../storage-r2/wrangler.jsonc'),
+          persist: false,
+        })
+        r2TestStorage.bucket = r2Environment.env.R2
+      })
+
+      beforeEach(async () => {
+        await restClient.login({ slug: 'users' })
+      })
+
+      afterEach(async () => {
+        const { env } = r2Environment
+
+        for (const { key, uploadId } of uploads) {
+          await env.R2.resumeMultipartUpload(key, uploadId).abort()
+          await env.R2.delete(key)
+        }
+        uploads.length = 0
+      })
+
+      afterAll(async () => {
+        await r2Environment?.dispose()
+        delete r2TestStorage.bucket
+      })
+
+      for (const [path, accessName] of [
+        [endpoint, 'default'],
+        [`${endpoint}-custom`, 'custom'],
+      ] as const) {
+        it(`should reject anonymous R2 uploads with ${accessName} access even when create access allows them`, async () => {
+          const response = await restClient.POST(`${path}?${new URLSearchParams(query)}`, {
+            auth: false,
+            headers: { 'x-public-create': 'true' },
+          })
+
+          expect(response.status).toBe(403)
+          expect((await response.json()).uploadId).toBeUndefined()
+        })
+
+        it(`should reject R2 uploads with ${accessName} access without create or update access`, async () => {
+          const response = await restClient.POST(`${path}?${new URLSearchParams(query)}`, {
+            headers: { 'x-disallow-create': 'true', 'x-disallow-update': 'true' },
+          })
+
+          expect(response.status).toBe(403)
+          expect((await response.json()).uploadId).toBeUndefined()
+        })
+      }
+
+      for (const [permission, deniedHeader] of [
+        ['create', 'x-disallow-update'],
+        ['update', 'x-disallow-create'],
+      ] as const) {
+        it(`should upload R2 file bytes with only ${permission} access`, async () => {
+          const { env } = r2Environment
+          const file = fs.readFileSync(path.resolve(dirname, '../uploads/image.png'))
+          const headers = { [deniedHeader]: 'true' }
+          const started = await restClient.POST(uploadURL, { headers })
+
+          expect(started.status).toBe(200)
+
+          const upload = await started.json()
+          uploads.push(upload)
+
+          const multipartQuery = {
+            ...query,
+            multipartId: upload.uploadId,
+            multipartKey: upload.key,
+            signedReceipt: upload.clientUploadContext.signedReceipt,
+          }
+          const multipartURL = `${endpoint}?${new URLSearchParams(multipartQuery)}` as const
+          const part = await restClient.POST(`${multipartURL}&multipartNumber=1`, {
+            body: file,
+            headers: { ...headers, 'Content-Type': 'application/octet-stream' },
+          })
+
+          expect(part.status).toBe(200)
+
+          const completed = await restClient.POST(multipartURL, {
+            body: JSON.stringify([await part.json()]),
+            headers,
+          })
+
+          expect(completed.status).toBe(200)
+          const stored = await env.R2.get(upload.key)
+
+          expect(Buffer.from(await stored!.arrayBuffer())).toEqual(file)
+        })
+      }
+
+      it('should still enforce custom R2 client upload access', async () => {
+        const response = await restClient.POST(`${endpoint}-custom?${new URLSearchParams(query)}`, {
+          headers: { 'x-disallow-access': 'true' },
+        })
+
+        expect(response.status).toBe(403)
+      })
     })
   })
 })

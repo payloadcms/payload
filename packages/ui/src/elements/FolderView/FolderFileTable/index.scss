@@ -7,5 +7,19 @@
       grid-template-columns: auto 1fr;
       gap: calc(var(--base) / 2);
     }
+
+    &__thumbnail {
+      align-self: center;
+      width: var(--base);
+      height: var(--base);
+      overflow: hidden;
+
+      img,
+      svg {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
   }
 }

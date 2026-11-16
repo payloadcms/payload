@@ -1,6 +1,7 @@
 import type { ArrayField, Payload, RelationshipField } from 'payload'
 
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
@@ -389,6 +390,53 @@ describe('@payloadcms/plugin-nested-docs', () => {
       expect(draft._status).toBe('draft')
       expect(draft.title).toBe('Breadcrumb Child Draft')
       expect(draft.breadcrumbs?.[0]?.url).toBe('/breadcrumb-parent-updated')
+    })
+  })
+
+  describe('scheduled publish', () => {
+    it('should allow scheduled publish on a collection with a nested-docs breadcrumbs field', async () => {
+      const draft = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Scheduled Page',
+          slug: 'scheduled-page',
+        },
+        draft: true,
+      })
+
+      expect(draft._status).toBe('draft')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        input: {
+          doc: {
+            relationTo: 'pages',
+            // The real schedule-publish UI always sends this as a string
+            // (it comes from client-side form/relationship-picker state),
+            // regardless of the collection's actual ID type. Cast explicitly
+            // here to reproduce that instead of relying on the incidental
+            // JS type of `draft.id` in a Local API call.
+            value: String(draft.id),
+          },
+        },
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+      })
+
+      await wait(4000)
+
+      await payload.jobs.run()
+
+      const retrieved = await payload.findByID({
+        id: draft.id,
+        collection: 'pages',
+        draft: false,
+      })
+
+      expect(retrieved._status).toBe('published')
+
+      await payload.delete({ collection: 'pages', id: draft.id })
     })
   })
 

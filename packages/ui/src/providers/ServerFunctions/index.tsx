@@ -26,6 +26,8 @@ import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
 import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
 import type { getFolderResultsComponentAndDataHandler } from '../../utilities/getFolderResultsComponentAndData.js'
 import type {
+  getUpcomingScheduledPublishHandler,
+  GetUpcomingScheduledPublishHandlerArgs,
   schedulePublishHandler,
   SchedulePublishHandlerArgs,
 } from '../../utilities/schedulePublishHandler.js'
@@ -41,6 +43,12 @@ type SchedulePublishClient = (
     signal?: AbortSignal
   } & Omit<SchedulePublishHandlerArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof schedulePublishHandler>
+
+type GetUpcomingScheduledPublishClient = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<GetUpcomingScheduledPublishHandlerArgs, 'clientConfig' | 'req'>,
+) => ReturnType<typeof getUpcomingScheduledPublishHandler>
 
 type GetTableStateClient = (
   args: {
@@ -119,6 +127,7 @@ export type ServerFunctionsContextType = {
   getFolderResultsComponentAndData: GetFolderResultsComponentAndDataClient
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
+  getUpcomingScheduledPublish: GetUpcomingScheduledPublishClient
   renderDocument: RenderDocumentServerFunctionHookFn
   schedulePublish: SchedulePublishClient
   serverFunction: ServerFunctionClient
@@ -180,6 +189,24 @@ export const ServerFunctionsProvider: React.FC<{
       }
 
       return { error }
+    },
+    [serverFunction],
+  )
+
+  const getUpcomingScheduledPublish = useCallback<GetUpcomingScheduledPublishClient>(
+    async (args) => {
+      const { signal: remoteSignal, ...rest } = args
+
+      if (remoteSignal?.aborted) {
+        return []
+      }
+
+      const result = (await serverFunction({
+        name: 'get-upcoming-scheduled-publish',
+        args: rest,
+      })) as Awaited<ReturnType<typeof getUpcomingScheduledPublishHandler>>
+
+      return remoteSignal?.aborted ? [] : result
     },
     [serverFunction],
   )
@@ -331,6 +358,7 @@ export const ServerFunctionsProvider: React.FC<{
         getFolderResultsComponentAndData,
         getFormState,
         getTableState,
+        getUpcomingScheduledPublish,
         renderDocument,
         schedulePublish,
         serverFunction,

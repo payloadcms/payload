@@ -174,6 +174,8 @@ export type AuthStrategyFunctionArgs = {
   headers: Request['headers']
   isGraphQL?: boolean
   payload: Payload
+  /** The request that initiated authentication, when available. */
+  req?: PayloadRequest
   /**
    * The AuthStrategy name property from the payload config.
    */
@@ -250,6 +252,12 @@ export interface IncomingAuthType {
     expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
+    /**
+     * The minimum number of milliseconds between password reset emails for the same user.
+     * @default 15000
+     * Set to 0 to disable.
+     */
+    minRequestInterval?: number
   }
   /**
    * Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than maxLoginAttempts allows for.
@@ -285,7 +293,15 @@ export interface IncomingAuthType {
    * @default false
    * @link https://payloadcms.com/docs/authentication/api-keys
    */
-  useAPIKey?: boolean
+  useAPIKey?:
+    | {
+        /**
+         * Allows administrators to reveal stored API keys from the Admin Panel.
+         * @default false
+         */
+        reveal?: boolean
+      }
+    | boolean
 
   /**
    * Use sessions for authentication. Enabled by default.
@@ -316,6 +332,7 @@ export interface Auth
     expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
+    minRequestInterval?: number
   }
   loginWithUsername: false | LoginWithUsernameOptions
   verify?: boolean | VerifyConfig

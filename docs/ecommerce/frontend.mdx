@@ -167,8 +167,8 @@ The `usePayments` hook is used to manage the checkout process. It provides metho
 
 | Property                | Type                       | Description                                                                                   |
 | ----------------------- | -------------------------- | --------------------------------------------------------------------------------------------- |
-| `confirmOrder`          | `(args) => Promise<Order>` | Method to confirm an order by ID. [More](#confirmOrder)                                       |
-| `initiatePayment`       | `(args) => Promise<void>`  | Method to initiate a payment for an order. [More](#initiatePayment)                           |
+| `confirmOrder`          | `(args) => Promise<Order>` | Method to confirm an order by ID. [More](#confirmorder)                                       |
+| `initiatePayment`       | `(args) => Promise<void>`  | Method to initiate a payment for an order. [More](#initiatepayment)                           |
 | `isLoading`             | `boolean`                  | Boolean indicating if any async operation is in progress (e.g., initiating/confirming order). |
 | `paymentMethods`        | `PaymentMethod[]`          | The list of available payment methods.                                                        |
 | `selectedPaymentMethod` | `PaymentMethod`            | The currently selected payment method, if any.                                                |

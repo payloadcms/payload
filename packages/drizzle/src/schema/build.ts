@@ -220,6 +220,17 @@ export const buildTable = ({
       unique: true,
     }
 
+    // Dedicated index for parent-only lookups/deletes. The composite unique index above leads
+    // with `_locale`, so a filter on `_parent_id` alone can't seek it (B-tree needs a
+    // leftmost-prefix match) and would otherwise fall back to a full scan.
+    localesIndexes._parentID = {
+      name: buildIndexName({
+        name: `${localeTableName}_parent_id`,
+        adapter,
+      }),
+      on: '_parentID',
+    }
+
     localesTable = {
       name: localeTableName,
       columns: localesColumns,

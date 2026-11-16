@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     posts: Post;
     tabs: Tab;
+    'restricted-tabs': RestrictedTab;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,6 +80,7 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     tabs: TabsSelect<false> | TabsSelect<true>;
+    'restricted-tabs': RestrictedTabsSelect<false> | RestrictedTabsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -187,6 +189,21 @@ export interface Tab {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-tabs".
+ */
+export interface RestrictedTab {
+  id: string;
+  title?: string | null;
+  noUpdate?: string | null;
+  namedTab?: {
+    namedTabText?: string | null;
+    namedTabNoUpdate?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -241,6 +258,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tabs';
         value: string | Tab;
+      } | null)
+    | ({
+        relationTo: 'restricted-tabs';
+        value: string | RestrictedTab;
       } | null)
     | ({
         relationTo: 'users';
@@ -357,6 +378,22 @@ export interface TabsSelect<T extends boolean = true> {
     | T
     | {
         rowText?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-tabs_select".
+ */
+export interface RestrictedTabsSelect<T extends boolean = true> {
+  title?: T;
+  noUpdate?: T;
+  namedTab?:
+    | T
+    | {
+        namedTabText?: T;
+        namedTabNoUpdate?: T;
       };
   updatedAt?: T;
   createdAt?: T;

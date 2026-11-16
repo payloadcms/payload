@@ -63,7 +63,9 @@ const getApiKey = async (
   globalFind: boolean = false,
   globalUpdate: boolean = false,
 ): Promise<string> => {
-  const doc = await payload.create({
+  const apiKey = randomUUID()
+
+  await payload.create({
     collection: 'payload-mcp-api-keys',
     data: {
       enableAPIKey: true,
@@ -73,12 +75,12 @@ const getApiKey = async (
       ...(globalFind || globalUpdate
         ? { siteSettings: { find: globalFind, update: globalUpdate } }
         : {}),
-      apiKey: randomUUID(),
+      apiKey,
       user: userId,
     },
   })
 
-  return doc.apiKey as string
+  return apiKey
 }
 
 describe('@payloadcms/plugin-mcp', () => {
@@ -228,8 +230,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(doc.products?.delete).toBe(false)
       expect(doc.media?.find).toBe(false)
       expect(doc.media?.update).toBe(false)
-      expect(typeof doc.apiKey).toBe('string')
-      expect(doc.apiKey).toHaveLength(36)
+      expect(doc.apiKey).toBeUndefined()
       expect(doc.override).toBe('This field added by overrideApiKeyCollection')
     })
 
@@ -361,6 +362,19 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.tools[0].inputSchema.properties.page.description).toContain(
         'Page number for pagination (default: 1)',
       )
+      expect(json.result.tools[0].inputSchema.properties.pagination).toBeDefined()
+      expect(json.result.tools[0].inputSchema.properties.pagination.type).toBe('boolean')
+      expect(json.result.tools[0].inputSchema.properties.populate).toBeDefined()
+      expect(json.result.tools[0].inputSchema.properties.populate.type).toBe('object')
+      expect(json.result.tools[0].inputSchema.properties.populate.description).toContain(
+        'control which fields to include from populated relationship or upload documents',
+      )
+      expect(json.result.tools[0].inputSchema.properties.joins).toBeDefined()
+      expect(json.result.tools[0].inputSchema.properties.joins.description).toContain(
+        'configure join field queries',
+      )
+      expect(json.result.tools[0].inputSchema.properties.trash).toBeDefined()
+      expect(json.result.tools[0].inputSchema.properties.trash.type).toBe('boolean')
       expect(json.result.tools[0].inputSchema.properties.sort).toBeDefined()
       expect(json.result.tools[0].inputSchema.properties.sort.type).toBe('string')
       expect(json.result.tools[0].inputSchema.properties.sort.description).toContain(
@@ -419,9 +433,9 @@ describe('@payloadcms/plugin-mcp', () => {
         'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
       )
       expect(json.result.tools[1].inputSchema.properties.select).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.select.type).toBe('string')
+      expect(json.result.tools[1].inputSchema.properties.select.type).toBe('object')
       expect(json.result.tools[1].inputSchema.properties.select.description).toContain(
-        'Optional: define exactly which fields you\'d like to create (JSON), e.g., \'{"title": "My Post"}\'',
+        "Optional: define exactly which fields you'd like to return in the response",
       )
 
       expect(json.result.tools[2].inputSchema).toBeDefined()
@@ -475,9 +489,9 @@ describe('@payloadcms/plugin-mcp', () => {
         'Optional JSON string for where clause filtering (e.g., \'{"title": {"contains": "test"}}\')',
       )
       expect(json.result.tools[2].inputSchema.properties.select).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.select.type).toBe('string')
+      expect(json.result.tools[2].inputSchema.properties.select.type).toBe('object')
       expect(json.result.tools[2].inputSchema.properties.select.description).toContain(
-        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        "Optional: define exactly which fields you'd like to return in the response",
       )
 
       expect(json.result.tools[3].inputSchema).toBeDefined()
@@ -615,18 +629,23 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(findGlobalTool).toBeDefined()
       expect(findGlobalTool.description).toContain('Payload global')
       expect(findGlobalTool.inputSchema.properties.select).toBeDefined()
-      expect(findGlobalTool.inputSchema.properties.select.type).toBe('string')
+      expect(findGlobalTool.inputSchema.properties.select.type).toBe('object')
       expect(findGlobalTool.inputSchema.properties.select.description).toContain(
-        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        "Optional: define exactly which fields you'd like to return in the response",
+      )
+      expect(findGlobalTool.inputSchema.properties.populate).toBeDefined()
+      expect(findGlobalTool.inputSchema.properties.populate.type).toBe('object')
+      expect(findGlobalTool.inputSchema.properties.populate.description).toContain(
+        'control which fields to include from populated relationship or upload documents',
       )
 
       const updateGlobalTool = json.result.tools.find((t: any) => t.name === 'updateSiteSettings')
       expect(updateGlobalTool).toBeDefined()
       expect(updateGlobalTool.description).toContain('Payload global')
       expect(updateGlobalTool.inputSchema.properties.select).toBeDefined()
-      expect(updateGlobalTool.inputSchema.properties.select.type).toBe('string')
+      expect(updateGlobalTool.inputSchema.properties.select.type).toBe('object')
       expect(updateGlobalTool.inputSchema.properties.select.description).toContain(
-        'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"siteName": "My Site"}\'',
+        "Optional: define exactly which fields you'd like to return in the response",
       )
     })
 
@@ -651,9 +670,9 @@ describe('@payloadcms/plugin-mcp', () => {
       const updateToolSchema = json.result.tools.find((t: any) => t.name === 'updatePosts')
       expect(updateToolSchema).toBeDefined()
       expect(updateToolSchema.inputSchema.properties.select).toBeDefined()
-      expect(updateToolSchema.inputSchema.properties.select.type).toBe('string')
+      expect(updateToolSchema.inputSchema.properties.select.type).toBe('object')
       expect(updateToolSchema.inputSchema.properties.select.description).toContain(
-        'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"title": "My Post"}\'',
+        "Optional: define exactly which fields you'd like to return in the response",
       )
     })
   })
@@ -898,7 +917,7 @@ describe('@payloadcms/plugin-mcp', () => {
             name: 'createPosts',
             arguments: {
               content: 'Content should be omitted',
-              select: '{"title": true}',
+              select: { title: true },
               title: 'Select Create Post',
             },
           },
@@ -984,7 +1003,7 @@ describe('@payloadcms/plugin-mcp', () => {
             arguments: {
               limit: 1,
               page: 1,
-              select: '{"title": true}',
+              select: { title: true },
               where: '{"title": {"contains": "Select Test Post"}}',
             },
           },
@@ -1005,6 +1024,117 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(responseText).toContain('Collection: "posts"')
       expect(responseText).toContain('"title":"Select Test Post (MCP Hook Override)"')
       expect(responseText).not.toContain('"content": "Content that should be omitted"')
+    })
+
+    it('should pass populate, joins, trash, and pagination to findPosts list queries', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          author: userId,
+          content: 'Find options pass-through content',
+          title: 'Find Options Pass Through',
+        },
+      })
+      const apiKey = await getApiKey()
+
+      const findSpy = vi.spyOn(payload, 'find')
+
+      try {
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'findPosts',
+              arguments: {
+                joins: false,
+                limit: 1,
+                page: 1,
+                pagination: false,
+                populate: { users: { email: true } },
+                trash: true,
+                where: '{"title": {"equals": "Find Options Pass Through"}}',
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(findSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            collection: 'posts',
+            joins: false,
+            pagination: false,
+            populate: { users: { email: true } },
+            trash: true,
+          }),
+        )
+      } finally {
+        findSpy.mockRestore()
+        await payload.delete({ id: post.id, collection: 'posts' })
+      }
+    })
+
+    it('should pass populate, joins, and trash to findPosts ID queries', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          author: userId,
+          content: 'Find by ID options pass-through content',
+          title: 'Find By ID Options Pass Through',
+        },
+      })
+      const apiKey = await getApiKey()
+
+      const findByIDSpy = vi.spyOn(payload, 'findByID')
+
+      try {
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'findPosts',
+              arguments: {
+                id: post.id,
+                joins: false,
+                populate: { users: { email: true } },
+                trash: true,
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(findByIDSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: post.id,
+            collection: 'posts',
+            joins: false,
+            populate: { users: { email: true } },
+            trash: true,
+          }),
+        )
+      } finally {
+        findByIDSpy.mockRestore()
+        await payload.delete({ id: post.id, collection: 'posts' })
+      }
     })
 
     it('should call updatePosts', async () => {
@@ -1160,7 +1290,7 @@ describe('@payloadcms/plugin-mcp', () => {
             arguments: {
               id: post.id,
               content: 'Updated but should be omitted',
-              select: '{"title": true}',
+              select: { title: true },
               title: 'Select Update Post Edited',
             },
           },
@@ -1326,7 +1456,9 @@ describe('@payloadcms/plugin-mcp', () => {
     const createdPageIds: (number | string)[] = []
 
     const getPagesApiKey = async (enableUpdate = false) => {
-      const doc = await payload.create({
+      const apiKey = randomUUID()
+
+      await payload.create({
         collection: 'payload-mcp-api-keys',
         data: {
           enableAPIKey: true,
@@ -1334,11 +1466,12 @@ describe('@payloadcms/plugin-mcp', () => {
           pages: { create: true, find: true, update: enableUpdate, delete: true },
           posts: { create: false, find: false },
           products: { find: false },
-          apiKey: randomUUID(),
+          apiKey,
           user: userId,
         },
       })
-      return doc.apiKey as string
+
+      return apiKey
     }
 
     it('should create a page with a block', async () => {
@@ -1706,7 +1839,7 @@ describe('@payloadcms/plugin-mcp', () => {
           params: {
             name: 'findSiteSettings',
             arguments: {
-              select: '{"siteName": true}',
+              select: { siteName: true },
             },
           },
         }),
@@ -1728,6 +1861,44 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(responseText).not.toContain('siteDescription')
       expect(responseText).not.toContain('contactEmail')
       expect(responseText).not.toContain('maintenanceMode')
+    })
+
+    it('should pass populate to findSiteSettings', async () => {
+      const apiKey = await getApiKey(false, false, true)
+      const findGlobalSpy = vi.spyOn(payload, 'findGlobal')
+
+      try {
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'findSiteSettings',
+              arguments: {
+                populate: { users: { email: true } },
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(findGlobalSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            slug: 'site-settings',
+            populate: { users: { email: true } },
+          }),
+        )
+      } finally {
+        findGlobalSpy.mockRestore()
+      }
     })
 
     it('should update site-settings global', async () => {
@@ -1773,7 +1944,7 @@ describe('@payloadcms/plugin-mcp', () => {
             name: 'updateSiteSettings',
             arguments: {
               maintenanceMode: false,
-              select: '{"siteName": true}',
+              select: { siteName: true },
               siteDescription: 'Should not appear',
               siteName: 'MCP Test Site Select',
             },
@@ -2223,7 +2394,9 @@ describe('@payloadcms/plugin-mcp', () => {
     const createdFieldTypeIds: (number | string)[] = []
 
     const getFieldTypesApiKey = async (enableUpdate = false, enableDelete = false) => {
-      const doc = await payload.create({
+      const apiKey = randomUUID()
+
+      await payload.create({
         collection: 'payload-mcp-api-keys',
         data: {
           enableAPIKey: true,
@@ -2234,11 +2407,12 @@ describe('@payloadcms/plugin-mcp', () => {
             update: enableUpdate,
             delete: enableDelete,
           },
-          apiKey: randomUUID(),
+          apiKey,
           user: userId,
         },
       })
-      return doc.apiKey as string
+
+      return apiKey
     }
 
     describe('Schema validation', () => {

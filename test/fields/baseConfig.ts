@@ -7,6 +7,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 import ArrayFields from './collections/Array/index.js'
+import { blockFieldHookCalls } from './collections/Blocks/hookCalls.js'
 import { BlockFields } from './collections/Blocks/index.js'
 import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
@@ -17,6 +18,7 @@ import { CustomTabID } from './collections/CustomID/CustomTabID.js'
 import { CustomID } from './collections/CustomID/index.js'
 import { CustomIDNested } from './collections/CustomIDNested/index.js'
 import DateFields from './collections/Date/index.js'
+import DuplicateFields from './collections/Duplicate/index.js'
 import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
 import IndexedFields from './collections/Indexed/index.js'
@@ -70,6 +72,7 @@ export const collections: CollectionConfig[] = [
   CustomTabID,
   CustomRowID,
   DateFields,
+  DuplicateFields,
   EmailFields,
   RadioFields,
   GroupFields,
@@ -104,6 +107,61 @@ export const baseConfig: Partial<Config> = {
         {
           name: 'deduplicatedText',
           type: 'text',
+          hooks: {
+            beforeValidate: [
+              ({ value }) => {
+                if (value === 'observe') {
+                  blockFieldHookCalls.push('beforeValidate')
+                }
+                return value
+              },
+            ],
+            beforeChange: [
+              ({ value }) => {
+                if (value === 'observe') {
+                  blockFieldHookCalls.push('beforeChange')
+                }
+                return value
+              },
+            ],
+            afterRead: [
+              ({ value }) => {
+                blockFieldHookCalls.push('globalAfterRead')
+                return value
+              },
+            ],
+          },
+        },
+      ],
+    },
+    {
+      slug: 'conditionalReference',
+      fields: [
+        {
+          name: 'testBlocks',
+          type: 'blocks',
+          admin: {
+            condition: (data) => Boolean(data.showConditionalFields),
+          },
+          blocks: [
+            {
+              slug: 'testBlock',
+              fields: [
+                {
+                  name: 'testField',
+                  type: 'text',
+                },
+              ],
+              labels: {
+                plural: 'Test Blocks',
+                singular: 'Test Block',
+              },
+            },
+          ],
+          defaultValue: [{ blockType: 'testBlock' }],
+          maxRows: 1,
+          minRows: 1,
+          required: true,
         },
       ],
     },

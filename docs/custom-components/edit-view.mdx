@@ -21,10 +21,11 @@ The Edit View can be swapped out in its entirety for a Custom View, or it can be
 To swap out the entire Edit View with a [Custom View](./custom-views), use the `views.edit.default` property in your [Collection Config](../configuration/collections) or [Global Config](../configuration/globals):
 
 ```tsx
-import { buildConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-const config = buildConfig({
-  // ...
+export const MyCollection: CollectionConfig = {
+  slug: 'my-collection',
+  fields: [],
   admin: {
     components: {
       views: {
@@ -38,7 +39,7 @@ const config = buildConfig({
       },
     },
   },
-})
+}
 ```
 
 Here is an example of a custom Edit View:

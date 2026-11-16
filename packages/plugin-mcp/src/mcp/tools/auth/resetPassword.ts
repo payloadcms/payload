@@ -18,7 +18,7 @@ export const resetPasswordTool = (server: McpServer, req: PayloadRequest, verbos
           password,
           token,
         },
-        overrideAccess: true,
+        overrideAccess: false,
       })
 
       if (verboseLogs) {

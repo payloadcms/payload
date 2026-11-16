@@ -3,6 +3,8 @@ export type {
   SanitizedStripePluginConfig,
   StripePluginConfig,
   StripeProxy,
+  StripeRESTAccess,
+  StripeRESTConfig,
   StripeWebhookHandler,
   StripeWebhookHandlers,
   SyncConfig,
