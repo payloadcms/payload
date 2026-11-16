@@ -7,8 +7,8 @@
     display: flex;
     align-items: center;
     padding-inline-start: calc(
-      var(--tree-indent-level) * var(--tree-indent) + var(--tree-gutter, var(--spacer-0)) +
-        var(--tree-content-offset)
+      var(--tree-indent-level) * var(--tree-indent) +
+        var(--tree-gutter, calc(var(--spacer-1) * 0)) + var(--tree-content-offset)
     );
 
     &[data-variant='continuation'] {
