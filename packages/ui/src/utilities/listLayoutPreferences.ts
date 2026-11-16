@@ -1,5 +1,10 @@
 import type { CollectionListQueryPreferences, CollectionPreferences, ListQuery } from 'payload'
 
+import {
+  getNonEmptyQueryString,
+  getPositiveQueryInteger,
+} from '../providers/ListQuery/sanitizeQuery.js'
+
 const scopedKeys = [
   'groupBy',
   'limit',
@@ -18,10 +23,10 @@ export function getListLayoutQuery({
   query: ListQuery
 }): CollectionListQueryPreferences {
   const snapshot: CollectionListQueryPreferences = {}
-  const groupBy = getNonEmptyString({ value: query.groupBy })
-  const limit = getPositiveInteger({ value: query.limit })
-  const page = getPositiveInteger({ value: query.page })
-  const search = getNonEmptyString({ value: query.search })
+  const groupBy = getNonEmptyQueryString({ value: query.groupBy })
+  const limit = getPositiveQueryInteger({ value: query.limit })
+  const page = getPositiveQueryInteger({ value: query.page })
+  const search = getNonEmptyQueryString({ value: query.search })
   const sort = getSort({ value: query.sort })
   const where = getSerializableObject({ value: query.where })
 
@@ -46,7 +51,7 @@ export function getListLayoutQuery({
 
   if (
     (typeof query.preset === 'number' && Number.isFinite(query.preset)) ||
-    getNonEmptyString({ value: query.preset }) !== undefined
+    getNonEmptyQueryString({ value: query.preset }) !== undefined
   ) {
     snapshot.preset = query.preset
   }
@@ -55,7 +60,7 @@ export function getListLayoutQuery({
     const ids = Array.isArray(query.treeExpanded) ? query.treeExpanded : [query.treeExpanded]
 
     snapshot.treeExpanded = [
-      ...new Set(ids.filter((id) => getNonEmptyString({ value: id }) !== undefined)),
+      ...new Set(ids.filter((id) => getNonEmptyQueryString({ value: id }) !== undefined)),
     ]
   }
 
@@ -133,7 +138,7 @@ export function resolveListLayoutQuery({
 
   Object.assign(resolved, scoped)
   resolved.listLayout = layout
-  resolved.limit = scoped.limit ?? getPositiveInteger({ value: defaultLimit }) ?? 10
+  resolved.limit = scoped.limit ?? getPositiveQueryInteger({ value: defaultLimit }) ?? 10
   resolved.page = scoped.page ?? 1
 
   const sort = scoped.sort ?? getSort({ value: defaultSort })
@@ -148,30 +153,16 @@ export function resolveListLayoutQuery({
   return resolved
 }
 
-function getNonEmptyString({ value }: { value: unknown }): string | undefined {
-  return typeof value === 'string' && value.trim().length > 0 ? value : undefined
-}
-
-function getPositiveInteger({ value }: { value: unknown }): number | undefined {
-  if (typeof value !== 'number' && typeof value !== 'string') {
-    return undefined
-  }
-
-  const number = Math.floor(Number(value))
-
-  return Number.isFinite(number) && number > 0 ? number : undefined
-}
-
 function getSort({ value }: { value: unknown }): ListQuery['sort'] {
   if (Array.isArray(value)) {
     const fields = value.filter(
-      (field): field is string => getNonEmptyString({ value: field }) !== undefined,
+      (field): field is string => getNonEmptyQueryString({ value: field }) !== undefined,
     )
 
     return fields.length > 0 ? fields : undefined
   }
 
-  return getNonEmptyString({ value })
+  return getNonEmptyQueryString({ value })
 }
 
 function getSerializableObject({ value }: { value: unknown }): Record<string, unknown> | undefined {
