@@ -59,8 +59,8 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
   )
 
   /**
-   * Updates the resolved theme, automatic mode state, and the document's `data-theme` attribute.
-   * Saves an explicit theme in the cookie for a year, or removes the cookie when automatic mode is selected.
+   * Sets the theme on `<html>` and saves your choice for a year.
+   * `'auto'` uses the system theme and clears the theme cookie.
    */
   const setTheme = useCallback(
     (themeToSet: 'auto' | Theme) => {
@@ -81,8 +81,7 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
   )
 
   /**
-   * Updates the high contrast state and toggles the document's `data-enhanced-contrast` attribute to match.
-   * Saves the selected boolean in the contrast cookie for a year, including when contrast is disabled.
+   * Sets contrast on `<html>` and saves your choice for a year, including when it's off.
    */
   const setHighContrastMode = useCallback(
     (isHighContrast: boolean) => {
