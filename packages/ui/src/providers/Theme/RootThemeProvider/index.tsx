@@ -29,6 +29,29 @@ type RootThemeProviderProps = {
  * The Admin mounts it explicitly to manage its theme preferences.
  * `useTheme` reads and updates these preferences until a local ThemeProvider is introduced.
  * Inside a local scope, use `useRootTheme` to read or change the root preferences.
+ *
+ * @example In the Admin, `useTheme` controls root preferences outside nested providers.
+ * ```tsx
+ * function ThemeButton() {
+ *   const { setTheme } = useTheme()
+ *   return <button type="button" onClick={() => setTheme('dark')}>Use dark theme</button>
+ * }
+ * ```
+ *
+ * @example Inside a nested provider, explicitly target the root preferences.
+ * ```tsx
+ * function RootThemeButton() {
+ *   const { setTheme } = useRootTheme()
+ *   return <button type="button" onClick={() => setTheme('auto')}>Use system theme</button>
+ * }
+ *
+ * <ThemeProvider theme="dark">
+ *   <div data-theme="dark">
+ *     <RootThemeButton />
+ *   </div>
+ * </ThemeProvider>
+ * // The root follows the system preference; the nested scope stays dark.
+ * ```
  */
 export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
   children,
