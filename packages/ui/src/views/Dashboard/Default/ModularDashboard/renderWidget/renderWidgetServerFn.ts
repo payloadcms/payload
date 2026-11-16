@@ -7,6 +7,8 @@ import { RenderServerComponent } from '../../../../../elements/RenderServerCompo
 import { extractLocaleData } from '../utils/localeUtils.js'
 
 export type RenderWidgetServerFnArgs = {
+  /** Render a non-interactive picker preview using server-configured sample data. */
+  isPreview?: boolean
   /**
    * Instance-specific data for this widget
    */
@@ -29,7 +31,17 @@ export type RenderWidgetServerFnReturnType = {
 export const renderWidgetHandler: ServerFunction<
   RenderWidgetServerFnArgs,
   RenderWidgetServerFnReturnType
-> = ({ cookies, locale, permissions, req, user, widgetData, widgetId, widgetSlug }) => {
+> = ({
+  cookies,
+  isPreview = false,
+  locale,
+  permissions,
+  req,
+  user,
+  widgetData,
+  widgetId,
+  widgetSlug,
+}) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -39,6 +51,10 @@ export const renderWidgetHandler: ServerFunction<
 
   // Find the widget configuration
   const widgetConfig = widgets.find((widget) => widget.slug === widgetSlug)
+
+  if (isPreview && (!widgetConfig || widgetConfig.preview === false)) {
+    return { component: null }
+  }
 
   if (!widgetConfig) {
     return {
@@ -60,12 +76,19 @@ export const renderWidgetHandler: ServerFunction<
   }
 
   try {
-    const data = getWidgetControlData({ controls: widgetConfig.controls, data: widgetData })
+    const preview = widgetConfig.preview || undefined
+    const data = getWidgetControlData({
+      controls: widgetConfig.controls,
+      data: isPreview ? preview?.data : widgetData,
+    })
     const controlData = Object.fromEntries(
       widgetConfig.controls?.map(({ name }) => [name, data[name]]) ?? [],
     )
     const localeFilteredData = widgetConfig.fields?.length
-      ? { ...controlData, ...extractLocaleData(data, req.locale || 'en', widgetConfig.fields) }
+      ? {
+          ...(isPreview ? data : controlData),
+          ...extractLocaleData(data, req.locale || 'en', widgetConfig.fields),
+        }
       : data
 
     const serverProps: WidgetServerProps = {
@@ -74,6 +97,7 @@ export const renderWidgetHandler: ServerFunction<
       permissions,
       req,
       user,
+      ...(isPreview ? { isPreview: true } : {}),
       widgetData: localeFilteredData,
       widgetId,
       widgetSlug,
@@ -81,7 +105,12 @@ export const renderWidgetHandler: ServerFunction<
 
     // Render the widget server component
     const component = RenderServerComponent({
-      Component: widgetConfig.Component,
+      Component: isPreview
+        ? (preview?.Component ?? widgetConfig.Component)
+        : widgetConfig.Component,
+      ...(isPreview
+        ? { clientProps: { isPreview: true, widgetData: localeFilteredData, widgetId, widgetSlug } }
+        : {}),
       importMap,
       serverProps,
     })
@@ -95,6 +124,9 @@ export const renderWidgetHandler: ServerFunction<
       msg: `Error rendering widget "${widgetSlug}": ${errorMessage}`,
     })
 
+    if (isPreview) {
+      return { component: null }
+    }
     return {
       component: React.createElement(
         'div',

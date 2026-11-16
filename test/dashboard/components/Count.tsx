@@ -3,7 +3,11 @@ import { type WidgetServerProps } from 'payload'
 
 import type { CountWidget } from '../payload-types.js'
 
-export default async function Count({ req, widgetData }: WidgetServerProps<CountWidget>) {
+export default async function Count({
+  isPreview,
+  req,
+  widgetData,
+}: WidgetServerProps<CountWidget>) {
   let count = 0
   let error: null | string = null
 
@@ -20,11 +24,16 @@ export default async function Count({ req, widgetData }: WidgetServerProps<Count
   const changeText = '10% increase'
 
   try {
-    const result = await payload.count({
-      collection: selectedCollection,
-      overrideAccess: true,
-    })
-    count = result.totalDocs
+    if (isPreview) {
+      count = 128
+    } else {
+      const result = await payload.count({
+        collection: selectedCollection,
+        overrideAccess: false,
+        user: req.user,
+      })
+      count = result.totalDocs
+    }
   } catch (err) {
     error =
       err instanceof Error

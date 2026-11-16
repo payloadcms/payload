@@ -105,6 +105,9 @@ export function iterateConfig({
   if (config.admin?.dashboard?.widgets?.length) {
     for (const dashboardWidget of config.admin.dashboard.widgets) {
       addToImportMap(dashboardWidget.Component)
+      if (dashboardWidget.preview) {
+        addToImportMap(dashboardWidget.preview.Component)
+      }
       for (const control of dashboardWidget.controls ?? []) {
         addToImportMap(control.Icon)
       }

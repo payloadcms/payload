@@ -963,6 +963,15 @@ export type Widget = {
   label?: LabelFunction | StaticLabel
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
+  /** Customize automatic picker previews, or disable rendering for this widget. */
+  preview?:
+    | {
+        /** Optional lightweight component used instead of Component in picker previews. */
+        Component?: PayloadComponent
+        /** Sample data used only for previews; never saved to the dashboard layout. */
+        data?: Record<string, unknown>
+      }
+    | false
   slug: string
   // Maybe:
   // ImageURL?: string // similar to Block
@@ -978,6 +987,7 @@ export type ClientWidget = {
   label?: StaticLabel
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
+  preview?: boolean
   slug: string
 }
 

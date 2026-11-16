@@ -33,3 +33,26 @@ it('should register optional widget control icons in the import map', () => {
   expect(addToImportMap).toHaveBeenCalledWith(Icon)
   expect(addToImportMap).toHaveBeenCalledWith('./Preview')
 })
+
+it('should register a custom widget preview component', () => {
+  const addToImportMap = vi.fn()
+  const Preview = { path: './SalesPreview.js', clientProps: { compact: true } }
+
+  iterateConfig({
+    addToImportMap,
+    baseDir: '',
+    config: {
+      admin: {
+        dashboard: {
+          widgets: [{ slug: 'sales', Component: './Sales.js', preview: { Component: Preview } }],
+        },
+      },
+      collections: [],
+      globals: [],
+    } as unknown as SanitizedConfig,
+    importMap: {},
+    imports: {},
+  })
+
+  expect(addToImportMap).toHaveBeenCalledWith(Preview)
+})

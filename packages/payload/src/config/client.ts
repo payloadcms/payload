@@ -193,11 +193,20 @@ export const createClientConfig = ({
         if (config.admin.dashboard?.widgets) {
           ;(clientConfig.admin.dashboard ??= {}).widgets = config.admin.dashboard.widgets.map(
             (widget) => {
-              const { Component: _, controls, description, fields, label, ...rest } = widget
+              const {
+                Component: _,
+                controls,
+                description,
+                fields,
+                label,
+                preview,
+                ...rest
+              } = widget
               return {
                 ...rest,
                 controls: createClientWidgetControls({ controls, i18n, importMap }),
                 description: description ? getTranslation(description, i18n) : undefined,
+                preview: preview !== false,
                 ...(fields?.length
                   ? {
                       fields: createClientFields({

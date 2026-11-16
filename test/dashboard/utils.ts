@@ -204,7 +204,7 @@ export class DashboardHelper {
   addWidget = async (slug: string) => {
     const widgetsCount = await this.widgets.count()
     await this.stepNavButtons.nth(0).click()
-    await this.page.locator('.drawer__content').getByText(slug).click()
+    await this.page.locator('.drawer__content').getByRole('button', { name: slug }).click()
     await expect(this.widgets).toHaveCount(widgetsCount + 1)
     // Wait for highlight animation to complete (1.5s animation + buffer)
     await this.page.waitForTimeout(1600)

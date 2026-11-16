@@ -181,6 +181,7 @@ export default buildConfigWithDefaults({
           {
             slug: 'count',
             description: 'Display the total number of documents in a collection.',
+            preview: { data: { title: 'Collection total', collection: 'tickets' } },
             Component: './components/Count.tsx#default',
             controls: [
               {

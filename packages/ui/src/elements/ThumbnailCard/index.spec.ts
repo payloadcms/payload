@@ -43,3 +43,23 @@ it('should retain the existing label behavior for cards without descriptions', (
   expect(button.hasAttribute('aria-describedby')).toBe(false)
   expect(button.textContent).toBe('Existing block')
 })
+
+it('should keep preview controls outside the card button and out of keyboard navigation', () => {
+  const container = document.createElement('div')
+
+  container.innerHTML = renderToStaticMarkup(
+    React.createElement(ThumbnailCard, {
+      label: 'Sales',
+      shouldRenderThumbnailOutsideButton: true,
+      thumbnail: React.createElement('button', null, 'Preview action'),
+    }),
+  )
+  const button = container.querySelector('.thumbnail-card')!
+  const preview = container.querySelector('.thumbnail-card__preview')!
+
+  expect(button.querySelector('button')).toBeNull()
+  expect(button.textContent).toBe('Sales')
+  expect(preview.getAttribute('aria-hidden')).toBe('true')
+  expect(preview.hasAttribute('inert')).toBe(true)
+  expect(preview.querySelector('button')?.textContent).toBe('Preview action')
+})

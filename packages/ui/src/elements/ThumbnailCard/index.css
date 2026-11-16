@@ -13,6 +13,22 @@
     cursor: pointer;
   }
 
+  .thumbnail-card__wrapper {
+    position: relative;
+    min-inline-size: 0;
+    inline-size: 100%;
+  }
+
+  .thumbnail-card__preview {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: var(--radius-medium);
+    pointer-events: none;
+  }
+
   .thumbnail-card--has-on-click {
     cursor: pointer;
 

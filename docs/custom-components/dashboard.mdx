@@ -64,12 +64,35 @@ export default buildConfig({
 | `slug` \*      | `string`                       | Unique identifier for the widget                                                                                                |
 | `Component` \* | `string`                       | Path to the widget component (supports `#` syntax for named exports)                                                            |
 | `controls`     | `WidgetControl[]`              | Optional settings shown in the edit toolbar, currently supporting select dropdowns                                              |
+| `preview`      | `false \| object`              | Customize the automatic picker thumbnail with sample `data` or an alternative `Component`, or disable it with `false`.          |
 | `description`  | `string \| object \| function` | Optional description shown beneath the widget title in the Add Widget drawer. Supports translation objects and label functions. |
 | `fields`       | `Field[]`                      | Optional widget-specific form fields shown in the edit drawer                                                                   |
 | `minWidth`     | `WidgetWidth`                  | Minimum width the widget can be resized to (default: `'x-small'`)                                                               |
 | `maxWidth`     | `WidgetWidth`                  | Maximum width the widget can be resized to (default: `'full'`)                                                                  |
 
 **WidgetWidth Values:** `'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full'`.
+
+### Picker Previews
+
+The Add and Replace Widget drawers automatically render the widget component as a non-interactive thumbnail. Previews load as their cards approach the visible part of the drawer and are cached until that drawer closes.
+
+Use `preview.data` to supply sample settings when a widget needs configuration. These values are used only for the thumbnail and are never saved when adding or replacing a widget. Control defaults are applied to previews too.
+
+```ts
+{
+  slug: 'sales-summary',
+  Component: '/components/SalesSummary',
+  preview: {
+    data: { title: 'Sales summary', timeframe: 'monthly' },
+    // Optional: use a lightweight component instead of the real widget.
+    Component: '/components/SalesSummaryPreview',
+  },
+}
+```
+
+Both the real component and an alternative preview component receive `isPreview: true` when rendering a thumbnail. Use this flag to display sample content and skip subscriptions, timers, automatic navigation, or writes. Making the preview non-interactive does not stop component effects or data fetching. Set `preview: false` for widgets that cannot be rendered safely in the picker; their neutral thumbnail, label, and description remain available.
+
+Preview components use the normal authenticated rendering context. Keep data queries access-controlled, just as for the actual widget. Preview component paths participate in import map generation.
 
 ### Toolbar Controls
 

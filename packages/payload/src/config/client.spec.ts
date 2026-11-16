@@ -82,3 +82,21 @@ it.each([
 
   expect(clientConfig.admin.dashboard.widgets[0].description).toBe(expected)
 })
+
+it.each([undefined, false, { data: { title: 'Sample' }, Component: './PreviewOnly.js' }] as const)(
+  'should expose only whether widget previews are enabled: %j',
+  (preview) => {
+    const clientConfig = createClientConfig({
+      config: {
+        admin: { dashboard: { widgets: [{ slug: 'sales', Component: './Sales.js', preview }] } },
+      } as unknown as SanitizedConfig,
+      i18n: { language: 'en' } as I18nClient,
+      importMap: {},
+      user: true,
+    })
+
+    expect(clientConfig.admin.dashboard.widgets[0].preview).toBe(preview !== false)
+    expect(JSON.stringify(clientConfig)).not.toContain('PreviewOnly')
+    expect(JSON.stringify(clientConfig)).not.toContain('Sample')
+  },
+)

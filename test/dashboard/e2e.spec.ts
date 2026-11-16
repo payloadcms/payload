@@ -1385,6 +1385,31 @@ describe('Dashboard', () => {
     await dashboard.cancelEditing()
   })
 
+  test('should render a decorative widget preview without saving its sample data', async ({
+    page,
+  }) => {
+    const dashboard = new DashboardHelper(page)
+
+    await dashboard.setEditing()
+    await dashboard.openAddWidgetDrawer()
+    const drawer = page.locator('.items-drawer--widgets.drawer--is-open')
+    const card = drawer.getByRole('button', { name: 'Count Widget', exact: true })
+    const preview = card.locator('..').locator('.widget-preview')
+
+    await card.scrollIntoViewIfNeeded()
+    await expect(preview).toHaveAttribute('data-state', 'ready')
+    await expect(preview.locator('.count-widget')).toBeVisible()
+    await expect(preview.locator('h3')).toHaveText('Collection total')
+    await expect(card).toHaveAccessibleName('Count Widget')
+    await expect(card.locator('.count-widget')).toHaveCount(0)
+    await card.click()
+    await expect(drawer).toBeHidden()
+    await expect(dashboard.widgetByPos(TOTAL_WIDGETS + 1).locator('.count-widget h3')).toHaveText(
+      'Tickets',
+    )
+    await dashboard.cancelEditing()
+  })
+
   test('add widget', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()

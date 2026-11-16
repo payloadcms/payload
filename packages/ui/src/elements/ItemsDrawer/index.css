@@ -135,7 +135,8 @@
       cursor: grab;
     }
 
-    .thumbnail-card__thumbnail {
+    .thumbnail-card__thumbnail,
+    .thumbnail-card__preview {
       border-radius: var(--radius-large);
     }
 

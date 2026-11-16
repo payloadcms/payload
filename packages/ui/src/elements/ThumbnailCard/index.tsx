@@ -22,6 +22,8 @@ export type ThumbnailCardProps = {
   onClick?: () => void
   onDoubleClick?: () => void
   onKeyDown?: () => void
+  /** Render a decorative thumbnail outside the button, allowing previews that contain controls. */
+  shouldRenderThumbnailOutsideButton?: boolean
   thumbnail: React.ReactNode
 }
 
@@ -39,6 +41,7 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
     label: labelFromProps,
     onClick,
     onDoubleClick,
+    shouldRenderThumbnailOutsideButton,
     thumbnail,
   } = props
 
@@ -69,7 +72,7 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
     })
   }
 
-  return (
+  const button = (
     <button
       {...extraButtonProps}
       aria-describedby={
@@ -87,7 +90,9 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
       title={title}
       type="button"
     >
-      <div className={`${baseClass}__thumbnail`}>{thumbnail}</div>
+      <div className={`${baseClass}__thumbnail`}>
+        {shouldRenderThumbnailOutsideButton ? null : thumbnail}
+      </div>
       <div className={`${baseClass}__details`}>
         <div className={`${baseClass}__label`}>{title}</div>
         {description && (
@@ -97,5 +102,16 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
         )}
       </div>
     </button>
+  )
+
+  return shouldRenderThumbnailOutsideButton ? (
+    <div className={`${baseClass}__wrapper`}>
+      {button}
+      <div aria-hidden="true" className={`${baseClass}__preview`} inert>
+        {thumbnail}
+      </div>
+    </div>
+  ) : (
+    button
   )
 }
