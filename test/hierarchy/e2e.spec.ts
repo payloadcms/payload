@@ -1057,6 +1057,47 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(tree.getByText('Products Only', { exact: true })).toBeVisible()
     })
 
+    test('should wait for the selected layout before accepting document selections', async () => {
+      await page.goto(foldersURL.list)
+      await page.getByRole('radio', { name: 'Tree', exact: true }).check()
+      await expect(page.locator('.hierarchy-contents-tree')).toBeVisible()
+      let releasePreference: () => void
+      const preferenceReady = new Promise<void>((resolve) => {
+        releasePreference = resolve
+      })
+      const preferenceURL = '**/api/payload-preferences/collection-folders'
+
+      await page.route(preferenceURL, async (route) => {
+        if (route.request().method() === 'POST') {
+          await preferenceReady
+        }
+        await route.continue()
+      })
+      try {
+        await page.getByRole('radio', { name: 'Table', exact: true }).check()
+        await expect(page.locator('.hierarchy-list [aria-busy="true"]')).toHaveAttribute(
+          'inert',
+          '',
+        )
+        releasePreference!()
+        const checkbox = page
+          .getByRole('row')
+          .filter({ has: page.getByRole('link', { name: 'General', exact: true }) })
+          .getByRole('checkbox')
+
+        await checkbox.check()
+        await page.getByRole('button', { name: 'Move', exact: true }).click()
+        const modal = page.locator('.hierarchy-modal')
+
+        await expect(modal).toBeVisible()
+        await modal.getByRole('button', { name: 'Close', exact: true }).click()
+        await expect(checkbox).toBeChecked()
+      } finally {
+        releasePreference!()
+        await page.unroute(preferenceURL)
+      }
+    })
+
     test('should preserve each selected Tree folder’s own destination restrictions', async () => {
       await page.goto(foldersURL.list)
       await page.getByRole('radio', { name: 'Tree', exact: true }).check()

@@ -5,7 +5,15 @@ import type { CollectionPreferences, ListViewClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { supportsHierarchyContents } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from 'react'
 
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { DocumentLayout } from '../../elements/LayoutToggle/index.js'
@@ -70,6 +78,18 @@ export function HierarchyListView(props: ListViewClientProps) {
   const { user } = useAuth()
   const [layout, setLayout] = useState<DocumentLayout>(documentLayout ?? 'table')
   const searchParams = useSearchParams()
+  const [isChangingLayout, startLayoutTransition] = useTransition()
+  const layoutOrigin = useMemo(() => ({}), [collectionSlug, searchParams])
+  const activeLayoutOrigin = useRef<null | object>(layoutOrigin)
+  activeLayoutOrigin.current = layoutOrigin
+  useEffect(() => {
+    activeLayoutOrigin.current = layoutOrigin
+    return () => {
+      if (activeLayoutOrigin.current === layoutOrigin) {
+        activeLayoutOrigin.current = null
+      }
+    }
+  }, [layoutOrigin])
   const { startRouteTransition } = useRouteTransition()
 
   const { allowCreate, isInDrawer } = useListDrawerContext()
@@ -110,13 +130,18 @@ export function HierarchyListView(props: ListViewClientProps) {
     refreshTree(collectionSlug)
   }, [clearRouteCache, collectionSlug, refreshTree])
 
-  const handleLayoutChange = async (nextLayout: DocumentLayout) => {
+  const handleLayoutChange = (nextLayout: DocumentLayout) => {
     setLayout(nextLayout)
-    await setPreference<CollectionPreferences>(`collection-${collectionSlug}`, (preferences) => ({
-      ...(preferences ?? {}),
-      documentLayout: nextLayout,
-    }))
-    router.refresh()
+    startLayoutTransition(async () => {
+      await setPreference<CollectionPreferences>(`collection-${collectionSlug}`, (preferences) => ({
+        ...(preferences ?? {}),
+        documentLayout: nextLayout,
+      }))
+      if (activeLayoutOrigin.current !== layoutOrigin) {
+        return
+      }
+      startLayoutTransition(() => router.refresh())
+    })
   }
 
   // Get search from URL params
@@ -473,40 +498,42 @@ export function HierarchyListView(props: ListViewClientProps) {
               )}
             </ListControlsBar>
 
-            {BeforeListTable}
-            {hasNoResults ? (
-              NoResults
-            ) : isContentsTree && hierarchyData?.contents ? (
-              <HierarchyContentsTree
-                collectionSlug={collectionSlug}
-                enableRowSelections={enableRowSelections}
-                initialContents={hierarchyData.contents}
-                selectedTypes={selectedTypes}
-                SmallIcon={HierarchySmallIcon}
-              />
-            ) : (
-              <HierarchyTable
-                baseFilter={baseFilter}
-                childrenData={filteredChildrenData}
-                collections={collections}
-                collectionSlug={collectionSlug}
-                hasCreatePermission={hasCreatePermission}
-                HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
-                hierarchyLabel={collectionLabel}
-                key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
-                  hierarchyData?.relatedDocumentsByCollection || {},
-                )
-                  .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
-                  .join(',')}`}
-                layout={layout === 'tree' ? 'table' : layout}
-                parentFieldName={parentFieldName}
-                parentId={parentId}
-                relatedGroups={filteredRelatedGroups}
-                search={searchFromURL}
-                useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
-              />
-            )}
-            {AfterListTable}
+            <div aria-busy={isChangingLayout || undefined} inert={isChangingLayout}>
+              {BeforeListTable}
+              {hasNoResults ? (
+                NoResults
+              ) : isContentsTree && hierarchyData?.contents ? (
+                <HierarchyContentsTree
+                  collectionSlug={collectionSlug}
+                  enableRowSelections={enableRowSelections}
+                  initialContents={hierarchyData.contents}
+                  selectedTypes={selectedTypes}
+                  SmallIcon={HierarchySmallIcon}
+                />
+              ) : (
+                <HierarchyTable
+                  baseFilter={baseFilter}
+                  childrenData={filteredChildrenData}
+                  collections={collections}
+                  collectionSlug={collectionSlug}
+                  hasCreatePermission={hasCreatePermission}
+                  HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
+                  hierarchyLabel={collectionLabel}
+                  key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
+                    hierarchyData?.relatedDocumentsByCollection || {},
+                  )
+                    .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
+                    .join(',')}`}
+                  layout={layout === 'tree' ? 'table' : layout}
+                  parentFieldName={parentFieldName}
+                  parentId={parentId}
+                  relatedGroups={filteredRelatedGroups}
+                  search={searchFromURL}
+                  useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+                />
+              )}
+              {AfterListTable}
+            </div>
           </div>
         </DocumentSelectionProvider>
         {AfterList}
