@@ -251,6 +251,7 @@ test.describe('Hierarchy Sidebar', () => {
       })
 
       await expect(engineeringLink).toHaveAttribute('href', /[?&]view=hierarchy(?:&|$)/)
+      await expect(page.locator('.hierarchy-list [aria-busy="true"]')).toHaveCount(0)
       await engineeringLink.press('Enter')
       await expect(page).toHaveURL(/[?&]view=hierarchy(?:&|$)/)
       await expect(page.getByRole('heading', { name: 'Engineering Division' })).toBeVisible()
