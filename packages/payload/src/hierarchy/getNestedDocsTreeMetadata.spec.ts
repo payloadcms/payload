@@ -5,6 +5,31 @@ import { describe, expect, it, vi } from 'vitest'
 import { getNestedDocsTreeMetadata } from './getNestedDocsTreeMetadata.js'
 
 describe('nested document list', () => {
+  it('should disable inherited lock lookups, joins and population for existence probes', async () => {
+    const find = vi.fn().mockResolvedValue({ docs: [] })
+
+    await getNestedDocsTreeMetadata({
+      data: { docs: [{ id: 'root' }] } as never,
+      findArgs: {
+        collection: 'pages',
+        depth: 3,
+        includeLockStatus: true,
+        joins: { related: { limit: 10 } },
+      },
+      parentFieldName: 'parent',
+      req: { payload: { find } } as unknown as PayloadRequest,
+    })
+
+    expect(find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        depth: 0,
+        includeLockStatus: false,
+        joins: false,
+        select: { id: true },
+      }),
+    )
+  })
+
   it('should avoid probing membership through a parent field with read access rules', async () => {
     const find = vi.fn()
     const req = {

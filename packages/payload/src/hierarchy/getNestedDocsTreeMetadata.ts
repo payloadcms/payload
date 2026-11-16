@@ -44,6 +44,9 @@ export async function getNestedDocsTreeMetadata({
       data.docs.slice(offset, offset + 4).map(async (doc) => {
         const children = await req.payload.find({
           ...findArgs,
+          depth: 0,
+          includeLockStatus: false,
+          joins: false,
           limit: 1,
           overrideAccess: false,
           page: 1,
