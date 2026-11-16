@@ -154,6 +154,6 @@ test.suite('Nested documents', { config: './config.ts' }, () => {
     })
 
     expect(child.ancestor).toBe(parent.id)
-    expect(child).not.toHaveProperty('_h_parent')
+    expect(child).not.toHaveProperty('_h_parent_document')
   })
 })
