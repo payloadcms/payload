@@ -218,7 +218,9 @@ export const updateDocument = async <
     // updateByID / bulk update prepare file identity from the latest version (often the pending
     // draft). When the main write uses the published document instead, rebind upload fields to
     // that document so trash/restore does not point the live record at the draft's file.
-    if (collectionConfig.upload && versionDocWithLocales) {
+    // Skip when a replacement file is being uploaded — generateFileData already set identity
+    // from the new file, and rebinding would silently drop it.
+    if (collectionConfig.upload && versionDocWithLocales && filesToUpload.length === 0) {
       data = restoreUploadDataFromDocument(data, docWithLocales, {
         locale:
           locale === 'all' || !locale
