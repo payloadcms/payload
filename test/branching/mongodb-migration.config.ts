@@ -2,9 +2,9 @@ import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { databaseAdapter } from '../databaseAdapter.js'
-import { Pages } from './collections/Pages.js'
-import { Uploads } from './collections/Uploads.js'
-import { pagesSlug, settingsSlug, uploadsSlug } from './shared.js'
+import { Pages } from './mongodb-migration/collections/Pages.js'
+import { Uploads } from './mongodb-migration/collections/Uploads.js'
+import { pagesSlug, settingsSlug, uploadsSlug } from './mongodb-migration/shared.js'
 
 const config = await buildConfigWithDefaults({
   config: {
@@ -28,7 +28,7 @@ const config = await buildConfigWithDefaults({
     localization: { defaultLocale: 'en', locales: ['en', 'de'] },
   },
   disableMCP: true,
-  suite: 'mongodb-branching-migration',
+  suite: 'branching',
 })
 
 // The MongoDB layer precedes core branch-field injection and branch lifecycle registration.
