@@ -1,10 +1,10 @@
 import type { SQL, Table } from 'drizzle-orm'
 import type { FlattenedField, Operator, Sort, Where } from 'payload'
 
-import { and, getTableName, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { and, getTableName, isNotNull, isNull, ne, not, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { APIError, getFieldByPath, QueryError } from 'payload'
-import { isNestedRelationshipQuery, validOperatorSet } from 'payload/shared'
+import { getDateOnlyComparison, isNestedRelationshipQuery, validOperatorSet } from 'payload/shared'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
@@ -129,6 +129,7 @@ export function parseParams({
 
               if (validOperatorSet.has(operator as Operator)) {
                 const val = where[relationOrPath][operator]
+                const originalOperator = operator as Operator
 
                 const {
                   columnName,
@@ -288,6 +289,29 @@ export function parseParams({
                         .split(' ')
                         .map((word) => adapter.operators.like(table[columnName], `%${word}%`)),
                     ),
+                  )
+                  break
+                }
+
+                const dateOnlyComparison = getDateOnlyComparison({
+                  config: adapter.payload.config,
+                  field,
+                  operator: originalOperator,
+                  value: val,
+                })
+
+                if (dateOnlyComparison) {
+                  const range = and(
+                    ...dateOnlyComparison.constraints.map((constraint) =>
+                      adapter.operators[constraint.operator](
+                        resolvedColumn,
+                        constraint.value.toISOString(),
+                      ),
+                    ),
+                  )
+
+                  constraints.push(
+                    dateOnlyComparison.isNegated ? or(isNull(resolvedColumn), not(range)) : range,
                   )
                   break
                 }

@@ -9,7 +9,7 @@ import path from 'path'
 import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
-import { afterAll, afterEach, beforeAll, describe, expect, it, vitest } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
@@ -880,6 +880,80 @@ describe('Collections - Uploads', () => {
           )
           await new Promise((resolve) => sourceServer.close(resolve))
         }
+      })
+
+      describe('pasteURL restrictions on remote sources', () => {
+        let sourceRequestCount: number
+        let sourceServer: ReturnType<typeof createServer>
+        let sourcePort: number
+
+        beforeEach(async () => {
+          const remoteBytes = await fs.promises.readFile(path.resolve(dirname, './test-image.png'))
+
+          sourceRequestCount = 0
+          sourceServer = createServer((_req, res) => {
+            sourceRequestCount++
+            res.writeHead(200, {
+              'Content-Length': remoteBytes.length,
+              'Content-Type': 'image/png',
+            })
+            res.end(remoteBytes)
+          })
+          await new Promise((resolve) => sourceServer.listen(0, '127.0.0.1', resolve))
+          sourcePort = (sourceServer.address() as AddressInfo).port
+        })
+
+        afterEach(async () => {
+          sourceServer.closeAllConnections()
+          await new Promise((resolve) => sourceServer.close(resolve))
+        })
+
+        it('should reject a remote source when pasteURL is false', async () => {
+          const response = await restClient.POST(`/${mediaSlug}`, {
+            body: JSON.stringify({
+              filename: 'image.png',
+              url: `http://127.0.0.1:${sourcePort}/image.png`,
+            }),
+          })
+
+          const { errors } = await response.json<{ errors: { message: string }[] }>()
+
+          expect(response.status).toBe(400)
+          expect(errors[0]?.message).toContain('Uploading files from URLs is disabled')
+          expect(sourceRequestCount).toBe(0)
+        })
+
+        it('should reject a remote source that is not in the pasteURL allowList', async () => {
+          const response = await restClient.POST(`/${allowListMediaSlug}`, {
+            body: JSON.stringify({
+              filename: 'image.png',
+              url: `https://127.0.0.1:${sourcePort}/image.png`,
+            }),
+          })
+
+          const { errors } = await response.json<{ errors: { message: string }[] }>()
+
+          expect(response.status).toBe(400)
+          expect(errors[0]?.message).toContain('The provided file URL is not allowed.')
+          expect(sourceRequestCount).toBe(0)
+        })
+
+        it('should fetch a remote source that is in the pasteURL allowList', async () => {
+          const response = await restClient.POST(`/${allowListMediaSlug}`, {
+            body: JSON.stringify({
+              filename: 'image.png',
+              url: `http://127.0.0.1:${sourcePort}/image.png`,
+            }),
+          })
+
+          expect(response.status).toBe(201)
+
+          const { doc } = await response.json<{ doc: { id: number | string } }>()
+
+          await payload.delete({ id: doc.id, collection: allowListMediaSlug })
+
+          expect(sourceRequestCount).toBe(1)
+        })
       })
 
       it('should URL encode filenames with spaces in both main url and size urls', async () => {

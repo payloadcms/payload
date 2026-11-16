@@ -29,16 +29,23 @@ const slugify = ({
   return defaultSlugify(valueToSlugify)
 }
 
+const isPromise = <T>(value: Promise<T> | T): value is Promise<T> =>
+  typeof (value as Promise<T>)?.then === 'function'
+
 /**
  * This is a `BeforeChange` field hook used to auto-generate the `slug` field.
  * See `slugField` for more details.
+ *
+ * The hook lives on the `generateSlug` checkbox, so it runs concurrently with the sibling `slug`
+ * field's validation. A synchronous `slugify` result must be assigned without awaiting, otherwise
+ * the hook yields and a required `slug` is validated before it has been generated.
  */
 export const generateSlug =
   ({ slugFieldName, slugify: customSlugify, useAsSlug }: HookArgs): FieldHook =>
   async ({ collection, data, global, operation, originalDoc, req, value: isChecked }) => {
     if (operation === 'create') {
       if (data) {
-        data[slugFieldName] = await slugify({
+        const slug = slugify({
           customSlugify,
           data,
           req,
@@ -46,6 +53,8 @@ export const generateSlug =
           // Use a generic falsy check here to include empty strings
           valueToSlugify: data?.[slugFieldName] || data?.[useAsSlug],
         })
+
+        data[slugFieldName] = isPromise(slug) ? await slug : slug
       }
 
       return Boolean(!data?.[slugFieldName])
@@ -60,12 +69,14 @@ export const generateSlug =
       if (!hasAutosaveEnabled(collection || global!)) {
         // We can generate the slug at this point
         if (data) {
-          data[slugFieldName] = await slugify({
+          const slug = slugify({
             customSlugify,
             data,
             req,
             valueToSlugify: data?.[useAsSlug],
           })
+
+          data[slugFieldName] = isPromise(slug) ? await slug : slug
         }
 
         return Boolean(!data?.[slugFieldName])
@@ -80,14 +91,16 @@ export const generateSlug =
           if (data) {
             // If the fallback is an empty string, we want the slug to return to `null`
             // This will ensure that live preview conditions continue to run as expected
-            data[slugFieldName] = data?.[useAsSlug]
-              ? await slugify({
+            const slug = data?.[useAsSlug]
+              ? slugify({
                   customSlugify,
                   data,
                   req,
                   valueToSlugify: data?.[useAsSlug],
                 })
               : null
+
+            data[slugFieldName] = isPromise(slug) ? await slug : slug
           }
         }
 

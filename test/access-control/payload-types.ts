@@ -592,6 +592,18 @@ export interface FieldsAndTopAccess {
  */
 export interface BlocksFieldAccess {
   id: string;
+  rows?:
+    | {
+        children?:
+          | {
+              allowCodeChanges?: boolean | null;
+              code?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   title: string;
   editableBlocks?:
     | {
@@ -627,6 +639,7 @@ export interface BlocksFieldAccess {
   };
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1608,6 +1621,18 @@ export interface FieldsAndTopAccessSelect<T extends boolean = true> {
  * via the `definition` "blocks-field-access_select".
  */
 export interface BlocksFieldAccessSelect<T extends boolean = true> {
+  rows?:
+    | T
+    | {
+        children?:
+          | T
+          | {
+              allowCodeChanges?: T;
+              code?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   title?: T;
   editableBlocks?:
     | T
@@ -1654,6 +1679,7 @@ export interface BlocksFieldAccessSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

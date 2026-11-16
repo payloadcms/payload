@@ -1,4 +1,4 @@
-import type { FlattenedBlock, FlattenedField, JoinQuery, SanitizedConfig } from 'payload'
+import type { FlattenedField, JoinQuery, SanitizedConfig } from 'payload'
 
 import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
@@ -8,6 +8,7 @@ import type { BlocksMap } from '../../utilities/createBlocksMap.js'
 
 import { getArrayRelationName } from '../../utilities/getArrayRelationName.js'
 import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
+import { getBlockFromField } from '../getBlockFromField.js'
 import { transformHasManyNumber } from './hasManyNumber.js'
 import { transformHasManyText } from './hasManyText.js'
 import { transformRelationship } from './relationship.js'
@@ -245,18 +246,16 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
           Object.entries(result[field.name]).forEach(([locale, localizedBlocks]) => {
             result[field.name][locale] = localizedBlocks.map((row) => {
-              const block =
-                adapter.payload.blocks[row.blockType] ??
-                ((field.blockReferences ?? field.blocks).find(
-                  (block) => typeof block !== 'string' && block.slug === row.blockType,
-                ) as FlattenedBlock | undefined)
-
-              const tableName = resolveBlockTableName(
-                block,
-                adapter.tableNameMap.get(`${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`),
-              )
+              const block = getBlockFromField({ adapter, blockType: row.blockType, field })
 
               if (block) {
+                const tableName = resolveBlockTableName(
+                  block,
+                  adapter.tableNameMap.get(
+                    `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+                  ),
+                )
+
                 const blockResult = traverseFields<T>({
                   adapter,
                   blocks,
@@ -312,11 +311,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
               return acc
             }
 
-            const block =
-              adapter.payload.blocks[row.blockType] ??
-              ((field.blockReferences ?? field.blocks).find(
-                (block) => typeof block !== 'string' && block.slug === row.blockType,
-              ) as FlattenedBlock | undefined)
+            const block = getBlockFromField({ adapter, blockType: row.blockType, field })
 
             if (block) {
               if (

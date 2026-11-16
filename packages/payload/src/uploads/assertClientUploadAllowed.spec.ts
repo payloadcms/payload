@@ -30,6 +30,10 @@ describe('assertClientUploadAllowed', () => {
   it.each([
     ['filename extension', 'image.SVG', 'application/octet-stream'],
     ['declared MIME parameters', 'image.txt', 'image/svg+xml; charset=utf-8'],
+    ['stylesheet extension', 'document.XSL', 'application/octet-stream'],
+    ['stylesheet template extension', 'document.XSLT', 'application/octet-stream'],
+    ['stylesheet MIME', 'document.txt', 'text/xsl'],
+    ['stylesheet MIME parameters', 'document.txt', 'TEXT/XSL; charset=utf-8'],
     ['XML extension', 'image.xml', 'application/octet-stream'],
     ['XML structured-suffix MIME', 'image.txt', 'application/xhtml+xml; charset=utf-8'],
     ['sanitized trailing period', 'image.svg.', 'application/octet-stream'],
@@ -42,6 +46,13 @@ describe('assertClientUploadAllowed', () => {
   it('should preserve configured client upload paths', () => {
     expect(() =>
       assertClientUploadAllowed({ filename: 'image.png', mimeType: 'image/png' }),
+    ).not.toThrow()
+    expect(() =>
+      assertClientUploadAllowed({
+        collection: { upload: { allowRestrictedFileTypes: true } },
+        filename: 'document.xsl',
+        mimeType: 'text/xsl',
+      }),
     ).not.toThrow()
     expect(() =>
       assertClientUploadAllowed({

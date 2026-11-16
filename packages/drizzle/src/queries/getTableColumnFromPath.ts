@@ -1,12 +1,6 @@
 import type { SQL, Table } from 'drizzle-orm'
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
-import type {
-  FlattenedBlock,
-  FlattenedField,
-  NumberField,
-  RelationshipField,
-  TextField,
-} from 'payload'
+import type { FlattenedField, NumberField, RelationshipField, TextField } from 'payload'
 
 import { and, eq, getTableName, like, or, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
@@ -18,6 +12,7 @@ import { validate as uuidValidate } from 'uuid'
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
+import { getBlockFromField } from '../transform/getBlockFromField.js'
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
 import { jsonBuildObject } from '../utilities/json.js'
@@ -202,11 +197,11 @@ export const getTableColumnFromPath = ({
           // find the block config using the value
           const blockTypes = Array.isArray(value) ? value : [value]
           blockTypes.forEach((blockType) => {
-            const block =
-              adapter.payload.blocks[blockType] ??
-              ((field.blockReferences ?? field.blocks).find(
-                (block) => typeof block !== 'string' && block.slug === blockType,
-              ) as FlattenedBlock | undefined)
+            const block = getBlockFromField({ adapter, blockType, field })
+
+            if (!block) {
+              throw new APIError('Block was not found', 400)
+            }
 
             newTableName = resolveBlockTableName(
               block,

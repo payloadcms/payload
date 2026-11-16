@@ -81,8 +81,25 @@ export function getLocalizedPaths({
               block = _block
             }
 
-            matchedField = block.flattenedFields.find((field) => field.name === segment)!
-            if (matchedField) {
+            const candidate = block.flattenedFields.find((field) => field.name === segment)
+
+            // A shared field name can have different shapes in different blocks.
+            // Select a schema that resolves the complete path, not just its first segment.
+            if (
+              candidate &&
+              !getLocalizedPaths({
+                collectionSlug,
+                fields: block.flattenedFields,
+                globalSlug,
+                incomingPath: pathSegments.slice(i).join('.'),
+                locale,
+                overrideAccess,
+                parentIsLocalized: parentIsLocalized || lastIncompletePath.field.localized,
+                payload,
+                showHiddenFields,
+              }).some(({ invalid }) => invalid)
+            ) {
+              matchedField = candidate
               break
             }
           }

@@ -647,6 +647,20 @@ describe('@payloadcms/plugin-form-builder', () => {
       expect(result).toContain('&quot;')
     })
 
+    it('sanitizes link URLs after replacing submission variables', () => {
+      const nodes = [
+        {
+          children: [{ text: 'website' }],
+          type: 'link',
+          url: '{{website}}',
+        },
+      ]
+      const submissionData = [{ field: 'website', value: 'javascript:alert(1)' }]
+      const result = serializeSlate(nodes, submissionData)
+      expect(result).not.toContain('javascript:')
+      expect(result).toContain('href="#"')
+    })
+
     it('uses proper HTML attribute quotes for links (not JSX syntax)', () => {
       const nodes = [
         {

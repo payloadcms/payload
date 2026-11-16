@@ -5,6 +5,8 @@ import { multiTenantPostsSlug } from '../shared.js'
 export const MultiTenantPosts: CollectionConfig = {
   slug: multiTenantPostsSlug,
   admin: {
+    groupBy: true,
+    defaultColumns: ['title', 'category', '_status'],
     useAsTitle: 'title',
   },
   fields: [
@@ -13,10 +15,14 @@ export const MultiTenantPosts: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    { name: 'description', type: 'text' },
+    { name: 'category', type: 'select', options: ['target', 'other'] },
     {
       name: 'parent',
       type: 'relationship',
       relationTo: multiTenantPostsSlug,
     },
   ],
+  trash: true,
+  versions: { drafts: true },
 }

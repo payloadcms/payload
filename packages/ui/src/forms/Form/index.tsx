@@ -268,6 +268,8 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
+      modifiedWhileProcessingRef.current = false
+
       // create new toast promise which will resolve manually later
       let errorToast, successToast
 
@@ -408,9 +410,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
         if (!modifiedWhileProcessingRef.current) {
           setModified(false)
-        } else {
-          modifiedWhileProcessingRef.current = false
         }
+        modifiedWhileProcessingRef.current = false
 
         setDisabled(false)
 

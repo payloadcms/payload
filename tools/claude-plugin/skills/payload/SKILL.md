@@ -262,30 +262,32 @@ See [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control
 
 ### 2. Transaction Failures in Hooks
 
-**Nested operations in hooks without `req` break transaction atomicity.**
+**Always pass `req` to nested operations in hooks to preserve request context and share the active transaction, if any.**
+
+Passing `req` does not enable transactions. SQLite transactions are disabled by default and should remain disabled because enabling them can cause locking issues.
 
 ```ts
-// ❌ DATA CORRUPTION RISK: Separate transaction
+// ❌ Missing request context and any active transaction
 hooks: {
   afterChange: [
     async ({ doc, req }) => {
       await req.payload.create({
         collection: 'audit-log',
         data: { docId: doc.id },
-        // Missing req - runs in separate transaction!
+        // Missing req - does not share the parent transaction
       })
     },
   ]
 }
 
-// ✅ ATOMIC: Same transaction
+// ✅ Preserves request context and any active transaction
 hooks: {
   afterChange: [
     async ({ doc, req }) => {
       await req.payload.create({
         collection: 'audit-log',
         data: { docId: doc.id },
-        req, // Maintains atomicity
+        req, // Shares the active transaction, if any
       })
     },
   ]
@@ -373,15 +375,15 @@ import type { Post, User } from '@/payload-types'
 ## Common Gotchas
 
 1. **Local API bypasses access control** unless you pass `overrideAccess: false`
-2. **Missing `req` in nested operations** breaks transaction atomicity
+2. **Missing `req` in nested operations** breaks transaction atomicity when transactions are enabled
 3. **Hook loops** — operations in hooks can re-trigger the same hooks; use `req.context` flags
 4. **Field-level access** returns boolean only, no query constraints
 5. **Relationship depth** defaults to 2; set `depth: 0` for IDs only
 6. **Draft status** — `_status` field is auto-injected when drafts are enabled
 7. **Types are stale** until you run `generate:types`
 8. **MongoDB transactions** require replica set configuration
-9. **SQLite transactions** are disabled by default; enable with `transactionOptions: {}`
-10. **Point fields** are not supported in SQLite
+9. **SQLite transactions** default to `transactionOptions: false`. Keep this default: transactions are not fully supported or recommended in Payload and can cause locking issues. Do not add `transactionOptions: {}` as a setup step or a fix for hook atomicity.
+10. **Point fields** are not fully supported in SQLite. Geospatial indexes are not created and the query operators `near`, `within`, and `intersects` will not work.
 
 ## Best Practices
 
@@ -405,7 +407,8 @@ import type { Post, User } from '@/payload-types'
 
 - Always pass `req` to nested operations in hooks
 - Use context flags to prevent infinite hook loops
-- Enable transactions for MongoDB (requires replica set) and Postgres
+- MongoDB (with a replica set) and Postgres use transactions by default unless disabled
+- Keep SQLite transactions disabled; passing `req` does not make nested writes atomic when transactions are disabled
 - Use `beforeValidate` for data formatting
 - Use `beforeChange` for business logic
 

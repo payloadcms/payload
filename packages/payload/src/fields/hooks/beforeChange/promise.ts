@@ -11,6 +11,7 @@ import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
+import { getBlockFromField } from '../../getBlockFromField.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { flattenValidationData } from './flattenValidationData.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
@@ -181,6 +182,25 @@ export const promise = async ({
         path,
       })
       return
+    }
+
+    if (field.type === 'blocks' && Array.isArray(siblingData[field.name])) {
+      for (const row of siblingData[field.name] as JsonObject[]) {
+        const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
+        const blockType = (row.blockType || rowSiblingDoc.blockType) as string
+
+        if (!getBlockFromField({ blockType, field, req })) {
+          errors.push({
+            label: buildFieldLabel(
+              fieldLabelPath,
+              getTranslatedLabel(field?.label || field?.name, req.i18n),
+            ),
+            message: req.t('validation:invalidBlock', { block: blockType }),
+            path,
+          })
+          return
+        }
+      }
     }
 
     // Validate
@@ -467,11 +487,7 @@ export const promise = async ({
 
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
 
-          const block: Block | undefined =
-            req.payload.blocks[blockTypeToMatch] ??
-            ((field.blockReferences ?? field.blocks).find(
-              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
-            ) as Block | undefined)
+          const block = getBlockFromField({ blockType: blockTypeToMatch, field, req })
 
           const blockLabelPath =
             field?.label === false

@@ -122,29 +122,29 @@ const count = await payload.count({
 
 ### Threading req Parameter
 
-When performing operations in hooks or nested operations, pass the `req` parameter to maintain transaction context:
+When performing nested operations in hooks, pass `req` to preserve request context and share the active transaction, if any. Passing `req` does not enable transactions or provide atomicity when transactions are disabled (the default for SQLite):
 
 ```ts
-// ✅ CORRECT: Pass req for transaction safety
+// ✅ CORRECT: Preserve request context and any active transaction
 const afterChange: CollectionAfterChangeHook = async ({ doc, req }) => {
   await req.payload.create({
     collection: 'audit-log',
     data: { action: 'created', docId: doc.id },
-    req, // Maintains transaction atomicity
+    req, // Shares the active transaction, if any
   })
 }
 
-// ❌ WRONG: Missing req breaks transaction
+// ❌ WRONG: Missing req loses request context and any active transaction
 const afterChange: CollectionAfterChangeHook = async ({ doc, req }) => {
   await req.payload.create({
     collection: 'audit-log',
     data: { action: 'created', docId: doc.id },
-    // Missing req - runs in separate transaction
+    // Missing req - does not share the parent transaction
   })
 }
 ```
 
-This is critical for MongoDB replica sets and Postgres. See [ADAPTERS.md#threading-req-through-operations](ADAPTERS.md#threading-req-through-operations) for details.
+Keep SQLite transactions disabled because enabling them can cause locking issues. See [ADAPTERS.md#threading-req-through-operations](ADAPTERS.md#threading-req-through-operations) for details.
 
 ### Access Control in Local API
 

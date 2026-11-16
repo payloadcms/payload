@@ -37,6 +37,7 @@ export const arrayWithFallbackCollectionSlug = 'array-with-fallback-fields'
 export const localeRestrictedSlug = 'locale-restricted'
 
 export const globalWithDraftsSlug = 'global-drafts'
+export const localizedStatusSharedGlobalSlug = 'localized-status-shared-global'
 
 export const localeValidationSlug = 'locale-validation'
 export const localeValidationGlobalSlug = 'locale-validation-global'

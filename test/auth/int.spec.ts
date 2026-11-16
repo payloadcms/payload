@@ -21,6 +21,8 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { transformForWrite } from '../../packages/drizzle/src/transform/write/index.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { traverseFields as traverseDrizzleFields } from '../../packages/drizzle/src/transform/write/traverseFields.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
@@ -262,6 +264,52 @@ describe('Auth', () => {
         expect(updatedUser?.hash).not.toBe(existingHash)
         expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v1:[a-f0-9]{64}$/)
         expect(updatedUser?.salt).not.toBe(existingSalt)
+      })
+
+      it('should rehash a 100k password hash to 600k after login', async () => {
+        const testEmail = '100k-password-hash@example.com'
+        const testPassword = 'test-password'
+        const existingSalt = crypto.randomBytes(32).toString('hex')
+        const existingHash = `pbkdf2-sha256-100k-v1:${crypto
+          .pbkdf2Sync(testPassword, existingSalt, 100000, 32, 'sha256')
+          .toString('hex')}`
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+        })
+        createdUserIDs.push(user.id)
+
+        await payload.db.updateOne({
+          collection: slug,
+          data: {
+            hash: existingHash,
+            salt: existingSalt,
+          },
+          id: user.id,
+        })
+
+        await payload.login({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+        })
+
+        const updatedUser = await payload.db.findOne({
+          collection: slug,
+          select: {
+            hash: true,
+          },
+          where: {
+            id: { equals: user.id },
+          },
+        })
+
+        expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v1:[a-f0-9]{64}$/)
       })
 
       it('should preserve a password changed during login', async () => {
@@ -535,11 +583,27 @@ describe('Auth', () => {
 
       try {
         traverseFields({ fields: [], fillEmpty: false, ref: sharedData })
-        transformForWrite({
+        const rowToInsert = transformForWrite({
           adapter: payload.db as DrizzleAdapter,
           data: drizzleData,
           fields: [],
           tableName: 'session_users',
+        })
+
+        expect(drizzleData).toEqual(createConstrainedData())
+
+        // Inspect dotted-key expansion directly because transformForWrite preserves its input.
+        traverseDrizzleFields({
+          ...rowToInsert,
+          adapter: payload.db as DrizzleAdapter,
+          baseTableName: 'session_users',
+          columnPrefix: '',
+          data: drizzleData,
+          fieldPrefix: '',
+          fields: [],
+          parentIsLocalized: false,
+          parentTableName: 'session_users',
+          path: '',
         })
 
         const response = await restClient.POST('/session-users/first-register', {

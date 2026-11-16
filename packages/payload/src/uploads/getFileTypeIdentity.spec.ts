@@ -12,6 +12,10 @@ describe('isXmlMimeType', () => {
   it.each([
     ['application/xml', true],
     ['text/xml', true],
+    ['text/xsl', true],
+    ['TEXT/XSL', true],
+    [' Text/Xsl; Charset=UTF-8 ', true],
+    ['application/xslt+xml', true],
     ['application/atom+xml', true],
     ['image/svg+xml', true],
     ['APPLICATION/XML', true],

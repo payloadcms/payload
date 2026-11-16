@@ -7,6 +7,7 @@ import type { PaginatedDocs, Payload } from 'payload'
 
 import {
   buildEditorState,
+  consolidateHTMLConverters,
   convertLexicalToHTML,
   type DefaultNodeTypes,
   type LexicalRichTextField,
@@ -65,6 +66,7 @@ import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
+  lexicalFullyFeaturedSlug,
   lexicalHeadingFeatureSlug,
   lexicalListsFeatureSlug,
   lexicalMigrateFieldsSlug,
@@ -1362,6 +1364,184 @@ describe('Lexical', () => {
     })
   })
 
+  describe('Legacy HTML converters', () => {
+    const textNode = {
+      type: 'text',
+      detail: 0,
+      format: 0,
+      mode: 'normal',
+      style: '',
+      text: 'Content',
+      version: 1,
+    }
+
+    const convertWithLegacyConverters = async (nodes: Record<string, unknown>[]) => {
+      const field = payload.collections[lexicalFieldsSlug].config.fields.find(
+        (field) => 'name' in field && field.name === 'lexicalWithBlocks',
+      ) as LexicalRichTextField
+
+      return await convertLexicalToHTML({
+        converters: consolidateHTMLConverters({ editorConfig: field.editor.editorConfig }),
+        data: buildEditorState<SerializedLexicalNode>({
+          nodes: nodes as unknown as SerializedLexicalNode[],
+        }),
+        depth: 2,
+        overrideAccess: true,
+        payload,
+      })
+    }
+
+    vitestIt.each(['paragraph', 'heading', 'quote'])(
+      'should drop unsafe text alignment from %s nodes',
+      async (type) => {
+        const html = await convertWithLegacyConverters([
+          {
+            type,
+            children: [textNode],
+            direction: null,
+            format: "left' onmouseover='alert(1)",
+            indent: 0,
+            tag: 'h2',
+            version: 1,
+          },
+        ])
+
+        expect(html).toContain('Content')
+        expect(html).not.toContain('onmouseover')
+      },
+    )
+
+    vitestIt('should escape tab node text', async () => {
+      const html = await convertWithLegacyConverters([
+        {
+          type: 'paragraph',
+          children: [{ ...textNode, type: 'tab', text: '<img src=x onerror=alert(1)>' }],
+          direction: null,
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      ])
+
+      expect(html).not.toContain('<img')
+      expect(html).toContain('&lt;img')
+    })
+
+    vitestIt.each(['autolink', 'link'])('should sanitize %s URLs', async (type) => {
+      const html = await convertWithLegacyConverters([
+        {
+          type: 'paragraph',
+          children: [
+            {
+              type,
+              children: [textNode],
+              direction: null,
+              fields: {
+                linkType: 'custom',
+                newTab: false,
+                url: 'javascript:alert(1)" onmouseover="alert(1)',
+              },
+              format: '',
+              indent: 0,
+              version: 2,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      ])
+
+      expect(html).not.toContain('javascript:')
+      expect(html).not.toContain('onmouseover')
+      expect(html).toContain('href="#"')
+    })
+
+    vitestIt('should drop unsafe list types', async () => {
+      const html = await convertWithLegacyConverters([
+        {
+          type: 'list',
+          children: [
+            {
+              type: 'listitem',
+              children: [textNode],
+              direction: null,
+              format: '',
+              indent: 0,
+              value: 1,
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          listType: 'bullet" onmouseover="alert(1)',
+          start: 1,
+          tag: 'ul',
+          version: 1,
+        },
+      ])
+
+      expect(html).not.toContain('onmouseover')
+      expect(html).toContain('class="list-bullet"')
+    })
+
+    vitestIt('should ignore unsafe table cell values', async () => {
+      const html = await convertWithLegacyConverters([
+        {
+          type: 'table',
+          children: [
+            {
+              type: 'tablerow',
+              children: [
+                {
+                  type: 'tablecell',
+                  backgroundColor: 'red;" onmouseover="alert(1)',
+                  children: [textNode],
+                  colSpan: 1,
+                  direction: null,
+                  format: '',
+                  headerState: '1"><img src=x onerror=alert(1)>',
+                  indent: 0,
+                  rowSpan: 1,
+                  version: 1,
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      ])
+
+      expect(html).not.toContain('onmouseover')
+      expect(html).not.toContain('<img')
+      expect(html).toContain('lexical-table-cell-header-0')
+    })
+
+    vitestIt('should escape upload alt text', async () => {
+      const html = await convertWithLegacyConverters([
+        {
+          type: 'upload',
+          fields: { alt: '" onerror="alert(1)' },
+          relationTo: uploadsSlug,
+          value: createdJPGDocID,
+          version: 2,
+        },
+      ])
+
+      expect(html).toContain('alt="&quot; onerror=&quot;alert(1)"')
+      expect(html).not.toContain('" onerror="')
+    })
+  })
+
   const noopNodesToHTML = ({ nodes }: { nodes: any[] }) => nodes.map(() => '')
   const noopNodesToHTMLAsync = ({ nodes }: { nodes: any[] }) => Promise.resolve(nodes.map(() => ''))
 
@@ -1711,6 +1891,22 @@ describe('Lexical', () => {
           expect(result).toContain('background-color: #336699;')
           expect(result).toContain('colspan="2"')
           expect(result).toContain('Cell content')
+        })
+
+        vitestIt('ignores non-numeric colSpan and rowSpan values', async () => {
+          const result = await variant.table.tablecell!({
+            ...converterBaseArgs,
+            node: {
+              children: [],
+              colSpan: '2" onmouseover="alert(1)',
+              headerState: 0,
+              rowSpan: '2" onmouseover="alert(1)',
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('onmouseover')
+          expect(result).not.toContain('colspan=')
+          expect(result).not.toContain('rowspan=')
         })
       })
     })

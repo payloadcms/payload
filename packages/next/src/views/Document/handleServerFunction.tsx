@@ -1,9 +1,11 @@
 import type { RenderDocumentServerFunction } from '@payloadcms/ui'
 import type { DocumentPreferences, VisibleEntities } from 'payload'
 
+import { PageLocaleProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { canAccessAdmin, isEntityHidden } from 'payload'
 import { applyLocaleFiltering } from 'payload/shared'
+import React from 'react'
 
 import { renderDocument } from './index.js'
 
@@ -124,7 +126,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
 
   return {
     data,
-    Document,
+    Document: <PageLocaleProvider locale={locale?.code}>{Document}</PageLocaleProvider>,
     preferences,
   }
 }
