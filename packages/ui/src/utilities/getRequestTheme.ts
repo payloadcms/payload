@@ -21,6 +21,7 @@ export type RequestThemeResult = {
 
 const acceptedThemes: Theme[] = ['dark', 'light']
 
+/** @internal */
 export const getRequestTheme = ({
   config,
   cookies,

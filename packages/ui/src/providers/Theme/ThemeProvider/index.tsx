@@ -56,7 +56,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   theme: themeOverride,
 }) => {
   const parentContext = useTheme()
+
   const [localTheme, setLocalTheme] = useControllableState(themeOverride)
+
   const [localHighContrastMode, setLocalHighContrastMode] =
     useControllableState(highContrastModeOverride)
 
@@ -70,8 +72,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   const highContrastMode = contrastPreference ?? parentContext.highContrastMode
 
   /**
-   * Sets the local theme and target's `data-theme`, leaving root preferences alone.
-   * Requires a mounted `targetRef`; automatic mode belongs to `useRootTheme`.
+   * Sets the local theme and target's `data-theme`. Requires a mounted `targetRef`.
    */
   const setTheme = useCallback(
     (themeToSet: Theme) => {
@@ -90,8 +91,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   )
 
   /**
-   * Sets local contrast and the target flag, leaving root preferences alone.
-   * Requires a mounted `targetRef`; inherited contrast styling still applies.
+   * Sets local contrast and the target flag. Requires a mounted `targetRef`.
    */
   const setHighContrastMode = useCallback(
     (isHighContrast: boolean) => {

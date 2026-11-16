@@ -8,6 +8,7 @@ type GetRequestHighContrastArgs = {
   headers: Request['headers']
 }
 
+/** @internal */
 export const getRequestHighContrast = ({
   config,
   cookies,

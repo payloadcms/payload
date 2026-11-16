@@ -78,7 +78,7 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
   )
 
   /**
-   * Sets the theme on `<html>` and saves your choice for a year.
+   * Sets the theme on `<html>` and saves to cookies.
    * `'auto'` uses the system theme and clears the theme cookie.
    */
   const setTheme = useCallback(
@@ -102,11 +102,12 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
   )
 
   /**
-   * Sets contrast on `<html>` and saves your choice for a year, including when it's off.
+   * Sets contrast on `<html>` and saves to cookies.
    */
   const setHighContrastMode = useCallback(
     (isHighContrast: boolean) => {
       _setHighContrastMode(isHighContrast)
+
       document.cookie = generateCookie<false>({
         name: contrastCookieKey,
         maxAge: 60 * 60 * 24 * 365,
@@ -114,36 +115,43 @@ export const RootThemeProvider: React.FC<RootThemeProviderProps> = ({
         returnCookieAsObject: false,
         value: String(isHighContrast),
       })
+
       document.documentElement.toggleAttribute('data-enhanced-contrast', isHighContrast)
     },
     [contrastCookieKey],
   )
 
-  useEffect(() => {
-    if (preselectedTheme !== 'all') {
-      return
-    }
+  useEffect(
+    function syncThemeFromPreferences() {
+      if (preselectedTheme !== 'all') {
+        return
+      }
 
-    if (isValidThemeParam(themeParam)) {
-      setTheme(themeParam)
-      return
-    }
+      if (isValidThemeParam(themeParam)) {
+        setTheme(themeParam)
+        return
+      }
 
-    const { isAutoMode, theme: detectedTheme } = detectTheme({ cookieKey: themeCookieKey })
+      const { isAutoMode, theme: detectedTheme } = detectTheme({ cookieKey: themeCookieKey })
 
-    document.documentElement.setAttribute('data-theme', detectedTheme)
+      document.documentElement.setAttribute('data-theme', detectedTheme)
 
-    _setTheme(detectedTheme)
-    setAutoMode(isAutoMode)
-  }, [preselectedTheme, themeCookieKey, themeParam, setTheme])
+      _setTheme(detectedTheme)
+      setAutoMode(isAutoMode)
+    },
+    [preselectedTheme, themeCookieKey, themeParam, setTheme],
+  )
 
-  useEffect(() => {
-    const isHighContrast = detectHighContrastMode({ cookieKey: contrastCookieKey })
+  useEffect(
+    function syncHighContrastFromPreferences() {
+      const isHighContrast = detectHighContrastMode({ cookieKey: contrastCookieKey })
 
-    document.documentElement.toggleAttribute('data-enhanced-contrast', isHighContrast)
+      document.documentElement.toggleAttribute('data-enhanced-contrast', isHighContrast)
 
-    _setHighContrastMode(isHighContrast)
-  }, [contrastCookieKey])
+      _setHighContrastMode(isHighContrast)
+    },
+    [contrastCookieKey],
+  )
 
   const context = useMemo(
     () => ({ autoMode, highContrastMode, setHighContrastMode, setTheme, theme }),
