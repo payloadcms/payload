@@ -54,6 +54,7 @@ export const baseConfig: Partial<Config> = {
     {
       slug: foldersSlug,
       hierarchy: {
+        allowHasMany: false,
         parentFieldName: 'folder',
       },
       admin: {
