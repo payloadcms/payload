@@ -3,6 +3,7 @@ import type { WidgetWidth } from 'payload'
 import type { WidgetInstanceClient } from '../index.client.js'
 
 import { WIDTH_TO_PERCENTAGE } from './resizeWidget.js'
+import { flattenLayoutRows, getLayoutRows } from './widgetLayoutRows.js'
 
 const EPSILON = 0.000001
 
@@ -38,25 +39,12 @@ export function resizeWidgetLayout({
         : nearest,
     options[0] ?? active.item.width,
   )
-  let rowStart = 0
-  let rowEnd = layout.length
-  let usedWidth = 0
-
-  for (let index = 0; index < layout.length; index++) {
-    const percentage = WIDTH_TO_PERCENTAGE[layout[index].item.width]
-
-    if (usedWidth + percentage > 100 + EPSILON) {
-      if (index > activeIndex) {
-        rowEnd = index
-        break
-      }
-      rowStart = index
-      usedWidth = 0
-    }
-    usedWidth += percentage
+  if (nextWidth === active.item.width) {
+    return layout
   }
-
-  const row = layout.slice(rowStart, rowEnd)
+  const rows = getLayoutRows({ getItem: ({ item }) => item, layout })
+  const rowIndex = rows.findIndex((row) => row.some(({ item }) => item.id === widgetID))
+  const row = rows[rowIndex]
   const widths = new Map<string, WidgetWidth>([[widgetID, nextWidth]])
   const overflow = new Set<string>()
   const siblings = row.filter(({ item }) => item.id !== widgetID)
@@ -131,5 +119,11 @@ export function resizeWidgetLayout({
       : widget
   })
 
-  return [...layout.slice(0, rowStart), ...updatedRow, ...layout.slice(rowEnd)]
+  const resizedRows = getLayoutRows({
+    getItem: ({ item }) => ({ width: item.width }),
+    layout: updatedRow,
+  })
+
+  rows.splice(rowIndex, 1, ...resizedRows)
+  return flattenLayoutRows({ rows })
 }

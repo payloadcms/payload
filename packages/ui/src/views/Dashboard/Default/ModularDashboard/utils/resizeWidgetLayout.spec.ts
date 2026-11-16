@@ -57,8 +57,9 @@ it('should wrap siblings below the resized widget when their minimum widths do n
     ['sibling', 'medium'],
     ['next-row', 'full'],
   ])
-  expect(result[1]).toBe(layout[0])
-  expect(result[2]).toBe(layout[2])
+  expect(result[1]).toMatchObject(layout[0])
+  expect(result[1].item.startsNewRow).toBe(true)
+  expect(result[2]).toMatchObject(layout[2])
 })
 
 it('should keep fitting siblings in order and wrap only the overflow', () => {
@@ -85,7 +86,7 @@ it('should leave other rows and sibling widths unchanged when shrinking', () => 
   expect(result.map(({ item }) => item.width)).toEqual(['full', 'x-small', 'medium', 'full'])
   expect(result[0]).toBe(layout[0])
   expect(result[2]).toBe(layout[2])
-  expect(result[3]).toBe(layout[3])
+  expect(result[3]).toMatchObject(layout[3])
 })
 
 it('should handle fractional widths without wrapping a fitting sibling', () => {
@@ -181,4 +182,26 @@ it('should not enlarge a preceding widget from a different row', () => {
       ({ item }) => item.width,
     ),
   ).toEqual(['large', 'x-small'])
+})
+
+it('should preserve separate partial rows when resizing without changing adjacent rows', () => {
+  const active = widget({ id: 'active', width: 'medium' })
+  const following = widget({ id: 'following', width: 'medium' })
+  const layout = [
+    widget({ id: 'previous', width: 'x-small' }),
+    { ...active, item: { ...active.item, startsNewRow: true } },
+    { ...following, item: { ...following.item, startsNewRow: true } },
+  ]
+  const result = resizeWidgetLayout({
+    edge: 'start',
+    layout,
+    widgetID: 'active',
+    width: 'x-small',
+  })
+
+  expect(result.map(({ item }) => [item.id, item.width, Boolean(item.startsNewRow)])).toEqual([
+    ['previous', 'x-small', false],
+    ['active', 'x-small', true],
+    ['following', 'medium', true],
+  ])
 })

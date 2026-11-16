@@ -2,11 +2,13 @@ import type { WidgetWidth } from 'payload'
 
 import { getWidgetIDFromDropTarget } from './getWidgetMoveIndexes.js'
 import { WIDTH_TO_PERCENTAGE } from './resizeWidget.js'
+import { getLayoutRows } from './widgetLayoutRows.js'
 
 type DropWidget = {
   id: string
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
+  startsNewRow?: boolean
   width: WidgetWidth
 }
 
@@ -76,6 +78,9 @@ export function getWidgetDropSizing({
     return null
   }
 
+  const rows = getRows({ layout })
+  const targetRow = rows.find((row) => row.some(({ id }) => id === targetID))!
+
   if (target.width === 'full') {
     const candidates: Required<WidgetDropSizing>[] = []
     const preferredWidth = active.width === 'full' ? 50 : WIDTH_TO_PERCENTAGE[active.width]
@@ -85,14 +90,14 @@ export function getWidgetDropSizing({
         if (WIDTH_TO_PERCENTAGE[width] + WIDTH_TO_PERCENTAGE[targetWidth] > 100 + WIDTH_EPSILON) {
           continue
         }
-        const proposed = layout
+        const proposed = targetRow
           .filter(({ id }) => id !== activeID)
           .map((widget) => (widget.id === targetID ? { ...widget, width: targetWidth } : widget))
         const index = proposed.findIndex(({ id }) => id === targetID)
 
         proposed.splice(index + (overID.endsWith('-after') ? 1 : 0), 0, { ...active, width })
         if (
-          getRows({ layout: proposed }).some(
+          getRows({ layout: proposed.map((widget) => ({ ...widget, startsNewRow: false })) }).some(
             (row) => row.some(({ id }) => id === activeID) && row.some(({ id }) => id === targetID),
           )
         ) {
@@ -111,8 +116,6 @@ export function getWidgetDropSizing({
     )
   }
 
-  const rows = getRows({ layout })
-  const targetRow = rows.find((row) => row.some(({ id }) => id === targetID))!
   let width = active.width
 
   if (!targetRow.some(({ id }) => id === activeID)) {
@@ -134,12 +137,12 @@ export function getWidgetDropSizing({
     }
   }
 
-  const proposed = layout.filter(({ id }) => id !== activeID)
+  const proposed = targetRow.filter(({ id }) => id !== activeID)
   const index = proposed.findIndex(({ id }) => id === targetID)
 
   proposed.splice(index + (overID.endsWith('-after') ? 1 : 0), 0, { ...active, width })
 
-  return getRows({ layout: proposed }).some(
+  return getRows({ layout: proposed.map((widget) => ({ ...widget, startsNewRow: false })) }).some(
     (row) => row.some(({ id }) => id === activeID) && row.some(({ id }) => id === targetID),
   )
     ? { width }
@@ -156,21 +159,7 @@ export function isValidWidgetDropTarget(args: {
 }
 
 function getRows({ layout }: { layout: DropWidget[] }): DropWidget[][] {
-  const rows: DropWidget[][] = []
-  let usedWidth = 0
-
-  for (const widget of layout) {
-    const width = WIDTH_TO_PERCENTAGE[widget.width]
-
-    if (!rows.length || usedWidth + width > 100 + WIDTH_EPSILON) {
-      rows.push([])
-      usedWidth = 0
-    }
-    rows[rows.length - 1].push(widget)
-    usedWidth += width
-  }
-
-  return rows
+  return getLayoutRows({ getItem: (widget) => widget, layout })
 }
 
 function getAllowedWidths({ widget }: { widget: DropWidget }): WidgetWidth[] {

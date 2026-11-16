@@ -7,6 +7,11 @@ import type { WidgetInstanceClient } from './index.client.js'
 
 import { useDashboardLayout } from './useDashboardLayout.js'
 
+const { openModal, setPreference } = vi.hoisted(() => ({
+  openModal: vi.fn(),
+  setPreference: vi.fn(),
+}))
+
 vi.mock('payload/shared', async (importOriginal) => ({
   ...(await importOriginal<typeof import('payload/shared')>()),
   PREFERENCE_KEYS: { DASHBOARD_LAYOUT: 'dashboard-layout' },
@@ -14,7 +19,7 @@ vi.mock('payload/shared', async (importOriginal) => ({
 vi.mock('../../../../elements/ConfirmationModal/index.js', () => ({
   ConfirmationModal: () => null,
 }))
-vi.mock('../../../../elements/Modal/index.js', () => ({ useModal: () => ({ openModal: vi.fn() }) }))
+vi.mock('../../../../elements/Modal/index.js', () => ({ useModal: () => ({ openModal }) }))
 vi.mock('../../../../providers/Config/index.js', () => ({
   useConfig: () => ({
     config: {
@@ -26,6 +31,7 @@ vi.mock('../../../../providers/Config/index.js', () => ({
               slug: 'replacement',
               minWidth: 'small',
               maxWidth: 'large',
+              preview: { data: { timeframe: 'weekly', title: 'Preview only' } },
               controls: [
                 {
                   name: 'timeframe',
@@ -43,7 +49,7 @@ vi.mock('../../../../providers/Config/index.js', () => ({
 }))
 vi.mock('../../../../providers/Embed/index.js', () => ({ useEmbed: () => ({ isEmbedded: false }) }))
 vi.mock('../../../../providers/Preferences/index.js', () => ({
-  usePreferences: () => ({ setPreference: vi.fn() }),
+  usePreferences: () => ({ setPreference }),
 }))
 vi.mock('../../../../providers/ServerFunctions/index.js', () => ({
   useServerFunctions: () => ({ serverFunction: vi.fn() }),
@@ -56,6 +62,85 @@ vi.mock('./renderWidget/RenderWidget.js', () => ({ RenderWidget: () => null }))
 afterEach(() => {
   vi.useRealTimers()
   vi.unstubAllGlobals()
+})
+
+it('should cancel without confirmation when a saved layout is reopened without changes', async () => {
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  openModal.mockClear()
+  const root = createRoot(document.createElement('div'))
+  const initialLayout: WidgetInstanceClient[] = [
+    { component: null, item: { id: 'a', width: 'x-small', minWidth: 'x-small', maxWidth: 'full' } },
+  ]
+  let dashboard!: ReturnType<typeof useDashboardLayout>
+  const Harness = () => {
+    dashboard = useDashboardLayout(initialLayout)
+    return null
+  }
+
+  try {
+    act(() => root.render(React.createElement(Harness)))
+    act(() => dashboard.setIsEditing(true))
+    act(() => dashboard.cancel())
+    expect(dashboard.isEditing).toBe(false)
+    expect(openModal).not.toHaveBeenCalled()
+
+    act(() => dashboard.setIsEditing(true))
+    act(() => dashboard.resizeWidget({ widgetID: 'a', width: 'medium' }))
+    await act(async () => dashboard.saveLayout())
+    act(() => dashboard.setIsEditing(true))
+    act(() => dashboard.cancel())
+
+    expect(openModal).not.toHaveBeenCalled()
+    expect(dashboard.isEditing).toBe(false)
+    expect(dashboard.currentLayout[0].item.width).toBe('medium')
+
+    act(() => dashboard.setIsEditing(true))
+    act(() => dashboard.resizeWidget({ widgetID: 'a', width: 'large' }))
+    act(() => dashboard.cancel())
+    expect(openModal).toHaveBeenCalledWith('cancel-dashboard-changes')
+    act(() => dashboard.cancelModal.props.onConfirm())
+    expect(dashboard.currentLayout[0].item.width).toBe('medium')
+  } finally {
+    act(() => root.unmount())
+  }
+})
+
+it('should cancel without confirmation when edits restore the original rows, widths and widget data', () => {
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  openModal.mockClear()
+  const root = createRoot(document.createElement('div'))
+  const initialLayout: WidgetInstanceClient[] = [
+    { component: null, item: { id: 'a', width: 'full', minWidth: 'x-small', maxWidth: 'full' } },
+    {
+      component: null,
+      item: {
+        id: 'b',
+        width: 'x-small',
+        minWidth: 'x-small',
+        maxWidth: 'full',
+        data: { title: 'My widget', count: 10 },
+      },
+    },
+  ]
+  let dashboard!: ReturnType<typeof useDashboardLayout>
+  const Harness = () => {
+    dashboard = useDashboardLayout(initialLayout)
+    return null
+  }
+
+  try {
+    act(() => root.render(React.createElement(Harness)))
+    act(() => dashboard.setIsEditing(true))
+    act(() => dashboard.resizeWidget({ widgetID: 'b', width: 'medium' }))
+    act(() => dashboard.resizeWidget({ widgetID: 'b', width: 'x-small' }))
+    act(() => dashboard.updateWidgetData('b', { count: 10, title: 'My widget' }))
+    act(() => dashboard.cancel())
+
+    expect(openModal).not.toHaveBeenCalled()
+    expect(dashboard.isEditing).toBe(false)
+  } finally {
+    act(() => root.unmount())
+  }
 })
 
 it('should distinguish widgets added in the same millisecond when moving and deleting them', () => {
@@ -394,6 +479,46 @@ it('should resize a full-width target when inserting a drawer widget beside it',
     )
     expect(dashboard.currentLayout.map(({ item }) => item.width)).toEqual(['x-large', 'x-small'])
     expect(initialLayout[0].item.width).toBe('full')
+  } finally {
+    act(() => root.unmount())
+  }
+})
+
+it('should persist a new row even when the widget order and widths stay unchanged', async () => {
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  openModal.mockClear()
+  setPreference.mockClear()
+  const root = createRoot(document.createElement('div'))
+  const initialLayout: WidgetInstanceClient[] = [
+    { component: null, item: { id: 'a', width: 'x-small', minWidth: 'x-small', maxWidth: 'full' } },
+    { component: null, item: { id: 'b', width: 'x-small', minWidth: 'x-small', maxWidth: 'full' } },
+  ]
+  let dashboard!: ReturnType<typeof useDashboardLayout>
+  const Harness = () => {
+    dashboard = useDashboardLayout(initialLayout)
+    return null
+  }
+
+  try {
+    act(() => root.render(React.createElement(Harness)))
+    act(() => dashboard.setIsEditing(true))
+    act(() =>
+      dashboard.moveWidget({
+        moveFromIndex: 1,
+        moveToIndex: 1,
+        overID: 'a-row-after',
+        width: 'x-small',
+      }),
+    )
+    expect(dashboard.currentLayout[1].item.startsNewRow).toBe(true)
+    act(() => dashboard.cancel())
+    expect(openModal).toHaveBeenCalledWith('cancel-dashboard-changes')
+    await act(async () => dashboard.saveLayout())
+    expect(setPreference).toHaveBeenCalledWith(
+      'dashboard-layout',
+      { layouts: [initialLayout[0].item, { ...initialLayout[1].item, startsNewRow: true }] },
+      false,
+    )
   } finally {
     act(() => root.unmount())
   }

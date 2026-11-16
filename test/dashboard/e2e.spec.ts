@@ -1836,8 +1836,17 @@ describe('Dashboard', () => {
     await expect(rowTarget).toHaveClass(/dashboard-row-drop-target--active/)
     await page.mouse.up()
     await expect(dashboard.widgetByPos(7)).toHaveAttribute('data-slug', sourceID)
+    await expect(dashboard.widgetByPos(7)).toHaveAttribute('data-starts-new-row', 'true')
+    await expect(async () => {
+      const previous = await dashboard.widgetByPos(6).boundingBox()
+      const moved = await dashboard.widgetByPos(7).boundingBox()
+
+      expect(moved!.y).toBeGreaterThan(previous!.y)
+    }).toPass()
     await expect(page.locator('.dashboard-row-drop-targets')).toHaveCount(0)
-    await dashboard.cancelEditing()
+    await dashboard.saveChangesAndValidate()
+    await expect(dashboard.widgetByPos(7)).toHaveAttribute('data-slug', sourceID)
+    await expect(dashboard.widgetByPos(7)).toHaveAttribute('data-starts-new-row', 'true')
   })
 
   test('should resize a selected widget from its edge without reordering it', async ({ page }) => {

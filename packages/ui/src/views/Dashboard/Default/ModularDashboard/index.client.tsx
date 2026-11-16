@@ -38,6 +38,7 @@ import {
 import { getWidgetIDFromDropTarget, getWidgetMoveIndexes } from './utils/getWidgetMoveIndexes.js'
 import { WIDTH_TO_PERCENTAGE } from './utils/resizeWidget.js'
 import { useDashboardSensors } from './utils/sensors.js'
+import { getLayoutRows, placeWidgetInLayout } from './utils/widgetLayoutRows.js'
 import { WidgetContent } from './WidgetContent/index.js'
 import { WidgetEditControl } from './WidgetEditControl.js'
 import { WidgetReplaceControl } from './WidgetReplaceControl/index.js'
@@ -65,6 +66,7 @@ export type WidgetItem = {
   id: string
   maxWidth: WidgetWidth
   minWidth: WidgetWidth
+  startsNewRow?: boolean
   width: WidgetWidth
 }
 
@@ -199,6 +201,22 @@ export function ModularDashboardClient({
 
       return `. ${label}: ${t('upload:width')}: ${WIDTH_TO_PERCENTAGE[target.width].toFixed(0)}%`
     }
+    const describeRowDestination = ({
+      overID,
+      resizeTarget,
+      widget,
+    }: {
+      overID: string
+      resizeTarget?: { widgetID: string; width: WidgetWidth }
+      widget: WidgetInstanceClient
+    }) => {
+      const planned = placeWidgetInLayout({ layout: currentLayout, overID, resizeTarget, widget })
+      const rowIndex = getLayoutRows({ layout: planned, getItem: ({ item }) => item }).findIndex(
+        (row) => row.some(({ item }) => item.id === widget.item.id),
+      )
+
+      return `${t('general:row')} ${rowIndex + 1}`
+    }
     const announceCancel: Announcements['onDragCancel'] = ({ active }) =>
       `${t('general:cancel')}: ${describeWidget({ id: active.id })}`
     const announceMove: NonNullable<Announcements['onDragOver']> = ({ active, over }) => {
@@ -219,7 +237,16 @@ export function ModularDashboardClient({
         return drop
           ? `${t('hierarchy:itemsMovedTo', {
               title: describeWidget({ id: active.id }),
-              destination: `${t('general:dashboard')}, ${t('general:order')}: ${drop.index + 1}`,
+              destination: /-row-(?:before|after)$/.test(String(over!.id))
+                ? describeRowDestination({
+                    overID: String(over!.id),
+                    resizeTarget: drop.resizeTarget,
+                    widget: {
+                      component: null,
+                      item: { ...getDrawerWidgetItem({ widget: sourceWidget }), width: drop.width },
+                    },
+                  })
+                : `${t('general:dashboard')}, ${t('general:order')}: ${drop.index + 1}`,
             })}. ${t('upload:width')}: ${WIDTH_TO_PERCENTAGE[drop.width].toFixed(0)}%${describeTargetResize(drop.resizeTarget)}`
           : undefined
       }
@@ -244,11 +271,25 @@ export function ModularDashboardClient({
         layout: currentLayout.map(({ item }) => item),
         overID: String(over.id),
       })
+      const activeWidget = currentLayout.find(({ item }) => item.id === active.id)!
       const message = t('hierarchy:itemsMovedTo', {
         title: describeWidget({ id: active.id }),
-        destination: describeWidget({ id: over.id, index: moveToIndex }),
+        destination:
+          /-row-(?:before|after)$/.test(String(over.id)) && sizing
+            ? describeRowDestination({
+                overID: String(over.id),
+                resizeTarget: sizing.resizeTarget,
+                widget: {
+                  ...activeWidget,
+                  item: {
+                    ...activeWidget.item,
+                    width: sizing.width,
+                  },
+                },
+              })
+            : describeWidget({ id: over.id, index: moveToIndex }),
       })
-      const currentWidth = currentLayout.find(({ item }) => item.id === active.id)?.item.width
+      const currentWidth = activeWidget.item.width
 
       const resizedMessage =
         sizing && sizing.width !== currentWidth
@@ -287,7 +328,17 @@ export function ModularDashboardClient({
           if (
             moveFromIndex !== moveToIndex ||
             sizing?.width !== currentLayout[moveFromIndex]?.item.width ||
-            sizing?.resizeTarget
+            sizing?.resizeTarget ||
+            (/-row-(?:before|after)$/.test(String(event.over.id)) &&
+              sizing &&
+              placeWidgetInLayout({
+                layout: currentLayout,
+                overID: String(event.over.id),
+                widget: {
+                  ...currentLayout[moveFromIndex],
+                  item: { ...currentLayout[moveFromIndex].item, width: sizing.width },
+                },
+              }) !== currentLayout)
           ) {
             return announceMove(event)
           }
@@ -365,7 +416,7 @@ export function ModularDashboardClient({
 
             setDrawerDrag(null)
             if (drop) {
-              addWidget({ ...drop, widgetSlug: source.widget.slug })
+              addWidget({ ...drop, overID: String(event.over!.id), widgetSlug: source.widget.slug })
             } else {
               restoreDrawer(source)
             }
@@ -395,7 +446,7 @@ export function ModularDashboardClient({
           })
 
           if (sizing !== null) {
-            moveWidget({ ...indexes, ...sizing })
+            moveWidget({ ...indexes, ...sizing, overID: String(event.over.id) })
           }
         }}
         onDragStart={(event) => {
@@ -414,12 +465,6 @@ export function ModularDashboardClient({
         <div
           className={`modular-dashboard ${isEditing ? 'editing' : ''} ${hasOpenModal ? 'modular-dashboard--modal-open' : ''}`}
           ref={dashboardRef}
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            // Don't add gap here! We need to use padding on the widgets instead
-            // to make sure all rows have the same width always.
-          }}
         >
           {currentLayout?.length === 0 &&
             (drawerDrag ? (
@@ -451,9 +496,14 @@ export function ModularDashboardClient({
                 key={widget.item.id}
                 label={label}
                 onSelect={() => setSelectedWidgetID(widget.item.id)}
-                style={{
-                  width: `${WIDTH_TO_PERCENTAGE[widget.item.width]}%`,
-                }}
+                startsNewRow={widget.item.startsNewRow}
+                style={
+                  {
+                    '--widget-columns': Math.round(
+                      (WIDTH_TO_PERCENTAGE[widget.item.width] * 12) / 100,
+                    ),
+                  } as React.CSSProperties
+                }
                 width={widget.item.width}
               >
                 {({ dragHandle }) => (
@@ -729,6 +779,7 @@ function DraggableItem(props: {
   isSelected: boolean
   label: string
   onSelect: () => void
+  startsNewRow?: boolean
   style?: React.CSSProperties
   width: WidgetWidth
 }) {
@@ -748,6 +799,7 @@ function DraggableItem(props: {
     <div
       className={`widget${props.isSelected ? ' widget--selected' : ''}`}
       data-slug={props.id}
+      data-starts-new-row={props.startsNewRow || undefined}
       data-widget-index={props.index}
       data-width={props.width}
       style={mergedStyles}

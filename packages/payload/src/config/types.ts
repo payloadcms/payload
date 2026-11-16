@@ -996,6 +996,8 @@ export type WidgetInstance<TSlug extends WidgetSlug = WidgetSlug> = TSlug extend
       data?: DataFromWidgetSlug<TSlug> extends Record<string, unknown>
         ? DataFromWidgetSlug<TSlug>
         : Record<string, unknown>
+      /** Start this widget on a separate row, even when the previous row has free space. */
+      startsNewRow?: boolean
       widgetSlug: TSlug
       width: [
         Extract<

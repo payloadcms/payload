@@ -105,6 +105,7 @@ export class DashboardHelper {
         throw new Error(`Widget has no width`)
       }
       const cols = WIDTH_TO_COLS[width as WidgetWidth]
+      const startsNewRow = (await widget.getAttribute('data-starts-new-row')) === 'true'
       const dashboardBox = await this.dashboard.boundingBox()
       const widgetBox = await widget.boundingBox()
       if (!widgetBox || !dashboardBox) {
@@ -113,7 +114,8 @@ export class DashboardHelper {
 
       // Determine expected position
       let expectedX: number
-      if (currentPos === 0 || currentPos + cols > 12) {
+      if (currentPos === 0 || startsNewRow || currentPos + cols > 12) {
+        currentPos = 0
         // Widget is at the start of a new row
         expectedX = dashboardBox.x
       } else {

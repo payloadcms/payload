@@ -19,6 +19,7 @@ export async function getItemsFromConfig(
     return {
       id: `${widgetInstance.widgetSlug}-${index}`,
       data: widgetInstance.data,
+      ...(widgetInstance.startsNewRow ? { startsNewRow: true } : {}),
       maxWidth: widget?.maxWidth ?? 'full',
       minWidth: widget?.minWidth ?? 'x-small',
       width: widgetInstance.width || 'x-small',

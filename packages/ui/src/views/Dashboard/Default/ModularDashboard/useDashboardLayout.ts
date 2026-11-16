@@ -1,6 +1,7 @@
 import type { WidgetWidth } from 'payload'
 
 import { arrayMove } from '@dnd-kit/sortable'
+import { dequal } from 'dequal/lite'
 import { getWidgetControlData, PREFERENCE_KEYS } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -19,6 +20,11 @@ import { useServerFunctions } from '../../../../providers/ServerFunctions/index.
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { RenderWidget } from './renderWidget/RenderWidget.js'
 import { resizeWidgetLayout } from './utils/resizeWidgetLayout.js'
+import {
+  getLayoutRows,
+  placeWidgetInLayout,
+  removeWidgetFromLayout,
+} from './utils/widgetLayoutRows.js'
 
 const WIDGET_WIDTHS: WidgetWidth[] = ['x-small', 'small', 'medium', 'large', 'x-large', 'full']
 
@@ -33,6 +39,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   )
   const { widgets = [] } = useConfig().config.admin.dashboard ?? {}
   const [currentLayout, setCurrentLayout] = useState<WidgetInstanceClient[]>(initialLayout)
+  const savedLayoutRef = useRef(initialLayout)
   const resizeSessionRef = useRef<{ layout: WidgetInstanceClient[]; widgetID: string } | null>(null)
   const { openModal } = useModal()
   const cancelModalSlug = 'cancel-dashboard-changes'
@@ -41,6 +48,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
 
   useEffect(() => {
     if (isEmbedded) {
+      savedLayoutRef.current = initialLayout
       setIsEditingState(false)
       setCurrentLayout(initialLayout)
     }
@@ -49,6 +57,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   // Sync state when initialLayout prop changes (e.g., when query params change and server component re-renders)
   useEffect(() => {
     if (!isEditing) {
+      savedLayoutRef.current = initialLayout
       setCurrentLayout(initialLayout)
     }
     // do not sync while editing. Depending on `isEditing` in this effect causes an
@@ -60,6 +69,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       const layoutData: WidgetItem[] = currentLayout.map((item) => item.item)
       setIsEditing(false)
       await setLayoutPreference(layoutData)
+      savedLayoutRef.current = currentLayout
     } catch {
       setIsEditing(true)
       toast.error(t('error:failedToSaveLayout'))
@@ -76,6 +86,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       })) as GetDefaultLayoutServerFnReturnType
 
       setCurrentLayout(result.layout)
+      savedLayoutRef.current = result.layout
       setIsEditing(false)
     } catch {
       toast.error(t('error:failedToResetLayout'))
@@ -83,23 +94,15 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   }, [setLayoutPreference, serverFunction, setIsEditing])
 
   const performCancel = useCallback(() => {
-    setCurrentLayout(initialLayout)
+    setCurrentLayout(savedLayoutRef.current)
     setIsEditing(false)
-  }, [initialLayout, setIsEditing])
+  }, [setIsEditing])
 
   const cancel = useCallback(() => {
-    // Check if layout has changed
-    const hasChanges =
-      currentLayout.length !== initialLayout.length ||
-      currentLayout.some((widget, index) => {
-        const initialWidget = initialLayout[index]
-        return (
-          !initialWidget ||
-          widget.item.id !== initialWidget.item.id ||
-          widget.item.width !== initialWidget.item.width ||
-          JSON.stringify(widget.item.data || {}) !== JSON.stringify(initialWidget.item.data || {})
-        )
-      })
+    const hasChanges = !dequal(
+      getComparableLayout({ layout: currentLayout }),
+      getComparableLayout({ layout: savedLayoutRef.current }),
+    )
 
     // If there are changes, show confirmation modal
     if (hasChanges) {
@@ -107,21 +110,23 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     } else {
       performCancel()
     }
-  }, [currentLayout, initialLayout, openModal, cancelModalSlug, performCancel])
+  }, [currentLayout, openModal, cancelModalSlug, performCancel])
 
   const moveWidget = useCallback(
     ({
       moveFromIndex,
       moveToIndex,
+      overID,
       resizeTarget,
       width,
     }: {
       moveFromIndex: number
       moveToIndex: number
+      overID?: string
       width?: WidgetWidth
     } & Pick<WidgetDropSizing, 'resizeTarget'>) => {
       if (
-        (moveFromIndex === moveToIndex && !width && !resizeTarget) ||
+        (moveFromIndex === moveToIndex && !width && !resizeTarget && !overID) ||
         moveFromIndex < 0 ||
         moveToIndex < 0
       ) {
@@ -131,6 +136,15 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       setCurrentLayout((prev) => {
         if (moveFromIndex >= prev.length || moveToIndex >= prev.length) {
           return prev
+        }
+        if (overID) {
+          const widget = prev[moveFromIndex]
+          return placeWidgetInLayout({
+            layout: prev,
+            overID,
+            resizeTarget,
+            widget: width ? { ...widget, item: { ...widget.item, width } } : widget,
+          })
         }
         const moved = arrayMove(prev, moveFromIndex, moveToIndex)
 
@@ -152,10 +166,11 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   const addWidget = useCallback(
     ({
       index,
+      overID,
       resizeTarget,
       widgetSlug,
       width,
-    }: { index?: number; widgetSlug: string; width?: WidgetWidth } & Pick<
+    }: { index?: number; overID?: string; widgetSlug: string; width?: WidgetWidth } & Pick<
       WidgetDropSizing,
       'resizeTarget'
     >) => {
@@ -199,6 +214,14 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
             : widget,
         )
 
+        if (overID) {
+          return placeWidgetInLayout({
+            layout: prev,
+            overID,
+            resizeTarget,
+            widget: newWidgetInstance,
+          })
+        }
         next.splice(Math.max(0, Math.min(index ?? prev.length, prev.length)), 0, newWidgetInstance)
         return next
       })
@@ -256,6 +279,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
           maxWidth,
           minWidth,
           width: WIDGET_WIDTHS[widthIndex],
+          ...(currentWidget.item.startsNewRow ? { startsNewRow: true } : {}),
         },
       }
 
@@ -276,7 +300,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       if (!isEditing) {
         return
       }
-      setCurrentLayout((prev) => prev.filter((item) => item.item.id !== widgetId))
+      setCurrentLayout((prev) => removeWidgetFromLayout({ layout: prev, widgetID: widgetId }))
     },
     [isEditing],
   )
@@ -377,6 +401,12 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     startWidgetResize,
     updateWidgetData,
   }
+}
+
+function getComparableLayout({ layout }: { layout: WidgetInstanceClient[] }) {
+  return getLayoutRows({ getItem: ({ item }) => item, layout }).map((row) =>
+    row.map(({ item }) => ({ id: item.id, data: item.data ?? {}, width: item.width })),
+  )
 }
 
 function useSetLayoutPreference() {

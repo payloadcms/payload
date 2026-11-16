@@ -72,6 +72,8 @@ export default buildConfig({
 
 **WidgetWidth Values:** `'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full'`.
 
+Dropping above or below a widget row creates a separate row even when there is unused space. These row breaks persist with the dashboard layout. Moving or removing the last widget in a row removes that row automatically. Default layout entries can also set `startsNewRow: true` to begin a separate row.
+
 ### Picker Previews
 
 The Add and Replace Widget drawers automatically render the widget component as a non-interactive thumbnail. Previews load as their cards approach the visible part of the drawer and are cached until that drawer closes.

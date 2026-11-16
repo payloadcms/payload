@@ -1,5 +1,7 @@
 @layer payload-default {
   .modular-dashboard {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
     position: relative;
     margin: calc(var(--spacer-4) / -2);
     width: calc(100% + var(--spacer-4));
@@ -7,8 +9,14 @@
   }
 
   .modular-dashboard .widget {
+    grid-column-end: span var(--widget-columns);
+    min-inline-size: 0;
     isolation: isolate;
     padding: calc(var(--spacer-4) / 2);
+  }
+
+  .modular-dashboard .widget[data-starts-new-row='true'] {
+    grid-column-start: 1;
   }
 
   .modular-dashboard .widget--selected {
@@ -41,6 +49,7 @@
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .modular-dashboard .widget {
+      grid-column: 1 / -1;
       /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
       width: 100% !important;
     }
@@ -73,6 +82,7 @@
   }
 
   .modular-dashboard__empty {
+    grid-column: 1 / -1;
     display: flex;
     align-items: center;
     justify-content: center;
