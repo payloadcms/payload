@@ -475,6 +475,7 @@ export const caTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Sobreescriu les dades existents',
     pageNotFound: 'Pàgina no trobada',
     pageNumberRange: 'Introduïu un número de pàgina entre 1 i {{totalPages}}.',
+    parentDocument: 'Document pare',
     password: 'Contrasenya',
     pasteBelow: 'Enganxeu a continuació',
     pasteField: 'Enganxar camp',

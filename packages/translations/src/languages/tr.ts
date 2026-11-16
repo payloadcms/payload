@@ -476,6 +476,7 @@ export const trTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Mevcut alan verilerinin üzerine yazın',
     pageNotFound: 'Sayfa bulunamadı',
     pageNumberRange: '1 ile {{totalPages}} arasında bir sayfa numarası girin.',
+    parentDocument: 'Üst belge',
     password: 'Parola',
     pasteBelow: 'Aşağıya Yapıştır',
     pasteField: 'Alanı yapıştır',

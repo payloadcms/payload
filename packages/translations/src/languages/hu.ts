@@ -478,6 +478,7 @@ export const huTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Írja felül a meglévő mezőadatokat',
     pageNotFound: 'Az oldal nem található',
     pageNumberRange: 'Adjon meg egy oldalszámot 1 és {{totalPages}} között.',
+    parentDocument: 'Szülődokumentum',
     password: 'Jelszó',
     pasteBelow: 'Illessze be alább',
     pasteField: 'Mező beillesztése',
